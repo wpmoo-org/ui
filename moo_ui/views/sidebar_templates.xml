@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Moo UI. See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <template id="sidebar_layout" name="Moo UI Sidebar Layout">
+        <div t-attf-class="o_moo_ui_scope o_moo_ui_sidebar_layout #{sidebar_layout_class or ''} #{'o_moo_ui_sidebar_layout_compact' if sidebar_compact else ''}"
+             data-moo-ui-sidebar-layout="1"
+             t-att-data-moo-ui-sidebar-storage-key="sidebar_storage_key or 'moo.ui.sidebar.compact'"
+             t-att-data-moo-ui-sidebar-cookie-key="sidebar_cookie_key or 'moo_ui_sidebar_compact'">
+            <t t-out="0"/>
+        </div>
+    </template>
+
+    <template id="sidebar" name="Moo UI Sidebar">
+        <aside t-att-id="sidebar_id"
+               t-attf-class="offcanvas-lg offcanvas-start o_moo_ui_sidebar #{sidebar_class or ''}"
+               tabindex="-1"
+               t-att-aria-label="sidebar_label or 'Navigation'"
+               data-moo-ui-sidebar="1">
+            <div class="offcanvas-header visually-hidden">
+                <h2 class="offcanvas-title" t-out="sidebar_label or 'Navigation'"/>
+            </div>
+            <div class="offcanvas-body o_moo_ui_sidebar_inner">
+                <t t-out="0"/>
+            </div>
+        </aside>
+    </template>
+
+    <template id="sidebar_inset" name="Moo UI Sidebar Inset">
+        <main t-attf-class="o_moo_ui_sidebar_inset #{sidebar_inset_class or ''}">
+            <t t-out="0"/>
+        </main>
+    </template>
+
+    <template id="sidebar_trigger" name="Moo UI Sidebar Trigger">
+        <button type="button"
+                class="o_moo_ui_sidebar_trigger o_moo_ui_sidebar_trigger_desktop d-none d-lg-inline-flex"
+                data-moo-ui-sidebar-compact-toggle="1"
+                t-att-aria-controls="sidebar_id"
+                aria-expanded="true"
+                t-att-aria-label="sidebar_trigger_label or 'Toggle sidebar'">
+            <t t-out="0"/>
+        </button>
+        <button type="button"
+                class="o_moo_ui_sidebar_trigger o_moo_ui_sidebar_trigger_mobile d-inline-flex d-lg-none"
+                data-bs-toggle="offcanvas"
+                t-att-data-bs-target="'#' + sidebar_id"
+                t-att-aria-controls="sidebar_id"
+                aria-expanded="false"
+                t-att-aria-label="sidebar_trigger_label or 'Open navigation'">
+            <t t-out="0"/>
+        </button>
+    </template>
+
+    <template id="sidebar_header" name="Moo UI Sidebar Header">
+        <header t-attf-class="o_moo_ui_sidebar_header #{sidebar_header_class or ''}">
+            <t t-out="0"/>
+        </header>
+    </template>
+
+    <template id="sidebar_content" name="Moo UI Sidebar Content">
+        <div t-attf-class="o_moo_ui_sidebar_content #{sidebar_content_class or ''}">
+            <t t-out="0"/>
+        </div>
+    </template>
+
+    <template id="sidebar_footer" name="Moo UI Sidebar Footer">
+        <footer t-attf-class="o_moo_ui_sidebar_footer #{sidebar_footer_class or ''}">
+            <t t-out="0"/>
+        </footer>
+    </template>
+</odoo>

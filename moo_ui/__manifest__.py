@@ -11,6 +11,7 @@
     'depends': ['web'],
     'data': [
         'views/icon_templates.xml',
+        'views/sidebar_templates.xml',
     ],
     'assets': {
         'web.assets_frontend': [
