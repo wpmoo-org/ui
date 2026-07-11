@@ -149,6 +149,10 @@ class TestMooUiContract(unittest.TestCase):
             '--moo-ui-sidebar-width',
             '--moo-ui-sidebar-compact-width',
             'var(--moo-ui-foreground)',
+            'min-height: 100vh',
+            'position: sticky',
+            'height: 100vh',
+            'overflow: visible',
         ):
             self.assertIn(marker, styles)
 

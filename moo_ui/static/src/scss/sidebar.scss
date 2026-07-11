@@ -16,9 +16,9 @@
 .o_moo_ui_sidebar_inner {
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    min-height: 100vh;
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .o_moo_ui_sidebar_inset {
@@ -44,6 +44,13 @@
 }
 
 @media (min-width: 992px) {
+    .o_moo_ui_sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: visible;
+    }
+
     .o_moo_ui_sidebar_layout_compact {
         grid-template-columns: var(--moo-ui-sidebar-compact-width, 4.5rem) minmax(0, 1fr);
     }
@@ -56,5 +63,10 @@
 @media (max-width: 991.98px) {
     .o_moo_ui_sidebar_layout {
         display: block;
+    }
+
+    .o_moo_ui_sidebar_inner {
+        min-height: 100%;
+        overflow-y: auto;
     }
 }
