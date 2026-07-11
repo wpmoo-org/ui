@@ -16,7 +16,8 @@
 .o_moo_ui_sidebar_inner {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 0;
+    height: 100%;
     padding: 0;
     overflow: visible;
 }
@@ -66,7 +67,7 @@
     }
 
     .o_moo_ui_sidebar_inner {
-        min-height: 100%;
+        min-height: 0;
         overflow-y: auto;
     }
 }
