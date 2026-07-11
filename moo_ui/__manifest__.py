@@ -9,8 +9,14 @@
     'website': 'https://www.wpmoo.org',
     'license': 'OPL-1',
     'depends': ['web'],
-    'data': [],
-    'assets': {},
+    'data': [
+        'views/icon_templates.xml',
+    ],
+    'assets': {
+        'web.assets_frontend': [
+            'moo_ui/static/src/scss/tokens.scss',
+        ],
+    },
     'application': False,
     'installable': True,
 }
