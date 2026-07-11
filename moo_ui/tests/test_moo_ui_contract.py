@@ -93,6 +93,67 @@ class TestMooUiContract(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, lower_template)
 
+    def test_manifest_loads_sidebar_interaction_and_styles_in_order(self):
+        manifest = ast.literal_eval((ADDON_ROOT / '__manifest__.py').read_text())
+
+        self.assertEqual(
+            manifest['assets']['web.assets_frontend'],
+            [
+                'moo_ui/static/src/scss/tokens.scss',
+                'moo_ui/static/src/interactions/sidebar.js',
+                'moo_ui/static/src/scss/sidebar.scss',
+            ],
+        )
+
+    def test_sidebar_interaction_uses_odoo_public_interaction_contract(self):
+        script = (ADDON_ROOT / 'static/src/interactions/sidebar.js').read_text()
+
+        for marker in (
+            'import { browser } from "@web/core/browser/browser";',
+            'import { cookie } from "@web/core/browser/cookie";',
+            'import { registry } from "@web/core/registry";',
+            'import { Interaction } from "@web/public/interaction";',
+            'export class MooUiSidebar extends Interaction',
+            'static selector = "[data-moo-ui-sidebar-layout]"',
+            'data-moo-ui-sidebar-compact-toggle',
+            'data-moo-ui-sidebar-group-trigger',
+            'registry.category("public.interactions").add("moo_ui.sidebar", MooUiSidebar)',
+            'browser.localStorage',
+            'cookie.set',
+            'browser.matchMedia',
+            'closeFlyouts',
+        ):
+            self.assertIn(marker, script)
+
+        for forbidden in (
+            'mobileOpen',
+            'backdrop',
+            'focus trap',
+            'cloneNode',
+            'o_moo_ui_sidebar_mobile_open',
+        ):
+            self.assertNotIn(forbidden, script)
+
+    def test_sidebar_styles_are_generic_and_token_backed(self):
+        styles = (ADDON_ROOT / 'static/src/scss/sidebar.scss').read_text()
+
+        for marker in (
+            '.o_moo_ui_sidebar_layout',
+            '.o_moo_ui_sidebar',
+            '.o_moo_ui_sidebar_inset',
+            '.o_moo_ui_sidebar_trigger',
+            '.o_moo_ui_sidebar_header',
+            '.o_moo_ui_sidebar_content',
+            '.o_moo_ui_sidebar_footer',
+            '.o_moo_ui_sidebar_layout_compact',
+            '--moo-ui-sidebar-width',
+            '--moo-ui-sidebar-compact-width',
+            'var(--moo-ui-foreground)',
+        ):
+            self.assertIn(marker, styles)
+
+        self.assertNotIn('--moo-account-', styles)
+
 
 if __name__ == '__main__':
     unittest.main()

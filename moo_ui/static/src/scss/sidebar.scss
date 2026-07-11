@@ -1,0 +1,60 @@
+.o_moo_ui_sidebar_layout {
+    display: grid;
+    grid-template-columns: var(--moo-ui-sidebar-width, 17rem) minmax(0, 1fr);
+    min-height: 100vh;
+    align-items: stretch;
+    transition: grid-template-columns 0.22s ease;
+}
+
+.o_moo_ui_sidebar {
+    --bs-offcanvas-width: var(--moo-ui-sidebar-width, 17rem);
+    min-width: 0;
+    color: var(--moo-ui-foreground);
+    background: var(--moo-ui-background);
+}
+
+.o_moo_ui_sidebar_inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.o_moo_ui_sidebar_inset {
+    min-width: 0;
+    color: var(--moo-ui-foreground);
+    background: var(--moo-ui-background);
+}
+
+.o_moo_ui_sidebar_trigger {
+    align-items: center;
+    justify-content: center;
+}
+
+.o_moo_ui_sidebar_header,
+.o_moo_ui_sidebar_footer {
+    flex: 0 0 auto;
+}
+
+.o_moo_ui_sidebar_content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+@media (min-width: 992px) {
+    .o_moo_ui_sidebar_layout_compact {
+        grid-template-columns: var(--moo-ui-sidebar-compact-width, 4.5rem) minmax(0, 1fr);
+    }
+
+    .o_moo_ui_sidebar_layout_compact [data-moo-ui-sidebar-collapsible-label] {
+        display: none;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .o_moo_ui_sidebar_layout {
+        display: block;
+    }
+}

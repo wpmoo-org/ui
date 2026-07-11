@@ -16,6 +16,8 @@
     'assets': {
         'web.assets_frontend': [
             'moo_ui/static/src/scss/tokens.scss',
+            'moo_ui/static/src/interactions/sidebar.js',
+            'moo_ui/static/src/scss/sidebar.scss',
         ],
     },
     'application': False,
