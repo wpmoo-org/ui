@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="aspect_ratio" name="Moo UI Aspect Ratio">
+        <div t-attf-class="o_moo_ui_aspect_ratio #{aspect_ratio_class or ''}"
+             t-attf-style="--moo-ui-aspect-ratio: #{aspect_ratio or '16 / 9'};">
+            <div class="o_moo_ui_aspect_ratio_content">
+                <t t-out="0"/>
+            </div>
+        </div>
+    </template>
+</odoo>

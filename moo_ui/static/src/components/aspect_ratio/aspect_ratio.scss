@@ -1,0 +1,15 @@
+.o_moo_ui_scope {
+    .o_moo_ui_aspect_ratio {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        aspect-ratio: var(--moo-ui-aspect-ratio, 16 / 9);
+        border-radius: var(--moo-ui-radius);
+        background: var(--moo-ui-soft);
+    }
+
+    .o_moo_ui_aspect_ratio_content {
+        position: absolute;
+        inset: 0;
+    }
+}

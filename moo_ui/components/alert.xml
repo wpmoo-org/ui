@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="alert" name="Moo UI Alert">
+        <section t-attf-class="o_moo_ui_alert o_moo_ui_alert_#{alert_variant or 'default'} #{alert_class or ''}" role="alert">
+            <h3 t-if="alert_title" class="o_moo_ui_alert_title" t-out="alert_title"/>
+            <div class="o_moo_ui_alert_description">
+                <t t-if="alert_description" t-out="alert_description"/>
+                <t t-else="" t-out="0"/>
+            </div>
+        </section>
+    </template>
+</odoo>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="dropdown_menu" name="Moo UI Dropdown Menu">
+        <div t-attf-class="dropdown o_moo_ui_dropdown_menu #{dropdown_class or ''}">
+            <button class="o_moo_ui_dropdown_menu_trigger btn btn-outline-secondary dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                <t t-out="dropdown_label or 'Open'"/>
+            </button>
+            <div class="dropdown-menu o_moo_ui_dropdown_menu_content">
+                <t t-out="0"/>
+            </div>
+        </div>
+    </template>
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="tooltip" name="Moo UI Tooltip">
+        <span t-attf-class="o_moo_ui_tooltip #{tooltip_class or ''}"
+              data-moo-ui-tooltip="1"
+              data-bs-toggle="tooltip"
+              t-att-title="tooltip_text">
+            <t t-out="0"/>
+        </span>
+    </template>
+</odoo>

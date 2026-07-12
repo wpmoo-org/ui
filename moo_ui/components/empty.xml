@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="empty" name="Moo UI Empty">
+        <section t-attf-class="o_moo_ui_empty #{empty_class or ''}">
+            <div t-if="empty_icon" class="o_moo_ui_empty_icon">
+                <t t-set="icon_name" t-value="empty_icon"/>
+                <t t-call="moo_ui.icon"/>
+            </div>
+            <h3 class="o_moo_ui_empty_title" t-out="empty_title"/>
+            <p t-if="empty_description" class="o_moo_ui_empty_description" t-out="empty_description"/>
+            <div class="o_moo_ui_empty_content">
+                <t t-out="0"/>
+            </div>
+        </section>
+    </template>
+</odoo>

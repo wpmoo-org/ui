@@ -1,0 +1,39 @@
+.o_moo_ui_scope {
+    .o_moo_ui_attachment {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid var(--moo-ui-border);
+        border-radius: var(--moo-ui-radius);
+        color: var(--moo-ui-foreground);
+        background: var(--moo-ui-card);
+    }
+
+    .o_moo_ui_attachment_icon {
+        width: 2.25rem;
+        height: 2.25rem;
+        display: inline-grid;
+        place-items: center;
+        border-radius: var(--moo-ui-radius);
+        color: var(--moo-ui-muted);
+        background: var(--moo-ui-soft);
+    }
+
+    .o_moo_ui_attachment_body {
+        min-width: 0;
+        display: grid;
+        flex: 1 1 auto;
+    }
+
+    .o_moo_ui_attachment_name,
+    .o_moo_ui_attachment_size {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .o_moo_ui_attachment_size {
+        color: var(--moo-ui-muted);
+    }
+}

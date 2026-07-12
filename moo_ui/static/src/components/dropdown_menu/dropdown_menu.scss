@@ -1,0 +1,21 @@
+.o_moo_ui_scope {
+    .o_moo_ui_dropdown_menu_content {
+        min-width: 12rem;
+        padding: 0.35rem;
+        border-color: var(--moo-ui-border);
+        border-radius: calc(var(--moo-ui-radius) * 1.25);
+        color: var(--moo-ui-foreground);
+        background: var(--moo-ui-popover);
+        box-shadow: 0 10px 15px -3px rgba(24, 24, 27, 0.1);
+    }
+
+    .o_moo_ui_dropdown_menu_content .dropdown-item {
+        border-radius: var(--moo-ui-radius);
+        color: var(--moo-ui-foreground);
+    }
+
+    .o_moo_ui_dropdown_menu_content .dropdown-item:hover,
+    .o_moo_ui_dropdown_menu_content .dropdown-item:focus {
+        background: var(--moo-ui-soft);
+    }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="input_group" name="Moo UI Input Group">
+        <div t-attf-class="o_moo_ui_input_group input-group #{input_group_class or ''}">
+            <span t-if="input_group_prefix" class="input-group-text o_moo_ui_input_group_prefix" t-out="input_group_prefix"/>
+            <t t-out="0"/>
+            <span t-if="input_group_suffix" class="input-group-text o_moo_ui_input_group_suffix" t-out="input_group_suffix"/>
+        </div>
+    </template>
+</odoo>

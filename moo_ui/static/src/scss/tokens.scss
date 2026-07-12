@@ -4,10 +4,19 @@
     --moo-ui-muted: var(--bs-secondary-color, #6c757d);
     --moo-ui-border: var(--bs-border-color, #dee2e6);
     --moo-ui-card: var(--bs-body-bg, #fff);
+    --moo-ui-card-hover: var(--bs-tertiary-bg, #f8f9fa);
     --moo-ui-popover: var(--bs-body-bg, #fff);
     --moo-ui-accent: var(--bs-primary, #5b35f5);
+    --moo-ui-accent-foreground: #ffffff;
     --moo-ui-accent-soft: color-mix(in srgb, var(--moo-ui-accent) 9%, transparent);
     --moo-ui-ring: color-mix(in srgb, var(--moo-ui-accent) 22%, transparent);
+    --moo-ui-success: var(--bs-success, #198754);
+    --moo-ui-warning: var(--bs-warning, #ffc107);
+    --moo-ui-danger: var(--bs-danger, #dc3545);
+    --moo-ui-info: var(--bs-info, #0dcaf0);
+    --moo-ui-soft: var(--bs-tertiary-bg, #f8f9fa);
+    --moo-ui-control-background: var(--bs-body-bg, #ffffff);
+    --moo-ui-control-color: var(--bs-body-color, #212529);
     --moo-ui-radius: var(--bs-border-radius, 0.375rem);
     --moo-ui-shadow: 0 1px 2px rgba(24, 24, 27, 0.06);
 }

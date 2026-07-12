@@ -1,0 +1,12 @@
+.o_moo_ui_scope {
+    .o_moo_ui_input_group {
+        color: var(--moo-ui-foreground);
+    }
+
+    .o_moo_ui_input_group_prefix,
+    .o_moo_ui_input_group_suffix {
+        border-color: var(--moo-ui-border);
+        color: var(--moo-ui-muted);
+        background: var(--moo-ui-soft);
+    }
+}

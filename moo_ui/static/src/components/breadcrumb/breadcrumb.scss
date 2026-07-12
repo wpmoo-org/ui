@@ -1,0 +1,28 @@
+.o_moo_ui_scope {
+    .o_moo_ui_breadcrumb_list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin: 0;
+        padding: 0;
+        color: var(--moo-ui-muted);
+        list-style: none;
+        font-size: 0.875rem;
+    }
+
+    .o_moo_ui_breadcrumb_item + .o_moo_ui_breadcrumb_item::before {
+        content: "/";
+        margin-right: 0.45rem;
+        color: var(--moo-ui-muted);
+    }
+
+    .o_moo_ui_breadcrumb_link {
+        color: var(--moo-ui-muted);
+        text-decoration: none;
+    }
+
+    .o_moo_ui_breadcrumb_page,
+    .o_moo_ui_breadcrumb_link:hover {
+        color: var(--moo-ui-foreground);
+    }
+}

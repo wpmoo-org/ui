@@ -1,0 +1,14 @@
+.o_moo_ui_scope {
+    .o_moo_ui_textarea {
+        min-height: 5rem;
+        border-color: var(--moo-ui-border);
+        border-radius: var(--moo-ui-radius);
+        color: var(--moo-ui-control-color);
+        background: var(--moo-ui-control-background);
+    }
+
+    .o_moo_ui_textarea:focus {
+        border-color: var(--moo-ui-accent);
+        box-shadow: 0 0 0 0.18rem var(--moo-ui-ring);
+    }
+}

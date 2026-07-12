@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="accordion" name="Moo UI Accordion">
+        <div t-att-id="accordion_id" t-attf-class="o_moo_ui_accordion accordion #{accordion_class or ''}">
+            <t t-foreach="accordion_items or ()" t-as="item">
+                <div class="accordion-item">
+                    <h3 class="accordion-header">
+                        <button t-attf-class="accordion-button #{'' if item.get('open') else 'collapsed'}"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                t-att-data-bs-target="'#' + item.get('id')"
+                                t-att-aria-controls="item.get('id')"
+                                t-att-aria-expanded="'true' if item.get('open') else 'false'"
+                                t-out="item.get('title')"/>
+                    </h3>
+                    <div t-att-id="item.get('id')" t-attf-class="accordion-collapse collapse #{'show' if item.get('open') else ''}">
+                        <div class="accordion-body" t-out="item.get('body')"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </template>
+</odoo>

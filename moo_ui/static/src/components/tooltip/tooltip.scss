@@ -1,0 +1,14 @@
+.o_moo_ui_scope {
+    .o_moo_ui_tooltip {
+        display: inline-flex;
+        color: var(--moo-ui-foreground);
+        text-decoration: underline dotted var(--moo-ui-muted);
+        text-underline-offset: 0.2rem;
+        cursor: help;
+    }
+
+    .tooltip {
+        --bs-tooltip-bg: var(--moo-ui-popover);
+        --bs-tooltip-color: var(--moo-ui-foreground);
+    }
+}

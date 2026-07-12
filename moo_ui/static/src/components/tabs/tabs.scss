@@ -1,0 +1,24 @@
+.o_moo_ui_scope {
+    .o_moo_ui_tabs {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        padding: 0.22rem;
+        border-radius: calc(var(--moo-ui-radius) * 1.2);
+        background: var(--moo-ui-soft);
+    }
+
+    .o_moo_ui_tabs_trigger {
+        padding: 0.45rem 0.75rem;
+        border-radius: var(--moo-ui-radius);
+        color: var(--moo-ui-muted);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .o_moo_ui_tabs_trigger.active {
+        color: var(--moo-ui-foreground);
+        background: var(--moo-ui-card);
+        box-shadow: var(--moo-ui-shadow);
+    }
+}

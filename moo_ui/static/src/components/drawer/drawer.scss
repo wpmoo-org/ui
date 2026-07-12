@@ -1,0 +1,32 @@
+.o_moo_ui_scope {
+    .o_moo_ui_drawer {
+        --bs-offcanvas-width: 30rem;
+
+        color: var(--moo-ui-foreground);
+        background: var(--moo-ui-card);
+        border-color: var(--moo-ui-border);
+    }
+
+    .o_moo_ui_drawer_title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .o_moo_ui_drawer_description {
+        margin: 0.35rem 0 0;
+        color: var(--moo-ui-muted);
+        font-size: 0.875rem;
+    }
+
+    .o_moo_ui_drawer_body {
+        color: var(--moo-ui-foreground);
+    }
+
+    .o_moo_ui_drawer_footer {
+        padding: 1rem;
+        border-top: 1px solid var(--moo-ui-border);
+        background: var(--moo-ui-card);
+    }
+}

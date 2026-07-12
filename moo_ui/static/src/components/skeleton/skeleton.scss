@@ -1,0 +1,20 @@
+.o_moo_ui_scope {
+    .o_moo_ui_skeleton {
+        display: block;
+        min-height: 1rem;
+        border-radius: var(--moo-ui-radius);
+        background: linear-gradient(90deg, var(--moo-ui-soft), var(--moo-ui-card-hover), var(--moo-ui-soft));
+        background-size: 200% 100%;
+        animation: mooUiSkeleton 1.4s ease-in-out infinite;
+    }
+}
+
+@keyframes mooUiSkeleton {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}

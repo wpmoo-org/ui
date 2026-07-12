@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="skeleton" name="Moo UI Skeleton">
+        <span t-attf-class="o_moo_ui_skeleton #{skeleton_class or ''}" aria-hidden="true"/>
+    </template>
+</odoo>

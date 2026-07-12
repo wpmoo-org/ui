@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="badge" name="Moo UI Badge">
+        <span t-attf-class="o_moo_ui_badge o_moo_ui_badge_#{badge_variant or 'secondary'} #{badge_class or ''}">
+            <t t-if="badge_label" t-out="badge_label"/>
+            <t t-else="" t-out="0"/>
+        </span>
+    </template>
+</odoo>

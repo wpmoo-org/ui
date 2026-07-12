@@ -1,0 +1,15 @@
+.o_moo_ui_scope {
+    .o_moo_ui_label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin: 0;
+        color: var(--moo-ui-foreground);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .o_moo_ui_label_required {
+        color: var(--moo-ui-danger);
+    }
+}

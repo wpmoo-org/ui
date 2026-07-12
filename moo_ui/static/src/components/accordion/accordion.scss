@@ -1,0 +1,10 @@
+.o_moo_ui_scope {
+    .o_moo_ui_accordion {
+        --bs-accordion-border-color: var(--moo-ui-border);
+        --bs-accordion-border-radius: var(--moo-ui-radius);
+        --bs-accordion-bg: var(--moo-ui-card);
+        --bs-accordion-color: var(--moo-ui-foreground);
+        --bs-accordion-active-bg: var(--moo-ui-soft);
+        --bs-accordion-active-color: var(--moo-ui-foreground);
+    }
+}

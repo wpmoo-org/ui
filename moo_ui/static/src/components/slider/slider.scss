@@ -1,0 +1,9 @@
+.o_moo_ui_scope {
+    .o_moo_ui_slider {
+        accent-color: var(--moo-ui-accent);
+    }
+
+    .o_moo_ui_slider:focus {
+        box-shadow: 0 0 0 0.18rem var(--moo-ui-ring);
+    }
+}

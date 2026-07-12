@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="slider" name="Moo UI Slider">
+        <input type="range"
+               t-att-id="slider_id"
+               t-att-name="slider_name"
+               t-att-min="slider_min or 0"
+               t-att-max="slider_max or 100"
+               t-att-step="slider_step or 1"
+               t-att-value="slider_value or 0"
+               t-attf-class="o_moo_ui_slider form-range #{slider_class or ''}"/>
+    </template>
+</odoo>

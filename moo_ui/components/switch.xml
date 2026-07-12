@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="switch" name="Moo UI Switch">
+        <div t-attf-class="o_moo_ui_switch form-check form-switch #{switch_class or ''}">
+            <input class="form-check-input"
+                   type="checkbox"
+                   role="switch"
+                   t-att-id="switch_id"
+                   t-att-name="switch_name"
+                   t-att-checked="'checked' if switch_checked else None"
+                   t-att-disabled="'disabled' if switch_disabled else None"/>
+            <label class="form-check-label" t-att-for="switch_id">
+                <t t-out="0"/>
+            </label>
+        </div>
+    </template>
+</odoo>

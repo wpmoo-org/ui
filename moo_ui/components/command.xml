@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="command" name="Moo UI Command">
+        <section t-attf-class="o_moo_ui_command #{command_class or ''}" data-moo-ui-command="1">
+            <label t-if="command_label" class="visually-hidden" t-out="command_label"/>
+            <input class="o_moo_ui_command_input form-control"
+                   type="search"
+                   t-att-placeholder="command_placeholder or 'Search...'"
+                   data-moo-ui-command-input="1"/>
+            <div class="o_moo_ui_command_list" role="listbox">
+                <t t-foreach="command_items or ()" t-as="item">
+                    <a class="o_moo_ui_command_item"
+                       t-att-href="item.get('url') or '#'"
+                       data-moo-ui-command-item="1">
+                        <span class="o_moo_ui_command_item_label" t-out="item.get('label')"/>
+                        <span t-if="item.get('description')" class="o_moo_ui_command_item_description" t-out="item.get('description')"/>
+                    </a>
+                </t>
+            </div>
+        </section>
+    </template>
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="dialog" name="Moo UI Dialog">
+        <div t-att-id="dialog_id"
+             t-attf-class="modal fade o_moo_ui_dialog #{dialog_class or ''}"
+             tabindex="-1"
+             t-att-aria-labelledby="dialog_id and (dialog_id + '_title') or None"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content o_moo_ui_dialog_content">
+                    <div class="modal-header o_moo_ui_dialog_header">
+                        <div>
+                            <h2 t-att-id="dialog_id and (dialog_id + '_title') or None"
+                                class="modal-title o_moo_ui_dialog_title"
+                                t-out="dialog_title"/>
+                            <p t-if="dialog_description" class="o_moo_ui_dialog_description" t-out="dialog_description"/>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
+                    </div>
+                    <div class="modal-body o_moo_ui_dialog_body">
+                        <t t-out="0"/>
+                    </div>
+                    <div t-if="dialog_footer" class="modal-footer o_moo_ui_dialog_footer">
+                        <t t-out="dialog_footer"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

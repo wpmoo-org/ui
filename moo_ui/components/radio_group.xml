@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="radio_group" name="Moo UI Radio Group">
+        <fieldset t-attf-class="o_moo_ui_radio_group #{radio_group_class or ''}">
+            <legend t-if="radio_group_label" class="o_moo_ui_radio_group_label" t-out="radio_group_label"/>
+            <t t-foreach="radio_options or ()" t-as="option">
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           t-att-name="radio_name"
+                           t-att-id="option.get('id')"
+                           t-att-value="option.get('value')"
+                           t-att-checked="'checked' if option.get('value') == radio_value else None"
+                           t-att-disabled="'disabled' if option.get('disabled') or radio_disabled else None"/>
+                    <label class="form-check-label" t-att-for="option.get('id')" t-out="option.get('label')"/>
+                </div>
+            </t>
+        </fieldset>
+    </template>
+</odoo>

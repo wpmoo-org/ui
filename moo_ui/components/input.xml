@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="input" name="Moo UI Input">
+        <input t-att-type="input_type or 'text'"
+               t-att-id="input_id"
+               t-att-name="input_name"
+               t-att-value="input_value"
+               t-att-placeholder="input_placeholder"
+               t-att-required="'required' if input_required else None"
+               t-att-disabled="'disabled' if input_disabled else None"
+               t-attf-class="o_moo_ui_input form-control #{input_class or ''}"/>
+    </template>
+</odoo>

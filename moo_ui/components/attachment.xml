@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="attachment" name="Moo UI Attachment">
+        <article t-attf-class="o_moo_ui_attachment #{attachment_class or ''}">
+            <span class="o_moo_ui_attachment_icon">
+                <t t-set="icon_name" t-value="attachment_icon or 'file-text'"/>
+                <t t-call="moo_ui.icon"/>
+            </span>
+            <span class="o_moo_ui_attachment_body">
+                <span class="o_moo_ui_attachment_name" t-out="attachment_filename"/>
+                <span t-if="attachment_size" class="o_moo_ui_attachment_size" t-out="attachment_size"/>
+            </span>
+            <span class="o_moo_ui_attachment_action">
+                <t t-out="0"/>
+            </span>
+        </article>
+    </template>
+</odoo>

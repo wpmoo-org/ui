@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="card" name="Moo UI Card">
+        <section t-attf-class="o_moo_ui_card #{card_class or ''}">
+            <t t-out="0"/>
+        </section>
+    </template>
+    <template id="card_header" name="Moo UI Card Header">
+        <header t-attf-class="o_moo_ui_card_header #{card_header_class or ''}">
+            <t t-out="0"/>
+        </header>
+    </template>
+    <template id="card_title" name="Moo UI Card Title">
+        <h3 t-attf-class="o_moo_ui_card_title #{card_title_class or ''}">
+            <t t-out="0"/>
+        </h3>
+    </template>
+    <template id="card_description" name="Moo UI Card Description">
+        <p t-attf-class="o_moo_ui_card_description #{card_description_class or ''}">
+            <t t-out="0"/>
+        </p>
+    </template>
+    <template id="card_content" name="Moo UI Card Content">
+        <div t-attf-class="o_moo_ui_card_content #{card_content_class or ''}">
+            <t t-out="0"/>
+        </div>
+    </template>
+    <template id="card_footer" name="Moo UI Card Footer">
+        <footer t-attf-class="o_moo_ui_card_footer #{card_footer_class or ''}">
+            <t t-out="0"/>
+        </footer>
+    </template>
+</odoo>
