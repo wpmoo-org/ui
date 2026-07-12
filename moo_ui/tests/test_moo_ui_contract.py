@@ -183,8 +183,13 @@ class TestMooUiContract(unittest.TestCase):
             'cookie.set',
             'browser.matchMedia',
             'closeFlyouts',
+            'openActiveGroups',
         ):
             self.assertIn(marker, script)
+
+        self.assertIn('if (active) {\n            this.closeFlyouts();', script)
+        self.assertIn('this.openActiveGroups();', script)
+        self.assertNotIn('if (!active) {\n            this.closeFlyouts();', script)
 
         for forbidden in (
             'mobileOpen',

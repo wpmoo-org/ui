@@ -53,8 +53,10 @@ export class MooUiSidebar extends Interaction {
     applyCompactState(compact) {
         const active = this.desktopMedia.matches && compact;
         this.el.classList.toggle(COMPACT_CLASS, active);
-        if (!active) {
+        if (active) {
             this.closeFlyouts();
+        } else {
+            this.openActiveGroups();
         }
         this.el.querySelectorAll("[data-moo-ui-sidebar-compact-toggle]").forEach((button) => {
             const label = active ? "Expand sidebar" : "Collapse sidebar";
@@ -113,6 +115,16 @@ export class MooUiSidebar extends Interaction {
 
     isCompactDesktop() {
         return this.desktopMedia.matches && this.el.classList.contains(COMPACT_CLASS);
+    }
+
+    openActiveGroups() {
+        this.el.querySelectorAll(`${GROUP_SELECTOR}.active`).forEach((group) => {
+            const button = group.querySelector(GROUP_TRIGGER_SELECTOR);
+            const content = button ? this.getGroupContent(button) : null;
+            if (button && content) {
+                this.setGroupOpen(button, content, true);
+            }
+        });
     }
 
     getGroupContent(button) {
