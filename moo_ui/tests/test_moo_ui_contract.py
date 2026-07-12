@@ -46,6 +46,66 @@ class TestMooUiContract(unittest.TestCase):
 
         self.assertIn('components/sidebar.xml', manifest['data'])
 
+    def test_manifest_loads_typography_template_and_styles(self):
+        manifest = ast.literal_eval((ADDON_ROOT / '__manifest__.py').read_text())
+
+        self.assertIn('components/typography.xml', manifest['data'])
+        self.assertIn(
+            'moo_ui/static/src/components/typography/typography.scss',
+            manifest['assets']['web.assets_frontend'],
+        )
+
+    def test_typography_templates_define_basic_text_api(self):
+        template = (ADDON_ROOT / 'components/typography.xml').read_text()
+
+        for template_id in (
+            'typography_h1',
+            'typography_h2',
+            'typography_h3',
+            'typography_h4',
+            'typography_p',
+            'typography_lead',
+            'typography_large',
+            'typography_small',
+            'typography_muted',
+            'typography_inline_code',
+            'typography_blockquote',
+            'typography_list',
+        ):
+            self.assertIn(f'id="{template_id}"', template)
+
+        for marker in (
+            't-out="0"',
+            'o_moo_ui_typography_h1',
+            'o_moo_ui_typography_p',
+            'o_moo_ui_typography_muted',
+            'o_moo_ui_typography_inline_code',
+            'o_moo_ui_typography_blockquote',
+            'o_moo_ui_typography_list',
+        ):
+            self.assertIn(marker, template)
+
+    def test_typography_styles_are_generic_and_token_backed(self):
+        styles = (ADDON_ROOT / 'static/src/components/typography/typography.scss').read_text()
+
+        for marker in (
+            '.o_moo_ui_typography_h1',
+            '.o_moo_ui_typography_h2',
+            '.o_moo_ui_typography_p',
+            '.o_moo_ui_typography_lead',
+            '.o_moo_ui_typography_muted',
+            '.o_moo_ui_typography_inline_code',
+            '.o_moo_ui_typography_blockquote',
+            '.o_moo_ui_typography_list',
+            'var(--moo-ui-foreground)',
+            'var(--moo-ui-muted)',
+        ):
+            self.assertIn(marker, styles)
+
+        self.assertNotIn('--moo-account-', styles)
+        self.assertNotIn('vw', styles)
+        self.assertNotRegex(styles, r'letter-spacing:\s*-')
+
     def test_sidebar_templates_define_compound_api(self):
         template = (ADDON_ROOT / 'components/sidebar.xml').read_text()
 
@@ -100,6 +160,7 @@ class TestMooUiContract(unittest.TestCase):
             manifest['assets']['web.assets_frontend'],
             [
                 'moo_ui/static/src/scss/tokens.scss',
+                'moo_ui/static/src/components/typography/typography.scss',
                 'moo_ui/static/src/components/sidebar/sidebar.js',
                 'moo_ui/static/src/components/sidebar/sidebar.scss',
             ],

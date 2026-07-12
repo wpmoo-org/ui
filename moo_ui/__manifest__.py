@@ -11,11 +11,13 @@
     'depends': ['web'],
     'data': [
         'components/icon.xml',
+        'components/typography.xml',
         'components/sidebar.xml',
     ],
     'assets': {
         'web.assets_frontend': [
             'moo_ui/static/src/scss/tokens.scss',
+            'moo_ui/static/src/components/typography/typography.scss',
             'moo_ui/static/src/components/sidebar/sidebar.js',
             'moo_ui/static/src/components/sidebar/sidebar.scss',
         ],
