@@ -47,6 +47,7 @@
         'components/kbd.xml',
         'components/aspect_ratio.xml',
         'components/attachment.xml',
+        'components/scroll_fade.xml',
     ],
     'assets': {
         'web.assets_frontend': [
@@ -89,6 +90,7 @@
             'moo_ui/static/src/components/kbd/kbd.scss',
             'moo_ui/static/src/components/aspect_ratio/aspect_ratio.scss',
             'moo_ui/static/src/components/attachment/attachment.scss',
+            'moo_ui/static/src/components/scroll_fade/scroll_fade.scss',
             'moo_ui/static/src/components/sidebar/sidebar.js',
             'moo_ui/static/src/components/sidebar/sidebar.scss',
         ],

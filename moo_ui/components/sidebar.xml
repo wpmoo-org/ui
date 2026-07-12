@@ -58,7 +58,7 @@
     </template>
 
     <template id="sidebar_content" name="Moo UI Sidebar Content">
-        <div t-attf-class="o_moo_ui_sidebar_content #{sidebar_content_class or ''}">
+        <div t-attf-class="o_moo_ui_sidebar_content o_moo_ui_scroll_fade o_moo_ui_scroll_fade_y o_moo_ui_scrollbar_none #{sidebar_content_class or ''}">
             <t t-out="0"/>
         </div>
     </template>

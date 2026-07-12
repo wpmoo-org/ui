@@ -47,6 +47,7 @@ CORE_COMPONENTS = {
     'kbd': ('kbd',),
     'aspect_ratio': ('aspect_ratio',),
     'attachment': ('attachment',),
+    'scroll_fade': ('scroll_fade',),
 }
 
 
@@ -242,7 +243,16 @@ class TestMooUiContract(unittest.TestCase):
             self.assertNotIn(forbidden, script)
 
     def test_sidebar_styles_are_generic_and_token_backed(self):
+        template = (ADDON_ROOT / 'components/sidebar.xml').read_text()
         styles = (ADDON_ROOT / 'static/src/components/sidebar/sidebar.scss').read_text()
+
+        for marker in (
+            'id="sidebar_content"',
+            'o_moo_ui_scroll_fade',
+            'o_moo_ui_scroll_fade_y',
+            'o_moo_ui_scrollbar_none',
+        ):
+            self.assertIn(marker, template)
 
         for marker in (
             '.o_moo_ui_sidebar_layout',
@@ -344,6 +354,38 @@ class TestMooUiContract(unittest.TestCase):
             'Boolean(query && !item.textContent.toLowerCase().includes(query))',
         ):
             self.assertIn(marker, script)
+
+    def test_scroll_fade_matches_shadcn_utility_shape_without_js(self):
+        template = (ADDON_ROOT / 'components/scroll_fade.xml').read_text()
+        styles = (ADDON_ROOT / 'static/src/components/scroll_fade/scroll_fade.scss').read_text()
+
+        for marker in (
+            'id="scroll_fade"',
+            'o_moo_ui_scroll_fade',
+            't-att-data-orientation',
+            't-out="0"',
+        ):
+            self.assertIn(marker, template)
+
+        for marker in (
+            '.o_moo_ui_scroll_fade',
+            '.o_moo_ui_scroll_fade_x',
+            '.o_moo_ui_scroll_fade_t',
+            '.o_moo_ui_scroll_fade_b',
+            '.o_moo_ui_scroll_fade_none',
+            '.o_moo_ui_scrollbar_none',
+            'scrollbar-width: none',
+            '::-webkit-scrollbar',
+            'display: none',
+            '--moo-ui-scroll-fade-size',
+            '--moo-ui-scroll-fade-reveal',
+            'mask-image',
+            'animation-timeline: scroll(self y)',
+            'animation-timeline: scroll(self inline)',
+        ):
+            self.assertIn(marker, styles)
+
+        self.assertNotIn('.js', styles)
 
 
 if __name__ == '__main__':
