@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="code_block" name="Moo UI Code Block">
+        <section t-attf-class="o_moo_ui_code_block #{code_block_class or ''}"
+                 data-moo-ui-code-block="1">
+            <header class="o_moo_ui_code_block_header">
+                <span class="o_moo_ui_code_block_language" t-out="code_block_language or 'Code'"/>
+                <button t-if="code_block_copy is not False"
+                        type="button"
+                        class="o_moo_ui_button o_moo_ui_button_outline o_moo_ui_button_sm o_moo_ui_code_block_copy"
+                        data-moo-ui-code-block-copy="1">
+                    <t t-out="code_block_copy_label or 'Copy code'"/>
+                </button>
+            </header>
+            <div class="o_moo_ui_code_block_body">
+                <pre class="o_moo_ui_code_block_line_numbers" data-moo-ui-code-block-lines="1" aria-hidden="true">1</pre>
+                <pre class="o_moo_ui_code_block_pre"><code t-attf-class="o_moo_ui_code_block_code language-#{code_block_highlight_language or 'html'}" data-moo-ui-code-block-code="1"><t t-out="0"/></code></pre>
+            </div>
+        </section>
+    </template>
+</odoo>

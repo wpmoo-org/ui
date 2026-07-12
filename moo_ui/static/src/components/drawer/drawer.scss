@@ -21,6 +21,9 @@
     }
 
     .o_moo_ui_drawer_body {
+        min-height: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
         color: var(--moo-ui-foreground);
     }
 

@@ -17,6 +17,7 @@ CORE_COMPONENTS = {
     'badge': ('badge',),
     'empty': ('empty',),
     'button': ('button',),
+    'code_block': ('code_block',),
     'avatar': ('avatar',),
     'dialog': ('dialog',),
     'drawer': ('drawer',),
@@ -299,6 +300,10 @@ class TestMooUiContract(unittest.TestCase):
             'moo_ui/static/src/components/popover/popover.js',
             assets,
         )
+        self.assertIn(
+            'moo_ui/static/src/components/code_block/code_block.js',
+            assets,
+        )
 
     def test_core_component_templates_define_safe_generic_api(self):
         for component, template_ids in CORE_COMPONENTS.items():
@@ -334,7 +339,7 @@ class TestMooUiContract(unittest.TestCase):
             self.assertNotIn('kita', styles.lower())
 
     def test_interactive_components_use_public_interaction_contract(self):
-        for component in ('command', 'tooltip', 'popover'):
+        for component in ('command', 'tooltip', 'popover', 'code_block'):
             script = (ADDON_ROOT / f'static/src/components/{component}/{component}.js').read_text()
 
             self.assertIn('import { registry } from "@web/core/registry";', script)
@@ -342,6 +347,76 @@ class TestMooUiContract(unittest.TestCase):
             self.assertIn(f'registry.category("public.interactions").add("moo_ui.{component}"', script)
             self.assertNotIn('olympiad', script.lower())
             self.assertNotIn('kita', script.lower())
+
+    def test_button_and_drawer_accept_generic_attributes_for_consumers(self):
+        button = (ADDON_ROOT / 'components/button.xml').read_text()
+        drawer = (ADDON_ROOT / 'components/drawer.xml').read_text()
+        drawer_styles = (ADDON_ROOT / 'static/src/components/drawer/drawer.scss').read_text()
+
+        self.assertIn('t-att="button_attrs or {}"', button)
+        self.assertIn('t-att="drawer_attrs or {}"', drawer)
+        self.assertIn("#{drawer_body_class or ''}", drawer)
+        self.assertIn('min-height: 0', drawer_styles)
+        self.assertIn('overflow: auto', drawer_styles)
+        self.assertIn('overscroll-behavior: contain', drawer_styles)
+
+    def test_code_block_defines_copyable_code_viewer(self):
+        manifest = ast.literal_eval((ADDON_ROOT / '__manifest__.py').read_text())
+        template = (ADDON_ROOT / 'components/code_block.xml').read_text()
+        styles = (ADDON_ROOT / 'static/src/components/code_block/code_block.scss').read_text()
+        script = (ADDON_ROOT / 'static/src/components/code_block/code_block.js').read_text()
+
+        self.assertIn(
+            'web/static/lib/prismjs/prism.js',
+            manifest['assets']['web.assets_frontend'],
+        )
+
+        for marker in (
+            'id="code_block"',
+            'o_moo_ui_code_block',
+            'data-moo-ui-code-block',
+            'data-moo-ui-code-block-lines',
+            'data-moo-ui-code-block-code',
+            'data-moo-ui-code-block-copy',
+            'code_block_language',
+            'code_block_highlight_language',
+            'language-',
+            't-out="0"',
+        ):
+            self.assertIn(marker, template)
+
+        for marker in (
+            '.o_moo_ui_code_block',
+            '.o_moo_ui_code_block_header',
+            '.o_moo_ui_code_block_body',
+            '.o_moo_ui_code_block_line_numbers',
+            '.o_moo_ui_code_block_code',
+            'grid-template-columns: auto max-content',
+            'background: #f6f8fa',
+            '.o_moo_ui_code_block_dark',
+            '--moo-ui-code-background: #0f172a',
+            '--moo-ui-code-foreground: #e5e7eb',
+            'font-family: ui-monospace',
+            'white-space: pre',
+            'min-width: max-content',
+            '.token.keyword',
+            'var(--moo-ui-border)',
+        ):
+            self.assertIn(marker, styles)
+
+        for marker in (
+            'static selector = "[data-moo-ui-code-block]"',
+            'data-moo-ui-code-block-lines',
+            'data-moo-ui-code-block-code',
+            'data-moo-ui-code-block-copy',
+            'MutationObserver',
+            'navigator.clipboard?.writeText',
+            'document.execCommand("copy")',
+            'this.rawText = this.code.textContent',
+            'window.Prism?.highlightElement(this.code)',
+            'registry.category("public.interactions").add("moo_ui.code_block", MooUiCodeBlock)',
+        ):
+            self.assertIn(marker, script)
 
     def test_command_interaction_has_native_input_fallback(self):
         script = (ADDON_ROOT / 'static/src/components/command/command.js').read_text()
