@@ -19,14 +19,14 @@ class TestMooUiContract(unittest.TestCase):
     def test_manifest_loads_icon_template_and_tokens(self):
         manifest = ast.literal_eval((ADDON_ROOT / '__manifest__.py').read_text())
 
-        self.assertIn('views/icon_templates.xml', manifest['data'])
+        self.assertIn('components/icon.xml', manifest['data'])
         self.assertIn(
             'moo_ui/static/src/scss/tokens.scss',
             manifest['assets']['web.assets_frontend'],
         )
 
     def test_icon_template_is_generic_and_escaped(self):
-        template = (ADDON_ROOT / 'views/icon_templates.xml').read_text()
+        template = (ADDON_ROOT / 'components/icon.xml').read_text()
 
         self.assertIn('id="icon"', template)
         self.assertIn('class="o_moo_ui_icon"', template)
@@ -44,10 +44,10 @@ class TestMooUiContract(unittest.TestCase):
     def test_manifest_loads_sidebar_template(self):
         manifest = ast.literal_eval((ADDON_ROOT / '__manifest__.py').read_text())
 
-        self.assertIn('views/sidebar_templates.xml', manifest['data'])
+        self.assertIn('components/sidebar.xml', manifest['data'])
 
     def test_sidebar_templates_define_compound_api(self):
-        template = (ADDON_ROOT / 'views/sidebar_templates.xml').read_text()
+        template = (ADDON_ROOT / 'components/sidebar.xml').read_text()
 
         for template_id in (
             'sidebar_layout',
@@ -76,7 +76,7 @@ class TestMooUiContract(unittest.TestCase):
             self.assertIn(marker, template)
 
     def test_sidebar_templates_stay_generic_and_safe(self):
-        template = (ADDON_ROOT / 'views/sidebar_templates.xml').read_text()
+        template = (ADDON_ROOT / 'components/sidebar.xml').read_text()
         lower_template = template.lower()
 
         for forbidden in (
@@ -100,13 +100,13 @@ class TestMooUiContract(unittest.TestCase):
             manifest['assets']['web.assets_frontend'],
             [
                 'moo_ui/static/src/scss/tokens.scss',
-                'moo_ui/static/src/interactions/sidebar.js',
-                'moo_ui/static/src/scss/sidebar.scss',
+                'moo_ui/static/src/components/sidebar/sidebar.js',
+                'moo_ui/static/src/components/sidebar/sidebar.scss',
             ],
         )
 
     def test_sidebar_interaction_uses_odoo_public_interaction_contract(self):
-        script = (ADDON_ROOT / 'static/src/interactions/sidebar.js').read_text()
+        script = (ADDON_ROOT / 'static/src/components/sidebar/sidebar.js').read_text()
 
         for marker in (
             'import { browser } from "@web/core/browser/browser";',
@@ -135,7 +135,7 @@ class TestMooUiContract(unittest.TestCase):
             self.assertNotIn(forbidden, script)
 
     def test_sidebar_styles_are_generic_and_token_backed(self):
-        styles = (ADDON_ROOT / 'static/src/scss/sidebar.scss').read_text()
+        styles = (ADDON_ROOT / 'static/src/components/sidebar/sidebar.scss').read_text()
 
         for marker in (
             '.o_moo_ui_sidebar_layout',

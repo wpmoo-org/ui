@@ -10,14 +10,14 @@
     'license': 'OPL-1',
     'depends': ['web'],
     'data': [
-        'views/icon_templates.xml',
-        'views/sidebar_templates.xml',
+        'components/icon.xml',
+        'components/sidebar.xml',
     ],
     'assets': {
         'web.assets_frontend': [
             'moo_ui/static/src/scss/tokens.scss',
-            'moo_ui/static/src/interactions/sidebar.js',
-            'moo_ui/static/src/scss/sidebar.scss',
+            'moo_ui/static/src/components/sidebar/sidebar.js',
+            'moo_ui/static/src/components/sidebar/sidebar.scss',
         ],
     },
     'application': False,
