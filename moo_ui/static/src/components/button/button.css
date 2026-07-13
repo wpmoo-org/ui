@@ -1,0 +1,62 @@
+.moo-ui .btn {
+    --bs-btn-font-weight: 500;
+    --bs-btn-border-radius: var(--moo-ui-radius);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.moo-ui .btn:focus-visible {
+    box-shadow: 0 0 0 0.2rem var(--moo-ui-ring);
+}
+
+.moo-ui .btn-ghost {
+    --bs-btn-color: var(--moo-ui-foreground);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-color: var(--moo-ui-foreground);
+    --bs-btn-hover-bg: var(--moo-ui-soft);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-bg: var(--moo-ui-soft);
+    --bs-btn-active-border-color: transparent;
+}
+
+.moo-ui .btn-xs {
+    --bs-btn-padding-y: 0.125rem;
+    --bs-btn-padding-x: 0.5rem;
+    --bs-btn-font-size: 0.75rem;
+}
+
+.moo-ui .btn-icon,
+.moo-ui .btn-icon-xs,
+.moo-ui .btn-icon-sm,
+.moo-ui .btn-icon-lg {
+    aspect-ratio: 1;
+    padding: 0;
+}
+
+.moo-ui .btn-icon {
+    width: 2.25rem;
+}
+
+.moo-ui .btn-icon-xs {
+    width: 1.75rem;
+    font-size: 0.75rem;
+}
+
+.moo-ui .btn-icon-sm {
+    width: 2rem;
+}
+
+.moo-ui .btn-icon-lg {
+    width: 2.75rem;
+}
+
+.moo-ui .btn[data-icon],
+.moo-ui .btn [data-icon] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

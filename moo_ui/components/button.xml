@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Moo UI. See LICENSE file for full copyright and licensing details. -->
 <odoo>
     <template id="button" name="Moo UI Button">
-        <t t-set="button_variant" t-value="button_variant or 'default'"/>
-        <t t-set="button_size" t-value="button_size or 'md'"/>
-        <a t-if="button_href"
-           t-att-href="button_href"
-           t-attf-class="o_moo_ui_button o_moo_ui_button_#{button_variant} o_moo_ui_button_#{button_size} #{button_class or ''}"
-           t-att="button_attrs or {}"
-           t-att-aria-disabled="'true' if button_disabled else None">
-            <t t-out="0"/>
-        </a>
-        <button t-else=""
-                t-att-type="button_type or 'button'"
-                t-attf-class="o_moo_ui_button o_moo_ui_button_#{button_variant} o_moo_ui_button_#{button_size} #{button_class or ''}"
-                t-att="button_attrs or {}"
-                t-att-disabled="'disabled' if button_disabled else None">
+        <t t-set="button_variant" t-value="variant or 'default'"/>
+        <t t-set="button_size" t-value="size or 'default'"/>
+        <t t-set="variant_class" t-value="{
+            'default': 'btn-primary',
+            'outline': 'btn-outline-secondary',
+            'ghost': 'btn-ghost',
+            'destructive': 'btn-danger',
+            'secondary': 'btn-secondary',
+            'link': 'btn-link',
+        }.get(button_variant, 'btn-primary')"/>
+        <t t-set="size_class" t-value="{
+            'default': '',
+            'xs': 'btn-xs',
+            'sm': 'btn-sm',
+            'lg': 'btn-lg',
+            'icon': 'btn-icon',
+            'icon-xs': 'btn-icon-xs',
+            'icon-sm': 'btn-icon-sm',
+            'icon-lg': 'btn-icon-lg',
+        }.get(button_size, '')"/>
+        <button t-att="button_attrs or {}"
+                t-att-type="type or 'button'"
+                t-att-disabled="disabled and 'disabled' or None"
+                t-attf-class="btn #{variant_class} #{size_class} #{button_class or ''}">
             <t t-out="0"/>
         </button>
     </template>

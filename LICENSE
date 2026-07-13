@@ -1,10 +1,4 @@
-Moo Portal
-Copyright (c) WPMoo. All rights reserved.
+OPL-1
 
-This repository is licensed under the Odoo Proprietary License v1.0 (OPL-1).
-
-The canonical Odoo Proprietary License v1.0 text is published by Odoo under:
-https://www.odoo.com/documentation/19.0/legal/licenses.html#odoo-apps
-
-The manifest license identifier for each commercial addon in this repository
-must be `OPL-1`.
+This repository is licensed under the Odoo Proprietary License v1.0 unless a
+file states otherwise.

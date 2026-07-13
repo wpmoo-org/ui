@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <template id="label" name="Moo UI Label">
-        <label t-att-for="label_for" t-attf-class="o_moo_ui_label #{label_class or ''}">
-            <t t-out="0"/>
-            <span t-if="label_required" class="o_moo_ui_label_required" aria-hidden="true">*</span>
-        </label>
-    </template>
-</odoo>

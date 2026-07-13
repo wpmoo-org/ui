@@ -1,12 +1,16 @@
 # Third-Party Notices
 
+## Bootstrap
+
+Bootstrap is used as the runtime CSS foundation. Bootstrap is licensed under
+the MIT License.
+
+Source: https://getbootstrap.com/docs/5.3/
+
 ## shadcn/ui
 
-The Moo UI component anatomy and interaction contracts are informed by
-shadcn/ui, licensed under the MIT License:
+shadcn/ui is used as an API and design reference for component shape. No React,
+Tailwind, Radix, or Base UI source is bundled.
 
-- Repository: https://github.com/shadcn-ui/ui
-- Sidebar source reference:
-  https://github.com/shadcn-ui/ui/blob/main/apps/v4/registry/new-york-v4/ui/sidebar.tsx
-
-Moo UI does not bundle React, Radix, Tailwind, or shadcn/ui runtime code.
+Source: https://ui.shadcn.com/docs/components
+License: MIT

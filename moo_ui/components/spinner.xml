@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <template id="spinner" name="Moo UI Spinner">
-        <span t-attf-class="o_moo_ui_spinner spinner-border spinner-border-#{spinner_size or 'sm'} #{spinner_class or ''}" aria-hidden="true"/>
-        <span class="visually-hidden" t-out="spinner_label or 'Loading'"/>
-    </template>
-</odoo>
