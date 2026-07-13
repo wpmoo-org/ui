@@ -21,6 +21,16 @@
                 <rect width="7" height="9" x="14" y="12" rx="1"/>
                 <rect width="7" height="5" x="3" y="16" rx="1"/>
             </t>
+            <t t-elif="icon_key == 'mouse-pointer-click'">
+                <path d="M14 4.1 12 6"/>
+                <path d="m5.1 8-2.9-.8"/>
+                <path d="m6 12-2 2"/>
+                <path d="M7.2 2.2 8 5.1"/>
+                <path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/>
+            </t>
+            <t t-elif="icon_key == 'square'">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+            </t>
             <t t-elif="icon_key == 'home'">
                 <path d="m3 9 9-7 9 7"/>
                 <path d="M9 22V12h6v10"/>

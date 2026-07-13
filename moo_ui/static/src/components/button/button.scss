@@ -11,71 +11,71 @@
         text-decoration: none;
         white-space: nowrap;
         box-shadow: none !important;
-    }
 
-    .o_moo_ui_button_sm {
-        min-height: 2rem;
-        padding: 0.25rem 0.65rem;
-        font-size: 0.82rem;
-    }
+        &_sm {
+            min-height: 2rem;
+            padding: 0.25rem 0.65rem;
+            font-size: 0.82rem;
+        }
 
-    .o_moo_ui_button_md {
-        min-height: 2.4rem;
-        padding: 0.45rem 0.85rem;
-        font-size: 0.9rem;
-    }
+        &_md {
+            min-height: 2.4rem;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.9rem;
+        }
 
-    .o_moo_ui_button_lg {
-        min-height: 2.75rem;
-        padding: 0.55rem 1rem;
-        font-size: 0.96rem;
-    }
+        &_lg {
+            min-height: 2.75rem;
+            padding: 0.55rem 1rem;
+            font-size: 0.96rem;
+        }
 
-    .o_moo_ui_button_icon {
-        width: 2.4rem;
-        height: 2.4rem;
-        padding: 0;
-    }
+        &_icon {
+            width: 2.4rem;
+            height: 2.4rem;
+            padding: 0;
+        }
 
-    .o_moo_ui_button_default,
-    .o_moo_ui_button_primary {
-        border-color: var(--moo-ui-accent);
-        color: var(--moo-ui-accent-foreground);
-        background: var(--moo-ui-accent);
-    }
+        &_default,
+        &_primary {
+            border-color: var(--moo-ui-accent);
+            color: var(--moo-ui-accent-foreground);
+            background: var(--moo-ui-accent);
+        }
 
-    .o_moo_ui_button_secondary,
-    .o_moo_ui_button_outline {
-        border-color: var(--moo-ui-border);
-        color: var(--moo-ui-foreground);
-        background: var(--moo-ui-card);
-    }
+        &_secondary,
+        &_outline {
+            border-color: var(--moo-ui-border);
+            color: var(--moo-ui-foreground);
+            background: var(--moo-ui-card);
+        }
 
-    .o_moo_ui_button_ghost,
-    .o_moo_ui_button_link {
-        border-color: transparent;
-        color: var(--moo-ui-foreground);
-        background: transparent;
-    }
+        &_ghost,
+        &_link {
+            border-color: transparent;
+            color: var(--moo-ui-foreground);
+            background: transparent;
+        }
 
-    .o_moo_ui_button_danger {
-        border-color: var(--moo-ui-danger);
-        color: #ffffff;
-        background: var(--moo-ui-danger);
-    }
+        &_danger {
+            border-color: var(--moo-ui-danger);
+            color: #ffffff;
+            background: var(--moo-ui-danger);
+        }
 
-    .o_moo_ui_button:hover,
-    .o_moo_ui_button:focus-visible {
-        border-color: var(--moo-ui-accent);
-        box-shadow: 0 0 0 0.18rem var(--moo-ui-ring) !important;
-    }
+        &:hover,
+        &:focus-visible {
+            border-color: var(--moo-ui-accent);
+            box-shadow: 0 0 0 0.18rem var(--moo-ui-ring) !important;
+        }
 
-    .o_moo_ui_button[disabled],
-    .o_moo_ui_button[aria-disabled="true"] {
-        color: var(--moo-ui-muted) !important;
-        background: var(--moo-ui-soft) !important;
-        border-color: var(--moo-ui-border) !important;
-        opacity: 1;
-        cursor: not-allowed;
+        &[disabled],
+        &[aria-disabled="true"] {
+            color: var(--moo-ui-muted) !important;
+            background: var(--moo-ui-soft) !important;
+            border-color: var(--moo-ui-border) !important;
+            opacity: 1;
+            cursor: not-allowed;
+        }
     }
 }

@@ -80,6 +80,12 @@ class TestMooUiContract(unittest.TestCase):
         self.assertNotIn('kita', template.lower())
         self.assertNotIn('mentor', template.lower())
 
+    def test_icon_template_supports_showcase_navigation_icons(self):
+        template = (ADDON_ROOT / 'components/icon.xml').read_text()
+
+        self.assertIn("icon_key == 'mouse-pointer-click'", template)
+        self.assertIn("icon_key == 'square'", template)
+
     def test_tokens_are_scoped_and_bootstrap_backed(self):
         styles = (ADDON_ROOT / 'static/src/scss/tokens.scss').read_text()
 
