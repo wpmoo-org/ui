@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
 {% from "components/example.html.jinja" import render_example %}
 
 {% block title %}Card — Moo UI{% endblock %}
@@ -14,11 +15,9 @@
 
   <div class="moo-component-examples">
     {% set content_card %}
-      <div class="card" style="width: 22rem;">
-        <div class="card-body">
-          <p class="card-text mb-0">A single content section works when the card holds one short, self-contained note.</p>
-        </div>
-      </div>
+      {% call card(style="width: 22rem;") %}
+        <p class="card-text mb-0">A single content section works when the card holds one short, self-contained note.</p>
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "card-content",
@@ -28,15 +27,13 @@
     ) }}
 
     {% set basic_card %}
-      <div class="card" style="width: 22rem;">
-        <div class="card-header">
-          <h3 class="card-title">Team workspace</h3>
-          <p class="card-subtitle">Everyone you invite can open and edit the shared boards.</p>
-        </div>
-        <div class="card-body">
-          <p class="card-text mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
-        </div>
-      </div>
+      {% call card(
+        "Team workspace",
+        "Everyone you invite can open and edit the shared boards.",
+        style="width: 22rem;"
+      ) %}
+        <p class="card-text mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "card-basic",
@@ -46,19 +43,19 @@
     ) }}
 
     {% set actions_card %}
-      <div class="card" style="width: 22rem;">
-        <div class="card-header">
-          <h3 class="card-title">Discard changes?</h3>
-          <p class="card-subtitle">Your recent edits to this board are still unsaved.</p>
-        </div>
-        <div class="card-body">
-          <p class="card-text mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
-        </div>
-        <div class="card-footer justify-content-end">
-          {{ button("Discard", variant="outline") }}
-          {{ button("Save changes") }}
-        </div>
-      </div>
+      {% set actions_footer %}
+        {{ button("Discard", variant="outline") }}
+        {{ button("Save changes") }}
+      {% endset %}
+      {% call card(
+        "Discard changes?",
+        "Your recent edits to this board are still unsaved.",
+        footer=actions_footer,
+        style="width: 22rem;",
+        footer_class="justify-content-end"
+      ) %}
+        <p class="card-text mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "card-actions",
@@ -68,18 +65,19 @@
     ) }}
 
     {% set rtl_card %}
-      <div class="card" dir="rtl" style="width: 22rem;">
-        <div class="card-header">
-          <h3 class="card-title">مساحة العمل</h3>
-          <p class="card-subtitle">يمكن لكل شخص تدعوه فتح اللوحات المشتركة وتحريرها.</p>
-        </div>
-        <div class="card-body">
-          <p class="card-text mb-0">انضم أربعة أعضاء في آخر تحديث. يمكنك إدارة من يبقى من لوحة الوصول.</p>
-        </div>
-        <div class="card-footer justify-content-end">
-          {{ button("حفظ") }}
-        </div>
-      </div>
+      {% set rtl_footer %}
+        {{ button("حفظ") }}
+      {% endset %}
+      {% call card(
+        "مساحة العمل",
+        "يمكن لكل شخص تدعوه فتح اللوحات المشتركة وتحريرها.",
+        footer=rtl_footer,
+        style="width: 22rem;",
+        dir="rtl",
+        footer_class="justify-content-end"
+      ) %}
+        <p class="card-text mb-0">انضم أربعة أعضاء في آخر تحديث. يمكنك إدارة من يبقى من لوحة الوصول.</p>
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "card-rtl",
