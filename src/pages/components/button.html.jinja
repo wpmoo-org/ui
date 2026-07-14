@@ -156,113 +156,56 @@
   <section class="moo-component-reference" aria-labelledby="button-reference-title">
     <h2 class="h3" id="button-reference-title">API Reference</h2>
     <p class="text-body-secondary">
-      Use the Jinja macro to emit Bootstrap-native markup with Moo UI defaults.
+      Use Bootstrap button classes directly. Copy exact rendered HTML from each
+      example's View markup panel.
     </p>
-    <pre class="overflow-x-auto rounded-3 border bg-body-tertiary p-3"><code>button(
-  label,
-  variant="default",
-  size="default",
-  element="button",
-  type="button",
-  href="",
-  disabled=false,
-  aria_label="",
-  icon_start="",
-  icon_end="",
-  extra_class="",
-  toggle=false
-)</code></pre>
     <div class="table-responsive">
       <table class="table align-middle">
         <thead>
           <tr>
-            <th scope="col">Parameter</th>
-            <th scope="col">Value</th>
-            <th scope="col">HTML or behavior</th>
+            <th scope="col">Class or attribute</th>
+            <th scope="col">Use</th>
+            <th scope="col">Behavior</th>
           </tr>
         </thead>
         <tbody>
-          {% for variant_name, variant_class in button_variants.items() %}
           <tr>
-            {% if loop.first %}
-              <th scope="rowgroup" rowspan="{{ button_variants | length }}"><code>variant</code></th>
-            {% endif %}
-            <td>
-              <code>{{ variant_name }}</code>
-              {% if variant_name == "default" %}<span class="text-body-secondary">(default)</span>{% endif %}
-            </td>
-            <td>
-              <code>btn {{ variant_class }}</code>
-              {% if variant_name == "ghost" %}<span class="badge text-bg-secondary">Moo</span>{% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-        <tbody>
-          {% for size_name, size_config in button_sizes.items() %}
-          <tr>
-            {% if loop.first %}
-              <th scope="rowgroup" rowspan="{{ button_sizes | length }}"><code>size</code></th>
-            {% endif %}
-            <td>
-              <code>{{ size_name }}</code>
-              {% if size_name == "default" %}<span class="text-body-secondary">(default)</span>{% endif %}
-            </td>
-            <td>
-              <code>btn{% if size_config["class"] %} {{ size_config["class"] }}{% endif %}</code>
-              {% if size_name in ("xs", "icon", "icon-xs", "icon-sm", "icon-lg") %}<span class="badge text-bg-secondary">Moo</span>{% endif %}
-              — {{ size_config["dimensions"] }}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-        <tbody>
-          <tr>
-            <th scope="row"><code>element</code></th>
-            <td><code>button</code> (default), <code>a</code>, <code>input</code></td>
-            <td>Preserves the native action, navigation, or form-control element.</td>
+            <th scope="row"><code>btn-primary</code></th>
+            <td>Primary action</td>
+            <td>Uses Moo foreground and surface tokens.</td>
           </tr>
           <tr>
-            <th scope="row"><code>type</code></th>
-            <td><code>button</code> (default), <code>submit</code>, <code>reset</code></td>
-            <td>Emitted for <code>button</code> and <code>input</code> elements.</td>
+            <th scope="row"><code>btn-secondary</code> / <code>btn-outline-secondary</code></th>
+            <td>Secondary action</td>
+            <td>Matches the compact shadcn-like neutral treatment.</td>
           </tr>
           <tr>
-            <th scope="row"><code>href</code></th>
-            <td>URL string</td>
-            <td>Emitted only for an enabled <code>a</code> element.</td>
+            <th scope="row"><code>btn-ghost</code> / <code>btn-danger</code> / <code>btn-link</code></th>
+            <td>Special intent</td>
+            <td>Covers low-emphasis, destructive, and text-link actions.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>btn-xs</code>, <code>btn-sm</code>, <code>btn-lg</code></th>
+            <td>Text button density</td>
+            <td>Maps to the 24 / 28 / 32 / 36 px height scale.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>btn-icon</code> variants</th>
+            <td>Icon-only controls</td>
+            <td>Keep controls square and require an accessible name.</td>
           </tr>
           <tr>
             <th scope="row"><code>disabled</code></th>
-            <td><code>false</code> (default) or <code>true</code></td>
-            <td>Uses native <code>disabled</code>; anchors omit <code>href</code> and receive <code>aria-disabled="true"</code> plus <code>tabindex="-1"</code>.</td>
+            <td>Unavailable action</td>
+            <td>Uses native disabled behavior with Moo runtime contrast tokens.</td>
           </tr>
           <tr>
-            <th scope="row"><code>aria_label</code></th>
-            <td>Accessible-name string</td>
-            <td>Required when the visible <code>label</code> is empty.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>icon_start</code>, <code>icon_end</code></th>
-            <td><code>plus</code>, <code>arrow-right</code>, <code>pin</code></td>
-            <td>Emits a decorative SVG with logical icon spacing.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>extra_class</code></th>
-            <td>Class string</td>
-            <td>Adds Bootstrap utilities such as <code>w-100</code> or <code>rounded-pill</code>.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>toggle</code></th>
-            <td><code>false</code> (default) or <code>true</code></td>
-            <td>Adds <code>data-bs-toggle="button"</code> and <code>aria-pressed="false"</code> to a button.</td>
+            <th scope="row"><code>data-bs-toggle="button"</code></th>
+            <td>Pressed state</td>
+            <td>Uses Bootstrap's native toggle behavior.</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="text-body-secondary mt-3 mb-0">
-      <strong>Deferred:</strong> Loading visuals remain deferred until Spinner;
-      joined controls remain deferred until Button Group.
-    </p>
   </section>
 {% endblock %}

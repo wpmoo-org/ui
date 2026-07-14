@@ -1,0 +1,92 @@
+.btn-group-sm > .btn,
+.btn-group-sm > .btn-group > .btn {
+  --moo-button-height: 1.75rem;
+  --moo-button-icon-padding-x: 0.375rem;
+  --moo-button-gap: 0.25rem;
+  --moo-button-icon-size: 0.875rem;
+}
+
+.btn-group-lg > .btn,
+.btn-group-lg > .btn-group > .btn {
+  --moo-button-height: 2.25rem;
+}
+
+.dropdown-menu {
+  --bs-dropdown-min-width: 11rem;
+  --bs-dropdown-padding-x: 0.25rem;
+  --bs-dropdown-padding-y: 0.25rem;
+  --bs-dropdown-font-size: 0.875rem;
+  --bs-dropdown-color: var(--moo-foreground);
+  --bs-dropdown-bg: var(--moo-surface);
+  --bs-dropdown-border-color: var(--moo-border);
+  --bs-dropdown-border-radius: var(--bs-border-radius-lg);
+  --bs-dropdown-divider-bg: var(--moo-border);
+  --bs-dropdown-divider-margin-y: 0.25rem;
+  --bs-dropdown-item-border-radius: var(--bs-border-radius);
+  --bs-dropdown-link-color: var(--moo-foreground);
+  --bs-dropdown-link-hover-color: var(--moo-foreground);
+  --bs-dropdown-link-hover-bg: var(--moo-muted-surface);
+  --bs-dropdown-link-active-color: var(--moo-surface);
+  --bs-dropdown-link-active-bg: var(--moo-foreground);
+  --bs-dropdown-item-padding-x: 0.5rem;
+  --bs-dropdown-item-padding-y: 0.375rem;
+
+  box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--moo-foreground) 12%, transparent);
+}
+
+.btn-icon.dropdown-toggle::after {
+  display: none;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+  border-radius: var(--bs-dropdown-item-border-radius);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  border-radius: var(--bs-dropdown-item-border-radius);
+}
+
+.dropdown-item > [data-icon="inline-start"] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.dropdown-item.text-danger {
+  color: var(--moo-destructive);
+}
+
+.dropdown-item.text-danger:hover,
+.dropdown-item.text-danger:focus {
+  color: var(--moo-destructive);
+}
+
+.moo-button-group-input {
+  --moo-button-height: 2rem;
+
+  max-width: 18rem;
+}
+
+.moo-button-group-input > .form-control {
+  min-height: var(--moo-button-height);
+  padding-block: 0;
+  font-size: 0.875rem;
+  color: var(--moo-foreground);
+  background-color: var(--moo-surface);
+  border-color: var(--moo-border);
+}
+
+[dir="rtl"] .btn-group,
+[dir="rtl"] .btn-toolbar {
+  direction: ltr;
+}
+
+[dir="rtl"] .btn-group > .btn,
+[dir="rtl"] .btn-toolbar > .btn {
+  unicode-bidi: plaintext;
+}
