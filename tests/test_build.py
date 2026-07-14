@@ -229,6 +229,21 @@ class CatalogBuildTests(unittest.TestCase):
             self.assertNotIn("button_group(", page)
             self.assertNotIn("Internal note:", page)
 
+    def test_card_examples_are_generated_from_component_macro(self) -> None:
+        card_component_path = ROOT / "src/components/card.html.jinja"
+        self.assertTrue(card_component_path.is_file())
+        card_component = card_component_path.read_text(encoding="utf-8")
+        card_page = (
+            ROOT / "src/pages/components/card.html.jinja"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("{% macro card(", card_component)
+        self.assertIn(
+            '{% from "components/card.html.jinja" import card %}',
+            card_page,
+        )
+        self.assertNotIn('<div class="card"', card_page)
+
     def test_button_focus_indicator_uses_high_contrast_outline(self) -> None:
         result = self.run_build()
 

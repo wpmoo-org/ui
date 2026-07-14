@@ -1,0 +1,30 @@
+{% macro card(
+  title="",
+  subtitle="",
+  footer="",
+  style="",
+  dir="",
+  extra_class="",
+  header_class="",
+  body_class="",
+  footer_class=""
+) -%}
+  {% set classes = "card" %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <div class="{{ classes }}"{% if dir %} dir="{{ dir }}"{% endif %}{% if style %} style="{{ style }}"{% endif %}>
+    {% if title or subtitle %}
+      <div class="card-header{% if header_class %} {{ header_class }}{% endif %}">
+        {% if title %}<h3 class="card-title">{{ title }}</h3>{% endif %}
+        {% if subtitle %}<p class="card-subtitle">{{ subtitle }}</p>{% endif %}
+      </div>
+    {% endif %}
+    <div class="card-body{% if body_class %} {{ body_class }}{% endif %}">
+      {{ caller() | trim | safe }}
+    </div>
+    {% if footer %}
+      <div class="card-footer{% if footer_class %} {{ footer_class }}{% endif %}">
+        {{ footer | trim | safe }}
+      </div>
+    {% endif %}
+  </div>
+{%- endmacro %}
