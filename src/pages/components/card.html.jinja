@@ -1,4 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/example.html.jinja" import render_example %}
@@ -16,7 +17,7 @@
   <div class="moo-component-examples">
     {% set content_card %}
       {% call card(style="width: 22rem;") %}
-        <p class="card-text mb-0">A single content section works when the card holds one short, self-contained note.</p>
+        <p class="mb-0">A single content section works when the card holds one short, self-contained note.</p>
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -32,7 +33,7 @@
         "Everyone you invite can open and edit the shared boards.",
         style="width: 22rem;"
       ) %}
-        <p class="card-text mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
+        <p class="mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -54,7 +55,7 @@
         style="width: 22rem;",
         footer_class="justify-content-end"
       ) %}
-        <p class="card-text mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
+        <p class="mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -76,7 +77,7 @@
         dir="rtl",
         footer_class="justify-content-end"
       ) %}
-        <p class="card-text mb-0">انضم أربعة أعضاء في آخر تحديث. يمكنك إدارة من يبقى من لوحة الوصول.</p>
+        <p class="mb-0">انضم أربعة أعضاء في آخر تحديث. يمكنك إدارة من يبقى من لوحة الوصول.</p>
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -87,49 +88,16 @@
     ) }}
   </div>
 
-  <section class="moo-component-reference" aria-labelledby="card-reference-title">
-    <h2 class="h3" id="card-reference-title">API Reference</h2>
-    <p class="text-body-secondary">
-      Use Bootstrap card classes directly. Copy exact rendered HTML from each
-      example's View markup panel.
-    </p>
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th scope="col">Class</th>
-            <th scope="col">Use</th>
-            <th scope="col">Behavior</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row"><code>card</code></th>
-            <td>Root surface</td>
-            <td>Owns the border, radius, shadow, background, and vertical rhythm.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>card-header</code></th>
-            <td>Title area</td>
-            <td>Stacks a title and description with no divider or fill.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>card-title</code> / <code>card-subtitle</code></th>
-            <td>Heading and description</td>
-            <td>Renders a semibold title and a muted secondary line.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>card-body</code> / <code>card-text</code></th>
-            <td>Main content</td>
-            <td>Holds the padded content section and its copy.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>card-footer</code></th>
-            <td>Action row</td>
-            <td>Aligns finished controls in a row with no divider.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  {% set api_rows = [
+    {"contract": "card", "use": "Root surface", "behavior": "Owns border, radius, shadow, background, and vertical rhythm."},
+    {"contract": "card-header", "use": "Title area", "behavior": "Stacks a title and description with no divider or fill."},
+    {"contract": "card-title / card-subtitle", "use": "Heading and description", "behavior": "Renders a semibold title and a muted secondary line."},
+    {"contract": "card-body / card-text", "use": "Main content", "behavior": "Holds the padded content section and its copy."},
+    {"contract": "card-footer", "use": "Action row", "behavior": "Aligns finished controls in a row with no divider."}
+  ] %}
+  {{ render_api_reference(
+    "card",
+    "Use Bootstrap card classes directly. Copy exact rendered HTML from each example's View Code panel.",
+    api_rows
+  ) }}
 {% endblock %}

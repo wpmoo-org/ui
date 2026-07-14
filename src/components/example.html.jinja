@@ -5,12 +5,14 @@
       <h2 class="h4" id="{{ id }}-title">{{ title }}</h2>
       <p class="text-body-secondary mb-0">{{ description }}</p>
     </div>
-    <div class="moo-example__preview">
-      {{ rendered | safe }}
+    <div class="moo-example__surface">
+      <div class="moo-example__preview">
+        {{ rendered | safe }}
+      </div>
+      <details class="moo-example__source" open>
+        <summary>View Code</summary>
+        <pre><code>{{ rendered | e }}</code></pre>
+      </details>
     </div>
-    <details class="moo-example__source">
-      <summary>View markup</summary>
-      <pre><code>{{ rendered | e }}</code></pre>
-    </details>
   </section>
 {% endmacro %}

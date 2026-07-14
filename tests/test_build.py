@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import unittest
@@ -99,6 +100,39 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn('<input class="btn', page)
         self.assertIn("disabled", page)
         self.assertIn('aria-label="Pin dashboard"', page)
+
+    def test_render_example_owns_one_preview_and_source_surface(self) -> None:
+        template = (
+            ROOT / "src/components/example.html.jinja"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual(template.count('class="moo-example__surface"'), 1)
+        self.assertEqual(template.count('class="moo-example__preview"'), 1)
+        self.assertEqual(template.count('class="moo-example__source"'), 1)
+        self.assertIn("<summary>View Code</summary>", template)
+        self.assertEqual(template.count("{{ rendered | safe }}"), 1)
+        self.assertEqual(template.count("{{ rendered | e }}"), 1)
+
+    def test_component_pages_use_shared_api_reference_macro(self) -> None:
+        macro_path = ROOT / "src/components/api_reference.html.jinja"
+        self.assertTrue(macro_path.is_file())
+        macro = macro_path.read_text(encoding="utf-8")
+        self.assertIn("{% macro render_api_reference(", macro)
+        self.assertEqual(macro.count('class="moo-component-reference"'), 1)
+
+        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+            source = path.read_text(encoding="utf-8")
+            with self.subTest(page=path.name):
+                self.assertIn(
+                    '{% from "components/api_reference.html.jinja" import render_api_reference %}',
+                    source,
+                )
+                self.assertIn("{{ render_api_reference(", source)
+                self.assertNotIn(
+                    '<section class="moo-component-reference"',
+                    source,
+                )
+                self.assertNotIn('<table class="table', source)
 
     def test_button_examples_do_not_emit_demo_links(self) -> None:
         result = self.run_build()
@@ -244,6 +278,75 @@ class CatalogBuildTests(unittest.TestCase):
         )
         self.assertNotIn('<div class="card"', card_page)
 
+    def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
+        allowed_prefixes = {
+            "button": ("btn", "disabled"),
+            "button_group": ("btn",),
+            "card": ("card",),
+        }
+
+        for path in sorted((ROOT / "scss/components").glob("*.scss")):
+            source = path.read_text(encoding="utf-8")
+            component = path.stem.removeprefix("_")
+            prefixes = allowed_prefixes.get(
+                component,
+                (component.replace("_", "-"),),
+            )
+
+            for class_name in set(re.findall(r"\.([a-z][a-z0-9_-]*)", source)):
+                with self.subTest(component=component, selector=class_name):
+                    self.assertTrue(
+                        any(
+                            class_name == prefix
+                            or class_name.startswith(f"{prefix}-")
+                            for prefix in prefixes
+                        ),
+                        f".{class_name} belongs to another component or catalog chrome",
+                    )
+
+    def test_component_pages_compose_ready_macros_only(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
+        ready = {
+            item["slug"] for item in catalog if item["status"] == "ready"
+        }
+        infrastructure = {"api_reference", "example"}
+        component_class = re.compile(
+            r"^(?:accordion|alert|badge|btn|card|dropdown|form-control|"
+            r"form-label|input-group|list-group|modal|nav|navbar|offcanvas|"
+            r"placeholder|popover|progress|spinner|toast)(?:-|$)"
+        )
+
+        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+            source = path.read_text(encoding="utf-8")
+
+            with self.subTest(page=path.name, contract="interactive markup"):
+                self.assertNotRegex(
+                    source,
+                    r"<(?:button|form|input|select|textarea)\b",
+                )
+
+            imports = re.findall(
+                r'{%\s*from\s+"components/([^"/]+)\.html\.jinja"\s+import',
+                source,
+            )
+            for imported in imports:
+                with self.subTest(page=path.name, imported=imported):
+                    self.assertTrue(
+                        imported in infrastructure
+                        or imported.replace("_", "-") in ready,
+                        f"{imported} is not a ready component macro",
+                    )
+
+            for class_value in re.findall(r'class="([^"]*)"', source):
+                for class_name in class_value.split():
+                    with self.subTest(page=path.name, class_name=class_name):
+                        self.assertIsNone(
+                            component_class.match(class_name),
+                            f".{class_name} must come from a ready component macro",
+                        )
+
     def test_button_focus_indicator_uses_high_contrast_outline(self) -> None:
         result = self.run_build()
 
@@ -337,8 +440,6 @@ class CatalogBuildTests(unittest.TestCase):
             'data-example="size-groups"',
             'data-example="vertical-group"',
             'data-example="toolbar-groups"',
-            'data-example="radio-toggle-group"',
-            'data-example="nested-groups"',
             'data-example="rtl-preview"',
         ):
             self.assertIn(marker, page)
@@ -349,7 +450,6 @@ class CatalogBuildTests(unittest.TestCase):
             "btn-toolbar",
             "btn-group-sm",
             "btn-group-lg",
-            "btn-check",
         ):
             self.assertIn(native_class, page)
 
@@ -357,8 +457,9 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn('role="toolbar"', page)
         self.assertIn('aria-label="Ticket actions"', page)
         self.assertIn('aria-label="Media controls"', page)
-        self.assertIn('name="button-group-view"', page)
-        self.assertIn('autocomplete="off"', page)
+        self.assertNotIn("dropdown-menu", page)
+        self.assertNotIn("btn-check", page)
+        self.assertNotIn("form-control", page)
         self.assertNotIn('<a class="btn', page)
         self.assertNotIn("example.com", page)
         self.assertNotIn("React", page)
@@ -378,7 +479,7 @@ class CatalogBuildTests(unittest.TestCase):
             "btn-group-sm",
             "role",
             "aria-label",
-            "View markup",
+            "View Code",
         ):
             self.assertIn(contract_text, reference)
         self.assertNotIn("button_group(", reference)
@@ -396,19 +497,7 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn("[dir=\"rtl\"] .btn-toolbar > .btn {", css)
         self.assertIn("unicode-bidi: plaintext;", css)
 
-    def test_button_group_more_buttons_use_svg_ellipsis_icon(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_output("components/button-group.html")
-        self.assertIn('aria-label="More options"', page)
-        self.assertNotIn("…", page)
-        self.assertIn('data-icon="inline-start"', page)
-        self.assertIn(lucide_body("ellipsis"), page)
-        self.assertNotIn("‹", page)
-        self.assertNotIn("›", page)
-
-    def test_button_group_composition_uses_native_dropdown(self) -> None:
+    def test_button_group_composition_uses_ready_group_macros(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -418,16 +507,15 @@ class CatalogBuildTests(unittest.TestCase):
         )[0]
         self.assertIn('aria-label="Go back"', composition)
         self.assertIn(lucide_body("arrow-left"), composition)
-        self.assertIn('data-bs-toggle="dropdown"', composition)
-        self.assertIn('aria-expanded="false"', composition)
-        self.assertIn('btn-icon dropdown-toggle', composition)
-        self.assertIn('class="dropdown-menu dropdown-menu-end"', composition)
-        self.assertIn('class="dropdown-item"', composition)
-        self.assertIn("dropdown-divider", composition)
+        self.assertIn('aria-label="Ticket review"', composition)
+        self.assertIn("Archive", composition)
+        self.assertIn("Report", composition)
+        self.assertIn("Snooze", composition)
+        self.assertNotIn("dropdown", composition)
         self.assertNotIn("‹", composition)
         self.assertNotIn('href="#"', composition)
 
-    def test_button_group_examples_cover_orientation_size_and_input(self) -> None:
+    def test_button_group_examples_cover_orientation_and_size(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -436,63 +524,10 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn('aria-label="Decrease value"', page)
         self.assertIn(lucide_body("plus"), page)
         self.assertIn(lucide_body("minus"), page)
-        self.assertIn('placeholder="Send a message..."', page)
-        self.assertIn('aria-label="Add attachment"', page)
-        self.assertIn('aria-label="Record voice note"', page)
         self.assertIn(
             'class="d-flex flex-column align-items-center gap-3"',
             page,
         )
-        self.assertIn(
-            'class="d-flex align-items-center gap-2 moo-button-group-message"',
-            page,
-        )
-        self.assertIn('class="input-group moo-button-group-input"', page)
-        self.assertIn(lucide_body("audio-lines"), page)
-
-    def test_button_group_dropdown_uses_runtime_theme_tokens(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        css = self.read_output("assets/css/moo-ui.css")
-        self.assertIn(".dropdown-menu {", css)
-        self.assertIn("--bs-dropdown-bg: var(--moo-surface);", css)
-        self.assertIn("--bs-dropdown-border-color: var(--moo-border);", css)
-        self.assertIn(
-            "--bs-dropdown-link-hover-bg: var(--moo-muted-surface);",
-            css,
-        )
-        self.assertIn(".dropdown-item > [data-icon=\"inline-start\"]", css)
-
-    def test_dropdown_examples_are_not_clipped_by_preview_card(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        css = self.read_output("assets/css/catalog.css")
-        self.assertIn(".moo-example__preview:has(.dropdown-menu) {", css)
-        dropdown_preview = css.split(
-            ".moo-example__preview:has(.dropdown-menu) {", 1
-        )[1].split("}", 1)[0]
-        self.assertIn("overflow: visible;", dropdown_preview)
-        self.assertIn("align-items: flex-start;", dropdown_preview)
-        self.assertIn("min-height: 22rem;", dropdown_preview)
-
-    def test_button_group_dropdown_items_match_shadcn_spacing(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        css = self.read_output("assets/css/moo-ui.css")
-        dropdown_menu = css.rsplit(".dropdown-menu {", 1)[1].split("}", 1)[0]
-        self.assertIn("--bs-dropdown-padding-x: 0.25rem;", dropdown_menu)
-        self.assertIn("--bs-dropdown-item-border-radius: var(--bs-border-radius);", dropdown_menu)
-        self.assertIn("--bs-dropdown-item-padding-x: 0.5rem;", dropdown_menu)
-        self.assertIn("--bs-dropdown-item-padding-y: 0.375rem;", dropdown_menu)
-        self.assertIn(".dropdown-item:hover,", css)
-        self.assertIn(".dropdown-item:focus {", css)
-        hover_block = css.rsplit(".dropdown-item:hover,", 1)[1].split("}", 1)[0]
-        self.assertIn("border-radius: var(--bs-dropdown-item-border-radius);", hover_block)
-        self.assertIn(".btn-icon.dropdown-toggle::after {", css)
-        self.assertIn("display: none;", css.rsplit(".btn-icon.dropdown-toggle::after {", 1)[1].split("}", 1)[0])
 
     def test_card_page_uses_bootstrap_native_contract(self) -> None:
         result = self.run_build()
@@ -555,7 +590,7 @@ class CatalogBuildTests(unittest.TestCase):
             "card-subtitle",
             "card-text",
             "card-footer",
-            "View markup",
+            "View Code",
         ):
             self.assertIn(contract_text, reference)
         self.assertNotIn("<pre", reference)
@@ -622,6 +657,43 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn("$box-shadow-sm:", variables)
         self.assertIn("$border-radius-xl:", variables)
 
+    def test_component_styles_use_bootstrap_visual_primitives(self) -> None:
+        for path in sorted((ROOT / "scss/components").glob("*.scss")):
+            source = path.read_text(encoding="utf-8")
+
+            with self.subTest(component=path.name):
+                self.assertNotRegex(
+                    source,
+                    r"#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(",
+                    "Component colors must use runtime theme tokens",
+                )
+
+                for line in source.splitlines():
+                    declaration = line.strip()
+                    if declaration.startswith("box-shadow:"):
+                        self.assertRegex(
+                            declaration,
+                            r"^box-shadow: (?:none|var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\));$",
+                        )
+                    elif declaration.startswith("border-radius:"):
+                        self.assertRegex(
+                            declaration,
+                            r"^border-radius: (?:0|var\(--bs-[a-z0-9-]*border-radius[a-z0-9-]*\));$",
+                        )
+                    elif declaration.startswith("--bs-"):
+                        name, value = declaration.rstrip(";").split(":", 1)
+                        value = value.strip()
+                        if "box-shadow" in name:
+                            self.assertRegex(
+                                value,
+                                r"^(?:none|var\(--bs-box-shadow(?:-[a-z0-9-]+)?\))$",
+                            )
+                        elif "border-radius" in name:
+                            self.assertRegex(
+                                value,
+                                r"^(?:0|var\(--bs-border-radius(?:-[a-z0-9-]+)?\))$",
+                            )
+
     def test_example_preview_container_centers_component_demos(self) -> None:
         result = self.run_build()
 
@@ -640,6 +712,36 @@ class CatalogBuildTests(unittest.TestCase):
                 1,
             )[0]
             self.assertNotIn("mx-auto", examples)
+
+    def test_catalog_example_surface_integrates_preview_and_code(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/catalog.css")
+        self.assertIn(".moo-example__surface {", css)
+        surface = css.split(".moo-example__surface {", 1)[1].split("}", 1)[0]
+        self.assertIn("overflow: hidden;", surface)
+        self.assertIn("border: var(--bs-border-width) solid var(--bs-border-color);", surface)
+        self.assertIn(".moo-example__source {", css)
+        source = css.split(".moo-example__source {", 1)[1].split("}", 1)[0]
+        self.assertIn("border-top: var(--bs-border-width) solid var(--bs-border-color);", source)
+        source_code = css.split(".moo-example__source pre {", 1)[1].split("}", 1)[0]
+        self.assertIn("white-space: pre-wrap;", source_code)
+        self.assertIn("overflow-wrap: anywhere;", source_code)
+        self.assertNotIn("max-height:", source_code)
+        self.assertNotIn("overflow:", source_code)
+        self.assertNotIn(".moo-example__preview:has(.dropdown-menu)", css)
+
+        for relative_path in (
+            "components/button.html",
+            "components/button-group.html",
+            "components/card.html",
+        ):
+            page = self.read_output(relative_path)
+            self.assertEqual(
+                page.count("moo-example__surface"),
+                page.count("moo-example__preview"),
+            )
 
 
 if __name__ == "__main__":
