@@ -3,5 +3,10 @@
     "slug": "button",
     "label": "Button",
     "status": "ready"
+  },
+  {
+    "slug": "button-group",
+    "label": "Button Group",
+    "status": "ready"
   }
 ]

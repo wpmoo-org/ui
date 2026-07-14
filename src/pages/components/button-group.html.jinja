@@ -1,0 +1,225 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button, icon %}
+{% from "components/button_group.html.jinja" import button_group %}
+{% from "components/example.html.jinja" import render_example %}
+
+{% block title %}Button Group — Moo UI{% endblock %}
+
+{% block content %}
+  <header class="moo-component-header">
+    <h1 class="display-5 fw-semibold">Button Group</h1>
+    <p class="lead text-body-secondary mb-0">
+      Join related controls into one compact action surface.
+    </p>
+  </header>
+
+  <div class="moo-component-examples">
+    {% set basic_actions %}
+      {% call button_group("Ticket actions", toolbar=true, extra_class="gap-2 mx-auto") %}
+        {% call button_group("Ticket navigation") %}
+          {{ button("", variant="outline", size="icon", aria_label="Go back", icon_start="arrow-left") }}
+        {% endcall %}
+        {% call button_group("Ticket review") %}
+          {{ button("Archive", variant="outline") }}
+        {{ button("Report", variant="outline") }}
+        {% endcall %}
+        <div class="btn-group" role="group" aria-label="Ticket delay">
+          {{ button("Snooze", variant="outline") }}
+          <button class="btn btn-outline-secondary btn-icon dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More options">
+            {{ icon("ellipsis", "inline-start") }}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><button class="dropdown-item" type="button">{{ icon("mail", "inline-start") }} Mark as handled</button></li>
+            <li><button class="dropdown-item" type="button">{{ icon("archive", "inline-start") }} Move to archive</button></li>
+            <li><button class="dropdown-item" type="button">{{ icon("clock", "inline-start") }} Delay reminder</button></li>
+            <li><button class="dropdown-item" type="button">{{ icon("calendar", "inline-start") }} Add to schedule</button></li>
+            <li><button class="dropdown-item" type="button">{{ icon("list", "inline-start") }} Add to queue</button></li>
+            <li><button class="dropdown-item" type="button">{{ icon("tag", "inline-start") }} Set label</button></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item text-danger" type="button">{{ icon("trash", "inline-start") }} Delete ticket</button></li>
+          </ul>
+        </div>
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic-actions",
+      "Composition",
+      "Keep adjacent actions visually connected while preserving separate controls.",
+      basic_actions
+    ) }}
+
+    {% set icon_only_group %}
+      {% call button_group("Media controls", extra_class="mx-auto") %}
+        {{ button("", variant="outline", size="icon", aria_label="Previous item", icon_start="chevron-left") }}
+        {{ button("", variant="outline", size="icon", aria_label="Pin item", icon_start="pin") }}
+        {{ button("", variant="outline", size="icon", aria_label="Next item", icon_start="chevron-right") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "icon-only-group",
+      "Icon-only group",
+      "Icon buttons stay square and require an accessible name.",
+      icon_only_group
+    ) }}
+
+    {% set size_groups %}
+      <div class="d-flex flex-column align-items-center gap-3 mx-auto">
+        {% call button_group("Small button group", size="sm") %}
+          {{ button("Small", variant="outline") }}
+          {{ button("Button", variant="outline") }}
+          {{ button("Group", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Add small action", icon_start="plus") }}
+        {% endcall %}
+        {% call button_group("Default button group") %}
+          {{ button("Default", variant="outline") }}
+          {{ button("Button", variant="outline") }}
+          {{ button("Group", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Add default action", icon_start="plus") }}
+        {% endcall %}
+        {% call button_group("Large button group", size="lg") %}
+          {{ button("Large", variant="outline") }}
+          {{ button("Button", variant="outline") }}
+          {{ button("Group", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Add large action", icon_start="plus") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "size-groups",
+      "Size",
+      "Use Bootstrap group sizing when a whole action set changes density.",
+      size_groups
+    ) }}
+
+    {% set vertical_group %}
+      {% call button_group("Quantity controls", vertical=true, extra_class="mx-auto") %}
+        {{ button("", variant="outline", size="icon", aria_label="Increase value", icon_start="plus") }}
+        {{ button("", variant="outline", size="icon", aria_label="Decrease value", icon_start="minus") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "vertical-group",
+      "Orientation",
+      "Stack controls when a narrow rail or tool palette needs the same grouping.",
+      vertical_group
+    ) }}
+
+    {% set toolbar_groups %}
+      {% call button_group("Editor toolbar", toolbar=true, extra_class="gap-2 mx-auto") %}
+        {% call button_group("History actions") %}
+          {{ button("Undo", variant="outline") }}
+          {{ button("Redo", variant="outline") }}
+        {% endcall %}
+        {% call button_group("Formatting actions") %}
+          {{ button("Bold", variant="outline") }}
+          {{ button("Italic", variant="outline") }}
+          {{ button("Link", variant="outline") }}
+        {% endcall %}
+        {% call button_group("Publish action") %}
+          {{ button("Publish", variant="secondary") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "toolbar-groups",
+      "Toolbar",
+      "Group related clusters inside one toolbar when the action row has sections.",
+      toolbar_groups
+    ) }}
+
+    {% set radio_toggle_group %}
+      <div class="btn-group mx-auto" role="group" aria-label="View mode">
+        <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-list" autocomplete="off" checked>
+        <label class="btn btn-outline-secondary" for="button-group-view-list">List</label>
+        <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-board" autocomplete="off">
+        <label class="btn btn-outline-secondary" for="button-group-view-board">Board</label>
+        <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-map" autocomplete="off">
+        <label class="btn btn-outline-secondary" for="button-group-view-map">Map</label>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "radio-toggle-group",
+      "Toggle group",
+      "Use Bootstrap check inputs when one choice in the group must stay active.",
+      radio_toggle_group
+    ) }}
+
+    {% set nested_groups %}
+      <div class="d-flex align-items-center gap-2 mx-auto moo-button-group-message">
+        {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus") }}
+        <div class="input-group moo-button-group-input">
+          <input class="form-control" type="text" placeholder="Send a message..." aria-label="Message body">
+          {{ button("", variant="outline", size="icon", aria_label="Record voice note", icon_start="audio-lines") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "nested-groups",
+      "Nested groups",
+      "Use Bootstrap input grouping when buttons and fields need one connected surface.",
+      nested_groups
+    ) }}
+
+    {% set rtl_preview %}
+      <div class="mx-auto" dir="rtl">
+        {% call button_group("إجراءات التذكرة") %}
+          {{ button("أرشفة", variant="outline") }}
+          {{ button("مراجعة", variant="outline") }}
+          {{ button("تأجيل", variant="outline") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl-preview",
+      "Right-to-left layout",
+      "Bootstrap's logical grouping keeps joined borders coherent in RTL layouts.",
+      rtl_preview
+    ) }}
+  </div>
+
+  <section class="moo-component-reference" aria-labelledby="button-group-reference-title">
+    <h2 class="h3" id="button-group-reference-title">API Reference</h2>
+    <p class="text-body-secondary">
+      Use Bootstrap button group classes directly. Copy exact rendered HTML from
+      each example's View markup panel.
+    </p>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th scope="col">Class or attribute</th>
+            <th scope="col">Use</th>
+            <th scope="col">Behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><code>btn-group</code></th>
+            <td>Adjacent related controls</td>
+            <td>Joins borders and keeps each button as a separate control.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>btn-group-vertical</code></th>
+            <td>Narrow rails or stacked palettes</td>
+            <td>Stacks the same controls vertically.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>btn-toolbar</code></th>
+            <td>Multiple grouped clusters</td>
+            <td>Wraps several <code>btn-group</code> sections in one toolbar.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>btn-group-sm</code> / <code>btn-group-lg</code></th>
+            <td>Density changes</td>
+            <td>Applies one size to every button inside the group.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>role</code> + <code>aria-label</code></th>
+            <td>Accessibility</td>
+            <td>Give each group or toolbar a clear accessible name.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

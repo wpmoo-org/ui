@@ -6,10 +6,12 @@ import json
 import shutil
 import textwrap
 import time
+from html import escape
 from pathlib import Path
 
 import sass
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from markupsafe import Markup
 
 
 ROOT = Path(__file__).resolve().parent
@@ -19,10 +21,49 @@ SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
+LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 
 
 def dedent_html(value: object) -> str:
     return textwrap.dedent(str(value)).strip()
+
+
+def load_lucide_icons() -> dict[str, object]:
+    return json.loads(LUCIDE_ICONS.read_text(encoding="utf-8"))
+
+
+def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) -> Markup:
+    icons = icon_set["icons"]
+    if not isinstance(icons, dict) or name not in icons:
+        raise KeyError(f"Unknown Lucide icon: {name}")
+
+    icon = icons[name]
+    if not isinstance(icon, dict):
+        raise TypeError(f"Invalid Lucide icon: {name}")
+
+    left = icon.get("left", icon_set.get("left", 0))
+    top = icon.get("top", icon_set.get("top", 0))
+    width = icon.get("width", icon_set.get("width", 24))
+    height = icon.get("height", icon_set.get("height", 24))
+    body = icon["body"]
+    return Markup(
+        "\n".join(
+            (
+                "<svg",
+                f'  data-icon="{escape(position)}"',
+                f'  viewBox="{left} {top} {width} {height}"',
+                '  fill="none"',
+                '  stroke="currentColor"',
+                '  stroke-width="2"',
+                '  stroke-linecap="round"',
+                '  stroke-linejoin="round"',
+                '  aria-hidden="true"',
+                ">",
+                f"  {body}",
+                "</svg>",
+            )
+        )
+    )
 
 
 def create_environment() -> Environment:
@@ -34,6 +75,12 @@ def create_environment() -> Environment:
         lstrip_blocks=True,
     )
     environment.filters["dedent_html"] = dedent_html
+    icon_set = load_lucide_icons()
+    environment.globals["lucide_icon"] = lambda name, position: render_lucide_icon(
+        icon_set,
+        name,
+        position,
+    )
     return environment
 
 

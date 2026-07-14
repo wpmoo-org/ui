@@ -126,6 +126,12 @@ body {
   background: var(--bs-body-bg);
 }
 
+.moo-example__preview:has(.dropdown-menu) {
+  align-items: flex-start;
+  min-height: 22rem;
+  overflow: visible;
+}
+
 .moo-example__preview > .d-grid {
   width: 100%;
 }

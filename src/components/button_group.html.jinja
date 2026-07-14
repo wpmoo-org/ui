@@ -1,0 +1,14 @@
+{% macro button_group(
+  aria_label,
+  vertical=false,
+  toolbar=false,
+  size="",
+  extra_class=""
+) -%}
+  {% set classes = "btn-toolbar" if toolbar else ("btn-group-vertical" if vertical else "btn-group") %}
+  {% if size and not toolbar %}{% set classes = classes ~ " btn-group-" ~ size %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <div class="{{ classes }}" role="{{ 'toolbar' if toolbar else 'group' }}" aria-label="{{ aria_label }}">
+    {{ caller() | trim | safe }}
+  </div>
+{% endmacro %}

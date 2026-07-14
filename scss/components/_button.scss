@@ -25,7 +25,8 @@
 }
 
 button.btn:not(:disabled),
-input.btn:not(:disabled) {
+input.btn:not(:disabled),
+label.btn {
   cursor: default;
 }
 
@@ -97,7 +98,7 @@ input.btn:not(:disabled) {
 .btn.disabled,
 .btn[aria-disabled="true"] {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: var(--bs-btn-disabled-opacity);
 }
 
 .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
@@ -112,6 +113,16 @@ input.btn:not(:disabled) {
   --bs-btn-active-color: var(--bs-btn-hover-color);
   --bs-btn-active-bg: var(--bs-btn-hover-bg);
   --bs-btn-active-border-color: var(--bs-btn-active-bg);
+  --bs-btn-disabled-color: var(--bs-btn-color);
+  --bs-btn-disabled-border-color: var(--bs-btn-border-color);
+}
+
+:is(.btn-primary, .btn-secondary, .btn-danger) {
+  --bs-btn-disabled-bg: var(--bs-btn-bg);
+}
+
+:is(.btn-outline-secondary, .btn-outline-primary, .btn-ghost) {
+  --bs-btn-disabled-bg: transparent;
 }
 
 .btn-primary {
