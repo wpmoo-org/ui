@@ -1,5 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/button.html.jinja" import button %}
+{% from "components/button.html.jinja" import button, button_sizes, button_variants %}
 {% from "components/example.html.jinja" import render_example %}
 
 {% block title %}Button — Moo UI{% endblock %}
@@ -89,16 +89,31 @@
       outline_variants
     ) }}
 
-    {% set button_sizes %}
-      {{ button("Compact action", size="sm") }}
-      {{ button("Standard action") }}
-      {{ button("Expanded action", size="lg") }}
+    {% set button_size_examples %}
+      <div class="d-flex flex-column align-items-center gap-3 mx-auto">
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+          {{ button("Quick note", variant="outline", size="xs") }}
+          {{ button("", variant="outline", size="icon-xs", aria_label="Add quick note", icon_start="plus") }}
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+          {{ button("Compact action", variant="outline", size="sm") }}
+          {{ button("", variant="outline", size="icon-sm", aria_label="Add compact action", icon_start="plus") }}
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+          {{ button("Standard action", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Add standard action", icon_start="plus") }}
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+          {{ button("Expanded action", variant="outline", size="lg") }}
+          {{ button("", variant="outline", size="icon-lg", aria_label="Add expanded action", icon_start="plus") }}
+        </div>
+      </div>
     {% endset %}
     {{ render_example(
       "button-sizes",
       "Sizes",
       "Match control height to the density of the surrounding interface.",
-      button_sizes
+      button_size_examples
     ) }}
 
     {% set full_width_actions %}
@@ -139,43 +154,115 @@
   </div>
 
   <section class="moo-component-reference" aria-labelledby="button-reference-title">
-    <h2 class="h3" id="button-reference-title">Button options</h2>
+    <h2 class="h3" id="button-reference-title">API Reference</h2>
     <p class="text-body-secondary">
-      The macro keeps Bootstrap semantics while exposing only the choices used
-      by this catalog.
+      Use the Jinja macro to emit Bootstrap-native markup with Moo UI defaults.
     </p>
+    <pre class="overflow-x-auto rounded-3 border bg-body-tertiary p-3"><code>button(
+  label,
+  variant="default",
+  size="default",
+  element="button",
+  type="button",
+  href="",
+  disabled=false,
+  aria_label="",
+  icon_start="",
+  icon_end="",
+  extra_class="",
+  toggle=false
+)</code></pre>
     <div class="table-responsive">
       <table class="table align-middle">
         <thead>
           <tr>
-            <th scope="col">Option</th>
-            <th scope="col">Values</th>
-            <th scope="col">Default</th>
+            <th scope="col">Parameter</th>
+            <th scope="col">Value</th>
+            <th scope="col">HTML or behavior</th>
           </tr>
         </thead>
         <tbody>
+          {% for variant_name, variant_class in button_variants.items() %}
           <tr>
-            <th scope="row"><code>variant</code></th>
-            <td>Core Moo variants plus Bootstrap semantic and outline variants</td>
-            <td><code>default</code></td>
+            {% if loop.first %}
+              <th scope="rowgroup" rowspan="{{ button_variants | length }}"><code>variant</code></th>
+            {% endif %}
+            <td>
+              <code>{{ variant_name }}</code>
+              {% if variant_name == "default" %}<span class="text-body-secondary">(default)</span>{% endif %}
+            </td>
+            <td>
+              <code>btn {{ variant_class }}</code>
+              {% if variant_name == "ghost" %}<span class="badge text-bg-secondary">Moo</span>{% endif %}
+            </td>
           </tr>
+          {% endfor %}
+        </tbody>
+        <tbody>
+          {% for size_name, size_config in button_sizes.items() %}
           <tr>
-            <th scope="row"><code>size</code></th>
-            <td><code>default</code>, <code>sm</code>, <code>lg</code>, <code>icon</code></td>
-            <td><code>default</code></td>
+            {% if loop.first %}
+              <th scope="rowgroup" rowspan="{{ button_sizes | length }}"><code>size</code></th>
+            {% endif %}
+            <td>
+              <code>{{ size_name }}</code>
+              {% if size_name == "default" %}<span class="text-body-secondary">(default)</span>{% endif %}
+            </td>
+            <td>
+              <code>btn{% if size_config["class"] %} {{ size_config["class"] }}{% endif %}</code>
+              {% if size_name in ("xs", "icon", "icon-xs", "icon-sm", "icon-lg") %}<span class="badge text-bg-secondary">Moo</span>{% endif %}
+              — {{ size_config["dimensions"] }}
+            </td>
           </tr>
+          {% endfor %}
+        </tbody>
+        <tbody>
           <tr>
             <th scope="row"><code>element</code></th>
-            <td><code>button</code>, <code>a</code>, <code>input</code></td>
-            <td><code>button</code></td>
+            <td><code>button</code> (default), <code>a</code>, <code>input</code></td>
+            <td>Preserves the native action, navigation, or form-control element.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>type</code></th>
+            <td><code>button</code> (default), <code>submit</code>, <code>reset</code></td>
+            <td>Emitted for <code>button</code> and <code>input</code> elements.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>href</code></th>
+            <td>URL string</td>
+            <td>Emitted only for an enabled <code>a</code> element.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>disabled</code></th>
+            <td><code>false</code> (default) or <code>true</code></td>
+            <td>Uses native <code>disabled</code>; anchors omit <code>href</code> and receive <code>aria-disabled="true"</code> plus <code>tabindex="-1"</code>.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>aria_label</code></th>
+            <td>Accessible-name string</td>
+            <td>Required when the visible <code>label</code> is empty.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>icon_start</code>, <code>icon_end</code></th>
+            <td><code>plus</code>, <code>arrow-right</code>, <code>pin</code></td>
+            <td>Emits a decorative SVG with logical icon spacing.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>extra_class</code></th>
+            <td>Class string</td>
+            <td>Adds Bootstrap utilities such as <code>w-100</code> or <code>rounded-pill</code>.</td>
           </tr>
           <tr>
             <th scope="row"><code>toggle</code></th>
-            <td><code>true</code> or <code>false</code></td>
-            <td><code>false</code></td>
+            <td><code>false</code> (default) or <code>true</code></td>
+            <td>Adds <code>data-bs-toggle="button"</code> and <code>aria-pressed="false"</code> to a button.</td>
           </tr>
         </tbody>
       </table>
     </div>
+    <p class="text-body-secondary mt-3 mb-0">
+      <strong>Deferred:</strong> Loading visuals remain deferred until Spinner;
+      joined controls remain deferred until Button Group.
+    </p>
   </section>
 {% endblock %}

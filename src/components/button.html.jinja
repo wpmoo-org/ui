@@ -1,3 +1,31 @@
+{% set button_variants = {
+  "default": "btn-primary",
+  "secondary": "btn-secondary",
+  "outline": "btn-outline-secondary",
+  "ghost": "btn-ghost",
+  "destructive": "btn-danger",
+  "link": "btn-link",
+  "success": "btn-success",
+  "warning": "btn-warning",
+  "info": "btn-info",
+  "light": "btn-light",
+  "dark": "btn-dark",
+  "outline-primary": "btn-outline-primary",
+  "outline-success": "btn-outline-success",
+  "outline-danger": "btn-outline-danger"
+} %}
+
+{% set button_sizes = {
+  "default": {"class": "", "dimensions": "32px"},
+  "xs": {"class": "btn-xs", "dimensions": "24px"},
+  "sm": {"class": "btn-sm", "dimensions": "28px"},
+  "lg": {"class": "btn-lg", "dimensions": "36px"},
+  "icon": {"class": "btn-icon", "dimensions": "32×32px"},
+  "icon-xs": {"class": "btn-icon-xs", "dimensions": "24×24px"},
+  "icon-sm": {"class": "btn-icon-sm", "dimensions": "28×28px"},
+  "icon-lg": {"class": "btn-icon-lg", "dimensions": "36×36px"}
+} %}
+
 {% macro icon(name, position) -%}
   <svg
     data-icon="{{ position }}"
@@ -33,30 +61,9 @@
   extra_class="",
   toggle=false
 ) -%}
-  {% set variants = {
-    "default": "btn-primary",
-    "secondary": "btn-secondary",
-    "outline": "btn-outline-secondary",
-    "ghost": "btn-ghost",
-    "destructive": "btn-danger",
-    "link": "btn-link",
-    "success": "btn-success",
-    "warning": "btn-warning",
-    "info": "btn-info",
-    "light": "btn-light",
-    "dark": "btn-dark",
-    "outline-primary": "btn-outline-primary",
-    "outline-success": "btn-outline-success",
-    "outline-danger": "btn-outline-danger"
-  } %}
-  {% set sizes = {
-    "default": "",
-    "sm": "btn-sm",
-    "lg": "btn-lg",
-    "icon": "btn-icon"
-  } %}
-  {% set variant_class = variants.get(variant, variants["default"]) %}
-  {% set size_class = sizes.get(size, "") %}
+  {% set variant_class = button_variants.get(variant, button_variants["default"]) %}
+  {% set size_config = button_sizes.get(size, button_sizes["default"]) %}
+  {% set size_class = size_config["class"] %}
   {% set classes = "btn " ~ variant_class %}
   {% if size_class %}{% set classes = classes ~ " " ~ size_class %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
