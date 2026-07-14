@@ -82,10 +82,20 @@ class CatalogBuildTests(unittest.TestCase):
         )
         self.assertIn('class="btn btn-primary"', page)
         self.assertIn('<button class="btn', page)
-        self.assertIn('<a class="btn', page)
         self.assertIn('<input class="btn', page)
-        self.assertIn('aria-disabled="true"', page)
+        self.assertIn("disabled", page)
         self.assertIn('aria-label="Pin dashboard"', page)
+
+    def test_button_examples_do_not_emit_demo_links(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/button.html")
+        examples = page.split(
+            '<section class="moo-component-reference"', 1
+        )[0]
+        self.assertNotIn('<a class="btn', examples)
+        self.assertNotIn("example.com", examples)
 
     def test_button_page_covers_approved_variants_and_states(self) -> None:
         result = self.run_build()
@@ -159,6 +169,14 @@ class CatalogBuildTests(unittest.TestCase):
         css = self.read_output("assets/css/moo-ui.css")
         for height in ("1.5rem", "1.75rem", "2rem", "2.25rem"):
             self.assertIn(f"--moo-button-height: {height};", css)
+        self.assertIn(
+            ".btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon=\"inline-start\"])",
+            css,
+        )
+        self.assertIn(
+            ".btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon=\"inline-end\"])",
+            css,
+        )
 
     def test_button_api_reference_documents_the_public_contract(self) -> None:
         result = self.run_build()
@@ -189,6 +207,27 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn("outline: 2px solid var(--moo-ring);", css)
         self.assertIn("outline-offset: 2px;", css)
         self.assertNotIn("var(--moo-ring) 30%, transparent", css)
+
+    def test_button_active_press_uses_subtle_half_pixel_shift(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(
+            '.btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active',
+            css,
+        )
+        self.assertIn("transform: translateY(0.5px);", css)
+
+    def test_native_button_cursor_stays_default(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn("button.btn:not(:disabled),", css)
+        self.assertIn("input.btn:not(:disabled) {", css)
+        self.assertIn("cursor: default;", css)
+        self.assertNotIn("\n.btn:not(:disabled) {\n  cursor: default;", css)
 
     def test_primary_outline_button_uses_theme_tokens(self) -> None:
         result = self.run_build()

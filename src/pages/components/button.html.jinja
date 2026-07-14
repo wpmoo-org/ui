@@ -29,7 +29,7 @@
     ) }}
 
     {% set semantic_elements %}
-      {{ button("Open handbook", variant="outline", element="a", href="https://example.com/handbook") }}
+      {{ button("Open handbook", variant="outline") }}
       {{ button("Submit request", element="input", type="submit") }}
       {{ button("Reset filters", variant="secondary", type="reset") }}
     {% endset %}
@@ -42,7 +42,7 @@
 
     {% set disabled_states %}
       {{ button("Awaiting approval", variant="secondary", disabled=true) }}
-      {{ button("Archived guide", variant="outline", element="a", disabled=true) }}
+      {{ button("Archived guide", variant="outline", disabled=true) }}
     {% endset %}
     {{ render_example(
       "disabled-states",
