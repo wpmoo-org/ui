@@ -1,17 +1,55 @@
+// Card: bridge Bootstrap's consumption variables to shared primitives
+// (UI-wide shadow and radius) and runtime theme tokens, then add the minimal
+// structure that gives Bootstrap's native card a shadcn silhouette.
 .card {
-  --moo-card-spacing: 1.5rem;
-  --bs-card-spacer-y: var(--moo-card-spacing);
-  --bs-card-spacer-x: var(--moo-card-spacing);
-  --bs-card-title-spacer-y: 0.25rem;
-  --bs-card-title-color: var(--moo-foreground);
-  --bs-card-subtitle-color: var(--moo-muted-foreground);
+  --bs-card-bg: var(--moo-surface);
+  --bs-card-color: var(--moo-foreground);
   --bs-card-border-color: var(--moo-border);
   --bs-card-border-radius: var(--bs-border-radius-xl);
-  --bs-card-inner-border-radius: calc(var(--bs-card-border-radius) - var(--bs-card-border-width));
-  --bs-card-cap-padding-y: var(--moo-card-spacing);
-  --bs-card-cap-padding-x: var(--moo-card-spacing);
+  --bs-card-box-shadow: var(--bs-box-shadow-sm);
   --bs-card-cap-bg: transparent;
   --bs-card-cap-color: var(--moo-foreground);
-  --bs-card-color: var(--moo-foreground);
-  --bs-card-bg: var(--moo-surface);
+  --bs-card-title-color: var(--moo-foreground);
+  --bs-card-subtitle-color: var(--moo-muted-foreground);
+  --bs-card-spacer-x: 1.5rem;
+  --bs-card-spacer-y: 0;
+  --bs-card-cap-padding-x: var(--bs-card-spacer-x);
+  --bs-card-cap-padding-y: 0;
+
+  // One vertical rhythm owned by the card; sections add only inline padding.
+  gap: var(--bs-card-spacer-x);
+  padding-block: var(--bs-card-spacer-x);
+
+  // Bootstrap gates its box-shadow mixin behind $enable-shadows (off), so apply
+  // the shared elevation token directly.
+  box-shadow: var(--bs-card-box-shadow);
+}
+
+// shadcn header stacks title and description; no cap background or divider.
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  border-bottom: 0;
+}
+
+// shadcn footer lays actions in a row; no divider.
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 0;
+}
+
+.card-title {
+  margin-bottom: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.card-subtitle {
+  margin-top: 0;
+  font-size: 0.875rem;
 }

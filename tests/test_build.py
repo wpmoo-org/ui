@@ -493,11 +493,10 @@ class CatalogBuildTests(unittest.TestCase):
             page.count("moo-example__source"),
         )
         for marker in (
+            'data-example="card-content"',
             'data-example="card-basic"',
-            'data-example="card-body"',
-            'data-example="card-title-text"',
-            'data-example="card-image"',
-            'data-example="card-header-footer"',
+            'data-example="card-actions"',
+            'data-example="card-rtl"',
         ):
             self.assertIn(marker, page)
 
@@ -509,26 +508,19 @@ class CatalogBuildTests(unittest.TestCase):
             "card-subtitle",
             "card-text",
             "card-footer",
-            "card-img-top",
         ):
             self.assertIn(native_class, page)
 
+        # Examples reuse finished controls only; no unbuilt elements.
         self.assertIn('class="btn btn-primary"', page)
-        self.assertIn('style="width: 18rem;"', page)
-        card_examples = page.split(
-            '<section class="moo-component-reference"',
-            1,
-        )[0]
-        self.assertNotIn("mx-auto", card_examples)
+        self.assertIn('class="btn btn-outline-secondary"', page)
+        self.assertIn('dir="rtl"', page)
         self.assertNotIn('<a class="btn', page)
         self.assertNotIn("<input", page)
         self.assertNotIn("form-control", page)
         self.assertNotIn("form-label", page)
         self.assertNotIn("list-group", page)
-        self.assertNotIn("card-login", page)
-        self.assertNotIn("card-summary", page)
-        self.assertNotIn('data-example="card-spacing"', page)
-        self.assertNotIn("card-rtl", page)
+        self.assertNotIn("card-img", page)
         self.assertNotIn("example.com", page)
         for runtime_name in ("React", "Tailwind", "className", "shadcn"):
             self.assertNotIn(runtime_name, page)
@@ -567,24 +559,53 @@ class CatalogBuildTests(unittest.TestCase):
             "--bs-card-bg: var(--moo-surface);",
             "--bs-card-color: var(--moo-foreground);",
             "--bs-card-border-color: var(--moo-border);",
+            "--bs-card-border-radius: var(--bs-border-radius-xl);",
+            "--bs-card-box-shadow: var(--bs-box-shadow-sm);",
             "--bs-card-cap-bg: transparent;",
             "--bs-card-title-color: var(--moo-foreground);",
             "--bs-card-subtitle-color: var(--moo-muted-foreground);",
         ):
             self.assertIn(declaration, card_block)
 
-    def test_card_scss_stays_token_bridge_only(self) -> None:
+    def test_card_bridges_shared_primitives_without_hardcoded_values(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        card_scss = (
+            ROOT / "scss/components/_card.scss"
+        ).read_text(encoding="utf-8")
+        # Colours are only ever referenced through tokens, never hardcoded.
+        self.assertNotIn("#", card_scss)
+        self.assertNotIn("rgb", card_scss)
+        # Elevation and radius consume the UI-wide shared primitives.
+        self.assertIn(
+            "--bs-card-box-shadow: var(--bs-box-shadow-sm);", card_scss
+        )
+        self.assertIn(
+            "--bs-card-border-radius: var(--bs-border-radius-xl);", card_scss
+        )
+        # Themed colours come from runtime theme tokens.
+        self.assertIn("var(--moo-surface)", card_scss)
+        self.assertIn("var(--moo-border)", card_scss)
+        # No dependency on elements that are not built yet.
+        self.assertNotIn("form-control", card_scss)
+        self.assertNotIn("list-group", card_scss)
+
+    def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         css = self.read_output("assets/css/moo-ui.css")
-        card_block = css.rsplit(".card {", 1)[1].split("}", 1)[0]
-        self.assertNotIn("font-size:", card_block)
-        self.assertNotIn(".card-header {", css.rsplit(".card {", 1)[1])
-        self.assertNotIn(".card-footer {", css.rsplit(".card {", 1)[1])
-        self.assertNotIn(".card-title {", css.rsplit(".card {", 1)[1])
-        self.assertNotIn(".card .form-control", css)
-        self.assertNotIn(".moo-card-", css)
+        # shadcn elevation lives on Bootstrap's own UI-wide shadow scale.
+        self.assertIn(
+            "--bs-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);", css
+        )
+        self.assertIn("--bs-border-radius-xl: 0.75rem;", css)
+        variables = (
+            ROOT / "scss/_primary_variables.scss"
+        ).read_text(encoding="utf-8")
+        self.assertIn("$box-shadow-sm:", variables)
+        self.assertIn("$border-radius-xl:", variables)
 
     def test_example_preview_container_centers_component_demos(self) -> None:
         result = self.run_build()
