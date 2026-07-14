@@ -8,103 +8,84 @@
   <header class="moo-component-header">
     <h1 class="display-5 fw-semibold">Card</h1>
     <p class="lead text-body-secondary mb-0">
-      Group related content inside a flexible Bootstrap surface.
+      Group related content on one quiet, self-contained surface.
     </p>
   </header>
 
   <div class="moo-component-examples">
-    {% set basic_card %}
-      <div class="card" style="width: 18rem;">
-        <svg class="card-img-top" width="100%" height="180" viewBox="0 0 288 180" role="img" aria-label="Placeholder image cap" preserveAspectRatio="none">
-          <rect width="288" height="180" fill="currentColor" opacity="0.06"></rect>
-          <circle cx="96" cy="72" r="36" fill="currentColor" opacity="0.12"></circle>
-          <rect x="148" y="62" width="92" height="14" rx="7" fill="currentColor" opacity="0.16"></rect>
-          <rect x="148" y="92" width="60" height="14" rx="7" fill="currentColor" opacity="0.10"></rect>
-        </svg>
+    {% set content_card %}
+      <div class="card" style="width: 22rem;">
         <div class="card-body">
-          <h5 class="card-title">Workspace card</h5>
-          <p class="card-text">Use a card when one topic needs a compact visual boundary.</p>
-          {{ button("Open workspace") }}
+          <p class="card-text mb-0">A single content section works when the card holds one short, self-contained note.</p>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "card-content",
+      "Content only",
+      "Start with one padded body when the card holds a single block of content.",
+      content_card
+    ) }}
+
+    {% set basic_card %}
+      <div class="card" style="width: 22rem;">
+        <div class="card-header">
+          <h3 class="card-title">Team workspace</h3>
+          <p class="card-subtitle">Everyone you invite can open and edit the shared boards.</p>
+        </div>
+        <div class="card-body">
+          <p class="card-text mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
         </div>
       </div>
     {% endset %}
     {{ render_example(
       "card-basic",
-      "Basic card",
-      "Start with Bootstrap's mixed content pattern: media, body, text, and one action.",
+      "Header and content",
+      "Add a header with a title and description above the content section.",
       basic_card
     ) }}
 
-    {% set body_card %}
-      <div class="card" style="width: 18rem;">
-        <div class="card-body">
-          This is a single padded card body for short, self-contained content.
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "card-body",
-      "Body",
-      "Use card-body whenever the card needs one padded content section.",
-      body_card
-    ) }}
-
-    {% set title_text_card %}
-      <div class="card" style="width: 18rem;">
-        <div class="card-body">
-          <h5 class="card-title">Review packet</h5>
-          <h6 class="card-subtitle mb-2 text-body-secondary">Updated today</h6>
-          <p class="card-text">Keep the title, helper text, and body copy together when the content explains one object.</p>
-          <a class="card-link" href="#card-reference-title">Read contract</a>
-          <a class="card-link" href="../components/button.html">Button examples</a>
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "card-title-text",
-      "Titles, text, and links",
-      "Use Bootstrap's title, subtitle, text, and card-link classes for simple content cards.",
-      title_text_card
-    ) }}
-
-    {% set image_card %}
-      <div class="card" style="width: 18rem;">
-        <svg class="card-img-top" width="100%" height="180" viewBox="0 0 288 180" role="img" aria-label="Placeholder image cap" preserveAspectRatio="none">
-          <rect width="288" height="180" fill="currentColor" opacity="0.06"></rect>
-          <path d="M0 132 L74 82 L132 116 L186 68 L288 126 V180 H0 Z" fill="currentColor" opacity="0.12"></path>
-        </svg>
-        <div class="card-body">
-          <p class="card-text">Use an image cap when the card needs a visual anchor before the text.</p>
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "card-image",
-      "Image cap",
-      "Keep image examples limited to Bootstrap's card-img-top contract for now.",
-      image_card
-    ) }}
-
-    {% set header_footer_card %}
-      <div class="card text-center">
+    {% set actions_card %}
+      <div class="card" style="width: 22rem;">
         <div class="card-header">
-          Featured
+          <h3 class="card-title">Discard changes?</h3>
+          <p class="card-subtitle">Your recent edits to this board are still unsaved.</p>
         </div>
         <div class="card-body">
-          <h5 class="card-title">Decision summary</h5>
-          <p class="card-text">Use headers and footers when a card needs surrounding context.</p>
-          {{ button("Review summary") }}
+          <p class="card-text mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
         </div>
-        <div class="card-footer text-body-secondary">
-          Updated 2 days ago
+        <div class="card-footer justify-content-end">
+          {{ button("Discard", variant="outline") }}
+          {{ button("Save changes") }}
         </div>
       </div>
     {% endset %}
     {{ render_example(
-      "card-header-footer",
-      "Header and footer",
-      "Add optional sections without changing the card's core structure.",
-      header_footer_card
+      "card-actions",
+      "Footer actions",
+      "Place related actions in a footer using finished Button controls.",
+      actions_card
+    ) }}
+
+    {% set rtl_card %}
+      <div class="card" dir="rtl" style="width: 22rem;">
+        <div class="card-header">
+          <h3 class="card-title">مساحة العمل</h3>
+          <p class="card-subtitle">يمكن لكل شخص تدعوه فتح اللوحات المشتركة وتحريرها.</p>
+        </div>
+        <div class="card-body">
+          <p class="card-text mb-0">انضم أربعة أعضاء في آخر تحديث. يمكنك إدارة من يبقى من لوحة الوصول.</p>
+        </div>
+        <div class="card-footer justify-content-end">
+          {{ button("حفظ") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "card-rtl",
+      "Right-to-left layout",
+      "The same structure stays coherent when the writing direction flips.",
+      rtl_card
     ) }}
   </div>
 
@@ -118,7 +99,7 @@
       <table class="table align-middle">
         <thead>
           <tr>
-            <th scope="col">Class or attribute</th>
+            <th scope="col">Class</th>
             <th scope="col">Use</th>
             <th scope="col">Behavior</th>
           </tr>
@@ -127,37 +108,27 @@
           <tr>
             <th scope="row"><code>card</code></th>
             <td>Root surface</td>
-            <td>Owns the border, radius, background, and spacing tokens.</td>
+            <td>Owns the border, radius, shadow, background, and vertical rhythm.</td>
           </tr>
           <tr>
-            <th scope="row"><code>card-body</code></th>
-            <td>Main content</td>
-            <td>Provides Bootstrap's padded card section.</td>
+            <th scope="row"><code>card-header</code></th>
+            <td>Title area</td>
+            <td>Stacks a title and description with no divider or fill.</td>
           </tr>
           <tr>
             <th scope="row"><code>card-title</code> / <code>card-subtitle</code></th>
-            <td>Heading and helper text</td>
-            <td>Uses Bootstrap typography with Moo foreground and muted tokens.</td>
+            <td>Heading and description</td>
+            <td>Renders a semibold title and a muted secondary line.</td>
           </tr>
           <tr>
-            <th scope="row"><code>card-text</code></th>
-            <td>Body copy</td>
-            <td>Marks text that belongs to the card body.</td>
+            <th scope="row"><code>card-body</code> / <code>card-text</code></th>
+            <td>Main content</td>
+            <td>Holds the padded content section and its copy.</td>
           </tr>
           <tr>
-            <th scope="row"><code>card-img-top</code></th>
-            <td>Top media cap</td>
-            <td>Lets media inherit the card radius before body content.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>card-header</code> / <code>card-footer</code></th>
-            <td>Optional surrounding sections</td>
-            <td>Use Bootstrap's native header and footer structure.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>--moo-card-spacing</code></th>
-            <td>Runtime density</td>
-            <td>Aliases Bootstrap card spacer variables without rebuilding CSS.</td>
+            <th scope="row"><code>card-footer</code></th>
+            <td>Action row</td>
+            <td>Aligns finished controls in a row with no divider.</td>
           </tr>
         </tbody>
       </table>

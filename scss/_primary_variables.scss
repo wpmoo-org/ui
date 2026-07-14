@@ -19,3 +19,11 @@ $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
 $btn-line-height: 1.25rem !default;
 $btn-focus-width: 0.2rem !default;
+
+// shadcn-style elevation and the extra radius step, applied UI-wide through
+// Bootstrap's own scales so every component consumes one shared primitive.
+$box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !default;
+$box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1) !default;
+$box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !default;
+
+$border-radius-xl: 0.75rem !default;
