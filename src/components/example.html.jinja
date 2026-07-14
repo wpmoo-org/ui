@@ -1,0 +1,16 @@
+{% macro render_example(id, title, description, content) %}
+  {% set rendered = content | dedent_html %}
+  <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
+    <div class="moo-example__header">
+      <h2 class="h4" id="{{ id }}-title">{{ title }}</h2>
+      <p class="text-body-secondary mb-0">{{ description }}</p>
+    </div>
+    <div class="moo-example__preview">
+      {{ rendered | safe }}
+    </div>
+    <details class="moo-example__source">
+      <summary>View markup</summary>
+      <pre><code>{{ rendered | e }}</code></pre>
+    </details>
+  </section>
+{% endmacro %}

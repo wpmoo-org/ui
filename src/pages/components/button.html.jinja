@@ -1,0 +1,66 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/example.html.jinja" import render_example %}
+
+{% block title %}Button — Moo UI{% endblock %}
+
+{% block content %}
+  <header class="moo-component-header">
+    <h1 class="display-5 fw-semibold">Button</h1>
+    <p class="lead text-body-secondary mb-0">
+      Trigger actions and guide navigation with clear, familiar controls.
+    </p>
+  </header>
+
+  <div class="moo-component-examples">
+    {% set core_variants %}
+      {{ button("Launch workspace") }}
+      {{ button("Save draft", variant="secondary") }}
+      {{ button("Compare changes", variant="outline") }}
+      {{ button("Open details", variant="ghost") }}
+      {{ button("Remove access", variant="destructive") }}
+      {{ button("Read release notes", variant="link") }}
+    {% endset %}
+    {{ render_example(
+      "core-variants",
+      "Core variants",
+      "Choose emphasis that matches the consequence of the action.",
+      core_variants
+    ) }}
+
+    {% set semantic_elements %}
+      {{ button("Open handbook", variant="outline", element="a", href="https://example.com/handbook") }}
+      {{ button("Submit request", element="input", type="submit") }}
+      {{ button("Reset filters", variant="secondary", type="reset") }}
+    {% endset %}
+    {{ render_example(
+      "semantic-elements",
+      "Semantic elements",
+      "Use the native element that matches the control's real behavior.",
+      semantic_elements
+    ) }}
+
+    {% set disabled_states %}
+      {{ button("Awaiting approval", variant="secondary", disabled=true) }}
+      {{ button("Archived guide", variant="outline", element="a", disabled=true) }}
+    {% endset %}
+    {{ render_example(
+      "disabled-states",
+      "Unavailable actions",
+      "Disabled controls remain legible while leaving the interaction path.",
+      disabled_states
+    ) }}
+
+    {% set icon_actions %}
+      {{ button("Create team space", icon_start="plus") }}
+      {{ button("Invite collaborators", variant="outline", icon_end="arrow-right") }}
+      {{ button("", variant="secondary", size="icon", aria_label="Pin dashboard", icon_start="pin") }}
+    {% endset %}
+    {{ render_example(
+      "icon-actions",
+      "Actions with icons",
+      "Icons reinforce meaning without replacing an accessible name.",
+      icon_actions
+    ) }}
+  </div>
+{% endblock %}

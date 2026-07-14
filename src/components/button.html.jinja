@@ -1,0 +1,75 @@
+{% macro icon(name, position) -%}
+  <svg
+    data-icon="{{ position }}"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    {% if name == "plus" %}
+      <path d="M12 5v14M5 12h14"/>
+    {% elif name == "arrow-right" %}
+      <path d="M5 12h14M14 7l5 5-5 5"/>
+    {% elif name == "pin" %}
+      <path d="M8 3h8l-1 6 3 3v2H6v-2l3-3-1-6M12 14v7"/>
+    {% endif %}
+  </svg>
+{%- endmacro %}
+
+{% macro button(
+  label,
+  variant="default",
+  size="default",
+  element="button",
+  type="button",
+  href="",
+  disabled=false,
+  aria_label="",
+  icon_start="",
+  icon_end="",
+  extra_class=""
+) -%}
+  {% set variants = {
+    "default": "btn-primary",
+    "secondary": "btn-secondary",
+    "outline": "btn-outline-secondary",
+    "ghost": "btn-ghost",
+    "destructive": "btn-danger",
+    "link": "btn-link",
+    "success": "btn-success",
+    "warning": "btn-warning",
+    "info": "btn-info",
+    "light": "btn-light",
+    "dark": "btn-dark"
+  } %}
+  {% set sizes = {
+    "default": "",
+    "sm": "btn-sm",
+    "lg": "btn-lg",
+    "icon": "btn-icon"
+  } %}
+  {% set variant_class = variants.get(variant, variants["default"]) %}
+  {% set size_class = sizes.get(size, "") %}
+  {% set classes = "btn " ~ variant_class %}
+  {% if size_class %}{% set classes = classes ~ " " ~ size_class %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+
+  {% if element == "a" %}
+    <a class="{{ classes }}"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+      {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
+      {{ label }}
+      {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
+    </a>
+  {% elif element == "input" %}
+    <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+  {% else %}
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+      {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
+      {{ label }}
+      {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
+    </button>
+  {% endif %}
+{%- endmacro %}

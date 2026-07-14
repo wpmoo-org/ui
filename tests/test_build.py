@@ -54,6 +54,37 @@ class CatalogBuildTests(unittest.TestCase):
             [{"slug": "button", "label": "Button", "status": "ready"}],
         )
 
+    def test_button_examples_share_one_rendered_source(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        button_output = DIST / "components/button.html"
+        self.assertTrue(button_output.is_file())
+
+        page = button_output.read_text(encoding="utf-8")
+        example_template = (
+            ROOT / "src/components/example.html.jinja"
+        ).read_text(encoding="utf-8")
+        self.assertEqual(
+            example_template.count(
+                "{% set rendered = content | dedent_html %}"
+            ),
+            1,
+        )
+        self.assertEqual(example_template.count("{{ rendered | safe }}"), 1)
+        self.assertEqual(example_template.count("{{ rendered | e }}"), 1)
+        self.assertGreater(page.count("moo-example__preview"), 0)
+        self.assertEqual(
+            page.count("moo-example__preview"),
+            page.count("moo-example__source"),
+        )
+        self.assertIn('class="btn btn-primary"', page)
+        self.assertIn('<button class="btn', page)
+        self.assertIn('<a class="btn', page)
+        self.assertIn('<input class="btn', page)
+        self.assertIn('aria-disabled="true"', page)
+        self.assertIn('aria-label="Pin dashboard"', page)
+
 
 if __name__ == "__main__":
     unittest.main()
