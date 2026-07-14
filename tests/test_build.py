@@ -49,6 +49,7 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertEqual(index.count("<header"), 1)
         self.assertEqual(index.count("<footer"), 1)
         self.assertIn('href="components/button.html"', index)
+        self.assertIn('href="components/card.html"', index)
         self.assertIn('id="main-content"', index)
         self.assertIn('href="#main-content"', index)
         self.assertIn('id="main-content" tabindex="-1"', index)
@@ -65,6 +66,7 @@ class CatalogBuildTests(unittest.TestCase):
                     "label": "Button Group",
                     "status": "ready",
                 },
+                {"slug": "card", "label": "Card", "status": "ready"},
             ],
         )
 
@@ -215,6 +217,7 @@ class CatalogBuildTests(unittest.TestCase):
         for relative_path in (
             "components/button.html",
             "components/button-group.html",
+            "components/card.html",
         ):
             page = self.read_output(relative_path)
             self.assertIn('class="moo-component-reference"', page)
@@ -422,11 +425,11 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn('aria-label="Add attachment"', page)
         self.assertIn('aria-label="Record voice note"', page)
         self.assertIn(
-            'class="d-flex flex-column align-items-center gap-3 mx-auto"',
+            'class="d-flex flex-column align-items-center gap-3"',
             page,
         )
         self.assertIn(
-            'class="d-flex align-items-center gap-2 mx-auto moo-button-group-message"',
+            'class="d-flex align-items-center gap-2 moo-button-group-message"',
             page,
         )
         self.assertIn('class="input-group moo-button-group-input"', page)
@@ -475,6 +478,132 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn("border-radius: var(--bs-dropdown-item-border-radius);", hover_block)
         self.assertIn(".btn-icon.dropdown-toggle::after {", css)
         self.assertIn("display: none;", css.rsplit(".btn-icon.dropdown-toggle::after {", 1)[1].split("}", 1)[0])
+
+    def test_card_page_uses_bootstrap_native_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = DIST / "components/card.html"
+        self.assertTrue(output.is_file())
+
+        page = output.read_text(encoding="utf-8")
+        self.assertGreater(page.count("moo-example__preview"), 0)
+        self.assertEqual(
+            page.count("moo-example__preview"),
+            page.count("moo-example__source"),
+        )
+        for marker in (
+            'data-example="card-basic"',
+            'data-example="card-body"',
+            'data-example="card-title-text"',
+            'data-example="card-image"',
+            'data-example="card-header-footer"',
+        ):
+            self.assertIn(marker, page)
+
+        for native_class in (
+            "card",
+            "card-header",
+            "card-body",
+            "card-title",
+            "card-subtitle",
+            "card-text",
+            "card-footer",
+            "card-img-top",
+        ):
+            self.assertIn(native_class, page)
+
+        self.assertIn('class="btn btn-primary"', page)
+        self.assertIn('style="width: 18rem;"', page)
+        card_examples = page.split(
+            '<section class="moo-component-reference"',
+            1,
+        )[0]
+        self.assertNotIn("mx-auto", card_examples)
+        self.assertNotIn('<a class="btn', page)
+        self.assertNotIn("<input", page)
+        self.assertNotIn("form-control", page)
+        self.assertNotIn("form-label", page)
+        self.assertNotIn("list-group", page)
+        self.assertNotIn("card-login", page)
+        self.assertNotIn("card-summary", page)
+        self.assertNotIn('data-example="card-spacing"', page)
+        self.assertNotIn("card-rtl", page)
+        self.assertNotIn("example.com", page)
+        for runtime_name in ("React", "Tailwind", "className", "shadcn"):
+            self.assertNotIn(runtime_name, page)
+
+    def test_card_api_reference_documents_public_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/card.html")
+        self.assertIn('class="moo-component-reference"', page)
+        reference = page.split('class="moo-component-reference"', 1)[1]
+        for contract_text in (
+            "card",
+            "card-header",
+            "card-body",
+            "card-title",
+            "card-subtitle",
+            "card-text",
+            "card-footer",
+            "View markup",
+        ):
+            self.assertIn(contract_text, reference)
+        self.assertNotIn("<pre", reference)
+        self.assertNotIn("card(", reference)
+        self.assertNotIn("Internal note", reference)
+
+    def test_card_uses_runtime_theme_tokens(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn('@import "components/card";', (ROOT / "scss/moo-ui.scss").read_text(encoding="utf-8"))
+        self.assertIn(".card {", css)
+        card_block = css.rsplit(".card {", 1)[1].split("}", 1)[0]
+        for declaration in (
+            "--bs-card-bg: var(--moo-surface);",
+            "--bs-card-color: var(--moo-foreground);",
+            "--bs-card-border-color: var(--moo-border);",
+            "--bs-card-cap-bg: transparent;",
+            "--bs-card-title-color: var(--moo-foreground);",
+            "--bs-card-subtitle-color: var(--moo-muted-foreground);",
+        ):
+            self.assertIn(declaration, card_block)
+
+    def test_card_scss_stays_token_bridge_only(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        card_block = css.rsplit(".card {", 1)[1].split("}", 1)[0]
+        self.assertNotIn("font-size:", card_block)
+        self.assertNotIn(".card-header {", css.rsplit(".card {", 1)[1])
+        self.assertNotIn(".card-footer {", css.rsplit(".card {", 1)[1])
+        self.assertNotIn(".card-title {", css.rsplit(".card {", 1)[1])
+        self.assertNotIn(".card .form-control", css)
+        self.assertNotIn(".moo-card-", css)
+
+    def test_example_preview_container_centers_component_demos(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/catalog.css")
+        preview_block = css.split(".moo-example__preview {", 1)[1].split("}", 1)[0]
+        self.assertIn("justify-content: center;", preview_block)
+        for component_page in (
+            "components/button.html",
+            "components/button-group.html",
+            "components/card.html",
+        ):
+            page = self.read_output(component_page)
+            examples = page.split(
+                '<section class="moo-component-reference"',
+                1,
+            )[0]
+            self.assertNotIn("mx-auto", examples)
 
 
 if __name__ == "__main__":

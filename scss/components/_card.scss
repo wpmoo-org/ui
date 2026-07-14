@@ -1,0 +1,17 @@
+.card {
+  --moo-card-spacing: 1.5rem;
+  --bs-card-spacer-y: var(--moo-card-spacing);
+  --bs-card-spacer-x: var(--moo-card-spacing);
+  --bs-card-title-spacer-y: 0.25rem;
+  --bs-card-title-color: var(--moo-foreground);
+  --bs-card-subtitle-color: var(--moo-muted-foreground);
+  --bs-card-border-color: var(--moo-border);
+  --bs-card-border-radius: var(--bs-border-radius-xl);
+  --bs-card-inner-border-radius: calc(var(--bs-card-border-radius) - var(--bs-card-border-width));
+  --bs-card-cap-padding-y: var(--moo-card-spacing);
+  --bs-card-cap-padding-x: var(--moo-card-spacing);
+  --bs-card-cap-bg: transparent;
+  --bs-card-cap-color: var(--moo-foreground);
+  --bs-card-color: var(--moo-foreground);
+  --bs-card-bg: var(--moo-surface);
+}
