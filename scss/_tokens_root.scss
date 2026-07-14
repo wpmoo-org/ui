@@ -1,0 +1,22 @@
+:root,
+[data-bs-theme="light"] {
+  --moo-surface: #fff;
+  --moo-muted-surface: #f4f4f5;
+  --moo-border: #e4e4e7;
+  --moo-foreground: #18181b;
+  --moo-muted-foreground: #71717a;
+  --moo-ring: #18181b;
+  --moo-destructive: #dc2626;
+  --moo-destructive-foreground: #fff;
+}
+
+[data-bs-theme="dark"] {
+  --moo-surface: #18181b;
+  --moo-muted-surface: #27272a;
+  --moo-border: #3f3f46;
+  --moo-foreground: #fafafa;
+  --moo-muted-foreground: #a1a1aa;
+  --moo-ring: #fafafa;
+  --moo-destructive: #f87171;
+  --moo-destructive-foreground: #18181b;
+}

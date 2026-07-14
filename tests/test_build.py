@@ -85,6 +85,55 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertIn('aria-disabled="true"', page)
         self.assertIn('aria-label="Pin dashboard"', page)
 
+    def test_button_page_covers_approved_variants_and_states(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/button.html")
+        for class_name in (
+            "btn-primary",
+            "btn-secondary",
+            "btn-outline-secondary",
+            "btn-ghost",
+            "btn-danger",
+            "btn-link",
+            "btn-success",
+            "btn-warning",
+            "btn-info",
+            "btn-light",
+            "btn-dark",
+            "btn-outline-primary",
+            "btn-outline-success",
+            "btn-outline-danger",
+            "btn-sm",
+            "btn-lg",
+            "btn-icon",
+            "w-100",
+        ):
+            self.assertIn(class_name, page)
+
+        self.assertIn('data-bs-toggle="button"', page)
+        self.assertIn('aria-pressed="false"', page)
+        self.assertEqual(page.count('data-example="rtl-preview"'), 1)
+        self.assertIn('dir="rtl"', page)
+
+        for runtime_name in ("React", "Tailwind", "Vue", "customElements"):
+            self.assertNotIn(runtime_name, page)
+        for reference_label in (
+            "Primary button",
+            "Secondary button",
+            "Large button",
+            "Small button",
+            "Toggle button",
+            "Active toggle button",
+            "New Branch",
+            "Continue",
+            "Login",
+            "Docs",
+            "Review",
+        ):
+            self.assertNotIn(reference_label, page)
+
 
 if __name__ == "__main__":
     unittest.main()

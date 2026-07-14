@@ -30,7 +30,8 @@
   aria_label="",
   icon_start="",
   icon_end="",
-  extra_class=""
+  extra_class="",
+  toggle=false
 ) -%}
   {% set variants = {
     "default": "btn-primary",
@@ -43,7 +44,10 @@
     "warning": "btn-warning",
     "info": "btn-info",
     "light": "btn-light",
-    "dark": "btn-dark"
+    "dark": "btn-dark",
+    "outline-primary": "btn-outline-primary",
+    "outline-success": "btn-outline-success",
+    "outline-danger": "btn-outline-danger"
   } %}
   {% set sizes = {
     "default": "",
@@ -66,7 +70,7 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}>
       {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}

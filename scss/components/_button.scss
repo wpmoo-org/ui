@@ -1,0 +1,106 @@
+.btn {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-sm {
+  min-height: 2.25rem;
+}
+
+.btn-lg {
+  min-height: 2.75rem;
+}
+
+.btn-icon {
+  width: 2.5rem;
+  min-width: 2.5rem;
+  padding: 0;
+  aspect-ratio: 1;
+}
+
+.btn > [data-icon="inline-start"],
+.btn > [data-icon="inline-end"] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--moo-ring) 30%, transparent);
+}
+
+.btn:disabled,
+.btn.disabled,
+.btn[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  --bs-btn-color: var(--moo-surface);
+  --bs-btn-bg: var(--moo-foreground);
+  --bs-btn-border-color: var(--moo-foreground);
+  --bs-btn-hover-color: var(--moo-surface);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface));
+  --bs-btn-active-color: var(--moo-surface);
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface));
+  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface));
+}
+
+.btn-secondary {
+  --bs-btn-color: var(--moo-foreground);
+  --bs-btn-bg: var(--moo-muted-surface);
+  --bs-btn-border-color: var(--moo-border);
+  --bs-btn-hover-color: var(--moo-foreground);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 86%, var(--moo-foreground));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 80%, var(--moo-foreground));
+  --bs-btn-active-color: var(--moo-foreground);
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-muted-surface) 78%, var(--moo-foreground));
+  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-border) 72%, var(--moo-foreground));
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--moo-foreground);
+  --bs-btn-border-color: var(--moo-border);
+  --bs-btn-hover-color: var(--moo-foreground);
+  --bs-btn-hover-bg: var(--moo-muted-surface);
+  --bs-btn-hover-border-color: var(--moo-border);
+  --bs-btn-active-color: var(--moo-foreground);
+  --bs-btn-active-bg: var(--moo-muted-surface);
+  --bs-btn-active-border-color: var(--moo-border);
+}
+
+.btn-ghost {
+  --bs-btn-color: var(--moo-foreground);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--moo-foreground);
+  --bs-btn-hover-bg: var(--moo-muted-surface);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: var(--moo-foreground);
+  --bs-btn-active-bg: var(--moo-muted-surface);
+  --bs-btn-active-border-color: transparent;
+}
+
+.btn-danger {
+  --bs-btn-color: var(--moo-destructive-foreground);
+  --bs-btn-bg: var(--moo-destructive);
+  --bs-btn-border-color: var(--moo-destructive);
+  --bs-btn-hover-color: var(--moo-destructive-foreground);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground));
+  --bs-btn-active-color: var(--moo-destructive-foreground);
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground));
+  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground));
+}
+
+.btn-link {
+  --bs-btn-color: var(--moo-foreground);
+  --bs-btn-hover-color: var(--moo-muted-foreground);
+  text-underline-offset: 0.25rem;
+}

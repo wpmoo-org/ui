@@ -62,5 +62,120 @@
       "Icons reinforce meaning without replacing an accessible name.",
       icon_actions
     ) }}
+
+    {% set bootstrap_colors %}
+      {{ button("Deploy safely", variant="success") }}
+      {{ button("Check forecast", variant="warning") }}
+      {{ button("Inspect signal", variant="info") }}
+      {{ button("Use light mode", variant="light") }}
+      {{ button("Switch contrast", variant="dark") }}
+    {% endset %}
+    {{ render_example(
+      "bootstrap-colors",
+      "Bootstrap colors",
+      "Keep familiar semantic colors when the interface needs a broader signal.",
+      bootstrap_colors
+    ) }}
+
+    {% set outline_variants %}
+      {{ button("Start preview", variant="outline-primary") }}
+      {{ button("Mark complete", variant="outline-success") }}
+      {{ button("Revoke invitation", variant="outline-danger") }}
+    {% endset %}
+    {{ render_example(
+      "outline-variants",
+      "Outline variants",
+      "Use a lighter visual weight without losing the action's meaning.",
+      outline_variants
+    ) }}
+
+    {% set button_sizes %}
+      {{ button("Compact action", size="sm") }}
+      {{ button("Standard action") }}
+      {{ button("Expanded action", size="lg") }}
+    {% endset %}
+    {{ render_example(
+      "button-sizes",
+      "Sizes",
+      "Match control height to the density of the surrounding interface.",
+      button_sizes
+    ) }}
+
+    {% set full_width_actions %}
+      <div class="d-grid gap-2">
+        {{ button("Create workspace", extra_class="w-100") }}
+        {{ button("Invite collaborators", variant="outline", extra_class="w-100") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "full-width-actions",
+      "Full-width actions",
+      "Stack primary paths when the available width is narrow or focused.",
+      full_width_actions
+    ) }}
+
+    {% set toggle_state %}
+      {{ button("Pin this view", variant="outline", toggle=true) }}
+    {% endset %}
+    {{ render_example(
+      "toggle-state",
+      "Toggle state",
+      "Bootstrap manages the pressed state without a component-specific script.",
+      toggle_state
+    ) }}
+
+    {% set rtl_preview %}
+      <div class="d-flex flex-wrap gap-2" dir="rtl">
+        {{ button("إنشاء مساحة", icon_start="plus") }}
+        {{ button("فتح التفاصيل", variant="outline", icon_end="arrow-right") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl-preview",
+      "Right-to-left layout",
+      "Logical spacing keeps labels and icons coherent in either direction.",
+      rtl_preview
+    ) }}
   </div>
+
+  <section class="moo-component-reference" aria-labelledby="button-reference-title">
+    <h2 class="h3" id="button-reference-title">Button options</h2>
+    <p class="text-body-secondary">
+      The macro keeps Bootstrap semantics while exposing only the choices used
+      by this catalog.
+    </p>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th scope="col">Option</th>
+            <th scope="col">Values</th>
+            <th scope="col">Default</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><code>variant</code></th>
+            <td>Core Moo variants plus Bootstrap semantic and outline variants</td>
+            <td><code>default</code></td>
+          </tr>
+          <tr>
+            <th scope="row"><code>size</code></th>
+            <td><code>default</code>, <code>sm</code>, <code>lg</code>, <code>icon</code></td>
+            <td><code>default</code></td>
+          </tr>
+          <tr>
+            <th scope="row"><code>element</code></th>
+            <td><code>button</code>, <code>a</code>, <code>input</code></td>
+            <td><code>button</code></td>
+          </tr>
+          <tr>
+            <th scope="row"><code>toggle</code></th>
+            <td><code>true</code> or <code>false</code></td>
+            <td><code>false</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 {% endblock %}

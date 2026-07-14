@@ -96,6 +96,74 @@ body {
   font-size: 0.875rem;
 }
 
+.moo-component-header {
+  max-width: 44rem;
+}
+
+.moo-component-examples,
+.moo-component-reference {
+  margin-top: 4rem;
+}
+
+.moo-example + .moo-example {
+  margin-top: 3rem;
+}
+
+.moo-example__header {
+  max-width: 44rem;
+  margin-bottom: 1rem;
+}
+
+.moo-example__preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  overflow-x: auto;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+}
+
+.moo-example__preview > .d-grid {
+  width: 100%;
+}
+
+.moo-example__source {
+  margin-top: 0.75rem;
+}
+
+.moo-example__source summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+}
+
+.moo-example__source pre {
+  margin: 0.75rem 0 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-dark);
+  color: var(--bs-light);
+  font-size: 0.8125rem;
+}
+
+[dir="rtl"] .moo-example__preview {
+  text-align: right;
+}
+
+.moo-component-reference .table-responsive {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.moo-component-reference .table {
+  margin-bottom: 0;
+}
+
 @media (min-width: 992px) {
   .moo-catalog__sidebar {
     position: sticky;
