@@ -95,74 +95,92 @@
   opacity: 0.5;
 }
 
+// Variant token bridge: Bootstrap's button-variant() mixins need
+// compile-time colors, so each variant maps Bootstrap's consumption
+// custom properties onto runtime theme tokens instead. Defaults:
+// hover-color <- color, active-color <- hover-color,
+// active-bg <- hover-bg, and each state's border-color <- its bg.
+@mixin moo-button-variant(
+  $color,
+  $hover-bg,
+  $bg: null,
+  $border-color: $bg,
+  $hover-color: $color,
+  $hover-border-color: $hover-bg,
+  $active-color: $hover-color,
+  $active-bg: $hover-bg,
+  $active-border-color: $active-bg
+) {
+  --bs-btn-color: #{$color};
+  @if $bg != null {
+    --bs-btn-bg: #{$bg};
+  }
+  --bs-btn-border-color: #{$border-color};
+  --bs-btn-hover-color: #{$hover-color};
+  --bs-btn-hover-bg: #{$hover-bg};
+  --bs-btn-hover-border-color: #{$hover-border-color};
+  --bs-btn-active-color: #{$active-color};
+  --bs-btn-active-bg: #{$active-bg};
+  --bs-btn-active-border-color: #{$active-border-color};
+}
+
 .btn-primary {
-  --bs-btn-color: var(--moo-surface);
-  --bs-btn-bg: var(--moo-foreground);
-  --bs-btn-border-color: var(--moo-foreground);
-  --bs-btn-hover-color: var(--moo-surface);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface));
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface));
-  --bs-btn-active-color: var(--moo-surface);
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface));
-  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface));
+  @include moo-button-variant(
+    $color: var(--moo-surface),
+    $bg: var(--moo-foreground),
+    $hover-bg: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface)),
+    $active-bg: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface))
+  );
 }
 
 .btn-secondary {
-  --bs-btn-color: var(--moo-foreground);
-  --bs-btn-bg: var(--moo-muted-surface);
-  --bs-btn-border-color: var(--moo-border);
-  --bs-btn-hover-color: var(--moo-foreground);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 86%, var(--moo-foreground));
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 80%, var(--moo-foreground));
-  --bs-btn-active-color: var(--moo-foreground);
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-muted-surface) 78%, var(--moo-foreground));
-  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-border) 72%, var(--moo-foreground));
+  @include moo-button-variant(
+    $color: var(--moo-foreground),
+    $bg: var(--moo-muted-surface),
+    $border-color: var(--moo-border),
+    $hover-bg: color-mix(in srgb, var(--moo-muted-surface) 86%, var(--moo-foreground)),
+    $hover-border-color: color-mix(in srgb, var(--moo-border) 80%, var(--moo-foreground)),
+    $active-bg: color-mix(in srgb, var(--moo-muted-surface) 78%, var(--moo-foreground)),
+    $active-border-color: color-mix(in srgb, var(--moo-border) 72%, var(--moo-foreground))
+  );
 }
 
 .btn-outline-secondary {
-  --bs-btn-color: var(--moo-foreground);
-  --bs-btn-border-color: var(--moo-border);
-  --bs-btn-hover-color: var(--moo-foreground);
-  --bs-btn-hover-bg: var(--moo-muted-surface);
-  --bs-btn-hover-border-color: var(--moo-border);
-  --bs-btn-active-color: var(--moo-foreground);
-  --bs-btn-active-bg: var(--moo-muted-surface);
-  --bs-btn-active-border-color: var(--moo-border);
+  @include moo-button-variant(
+    $color: var(--moo-foreground),
+    $border-color: var(--moo-border),
+    $hover-bg: var(--moo-muted-surface),
+    $hover-border-color: var(--moo-border),
+    $active-border-color: var(--moo-border)
+  );
 }
 
 .btn-outline-primary {
-  --bs-btn-color: var(--moo-foreground);
-  --bs-btn-border-color: var(--moo-foreground);
-  --bs-btn-hover-color: var(--moo-surface);
-  --bs-btn-hover-bg: var(--moo-foreground);
-  --bs-btn-hover-border-color: var(--moo-foreground);
-  --bs-btn-active-color: var(--moo-surface);
-  --bs-btn-active-bg: var(--moo-foreground);
-  --bs-btn-active-border-color: var(--moo-foreground);
+  @include moo-button-variant(
+    $color: var(--moo-foreground),
+    $border-color: var(--moo-foreground),
+    $hover-color: var(--moo-surface),
+    $hover-bg: var(--moo-foreground)
+  );
 }
 
 .btn-ghost {
-  --bs-btn-color: var(--moo-foreground);
-  --bs-btn-bg: transparent;
-  --bs-btn-border-color: transparent;
-  --bs-btn-hover-color: var(--moo-foreground);
-  --bs-btn-hover-bg: var(--moo-muted-surface);
-  --bs-btn-hover-border-color: transparent;
-  --bs-btn-active-color: var(--moo-foreground);
-  --bs-btn-active-bg: var(--moo-muted-surface);
-  --bs-btn-active-border-color: transparent;
+  @include moo-button-variant(
+    $color: var(--moo-foreground),
+    $bg: transparent,
+    $hover-bg: var(--moo-muted-surface),
+    $hover-border-color: transparent,
+    $active-border-color: transparent
+  );
 }
 
 .btn-danger {
-  --bs-btn-color: var(--moo-destructive-foreground);
-  --bs-btn-bg: var(--moo-destructive);
-  --bs-btn-border-color: var(--moo-destructive);
-  --bs-btn-hover-color: var(--moo-destructive-foreground);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground));
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground));
-  --bs-btn-active-color: var(--moo-destructive-foreground);
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground));
-  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground));
+  @include moo-button-variant(
+    $color: var(--moo-destructive-foreground),
+    $bg: var(--moo-destructive),
+    $hover-bg: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground)),
+    $active-bg: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground))
+  );
 }
 
 .btn-link {
