@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Moo UI Bootstrap component catalog">
+    <title>{% block title %}Moo UI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css">
+    <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css">
+  </head>
+  <body>
+    <a class="visually-hidden-focusable" href="#main-content">
+      Skip to component content
+    </a>
+    {% block body %}{% endblock %}
+    <script defer src="{{ root_path }}assets/js/bootstrap.bundle.min.js"></script>
+    <script defer src="{{ root_path }}assets/js/preview.js"></script>
+  </body>
+</html>

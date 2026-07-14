@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import unittest
@@ -32,6 +33,25 @@ class CatalogBuildTests(unittest.TestCase):
         self.assertTrue((DIST / "assets/css/catalog.css").is_file())
         self.assertTrue(
             (DIST / "assets/js/bootstrap.bundle.min.js").is_file()
+        )
+
+    def test_build_uses_one_shared_catalog_shell(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        self.assertEqual(index.count('data-moo-shell="catalog"'), 1)
+        self.assertEqual(index.count("<header"), 1)
+        self.assertEqual(index.count("<footer"), 1)
+        self.assertIn('href="components/button.html"', index)
+        self.assertIn('id="main-content"', index)
+
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            catalog,
+            [{"slug": "button", "label": "Button", "status": "ready"}],
         )
 
 

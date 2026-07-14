@@ -1,11 +1,28 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Moo UI</title>
-  </head>
-  <body>
-    <main>Moo UI</main>
-  </body>
-</html>
+{% extends "layouts/catalog.html.jinja" %}
+
+{% block title %}Component catalog — Moo UI{% endblock %}
+
+{% block content %}
+  <section class="moo-catalog__intro" aria-labelledby="catalog-title">
+    <h1 class="display-5 fw-semibold" id="catalog-title">Component catalog</h1>
+    <p class="lead mb-2">Build familiar interfaces with less noise.</p>
+    <p class="text-body-secondary mb-0">
+      Moo UI keeps Bootstrap semantics while giving product teams a quieter,
+      more deliberate starting point.
+    </p>
+  </section>
+
+  <section class="moo-catalog__component-list" aria-labelledby="components-title">
+    <h2 class="h4" id="components-title">Components</h2>
+    <div class="row g-3">
+      {% for component in catalog %}
+        <div class="col-12 col-md-6">
+          <a class="moo-catalog__component-card" href="components/{{ component.slug }}.html">
+            <span class="fw-medium">{{ component.label }}</span>
+            <span class="text-body-secondary">{{ component.status | capitalize }}</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

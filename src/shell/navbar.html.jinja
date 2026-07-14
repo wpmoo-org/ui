@@ -1,0 +1,24 @@
+<header class="moo-catalog__header">
+  <nav class="navbar moo-catalog__navbar" aria-label="Catalog controls">
+    <div class="container-fluid moo-catalog__navbar-inner">
+      <a class="navbar-brand mb-0" href="{{ root_path }}index.html">Moo UI</a>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-theme>
+          Dark
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-direction>
+          RTL
+        </button>
+        <button
+          class="btn btn-sm btn-outline-secondary d-lg-none"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#catalog-navigation"
+          aria-controls="catalog-navigation"
+        >
+          Browse
+        </button>
+      </div>
+    </div>
+  </nav>
+</header>
