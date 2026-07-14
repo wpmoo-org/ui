@@ -1,4 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/button.html.jinja" import button, button_sizes, button_variants %}
 {% from "components/example.html.jinja" import render_example %}
 
@@ -153,59 +154,18 @@
     ) }}
   </div>
 
-  <section class="moo-component-reference" aria-labelledby="button-reference-title">
-    <h2 class="h3" id="button-reference-title">API Reference</h2>
-    <p class="text-body-secondary">
-      Use Bootstrap button classes directly. Copy exact rendered HTML from each
-      example's View markup panel.
-    </p>
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th scope="col">Class or attribute</th>
-            <th scope="col">Use</th>
-            <th scope="col">Behavior</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row"><code>btn-primary</code></th>
-            <td>Primary action</td>
-            <td>Uses Moo foreground and surface tokens.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-secondary</code> / <code>btn-outline-secondary</code></th>
-            <td>Secondary action</td>
-            <td>Matches the compact shadcn-like neutral treatment.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-ghost</code> / <code>btn-danger</code> / <code>btn-link</code></th>
-            <td>Special intent</td>
-            <td>Covers low-emphasis, destructive, and text-link actions.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-xs</code>, <code>btn-sm</code>, <code>btn-lg</code></th>
-            <td>Text button density</td>
-            <td>Maps to the 24 / 28 / 32 / 36 px height scale.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-icon</code> variants</th>
-            <td>Icon-only controls</td>
-            <td>Keep controls square and require an accessible name.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>disabled</code></th>
-            <td>Unavailable action</td>
-            <td>Uses native disabled behavior with Moo runtime contrast tokens.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>data-bs-toggle="button"</code></th>
-            <td>Pressed state</td>
-            <td>Uses Bootstrap's native toggle behavior.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  {% set api_rows = [
+    {"contract": "btn-primary", "use": "Primary action", "behavior": "Uses Moo foreground and surface tokens."},
+    {"contract": "btn-secondary / btn-outline-secondary", "use": "Secondary action", "behavior": "Uses the compact neutral treatment."},
+    {"contract": "btn-ghost / btn-danger / btn-link", "use": "Special intent", "behavior": "Covers low-emphasis, destructive, and text-link actions."},
+    {"contract": "btn-xs / btn-sm / btn-lg", "use": "Text button density", "behavior": "Maps to the 24 / 28 / 32 / 36 px height scale."},
+    {"contract": "btn-icon variants", "use": "Icon-only controls", "behavior": "Keeps controls square and requires an accessible name."},
+    {"contract": "disabled", "use": "Unavailable action", "behavior": "Uses native disabled behavior with Moo runtime contrast tokens."},
+    {"contract": "data-bs-toggle=button", "use": "Pressed state", "behavior": "Uses Bootstrap's native toggle behavior."}
+  ] %}
+  {{ render_api_reference(
+    "button",
+    "Use Bootstrap button classes directly. Copy exact rendered HTML from each example's View Code panel.",
+    api_rows
+  ) }}
 {% endblock %}

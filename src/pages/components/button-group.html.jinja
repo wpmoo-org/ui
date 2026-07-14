@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/button.html.jinja" import button, icon %}
+{% from "components/api_reference.html.jinja" import render_api_reference %}
+{% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
 {% from "components/example.html.jinja" import render_example %}
 
@@ -21,24 +22,9 @@
         {% endcall %}
         {% call button_group("Ticket review") %}
           {{ button("Archive", variant="outline") }}
-        {{ button("Report", variant="outline") }}
-        {% endcall %}
-        <div class="btn-group" role="group" aria-label="Ticket delay">
+          {{ button("Report", variant="outline") }}
           {{ button("Snooze", variant="outline") }}
-          <button class="btn btn-outline-secondary btn-icon dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More options">
-            {{ icon("ellipsis", "inline-start") }}
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><button class="dropdown-item" type="button">{{ icon("mail", "inline-start") }} Mark as handled</button></li>
-            <li><button class="dropdown-item" type="button">{{ icon("archive", "inline-start") }} Move to archive</button></li>
-            <li><button class="dropdown-item" type="button">{{ icon("clock", "inline-start") }} Delay reminder</button></li>
-            <li><button class="dropdown-item" type="button">{{ icon("calendar", "inline-start") }} Add to schedule</button></li>
-            <li><button class="dropdown-item" type="button">{{ icon("list", "inline-start") }} Add to queue</button></li>
-            <li><button class="dropdown-item" type="button">{{ icon("tag", "inline-start") }} Set label</button></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><button class="dropdown-item text-danger" type="button">{{ icon("trash", "inline-start") }} Delete ticket</button></li>
-          </ul>
-        </div>
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -127,39 +113,6 @@
       toolbar_groups
     ) }}
 
-    {% set radio_toggle_group %}
-      <div class="btn-group" role="group" aria-label="View mode">
-        <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-list" autocomplete="off" checked>
-        <label class="btn btn-outline-secondary" for="button-group-view-list">List</label>
-        <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-board" autocomplete="off">
-        <label class="btn btn-outline-secondary" for="button-group-view-board">Board</label>
-        <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-map" autocomplete="off">
-        <label class="btn btn-outline-secondary" for="button-group-view-map">Map</label>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "radio-toggle-group",
-      "Toggle group",
-      "Use Bootstrap check inputs when one choice in the group must stay active.",
-      radio_toggle_group
-    ) }}
-
-    {% set nested_groups %}
-      <div class="d-flex align-items-center gap-2 moo-button-group-message">
-        {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus") }}
-        <div class="input-group moo-button-group-input">
-          <input class="form-control" type="text" placeholder="Send a message..." aria-label="Message body">
-          {{ button("", variant="outline", size="icon", aria_label="Record voice note", icon_start="audio-lines") }}
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "nested-groups",
-      "Nested groups",
-      "Use Bootstrap input grouping when buttons and fields need one connected surface.",
-      nested_groups
-    ) }}
-
     {% set rtl_preview %}
       <div dir="rtl">
         {% call button_group("إجراءات التذكرة") %}
@@ -177,49 +130,16 @@
     ) }}
   </div>
 
-  <section class="moo-component-reference" aria-labelledby="button-group-reference-title">
-    <h2 class="h3" id="button-group-reference-title">API Reference</h2>
-    <p class="text-body-secondary">
-      Use Bootstrap button group classes directly. Copy exact rendered HTML from
-      each example's View markup panel.
-    </p>
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th scope="col">Class or attribute</th>
-            <th scope="col">Use</th>
-            <th scope="col">Behavior</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row"><code>btn-group</code></th>
-            <td>Adjacent related controls</td>
-            <td>Joins borders and keeps each button as a separate control.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-group-vertical</code></th>
-            <td>Narrow rails or stacked palettes</td>
-            <td>Stacks the same controls vertically.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-toolbar</code></th>
-            <td>Multiple grouped clusters</td>
-            <td>Wraps several <code>btn-group</code> sections in one toolbar.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>btn-group-sm</code> / <code>btn-group-lg</code></th>
-            <td>Density changes</td>
-            <td>Applies one size to every button inside the group.</td>
-          </tr>
-          <tr>
-            <th scope="row"><code>role</code> + <code>aria-label</code></th>
-            <td>Accessibility</td>
-            <td>Give each group or toolbar a clear accessible name.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  {% set api_rows = [
+    {"contract": "btn-group", "use": "Adjacent related controls", "behavior": "Joins borders while keeping each button separate."},
+    {"contract": "btn-group-vertical", "use": "Narrow rails or stacked palettes", "behavior": "Stacks the same controls vertically."},
+    {"contract": "btn-toolbar", "use": "Multiple grouped clusters", "behavior": "Wraps several button groups in one toolbar."},
+    {"contract": "btn-group-sm / btn-group-lg", "use": "Density changes", "behavior": "Applies one size to every button in the group."},
+    {"contract": "role / aria-label", "use": "Accessibility", "behavior": "Gives each group or toolbar a clear accessible name."}
+  ] %}
+  {{ render_api_reference(
+    "button-group",
+    "Use Bootstrap button group classes directly. Copy exact rendered HTML from each example's View Code panel.",
+    api_rows
+  ) }}
 {% endblock %}
