@@ -16,12 +16,17 @@
   white-space: nowrap;
 }
 
-.btn:has(> [data-icon="inline-start"]) {
+.btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon="inline-start"]) {
   padding-inline-start: var(--moo-button-icon-padding-x);
 }
 
-.btn:has(> [data-icon="inline-end"]) {
+.btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon="inline-end"]) {
   padding-inline-end: var(--moo-button-icon-padding-x);
+}
+
+button.btn:not(:disabled),
+input.btn:not(:disabled) {
+  cursor: default;
 }
 
 .btn-xs {
@@ -93,6 +98,10 @@
 .btn[aria-disabled="true"] {
   pointer-events: none;
   opacity: 0.5;
+}
+
+.btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
+  transform: translateY(0.5px);
 }
 
 // Bootstrap consumes these properties; owned variants supply only exceptions.
