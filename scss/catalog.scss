@@ -117,6 +117,7 @@ body {
 .moo-example__preview {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 0.75rem;
   padding: clamp(1.5rem, 5vw, 3rem);

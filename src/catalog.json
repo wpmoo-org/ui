@@ -8,5 +8,10 @@
     "slug": "button-group",
     "label": "Button Group",
     "status": "ready"
+  },
+  {
+    "slug": "card",
+    "label": "Card",
+    "status": "ready"
   }
 ]

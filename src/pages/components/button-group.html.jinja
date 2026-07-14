@@ -15,7 +15,7 @@
 
   <div class="moo-component-examples">
     {% set basic_actions %}
-      {% call button_group("Ticket actions", toolbar=true, extra_class="gap-2 mx-auto") %}
+      {% call button_group("Ticket actions", toolbar=true, extra_class="gap-2") %}
         {% call button_group("Ticket navigation") %}
           {{ button("", variant="outline", size="icon", aria_label="Go back", icon_start="arrow-left") }}
         {% endcall %}
@@ -49,7 +49,7 @@
     ) }}
 
     {% set icon_only_group %}
-      {% call button_group("Media controls", extra_class="mx-auto") %}
+      {% call button_group("Media controls") %}
         {{ button("", variant="outline", size="icon", aria_label="Previous item", icon_start="chevron-left") }}
         {{ button("", variant="outline", size="icon", aria_label="Pin item", icon_start="pin") }}
         {{ button("", variant="outline", size="icon", aria_label="Next item", icon_start="chevron-right") }}
@@ -63,7 +63,7 @@
     ) }}
 
     {% set size_groups %}
-      <div class="d-flex flex-column align-items-center gap-3 mx-auto">
+      <div class="d-flex flex-column align-items-center gap-3">
         {% call button_group("Small button group", size="sm") %}
           {{ button("Small", variant="outline") }}
           {{ button("Button", variant="outline") }}
@@ -92,7 +92,7 @@
     ) }}
 
     {% set vertical_group %}
-      {% call button_group("Quantity controls", vertical=true, extra_class="mx-auto") %}
+      {% call button_group("Quantity controls", vertical=true) %}
         {{ button("", variant="outline", size="icon", aria_label="Increase value", icon_start="plus") }}
         {{ button("", variant="outline", size="icon", aria_label="Decrease value", icon_start="minus") }}
       {% endcall %}
@@ -105,7 +105,7 @@
     ) }}
 
     {% set toolbar_groups %}
-      {% call button_group("Editor toolbar", toolbar=true, extra_class="gap-2 mx-auto") %}
+      {% call button_group("Editor toolbar", toolbar=true, extra_class="gap-2") %}
         {% call button_group("History actions") %}
           {{ button("Undo", variant="outline") }}
           {{ button("Redo", variant="outline") }}
@@ -128,7 +128,7 @@
     ) }}
 
     {% set radio_toggle_group %}
-      <div class="btn-group mx-auto" role="group" aria-label="View mode">
+      <div class="btn-group" role="group" aria-label="View mode">
         <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-list" autocomplete="off" checked>
         <label class="btn btn-outline-secondary" for="button-group-view-list">List</label>
         <input class="btn-check" type="radio" name="button-group-view" id="button-group-view-board" autocomplete="off">
@@ -145,7 +145,7 @@
     ) }}
 
     {% set nested_groups %}
-      <div class="d-flex align-items-center gap-2 mx-auto moo-button-group-message">
+      <div class="d-flex align-items-center gap-2 moo-button-group-message">
         {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus") }}
         <div class="input-group moo-button-group-input">
           <input class="form-control" type="text" placeholder="Send a message..." aria-label="Message body">
@@ -161,7 +161,7 @@
     ) }}
 
     {% set rtl_preview %}
-      <div class="mx-auto" dir="rtl">
+      <div dir="rtl">
         {% call button_group("إجراءات التذكرة") %}
           {{ button("أرشفة", variant="outline") }}
           {{ button("مراجعة", variant="outline") }}
