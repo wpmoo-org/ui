@@ -47,23 +47,28 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("{% if name ==", button_template)
 
     def test_component_pages_render_public_api_reference_sections(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        for relative_path in (
-            "components/button.html",
-            "components/button-group.html",
-            "components/card.html",
-        ):
-            page = self.read_output(relative_path)
-            self.assertIn('class="moo-component-reference"', page)
-            reference = page.split('class="moo-component-reference"', 1)[1]
-            self.assertIn(">API Reference</h2>", reference)
-            self.assertNotIn("<pre", reference)
-            self.assertNotIn("button(", reference)
-            self.assertNotIn("Use the Jinja", page)
-            self.assertNotIn("button_group(", page)
-            self.assertNotIn("Internal note:", page)
+        for item in catalog:
+            if item["status"] != "ready":
+                continue
+            with self.subTest(component=item["slug"]):
+                page = self.read_output(
+                    f'components/{item["slug"]}.html'
+                )
+                self.assertIn('class="moo-component-reference"', page)
+                reference = page.split(
+                    'class="moo-component-reference"', 1
+                )[1]
+                self.assertIn(">API Reference</h2>", reference)
+                self.assertNotIn("<pre", reference)
+                self.assertNotIn(f'{item["slug"].replace("-", "_")}(', reference)
+                self.assertNotIn("Use the Jinja", page)
+                self.assertNotIn("Internal note:", page)
 
     def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
         allowed_prefixes = {
