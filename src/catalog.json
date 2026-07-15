@@ -18,5 +18,10 @@
     "slug": "typography",
     "label": "Typography",
     "status": "ready"
+  },
+  {
+    "slug": "kbd",
+    "label": "Kbd",
+    "status": "ready"
   }
 ]
