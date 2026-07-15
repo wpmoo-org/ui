@@ -25,6 +25,16 @@ $btn-focus-width: 0.2rem !default;
 $btn-font-size-sm: 0.8rem !default;
 $btn-font-size-lg: 0.875rem !default;
 
+// Paddings ride Bootstrap's scale too: zero block padding because control
+// heights come from min-height, one shared inline padding across sizes
+// (the xs step overrides its consumption variable locally).
+$btn-padding-y: 0 !default;
+$btn-padding-x: 0.625rem !default;
+$btn-padding-y-sm: 0 !default;
+$btn-padding-x-sm: 0.625rem !default;
+$btn-padding-y-lg: 0 !default;
+$btn-padding-x-lg: 0.625rem !default;
+
 // Shared focus primitive: shadcn-style 2px ring. Components consume
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
 $focus-ring-width: 2px !default;
