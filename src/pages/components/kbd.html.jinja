@@ -1,0 +1,50 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/api_reference.html.jinja" import render_api_reference %}
+{% from "components/example.html.jinja" import render_example %}
+{% from "components/kbd.html.jinja" import kbd %}
+{% from "components/typography.html.jinja" import typography %}
+
+{% block title %}Kbd — Moo UI{% endblock %}
+
+{% block content %}
+  <header class="moo-component-header">
+    {{ typography("Kbd", variant="page-title") }}
+    {{ typography(
+      "Show keyboard input in clear, accessible surrounding instructions.",
+      variant="page-description"
+    ) }}
+  </header>
+
+  <div class="moo-component-examples">
+    {% set single_key %}
+      <p class="mb-0">Press {{ kbd("Esc") }} to close the current surface.</p>
+    {% endset %}
+    {{ render_example(
+      "single-key",
+      "Single key",
+      "Place a key inside a sentence that explains the available action.",
+      single_key
+    ) }}
+
+    {% set key_combination %}
+      <p class="mb-0">Press {{ kbd("Ctrl") }} + {{ kbd("K") }} to open search.</p>
+    {% endset %}
+    {{ render_example(
+      "key-combination",
+      "Key combination",
+      "Keep every key in an accessible instruction instead of relying on symbols alone.",
+      key_combination
+    ) }}
+  </div>
+
+  {% set api_rows = [
+    {"contract": "<" ~ "kbd>", "use": "Native keyboard input", "behavior": "Provides semantic keyboard-input markup with no runtime behavior or focus target."},
+    {"contract": "$kbd-padding-y / $kbd-padding-x / $kbd-font-size", "use": "Compile-time sizing", "behavior": "Controls the native element's padding and type scale in Bootstrap Sass."},
+    {"contract": "$kbd-color / $kbd-bg / $border-radius-sm", "use": "Compile-time theme and shape", "behavior": "Controls the native element's foreground, background, and shared small radius in Bootstrap Sass."}
+  ] %}
+  {{ render_api_reference(
+    "kbd",
+    "Use the native element for keyboard input; it adds no runtime shortcut behavior or focus handling.",
+    api_rows
+  ) }}
+{% endblock %}

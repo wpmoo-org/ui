@@ -111,7 +111,7 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(page=path.name, contract="interactive markup"):
                 self.assertNotRegex(
                     source,
-                    r"<(?:button|form|input|select|textarea)\b",
+                    r"<(?:button|form|input|kbd|select|textarea)\b",
                 )
 
             imports = re.findall(

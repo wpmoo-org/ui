@@ -1,0 +1,4 @@
+{% macro kbd(text) -%}
+  {% if not text | trim %}{{ fail("Kbd text is required") }}{% endif %}
+  <kbd>{{ text }}</kbd>
+{%- endmacro %}
