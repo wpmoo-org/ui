@@ -44,8 +44,11 @@
   extra_class="",
   toggle=false
 ) -%}
-  {% set variant_class = button_variants.get(variant, button_variants["default"]) %}
-  {% set size_config = button_sizes.get(size, button_sizes["default"]) %}
+  {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
+  {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
+  {% if size.startswith("icon") and not label | trim and not aria_label | trim %}{{ fail("Icon-only buttons require aria_label") }}{% endif %}
+  {% set variant_class = button_variants[variant] %}
+  {% set size_config = button_sizes[size] %}
   {% set size_class = size_config["class"] %}
   {% set classes = "btn " ~ variant_class %}
   {% if size_class %}{% set classes = classes ~ " " ~ size_class %}{% endif %}

@@ -1,4 +1,4 @@
-{% macro render_example(id, title, description, content) %}
+{% macro render_example(id, title, description, content, preview_class="") %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
   <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
@@ -7,7 +7,7 @@
       <p class="text-body-secondary mb-0">{{ description }}</p>
     </div>
     <div class="moo-example__surface">
-      <div class="moo-example__preview">
+      <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {{ rendered | safe }}
       </div>
       <div class="moo-example__source" data-bs-theme="dark" data-moo-code-panel data-expanded="false">

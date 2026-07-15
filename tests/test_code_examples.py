@@ -11,7 +11,7 @@ class CodeExampleTests(CatalogTestCase):
         ).read_text(encoding="utf-8")
 
         self.assertEqual(template.count('class="moo-example__surface"'), 1)
-        self.assertEqual(template.count('class="moo-example__preview"'), 1)
+        self.assertEqual(template.count('class="moo-example__preview'), 1)
         self.assertEqual(template.count('class="moo-example__source"'), 1)
         self.assertIn("data-moo-code-panel", template)
         self.assertIn("data-moo-code-toggle", template)
@@ -85,7 +85,7 @@ class CodeExampleTests(CatalogTestCase):
             page = self.read_output(relative_path)
             self.assertEqual(
                 page.count("moo-example__surface"),
-                page.count("moo-example__preview"),
+                page.count('<div class="moo-example__preview'),
             )
 
     def test_rendered_code_has_syntax_tokens_lines_and_clean_indent(self) -> None:

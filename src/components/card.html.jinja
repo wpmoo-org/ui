@@ -2,7 +2,6 @@
   title="",
   subtitle="",
   footer="",
-  style="",
   dir="",
   extra_class="",
   header_class="",
@@ -11,7 +10,7 @@
 ) -%}
   {% set classes = "card" %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  <div class="{{ classes }}"{% if dir %} dir="{{ dir }}"{% endif %}{% if style %} style="{{ style }}"{% endif %}>
+  <div class="{{ classes }}"{% if dir %} dir="{{ dir }}"{% endif %}>
     {% if title or subtitle %}
       <div class="card-header{% if header_class %} {{ header_class }}{% endif %}">
         {% if title %}<h3 class="card-title">{{ title }}</h3>{% endif %}

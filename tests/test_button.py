@@ -1,9 +1,34 @@
 from __future__ import annotations
 
+from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 class ButtonTests(CatalogTestCase):
+    def render_button(self, call: str) -> str:
+        template = create_environment().from_string(
+            '{% from "components/button.html.jinja" import button %}'
+            f"{{{{ {call} }}}}"
+        )
+        return template.render()
+
+    def test_button_rejects_unknown_variants(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown button variant: typo"):
+            self.render_button('button("Save", variant="typo")')
+
+    def test_button_rejects_unknown_sizes(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown button size: huge"):
+            self.render_button('button("Save", size="huge")')
+
+    def test_icon_only_button_requires_an_accessible_name(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Icon-only buttons require aria_label",
+        ):
+            self.render_button(
+                'button("", size="icon", icon_start="plus")'
+            )
+
     def test_button_examples_share_one_rendered_source(self) -> None:
         result = self.run_build()
 

@@ -159,6 +159,10 @@ def line_numbers(value: object) -> Markup:
     return Markup("\n".join(str(number) for number in range(1, count + 1)))
 
 
+def fail(message: str) -> None:
+    raise ValueError(message)
+
+
 def load_lucide_icons() -> dict[str, object]:
     return json.loads(LUCIDE_ICONS.read_text(encoding="utf-8"))
 
@@ -209,6 +213,7 @@ def create_environment() -> Environment:
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
     environment.filters["line_numbers"] = line_numbers
+    environment.globals["fail"] = fail
     icon_set = load_lucide_icons()
     environment.globals["lucide_icon"] = lambda name, position: render_lucide_icon(
         icon_set,

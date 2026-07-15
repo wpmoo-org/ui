@@ -183,7 +183,7 @@ class CatalogContractTests(CatalogTestCase):
                         elif "border-radius" in name:
                             self.assertRegex(
                                 value,
-                                r"^(?:0|var\(--bs-border-radius(?:-[a-z0-9-]+)?\))$",
+                                r"^(?:0|var\(--bs-border-radius(?:-[a-z0-9-]+)?\)|calc\(var\(--bs-[a-z0-9-]*border-radius\) - var\(--bs-[a-z0-9-]*border-width\)\))$",
                             )
 
     def test_example_preview_container_centers_component_demos(self) -> None:
@@ -193,6 +193,8 @@ class CatalogContractTests(CatalogTestCase):
         css = self.read_output("assets/css/catalog.css")
         preview_block = css.split(".moo-example__preview {", 1)[1].split("}", 1)[0]
         self.assertIn("justify-content: center;", preview_block)
+        self.assertIn(".moo-example__preview--narrow > * {", css)
+        self.assertNotIn(".moo-example__preview .card", css)
         for component_page in (
             "components/button.html",
             "components/button-group.html",

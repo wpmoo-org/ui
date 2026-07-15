@@ -16,7 +16,7 @@
 
   <div class="moo-component-examples">
     {% set content_card %}
-      {% call card(style="width: 22rem;") %}
+      {% call card() %}
         <p class="mb-0">A single content section works when the card holds one short, self-contained note.</p>
       {% endcall %}
     {% endset %}
@@ -24,14 +24,14 @@
       "card-content",
       "Content only",
       "Start with one padded body when the card holds a single block of content.",
-      content_card
+      content_card,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set basic_card %}
       {% call card(
         "Team workspace",
-        "Everyone you invite can open and edit the shared boards.",
-        style="width: 22rem;"
+        "Everyone you invite can open and edit the shared boards."
       ) %}
         <p class="mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
       {% endcall %}
@@ -40,7 +40,8 @@
       "card-basic",
       "Header and content",
       "Add a header with a title and description above the content section.",
-      basic_card
+      basic_card,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set actions_card %}
@@ -52,7 +53,6 @@
         "Discard changes?",
         "Your recent edits to this board are still unsaved.",
         footer=actions_footer,
-        style="width: 22rem;",
         footer_class="justify-content-end"
       ) %}
         <p class="mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
@@ -62,7 +62,8 @@
       "card-actions",
       "Footer actions",
       "Place related actions in a footer using finished Button controls.",
-      actions_card
+      actions_card,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set rtl_card %}
@@ -73,7 +74,6 @@
         "مساحة العمل",
         "يمكن لكل شخص تدعوه فتح اللوحات المشتركة وتحريرها.",
         footer=rtl_footer,
-        style="width: 22rem;",
         dir="rtl",
         footer_class="justify-content-end"
       ) %}
@@ -84,7 +84,8 @@
       "card-rtl",
       "Right-to-left layout",
       "The same structure stays coherent when the writing direction flips.",
-      rtl_card
+      rtl_card,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 
