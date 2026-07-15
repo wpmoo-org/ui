@@ -28,5 +28,10 @@
     "slug": "input",
     "label": "Input",
     "status": "ready"
+  },
+  {
+    "slug": "textarea",
+    "label": "Textarea",
+    "status": "ready"
   }
 ]

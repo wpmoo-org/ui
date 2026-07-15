@@ -1,45 +1,47 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
-{% from "components/example.html.jinja" import render_example %}
-{% from "components/typography.html.jinja" import typography %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
 
 {% block title %}Button — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    {{ typography("Button", variant="page-title") }}
-    {{ typography(
-      "Trigger actions and guide navigation with clear, familiar controls.",
-      variant="page-description"
-    ) }}
-  </header>
+  {{ render_page_header(
+    "Buttons",
+    "Use Bootstrap button styles for actions in forms, dialogs, and more."
+  ) }}
 
   <div class="moo-component-examples">
     {% set core_variants %}
-      {{ button("Launch workspace") }}
-      {{ button("Save draft", variant="secondary") }}
-      {{ button("Compare changes", variant="outline") }}
-      {{ button("Open details", variant="ghost") }}
-      {{ button("Remove access", variant="destructive") }}
-      {{ button("Read release notes", variant="link") }}
+      {{ button("Primary") }}
+      {{ button("Secondary", variant="secondary") }}
+      {{ button("Success", variant="success") }}
+      {{ button("Danger", variant="destructive") }}
+      {{ button("Warning", variant="warning") }}
+      {{ button("Info", variant="info") }}
+      {{ button("Light", variant="light") }}
+      {{ button("Dark", variant="dark") }}
+      {{ button("Link", variant="link") }}
     {% endset %}
     {{ render_example(
       "core-variants",
-      "Core variants",
-      "Choose emphasis that matches the consequence of the action.",
+      "Variants",
+      "Choose a Bootstrap variant for the action's emphasis. Keep the meaning in the label too; color alone is not enough for assistive technology.",
       core_variants
     ) }}
 
     {% set semantic_elements %}
-      {{ button("Open handbook", variant="outline") }}
-      {{ button("Submit request", element="input", type="submit") }}
-      {{ button("Reset filters", variant="secondary", type="reset") }}
+      {{ button("Link", variant="outline", element="a", href="#button-tags") }}
+      {{ button("Button") }}
+      {{ button("Submit", element="input", type="submit") }}
+      {{ button("Reset", element="input", variant="secondary", type="reset") }}
     {% endset %}
     {{ render_example(
       "semantic-elements",
-      "Semantic elements",
-      "Use the native element that matches the control's real behavior.",
+      "Button tags",
+      "Bootstrap button classes work on <code>&lt;button&gt;</code>, <code>&lt;a&gt;</code>, and <code>&lt;input&gt;</code>. Use the element that matches navigation, an action, or form submission.",
       semantic_elements
     ) }}
 
@@ -49,8 +51,8 @@
     {% endset %}
     {{ render_example(
       "disabled-states",
-      "Unavailable actions",
-      "Disabled controls remain legible while leaving the interaction path.",
+      "Disabled state",
+      "The native <code>disabled</code> attribute removes interaction and hover states from buttons. Prefer a real button for unavailable actions; disabled links need extra accessibility handling.",
       disabled_states
     ) }}
 
@@ -61,61 +63,48 @@
     {% endset %}
     {{ render_example(
       "icon-actions",
-      "Actions with icons",
-      "Icons reinforce meaning without replacing an accessible name.",
+      "Icons",
+      "Inline icons reinforce a visible label. Icon-only buttons need an <code>aria-label</code>; the decorative SVG stays hidden from assistive technology.",
       icon_actions
     ) }}
 
-    {% set bootstrap_colors %}
-      {{ button("Deploy safely", variant="success") }}
-      {{ button("Check forecast", variant="warning") }}
-      {{ button("Inspect signal", variant="info") }}
-      {{ button("Use light mode", variant="light") }}
-      {{ button("Switch contrast", variant="dark") }}
-    {% endset %}
-    {{ render_example(
-      "bootstrap-colors",
-      "Bootstrap colors",
-      "Keep familiar semantic colors when the interface needs a broader signal.",
-      bootstrap_colors
-    ) }}
-
     {% set outline_variants %}
-      {{ button("Start preview", variant="outline-primary") }}
-      {{ button("Mark complete", variant="outline-success") }}
-      {{ button("Revoke invitation", variant="outline-danger") }}
+      {{ button("Primary", variant="outline-primary") }}
+      {{ button("Secondary", variant="outline") }}
+      {{ button("Success", variant="outline-success") }}
+      {{ button("Danger", variant="outline-danger") }}
     {% endset %}
     {{ render_example(
       "outline-variants",
-      "Outline variants",
-      "Use a lighter visual weight without losing the action's meaning.",
+      "Outline buttons",
+      "Use <code>btn-outline-*</code> when a filled surface is too strong. The variant keeps its semantic color on the border and hover state.",
       outline_variants
     ) }}
 
     {% set button_size_examples %}
       <div class="d-flex flex-column align-items-center gap-3">
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-          {{ button("Quick note", variant="outline", size="xs") }}
-          {{ button("", variant="outline", size="icon-xs", aria_label="Add quick note", icon_start="plus") }}
+          {{ button("Small button", variant="outline", size="xs") }}
+          {{ button("", variant="outline", size="icon-xs", aria_label="Add small button", icon_start="plus") }}
         </div>
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-          {{ button("Compact action", variant="outline", size="sm") }}
-          {{ button("", variant="outline", size="icon-sm", aria_label="Add compact action", icon_start="plus") }}
+          {{ button("Small button", variant="outline", size="sm") }}
+          {{ button("", variant="outline", size="icon-sm", aria_label="Add small button", icon_start="plus") }}
         </div>
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-          {{ button("Standard action", variant="outline") }}
-          {{ button("", variant="outline", size="icon", aria_label="Add standard action", icon_start="plus") }}
+          {{ button("Button", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Add button", icon_start="plus") }}
         </div>
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-          {{ button("Expanded action", variant="outline", size="lg") }}
-          {{ button("", variant="outline", size="icon-lg", aria_label="Add expanded action", icon_start="plus") }}
+          {{ button("Large button", variant="outline", size="lg") }}
+          {{ button("", variant="outline", size="icon-lg", aria_label="Add large button", icon_start="plus") }}
         </div>
       </div>
     {% endset %}
     {{ render_example(
       "button-sizes",
       "Sizes",
-      "Match control height to the density of the surrounding interface.",
+      "Use Bootstrap's small and large scales when control density changes. Moo's icon sizes keep square controls aligned with the same scale.",
       button_size_examples
     ) }}
 
@@ -127,8 +116,8 @@
     {% endset %}
     {{ render_example(
       "full-width-actions",
-      "Full-width actions",
-      "Stack primary paths when the available width is narrow or focused.",
+      "Block buttons",
+      "<code>d-grid gap-2</code> stacks actions with consistent spacing, while <code>w-100</code> lets each button fill the available width. This is a layout choice, not a new button variant.",
       full_width_actions
     ) }}
 
@@ -137,8 +126,8 @@
     {% endset %}
     {{ render_example(
       "toggle-state",
-      "Toggle state",
-      "Bootstrap manages the pressed state without a component-specific script.",
+      "Toggle states",
+      "<code>data-bs-toggle=\"button\"</code> asks Bootstrap's button plugin to switch the active state on click. <code>aria-pressed=\"false\"</code> exposes the initial state to assistive technology; use <code>true</code> together with <code>active</code> when preselecting it.",
       toggle_state
     ) }}
 
@@ -151,7 +140,7 @@
     {{ render_example(
       "rtl-preview",
       "Right-to-left layout",
-      "Logical spacing keeps labels and icons coherent in either direction.",
+      "<code>dir=\"rtl\"</code> lets the browser resolve logical start and end spacing for Arabic and other RTL content. Use semantic icon positions instead of manually flipping the SVG.",
       rtl_preview
     ) }}
 
@@ -161,15 +150,23 @@
           {{ button("Previous", variant="outline") }}
           {{ button("Next", variant="outline") }}
         {% endcall %}
-        <a href="../components/button-group.html">Button Group</a>
       </div>
+    {% endset %}
+    {% set related_button_group_description %}
+      Group adjacent actions that belong together. See the <a href="../components/button-group.html">Button Group</a> component for more patterns.
     {% endset %}
     {{ render_example(
       "related-button-group",
-      "Related component",
-      "Group adjacent actions that belong together.",
+      "Button group",
+      related_button_group_description,
       related_button_group
     ) }}
   </div>
+
+  {{ render_reference(
+    "For more detailed information, see the",
+    "https://getbootstrap.com/docs/5.3/components/buttons/",
+    "Bootstrap Buttons documentation"
+  ) }}
 
 {% endblock %}

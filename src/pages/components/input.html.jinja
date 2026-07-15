@@ -1,68 +1,123 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/example.html.jinja" import render_example %}
 {% from "components/input.html.jinja" import input %}
-{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Input — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    {{ typography("Input", variant="page-title") }}
-    {{ typography(
-      "Collect short text and search queries with native form controls.",
-      variant="page-description"
-    ) }}
-  </header>
+  {{ render_page_header(
+    "Input",
+    "A text input component for forms and user data entry with built-in styling and accessibility features."
+  ) }}
 
   <div class="moo-component-examples">
-    {% set visible_label %}
-      {{ input(
-        label="Component name",
-        id="component-name",
-        placeholder="Enter a component name"
-      ) }}
-    {% endset %}
-    {{ render_example(
-      "visible-label",
-      "Visible label",
-      "Connect the label and control when the field name should remain visible.",
-      visible_label
-    ) }}
-
-    {% set search_input %}
-      {{ input(
-        aria_label="Search components",
-        type="search",
-        placeholder="Filter components"
-      ) }}
-    {% endset %}
-    {{ render_example(
-      "search-input",
-      "Search input",
-      "Use an accessible name when surrounding context already identifies the field.",
-      search_input
-    ) }}
-
-    {% set native_states %}
-      <div class="d-grid gap-3">
+    {% set api_key %}
+      <div class="d-grid gap-2">
         {{ input(
-          aria_label="Disabled project name",
-          value="Unavailable project",
-          disabled=true
+          label="API Key",
+          id="api-key",
+          placeholder="sk-..."
         ) }}
-        {{ input(
-          aria_label="Read-only project name",
-          value="Published project",
-          readonly=true
-        ) }}
+        <div class="form-text">Your API key is encrypted and stored securely.</div>
       </div>
     {% endset %}
     {{ render_example(
-      "native-states",
-      "Native states",
-      "Choose disabled for unavailable controls and readonly for values that remain selectable.",
-      native_states
+      "api-key",
+      "API Key",
+      "Keep a visible label and a short supporting message together when a field needs context.",
+      api_key,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set basic %}
+      {{ input(
+        aria_label="Enter text",
+        placeholder="Enter text"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Use the native text input when the surrounding layout already explains the field.",
+      basic,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      <div class="d-grid gap-2">
+        {{ input(
+          label="Email",
+          id="disabled-email",
+          type="text",
+          value="team@example.com",
+          disabled=true
+        ) }}
+        <div class="form-text">This field is currently disabled.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Use the <code>disabled</code> attribute to prevent editing and focus while Bootstrap applies its disabled appearance.",
+      disabled,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set invalid %}
+      <div class="d-grid gap-2">
+        {{ input(
+          label="Invalid Input",
+          id="invalid-input",
+          placeholder="Error",
+          aria_invalid=true
+        ) }}
+        <div class="form-text">This field contains validation errors.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Invalid",
+      "Use <code>aria-invalid</code> for the accessibility state; the macro adds Bootstrap's matching <code>is-invalid</code> class.",
+      invalid,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set file_input %}
+      <div class="d-grid gap-2">
+        {{ input(
+          label="Picture",
+          id="picture",
+          type="file"
+        ) }}
+        <div class="form-text">Select a picture to upload.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "file",
+      "File",
+      "Use the <code>type=\"file\"</code> input for a native file picker.",
+      file_input,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set required_field %}
+      <div class="d-grid gap-2">
+        {{ input(
+          label="Required Field *",
+          id="required-field",
+          placeholder="This field is required",
+          required=true
+        ) }}
+        <div class="form-text">This field must be filled out.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "required",
+      "Required",
+      "Use the native <code>required</code> attribute to indicate that an input must be filled out.",
+      required_field,
+      "moo-example__preview--narrow"
     ) }}
   </div>
-
 {% endblock %}

@@ -1,0 +1,24 @@
+{% set textarea_sizes = ["", "sm", "lg"] %}
+
+{% macro textarea(
+  label="",
+  aria_label="",
+  id="",
+  placeholder="",
+  value="",
+  rows=3,
+  size="",
+  aria_invalid=false,
+  disabled=false,
+  readonly=false
+) -%}
+  {% set has_label = label | trim %}
+  {% set has_aria_label = aria_label | trim %}
+  {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Textarea requires exactly one of label or aria_label") }}{% endif %}
+  {% if has_label and not id | trim %}{{ fail("Visible textarea labels require id") }}{% endif %}
+  {% if size not in textarea_sizes %}{{ fail("Unknown textarea size: " ~ size) }}{% endif %}
+  {% if rows < 1 %}{{ fail("Textarea rows must be positive") }}{% endif %}
+
+  {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
+  <textarea class="form-control{% if size %} form-control-{{ size }}{% endif %}{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} rows="{{ rows }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>{{ value }}</textarea>
+{%- endmacro %}

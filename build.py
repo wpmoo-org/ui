@@ -52,6 +52,27 @@ VOID_ELEMENTS = {
     "track",
     "wbr",
 }
+INLINE_CHILD_ELEMENTS = {
+    "a",
+    "abbr",
+    "b",
+    "code",
+    "del",
+    "em",
+    "i",
+    "kbd",
+    "mark",
+    "q",
+    "s",
+    "small",
+    "span",
+    "strong",
+    "sub",
+    "sup",
+    "time",
+    "u",
+    "var",
+}
 
 
 def dedent_html(value: object) -> str:
@@ -60,13 +81,51 @@ def dedent_html(value: object) -> str:
     return re.sub(r"\n(?:[ \t]*\n){2,}", "\n\n", clean_lines)
 
 
+def _inline_element(source: str, match: re.Match[str], tag_name: str, depth: int):
+    if tag_name not in {"h1", "h2", "h3", "h4", "h5", "h6", "li", "p"}:
+        return None
+
+    closing = re.search(
+        rf"</{re.escape(tag_name)}\s*>",
+        source[match.end() :],
+        re.IGNORECASE,
+    )
+    if closing is None:
+        return None
+
+    body = source[match.end() : match.end() + closing.start()]
+    for child in HTML_TOKEN.finditer(body):
+        child_match = HTML_TAG.fullmatch(child.group())
+        child_name = child_match.group("name").lower() if child_match else ""
+        if not child_match or child_name not in INLINE_CHILD_ELEMENTS:
+            return None
+
+    if not HTML_TOKEN.search(body):
+        return None
+
+    body = re.sub(r"\s+", " ", body).strip()
+    close = closing.group()
+    rendered = "\n".join(
+        (
+            f"{'  ' * depth}{match.group()}",
+            f"{'  ' * (depth + 1)}{body}",
+            f"{'  ' * depth}{close}",
+        )
+    )
+    return rendered, match.end() + closing.end()
+
+
 def format_html(value: object) -> str:
     source = dedent_html(value)
     lines: list[str] = []
     depth = 0
     position = 0
+    inline_until = 0
 
     for match in HTML_TOKEN.finditer(source):
+        if match.start() < inline_until:
+            continue
+
         text_content = re.sub(
             r"\s+", " ", source[position : match.start()]
         ).strip()
@@ -84,6 +143,31 @@ def format_html(value: object) -> str:
             depth = max(0, depth - 1)
 
         prefix = "  " * depth
+
+        if not is_closing and not is_void and tag_match and "\n" not in token:
+            inline_element = _inline_element(source, match, tag_name, depth)
+            if inline_element:
+                rendered, inline_until = inline_element
+                lines.append(rendered)
+                position = inline_until
+                continue
+
+            inline_close = re.match(
+                rf"(?P<text>[^<>]*?)(?P<close></{re.escape(tag_name)}\s*>)",
+                source[match.end() :],
+                re.IGNORECASE | re.DOTALL,
+            )
+            if inline_close and inline_close.group("text").strip():
+                inline_text = re.sub(
+                    r"\s+", " ", inline_close.group("text")
+                ).strip()
+                lines.append(
+                    f"{prefix}{token}{inline_text}{inline_close.group('close')}"
+                )
+                inline_until = match.end() + inline_close.end()
+                position = inline_until
+                continue
+
         lines.extend(f"{prefix}{line}" for line in token.splitlines())
 
         if not is_closing and not is_void and not is_special:

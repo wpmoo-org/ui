@@ -24,7 +24,7 @@ class CardTests(CatalogTestCase):
             card_page.count(
                 'preview_class="moo-example__preview--narrow"'
             ),
-            4,
+            5,
         )
 
     def test_card_page_uses_bootstrap_native_contract(self) -> None:

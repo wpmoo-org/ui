@@ -43,6 +43,7 @@ class CatalogContractTests(CatalogTestCase):
             "button": ("btn", "disabled"),
             "button_group": ("btn",),
             "card": ("card",),
+            "input": ("form-control",),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):

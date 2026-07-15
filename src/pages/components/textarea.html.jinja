@@ -1,0 +1,80 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/textarea.html.jinja" import textarea %}
+
+{% block title %}Textarea — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Textarea",
+    "Displays a form textarea or a component that looks like a textarea."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ textarea(
+        aria_label="Message",
+        placeholder="Type your message here."
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Use a textarea when a message needs more room than a single-line input.",
+      basic,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      {{ textarea(
+        aria_label="Message",
+        placeholder="Message",
+        disabled=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Use the <code>disabled</code> attribute to prevent editing and focus while Bootstrap applies its disabled appearance.",
+      disabled,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set invalid %}
+      <div class="d-grid gap-2">
+        {{ textarea(
+          aria_label="Message",
+          placeholder="Please enter a valid message.",
+          aria_invalid=true
+        ) }}
+        <div class="form-text">Please enter a valid message.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Invalid",
+      "Use <code>aria-invalid</code> for the accessibility state; the macro adds Bootstrap's matching <code>is-invalid</code> class.",
+      invalid,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set with_button %}
+      <div class="d-grid gap-2">
+        {{ textarea(
+          aria_label="Message",
+          placeholder="Type your message here."
+        ) }}
+        {{ button("Send message", extra_class="w-100") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "button",
+      "Button",
+      "Pair the textarea with a button to submit the message.",
+      with_button,
+      "moo-example__preview--narrow"
+    ) }}
+  </div>
+{% endblock %}

@@ -1,17 +1,16 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
 {% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Typography — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    {{ typography("Typography", variant="page-title") }}
-    {{ typography(
-      "Give catalog content a consistent hierarchy with Bootstrap-native text roles.",
-      variant="page-description"
-    ) }}
-  </header>
+  {{ render_page_header(
+    "Typography",
+    "Give catalog content a consistent hierarchy with Bootstrap-native text roles."
+  ) }}
 
   <div class="moo-component-examples">
     {% set headings %}
@@ -23,8 +22,69 @@
     {{ render_example(
       "headings",
       "Headings",
-      "Use each heading role at its matching level in the catalog hierarchy.",
+      "Choose the semantic heading level first; the catalog maps the roles to Bootstrap classes such as <code>display-5</code>, <code>h3</code>, and <code>h4</code>.",
       headings
+    ) }}
+
+    {% set semantic_headings %}
+      <div class="d-grid gap-2">
+        <h1 class="mb-0">h1. Bootstrap heading</h1>
+        <h2 class="mb-0">h2. Bootstrap heading</h2>
+        <h3 class="mb-0">h3. Bootstrap heading</h3>
+        <h4 class="mb-0">h4. Bootstrap heading</h4>
+        <h5 class="mb-0">h5. Bootstrap heading</h5>
+        <h6 class="mb-0">h6. Bootstrap heading</h6>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "semantic-headings",
+      "Semantic headings",
+      "Use the native <code>h1</code> through <code>h6</code> elements when the document outline should carry the meaning.",
+      semantic_headings
+    ) }}
+
+    {% set heading_utilities %}
+      <div class="d-grid gap-2">
+        <p class="h1 mb-0">h1. Bootstrap heading</p>
+        <p class="h2 mb-0">h2. Bootstrap heading</p>
+        <p class="h3 mb-0">h3. Bootstrap heading</p>
+        <p class="h4 mb-0">h4. Bootstrap heading</p>
+        <p class="h5 mb-0">h5. Bootstrap heading</p>
+        <p class="h6 mb-0">h6. Bootstrap heading</p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "heading-utilities",
+      "Heading utilities",
+      "Use <code>.h1</code> through <code>.h6</code> when the visual heading level must not replace the element's semantic level.",
+      heading_utilities
+    ) }}
+
+    {% set customizing_headings %}
+      <h3 class="mb-0">Fancy display heading <small class="text-body-secondary">With faded secondary text</small></h3>
+    {% endset %}
+    {{ render_example(
+      "customizing-headings",
+      "Customizing headings",
+      "Pair a heading with <code>small.text-body-secondary</code> when a secondary phrase should stay visually subordinate.",
+      customizing_headings
+    ) }}
+
+    {% set display_headings %}
+      <div class="d-grid gap-2">
+        <h1 class="display-1 mb-0">Display 1</h1>
+        <h1 class="display-2 mb-0">Display 2</h1>
+        <h1 class="display-3 mb-0">Display 3</h1>
+        <h1 class="display-4 mb-0">Display 4</h1>
+        <h1 class="display-5 mb-0">Display 5</h1>
+        <h1 class="display-6 mb-0">Display 6</h1>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "display-headings",
+      "Display headings",
+      "Use <code>display-1</code> through <code>display-6</code> when a heading needs more visual presence than the surrounding content hierarchy.",
+      display_headings
     ) }}
 
     {% set supporting_text %}
@@ -37,8 +97,196 @@
     {{ render_example(
       "supporting-text",
       "Supporting text",
-      "Choose the smallest text role that communicates the intended emphasis.",
+      "Use lead, secondary, and label roles to show hierarchy without inventing one-off text styles for each page.",
       supporting_text
+    ) }}
+
+    {% set lead %}
+      <p class="lead mb-0">This is a lead paragraph. It stands out from regular paragraphs.</p>
+    {% endset %}
+    {{ render_example(
+      "lead",
+      "Lead",
+      "Add <code>lead</code> when an introductory paragraph needs more visual weight than ordinary body copy.",
+      lead
+    ) }}
+
+    {% set inline_elements %}
+      <div class="d-grid gap-2">
+        <p class="mb-0">Use <mark>mark</mark> to highlight text for reference.</p>
+        <p class="mb-0"><del>This line is no longer accurate.</del></p>
+        <p class="mb-0"><s>This line is no longer relevant.</s></p>
+        <p class="mb-0"><ins>This line was added to the document.</ins></p>
+        <p class="mb-0"><u>This line carries a non-textual annotation.</u></p>
+        <p class="mb-0"><small>This is fine print and supporting detail.</small></p>
+        <p class="mb-0"><strong>This line carries strong importance.</strong></p>
+        <p class="mb-0"><em>This line carries emphasis.</em></p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "inline-elements",
+      "Inline text elements",
+      "Use semantic inline elements for their meaning: <code>mark</code> highlights, <code>del</code> removes, <code>ins</code> adds, and <code>strong</code>/<code>em</code> convey emphasis.",
+      inline_elements
+    ) }}
+
+    {% set abbreviation %}
+      <p class="mb-0"><abbr title="HyperText Markup Language" class="initialism">HTML</abbr> keeps its expanded meaning available on hover.</p>
+    {% endset %}
+    {{ render_example(
+      "abbreviation",
+      "Abbreviations",
+      "Add a <code>title</code> to <code>abbr</code> so an acronym has an accessible expanded meaning; <code>initialism</code> gives it a slightly smaller treatment.",
+      abbreviation
+    ) }}
+
+    {% set blockquote %}
+      <figure class="mb-0">
+        <blockquote class="blockquote mb-2">
+          <p class="mb-0">A calm interface makes the next action easier to find.</p>
+        </blockquote>
+        <figcaption class="blockquote-footer mb-0">
+          A design principle in <cite title="Moo UI handbook">Moo UI handbook</cite>
+        </figcaption>
+      </figure>
+    {% endset %}
+    {{ render_example(
+      "blockquote",
+      "Blockquotes",
+      "Wrap a quotation in <code>blockquote</code> and keep its attribution outside the quote with <code>blockquote-footer</code> and <code>cite</code>.",
+      blockquote
+    ) }}
+
+    {% set blockquote_alignment %}
+      <div class="d-grid gap-3 w-100">
+        <figure class="text-center mb-0">
+          <blockquote class="blockquote mb-2">
+            <p class="mb-0">A calm interface makes the next action easier to find.</p>
+          </blockquote>
+          <figcaption class="blockquote-footer mb-0">
+            A design principle in <cite title="Moo UI handbook">Moo UI handbook</cite>
+          </figcaption>
+        </figure>
+        <figure class="text-end mb-0">
+          <blockquote class="blockquote mb-2">
+            <p class="mb-0">A calm interface makes the next action easier to find.</p>
+          </blockquote>
+          <figcaption class="blockquote-footer mb-0">
+            A design principle in <cite title="Moo UI handbook">Moo UI handbook</cite>
+          </figcaption>
+        </figure>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "blockquote-alignment",
+      "Blockquote alignment",
+      "Use <code>text-center</code> or <code>text-end</code> on the figure to align a quote and its attribution together.",
+      blockquote_alignment
+    ) }}
+
+    {% set lists %}
+      <div class="d-grid gap-3 w-100">
+        <ul class="list-unstyled mb-0">
+          <li>Unstyled lists keep their structure without bullets.</li>
+          <li>The content remains a real list for assistive technology.</li>
+        </ul>
+        <ul class="list-inline mb-0">
+          <li class="list-inline-item">Inline item one</li>
+          <li class="list-inline-item">Inline item two</li>
+          <li class="list-inline-item">Inline item three</li>
+        </ul>
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Term</dt>
+          <dd class="col-sm-9">A short definition aligned with the grid.</dd>
+          <dt class="col-sm-3">Another term</dt>
+          <dd class="col-sm-9 mb-0">Another definition in the same rhythm.</dd>
+        </dl>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "lists",
+      "Lists",
+      "Use <code>list-unstyled</code> for quiet lists, <code>list-inline</code> for compact rows, and the grid classes to align a description list.",
+      lists
+    ) }}
+
+    {% set text_alignment %}
+      <div class="d-grid gap-2 w-100">
+        <p class="text-start mb-0">Start-aligned text follows the reading direction.</p>
+        <p class="text-center mb-0">Center-aligned text suits short, focused labels.</p>
+        <p class="text-end mb-0">End-aligned text closes the row cleanly.</p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "text-alignment",
+      "Alignment",
+      "Use <code>text-start</code>, <code>text-center</code>, and <code>text-end</code> to align text without a custom selector.",
+      text_alignment
+    ) }}
+
+    {% set text_transform %}
+      <div class="d-grid gap-2">
+        <p class="text-lowercase mb-0">QUIET SYSTEM STATUS</p>
+        <p class="text-uppercase mb-0">quiet system status</p>
+        <p class="text-capitalize mb-0">quiet system status</p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "text-transform",
+      "Transform",
+      "Use <code>text-lowercase</code>, <code>text-uppercase</code>, or <code>text-capitalize</code> when the displayed casing is part of the content treatment.",
+      text_transform
+    ) }}
+
+    {% set text_scale %}
+      <div class="d-grid gap-2">
+        <p class="fs-5 mb-0">A slightly larger supporting line.</p>
+        <p class="fw-semibold mb-0">A stronger label for an important state.</p>
+        <p class="fst-italic mb-0">A quiet note that stays in the same hierarchy.</p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "text-scale",
+      "Size and emphasis",
+      "Use <code>fs-*</code> for font size and <code>fw-*</code>/<code>fst-*</code> for weight or italics; these utilities change treatment without replacing semantic elements.",
+      text_scale
+    ) }}
+
+    {% set line_height %}
+      <div class="d-grid gap-2">
+        <p class="lh-1 mb-0">Tight line-height keeps a compact label close together.</p>
+        <p class="lh-base mb-0">Base line-height keeps ordinary reading comfortable.</p>
+        <p class="lh-lg mb-0">Large line-height gives a longer sentence more air.</p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "line-height",
+      "Line height",
+      "Use <code>lh-1</code>, <code>lh-base</code>, or <code>lh-lg</code> when text density needs to change without a custom line-height declaration.",
+      line_height
+    ) }}
+
+    {% set text_decoration %}
+      <div class="d-grid gap-2">
+        <p class="text-decoration-underline mb-0">Underline a supporting link-like phrase.</p>
+        <p class="text-decoration-line-through mb-0">Strike through a superseded phrase.</p>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "text-decoration",
+      "Text decoration",
+      "Use <code>text-decoration-underline</code> or <code>text-decoration-line-through</code> when the decoration communicates the text state.",
+      text_decoration
+    ) }}
+
+    {% set monospace %}
+      <p class="font-monospace mb-0">moo-ui@button-group --watch</p>
+    {% endset %}
+    {{ render_example(
+      "monospace",
+      "Monospace",
+      "Apply <code>font-monospace</code> to identifiers and terminal-like values when a fixed-width face improves scanning.",
+      monospace
     ) }}
 
     {% set inline_code %}
@@ -47,9 +295,15 @@
     {{ render_example(
       "inline-code",
       "Inline code",
-      "Mark public classes and contracts as code inside prose.",
+      "Wrap public classes, attributes, and contracts in <code>&lt;code&gt;</code> so technical names stay distinct inside prose.",
       inline_code
     ) }}
   </div>
+
+  {{ render_reference(
+    "For more text patterns, see the",
+    "https://getbootstrap.com/docs/5.3/utilities/text/",
+    "Bootstrap Text utilities documentation"
+  ) }}
 
 {% endblock %}

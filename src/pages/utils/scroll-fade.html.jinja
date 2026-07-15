@@ -1,15 +1,14 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/example.html.jinja" import render_example %}
 
 {% block title %}Scroll Fade — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    <h1 class="display-5 fw-semibold">Scroll Fade</h1>
-    <p class="lead text-body-secondary mb-0">
-      Hint at content beyond a scroll boundary without adding visible chrome.
-    </p>
-  </header>
+  {{ render_page_header(
+    "Scroll Fade",
+    "Hint at content beyond a scroll boundary without adding visible chrome."
+  ) }}
 
   <div class="moo-component-examples">
     {% set vertical_scroll %}
@@ -28,7 +27,7 @@
     {{ render_example(
       "vertical-scroll",
       "Vertical scrolling",
-      "Fade both block edges only while more content remains in that direction.",
+      "Combine <code>scroll-fade</code> with <code>overflow-y-auto</code> to show a mask only while more content remains above or below.",
       vertical_scroll
     ) }}
 
@@ -43,7 +42,7 @@
     {{ render_example(
       "no-overflow",
       "No overflow",
-      "The mask stays inactive when the content already fits inside its container.",
+      "When the content fits, the utility stays quiet: no mask appears and no extra script is needed.",
       no_overflow
     ) }}
 
@@ -60,7 +59,7 @@
     {{ render_example(
       "horizontal-scroll",
       "Horizontal scrolling",
-      "Use the inline-axis utility for rows that may overflow in either writing direction.",
+      "Use <code>scroll-fade-x</code> for horizontally overflowing rows; its inline-axis behavior also works in RTL layouts.",
       horizontal_scroll
     ) }}
 
@@ -89,7 +88,7 @@
     {{ render_example(
       "edge-fades",
       "Single edges",
-      "Target physical or logical edges when only one boundary needs a cue.",
+      "Choose physical edges such as <code>scroll-fade-t</code> or logical edges such as <code>scroll-fade-s</code> when only one boundary needs a cue.",
       edge_fades
     ) }}
 
@@ -106,7 +105,7 @@
     {{ render_example(
       "fade-size",
       "Fade size",
-      "Override the shared custom property when a surface needs a shorter or longer transition.",
+      "Override <code>--scroll-fade-size</code> when a surface needs a shorter or longer transition without changing the utility itself.",
       fade_size
     ) }}
 
@@ -118,7 +117,7 @@
     {{ render_example(
       "disabled-fade",
       "Disable the fade",
-      "Remove the mask while preserving the scrolling and scrollbar contracts.",
+      "Add <code>scroll-fade-none</code> to remove only the mask; scrolling and the hidden-scrollbar behavior remain intact.",
       disabled_fade
     ) }}
   </div>

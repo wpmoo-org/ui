@@ -1,19 +1,17 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/example.html.jinja" import render_example %}
-{% from "components/typography.html.jinja" import typography %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
 
 {% block title %}Card — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    {{ typography("Card", variant="page-title") }}
-    {{ typography(
-      "Group related content on one quiet, self-contained surface.",
-      variant="page-description"
-    ) }}
-  </header>
+  {{ render_page_header(
+    "Card",
+    "Group related content on one quiet, self-contained surface."
+  ) }}
 
   <div class="moo-component-examples">
     {% set content_card %}
@@ -24,7 +22,7 @@
     {{ render_example(
       "card-content",
       "Content only",
-      "Start with one padded body when the card holds a single block of content.",
+      "A <code>card</code> with only a <code>card-body</code> is enough for one short, self-contained block of content.",
       content_card,
       preview_class="moo-example__preview--narrow"
     ) }}
@@ -35,13 +33,34 @@
         "Everyone you invite can open and edit the shared boards."
       ) %}
         <p class="mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          {{ button("Open workspace", variant="outline") }}
+          {{ button("Invite member", variant="link") }}
+        </div>
       {% endcall %}
     {% endset %}
     {{ render_example(
       "card-basic",
       "Header and content",
-      "Add a header with a title and description above the content section.",
+      "Add a <code>card-header</code> for the title and supporting text, then keep the main content in <code>card-body</code>.",
       basic_card,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set centered_card %}
+      {% call card(
+        "Design systems meetup",
+        "A practical session on component APIs and shipping faster.",
+        extra_class="text-center"
+      ) %}
+        <p class="mb-0">Keep the same card structure and let Bootstrap's text utilities change the alignment.</p>
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "card-alignment",
+      "Text alignment",
+      "Apply <code>text-center</code> or another Bootstrap text utility to the card when the content needs a different alignment.",
+      centered_card,
       preview_class="moo-example__preview--narrow"
     ) }}
 
@@ -62,7 +81,7 @@
     {{ render_example(
       "card-actions",
       "Footer actions",
-      "Place related actions in a footer using finished Button controls.",
+      "Put related actions in <code>card-footer</code> and compose them from ready Button controls instead of hand-written controls.",
       actions_card,
       preview_class="moo-example__preview--narrow"
     ) }}
@@ -84,10 +103,16 @@
     {{ render_example(
       "card-rtl",
       "Right-to-left layout",
-      "The same structure stays coherent when the writing direction flips.",
+      "Set <code>dir=\"rtl\"</code> on the card when its content is right-to-left; the same header, body, and footer structure remains usable.",
       rtl_card,
       preview_class="moo-example__preview--narrow"
     ) }}
   </div>
+
+  {{ render_reference(
+    "For more content patterns, see the",
+    "https://getbootstrap.com/docs/5.3/components/card/",
+    "Bootstrap Card documentation"
+  ) }}
 
 {% endblock %}

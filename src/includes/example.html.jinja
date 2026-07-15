@@ -6,7 +6,7 @@
   <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
     <div class="moo-example__header">
       {{ typography(title, variant="example-title", id=id ~ "-title") }}
-      <p class="text-body-secondary mb-0">{{ description }}</p>
+      <p class="text-body-secondary mb-0">{{ description | safe }}</p>
     </div>
     <div class="moo-example__surface">
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">

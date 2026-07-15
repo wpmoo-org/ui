@@ -1,19 +1,17 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
-{% from "components/example.html.jinja" import render_example %}
-{% from "components/typography.html.jinja" import typography %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
 
 {% block title %}Button Group — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    {{ typography("Button Group", variant="page-title") }}
-    {{ typography(
-      "Join related controls into one compact action surface.",
-      variant="page-description"
-    ) }}
-  </header>
+  {{ render_page_header(
+    "Button Group",
+    "Join related controls into one compact action surface."
+  ) }}
 
   <div class="moo-component-examples">
     {% set basic_actions %}
@@ -31,8 +29,36 @@
     {{ render_example(
       "basic-actions",
       "Composition",
-      "Keep adjacent actions visually connected while preserving separate controls.",
+      "Use <code>btn-group</code> for joined controls. Wrap separate groups in <code>btn-toolbar</code> when the toolbar needs its own spacing.",
       basic_actions
+    ) }}
+
+    {% set mixed_styles %}
+      {% call button_group("Mixed semantic styles") %}
+        {{ button("Danger", variant="destructive") }}
+        {{ button("Warning", variant="warning") }}
+        {{ button("Success", variant="success") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "mixed-styles",
+      "Mixed styles",
+      "Combine semantic <code>btn-*</code> variants when each action carries a different consequence.",
+      mixed_styles
+    ) }}
+
+    {% set outlined_styles %}
+      {% call button_group("Outlined actions") %}
+        {{ button("Previous", variant="outline-primary") }}
+        {{ button("Current", variant="outline-primary") }}
+        {{ button("Next", variant="outline-primary") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "outlined-styles",
+      "Outlined styles",
+      "Use the same <code>btn-outline-*</code> variant across a group when the controls should share one quiet visual weight.",
+      outlined_styles
     ) }}
 
     {% set icon_only_group %}
@@ -45,7 +71,7 @@
     {{ render_example(
       "icon-only-group",
       "Icon-only group",
-      "Icon buttons stay square and require an accessible name.",
+      "Give every icon-only button a square <code>size=\"icon\"</code> shape and an <code>aria-label</code>; the icon alone is not an accessible name.",
       icon_only_group
     ) }}
 
@@ -74,7 +100,7 @@
     {{ render_example(
       "size-groups",
       "Size",
-      "Use Bootstrap group sizing when a whole action set changes density.",
+      "<code>btn-group-sm</code> and <code>btn-group-lg</code> apply one density to every button in the group, keeping joined edges aligned.",
       size_groups
     ) }}
 
@@ -87,7 +113,7 @@
     {{ render_example(
       "vertical-group",
       "Orientation",
-      "Stack controls when a narrow rail or tool palette needs the same grouping.",
+      "Use <code>btn-group-vertical</code> when related controls belong in a narrow rail or stacked tool palette.",
       vertical_group
     ) }}
 
@@ -110,7 +136,7 @@
     {{ render_example(
       "toolbar-groups",
       "Toolbar",
-      "Group related clusters inside one toolbar when the action row has sections.",
+      "Use <code>btn-toolbar</code> for separate action clusters; <code>gap-2</code> spaces the clusters while each inner group stays joined.",
       toolbar_groups
     ) }}
 
@@ -126,9 +152,15 @@
     {{ render_example(
       "rtl-preview",
       "Right-to-left layout",
-      "Bootstrap's logical grouping keeps joined borders coherent in RTL layouts.",
+      "With <code>dir=\"rtl\"</code>, Bootstrap keeps joined borders and action order coherent for right-to-left content.",
       rtl_preview
     ) }}
   </div>
+
+  {{ render_reference(
+    "For more grouping patterns, see the",
+    "https://getbootstrap.com/docs/5.3/components/button-group/",
+    "Bootstrap Button group documentation"
+  ) }}
 
 {% endblock %}

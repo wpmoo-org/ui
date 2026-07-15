@@ -1,18 +1,15 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/example.html.jinja" import render_example %}
 {% from "components/kbd.html.jinja" import kbd %}
-{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Kbd — Moo UI{% endblock %}
 
 {% block content %}
-  <header class="moo-component-header">
-    {{ typography("Kbd", variant="page-title") }}
-    {{ typography(
-      "Show keyboard input in clear, accessible surrounding instructions.",
-      variant="page-description"
-    ) }}
-  </header>
+  {{ render_page_header(
+    "Kbd",
+    "Show keyboard input in clear, accessible surrounding instructions."
+  ) }}
 
   <div class="moo-component-examples">
     {% set single_key %}
@@ -21,7 +18,7 @@
     {{ render_example(
       "single-key",
       "Single key",
-      "Place a key inside a sentence that explains the available action.",
+      "Use <code>&lt;kbd&gt;</code> inside a sentence so the key and the action it triggers are understandable together.",
       single_key
     ) }}
 
@@ -31,7 +28,7 @@
     {{ render_example(
       "key-combination",
       "Key combination",
-      "Keep every key in an accessible instruction instead of relying on symbols alone.",
+      "Render each key separately and explain the result in text; do not make a <code>+</code> symbol carry the instruction by itself.",
       key_combination
     ) }}
   </div>
