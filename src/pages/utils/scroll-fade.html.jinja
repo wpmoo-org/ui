@@ -1,0 +1,142 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/api_reference.html.jinja" import render_api_reference %}
+{% from "components/example.html.jinja" import render_example %}
+
+{% block title %}Scroll Fade — Moo UI{% endblock %}
+
+{% block content %}
+  <header class="moo-component-header">
+    <h1 class="display-5 fw-semibold">Scroll Fade</h1>
+    <p class="lead text-body-secondary mb-0">
+      Hint at content beyond a scroll boundary without adding visible chrome.
+    </p>
+  </header>
+
+  <div class="moo-component-examples">
+    {% set vertical_scroll %}
+      <div class="scroll-fade no-scrollbar overflow-y-auto border rounded-4 p-3 w-100" style="height: 14rem; max-width: 20rem;">
+        <div class="vstack gap-3">
+          <p class="mb-0 pb-3 border-bottom">Review the latest workspace activity.</p>
+          <p class="mb-0 pb-3 border-bottom">Compare the proposed navigation changes.</p>
+          <p class="mb-0 pb-3 border-bottom">Confirm the accessible names.</p>
+          <p class="mb-0 pb-3 border-bottom">Check the compact density.</p>
+          <p class="mb-0 pb-3 border-bottom">Test the dark theme.</p>
+          <p class="mb-0 pb-3 border-bottom">Verify the right-to-left layout.</p>
+          <p class="mb-0">Publish the approved update.</p>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "vertical-scroll",
+      "Vertical scrolling",
+      "Fade both block edges only while more content remains in that direction.",
+      vertical_scroll
+    ) }}
+
+    {% set no_overflow %}
+      <div class="scroll-fade no-scrollbar overflow-y-auto border rounded-4 p-3 w-100" style="height: 14rem; max-width: 20rem;">
+        <div class="vstack gap-3">
+          <p class="mb-0">Short content keeps both edges clear.</p>
+          <p class="mb-0">No extra state or script is required.</p>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "no-overflow",
+      "No overflow",
+      "The mask stays inactive when the content already fits inside its container.",
+      no_overflow
+    ) }}
+
+    {% set horizontal_scroll %}
+      <div class="scroll-fade-x no-scrollbar d-flex gap-2 overflow-x-auto py-2 w-100" style="max-width: 24rem;">
+        <span class="flex-shrink-0 border rounded-pill px-3 py-2">Overview</span>
+        <span class="flex-shrink-0 border rounded-pill px-3 py-2">Activity</span>
+        <span class="flex-shrink-0 border rounded-pill px-3 py-2">Collaborators</span>
+        <span class="flex-shrink-0 border rounded-pill px-3 py-2">Permissions</span>
+        <span class="flex-shrink-0 border rounded-pill px-3 py-2">Automations</span>
+        <span class="flex-shrink-0 border rounded-pill px-3 py-2">Integrations</span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "horizontal-scroll",
+      "Horizontal scrolling",
+      "Use the inline-axis utility for rows that may overflow in either writing direction.",
+      horizontal_scroll
+    ) }}
+
+    {% set edge_fades %}
+      <div class="row g-3 w-100" style="max-width: 40rem;">
+        {% for edge, label in [("t", "Top"), ("b", "Bottom")] %}
+          <div class="col-12 col-sm-6">
+            <p class="small text-body-secondary mb-2">{{ label }}</p>
+            <div class="scroll-fade-{{ edge }} no-scrollbar overflow-y-auto border rounded-3 p-3" style="height: 8rem;">
+              <div class="vstack gap-3">
+                <span>Planning</span><span>Design</span><span>Review</span><span>Release</span><span>Archive</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        {% for edge, label in [("l", "Left"), ("r", "Right"), ("s", "Inline start"), ("e", "Inline end")] %}
+          <div class="col-12 col-sm-6">
+            <p class="small text-body-secondary mb-2">{{ label }}</p>
+            <div class="scroll-fade-{{ edge }} no-scrollbar d-flex gap-3 overflow-x-auto border rounded-3 p-3">
+              <span class="flex-shrink-0">Planning</span><span class="flex-shrink-0">Design</span><span class="flex-shrink-0">Review</span><span class="flex-shrink-0">Release</span><span class="flex-shrink-0">Archive</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "edge-fades",
+      "Single edges",
+      "Target physical or logical edges when only one boundary needs a cue.",
+      edge_fades
+    ) }}
+
+    {% set fade_size %}
+      <div class="d-grid gap-3 w-100" style="max-width: 24rem;">
+        <div class="scroll-fade-x no-scrollbar d-flex gap-3 overflow-x-auto border rounded-3 p-3" style="--scroll-fade-size: 1rem;">
+          <span class="flex-shrink-0">Compact</span><span class="flex-shrink-0">fade</span><span class="flex-shrink-0">keeps</span><span class="flex-shrink-0">content</span><span class="flex-shrink-0">nearby</span>
+        </div>
+        <div class="scroll-fade-x no-scrollbar d-flex gap-3 overflow-x-auto border rounded-3 p-3" style="--scroll-fade-size: 4rem;">
+          <span class="flex-shrink-0">Roomy</span><span class="flex-shrink-0">fade</span><span class="flex-shrink-0">creates</span><span class="flex-shrink-0">a</span><span class="flex-shrink-0">longer</span><span class="flex-shrink-0">transition</span>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "fade-size",
+      "Fade size",
+      "Override the shared custom property when a surface needs a shorter or longer transition.",
+      fade_size
+    ) }}
+
+    {% set disabled_fade %}
+      <div class="scroll-fade-x scroll-fade-none no-scrollbar d-flex gap-3 overflow-x-auto border rounded-3 p-3 w-100" style="max-width: 24rem;">
+        <span class="flex-shrink-0">Temporarily</span><span class="flex-shrink-0">disable</span><span class="flex-shrink-0">the</span><span class="flex-shrink-0">mask</span><span class="flex-shrink-0">without</span><span class="flex-shrink-0">changing</span><span class="flex-shrink-0">overflow</span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "disabled-fade",
+      "Disable the fade",
+      "Remove the mask while preserving the scrolling and scrollbar contracts.",
+      disabled_fade
+    ) }}
+  </div>
+
+  {% set api_rows = [
+    {"contract": "scroll-fade / scroll-fade-y", "use": "Both block edges", "behavior": "Tracks vertical overflow and reveals each edge as it is reached."},
+    {"contract": "scroll-fade-x", "use": "Both inline edges", "behavior": "Tracks horizontal overflow and follows the document writing direction."},
+    {"contract": "scroll-fade-t / scroll-fade-b", "use": "One block edge", "behavior": "Limits the mask to the top or bottom boundary."},
+    {"contract": "scroll-fade-l / scroll-fade-r", "use": "One physical edge", "behavior": "Limits the mask to the viewport's left or right boundary."},
+    {"contract": "scroll-fade-s / scroll-fade-e", "use": "One logical edge", "behavior": "Limits the mask to inline start or inline end and mirrors in RTL."},
+    {"contract": "--scroll-fade-size / --scroll-fade-reveal", "use": "Local tuning", "behavior": "Controls the mask depth and the distance used to reveal it."},
+    {"contract": "scroll-fade-none", "use": "Disable the mask", "behavior": "Turns off the fade without changing overflow behavior."},
+    {"contract": "no-scrollbar", "use": "Hide scrollbar chrome", "behavior": "Preserves scrolling while hiding visual scrollbar tracks."}
+  ] %}
+  {{ render_api_reference(
+    "scroll-fade",
+    "Combine the utility with an overflow rule on the same element. The mask responds to native scroll position without JavaScript.",
+    api_rows
+  ) }}
+{% endblock %}

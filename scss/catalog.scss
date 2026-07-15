@@ -39,6 +39,19 @@ body {
   background: var(--bs-body-bg);
 }
 
+.moo-catalog__sidebar .offcanvas-body {
+  overflow-y: auto;
+}
+
+.moo-catalog__nav-heading {
+  margin-bottom: 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .moo-catalog__sidebar .nav-link {
   color: var(--bs-body-color);
 }
@@ -166,12 +179,56 @@ body {
 }
 
 .moo-example__source pre {
+  display: flex;
   margin: 0;
-  padding: 2.25rem 2rem 1.5rem;
+  padding: 2.25rem 0 1.5rem;
+  overflow-x: auto;
   color: var(--bs-secondary-color);
   font-size: 0.8125rem;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  line-height: 1.6;
+  white-space: pre;
+  direction: ltr;
+  text-align: left;
+}
+
+.moo-code__lines {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: block;
+  min-width: 3.5rem;
+  padding: 0 0.75rem 0 1.25rem;
+  flex: 0 0 auto;
+  color: var(--bs-tertiary-color);
+  text-align: right;
+  user-select: none;
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-code code {
+  display: block;
+  min-width: max-content;
+  padding-right: 2rem;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+.token.comment,
+.token.doctype,
+.token.punctuation {
+  color: var(--bs-tertiary-color);
+}
+
+.token.tag {
+  color: var(--bs-info-text-emphasis);
+}
+
+.token.attr-name {
+  color: var(--bs-success-text-emphasis);
+}
+
+.token.attr-value {
+  color: var(--bs-code-color);
 }
 
 [dir="rtl"] .moo-example__preview {
@@ -184,6 +241,7 @@ body {
 }
 
 .moo-component-reference .table {
+  min-width: 48rem;
   margin-bottom: 0;
 }
 
