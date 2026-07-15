@@ -108,7 +108,10 @@ class ButtonTests(CatalogTestCase):
         size_example = page.split(
             'data-example="button-sizes"', 1
         )[1].split("</section>", 1)[0]
-        self.assertEqual(size_example.count("<button"), 8)
+        preview = size_example.split(
+            '<div class="moo-example__source"', 1
+        )[0]
+        self.assertEqual(preview.count("<button"), 8)
         for class_name in (
             "btn-xs",
             "btn-sm",

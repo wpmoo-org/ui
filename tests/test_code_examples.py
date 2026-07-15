@@ -13,7 +13,11 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(template.count('class="moo-example__surface"'), 1)
         self.assertEqual(template.count('class="moo-example__preview"'), 1)
         self.assertEqual(template.count('class="moo-example__source"'), 1)
-        self.assertIn("<summary>View Code</summary>", template)
+        self.assertIn("data-moo-code-panel", template)
+        self.assertIn("data-moo-code-toggle", template)
+        self.assertIn('aria-expanded="false"', template)
+        self.assertIn("data-moo-code-copy", template)
+        self.assertIn('data-bs-theme="dark"', template)
         self.assertEqual(template.count("{{ rendered | safe }}"), 1)
         self.assertEqual(template.count("{% set source = rendered | format_html %}"), 1)
         self.assertEqual(template.count("{{ source | highlight_html }}"), 1)
@@ -62,7 +66,15 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("white-space: pre;", source_code)
         self.assertIn("overflow-x: auto;", source_code)
         self.assertNotIn("overflow-wrap: anywhere;", source_code)
-        self.assertNotIn("max-height:", source_code)
+        self.assertIn("max-height: 6.75rem;", source_code)
+        self.assertIn("padding: 0.875rem 0;", source_code)
+        self.assertIn("font-size: 0.875rem;", source_code)
+        self.assertIn("line-height: 1.75;", source_code)
+        self.assertIn(
+            '[data-expanded="true"] .moo-code {',
+            css,
+        )
+        self.assertIn("max-height: 18rem;", css)
         self.assertNotIn(".moo-example__preview:has(.dropdown-menu)", css)
 
         for relative_path in (
@@ -109,3 +121,36 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn(".token.tag {", catalog_css)
         self.assertIn(".token.attr-name", catalog_css)
         self.assertIn(".token.attr-value", catalog_css)
+
+    def test_code_panel_expands_and_copies_only_code_text(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/button.html")
+        self.assertIn('data-expanded="false"', page)
+        self.assertIn('data-moo-code-copy hidden', page)
+        self.assertIn('data-moo-copy-status role="status"', page)
+        self.assertIn('aria-controls="core-variants-code"', page)
+
+        script = self.read_output("assets/js/preview.js")
+        self.assertIn('panel.dataset.expanded = "true";', script)
+        self.assertIn('toggle.setAttribute("aria-expanded", "true")', script)
+        self.assertIn("copyButton.hidden = false;", script)
+        self.assertIn("navigator.clipboard.writeText(code.textContent)", script)
+        self.assertIn('let message = "Code copied";', script)
+        self.assertIn('message = "Copy failed";', script)
+        self.assertIn("copyStatus.textContent = message;", script)
+        self.assertNotIn("moo-code__lines", script)
+
+        catalog_css = self.read_output("assets/css/catalog.css")
+        self.assertIn(".moo-code__lines {", catalog_css)
+        self.assertIn("pointer-events: none;", catalog_css)
+        self.assertIn("user-select: none;", catalog_css)
+        self.assertIn(
+            '[data-expanded="true"] .moo-code__copy',
+            catalog_css,
+        )
+        self.assertNotIn(
+            '[data-expanded="true"]:hover .moo-code__copy',
+            catalog_css,
+        )
