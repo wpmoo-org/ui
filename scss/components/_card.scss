@@ -6,6 +6,7 @@
   --bs-card-color: var(--moo-foreground);
   --bs-card-border-color: var(--moo-border);
   --bs-card-border-radius: var(--bs-border-radius-xl);
+  --bs-card-inner-border-radius: calc(var(--bs-card-border-radius) - var(--bs-card-border-width));
   --bs-card-box-shadow: var(--bs-box-shadow-sm);
   --bs-card-cap-bg: transparent;
   --bs-card-cap-color: var(--moo-foreground);

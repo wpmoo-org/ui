@@ -43,6 +43,9 @@ class DesignGateTests(CatalogTestCase):
     def test_private_tokens_are_prefixed_and_documented(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
+        primary_variables = (
+            ROOT / "scss/_primary_variables.scss"
+        ).read_text(encoding="utf-8")
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
             component = path.stem.removeprefix("_")
@@ -64,11 +67,32 @@ class DesignGateTests(CatalogTestCase):
             )
             reference = page.split('class="moo-component-reference"', 1)[1]
             for token in sorted(tokens):
+                knob = f"${token.removeprefix('--')}"
+                self.assertRegex(
+                    primary_variables,
+                    rf"{re.escape(knob)}\s*:[^;]+!default;",
+                    f"{token} must have a matching {knob} !default Sass knob",
+                )
                 self.assertIn(
                     token,
                     reference,
                     f"{token} must be documented, with its reason, in the"
                     f" {component} API Reference",
+                )
+                row = next(
+                    (
+                        table_row
+                        for table_row in re.findall(
+                            r"<tr>.*?</tr>", reference, re.DOTALL
+                        )
+                        if token in table_row
+                    ),
+                    "",
+                )
+                self.assertIn(
+                    knob,
+                    row,
+                    f"{token} API Reference row must name its {knob} knob",
                 )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:

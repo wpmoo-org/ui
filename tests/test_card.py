@@ -18,6 +18,14 @@ class CardTests(CatalogTestCase):
             card_page,
         )
         self.assertNotIn('<div class="card"', card_page)
+        self.assertNotIn('style=""', card_component)
+        self.assertNotIn("style=", card_page)
+        self.assertEqual(
+            card_page.count(
+                'preview_class="moo-example__preview--narrow"'
+            ),
+            4,
+        )
 
     def test_card_page_uses_bootstrap_native_contract(self) -> None:
         result = self.run_build()
@@ -27,9 +35,10 @@ class CardTests(CatalogTestCase):
         self.assertTrue(output.is_file())
 
         page = output.read_text(encoding="utf-8")
-        self.assertGreater(page.count("moo-example__preview"), 0)
+        preview_count = page.count('<div class="moo-example__preview')
+        self.assertGreater(preview_count, 0)
         self.assertEqual(
-            page.count("moo-example__preview"),
+            preview_count,
             page.count("moo-example__source"),
         )
         for marker in (
@@ -61,6 +70,10 @@ class CardTests(CatalogTestCase):
         self.assertNotIn("list-group", page)
         self.assertNotIn("card-img", page)
         self.assertNotIn("example.com", page)
+        examples = page.split(
+            '<section class="moo-component-reference"', 1
+        )[0]
+        self.assertNotIn('style="width: 22rem;"', examples)
         for runtime_name in ("React", "Tailwind", "className", "shadcn"):
             self.assertNotIn(runtime_name, page)
 
@@ -102,6 +115,7 @@ class CardTests(CatalogTestCase):
             "--bs-card-color: var(--moo-foreground);",
             "--bs-card-border-color: var(--moo-border);",
             "--bs-card-border-radius: var(--bs-border-radius-xl);",
+            "--bs-card-inner-border-radius: calc(var(--bs-card-border-radius) - var(--bs-card-border-width));",
             "--bs-card-box-shadow: var(--bs-box-shadow-sm);",
             "--bs-card-cap-bg: transparent;",
             "--bs-card-title-color: var(--moo-foreground);",
