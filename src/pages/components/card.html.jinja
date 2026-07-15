@@ -3,15 +3,17 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/example.html.jinja" import render_example %}
+{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Card — Moo UI{% endblock %}
 
 {% block content %}
   <header class="moo-component-header">
-    <h1 class="display-5 fw-semibold">Card</h1>
-    <p class="lead text-body-secondary mb-0">
-      Group related content on one quiet, self-contained surface.
-    </p>
+    {{ typography("Card", variant="page-title") }}
+    {{ typography(
+      "Group related content on one quiet, self-contained surface.",
+      variant="page-description"
+    ) }}
   </header>
 
   <div class="moo-component-examples">

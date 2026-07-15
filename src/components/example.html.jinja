@@ -1,9 +1,11 @@
+{% from "components/typography.html.jinja" import typography %}
+
 {% macro render_example(id, title, description, content, preview_class="") %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
   <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
     <div class="moo-example__header">
-      <h2 class="h4" id="{{ id }}-title">{{ title }}</h2>
+      {{ typography(title, variant="example-title", id=id ~ "-title") }}
       <p class="text-body-secondary mb-0">{{ description }}</p>
     </div>
     <div class="moo-example__surface">

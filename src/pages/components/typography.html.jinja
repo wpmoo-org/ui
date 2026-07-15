@@ -1,0 +1,67 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/api_reference.html.jinja" import render_api_reference %}
+{% from "components/example.html.jinja" import render_example %}
+{% from "components/typography.html.jinja" import typography %}
+
+{% block title %}Typography — Moo UI{% endblock %}
+
+{% block content %}
+  <header class="moo-component-header">
+    {{ typography("Typography", variant="page-title") }}
+    {{ typography(
+      "Give catalog content a consistent hierarchy with Bootstrap-native text roles.",
+      variant="page-description"
+    ) }}
+  </header>
+
+  <div class="moo-component-examples">
+    {% set headings %}
+      <div class="d-grid gap-3">
+        {{ typography("Section title", variant="section-title") }}
+        {{ typography("Example title", variant="example-title") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "headings",
+      "Headings",
+      "Use each heading role at its matching level in the catalog hierarchy.",
+      headings
+    ) }}
+
+    {% set supporting_text %}
+      <div class="d-grid gap-3">
+        {{ typography("Lead copy introduces the purpose of a page.", variant="page-description") }}
+        {{ typography("Muted text adds quiet supporting context.", variant="muted") }}
+        {{ typography("Section label", variant="section-label") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "supporting-text",
+      "Supporting text",
+      "Choose the smallest text role that communicates the intended emphasis.",
+      supporting_text
+    ) }}
+
+    {% set inline_code %}
+      <p class="mb-0">Use {{ typography(".display-5", variant="inline-code") }} for the public Bootstrap class.</p>
+    {% endset %}
+    {{ render_example(
+      "inline-code",
+      "Inline code",
+      "Mark public classes and contracts as code inside prose.",
+      inline_code
+    ) }}
+  </div>
+
+  {% set api_rows = [
+    {"contract": "page-title / page-description", "use": "Catalog page introduction", "behavior": "Renders the shared display heading and supporting lead copy."},
+    {"contract": "section-title / example-title", "use": "Catalog content hierarchy", "behavior": "Keeps h2 semantics while applying Bootstrap's h3 and h4 visual scales."},
+    {"contract": "muted / section-label", "use": "Supporting context", "behavior": "Renders secondary copy and compact labels without changing document hierarchy."},
+    {"contract": "inline-code", "use": "Public classes and contracts", "behavior": "Renders escaped text with the native inline code element."}
+  ] %}
+  {{ render_api_reference(
+    "typography",
+    "Use the planned roles to keep catalog text consistent without adding component CSS.",
+    api_rows
+  ) }}
+{% endblock %}

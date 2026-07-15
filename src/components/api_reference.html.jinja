@@ -1,6 +1,8 @@
+{% from "components/typography.html.jinja" import typography %}
+
 {% macro render_api_reference(id, description, rows) %}
   <section class="moo-component-reference" aria-labelledby="{{ id }}-reference-title">
-    <h2 class="h3" id="{{ id }}-reference-title">API Reference</h2>
+    {{ typography("API Reference", variant="section-title", id=id ~ "-reference-title") }}
     <p class="text-body-secondary">{{ description }}</p>
     <div class="table-responsive scroll-fade-x no-scrollbar">
       <table class="table align-middle">
@@ -14,7 +16,7 @@
         <tbody>
           {% for row in rows %}
             <tr>
-              <th scope="row"><code>{{ row.contract }}</code></th>
+              <th scope="row">{{ typography(row.contract, variant="inline-code") }}</th>
               <td>{{ row.use }}</td>
               <td>{{ row.behavior }}</td>
             </tr>

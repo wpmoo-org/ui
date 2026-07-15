@@ -3,15 +3,17 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
 {% from "components/example.html.jinja" import render_example %}
+{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Button Group — Moo UI{% endblock %}
 
 {% block content %}
   <header class="moo-component-header">
-    <h1 class="display-5 fw-semibold">Button Group</h1>
-    <p class="lead text-body-secondary mb-0">
-      Join related controls into one compact action surface.
-    </p>
+    {{ typography("Button Group", variant="page-title") }}
+    {{ typography(
+      "Join related controls into one compact action surface.",
+      variant="page-description"
+    ) }}
   </header>
 
   <div class="moo-component-examples">

@@ -1,0 +1,19 @@
+{% macro typography(content, variant, id="") -%}
+  {% if variant == "page-title" -%}
+    <h1 class="display-5 fw-semibold"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
+  {%- elif variant == "page-description" -%}
+    <p class="lead text-body-secondary mb-0">{{ content }}</p>
+  {%- elif variant == "section-title" -%}
+    <h2 class="h3"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
+  {%- elif variant == "example-title" -%}
+    <h2 class="h4"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
+  {%- elif variant == "muted" -%}
+    <span class="text-body-secondary">{{ content }}</span>
+  {%- elif variant == "section-label" -%}
+    <span class="small fw-semibold">{{ content }}</span>
+  {%- elif variant == "inline-code" -%}
+    <code>{{ content }}</code>
+  {%- else -%}
+    {{ fail("Unknown typography variant: " ~ variant) }}
+  {%- endif %}
+{%- endmacro %}

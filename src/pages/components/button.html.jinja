@@ -2,15 +2,17 @@
 {% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/button.html.jinja" import button, button_sizes, button_variants %}
 {% from "components/example.html.jinja" import render_example %}
+{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Button — Moo UI{% endblock %}
 
 {% block content %}
   <header class="moo-component-header">
-    <h1 class="display-5 fw-semibold">Button</h1>
-    <p class="lead text-body-secondary mb-0">
-      Trigger actions and guide navigation with clear, familiar controls.
-    </p>
+    {{ typography("Button", variant="page-title") }}
+    {{ typography(
+      "Trigger actions and guide navigation with clear, familiar controls.",
+      variant="page-description"
+    ) }}
   </header>
 
   <div class="moo-component-examples">
