@@ -161,7 +161,11 @@
     {"contract": "btn-xs / btn-sm / btn-lg", "use": "Text button density", "behavior": "Maps to the 24 / 28 / 32 / 36 px height scale."},
     {"contract": "btn-icon variants", "use": "Icon-only controls", "behavior": "Keeps controls square and requires an accessible name."},
     {"contract": "disabled", "use": "Unavailable action", "behavior": "Uses native disabled behavior with Moo runtime contrast tokens."},
-    {"contract": "data-bs-toggle=button", "use": "Pressed state", "behavior": "Uses Bootstrap's native toggle behavior."}
+    {"contract": "data-bs-toggle=button", "use": "Pressed state", "behavior": "Uses Bootstrap's native toggle behavior."},
+    {"contract": "--moo-button-height", "use": "Control height token", "behavior": "Fixed control height per density step; Bootstrap's button API has no height variable. Sass knob: $moo-button-height(-xs/-sm/-lg)."},
+    {"contract": "--moo-button-gap", "use": "Content gap token", "behavior": "Space between label and icons; Bootstrap has no button gap variable. Sass knob: $moo-button-gap(-xs/-sm)."},
+    {"contract": "--moo-button-icon-size", "use": "Icon size token", "behavior": "Nested SVG size per density step; Bootstrap has no button icon variable. Sass knob: $moo-button-icon-size(-xs/-sm)."},
+    {"contract": "--moo-button-icon-padding-x", "use": "Icon-edge inset token", "behavior": "Tightens inline padding on the icon side only; Bootstrap cannot express asymmetric logical padding. Sass knob: $moo-button-icon-padding-x(-xs/-sm)."}
   ] %}
   {{ render_api_reference(
     "button",
