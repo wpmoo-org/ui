@@ -74,7 +74,14 @@ class CodeExampleTests(CatalogTestCase):
             '[data-expanded="true"] .moo-code {',
             css,
         )
-        self.assertIn("max-height: 18rem;", css)
+        expanded_code = css.split(
+            '[data-expanded="true"] .moo-code {', 1
+        )[1].split("}", 1)[0]
+        self.assertIn("max-height: 18rem;", expanded_code)
+        scrolling_code = css.split(
+            '[data-expanded="true"] .moo-code--scrolling {', 1
+        )[1].split("}", 1)[0]
+        self.assertIn("margin-bottom: 0.625rem;", scrolling_code)
         self.assertNotIn(".moo-example__preview:has(.dropdown-menu)", css)
 
         for relative_path in (
@@ -134,6 +141,10 @@ class CodeExampleTests(CatalogTestCase):
 
         script = self.read_output("assets/js/preview.js")
         self.assertIn('panel.dataset.expanded = "true";', script)
+        self.assertIn(
+            'scroller.classList.toggle("moo-code--scrolling", scroller.scrollHeight > scroller.clientHeight);',
+            script,
+        )
         self.assertIn('toggle.setAttribute("aria-expanded", "true")', script)
         self.assertIn("copyButton.hidden = false;", script)
         self.assertIn("navigator.clipboard.writeText(code.textContent)", script)

@@ -19,10 +19,12 @@
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");
     const copyStatus = panel.querySelector("[data-moo-copy-status]");
+    const scroller = panel.querySelector(".moo-code");
     const code = panel.querySelector("code");
 
     toggle?.addEventListener("click", () => {
       panel.dataset.expanded = "true";
+      scroller.classList.toggle("moo-code--scrolling", scroller.scrollHeight > scroller.clientHeight);
       toggle.setAttribute("aria-expanded", "true");
       copyButton.hidden = false;
     });

@@ -205,6 +205,10 @@ body {
   overflow-y: auto;
 }
 
+[data-expanded="true"] .moo-code--scrolling {
+  margin-bottom: 0.625rem;
+}
+
 .moo-code__copy {
   position: absolute;
   z-index: 3;
