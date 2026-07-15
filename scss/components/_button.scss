@@ -41,19 +41,23 @@ label.btn {
   --bs-btn-border-radius: var(--bs-border-radius-sm);
 }
 
-.btn-sm {
+// Grouped with Bootstrap's extend chain (.btn-group-sm > .btn extends
+// .btn-sm) so group variants share one size scale. Font sizes come from
+// $btn-font-size-sm/-lg; only Moo shape tokens and line-height live here.
+.btn-sm,
+.btn-group-sm > .btn,
+.btn-group-sm > .btn-group > .btn {
   --moo-button-height: 1.75rem;
   --moo-button-icon-padding-x: 0.375rem;
   --moo-button-gap: 0.25rem;
   --moo-button-icon-size: 0.875rem;
-  --bs-btn-font-size: 0.8rem;
   --bs-btn-line-height: 1rem;
 }
 
-.btn-lg {
+.btn-lg,
+.btn-group-lg > .btn,
+.btn-group-lg > .btn-group > .btn {
   --moo-button-height: 2.25rem;
-  --bs-btn-font-size: 0.875rem;
-  --bs-btn-line-height: 1.25rem;
 }
 
 .btn-icon,
@@ -87,11 +91,6 @@ label.btn {
   width: var(--moo-button-icon-size);
   height: var(--moo-button-icon-size);
   flex: 0 0 auto;
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--moo-ring);
-  outline-offset: 2px;
 }
 
 .btn:disabled,

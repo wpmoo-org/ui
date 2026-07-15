@@ -20,6 +20,15 @@ $btn-font-size: 0.875rem !default;
 $btn-line-height: 1.25rem !default;
 $btn-focus-width: 0.2rem !default;
 
+// Size-scale fonts flow through Bootstrap's own variables so the
+// .btn-group-sm/-lg extend chains inherit them without re-declaration.
+$btn-font-size-sm: 0.8rem !default;
+$btn-font-size-lg: 0.875rem !default;
+
+// Shared focus primitive: shadcn-style 2px ring. Components consume
+// --bs-focus-ring-width; only the ring color is a runtime theme token.
+$focus-ring-width: 2px !default;
+
 // shadcn-style elevation and the extra radius step, applied UI-wide through
 // Bootstrap's own scales so every component consumes one shared primitive.
 $box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !default;

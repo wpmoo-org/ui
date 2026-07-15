@@ -1,0 +1,10 @@
+// Shared focus primitive: one high-contrast ring for every interactive
+// element, sized by Bootstrap's focus-ring scale and colored by the runtime
+// ring token. :is() carries .btn's class specificity so this single rule
+// outranks Bootstrap's own `outline: 0` inside .btn:focus-visible.
+:is(.btn, a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
+  outline-offset: var(--bs-focus-ring-width);
+  // The ring is the only focus indicator; suppress Bootstrap's focus glow.
+  box-shadow: none;
+}
