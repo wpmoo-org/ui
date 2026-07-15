@@ -23,5 +23,10 @@
     "slug": "kbd",
     "label": "Kbd",
     "status": "ready"
+  },
+  {
+    "slug": "input",
+    "label": "Input",
+    "status": "ready"
   }
 ]

@@ -1,0 +1,180 @@
+from __future__ import annotations
+
+import json
+import re
+
+from build import create_environment
+from tests.helpers import DIST, ROOT, CatalogTestCase
+
+
+COMPONENT = ROOT / "src/components/input.html.jinja"
+PAGE = ROOT / "src/pages/components/input.html.jinja"
+
+
+class InputTests(CatalogTestCase):
+    def render_input(self, call: str) -> str:
+        self.assertTrue(COMPONENT.is_file(), "Input macro is not implemented")
+        template = create_environment().from_string(
+            '{% from "components/input.html.jinja" import input %}'
+            f"{{{{ {call} }}}}"
+        )
+        return " ".join(template.render().split())
+
+    def read_input_output(self) -> str:
+        output = DIST / "components/input.html"
+        self.assertTrue(
+            output.is_file(),
+            "Input catalog output is not implemented",
+        )
+        return output.read_text(encoding="utf-8")
+
+    def test_visible_label_is_linked_to_native_form_control(self) -> None:
+        output = self.render_input(
+            'input(label="<Name>", id="query", '
+            'placeholder="<term>", value="<draft>")'
+        )
+
+        self.assertEqual(
+            output,
+            '<label class="form-label" for="query">&lt;Name&gt;</label> '
+            '<input class="form-control" id="query" type="text" '
+            'placeholder="&lt;term&gt;" value="&lt;draft&gt;">',
+        )
+
+    def test_aria_label_mode_supports_standalone_search_without_id(self) -> None:
+        output = self.render_input(
+            'input(aria_label="Search catalog", type="search", '
+            'placeholder="Filter components")'
+        )
+
+        self.assertNotIn("<label", output)
+        self.assertIn('class="form-control"', output)
+        self.assertIn('type="search"', output)
+        self.assertIn('placeholder="Filter components"', output)
+        self.assertIn('aria-label="Search catalog"', output)
+        self.assertNotIn(" id=", output)
+
+    def test_input_requires_exactly_one_accessible_name_source(self) -> None:
+        for call in (
+            "input()",
+            'input(label="   ", aria_label="")',
+            'input(label="Search", aria_label="Search", id="search")',
+            'input(placeholder="Search")',
+        ):
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "Input requires exactly one of label or aria_label",
+                ):
+                    self.render_input(call)
+
+    def test_visible_label_requires_id(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Visible input labels require id",
+        ):
+            self.render_input('input(label="Search")')
+
+    def test_input_supports_only_text_and_search_types(self) -> None:
+        for input_type in ("text", "search"):
+            with self.subTest(input_type=input_type):
+                output = self.render_input(
+                    f'input(aria_label="Query", type="{input_type}")'
+                )
+                self.assertIn(f'type="{input_type}"', output)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Unknown input type: email",
+        ):
+            self.render_input('input(aria_label="Email", type="email")')
+
+    def test_input_emits_native_disabled_and_readonly_states(self) -> None:
+        disabled = self.render_input(
+            'input(aria_label="Disabled query", disabled=true)'
+        )
+        readonly = self.render_input(
+            'input(aria_label="Read-only query", readonly=true)'
+        )
+
+        self.assertIn(" disabled", disabled)
+        self.assertNotIn(" readonly", disabled)
+        self.assertIn(" readonly", readonly)
+        self.assertNotIn(" disabled", readonly)
+
+    def test_input_page_uses_shared_catalog_contracts(self) -> None:
+        self.assertTrue(PAGE.is_file(), "Input catalog page is not implemented")
+        source = PAGE.read_text(encoding="utf-8")
+        imports = set(
+            re.findall(
+                r'{%\s*from\s+"components/([^"/]+)\.html\.jinja"\s+import',
+                source,
+            )
+        )
+
+        self.assertEqual(
+            imports,
+            {"api_reference", "example", "input", "typography"},
+        )
+        self.assertIn('variant="page-title"', source)
+        self.assertIn('variant="page-description"', source)
+        self.assertIn("{{ render_example(", source)
+        self.assertIn("{{ render_api_reference(", source)
+
+    def test_input_catalog_builds_ready_page_with_generated_source(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
+        self.assertIn(
+            {"slug": "input", "label": "Input", "status": "ready"},
+            catalog,
+        )
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_input_output()
+        preview_count = page.count('<div class="moo-example__preview')
+        self.assertGreater(preview_count, 0)
+        self.assertEqual(
+            preview_count,
+            page.count('class="moo-example__source"'),
+        )
+        self.assertIn('class="form-label"', page)
+        self.assertIn('class="form-control"', page)
+        self.assertIn('type="search"', page)
+        self.assertIn('aria-label=', page)
+        self.assertIn(" disabled", page)
+        self.assertIn(" readonly", page)
+        self.assertIn('<span class="token tag">input</span>', page)
+        self.assertIn('class="moo-component-reference"', page)
+
+        active_labels = [
+            re.sub(r"<[^>]+>", "", label).strip()
+            for label in re.findall(
+                r'<a\b[^>]*aria-current="page"[^>]*>(.*?)</a>',
+                page,
+                re.DOTALL,
+            )
+        ]
+        self.assertIn("Input", active_labels)
+
+        headings = [
+            re.sub(r"<[^>]+>", "", heading).strip()
+            for heading in re.findall(r"<h1\b[^>]*>(.*?)</h1>", page, re.DOTALL)
+        ]
+        self.assertEqual(headings, ["Input"])
+
+    def test_input_page_does_not_fake_future_components(self) -> None:
+        self.assertTrue(PAGE.is_file(), "Input catalog page is not implemented")
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertNotRegex(
+            source,
+            r"<(?:button|form|input|kbd|label|select|textarea)\b",
+        )
+        self.assertNotRegex(
+            source,
+            r'class="[^"]*\b(?:avatar|badge|btn|dropdown|form-control|'
+            r'form-label|input-group|nav|navbar|offcanvas|vr)(?:-|\b)',
+        )

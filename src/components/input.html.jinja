@@ -1,0 +1,21 @@
+{% set input_types = ["text", "search"] %}
+
+{% macro input(
+  label="",
+  aria_label="",
+  id="",
+  type="text",
+  placeholder="",
+  value="",
+  disabled=false,
+  readonly=false
+) -%}
+  {% set has_label = label | trim %}
+  {% set has_aria_label = aria_label | trim %}
+  {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Input requires exactly one of label or aria_label") }}{% endif %}
+  {% if has_label and not id | trim %}{{ fail("Visible input labels require id") }}{% endif %}
+  {% if type not in input_types %}{{ fail("Unknown input type: " ~ type) }}{% endif %}
+
+  {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
+  <input class="form-control"{% if id %} id="{{ id }}"{% endif %} type="{{ type }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if value %} value="{{ value }}"{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+{%- endmacro %}
