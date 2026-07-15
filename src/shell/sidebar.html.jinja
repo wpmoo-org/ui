@@ -5,7 +5,7 @@
   aria-labelledby="catalog-navigation-title"
 >
   <div class="offcanvas-header">
-    <h2 class="offcanvas-title fs-6" id="catalog-navigation-title">Components</h2>
+    <h2 class="offcanvas-title fs-6" id="catalog-navigation-title">Catalog</h2>
     <button
       class="btn-close"
       type="button"
@@ -14,17 +14,34 @@
       aria-label="Close navigation"
     ></button>
   </div>
-  <div class="offcanvas-body d-block">
+  <div class="offcanvas-body d-block scroll-fade-y no-scrollbar">
     <nav aria-label="Components">
+      <h3 class="moo-catalog__nav-heading">Components</h3>
       <ul class="nav nav-pills flex-column gap-1">
         {% for component in catalog %}
           <li class="nav-item">
             <a
-              class="nav-link{% if current_slug == component.slug %} active{% endif %}"
+              class="nav-link{% if current_section == 'components' and current_slug == component.slug %} active{% endif %}"
               href="{{ root_path }}components/{{ component.slug }}.html"
-              {% if current_slug == component.slug %}aria-current="page"{% endif %}
+              {% if current_section == 'components' and current_slug == component.slug %}aria-current="page"{% endif %}
             >
               {{ component.label }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    <nav class="mt-4" aria-label="Utilities">
+      <h3 class="moo-catalog__nav-heading">Utilities</h3>
+      <ul class="nav nav-pills flex-column gap-1">
+        {% for utility in utilities %}
+          <li class="nav-item">
+            <a
+              class="nav-link{% if current_section == 'utils' and current_slug == utility.slug %} active{% endif %}"
+              href="{{ root_path }}utils/{{ utility.slug }}.html"
+              {% if current_section == 'utils' and current_slug == utility.slug %}aria-current="page"{% endif %}
+            >
+              {{ utility.label }}
             </a>
           </li>
         {% endfor %}

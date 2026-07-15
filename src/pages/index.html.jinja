@@ -25,4 +25,18 @@
       {% endfor %}
     </div>
   </section>
+
+  <section class="moo-catalog__component-list" aria-labelledby="utilities-title">
+    <h2 class="h4" id="utilities-title">Utilities</h2>
+    <div class="row g-3">
+      {% for utility in utilities %}
+        <div class="col-12 col-md-6">
+          <a class="moo-catalog__component-card" href="utils/{{ utility.slug }}.html">
+            <span class="fw-medium">{{ utility.label }}</span>
+            <span class="text-body-secondary">{{ utility.status | capitalize }}</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
 {% endblock %}

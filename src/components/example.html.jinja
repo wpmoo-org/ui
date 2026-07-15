@@ -1,5 +1,6 @@
 {% macro render_example(id, title, description, content) %}
   {% set rendered = content | dedent_html %}
+  {% set source = rendered | format_html %}
   <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
     <div class="moo-example__header">
       <h2 class="h4" id="{{ id }}-title">{{ title }}</h2>
@@ -11,7 +12,7 @@
       </div>
       <details class="moo-example__source" open>
         <summary>View Code</summary>
-        <pre><code>{{ rendered | e }}</code></pre>
+        <pre class="moo-code scroll-fade-x no-scrollbar"><span class="moo-code__lines" aria-hidden="true">{{ source | line_numbers }}</span><code class="language-html">{{ source | highlight_html }}</code></pre>
       </details>
     </div>
   </section>
