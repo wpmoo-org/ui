@@ -1,16 +1,7 @@
-.btn-group-sm > .btn,
-.btn-group-sm > .btn-group > .btn {
-  --moo-button-height: 1.75rem;
-  --moo-button-icon-padding-x: 0.375rem;
-  --moo-button-gap: 0.25rem;
-  --moo-button-icon-size: 0.875rem;
-}
-
-.btn-group-lg > .btn,
-.btn-group-lg > .btn-group > .btn {
-  --moo-button-height: 2.25rem;
-}
-
+// Button Group adds no visual tokens of its own: Bootstrap's extend chain
+// (group sizes extend the button sizes) plus the grouped size selectors in
+// the button partial deliver one shared scale. Only RTL geometry lives here:
+// joined borders keep LTR order while labels render bidi-correctly.
 [dir="rtl"] .btn-group,
 [dir="rtl"] .btn-toolbar {
   direction: ltr;

@@ -135,14 +135,35 @@ class ButtonTests(CatalogTestCase):
             css,
         )
 
-    def test_button_focus_indicator_uses_high_contrast_outline(self) -> None:
+    def test_button_focus_indicator_uses_shared_focus_primitive(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         css = self.read_output("assets/css/moo-ui.css")
-        self.assertIn("outline: 2px solid var(--moo-ring);", css)
-        self.assertIn("outline-offset: 2px;", css)
+        self.assertIn("--bs-focus-ring-width: 2px;", css)
+        self.assertIn(
+            "outline: var(--bs-focus-ring-width) solid var(--moo-ring);", css
+        )
+        self.assertIn("outline-offset: var(--bs-focus-ring-width);", css)
+        self.assertNotIn("outline: 2px solid", css)
         self.assertNotIn("var(--moo-ring) 30%, transparent", css)
+
+    def test_button_group_sizes_inherit_the_button_size_scale(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".btn-sm, .btn-group-sm > .btn {", css)
+        self.assertIn(
+            ".btn-sm,\n.btn-group-sm > .btn,\n.btn-group-sm > .btn-group > .btn {",
+            css,
+        )
+        self.assertIn(
+            ".btn-lg,\n.btn-group-lg > .btn,\n.btn-group-lg > .btn-group > .btn {",
+            css,
+        )
+        self.assertIn("--bs-btn-font-size: 0.8rem;", css)
+        self.assertNotIn("--bs-btn-font-size: 1.25rem;", css)
 
     def test_button_active_press_uses_subtle_half_pixel_shift(self) -> None:
         result = self.run_build()
