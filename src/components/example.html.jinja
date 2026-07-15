@@ -10,10 +10,18 @@
       <div class="moo-example__preview">
         {{ rendered | safe }}
       </div>
-      <details class="moo-example__source" open>
-        <summary>View Code</summary>
-        <pre class="moo-code scroll-fade-x no-scrollbar"><span class="moo-code__lines" aria-hidden="true">{{ source | line_numbers }}</span><code class="language-html">{{ source | highlight_html }}</code></pre>
-      </details>
+      <div class="moo-example__source" data-bs-theme="dark" data-moo-code-panel data-expanded="false">
+        <pre class="moo-code scroll-fade-x no-scrollbar" id="{{ id }}-code"><span class="moo-code__lines" aria-hidden="true">{{ source | line_numbers }}</span><code class="language-html">{{ source | highlight_html }}</code></pre>
+        <div class="moo-code__reveal">
+          <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-code-toggle aria-expanded="false" aria-controls="{{ id }}-code">
+            View Code
+          </button>
+        </div>
+        <button class="btn btn-outline-secondary btn-icon-sm moo-code__copy" type="button" data-moo-code-copy hidden aria-label="Copy code" title="Copy code">
+          {{ lucide_icon("copy", "inline-start") }}
+        </button>
+        <span class="position-absolute top-0 end-0 mt-3 me-5 small text-body-secondary" data-moo-copy-status role="status"></span>
+      </div>
     </div>
   </section>
 {% endmacro %}
