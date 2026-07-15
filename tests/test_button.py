@@ -155,15 +155,27 @@ class ButtonTests(CatalogTestCase):
         css = self.read_output("assets/css/moo-ui.css")
         self.assertIn(".btn-sm, .btn-group-sm > .btn {", css)
         self.assertIn(
-            ".btn-sm,\n.btn-group-sm > .btn,\n.btn-group-sm > .btn-group > .btn {",
+            ".btn-sm,\n.btn-icon-sm,\n.btn-group-sm > .btn,\n"
+            ".btn-group-sm > .btn-group > .btn {",
             css,
         )
         self.assertIn(
-            ".btn-lg,\n.btn-group-lg > .btn,\n.btn-group-lg > .btn-group > .btn {",
+            ".btn-lg,\n.btn-icon-lg,\n.btn-group-lg > .btn,\n"
+            ".btn-group-lg > .btn-group > .btn {",
             css,
         )
         self.assertIn("--bs-btn-font-size: 0.8rem;", css)
         self.assertNotIn("--bs-btn-font-size: 1.25rem;", css)
+
+    def test_button_paddings_ride_the_bootstrap_scale(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn("--bs-btn-padding-y: 0;", css)
+        self.assertIn("--bs-btn-padding-x: 0.625rem;", css)
+        self.assertIn("--bs-btn-padding-x: 0.5rem;", css)
+        self.assertNotIn("--moo-button-padding-x", css)
 
     def test_button_active_press_uses_subtle_half_pixel_shift(self) -> None:
         result = self.run_build()
