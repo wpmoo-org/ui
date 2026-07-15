@@ -1,0 +1,6 @@
+{% macro render_reference(lead, href, label) %}
+  <p class="text-body-secondary mt-5 mb-0">
+    {{ lead }}
+    <a href="{{ href }}" target="_blank" rel="noreferrer">{{ label }}</a>.
+  </p>
+{% endmacro %}

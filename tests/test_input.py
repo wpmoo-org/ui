@@ -75,8 +75,8 @@ class InputTests(CatalogTestCase):
         ):
             self.render_input('input(label="Search")')
 
-    def test_input_supports_only_text_and_search_types(self) -> None:
-        for input_type in ("text", "search"):
+    def test_input_supports_only_approved_native_types(self) -> None:
+        for input_type in ("text", "search", "file"):
             with self.subTest(input_type=input_type):
                 output = self.render_input(
                     f'input(aria_label="Query", type="{input_type}")'
@@ -102,6 +102,15 @@ class InputTests(CatalogTestCase):
         self.assertIn(" readonly", readonly)
         self.assertNotIn(" disabled", readonly)
 
+    def test_input_emits_validation_and_required_states(self) -> None:
+        output = self.render_input(
+            'input(label="Key", id="key", aria_invalid=true, required=true)'
+        )
+
+        self.assertIn(" is-invalid", output)
+        self.assertIn(' aria-invalid="true"', output)
+        self.assertIn(" required", output)
+
     def test_input_page_uses_shared_catalog_contracts(self) -> None:
         self.assertTrue(PAGE.is_file(), "Input catalog page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
@@ -114,10 +123,17 @@ class InputTests(CatalogTestCase):
 
         self.assertEqual(
             imports,
-            {"example", "input", "typography"},
+            {"input"},
         )
-        self.assertIn('variant="page-title"', source)
-        self.assertIn('variant="page-description"', source)
+        self.assertIn(
+            '{% from "includes/page-header.html.jinja" import render_page_header %}',
+            source,
+        )
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_example %}',
+            source,
+        )
+        self.assertIn("{{ render_page_header(", source)
         self.assertIn("{{ render_example(", source)
 
     def test_input_catalog_builds_ready_page_with_generated_source(self) -> None:
@@ -141,10 +157,11 @@ class InputTests(CatalogTestCase):
         )
         self.assertIn('class="form-label"', page)
         self.assertIn('class="form-control"', page)
-        self.assertIn('type="search"', page)
+        self.assertIn('type="file"', page)
         self.assertIn('aria-label=', page)
         self.assertIn(" disabled", page)
-        self.assertIn(" readonly", page)
+        self.assertIn(" required", page)
+        self.assertIn('aria-invalid="true"', page)
         self.assertIn('<span class="token tag">input</span>', page)
 
         active_labels = [

@@ -1,28 +1,20 @@
-// Paddings come from Bootstrap's own --bs-btn-padding-* variables (set on
-// the Sass scale). Only concepts Bootstrap's button API lacks stay as
-// private tokens; their values live on the $moo-button-* Sass knobs in
-// _primary_variables.
+// Bootstrap owns button geometry through its --bs-btn-* consumption values.
+// Moo adds only icon composition and the missing xs/icon-only variants.
 .btn {
-  --moo-button-height: #{$moo-button-height};
-  --moo-button-icon-padding-x: #{$moo-button-icon-padding-x};
-  --moo-button-gap: #{$moo-button-gap};
-  --moo-button-icon-size: #{$moo-button-icon-size};
-
-  min-height: var(--moo-button-height);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  gap: var(--moo-button-gap);
+  gap: $icon-link-gap;
   white-space: nowrap;
 }
 
 .btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon="inline-start"]) {
-  padding-inline-start: var(--moo-button-icon-padding-x);
+  padding-inline-start: $spacer * 0.5;
 }
 
 .btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon="inline-end"]) {
-  padding-inline-end: var(--moo-button-icon-padding-x);
+  padding-inline-end: $spacer * 0.5;
 }
 
 button.btn:not(:disabled),
@@ -31,57 +23,79 @@ label.btn {
   cursor: default;
 }
 
-// One block per size step. Icon variants and Bootstrap's group extend
-// chain (.btn-group-sm > .btn extends .btn-sm) share the same scale; text
-// sizes ride $btn-font-size-sm/-lg and paddings ride $btn-padding-x, so
-// only the xs step declares its own consumption values. The lg step sets
-// no radius: .btn-lg keeps Bootstrap's lg radius, .btn-icon-lg the base.
+// Bootstrap provides sm/lg; xs and icon-only variants reuse the same
+// consumption properties instead of introducing a parallel size system.
 .btn-xs,
 .btn-icon-xs {
-  --moo-button-height: #{$moo-button-height-xs};
-  --moo-button-icon-padding-x: #{$moo-button-icon-padding-x-xs};
-  --moo-button-gap: #{$moo-button-gap-xs};
-  --moo-button-icon-size: #{$moo-button-icon-size-xs};
-  --bs-btn-padding-x: 0.5rem;
-  --bs-btn-font-size: 0.75rem;
-  --bs-btn-line-height: 1rem;
+  --bs-btn-padding-y: #{$spacer * 0.1875};
+  --bs-btn-padding-x: #{$spacer * 0.5};
+  --bs-btn-font-size: #{$spacer * 0.75};
+  --bs-btn-line-height: #{$spacer};
   --bs-btn-border-radius: var(--bs-border-radius-sm);
+  gap: #{$spacer * 0.25};
 }
 
 .btn-sm,
 .btn-icon-sm,
 .btn-group-sm > .btn,
 .btn-group-sm > .btn-group > .btn {
-  --moo-button-height: #{$moo-button-height-sm};
-  --moo-button-icon-padding-x: #{$moo-button-icon-padding-x-sm};
-  --moo-button-gap: #{$moo-button-gap-sm};
-  --moo-button-icon-size: #{$moo-button-icon-size-sm};
-  --bs-btn-line-height: 1rem;
+  --bs-btn-padding-y: #{$btn-padding-y-sm};
+  --bs-btn-padding-x: #{$btn-padding-x-sm};
+  --bs-btn-font-size: #{$btn-font-size-sm};
+  --bs-btn-line-height: #{$spacer};
   --bs-btn-border-radius: var(--bs-border-radius-sm);
+  gap: #{$spacer * 0.25};
 }
 
 .btn-lg,
 .btn-icon-lg,
 .btn-group-lg > .btn,
 .btn-group-lg > .btn-group > .btn {
-  --moo-button-height: #{$moo-button-height-lg};
+  --bs-btn-padding-y: #{$btn-padding-y-lg};
+  --bs-btn-padding-x: #{$btn-padding-x-lg};
+  --bs-btn-font-size: #{$btn-font-size-lg};
+  --bs-btn-line-height: #{$btn-line-height};
+  --bs-btn-border-radius: var(--bs-border-radius-lg);
+}
+
+:is(.btn-xs, .btn-sm, .btn-group-sm > .btn, .btn-group-sm > .btn-group > .btn):not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon="inline-start"]) {
+  padding-inline-start: $icon-link-gap;
+}
+
+:is(.btn-xs, .btn-sm, .btn-group-sm > .btn, .btn-group-sm > .btn-group > .btn):not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon="inline-end"]) {
+  padding-inline-end: $icon-link-gap;
 }
 
 .btn-icon,
 .btn-icon-xs,
 .btn-icon-sm,
 .btn-icon-lg {
-  width: var(--moo-button-height);
-  min-width: var(--moo-button-height);
   padding: 0;
+  inline-size: calc(
+    var(--bs-btn-line-height) +
+    var(--bs-btn-padding-y) +
+    var(--bs-btn-padding-y) +
+    var(--bs-btn-border-width) +
+    var(--bs-btn-border-width)
+  );
   aspect-ratio: 1;
 }
 
 .btn > [data-icon="inline-start"],
 .btn > [data-icon="inline-end"] {
-  width: var(--moo-button-icon-size);
-  height: var(--moo-button-icon-size);
+  width: $spacer;
+  height: $spacer;
   flex: 0 0 auto;
+}
+
+:is(.btn-xs, .btn-icon-xs) > [data-icon] {
+  width: $spacer * 0.75;
+  height: $spacer * 0.75;
+}
+
+:is(.btn-sm, .btn-icon-sm, .btn-group-sm > .btn, .btn-group-sm > .btn-group > .btn) > [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
 }
 
 .btn:disabled,

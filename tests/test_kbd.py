@@ -51,10 +51,17 @@ class KbdTests(CatalogTestCase):
 
         self.assertEqual(
             imports,
-            {"example", "kbd", "typography"},
+            {"kbd"},
         )
-        self.assertIn('variant="page-title"', source)
-        self.assertIn('variant="page-description"', source)
+        self.assertIn(
+            '{% from "includes/page-header.html.jinja" import render_page_header %}',
+            source,
+        )
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_example %}',
+            source,
+        )
+        self.assertIn("{{ render_page_header(", source)
         self.assertIn("{{ render_example(", source)
 
     def test_kbd_catalog_builds_ready_page_with_generated_source(self) -> None:

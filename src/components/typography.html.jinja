@@ -1,6 +1,6 @@
 {% macro typography(content, variant, id="") -%}
   {% if variant == "page-title" -%}
-    <h1 class="display-5 fw-semibold"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
+    <h1 class="fw-semibold"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h1>
   {%- elif variant == "page-description" -%}
     <p class="lead text-body-secondary mb-0">{{ content }}</p>
   {%- elif variant == "section-title" -%}

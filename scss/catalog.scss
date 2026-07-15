@@ -113,6 +113,14 @@ body {
   max-width: 44rem;
 }
 
+.moo-component-header h1 {
+  letter-spacing: -0.025em;
+}
+
+.moo-component-header .lead {
+  line-height: 1.5;
+}
+
 .moo-component-examples {
   margin-top: 4rem;
 }
@@ -124,6 +132,14 @@ body {
 .moo-example__header {
   max-width: 44rem;
   margin-bottom: 1rem;
+}
+
+.moo-example__header h2 {
+  letter-spacing: -0.015em;
+}
+
+.moo-example__header > p {
+  line-height: 1.5;
 }
 
 .moo-example__surface {

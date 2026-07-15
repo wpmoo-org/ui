@@ -8,6 +8,10 @@
   --moo-ring: #18181b;
   --moo-destructive: #dc2626;
   --moo-destructive-foreground: #fff;
+  --bs-body-color: var(--moo-foreground);
+  --bs-body-color-rgb: 24, 24, 27;
+  --bs-heading-color: var(--moo-foreground);
+  --bs-secondary-color: var(--moo-muted-foreground);
 }
 
 [data-bs-theme="dark"] {
@@ -19,4 +23,8 @@
   --moo-ring: #fafafa;
   --moo-destructive: #f87171;
   --moo-destructive-foreground: #18181b;
+  --bs-body-color: var(--moo-foreground);
+  --bs-body-color-rgb: 250, 250, 250;
+  --bs-heading-color: var(--moo-foreground);
+  --bs-secondary-color: var(--moo-muted-foreground);
 }

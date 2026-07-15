@@ -102,7 +102,7 @@ class ButtonTests(CatalogTestCase):
 
         page = button_output.read_text(encoding="utf-8")
         example_template = (
-            ROOT / "src/components/example.html.jinja"
+            ROOT / "src/includes/example.html.jinja"
         ).read_text(encoding="utf-8")
         self.assertEqual(
             example_template.count(
@@ -129,12 +129,11 @@ class ButtonTests(CatalogTestCase):
         self.assertIn("disabled", page)
         self.assertIn('aria-label="Pin dashboard"', page)
 
-    def test_button_examples_do_not_emit_demo_links(self) -> None:
+    def test_button_examples_do_not_emit_fake_external_links(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
-        self.assertNotIn('<a class="btn', page)
         self.assertNotIn("example.com", page)
 
     def test_button_page_links_the_related_button_group_component(self) -> None:
@@ -163,7 +162,6 @@ class ButtonTests(CatalogTestCase):
             "btn-primary",
             "btn-secondary",
             "btn-outline-secondary",
-            "btn-ghost",
             "btn-danger",
             "btn-link",
             "btn-success",
@@ -191,8 +189,6 @@ class ButtonTests(CatalogTestCase):
         for reference_label in (
             "Primary button",
             "Secondary button",
-            "Large button",
-            "Small button",
             "Toggle button",
             "Active toggle button",
             "New Branch",
@@ -227,8 +223,16 @@ class ButtonTests(CatalogTestCase):
             self.assertIn(class_name, size_example)
 
         css = self.read_output("assets/css/moo-ui.css")
-        for height in ("1.5rem", "1.75rem", "2rem", "2.25rem"):
-            self.assertIn(f"--moo-button-height: {height};", css)
+        self.assertNotIn("--moo-button-", css)
+        self.assertIn("--bs-btn-padding-y: 0.1875rem;", css)
+        self.assertIn("--bs-btn-padding-y: 0.3125rem;", css)
+        self.assertIn("--bs-btn-padding-y: 0.4375rem;", css)
+        self.assertIn(
+            "inline-size: calc( var(--bs-btn-line-height) + "
+            "var(--bs-btn-padding-y) + var(--bs-btn-padding-y) + "
+            "var(--bs-btn-border-width) + var(--bs-btn-border-width));",
+            css,
+        )
         self.assertIn(
             ".btn:not(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg):has(> [data-icon=\"inline-start\"])",
             css,
@@ -275,10 +279,11 @@ class ButtonTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         css = self.read_output("assets/css/moo-ui.css")
-        self.assertIn("--bs-btn-padding-y: 0;", css)
+        self.assertIn("--bs-btn-padding-y: 0.3125rem;", css)
+        self.assertIn("--bs-btn-padding-y: 0.4375rem;", css)
         self.assertIn("--bs-btn-padding-x: 0.625rem;", css)
         self.assertIn("--bs-btn-padding-x: 0.5rem;", css)
-        self.assertNotIn("--moo-button-padding-x", css)
+        self.assertNotIn("--moo-button-", css)
 
     def test_button_active_press_uses_subtle_half_pixel_shift(self) -> None:
         result = self.run_build()
