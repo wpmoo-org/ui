@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
-
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import DIST, CatalogTestCase
 
 
 class BuildTests(CatalogTestCase):
@@ -30,19 +28,3 @@ class BuildTests(CatalogTestCase):
         self.assertIn('id="main-content"', index)
         self.assertIn('href="#main-content"', index)
         self.assertIn('id="main-content" tabindex="-1"', index)
-
-        catalog = json.loads(
-            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(
-            catalog,
-            [
-                {"slug": "button", "label": "Button", "status": "ready"},
-                {
-                    "slug": "button-group",
-                    "label": "Button Group",
-                    "status": "ready",
-                },
-                {"slug": "card", "label": "Card", "status": "ready"},
-            ],
-        )

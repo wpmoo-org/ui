@@ -13,5 +13,10 @@
     "slug": "card",
     "label": "Card",
     "status": "ready"
+  },
+  {
+    "slug": "typography",
+    "label": "Typography",
+    "status": "ready"
   }
 ]
