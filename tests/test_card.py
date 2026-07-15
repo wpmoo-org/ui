@@ -55,7 +55,6 @@ class CardTests(CatalogTestCase):
             "card-body",
             "card-title",
             "card-subtitle",
-            "card-text",
             "card-footer",
         ):
             self.assertIn(native_class, page)
@@ -70,34 +69,9 @@ class CardTests(CatalogTestCase):
         self.assertNotIn("list-group", page)
         self.assertNotIn("card-img", page)
         self.assertNotIn("example.com", page)
-        examples = page.split(
-            '<section class="moo-component-reference"', 1
-        )[0]
-        self.assertNotIn('style="width: 22rem;"', examples)
+        self.assertNotIn('style="width: 22rem;"', page)
         for runtime_name in ("React", "Tailwind", "className", "shadcn"):
             self.assertNotIn(runtime_name, page)
-
-    def test_card_api_reference_documents_public_contract(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_output("components/card.html")
-        self.assertIn('class="moo-component-reference"', page)
-        reference = page.split('class="moo-component-reference"', 1)[1]
-        for contract_text in (
-            "card",
-            "card-header",
-            "card-body",
-            "card-title",
-            "card-subtitle",
-            "card-text",
-            "card-footer",
-            "View Code",
-        ):
-            self.assertIn(contract_text, reference)
-        self.assertNotIn("<pre", reference)
-        self.assertNotIn("card(", reference)
-        self.assertNotIn("Internal note", reference)
 
     def test_card_uses_runtime_theme_tokens(self) -> None:
         result = self.run_build()

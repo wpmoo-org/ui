@@ -1,5 +1,4 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/example.html.jinja" import render_example %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/typography.html.jinja" import typography %}
@@ -37,14 +36,4 @@
     ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "<" ~ "kbd>", "use": "Native keyboard input", "behavior": "Provides semantic keyboard-input markup with no runtime behavior or focus target."},
-    {"contract": "$kbd-padding-y / $kbd-padding-x / $kbd-font-size", "use": "Compile-time sizing", "behavior": "Controls the native element's padding and type scale in Bootstrap Sass."},
-    {"contract": "$kbd-color / $kbd-bg / $border-radius-sm", "use": "Compile-time theme and shape", "behavior": "Controls the native element's foreground, background, and shared small radius in Bootstrap Sass."}
-  ] %}
-  {{ render_api_reference(
-    "kbd",
-    "Use the native element for keyboard input; it adds no runtime shortcut behavior or focus handling.",
-    api_rows
-  ) }}
 {% endblock %}

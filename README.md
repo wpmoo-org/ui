@@ -36,6 +36,21 @@ Tests are organized by ownership instead of accumulating in one build file:
 Add new behavior to its owning module. Keep `tests/test_build.py` limited to
 the build entrypoints and shared shell output.
 
+### Verification strategy
+
+- Write the failing test first for public macro behavior, validation and
+  fail-fast branches, accessibility contracts, build behavior, and reusable
+  design gates.
+- Iterate in the browser first for styling, spacing, responsive behavior, RTL,
+  dark mode, and pixel matching. Add regression tests only after the behavior
+  is stable and machine-verifiable.
+- For catalog copy, example order, and other documentation-only changes, run
+  the build and inspect the rendered page. They do not need unit tests unless
+  they change behavior or a reusable contract.
+
+Every completed component phase still finishes with its relevant targeted
+tests, design gates, the proportionate full suite, and browser review.
+
 ## Source boundaries
 
 Jinja macros are canonical component sources. Each example captures one macro
@@ -60,6 +75,5 @@ from the legacy product repositories or the `tmp/ui-html` pilot.
   If a required macro is missing, build that dependency first or defer the
   example; do not substitute raw interactive or Bootstrap component markup.
 - `render_example` owns example title, description, preview, and copyable code.
-  `render_api_reference` owns API Reference layout for every component page.
 - General visual behavior that is useful beyond one component belongs under
   `scss/utilities/` and `src/pages/utils/`, with one dedicated test module.

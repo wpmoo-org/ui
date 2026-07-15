@@ -114,12 +114,11 @@ class InputTests(CatalogTestCase):
 
         self.assertEqual(
             imports,
-            {"api_reference", "example", "input", "typography"},
+            {"example", "input", "typography"},
         )
         self.assertIn('variant="page-title"', source)
         self.assertIn('variant="page-description"', source)
         self.assertIn("{{ render_example(", source)
-        self.assertIn("{{ render_api_reference(", source)
 
     def test_input_catalog_builds_ready_page_with_generated_source(self) -> None:
         catalog = json.loads(
@@ -147,7 +146,6 @@ class InputTests(CatalogTestCase):
         self.assertIn(" disabled", page)
         self.assertIn(" readonly", page)
         self.assertIn('<span class="token tag">input</span>', page)
-        self.assertIn('class="moo-component-reference"', page)
 
         active_labels = [
             re.sub(r"<[^>]+>", "", label).strip()

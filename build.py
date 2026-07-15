@@ -201,7 +201,7 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
     )
 
 
-def create_environment() -> Environment:
+def create_environment(icon_renderer=None) -> Environment:
     environment = Environment(
         loader=FileSystemLoader(SRC),
         autoescape=select_autoescape(("html", "jinja")),
@@ -215,11 +215,15 @@ def create_environment() -> Environment:
     environment.filters["line_numbers"] = line_numbers
     environment.globals["fail"] = fail
     icon_set = load_lucide_icons()
-    environment.globals["lucide_icon"] = lambda name, position: render_lucide_icon(
+    lucide_renderer = lambda name, position: render_lucide_icon(
         icon_set,
         name,
         position,
     )
+    environment.globals["lucide_icon"] = lucide_renderer
+    if icon_renderer is None:
+        icon_renderer = lucide_renderer
+    environment.globals["render_icon"] = icon_renderer
     return environment
 
 

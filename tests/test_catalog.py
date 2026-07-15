@@ -7,27 +7,6 @@ from tests.helpers import DIST, ICONS, ROOT, CatalogTestCase
 
 
 class CatalogContractTests(CatalogTestCase):
-    def test_component_pages_use_shared_api_reference_macro(self) -> None:
-        macro_path = ROOT / "src/components/api_reference.html.jinja"
-        self.assertTrue(macro_path.is_file())
-        macro = macro_path.read_text(encoding="utf-8")
-        self.assertIn("{% macro render_api_reference(", macro)
-        self.assertEqual(macro.count('class="moo-component-reference"'), 1)
-
-        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
-            source = path.read_text(encoding="utf-8")
-            with self.subTest(page=path.name):
-                self.assertIn(
-                    '{% from "components/api_reference.html.jinja" import render_api_reference %}',
-                    source,
-                )
-                self.assertIn("{{ render_api_reference(", source)
-                self.assertNotIn(
-                    '<section class="moo-component-reference"',
-                    source,
-                )
-                self.assertNotIn('<table class="table', source)
-
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
 
@@ -43,32 +22,21 @@ class CatalogContractTests(CatalogTestCase):
         button_template = (
             ROOT / "src/components/button.html.jinja"
         ).read_text(encoding="utf-8")
-        self.assertIn("lucide_icon(name, position)", button_template)
+        self.assertIn("render_icon(name, position)", button_template)
+        self.assertNotIn("lucide_icon(", button_template)
         self.assertNotIn("{% if name ==", button_template)
 
-    def test_component_pages_render_public_api_reference_sections(self) -> None:
-        catalog = json.loads(
-            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
-        )
+    def test_icons_need_no_cdn_or_runtime_script(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        for item in catalog:
-            if item["status"] != "ready":
-                continue
-            with self.subTest(component=item["slug"]):
-                page = self.read_output(
-                    f'components/{item["slug"]}.html'
-                )
-                self.assertIn('class="moo-component-reference"', page)
-                reference = page.split(
-                    'class="moo-component-reference"', 1
-                )[1]
-                self.assertIn(">API Reference</h2>", reference)
-                self.assertNotIn("<pre", reference)
-                self.assertNotIn(f'{item["slug"].replace("-", "_")}(', reference)
-                self.assertNotIn("Use the Jinja", page)
-                self.assertNotIn("Internal note:", page)
+        for path in DIST.rglob("*.html"):
+            page = path.read_text(encoding="utf-8")
+            for script_source in re.findall(
+                r'<script\b[^>]*\bsrc="([^"]+)"', page
+            ):
+                self.assertNotRegex(script_source, r"^(?:https?:)?//")
+                self.assertNotRegex(script_source, r"(?i)(?:iconify|lucide)")
 
     def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
         allowed_prefixes = {
@@ -103,7 +71,7 @@ class CatalogContractTests(CatalogTestCase):
         ready = {
             item["slug"] for item in catalog if item["status"] == "ready"
         }
-        infrastructure = {"api_reference", "example"}
+        infrastructure = {"example"}
         component_class = re.compile(
             r"^(?:accordion|alert|badge|btn|card|dropdown|form-control|"
             r"form-label|input-group|list-group|modal|nav|navbar|offcanvas|"
@@ -206,8 +174,4 @@ class CatalogContractTests(CatalogTestCase):
             "components/card.html",
         ):
             page = self.read_output(component_page)
-            examples = page.split(
-                '<section class="moo-component-reference"',
-                1,
-            )[0]
-            self.assertNotIn("mx-auto", examples)
+            self.assertNotIn("mx-auto", page)

@@ -37,8 +37,7 @@ $btn-padding-x-lg: 0.625rem !default;
 
 // Private Button tokens for the four concepts Bootstrap's button API lacks:
 // control height, icon-edge inset, content gap, icon size. Each is emitted
-// as a --moo-button-* consumption variable and documented, with its reason,
-// on the Button page API Reference. Height and icon steps derive from the
+// as a --moo-button-* consumption variable. Height and icon steps derive from the
 // base at compile time, Bootstrap-style; gap steps are optically corrected.
 $moo-button-height: 2rem !default;
 $moo-button-height-xs: $moo-button-height * 0.75 !default;

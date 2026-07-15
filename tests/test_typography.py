@@ -28,8 +28,8 @@ class TypographyTests(CatalogTestCase):
             'typography("Supporting copy", variant="page-description")': (
                 '<p class="lead text-body-secondary mb-0">Supporting copy</p>'
             ),
-            'typography("API Reference", variant="section-title", id="api-title")': (
-                '<h2 class="h3" id="api-title">API Reference</h2>'
+            'typography("Section title", variant="section-title", id="section-title")': (
+                '<h2 class="h3" id="section-title">Section title</h2>'
             ),
             'typography("Example", variant="example-title", id="example-title")': (
                 '<h2 class="h4" id="example-title">Example</h2>'
@@ -81,12 +81,9 @@ class TypographyTests(CatalogTestCase):
                     source,
                 )
 
-    def test_shared_catalog_macros_use_distinct_typography_roles(self) -> None:
+    def test_example_macro_uses_its_typography_role(self) -> None:
         example = (
             ROOT / "src/components/example.html.jinja"
-        ).read_text(encoding="utf-8")
-        api_reference = (
-            ROOT / "src/components/api_reference.html.jinja"
         ).read_text(encoding="utf-8")
         typography_import = (
             '{% from "components/typography.html.jinja" import typography %}'
@@ -95,12 +92,6 @@ class TypographyTests(CatalogTestCase):
         self.assertIn(typography_import, example)
         self.assertIn('variant="example-title"', example)
         self.assertNotIn('<h2 class="h4"', example)
-
-        self.assertIn(typography_import, api_reference)
-        self.assertIn('variant="section-title"', api_reference)
-        self.assertIn('variant="inline-code"', api_reference)
-        self.assertNotIn('<h2 class="h3"', api_reference)
-        self.assertNotIn('<code>{{ row.contract }}</code>', api_reference)
 
     def test_typography_catalog_builds_shared_examples_and_source(self) -> None:
         catalog = json.loads(
@@ -136,7 +127,6 @@ class TypographyTests(CatalogTestCase):
             page.count('class="moo-example__source"'),
         )
         self.assertEqual(page.count('<div class="moo-example__preview'), 3)
-        self.assertIn('class="moo-component-reference"', page)
         active_labels = [
             re.sub(r"<[^>]+>", "", label).strip()
             for label in re.findall(
@@ -163,7 +153,7 @@ class TypographyTests(CatalogTestCase):
             )
         )
 
-        self.assertEqual(imports, {"api_reference", "example", "typography"})
+        self.assertEqual(imports, {"example", "typography"})
         self.assertNotRegex(
             source,
             r"<(?:button|form|input|kbd|select|textarea)\b",

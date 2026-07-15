@@ -1,5 +1,4 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/example.html.jinja" import render_example %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/typography.html.jinja" import typography %}
@@ -66,17 +65,4 @@
     ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "form-control", "use": "Text and search fields", "behavior": "Uses Bootstrap's native control sizing, border, focus, placeholder, and state styles."},
-    {"contract": "form-label + for / id", "use": "Visible accessible name", "behavior": "Links a visible label to its input through native HTML attributes."},
-    {"contract": "aria-label", "use": "Standalone accessible name", "behavior": "Names a control when its purpose is already visible in surrounding content."},
-    {"contract": "disabled", "use": "Unavailable input", "behavior": "Uses native disabled interaction and Bootstrap's disabled appearance."},
-    {"contract": "readonly", "use": "Non-editable value", "behavior": "Keeps the native control readable and selectable without accepting edits."},
-    {"contract": "type=text / type=search", "use": "Supported scope", "behavior": "Input Group, textarea, validation, and floating labels remain deferred until an approved consumer needs them."}
-  ] %}
-  {{ render_api_reference(
-    "input",
-    "Use Bootstrap form-control markup directly for the current text and search field scope.",
-    api_rows
-  ) }}
 {% endblock %}

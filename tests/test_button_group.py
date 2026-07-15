@@ -48,26 +48,6 @@ class ButtonGroupTests(CatalogTestCase):
         self.assertNotIn("React", page)
         self.assertNotIn("Tailwind", page)
 
-    def test_button_group_api_reference_documents_public_contract(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_output("components/button-group.html")
-        self.assertIn('class="moo-component-reference"', page)
-        reference = page.split('class="moo-component-reference"', 1)[1]
-        for contract_text in (
-            "btn-group",
-            "btn-group-vertical",
-            "btn-toolbar",
-            "btn-group-sm",
-            "role",
-            "aria-label",
-            "View Code",
-        ):
-            self.assertIn(contract_text, reference)
-        self.assertNotIn("button_group(", reference)
-        self.assertNotIn("Internal note", reference)
-
     def test_button_group_rtl_keeps_bootstrap_ltr_geometry(self) -> None:
         result = self.run_build()
 

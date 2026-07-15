@@ -113,10 +113,6 @@ class ScrollFadeTests(CatalogTestCase):
             button,
         )
         self.assertIn(
-            'class="table-responsive scroll-fade-x no-scrollbar"',
-            button,
-        )
-        self.assertIn(
             'class="offcanvas-body d-block scroll-fade-y no-scrollbar"',
             button,
         )
@@ -128,8 +124,3 @@ class ScrollFadeTests(CatalogTestCase):
         self.assertIn("overflow-x: auto;", code_block)
         self.assertIn("white-space: pre;", code_block)
         self.assertNotIn("overflow-wrap: anywhere;", code_block)
-
-        table = catalog_css.split(
-            ".moo-component-reference .table {", 1
-        )[1].split("}", 1)[0]
-        self.assertIn("min-width:", table)
