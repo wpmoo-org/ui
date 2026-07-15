@@ -40,6 +40,37 @@ class DesignGateTests(CatalogTestCase):
                 )
         self.assertEqual(offenders, [])
 
+    def test_private_tokens_are_prefixed_and_documented(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
+            component = path.stem.removeprefix("_")
+            prefix = f"--moo-{component.replace('_', '-')}"
+            source = path.read_text(encoding="utf-8")
+            tokens = set(re.findall(r"--moo-[\w-]+(?=\s*:)", source))
+
+            for token in sorted(tokens):
+                self.assertTrue(
+                    token.startswith(prefix),
+                    f"{path.name}: {token} is outside the {prefix}-* namespace",
+                )
+
+            if not tokens:
+                continue
+
+            page = self.read_output(
+                f"components/{component.replace('_', '-')}.html"
+            )
+            reference = page.split('class="moo-component-reference"', 1)[1]
+            for token in sorted(tokens):
+                self.assertIn(
+                    token,
+                    reference,
+                    f"{token} must be documented, with its reason, in the"
+                    f" {component} API Reference",
+                )
+
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:
         primary_variables = (ROOT / "scss/_primary_variables.scss").read_text(
             encoding="utf-8"

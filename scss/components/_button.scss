@@ -1,11 +1,12 @@
 // Paddings come from Bootstrap's own --bs-btn-padding-* variables (set on
-// the Sass scale); only concepts Bootstrap's button API lacks stay as
-// private tokens: control height, icon-edge inset, content gap, icon size.
+// the Sass scale). Only concepts Bootstrap's button API lacks stay as
+// private tokens; their values live on the $moo-button-* Sass knobs in
+// _primary_variables and are documented on the Button page API Reference.
 .btn {
-  --moo-button-height: 2rem;
-  --moo-button-icon-padding-x: 0.5rem;
-  --moo-button-gap: 0.375rem;
-  --moo-button-icon-size: 1rem;
+  --moo-button-height: #{$moo-button-height};
+  --moo-button-icon-padding-x: #{$moo-button-icon-padding-x};
+  --moo-button-gap: #{$moo-button-gap};
+  --moo-button-icon-size: #{$moo-button-icon-size};
 
   min-height: var(--moo-button-height);
   display: inline-flex;
@@ -37,10 +38,10 @@ label.btn {
 // no radius: .btn-lg keeps Bootstrap's lg radius, .btn-icon-lg the base.
 .btn-xs,
 .btn-icon-xs {
-  --moo-button-height: 1.5rem;
-  --moo-button-icon-padding-x: 0.375rem;
-  --moo-button-gap: 0.25rem;
-  --moo-button-icon-size: 0.75rem;
+  --moo-button-height: #{$moo-button-height-xs};
+  --moo-button-icon-padding-x: #{$moo-button-icon-padding-x-xs};
+  --moo-button-gap: #{$moo-button-gap-xs};
+  --moo-button-icon-size: #{$moo-button-icon-size-xs};
   --bs-btn-padding-x: 0.5rem;
   --bs-btn-font-size: 0.75rem;
   --bs-btn-line-height: 1rem;
@@ -51,10 +52,10 @@ label.btn {
 .btn-icon-sm,
 .btn-group-sm > .btn,
 .btn-group-sm > .btn-group > .btn {
-  --moo-button-height: 1.75rem;
-  --moo-button-icon-padding-x: 0.375rem;
-  --moo-button-gap: 0.25rem;
-  --moo-button-icon-size: 0.875rem;
+  --moo-button-height: #{$moo-button-height-sm};
+  --moo-button-icon-padding-x: #{$moo-button-icon-padding-x-sm};
+  --moo-button-gap: #{$moo-button-gap-sm};
+  --moo-button-icon-size: #{$moo-button-icon-size-sm};
   --bs-btn-line-height: 1rem;
   --bs-btn-border-radius: var(--bs-border-radius-sm);
 }
@@ -63,7 +64,7 @@ label.btn {
 .btn-icon-lg,
 .btn-group-lg > .btn,
 .btn-group-lg > .btn-group > .btn {
-  --moo-button-height: 2.25rem;
+  --moo-button-height: #{$moo-button-height-lg};
 }
 
 .btn-icon,
