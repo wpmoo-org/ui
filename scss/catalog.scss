@@ -113,8 +113,7 @@ body {
   max-width: 44rem;
 }
 
-.moo-component-examples,
-.moo-component-reference {
+.moo-component-examples {
   margin-top: 4rem;
 }
 
@@ -263,16 +262,6 @@ body {
 
 [dir="rtl"] .moo-example__preview {
   text-align: right;
-}
-
-.moo-component-reference .table-responsive {
-  border: var(--bs-border-width) solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius-lg);
-}
-
-.moo-component-reference .table {
-  min-width: 48rem;
-  margin-bottom: 0;
 }
 
 @media (min-width: 992px) {

@@ -51,12 +51,11 @@ class KbdTests(CatalogTestCase):
 
         self.assertEqual(
             imports,
-            {"api_reference", "example", "kbd", "typography"},
+            {"example", "kbd", "typography"},
         )
         self.assertIn('variant="page-title"', source)
         self.assertIn('variant="page-description"', source)
         self.assertIn("{{ render_example(", source)
-        self.assertIn("{{ render_api_reference(", source)
 
     def test_kbd_catalog_builds_ready_page_with_generated_source(self) -> None:
         catalog = json.loads(
@@ -77,7 +76,6 @@ class KbdTests(CatalogTestCase):
         self.assertIn("<kbd>Ctrl</kbd>", page)
         self.assertIn("<kbd>K</kbd>", page)
         self.assertIn('<span class="token tag">kbd</span>', page)
-        self.assertIn('class="moo-component-reference"', page)
 
         active_labels = [
             re.sub(r"<[^>]+>", "", label).strip()
@@ -109,16 +107,6 @@ class KbdTests(CatalogTestCase):
         context = contexts[0]
         self.assertRegex(context, r"<p\b[^>]*>\s*[A-Za-z][^<]*<kbd>")
         self.assertRegex(context, r"</kbd>[^<]*[A-Za-z][^<]*</p>")
-
-    def test_kbd_api_reference_documents_native_public_contract(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_kbd_output()
-        reference = page.split('class="moo-component-reference"', 1)[1]
-        self.assertIn("<code>&lt;kbd&gt;</code>", reference)
-        self.assertNotIn("kbd(", reference)
-        self.assertNotIn("Internal note", reference)
 
     def test_kbd_page_does_not_fake_future_components(self) -> None:
         self.assertTrue(PAGE.is_file(), "Kbd catalog page is not implemented")

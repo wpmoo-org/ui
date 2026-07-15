@@ -1,5 +1,4 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/example.html.jinja" import render_example %}
 
 {% block title %}Scroll Fade — Moo UI{% endblock %}
@@ -124,19 +123,4 @@
     ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "scroll-fade / scroll-fade-y", "use": "Both block edges", "behavior": "Tracks vertical overflow and reveals each edge as it is reached."},
-    {"contract": "scroll-fade-x", "use": "Both inline edges", "behavior": "Tracks horizontal overflow and follows the document writing direction."},
-    {"contract": "scroll-fade-t / scroll-fade-b", "use": "One block edge", "behavior": "Limits the mask to the top or bottom boundary."},
-    {"contract": "scroll-fade-l / scroll-fade-r", "use": "One physical edge", "behavior": "Limits the mask to the viewport's left or right boundary."},
-    {"contract": "scroll-fade-s / scroll-fade-e", "use": "One logical edge", "behavior": "Limits the mask to inline start or inline end and mirrors in RTL."},
-    {"contract": "--scroll-fade-size / --scroll-fade-reveal", "use": "Local tuning", "behavior": "Controls the mask depth and the distance used to reveal it."},
-    {"contract": "scroll-fade-none", "use": "Disable the mask", "behavior": "Turns off the fade without changing overflow behavior."},
-    {"contract": "no-scrollbar", "use": "Hide scrollbar chrome", "behavior": "Preserves scrolling while hiding visual scrollbar tracks."}
-  ] %}
-  {{ render_api_reference(
-    "scroll-fade",
-    "Combine the utility with an overflow rule on the same element. The mask responds to native scroll position without JavaScript.",
-    api_rows
-  ) }}
 {% endblock %}

@@ -1,5 +1,4 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/example.html.jinja" import render_example %}
 {% from "components/typography.html.jinja" import typography %}
 
@@ -53,15 +52,4 @@
     ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "page-title / page-description", "use": "Catalog page introduction", "behavior": "Renders the shared display heading and supporting lead copy."},
-    {"contract": "section-title / example-title", "use": "Catalog content hierarchy", "behavior": "Keeps h2 semantics while applying Bootstrap's h3 and h4 visual scales."},
-    {"contract": "muted / section-label", "use": "Supporting context", "behavior": "Renders secondary copy and compact labels without changing document hierarchy."},
-    {"contract": "inline-code", "use": "Public classes and contracts", "behavior": "Renders escaped text with the native inline code element."}
-  ] %}
-  {{ render_api_reference(
-    "typography",
-    "Use the planned roles to keep catalog text consistent without adding component CSS.",
-    api_rows
-  ) }}
 {% endblock %}

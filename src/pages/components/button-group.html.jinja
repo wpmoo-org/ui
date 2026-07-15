@@ -1,5 +1,4 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
 {% from "components/example.html.jinja" import render_example %}
@@ -132,16 +131,4 @@
     ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "btn-group", "use": "Adjacent related controls", "behavior": "Joins borders while keeping each button separate."},
-    {"contract": "btn-group-vertical", "use": "Narrow rails or stacked palettes", "behavior": "Stacks the same controls vertically."},
-    {"contract": "btn-toolbar", "use": "Multiple grouped clusters", "behavior": "Wraps several button groups in one toolbar."},
-    {"contract": "btn-group-sm / btn-group-lg", "use": "Density changes", "behavior": "Applies one size to every button in the group."},
-    {"contract": "role / aria-label", "use": "Accessibility", "behavior": "Gives each group or toolbar a clear accessible name."}
-  ] %}
-  {{ render_api_reference(
-    "button-group",
-    "Use Bootstrap button group classes directly. Copy exact rendered HTML from each example's View Code panel.",
-    api_rows
-  ) }}
 {% endblock %}

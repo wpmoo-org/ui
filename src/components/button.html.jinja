@@ -26,8 +26,12 @@
   "icon-lg": {"class": "btn-icon-lg", "dimensions": "36×36px"}
 } %}
 
+{% set button_elements = ["button", "input", "a"] %}
+
+{% set button_types = ["button", "submit", "reset"] %}
+
 {% macro icon(name, position) -%}
-  {{ lucide_icon(name, position) }}
+  {{ render_icon(name, position) }}
 {%- endmacro %}
 
 {% macro button(
@@ -46,7 +50,9 @@
 ) -%}
   {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
-  {% if size.startswith("icon") and not label | trim and not aria_label | trim %}{{ fail("Icon-only buttons require aria_label") }}{% endif %}
+  {% if element not in button_elements %}{{ fail("Unknown button element: " ~ element) }}{% endif %}
+  {% if type not in button_types %}{{ fail("Unknown button type: " ~ type) }}{% endif %}
+  {% if not label | trim and not aria_label | trim %}{{ fail("Buttons without a visible label require aria_label") }}{% endif %}
   {% set variant_class = button_variants[variant] %}
   {% set size_config = button_sizes[size] %}
   {% set size_class = size_config["class"] %}

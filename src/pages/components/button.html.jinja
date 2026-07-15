@@ -1,6 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
-{% from "components/button.html.jinja" import button, button_sizes, button_variants %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/button_group.html.jinja" import button_group %}
 {% from "components/example.html.jinja" import render_example %}
 {% from "components/typography.html.jinja" import typography %}
 
@@ -154,24 +154,22 @@
       "Logical spacing keeps labels and icons coherent in either direction.",
       rtl_preview
     ) }}
+
+    {% set related_button_group %}
+      <div class="d-flex flex-column align-items-center gap-3">
+        {% call button_group("Related actions") %}
+          {{ button("Previous", variant="outline") }}
+          {{ button("Next", variant="outline") }}
+        {% endcall %}
+        <a href="../components/button-group.html">Button Group</a>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "related-button-group",
+      "Related component",
+      "Group adjacent actions that belong together.",
+      related_button_group
+    ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "btn-primary", "use": "Primary action", "behavior": "Uses Moo foreground and surface tokens."},
-    {"contract": "btn-secondary / btn-outline-secondary", "use": "Secondary action", "behavior": "Uses the compact neutral treatment."},
-    {"contract": "btn-ghost / btn-danger / btn-link", "use": "Special intent", "behavior": "Covers low-emphasis, destructive, and text-link actions."},
-    {"contract": "btn-xs / btn-sm / btn-lg", "use": "Text button density", "behavior": "Maps to the 24 / 28 / 32 / 36 px height scale."},
-    {"contract": "btn-icon variants", "use": "Icon-only controls", "behavior": "Keeps controls square and requires an accessible name."},
-    {"contract": "disabled", "use": "Unavailable action", "behavior": "Uses native disabled behavior with Moo runtime contrast tokens."},
-    {"contract": "data-bs-toggle=button", "use": "Pressed state", "behavior": "Uses Bootstrap's native toggle behavior."},
-    {"contract": "--moo-button-height", "use": "Control height token", "behavior": "Fixed control height per density step; Bootstrap's button API has no height variable. Sass knob: $moo-button-height(-xs/-sm/-lg)."},
-    {"contract": "--moo-button-gap", "use": "Content gap token", "behavior": "Space between label and icons; Bootstrap has no button gap variable. Sass knob: $moo-button-gap(-xs/-sm)."},
-    {"contract": "--moo-button-icon-size", "use": "Icon size token", "behavior": "Nested SVG size per density step; Bootstrap has no button icon variable. Sass knob: $moo-button-icon-size(-xs/-sm)."},
-    {"contract": "--moo-button-icon-padding-x", "use": "Icon-edge inset token", "behavior": "Tightens inline padding on the icon side only; Bootstrap cannot express asymmetric logical padding. Sass knob: $moo-button-icon-padding-x(-xs/-sm)."}
-  ] %}
-  {{ render_api_reference(
-    "button",
-    "Use Bootstrap button classes directly. Copy exact rendered HTML from each example's View Code panel.",
-    api_rows
-  ) }}
 {% endblock %}

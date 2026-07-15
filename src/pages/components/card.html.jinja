@@ -1,5 +1,4 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/api_reference.html.jinja" import render_api_reference %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/example.html.jinja" import render_example %}
@@ -91,16 +90,4 @@
     ) }}
   </div>
 
-  {% set api_rows = [
-    {"contract": "card", "use": "Root surface", "behavior": "Owns border, radius, shadow, background, and vertical rhythm."},
-    {"contract": "card-header", "use": "Title area", "behavior": "Stacks a title and description with no divider or fill."},
-    {"contract": "card-title / card-subtitle", "use": "Heading and description", "behavior": "Renders a semibold title and a muted secondary line."},
-    {"contract": "card-body / card-text", "use": "Main content", "behavior": "Holds the padded content section and its copy."},
-    {"contract": "card-footer", "use": "Action row", "behavior": "Aligns finished controls in a row with no divider."}
-  ] %}
-  {{ render_api_reference(
-    "card",
-    "Use Bootstrap card classes directly. Copy exact rendered HTML from each example's View Code panel.",
-    api_rows
-  ) }}
 {% endblock %}

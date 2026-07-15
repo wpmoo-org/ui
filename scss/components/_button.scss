@@ -1,7 +1,7 @@
 // Paddings come from Bootstrap's own --bs-btn-padding-* variables (set on
 // the Sass scale). Only concepts Bootstrap's button API lacks stay as
 // private tokens; their values live on the $moo-button-* Sass knobs in
-// _primary_variables and are documented on the Button page API Reference.
+// _primary_variables.
 .btn {
   --moo-button-height: #{$moo-button-height};
   --moo-button-icon-padding-x: #{$moo-button-icon-padding-x};

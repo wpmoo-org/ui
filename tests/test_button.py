@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import inspect
+import re
+
+from markupsafe import Markup, escape
+
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase, lucide_body
 
 
 class ButtonTests(CatalogTestCase):
@@ -20,14 +25,73 @@ class ButtonTests(CatalogTestCase):
         with self.assertRaisesRegex(ValueError, "Unknown button size: huge"):
             self.render_button('button("Save", size="huge")')
 
-    def test_icon_only_button_requires_an_accessible_name(self) -> None:
-        with self.assertRaisesRegex(
-            ValueError,
-            "Icon-only buttons require aria_label",
+    def test_button_rejects_unknown_elements(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown button element: typo"):
+            self.render_button('button("Save", element="typo")')
+
+    def test_button_rejects_unknown_types(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown button type: typo"):
+            self.render_button('button("Save", type="typo")')
+
+    def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
+        for call in (
+            'button("")',
+            'button("", icon_start="plus")',
+            'button("", size="icon", icon_start="plus")',
         ):
-            self.render_button(
-                'button("", size="icon", icon_start="plus")'
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    r"require(?:s)? aria_label",
+                ):
+                    self.render_button(call)
+
+    def test_button_uses_bundled_lucide_renderer_by_default(self) -> None:
+        output = self.render_button(
+            'button("Continue", icon_start="plus", icon_end="arrow-right")'
+        )
+
+        self.assertIn(lucide_body("plus"), output)
+        self.assertIn(lucide_body("arrow-right"), output)
+        self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('data-icon="inline-end"', output)
+
+    def test_button_accepts_a_custom_icon_renderer(self) -> None:
+        calls: list[tuple[str, str]] = []
+
+        def custom_renderer(name: str, position: str) -> Markup:
+            calls.append((name, position))
+            return Markup(
+                '<i data-name="{}" data-icon="{}"></i>'
+            ).format(
+                escape(name),
+                escape(position),
             )
+
+        custom_name = 'custom"><script>alert(1)</script>'
+        self.assertIn(
+            "icon_renderer",
+            inspect.signature(create_environment).parameters,
+        )
+        environment = create_environment(icon_renderer=custom_renderer)
+        template = environment.from_string(
+            '{% from "components/button.html.jinja" import button %}'
+            '{{ button("Continue", icon_start=custom_name, '
+            'icon_end="custom-end") }}'
+        )
+        output = template.render(custom_name=custom_name)
+
+        self.assertEqual(
+            calls,
+            [
+                (custom_name, "inline-start"),
+                ("custom-end", "inline-end"),
+            ],
+        )
+        self.assertIn(f'data-name="{escape(custom_name)}"', output)
+        self.assertIn('data-name="custom-end" data-icon="inline-end"', output)
+        self.assertNotIn("<script>", output)
+        self.assertNotIn("<svg", output)
 
     def test_button_examples_share_one_rendered_source(self) -> None:
         result = self.run_build()
@@ -70,11 +134,25 @@ class ButtonTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
-        examples = page.split(
-            '<section class="moo-component-reference"', 1
+        self.assertNotIn('<a class="btn', page)
+        self.assertNotIn("example.com", page)
+
+    def test_button_page_links_the_related_button_group_component(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/button.html")
+        marker = 'data-example="related-button-group"'
+        self.assertIn(marker, page)
+        related = page.split(marker, 1)[1].split(
+            "</section>", 1
         )[0]
-        self.assertNotIn('<a class="btn', examples)
-        self.assertNotIn("example.com", examples)
+
+        self.assertRegex(
+            related,
+            r'<a\b[^>]*href="(?:\.\./)?components/button-group\.html"[^>]*>'
+            r"\s*Button Group\s*</a>",
+        )
 
     def test_button_page_covers_approved_variants_and_states(self) -> None:
         result = self.run_build()
