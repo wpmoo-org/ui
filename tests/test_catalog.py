@@ -44,6 +44,9 @@ class CatalogContractTests(CatalogTestCase):
             "button_group": ("btn",),
             "card": ("card",),
             "input": ("form-control",),
+            # Bootstrap renders both single-line inputs and textareas through
+            # the shared `.form-control` family.
+            "textarea": ("form-control",),
             # Bootstrap's own forms/_input-group.scss styles `.input-group >
             # .form-control` / `> .form-select`, so the group legitimately owns
             # those controls within its scope.

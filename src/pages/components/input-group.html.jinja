@@ -80,7 +80,7 @@
     ) }}
 
     {% set text_addons %}
-      <div class="d-grid gap-3 w-100">
+      <div class="d-grid gap-4 w-100">
         {% call input_group() %}
           {{ input_group_text("$") }}
           {{ input(aria_label="Amount", placeholder="0.00") }}
@@ -88,36 +88,92 @@
         {% endcall %}
         {% call input_group() %}
           {{ input_group_text("https://") }}
-          {{ input(aria_label="Site path", placeholder="wpmoo.dev") }}
+          {{ input(aria_label="Site path", placeholder="example.com") }}
           {{ input_group_text(".com") }}
         {% endcall %}
         {% call input_group() %}
-          {{ input(aria_label="Work email", placeholder="name") }}
+          {{ input(aria_label="Work email", placeholder="Enter your username") }}
           {{ input_group_text("@company.com") }}
+        {% endcall %}
+        {% call input_group() %}
+          {{ textarea(
+            aria_label="Message",
+            placeholder="Enter your message",
+            rows=2
+          ) }}
+          {% call input_group_block_addon("end") %}
+            {{ input_group_text("120 characters left") }}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
     {{ render_example(
       "text-addons",
       "Text",
-      "Use text addons for fixed prefixes, suffixes, and units; keep only the editable value in the input.",
+      "",
       text_addons,
       "moo-example__preview--narrow"
     ) }}
 
     {% set button_addon %}
-      {% call input_group() %}
-        {{ input(
-          aria_label="Workspace",
-          placeholder="Workspace name"
-        ) }}
-        {{ button("Create", variant="outline") }}
-      {% endcall %}
+      <div class="d-grid gap-4 w-100">
+        {% call input_group() %}
+          {{ input(
+            aria_label="Profile URL",
+            placeholder="https://x.com/shadcn",
+            readonly=true
+          ) }}
+          {{ button(
+            "",
+            variant="ghost",
+            size="icon-xs",
+            aria_label="Copy profile URL",
+            icon_start="copy",
+            extra_class="m-1 rounded-2 text-body-secondary"
+          ) }}
+        {% endcall %}
+
+        {% call input_group("rounded-pill") %}
+          {{ button(
+            "",
+            variant="secondary",
+            size="icon-xs",
+            aria_label="About secure URLs",
+            icon_start="info",
+            extra_class="m-1 rounded-circle"
+          ) }}
+          {{ input_group_text("https://") }}
+          {{ input(aria_label="Secure URL") }}
+          {{ button(
+            "",
+            variant="ghost",
+            size="icon-xs",
+            aria_label="Favorite URL",
+            icon_start="star",
+            extra_class="m-1 rounded-circle text-body-secondary",
+            toggle=true
+          ) }}
+        {% endcall %}
+
+        {% call input_group() %}
+          {{ input(
+            aria_label="Search",
+            type="search",
+            placeholder="Type to search..."
+          ) }}
+          {{ button(
+            "Search",
+            variant="secondary",
+            size="xs",
+            extra_class="m-1 rounded-2"
+          ) }}
+        {% endcall %}
+      </div>
     {% endset %}
     {{ render_example(
       "button-addon",
       "Button",
-      "Bootstrap lets buttons join an input group without extra CSS. Keep the button action scoped to the adjacent field.",
+      "",
       button_addon,
       "moo-example__preview--narrow"
     ) }}
@@ -147,7 +203,7 @@
             aria_label="File name",
             placeholder="Enter file name"
           ) }}
-          {{ button("", variant="ghost", size="icon-xs", aria_label="More file actions", icon_start="ellipsis", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true) }}
+          {{ button("", variant="ghost", size="icon-xs", aria_label="More file actions", icon_start="ellipsis", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true, dropdown_offset="0,8") }}
           {% call dropdown_menu(align="end") %}
             {{ dropdown_item("Settings") }}
             {{ dropdown_item("Copy path") }}
@@ -160,7 +216,7 @@
             type="search",
             placeholder="Enter search query"
           ) }}
-          {{ button("Search In...", variant="ghost", size="xs", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true) }}
+          {{ button("Search In...", variant="ghost", size="xs", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true, dropdown_offset="0,8") }}
           {% call dropdown_menu(align="end") %}
             {{ dropdown_item("Documentation") }}
             {{ dropdown_item("Blog Posts") }}
@@ -187,7 +243,7 @@
               placeholder="Enter your name"
             ) }}
             {% call input_group_block_addon("start") %}
-              {{ input_group_text("Full Name") }}
+              {{ input_group_text("Full Name", extra_class="flex-grow-1", for_id="block-start-input") }}
             {% endcall %}
           {% endcall %}
         {% endcall %}
@@ -199,7 +255,7 @@
               placeholder="console.log('Hello, world!');"
             ) }}
             {% call input_group_block_addon("start") %}
-              {{ input_group_text("script.js") }}
+              {{ input_group_text("script.js", extra_class="flex-grow-1", for_id="block-start-textarea") }}
             {% endcall %}
           {% endcall %}
         {% endcall %}
@@ -217,10 +273,11 @@
       {% call input_group() %}
         {{ input(
           aria_label="Amount",
+          id="block-end-input-control",
           placeholder="Enter amount"
         ) }}
         {% call input_group_block_addon("end") %}
-          {{ input_group_text("USD") }}
+          {{ input_group_text("USD", extra_class="flex-grow-1", for_id="block-end-input-control") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -236,10 +293,11 @@
       {% call input_group() %}
         {{ textarea(
           aria_label="Comment",
+          id="block-end-textarea-control",
           placeholder="Write a comment..."
         ) }}
         {% call input_group_block_addon("end", "d-flex align-items-center justify-content-between") %}
-          {{ input_group_text("0/280") }}
+          {{ input_group_text("0/280", extra_class="flex-grow-1", for_id="block-end-textarea-control") }}
           {{ button("Post", variant="default") }}
         {% endcall %}
       {% endcall %}
@@ -267,7 +325,7 @@
     {{ render_example(
       "custom-input",
       "Custom Input",
-      "Combine a native resizable textarea and action in one Bootstrap input group.",
+      "Combine a textarea and action in one Bootstrap input group.",
       custom_input,
       "moo-example__preview--narrow"
     ) }}
