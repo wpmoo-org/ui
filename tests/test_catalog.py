@@ -154,7 +154,7 @@ class CatalogContractTests(CatalogTestCase):
                     elif declaration.startswith("border-radius:"):
                         self.assertRegex(
                             declaration,
-                            r"^border-radius: (?:0|var\(--bs-[a-z0-9-]*border-radius[a-z0-9-]*\));$",
+                            r"^border-radius: (?:0|\$input-border-radius|var\(--bs-[a-z0-9-]*border-radius[a-z0-9-]*\));$",
                         )
                     elif declaration.startswith("--bs-"):
                         name, value = declaration.rstrip(";").split(":", 1)

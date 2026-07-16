@@ -34,6 +34,26 @@ class InputGroupTests(CatalogTestCase):
             'aria-label="Username"> </div>',
         )
 
+    def test_block_addon_maps_logical_alignment_and_classes(self) -> None:
+        for align, expected in (
+            ("start", '<div data-align="block-start"> Header </div>'),
+            (
+                "end",
+                '<div class="d-flex gap-2" data-align="block-end"> Footer </div>',
+            ),
+        ):
+            with self.subTest(align=align):
+                extra_class = ', extra_class="d-flex gap-2"' if align == "end" else ""
+                output = self.render_template(
+                    '{% from "components/input_group.html.jinja" import '
+                    "input_group_block_addon %}"
+                    f'{{% call input_group_block_addon("{align}"{extra_class}) %}}'
+                    f"{'Header' if align == 'start' else 'Footer'}"
+                    "{% endcall %}"
+                )
+
+                self.assertEqual(output, expected)
+
     def test_input_group_fails_fast_for_unknown_contracts(self) -> None:
         with self.assertRaisesRegex(
             TypeError,
@@ -55,6 +75,12 @@ class InputGroupTests(CatalogTestCase):
                 "input_group_text %}"
                 '{{ input_group_text("   ") }}',
                 "Input group text content is required",
+            ),
+            (
+                '{% from "components/input_group.html.jinja" import '
+                "input_group_block_addon %}"
+                '{% call input_group_block_addon("middle") %}x{% endcall %}',
+                "Unknown input group block addon alignment: middle",
             ),
         )
 

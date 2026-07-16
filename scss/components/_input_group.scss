@@ -1,10 +1,14 @@
 .input-group {
-  border: var(--bs-border-width) solid var(--moo-border);
-  border-radius: var(--bs-border-radius-lg);
+  border: $input-border-width solid $input-border-color;
+  border-radius: $input-border-radius;
 }
 
 .input-group:not(:has(textarea)) {
   height: $input-height;
+}
+
+.input-group:not(:has(textarea)) > .form-control {
+  min-height: 0;
 }
 
 .input-group > :not(:first-child):not([class~="dropdown-menu"]):not([class~="valid-tooltip"]):not([class~="valid-feedback"]):not([class~="invalid-tooltip"]):not([class~="invalid-feedback"]) {
@@ -17,29 +21,8 @@
 }
 
 .input-group > .input-group-text {
-  padding-block: $input-padding-y;
   color: var(--bs-secondary-color);
   background-color: transparent;
-}
-
-// The icon field derives both insets from Bootstrap's input/addon padding
-// scale. Logical properties mirror in RTL; text addons keep native padding.
-.input-group > .input-group-text:first-child:has(> [data-icon]) {
-  padding-inline: ($input-group-addon-padding-x - ($input-padding-y * 0.5)) 0;
-}
-
-.input-group > .input-group-text:last-child:has(> [data-icon]) {
-  padding-inline: 0 ($input-group-addon-padding-x - ($input-padding-y * 0.5));
-}
-
-.input-group > .input-group-text:first-child:has(> [data-icon]) + .form-control {
-  padding-inline-start: ($input-padding-x - $input-padding-y);
-}
-
-// No preceding-sibling combinator exists, and :has() cannot nest, so scope the
-// trailing control by the group (ends with an icon addon) plus its own adjacency.
-.input-group:has(> .input-group-text:last-child > [data-icon]) > .form-control:has(+ .input-group-text:last-child) {
-  padding-inline-end: ($input-padding-x - $input-padding-y);
 }
 
 .input-group-text > [data-icon] {
@@ -63,20 +46,18 @@
   flex-basis: 100%;
   align-items: center;
   width: 100%;
-  border-color: var(--bs-border-color);
 }
 
 .input-group > [data-align="block-start"] {
   order: -1;
-  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  border-bottom: $input-border-width solid $input-group-addon-border-color;
 }
 
 .input-group > [data-align="block-end"] {
-  border-top: var(--bs-border-width) solid var(--bs-border-color);
+  border-top: $input-border-width solid $input-group-addon-border-color;
 }
 
 .input-group > [data-align] > .input-group-text {
-  padding-block: $input-padding-y;
   color: var(--bs-secondary-color);
   border: 0;
   background-color: transparent;

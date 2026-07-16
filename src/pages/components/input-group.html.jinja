@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button, icon as button_icon %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
-{% from "components/input_group.html.jinja" import input_group, input_group_text %}
+{% from "components/input_group.html.jinja" import input_group, input_group_block_addon, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
@@ -165,7 +165,7 @@
           rows=4
         ) }}
         {{ input_group_text("0/280") }}
-        {{ button("Post", variant="outline") }}
+        {{ button("Post", variant="default") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -185,7 +185,9 @@
               id="block-start-input",
               placeholder="Enter your name"
             ) }}
-            <div data-align="block-start">{{ input_group_text("Full Name") }}</div>
+            {% call input_group_block_addon("start") %}
+              {{ input_group_text("Full Name") }}
+            {% endcall %}
           {% endcall %}
         {% endcall %}
         {% call render_field("Textarea", "block-start-textarea", "Header positioned above the textarea.") %}
@@ -195,7 +197,9 @@
               id="block-start-textarea",
               placeholder="console.log('Hello, world!');"
             ) }}
-            <div data-align="block-start">{{ input_group_text("script.js") }}</div>
+            {% call input_group_block_addon("start") %}
+              {{ input_group_text("script.js") }}
+            {% endcall %}
           {% endcall %}
         {% endcall %}
       </div>
@@ -217,7 +221,9 @@
               id="block-end-input",
               placeholder="Enter amount"
             ) }}
-            <div data-align="block-end">{{ input_group_text("USD") }}</div>
+            {% call input_group_block_addon("end") %}
+              {{ input_group_text("USD") }}
+            {% endcall %}
           {% endcall %}
         {% endcall %}
         {% call render_field("Textarea", "block-end-textarea", "Footer positioned below the textarea.") %}
@@ -228,10 +234,10 @@
               placeholder="Write a comment...",
               rows=4
             ) }}
-            <div class="d-flex align-items-center justify-content-between" data-align="block-end">
+            {% call input_group_block_addon("end", "d-flex align-items-center justify-content-between") %}
               {{ input_group_text("0/280") }}
               {{ button("Post", variant="default", size="sm") }}
-            </div>
+            {% endcall %}
           {% endcall %}
         {% endcall %}
       </div>

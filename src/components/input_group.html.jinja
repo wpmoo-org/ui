@@ -11,3 +11,10 @@
   {% if not content | trim %}{{ fail("Input group text content is required") }}{% endif %}
   <span class="input-group-text{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}>{{ content | trim | safe }}</span>
 {%- endmacro %}
+
+{% macro input_group_block_addon(align, extra_class="") -%}
+  {% if align not in ["start", "end"] %}{{ fail("Unknown input group block addon alignment: " ~ align) }}{% endif %}
+  <div{% if extra_class %} class="{{ extra_class }}"{% endif %} data-align="block-{{ align }}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}

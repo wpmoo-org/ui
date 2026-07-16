@@ -1,6 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/input_group.html.jinja" import input_group %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
@@ -138,6 +140,22 @@
       "Toolbar",
       "Use <code>btn-toolbar</code> for separate action clusters; <code>gap-2</code> spaces the clusters while each inner group stays joined.",
       toolbar_groups
+    ) }}
+
+    {% set nested_groups %}
+      <div class="d-flex align-items-center gap-2 w-100">
+        {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus") }}
+        {% call input_group(extra_class="flex-grow-1") %}
+          {{ input(aria_label="Message body", placeholder="Send a message...") }}
+          {{ button("", variant="outline", size="icon", aria_label="Record voice note", icon_start="audio-lines") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "nested-groups",
+      "Nested groups",
+      "Use Bootstrap input grouping when buttons and fields need one connected surface.",
+      nested_groups
     ) }}
 
     {% set rtl_preview %}
