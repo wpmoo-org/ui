@@ -53,6 +53,15 @@ $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;
 $card-cap-padding-x: $card-spacer-x !default;
 
+// Bootstrap has no native avatar component. Keep unmatched static values as
+// compile-time Sass knobs; exact shared typography reuses Bootstrap variables.
+$avatar-size: 2rem !default;
+$avatar-size-sm: $avatar-size * 0.75 !default;
+$avatar-size-lg: $avatar-size * 1.25 !default;
+$avatar-font-size-sm: 0.75rem !default;
+$avatar-font-size-lg: 1rem !default;
+$avatar-line-height: 1 !default;
+
 $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
 $btn-line-height: 1.25rem !default;
