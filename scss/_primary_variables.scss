@@ -52,6 +52,8 @@ $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;
 $card-cap-padding-x: $card-spacer-x !default;
+$card-title-font-size: 1rem !default;
+$card-title-letter-spacing: -0.01em !default;
 
 // Bootstrap has no native avatar component. Keep unmatched static values as
 // compile-time Sass knobs; exact shared typography reuses Bootstrap variables.

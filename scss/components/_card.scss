@@ -40,13 +40,13 @@
 
 .card-title {
   margin-bottom: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-size: $card-title-font-size;
+  font-weight: $headings-font-weight;
+  line-height: $line-height-sm;
+  letter-spacing: $card-title-letter-spacing;
 }
 
 .card-subtitle {
   margin-top: 0;
-  font-size: 0.875rem;
+  font-size: $font-size-base;
 }

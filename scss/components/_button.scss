@@ -183,5 +183,5 @@ label.btn {
 .btn-link {
   --bs-btn-color: var(--moo-foreground);
   --bs-btn-hover-color: var(--moo-muted-foreground);
-  text-underline-offset: 0.25rem;
+  text-underline-offset: $spacer * 0.25;
 }
