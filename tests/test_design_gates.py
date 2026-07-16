@@ -6,8 +6,8 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENTS_SCSS = ROOT / "scss/components"
 
-# Component partials must consume shared primitives (--bs-* scales and
-# --moo-* theme tokens); literal colors, shadows, and radii are defects.
+# Component partials must consume shared primitives (Bootstrap Sass/CSS scales
+# and --moo-* theme tokens); literal colors, shadows, and radii are defects.
 LITERAL_COLOR = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch)\(")
 DECLARATION = re.compile(r"^\s*(--[\w-]+|[a-z-]+)\s*:\s*([^;]+);")
 GATED_PROP = re.compile(r"color|background|-bg$|shadow|radius|outline|border")
@@ -36,6 +36,9 @@ class DesignGateTests(CatalogTestCase):
                     "var(" in value
                     or value.lower() in ALLOWED_LITERALS
                     or value in {
+                        "$input-border-radius",
+                        "$input-border-width solid $input-border-color",
+                        "$input-border-width solid $input-group-addon-border-color",
                         "$input-focus-border-color",
                         "$input-focus-box-shadow",
                     }
@@ -43,7 +46,7 @@ class DesignGateTests(CatalogTestCase):
                     continue
                 offenders.append(
                     f"{path.name}:{lineno}: '{prop}: {value}' must consume"
-                    " a shared --bs-* scale or --moo-* token"
+                    " a shared Bootstrap Sass/CSS scale or --moo-* token"
                 )
         self.assertEqual(offenders, [])
 
