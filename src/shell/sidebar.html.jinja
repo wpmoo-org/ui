@@ -1,3 +1,5 @@
+{% from "components/navigation.html.jinja" import nav_item, nav_menu %}
+
 <aside
   class="offcanvas-lg offcanvas-start moo-catalog__sidebar"
   tabindex="-1"
@@ -15,37 +17,27 @@
     ></button>
   </div>
   <div class="offcanvas-body d-block scroll-fade-y no-scrollbar">
-    <nav aria-label="Components">
-      <h3 class="moo-catalog__nav-heading">Components</h3>
-      <ul class="nav nav-pills flex-column gap-1">
-        {% for component in catalog %}
-          <li class="nav-item">
-            <a
-              class="nav-link{% if current_section == 'components' and current_slug == component.slug %} active{% endif %}"
-              href="{{ root_path }}components/{{ component.slug }}.html"
-              {% if current_section == 'components' and current_slug == component.slug %}aria-current="page"{% endif %}
-            >
-              {{ component.label }}
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    </nav>
-    <nav class="mt-4" aria-label="Utilities">
+    <h3 class="moo-catalog__nav-heading">Components</h3>
+    {% call nav_menu("Components", vertical=true) %}
+      {% for component in catalog %}
+        {{ nav_item(
+          component.label,
+          href=root_path ~ "components/" ~ component.slug ~ ".html",
+          active=current_section == "components" and current_slug == component.slug
+        ) }}
+      {% endfor %}
+    {% endcall %}
+    <div class="mt-4">
       <h3 class="moo-catalog__nav-heading">Utilities</h3>
-      <ul class="nav nav-pills flex-column gap-1">
+      {% call nav_menu("Utilities", vertical=true) %}
         {% for utility in utilities %}
-          <li class="nav-item">
-            <a
-              class="nav-link{% if current_section == 'utils' and current_slug == utility.slug %} active{% endif %}"
-              href="{{ root_path }}utils/{{ utility.slug }}.html"
-              {% if current_section == 'utils' and current_slug == utility.slug %}aria-current="page"{% endif %}
-            >
-              {{ utility.label }}
-            </a>
-          </li>
+          {{ nav_item(
+            utility.label,
+            href=root_path ~ "utils/" ~ utility.slug ~ ".html",
+            active=current_section == "utils" and current_slug == utility.slug
+          ) }}
         {% endfor %}
-      </ul>
-    </nav>
+      {% endcall %}
+    </div>
   </div>
 </aside>
