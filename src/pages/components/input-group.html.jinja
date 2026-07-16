@@ -20,13 +20,16 @@
 
   <div class="moo-component-examples">
     {% set icon_start %}
-      {% call input_group() %}
-        {{ input_group_text(button_icon("search", "inline-start")) }}
-        {{ input(
-          aria_label="Search components",
-          type="search",
-          placeholder="Search..."
-        ) }}
+      {% call render_field("Search", "icon-start-search", "Icon positioned at the start.", "w-100") %}
+        {% call input_group() %}
+          {{ input_group_text(button_icon("search", "inline-start")) }}
+          {{ input(
+            aria_label="Search",
+            id="icon-start-search",
+            type="search",
+            placeholder="Search..."
+          ) }}
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -38,12 +41,15 @@
     ) }}
 
     {% set icon_end %}
-      {% call input_group() %}
-        {{ input(
-          aria_label="Password",
-          placeholder="Password"
-        ) }}
-        {{ input_group_text(button_icon("eye-off", "inline-start")) }}
+      {% call render_field("Password", "icon-end-password", "Icon positioned at the end.", "w-100") %}
+        {% call input_group() %}
+          {{ input(
+            aria_label="Password",
+            id="icon-end-password",
+            placeholder="Password"
+          ) }}
+          {{ input_group_text(button_icon("eye-off", "inline-start")) }}
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -123,7 +129,7 @@
           type="search",
           placeholder="Search commands..."
         ) }}
-        {{ input_group_text(kbd("⌘ K")) }}
+        {{ input_group_text(kbd("⌘K")) }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -134,45 +140,40 @@
       "moo-example__preview--narrow"
     ) }}
 
-    {% set dropdown_search %}
-      {% call input_group() %}
-        {{ input(
-          aria_label="Search destination",
-          type="search",
-          placeholder="Search..."
-        ) }}
-        {{ button("Search in", variant="outline", dropdown=true) }}
-        {% call dropdown_menu(align="end") %}
-          {{ dropdown_item("Inbox", icon="inbox") }}
-          {{ dropdown_item("Archive", icon="archive") }}
-          {{ dropdown_item("Trash", icon="trash", destructive=true) }}
+    {% set dropdown_groups %}
+      <div class="d-grid gap-3 w-100">
+        {% call input_group() %}
+          {{ input(
+            aria_label="File name",
+            placeholder="Enter file name"
+          ) }}
+          {{ button("", variant="ghost", size="icon-xs", aria_label="More file actions", icon_start="ellipsis", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true) }}
+          {% call dropdown_menu(align="end") %}
+            {{ dropdown_item("Settings") }}
+            {{ dropdown_item("Copy path") }}
+            {{ dropdown_item("Open location") }}
+          {% endcall %}
         {% endcall %}
-      {% endcall %}
+        {% call input_group() %}
+          {{ input(
+            aria_label="Search query",
+            type="search",
+            placeholder="Enter search query"
+          ) }}
+          {{ button("Search In...", variant="ghost", size="xs", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true) }}
+          {% call dropdown_menu(align="end") %}
+            {{ dropdown_item("Documentation") }}
+            {{ dropdown_item("Blog Posts") }}
+            {{ dropdown_item("Changelog") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
     {% endset %}
     {{ render_example(
       "dropdown",
       "Dropdown",
-      "Use Bootstrap's dropdown button markup directly inside the group when the input action needs a scope selector.",
-      dropdown_search,
-      "moo-example__preview--narrow"
-    ) }}
-
-    {% set textarea_group %}
-      {% call input_group() %}
-        {{ textarea(
-          aria_label="Message",
-          placeholder="Write a message...",
-          rows=4
-        ) }}
-        {{ input_group_text("0/280") }}
-        {{ button("Post", variant="default") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "textarea",
-      "Textarea",
-      "A textarea can share the same Bootstrap group when the counter or action belongs to the field.",
-      textarea_group,
+      "Use an icon-only menu for file actions or a labeled menu when the input action needs a search scope.",
+      dropdown_groups,
       "moo-example__preview--narrow"
     ) }}
 
@@ -212,41 +213,42 @@
       "moo-example__preview--narrow"
     ) }}
 
-    {% set block_end %}
-      <div class="d-grid gap-3 w-100">
-        {% call render_field("Input", "block-end-input", "Footer positioned below the input.") %}
-          {% call input_group() %}
-            {{ input(
-              aria_label="Input",
-              id="block-end-input",
-              placeholder="Enter amount"
-            ) }}
-            {% call input_group_block_addon("end") %}
-              {{ input_group_text("USD") }}
-            {% endcall %}
-          {% endcall %}
+    {% set block_end_input %}
+      {% call input_group() %}
+        {{ input(
+          aria_label="Amount",
+          placeholder="Enter amount"
+        ) }}
+        {% call input_group_block_addon("end") %}
+          {{ input_group_text("USD") }}
         {% endcall %}
-        {% call render_field("Textarea", "block-end-textarea", "Footer positioned below the textarea.") %}
-          {% call input_group() %}
-            {{ textarea(
-              aria_label="Textarea",
-              id="block-end-textarea",
-              placeholder="Write a comment...",
-              rows=4
-            ) }}
-            {% call input_group_block_addon("end", "d-flex align-items-center justify-content-between") %}
-              {{ input_group_text("0/280") }}
-              {{ button("Post", variant="default", size="sm") }}
-            {% endcall %}
-          {% endcall %}
-        {% endcall %}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_example(
-      "block-end",
-      "Block-end addons",
-      "Place a unit, counter, or action below the control when the supporting content belongs to the field.",
-      block_end,
+      "block-end-input",
+      "Block-end input",
+      "Place a unit below the input when the supporting content belongs to the field.",
+      block_end_input,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set block_end_textarea %}
+      {% call input_group() %}
+        {{ textarea(
+          aria_label="Comment",
+          placeholder="Write a comment..."
+        ) }}
+        {% call input_group_block_addon("end", "d-flex align-items-center justify-content-between") %}
+          {{ input_group_text("0/280") }}
+          {{ button("Post", variant="default") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "block-end-textarea",
+      "Block-end textarea",
+      "Keep a counter and action below the textarea when both belong to the field.",
+      block_end_textarea,
       "moo-example__preview--narrow"
     ) }}
 
@@ -257,7 +259,7 @@
           type="search",
           placeholder="بحث..."
         ) }}
-        {{ input_group_text(kbd("⌘ K")) }}
+        {{ input_group_text(kbd("⌘K")) }}
       {% endcall %}
     {% endset %}
     {{ render_example(

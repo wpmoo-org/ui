@@ -5,3 +5,7 @@
   outline-offset: var(--bs-focus-ring-width);
   box-shadow: none;
 }
+
+.input-group > .dropdown-toggle[aria-expanded="true"]:focus-visible {
+  outline: 0;
+}
