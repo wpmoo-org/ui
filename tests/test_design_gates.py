@@ -15,6 +15,13 @@ ALLOWED_LITERALS = {"0", "none", "transparent", "inherit", "currentcolor"}
 
 
 class DesignGateTests(CatalogTestCase):
+    def test_all_component_partials_are_imported(self) -> None:
+        entrypoint = (ROOT / "scss/moo-ui.scss").read_text(encoding="utf-8")
+
+        for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
+            component = path.stem.removeprefix("_")
+            self.assertIn(f'@import "components/{component}";', entrypoint)
+
     def test_component_styles_consume_shared_primitives_only(self) -> None:
         offenders: list[str] = []
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
