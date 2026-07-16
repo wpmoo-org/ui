@@ -252,6 +252,26 @@
       "moo-example__preview--narrow"
     ) }}
 
+    {% set custom_input %}
+      {% call input_group() %}
+        {{ textarea(
+          aria_label="Custom message",
+          placeholder="Write a message...",
+          rows=4
+        ) }}
+        {% call input_group_block_addon("end", "justify-content-end") %}
+          {{ button("Submit") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "custom-input",
+      "Custom Input",
+      "Combine a native resizable textarea and action in one Bootstrap input group.",
+      custom_input,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set rtl_group %}
       {% call input_group(dir="rtl") %}
         {{ input(
