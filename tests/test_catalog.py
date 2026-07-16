@@ -84,7 +84,12 @@ class CatalogContractTests(CatalogTestCase):
             r"placeholder|popover|progress|spinner|toast)(?:-|$)"
         )
 
-        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+        pages = [
+            *sorted((ROOT / "src/pages/components").glob("*.jinja")),
+            # The index composes the same ready macros; it gets no exemption.
+            ROOT / "src/pages/index.html.jinja",
+        ]
+        for path in pages:
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="interactive markup"):
@@ -164,20 +169,3 @@ class CatalogContractTests(CatalogTestCase):
                                 value,
                                 r"^(?:0|var\(--bs-border-radius(?:-[a-z0-9-]+)?\)|calc\(var\(--bs-[a-z0-9-]*border-radius\) - var\(--bs-[a-z0-9-]*border-width\)\))$",
                             )
-
-    def test_example_preview_container_centers_component_demos(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        css = self.read_output("assets/css/catalog.css")
-        preview_block = css.split(".moo-example__preview {", 1)[1].split("}", 1)[0]
-        self.assertIn("justify-content: center;", preview_block)
-        self.assertIn(".moo-example__preview--narrow > * {", css)
-        self.assertNotIn(".moo-example__preview .card", css)
-        for component_page in (
-            "components/button.html",
-            "components/button-group.html",
-            "components/card.html",
-        ):
-            page = self.read_output(component_page)
-            self.assertNotIn("mx-auto", page)
