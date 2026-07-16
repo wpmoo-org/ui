@@ -81,6 +81,10 @@ label.btn {
   aspect-ratio: 1;
 }
 
+:is(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg)::after {
+  display: none;
+}
+
 .btn > [data-icon="inline-start"],
 .btn > [data-icon="inline-end"] {
   width: $spacer;

@@ -20,9 +20,29 @@
   border-radius: 0;
 }
 
+.input-group > :is(button, a) {
+  border: var(--bs-btn-border-width) var(--bs-border-style) var(--bs-btn-border-color);
+}
+
 .input-group > .input-group-text {
   color: var(--bs-secondary-color);
   background-color: transparent;
+}
+
+.input-group > .input-group-text:first-child:has(> [data-icon]) {
+  padding-inline-end: 0;
+}
+
+.input-group > .input-group-text:first-child:has(> [data-icon]) + .form-control {
+  padding-inline-start: $input-btn-padding-y;
+}
+
+.input-group > .input-group-text:last-child:has(> [data-icon]) {
+  padding-inline-start: 0;
+}
+
+.input-group:has(> .input-group-text:last-child > [data-icon]) > .form-control:has(+ .input-group-text:last-child) {
+  padding-inline-end: $input-btn-padding-y;
 }
 
 .input-group-text > [data-icon] {
@@ -30,11 +50,6 @@
   height: 1rem;
   flex: 0 0 auto;
   color: var(--bs-secondary-color);
-}
-
-.input-group-text > kbd {
-  color: var(--bs-secondary-color);
-  background-color: var(--bs-secondary-bg);
 }
 
 .input-group:has(> [data-align]) {
@@ -46,24 +61,21 @@
   flex-basis: 100%;
   align-items: center;
   width: 100%;
+  padding: $input-btn-padding-y $input-padding-x $input-padding-y-lg;
 }
 
 .input-group > [data-align="block-start"] {
   order: -1;
-  border-bottom: $input-border-width solid $input-group-addon-border-color;
-}
-
-.input-group > [data-align="block-end"] {
-  border-top: $input-border-width solid $input-group-addon-border-color;
 }
 
 .input-group > [data-align] > .input-group-text {
+  padding: 0;
   color: var(--bs-secondary-color);
   border: 0;
   background-color: transparent;
 }
 
-.input-group:focus-within {
+.input-group:has(> .form-control:focus) {
   border-color: $input-focus-border-color;
   box-shadow: $input-focus-box-shadow;
 }
