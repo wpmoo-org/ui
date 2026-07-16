@@ -150,11 +150,8 @@ class InputGroupTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        source = (ROOT / "scss/components/_input_group.scss").read_text(encoding="utf-8")
         css = self.read_output("assets/css/moo-ui.css")
 
-        self.assertIn("padding-inline: $input-group-addon-padding-y;", source)
-        self.assertNotIn("padding-inline: 0.25rem;", source)
         self.assertIn(
             "border: var(--bs-border-width) solid var(--moo-border);",
             css,

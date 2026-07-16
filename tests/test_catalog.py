@@ -44,6 +44,10 @@ class CatalogContractTests(CatalogTestCase):
             "button_group": ("btn",),
             "card": ("card",),
             "input": ("form-control",),
+            # Bootstrap's own forms/_input-group.scss styles `.input-group >
+            # .form-control` / `> .form-select`, so the group legitimately owns
+            # those controls within its scope.
+            "input_group": ("input-group", "form-control", "form-select"),
             "navigation": ("active", "disabled", "nav"),
         }
 
