@@ -38,18 +38,20 @@ the build entrypoints and shared shell output.
 
 ### Verification strategy
 
-- Write the failing test first for public macro behavior, validation and
-  fail-fast branches, accessibility contracts, build behavior, and reusable
-  design gates.
-- Iterate in the browser first for styling, spacing, responsive behavior, RTL,
-  dark mode, and pixel matching. Add regression tests only after the behavior
-  is stable and machine-verifiable.
+- Compare the Bootstrap and shadcn reference pages before implementing a
+  component; iterate in the browser for styling, spacing, responsive behavior,
+  RTL, and dark mode.
+- The permanent suite carries four categories only: build entrypoints, the
+  design/composition/selector-ownership gates, the code-renderer and
+  source-format contracts, and macro fail-fast/accessibility guards. Visual
+  and DOM-shape pins are not written during the shadcn convergence.
+- Per-component contract tests are written after visual and behavior approval
+  — at catalog acceptance — to lock approved outcomes without pixel pins.
 - For catalog copy, example order, and other documentation-only changes, run
-  the build and inspect the rendered page. They do not need unit tests unless
-  they change behavior or a reusable contract.
+  the build and inspect the rendered page.
 
-Every completed component phase still finishes with its relevant targeted
-tests, design gates, the proportionate full suite, and browser review.
+Every phase closes with browser review plus the green gate suite and lands as
+its own commit.
 
 ## Source boundaries
 
