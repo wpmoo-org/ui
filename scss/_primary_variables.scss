@@ -30,6 +30,7 @@ $input-bg: transparent !default;
 $input-border-color: var(--moo-border) !default;
 $input-border-radius: 0.625rem !default;
 $input-focus-bg: transparent !default;
+$form-text-margin-top: 0.5rem !default;
 
 // Static component geometry belongs on Bootstrap's own Sass knobs. Bootstrap
 // then emits the matching --bs-* consumption variables for each component.

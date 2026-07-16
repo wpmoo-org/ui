@@ -1,5 +1,5 @@
 {% macro render_field(label, id, description="", extra_class="") %}
-  <div class="d-grid gap-2{% if extra_class %} {{ extra_class }}{% endif %}">
+  <div class="d-grid gap-0{% if extra_class %} {{ extra_class }}{% endif %}">
     <label class="form-label" for="{{ id }}">{{ label }}</label>
     {{ caller() | trim | safe }}
     {% if description %}<div class="form-text">{{ description | safe }}</div>{% endif %}
