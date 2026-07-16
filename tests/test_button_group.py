@@ -40,13 +40,17 @@ class ButtonGroupTests(CatalogTestCase):
         self.assertIn('role="toolbar"', page)
         self.assertIn('aria-label="Ticket actions"', page)
         self.assertIn('aria-label="Media controls"', page)
-        self.assertNotIn("dropdown-menu", page)
-        self.assertNotIn("btn-check", page)
-        self.assertNotIn("form-control", page)
-        self.assertNotIn('<a class="btn', page)
-        self.assertNotIn("example.com", page)
-        self.assertNotIn("React", page)
-        self.assertNotIn("Tailwind", page)
+        examples = page.split('<div class="moo-component-examples">', 1)[1].split(
+            "For more grouping patterns",
+            1,
+        )[0]
+        self.assertNotIn("dropdown-menu", examples)
+        self.assertNotIn("btn-check", examples)
+        self.assertNotIn("form-control", examples)
+        self.assertNotIn('<a class="btn', examples)
+        self.assertNotIn("example.com", examples)
+        self.assertNotIn("React", examples)
+        self.assertNotIn("Tailwind", examples)
 
     def test_button_group_rtl_keeps_bootstrap_ltr_geometry(self) -> None:
         result = self.run_build()

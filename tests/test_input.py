@@ -89,6 +89,13 @@ class InputTests(CatalogTestCase):
         ):
             self.render_input('input(aria_label="Email", type="email")')
 
+    def test_input_does_not_expose_bootstrap_size_variants(self) -> None:
+        with self.assertRaisesRegex(
+            TypeError,
+            "macro 'input' takes no keyword argument 'size'",
+        ):
+            self.render_input('input(aria_label="Search", size="lg")')
+
     def test_input_emits_native_disabled_and_readonly_states(self) -> None:
         disabled = self.render_input(
             'input(aria_label="Disabled query", disabled=true)'
@@ -157,11 +164,22 @@ class InputTests(CatalogTestCase):
         )
         self.assertIn('class="form-label"', page)
         self.assertIn('class="form-control"', page)
+        self.assertNotIn("form-control-sm", page)
+        self.assertNotIn("form-control-lg", page)
         self.assertIn('type="file"', page)
         self.assertIn('aria-label=', page)
         self.assertIn(" disabled", page)
-        self.assertIn(" required", page)
-        self.assertIn('aria-invalid="true"', page)
+        self.assertNotIn(" required", page)
+        self.assertNotIn('aria-invalid="true"', page)
+        for marker in (
+            'data-example="api-key"',
+            'data-example="basic"',
+            'data-example="disabled"',
+            'data-example="file"',
+        ):
+            self.assertIn(marker, page)
+        self.assertNotIn('data-example="invalid"', page)
+        self.assertNotIn('data-example="required"', page)
         self.assertIn('<span class="token tag">input</span>', page)
 
         active_labels = [

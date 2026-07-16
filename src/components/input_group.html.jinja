@@ -1,0 +1,13 @@
+{% set input_group_dirs = ["", "ltr", "rtl"] %}
+
+{% macro input_group(extra_class="", dir="") -%}
+  {% if dir not in input_group_dirs %}{{ fail("Unknown input group direction: " ~ dir) }}{% endif %}
+  <div class="input-group{% if extra_class %} {{ extra_class }}{% endif %}"{% if dir %} dir="{{ dir }}"{% endif %}>
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro input_group_text(content, id="", extra_class="") -%}
+  {% if not content | trim %}{{ fail("Input group text content is required") }}{% endif %}
+  <span class="input-group-text{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}>{{ content | trim | safe }}</span>
+{%- endmacro %}

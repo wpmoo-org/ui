@@ -1,0 +1,32 @@
+{% set select_sizes = ["", "sm", "lg"] %}
+{% set select_dirs = ["", "ltr", "rtl"] %}
+
+{% macro select(
+  label="",
+  aria_label="",
+  id="",
+  options=[],
+  selected="",
+  size="",
+  multiple=false,
+  rows="",
+  disabled=false,
+  required=false,
+  extra_class="",
+  dir=""
+) -%}
+  {% set has_label = label | trim %}
+  {% set has_aria_label = aria_label | trim %}
+  {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Select requires exactly one of label or aria_label") }}{% endif %}
+  {% if has_label and not id | trim %}{{ fail("Visible select labels require id") }}{% endif %}
+  {% if not options %}{{ fail("Select options are required") }}{% endif %}
+  {% if size not in select_sizes %}{{ fail("Unknown select size: " ~ size) }}{% endif %}
+  {% if dir not in select_dirs %}{{ fail("Unknown select direction: " ~ dir) }}{% endif %}
+
+  {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
+  <select class="form-select{% if size %} form-select-{{ size }}{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if selected %} data-selected="{{ selected }}"{% endif %}{% if multiple %} multiple{% endif %}{% if rows %} size="{{ rows }}"{% endif %}{% if disabled %} disabled{% endif %}{% if required %} required{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
+    {% for option in options %}
+      <option value="{{ option.value }}"{% if option.value == selected or (option.selected is defined and option.selected) %} selected{% endif %}{% if option.disabled is defined and option.disabled %} disabled{% endif %}>{{ option.label }}</option>
+    {% endfor %}
+  </select>
+{%- endmacro %}

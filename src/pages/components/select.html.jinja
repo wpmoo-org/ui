@@ -1,0 +1,161 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/select.html.jinja" import select %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Select — Moo UI{% endblock %}
+
+{% set workspace_options = [
+  {"value": "olympiad", "label": "Olympiad"},
+  {"value": "kita", "label": "Kita"},
+  {"value": "portal", "label": "Portal"},
+  {"value": "ui", "label": "UI"}
+] %}
+
+{% set status_options = [
+  {"value": "all", "label": "All statuses"},
+  {"value": "draft", "label": "Draft"},
+  {"value": "active", "label": "Active"},
+  {"value": "archived", "label": "Archived"}
+] %}
+
+{% block content %}
+  {{ render_page_header(
+    "Select",
+    "Use native select controls when the user chooses from a compact, known set of options."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      <div class="d-grid gap-2">
+        {{ select(
+          label="Workspace",
+          id="workspace-select",
+          options=workspace_options,
+          selected="ui"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Default",
+      "Use <code>form-select</code> for a native select. Browser-owned option menus stay accessible and platform-correct.",
+      basic,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set sizing %}
+      <div class="d-grid gap-3 w-100">
+        {{ select(
+          aria_label="Small status filter",
+          options=status_options,
+          selected="all",
+          size="sm"
+        ) }}
+        {{ select(
+          aria_label="Default status filter",
+          options=status_options,
+          selected="active"
+        ) }}
+        {{ select(
+          aria_label="Large status filter",
+          options=status_options,
+          selected="draft",
+          size="lg"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "sizing",
+      "Sizing",
+      "Apply <code>form-select-sm</code> or <code>form-select-lg</code> directly to the select when the surrounding form changes density.",
+      sizing,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      <div class="d-grid gap-2">
+        {{ select(
+          label="Locked workspace",
+          id="locked-workspace-select",
+          options=workspace_options,
+          selected="olympiad",
+          disabled=true
+        ) }}
+        <div class="form-text">This choice is managed by the current project.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Use the native <code>disabled</code> attribute when a choice is visible but cannot be changed.",
+      disabled,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set visible_rows %}
+      {{ select(
+        aria_label="Visible workspace list",
+        options=workspace_options,
+        selected="portal",
+        rows="4"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "visible-rows",
+      "Visible rows",
+      "Bootstrap supports the native <code>size</code> attribute. Use it for compact lists where opening a menu would hide useful context.",
+      visible_rows,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set multiple %}
+      {{ select(
+        aria_label="Multiple workspace selection",
+        options=[
+          {"value": "portal", "label": "Portal", "selected": true},
+          {"value": "ui", "label": "UI", "selected": true},
+          {"value": "kita", "label": "Kita"},
+          {"value": "olympiad", "label": "Olympiad"}
+        ],
+        multiple=true,
+        rows="4"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "multiple",
+      "Multiple",
+      "Use <code>multiple</code> only when the user can keep more than one option selected; otherwise prefer a single select.",
+      multiple,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      {{ select(
+        aria_label="Arabic workspace",
+        options=[
+          {"value": "workspace", "label": "مساحة العمل"},
+          {"value": "portal", "label": "البوابة"},
+          {"value": "ui", "label": "واجهة المستخدم"}
+        ],
+        selected="workspace",
+        dir="rtl"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Use <code>dir=\"rtl\"</code> on the select or parent form when the option labels are right-to-left.",
+      rtl,
+      "moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For native select constraints and Sass variables, see the",
+    "https://getbootstrap.com/docs/5.3/forms/select/",
+    "Bootstrap Select documentation"
+  ) }}
+
+{% endblock %}

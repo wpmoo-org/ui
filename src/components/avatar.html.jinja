@@ -1,0 +1,17 @@
+{% set avatar_sizes = ["", "sm", "lg"] %}
+
+{% macro avatar(name="", src="", alt="", initials="", size="", extra_class="") -%}
+  {% if size not in avatar_sizes %}{{ fail("Unknown avatar size: " ~ size) }}{% endif %}
+  {% if src and not alt | trim %}{{ fail("Avatar images require alt text") }}{% endif %}
+  {% if not src and not initials | trim %}{{ fail("Avatar fallback initials are required when src is empty") }}{% endif %}
+  {% set classes = "avatar" %}
+  {% if size %}{% set classes = classes ~ " avatar-" ~ size %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <span class="{{ classes }}"{% if not src %} role="img" aria-label="{{ name if name else initials }}"{% endif %}>
+    {% if src %}
+      <img src="{{ src }}" alt="{{ alt }}">
+    {% else %}
+      {{ initials }}
+    {% endif %}
+  </span>
+{%- endmacro %}

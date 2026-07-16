@@ -33,5 +33,40 @@
     "slug": "textarea",
     "label": "Textarea",
     "status": "ready"
+  },
+  {
+    "slug": "input-group",
+    "label": "Input Group",
+    "status": "ready"
+  },
+  {
+    "slug": "select",
+    "label": "Select",
+    "status": "ready"
+  },
+  {
+    "slug": "dropdown-menu",
+    "label": "Dropdown Menu",
+    "status": "ready"
+  },
+  {
+    "slug": "badge",
+    "label": "Badge",
+    "status": "ready"
+  },
+  {
+    "slug": "avatar",
+    "label": "Avatar",
+    "status": "ready"
+  },
+  {
+    "slug": "navigation",
+    "label": "Navigation",
+    "status": "ready"
+  },
+  {
+    "slug": "separator",
+    "label": "Separator",
+    "status": "ready"
   }
 ]

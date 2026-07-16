@@ -1,0 +1,109 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Dropdown Menu — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Dropdown Menu",
+    "Show contextual actions from a Bootstrap button trigger without replacing Bootstrap's dropdown plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {% call dropdown("Open menu") %}
+        {{ dropdown_item("Edit project", icon="pencil") }}
+        {{ dropdown_item("Duplicate", icon="copy") }}
+        {{ dropdown_item("Archive", icon="archive") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Single button",
+      "Use <code>data-bs-toggle=\"dropdown\"</code> on the trigger. Bootstrap owns positioning, closing, and keyboard handling through its dropdown plugin.",
+      basic
+    ) }}
+
+    {% set grouped %}
+      {% call dropdown("Workspace", align="end") %}
+        {{ dropdown_header("Current workspace") }}
+        {{ dropdown_item("Olympiad", active=true, icon="check") }}
+        {{ dropdown_item("Kita", icon="folder") }}
+        {{ dropdown_item("Portal", icon="globe") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Manage workspaces", icon="settings") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "grouped",
+      "Headers and dividers",
+      "Use <code>dropdown-header</code> for a quiet group label and <code>dropdown-divider</code> to separate unrelated actions.",
+      grouped
+    ) }}
+
+    {% set states %}
+      {% call dropdown("More actions") %}
+        {{ dropdown_item("Publish", icon="send") }}
+        {{ dropdown_item("Waiting for review", disabled=true, icon="clock") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Delete draft", icon="trash-2", destructive=true) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "states",
+      "Disabled and destructive items",
+      "Disabled items use native disabled behavior. Destructive rows keep Bootstrap's item contract and add only the semantic <code>text-danger</code> utility.",
+      states
+    ) }}
+
+    {% set variants %}
+      <div class="d-flex flex-wrap gap-2">
+        {% call dropdown("Primary", variant="default") %}
+          {{ dropdown_item("Open") }}
+          {{ dropdown_item("Share") }}
+        {% endcall %}
+        {% call dropdown("Secondary", variant="secondary") %}
+          {{ dropdown_item("Open") }}
+          {{ dropdown_item("Share") }}
+        {% endcall %}
+        {% call dropdown("Outline", variant="outline") %}
+          {{ dropdown_item("Open") }}
+          {{ dropdown_item("Share") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "variants",
+      "Button variants",
+      "Any ready Button variant can trigger a dropdown; the menu contract stays the same.",
+      variants
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {% call dropdown("الإجراءات", align="end") %}
+          {{ dropdown_item("فتح", icon="folder-open") }}
+          {{ dropdown_item("مشاركة", icon="share") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("حذف", icon="trash-2", destructive=true) }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Set <code>dir=\"rtl\"</code> on a parent when menu labels are right-to-left; Bootstrap keeps the trigger and menu semantics unchanged.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For positioning, split buttons, and JavaScript behavior, see the",
+    "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+    "Bootstrap Dropdown documentation"
+  ) }}
+
+{% endblock %}

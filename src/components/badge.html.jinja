@@ -1,0 +1,20 @@
+{% set badge_variants = {
+  "default": "text-bg-primary",
+  "secondary": "text-bg-secondary",
+  "destructive": "text-bg-danger",
+  "outline": "border text-body-secondary",
+  "success": "text-bg-success",
+  "warning": "text-bg-warning",
+  "info": "text-bg-info",
+  "light": "text-bg-light",
+  "dark": "text-bg-dark"
+} %}
+
+{% macro badge(label, variant="default", pill=false, extra_class="", visually_hidden="") -%}
+  {% if variant not in badge_variants %}{{ fail("Unknown badge variant: " ~ variant) }}{% endif %}
+  {% if not label | trim %}{{ fail("Badge label is required") }}{% endif %}
+  {% set classes = "badge " ~ badge_variants[variant] %}
+  {% if pill %}{% set classes = classes ~ " rounded-pill" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <span class="{{ classes }}">{{ label }}{% if visually_hidden %}<span class="visually-hidden">{{ visually_hidden }}</span>{% endif %}</span>
+{%- endmacro %}

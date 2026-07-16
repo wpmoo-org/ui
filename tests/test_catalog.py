@@ -44,6 +44,7 @@ class CatalogContractTests(CatalogTestCase):
             "button_group": ("btn",),
             "card": ("card",),
             "input": ("form-control",),
+            "navigation": ("active", "disabled", "nav"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -139,7 +140,7 @@ class CatalogContractTests(CatalogTestCase):
                     if declaration.startswith("box-shadow:"):
                         self.assertRegex(
                             declaration,
-                            r"^box-shadow: (?:none|var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\));$",
+                            r"^box-shadow: (?:none|\$input-focus-box-shadow|var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\));$",
                         )
                     elif declaration.startswith("border-radius:"):
                         self.assertRegex(
