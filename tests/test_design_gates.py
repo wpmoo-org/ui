@@ -14,19 +14,35 @@ GATED_PROP = re.compile(r"color|background|-bg$|shadow|radius|outline|border")
 ALLOWED_LITERALS = {"0", "none", "transparent", "inherit", "currentcolor"}
 
 
+def active_component_imports(source: str) -> set[str]:
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    active_source = "\n".join(
+        line.split("//", 1)[0] for line in source.splitlines()
+    )
+    return set(
+        re.findall(
+            r'^\s*@import\s+["\']components/([^"\']+)["\']\s*;',
+            active_source,
+            re.MULTILINE,
+        )
+    )
+
+
 class DesignGateTests(CatalogTestCase):
+    def test_commented_component_imports_are_not_active(self) -> None:
+        source = """
+            @import "components/active";
+            // @import "components/line_commented";
+            /*
+            @import "components/block_commented";
+            */
+        """
+
+        self.assertEqual(active_component_imports(source), {"active"})
+
     def test_all_component_partials_are_imported(self) -> None:
         entrypoint = (ROOT / "scss/moo-ui.scss").read_text(encoding="utf-8")
-        active_source = "\n".join(
-            line.split("//", 1)[0] for line in entrypoint.splitlines()
-        )
-        imported_components = set(
-            re.findall(
-                r'^\s*@import\s+["\']components/([^"\']+)["\']\s*;',
-                active_source,
-                re.MULTILINE,
-            )
-        )
+        imported_components = active_component_imports(entrypoint)
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
             component = path.stem.removeprefix("_")
