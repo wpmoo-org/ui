@@ -7,9 +7,10 @@
   </div>
 {%- endmacro %}
 
-{% macro input_group_text(content, id="", extra_class="") -%}
+{% macro input_group_text(content, id="", extra_class="", for_id="") -%}
   {% if not content | trim %}{{ fail("Input group text content is required") }}{% endif %}
-  <span class="input-group-text{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}>{{ content | trim | safe }}</span>
+  {% set tag = "label" if for_id | trim else "span" %}
+  <{{ tag }} class="input-group-text{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if for_id | trim %} for="{{ for_id | trim }}"{% endif %}>{{ content | trim | safe }}</{{ tag }}>
 {%- endmacro %}
 
 {% macro input_group_block_addon(align, extra_class="") -%}

@@ -4,11 +4,16 @@
 }
 
 .input-group:not(:has(textarea)) {
+  align-items: center;
   height: $input-height;
 }
 
 .input-group:not(:has(textarea)) > .form-control {
   min-height: 0;
+}
+
+.input-group > textarea.form-control {
+  resize: none;
 }
 
 .input-group > :not(:first-child):not([class~="dropdown-menu"]):not([class~="valid-tooltip"]):not([class~="valid-feedback"]):not([class~="invalid-tooltip"]):not([class~="invalid-feedback"]) {
@@ -29,19 +34,19 @@
   background-color: transparent;
 }
 
-.input-group > .input-group-text:first-child:has(> [data-icon]) {
+.input-group > .input-group-text:first-child {
   padding-inline-end: 0;
 }
 
-.input-group > .input-group-text:first-child:has(> [data-icon]) + .form-control {
+.input-group > .input-group-text:first-child + .form-control {
   padding-inline-start: $input-btn-padding-y;
 }
 
-.input-group > .input-group-text:last-child:has(> [data-icon]) {
+.input-group > .input-group-text:last-child {
   padding-inline-start: 0;
 }
 
-.input-group:has(> .input-group-text:last-child > [data-icon]) > .form-control:has(+ .input-group-text:last-child) {
+.input-group > .form-control:has(+ .input-group-text:last-child) {
   padding-inline-end: $input-btn-padding-y;
 }
 
