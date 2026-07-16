@@ -4,17 +4,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: $avatar-size;
+  height: $avatar-size;
   flex: 0 0 auto;
   overflow: hidden;
   border: var(--bs-border-width) solid var(--moo-border);
   border-radius: var(--bs-border-radius-pill);
   background-color: var(--moo-muted-surface);
   color: var(--moo-foreground);
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  line-height: $avatar-line-height;
 }
 
 .avatar > img {
@@ -24,13 +24,13 @@
 }
 
 .avatar-sm {
-  width: 1.5rem;
-  height: 1.5rem;
-  font-size: 0.75rem;
+  width: $avatar-size-sm;
+  height: $avatar-size-sm;
+  font-size: $avatar-font-size-sm;
 }
 
 .avatar-lg {
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 1rem;
+  width: $avatar-size-lg;
+  height: $avatar-size-lg;
+  font-size: $avatar-font-size-lg;
 }
