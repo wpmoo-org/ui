@@ -1,6 +1,4 @@
 .nav {
-  --bs-nav-link-padding-x: 0.75rem;
-  --bs-nav-link-padding-y: 0.375rem;
   --bs-nav-link-color: var(--moo-foreground);
   --bs-nav-link-hover-color: var(--moo-foreground);
   --bs-nav-link-disabled-color: var(--moo-muted-foreground);
@@ -15,7 +13,7 @@
 .nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: $spacer * 0.5;
 }
 
 .nav-pills .nav-link:not(.active, .disabled):hover {

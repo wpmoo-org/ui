@@ -12,10 +12,6 @@
   --bs-card-cap-color: var(--moo-foreground);
   --bs-card-title-color: var(--moo-foreground);
   --bs-card-subtitle-color: var(--moo-muted-foreground);
-  --bs-card-spacer-x: 1.5rem;
-  --bs-card-spacer-y: 0;
-  --bs-card-cap-padding-x: var(--bs-card-spacer-x);
-  --bs-card-cap-padding-y: 0;
 
   // One vertical rhythm owned by the card; sections add only inline padding.
   gap: var(--bs-card-spacer-x);
@@ -30,7 +26,7 @@
 .card-header {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: $spacer * 0.375;
   border-bottom: 0;
 }
 
@@ -38,7 +34,7 @@
 .card-footer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: $spacer * 0.5;
   border-top: 0;
 }
 
