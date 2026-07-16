@@ -25,7 +25,7 @@
     {{ render_example(
       "api-key",
       "API Key",
-      "Keep a visible label and a short supporting message together when a field needs context.",
+      "Keep the visible label, input, and helper text together when the field needs context.",
       api_key,
       "moo-example__preview--narrow"
     ) }}
@@ -39,7 +39,7 @@
     {{ render_example(
       "basic",
       "Basic",
-      "Use the native text input when the surrounding layout already explains the field.",
+      "Use a plain text input when the surrounding layout already explains the field.",
       basic,
       "moo-example__preview--narrow"
     ) }}
@@ -59,27 +59,8 @@
     {{ render_example(
       "disabled",
       "Disabled",
-      "Use the <code>disabled</code> attribute to prevent editing and focus while Bootstrap applies its disabled appearance.",
+      "Use the <code>disabled</code> attribute when the value is visible but cannot be edited.",
       disabled,
-      "moo-example__preview--narrow"
-    ) }}
-
-    {% set invalid %}
-      <div class="d-grid gap-2">
-        {{ input(
-          label="Invalid Input",
-          id="invalid-input",
-          placeholder="Error",
-          aria_invalid=true
-        ) }}
-        <div class="form-text">This field contains validation errors.</div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "invalid",
-      "Invalid",
-      "Use <code>aria-invalid</code> for the accessibility state; the macro adds Bootstrap's matching <code>is-invalid</code> class.",
-      invalid,
       "moo-example__preview--narrow"
     ) }}
 
@@ -98,25 +79,6 @@
       "File",
       "Use the <code>type=\"file\"</code> input for a native file picker.",
       file_input,
-      "moo-example__preview--narrow"
-    ) }}
-
-    {% set required_field %}
-      <div class="d-grid gap-2">
-        {{ input(
-          label="Required Field *",
-          id="required-field",
-          placeholder="This field is required",
-          required=true
-        ) }}
-        <div class="form-text">This field must be filled out.</div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "required",
-      "Required",
-      "Use the native <code>required</code> attribute to indicate that an input must be filled out.",
-      required_field,
       "moo-example__preview--narrow"
     ) }}
   </div>

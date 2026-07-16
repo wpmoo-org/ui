@@ -1,0 +1,88 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Badge — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Badge",
+    "Add compact labels, counts, and statuses with Bootstrap's native badge component."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set variants %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ badge("Default") }}
+        {{ badge("Secondary", variant="secondary") }}
+        {{ badge("Destructive", variant="destructive") }}
+        {{ badge("Outline", variant="outline") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "variants",
+      "Variants",
+      "Use semantic Bootstrap color helpers through the badge macro. Keep the label explicit so color is not the only signal.",
+      variants
+    ) }}
+
+    {% set contextual %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ badge("Success", variant="success") }}
+        {{ badge("Warning", variant="warning") }}
+        {{ badge("Info", variant="info") }}
+        {{ badge("Light", variant="light") }}
+        {{ badge("Dark", variant="dark") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "contextual",
+      "Context colors",
+      "Bootstrap's <code>text-bg-*</code> helpers pair background and foreground colors for familiar status labels.",
+      contextual
+    ) }}
+
+    {% set pill %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ badge("New", pill=true) }}
+        {{ badge("In review", variant="secondary", pill=true) }}
+        {{ badge("Blocked", variant="destructive", pill=true) }}
+        {{ badge("Live", variant="success", pill=true) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "pill",
+      "Pill badges",
+      "Add <code>rounded-pill</code> when the badge should read as a soft capsule rather than a squared label.",
+      pill
+    ) }}
+
+    {% set counts %}
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <span class="d-inline-flex align-items-center gap-2">
+          Inbox
+          {{ badge("12", variant="secondary", visually_hidden="unread messages") }}
+        </span>
+        <span class="d-inline-flex align-items-center gap-2">
+          Chats
+          {{ badge("3", pill=true, visually_hidden="new chats") }}
+        </span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "counts",
+      "Counts",
+      "When a badge is only a number, add visually hidden context so screen readers hear what the count means.",
+      counts
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For positioned badges and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/badge/",
+    "Bootstrap Badge documentation"
+  ) }}
+
+{% endblock %}

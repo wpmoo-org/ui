@@ -1,0 +1,98 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/navigation.html.jinja" import nav_item, nav_menu %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Navigation — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Navigation",
+    "Group links into clear static navigation surfaces with Bootstrap's native nav classes."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set horizontal %}
+      {% call nav_menu("Workspace sections") %}
+        {{ nav_item("Dashboard", href="#", active=true) }}
+        {{ nav_item("Tasks", href="#") }}
+        {{ nav_item("Apps", href="#") }}
+        {{ nav_item("Settings", href="#", disabled=true) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "horizontal-pills",
+      "Pills",
+      "Use <code>.nav-pills</code> for a compact row of related destinations. Add <code>aria-current=\"page\"</code> to the active link.",
+      horizontal
+    ) }}
+
+    {% set sidebar %}
+      {% call nav_menu("App sections", vertical=true, extra_class="w-100") %}
+        {{ nav_item("Dashboard", href="#", icon="layout-dashboard", active=true) }}
+        {{ nav_item("Tasks", href="#", icon="list-check") }}
+        {{ nav_item("Apps", href="#", icon="package") }}
+        {{ nav_item("Chats", href="#", icon="messages-square", badge_label="3", badge_variant="default") }}
+        {{ nav_item("Users", href="#", icon="users") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "sidebar",
+      "Sidebar list",
+      "Stack pills vertically for shell sidebars. Icons and badges are optional; keep the link itself as the only interactive target.",
+      sidebar,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set underline %}
+      {% call nav_menu("Project filters", style="underline") %}
+        {{ nav_item("All", href="#", active=true) }}
+        {{ nav_item("Open", href="#") }}
+        {{ nav_item("Archived", href="#") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "underline",
+      "Underline",
+      "Use Bootstrap's <code>.nav-underline</code> when the navigation should feel lighter than pills.",
+      underline
+    ) }}
+
+    {% set base %}
+      {% call nav_menu("Plain navigation", style="base") %}
+        {{ nav_item("Overview", href="#", active=true) }}
+        {{ nav_item("Reports", href="#") }}
+        {{ nav_item("Disabled", disabled=true) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "base",
+      "Base nav",
+      "The base <code>.nav</code> class handles layout only. Use it when another surface owns the selected-state styling.",
+      base
+    ) }}
+
+    {% set rtl %}
+      {% call nav_menu("Arabic sections", vertical=true, extra_class="w-100", dir="rtl") %}
+        {{ nav_item("لوحة التحكم", href="#", icon="layout-dashboard", active=true) }}
+        {{ nav_item("المهام", href="#", icon="list-check") }}
+        {{ nav_item("التطبيقات", href="#", icon="package", badge_label="٤", badge_variant="secondary") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left",
+      "<code>dir=\"rtl\"</code> lets icon, label, and badge order follow the document direction without custom SVG flipping.",
+      rtl,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For dynamic tabs, pills, and JavaScript tab panels, continue with the",
+    "https://getbootstrap.com/docs/5.3/components/navs-tabs/",
+    "Bootstrap Navs and tabs documentation"
+  ) }}
+
+{% endblock %}

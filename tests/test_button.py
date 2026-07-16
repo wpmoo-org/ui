@@ -33,6 +33,20 @@ class ButtonTests(CatalogTestCase):
         with self.assertRaisesRegex(ValueError, "Unknown button type: typo"):
             self.render_button('button("Save", type="typo")')
 
+    def test_button_dropdown_trigger_uses_bootstrap_plugin_contract(self) -> None:
+        output = self.render_button('button("Actions", variant="outline", dropdown=true)')
+
+        self.assertIn("dropdown-toggle", output)
+        self.assertIn('data-bs-toggle="dropdown"', output)
+        self.assertIn('aria-expanded="false"', output)
+        self.assertNotIn('aria-pressed="false"', output)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button cannot be both toggle and dropdown",
+        ):
+            self.render_button('button("Actions", toggle=true, dropdown=true)')
+
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
         for call in (
             'button("")',

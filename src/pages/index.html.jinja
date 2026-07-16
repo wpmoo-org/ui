@@ -1,42 +1,132 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/select.html.jinja" import select %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/typography.html.jinja" import typography %}
 
-{% block title %}Component catalog — Moo UI{% endblock %}
+{% block title %}Components — Moo UI{% endblock %}
+
+{% set component_descriptions = {
+  "button": "Trigger actions with Bootstrap buttons shaped to the Moo visual language.",
+  "button-group": "Join related actions into one compact control surface.",
+  "card": "Group content, metadata, and actions inside a flexible surface.",
+  "typography": "Keep headings, support copy, and inline code consistent.",
+  "kbd": "Show keyboard input in clear surrounding instructions.",
+  "input": "Capture single-line text with native form-control behavior.",
+  "textarea": "Capture longer messages with the same field contract.",
+  "input-group": "Attach text, shortcuts, and actions to a field.",
+  "select": "Let users choose from a native option list.",
+  "dropdown-menu": "Collect secondary actions in a Bootstrap dropdown.",
+  "badge": "Mark counts, labels, and compact statuses.",
+  "avatar": "Represent people, teams, or accounts.",
+  "navigation": "Group static destinations for sidebars and sections.",
+  "separator": "Separate content with horizontal and vertical rules."
+} %}
 
 {% block content %}
   <section class="moo-catalog__intro" aria-labelledby="catalog-title">
-    <h1 class="display-5 fw-semibold" id="catalog-title">Component catalog</h1>
-    <p class="lead mb-2">Build familiar interfaces with less noise.</p>
-    <p class="text-body-secondary mb-0">
-      Moo UI keeps Bootstrap semantics while giving product teams a quieter,
-      more deliberate starting point.
+    {{ typography("Components", variant="page-title", id="catalog-title") }}
+    <p class="lead text-body-secondary mb-0">
+      A Bootstrap-native catalog with shadcn-inspired density, radius, and rhythm.
     </p>
   </section>
 
-  <section class="moo-catalog__component-list" aria-labelledby="components-title">
-    <h2 class="h4" id="components-title">Components</h2>
-    <div class="row g-3">
-      {% for component in catalog %}
-        <div class="col-12 col-md-6">
-          <a class="moo-catalog__component-card" href="components/{{ component.slug }}.html">
-            <span class="fw-medium">{{ component.label }}</span>
-            <span class="text-body-secondary">{{ component.status | capitalize }}</span>
-          </a>
-        </div>
-      {% endfor %}
+  <section class="moo-catalog__dashboard" aria-label="Catalog filters">
+    <div class="moo-catalog__toolbar">
+      {{ input(
+        aria_label="Filter components",
+        type="search",
+        placeholder="Filter components..."
+      ) }}
+      {{ select(
+        aria_label="Component status",
+        options=[
+          {"value": "ready", "label": "Ready components"},
+          {"value": "all", "label": "All components"}
+        ],
+        selected="ready",
+        extra_class="moo-catalog__status-select"
+      ) }}
+      {% call dropdown("View", align="end", extra_class="moo-catalog__toolbar-menu") %}
+        {{ dropdown_header("Catalog view") }}
+        {{ dropdown_item("Components", href="#components", active=true, icon="blocks") }}
+        {{ dropdown_item("Utilities", href="#utilities", icon="sparkles") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Bootstrap references", href="https://getbootstrap.com/docs/5.3/", icon="book-open") }}
+      {% endcall %}
     </div>
-  </section>
 
-  <section class="moo-catalog__component-list" aria-labelledby="utilities-title">
-    <h2 class="h4" id="utilities-title">Utilities</h2>
-    <div class="row g-3">
-      {% for utility in utilities %}
-        <div class="col-12 col-md-6">
-          <a class="moo-catalog__component-card" href="utils/{{ utility.slug }}.html">
-            <span class="fw-medium">{{ utility.label }}</span>
-            <span class="text-body-secondary">{{ utility.status | capitalize }}</span>
-          </a>
-        </div>
-      {% endfor %}
-    </div>
+    {{ separator(extra_class="my-4") }}
+
+    <section aria-labelledby="components-title">
+      {{ typography("Components", variant="section-title", id="components-title") }}
+      <div class="moo-catalog__grid" id="components">
+        {% for component in catalog %}
+          {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-4") %}
+            <div class="d-flex align-items-start justify-content-between gap-3">
+              {{ avatar(
+                name=component.label,
+                initials=component.label[:2] | upper,
+                extra_class="moo-catalog__app-icon"
+              ) }}
+              {{ badge(component.status | capitalize, variant="outline") }}
+            </div>
+            <div>
+              <h2 class="h5 mb-2">{{ component.label }}</h2>
+              <p class="text-body-secondary mb-0">
+                {{ component_descriptions.get(component.slug, "Bootstrap-native component primitive.") }}
+              </p>
+            </div>
+            <div>
+              {{ button(
+                "Open",
+                variant="outline",
+                size="sm",
+                element="a",
+                href="components/" ~ component.slug ~ ".html"
+              ) }}
+            </div>
+          {% endcall %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="mt-5" aria-labelledby="utilities-title">
+      {{ typography("Utilities", variant="section-title", id="utilities-title") }}
+      <div class="moo-catalog__grid moo-catalog__grid--compact" id="utilities">
+        {% for utility in utilities %}
+          {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}
+            <div class="d-flex align-items-start justify-content-between gap-3">
+              {{ avatar(
+                name=utility.label,
+                initials=utility.label[:2] | upper,
+                extra_class="moo-catalog__app-icon"
+              ) }}
+              {{ badge(utility.status | capitalize, variant="outline") }}
+            </div>
+            <div>
+              <h2 class="h5 mb-2">{{ utility.label }}</h2>
+              <p class="text-body-secondary mb-0">
+                Reusable behavior that supports the component catalog without becoming a component.
+              </p>
+            </div>
+            <div>
+              {{ button(
+                "Open",
+                variant="outline",
+                size="sm",
+                element="a",
+                href="utils/" ~ utility.slug ~ ".html"
+              ) }}
+            </div>
+          {% endcall %}
+        {% endfor %}
+      </div>
+    </section>
   </section>
 {% endblock %}

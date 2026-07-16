@@ -82,6 +82,31 @@ body {
   margin-top: 4rem;
 }
 
+.moo-catalog__dashboard {
+  margin-top: 2rem;
+}
+
+.moo-catalog__toolbar {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.moo-catalog__status-select,
+.moo-catalog__toolbar-menu {
+  width: 100%;
+}
+
+.moo-catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.moo-catalog__grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
 .moo-catalog__component-card {
   display: flex;
   align-items: center;
@@ -96,6 +121,25 @@ body {
 
 .moo-catalog__component-card:hover {
   border-color: var(--bs-secondary-color);
+}
+
+.moo-catalog__app-card {
+  min-height: 12rem;
+}
+
+.moo-catalog__app-card .card-body {
+  align-content: space-between;
+}
+
+.moo-catalog__app-icon {
+  background: var(--bs-secondary-bg);
+}
+
+@media (min-width: 768px) {
+  .moo-catalog__toolbar {
+    grid-template-columns: minmax(16rem, 1fr) 12rem auto;
+    align-items: start;
+  }
 }
 
 .moo-catalog__footer {

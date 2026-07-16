@@ -1,5 +1,4 @@
 {% set input_types = ["text", "search", "file"] %}
-{% set input_sizes = ["", "sm", "lg"] %}
 
 {% macro input(
   label="",
@@ -8,7 +7,6 @@
   type="text",
   placeholder="",
   value="",
-  size="",
   aria_invalid=false,
   required=false,
   disabled=false,
@@ -19,8 +17,7 @@
   {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Input requires exactly one of label or aria_label") }}{% endif %}
   {% if has_label and not id | trim %}{{ fail("Visible input labels require id") }}{% endif %}
   {% if type not in input_types %}{{ fail("Unknown input type: " ~ type) }}{% endif %}
-  {% if size not in input_sizes %}{{ fail("Unknown input size: " ~ size) }}{% endif %}
 
   {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
-  <input class="form-control{% if size %} form-control-{{ size }}{% endif %}{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} type="{{ type }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if value %} value="{{ value }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+  <input class="form-control{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} type="{{ type }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if value %} value="{{ value }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>
 {%- endmacro %}

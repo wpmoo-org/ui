@@ -1,0 +1,71 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Separator — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Separator",
+    "Separate related content with Bootstrap's native horizontal rule and vertical rule helper."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set horizontal %}
+      <div class="w-100">
+        <div class="fw-medium">Workspace access</div>
+        <div class="text-body-secondary small">Invite collaborators after the project is ready.</div>
+        {{ separator(extra_class="my-4") }}
+        <div class="fw-medium">Billing owner</div>
+        <div class="text-body-secondary small">Only the owner can update payment settings.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "horizontal",
+      "Horizontal rule",
+      "Use <code>&lt;hr&gt;</code> to divide stacked content. Bootstrap keeps the color inherited and the opacity low by default.",
+      horizontal,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set vertical %}
+      <div class="hstack gap-3">
+        <span class="fw-medium">Draft</span>
+        {{ separator("vertical") }}
+        <span class="text-body-secondary">Reviewed</span>
+        {{ separator("vertical") }}
+        <span class="text-body-secondary">Published</span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "vertical",
+      "Vertical rule",
+      "Use Bootstrap's <code>.vr</code> helper inside flex rows when adjacent text or controls need a quiet divider.",
+      vertical
+    ) }}
+
+    {% set semantic %}
+      <div class="d-grid gap-3 w-100">
+        <div class="fw-medium">Plan summary</div>
+        {{ separator(decorative=false) }}
+        <div class="text-body-secondary">The next section is announced as a separator for assistive technology.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "semantic",
+      "Semantic separator",
+      "Keep separators decorative by default. Set <code>decorative=false</code> only when the rule itself communicates structure.",
+      semantic,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and vertical rule helper details, see the",
+    "https://getbootstrap.com/docs/5.3/helpers/vertical-rule/",
+    "Bootstrap Vertical rule documentation"
+  ) }}
+
+{% endblock %}

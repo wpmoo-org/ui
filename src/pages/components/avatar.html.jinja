@@ -1,0 +1,86 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Avatar — Moo UI{% endblock %}
+
+{% set sample_avatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%23171717'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
+
+{% block content %}
+  {{ render_page_header(
+    "Avatar",
+    "Represent people, teams, or accounts with a compact image or initials fallback."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set fallback %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(name="Moo UI", initials="MU") }}
+        <div>
+          <div class="fw-medium">Moo UI</div>
+          <div class="text-body-secondary small">Design system</div>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "fallback",
+      "Fallback initials",
+      "Use initials when no image is available. The fallback still needs an accessible name through <code>aria-label</code>.",
+      fallback
+    ) }}
+
+    {% set image %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(src=sample_avatar, alt="Moo mascot") }}
+        <div>
+          <div class="fw-medium">Moo Mascot</div>
+          <div class="text-body-secondary small">Image avatar</div>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "image",
+      "Image",
+      "Provide meaningful <code>alt</code> text for image avatars; use initials only as the fallback path.",
+      image
+    ) }}
+
+    {% set sizes %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(name="Small avatar", initials="SM", size="sm") }}
+        {{ avatar(name="Default avatar", initials="DF") }}
+        {{ avatar(name="Large avatar", initials="LG", size="lg") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "sizes",
+      "Sizes",
+      "Use the smallest avatar that still identifies the subject in the surrounding layout.",
+      sizes
+    ) }}
+
+    {% set group %}
+      <div class="d-flex align-items-center gap-2">
+        {{ avatar(name="Aylin", initials="AY") }}
+        {{ avatar(name="Can", initials="CN") }}
+        {{ avatar(name="Mert", initials="MT") }}
+        <span class="text-body-secondary small">3 collaborators</span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "inline-group",
+      "Inline group",
+      "Keep avatar groups simple until the surrounding component owns overlap, status, or overflow behavior.",
+      group
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "Bootstrap does not ship an avatar component; related image primitives live in the",
+    "https://getbootstrap.com/docs/5.3/content/images/",
+    "Bootstrap Image documentation"
+  ) }}
+
+{% endblock %}

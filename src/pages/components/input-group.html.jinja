@@ -1,0 +1,272 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button, icon as button_icon %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/input_group.html.jinja" import input_group, input_group_text %}
+{% from "components/kbd.html.jinja" import kbd %}
+{% from "components/textarea.html.jinja" import textarea %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/field.html.jinja" import render_field %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Input Group — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Input Group",
+    "Add icons, text, buttons, and helper content to inputs with Bootstrap's native grouping behavior."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set icon_start %}
+      {% call input_group() %}
+        {{ input_group_text(button_icon("search", "inline-start")) }}
+        {{ input(
+          aria_label="Search components",
+          type="search",
+          placeholder="Search..."
+        ) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "icon-start",
+      "Icon at start",
+      "Place a decorative icon in <code>input-group-text</code> before the input when it clarifies the field's purpose.",
+      icon_start,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set icon_end %}
+      {% call input_group() %}
+        {{ input(
+          aria_label="Password",
+          placeholder="Password"
+        ) }}
+        {{ input_group_text(button_icon("eye-off", "inline-start")) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "icon-end",
+      "Icon at end",
+      "Place the addon after the input when the affordance belongs to the trailing edge.",
+      icon_end,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set search_results %}
+      {% call input_group() %}
+        {{ input_group_text(button_icon("search", "inline-start")) }}
+        {{ input(
+          aria_label="Search results",
+          type="search",
+          placeholder="Search..."
+        ) }}
+        {{ input_group_text("12 results") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "search-results",
+      "Search results",
+      "Keep a result count in the same surface while the input remains the editable control.",
+      search_results,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set text_addons %}
+      <div class="d-grid gap-3 w-100">
+        {% call input_group() %}
+          {{ input_group_text("$") }}
+          {{ input(aria_label="Amount", placeholder="0.00") }}
+          {{ input_group_text("USD") }}
+        {% endcall %}
+        {% call input_group() %}
+          {{ input_group_text("https://") }}
+          {{ input(aria_label="Site path", placeholder="wpmoo.dev") }}
+          {{ input_group_text(".com") }}
+        {% endcall %}
+        {% call input_group() %}
+          {{ input(aria_label="Work email", placeholder="name") }}
+          {{ input_group_text("@company.com") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "text-addons",
+      "Text",
+      "Use text addons for fixed prefixes, suffixes, and units; keep only the editable value in the input.",
+      text_addons,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set button_addon %}
+      {% call input_group() %}
+        {{ input(
+          aria_label="Workspace",
+          placeholder="Workspace name"
+        ) }}
+        {{ button("Create", variant="outline") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "button-addon",
+      "Button",
+      "Bootstrap lets buttons join an input group without extra CSS. Keep the button action scoped to the adjacent field.",
+      button_addon,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set shortcut %}
+      {% call input_group() %}
+        {{ input(
+          aria_label="Command search",
+          type="search",
+          placeholder="Search commands..."
+        ) }}
+        {{ input_group_text(kbd("⌘ K")) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "kbd",
+      "Kbd",
+      "Use a single keyboard hint in the trailing addon; avoid splitting one shortcut into separate visual controls.",
+      shortcut,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set dropdown_search %}
+      {% call input_group() %}
+        {{ input(
+          aria_label="Search destination",
+          type="search",
+          placeholder="Search..."
+        ) }}
+        {{ button("Search in", variant="outline", dropdown=true) }}
+        {% call dropdown_menu(align="end") %}
+          {{ dropdown_item("Inbox", icon="inbox") }}
+          {{ dropdown_item("Archive", icon="archive") }}
+          {{ dropdown_item("Trash", icon="trash", destructive=true) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "dropdown",
+      "Dropdown",
+      "Use Bootstrap's dropdown button markup directly inside the group when the input action needs a scope selector.",
+      dropdown_search,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set textarea_group %}
+      {% call input_group() %}
+        {{ textarea(
+          aria_label="Message",
+          placeholder="Write a message...",
+          rows=4
+        ) }}
+        {{ input_group_text("0/280") }}
+        {{ button("Post", variant="outline") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "textarea",
+      "Textarea",
+      "A textarea can share the same Bootstrap group when the counter or action belongs to the field.",
+      textarea_group,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set block_start %}
+      <div class="d-grid gap-3 w-100">
+        {% call render_field("Input", "block-start-input", "Header positioned above the input.") %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Input",
+              id="block-start-input",
+              placeholder="Enter your name"
+            ) }}
+            <div data-align="block-start">{{ input_group_text("Full Name") }}</div>
+          {% endcall %}
+        {% endcall %}
+        {% call render_field("Textarea", "block-start-textarea", "Header positioned above the textarea.") %}
+          {% call input_group() %}
+            {{ textarea(
+              aria_label="Textarea",
+              id="block-start-textarea",
+              placeholder="console.log('Hello, world!');"
+            ) }}
+            <div data-align="block-start">{{ input_group_text("script.js") }}</div>
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "block-start",
+      "Block-start addons",
+      "Place a label-like addon above an input or textarea while keeping the control focusable.",
+      block_start,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set block_end %}
+      <div class="d-grid gap-3 w-100">
+        {% call render_field("Input", "block-end-input", "Footer positioned below the input.") %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Input",
+              id="block-end-input",
+              placeholder="Enter amount"
+            ) }}
+            <div data-align="block-end">{{ input_group_text("USD") }}</div>
+          {% endcall %}
+        {% endcall %}
+        {% call render_field("Textarea", "block-end-textarea", "Footer positioned below the textarea.") %}
+          {% call input_group() %}
+            {{ textarea(
+              aria_label="Textarea",
+              id="block-end-textarea",
+              placeholder="Write a comment...",
+              rows=4
+            ) }}
+            <div class="d-flex align-items-center justify-content-between" data-align="block-end">
+              {{ input_group_text("0/280") }}
+              {{ button("Post", variant="default", size="sm") }}
+            </div>
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "block-end",
+      "Block-end addons",
+      "Place a unit, counter, or action below the control when the supporting content belongs to the field.",
+      block_end,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_group %}
+      {% call input_group(dir="rtl") %}
+        {{ input(
+          aria_label="بحث",
+          type="search",
+          placeholder="بحث..."
+        ) }}
+        {{ input_group_text(kbd("⌘ K")) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Use <code>dir=\"rtl\"</code> on the group or a parent container so Bootstrap keeps the joined borders and visual order aligned.",
+      rtl_group,
+      "moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For more addon combinations, see the",
+    "https://getbootstrap.com/docs/5.3/forms/input-group/",
+    "Bootstrap Input group documentation"
+  ) }}
+
+{% endblock %}

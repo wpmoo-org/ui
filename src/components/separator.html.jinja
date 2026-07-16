@@ -1,0 +1,10 @@
+{% set separator_orientations = ["horizontal", "vertical"] %}
+
+{% macro separator(orientation="horizontal", decorative=true, extra_class="") -%}
+  {% if orientation not in separator_orientations %}{{ fail("Unknown separator orientation: " ~ orientation) }}{% endif %}
+  {% if orientation == "vertical" %}
+    <div class="vr{% if extra_class %} {{ extra_class }}{% endif %}"{% if decorative %} aria-hidden="true"{% else %} role="separator" aria-orientation="vertical"{% endif %}></div>
+  {% else %}
+    <hr{% if extra_class %} class="{{ extra_class }}"{% endif %}{% if decorative %} aria-hidden="true"{% endif %}>
+  {% endif %}
+{%- endmacro %}

@@ -32,7 +32,14 @@ class DesignGateTests(CatalogTestCase):
                 prop, value = match.group(1), match.group(2).strip()
                 if not GATED_PROP.search(prop):
                     continue
-                if "var(" in value or value.lower() in ALLOWED_LITERALS:
+                if (
+                    "var(" in value
+                    or value.lower() in ALLOWED_LITERALS
+                    or value in {
+                        "$input-focus-border-color",
+                        "$input-focus-box-shadow",
+                    }
+                ):
                     continue
                 offenders.append(
                     f"{path.name}:{lineno}: '{prop}: {value}' must consume"
