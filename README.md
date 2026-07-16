@@ -43,10 +43,11 @@ the build entrypoints and shared shell output.
   RTL, and dark mode.
 - The permanent suite carries four categories only: build entrypoints, the
   design/composition/selector-ownership gates, the code-renderer and
-  source-format contracts, and macro fail-fast/accessibility guards. Visual
-  and DOM-shape pins are not written during the shadcn convergence.
-- Per-component contract tests are written after visual and behavior approval
-  — at catalog acceptance — to lock approved outcomes without pixel pins.
+  source-format contracts, and stable public macro contracts plus
+  fail-fast/accessibility guards. Visual and DOM-shape pins are not written
+  during the shadcn convergence.
+- Acceptance-specific contract coverage is added or expanded after visual and
+  behavior approval — at catalog acceptance — without pixel pins.
 - For catalog copy, example order, and other documentation-only changes, run
   the build and inspect the rendered page.
 

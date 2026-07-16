@@ -11,10 +11,7 @@
   --bs-dropdown-link-active-color: var(--moo-foreground);
   --bs-dropdown-link-active-bg: var(--moo-muted-surface);
   --bs-dropdown-link-disabled-color: var(--moo-muted-foreground);
-  --bs-dropdown-item-padding-x: 0.5rem;
-  --bs-dropdown-item-padding-y: 0.375rem;
   --bs-dropdown-header-color: var(--moo-muted-foreground);
-  --bs-dropdown-header-padding-x: 0.5rem;
 
   // Bootstrap gates dropdown shadow behind $enable-shadows, so apply the
   // shared elevation token directly after bridging it to --bs-dropdown-box-shadow.
@@ -26,7 +23,7 @@
 
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: $spacer * 0.5;
 }
 
 .dropdown-item > [data-icon] {

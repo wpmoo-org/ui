@@ -22,26 +22,24 @@
   background-color: transparent;
 }
 
-// shadcn icon field: the icon hugs the control — 0.5rem outer inset, none on
-// the inner edge — and the control tightens to 0.375rem on the icon side while
-// its outer side keeps the native input padding. Logical properties mirror in
-// RTL. Bootstrap has no matching spacing token; text addons keep full padding.
+// The icon field derives both insets from Bootstrap's input/addon padding
+// scale. Logical properties mirror in RTL; text addons keep native padding.
 .input-group > .input-group-text:first-child:has(> [data-icon]) {
-  padding-inline: 0.5rem 0;
+  padding-inline: ($input-group-addon-padding-x - ($input-padding-y * 0.5)) 0;
 }
 
 .input-group > .input-group-text:last-child:has(> [data-icon]) {
-  padding-inline: 0 0.5rem;
+  padding-inline: 0 ($input-group-addon-padding-x - ($input-padding-y * 0.5));
 }
 
 .input-group > .input-group-text:first-child:has(> [data-icon]) + .form-control {
-  padding-inline-start: 0.375rem;
+  padding-inline-start: ($input-padding-x - $input-padding-y);
 }
 
 // No preceding-sibling combinator exists, and :has() cannot nest, so scope the
 // trailing control by the group (ends with an icon addon) plus its own adjacency.
 .input-group:has(> .input-group-text:last-child > [data-icon]) > .form-control:has(+ .input-group-text:last-child) {
-  padding-inline-end: 0.375rem;
+  padding-inline-end: ($input-padding-x - $input-padding-y);
 }
 
 .input-group-text > [data-icon] {
