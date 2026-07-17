@@ -79,10 +79,9 @@
         {% call input_group(extra_class="moo-catalog__command-search") %}
           {{ input_group_text(render_icon("search", "inline-start")) }}
           {{ input(aria_label="Search documentation", type="search", placeholder="Search documentation...") }}
-          {{ input_group_text(kbd("Esc")) }}
         {% endcall %}
       </div>
-      <div class="modal-body moo-catalog__command-body">
+      <div class="modal-body moo-catalog__command-body scroll-fade-y no-scrollbar">
         <div class="moo-catalog__command-section" id="catalog-command-pages">Pages</div>
         <div class="list-group list-group-flush" role="listbox" aria-labelledby="catalog-command-pages">
           {{ _command_item(root_path ~ "index.html", "Home") }}
