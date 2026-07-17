@@ -63,6 +63,9 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap documents vertical navs as `.nav.flex-column`, so the
             # Navigation partial may scope width fixes to that native utility.
             "navigation": ("active", "disabled", "flex-column", "nav"),
+            # Bootstrap has no native sidebar component; its public namespace
+            # is owned explicitly by the Sidebar partial and styles.
+            "sidebar": ("sidebar",),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -153,10 +156,13 @@ class CatalogContractTests(CatalogTestCase):
 
         for contract in (
             'data-moo-shell="catalog"',
-            'id="catalog-navigation"',
-            "moo-catalog__header-search",
+            'class="sidebar-wrapper"',
+            'id="catalog-sidebar"',
+            'data-moo-sidebar-trigger',
+            "moo-catalog__search-trigger",
+            "wpmoo-org/ui",
+            'aria-label="Catalog navigation"',
             "input-group",
-            "<kbd>",
             "dropdown-menu",
             "scroll-fade-y no-scrollbar",
         ):
@@ -165,6 +171,24 @@ class CatalogContractTests(CatalogTestCase):
         self.assertRegex(index, r'class="[^"]*\bavatar\b[^"]*\bavatar-sm\b')
         self.assertRegex(index, r'class="[^"]*\bbadge\b')
         self.assertRegex(index, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
+
+    def test_catalog_search_trigger_opens_command_palette(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        preview = self.read_output("assets/js/preview.js")
+
+        # The header search trigger opens a command-palette modal listing the
+        # catalog pages; it no longer deep-links to the index filter field.
+        self.assertIn("moo-catalog__search-trigger", index)
+        self.assertIn('id="catalog-command"', index)
+        self.assertIn("data-moo-command-item", index)
+        self.assertIn('href="index.html"', index)
+        self.assertIn('href="components/button.html"', index)
+        # Open + filter + keyboard navigation behavior lives in preview.js.
+        self.assertIn("moo-catalog__search-trigger", preview)
+        self.assertIn("catalog-command", preview)
 
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()

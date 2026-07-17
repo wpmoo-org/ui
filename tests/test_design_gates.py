@@ -83,6 +83,16 @@ class DesignGateTests(CatalogTestCase):
                 )
         self.assertEqual(offenders, [])
 
+    def test_sidebar_styles_own_the_public_sidebar_namespace(self) -> None:
+        source = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
+        selectors = set(re.findall(r"\.([a-z][a-z0-9_-]*)", source))
+
+        self.assertTrue(selectors)
+        self.assertTrue(
+            all(selector.startswith("sidebar") for selector in selectors),
+            sorted(selector for selector in selectors if not selector.startswith("sidebar")),
+        )
+
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:
         primary_variables = (
             ROOT / "scss/_primary_variables.scss"
