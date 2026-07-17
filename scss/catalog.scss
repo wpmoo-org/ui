@@ -62,7 +62,6 @@ body {
   z-index: 1030;
   top: 0;
   min-height: 4rem;
-  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
   background: rgba(var(--bs-body-bg-rgb), 0.94);
   backdrop-filter: blur(0.75rem);
 }

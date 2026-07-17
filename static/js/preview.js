@@ -77,6 +77,25 @@
   const searchTrigger = document.querySelector(".moo-catalog__search-trigger");
   let commandActive = -1;
 
+  // Wire the ARIA combobox/listbox relationship so assistive tech follows the
+  // highlighted option, not just the CSS `.active` class.
+  const commandList = commandModalEl?.querySelector('[role="listbox"]');
+  if (commandList && !commandList.id) {
+    commandList.id = "catalog-command-list";
+  }
+  commandItems.forEach((item, index) => {
+    if (!item.id) {
+      item.id = `catalog-command-item-${index}`;
+    }
+    item.setAttribute("aria-selected", "false");
+  });
+  if (commandInput && commandList) {
+    commandInput.setAttribute("role", "combobox");
+    commandInput.setAttribute("aria-controls", commandList.id);
+    commandInput.setAttribute("aria-autocomplete", "list");
+    commandInput.setAttribute("aria-expanded", "false");
+  }
+
   const openCommand = () => {
     const Modal = window.bootstrap?.Modal;
     if (commandModalEl && Modal) {
@@ -88,15 +107,21 @@
 
   const setCommandActive = (index) => {
     const items = visibleCommandItems();
-    commandItems.forEach((item) => item.classList.remove("active"));
+    commandItems.forEach((item) => {
+      item.classList.remove("active");
+      item.setAttribute("aria-selected", "false");
+    });
     if (items.length === 0) {
       commandActive = -1;
+      commandInput?.removeAttribute("aria-activedescendant");
       return;
     }
     commandActive = ((index % items.length) + items.length) % items.length;
     const current = items[commandActive];
     current.classList.add("active");
+    current.setAttribute("aria-selected", "true");
     current.scrollIntoView({ block: "nearest" });
+    commandInput?.setAttribute("aria-activedescendant", current.id);
   };
 
   const filterCommand = (query = commandInput?.value || "") => {
@@ -135,12 +160,15 @@
   });
 
   commandModalEl?.addEventListener("shown.bs.modal", () => {
+    commandInput?.setAttribute("aria-expanded", "true");
     commandInput?.focus();
     commandInput?.select();
     filterCommand();
   });
 
   commandModalEl?.addEventListener("hidden.bs.modal", () => {
+    commandInput?.setAttribute("aria-expanded", "false");
+    commandInput?.removeAttribute("aria-activedescendant");
     if (commandInput) {
       commandInput.value = "";
     }
