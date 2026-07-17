@@ -21,14 +21,14 @@ class DropdownMenuTests(CatalogTestCase):
         output = self.render_template(
             '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
             '{% call dropdown("Actions", align="end") %}'
-            '{{ dropdown_item("Open", icon="folder-open") }}'
+            '{{ dropdown_item("Open", icon="folder-open", shortcut="⌘O") }}'
             '{{ dropdown_item("Delete", destructive=true) }}'
             "{% endcall %}"
         )
 
         self.assertIn('<div class="dropdown">', output)
         self.assertIn(
-            '<button class="btn btn-outline-secondary dropdown-toggle" '
+            '<button class="btn btn-outline-secondary" '
             'type="button" data-bs-toggle="dropdown" aria-expanded="false">',
             output,
         )
@@ -36,6 +36,38 @@ class DropdownMenuTests(CatalogTestCase):
         self.assertIn('class="dropdown-item"', output)
         self.assertIn('class="dropdown-item text-danger"', output)
         self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('<span class="ms-auto small text-body-secondary">⌘O</span>', output)
+
+    def test_dropdown_caret_is_explicit(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
+            '{% call dropdown("Actions", caret=true) %}'
+            '{{ dropdown_item("Open") }}'
+            "{% endcall %}"
+        )
+
+        self.assertIn("dropdown-toggle", output)
+
+    def test_dropdown_keeps_positional_extra_class_compatibility(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
+            '{% call dropdown("Actions", "outline", "end", "my-menu") %}'
+            '{{ dropdown_item("Open") }}'
+            "{% endcall %}"
+        )
+
+        self.assertIn('<div class="dropdown my-menu">', output)
+        self.assertIn('<ul class="dropdown-menu dropdown-menu-end">', output)
+        self.assertNotIn("dropdown-toggle", output)
+
+    def test_dropdown_item_keeps_positional_state_compatibility(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
+            '{{ dropdown_item("Delete", "", "", false, false, true) }}'
+        )
+
+        self.assertIn('class="dropdown-item text-danger"', output)
+        self.assertNotIn("ms-auto small", output)
 
     def test_dropdown_fails_fast_for_unknown_contracts(self) -> None:
         invalid_templates = (

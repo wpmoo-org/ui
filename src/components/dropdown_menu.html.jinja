@@ -2,11 +2,11 @@
 
 {% set dropdown_alignments = ["", "start", "end"] %}
 
-{% macro dropdown(label, variant="outline", align="", extra_class="") -%}
+{% macro dropdown(label, variant="outline", align="", extra_class="", caret=false) -%}
   {% if align not in dropdown_alignments %}{{ fail("Unknown dropdown alignment: " ~ align) }}{% endif %}
   {% set items %}{{ caller() | trim | safe }}{% endset %}
   <div class="dropdown{% if extra_class %} {{ extra_class }}{% endif %}">
-    {{ button(label, variant=variant, dropdown=true) }}
+    {{ button(label, variant=variant, dropdown=true, dropdown_caret=caret) }}
     {% call dropdown_menu(align=align) %}{{ items | safe }}{% endcall %}
   </div>
 {%- endmacro %}
@@ -18,7 +18,7 @@
   </ul>
 {%- endmacro %}
 
-{% macro dropdown_item(label, href="", icon="", active=false, disabled=false, destructive=false) -%}
+{% macro dropdown_item(label, href="", icon="", active=false, disabled=false, destructive=false, shortcut="") -%}
   {% if not label | trim %}{{ fail("Dropdown item label is required") }}{% endif %}
   {% set classes = "dropdown-item" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
@@ -27,14 +27,16 @@
     <li>
       <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>
         {% if icon %}{{ lucide_icon(icon, "inline-start") }}{% endif %}
-        {{ label }}
+        <span>{{ label }}</span>
+        {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
       </a>
     </li>
   {% else %}
     <li>
       <button class="{{ classes }}" type="button"{% if disabled %} disabled{% endif %}>
         {% if icon %}{{ lucide_icon(icon, "inline-start") }}{% endif %}
-        {{ label }}
+        <span>{{ label }}</span>
+        {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
       </button>
     </li>
   {% endif %}

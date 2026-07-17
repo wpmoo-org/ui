@@ -36,16 +36,36 @@ class ButtonTests(CatalogTestCase):
     def test_button_dropdown_trigger_uses_bootstrap_plugin_contract(self) -> None:
         output = self.render_button('button("Actions", variant="outline", dropdown=true)')
 
-        self.assertIn("dropdown-toggle", output)
+        self.assertNotIn("dropdown-toggle", output)
         self.assertIn('data-bs-toggle="dropdown"', output)
         self.assertIn('aria-expanded="false"', output)
         self.assertNotIn('aria-pressed="false"', output)
+
+        caret_output = self.render_button(
+            'button("Actions", variant="outline", dropdown=true, dropdown_caret=true)'
+        )
+        self.assertIn("dropdown-toggle", caret_output)
 
         with self.assertRaisesRegex(
             ValueError,
             "Button cannot be both toggle and dropdown",
         ):
             self.render_button('button("Actions", toggle=true, dropdown=true)')
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button dropdown_caret requires dropdown=true",
+        ):
+            self.render_button('button("Actions", dropdown_caret=true)')
+
+    def test_button_dropdown_offset_keeps_positional_compatibility(self) -> None:
+        output = self.render_button(
+            'button("Actions", "outline", "default", "button", "button", "", '
+            'false, "", "", "", "", false, true, "0,8")'
+        )
+
+        self.assertIn('data-bs-offset="0,8"', output)
+        self.assertNotIn("dropdown-toggle", output)
 
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
         for call in (
