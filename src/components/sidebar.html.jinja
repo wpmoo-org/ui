@@ -12,7 +12,7 @@
 {% set sidebar_collapsible = ["icon", "offcanvas", "none"] %}
 {% set sidebar_button_sizes = ["default", "lg"] %}
 
-{% macro sidebar_provider(default_open=true, contained=false, extra_class="") -%}
+{% macro sidebar_provider(default_open=true, contained=false, key="", extra_class="") -%}
   {% set classes = "sidebar-wrapper" %}
   {% if contained %}{% set classes = classes ~ " sidebar-wrapper--contained" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
@@ -20,12 +20,13 @@
     class="{{ classes }}"
     data-slot="sidebar-wrapper"
     data-moo-sidebar-state="{{ 'expanded' if default_open else 'collapsed' }}"
+    {% if key %}data-moo-sidebar-key="{{ key }}"{% endif %}
   >
     {{ caller() | trim | safe }}
   </div>
 {%- endmacro %}
 
-{% macro sidebar(side="left", variant="sidebar", collapsible="icon", extra_class="") -%}
+{% macro sidebar(side="left", variant="sidebar", collapsible="icon", rail=true, extra_class="") -%}
   {% if side not in sidebar_sides %}{{ fail("Unknown sidebar side: " ~ side) }}{% endif %}
   {% if variant not in sidebar_variants %}{{ fail("Unknown sidebar variant: " ~ variant) }}{% endif %}
   {% if collapsible not in sidebar_collapsible %}{{ fail("Unknown sidebar collapsible mode: " ~ collapsible) }}{% endif %}
@@ -41,7 +42,29 @@
     <div class="sidebar-inner" data-slot="sidebar-inner">
       {{ caller() | trim | safe }}
     </div>
+    {% if rail and collapsible != "none" %}{{ sidebar_rail() }}{% endif %}
   </aside>
+{%- endmacro %}
+
+{% macro sidebar_trigger(aria_label="Toggle sidebar", extra_class="") -%}
+  <button
+    class="btn btn-ghost btn-icon-sm sidebar-trigger{% if extra_class %} {{ extra_class }}{% endif %}"
+    type="button"
+    data-moo-sidebar-trigger
+    aria-label="{{ aria_label }}"
+  >
+    {{ render_icon("panel-left", "inline-start") }}
+  </button>
+{%- endmacro %}
+
+{% macro sidebar_rail(aria_label="Toggle sidebar") -%}
+  <button
+    class="sidebar-rail"
+    type="button"
+    data-moo-sidebar-rail
+    aria-label="{{ aria_label }}"
+    tabindex="-1"
+  ></button>
 {%- endmacro %}
 
 {% macro sidebar_header(extra_class="") -%}
@@ -123,13 +146,16 @@
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   {% set body = _sidebar_button_body(title, subtitle, icon, lead, end_icon) %}
+  {# The collapsed icon rail reveals this label as a tooltip; default it to the
+     visible title so every menu button stays legible when text is hidden. #}
+  {% set tip = tooltip if tooltip else title %}
   {% if dropdown or element == "button" %}
     <button
       class="{{ classes }}"
       type="button"
       data-slot="sidebar-menu-button"
       {% if dropdown %}data-bs-toggle="dropdown" aria-expanded="false"{% endif %}
-      {% if tooltip %} data-moo-sidebar-tooltip="{{ tooltip }}"{% endif %}
+      data-moo-sidebar-tooltip="{{ tip }}"
       {% if aria_label %} aria-label="{{ aria_label }}"{% endif %}
     >
       {{ body }}
@@ -140,7 +166,7 @@
       href="{{ href }}"
       data-slot="sidebar-menu-button"
       {% if active %} aria-current="page"{% endif %}
-      {% if tooltip %} data-moo-sidebar-tooltip="{{ tooltip }}"{% endif %}
+      data-moo-sidebar-tooltip="{{ tip }}"
       {% if aria_label %} aria-label="{{ aria_label }}"{% endif %}
     >
       {{ body }}

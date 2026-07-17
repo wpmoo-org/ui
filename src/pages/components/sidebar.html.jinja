@@ -1,9 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
-{% from "components/button.html.jinja" import button %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_provider %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_provider, sidebar_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
@@ -85,15 +84,15 @@
             {% call sidebar_menu() %}
               {% call sidebar_menu_item(dropdown=true) %}
                 {{ sidebar_menu_button(
-                  "shadcn",
-                  subtitle="m@example.com",
+                  "wpmoo",
+                  subtitle="hello@wpmoo.org",
                   size="lg",
                   dropdown=true,
-                  lead=avatar(name="shadcn", initials="SC", extra_class="sidebar-avatar"),
+                  lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
                   end_icon="chevrons-up-down"
                 ) }}
                 {% call dropdown_menu(align="end") %}
-                  {{ dropdown_header("m@example.com") }}
+                  {{ dropdown_header("hello@wpmoo.org") }}
                   {{ dropdown_item("Upgrade to Pro", icon="sparkles") }}
                   {{ dropdown_divider() }}
                   {{ dropdown_item("Account", icon="badge-check") }}
@@ -109,7 +108,7 @@
 
         {% call sidebar_inset() %}
           <header class="sidebar-inset__header">
-            {{ button("", variant="ghost", size="icon-sm", aria_label="Toggle sidebar", icon_start="panel-left") }}
+            {{ sidebar_trigger() }}
             {{ separator(orientation="vertical") }}
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb mb-0">
