@@ -1,4 +1,29 @@
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
 {% from "components/navigation.html.jinja" import nav_item, nav_menu %}
+{% from "components/separator.html.jinja" import separator %}
+
+{% set component_icons = {
+  "button": "mouse-pointer-click",
+  "button-group": "panel-top",
+  "card": "square-stack",
+  "typography": "type",
+  "kbd": "keyboard",
+  "input": "text-cursor-input",
+  "textarea": "file-text",
+  "input-group": "search",
+  "select": "chevrons-up-down",
+  "dropdown-menu": "menu",
+  "badge": "badge",
+  "avatar": "circle-user",
+  "navigation": "panel-left",
+  "separator": "separator-horizontal"
+} %}
+
+{% set utility_icons = {
+  "scroll-fade": "scroll"
+} %}
 
 <aside
   class="offcanvas-lg offcanvas-start moo-catalog__sidebar"
@@ -16,28 +41,60 @@
       aria-label="Close navigation"
     ></button>
   </div>
-  <div class="offcanvas-body d-block scroll-fade-y no-scrollbar">
-    <h3 class="moo-catalog__nav-heading">Components</h3>
-    {% call nav_menu("Components", vertical=true) %}
-      {% for component in catalog %}
-        {{ nav_item(
-          component.label,
-          href=root_path ~ "components/" ~ component.slug ~ ".html",
-          active=current_section == "components" and current_slug == component.slug
-        ) }}
-      {% endfor %}
-    {% endcall %}
-    <div class="mt-4">
-      <h3 class="moo-catalog__nav-heading">Utilities</h3>
-      {% call nav_menu("Utilities", vertical=true) %}
-        {% for utility in utilities %}
+  <div class="offcanvas-body moo-catalog__sidebar-body">
+    <a class="moo-catalog__sidebar-brand" href="{{ root_path }}index.html">
+      <span class="moo-catalog__brand-mark" aria-hidden="true">
+        {{ render_icon("blocks", "inline-start") }}
+      </span>
+      <span class="moo-catalog__brand-copy">
+        <span class="moo-catalog__brand-title">Moo UI</span>
+        <span class="moo-catalog__brand-subtitle">Component system</span>
+      </span>
+      {{ render_icon("chevrons-up-down", "inline-end") }}
+    </a>
+
+    {{ separator() }}
+
+    <div class="moo-catalog__sidebar-scroll scroll-fade-y no-scrollbar">
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <h3 class="moo-catalog__nav-heading mb-0">Components</h3>
+        {{ badge(catalog | length ~ " ready", variant="secondary", pill=true) }}
+      </div>
+      {% call nav_menu("Components", vertical=true, extra_class="mt-2") %}
+        {% for component in catalog %}
           {{ nav_item(
-            utility.label,
-            href=root_path ~ "utils/" ~ utility.slug ~ ".html",
-            active=current_section == "utils" and current_slug == utility.slug
+            component.label,
+            href=root_path ~ "components/" ~ component.slug ~ ".html",
+            active=current_section == "components" and current_slug == component.slug,
+            icon=component_icons.get(component.slug, "component")
           ) }}
         {% endfor %}
       {% endcall %}
+
+      <div class="mt-4">
+        <h3 class="moo-catalog__nav-heading">Utilities</h3>
+        {% call nav_menu("Utilities", vertical=true) %}
+          {% for utility in utilities %}
+            {{ nav_item(
+              utility.label,
+              href=root_path ~ "utils/" ~ utility.slug ~ ".html",
+              active=current_section == "utils" and current_slug == utility.slug,
+              icon=utility_icons.get(utility.slug, "sparkles")
+            ) }}
+          {% endfor %}
+        {% endcall %}
+      </div>
+    </div>
+
+    {{ separator() }}
+
+    <div class="moo-catalog__sidebar-account">
+      {{ avatar(name="Moo UI", initials="MO", size="sm") }}
+      <div class="min-w-0">
+        <div class="moo-catalog__account-name">Moo UI</div>
+        <div class="moo-catalog__account-meta">Bootstrap-first shell</div>
+      </div>
+      {{ button("", variant="ghost", size="icon-sm", aria_label="Account options", icon_start="chevron-right") }}
     </div>
   </div>
 </aside>

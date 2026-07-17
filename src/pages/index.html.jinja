@@ -1,10 +1,11 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/avatar.html.jinja" import avatar %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
 {% from "components/input.html.jinja" import input %}
+{% from "components/input_group.html.jinja" import input_group, input_group_text %}
+{% from "components/kbd.html.jinja" import kbd %}
 {% from "components/select.html.jinja" import select %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
@@ -28,21 +29,52 @@
   "separator": "Separate content with horizontal and vertical rules."
 } %}
 
+{% set component_icons = {
+  "button": "mouse-pointer-click",
+  "button-group": "panel-top",
+  "card": "square-stack",
+  "typography": "type",
+  "kbd": "keyboard",
+  "input": "text-cursor-input",
+  "textarea": "file-text",
+  "input-group": "search",
+  "select": "chevrons-up-down",
+  "dropdown-menu": "menu",
+  "badge": "badge",
+  "avatar": "circle-user",
+  "navigation": "panel-left",
+  "separator": "separator-horizontal"
+} %}
+
+{% set connected_components = [
+  "button",
+  "card",
+  "input",
+  "input-group",
+  "select",
+  "dropdown-menu",
+  "navigation",
+  "separator"
+] %}
+
 {% block content %}
   <section class="moo-catalog__intro" aria-labelledby="catalog-title">
-    {{ typography("Components", variant="page-title", id="catalog-title") }}
+    {{ typography("Component integrations", variant="page-title", id="catalog-title") }}
     <p class="lead text-body-secondary mb-0">
-      A Bootstrap-native catalog with shadcn-inspired density, radius, and rhythm.
+      Track the ready Bootstrap-native primitives that make up the Moo UI shell.
     </p>
   </section>
 
   <section class="moo-catalog__dashboard" aria-label="Catalog filters">
     <div class="moo-catalog__toolbar">
-      {{ input(
-        aria_label="Filter components",
-        type="search",
-        placeholder="Filter components..."
-      ) }}
+      {% call input_group() %}
+        {{ input(
+          aria_label="Filter components",
+          type="search",
+          placeholder="Filter components..."
+        ) }}
+        {{ input_group_text(kbd("⌘ K")) }}
+      {% endcall %}
       {{ select(
         aria_label="Component status",
         options=[
@@ -52,7 +84,7 @@
         selected="ready",
         extra_class="moo-catalog__status-select"
       ) }}
-      {% call dropdown("View", align="end", extra_class="moo-catalog__toolbar-menu") %}
+      {% call dropdown("View", align="end", extra_class="moo-catalog__toolbar-menu", caret=true) %}
         {{ dropdown_header("Catalog view") }}
         {{ dropdown_item("Components", href="#components", active=true, icon="blocks") }}
         {{ dropdown_item("Utilities", href="#utilities", icon="sparkles") }}
@@ -67,14 +99,13 @@
       {{ typography("Components", variant="section-title", id="components-title") }}
       <div class="moo-catalog__grid" id="components">
         {% for component in catalog %}
+          {% set is_connected = component.slug in connected_components %}
           {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-4") %}
             <div class="d-flex align-items-start justify-content-between gap-3">
-              {{ avatar(
-                name=component.label,
-                initials=component.label[:2] | upper,
-                extra_class="moo-catalog__app-icon"
-              ) }}
-              {{ badge(component.status | capitalize, variant="outline") }}
+              <span class="moo-catalog__app-icon" aria-hidden="true">
+                {{ render_icon(component_icons.get(component.slug, "component"), "inline-start") }}
+              </span>
+              {{ badge("Connected" if is_connected else "Ready", variant="outline") }}
             </div>
             <div>
               <h2 class="h5 mb-2">{{ component.label }}</h2>
@@ -84,8 +115,8 @@
             </div>
             <div>
               {{ button(
-                "Open",
-                variant="outline",
+                "Connected" if is_connected else "Connect",
+                variant="outline-primary" if is_connected else "outline",
                 size="sm",
                 element="a",
                 href="components/" ~ component.slug ~ ".html"
@@ -102,12 +133,10 @@
         {% for utility in utilities %}
           {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}
             <div class="d-flex align-items-start justify-content-between gap-3">
-              {{ avatar(
-                name=utility.label,
-                initials=utility.label[:2] | upper,
-                extra_class="moo-catalog__app-icon"
-              ) }}
-              {{ badge(utility.status | capitalize, variant="outline") }}
+              <span class="moo-catalog__app-icon" aria-hidden="true">
+                {{ render_icon("sparkles", "inline-start") }}
+              </span>
+              {{ badge("Ready", variant="outline") }}
             </div>
             <div>
               <h2 class="h5 mb-2">{{ utility.label }}</h2>
@@ -117,7 +146,7 @@
             </div>
             <div>
               {{ button(
-                "Open",
+                "Connect",
                 variant="outline",
                 size="sm",
                 element="a",

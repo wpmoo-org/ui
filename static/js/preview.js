@@ -1,7 +1,7 @@
 (() => {
   const root = document.documentElement;
-  const themeButton = document.querySelector("[data-moo-theme]");
-  const directionButton = document.querySelector("[data-moo-direction]");
+  const themeButton = document.querySelector("[data-moo-theme], .moo-catalog__theme-toggle");
+  const directionButton = document.querySelector("[data-moo-direction], .moo-catalog__direction-toggle");
 
   themeButton?.addEventListener("click", () => {
     const theme = root.dataset.bsTheme === "dark" ? "light" : "dark";
