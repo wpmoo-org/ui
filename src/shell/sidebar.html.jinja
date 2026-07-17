@@ -37,14 +37,11 @@
       {{ render_icon("chevrons-up-down", "inline-end") }}
     </a>
 
-    {{ separator() }}
-
     <div class="moo-catalog__sidebar-scroll scroll-fade-y no-scrollbar">
       <div class="d-flex align-items-center justify-content-between gap-2">
-        <h3 class="moo-catalog__nav-heading mb-0">Components</h3>
-        {{ badge(catalog | length ~ " ready", variant="secondary", pill=true) }}
+        <h3 class="moo-catalog__nav-heading">Components</h3>
       </div>
-      {% call nav_menu("Components", vertical=true, extra_class="mt-2") %}
+      {% call nav_menu("Components", vertical=true) %}
         {% for component in catalog %}
           {{ nav_item(
             component.label,
@@ -69,8 +66,6 @@
         {% endcall %}
       </div>
     </div>
-
-    {{ separator() }}
 
     <div class="moo-catalog__sidebar-account">
       {{ avatar(name="Moo UI", initials="MO", size="sm") }}

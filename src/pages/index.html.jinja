@@ -5,7 +5,6 @@
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
-{% from "components/kbd.html.jinja" import kbd %}
 {% from "components/select.html.jinja" import select %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
@@ -30,22 +29,11 @@
   "separator": "Separate content with horizontal and vertical rules."
 } %}
 
-{% set connected_components = [
-  "button",
-  "card",
-  "input",
-  "input-group",
-  "select",
-  "dropdown-menu",
-  "navigation",
-  "separator"
-] %}
-
 {% block content %}
   <section class="moo-catalog__intro" aria-labelledby="catalog-title">
-    {{ typography("Component integrations", variant="page-title", id="catalog-title") }}
+    {{ typography("Components", variant="page-title", id="catalog-title") }}
     <p class="lead text-body-secondary mb-0">
-      Track the ready Bootstrap-native primitives that make up the Moo UI shell.
+      Browse the Bootstrap-native primitives that make up the Moo UI shell.
     </p>
   </section>
 
@@ -57,15 +45,16 @@
           type="search",
           placeholder="Filter components..."
         ) }}
-        {{ input_group_text(kbd("⌘ K")) }}
+        {{ input_group_text(render_icon("search", "inline-start")) }}
       {% endcall %}
       {{ select(
-        aria_label="Component status",
+        aria_label="Catalog section",
         options=[
-          {"value": "ready", "label": "Ready components"},
-          {"value": "all", "label": "All components"}
+          {"value": "all", "label": "All catalog"},
+          {"value": "components", "label": "Components"},
+          {"value": "utilities", "label": "Utilities"}
         ],
-        selected="ready",
+        selected="all",
         extra_class="moo-catalog__status-select"
       ) }}
       {% call dropdown("View", align="end", extra_class="moo-catalog__toolbar-menu", caret=true) %}
@@ -79,17 +68,16 @@
 
     {{ separator(extra_class="my-4") }}
 
-    <section aria-labelledby="components-title">
+    <section aria-labelledby="components-title" data-moo-catalog-section="components">
       {{ typography("Components", variant="section-title", id="components-title") }}
       <div class="moo-catalog__grid" id="components">
         {% for component in catalog %}
-          {% set is_connected = component.slug in connected_components %}
           {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-4") %}
             <div class="d-flex align-items-start justify-content-between gap-3">
               <span class="moo-catalog__app-icon" aria-hidden="true">
                 {{ render_icon(component_icons.get(component.slug, "component"), "inline-start") }}
               </span>
-              {{ badge("Connected" if is_connected else "Ready", variant="outline") }}
+              {{ badge("Ready", variant="outline") }}
             </div>
             <div>
               <h2 class="h5 mb-2">{{ component.label }}</h2>
@@ -99,8 +87,8 @@
             </div>
             <div>
               {{ button(
-                "Connected" if is_connected else "Connect",
-                variant="outline-primary" if is_connected else "outline",
+                "Open",
+                variant="outline",
                 size="sm",
                 element="a",
                 href="components/" ~ component.slug ~ ".html"
@@ -111,7 +99,7 @@
       </div>
     </section>
 
-    <section class="mt-5" aria-labelledby="utilities-title">
+    <section class="mt-5" aria-labelledby="utilities-title" data-moo-catalog-section="utilities">
       {{ typography("Utilities", variant="section-title", id="utilities-title") }}
       <div class="moo-catalog__grid moo-catalog__grid--compact" id="utilities">
         {% for utility in utilities %}
@@ -130,7 +118,7 @@
             </div>
             <div>
               {{ button(
-                "Connect",
+                "Open",
                 variant="outline",
                 size="sm",
                 element="a",
