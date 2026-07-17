@@ -160,4 +160,95 @@
       window.setTimeout(() => { copyStatus.textContent = ""; }, 2000);
     });
   });
+
+  const sidebarWrappers = Array.from(
+    document.querySelectorAll('[data-slot="sidebar-wrapper"]')
+  );
+  const SIDEBAR_STORAGE_PREFIX = "moo-sidebar:";
+
+  const syncSidebarTooltips = (wrapper) => {
+    const Tooltip = window.bootstrap?.Tooltip;
+    if (!Tooltip) {
+      return;
+    }
+    const collapsed = wrapper.dataset.mooSidebarState === "collapsed";
+    const placement = root.dir === "rtl" ? "left" : "right";
+    wrapper.querySelectorAll("[data-moo-sidebar-tooltip]").forEach((button) => {
+      const existing = Tooltip.getInstance(button);
+      if (collapsed) {
+        if (!existing) {
+          new Tooltip(button, {
+            title: button.getAttribute("data-moo-sidebar-tooltip"),
+            placement,
+            container: "body",
+            trigger: "hover focus",
+          });
+        }
+      } else if (existing) {
+        existing.dispose();
+      }
+    });
+  };
+
+  const setSidebarState = (wrapper, state, persist = true) => {
+    wrapper.dataset.mooSidebarState = state;
+    const key = wrapper.dataset.mooSidebarKey;
+    if (persist && key) {
+      try {
+        window.localStorage.setItem(SIDEBAR_STORAGE_PREFIX + key, state);
+      } catch {
+        // Storage is best-effort; ignore private-mode or quota errors.
+      }
+    }
+    syncSidebarTooltips(wrapper);
+  };
+
+  const toggleSidebar = (wrapper) => {
+    const collapsed = wrapper.dataset.mooSidebarState === "collapsed";
+    setSidebarState(wrapper, collapsed ? "expanded" : "collapsed");
+  };
+
+  sidebarWrappers.forEach((wrapper) => {
+    const key = wrapper.dataset.mooSidebarKey;
+    let stored = null;
+    if (key) {
+      try {
+        stored = window.localStorage.getItem(SIDEBAR_STORAGE_PREFIX + key);
+      } catch {
+        stored = null;
+      }
+    }
+    if (stored === "collapsed" || stored === "expanded") {
+      setSidebarState(wrapper, stored, false);
+    } else {
+      syncSidebarTooltips(wrapper);
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const control = event.target.closest(
+      "[data-moo-sidebar-trigger], [data-moo-sidebar-rail]"
+    );
+    if (!control) {
+      return;
+    }
+    const wrapper = control.closest('[data-slot="sidebar-wrapper"]');
+    if (wrapper) {
+      toggleSidebar(wrapper);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "b") {
+      return;
+    }
+    const wrapper =
+      document.querySelector(
+        '[data-slot="sidebar-wrapper"][data-moo-sidebar-key]'
+      ) || sidebarWrappers[0];
+    if (wrapper) {
+      event.preventDefault();
+      toggleSidebar(wrapper);
+    }
+  });
 })();
