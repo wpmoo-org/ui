@@ -43,13 +43,14 @@
     ) }}
 
     {% set invalid %}
-      <div class="d-grid gap-2">
+      <div class="moo-field w-100">
         {{ textarea(
-          aria_label="Message",
+          label="Message",
+          id="invalid-message",
           placeholder="Please enter a valid message.",
           aria_invalid=true
         ) }}
-        <div class="form-text">Please enter a valid message.</div>
+        <div class="form-text text-danger">Please enter a valid message.</div>
       </div>
     {% endset %}
     {{ render_example(
