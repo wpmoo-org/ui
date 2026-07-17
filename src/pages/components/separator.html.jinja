@@ -14,7 +14,7 @@
 
   <div class="moo-component-examples">
     {% set horizontal %}
-      <div class="w-100">
+      <div class="d-grid w-100">
         <div class="fw-medium">Workspace access</div>
         <div class="text-body-secondary small">Invite collaborators after the project is ready.</div>
         {{ separator(extra_class="my-4") }}
@@ -31,7 +31,7 @@
     ) }}
 
     {% set vertical %}
-      <div class="hstack gap-3">
+      <div class="hstack gap-3" aria-label="Project status">
         <span class="fw-medium">Draft</span>
         {{ separator("vertical") }}
         <span class="text-body-secondary">Reviewed</span>
@@ -46,19 +46,46 @@
       vertical
     ) }}
 
-    {% set semantic %}
+    {% set grouped %}
       <div class="d-grid gap-3 w-100">
-        <div class="fw-medium">Plan summary</div>
-        {{ separator(decorative=false) }}
-        <div class="text-body-secondary">The next section is announced as a separator for assistive technology.</div>
+        <div>
+          <div class="fw-medium">Profile</div>
+          <div class="text-body-secondary small">Name, avatar, and public details.</div>
+        </div>
+        {{ separator(extra_class="my-1") }}
+        <div>
+          <div class="fw-medium">Security</div>
+          <div class="text-body-secondary small">Password, sessions, and recovery options.</div>
+        </div>
+        {{ separator(extra_class="my-1") }}
+        <div>
+          <div class="fw-medium">Billing</div>
+          <div class="text-body-secondary small">Invoices and payment method.</div>
+        </div>
       </div>
     {% endset %}
     {{ render_example(
-      "semantic",
-      "Semantic separator",
-      "Keep separators decorative by default. Set <code>decorative=false</code> only when the rule itself communicates structure.",
-      semantic,
+      "grouped",
+      "Grouped content",
+      "Place horizontal separators between related groups; keep the text or controls responsible for meaning.",
+      grouped,
       preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div class="hstack gap-3" dir="rtl" aria-label="حالة المشروع">
+        <span class="fw-medium">مسودة</span>
+        {{ separator("vertical") }}
+        <span class="text-body-secondary">مراجعة</span>
+        {{ separator("vertical") }}
+        <span class="text-body-secondary">منشور</span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Use normal document direction; Bootstrap's vertical rule stays aligned without mirrored custom CSS.",
+      rtl
     ) }}
   </div>
 
