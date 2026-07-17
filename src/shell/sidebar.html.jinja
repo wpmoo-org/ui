@@ -1,79 +1,88 @@
 {% from "components/avatar.html.jinja" import avatar %}
-{% from "components/badge.html.jinja" import badge %}
-{% from "components/button.html.jinja" import button %}
-{% from "components/navigation.html.jinja" import nav_item, nav_menu %}
-{% from "components/separator.html.jinja" import separator %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item %}
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% set utility_icons = {
   "scroll-fade": "scroll"
 } %}
 
-<aside
-  class="offcanvas-lg offcanvas-start moo-catalog__sidebar"
-  tabindex="-1"
-  id="catalog-navigation"
-  aria-labelledby="catalog-navigation-title"
->
-  <div class="offcanvas-header">
-    <h2 class="offcanvas-title fs-6" id="catalog-navigation-title">Catalog</h2>
-    <button
-      class="btn-close"
-      type="button"
-      data-bs-dismiss="offcanvas"
-      data-bs-target="#catalog-navigation"
-      aria-label="Close navigation"
-    ></button>
-  </div>
-  <div class="offcanvas-body moo-catalog__sidebar-body">
-    <a class="moo-catalog__sidebar-brand" href="{{ root_path }}index.html">
-      <span class="moo-catalog__brand-mark" aria-hidden="true">
-        {{ render_icon("blocks", "inline-start") }}
-      </span>
-      <span class="moo-catalog__brand-copy">
-        <span class="moo-catalog__brand-title">Moo UI</span>
-        <span class="moo-catalog__brand-subtitle">Component system</span>
-      </span>
-      {{ render_icon("chevrons-up-down", "inline-end") }}
-    </a>
+{% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
+  {% call sidebar_header() %}
+    {% call sidebar_menu() %}
+      {% call sidebar_menu_item(dropdown=true) %}
+        {{ sidebar_menu_button(
+          "Moo UI",
+          subtitle="Component system",
+          size="lg",
+          dropdown=true,
+          lead=sidebar_brand_mark("blocks"),
+          end_icon="chevrons-up-down"
+        ) }}
+        {% call dropdown_menu() %}
+          {{ dropdown_header("Workspaces") }}
+          {{ dropdown_item("Moo UI", icon="blocks", active=true) }}
+          {{ dropdown_item("Moo Odoo", icon="box") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Add workspace", icon="plus") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
 
-    <div class="moo-catalog__sidebar-scroll scroll-fade-y no-scrollbar">
-      <div class="d-flex align-items-center justify-content-between gap-2">
-        <h3 class="moo-catalog__nav-heading">Components</h3>
-      </div>
-      {% call nav_menu("Components", vertical=true) %}
+  {% call sidebar_content() %}
+    {% call sidebar_group() %}
+      {{ sidebar_group_label("Components") }}
+      {% call sidebar_menu() %}
         {% for component in catalog %}
-          {{ nav_item(
-            component.label,
-            href=root_path ~ "components/" ~ component.slug ~ ".html",
-            active=current_section == "components" and current_slug == component.slug,
-            icon=component_icons.get(component.slug, "component")
-          ) }}
+          {% call sidebar_menu_item() %}
+            {{ sidebar_menu_button(
+              component.label,
+              href=root_path ~ "components/" ~ component.slug ~ ".html",
+              active=current_section == "components" and current_slug == component.slug,
+              icon=component_icons.get(component.slug, "component")
+            ) }}
+          {% endcall %}
         {% endfor %}
       {% endcall %}
+    {% endcall %}
 
-      <div class="mt-4">
-        <h3 class="moo-catalog__nav-heading">Utilities</h3>
-        {% call nav_menu("Utilities", vertical=true) %}
-          {% for utility in utilities %}
-            {{ nav_item(
+    {% call sidebar_group() %}
+      {{ sidebar_group_label("Utilities") }}
+      {% call sidebar_menu() %}
+        {% for utility in utilities %}
+          {% call sidebar_menu_item() %}
+            {{ sidebar_menu_button(
               utility.label,
               href=root_path ~ "utils/" ~ utility.slug ~ ".html",
               active=current_section == "utils" and current_slug == utility.slug,
               icon=utility_icons.get(utility.slug, "sparkles")
             ) }}
-          {% endfor %}
-        {% endcall %}
-      </div>
-    </div>
+          {% endcall %}
+        {% endfor %}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
 
-    <div class="moo-catalog__sidebar-account">
-      {{ avatar(name="Moo UI", initials="MO", size="sm") }}
-      <div class="min-w-0">
-        <div class="moo-catalog__account-name">Moo UI</div>
-        <div class="moo-catalog__account-meta">Bootstrap-first shell</div>
-      </div>
-      {{ button("", variant="ghost", size="icon-sm", aria_label="Account options", icon_start="chevron-right") }}
-    </div>
-  </div>
-</aside>
+  {% call sidebar_footer() %}
+    {% call sidebar_menu() %}
+      {% call sidebar_menu_item(dropdown=true) %}
+        {{ sidebar_menu_button(
+          "Moo UI",
+          subtitle="Bootstrap-first shell",
+          size="lg",
+          dropdown=true,
+          lead=avatar(name="Moo UI", initials="MO", size="sm", extra_class="sidebar-avatar"),
+          end_icon="chevron-right"
+        ) }}
+        {% call dropdown_menu(align="end") %}
+          {{ dropdown_header("hello@wpmoo.org") }}
+          {{ dropdown_item("Account", icon="badge-check") }}
+          {{ dropdown_item("Settings", icon="settings-2") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Log out", icon="log-out") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+{% endcall %}

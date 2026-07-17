@@ -2,8 +2,6 @@
   const root = document.documentElement;
   const themeButton = document.querySelector("[data-moo-theme], .moo-catalog__theme-toggle");
   const directionButton = document.querySelector("[data-moo-direction], .moo-catalog__direction-toggle");
-  const sidebarToggle = document.querySelector("[data-moo-sidebar-toggle]");
-  const catalogShell = document.querySelector(".moo-catalog");
   const themeIcons = Array.from(themeButton?.querySelectorAll("[data-moo-theme-icon]") || []);
 
   const updateThemeButton = () => {
@@ -26,18 +24,6 @@
   });
 
   updateThemeButton();
-
-  const updateCatalogSidebarToggle = () => {
-    const collapsed = catalogShell?.classList.contains("moo-catalog--sidebar-collapsed") || false;
-    sidebarToggle?.setAttribute("aria-expanded", String(!collapsed));
-  };
-
-  sidebarToggle?.addEventListener("click", () => {
-    catalogShell?.classList.toggle("moo-catalog--sidebar-collapsed");
-    updateCatalogSidebarToggle();
-  });
-
-  updateCatalogSidebarToggle();
 
   const searchControls = Array.from(
     document.querySelectorAll(".moo-catalog__toolbar input[type='search']")
