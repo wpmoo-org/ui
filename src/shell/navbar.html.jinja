@@ -5,6 +5,7 @@
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/separator.html.jinja" import separator %}
+{% from "includes/component-icons.html.jinja" import component_icons %}
 
 <header class="moo-catalog__header">
   <nav class="navbar moo-catalog__navbar" aria-label="Catalog controls">
@@ -19,16 +20,40 @@
         </span>
       </a>
 
-      <div class="moo-catalog__header-search d-none d-md-block">
-        {% call input_group() %}
-          {{ input(aria_label="Search documentation", type="search", placeholder="Search components...") }}
-          {{ input_group_text(kbd("⌘ K")) }}
-        {% endcall %}
+      <div class="moo-catalog__header-start">
+        <button
+          class="btn btn-outline-secondary btn-icon-sm moo-catalog__sidebar-toggle d-none d-lg-inline-flex"
+          type="button"
+          data-moo-sidebar-toggle
+          aria-label="Toggle sidebar"
+          aria-expanded="true"
+        >
+          {{ render_icon("panel-left", "inline-start") }}
+        </button>
+        {{ separator(orientation="vertical", extra_class="d-none d-lg-block") }}
+        <button
+          class="btn btn-outline-secondary moo-catalog__header-search moo-catalog__search-trigger d-none d-md-flex"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="#catalog-command"
+          aria-label="Search catalog pages"
+        >
+          {{ render_icon("search", "inline-start") }}
+          <span>Search</span>
+          {{ kbd("⌘ K") }}
+        </button>
       </div>
 
       <div class="moo-catalog__header-actions">
-        {{ separator(orientation="vertical", extra_class="d-none d-md-block") }}
-        {{ button("Dark", variant="outline", size="sm", extra_class="moo-catalog__theme-toggle") }}
+        <button
+          class="btn btn-ghost btn-icon-sm moo-catalog__theme-toggle"
+          type="button"
+          data-moo-theme
+          aria-label="Switch to dark mode"
+        >
+          <span data-moo-theme-icon="light">{{ render_icon("sun", "inline-start") }}</span>
+          <span data-moo-theme-icon="dark" class="d-none">{{ render_icon("moon", "inline-start") }}</span>
+        </button>
         {{ button("RTL", variant="outline", size="sm", extra_class="moo-catalog__direction-toggle") }}
         <div class="dropdown">
           {{ button("", variant="ghost", size="icon-sm", aria_label="Catalog settings", icon_start="settings", dropdown=true) }}
@@ -55,3 +80,57 @@
     </div>
   </nav>
 </header>
+
+<div class="modal fade moo-catalog__command" id="catalog-command" tabindex="-1" aria-labelledby="catalog-command-title">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="visually-hidden" id="catalog-command-title">Search catalog pages</h2>
+        {% call input_group(extra_class="moo-catalog__command-search") %}
+          {{ input_group_text(render_icon("search", "inline-start")) }}
+          {{ input(aria_label="Search catalog pages", type="search", placeholder="Search pages...") }}
+          {{ input_group_text(kbd("Esc")) }}
+        {% endcall %}
+      </div>
+      <div class="modal-body">
+        <div class="moo-catalog__command-section">Components</div>
+        <div class="list-group list-group-flush">
+          {% for component in catalog %}
+            <a
+              class="list-group-item list-group-item-action moo-catalog__command-item"
+              href="{{ root_path }}components/{{ component.slug }}.html"
+              data-moo-command-item
+            >
+              <span class="moo-catalog__command-icon" aria-hidden="true">
+                {{ render_icon(component_icons.get(component.slug, "component"), "inline-start") }}
+              </span>
+              <span>
+                <span class="moo-catalog__command-title">{{ component.label }}</span>
+                <span class="moo-catalog__command-meta">Component page</span>
+              </span>
+            </a>
+          {% endfor %}
+        </div>
+        <div class="moo-catalog__command-section">Utilities</div>
+        <div class="list-group list-group-flush">
+          {% for utility in utilities %}
+            <a
+              class="list-group-item list-group-item-action moo-catalog__command-item"
+              href="{{ root_path }}utils/{{ utility.slug }}.html"
+              data-moo-command-item
+            >
+              <span class="moo-catalog__command-icon" aria-hidden="true">
+                {{ render_icon("scroll", "inline-start") }}
+              </span>
+              <span>
+                <span class="moo-catalog__command-title">{{ utility.label }}</span>
+                <span class="moo-catalog__command-meta">Utility page</span>
+              </span>
+            </a>
+          {% endfor %}
+        </div>
+        <p class="moo-catalog__command-empty" hidden>No matching pages.</p>
+      </div>
+    </div>
+  </div>
+</div>
