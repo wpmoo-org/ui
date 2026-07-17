@@ -8,6 +8,10 @@
   --moo-ring: #18181b;
   --moo-destructive: #dc2626;
   --moo-destructive-foreground: #fff;
+  --moo-sidebar: #fafafa;
+  --moo-sidebar-foreground: var(--moo-foreground);
+  --moo-sidebar-accent: var(--moo-muted-surface);
+  --moo-sidebar-border: var(--moo-border);
   --bs-body-color: var(--moo-foreground);
   --bs-body-color-rgb: 24, 24, 27;
   --bs-heading-color: var(--moo-foreground);
@@ -23,6 +27,10 @@
   --moo-ring: #fafafa;
   --moo-destructive: #f87171;
   --moo-destructive-foreground: #18181b;
+  --moo-sidebar: #1c1c1f;
+  --moo-sidebar-foreground: var(--moo-foreground);
+  --moo-sidebar-accent: var(--moo-muted-surface);
+  --moo-sidebar-border: var(--moo-border);
   --bs-body-color: var(--moo-foreground);
   --bs-body-color-rgb: 250, 250, 250;
   --bs-heading-color: var(--moo-foreground);

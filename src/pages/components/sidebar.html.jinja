@@ -1,0 +1,146 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_provider %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Sidebar — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Sidebar",
+    "Compose a collapsible application shell from a small family of Bootstrap-native primitives — header, groups, menus, footer, and inset."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set app_shell %}
+      {% call sidebar_provider(contained=true) %}
+        {% call sidebar() %}
+          {% call sidebar_header() %}
+            {% call sidebar_menu() %}
+              {% call sidebar_menu_item(dropdown=true) %}
+                {{ sidebar_menu_button(
+                  "Acme Inc",
+                  subtitle="Enterprise",
+                  size="lg",
+                  dropdown=true,
+                  lead=sidebar_brand_mark("gallery-vertical-end"),
+                  end_icon="chevrons-up-down"
+                ) }}
+                {% call dropdown_menu() %}
+                  {{ dropdown_header("Teams") }}
+                  {{ dropdown_item("Acme Inc", icon="gallery-vertical-end") }}
+                  {{ dropdown_item("Acme Corp.", icon="audio-waveform") }}
+                  {{ dropdown_item("Evil Corp.", icon="command") }}
+                  {{ dropdown_divider() }}
+                  {{ dropdown_item("Add team", icon="plus") }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+
+          {% call sidebar_content() %}
+            {% call sidebar_group() %}
+              {{ sidebar_group_label("Platform") }}
+              {% call sidebar_menu() %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Playground", href="#", icon="square-terminal", active=true) }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Models", href="#", icon="bot") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Documentation", href="#", icon="book-open") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+
+            {% call sidebar_group() %}
+              {{ sidebar_group_label("Projects") }}
+              {% call sidebar_menu() %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Travel", href="#", icon="map") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("More", href="#", icon="ellipsis") }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+
+          {% call sidebar_footer() %}
+            {% call sidebar_menu() %}
+              {% call sidebar_menu_item(dropdown=true) %}
+                {{ sidebar_menu_button(
+                  "shadcn",
+                  subtitle="m@example.com",
+                  size="lg",
+                  dropdown=true,
+                  lead=avatar(name="shadcn", initials="SC", extra_class="sidebar-avatar"),
+                  end_icon="chevrons-up-down"
+                ) }}
+                {% call dropdown_menu(align="end") %}
+                  {{ dropdown_header("m@example.com") }}
+                  {{ dropdown_item("Upgrade to Pro", icon="sparkles") }}
+                  {{ dropdown_divider() }}
+                  {{ dropdown_item("Account", icon="badge-check") }}
+                  {{ dropdown_item("Billing", icon="credit-card") }}
+                  {{ dropdown_item("Notifications", icon="bell") }}
+                  {{ dropdown_divider() }}
+                  {{ dropdown_item("Log out", icon="log-out") }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+
+        {% call sidebar_inset() %}
+          <header class="sidebar-inset__header">
+            {{ button("", variant="ghost", size="icon-sm", aria_label="Toggle sidebar", icon_start="panel-left") }}
+            {{ separator(orientation="vertical") }}
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#">Building Your Application</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Data Fetching</li>
+              </ol>
+            </nav>
+          </header>
+          <div class="sidebar-inset__content d-grid gap-3 p-3">
+            <div class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
+              <div class="rounded-3 bg-body-secondary" style="aspect-ratio: 16 / 9;"></div>
+              <div class="rounded-3 bg-body-secondary" style="aspect-ratio: 16 / 9;"></div>
+              <div class="rounded-3 bg-body-secondary" style="aspect-ratio: 16 / 9;"></div>
+            </div>
+            <div class="rounded-3 bg-body-secondary flex-grow-1" style="min-height: 12rem;"></div>
+          </div>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "app-shell",
+      "Application shell",
+      "Compose the shell from <code>sidebar_provider</code>, <code>sidebar</code>, and <code>sidebar_inset</code>. The header holds a team switcher, the content holds grouped menus, and the footer holds the account menu — each a ready Dropdown Menu and Avatar composition.",
+      app_shell,
+      preview_class="moo-example__preview--shell"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "The mobile drawer and collapse behavior build on Bootstrap's own Offcanvas and Collapse plugins; see the",
+    "https://getbootstrap.com/docs/5.3/components/offcanvas/",
+    "Bootstrap Offcanvas documentation"
+  ) }}
+{% endblock %}
