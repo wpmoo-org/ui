@@ -19,7 +19,7 @@
     {% set sidebar_open = true %}
     {% set app_shell %}
       {% call sidebar_provider(contained=true, key="components-sidebar", default_open=sidebar_open) %}
-        {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
+        {% call sidebar(id="components-sidebar-demo", aria_label="Sidebar demo navigation") %}
           {% call sidebar_header() %}
             {% call sidebar_menu() %}
               {% call sidebar_menu_item(dropdown=true) %}
@@ -137,7 +137,7 @@
 
         {% call sidebar_inset() %}
           <header class="sidebar-inset__header">
-            {{ sidebar_trigger(sidebar_id="catalog-sidebar", expanded=sidebar_open) }}
+            {{ sidebar_trigger(sidebar_id="components-sidebar-demo", expanded=sidebar_open) }}
             {{ separator(orientation="vertical") }}
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb mb-0">

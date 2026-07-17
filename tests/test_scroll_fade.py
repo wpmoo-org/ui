@@ -112,7 +112,10 @@ class ScrollFadeTests(CatalogTestCase):
             'class="moo-code scroll-fade-x no-scrollbar"',
             button,
         )
-        self.assertIn("moo-catalog__sidebar-scroll scroll-fade-y no-scrollbar", button)
+        self.assertIn(
+            'class="sidebar-content scroll-fade-y no-scrollbar"',
+            button,
+        )
 
         catalog_css = self.read_output("assets/css/catalog.css")
         code_block = catalog_css.split(".moo-example__source pre {", 1)[

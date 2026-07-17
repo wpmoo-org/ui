@@ -65,6 +65,95 @@
 
   sectionFilter?.addEventListener("change", () => filterCatalog());
 
+  // Command palette: the header search trigger and Cmd/Ctrl+K open a Bootstrap
+  // modal that filters catalog pages; arrow keys move the highlight and Enter
+  // navigates to the highlighted page.
+  const commandModalEl = document.getElementById("catalog-command");
+  const commandInput = commandModalEl?.querySelector("input[type='search']");
+  const commandItems = Array.from(
+    commandModalEl?.querySelectorAll("[data-moo-command-item]") || []
+  );
+  const commandEmpty = commandModalEl?.querySelector(".moo-catalog__command-empty");
+  const searchTrigger = document.querySelector(".moo-catalog__search-trigger");
+  let commandActive = -1;
+
+  const openCommand = () => {
+    const Modal = window.bootstrap?.Modal;
+    if (commandModalEl && Modal) {
+      Modal.getOrCreateInstance(commandModalEl).show();
+    }
+  };
+
+  const visibleCommandItems = () => commandItems.filter((item) => !item.hidden);
+
+  const setCommandActive = (index) => {
+    const items = visibleCommandItems();
+    commandItems.forEach((item) => item.classList.remove("active"));
+    if (items.length === 0) {
+      commandActive = -1;
+      return;
+    }
+    commandActive = ((index % items.length) + items.length) % items.length;
+    const current = items[commandActive];
+    current.classList.add("active");
+    current.scrollIntoView({ block: "nearest" });
+  };
+
+  const filterCommand = (query = commandInput?.value || "") => {
+    const needle = normalize(query);
+    let visible = 0;
+    commandItems.forEach((item) => {
+      const matches = !needle || normalize(item.textContent).includes(needle);
+      item.hidden = !matches;
+      if (matches) {
+        visible += 1;
+      }
+    });
+    if (commandEmpty) {
+      commandEmpty.hidden = visible !== 0;
+    }
+    setCommandActive(0);
+  };
+
+  searchTrigger?.addEventListener("click", () => openCommand());
+  commandInput?.addEventListener("input", () => filterCommand());
+
+  commandInput?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setCommandActive(commandActive + 1);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setCommandActive(commandActive - 1);
+    } else if (event.key === "Enter") {
+      const target = visibleCommandItems()[commandActive];
+      if (target) {
+        event.preventDefault();
+        window.location.href = target.getAttribute("href");
+      }
+    }
+  });
+
+  commandModalEl?.addEventListener("shown.bs.modal", () => {
+    commandInput?.focus();
+    commandInput?.select();
+    filterCommand();
+  });
+
+  commandModalEl?.addEventListener("hidden.bs.modal", () => {
+    if (commandInput) {
+      commandInput.value = "";
+    }
+    filterCommand("");
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      openCommand();
+    }
+  });
+
   document.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");
