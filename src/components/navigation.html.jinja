@@ -22,7 +22,7 @@
   </nav>
 {%- endmacro %}
 
-{% macro nav_item(label, href="#", active=false, disabled=false, icon="", badge_label="", badge_variant="secondary") -%}
+{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary") -%}
   {% if not label | trim %}{{ fail("Navigation item label is required") }}{% endif %}
   {% set classes = "nav-link" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
@@ -32,6 +32,7 @@
       {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
       <span>{{ label }}</span>
       {% if badge_label %}{{ badge(badge_label, variant=badge_variant, pill=true, extra_class="ms-auto") }}{% endif %}
+      {% if end_icon %}<span class="ms-auto">{{ render_icon(end_icon, "inline-end") }}</span>{% endif %}
     </a>
   </li>
 {%- endmacro %}

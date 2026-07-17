@@ -16,11 +16,15 @@
   gap: $spacer * 0.5;
 }
 
+.nav.flex-column .nav-link {
+  width: 100%;
+}
+
 .nav-pills .nav-link:not(.active, .disabled):hover {
   background-color: var(--moo-muted-surface);
 }
 
-.nav-link > [data-icon] {
+.nav-link [data-icon] {
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
