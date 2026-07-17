@@ -491,9 +491,11 @@ body {
 
 .moo-catalog__command-content {
   overflow: hidden;
-  border: var(--bs-border-width) solid var(--bs-border-color);
-  border-radius: 0.875rem;
-  box-shadow: var(--bs-box-shadow-lg);
+  border: 0;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 0 0 4px var(--moo-border),
+    0 24px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .moo-catalog__command-header {
@@ -503,6 +505,12 @@ body {
 
 .moo-catalog__command-search {
   width: 100%;
+}
+
+/* Match shadcn's command input: keep the border, drop the focus ring. */
+.moo-catalog__command-search:has(> .form-control:focus) {
+  border-color: var(--moo-border);
+  box-shadow: none;
 }
 
 .moo-catalog__command-body {
