@@ -15,8 +15,8 @@
   <div class="moo-component-examples">
     {% set basic %}
       {% call dropdown("Open menu") %}
-        {{ dropdown_item("Edit project", icon="pencil") }}
-        {{ dropdown_item("Duplicate", icon="copy") }}
+        {{ dropdown_item("Edit project", icon="pencil", shortcut="⌘E") }}
+        {{ dropdown_item("Duplicate", icon="copy", shortcut="⌘D") }}
         {{ dropdown_item("Archive", icon="archive") }}
       {% endcall %}
     {% endset %}
@@ -28,7 +28,7 @@
     ) }}
 
     {% set grouped %}
-      {% call dropdown("Workspace", align="end") %}
+      {% call dropdown("Workspace", align="end", caret=true) %}
         {{ dropdown_header("Current workspace") }}
         {{ dropdown_item("Olympiad", active=true, icon="check") }}
         {{ dropdown_item("Kita", icon="folder") }}

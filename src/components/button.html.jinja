@@ -48,13 +48,15 @@
   extra_class="",
   toggle=false,
   dropdown=false,
-  dropdown_offset=""
+  dropdown_offset="",
+  dropdown_caret=false
 ) -%}
   {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
   {% if element not in button_elements %}{{ fail("Unknown button element: " ~ element) }}{% endif %}
   {% if type not in button_types %}{{ fail("Unknown button type: " ~ type) }}{% endif %}
   {% if toggle and dropdown %}{{ fail("Button cannot be both toggle and dropdown") }}{% endif %}
+  {% if dropdown_caret and not dropdown %}{{ fail("Button dropdown_caret requires dropdown=true") }}{% endif %}
   {% if dropdown_offset and not dropdown %}{{ fail("Button dropdown_offset requires dropdown=true") }}{% endif %}
   {% if not label | trim and not aria_label | trim %}{{ fail("Buttons without a visible label require aria_label") }}{% endif %}
   {% set variant_class = button_variants[variant] %}
@@ -62,7 +64,7 @@
   {% set size_class = size_config["class"] %}
   {% set classes = "btn " ~ variant_class %}
   {% if size_class %}{% set classes = classes ~ " " ~ size_class %}{% endif %}
-  {% if dropdown %}{% set classes = classes ~ " dropdown-toggle" %}{% endif %}
+  {% if dropdown_caret %}{% set classes = classes ~ " dropdown-toggle" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
 
   {% if element == "a" %}

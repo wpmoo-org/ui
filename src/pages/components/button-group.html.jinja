@@ -1,6 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
@@ -33,6 +34,28 @@
       "Composition",
       "Use <code>btn-group</code> for joined controls. Wrap separate groups in <code>btn-toolbar</code> when the toolbar needs its own spacing.",
       basic_actions
+    ) }}
+
+    {% set dropdown_actions %}
+      {% call button_group("Message actions") %}
+        {{ button("Archive", variant="outline") }}
+        {{ button("Report", variant="outline") }}
+        {{ button("Snooze", variant="outline") }}
+        {{ button("", variant="outline", size="icon", aria_label="More message actions", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
+        {% call dropdown_menu(align="end") %}
+          {{ dropdown_item("Mark as handled", icon="mail-check") }}
+          {{ dropdown_item("Move to archive", icon="archive") }}
+          {{ dropdown_item("Delay reminder", icon="clock") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Delete message", icon="trash-2", destructive=true) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "dropdown-actions",
+      "Dropdown menu",
+      "Keep frequent actions visible and place the remaining actions in a ready Dropdown Menu. The icon-only trigger keeps an accessible name without adding Bootstrap's caret.",
+      dropdown_actions
     ) }}
 
     {% set mixed_styles %}
