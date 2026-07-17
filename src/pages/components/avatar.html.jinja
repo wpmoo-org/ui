@@ -61,19 +61,20 @@
       sizes
     ) }}
 
-    {% set group %}
-      <div class="d-flex align-items-center gap-2">
-        {{ avatar(name="Aylin", initials="AY") }}
-        {{ avatar(name="Can", initials="CN") }}
-        {{ avatar(name="Mert", initials="MT") }}
-        <span class="text-body-secondary small">3 collaborators</span>
+    {% set rtl %}
+      <div class="d-flex align-items-center gap-3" dir="rtl">
+        {{ avatar(name="مروة", initials="مو") }}
+        <div>
+          <div class="fw-medium">مروة</div>
+          <div class="text-body-secondary small">حساب مستخدم</div>
+        </div>
       </div>
     {% endset %}
     {{ render_example(
-      "inline-group",
-      "Inline group",
-      "Keep avatar groups simple until the surrounding component owns overlap, status, or overflow behavior.",
-      group
+      "rtl",
+      "Right-to-left layout",
+      "Use the same avatar markup inside RTL content; logical spacing keeps the identity and label aligned.",
+      rtl
     ) }}
   </div>
 
