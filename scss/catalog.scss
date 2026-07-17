@@ -477,6 +477,16 @@ body {
   max-width: 24rem;
 }
 
+.moo-example__preview--shell {
+  display: block;
+  min-height: 0;
+  padding: 0;
+}
+
+.moo-example__preview--shell > * {
+  width: 100%;
+}
+
 .moo-example__preview > .d-grid {
   width: 100%;
 }

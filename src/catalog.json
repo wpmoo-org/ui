@@ -68,5 +68,10 @@
     "slug": "separator",
     "label": "Separator",
     "status": "ready"
+  },
+  {
+    "slug": "sidebar",
+    "label": "Sidebar",
+    "status": "ready"
   }
 ]

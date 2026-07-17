@@ -1,0 +1,159 @@
+{# Moo UI Sidebar: a composable app-shell primitive.
+
+   Bootstrap has no native sidebar component, so this family owns the public
+   `.sidebar*` selector namespace (same precedent as `.avatar`). The macros
+   mirror shadcn's composable sidebar API so an app shell is rearranged by
+   editing markup rather than rewriting CSS. Behavior (collapse-to-icon rail,
+   mobile offcanvas, sub-menu disclosure) layers on in later phases using
+   native Bootstrap plugins. #}
+
+{% set sidebar_sides = ["left", "right"] %}
+{% set sidebar_variants = ["sidebar", "floating", "inset"] %}
+{% set sidebar_collapsible = ["icon", "offcanvas", "none"] %}
+{% set sidebar_button_sizes = ["default", "lg"] %}
+
+{% macro sidebar_provider(default_open=true, contained=false, extra_class="") -%}
+  {% set classes = "sidebar-wrapper" %}
+  {% if contained %}{% set classes = classes ~ " sidebar-wrapper--contained" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <div
+    class="{{ classes }}"
+    data-slot="sidebar-wrapper"
+    data-moo-sidebar-state="{{ 'expanded' if default_open else 'collapsed' }}"
+  >
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar(side="left", variant="sidebar", collapsible="icon", extra_class="") -%}
+  {% if side not in sidebar_sides %}{{ fail("Unknown sidebar side: " ~ side) }}{% endif %}
+  {% if variant not in sidebar_variants %}{{ fail("Unknown sidebar variant: " ~ variant) }}{% endif %}
+  {% if collapsible not in sidebar_collapsible %}{{ fail("Unknown sidebar collapsible mode: " ~ collapsible) }}{% endif %}
+  {% set classes = "sidebar" %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <aside
+    class="{{ classes }}"
+    data-slot="sidebar"
+    data-side="{{ side }}"
+    data-variant="{{ variant }}"
+    data-collapsible="{{ collapsible }}"
+  >
+    <div class="sidebar-inner" data-slot="sidebar-inner">
+      {{ caller() | trim | safe }}
+    </div>
+  </aside>
+{%- endmacro %}
+
+{% macro sidebar_header(extra_class="") -%}
+  <div class="sidebar-header{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-header">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar_content(extra_class="") -%}
+  <div class="sidebar-content scroll-fade-y no-scrollbar{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-content">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar_footer(extra_class="") -%}
+  <div class="sidebar-footer{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-footer">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar_group(extra_class="") -%}
+  <div class="sidebar-group{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-group">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar_group_label(label) -%}
+  {% if not label | trim %}{{ fail("Sidebar group label is required") }}{% endif %}
+  <div class="sidebar-group-label" data-slot="sidebar-group-label">{{ label }}</div>
+{%- endmacro %}
+
+{% macro sidebar_menu(extra_class="") -%}
+  <ul class="sidebar-menu{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-menu">
+    {{ caller() | trim | safe }}
+  </ul>
+{%- endmacro %}
+
+{% macro sidebar_menu_item(dropdown=false, extra_class="") -%}
+  {% set classes = "sidebar-menu-item" %}
+  {% if dropdown %}{% set classes = classes ~ " dropdown" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <li class="{{ classes }}" data-slot="sidebar-menu-item">
+    {{ caller() | trim | safe }}
+  </li>
+{%- endmacro %}
+
+{% macro _sidebar_button_body(title, subtitle, icon, lead, end_icon) -%}
+  {% if lead %}
+    <span class="sidebar-menu-button__lead" aria-hidden="true">{{ lead | safe }}</span>
+  {% elif icon %}
+    <span class="sidebar-menu-button__lead" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>
+  {% endif %}
+  <span class="sidebar-menu-button__text">
+    <span class="sidebar-menu-button__title">{{ title }}</span>
+    {% if subtitle %}<span class="sidebar-menu-button__subtitle">{{ subtitle }}</span>{% endif %}
+  </span>
+  {% if end_icon %}<span class="sidebar-menu-button__end" aria-hidden="true">{{ render_icon(end_icon, "inline-end") }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro sidebar_menu_button(
+  title,
+  subtitle="",
+  href="#",
+  icon="",
+  lead="",
+  end_icon="",
+  active=false,
+  size="default",
+  tooltip="",
+  element="a",
+  dropdown=false,
+  aria_label="",
+  extra_class=""
+) -%}
+  {% if not title | trim %}{{ fail("Sidebar menu button title is required") }}{% endif %}
+  {% if size not in sidebar_button_sizes %}{{ fail("Unknown sidebar menu button size: " ~ size) }}{% endif %}
+  {% set classes = "sidebar-menu-button" %}
+  {% if size != "default" %}{% set classes = classes ~ " sidebar-menu-button--" ~ size %}{% endif %}
+  {% if active %}{% set classes = classes ~ " active" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  {% set body = _sidebar_button_body(title, subtitle, icon, lead, end_icon) %}
+  {% if dropdown or element == "button" %}
+    <button
+      class="{{ classes }}"
+      type="button"
+      data-slot="sidebar-menu-button"
+      {% if dropdown %}data-bs-toggle="dropdown" aria-expanded="false"{% endif %}
+      {% if tooltip %} data-moo-sidebar-tooltip="{{ tooltip }}"{% endif %}
+      {% if aria_label %} aria-label="{{ aria_label }}"{% endif %}
+    >
+      {{ body }}
+    </button>
+  {% else %}
+    <a
+      class="{{ classes }}"
+      href="{{ href }}"
+      data-slot="sidebar-menu-button"
+      {% if active %} aria-current="page"{% endif %}
+      {% if tooltip %} data-moo-sidebar-tooltip="{{ tooltip }}"{% endif %}
+      {% if aria_label %} aria-label="{{ aria_label }}"{% endif %}
+    >
+      {{ body }}
+    </a>
+  {% endif %}
+{%- endmacro %}
+
+{% macro sidebar_brand_mark(icon, variant="primary") -%}
+  <span class="sidebar-brand-mark sidebar-brand-mark--{{ variant }}">{{ render_icon(icon, "inline-start") }}</span>
+{%- endmacro %}
+
+{% macro sidebar_inset(extra_class="") -%}
+  <div class="sidebar-inset{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-inset">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}

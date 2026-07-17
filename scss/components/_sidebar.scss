@@ -1,0 +1,253 @@
+// Bootstrap has no native sidebar, so this owned sidebar selector namespace
+// styles the app-shell primitive (same precedent as the avatar component).
+// Geometry rides the $moo-sidebar-* Sass knobs; every color consumes a
+// runtime --moo-* token.
+
+.sidebar-wrapper {
+  --moo-sidebar-width: #{$moo-sidebar-width};
+  --moo-sidebar-width-icon: #{$moo-sidebar-width-icon};
+  display: flex;
+  width: 100%;
+  min-height: 100svh;
+}
+
+.sidebar-wrapper--contained {
+  min-height: 0;
+  height: 34rem;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--moo-border);
+  border-radius: var(--bs-border-radius-xl);
+}
+
+// Sidebar column ---------------------------------------------------------
+.sidebar {
+  flex: 0 0 var(--moo-sidebar-width);
+  width: var(--moo-sidebar-width);
+  color: var(--moo-sidebar-foreground);
+}
+
+.sidebar[data-side="left"] .sidebar-inner {
+  border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.sidebar[data-side="right"] {
+  order: 1;
+}
+
+.sidebar[data-side="right"] .sidebar-inner {
+  border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.sidebar-inner {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100svh;
+  max-height: 100svh;
+  background: var(--moo-sidebar);
+}
+
+.sidebar-wrapper--contained .sidebar-inner {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+}
+
+.sidebar-header,
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.25;
+  padding: $spacer * 0.5;
+}
+
+.sidebar-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: $spacer * 0.5;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  padding: $spacer * 0.5;
+}
+
+.sidebar-group-label {
+  display: flex;
+  align-items: center;
+  height: $spacer * 2;
+  padding-inline: $spacer * 0.5;
+  color: var(--moo-muted-foreground);
+  font-size: $font-size-base * 0.857;
+  font-weight: $font-weight-medium;
+}
+
+// Menus ------------------------------------------------------------------
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.25;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar-menu-item {
+  position: relative;
+}
+
+.sidebar-menu-button {
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.5;
+  width: 100%;
+  min-width: 0;
+  height: $spacer * 2;
+  padding-inline: $spacer * 0.5;
+  overflow: hidden;
+  color: var(--moo-sidebar-foreground);
+  font-size: $font-size-base;
+  text-align: start;
+  text-decoration: none;
+  border: 0;
+  border-radius: var(--bs-border-radius);
+  background: transparent;
+}
+
+.sidebar-menu-button:hover {
+  color: var(--moo-sidebar-foreground);
+  background: var(--moo-sidebar-accent);
+}
+
+.sidebar-menu-button[aria-current="page"] {
+  font-weight: $font-weight-medium;
+  background: var(--moo-sidebar-accent);
+}
+
+.sidebar-menu-button--lg {
+  height: $spacer * 3;
+  padding: $spacer * 0.5;
+}
+
+.sidebar-menu-button__lead {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-menu-button__lead [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+  color: var(--moo-muted-foreground);
+}
+
+.sidebar-menu-button[aria-current="page"] .sidebar-menu-button__lead [data-icon] {
+  color: var(--moo-sidebar-foreground);
+}
+
+.sidebar-menu-button__text {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.sidebar-menu-button__title {
+  overflow: hidden;
+  font-size: $font-size-base;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-menu-button--lg .sidebar-menu-button__title {
+  font-weight: $font-weight-medium;
+}
+
+.sidebar-menu-button__subtitle {
+  overflow: hidden;
+  color: var(--moo-muted-foreground);
+  font-size: $font-size-base * 0.857;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-menu-button__end {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.sidebar-menu-button__end [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+  color: var(--moo-muted-foreground);
+}
+
+// Leading brand/avatar tiles for the team switcher and user rows.
+.sidebar-brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: $spacer * 2;
+  height: $spacer * 2;
+  flex: 0 0 auto;
+  border-radius: var(--bs-border-radius);
+}
+
+.sidebar-brand-mark [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+}
+
+.sidebar-brand-mark--primary {
+  color: var(--moo-sidebar);
+  background: var(--moo-sidebar-foreground);
+}
+
+.sidebar-brand-mark--muted {
+  color: var(--moo-sidebar-foreground);
+  border: var(--bs-border-width) solid var(--moo-sidebar-border);
+  background: var(--moo-sidebar-accent);
+}
+
+// Applied to the footer user avatar via the avatar macro's extra_class so the
+// override stays inside the sidebar's owned selector namespace.
+.sidebar-avatar {
+  border-radius: var(--bs-border-radius);
+}
+
+// Inset (content area) ---------------------------------------------------
+.sidebar-inset {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bs-body-bg);
+}
+
+.sidebar-inset__header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.5;
+  height: $spacer * 4;
+  padding-inline: $spacer;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+}
+
+.sidebar-inset__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}

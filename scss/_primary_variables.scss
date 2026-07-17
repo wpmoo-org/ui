@@ -95,3 +95,9 @@ $box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1) !
 $box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !default;
 
 $border-radius-xl: 0.75rem !default;
+
+// Bootstrap has no sidebar primitive, so the app-shell geometry lives on
+// dedicated Sass knobs. The Sidebar component surfaces these as
+// --moo-sidebar-width / --moo-sidebar-width-icon consumption variables.
+$moo-sidebar-width: 16rem !default;
+$moo-sidebar-width-icon: 3rem !default;
