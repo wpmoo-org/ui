@@ -55,6 +55,7 @@
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
   {% if element not in button_elements %}{{ fail("Unknown button element: " ~ element) }}{% endif %}
   {% if type not in button_types %}{{ fail("Unknown button type: " ~ type) }}{% endif %}
+  {% if element != "button" and (toggle or dropdown or dropdown_offset or dropdown_caret) %}{{ fail("Button dropdown and toggle options require element=button") }}{% endif %}
   {% if toggle and dropdown %}{{ fail("Button cannot be both toggle and dropdown") }}{% endif %}
   {% if dropdown_caret and not dropdown %}{{ fail("Button dropdown_caret requires dropdown=true") }}{% endif %}
   {% if dropdown_offset and not dropdown %}{{ fail("Button dropdown_offset requires dropdown=true") }}{% endif %}

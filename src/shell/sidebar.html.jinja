@@ -3,23 +3,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/navigation.html.jinja" import nav_item, nav_menu %}
 {% from "components/separator.html.jinja" import separator %}
-
-{% set component_icons = {
-  "button": "mouse-pointer-click",
-  "button-group": "panel-top",
-  "card": "square-stack",
-  "typography": "type",
-  "kbd": "keyboard",
-  "input": "text-cursor-input",
-  "textarea": "file-text",
-  "input-group": "search",
-  "select": "chevrons-up-down",
-  "dropdown-menu": "menu",
-  "badge": "badge",
-  "avatar": "circle-user",
-  "navigation": "panel-left",
-  "separator": "separator-horizontal"
-} %}
+{% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% set utility_icons = {
   "scroll-fade": "scroll"
