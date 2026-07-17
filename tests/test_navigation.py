@@ -27,6 +27,7 @@ class NavigationTests(CatalogTestCase):
               {{ nav_item("Dashboard", active=true, icon="layout-dashboard") }}
               {{ nav_item("Tasks") }}
               {{ nav_item("Inbox", badge_label="3") }}
+              {{ nav_item("Settings", end_icon="chevron-right") }}
               {{ nav_item("Settings", disabled=true) }}
             {% endcall %}
             """
@@ -37,6 +38,7 @@ class NavigationTests(CatalogTestCase):
         self.assertIn('class="nav-link active"', output)
         self.assertIn('aria-current="page"', output)
         self.assertIn('class="badge text-bg-secondary rounded-pill ms-auto"', output)
+        self.assertIn('data-icon="inline-end"', output)
         self.assertIn('aria-disabled="true" tabindex="-1"', output)
         self.assertNotIn("--moo-navigation", output)
 
@@ -47,6 +49,11 @@ class NavigationTests(CatalogTestCase):
         with self.assertRaisesRegex(ValueError, "Unknown navigation style: tabs"):
             self.render_navigation(
                 '{% call nav_menu("Tabs", style="tabs") %}{{ nav_item("A") }}{% endcall %}'
+            )
+
+        with self.assertRaisesRegex(ValueError, "Unknown navigation direction: sideways"):
+            self.render_navigation(
+                '{% call nav_menu("RTL", dir="sideways") %}{{ nav_item("A") }}{% endcall %}'
             )
 
         with self.assertRaisesRegex(ValueError, "Navigation item label is required"):

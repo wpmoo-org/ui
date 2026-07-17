@@ -35,12 +35,13 @@
         {{ nav_item("Apps", href="#", icon="package") }}
         {{ nav_item("Chats", href="#", icon="messages-square", badge_label="3", badge_variant="default") }}
         {{ nav_item("Users", href="#", icon="users") }}
+        {{ nav_item("Settings", href="#", icon="settings", end_icon="chevron-right") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "sidebar",
       "Sidebar list",
-      "Stack pills vertically for shell sidebars. Icons and badges are optional; keep the link itself as the only interactive target.",
+      "Stack pills vertically for shell sidebars. Icons, counts, and end icons are decorative; keep the link itself as the only interactive target.",
       sidebar,
       preview_class="moo-example__preview--narrow"
     ) }}

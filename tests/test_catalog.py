@@ -51,7 +51,9 @@ class CatalogContractTests(CatalogTestCase):
             # .form-control` / `> .form-select`, so the group legitimately owns
             # those controls within its scope.
             "input_group": ("input-group", "form-control", "form-select"),
-            "navigation": ("active", "disabled", "nav"),
+            # Bootstrap documents vertical navs as `.nav.flex-column`, so the
+            # Navigation partial may scope width fixes to that native utility.
+            "navigation": ("active", "disabled", "flex-column", "nav"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
