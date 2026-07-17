@@ -123,6 +123,27 @@ class CatalogContractTests(CatalogTestCase):
                             f".{class_name} must come from a ready component macro",
                         )
 
+    def test_components_index_uses_admin_shell_primitives(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+
+        for contract in (
+            'data-moo-shell="catalog"',
+            'id="catalog-navigation"',
+            "moo-catalog__header-search",
+            "input-group",
+            "<kbd>",
+            "dropdown-menu",
+            "scroll-fade-y no-scrollbar",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, index)
+        self.assertRegex(index, r'class="[^"]*\bavatar\b[^"]*\bavatar-sm\b')
+        self.assertRegex(index, r'class="[^"]*\bbadge\b')
+        self.assertRegex(index, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
+
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()
 
