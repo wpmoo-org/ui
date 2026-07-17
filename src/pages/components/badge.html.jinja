@@ -24,39 +24,23 @@
     {{ render_example(
       "variants",
       "Variants",
-      "Use semantic Bootstrap color helpers through the badge macro. Keep the label explicit so color is not the only signal.",
+      "Use the same compact set as shadcn: default, secondary, destructive, and outline.",
       variants
     ) }}
 
-    {% set contextual %}
+    {% set status %}
       <div class="d-flex flex-wrap gap-2">
-        {{ badge("Success", variant="success") }}
-        {{ badge("Warning", variant="warning") }}
-        {{ badge("Info", variant="info") }}
-        {{ badge("Light", variant="light") }}
-        {{ badge("Dark", variant="dark") }}
+        {{ badge("Connected", variant="outline") }}
+        {{ badge("Beta", variant="secondary") }}
+        {{ badge("Draft", variant="warning") }}
+        {{ badge("Blocked", variant="destructive") }}
       </div>
     {% endset %}
     {{ render_example(
-      "contextual",
-      "Context colors",
-      "Bootstrap's <code>text-bg-*</code> helpers pair background and foreground colors for familiar status labels.",
-      contextual
-    ) }}
-
-    {% set pill %}
-      <div class="d-flex flex-wrap gap-2">
-        {{ badge("New", pill=true) }}
-        {{ badge("In review", variant="secondary", pill=true) }}
-        {{ badge("Blocked", variant="destructive", pill=true) }}
-        {{ badge("Live", variant="success", pill=true) }}
-      </div>
-    {% endset %}
-    {{ render_example(
-      "pill",
-      "Pill badges",
-      "Add <code>rounded-pill</code> when the badge should read as a soft capsule rather than a squared label.",
-      pill
+      "status",
+      "Status labels",
+      "Reserve extra Bootstrap statuses for product states that need a recognizable semantic cue.",
+      status
     ) }}
 
     {% set counts %}
