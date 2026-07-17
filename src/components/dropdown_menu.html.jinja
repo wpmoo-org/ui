@@ -26,7 +26,7 @@
   {% if href %}
     <li>
       <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>
-        {% if icon %}{{ lucide_icon(icon, "inline-start") }}{% endif %}
+        {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
         <span>{{ label }}</span>
         {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
       </a>
@@ -34,7 +34,7 @@
   {% else %}
     <li>
       <button class="{{ classes }}" type="button"{% if disabled %} disabled{% endif %}>
-        {% if icon %}{{ lucide_icon(icon, "inline-start") }}{% endif %}
+        {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
         <span>{{ label }}</span>
         {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
       </button>

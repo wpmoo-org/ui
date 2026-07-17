@@ -26,6 +26,15 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("lucide_icon(", button_template)
         self.assertNotIn("{% if name ==", button_template)
 
+        for path in (
+            ROOT / "src/components/dropdown_menu.html.jinja",
+            ROOT / "src/includes/example.html.jinja",
+        ):
+            source = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.name):
+                self.assertIn("render_icon(", source)
+                self.assertNotIn("lucide_icon(", source)
+
     def test_icons_need_no_cdn_or_runtime_script(self) -> None:
         result = self.run_build()
 
@@ -122,6 +131,19 @@ class CatalogContractTests(CatalogTestCase):
                             component_class.match(class_name),
                             f".{class_name} must come from a ready component macro",
                         )
+
+    def test_component_pages_link_to_bootstrap_documentation(self) -> None:
+        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+            source = path.read_text(encoding="utf-8")
+
+            with self.subTest(page=path.name, contract="reference import"):
+                self.assertIn(
+                    '{% from "includes/documentation-reference.html.jinja" '
+                    "import render_reference %}",
+                    source,
+                )
+            with self.subTest(page=path.name, contract="reference call"):
+                self.assertIn("render_reference(", source)
 
     def test_components_index_uses_admin_shell_primitives(self) -> None:
         result = self.run_build()

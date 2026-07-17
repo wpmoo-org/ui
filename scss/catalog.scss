@@ -132,6 +132,17 @@ body {
   padding: 0.25rem;
 }
 
+.moo-catalog__sidebar-brand .moo-catalog__brand-copy {
+  flex: 1 1 auto;
+}
+
+.moo-catalog__sidebar-brand > [data-icon="inline-end"] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  color: var(--bs-secondary-color);
+}
+
 .moo-catalog__sidebar-account {
   padding: 0.25rem;
 }

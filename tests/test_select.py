@@ -58,6 +58,15 @@ class SelectTests(CatalogTestCase):
                 with self.assertRaisesRegex(ValueError, message):
                     self.render_select(call)
 
+    def test_select_emits_empty_selected_value(self) -> None:
+        output = self.render_select(
+            'select(aria_label="Workspace", '
+            'options=[{"value": "", "label": "Choose a workspace"}], selected="")'
+        )
+
+        self.assertIn('data-selected=""', output)
+        self.assertIn('<option value="" selected>Choose a workspace</option>', output)
+
     def test_select_supports_native_size_state_and_direction_contracts(self) -> None:
         output = self.render_select(
             'select(aria_label="Workspace", '

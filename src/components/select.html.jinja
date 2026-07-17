@@ -6,7 +6,7 @@
   aria_label="",
   id="",
   options=[],
-  selected="",
+  selected=none,
   size="",
   multiple=false,
   rows="",
@@ -26,7 +26,7 @@
   {% if dir not in select_dirs %}{{ fail("Unknown select direction: " ~ dir) }}{% endif %}
 
   {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
-  <select class="form-select{% if size %} form-select-{{ size }}{% endif %}{% if invalid %} is-invalid{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if selected %} data-selected="{{ selected }}"{% endif %}{% if multiple %} multiple{% endif %}{% if rows %} size="{{ rows }}"{% endif %}{% if disabled %} disabled{% endif %}{% if required %} required{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
+  <select class="form-select{% if size %} form-select-{{ size }}{% endif %}{% if invalid %} is-invalid{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if selected is not none %} data-selected="{{ selected }}"{% endif %}{% if multiple %} multiple{% endif %}{% if rows %} size="{{ rows }}"{% endif %}{% if disabled %} disabled{% endif %}{% if required %} required{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
     {% for option in options %}
       {% if option.options is defined %}
         <optgroup label="{{ option.label }}"{% if option.disabled is defined and option.disabled %} disabled{% endif %}>

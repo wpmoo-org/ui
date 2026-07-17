@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/textarea.html.jinja" import textarea %}
@@ -78,4 +79,10 @@
       "moo-example__preview--narrow"
     ) }}
   </div>
+
+  {{ render_reference(
+    "For more form control options, see the",
+    "https://getbootstrap.com/docs/5.3/forms/form-control/",
+    "Bootstrap Form controls documentation"
+  ) }}
 {% endblock %}

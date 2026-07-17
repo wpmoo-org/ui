@@ -67,6 +67,22 @@ class ButtonTests(CatalogTestCase):
         self.assertIn('data-bs-offset="0,8"', output)
         self.assertNotIn("dropdown-toggle", output)
 
+    def test_button_plugin_options_require_button_element(self) -> None:
+        for call in (
+            'button("Actions", element="a", toggle=true)',
+            'button("Actions", element="a", dropdown=true)',
+            'button("Actions", element="a", dropdown_offset="0,8")',
+            'button("Actions", element="a", dropdown_caret=true)',
+            'button("Actions", element="a", dropdown=true, dropdown_offset="0,8")',
+            'button("Actions", element="a", dropdown=true, dropdown_caret=true)',
+        ):
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "Button dropdown and toggle options require element=button",
+                ):
+                    self.render_button(call)
+
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
         for call in (
             'button("")',

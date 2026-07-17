@@ -9,6 +9,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% block title %}Components — Moo UI{% endblock %}
 
@@ -27,23 +28,6 @@
   "avatar": "Represent people, teams, or accounts.",
   "navigation": "Group static destinations for sidebars and sections.",
   "separator": "Separate content with horizontal and vertical rules."
-} %}
-
-{% set component_icons = {
-  "button": "mouse-pointer-click",
-  "button-group": "panel-top",
-  "card": "square-stack",
-  "typography": "type",
-  "kbd": "keyboard",
-  "input": "text-cursor-input",
-  "textarea": "file-text",
-  "input-group": "search",
-  "select": "chevrons-up-down",
-  "dropdown-menu": "menu",
-  "badge": "badge",
-  "avatar": "circle-user",
-  "navigation": "panel-left",
-  "separator": "separator-horizontal"
 } %}
 
 {% set connected_components = [
