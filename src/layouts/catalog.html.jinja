@@ -1,16 +1,19 @@
 {% extends "layouts/base.html.jinja" %}
+{% from "components/sidebar.html.jinja" import sidebar_inset, sidebar_provider %}
 
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
-    {% include "shell/navbar.html.jinja" %}
-    <div class="moo-catalog__body">
+    {% call sidebar_provider(key="catalog-shell") %}
       {% include "shell/sidebar.html.jinja" %}
-      <main class="moo-catalog__main" id="main-content" tabindex="-1">
-        <div class="moo-catalog__content">
-          {% block content %}{% endblock %}
-        </div>
-      </main>
-    </div>
-    {% include "shell/footer.html.jinja" %}
+      {% call sidebar_inset() %}
+        {% include "shell/navbar.html.jinja" %}
+        <main class="moo-catalog__main sidebar-inset__content" id="main-content" tabindex="-1">
+          <div class="moo-catalog__content">
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+        {% include "shell/footer.html.jinja" %}
+      {% endcall %}
+    {% endcall %}
   </div>
 {% endblock %}

@@ -1,73 +1,48 @@
-{% from "components/avatar.html.jinja" import avatar %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
-{% from "components/input.html.jinja" import input %}
-{% from "components/input_group.html.jinja" import input_group, input_group_text %}
-{% from "components/kbd.html.jinja" import kbd %}
+{% from "components/navigation.html.jinja" import nav_item, nav_menu %}
+{% from "components/sidebar.html.jinja" import sidebar_trigger %}
 {% from "components/separator.html.jinja" import separator %}
 
 <header class="moo-catalog__header">
   <nav class="navbar moo-catalog__navbar" aria-label="Catalog controls">
     <div class="container-fluid moo-catalog__navbar-inner">
-      <a class="navbar-brand moo-catalog__brand" href="{{ root_path }}index.html">
-        <span class="moo-catalog__brand-mark" aria-hidden="true">
-          {{ render_icon("blocks", "inline-start") }}
-        </span>
-        <span class="moo-catalog__brand-copy">
-          <span class="moo-catalog__brand-title">Moo UI</span>
-          <span class="moo-catalog__brand-subtitle">Bootstrap-native catalog</span>
-        </span>
-      </a>
-
       <div class="moo-catalog__header-start">
-        <button
-          class="btn btn-outline-secondary btn-icon-sm moo-catalog__sidebar-toggle d-none d-lg-inline-flex"
-          type="button"
-          data-moo-sidebar-toggle
-          aria-label="Toggle sidebar"
-          aria-expanded="true"
-        >
-          {{ render_icon("panel-left", "inline-start") }}
-        </button>
-        {{ separator(orientation="vertical", extra_class="d-none d-lg-block") }}
-        {% call input_group(extra_class="moo-catalog__header-search d-none d-md-flex") %}
-          {{ input_group_text(render_icon("search", "inline-start")) }}
-          {{ input(aria_label="Search catalog pages", type="search", placeholder="Search pages...") }}
-          {{ input_group_text(kbd("⌘ K")) }}
+        {{ sidebar_trigger(sidebar_id="catalog-sidebar", extra_class="moo-catalog__sidebar-toggle") }}
+        {{ separator(orientation="vertical", extra_class="moo-catalog__header-divider") }}
+        {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav") %}
+          {{ nav_item("Home", href=root_path ~ "index.html") }}
         {% endcall %}
       </div>
 
       <div class="moo-catalog__header-actions">
+        {{ button(
+          "Search documentation...",
+          variant="ghost",
+          size="default",
+          aria_label="Open documentation search",
+          icon_start="search",
+          extra_class="moo-catalog__search-trigger d-none d-md-inline-flex"
+        ) }}
+        {{ separator(orientation="vertical", extra_class="moo-catalog__header-divider moo-catalog__header-divider--leading") }}
+        {{ button(
+          "wpmoo-org/ui",
+          variant="ghost",
+          size="default",
+          element="a",
+          href="https://github.com/wpmoo-org/ui",
+          aria_label="Open Moo UI on GitHub",
+          icon_start="github",
+          extra_class="moo-catalog__github-link"
+        ) }}
+        {{ separator(orientation="vertical", extra_class="moo-catalog__header-divider") }}
         <button
-          class="btn btn-ghost btn-icon-sm moo-catalog__theme-toggle"
+          class="btn btn-ghost btn-icon moo-catalog__theme-toggle"
           type="button"
           data-moo-theme
           aria-label="Switch to dark mode"
         >
           <span data-moo-theme-icon="light">{{ render_icon("sun", "inline-start") }}</span>
-          <span data-moo-theme-icon="dark" class="d-none">{{ render_icon("moon", "inline-start") }}</span>
-        </button>
-        {{ button("RTL", variant="outline", size="sm", extra_class="moo-catalog__direction-toggle") }}
-        <div class="dropdown">
-          {{ button("", variant="ghost", size="icon-sm", aria_label="Catalog settings", icon_start="settings", dropdown=true) }}
-          {% call dropdown_menu(align="end") %}
-            {{ dropdown_header("Catalog") }}
-            {{ dropdown_item("Components", href=root_path ~ "index.html#components", icon="blocks") }}
-            {{ dropdown_item("Utilities", href=root_path ~ "index.html#utilities", icon="sparkles") }}
-            {{ dropdown_divider() }}
-            {{ dropdown_item("Bootstrap docs", href="https://getbootstrap.com/docs/5.3/", icon="book-open") }}
-          {% endcall %}
-        </div>
-        {{ avatar(name="Moo UI", initials="MO", size="sm") }}
-        <button
-          class="btn btn-outline-secondary btn-icon-sm d-lg-none"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#catalog-navigation"
-          aria-controls="catalog-navigation"
-          aria-label="Browse catalog"
-        >
-          {{ render_icon("panel-left", "inline-start") }}
+          <span data-moo-theme-icon="dark" class="d-none">{{ render_icon("moon-star", "inline-start") }}</span>
         </button>
       </div>
     </div>
