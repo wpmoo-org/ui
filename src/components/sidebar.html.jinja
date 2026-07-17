@@ -12,6 +12,8 @@
 {% set sidebar_collapsible = ["icon", "offcanvas", "none"] %}
 {% set sidebar_button_sizes = ["default", "lg"] %}
 
+{% from "components/dropdown_menu.html.jinja" import dropdown_menu %}
+
 {% macro sidebar_provider(default_open=true, contained=false, key="", extra_class="") -%}
   {% set classes = "sidebar-wrapper" %}
   {% if contained %}{% set classes = classes ~ " sidebar-wrapper--contained" %}{% endif %}
@@ -26,15 +28,31 @@
   </div>
 {%- endmacro %}
 
-{% macro sidebar(side="left", variant="sidebar", collapsible="icon", rail=true, extra_class="") -%}
+{% macro sidebar(
+  side="left",
+  variant="sidebar",
+  collapsible="icon",
+  rail=true,
+  id="catalog-sidebar",
+  aria_label="Sidebar",
+  aria_labelled_by="",
+  extra_class=""
+) -%}
   {% if side not in sidebar_sides %}{{ fail("Unknown sidebar side: " ~ side) }}{% endif %}
   {% if variant not in sidebar_variants %}{{ fail("Unknown sidebar variant: " ~ variant) }}{% endif %}
   {% if collapsible not in sidebar_collapsible %}{{ fail("Unknown sidebar collapsible mode: " ~ collapsible) }}{% endif %}
+  {% if not id | trim %}{{ fail("Sidebar id is required") }}{% endif %}
   {% set classes = "sidebar" %}
+  {% set side_class = "offcanvas-end" if side == "right" else "offcanvas-start" %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  {% set classes = classes ~ " offcanvas-lg " ~ side_class %}
   <aside
+    id="{{ id }}"
     class="{{ classes }}"
+    tabindex="-1"
     data-slot="sidebar"
+    aria-label="{{ aria_label }}"
+    {% if aria_labelled_by %}aria-labelledby="{{ aria_labelled_by }}"{% endif %}
     data-side="{{ side }}"
     data-variant="{{ variant }}"
     data-collapsible="{{ collapsible }}"
@@ -46,12 +64,21 @@
   </aside>
 {%- endmacro %}
 
-{% macro sidebar_trigger(aria_label="Toggle sidebar", extra_class="") -%}
+{% macro sidebar_trigger(
+  aria_label="Toggle sidebar",
+  extra_class="",
+  sidebar_id="catalog-sidebar",
+  expanded=true
+) -%}
+  {% if not sidebar_id | trim %}{{ fail("Sidebar trigger target id is required") }}{% endif %}
   <button
     class="btn btn-ghost btn-icon-sm sidebar-trigger{% if extra_class %} {{ extra_class }}{% endif %}"
     type="button"
     data-moo-sidebar-trigger
+    data-bs-target="#{{ sidebar_id }}"
     aria-label="{{ aria_label }}"
+    aria-controls="{{ sidebar_id }}"
+    aria-expanded="{{ "true" if expanded else "false" }}"
   >
     {{ render_icon("panel-left", "inline-start") }}
   </button>
@@ -136,6 +163,8 @@
   tooltip="",
   element="a",
   dropdown=false,
+  collapse_target="",
+  collapse_open=false,
   aria_label="",
   extra_class=""
 ) -%}
@@ -144,17 +173,19 @@
   {% set classes = "sidebar-menu-button" %}
   {% if size != "default" %}{% set classes = classes ~ " sidebar-menu-button--" ~ size %}{% endif %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
+  {% if collapse_target %}{% set classes = classes ~ " sidebar-menu-button--disclosure" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   {% set body = _sidebar_button_body(title, subtitle, icon, lead, end_icon) %}
   {# The collapsed icon rail reveals this label as a tooltip; default it to the
      visible title so every menu button stays legible when text is hidden. #}
   {% set tip = tooltip if tooltip else title %}
-  {% if dropdown or element == "button" %}
+  {% if dropdown or collapse_target or element == "button" %}
     <button
       class="{{ classes }}"
       type="button"
       data-slot="sidebar-menu-button"
       {% if dropdown %}data-bs-toggle="dropdown" aria-expanded="false"{% endif %}
+      {% if collapse_target %}data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}
       data-moo-sidebar-tooltip="{{ tip }}"
       {% if aria_label %} aria-label="{{ aria_label }}"{% endif %}
     >
@@ -172,6 +203,65 @@
       {{ body }}
     </a>
   {% endif %}
+{%- endmacro %}
+
+{% macro sidebar_menu_sub(id, open=false, extra_class="") -%}
+  {% if not id | trim %}{{ fail("Sidebar submenu id is required") }}{% endif %}
+  <ul
+    id="{{ id }}"
+    class="sidebar-menu-sub collapse{% if open %} show{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+    data-slot="sidebar-menu-sub"
+  >
+    {{ caller() | trim | safe }}
+  </ul>
+{%- endmacro %}
+
+{% macro sidebar_menu_sub_item(extra_class="") -%}
+  <li class="sidebar-menu-sub-item{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-menu-sub-item">
+    {{ caller() | trim | safe }}
+  </li>
+{%- endmacro %}
+
+{% macro sidebar_menu_sub_button(
+  title,
+  submenu_id,
+  href="#",
+  icon="",
+  active=false,
+  open=false,
+  tooltip="",
+  extra_class=""
+) -%}
+  {% if not submenu_id | trim %}{{ fail("Sidebar submenu target id is required") }}{% endif %}
+  {{ sidebar_menu_button(
+    title,
+    href=href,
+    icon=icon,
+    active=active,
+    element="button",
+    collapse_target=submenu_id,
+    collapse_open=open,
+    end_icon="chevron-right",
+    tooltip=tooltip,
+    extra_class="sidebar-menu-sub-trigger" ~ (" " ~ extra_class if extra_class else "")
+  ) }}
+{%- endmacro %}
+
+{% macro sidebar_menu_action(icon="ellipsis", aria_label="More actions", align="end", extra_class="") -%}
+  {% if not aria_label | trim %}{{ fail("Sidebar menu action aria-label is required") }}{% endif %}
+  {% set items %}{{ caller() | trim | safe }}{% endset %}
+  <div class="sidebar-menu-action dropdown{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-menu-action">
+    <button
+      class="btn btn-ghost btn-icon-xs"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+      aria-label="{{ aria_label }}"
+    >
+      {{ render_icon(icon, "inline-start") }}
+    </button>
+    {% call dropdown_menu(align=align) %}{{ items | safe }}{% endcall %}
+  </div>
 {%- endmacro %}
 
 {% macro sidebar_brand_mark(icon, variant="primary") -%}

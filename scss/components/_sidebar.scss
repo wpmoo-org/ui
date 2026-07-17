@@ -21,7 +21,7 @@
 
 // Sidebar column ---------------------------------------------------------
 .sidebar {
-  position: relative;
+  --bs-offcanvas-width: var(--moo-sidebar-width);
   flex: 0 0 var(--moo-sidebar-width);
   width: var(--moo-sidebar-width);
   color: var(--moo-sidebar-foreground);
@@ -104,6 +104,10 @@
 
 .sidebar-menu-item {
   position: relative;
+}
+
+.sidebar-menu-item--has-action > .sidebar-menu-button {
+  padding-inline-end: $spacer * 2.5;
 }
 
 .sidebar-menu-button {
@@ -193,6 +197,41 @@
   width: $font-size-base;
   height: $font-size-base;
   color: var(--moo-muted-foreground);
+}
+
+.sidebar-menu-button--disclosure[aria-expanded="true"] .sidebar-menu-button__end [data-icon] {
+  transform: rotate(90deg);
+}
+
+.sidebar-menu-button__end [data-icon] {
+  transition: transform 0.15s ease;
+}
+
+.sidebar-menu-sub {
+  gap: 0;
+  padding-inline-start: $spacer * 1.5;
+}
+
+.sidebar-menu-sub-button {
+  height: $spacer * 1.75;
+  font-size: $font-size-base * 0.929;
+}
+
+.sidebar-menu-action {
+  position: absolute;
+  inset-inline-end: $spacer * 0.25;
+  inset-block: 0;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.sidebar-menu-action > button {
+  color: var(--moo-muted-foreground);
+}
+
+.sidebar-menu-action > button:hover {
+  color: var(--moo-sidebar-foreground);
 }
 
 // Leading brand/avatar tiles for the team switcher and user rows.
@@ -288,24 +327,41 @@
 
 // Collapsed-to-icon rail (desktop). Text, labels, and the rail's disclosure
 // chevrons hide; every remaining control centers on its icon.
-.sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
-  flex-basis: var(--moo-sidebar-width-icon);
-  width: var(--moo-sidebar-width-icon);
+@include media-breakpoint-up(lg) {
+  .sidebar {
+    position: relative;
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
+    flex-basis: var(--moo-sidebar-width-icon);
+    width: var(--moo-sidebar-width-icon);
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-group-label,
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__text,
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__subtitle,
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__end {
+    display: none;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-sub,
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-action {
+    display: none !important;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--lg {
+    height: $spacer * 2;
+    padding: 0;
+  }
 }
 
-[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-group-label,
-[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__text,
-[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__subtitle,
-[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__end {
-  display: none;
-}
-
-[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button {
-  justify-content: center;
-  padding-inline: 0;
-}
-
-[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--lg {
-  height: $spacer * 2;
-  padding: 0;
+@include media-breakpoint-down(lg) {
+  .sidebar-rail {
+    display: none;
+  }
 }
