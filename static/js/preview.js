@@ -27,23 +27,17 @@
 
   updateThemeButton();
 
-  directionButton?.addEventListener("click", () => {
-    const direction = root.dir === "rtl" ? "ltr" : "rtl";
-    root.dir = direction;
-    directionButton.textContent = direction === "rtl" ? "LTR" : "RTL";
-  });
-
-  const updateSidebarToggle = () => {
+  const updateCatalogSidebarToggle = () => {
     const collapsed = catalogShell?.classList.contains("moo-catalog--sidebar-collapsed") || false;
     sidebarToggle?.setAttribute("aria-expanded", String(!collapsed));
   };
 
   sidebarToggle?.addEventListener("click", () => {
     catalogShell?.classList.toggle("moo-catalog--sidebar-collapsed");
-    updateSidebarToggle();
+    updateCatalogSidebarToggle();
   });
 
-  updateSidebarToggle();
+  updateCatalogSidebarToggle();
 
   const searchControls = Array.from(
     document.querySelectorAll(".moo-catalog__toolbar input[type='search']")
@@ -85,54 +79,6 @@
 
   sectionFilter?.addEventListener("change", () => filterCatalog());
 
-  const commandModal = document.getElementById("catalog-command");
-  const commandInput = commandModal?.querySelector("input[type='search']");
-  const commandItems = Array.from(commandModal?.querySelectorAll("[data-moo-command-item]") || []);
-  const commandEmpty = commandModal?.querySelector(".moo-catalog__command-empty");
-
-  const filterCommand = (query = commandInput?.value || "") => {
-    const needle = normalize(query);
-    let visibleCount = 0;
-
-    commandItems.forEach((item) => {
-      const matches = !needle || normalize(item.textContent).includes(needle);
-      item.hidden = !matches;
-      if (matches) {
-        visibleCount += 1;
-      }
-    });
-
-    if (commandEmpty) {
-      commandEmpty.hidden = visibleCount !== 0;
-    }
-  };
-
-  commandInput?.addEventListener("input", () => filterCommand());
-
-  commandModal?.addEventListener("shown.bs.modal", () => {
-    commandInput?.focus();
-    commandInput?.select();
-    filterCommand();
-  });
-
-  commandModal?.addEventListener("hidden.bs.modal", () => {
-    if (commandInput) {
-      commandInput.value = "";
-    }
-    filterCommand("");
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") {
-      return;
-    }
-
-    event.preventDefault();
-    if (commandModal && window.bootstrap?.Modal) {
-      window.bootstrap.Modal.getOrCreateInstance(commandModal).show();
-    }
-  });
-
   document.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");
@@ -165,32 +111,35 @@
     document.querySelectorAll('[data-slot="sidebar-wrapper"]')
   );
   const SIDEBAR_STORAGE_PREFIX = "moo-sidebar:";
+  const SIDEBAR_COLLAPSE_BREAKPOINT = "(min-width: 992px)";
 
   const syncSidebarTooltips = (wrapper) => {
     const Tooltip = window.bootstrap?.Tooltip;
     if (!Tooltip) {
       return;
     }
-    const collapsed = wrapper.dataset.mooSidebarState === "collapsed";
+    const collapsed =
+      window.matchMedia(SIDEBAR_COLLAPSE_BREAKPOINT).matches &&
+      wrapper.dataset.mooSidebarState === "collapsed";
     const placement = root.dir === "rtl" ? "left" : "right";
     wrapper.querySelectorAll("[data-moo-sidebar-tooltip]").forEach((button) => {
       const existing = Tooltip.getInstance(button);
-      if (collapsed) {
-        if (!existing) {
-          new Tooltip(button, {
-            title: button.getAttribute("data-moo-sidebar-tooltip"),
-            placement,
-            container: "body",
-            trigger: "hover focus",
-          });
-        }
-      } else if (existing) {
+      if (existing) {
         existing.dispose();
+      }
+      if (collapsed) {
+        new Tooltip(button, {
+          title: button.getAttribute("data-moo-sidebar-tooltip"),
+          placement,
+          container: "body",
+          trigger: "hover focus",
+        });
       }
     });
   };
 
   const setSidebarState = (wrapper, state, persist = true) => {
+    state = state === "collapsed" ? "collapsed" : "expanded";
     wrapper.dataset.mooSidebarState = state;
     const key = wrapper.dataset.mooSidebarKey;
     if (persist && key) {
@@ -200,6 +149,7 @@
         // Storage is best-effort; ignore private-mode or quota errors.
       }
     }
+    syncSidebarControls(wrapper);
     syncSidebarTooltips(wrapper);
   };
 
@@ -208,7 +158,38 @@
     setSidebarState(wrapper, collapsed ? "expanded" : "collapsed");
   };
 
+  const isDesktopSidebar = () => window.matchMedia(SIDEBAR_COLLAPSE_BREAKPOINT).matches;
+
+  const syncSidebarControls = (wrapper) => {
+    const sidebar = wrapper.querySelector('[data-slot="sidebar"]');
+    const isExpanded = isDesktopSidebar()
+      ? wrapper.dataset.mooSidebarState === "expanded"
+      : sidebar?.classList.contains("show") || false;
+    wrapper
+      .querySelectorAll("[data-moo-sidebar-trigger], [data-moo-sidebar-rail]")
+      .forEach((control) => {
+        control.setAttribute("aria-expanded", String(isExpanded));
+      });
+  };
+
+  const bindSidebarOffcanvas = (wrapper) => {
+    const sidebar = wrapper.querySelector('[data-slot="sidebar"]');
+    if (!sidebar) {
+      return;
+    }
+    sidebar.addEventListener("shown.bs.offcanvas", () => syncSidebarControls(wrapper));
+    sidebar.addEventListener("hidden.bs.offcanvas", () => syncSidebarControls(wrapper));
+  };
+
+  directionButton?.addEventListener("click", () => {
+    const direction = root.dir === "rtl" ? "ltr" : "rtl";
+    root.dir = direction;
+    directionButton.textContent = direction === "rtl" ? "LTR" : "RTL";
+    sidebarWrappers.forEach((wrapper) => syncSidebarTooltips(wrapper));
+  });
+
   sidebarWrappers.forEach((wrapper) => {
+    bindSidebarOffcanvas(wrapper);
     const key = wrapper.dataset.mooSidebarKey;
     let stored = null;
     if (key) {
@@ -218,11 +199,20 @@
         stored = null;
       }
     }
-    if (stored === "collapsed" || stored === "expanded") {
-      setSidebarState(wrapper, stored, false);
-    } else {
+    const initialState =
+      stored === "collapsed" || stored === "expanded"
+        ? stored
+        : wrapper.dataset.mooSidebarState === "collapsed"
+          ? "collapsed"
+          : "expanded";
+    setSidebarState(wrapper, initialState, false);
+  });
+
+  window.addEventListener("resize", () => {
+    sidebarWrappers.forEach((wrapper) => {
+      syncSidebarControls(wrapper);
       syncSidebarTooltips(wrapper);
-    }
+    });
   });
 
   document.addEventListener("click", (event) => {
@@ -233,13 +223,28 @@
       return;
     }
     const wrapper = control.closest('[data-slot="sidebar-wrapper"]');
-    if (wrapper) {
+    if (!wrapper) {
+      return;
+    }
+    if (isDesktopSidebar()) {
+      event.preventDefault();
       toggleSidebar(wrapper);
+      return;
+    }
+    if (control.matches("[data-moo-sidebar-trigger]")) {
+      const sidebar = document.getElementById(control.getAttribute("aria-controls"));
+      const Offcanvas = window.bootstrap?.Offcanvas;
+      if (sidebar && Offcanvas) {
+        Offcanvas.getOrCreateInstance(sidebar).toggle();
+      }
     }
   });
 
   document.addEventListener("keydown", (event) => {
     if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "b") {
+      return;
+    }
+    if (!isDesktopSidebar()) {
       return;
     }
     const wrapper =

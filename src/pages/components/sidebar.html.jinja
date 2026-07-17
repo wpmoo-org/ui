@@ -2,7 +2,8 @@
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_provider, sidebar_trigger %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
@@ -16,9 +17,10 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set sidebar_open = true %}
     {% set app_shell %}
-      {% call sidebar_provider(contained=true) %}
-        {% call sidebar() %}
+      {% call sidebar_provider(contained=true, key="components-sidebar", default_open=sidebar_open) %}
+        {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
           {% call sidebar_header() %}
             {% call sidebar_menu() %}
               {% call sidebar_menu_item(dropdown=true) %}
@@ -50,10 +52,26 @@
                   {{ sidebar_menu_button("Playground", href="#", icon="square-terminal", active=true) }}
                 {% endcall %}
                 {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_button("Models", href="#", icon="bot") }}
+                  {{ sidebar_menu_sub_button("Models", "platform-models", icon="bot", open=true) }}
+                  {% call sidebar_menu_sub("platform-models", open=true) %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("GPT-4o", href="#", icon="sparkles", active=true) }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Claude 3.5", href="#", icon="brain") }}
+                    {% endcall %}
+                  {% endcall %}
                 {% endcall %}
                 {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_button("Documentation", href="#", icon="book-open") }}
+                  {{ sidebar_menu_sub_button("Documentation", "platform-documentation", icon="book-open") }}
+                  {% call sidebar_menu_sub("platform-documentation") %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Guides", href="#", icon="book-open") }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("API reference", href="#", icon="code") }}
+                    {% endcall %}
+                  {% endcall %}
                 {% endcall %}
                 {% call sidebar_menu_item() %}
                   {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
@@ -64,14 +82,26 @@
             {% call sidebar_group() %}
               {{ sidebar_group_label("Projects") }}
               {% call sidebar_menu() %}
-                {% call sidebar_menu_item() %}
+                {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
                   {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
+                  {% call sidebar_menu_action(aria_label="Design Engineering actions") %}
+                    {{ dropdown_item("Rename", icon="pencil") }}
+                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% endcall %}
                 {% endcall %}
-                {% call sidebar_menu_item() %}
+                {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
                   {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
+                  {% call sidebar_menu_action(aria_label="Sales and Marketing actions") %}
+                    {{ dropdown_item("Rename", icon="pencil") }}
+                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% endcall %}
                 {% endcall %}
-                {% call sidebar_menu_item() %}
+                {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
                   {{ sidebar_menu_button("Travel", href="#", icon="map") }}
+                  {% call sidebar_menu_action(aria_label="Travel actions") %}
+                    {{ dropdown_item("Rename", icon="pencil") }}
+                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% endcall %}
                 {% endcall %}
                 {% call sidebar_menu_item() %}
                   {{ sidebar_menu_button("More", href="#", icon="ellipsis") }}
@@ -108,7 +138,7 @@
 
         {% call sidebar_inset() %}
           <header class="sidebar-inset__header">
-            {{ sidebar_trigger() }}
+            {{ sidebar_trigger(sidebar_id="catalog-sidebar", expanded=sidebar_open) }}
             {{ separator(orientation="vertical") }}
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb mb-0">
