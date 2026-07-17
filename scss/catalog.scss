@@ -213,6 +213,19 @@ body {
   width: 100%;
 }
 
+.moo-field {
+  display: grid;
+  gap: 0;
+}
+
+.moo-field > .form-label {
+  margin-bottom: 0.5rem;
+}
+
+.moo-field > :is(.form-text, .valid-feedback, .invalid-feedback) {
+  margin-top: 0.5rem;
+}
+
 .moo-example__source {
   position: relative;
   overflow: hidden;

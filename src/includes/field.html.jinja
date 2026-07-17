@@ -1,7 +1,7 @@
-{% macro render_field(label, id, description="", extra_class="") %}
-  <div class="d-grid gap-0{% if extra_class %} {{ extra_class }}{% endif %}">
+{% macro render_field(label, id, description="", extra_class="", description_class="form-text", description_id="") %}
+  <div class="moo-field{% if extra_class %} {{ extra_class }}{% endif %}">
     <label class="form-label" for="{{ id }}">{{ label }}</label>
     {{ caller() | trim | safe }}
-    {% if description %}<div class="form-text">{{ description | safe }}</div>{% endif %}
+    {% if description %}<div class="{{ description_class }}"{% if description_id %} id="{{ description_id }}"{% endif %}>{{ description | safe }}</div>{% endif %}
   </div>
 {% endmacro %}
