@@ -304,7 +304,6 @@ def create_environment(icon_renderer=None) -> Environment:
         name,
         position,
     )
-    environment.globals["lucide_icon"] = lucide_renderer
     if icon_renderer is None:
         icon_renderer = lucide_renderer
     environment.globals["render_icon"] = icon_renderer
