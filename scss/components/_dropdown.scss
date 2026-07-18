@@ -49,3 +49,20 @@
   width: 0.875rem;
   height: 0.875rem;
 }
+
+// The Sidebar header/footer triggers (team switcher, account menu) span
+// the sidebar's full width, and shadcn's reference matches its menu width
+// to that trigger so it extends past the sidebar edge into the content
+// column. Bootstrap's own dropdown-menu only sizes to its own content, so
+// match the trigger via the shared positioned dropdown ancestor's width
+// instead. Scoped by data-slot attribute, not a sidebar class selector, so
+// this stays inside the dropdown component's own selector ownership.
+[data-slot="sidebar-header"] .dropdown-menu,
+[data-slot="sidebar-footer"] .dropdown-menu {
+  --moo-dropdown-sidebar-min-width: #{$moo-dropdown-sidebar-min-width};
+
+  // unquote(): libsass resolves max() as its own Sass function and rejects
+  // var() as a non-numeric argument, so escape it through to plain CSS
+  // (same technique already used for clamp() in the catalog stylesheet).
+  min-width: #{unquote("max(100%, var(--moo-dropdown-sidebar-min-width))")};
+}

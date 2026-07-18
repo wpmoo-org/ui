@@ -107,6 +107,13 @@ $moo-sidebar-width-icon: 3rem !default;
 // Border color/radius still ride Bootstrap consumption values.
 $moo-dropdown-item-icon-size: 1.5rem !default;
 
+// The Sidebar header/footer dropdown menus (team switcher, account menu)
+// intentionally overflow past the sidebar edge into the content column,
+// matching the shadcn reference's min-w-56. Bootstrap's shared
+// $dropdown-min-width stays the default for every other dropdown in the
+// product; this is a sidebar-scoped floor, not a global change.
+$moo-dropdown-sidebar-min-width: 14rem !default;
+
 // The Moo UI product stylesheet (moo-ui.scss) stays on Bootstrap's
 // $font-family-sans-serif default. The catalog's own documentation chrome
 // (scss/catalog.scss, .moo-catalog scope only) may use a distinct display

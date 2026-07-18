@@ -86,9 +86,34 @@ class DropdownMenuTests(CatalogTestCase):
                 '{{ dropdown_header("") }}',
                 "Dropdown header label is required",
             ),
+            (
+                '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
+                '{{ dropdown_item("Acme Inc", icon_box=true) }}',
+                "Dropdown item icon_box requires an icon",
+            ),
         )
 
         for source, message in invalid_templates:
             with self.subTest(message=message):
                 with self.assertRaisesRegex(ValueError, message):
                     self.render_template(source)
+
+    def test_dropdown_item_icon_box_wraps_the_icon_only(self) -> None:
+        boxed = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
+            '{{ dropdown_item("Acme Inc", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}'
+        )
+
+        self.assertIn(
+            '<span class="dropdown-item__icon-box">', boxed
+        )
+        self.assertIn('data-icon="inline-start"', boxed)
+        self.assertIn('<span class="ms-auto small text-body-secondary">⌘1</span>', boxed)
+
+        plain = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
+            '{{ dropdown_item("Rename", icon="pencil") }}'
+        )
+
+        self.assertNotIn("dropdown-item__icon-box", plain)
+        self.assertIn('data-icon="inline-start"', plain)
