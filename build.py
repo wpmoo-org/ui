@@ -22,6 +22,7 @@ SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
+GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 
 HTML_TOKEN = re.compile(
@@ -340,6 +341,12 @@ def copy_assets() -> None:
     shutil.copy2(
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js",
         js_dir / "bootstrap.bundle.min.js",
+    )
+    fonts_dir = DIST / "assets/fonts/geist"
+    fonts_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(
+        GEIST / "Geist-Variable.woff2",
+        fonts_dir / "Geist-Variable.woff2",
     )
     if STATIC.exists():
         shutil.copytree(STATIC, DIST / "assets", dirs_exist_ok=True)

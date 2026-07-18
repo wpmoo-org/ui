@@ -1,6 +1,20 @@
+@import "primary_variables";
+
 body {
   min-height: 100vh;
   background: var(--bs-tertiary-bg);
+}
+
+// Catalog-chrome-only display typeface. The Moo UI product itself
+// (moo-ui.scss) stays on Bootstrap's system-ui default; see the
+// $moo-catalog-font-family knob in _primary_variables.scss for the single
+// swap point if this font is ever replaced.
+@font-face {
+  font-family: "Geist";
+  src: url("../fonts/geist/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 .moo-catalog__search-trigger {
@@ -55,6 +69,7 @@ body {
 
 .moo-catalog {
   min-height: 100vh;
+  font-family: $moo-catalog-font-family, var(--bs-body-font-family);
 }
 
 .moo-catalog__header {
@@ -332,6 +347,10 @@ body {
   min-height: 18rem;
   padding: unquote("clamp(1.5rem, 5vw, 3rem)");
   overflow-x: auto;
+  // Live component previews stay on the real product default (Bootstrap's
+  // system-ui stack) even though the surrounding catalog chrome uses
+  // $moo-catalog-font-family — copied source must match what renders here.
+  font-family: var(--bs-body-font-family);
 }
 
 .moo-example__preview--narrow > * {
