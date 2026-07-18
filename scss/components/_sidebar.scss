@@ -101,6 +101,7 @@
 }
 
 .sidebar-group {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: $spacer * 0.5;
@@ -125,6 +126,14 @@
   color: var(--moo-muted-foreground);
   font-size: $font-size-base * 0.857;
   font-weight: $font-weight-medium;
+}
+
+// Reserve room so a long label doesn't run under the absolutely positioned
+// group action button (see .sidebar-group-action below). A descendant match
+// covers both a group action placed directly in .sidebar-group and one
+// nested inside .sidebar-group-content alongside the label.
+.sidebar-group:has(.sidebar-group-action) .sidebar-group-label {
+  padding-inline-end: $spacer * 2.5;
 }
 
 // Menus ------------------------------------------------------------------
@@ -270,21 +279,30 @@
   color: var(--moo-sidebar-foreground);
 }
 
+// Overlays the group's top-right corner, vertically centered against the
+// group label row ($moo group padding + half the label/button height delta).
 .sidebar-group-action {
-  margin-inline-start: auto;
+  position: absolute;
+  z-index: 1;
+  top: $spacer * 0.75;
+  inset-inline-end: $spacer * 0.5;
 }
 
+// Overlays the trailing edge of the menu row it belongs to, matching
+// .sidebar-menu-action's slot so both compose the same visual contract.
 .sidebar-menu-badge {
-  margin-inline-start: auto;
-}
-
-.sidebar-menu-item--has-action > .sidebar-menu-badge {
   position: absolute;
   inset-inline-end: $spacer * 0.25;
   inset-block: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
-  z-index: 1;
+  pointer-events: none;
+}
+
+// Reserve room so a long title doesn't run under the badge.
+.sidebar-menu-item:has(> .sidebar-menu-badge) > .sidebar-menu-button {
+  padding-inline-end: $spacer * 2.5;
 }
 
 // Leading brand/avatar tiles for the team switcher and user rows.
