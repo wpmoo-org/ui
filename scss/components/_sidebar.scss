@@ -278,6 +278,7 @@
 .sidebar-menu-sub {
   gap: 0;
   padding-inline-start: $spacer * 1.5;
+  border-inline-start: var(--bs-border-width) solid var(--moo-border);
 }
 
 .sidebar-menu-sub-button {
