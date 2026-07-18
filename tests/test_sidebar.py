@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 def _css_block(styles: str, selector: str) -> str:
@@ -275,6 +275,7 @@ class SidebarTests(CatalogTestCase):
             page.index('id="usage"'),
             page.index('id="app-shell-title"'),
             page.index('id="composition"'),
+            page.index('assets/images/sidebar-structure.png'),
             page.index('id="sidebar-api-reference"'),
             page.index('id="usesidebar"'),
         ]
@@ -283,6 +284,8 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("<table", page)
         self.assertIn("<th scope=\"col\">Macro</th>", page)
         self.assertIn("<th scope=\"col\">Purpose</th>", page)
+        self.assertIn("Diagram showing sidebar_provider", page)
+        self.assertTrue((DIST / "assets/images/sidebar-structure.png").is_file())
 
     def test_sidebar_catalog_page_documents_public_macro_reference(self) -> None:
         source = (ROOT / "src/pages/components/sidebar.html.jinja").read_text(
