@@ -19,7 +19,7 @@ class SidebarTests(CatalogTestCase):
         template = create_environment().from_string(
             '{% from "components/sidebar.html.jinja" import '
             'sidebar, sidebar_content, sidebar_group_label, sidebar_input, '
-            'sidebar_menu_button, '
+            'sidebar_menu_button, sidebar_menu_item, '
             'sidebar_group_action, sidebar_group_content, sidebar_menu_action, '
             'sidebar_menu_badge, sidebar_menu_skeleton, sidebar_menu_sub, '
             'sidebar_menu_sub_button, sidebar_separator, sidebar_provider, '
@@ -213,7 +213,8 @@ class SidebarTests(CatalogTestCase):
         self.assertIn(".sidebar-separator", styles)
         self.assertIn(".sidebar-menu-skeleton", styles)
         self.assertIn(".sidebar-group-content--inline", styles)
-        self.assertIn(".sidebar-menu-item--has-action > .sidebar-menu-badge", styles)
+        self.assertIn(".sidebar-menu-item:has(> .sidebar-menu-badge) > .sidebar-menu-button", styles)
+        self.assertIn(".sidebar-group:has(.sidebar-group-action) .sidebar-group-label", styles)
         self.assertIn(
             "[data-moo-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-group-action",
             styles,
@@ -253,7 +254,47 @@ class SidebarTests(CatalogTestCase):
                 '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton__line',
             ),
         )
-        self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-item--has-action > .sidebar-menu-badge"))
+        self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-badge"))
+
+    def test_sidebar_group_action_and_menu_badge_position_without_extra_classes(self) -> None:
+        # Regression coverage: sidebar_group_action and sidebar_menu_badge must
+        # overlay their trailing slot in their own documented default usage,
+        # as a sibling of sidebar_group_label / sidebar_menu_button, not only
+        # when an extra `--has-action` class is added by the consumer.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        self.assertIn("position: relative", _css_block(styles, ".sidebar-group"))
+        self.assertIn("position: absolute", _css_block(styles, ".sidebar-group-action"))
+        self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-badge"))
+        self.assertNotIn("margin-inline-start: auto", _css_block(styles, ".sidebar-group-action"))
+        self.assertNotIn("margin-inline-start: auto", _css_block(styles, ".sidebar-menu-badge"))
+
+    def test_sidebar_group_action_renders_beside_group_label(self) -> None:
+        output = self.render_sidebar(
+            """
+            {% call sidebar_group_content() %}
+              {{ sidebar_group_label("Application") }}
+              {{ sidebar_group_action(icon="plus", aria_label="Add project") }}
+            {% endcall %}
+            """
+        )
+
+        label_index = output.index('data-slot="sidebar-group-label"')
+        action_index = output.index('data-slot="sidebar-group-action"')
+        self.assertLess(label_index, action_index)
+
+    def test_sidebar_menu_badge_renders_beside_menu_button_without_has_action(self) -> None:
+        output = self.render_sidebar(
+            """
+            {% call sidebar_menu_item() %}
+              {{ sidebar_menu_button("Inbox", href="#") }}
+              {{ sidebar_menu_badge("24") }}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn('data-slot="sidebar-menu-badge"', output)
+        self.assertNotIn("sidebar-menu-item--has-action", output)
 
     def test_sidebar_catalog_page_uses_distinct_demo_target(self) -> None:
         result = self.run_build()
