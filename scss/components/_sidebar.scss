@@ -419,6 +419,17 @@
   .sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset {
     margin-inline-start: $spacer * 0.5;
   }
+
+  // A right-side sidebar sits on the opposite edge, so the content card must
+  // flush against the end side instead of the start side.
+  .sidebar-wrapper:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset {
+    margin-inline-start: $spacer * 0.5;
+    margin-inline-end: 0;
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset {
+    margin-inline-end: $spacer * 0.5;
+  }
 }
 
 // Rail: a thin toggle strip straddling the sidebar's inline-end edge.

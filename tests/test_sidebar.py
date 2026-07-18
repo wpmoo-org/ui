@@ -403,6 +403,27 @@ class SidebarTests(CatalogTestCase):
             ),
         )
 
+    def test_sidebar_inset_variant_is_side_aware_for_a_right_sidebar(self) -> None:
+        # Regression coverage: side="right" is an accepted, styled sidebar
+        # position, so combining it with variant="inset" must flush the
+        # content card against the end side, not the start side the
+        # left-sidebar default assumes.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        right_inset = _css_block(
+            styles,
+            '.sidebar-wrapper:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset',
+        )
+        self.assertIn("margin-inline-end: 0", right_inset)
+        self.assertIn("margin-inline-start: $spacer * 0.5", right_inset)
+        self.assertIn(
+            "margin-inline-end: $spacer * 0.5",
+            _css_block(
+                styles,
+                '.sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset',
+            ),
+        )
+
     def test_sidebar_variant_decoration_is_scoped_to_desktop(self) -> None:
         # The mobile offcanvas drawer ignores variant styling, matching
         # shadcn's own md:-prefixed scoping, so both new blocks must live
