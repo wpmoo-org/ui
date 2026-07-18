@@ -57,13 +57,24 @@
                 {{ sidebar_group_label("Platform") }}
                 {% call sidebar_menu() %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Playground", href="#", icon="square-terminal", active=true) }}
+                    {{ sidebar_menu_sub_button("Playground", "platform-playground", icon="square-terminal", open=true) }}
+                    {% call sidebar_menu_sub("platform-playground", open=true) %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("History", href="#") }}
+                      {% endcall %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("Starred", href="#") }}
+                      {% endcall %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("Settings", href="#") }}
+                      {% endcall %}
+                    {% endcall %}
                   {% endcall %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Models", "platform-models", icon="bot", open=true) }}
-                    {% call sidebar_menu_sub("platform-models", open=true) %}
+                    {{ sidebar_menu_sub_button("Models", "platform-models", icon="bot") }}
+                    {% call sidebar_menu_sub("platform-models") %}
                       {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("GPT-4o", href="#", icon="sparkles", active=true) }}
+                        {{ sidebar_menu_button("GPT-4o", href="#", icon="sparkles") }}
                       {% endcall %}
                       {% call sidebar_menu_sub_item() %}
                         {{ sidebar_menu_button("Claude 3.5", href="#", icon="brain") }}

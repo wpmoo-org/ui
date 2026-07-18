@@ -277,8 +277,15 @@
 
 .sidebar-menu-sub {
   gap: 0;
-  padding-inline-start: $spacer * 1.5;
+  margin: 0;
+  // Aligns the indent line with the center of the parent disclosure
+  // button's icon (padding-inline-start + half the icon width), so the
+  // line reads as a continuation of the icon column above it instead of
+  // sitting flush with the group edge.
+  margin-inline-start: $spacer * 0.5 + $font-size-base * 0.5;
+  padding-inline-start: $spacer * 0.5;
   border-inline-start: var(--bs-border-width) solid var(--moo-border);
+  list-style: none;
 }
 
 .sidebar-menu-sub-button {
