@@ -7,11 +7,21 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 def _css_block(styles: str, selector: str) -> str:
-    pattern = re.compile(rf"(?s){re.escape(selector)}\s*\{{([^}}]+)\}}")
-    match = pattern.search(styles)
+    # Brace-depth aware so a rule containing Sass interpolation (`#{...}`) or
+    # any other nested `{}` pair doesn't truncate the match at the wrong `}`.
+    match = re.search(rf"{re.escape(selector)}\s*\{{", styles)
     if not match:
         raise AssertionError(f"Missing CSS rule for selector: {selector}")
-    return match.group(1)
+    start = match.end()
+    depth = 1
+    for index in range(start, len(styles)):
+        if styles[index] == "{":
+            depth += 1
+        elif styles[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return styles[start:index]
+    raise AssertionError(f"Unbalanced braces for selector: {selector}")
 
 
 class SidebarTests(CatalogTestCase):
@@ -336,6 +346,60 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('data-slot="sidebar-menu-badge"', output)
         self.assertIn('data-slot="sidebar-menu-action"', output)
         self.assertIn("sidebar-menu-item--has-action", output)
+
+    def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
+        # Regression coverage: sidebar(variant="floating") accepted the enum
+        # value but produced no visual difference from the default variant.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        floating = _css_block(styles, '.sidebar[data-variant="floating"] .sidebar-inner')
+        self.assertIn("margin: $spacer * 0.5", floating)
+        self.assertIn("border:", floating)
+        self.assertIn("border-radius:", floating)
+        self.assertIn("box-shadow:", floating)
+        self.assertIn(
+            "height: calc(100%",
+            _css_block(
+                styles,
+                '.sidebar-wrapper--contained .sidebar[data-variant="floating"] .sidebar-inner',
+            ),
+        )
+
+    def test_sidebar_inset_variant_turns_main_content_into_a_floating_card(self) -> None:
+        # Regression coverage: sidebar(variant="inset") accepted the enum
+        # value but produced no visual difference from the default variant.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        self.assertIn(
+            "background: var(--moo-sidebar)",
+            _css_block(styles, '.sidebar-wrapper:has(.sidebar[data-variant="inset"])'),
+        )
+        inset_content = _css_block(
+            styles, '.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inset'
+        )
+        self.assertIn("margin: $spacer * 0.5", inset_content)
+        self.assertIn("margin-inline-start: 0", inset_content)
+        self.assertIn("border-radius:", inset_content)
+        self.assertIn("box-shadow:", inset_content)
+        self.assertIn(
+            "margin-inline-start: $spacer * 0.5",
+            _css_block(
+                styles,
+                '.sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset',
+            ),
+        )
+
+    def test_sidebar_variant_decoration_is_scoped_to_desktop(self) -> None:
+        # The mobile offcanvas drawer ignores variant styling, matching
+        # shadcn's own md:-prefixed scoping, so both new blocks must live
+        # inside the same desktop-only breakpoint as the icon-collapse rules.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        up_lg_blocks = re.findall(
+            r"@include media-breakpoint-up\(lg\)\s*\{(.*?)\n\}", styles, re.DOTALL
+        )
+        combined = "\n".join(up_lg_blocks)
+        self.assertIn('.sidebar[data-variant="floating"] .sidebar-inner', combined)
+        self.assertIn('.sidebar-wrapper:has(.sidebar[data-variant="inset"])', combined)
 
     def test_sidebar_catalog_page_uses_distinct_demo_target(self) -> None:
         result = self.run_build()

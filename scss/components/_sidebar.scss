@@ -40,6 +40,26 @@
   border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
 }
 
+// Floating variant: the surface detaches from the viewport edge with a
+// margin gap on every side and gains a full rounded border and shadow,
+// replacing the flush single-edge border the default variant uses. Scoped
+// to desktop, matching how the mobile offcanvas drawer ignores variant.
+@include media-breakpoint-up(lg) {
+  .sidebar[data-variant="floating"] .sidebar-inner {
+    height: calc(100svh - #{$spacer});
+    max-height: calc(100svh - #{$spacer});
+    margin: $spacer * 0.5;
+    border: var(--bs-border-width) solid var(--moo-sidebar-border);
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: var(--bs-box-shadow-sm);
+  }
+
+  .sidebar-wrapper--contained .sidebar[data-variant="floating"] .sidebar-inner {
+    height: calc(100% - #{$spacer});
+    max-height: calc(100% - #{$spacer});
+  }
+}
+
 .sidebar-inner {
   position: sticky;
   top: 0;
@@ -374,6 +394,28 @@
 .sidebar-inset__content {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+// Inset variant: the sidebar itself stays flush; the main content becomes a
+// rounded, shadowed card with a gap around it, and the page background
+// switches to the sidebar's own surface color so the card reads as inset.
+// Collapsing to the icon rail restores the inline-start gap. Scoped to
+// desktop, matching how the mobile offcanvas drawer ignores variant.
+@include media-breakpoint-up(lg) {
+  .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {
+    background: var(--moo-sidebar);
+  }
+
+  .sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+    margin: $spacer * 0.5;
+    margin-inline-start: 0;
+    border-radius: var(--bs-border-radius-xl);
+    box-shadow: var(--bs-box-shadow-sm);
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+    margin-inline-start: $spacer * 0.5;
+  }
 }
 
 // Rail: a thin toggle strip straddling the sidebar's inline-end edge.
