@@ -48,6 +48,20 @@
     {% endcall %}
 
     {% call sidebar_group() %}
+      {{ sidebar_group_label("Blocks") }}
+      {% call sidebar_menu() %}
+        {% call sidebar_menu_item() %}
+          {{ sidebar_menu_button(
+            "Blocks",
+            href=root_path ~ "blocks/index.html",
+            active=current_section == "blocks",
+            icon="panel-left-dashed"
+          ) }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+
+    {% call sidebar_group() %}
       {{ sidebar_group_label("Utilities") }}
       {% call sidebar_menu() %}
         {% for utility in utilities %}

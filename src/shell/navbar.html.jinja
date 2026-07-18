@@ -27,6 +27,7 @@
         {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav") %}
           {{ nav_item("Home", href=root_path ~ "index.html") }}
           {{ nav_item("Components", href=root_path ~ "components/index.html") }}
+          {{ nav_item("Blocks", href=root_path ~ "blocks/index.html") }}
         {% endcall %}
       </div>
 
@@ -92,6 +93,10 @@
           {% endfor %}
           {% for utility in utilities %}
             {{ _command_item(root_path ~ "utils/" ~ utility.slug ~ ".html", utility.label) }}
+          {% endfor %}
+          {{ _command_item(root_path ~ "blocks/index.html", "Blocks") }}
+          {% for block in blocks %}
+            {{ _command_item(root_path ~ "blocks/" ~ block.slug ~ ".html", block.label) }}
           {% endfor %}
         </div>
         <p class="moo-catalog__command-empty" hidden>No matching pages.</p>

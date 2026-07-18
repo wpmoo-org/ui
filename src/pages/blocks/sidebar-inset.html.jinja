@@ -1,0 +1,142 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Sidebar (Inset) — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Sidebar (Inset)",
+    "A composed application shell using the inset sidebar variant — the page content becomes a floating, rounded card inset from the sidebar."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set sidebar_open = true %}
+    {% set screen %}
+      {% call sidebar_provider(contained=true, key="block-sidebar-inset", default_open=sidebar_open) %}
+        {% call sidebar(id="block-sidebar-inset-demo", variant="inset", aria_label="Inset sidebar navigation") %}
+          {% call sidebar_header() %}
+            {% call sidebar_menu() %}
+              {% call sidebar_menu_item(dropdown=true) %}
+                {{ sidebar_menu_button(
+                  "Acme Inc",
+                  subtitle="Enterprise",
+                  size="lg",
+                  dropdown=true,
+                  lead=sidebar_brand_mark("gallery-vertical-end"),
+                  end_icon="chevrons-up-down"
+                ) }}
+                {% call dropdown_menu() %}
+                  {{ dropdown_header("Teams") }}
+                  {{ dropdown_item("Acme Inc", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
+                  {{ dropdown_item("Acme Corp.", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
+                  {{ dropdown_item("Evil Corp.", icon="command", icon_box=true, shortcut="⌘3") }}
+                  {{ dropdown_divider() }}
+                  {{ dropdown_item("Add team", icon="plus", icon_box=true) }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+
+          {% call sidebar_content() %}
+            {% call sidebar_group() %}
+              {% call sidebar_group_content() %}
+                {{ sidebar_group_label("Platform") }}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Playground", href="#", icon="square-terminal", active=true) }}
+                  {% endcall %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Models", href="#", icon="bot") }}
+                  {% endcall %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Documentation", href="#", icon="book-open") }}
+                  {% endcall %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+
+            {% call sidebar_group() %}
+              {% call sidebar_group_content() %}
+                {{ sidebar_group_label("Projects") }}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
+                    {% call sidebar_menu_action(aria_label="Design Engineering actions") %}
+                      {{ dropdown_item("Rename", icon="pencil") }}
+                      {{ dropdown_item("Archive", icon="archive") }}
+                    {% endcall %}
+                  {% endcall %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
+                    {% call sidebar_menu_action(aria_label="Sales and Marketing actions") %}
+                      {{ dropdown_item("Rename", icon="pencil") }}
+                      {{ dropdown_item("Archive", icon="archive") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+
+          {% call sidebar_footer() %}
+            {% call sidebar_menu() %}
+              {% call sidebar_menu_item(dropdown=true) %}
+                {{ sidebar_menu_button(
+                  "wpmoo",
+                  subtitle="hello@wpmoo.org",
+                  size="lg",
+                  dropdown=true,
+                  lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
+                  end_icon="chevrons-up-down"
+                ) }}
+                {% call dropdown_menu(align="end") %}
+                  {{ dropdown_header("hello@wpmoo.org") }}
+                  {{ dropdown_item("Account", icon="badge-check") }}
+                  {{ dropdown_item("Billing", icon="credit-card") }}
+                  {{ dropdown_divider() }}
+                  {{ dropdown_item("Log out", icon="log-out") }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+
+        {% call sidebar_inset() %}
+          <header class="sidebar-inset__header">
+            {{ sidebar_trigger(sidebar_id="block-sidebar-inset-demo", expanded=sidebar_open) }}
+            {{ separator(orientation="vertical") }}
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#">Building Your Application</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Data Fetching</li>
+              </ol>
+            </nav>
+          </header>
+          <div class="sidebar-inset__content d-grid gap-3 p-3">
+            <div class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
+              <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+              <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+              <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+            </div>
+            <div class="moo-sidebar-demo__placeholder rounded-3 flex-grow-1" style="min-height: 12rem;"></div>
+          </div>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_block_example(
+      "sidebar-inset",
+      "Inset sidebar",
+      "The page content becomes a floating, rounded card inset from the sidebar, using the same header, content, and footer macros as the default variant.",
+      screen,
+      preview_class="moo-example__preview--shell"
+    ) }}
+  </div>
+{% endblock %}

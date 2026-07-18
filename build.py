@@ -356,6 +356,7 @@ def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
     utilities = load_entries("utilities.json")
+    blocks = load_entries("blocks.json")
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
         output_relative = relative.with_suffix("")
@@ -365,13 +366,14 @@ def render_pages() -> None:
         root_path = "../" * depth
         current_section = output_relative.parent.name
         current_slug = output_relative.stem
-        if current_section not in {"components", "utils"}:
+        if current_section not in {"components", "utils", "blocks"}:
             current_section = "index"
             current_slug = "index"
         template_name = page.relative_to(SRC).as_posix()
         rendered = environment.get_template(template_name).render(
             catalog=catalog,
             utilities=utilities,
+            blocks=blocks,
             current_section=current_section,
             current_slug=current_slug,
             root_path=root_path,

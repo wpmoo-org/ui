@@ -32,6 +32,23 @@
           ) }}
         </div>
       {% endcall %}
+      {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}
+        <div>
+          <h2 class="h5 mb-2">Blocks</h2>
+          <p class="text-body-secondary mb-0">
+            Full composed screens built from ready component macros.
+          </p>
+        </div>
+        <div>
+          {{ button(
+            "Browse Blocks",
+            variant="outline",
+            size="sm",
+            element="a",
+            href=root_path ~ "blocks/index.html"
+          ) }}
+        </div>
+      {% endcall %}
     </div>
   </section>
 {% endblock %}

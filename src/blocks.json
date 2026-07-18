@@ -1,0 +1,12 @@
+[
+  {
+    "slug": "sidebar-floating",
+    "label": "Sidebar (Floating)",
+    "status": "ready"
+  },
+  {
+    "slug": "sidebar-inset",
+    "label": "Sidebar (Inset)",
+    "status": "ready"
+  }
+]

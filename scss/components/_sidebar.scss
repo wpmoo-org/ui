@@ -59,6 +59,21 @@
     height: calc(100% - #{$spacer});
     max-height: calc(100% - #{$spacer});
   }
+
+  // At icon-rail width the detached card reads as floating mostly through
+  // elevation and breathing room, since the margin/border alone are hard to
+  // read at the base icon width; step up to Bootstrap's base shadow scale
+  // (still a shared token, no new value) and widen the column by the same
+  // margin the card's sides consume, so the icon rail itself keeps its full
+  // width instead of shrinking.
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] {
+    flex-basis: calc(var(--moo-sidebar-width-icon) + #{$spacer});
+    width: calc(var(--moo-sidebar-width-icon) + #{$spacer});
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] .sidebar-inner {
+    box-shadow: var(--bs-box-shadow);
+  }
 }
 
 .sidebar-inner {
