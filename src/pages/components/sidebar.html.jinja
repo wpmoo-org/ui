@@ -16,8 +16,8 @@
   ) }}
 
   <div class="moo-component-examples">
-    <h2 id="usage">Usage</h2>
-    <p>
+    <h2 id="usage" class="mb-3">Usage</h2>
+    <p class="mb-4">
       Start with <code>sidebar_provider()</code>, render one <code>sidebar()</code>,
       and place page content in <code>sidebar_inset()</code>. Use
       <code>sidebar_trigger()</code> when the shell needs a visible collapse
@@ -177,15 +177,15 @@
       preview_class="moo-example__preview--shell"
     ) }}
 
-    <h2 id="composition">Composition</h2>
-    <p>
+    <h2 id="composition" class="mt-5 mb-3">Composition</h2>
+    <p class="mb-4">
       Sidebar parts compose existing ready macros. Actions use Button and
       Dropdown Menu, metadata uses Badge, form fields use Input, separators use
       Separator, and loading rows use Skeleton.
     </p>
 
-    <h2 id="sidebar-api-reference">Sidebar API Reference</h2>
-    <p>
+    <h2 id="sidebar-api-reference" class="mt-5 mb-3">Sidebar API Reference</h2>
+    <p class="mb-4">
       Public names follow the shadcn Sidebar reference conceptually; Moo UI
       documents the Jinja API directly.
     </p>
@@ -216,7 +216,7 @@
       {"id": "sidebar-inset", "name": "sidebar_inset()", "summary": "Hosts the page surface next to the sidebar."}
     ] %}
 
-    <div class="table-responsive">
+    <div class="table-responsive mb-5">
       <table class="table align-middle">
         <thead>
           <tr>
@@ -235,8 +235,8 @@
       </table>
     </div>
 
-    <h2 id="usesidebar">useSidebar</h2>
-    <p>
+    <h2 id="usesidebar" class="mt-5 mb-3">useSidebar</h2>
+    <p class="mb-0">
       <strong>useSidebar</strong> is a runtime mapping only:
       <code>sidebar_provider()</code> writes <code>data-moo-sidebar-state</code>,
       and the integration logic reads it from <code>static/js/preview.js</code>.

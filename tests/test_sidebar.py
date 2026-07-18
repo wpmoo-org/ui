@@ -272,11 +272,11 @@ class SidebarTests(CatalogTestCase):
         page = self.read_output("components/sidebar.html")
 
         positions = [
-            page.index('<h2 id="usage">Usage</h2>'),
+            page.index('id="usage"'),
             page.index('id="app-shell-title"'),
-            page.index('<h2 id="composition">Composition</h2>'),
-            page.index('<h2 id="sidebar-api-reference">Sidebar API Reference</h2>'),
-            page.index('<h2 id="usesidebar">useSidebar</h2>'),
+            page.index('id="composition"'),
+            page.index('id="sidebar-api-reference"'),
+            page.index('id="usesidebar"'),
         ]
         self.assertEqual(positions, sorted(positions))
         self.assertNotIn("SidebarProvider", page)
