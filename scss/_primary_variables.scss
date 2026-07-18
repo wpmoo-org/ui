@@ -101,3 +101,22 @@ $border-radius-xl: 0.75rem !default;
 // --moo-sidebar-width / --moo-sidebar-width-icon consumption variables.
 $moo-sidebar-width: 16rem !default;
 $moo-sidebar-width-icon: 3rem !default;
+
+// Bootstrap's dropdown-item has no bordered icon-container concept, so the
+// Team Switcher-style icon box geometry lives on a dedicated Sass knob.
+// Border color/radius still ride Bootstrap consumption values.
+$moo-dropdown-item-icon-size: 1.5rem !default;
+
+// The Moo UI product stylesheet (moo-ui.scss) stays on Bootstrap's
+// $font-family-sans-serif default. The catalog's own documentation chrome
+// (scss/catalog.scss, .moo-catalog scope only) may use a distinct display
+// typeface; this is the single swap point — vendor the font under
+// vendor/<font>/ (see vendor/geist/), add a matching @font-face block, and
+// change this variable. Never applied to .moo-example__preview, so a
+// component's live preview always matches its real Bootstrap-default
+// typography. The fallback stack is not duplicated here — catalog.scss
+// chains this onto the runtime --bs-body-font-family consumption value, so
+// it tracks Bootstrap's actual default instead of a second copy of it.
+// This variable is evaluated before Bootstrap's own defaults exist, so it
+// cannot reference $font-family-sans-serif directly.
+$moo-catalog-font-family: "Geist" !default;

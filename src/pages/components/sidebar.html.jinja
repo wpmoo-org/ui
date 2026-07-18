@@ -41,11 +41,11 @@
                 ) }}
                 {% call dropdown_menu() %}
                   {{ dropdown_header("Teams") }}
-                  {{ dropdown_item("Acme Inc", icon="gallery-vertical-end") }}
-                  {{ dropdown_item("Acme Corp.", icon="audio-waveform") }}
-                  {{ dropdown_item("Evil Corp.", icon="command") }}
+                  {{ dropdown_item("Acme Inc", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
+                  {{ dropdown_item("Acme Corp.", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
+                  {{ dropdown_item("Evil Corp.", icon="command", icon_box=true, shortcut="⌘3") }}
                   {{ dropdown_divider() }}
-                  {{ dropdown_item("Add team", icon="plus") }}
+                  {{ dropdown_item("Add team", icon="plus", icon_box=true) }}
                 {% endcall %}
               {% endcall %}
             {% endcall %}

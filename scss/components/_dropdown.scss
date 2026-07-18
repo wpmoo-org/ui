@@ -31,3 +31,21 @@
   height: 1rem;
   flex: 0 0 auto;
 }
+
+.dropdown-item__icon-box {
+  --moo-dropdown-item-icon-size: #{$moo-dropdown-item-icon-size};
+
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--moo-dropdown-item-icon-size);
+  height: var(--moo-dropdown-item-icon-size);
+  border: var(--bs-border-width) solid var(--moo-border);
+  border-radius: var(--bs-border-radius);
+}
+
+.dropdown-item__icon-box > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}

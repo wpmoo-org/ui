@@ -18,15 +18,23 @@
   </ul>
 {%- endmacro %}
 
-{% macro dropdown_item(label, href="", icon="", active=false, disabled=false, destructive=false, shortcut="") -%}
+{% macro dropdown_item(label, href="", icon="", active=false, disabled=false, destructive=false, shortcut="", icon_box=false) -%}
   {% if not label | trim %}{{ fail("Dropdown item label is required") }}{% endif %}
+  {% if icon_box and not icon %}{{ fail("Dropdown item icon_box requires an icon") }}{% endif %}
   {% set classes = "dropdown-item" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
   {% if destructive %}{% set classes = classes ~ " text-danger" %}{% endif %}
+  {% set icon_markup %}
+    {%- if icon and icon_box -%}
+      <span class="dropdown-item__icon-box">{{ render_icon(icon, "inline-start") }}</span>
+    {%- elif icon -%}
+      {{ render_icon(icon, "inline-start") }}
+    {%- endif -%}
+  {% endset %}
   {% if href %}
     <li>
       <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>
-        {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
+        {{ icon_markup | trim | safe }}
         <span>{{ label }}</span>
         {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
       </a>
@@ -34,7 +42,7 @@
   {% else %}
     <li>
       <button class="{{ classes }}" type="button"{% if disabled %} disabled{% endif %}>
-        {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
+        {{ icon_markup | trim | safe }}
         <span>{{ label }}</span>
         {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
       </button>
