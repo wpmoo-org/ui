@@ -296,6 +296,47 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('data-slot="sidebar-menu-badge"', output)
         self.assertNotIn("sidebar-menu-item--has-action", output)
 
+    def test_sidebar_menu_action_and_badge_do_not_share_the_same_trailing_slot(self) -> None:
+        # Regression coverage: a menu item can combine a trailing action with
+        # a badge (e.g. an unread count beside a "..." overflow menu). Both
+        # default to the same inset-inline-end slot, so the combined case
+        # must shift the badge inward instead of overlapping the action.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        base_badge_end = _css_block(styles, ".sidebar-menu-badge")
+        action_end = _css_block(styles, ".sidebar-menu-action")
+        combined_badge_end = _css_block(
+            styles, ".sidebar-menu-item--has-action > .sidebar-menu-badge"
+        )
+
+        self.assertIn("inset-inline-end: $spacer * 0.25", base_badge_end)
+        self.assertIn("inset-inline-end: $spacer * 0.25", action_end)
+        self.assertIn("inset-inline-end: $spacer * 2", combined_badge_end)
+        self.assertIn(
+            "padding-inline-end: $spacer * 4.5",
+            _css_block(
+                styles,
+                ".sidebar-menu-item--has-action:has(> .sidebar-menu-badge) > .sidebar-menu-button",
+            ),
+        )
+
+    def test_sidebar_menu_action_and_badge_compose_without_overlap(self) -> None:
+        output = self.render_sidebar(
+            """
+            {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+              {{ sidebar_menu_button("Inbox", href="#") }}
+              {{ sidebar_menu_badge("24") }}
+              {% call sidebar_menu_action(aria_label="Inbox actions") %}
+                <span>Archive</span>
+              {% endcall %}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn('data-slot="sidebar-menu-badge"', output)
+        self.assertIn('data-slot="sidebar-menu-action"', output)
+        self.assertIn("sidebar-menu-item--has-action", output)
+
     def test_sidebar_catalog_page_uses_distinct_demo_target(self) -> None:
         result = self.run_build()
 

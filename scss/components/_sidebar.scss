@@ -305,6 +305,18 @@
   padding-inline-end: $spacer * 2.5;
 }
 
+// A menu item can combine a trailing action with a badge, such as an unread
+// count beside a "..." overflow menu. Both default to the same trailing
+// slot, so shift the badge inward past the action's footprint and reserve
+// extra title space for the pair instead of just one accessory's width.
+.sidebar-menu-item--has-action > .sidebar-menu-badge {
+  inset-inline-end: $spacer * 2;
+}
+
+.sidebar-menu-item--has-action:has(> .sidebar-menu-badge) > .sidebar-menu-button {
+  padding-inline-end: $spacer * 4.5;
+}
+
 // Leading brand/avatar tiles for the team switcher and user rows.
 .sidebar-brand-mark {
   display: inline-grid;
