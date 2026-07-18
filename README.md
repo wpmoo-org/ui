@@ -12,18 +12,28 @@ unimplemented until their dependency macros are ready.
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt
-.venv/bin/python build.py
-.venv/bin/python -m unittest discover -s tests -v
-.venv/bin/python build.py --watch
+.venv/bin/python dev.py
 ```
 
-Serve the repository root in a second terminal:
+Then open `http://localhost:4173/components/sidebar.html`.
+
+`dev.py` builds the catalog once, serves `dist/`, and watches `build.py`,
+`src/`, `scss/`, and `static/` for rebuilds. Browser refresh remains manual.
+
+Run tests separately:
 
 ```bash
-python3 -m http.server 4173
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
-Then open `http://localhost:4173/dist/components/button.html`.
+Manual two-terminal alternative:
+
+```bash
+.venv/bin/python build.py --watch
+python3 -m http.server 4173 --directory dist
+```
+
+Then open `http://localhost:4173/components/sidebar.html`.
 
 Tests are organized by ownership instead of accumulating in one build file:
 
