@@ -13,6 +13,11 @@
 {% set sidebar_button_sizes = ["default", "lg"] %}
 
 {% from "components/dropdown_menu.html.jinja" import dropdown_menu %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/skeleton.html.jinja" import skeleton %}
 
 {% macro sidebar_provider(default_open=true, contained=false, key="", extra_class="") -%}
   {% set classes = "sidebar-wrapper" %}
@@ -106,6 +111,20 @@
   </div>
 {%- endmacro %}
 
+{% macro sidebar_input(id="", placeholder="", aria_label="Search", extra_class="") -%}
+  {% set classes = "sidebar-input" %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <div class="{{ classes }}" data-slot="sidebar-input">
+    {{ input(id=id, aria_label=aria_label, placeholder=placeholder) }}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar_separator(extra_class="") -%}
+  <div class="sidebar-separator{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-separator">
+    {{ separator() }}
+  </div>
+{%- endmacro %}
+
 {% macro sidebar_footer(extra_class="") -%}
   <div class="sidebar-footer{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-footer">
     {{ caller() | trim | safe }}
@@ -123,10 +142,31 @@
   <div class="sidebar-group-label" data-slot="sidebar-group-label">{{ label }}</div>
 {%- endmacro %}
 
+{% macro sidebar_group_content(extra_class="") -%}
+  <div class="sidebar-group-content{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-group-content">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
 {% macro sidebar_menu(extra_class="") -%}
   <ul class="sidebar-menu{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-menu">
     {{ caller() | trim | safe }}
   </ul>
+{%- endmacro %}
+
+{% macro sidebar_group_action(icon="plus", aria_label="", extra_class="") -%}
+  {% if not aria_label | trim %}{{ fail("Sidebar group action aria-label is required") }}{% endif %}
+  {% if not icon | trim %}{{ fail("Sidebar group action icon is required") }}{% endif %}
+  <span class="sidebar-group-action{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-group-action">
+    {{ button(
+      "",
+      variant="ghost",
+      size="icon-xs",
+      aria_label=aria_label,
+      icon_start=icon,
+      extra_class=""
+    ) }}
+  </span>
 {%- endmacro %}
 
 {% macro sidebar_menu_item(dropdown=false, extra_class="") -%}
@@ -261,6 +301,22 @@
       {{ render_icon(icon, "inline-start") }}
     </button>
     {% call dropdown_menu(align=align) %}{{ items | safe }}{% endcall %}
+  </div>
+{%- endmacro %}
+
+{% macro sidebar_menu_badge(value, variant="outline", extra_class="") -%}
+  {% if not value | trim %}{{ fail("Sidebar menu badge value is required") }}{% endif %}
+  <span class="sidebar-menu-badge{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-menu-badge">
+    {{ badge(value, variant=variant, extra_class="") }}
+  </span>
+{%- endmacro %}
+
+{% macro sidebar_menu_skeleton(show_icon=false, extra_class="") -%}
+  <div class="sidebar-menu-skeleton{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-menu-skeleton">
+    {% if show_icon %}
+      {{ skeleton(width="1rem", height="1rem", extra_class="sidebar-menu-skeleton__icon") }}
+    {% endif %}
+    {{ skeleton(width="8rem", height="0.875rem", extra_class="sidebar-menu-skeleton__line") }}
   </div>
 {%- endmacro %}
 

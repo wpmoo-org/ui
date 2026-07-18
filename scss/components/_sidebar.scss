@@ -74,10 +74,47 @@
   overflow-y: auto;
 }
 
+.sidebar-input {
+  width: 100%;
+  padding: $spacer * 0.25;
+}
+
+.sidebar-separator {
+  display: flex;
+}
+
+.sidebar-menu-skeleton {
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.25;
+  min-height: $spacer * 2;
+  padding-inline: $spacer * 0.5;
+}
+
+.sidebar-menu-skeleton__icon {
+  width: $spacer;
+  height: $spacer;
+}
+
+.sidebar-menu-skeleton__line {
+  flex: 1 1 auto;
+}
+
 .sidebar-group {
   display: flex;
   flex-direction: column;
   padding: $spacer * 0.5;
+}
+
+.sidebar-group-content {
+  display: block;
+}
+
+.sidebar-group-content--inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacer * 0.25;
 }
 
 .sidebar-group-label {
@@ -233,6 +270,23 @@
   color: var(--moo-sidebar-foreground);
 }
 
+.sidebar-group-action {
+  margin-inline-start: auto;
+}
+
+.sidebar-menu-badge {
+  margin-inline-start: auto;
+}
+
+.sidebar-menu-item--has-action > .sidebar-menu-badge {
+  position: absolute;
+  inset-inline-end: $spacer * 0.25;
+  inset-block: 0;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
 // Leading brand/avatar tiles for the team switcher and user rows.
 .sidebar-brand-mark {
   display: inline-grid;
@@ -344,7 +398,9 @@
   }
 
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-sub,
-  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-action {
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-action,
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-group-action,
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-badge {
     display: none !important;
   }
 
@@ -356,6 +412,14 @@
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--lg {
     height: $spacer * 2;
     padding: 0;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton {
+    justify-content: center;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton__line {
+    display: none;
   }
 }
 

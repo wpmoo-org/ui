@@ -2,7 +2,7 @@
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
@@ -12,10 +12,18 @@
 {% block content %}
   {{ render_page_header(
     "Sidebar",
-    "Compose a collapsible application shell from a small family of Bootstrap-native primitives — header, groups, menus, footer, and inset."
+    "Compose a collapsible application shell from Bootstrap-native primitives — header, groups, menus, footer, and inset."
   ) }}
 
   <div class="moo-component-examples">
+    <h2 id="usage">Usage</h2>
+    <p>
+      Start with <code>sidebar_provider()</code>, render one <code>sidebar()</code>,
+      and place page content in <code>sidebar_inset()</code>. Use
+      <code>sidebar_trigger()</code> when the shell needs a visible collapse
+      control.
+    </p>
+
     {% set sidebar_open = true %}
     {% set app_shell %}
       {% call sidebar_provider(contained=true, key="components-sidebar", default_open=sidebar_open) %}
@@ -45,65 +53,69 @@
 
           {% call sidebar_content() %}
             {% call sidebar_group() %}
-              {{ sidebar_group_label("Platform") }}
-              {% call sidebar_menu() %}
-                {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_button("Playground", href="#", icon="square-terminal", active=true) }}
-                {% endcall %}
-                {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_sub_button("Models", "platform-models", icon="bot", open=true) }}
-                  {% call sidebar_menu_sub("platform-models", open=true) %}
-                    {% call sidebar_menu_sub_item() %}
-                      {{ sidebar_menu_button("GPT-4o", href="#", icon="sparkles", active=true) }}
-                    {% endcall %}
-                    {% call sidebar_menu_sub_item() %}
-                      {{ sidebar_menu_button("Claude 3.5", href="#", icon="brain") }}
+              {% call sidebar_group_content() %}
+                {{ sidebar_group_label("Platform") }}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Playground", href="#", icon="square-terminal", active=true) }}
+                  {% endcall %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_sub_button("Models", "platform-models", icon="bot", open=true) }}
+                    {% call sidebar_menu_sub("platform-models", open=true) %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("GPT-4o", href="#", icon="sparkles", active=true) }}
+                      {% endcall %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("Claude 3.5", href="#", icon="brain") }}
+                      {% endcall %}
                     {% endcall %}
                   {% endcall %}
-                {% endcall %}
-                {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_sub_button("Documentation", "platform-documentation", icon="book-open") }}
-                  {% call sidebar_menu_sub("platform-documentation") %}
-                    {% call sidebar_menu_sub_item() %}
-                      {{ sidebar_menu_button("Guides", href="#", icon="book-open") }}
-                    {% endcall %}
-                    {% call sidebar_menu_sub_item() %}
-                      {{ sidebar_menu_button("API reference", href="#", icon="code") }}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_sub_button("Documentation", "platform-documentation", icon="book-open") }}
+                    {% call sidebar_menu_sub("platform-documentation") %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("Guides", href="#", icon="book-open") }}
+                      {% endcall %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("API reference", href="#", icon="code") }}
+                      {% endcall %}
                     {% endcall %}
                   {% endcall %}
-                {% endcall %}
-                {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
+                  {% endcall %}
                 {% endcall %}
               {% endcall %}
             {% endcall %}
 
             {% call sidebar_group() %}
-              {{ sidebar_group_label("Projects") }}
-              {% call sidebar_menu() %}
-                {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
-                  {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
-                  {% call sidebar_menu_action(aria_label="Design Engineering actions") %}
-                    {{ dropdown_item("Rename", icon="pencil") }}
-                    {{ dropdown_item("Archive", icon="archive") }}
+              {% call sidebar_group_content() %}
+                {{ sidebar_group_label("Projects") }}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+                    {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
+                    {% call sidebar_menu_action(aria_label="Design Engineering actions") %}
+                      {{ dropdown_item("Rename", icon="pencil") }}
+                      {{ dropdown_item("Archive", icon="archive") }}
+                    {% endcall %}
                   {% endcall %}
-                {% endcall %}
-                {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
-                  {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
-                  {% call sidebar_menu_action(aria_label="Sales and Marketing actions") %}
-                    {{ dropdown_item("Rename", icon="pencil") }}
-                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+                    {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
+                    {% call sidebar_menu_action(aria_label="Sales and Marketing actions") %}
+                      {{ dropdown_item("Rename", icon="pencil") }}
+                      {{ dropdown_item("Archive", icon="archive") }}
+                    {% endcall %}
                   {% endcall %}
-                {% endcall %}
-                {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
-                  {{ sidebar_menu_button("Travel", href="#", icon="map") }}
-                  {% call sidebar_menu_action(aria_label="Travel actions") %}
-                    {{ dropdown_item("Rename", icon="pencil") }}
-                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+                    {{ sidebar_menu_button("Travel", href="#", icon="map") }}
+                    {% call sidebar_menu_action(aria_label="Travel actions") %}
+                      {{ dropdown_item("Rename", icon="pencil") }}
+                      {{ dropdown_item("Archive", icon="archive") }}
+                    {% endcall %}
                   {% endcall %}
-                {% endcall %}
-                {% call sidebar_menu_item() %}
-                  {{ sidebar_menu_button("More", href="#", icon="ellipsis") }}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_button("More", href="#", icon="ellipsis") }}
+                  {% endcall %}
                 {% endcall %}
               {% endcall %}
             {% endcall %}
@@ -164,11 +176,81 @@
       app_shell,
       preview_class="moo-example__preview--shell"
     ) }}
+
+    <h2 id="composition">Composition</h2>
+    <p>
+      Sidebar parts compose existing ready macros. Actions use Button and
+      Dropdown Menu, metadata uses Badge, form fields use Input, separators use
+      Separator, and loading rows use Skeleton.
+    </p>
+
+    <h2 id="sidebar-api-reference">Sidebar API Reference</h2>
+    <p>
+      Public names follow the shadcn Sidebar reference conceptually; Moo UI
+      documents the Jinja API directly.
+    </p>
+
+    {% set sidebar_parts = [
+      {"id": "sidebar-provider", "name": "sidebar_provider()", "summary": "Owns persisted expanded/collapsed state and wraps the shell."},
+      {"id": "sidebar", "name": "sidebar()", "summary": "Renders the app navigation container."},
+      {"id": "sidebar-input", "name": "sidebar_input()", "summary": "Composes Input for sidebar-local filtering fields."},
+      {"id": "sidebar-header", "name": "sidebar_header()", "summary": "Hosts brand, team switcher, or primary header controls."},
+      {"id": "sidebar-footer", "name": "sidebar_footer()", "summary": "Hosts account menus and persistent footer actions."},
+      {"id": "sidebar-separator", "name": "sidebar_separator()", "summary": "Composes Separator for sidebar section breaks."},
+      {"id": "sidebar-content", "name": "sidebar_content()", "summary": "Provides the scrollable main navigation area."},
+      {"id": "sidebar-group", "name": "sidebar_group()", "summary": "Groups related navigation or action rows."},
+      {"id": "sidebar-group-label", "name": "sidebar_group_label()", "summary": "Labels a sidebar group with visible text."},
+      {"id": "sidebar-group-action", "name": "sidebar_group_action()", "summary": "Composes Button for icon-only group actions."},
+      {"id": "sidebar-group-content", "name": "sidebar_group_content()", "summary": "Wraps group children without adding layout policy by default."},
+      {"id": "sidebar-menu", "name": "sidebar_menu()", "summary": "Renders the menu list container."},
+      {"id": "sidebar-menu-item", "name": "sidebar_menu_item()", "summary": "Hosts one menu row, action row, or submenu trigger."},
+      {"id": "sidebar-menu-button", "name": "sidebar_menu_button()", "summary": "Renders a link-like or button-like menu row."},
+      {"id": "sidebar-menu-action", "name": "sidebar_menu_action()", "summary": "Composes Dropdown Menu for row-level overflow actions."},
+      {"id": "sidebar-menu-badge", "name": "sidebar_menu_badge()", "summary": "Composes Badge for trailing row metadata."},
+      {"id": "sidebar-menu-skeleton", "name": "sidebar_menu_skeleton()", "summary": "Composes Skeleton for deterministic loading rows."},
+      {"id": "sidebar-menu-sub", "name": "sidebar_menu_sub()", "summary": "Renders a Bootstrap Collapse-backed submenu container."},
+      {"id": "sidebar-menu-sub-item", "name": "sidebar_menu_sub_item()", "summary": "Hosts one nested submenu row."},
+      {"id": "sidebar-menu-sub-button", "name": "sidebar_menu_sub_button()", "summary": "Renders the disclosure control for a submenu."},
+      {"id": "sidebar-trigger", "name": "sidebar_trigger()", "summary": "Toggles the target sidebar."},
+      {"id": "sidebar-rail", "name": "sidebar_rail()", "summary": "Provides the collapsed rail hit target."},
+      {"id": "sidebar-inset", "name": "sidebar_inset()", "summary": "Hosts the page surface next to the sidebar."}
+    ] %}
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th scope="col">Macro</th>
+            <th scope="col">Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for part in sidebar_parts %}
+            <tr id="{{ part['id'] }}">
+              <th scope="row"><code>{{ part["name"] }}</code></th>
+              <td>{{ part["summary"] }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="usesidebar">useSidebar</h2>
+    <p>
+      <strong>useSidebar</strong> is a runtime mapping only:
+      <code>sidebar_provider()</code> writes <code>data-moo-sidebar-state</code>,
+      and the integration logic reads it from <code>static/js/preview.js</code>.
+    </p>
   </div>
 
   {{ render_reference(
     "The mobile drawer and collapse behavior build on Bootstrap's own Offcanvas and Collapse plugins; see the",
     "https://getbootstrap.com/docs/5.3/components/offcanvas/",
     "Bootstrap Offcanvas documentation"
+  ) }}
+  {{ render_reference(
+    "For the nested collapse behavior, see the",
+    "https://getbootstrap.com/docs/5.3/components/collapse/",
+    "Bootstrap Collapse documentation"
   ) }}
 {% endblock %}

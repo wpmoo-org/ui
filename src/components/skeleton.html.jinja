@@ -1,0 +1,15 @@
+{# Skeleton surfaces use Bootstrap's placeholder utilities directly.
+   Placeholder behavior is defined in:
+   - vendor/bootstrap/scss/_placeholders.scss
+   - vendor/bootstrap/scss/bootstrap.scss (imports placeholders) #}
+
+{% macro skeleton(width="100%", height="", extra_class="") -%}
+  {% if not width | trim %}{{ fail("Skeleton width is required") }}{% endif %}
+  <div
+    class="skeleton placeholder-glow{% if extra_class %} {{ extra_class }}{% endif %}"
+    aria-hidden="true"
+    style="width: {{ width }};{% if height | trim %} height: {{ height }};{% endif %}"
+  >
+    <span class="placeholder"{% if width | trim %} style="width: 100%{% if height | trim %}; height: 100%{% endif %}"{% endif %}></span>
+  </div>
+{%- endmacro %}
