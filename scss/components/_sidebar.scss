@@ -46,6 +46,7 @@
 // to desktop, matching how the mobile offcanvas drawer ignores variant.
 @include media-breakpoint-up(lg) {
   .sidebar[data-variant="floating"] .sidebar-inner {
+    width: auto;
     height: calc(100svh - #{$spacer});
     max-height: calc(100svh - #{$spacer});
     margin: $spacer * 0.5;
@@ -172,7 +173,9 @@
   position: relative;
 }
 
-.sidebar-menu-item--has-action > .sidebar-menu-button {
+// Auto-detect a trailing action so a public consumer doesn't need to
+// remember an extra class for the button to reserve room for it.
+.sidebar-menu-item:has(> .sidebar-menu-action) > .sidebar-menu-button {
   padding-inline-end: $spacer * 2.5;
 }
 
@@ -329,11 +332,11 @@
 // count beside a "..." overflow menu. Both default to the same trailing
 // slot, so shift the badge inward past the action's footprint and reserve
 // extra title space for the pair instead of just one accessory's width.
-.sidebar-menu-item--has-action > .sidebar-menu-badge {
+.sidebar-menu-item:has(> .sidebar-menu-action) > .sidebar-menu-badge {
   inset-inline-end: $spacer * 2;
 }
 
-.sidebar-menu-item--has-action:has(> .sidebar-menu-badge) > .sidebar-menu-button {
+.sidebar-menu-item:has(> .sidebar-menu-action):has(> .sidebar-menu-badge) > .sidebar-menu-button {
   padding-inline-end: $spacer * 4.5;
 }
 

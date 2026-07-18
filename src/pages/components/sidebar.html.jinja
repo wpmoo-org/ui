@@ -92,21 +92,21 @@
               {% call sidebar_group_content() %}
                 {{ sidebar_group_label("Projects") }}
                 {% call sidebar_menu() %}
-                  {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+                  {% call sidebar_menu_item() %}
                     {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
                     {% call sidebar_menu_action(aria_label="Design Engineering actions") %}
                       {{ dropdown_item("Rename", icon="pencil") }}
                       {{ dropdown_item("Archive", icon="archive") }}
                     {% endcall %}
                   {% endcall %}
-                  {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+                  {% call sidebar_menu_item() %}
                     {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
                     {% call sidebar_menu_action(aria_label="Sales and Marketing actions") %}
                       {{ dropdown_item("Rename", icon="pencil") }}
                       {{ dropdown_item("Archive", icon="archive") }}
                     {% endcall %}
                   {% endcall %}
-                  {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+                  {% call sidebar_menu_item() %}
                     {{ sidebar_menu_button("Travel", href="#", icon="map") }}
                     {% call sidebar_menu_action(aria_label="Travel actions") %}
                       {{ dropdown_item("Rename", icon="pencil") }}

@@ -310,13 +310,14 @@ class SidebarTests(CatalogTestCase):
         # Regression coverage: a menu item can combine a trailing action with
         # a badge (e.g. an unread count beside a "..." overflow menu). Both
         # default to the same inset-inline-end slot, so the combined case
-        # must shift the badge inward instead of overlapping the action.
+        # must shift the badge inward instead of overlapping the action. The
+        # combination is auto-detected via :has() — no extra class required.
         styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
 
         base_badge_end = _css_block(styles, ".sidebar-menu-badge")
         action_end = _css_block(styles, ".sidebar-menu-action")
         combined_badge_end = _css_block(
-            styles, ".sidebar-menu-item--has-action > .sidebar-menu-badge"
+            styles, ".sidebar-menu-item:has(> .sidebar-menu-action) > .sidebar-menu-badge"
         )
 
         self.assertIn("inset-inline-end: $spacer * 0.25", base_badge_end)
@@ -326,14 +327,18 @@ class SidebarTests(CatalogTestCase):
             "padding-inline-end: $spacer * 4.5",
             _css_block(
                 styles,
-                ".sidebar-menu-item--has-action:has(> .sidebar-menu-badge) > .sidebar-menu-button",
+                ".sidebar-menu-item:has(> .sidebar-menu-action):has(> .sidebar-menu-badge) > .sidebar-menu-button",
             ),
         )
+        self.assertNotIn("sidebar-menu-item--has-action", styles)
 
     def test_sidebar_menu_action_and_badge_compose_without_overlap(self) -> None:
+        # No extra_class needed: the action's own presence is what the CSS
+        # detects, so a public consumer combining these two macros gets
+        # correct positioning without having to know about any styling hook.
         output = self.render_sidebar(
             """
-            {% call sidebar_menu_item(extra_class="sidebar-menu-item--has-action") %}
+            {% call sidebar_menu_item() %}
               {{ sidebar_menu_button("Inbox", href="#") }}
               {{ sidebar_menu_badge("24") }}
               {% call sidebar_menu_action(aria_label="Inbox actions") %}
@@ -345,7 +350,7 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn('data-slot="sidebar-menu-badge"', output)
         self.assertIn('data-slot="sidebar-menu-action"', output)
-        self.assertIn("sidebar-menu-item--has-action", output)
+        self.assertNotIn("sidebar-menu-item--has-action", output)
 
     def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
         # Regression coverage: sidebar(variant="floating") accepted the enum
@@ -364,6 +369,15 @@ class SidebarTests(CatalogTestCase):
                 '.sidebar-wrapper--contained .sidebar[data-variant="floating"] .sidebar-inner',
             ),
         )
+
+    def test_sidebar_floating_variant_inner_width_does_not_overflow_the_column(self) -> None:
+        # Regression coverage: the base .sidebar-inner rule sets width: 100%;
+        # adding a margin on top of that (without resetting width) makes the
+        # card's border box extend past the fixed-width .sidebar column by
+        # the margin amount on each side.
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        floating = _css_block(styles, '.sidebar[data-variant="floating"] .sidebar-inner')
+        self.assertIn("width: auto", floating)
 
     def test_sidebar_inset_variant_turns_main_content_into_a_floating_card(self) -> None:
         # Regression coverage: sidebar(variant="inset") accepted the enum
@@ -469,10 +483,10 @@ class SidebarTests(CatalogTestCase):
 
         self.assertNotIn("SidebarBrandMark", source)
         self.assertIn("sidebar_brand_mark", source)
-        self.assertIn(
-            'sidebar_menu_item(extra_class="sidebar-menu-item--has-action")',
-            source,
-        )
+        # The action-bearing Projects rows document the composable pattern
+        # with no styling hook required (positioning is auto-detected).
+        self.assertIn("sidebar_menu_action(aria_label=", source)
+        self.assertNotIn("sidebar-menu-item--has-action", source)
         self.assertIn(
             "sidebar_group_content()",
             source,
