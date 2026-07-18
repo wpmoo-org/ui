@@ -27,10 +27,10 @@ class ScrollFadeTests(CatalogTestCase):
             ],
         )
 
-        index = self.read_output("index.html")
+        index = self.read_output("components/index.html")
         self.assertIn(">Components</h2>", index)
         self.assertIn(">Utilities</h2>", index)
-        self.assertIn('href="utils/scroll-fade.html"', index)
+        self.assertIn('href="../utils/scroll-fade.html"', index)
 
         component = self.read_output("components/button.html")
         self.assertIn('href="../utils/scroll-fade.html"', component)

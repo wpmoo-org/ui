@@ -103,8 +103,9 @@ class CatalogContractTests(CatalogTestCase):
 
         pages = [
             *sorted((ROOT / "src/pages/components").glob("*.jinja")),
-            # The index composes the same ready macros; it gets no exemption.
-            ROOT / "src/pages/index.html.jinja",
+            # The components index composes the same ready macros; it gets no
+            # exemption.
+            ROOT / "src/pages/components/index.html.jinja",
         ]
         for path in pages:
             source = path.read_text(encoding="utf-8")
@@ -137,6 +138,10 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_component_pages_link_to_bootstrap_documentation(self) -> None:
         for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+            # The components index lists every component; it documents no
+            # single Bootstrap component itself, so it carries no reference.
+            if path.name == "index.html.jinja":
+                continue
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="reference import"):
@@ -152,7 +157,7 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        index = self.read_output("index.html")
+        index = self.read_output("components/index.html")
 
         for contract in (
             'data-moo-shell="catalog"',
@@ -185,10 +190,27 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('id="catalog-command"', index)
         self.assertIn("data-moo-command-item", index)
         self.assertIn('href="index.html"', index)
+        self.assertIn('href="components/index.html"', index)
         self.assertIn('href="components/button.html"', index)
         # Open + filter + keyboard navigation behavior lives in preview.js.
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
+
+    def test_home_page_introduces_the_product_and_links_to_components(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+
+        self.assertIn('data-moo-shell="catalog"', home)
+        self.assertIn("Moo UI", home)
+        self.assertIn(
+            "Bootstrap-native component system", home
+        )
+        self.assertIn('href="components/index.html"', home)
+        self.assertRegex(home, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
 
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()
