@@ -1,0 +1,49 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/skeleton.html.jinja" import skeleton %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Skeleton — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Skeleton",
+    "Render inert loading placeholders with Bootstrap-native placeholder classes for deterministic layout.",
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set line %}
+      {{ skeleton(width="100%", height="1rem") }}
+    {% endset %}
+    {{ render_example(
+      "line",
+      "Line placeholder",
+      "Use a single-line placeholder when one row of content is loading.",
+      line
+    ) }}
+
+    {% set card_stack %}
+      <div class="d-grid gap-2 w-100" style="max-width: 18rem;">
+        {{ skeleton(height="1.5rem") }}
+        {{ skeleton(height="7rem") }}
+        <div class="d-flex gap-2">
+          {{ skeleton(width="55%", height="1rem", extra_class="flex-grow-1") }}
+          {{ skeleton(width="30%", height="1rem", extra_class="flex-grow-1") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "card-stack",
+      "Card stack",
+      "Compose a compact card-like block with stacked loading bars.",
+      card_stack
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For native animation and sizing options, see the",
+    "https://getbootstrap.com/docs/5.3/components/placeholders/",
+    "Bootstrap Placeholder documentation"
+  ) }}
+{% endblock %}
