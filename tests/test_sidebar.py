@@ -456,7 +456,7 @@ class SidebarTests(CatalogTestCase):
             page.index('id="usage"'),
             page.index('id="app-shell-title"'),
             page.index('id="composition"'),
-            page.index('assets/images/sidebar-structure.png'),
+            page.index('assets/images/sidebar-structure.webp'),
             page.index('id="sidebar-api-reference"'),
             page.index('id="usesidebar"'),
         ]
@@ -466,7 +466,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("<th scope=\"col\">Macro</th>", page)
         self.assertIn("<th scope=\"col\">Purpose</th>", page)
         self.assertIn("Diagram showing sidebar_provider", page)
-        self.assertTrue((DIST / "assets/images/sidebar-structure.png").is_file())
+        self.assertTrue((DIST / "assets/images/sidebar-structure.webp").is_file())
 
     def test_sidebar_catalog_page_documents_public_macro_reference(self) -> None:
         source = (ROOT / "src/pages/components/sidebar.html.jinja").read_text(
