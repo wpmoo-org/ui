@@ -79,9 +79,31 @@ class ButtonTests(CatalogTestCase):
             with self.subTest(call=call):
                 with self.assertRaisesRegex(
                     ValueError,
-                    "Button dropdown and toggle options require element=button",
+                    "Button dropdown, toggle, and loading options require element=button",
                 ):
                     self.render_button(call)
+
+    def test_button_loading_requires_button_element(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button dropdown, toggle, and loading options require element=button",
+        ):
+            self.render_button('button("Save", element="a", loading=true)')
+
+    def test_button_loading_renders_decorative_spinner(self) -> None:
+        output = self.render_button('button("Saving...", loading=true, disabled=true)')
+
+        self.assertIn(
+            '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>',
+            output,
+        )
+        self.assertNotIn('role="status"', output)
+
+    def test_button_loading_and_icon_start_are_mutually_exclusive(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Button loading replaces icon_start; do not set both"
+        ):
+            self.render_button('button("Save", loading=true, icon_start="plus")')
 
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
         for call in (

@@ -123,5 +123,10 @@
     "slug": "switch",
     "label": "Switch",
     "status": "ready"
+  },
+  {
+    "slug": "spinner",
+    "label": "Spinner",
+    "status": "ready"
   }
 ]

@@ -1,0 +1,69 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/spinner.html.jinja" import spinner %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Spinner — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Spinner",
+    "Show an indeterminate loading state using Bootstrap's native spinner contract."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ spinner() }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "A borderless ring built from <code>currentColor</code>, so it adapts to any theme without extra CSS.",
+      default
+    ) }}
+
+    {% set small %}
+      {{ spinner(size="sm") }}
+    {% endset %}
+    {{ render_example(
+      "small",
+      "Small",
+      "Set <code>size=\"sm\"</code> to use inside compact contexts like buttons.",
+      small
+    ) }}
+
+    {% set in_button %}
+      <div class="d-flex gap-2">
+        {{ button("Loading...", loading=true, disabled=true) }}
+        {{ button("Please wait", variant="outline", loading=true, disabled=true) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "button",
+      "Button",
+      "Set <code>loading=true</code> on a button to swap its leading icon for a spinner.",
+      in_button
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ spinner(aria_label="جارٍ التحميل") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The spinner has no directional geometry, so it renders identically under RTL.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and reduced-motion handling, see the",
+    "https://getbootstrap.com/docs/5.3/components/spinners/",
+    "Bootstrap Spinners documentation"
+  ) }}
+
+{% endblock %}

@@ -1,0 +1,7 @@
+{% macro spinner(aria_label="Loading", size="", extra_class="") -%}
+  {% if not aria_label | trim %}{{ fail("Spinner aria_label is required") }}{% endif %}
+  {% if size not in ("", "sm") %}{{ fail("Spinner size must be '' or 'sm'") }}{% endif %}
+  <div class="spinner-border{% if size %} spinner-border-{{ size }}{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" role="status">
+    <span class="visually-hidden">{{ aria_label }}</span>
+  </div>
+{%- endmacro %}
