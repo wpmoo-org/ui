@@ -105,9 +105,10 @@ label.btn {
 // The loading state swaps icon_start for the same loader-circle icon the
 // standalone Spinner uses; aria-busy doubles as the accessible loading
 // signal and the hook that scopes the spin to only that icon. The
-// rotation reuses Bootstrap's own spinner-border keyframe.
+// rotation uses Bootstrap's own spinner-border keyframe in the standalone
+// build and the namespaced Moo keyframe in the scoped core build.
 .btn[aria-busy="true"] > [data-icon="inline-start"] {
-  animation: spinner-border $spinner-animation-speed linear infinite;
+  animation: $moo-spinner-animation-name $spinner-animation-speed linear infinite;
 }
 
 .btn:disabled,

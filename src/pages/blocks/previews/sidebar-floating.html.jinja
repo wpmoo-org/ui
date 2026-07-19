@@ -1,0 +1,13 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
+
+{% block title %}Sidebar (Floating) Preview — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_sidebar_shell(
+    key="preview-sidebar-floating",
+    sidebar_id="preview-sidebar-floating-demo",
+    variant="floating",
+    demo_copy="portal"
+  ) }}
+{% endblock %}

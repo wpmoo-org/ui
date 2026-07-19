@@ -1,0 +1,43 @@
+@property --moo-scroll-fade-t {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --moo-scroll-fade-b {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --moo-scroll-fade-s {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --moo-scroll-fade-e {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes moo-scroll-fade-reveal-t {
+  from { --moo-scroll-fade-t: 0; }
+  to { --moo-scroll-fade-t: var(--moo-scroll-fade-t-size); }
+}
+
+@keyframes moo-scroll-fade-reveal-b {
+  from { --moo-scroll-fade-b: var(--moo-scroll-fade-b-size); }
+  to { --moo-scroll-fade-b: 0; }
+}
+
+@keyframes moo-scroll-fade-reveal-s {
+  from { --moo-scroll-fade-s: 0; }
+  to { --moo-scroll-fade-s: var(--moo-scroll-fade-s-size); }
+}
+
+@keyframes moo-scroll-fade-reveal-e {
+  from { --moo-scroll-fade-e: var(--moo-scroll-fade-e-size); }
+  to { --moo-scroll-fade-e: 0; }
+}

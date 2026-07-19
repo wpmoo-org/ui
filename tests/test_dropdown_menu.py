@@ -60,6 +60,25 @@ class DropdownMenuTests(CatalogTestCase):
         self.assertIn('<ul class="dropdown-menu dropdown-menu-end">', output)
         self.assertNotIn("dropdown-toggle", output)
 
+    def test_dropdown_menu_and_items_support_owned_extra_classes(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_menu, dropdown_item, dropdown_divider %}'
+            '{% call dropdown_menu(extra_class="sidebar-account-menu") %}'
+            '{{ dropdown_item("Account", icon="badge-check", extra_class="sidebar-account-menu__item") }}'
+            '{{ dropdown_divider(extra_class="sidebar-account-menu__divider") }}'
+            "{% endcall %}"
+        )
+
+        self.assertIn('<ul class="dropdown-menu sidebar-account-menu">', output)
+        self.assertIn(
+            'class="dropdown-item sidebar-account-menu__item"',
+            output,
+        )
+        self.assertIn(
+            'class="dropdown-divider sidebar-account-menu__divider"',
+            output,
+        )
+
     def test_dropdown_item_keeps_positional_state_compatibility(self) -> None:
         output = self.render_template(
             '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'

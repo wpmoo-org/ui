@@ -1,0 +1,271 @@
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+
+{% macro render_sidebar_shell(key, sidebar_id, variant="sidebar", contained=false, sidebar_open=true, demo_copy="default") -%}
+  {% set portal_copy = demo_copy == "portal" %}
+  {% if portal_copy %}
+    {% set brand_name = "Moo Portal" %}
+    {% set brand_subtitle = "Customer desk" %}
+    {% set team_header = "Workspaces" %}
+    {% set team_one = "Moo Portal" %}
+    {% set team_two = "Partner Desk" %}
+    {% set team_three = "Billing Hub" %}
+    {% set add_team = "Add workspace" %}
+    {% set brand_icon = "building-2" %}
+    {% set team_one_icon = "building-2" %}
+    {% set team_two_icon = "landmark" %}
+    {% set team_three_icon = "wallet-cards" %}
+    {% set primary_group = "Portal" %}
+    {% set primary_one = "Dashboard" %}
+    {% set primary_two = "Requests" %}
+    {% set primary_three = "Knowledge Base" %}
+    {% set primary_four = "Preferences" %}
+    {% set footer_name = "Moo Admin" %}
+    {% set footer_subtitle = "admin@example.com" %}
+    {% set footer_initials = "MO" %}
+    {% set breadcrumb_parent = "Portal Operations" %}
+    {% set breadcrumb_current = "Request Review" %}
+  {% else %}
+    {% set brand_name = "Acme Inc" %}
+    {% set brand_subtitle = "Enterprise" %}
+    {% set team_header = "Teams" %}
+    {% set team_one = "Acme Inc" %}
+    {% set team_two = "Acme Corp." %}
+    {% set team_three = "Evil Corp." %}
+    {% set add_team = "Add team" %}
+    {% set brand_icon = "gallery-vertical-end" %}
+    {% set team_one_icon = "gallery-vertical-end" %}
+    {% set team_two_icon = "audio-waveform" %}
+    {% set team_three_icon = "command" %}
+    {% set primary_group = "Platform" %}
+    {% set primary_one = "Playground" %}
+    {% set primary_two = "Models" %}
+    {% set primary_three = "Documentation" %}
+    {% set primary_four = "Settings" %}
+    {% set secondary_group = "Projects" %}
+    {% set project_one = "Design Engineering" %}
+    {% set project_two = "Sales & Marketing" %}
+    {% set project_one_action_label = "Design Engineering actions" %}
+    {% set project_two_action_label = "Sales and Marketing actions" %}
+    {% set footer_name = "wpmoo" %}
+    {% set footer_subtitle = "hello@wpmoo.org" %}
+    {% set footer_initials = "SC" %}
+    {% set breadcrumb_parent = "Building Your Application" %}
+    {% set breadcrumb_current = "Data Fetching" %}
+  {% endif %}
+  {% set provider_extra_class = "moo-sidebar-demo--portal-shell" if portal_copy else "" %}
+  {% if portal_copy and variant == "inset" %}
+    {% set provider_extra_class = provider_extra_class ~ " moo-sidebar-demo--flat-inset" %}
+  {% endif %}
+  {% call sidebar_provider(contained=contained, key=key, default_open=sidebar_open, extra_class=provider_extra_class) %}
+    {% call sidebar(id=sidebar_id, variant=variant, aria_label="Sidebar block navigation") %}
+      {% call sidebar_header() %}
+        {% call sidebar_menu() %}
+          {% call sidebar_menu_item(dropdown=true) %}
+            {{ sidebar_menu_button(
+              brand_name,
+              subtitle=brand_subtitle,
+              size="lg",
+              dropdown=true,
+              lead=sidebar_brand_mark(brand_icon),
+              end_icon="chevrons-up-down"
+            ) }}
+            {% call dropdown_menu() %}
+              {{ dropdown_header(team_header) }}
+              {{ dropdown_item(team_one, icon=team_one_icon, icon_box=true, shortcut="⌘1") }}
+              {{ dropdown_item(team_two, icon=team_two_icon, icon_box=true, shortcut="⌘2") }}
+              {{ dropdown_item(team_three, icon=team_three_icon, icon_box=true, shortcut="⌘3") }}
+              {{ dropdown_divider() }}
+              {{ dropdown_item(add_team, icon="plus", icon_box=true) }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+      {% endcall %}
+
+      {% call sidebar_content() %}
+        {% if portal_copy %}
+          {% call sidebar_group() %}
+            {% call sidebar_group_content() %}
+              {{ sidebar_group_label(primary_group) }}
+              {% call sidebar_menu() %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_sub_button("Workspace", key ~ "-workspace", icon="layout-dashboard", open=true) }}
+                  {% call sidebar_menu_sub(key ~ "-workspace", open=true) %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Overview", href="#") }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Approvals", href="#") }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Activity", href="#") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_sub_button("Customers", key ~ "-customers", icon="contact-round") }}
+                  {% call sidebar_menu_sub(key ~ "-customers") %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Accounts", href="#") }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Segments", href="#") }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Messages", href="#") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_sub_button("Reports", key ~ "-reports", icon="chart-no-axes-combined") }}
+                  {% call sidebar_menu_sub(key ~ "-reports") %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Health", href="#") }}
+                    {% endcall %}
+                    {% call sidebar_menu_sub_item() %}
+                      {{ sidebar_menu_button("Revenue", href="#") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button("Preferences", href="#", icon="sliders-horizontal") }}
+                  {% call sidebar_menu_action(aria_label="Preferences actions") %}
+                    {{ dropdown_item("Open preferences", icon="external-link") }}
+                    {{ dropdown_item("Copy profile link", icon="copy") }}
+                    {{ dropdown_item("Manage notifications", icon="bell") }}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% else %}
+          {% call sidebar_group() %}
+            {% call sidebar_group_content() %}
+              {{ sidebar_group_label(primary_group) }}
+              {% call sidebar_menu() %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button(primary_one, href="#", icon="square-terminal", active=true) }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button(primary_two, href="#", icon="bot") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button(primary_three, href="#", icon="book-open") }}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button(primary_four, href="#", icon="settings-2") }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endif %}
+
+        {% if not portal_copy %}
+          {% call sidebar_group() %}
+            {% call sidebar_group_content() %}
+              {{ sidebar_group_label(secondary_group) }}
+              {% call sidebar_menu() %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button(project_one, href="#", icon="frame") }}
+                  {% call sidebar_menu_action(aria_label=project_one_action_label) %}
+                    {{ dropdown_item("Rename", icon="pencil") }}
+                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% endcall %}
+                {% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_button(project_two, href="#", icon="pie-chart") }}
+                  {% call sidebar_menu_action(aria_label=project_two_action_label) %}
+                    {{ dropdown_item("Rename", icon="pencil") }}
+                    {{ dropdown_item("Archive", icon="archive") }}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endif %}
+      {% endcall %}
+
+      {% call sidebar_footer() %}
+        {% if portal_copy %}
+          {% call sidebar_menu(extra_class="sidebar-menu--utility") %}
+            {% call sidebar_menu_item() %}
+              {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
+            {% endcall %}
+            {% call sidebar_menu_item() %}
+              {{ sidebar_menu_button("Get Help", href="#", icon="circle-question-mark") }}
+            {% endcall %}
+            {% call sidebar_menu_item() %}
+              {{ sidebar_menu_button("Search", href="#", icon="search") }}
+            {% endcall %}
+          {% endcall %}
+        {% endif %}
+        {% call sidebar_menu() %}
+          {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend", extra_class="sidebar-menu-item--account") %}
+            {{ sidebar_menu_button(
+              footer_name,
+              subtitle=footer_subtitle,
+              size="lg",
+              dropdown=true,
+              dropdown_offset="0,4",
+              lead=avatar(name=footer_name, initials=footer_initials, extra_class="sidebar-avatar"),
+              end_icon="ellipsis-vertical",
+              extra_class="sidebar-menu-button--account"
+            ) }}
+            {% call dropdown_menu(extra_class="sidebar-account-menu") %}
+              <li class="sidebar-account-menu__header">
+                {{ avatar(name=footer_name, initials=footer_initials, extra_class="sidebar-avatar") }}
+                <span class="sidebar-account-menu__identity">
+                  <span class="sidebar-account-menu__name">{{ footer_name }}</span>
+                  <span class="sidebar-account-menu__email">{{ footer_subtitle }}</span>
+                </span>
+              </li>
+              {{ dropdown_divider(extra_class="sidebar-account-menu__divider") }}
+              {% if portal_copy %}
+                {{ dropdown_item("Upgrade workspace", icon="sparkles", extra_class="sidebar-account-menu__item") }}
+                {{ dropdown_divider(extra_class="sidebar-account-menu__divider") }}
+                {{ dropdown_item("Account", icon="badge-check", extra_class="sidebar-account-menu__item") }}
+                {{ dropdown_item("Billing", icon="credit-card", extra_class="sidebar-account-menu__item") }}
+                {{ dropdown_item("Notifications", icon="bell", extra_class="sidebar-account-menu__item") }}
+              {% else %}
+                {{ dropdown_item("Account", icon="badge-check", extra_class="sidebar-account-menu__item") }}
+                {{ dropdown_item("Billing", icon="credit-card", extra_class="sidebar-account-menu__item") }}
+              {% endif %}
+              {{ dropdown_divider(extra_class="sidebar-account-menu__divider") }}
+              {{ dropdown_item("Log out", icon="log-out", extra_class="sidebar-account-menu__item") }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+
+    {% call sidebar_inset() %}
+      <header class="sidebar-inset__header">
+        {{ sidebar_trigger(sidebar_id=sidebar_id, expanded=sidebar_open) }}
+        {{ separator(orientation="vertical") }}
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="#">{{ breadcrumb_parent }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_current }}</li>
+          </ol>
+        </nav>
+      </header>
+      {% if portal_copy %}
+        {% set content_classes = "sidebar-inset__content d-flex flex-column gap-3 p-3 pt-0" %}
+        {% set detail_placeholder_style = "min-height: 0;" %}
+      {% else %}
+        {% set content_classes = "sidebar-inset__content d-grid gap-3 p-3" %}
+        {% set detail_placeholder_style = "min-height: 12rem;" %}
+      {% endif %}
+      <div class="{{ content_classes }}">
+        <div class="d-grid gap-3" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+          <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+          <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+          <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+        </div>
+        <div class="moo-sidebar-demo__placeholder rounded-3 flex-grow-1" style="{{ detail_placeholder_style }}"></div>
+      </div>
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}

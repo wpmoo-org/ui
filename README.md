@@ -33,6 +33,15 @@ Browse the catalog at [ui.wpmoo.org](https://ui.wpmoo.org/). Component pages,
 blocks, examples, local development notes, and implementation contracts belong
 in the documentation rather than this README.
 
+## Build Outputs
+
+The static build emits three CSS artifacts under `dist/assets/css/`:
+
+- `moo-ui.css` for the standalone catalog and examples.
+- `catalog.css` for documentation chrome.
+- `moo-core.css` for integrations that need the Moo component surface as an
+  opt-in native `@scope (.moo-ui)` layer.
+
 ## Licensing
 
 Moo UI source code is licensed under the MIT License by WPMoo (`wpmoo.org`).
@@ -42,4 +51,5 @@ are not covered by the MIT source code license and remain copyright WPMoo, all
 rights reserved.
 
 Vendored third-party material keeps its original license and attribution. See
-`LICENSE`, `ASSET_LICENSE.md`, and `THIRD_PARTY_NOTICES.md`.
+`LICENSE`, `LICENSE-MOO-CORE.txt`, `ASSET_LICENSE.md`, and
+`THIRD_PARTY_NOTICES.md`.
