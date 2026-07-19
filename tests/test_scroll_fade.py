@@ -62,12 +62,22 @@ class ScrollFadeTests(CatalogTestCase):
                 rf"\.{re.escape(class_name)}(?=[\s,:{{])",
             )
         self.assertIn(".no-scrollbar::-webkit-scrollbar", css)
+        for variable in (
+            "--scroll-fade-size",
+            "--scroll-fade-reveal",
+            "--moo-scroll-fade-t-size",
+            "--moo-scroll-fade-b-size",
+            "--moo-scroll-fade-s-size",
+            "--moo-scroll-fade-e-size",
+            "--moo-scroll-fade-mask",
+        ):
+            self.assertIn(variable, css)
 
         for animation in (
-            "scroll-fade-reveal-t",
-            "scroll-fade-reveal-b",
-            "scroll-fade-reveal-s",
-            "scroll-fade-reveal-e",
+            "moo-scroll-fade-reveal-t",
+            "moo-scroll-fade-reveal-b",
+            "moo-scroll-fade-reveal-s",
+            "moo-scroll-fade-reveal-e",
         ):
             self.assertIn(f"@keyframes {animation}", css)
 

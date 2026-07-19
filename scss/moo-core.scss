@@ -1,0 +1,48 @@
+/*!
+ * Moo UI core
+ * Copyright (c) 2026 WPMoo (wpmoo.org)
+ * Includes Bootstrap 5.3.3 component output
+ * SPDX-License-Identifier: MIT
+ */
+$enable-dark-mode: false;
+$moo-spinner-animation-name: moo-spinner-rotate;
+
+@import "functions";
+@import "primary_variables";
+@import "bootstrap_overrides";
+@import "variables";
+@import "variables-dark";
+@import "maps";
+@import "mixins";
+@import "utilities";
+@import "core_theme";
+@import "core_global_primitives";
+
+.moo-ui {
+  @include moo-core-scales;
+  @include moo-core-light;
+}
+
+:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) {
+  @include moo-core-dark;
+}
+
+.moo-ui[data-bs-theme="light"] {
+  @include moo-core-light;
+}
+
+.moo-ui[data-bs-theme="dark"] {
+  @include moo-core-dark;
+}
+
+.moo-ui[dir="rtl"] {
+  direction: rtl;
+}
+
+@scope (.moo-ui) {
+  @import "bootstrap_component_layer";
+  @import "focus";
+  @import "component_layer";
+}
+
+@import "core_state_layer";

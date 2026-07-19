@@ -522,6 +522,47 @@ body {
   width: 100%;
 }
 
+.moo-block-preview {
+  width: 100%;
+}
+
+.moo-block-preview__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-block-preview__viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 20rem;
+  background: var(--bs-body-bg);
+}
+
+.moo-block-preview__frame {
+  display: block;
+  border: 0;
+  transform-origin: top left;
+}
+
+[dir="rtl"] .moo-block-preview__frame {
+  transform-origin: top right;
+}
+
+.moo-block-standalone {
+  min-height: 100vh;
+  background: var(--bs-body-bg);
+}
+
+.moo-block-standalone>.sidebar-wrapper {
+  min-height: 100vh;
+}
+
 .moo-example__preview>.d-grid {
   width: 100%;
 }
@@ -629,6 +670,32 @@ body {
 .moo-sidebar-demo__placeholder {
   // shadcn sidebar-07 uses bg-muted/50 for these preview surfaces.
   background: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent);
+}
+
+.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) {
+  background: var(--bs-body-bg);
+}
+
+.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.moo-sidebar-demo--flat-inset .sidebar[data-side="left"] .sidebar-inner {
+  border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.moo-sidebar-demo--flat-inset .sidebar[data-side="right"] .sidebar-inner {
+  border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.moo-sidebar-demo--portal-shell .sidebar-inset__header {
+  border-bottom: 0;
+}
+
+.moo-sidebar-demo--portal-shell .sidebar-inset__header>.vr {
+  display: none;
 }
 
 .token.comment,

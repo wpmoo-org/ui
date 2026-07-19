@@ -4,7 +4,8 @@ import re
 
 from tests.helpers import ROOT, CatalogTestCase
 
-COMPONENTS_SCSS = ROOT / "scss/components"
+SCSS = ROOT / "scss"
+COMPONENTS_SCSS = SCSS / "components"
 
 # Component partials must consume shared primitives (Bootstrap Sass/CSS scales
 # and --moo-* theme tokens); literal colors, shadows, and radii are defects.
@@ -41,8 +42,24 @@ class DesignGateTests(CatalogTestCase):
         self.assertEqual(active_component_imports(source), {"active"})
 
     def test_all_component_partials_are_imported(self) -> None:
-        entrypoint = (ROOT / "scss/moo-ui.scss").read_text(encoding="utf-8")
+        entrypoint = (SCSS / "moo-ui.scss").read_text(encoding="utf-8")
+        if '@import "component_layer"' in entrypoint:
+            entrypoint += "\n" + (SCSS / "_component_layer.scss").read_text(
+                encoding="utf-8"
+            )
         imported_components = active_component_imports(entrypoint)
+
+        for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
+            component = path.stem.removeprefix("_")
+            self.assertIn(component, imported_components)
+
+    def test_core_component_layer_imports_all_component_partials(self) -> None:
+        component_layer = SCSS / "_component_layer.scss"
+
+        self.assertTrue(component_layer.is_file())
+        imported_components = active_component_imports(
+            component_layer.read_text(encoding="utf-8")
+        )
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
             component = path.stem.removeprefix("_")

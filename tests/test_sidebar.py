@@ -197,7 +197,15 @@ class SidebarTests(CatalogTestCase):
                 'sidebar_menu_button("Button", size="compact")',
                 "Unknown sidebar menu button size: compact",
             ),
+            (
+                'sidebar_menu_button("Button", dropdown_offset="0,10")',
+                "Sidebar menu button dropdown_offset requires dropdown=true",
+            ),
             ('sidebar_group_action(aria_label="")', "Sidebar group action aria-label is required"),
+            (
+                'sidebar_menu_item(dropdown=true, dropdown_direction="sideways")',
+                "Unknown sidebar dropdown direction: sideways",
+            ),
             (
                 'sidebar_menu_badge("8", variant="bad")',
                 "Unknown badge variant: bad",
@@ -324,6 +332,10 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("inset-inline-end: $spacer * 0.25", action_end)
         self.assertIn("inset-inline-end: $spacer * 2", combined_badge_end)
         self.assertIn(
+            "z-index: 2",
+            _css_block(styles, ".sidebar-menu-action:has(> [data-popper-placement])"),
+        )
+        self.assertIn(
             "padding-inline-end: $spacer * 4.5",
             _css_block(
                 styles,
@@ -351,6 +363,51 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('data-slot="sidebar-menu-badge"', output)
         self.assertIn('data-slot="sidebar-menu-action"', output)
         self.assertNotIn("sidebar-menu-item--has-action", output)
+
+    def test_sidebar_menu_item_supports_dropend_profile_menus(self) -> None:
+        output = self.render_sidebar(
+            """
+            {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend", extra_class="sidebar-menu-item--account") %}
+              {{ sidebar_menu_button("Moo Admin", dropdown=true, dropdown_offset="0,4", extra_class="sidebar-menu-button--account") }}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn('class="sidebar-menu-item dropend sidebar-menu-item--account"', output)
+        self.assertIn("sidebar-menu-button--account", output)
+        self.assertIn('data-bs-offset="0,4"', output)
+        self.assertNotIn('class="sidebar-menu-item dropdown dropend"', output)
+
+    def test_sidebar_account_dropdown_open_state_is_visible(self) -> None:
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        open_account = _css_block(
+            styles, '.sidebar-menu-button--account[aria-expanded="true"]'
+        )
+
+        self.assertIn("background: var(--moo-sidebar-accent)", open_account)
+        self.assertIn("color: var(--moo-sidebar-foreground)", open_account)
+        account_item = _css_block(styles, ".sidebar-menu-item--account")
+        account_button = _css_block(styles, ".sidebar-menu-item--account > .sidebar-menu-button--account")
+        self.assertIn("padding-inline: 0", account_item)
+        self.assertIn("height: $spacer * 3", account_button)
+        self.assertIn("min-height: $spacer * 3", account_button)
+        self.assertIn("padding: $spacer * 0.5", account_button)
+        account_menu = _css_block(styles, ".sidebar-footer .sidebar-account-menu")
+        self.assertIn("width: 100%", account_menu)
+        self.assertIn("min-width: 100%", account_menu)
+        self.assertIn("padding: $spacer * 0.25", account_menu)
+        self.assertIn("border-radius: var(--bs-border-radius-lg)", account_menu)
+        self.assertIn("box-shadow: var(--bs-box-shadow)", account_menu)
+        self.assertIn("min-width: 0", _css_block(styles, ".sidebar-account-menu__header"))
+        account_menu_item = _css_block(styles, ".sidebar-account-menu__item")
+        self.assertIn("min-height: $spacer * 2", account_menu_item)
+        self.assertIn("padding: $spacer * 0.375 $spacer * 0.5", account_menu_item)
+        self.assertIn("line-height: $line-height-sm", account_menu_item)
+        self.assertIn(
+            "margin: $spacer * 0.25 0",
+            _css_block(styles, ".sidebar-account-menu__divider"),
+        )
 
     def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
         # Regression coverage: sidebar(variant="floating") accepted the enum

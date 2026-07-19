@@ -1,6 +1,6 @@
 {% from "components/typography.html.jinja" import typography %}
 
-{% macro render_block_example(id, title, description, content, preview_class="") %}
+{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720) %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
   <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
@@ -10,7 +10,35 @@
     </div>
     <div class="moo-example__surface">
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
-        {{ rendered | safe }}
+        {% if frame_src %}
+          <div
+            class="moo-block-preview"
+            data-moo-block-frame-shell
+            data-moo-frame-width="{{ frame_width }}"
+            data-moo-frame-height="{{ frame_height }}"
+          >
+            <div class="moo-block-preview__toolbar">
+              <span class="small text-body-secondary">{{ frame_width }} x {{ frame_height }}</span>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ frame_src }}" target="_blank" rel="noopener">
+                {{ render_icon("external-link", "inline-start") }}
+                Open standalone
+              </a>
+            </div>
+            <div class="moo-block-preview__viewport" data-moo-block-frame-viewport>
+              <iframe
+                class="moo-block-preview__frame"
+                data-moo-block-frame
+                src="{{ frame_src }}"
+                title="{{ title }} preview"
+                width="{{ frame_width }}"
+                height="{{ frame_height }}"
+                loading="lazy"
+              ></iframe>
+            </div>
+          </div>
+        {% else %}
+          {{ rendered | safe }}
+        {% endif %}
       </div>
       <div class="moo-example__source" data-bs-theme="dark" data-moo-code-panel data-expanded="false">
         <pre class="moo-code scroll-fade-x no-scrollbar" id="{{ id }}-code"><span class="moo-code__lines" aria-hidden="true">{{ source | line_numbers }}</span><code class="language-html">{{ source | highlight_html }}</code></pre>
