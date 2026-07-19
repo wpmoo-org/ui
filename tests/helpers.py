@@ -30,6 +30,12 @@ def read_png_ihdr(path: Path) -> tuple[int, int, int]:
     return width, height, color_type
 
 
+def is_valid_webp(path: Path) -> bool:
+    """Check a file has a well-formed RIFF/WEBP header (any codec chunk)."""
+    header = path.read_bytes()[:12]
+    return header[:4] == b"RIFF" and header[8:12] == b"WEBP"
+
+
 class CatalogTestCase(unittest.TestCase):
     def run_build(self) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
