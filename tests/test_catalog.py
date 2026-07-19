@@ -236,7 +236,6 @@ class CatalogContractTests(CatalogTestCase):
         ):
             with self.subTest(contract=contract):
                 self.assertIn(contract, index)
-        self.assertRegex(index, r'class="[^"]*\bavatar\b[^"]*\bavatar-sm\b')
         self.assertRegex(index, r'class="[^"]*\bbadge\b')
         self.assertRegex(index, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
 

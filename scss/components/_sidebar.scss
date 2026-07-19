@@ -217,6 +217,11 @@
   background: var(--moo-sidebar-accent);
 }
 
+// A fixed brand lockup, not an interactive control: no hover affordance.
+.sidebar-menu-button--static:hover {
+  background: transparent;
+}
+
 .sidebar-menu-button[aria-current="page"] {
   font-weight: $font-weight-medium;
   background: var(--moo-sidebar-accent);

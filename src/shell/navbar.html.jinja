@@ -1,10 +1,10 @@
 {% from "components/button.html.jinja" import button %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/navigation.html.jinja" import nav_item, nav_menu %}
 {% from "components/sidebar.html.jinja" import sidebar_trigger %}
-{% from "components/separator.html.jinja" import separator %}
 
 {% macro _command_item(href, label) -%}
   <a
@@ -23,8 +23,15 @@
     <div class="container-fluid moo-catalog__navbar-inner">
       <div class="moo-catalog__header-start">
         {{ sidebar_trigger(sidebar_id="catalog-sidebar", extra_class="moo-catalog__sidebar-toggle") }}
-        {{ separator(orientation="vertical", extra_class="moo-catalog__header-divider") }}
-        {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav") %}
+        <div class="dropdown moo-catalog__nav-dropdown d-md-none">
+          {{ button("", variant="ghost", size="icon-sm", element="button", aria_label="Toggle navigation menu", icon_start="menu", dropdown=true, extra_class="moo-catalog__nav-menu-trigger") }}
+          {% call dropdown_menu() %}
+            {{ dropdown_item("Home", href=root_path ~ "index.html") }}
+            {{ dropdown_item("Components", href=root_path ~ "components/index.html") }}
+            {{ dropdown_item("Blocks", href=root_path ~ "blocks/index.html") }}
+          {% endcall %}
+        </div>
+        {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav d-none d-md-flex") %}
           {{ nav_item("Home", href=root_path ~ "index.html") }}
           {{ nav_item("Components", href=root_path ~ "components/index.html") }}
           {{ nav_item("Blocks", href=root_path ~ "blocks/index.html") }}
@@ -32,27 +39,26 @@
       </div>
 
       <div class="moo-catalog__header-actions">
+        {#- Always visible (icon-only below sm) rather than d-none, so
+           search/the command palette stays reachable at every width even
+           once the primary nav and its label text are hidden. #}
+        {% set search_trigger_label %}
+          <span class="moo-catalog__search-trigger-lead">
+            {{ render_icon("search", "inline-start") }}
+            <span class="d-none d-sm-inline">Search</span>
+          </span>
+          {#- Real shortcut, not decoration: Cmd/Ctrl+K already opens this
+             same command palette (see the keydown listener in preview.js). #}
+          <span class="moo-catalog__search-trigger-shortcut d-none d-md-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
+        {% endset %}
         {{ button(
-          "Search documentation...",
+          search_trigger_label | safe,
           variant="ghost",
           size="default",
           element="button",
           aria_label="Search documentation",
-          icon_start="search",
-          extra_class="moo-catalog__search-trigger d-none d-md-inline-flex"
+          extra_class="moo-catalog__search-trigger"
         ) }}
-        {{ separator(orientation="vertical", extra_class="moo-catalog__header-divider moo-catalog__header-divider--leading") }}
-        {{ button(
-          "wpmoo-org/ui",
-          variant="ghost",
-          size="default",
-          element="a",
-          href="https://github.com/wpmoo-org/ui",
-          aria_label="Open Moo UI on GitHub",
-          icon_start="github",
-          extra_class="moo-catalog__github-link"
-        ) }}
-        {{ separator(orientation="vertical", extra_class="moo-catalog__header-divider") }}
         <button
           class="btn btn-ghost btn-icon moo-catalog__theme-toggle"
           type="button"
@@ -62,6 +68,19 @@
           <span data-moo-theme-icon="light">{{ render_icon("sun", "inline-start") }}</span>
           <span data-moo-theme-icon="dark" class="d-none">{{ render_icon("moon-star", "inline-start") }}</span>
         </button>
+        {#- The classic GitHub mark, not a Lucide icon: kept as a literal,
+           unmodified path (pixel-matched to the shadcn reference site)
+           rather than entered into src/icons/lucide-icons.json.
+           fill="currentColor" so it themes with the button's text color in
+           light/dark mode. Label stays "wpmoo-org/ui" instead of a star
+           count until the repo has enough stars for that count to be
+           meaningful. #}
+        <a class="btn btn-primary moo-catalog__github-link" role="button" href="https://github.com/wpmoo-org/ui" target="_blank" rel="noopener noreferrer" aria-label="Open Moo UI on GitHub">
+          <svg data-icon="inline-start" viewBox="0 0 438.549 438.549" fill="currentColor" aria-hidden="true">
+            <path d="M409.132 114.573c-19.608-33.596-46.205-60.194-79.798-79.8-33.598-19.607-70.277-29.408-110.063-29.408-39.781 0-76.472 9.804-110.063 29.408-33.596 19.605-60.192 46.204-79.8 79.8C9.803 148.168 0 184.854 0 224.63c0 47.78 13.94 90.745 41.827 128.906 27.884 38.164 63.906 64.572 108.063 79.227 5.14.954 8.945.283 11.419-1.996 2.475-2.282 3.711-5.14 3.711-8.562 0-.571-.049-5.708-.144-15.417a2549.81 2549.81 0 01-.144-25.406l-6.567 1.136c-4.187.767-9.469 1.092-15.846 1-6.374-.089-12.991-.757-19.842-1.999-6.854-1.231-13.229-4.086-19.13-8.559-5.898-4.473-10.085-10.328-12.56-17.556l-2.855-6.57c-1.903-4.374-4.899-9.233-8.992-14.559-4.093-5.331-8.232-8.945-12.419-10.848l-1.999-1.431c-1.332-.951-2.568-2.098-3.711-3.429-1.142-1.331-1.997-2.663-2.568-3.997-.572-1.335-.098-2.43 1.427-3.289 1.525-.859 4.281-1.276 8.28-1.276l5.708.853c3.807.763 8.516 3.042 14.133 6.851 5.614 3.806 10.229 8.754 13.846 14.842 4.38 7.806 9.657 13.754 15.846 17.847 6.184 4.093 12.419 6.136 18.699 6.136 6.28 0 11.704-.476 16.274-1.423 4.565-.952 8.848-2.383 12.847-4.285 1.713-12.758 6.377-22.559 13.988-29.41-10.848-1.14-20.601-2.857-29.264-5.14-8.658-2.286-17.605-5.996-26.835-11.14-9.235-5.137-16.896-11.516-22.985-19.126-6.09-7.614-11.088-17.61-14.987-29.979-3.901-12.374-5.852-26.648-5.852-42.826 0-23.035 7.52-42.637 22.557-58.817-7.044-17.318-6.379-36.732 1.997-58.24 5.52-1.715 13.706-.428 24.554 3.853 10.85 4.283 18.794 7.952 23.84 10.994 5.046 3.041 9.089 5.618 12.135 7.708 17.705-4.947 35.976-7.421 54.818-7.421s37.117 2.474 54.823 7.421l10.849-6.849c7.419-4.57 16.18-8.758 26.262-12.565 10.088-3.805 17.802-4.853 23.134-3.138 8.562 21.509 9.325 40.922 2.279 58.24 15.036 16.18 22.559 35.787 22.559 58.817 0 16.178-1.958 30.497-5.853 42.966-3.9 12.471-8.941 22.457-15.125 29.979-6.191 7.521-13.901 13.85-23.131 18.986-9.232 5.14-18.182 8.85-26.84 11.136-8.662 2.286-18.415 4.004-29.263 5.146 9.894 8.562 14.842 22.077 14.842 40.539v60.237c0 3.422 1.19 6.279 3.572 8.562 2.379 2.279 6.136 2.95 11.276 1.995 44.163-14.653 80.185-41.062 108.068-79.226 27.88-38.161 41.825-81.126 41.825-128.906-.01-39.771-9.818-76.454-29.414-110.049z"/>
+          </svg>
+          <span class="moo-catalog__github-label d-none d-lg-inline">wpmoo-org/ui</span>
+        </a>
       </div>
     </div>
   </nav>
