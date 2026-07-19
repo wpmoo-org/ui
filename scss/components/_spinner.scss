@@ -4,12 +4,12 @@
 // and rotation are needed here. The rotation reuses Bootstrap's own
 // spinner-border keyframe instead of declaring a new one.
 .spinner [data-icon] {
-  width: 1rem;
-  height: 1rem;
+  width: $spacer;
+  height: $spacer;
   animation: spinner-border $spinner-animation-speed linear infinite;
 }
 
 .spinner-sm [data-icon] {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: $spacer * 0.75;
+  height: $spacer * 0.75;
 }

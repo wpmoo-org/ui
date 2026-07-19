@@ -6,19 +6,19 @@
 // and must keep its plain Bootstrap look.
 .tabs-list {
   display: inline-flex;
-  gap: 0.125rem;
-  padding: 0.1875rem;
+  gap: $moo-tabs-list-gap;
+  padding: $moo-tabs-list-padding;
   background-color: var(--moo-muted-surface);
   border-radius: var(--bs-border-radius-lg);
 }
 
 .tabs-list .nav-link {
-  padding: 0.125rem 0.75rem;
+  padding: $moo-tabs-trigger-padding-y $moo-tabs-trigger-padding-x;
   font-size: $font-size-base;
   font-weight: 500;
   color: var(--moo-muted-foreground);
   border-radius: var(--bs-border-radius);
-  transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  @include transition($transition-base);
 }
 
 .tabs-list .nav-link:hover {

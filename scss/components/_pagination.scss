@@ -5,10 +5,10 @@
 .page-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: $spacer * 0.25;
 }
 
 .page-link [data-icon] {
-  width: 1rem;
-  height: 1rem;
+  width: $spacer;
+  height: $spacer;
 }
