@@ -64,6 +64,14 @@ the build entrypoints and shared shell output.
 Every phase closes with browser review plus the green gate suite and lands as
 its own commit.
 
+## Licensing
+
+Moo UI source code is licensed under the MIT License by WPMoo (`wpmoo.org`).
+WPMoo-generated visual assets, including image assets under `static/images/`,
+are not covered by the MIT source code license and remain copyright WPMoo, all
+rights reserved. See `LICENSE`, `ASSET_LICENSE.md`, and
+`THIRD_PARTY_NOTICES.md`.
+
 ## Source boundaries
 
 Jinja macros are canonical component sources. Each example captures one macro
