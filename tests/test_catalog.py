@@ -72,6 +72,9 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's checkbox markup uses the shared .form-check family,
             # not a "checkbox-" prefixed one.
             "checkbox": ("form-check",),
+            # The legend reuses Bootstrap's shared .form-label class to
+            # match sibling form labels.
+            "radio_group": ("radio-group", "form-label"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):

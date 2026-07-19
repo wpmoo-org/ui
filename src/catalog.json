@@ -113,5 +113,10 @@
     "slug": "checkbox",
     "label": "Checkbox",
     "status": "ready"
+  },
+  {
+    "slug": "radio-group",
+    "label": "Radio Group",
+    "status": "ready"
   }
 ]

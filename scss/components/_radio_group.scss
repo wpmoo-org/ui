@@ -1,0 +1,9 @@
+// Bootstrap's <legend> ships a heading-sized (1.5rem) default font-size
+// that .form-label doesn't reset: form-label's own font-size is null
+// (inherit) by default, which only works for bare <label> elements that
+// never had a UA font-size of their own. Reset it explicitly, the same
+// fix Bootstrap's own horizontal-form label class applies for the same
+// reason (see vendor Bootstrap's forms/labels partial).
+.radio-group legend.form-label {
+  font-size: inherit;
+}
