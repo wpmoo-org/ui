@@ -30,3 +30,22 @@
   background-color: var(--moo-surface);
   box-shadow: var(--bs-box-shadow-sm);
 }
+
+// Bootstrap hides inactive panes with display:none, so the pane height
+// changes the moment a shorter or taller tab becomes active — the
+// surrounding page jumps to the new height on every switch. Stacking every
+// pane in the same grid cell sizes the row to the tallest pane once, so
+// switching only toggles visibility, never the container's height.
+.tab-content {
+  display: grid;
+}
+
+.tab-content > .tab-pane {
+  grid-area: 1 / 1;
+  display: block;
+  visibility: hidden;
+}
+
+.tab-content > .active {
+  visibility: visible;
+}

@@ -83,8 +83,10 @@ class CatalogContractTests(CatalogTestCase):
             "accordion": ("accordion", "collapsed"),
             # The segmented-control track styles Bootstrap's shared
             # .nav-link/.active classes within its own .tabs-list scope,
-            # rather than the .nav-pills family Navigation already owns.
-            "tabs": ("tabs", "nav-link", "active"),
+            # rather than the .nav-pills family Navigation already owns,
+            # and also fixes the grid stacking on Bootstrap's own tab-content
+            # and tab-pane classes.
+            "tabs": ("tabs", "nav-link", "active", "tab-content", "tab-pane"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
