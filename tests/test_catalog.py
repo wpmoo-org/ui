@@ -96,9 +96,10 @@ class CatalogContractTests(CatalogTestCase):
         }
         infrastructure = {"example"}
         component_class = re.compile(
-            r"^(?:accordion|alert|badge|btn|card|dropdown|form-control|"
-            r"form-label|input-group|list-group|modal|nav|navbar|offcanvas|"
-            r"placeholder|popover|progress|spinner|toast)(?:-|$)"
+            r"^(?:accordion|alert|badge|breadcrumb|btn|card|dropdown|"
+            r"form-control|form-label|input-group|list-group|modal|nav|"
+            r"navbar|offcanvas|placeholder|popover|progress|spinner|"
+            r"toast)(?:-|$)"
         )
 
         pages = [

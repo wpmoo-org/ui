@@ -1,0 +1,15 @@
+{% macro breadcrumb(items, aria_label="breadcrumb", extra_class="") -%}
+  {% if not items %}{{ fail("Breadcrumb items are required") }}{% endif %}
+  <nav aria-label="{{ aria_label }}">
+    <ol class="breadcrumb{% if extra_class %} {{ extra_class }}{% endif %}">
+      {% for item in items %}
+        {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}
+        {% if loop.last %}
+          <li class="breadcrumb-item active" aria-current="page">{{ item.label }}</li>
+        {% else %}
+          <li class="breadcrumb-item"><a href="{{ item.href if item.href is defined else '#' }}">{{ item.label }}</a></li>
+        {% endif %}
+      {% endfor %}
+    </ol>
+  </nav>
+{%- endmacro %}

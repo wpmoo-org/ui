@@ -88,5 +88,10 @@
     "slug": "alert",
     "label": "Alert",
     "status": "ready"
+  },
+  {
+    "slug": "breadcrumb",
+    "label": "Breadcrumb",
+    "status": "ready"
   }
 ]

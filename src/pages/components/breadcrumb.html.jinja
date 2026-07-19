@@ -1,0 +1,66 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/breadcrumb.html.jinja" import breadcrumb %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Breadcrumb — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Breadcrumb",
+    "Indicate the current page's location within a hierarchy using Bootstrap's native breadcrumb list."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set current_only %}
+      {{ breadcrumb([{"label": "Home"}]) }}
+    {% endset %}
+    {{ render_example(
+      "current-only",
+      "Current page only",
+      "A single item renders as the current, non-linked page.",
+      current_only,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set trail %}
+      {{ breadcrumb([
+        {"label": "Home", "href": "#"},
+        {"label": "Components", "href": "#"},
+        {"label": "Breadcrumb"}
+      ]) }}
+    {% endset %}
+    {{ render_example(
+      "trail",
+      "Trail",
+      "Every item but the last links back up the hierarchy; the last item marks <code>aria-current=\"page\"</code>.",
+      trail,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ breadcrumb([
+          {"label": "الرئيسية", "href": "#"},
+          {"label": "المكونات", "href": "#"},
+          {"label": "فتات الخبز"}
+        ]) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The divider and item order follow reading direction without mirrored custom CSS.",
+      rtl,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and divider customization, see the",
+    "https://getbootstrap.com/docs/5.3/components/breadcrumb/",
+    "Bootstrap Breadcrumb documentation"
+  ) }}
+
+{% endblock %}

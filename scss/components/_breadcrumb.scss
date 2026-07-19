@@ -1,0 +1,17 @@
+// Bootstrap mutes the active/current item and leaves prior items on default
+// link styling (colored, underlined); shadcn inverts this — prior items are
+// muted, the active item reads at full foreground strength — verified
+// against the live shadcn Breadcrumb reference page.
+.breadcrumb {
+  --bs-breadcrumb-item-active-color: var(--moo-foreground);
+}
+
+.breadcrumb-item a {
+  color: var(--moo-muted-foreground);
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--moo-foreground);
+  text-decoration: underline;
+}

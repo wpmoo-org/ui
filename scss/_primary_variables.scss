@@ -48,6 +48,8 @@ $kbd-padding-x: 0.375rem !default;
 $kbd-font-size: 0.75rem !default;
 $kbd-color: var(--bs-secondary-color) !default;
 $kbd-bg: var(--bs-secondary-bg) !default;
+// shadcn's breadcrumb uses a chevron divider; Bootstrap's own default is "/".
+$breadcrumb-divider: quote(">") !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;
