@@ -1,0 +1,17 @@
+{# Component preview art comes from designer-authored transparent-background
+   PNG/WebP files, one per catalog slug, dropped into
+   static/images/component-previews/<slug>.webp or .png (copied to
+   dist/assets/images/component-previews/ by build.py's existing
+   copy_assets() — same static-asset pattern as sidebar-structure.png).
+   component_preview_src() (build.py) resolves to that file when it exists on
+   disk at build time (webp preferred over png), falling back to the
+   placeholder SVG otherwise. #}
+
+{% macro component_preview(slug, root_path) -%}
+  <img
+    class="moo-catalog__showcase-image"
+    src="{{ component_preview_src(slug, root_path) }}"
+    alt=""
+    loading="lazy"
+  >
+{%- endmacro %}

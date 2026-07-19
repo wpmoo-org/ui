@@ -8,7 +8,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
-{% from "includes/component-icons.html.jinja" import component_icons %}
+{% from "includes/component-previews.html.jinja" import component_preview %}
 
 {% block title %}Components — Moo UI{% endblock %}
 
@@ -26,7 +26,9 @@
   "badge": "Mark counts, labels, and compact statuses.",
   "avatar": "Represent people, teams, or accounts.",
   "navigation": "Group static destinations for sidebars and sections.",
-  "separator": "Separate content with horizontal and vertical rules."
+  "separator": "Separate content with horizontal and vertical rules.",
+  "skeleton": "Show a loading placeholder while real content arrives.",
+  "sidebar": "Compose a collapsible app shell navigation from ready parts."
 } %}
 
 {% block content %}
@@ -73,27 +75,17 @@
       {{ typography("Components", variant="section-title", id="components-title") }}
       <div class="moo-catalog__grid" id="components">
         {% for component in catalog %}
-          {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-4") %}
-            <div class="d-flex align-items-start justify-content-between gap-3">
-              <span class="moo-catalog__app-icon" aria-hidden="true">
-                {{ render_icon(component_icons.get(component.slug, "component"), "inline-start") }}
-              </span>
-              {{ badge("Ready", variant="outline") }}
+          {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
+            <div class="moo-catalog__showcase-preview">
+              {{ component_preview(component.slug, root_path) }}
             </div>
             <div>
-              <h2 class="h5 mb-2">{{ component.label }}</h2>
+              <h2 class="h5 mb-2">
+                <a class="stretched-link text-body text-decoration-none" href="{{ root_path ~ "components/" ~ component.slug ~ ".html" }}">{{ component.label }}</a>
+              </h2>
               <p class="text-body-secondary mb-0">
                 {{ component_descriptions.get(component.slug, "Bootstrap-native component primitive.") }}
               </p>
-            </div>
-            <div>
-              {{ button(
-                "Open",
-                variant="outline",
-                size="sm",
-                element="a",
-                href=root_path ~ "components/" ~ component.slug ~ ".html"
-              ) }}
             </div>
           {% endcall %}
         {% endfor %}

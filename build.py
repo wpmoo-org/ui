@@ -248,6 +248,14 @@ def fail(message: str) -> None:
     raise ValueError(message)
 
 
+def component_preview_src(slug: str, root_path: str) -> str:
+    directory = "assets/images/component-previews"
+    for extension in ("webp", "png"):
+        if (STATIC / "images/component-previews" / f"{slug}.{extension}").is_file():
+            return f"{root_path}{directory}/{slug}.{extension}"
+    return f"{root_path}{directory}/placeholder.svg"
+
+
 def load_lucide_icons() -> dict[str, object]:
     return json.loads(LUCIDE_ICONS.read_text(encoding="utf-8"))
 
@@ -299,6 +307,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["highlight_html"] = highlight_html
     environment.filters["line_numbers"] = line_numbers
     environment.globals["fail"] = fail
+    environment.globals["component_preview_src"] = component_preview_src
     icon_set = load_lucide_icons()
     lucide_renderer = lambda name, position: render_lucide_icon(
         icon_set,
