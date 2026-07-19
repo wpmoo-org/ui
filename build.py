@@ -248,12 +248,20 @@ def fail(message: str) -> None:
     raise ValueError(message)
 
 
-def component_preview_src(slug: str, root_path: str) -> str:
-    directory = "assets/images/component-previews"
+def _preview_src(category: str, slug: str, root_path: str) -> str:
+    directory = f"assets/images/{category}"
     for extension in ("webp", "png"):
-        if (STATIC / "images/component-previews" / f"{slug}.{extension}").is_file():
+        if (STATIC / "images" / category / f"{slug}.{extension}").is_file():
             return f"{root_path}{directory}/{slug}.{extension}"
-    return f"{root_path}{directory}/placeholder.svg"
+    return f"{root_path}assets/images/placeholder.webp"
+
+
+def component_preview_src(slug: str, root_path: str) -> str:
+    return _preview_src("components", slug, root_path)
+
+
+def block_preview_src(slug: str, root_path: str) -> str:
+    return _preview_src("blocks", slug, root_path)
 
 
 def load_lucide_icons() -> dict[str, object]:
@@ -308,6 +316,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["line_numbers"] = line_numbers
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
+    environment.globals["block_preview_src"] = block_preview_src
     icon_set = load_lucide_icons()
     lucide_renderer = lambda name, position: render_lucide_icon(
         icon_set,
@@ -350,6 +359,10 @@ def copy_assets() -> None:
     shutil.copy2(
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js",
         js_dir / "bootstrap.bundle.min.js",
+    )
+    shutil.copy2(
+        BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
+        js_dir / "bootstrap.bundle.min.js.map",
     )
     fonts_dir = DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
