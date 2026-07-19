@@ -1,13 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/badge.html.jinja" import badge %}
-{% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/typography.html.jinja" import typography %}
-
-{% set block_icons = {
-  "sidebar-floating": "panel-left-dashed",
-  "sidebar-inset": "layout-panel-left"
-} %}
+{% from "includes/component-previews.html.jinja" import block_preview %}
 
 {% set block_descriptions = {
   "sidebar-floating": "A composed application shell using the floating sidebar variant.",
@@ -27,27 +21,17 @@
   <section class="moo-catalog__dashboard" aria-label="Blocks">
     <div class="moo-catalog__grid" id="blocks">
       {% for block in blocks %}
-        {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-4") %}
-          <div class="d-flex align-items-start justify-content-between gap-3">
-            <span class="moo-catalog__app-icon" aria-hidden="true">
-              {{ render_icon(block_icons.get(block.slug, "panel-left"), "inline-start") }}
-            </span>
-            {{ badge("Ready", variant="outline") }}
+        {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
+          <div class="moo-catalog__showcase-preview">
+            {{ block_preview(block.slug, root_path) }}
           </div>
           <div>
-            <h2 class="h5 mb-2">{{ block.label }}</h2>
+            <h2 class="h5 mb-2">
+              <a class="stretched-link text-body text-decoration-none" href="{{ root_path ~ "blocks/" ~ block.slug ~ ".html" }}">{{ block.label }}</a>
+            </h2>
             <p class="text-body-secondary mb-0">
               {{ block_descriptions.get(block.slug, "Composed screen built from ready component macros.") }}
             </p>
-          </div>
-          <div>
-            {{ button(
-              "Open",
-              variant="outline",
-              size="sm",
-              element="a",
-              href=root_path ~ "blocks/" ~ block.slug ~ ".html"
-            ) }}
           </div>
         {% endcall %}
       {% endfor %}
