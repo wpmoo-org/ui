@@ -98,5 +98,10 @@
     "slug": "pagination",
     "label": "Pagination",
     "status": "ready"
+  },
+  {
+    "slug": "progress",
+    "label": "Progress",
+    "status": "ready"
   }
 ]

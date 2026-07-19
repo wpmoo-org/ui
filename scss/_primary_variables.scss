@@ -65,6 +65,8 @@ $pagination-active-color: var(--bs-body-color) !default;
 $pagination-active-bg: var(--moo-muted-surface) !default;
 $pagination-active-border-color: var(--moo-border) !default;
 $pagination-disabled-border-color: transparent !default;
+// shadcn's progress track is a slim 4px bar; Bootstrap's default is 1rem.
+$progress-height: 0.25rem !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;

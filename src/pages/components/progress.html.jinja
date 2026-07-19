@@ -1,0 +1,73 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/progress.html.jinja" import progress %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Progress — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Progress",
+    "Show the completion progress of a task using Bootstrap's native progress bar."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ progress(66, aria_label="Upload progress") }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "A slim, rounded bar; the fill width is driven entirely by <code>value</code>/<code>max</code>.",
+      default,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set values %}
+      <div class="d-grid gap-3">
+        {{ progress(20, aria_label="Step 1 progress") }}
+        {{ progress(50, aria_label="Step 2 progress") }}
+        {{ progress(90, aria_label="Step 3 progress") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "values",
+      "Values",
+      "Stack several bars to compare progress across related tasks.",
+      values,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set with_label %}
+      {{ progress(40, aria_label="Download progress", show_label=true) }}
+    {% endset %}
+    {{ render_example(
+      "with-label",
+      "With label",
+      "Set <code>show_label=true</code> to render the name and percentage above the bar; the 4px track is too thin for readable inline text.",
+      with_label,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ progress(66, aria_label="نسبة التقدم") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The fill grows from the reading-direction start without mirrored custom CSS.",
+      rtl,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and stacked/striped/animated variants, see the",
+    "https://getbootstrap.com/docs/5.3/components/progress/",
+    "Bootstrap Progress documentation"
+  ) }}
+
+{% endblock %}
