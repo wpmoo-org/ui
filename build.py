@@ -351,6 +351,10 @@ def copy_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js",
         js_dir / "bootstrap.bundle.min.js",
     )
+    shutil.copy2(
+        BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
+        js_dir / "bootstrap.bundle.min.js.map",
+    )
     fonts_dir = DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
