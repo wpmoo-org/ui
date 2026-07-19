@@ -1,0 +1,12 @@
+// Bootstrap bakes the checked state's fill color and checkmark glyph into
+// literal, non-inverting values at compile time (background-color:
+// $primary directly, plus a white checkmark stroke baked into an SVG data
+// URI) — the same non-inverting $primary issue already fixed for Progress,
+// but here the glyph itself is compiled in too, not just the fill, so a
+// --moo-foreground swap alone would leave a white check on a near-white
+// dark-mode fill. A theme-scoped filter invert flips the black fill and
+// white glyph together, mirroring Bootstrap's own close-button dark-mode
+// technique (see vendor Bootstrap's close-button partial).
+[data-bs-theme="dark"] .form-check-input:checked {
+  filter: invert(1);
+}

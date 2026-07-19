@@ -3,7 +3,15 @@ from __future__ import annotations
 import json
 import re
 
-from tests.helpers import DIST, ICONS, ROOT, CatalogTestCase
+from tests.helpers import (
+    DIST,
+    ICONS,
+    PNG_COLOR_TYPE_RGBA,
+    ROOT,
+    STATIC,
+    CatalogTestCase,
+    read_png_ihdr,
+)
 
 
 class CatalogContractTests(CatalogTestCase):
@@ -66,6 +74,27 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap has no native sidebar component; its public namespace
             # is owned explicitly by the Sidebar partial and styles.
             "sidebar": ("sidebar",),
+            # Bootstrap's pagination markup uses .page-item/.page-link, not a
+            # "pagination-" prefixed family.
+            "pagination": ("pagination", "page"),
+            # Bootstrap's checkbox markup uses the shared .form-check family,
+            # not a "checkbox-" prefixed one.
+            "checkbox": ("form-check",),
+            # The legend reuses Bootstrap's shared .form-label class to
+            # match sibling form labels.
+            "radio_group": ("radio-group", "form-label"),
+            # Bootstrap's switch markup uses the shared .form-switch and
+            # .form-check families, not a "switch-" prefixed one.
+            "switch": ("form-switch", "form-check"),
+            # Bootstrap's own Collapse plugin toggles the bare .collapsed
+            # state class on the trigger; it is not "accordion-" prefixed.
+            "accordion": ("accordion", "collapsed"),
+            # The segmented-control track styles Bootstrap's shared
+            # .nav-link/.active classes within its own .tabs-list scope,
+            # rather than the .nav-pills family Navigation already owns,
+            # and also fixes the grid stacking on Bootstrap's own tab-content
+            # and tab-pane classes.
+            "tabs": ("tabs", "nav-link", "active", "tab-content", "tab-pane"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -96,9 +125,10 @@ class CatalogContractTests(CatalogTestCase):
         }
         infrastructure = {"example"}
         component_class = re.compile(
-            r"^(?:accordion|alert|badge|btn|card|dropdown|form-control|"
-            r"form-label|input-group|list-group|modal|nav|navbar|offcanvas|"
-            r"placeholder|popover|progress|spinner|toast)(?:-|$)"
+            r"^(?:accordion|alert|badge|breadcrumb|btn|card|dropdown|"
+            r"form-check|form-control|form-label|input-group|list-group|"
+            r"modal|nav|navbar|offcanvas|page|pagination|placeholder|"
+            r"popover|progress|spinner|table|toast)(?:-|$)"
         )
 
         pages = [
@@ -152,6 +182,34 @@ class CatalogContractTests(CatalogTestCase):
                 )
             with self.subTest(page=path.name, contract="reference call"):
                 self.assertIn("render_reference(", source)
+
+    def test_ready_components_ship_a_real_preview_png(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
+        ready_slugs = [
+            item["slug"] for item in catalog if item["status"] == "ready"
+        ]
+        previews_dir = STATIC / "images/component-previews"
+
+        for slug in ready_slugs:
+            with self.subTest(slug=slug):
+                png_path = previews_dir / f"{slug}.png"
+                webp_path = previews_dir / f"{slug}.webp"
+                self.assertTrue(
+                    png_path.is_file() or webp_path.is_file(),
+                    f"{slug} has no preview PNG/WEBP and silently falls back "
+                    "to placeholder.svg",
+                )
+                if not png_path.is_file():
+                    continue
+                width, height, color_type = read_png_ihdr(png_path)
+                self.assertEqual((width, height), (1536, 1024), slug)
+                self.assertEqual(
+                    color_type,
+                    PNG_COLOR_TYPE_RGBA,
+                    f"{slug}.png is not RGBA (color type {color_type})",
+                )
 
     def test_components_index_uses_admin_shell_primitives(self) -> None:
         result = self.run_build()

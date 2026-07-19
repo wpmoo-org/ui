@@ -258,10 +258,66 @@ body {
 
 .moo-catalog__app-card {
   min-height: 12rem;
+  // The showcase preview bleeds past card-body's own padding up to the
+  // card's rounded corners (below); this clips it back to that shape
+  // instead of squaring the corners off.
+  overflow: hidden;
 }
 
 .moo-catalog__app-card .card-body {
   align-content: space-between;
+}
+
+// The Utilities cards above still want their action button pinned to the
+// card's bottom edge regardless of description length (align-content:
+// space-between, inherited). The showcase cards have no bottom-anchored
+// element — the title must sit at a fixed gap under the preview panel
+// instead of drifting with how much the grid row stretched this card, or
+// titles across a row go visually out of alignment.
+.moo-catalog__showcase-card .card-body {
+  align-content: start;
+}
+
+.moo-catalog__showcase-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 13rem;
+  overflow: hidden;
+  color: var(--bs-body-color);
+  border-bottom: var(--bs-border-width) solid var(--moo-border);
+  // Bleed past card-body's own horizontal padding and the card's own
+  // top padding-block (both var(--bs-card-spacer-x), see _card.scss) so the
+  // preview reaches the card's top/left/right edges instead of floating
+  // inside a padded inset — only a bottom border separates it from the
+  // title/description below, which keep the card's normal padding.
+  margin: calc(var(--bs-card-spacer-x) * -1) calc(var(--bs-card-spacer-x) * -1) 0;
+  // A flat --moo-muted-surface fill is a touch too close to --moo-border and
+  // other neutral tokens the preview art itself may use, so the panel gets
+  // its own faint tint instead — 10% keeps it clearly a panel, not a token.
+  background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
+}
+
+.moo-catalog__showcase-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+// Preview art is drawn once for a light background. Inverting lightness for
+// dark mode flips black ink to light strokes without a second asset;
+// hue-rotate cancels the hue shift invert() alone would introduce, keeping
+// grays neutral instead of tinted.
+[data-bs-theme="dark"] .moo-catalog__showcase-image {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.moo-catalog__showcase-preview>* {
+  transition: transform 0.3s ease;
+}
+
+.moo-catalog__app-card:hover .moo-catalog__showcase-preview>* {
+  transform: scale(1.1);
 }
 
 .moo-catalog__app-icon {
@@ -314,7 +370,7 @@ body {
   margin-top: 4rem;
 }
 
-.moo-example + .moo-example {
+.moo-example+.moo-example {
   margin-top: 3rem;
 }
 
@@ -327,7 +383,7 @@ body {
   letter-spacing: -0.015em;
 }
 
-.moo-example__header > p {
+.moo-example__header>p {
   line-height: 1.5;
 }
 
@@ -353,7 +409,7 @@ body {
   font-family: var(--bs-body-font-family);
 }
 
-.moo-example__preview--narrow > * {
+.moo-example__preview--narrow>* {
   width: 100%;
   max-width: 24rem;
 }
@@ -364,11 +420,11 @@ body {
   padding: 0;
 }
 
-.moo-example__preview--shell > * {
+.moo-example__preview--shell>* {
   width: 100%;
 }
 
-.moo-example__preview > .d-grid {
+.moo-example__preview>.d-grid {
   width: 100%;
 }
 
@@ -377,11 +433,11 @@ body {
   gap: 0;
 }
 
-.moo-field > .form-label {
+.moo-field>.form-label {
   margin-bottom: 0.5rem;
 }
 
-.moo-field > :is(.form-text, .valid-feedback, .invalid-feedback) {
+.moo-field> :is(.form-text, .valid-feedback, .invalid-feedback) {
   margin-top: 0.5rem;
 }
 
@@ -400,12 +456,10 @@ body {
   place-items: center;
   padding-bottom: 1rem;
   pointer-events: none;
-  background: linear-gradient(
-    to top,
-    var(--bs-tertiary-bg),
-    color-mix(in srgb, var(--bs-tertiary-bg) 65%, transparent),
-    transparent
-  );
+  background: linear-gradient(to top,
+      var(--bs-tertiary-bg),
+      color-mix(in srgb, var(--bs-tertiary-bg) 65%, transparent),
+      transparent);
 }
 
 .moo-code__reveal .btn {
@@ -555,7 +609,7 @@ body {
   color: var(--bs-body-color);
 }
 
-.moo-catalog__command-item + .moo-catalog__command-item {
+.moo-catalog__command-item+.moo-catalog__command-item {
   margin-top: 0.125rem;
 }
 

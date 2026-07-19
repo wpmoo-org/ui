@@ -1,0 +1,97 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/pagination.html.jinja" import pagination, pagination_ellipsis, pagination_item, pagination_next, pagination_prev %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Pagination — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Pagination",
+    "Navigate a series of related pages using Bootstrap's native pagination list."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {% call pagination() %}
+        {{ pagination_prev() }}
+        {{ pagination_item("1") }}
+        {{ pagination_item("2", active=true) }}
+        {{ pagination_item("3") }}
+        {{ pagination_ellipsis() }}
+        {{ pagination_next() }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Compose page numbers, an active state, and an ellipsis for skipped ranges.",
+      default
+    ) }}
+
+    {% set disabled_ends %}
+      {% call pagination() %}
+        {{ pagination_prev(disabled=true) }}
+        {{ pagination_item("1", active=true) }}
+        {{ pagination_item("2") }}
+        {{ pagination_item("3") }}
+        {{ pagination_next() }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "disabled-ends",
+      "Disabled boundary",
+      "Disable Previous or Next at the start or end of a range.",
+      disabled_ends
+    ) }}
+
+    {% set sizes %}
+      <div class="d-grid gap-3">
+        {% call pagination(size="sm") %}
+          {{ pagination_prev() }}
+          {{ pagination_item("1", active=true) }}
+          {{ pagination_item("2") }}
+          {{ pagination_next() }}
+        {% endcall %}
+        {% call pagination(size="lg") %}
+          {{ pagination_prev() }}
+          {{ pagination_item("1", active=true) }}
+          {{ pagination_item("2") }}
+          {{ pagination_next() }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "sizes",
+      "Sizes",
+      "Use <code>size=\"sm\"</code> or <code>size=\"lg\"</code> for a denser or larger control.",
+      sizes
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {% call pagination() %}
+          {{ pagination_prev() }}
+          {{ pagination_item("1") }}
+          {{ pagination_item("2", active=true) }}
+          {{ pagination_item("3") }}
+          {{ pagination_next() }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Previous and Next swap sides with the natural reading-direction order.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and sizing variables, see the",
+    "https://getbootstrap.com/docs/5.3/components/pagination/",
+    "Bootstrap Pagination documentation"
+  ) }}
+
+{% endblock %}

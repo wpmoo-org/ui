@@ -102,6 +102,14 @@ label.btn {
   height: $font-size-base;
 }
 
+// The loading state swaps icon_start for the same loader-circle icon the
+// standalone Spinner uses; aria-busy doubles as the accessible loading
+// signal and the hook that scopes the spin to only that icon. The
+// rotation reuses Bootstrap's own spinner-border keyframe.
+.btn[aria-busy="true"] > [data-icon="inline-start"] {
+  animation: spinner-border $spinner-animation-speed linear infinite;
+}
+
 .btn:disabled,
 .btn.disabled,
 .btn[aria-disabled="true"] {

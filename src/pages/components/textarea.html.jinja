@@ -49,9 +49,10 @@
           label="Message",
           id="invalid-message",
           placeholder="Please enter a valid message.",
-          aria_invalid=true
+          aria_invalid=true,
+          describedby="invalid-message-help"
         ) }}
-        <div class="form-text text-danger">Please enter a valid message.</div>
+        <div class="form-text text-danger" id="invalid-message-help">Please enter a valid message.</div>
       </div>
     {% endset %}
     {{ render_example(

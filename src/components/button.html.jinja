@@ -49,16 +49,22 @@
   toggle=false,
   dropdown=false,
   dropdown_offset="",
-  dropdown_caret=false
+  dropdown_caret=false,
+  loading=false,
+  collapse_target="",
+  collapse_open=false
 ) -%}
   {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
   {% if element not in button_elements %}{{ fail("Unknown button element: " ~ element) }}{% endif %}
   {% if type not in button_types %}{{ fail("Unknown button type: " ~ type) }}{% endif %}
-  {% if element != "button" and (toggle or dropdown or dropdown_offset or dropdown_caret) %}{{ fail("Button dropdown and toggle options require element=button") }}{% endif %}
+  {% if element != "button" and (toggle or dropdown or dropdown_offset or dropdown_caret or loading or collapse_target) %}{{ fail("Button dropdown, toggle, loading, and collapse_target options require element=button") }}{% endif %}
   {% if toggle and dropdown %}{{ fail("Button cannot be both toggle and dropdown") }}{% endif %}
   {% if dropdown_caret and not dropdown %}{{ fail("Button dropdown_caret requires dropdown=true") }}{% endif %}
   {% if dropdown_offset and not dropdown %}{{ fail("Button dropdown_offset requires dropdown=true") }}{% endif %}
+  {% if loading and icon_start %}{{ fail("Button loading replaces icon_start; do not set both") }}{% endif %}
+  {% if collapse_target and (toggle or dropdown) %}{{ fail("Button collapse_target cannot combine with toggle or dropdown") }}{% endif %}
+  {% if collapse_open and not collapse_target %}{{ fail("Button collapse_open requires collapse_target") }}{% endif %}
   {% if not label | trim and not aria_label | trim %}{{ fail("Buttons without a visible label require aria_label") }}{% endif %}
   {% set variant_class = button_variants[variant] %}
   {% set size_config = button_sizes[size] %}
@@ -66,10 +72,11 @@
   {% set classes = "btn " ~ variant_class %}
   {% if size_class %}{% set classes = classes ~ " " ~ size_class %}{% endif %}
   {% if dropdown_caret %}{% set classes = classes ~ " dropdown-toggle" %}{% endif %}
+  {% if element == "a" and disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
 
   {% if element == "a" %}
-    <a class="{{ classes }}"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+    <a class="{{ classes }}" role="button"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
       {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
@@ -77,8 +84,8 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}>
-      {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}>
+      {% if loading %}{{ icon("loader-circle", "inline-start") }}{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
     </button>

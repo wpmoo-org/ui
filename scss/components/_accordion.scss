@@ -1,0 +1,25 @@
+// shadcn's accordion trigger uses a real Lucide chevron-down icon that
+// rotates on expand, not Bootstrap's baked-in ::after background-image
+// glyph. Render the same icon our other components use and drive the
+// rotation off Bootstrap's own :not(.collapsed) state hook instead.
+.accordion-button::after {
+  content: none;
+}
+
+.accordion-button [data-icon] {
+  width: 1rem;
+  height: 1rem;
+  margin-inline-start: auto;
+  flex-shrink: 0;
+  transition: $accordion-icon-transition;
+}
+
+.accordion-button:not(.collapsed) [data-icon] {
+  transform: $accordion-icon-transform;
+}
+
+// shadcn's trigger has no active/pressed background — only a hover
+// underline signals interactivity, matching a plain text-link affordance.
+.accordion-button:hover {
+  text-decoration: underline;
+}

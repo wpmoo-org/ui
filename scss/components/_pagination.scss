@@ -1,0 +1,14 @@
+// Bootstrap's page-link class has no icon-sizing contract; unconstrained
+// SVGs render at an oversized default (~55px), breaking Previous/Next and
+// the ellipsis item. Size and align icons the same way other components
+// with inline icons already constrain their own [data-icon] children.
+.page-link {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacer * 0.25;
+}
+
+.page-link [data-icon] {
+  width: $spacer;
+  height: $spacer;
+}

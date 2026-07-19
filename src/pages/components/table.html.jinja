@@ -1,0 +1,96 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/table.html.jinja" import table %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Table — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Table",
+    "Display rows and columns of related data using Bootstrap's native, opt-in table styling."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ table(
+        ["Server", "Region", "Status", "Uptime"],
+        [
+          ["api-01", "eu-west", badge("Online", variant="outline"), "99.98%"],
+          ["api-02", "eu-west", badge("Degraded", variant="outline"), "97.40%"],
+          ["api-03", "us-east", badge("Offline", variant="outline"), "0.00%"]
+        ],
+        align=["", "", "", "end"],
+        caption="Current status of production API servers."
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Compose statuses from the ready Badge macro; right-align the numeric column.",
+      default
+    ) }}
+
+    {% set striped_hover %}
+      {{ table(
+        ["Package", "Version", "Size"],
+        [
+          ["moo-ui", "2.4.0", "48 KB"],
+          ["bootstrap", "5.3.3", "212 KB"],
+          ["lucide-icons", "0.462.0", "18 KB"],
+          ["geist-font", "1.0", "64 KB"]
+        ],
+        align=["", "", "end"],
+        striped=true,
+        hover=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "striped-hover",
+      "Striped and hoverable",
+      "Set <code>striped=true</code> and <code>hover=true</code> for denser, scannable rows.",
+      striped_hover
+    ) }}
+
+    {% set small %}
+      {{ table(
+        ["Package", "Size"],
+        [["moo-ui", "48 KB"], ["bootstrap", "212 KB"]],
+        align=["", "end"],
+        small=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "small",
+      "Compact",
+      "Set <code>small=true</code> for tighter cell padding.",
+      small,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ table(
+          ["الحزمة", "الحجم"],
+          [["moo-ui", "٤٨ ك.ب"], ["bootstrap", "٢١٢ ك.ب"]],
+          align=["", "end"]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Column order and text alignment follow reading direction without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and contextual row/cell variants, see the",
+    "https://getbootstrap.com/docs/5.3/content/tables/",
+    "Bootstrap Tables documentation"
+  ) }}
+
+{% endblock %}

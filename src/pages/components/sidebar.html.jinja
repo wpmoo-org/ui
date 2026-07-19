@@ -1,8 +1,10 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
+{% from "components/breadcrumb.html.jinja" import breadcrumb %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "components/table.html.jinja" import table %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
@@ -162,12 +164,10 @@
           <header class="sidebar-inset__header">
             {{ sidebar_trigger(sidebar_id="components-sidebar-demo", expanded=sidebar_open) }}
             {{ separator(orientation="vertical") }}
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="#">Building Your Application</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Data Fetching</li>
-              </ol>
-            </nav>
+            {{ breadcrumb([
+              {"label": "Building Your Application", "href": "#"},
+              {"label": "Data Fetching"}
+            ], extra_class="mb-0") }}
           </header>
           <div class="sidebar-inset__content d-grid gap-3 p-3">
             <div class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
@@ -235,24 +235,17 @@
       {"id": "sidebar-inset", "name": "sidebar_inset()", "summary": "Hosts the page surface next to the sidebar."}
     ] %}
 
-    <div class="table-responsive mb-5">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th scope="col">Macro</th>
-            <th scope="col">Purpose</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for part in sidebar_parts %}
-            <tr id="{{ part['id'] }}">
-              <th scope="row"><code>{{ part["name"] }}</code></th>
-              <td>{{ part["summary"] }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    {% set sidebar_parts_rows = [] %}
+    {% for part in sidebar_parts %}
+      {% set _ = sidebar_parts_rows.append(["<code>" ~ part["name"] ~ "</code>", part["summary"]]) %}
+    {% endfor %}
+    {{ table(
+      ["Macro", "Purpose"],
+      sidebar_parts_rows,
+      row_ids=sidebar_parts | map(attribute="id") | list,
+      row_header=true,
+      extra_class="align-middle mb-5"
+    ) }}
 
     <h2 id="usesidebar" class="h4 mt-5 mb-3">useSidebar</h2>
     <p class="mb-0">

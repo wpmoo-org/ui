@@ -1,0 +1,142 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/accordion.html.jinja" import accordion %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Accordion — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Accordion",
+    "Reveal one section of content at a time using Bootstrap's Collapse plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ accordion(
+        "accordion-basic",
+        [
+          {
+            "id": "browsers",
+            "title": "What browsers are supported?",
+            "content": "The catalog is tested against the latest two versions of Chrome, Firefox, and Safari.",
+            "open": true
+          },
+          {
+            "id": "no-js",
+            "title": "Does this work without JavaScript?",
+            "content": "No. Interactive components rely on Bootstrap's bundled Collapse, Tab, and Dropdown plugins."
+          },
+          {
+            "id": "issues",
+            "title": "Where can I report an issue?",
+            "content": "Open an issue on the project's GitHub repository."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Only one item stays open at a time; opening another closes the current one.",
+      basic
+    ) }}
+
+    {% set multiple %}
+      {{ accordion(
+        "accordion-multiple",
+        [
+          {
+            "id": "build",
+            "title": "Build status",
+            "content": "The last build passed all tests.",
+            "open": true
+          },
+          {
+            "id": "deploy",
+            "title": "Deploy status",
+            "content": "Deployed to the preview environment 2 minutes ago.",
+            "open": true
+          },
+          {
+            "id": "deps",
+            "title": "Dependency status",
+            "content": "All dependencies are up to date."
+          }
+        ],
+        always_open=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "multiple",
+      "Multiple",
+      "Set <code>always_open=true</code> to let more than one item stay open at the same time.",
+      multiple
+    ) }}
+
+    {% set disabled %}
+      {{ accordion(
+        "accordion-disabled",
+        [
+          {
+            "id": "export",
+            "title": "How do I export component previews?",
+            "content": "Download PNGs for any ready component from its catalog page."
+          },
+          {
+            "id": "themes",
+            "title": "Custom themes",
+            "content": "Only available on self-hosted installations.",
+            "disabled": true
+          },
+          {
+            "id": "request",
+            "title": "How do I request a new component?",
+            "content": "Open a feature request on the project's GitHub repository."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",
+      disabled
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ accordion(
+          "accordion-rtl",
+          [
+            {
+              "id": "browsers",
+              "title": "ما المتصفحات المدعومة؟",
+              "content": "يتم اختبار الكتالوج على آخر إصدارين من كروم وفايرفوكس وسفاري.",
+              "open": true
+            },
+            {
+              "id": "no-js",
+              "title": "هل يعمل هذا بدون جافاسكريبت؟",
+              "content": "لا. تعتمد المكونات التفاعلية على إضافات Collapse وTab وDropdown المرفقة مع Bootstrap."
+            }
+          ]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The trigger's chevron and text swap sides without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Collapse plugin behavior and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/accordion/",
+    "Bootstrap Accordion documentation"
+  ) }}
+
+{% endblock %}

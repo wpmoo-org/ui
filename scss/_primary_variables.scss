@@ -48,6 +48,56 @@ $kbd-padding-x: 0.375rem !default;
 $kbd-font-size: 0.75rem !default;
 $kbd-color: var(--bs-secondary-color) !default;
 $kbd-bg: var(--bs-secondary-bg) !default;
+// shadcn's breadcrumb uses a chevron divider; Bootstrap's own default is "/".
+$breadcrumb-divider: quote(">") !default;
+// shadcn's pagination items sit separated with no border, ghost-hover, and
+// only the active page gets a bordered box; Bootstrap's default is a fully
+// bordered, edge-to-edge connected strip. A positive margin-start switches
+// Bootstrap's own pagination.scss out of connected-border mode.
+$pagination-margin-start: 0.25rem !default;
+$pagination-color: var(--moo-muted-foreground) !default;
+$pagination-border-color: transparent !default;
+$pagination-hover-color: var(--bs-body-color) !default;
+$pagination-hover-bg: var(--moo-muted-surface) !default;
+$pagination-hover-border-color: transparent !default;
+$pagination-focus-bg: var(--moo-muted-surface) !default;
+$pagination-active-color: var(--bs-body-color) !default;
+$pagination-active-bg: var(--moo-muted-surface) !default;
+$pagination-active-border-color: var(--moo-border) !default;
+$pagination-disabled-border-color: transparent !default;
+// shadcn's progress track is a slim 4px bar; Bootstrap's default is 1rem.
+$progress-height: 0.25rem !default;
+// shadcn's switch track is chubbier than Bootstrap's default: 32x18.4px
+// versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
+// Bootstrap's own customization point, but there is no matching height
+// variable — .form-switch inherits its height from the same
+// $form-check-input-width Checkbox and Radio Group use, so a dedicated
+// height lives on a private knob instead of resizing every .form-check
+// control. The Switch component partial consumes it directly.
+$form-switch-width: 2rem !default;
+// Bootstrap derives padding-start as $form-switch-width + .5em, but mixing
+// rem and em in Sass arithmetic fails to compile; restate it in rem to
+// keep the same proportional gap Bootstrap's own default uses.
+$form-switch-padding-start: 2.5rem !default;
+$moo-switch-height: 1.15rem !default;
+// shadcn's accordion trigger stays fully neutral when expanded (only an
+// underline on hover); Bootstrap's default tints the expanded trigger with
+// $primary-bg-subtle / $primary-text-emphasis. Referencing the resting
+// --bs-accordion-bg/-color custom properties (rather than the Sass
+// variables, which primary_variables.scss loads before Bootstrap defines
+// them) matches the trigger's own resting look so expanding an item
+// changes nothing but the chevron and revealed content.
+$accordion-button-active-bg: var(--bs-accordion-bg) !default;
+$accordion-button-active-color: var(--bs-accordion-color) !default;
+// Bootstrap's pills nav has no shared-track concept, so the segmented
+// control's track padding/gap and trigger padding have no Bootstrap
+// variable to override — they are private knobs instead of literals in
+// the component partial. Values match the reference's 3px track padding,
+// 2px item gap, and 2px/12px trigger padding.
+$moo-tabs-list-padding: 0.1875rem !default;
+$moo-tabs-list-gap: 0.125rem !default;
+$moo-tabs-trigger-padding-y: 0.125rem !default;
+$moo-tabs-trigger-padding-x: 0.75rem !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;

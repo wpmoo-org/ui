@@ -1,0 +1,99 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/alert.html.jinja" import alert %}
+{% from "components/button.html.jinja" import button %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Alert — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Alert",
+    "Surface a contextual message with Bootstrap's native alert region."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ alert(
+        "Scheduled maintenance",
+        description="The catalog will be briefly unavailable this weekend while we upgrade the build pipeline.",
+        icon="info"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Pair an icon with a title and description inside a quiet bordered region.",
+      default
+    ) }}
+
+    {% set destructive %}
+      {{ alert(
+        "Build failed",
+        description="The last commit broke two tests. Check the CI log for details.",
+        variant="destructive",
+        icon="circle-alert"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "destructive",
+      "Destructive",
+      "Use <code>variant=\"destructive\"</code> for errors that need immediate attention.",
+      destructive
+    ) }}
+
+    {% set with_action %}
+      {{ alert(
+        "A new component just shipped",
+        description="Collapsible is ready to use. Check the docs to get started.",
+        icon="info",
+        action=button("View docs", variant="outline", size="sm")
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "with-action",
+      "With action",
+      "Compose the ready Button macro into <code>action</code> for a single inline response.",
+      with_action
+    ) }}
+
+    {% set dismissible %}
+      {{ alert(
+        "Preview images refreshed",
+        description="Component preview thumbnails were regenerated for the latest release.",
+        icon="info",
+        dismissible=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "dismissible",
+      "Dismissible",
+      "Add a Close Button; wire <code>data-bs-dismiss=\"alert\"</code> when the alert should remove itself.",
+      dismissible
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ alert(
+          "تنبيه",
+          description="تمت معالجة طلبك بنجاح.",
+          icon="info"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The icon, body, and action stay in reading-direction order without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and contextual variants, see the",
+    "https://getbootstrap.com/docs/5.3/components/alerts/",
+    "Bootstrap Alerts documentation"
+  ) }}
+
+{% endblock %}

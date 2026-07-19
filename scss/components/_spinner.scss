@@ -1,0 +1,15 @@
+// shadcn's Spinner is the Lucide loader-circle icon spun with CSS, not
+// Bootstrap's thicker spinner-border ring — render_icon already emits the
+// same stroke-width and line-cap Lucide markup shadcn uses, so only sizing
+// and rotation are needed here. The rotation reuses Bootstrap's own
+// spinner-border keyframe instead of declaring a new one.
+.spinner [data-icon] {
+  width: $spacer;
+  height: $spacer;
+  animation: spinner-border $spinner-animation-speed linear infinite;
+}
+
+.spinner-sm [data-icon] {
+  width: $spacer * 0.75;
+  height: $spacer * 0.75;
+}

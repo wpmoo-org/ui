@@ -1,0 +1,51 @@
+// shadcn's TabsList is a segmented control: a muted rounded track with an
+// inset, shadowed pill marking the active tab. Bootstrap's pills nav has
+// no shared track and colors the active pill with $primary directly, so
+// this styling is scoped to the tabs-list wrapper instead of the shared
+// pills class — Navigation's own pills variant already owns that class
+// and must keep its plain Bootstrap look.
+.tabs-list {
+  display: inline-flex;
+  gap: $moo-tabs-list-gap;
+  padding: $moo-tabs-list-padding;
+  background-color: var(--moo-muted-surface);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.tabs-list .nav-link {
+  padding: $moo-tabs-trigger-padding-y $moo-tabs-trigger-padding-x;
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: var(--moo-muted-foreground);
+  border-radius: var(--bs-border-radius);
+  @include transition($transition-base);
+}
+
+.tabs-list .nav-link:hover {
+  color: var(--moo-foreground);
+}
+
+.tabs-list .nav-link.active {
+  color: var(--moo-foreground);
+  background-color: var(--moo-surface);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+// Bootstrap hides inactive panes with display:none, so the pane height
+// changes the moment a shorter or taller tab becomes active — the
+// surrounding page jumps to the new height on every switch. Stacking every
+// pane in the same grid cell sizes the row to the tallest pane once, so
+// switching only toggles visibility, never the container's height.
+.tab-content {
+  display: grid;
+}
+
+.tab-content > .tab-pane {
+  grid-area: 1 / 1;
+  display: block;
+  visibility: hidden;
+}
+
+.tab-content > .active {
+  visibility: visible;
+}

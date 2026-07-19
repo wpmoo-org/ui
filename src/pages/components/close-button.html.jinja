@@ -1,0 +1,77 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/close_button.html.jinja" import close_button %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Close Button — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Close Button",
+    "Dismiss alerts, dialogs, and other transient content with Bootstrap's native .btn-close."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ close_button() }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Provide an accessible label; the icon itself carries no visible text.",
+      default,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      {{ close_button(disabled=true) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Disabled close buttons lower opacity and drop pointer and hover interaction.",
+      disabled,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set in_context %}
+      <div class="d-flex align-items-start justify-content-between gap-3 p-3 rounded-3 bg-body-secondary" style="width: 20rem;">
+        <div>
+          <div class="fw-medium">Update available</div>
+          <div class="text-body-secondary small">Version 2.1 is ready to install.</div>
+        </div>
+        {{ close_button() }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "in-context",
+      "In context",
+      "Pair with a flex row to dismiss a notice, alert, or toast.",
+      in_context
+    ) }}
+
+    {% set rtl %}
+      <div class="d-flex align-items-start justify-content-between gap-3 p-3 rounded-3 bg-body-secondary" style="width: 20rem;" dir="rtl">
+        <div>
+          <div class="fw-medium">تحديث متاح</div>
+          <div class="text-body-secondary small">الإصدار 2.1 جاهز للتثبيت.</div>
+        </div>
+        {{ close_button() }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The close glyph and its padding stay symmetric, so no mirroring is required.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and CSS variables, see the",
+    "https://getbootstrap.com/docs/5.3/components/close-button/",
+    "Bootstrap Close button documentation"
+  ) }}
+
+{% endblock %}

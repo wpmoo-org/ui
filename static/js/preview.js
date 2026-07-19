@@ -226,12 +226,20 @@
       wrapper.dataset.mooSidebarState === "collapsed";
     const placement = root.dir === "rtl" ? "left" : "right";
     wrapper.querySelectorAll("[data-moo-sidebar-tooltip]").forEach((button) => {
-      const existing = Tooltip.getInstance(button);
+      // Bootstrap allows only one plugin instance per element (see
+      // Data.set in bootstrap/js/dist/dom/data.js). A menu button with its
+      // own data-bs-toggle (dropdown/collapse) already owns that element's
+      // single instance slot, so a Tooltip constructed on the same node is
+      // silently rejected and both plugins log a console error. Anchor the
+      // tooltip to the row's <li> wrapper instead, which never owns a
+      // competing Bootstrap instance.
+      const anchor = button.closest("li") || button;
+      const existing = Tooltip.getInstance(anchor);
       if (existing) {
         existing.dispose();
       }
       if (collapsed) {
-        new Tooltip(button, {
+        new Tooltip(anchor, {
           title: button.getAttribute("data-moo-sidebar-tooltip"),
           placement,
           container: "body",

@@ -1,0 +1,71 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/collapsible.html.jinja" import collapsible %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Collapsible — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Collapsible",
+    "Toggle the visibility of a section of content using the ready Button macro and Bootstrap's Collapse plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ collapsible(
+        "collapsible-basic",
+        "Task: Update dependencies",
+        "Assigned to Alex &middot; Due Friday &middot; Priority: Medium.",
+        trigger_aria_label="Toggle task details"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "The trigger is an icon-only Button; set <code>open=true</code> to start expanded.",
+      basic
+    ) }}
+
+    {% set open %}
+      {{ collapsible(
+        "collapsible-open",
+        "Sound settings",
+        "Notification sound is on. Vibration is off.",
+        trigger_aria_label="Toggle sound settings",
+        open=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "open",
+      "Open by default",
+      "Set <code>open=true</code> to start expanded and mark the trigger's <code>aria-expanded</code> accordingly.",
+      open
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ collapsible(
+          "collapsible-rtl",
+          "المهمة: تحديث الاعتماديات",
+          "مسندة إلى أليكس &middot; موعد التسليم الجمعة &middot; الأولوية: متوسطة.",
+          trigger_aria_label="إظهار تفاصيل المهمة"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The title and trigger swap sides without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Collapse plugin behavior and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/collapse/",
+    "Bootstrap Collapse documentation"
+  ) }}
+
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/radio_group.html.jinja" import radio_group %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Radio Group — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Radio Group",
+    "Choose exactly one option from a set using Bootstrap's native radio contract."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ radio_group(
+        "radio-default",
+        "Notify me about",
+        [
+          {"id": "radio-default-all", "label": "All new messages", "checked": true},
+          {"id": "radio-default-mentions", "label": "Direct messages and mentions"},
+          {"id": "radio-default-none", "label": "Nothing"}
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "A fieldset and legend give the group its accessible name; items share one <code>name</code>.",
+      default,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set with_description %}
+      {{ radio_group(
+        "radio-format",
+        "Export format",
+        [
+          {"id": "radio-format-csv", "label": "CSV", "description": "Comma-separated values, opens in any spreadsheet.", "checked": true},
+          {"id": "radio-format-json", "label": "JSON", "description": "Structured data for developers and APIs."}
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "with-description",
+      "With description",
+      "Add supporting copy below an item's label with <code>description</code>.",
+      with_description,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      {{ radio_group(
+        "radio-disabled",
+        "Delivery method",
+        [
+          {"id": "radio-disabled-standard", "label": "Standard", "checked": true},
+          {"id": "radio-disabled-express", "label": "Express (unavailable)", "disabled": true}
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Set <code>disabled</code> on an individual item to remove it from selection.",
+      disabled,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ radio_group(
+          "radio-rtl",
+          "طريقة الاستلام",
+          [
+            {"id": "radio-rtl-pickup", "label": "الاستلام من المتجر", "checked": true},
+            {"id": "radio-rtl-delivery", "label": "التوصيل إلى المنزل"}
+          ]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The input and label swap sides without mirrored custom CSS.",
+      rtl,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and the shared form-check family, see the",
+    "https://getbootstrap.com/docs/5.3/forms/checks-radios/",
+    "Bootstrap Checks and radios documentation"
+  ) }}
+
+{% endblock %}

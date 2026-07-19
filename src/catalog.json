@@ -78,5 +78,70 @@
     "slug": "sidebar",
     "label": "Sidebar",
     "status": "ready"
+  },
+  {
+    "slug": "close-button",
+    "label": "Close Button",
+    "status": "ready"
+  },
+  {
+    "slug": "alert",
+    "label": "Alert",
+    "status": "ready"
+  },
+  {
+    "slug": "breadcrumb",
+    "label": "Breadcrumb",
+    "status": "ready"
+  },
+  {
+    "slug": "pagination",
+    "label": "Pagination",
+    "status": "ready"
+  },
+  {
+    "slug": "progress",
+    "label": "Progress",
+    "status": "ready"
+  },
+  {
+    "slug": "table",
+    "label": "Table",
+    "status": "ready"
+  },
+  {
+    "slug": "checkbox",
+    "label": "Checkbox",
+    "status": "ready"
+  },
+  {
+    "slug": "radio-group",
+    "label": "Radio Group",
+    "status": "ready"
+  },
+  {
+    "slug": "switch",
+    "label": "Switch",
+    "status": "ready"
+  },
+  {
+    "slug": "spinner",
+    "label": "Spinner",
+    "status": "ready"
+  },
+  {
+    "slug": "accordion",
+    "label": "Accordion",
+    "status": "ready"
+  },
+  {
+    "slug": "tabs",
+    "label": "Tabs",
+    "status": "ready"
+  },
+  {
+    "slug": "collapsible",
+    "label": "Collapsible",
+    "status": "ready"
   }
 ]

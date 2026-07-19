@@ -1,0 +1,24 @@
+{% macro progress(value, max=100, aria_label="", show_label=false, extra_class="") -%}
+  {% if not aria_label | trim %}{{ fail("Progress aria_label is required") }}{% endif %}
+  {% if max <= 0 %}{{ fail("Progress max must be positive") }}{% endif %}
+  {% if value < 0 or value > max %}{{ fail("Progress value must be between 0 and max") }}{% endif %}
+  {% set percent = (value / max * 100) | round | int %}
+  <div>
+    {% if show_label %}
+      <div class="d-flex justify-content-between small mb-1">
+        <span>{{ aria_label }}</span>
+        <span class="text-body-secondary">{{ percent }}%</span>
+      </div>
+    {% endif %}
+    <div
+      class="progress{% if extra_class %} {{ extra_class }}{% endif %}"
+      role="progressbar"
+      aria-label="{{ aria_label }}"
+      aria-valuenow="{{ value }}"
+      aria-valuemin="0"
+      aria-valuemax="{{ max }}"
+    >
+      <div class="progress-bar" style="width: {{ percent }}%"></div>
+    </div>
+  </div>
+{%- endmacro %}
