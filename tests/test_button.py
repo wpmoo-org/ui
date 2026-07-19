@@ -146,6 +146,17 @@ class ButtonTests(CatalogTestCase):
         ):
             self.render_button('button("Toggle", collapse_open=true)')
 
+    def test_anchor_button_carries_role_button(self) -> None:
+        output = self.render_button('button("Link", element="a", href="#")')
+        self.assertIn('role="button"', output)
+
+    def test_disabled_anchor_button_gets_bootstrap_disabled_class(self) -> None:
+        output = self.render_button('button("Link", element="a", disabled=true)')
+        self.assertIn('class="btn btn-primary disabled"', output)
+        self.assertIn('aria-disabled="true"', output)
+        self.assertIn('tabindex="-1"', output)
+        self.assertNotIn("href=", output)
+
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
         for call in (
             'button("")',

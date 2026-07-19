@@ -72,10 +72,11 @@
   {% set classes = "btn " ~ variant_class %}
   {% if size_class %}{% set classes = classes ~ " " ~ size_class %}{% endif %}
   {% if dropdown_caret %}{% set classes = classes ~ " dropdown-toggle" %}{% endif %}
+  {% if element == "a" and disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
 
   {% if element == "a" %}
-    <a class="{{ classes }}"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+    <a class="{{ classes }}" role="button"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
       {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
