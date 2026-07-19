@@ -1,0 +1,142 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/accordion.html.jinja" import accordion %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Accordion — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Accordion",
+    "Reveal one section of content at a time using Bootstrap's Collapse plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ accordion(
+        "accordion-basic",
+        [
+          {
+            "id": "password",
+            "title": "How do I reset my password?",
+            "content": "Click on \"Forgot Password\" on the login page, enter your email address, and we'll send you a link to reset your password.",
+            "open": true
+          },
+          {
+            "id": "plan",
+            "title": "Can I change my subscription plan?",
+            "content": "Yes, you can upgrade or downgrade your plan at any time from your account settings."
+          },
+          {
+            "id": "payment",
+            "title": "What payment methods do you accept?",
+            "content": "We accept all major credit cards, PayPal, and bank transfers for annual plans."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Only one item stays open at a time; opening another closes the current one.",
+      basic
+    ) }}
+
+    {% set multiple %}
+      {{ accordion(
+        "accordion-multiple",
+        [
+          {
+            "id": "notifications",
+            "title": "Notification settings",
+            "content": "Manage how you receive notifications. Enable email alerts or push notifications for mobile devices.",
+            "open": true
+          },
+          {
+            "id": "privacy",
+            "title": "Privacy & security",
+            "content": "Control who can see your profile and manage your two-factor authentication settings.",
+            "open": true
+          },
+          {
+            "id": "billing",
+            "title": "Billing & subscription",
+            "content": "View invoices, update your payment method, and change your subscription plan."
+          }
+        ],
+        always_open=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "multiple",
+      "Multiple",
+      "Set <code>always_open=true</code> to let more than one item stay open at the same time.",
+      multiple
+    ) }}
+
+    {% set disabled %}
+      {{ accordion(
+        "accordion-disabled",
+        [
+          {
+            "id": "history",
+            "title": "Can I access my account history?",
+            "content": "Yes, your full account history is available under Settings &gt; History."
+          },
+          {
+            "id": "premium",
+            "title": "Premium feature information",
+            "content": "This section is only available on the Premium plan.",
+            "disabled": true
+          },
+          {
+            "id": "email",
+            "title": "How do I update my email address?",
+            "content": "Go to Settings &gt; Account and select \"Change email address\"."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",
+      disabled
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ accordion(
+          "accordion-rtl",
+          [
+            {
+              "id": "shipping",
+              "title": "ما هي خيارات الشحن المتاحة؟",
+              "content": "نقدم الشحن القياسي (5-7 أيام)، والسريع (2-3 أيام)، والشحن بين عشية وضحاها.",
+              "open": true
+            },
+            {
+              "id": "returns",
+              "title": "ما هي سياسة الإرجاع الخاصة بكم؟",
+              "content": "يمكنك إرجاع أي منتج خلال 30 يومًا من الشراء."
+            }
+          ]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The trigger's chevron and text swap sides without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Collapse plugin behavior and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/accordion/",
+    "Bootstrap Accordion documentation"
+  ) }}
+
+{% endblock %}

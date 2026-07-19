@@ -80,6 +80,15 @@ $form-switch-width: 2rem !default;
 // keep the same proportional gap Bootstrap's own default uses.
 $form-switch-padding-start: 2.5rem !default;
 $moo-switch-height: 1.15rem !default;
+// shadcn's accordion trigger stays fully neutral when expanded (only an
+// underline on hover); Bootstrap's default tints the expanded trigger with
+// $primary-bg-subtle / $primary-text-emphasis. Referencing the resting
+// --bs-accordion-bg/-color custom properties (rather than the Sass
+// variables, which primary_variables.scss loads before Bootstrap defines
+// them) matches the trigger's own resting look so expanding an item
+// changes nothing but the chevron and revealed content.
+$accordion-button-active-bg: var(--bs-accordion-bg) !default;
+$accordion-button-active-color: var(--bs-accordion-color) !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;

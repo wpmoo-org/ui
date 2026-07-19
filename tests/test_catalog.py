@@ -78,6 +78,9 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's switch markup uses the shared .form-switch and
             # .form-check families, not a "switch-" prefixed one.
             "switch": ("form-switch", "form-check"),
+            # Bootstrap's own Collapse plugin toggles the bare .collapsed
+            # state class on the trigger; it is not "accordion-" prefixed.
+            "accordion": ("accordion", "collapsed"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
