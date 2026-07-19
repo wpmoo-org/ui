@@ -102,7 +102,7 @@ class CatalogContractTests(CatalogTestCase):
             r"^(?:accordion|alert|badge|breadcrumb|btn|card|dropdown|"
             r"form-control|form-label|input-group|list-group|modal|nav|"
             r"navbar|offcanvas|page|pagination|placeholder|popover|"
-            r"progress|spinner|toast)(?:-|$)"
+            r"progress|spinner|table|toast)(?:-|$)"
         )
 
         pages = [

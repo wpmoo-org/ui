@@ -1,0 +1,96 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/table.html.jinja" import table %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Table — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Table",
+    "Display rows and columns of related data using Bootstrap's native, opt-in table styling."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ table(
+        ["Invoice", "Status", "Method", "Amount"],
+        [
+          ["INV001", badge("Paid", variant="outline"), "Credit Card", "$250.00"],
+          ["INV002", badge("Pending", variant="outline"), "PayPal", "$150.00"],
+          ["INV003", badge("Unpaid", variant="outline"), "Bank Transfer", "$350.00"]
+        ],
+        align=["", "", "", "end"],
+        caption="A list of recent invoices."
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Compose statuses from the ready Badge macro; right-align the numeric column.",
+      default
+    ) }}
+
+    {% set striped_hover %}
+      {{ table(
+        ["Invoice", "Status", "Amount"],
+        [
+          ["INV001", "Paid", "$250.00"],
+          ["INV002", "Pending", "$150.00"],
+          ["INV003", "Unpaid", "$350.00"],
+          ["INV004", "Paid", "$450.00"]
+        ],
+        align=["", "", "end"],
+        striped=true,
+        hover=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "striped-hover",
+      "Striped and hoverable",
+      "Set <code>striped=true</code> and <code>hover=true</code> for denser, scannable rows.",
+      striped_hover
+    ) }}
+
+    {% set small %}
+      {{ table(
+        ["Invoice", "Amount"],
+        [["INV001", "$250.00"], ["INV002", "$150.00"]],
+        align=["", "end"],
+        small=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "small",
+      "Compact",
+      "Set <code>small=true</code> for tighter cell padding.",
+      small,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ table(
+          ["الفاتورة", "الحالة", "المبلغ"],
+          [["INV001", "مدفوع", "٢٥٠ ريال"], ["INV002", "معلق", "١٥٠ ريال"]],
+          align=["", "", "end"]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Column order and text alignment follow reading direction without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and contextual row/cell variants, see the",
+    "https://getbootstrap.com/docs/5.3/content/tables/",
+    "Bootstrap Tables documentation"
+  ) }}
+
+{% endblock %}

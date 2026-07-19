@@ -103,5 +103,10 @@
     "slug": "progress",
     "label": "Progress",
     "status": "ready"
+  },
+  {
+    "slug": "table",
+    "label": "Table",
+    "status": "ready"
   }
 ]

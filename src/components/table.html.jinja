@@ -1,0 +1,49 @@
+{% macro table(
+  headers,
+  rows,
+  caption="",
+  align=[],
+  row_ids=[],
+  row_header=false,
+  striped=false,
+  hover=false,
+  small=false,
+  borderless=false,
+  extra_class=""
+) -%}
+  {% if not headers %}{{ fail("Table headers are required") }}{% endif %}
+  {% set classes = "table" %}
+  {% if striped %}{% set classes = classes ~ " table-striped" %}{% endif %}
+  {% if hover %}{% set classes = classes ~ " table-hover" %}{% endif %}
+  {% if small %}{% set classes = classes ~ " table-sm" %}{% endif %}
+  {% if borderless %}{% set classes = classes ~ " table-borderless" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <div class="table-responsive">
+    <table class="{{ classes }}">
+      {% if caption %}<caption>{{ caption }}</caption>{% endif %}
+      <thead>
+        <tr>
+          {% for header in headers %}
+            {% set column_align = align[loop.index0] if loop.index0 < align | length else "" %}
+            <th scope="col"{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ header }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          {% set row_id = row_ids[loop.index0] if loop.index0 < row_ids | length else "" %}
+          <tr{% if row_id %} id="{{ row_id }}"{% endif %}>
+            {% for cell in row %}
+              {% set column_align = align[loop.index0] if loop.index0 < align | length else "" %}
+              {% if row_header and loop.first %}
+                <th scope="row"{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</th>
+              {% else %}
+                <td{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{%- endmacro %}
