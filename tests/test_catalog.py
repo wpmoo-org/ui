@@ -75,6 +75,9 @@ class CatalogContractTests(CatalogTestCase):
             # The legend reuses Bootstrap's shared .form-label class to
             # match sibling form labels.
             "radio_group": ("radio-group", "form-label"),
+            # Bootstrap's switch markup uses the shared .form-switch and
+            # .form-check families, not a "switch-" prefixed one.
+            "switch": ("form-switch", "form-check"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):

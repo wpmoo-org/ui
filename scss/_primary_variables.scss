@@ -67,6 +67,19 @@ $pagination-active-border-color: var(--moo-border) !default;
 $pagination-disabled-border-color: transparent !default;
 // shadcn's progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;
+// shadcn's switch track is chubbier than Bootstrap's default: 32x18.4px
+// versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
+// Bootstrap's own customization point, but there is no matching height
+// variable — .form-switch inherits its height from the same
+// $form-check-input-width Checkbox and Radio Group use, so a dedicated
+// height lives on a private knob instead of resizing every .form-check
+// control. The Switch component partial consumes it directly.
+$form-switch-width: 2rem !default;
+// Bootstrap derives padding-start as $form-switch-width + .5em, but mixing
+// rem and em in Sass arithmetic fails to compile; restate it in rem to
+// keep the same proportional gap Bootstrap's own default uses.
+$form-switch-padding-start: 2.5rem !default;
+$moo-switch-height: 1.15rem !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;
