@@ -138,5 +138,10 @@
     "slug": "tabs",
     "label": "Tabs",
     "status": "ready"
+  },
+  {
+    "slug": "collapsible",
+    "label": "Collapsible",
+    "status": "ready"
   }
 ]

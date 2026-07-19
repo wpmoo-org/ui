@@ -1,0 +1,16 @@
+{% from "components/button.html.jinja" import button %}
+
+{% macro collapsible(id, title, content, trigger_aria_label="Toggle", open=false, extra_class="") -%}
+  {% if not id | trim %}{{ fail("Collapsible id is required") }}{% endif %}
+  {% if not title | trim %}{{ fail("Collapsible title is required") }}{% endif %}
+  {% if not content | trim %}{{ fail("Collapsible content is required") }}{% endif %}
+  <div class="collapsible{% if extra_class %} {{ extra_class }}{% endif %}">
+    <div class="collapsible-header">
+      <h4 class="collapsible-title">{{ title }}</h4>
+      {{ button("", variant="ghost", size="icon-sm", icon_start="chevrons-up-down", aria_label=trigger_aria_label, collapse_target=id, collapse_open=open) }}
+    </div>
+    <div id="{{ id }}" class="collapse{% if open %} show{% endif %}">
+      <div class="collapsible-content">{{ content | safe }}</div>
+    </div>
+  </div>
+{%- endmacro %}

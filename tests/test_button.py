@@ -79,14 +79,14 @@ class ButtonTests(CatalogTestCase):
             with self.subTest(call=call):
                 with self.assertRaisesRegex(
                     ValueError,
-                    "Button dropdown, toggle, and loading options require element=button",
+                    "Button dropdown, toggle, loading, and collapse_target options require element=button",
                 ):
                     self.render_button(call)
 
     def test_button_loading_requires_button_element(self) -> None:
         with self.assertRaisesRegex(
             ValueError,
-            "Button dropdown, toggle, and loading options require element=button",
+            "Button dropdown, toggle, loading, and collapse_target options require element=button",
         ):
             self.render_button('button("Save", element="a", loading=true)')
 
@@ -104,6 +104,47 @@ class ButtonTests(CatalogTestCase):
             ValueError, "Button loading replaces icon_start; do not set both"
         ):
             self.render_button('button("Save", loading=true, icon_start="plus")')
+
+    def test_button_collapse_target_uses_bootstrap_collapse_contract(self) -> None:
+        output = self.render_button(
+            'button("Toggle", collapse_target="panel-one")'
+        )
+
+        self.assertIn('data-bs-toggle="collapse"', output)
+        self.assertIn('data-bs-target="#panel-one"', output)
+        self.assertIn('aria-expanded="false"', output)
+        self.assertIn('aria-controls="panel-one"', output)
+
+    def test_button_collapse_open_sets_aria_expanded_true(self) -> None:
+        output = self.render_button(
+            'button("Toggle", collapse_target="panel-one", collapse_open=true)'
+        )
+
+        self.assertIn('aria-expanded="true"', output)
+
+    def test_button_collapse_target_cannot_combine_with_toggle_or_dropdown(
+        self,
+    ) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button collapse_target cannot combine with toggle or dropdown",
+        ):
+            self.render_button(
+                'button("Toggle", collapse_target="panel-one", toggle=true)'
+            )
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button collapse_target cannot combine with toggle or dropdown",
+        ):
+            self.render_button(
+                'button("Toggle", collapse_target="panel-one", dropdown=true)'
+            )
+
+    def test_button_collapse_open_requires_collapse_target(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Button collapse_open requires collapse_target"
+        ):
+            self.render_button('button("Toggle", collapse_open=true)')
 
     def test_buttons_without_visible_labels_require_an_accessible_name(self) -> None:
         for call in (
