@@ -118,5 +118,10 @@
     "slug": "radio-group",
     "label": "Radio Group",
     "status": "ready"
+  },
+  {
+    "slug": "switch",
+    "label": "Switch",
+    "status": "ready"
   }
 ]
