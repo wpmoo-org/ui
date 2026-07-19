@@ -1,6 +1,4 @@
-{% from "components/avatar.html.jinja" import avatar %}
-{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_group, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item %}
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% set utility_icons = {
@@ -10,22 +8,14 @@
 {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
   {% call sidebar_header() %}
     {% call sidebar_menu() %}
-      {% call sidebar_menu_item(dropdown=true) %}
+      {% call sidebar_menu_item() %}
         {{ sidebar_menu_button(
           "Moo UI",
           subtitle="Component system",
           size="lg",
-          dropdown=true,
-          lead=sidebar_brand_mark("blocks"),
-          end_icon="chevrons-up-down"
+          href=root_path ~ "index.html",
+          lead=sidebar_brand_mark("blocks")
         ) }}
-        {% call dropdown_menu() %}
-          {{ dropdown_header("Workspaces") }}
-          {{ dropdown_item("Moo UI", icon="blocks", active=true) }}
-          {{ dropdown_item("Moo Odoo", icon="box") }}
-          {{ dropdown_divider() }}
-          {{ dropdown_item("Add workspace", icon="plus") }}
-        {% endcall %}
       {% endcall %}
     {% endcall %}
   {% endcall %}
@@ -48,20 +38,6 @@
     {% endcall %}
 
     {% call sidebar_group() %}
-      {{ sidebar_group_label("Blocks") }}
-      {% call sidebar_menu() %}
-        {% call sidebar_menu_item() %}
-          {{ sidebar_menu_button(
-            "Blocks",
-            href=root_path ~ "blocks/index.html",
-            active=current_section == "blocks",
-            icon="panel-left-dashed"
-          ) }}
-        {% endcall %}
-      {% endcall %}
-    {% endcall %}
-
-    {% call sidebar_group() %}
       {{ sidebar_group_label("Utilities") }}
       {% call sidebar_menu() %}
         {% for utility in utilities %}
@@ -74,28 +50,6 @@
             ) }}
           {% endcall %}
         {% endfor %}
-      {% endcall %}
-    {% endcall %}
-  {% endcall %}
-
-  {% call sidebar_footer() %}
-    {% call sidebar_menu() %}
-      {% call sidebar_menu_item(dropdown=true) %}
-        {{ sidebar_menu_button(
-          "Moo UI",
-          subtitle="Bootstrap-first shell",
-          size="lg",
-          dropdown=true,
-          lead=avatar(name="Moo UI", initials="MO", size="sm", extra_class="sidebar-avatar"),
-          end_icon="chevron-right"
-        ) }}
-        {% call dropdown_menu(align="end") %}
-          {{ dropdown_header("hello@wpmoo.org") }}
-          {{ dropdown_item("Account", icon="badge-check") }}
-          {{ dropdown_item("Settings", icon="settings-2") }}
-          {{ dropdown_divider() }}
-          {{ dropdown_item("Log out", icon="log-out") }}
-        {% endcall %}
       {% endcall %}
     {% endcall %}
   {% endcall %}

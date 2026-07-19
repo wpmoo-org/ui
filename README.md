@@ -1,100 +1,45 @@
 # Moo UI
 
-Moo UI is a standalone Bootstrap 5.3 component library with a compact,
-shadcn-inspired visual language.
+**Bootstrap markup. shadcn feel.**
 
-The reviewed product scope currently contains the shared catalog shell, Button,
-Button Group, Card, and the Scroll Fade utility. Other components remain
-unimplemented until their dependency macros are ready.
+![Moo UI catalog preview](static/images/readme-hero.webp)
 
-## Development
+Moo UI is a Bootstrap 5.3 component system for teams that want the calm,
+modern feel of shadcn/ui without leaving server-rendered HTML, Bootstrap
+classes, Bootstrap Sass, or Bootstrap JavaScript behind.
 
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements-dev.txt
-.venv/bin/python dev.py
-```
+It keeps Bootstrap as the public contract, then shapes the catalog, component
+examples, and composed blocks into a quieter product interface language.
 
-Then open `http://localhost:4173/components/sidebar.html`.
+## Philosophy
 
-`dev.py` builds the catalog once, serves `dist/`, and watches `build.py`,
-`src/`, `scss/`, and `static/` for rebuilds. Browser refresh remains manual.
+- **Bootstrap is the contract.** Moo UI keeps Bootstrap markup, documented
+  behavior, `data-bs-*` APIs, Sass knobs, and `--bs-*` variables wherever
+  Bootstrap can express the need.
+- **shadcn is the visual language.** Moo UI studies shadcn/ui for restraint,
+  spacing, composition, and state language. It does not copy shadcn source,
+  React code, Tailwind code, Radix code, or example prose.
+- **HTML stays first-class.** Component examples are generated from Jinja
+  macros, so the preview and copyable source share one rendered output.
+- **No framework adoption tax.** The catalog can be browsed, built, and
+  shipped as static HTML without a SPA runtime.
+- **Product shells matter.** Moo UI includes primitives, utilities, and
+  composed blocks for Bootstrap applications that need to feel like modern
+  product software.
 
-Run tests separately:
+## Documentation
 
-```bash
-.venv/bin/python -m unittest discover -s tests -v
-```
-
-Manual two-terminal alternative:
-
-```bash
-.venv/bin/python build.py --watch
-python3 -m http.server 4173 --directory dist
-```
-
-Then open `http://localhost:4173/components/sidebar.html`.
-
-Tests are organized by ownership instead of accumulating in one build file:
-
-- `tests/helpers.py` owns shared build and fixture helpers.
-- `tests/test_<component>.py` owns one component's public contract.
-- `tests/test_catalog.py` owns cross-component composition gates.
-- `tests/test_code_examples.py` owns the shared example/source renderer.
-- `tests/test_<utility>.py` owns one reusable utility contract.
-
-Add new behavior to its owning module. Keep `tests/test_build.py` limited to
-the build entrypoints and shared shell output.
-
-### Verification strategy
-
-- Compare the Bootstrap and shadcn reference pages before implementing a
-  component; iterate in the browser for styling, spacing, responsive behavior,
-  RTL, and dark mode.
-- The permanent suite carries four categories only: build entrypoints, the
-  design/composition/selector-ownership gates, the code-renderer and
-  source-format contracts, and stable public macro contracts plus
-  fail-fast/accessibility guards. Visual and DOM-shape pins are not written
-  during the shadcn convergence.
-- Acceptance-specific contract coverage is added or expanded after visual and
-  behavior approval — at catalog acceptance — without pixel pins.
-- For catalog copy, example order, and other documentation-only changes, run
-  the build and inspect the rendered page.
-
-Every phase closes with browser review plus the green gate suite and lands as
-its own commit.
+Browse the catalog at [ui.wpmoo.org](https://ui.wpmoo.org/). Component pages,
+blocks, examples, local development notes, and implementation contracts belong
+in the documentation rather than this README.
 
 ## Licensing
 
 Moo UI source code is licensed under the MIT License by WPMoo (`wpmoo.org`).
+
 WPMoo-generated visual assets, including image assets under `static/images/`,
 are not covered by the MIT source code license and remain copyright WPMoo, all
-rights reserved. See `LICENSE`, `ASSET_LICENSE.md`, and
-`THIRD_PARTY_NOTICES.md`.
+rights reserved.
 
-## Source boundaries
-
-Jinja macros are canonical component sources. Each example captures one macro
-result and derives both the live preview and displayed copy-paste markup from
-it. The shared example macro normalizes indentation, adds build-time syntax
-tokens and line numbers, and never loads a runtime highlighter. Generated
-`dist/` output is disposable and ignored by Git.
-
-The implementation was written from a clean structure. It does not copy source
-from the legacy product repositories or the `tmp/ui-html` pilot.
-
-## Styling contract
-
-- Keep Bootstrap classes and `--bs-*` component variables as the public contract.
-- Define shared static shadow and radius scales in `scss/_primary_variables.scss`.
-- Keep theme colors in `scss/_tokens_root.scss` and bridge component styles to
-  those shared tokens. The test suite rejects literal colors, shadows, and radii
-  in `scss/components/`.
-- Reserve `.moo-*` selectors for catalog chrome. Product component SCSS styles
-  native Bootstrap selectors only and stays inside its component boundary.
-- Compose examples from component macros already marked ready in `src/catalog.json`.
-  If a required macro is missing, build that dependency first or defer the
-  example; do not substitute raw interactive or Bootstrap component markup.
-- `render_example` owns example title, description, preview, and copyable code.
-- General visual behavior that is useful beyond one component belongs under
-  `scss/utilities/` and `src/pages/utils/`, with one dedicated test module.
+Vendored third-party material keeps its original license and attribution. See
+`LICENSE`, `ASSET_LICENSE.md`, and `THIRD_PARTY_NOTICES.md`.

@@ -206,7 +206,8 @@
   collapse_target="",
   collapse_open=false,
   aria_label="",
-  extra_class=""
+  extra_class="",
+  static=false
 ) -%}
   {% if not title | trim %}{{ fail("Sidebar menu button title is required") }}{% endif %}
   {% if size not in sidebar_button_sizes %}{{ fail("Unknown sidebar menu button size: " ~ size) }}{% endif %}
@@ -214,12 +215,17 @@
   {% if size != "default" %}{% set classes = classes ~ " sidebar-menu-button--" ~ size %}{% endif %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
   {% if collapse_target %}{% set classes = classes ~ " sidebar-menu-button--disclosure" %}{% endif %}
+  {% if static %}{% set classes = classes ~ " sidebar-menu-button--static" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   {% set body = _sidebar_button_body(title, subtitle, icon, lead, end_icon) %}
   {# The collapsed icon rail reveals this label as a tooltip; default it to the
      visible title so every menu button stays legible when text is hidden. #}
   {% set tip = tooltip if tooltip else title %}
-  {% if dropdown or collapse_target or element == "button" %}
+  {% if static %}
+    <div class="{{ classes }}" data-slot="sidebar-menu-button" data-moo-sidebar-tooltip="{{ tip }}">
+      {{ body }}
+    </div>
+  {% elif dropdown or collapse_target or element == "button" %}
     <button
       class="{{ classes }}"
       type="button"

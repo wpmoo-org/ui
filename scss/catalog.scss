@@ -1,4 +1,10 @@
 @import "primary_variables";
+// Sass-only (no CSS output): just for media-breakpoint-up below, so this
+// file doesn't have to pull in the full Bootstrap bundle that moo-ui.scss
+// already ships separately on the same page.
+@import "../vendor/bootstrap/scss/functions";
+@import "../vendor/bootstrap/scss/variables";
+@import "../vendor/bootstrap/scss/mixins/breakpoints";
 
 body {
   min-height: 100vh;
@@ -14,22 +20,77 @@ body {
   src: url("../fonts/geist/Geist-Variable.woff2") format("woff2-variations");
   font-weight: 100 900;
   font-style: normal;
-  font-display: swap;
+  // optional (not swap): a page either has the font in time for first paint
+  // or keeps the fallback for that render. No post-paint swap means no
+  // layout jump on slower connections, in any browser.
+  font-display: optional;
 }
 
+// Styled like a real search input (border + body background) rather than a
+// filled pill, so the Cmd/Ctrl+K hint on the right reads as a shortcut on a
+// field, not decoration on a button.
 .moo-catalog__search-trigger {
-  width: 16rem;
-  max-width: 42vw;
   height: 2rem;
-  justify-content: flex-start;
+  flex: 1 1 10rem;
+  min-width: 0;
   padding: 0.5rem 0.75rem;
-  color: var(--bs-body-color);
-  border: 0;
-  border-radius: 0.625rem;
-  background: var(--moo-muted-surface);
+  color: var(--bs-secondary-color);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 400;
   box-shadow: none;
+}
+
+.moo-catalog__search-trigger:hover {
+  background: var(--moo-muted-surface);
+}
+
+.moo-catalog__search-trigger-lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.moo-catalog__search-trigger-shortcut {
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// Below sm the trigger is icon-only, so it keeps the base .btn centering.
+// From sm up the visible "Search" label reads like input text, not a
+// centered button caption.
+@include media-breakpoint-up(sm) {
+  .moo-catalog__search-trigger {
+    justify-content: flex-start;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .moo-catalog__search-trigger {
+    flex: 0 0 auto;
+    justify-content: space-between;
+  }
+}
+
+@include media-breakpoint-up(sm) {
+  .moo-catalog__search-trigger {
+    width: 10rem;
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  .moo-catalog__search-trigger {
+    width: 13rem;
+  }
+}
+
+@include media-breakpoint-up(xxl) {
+  .moo-catalog__search-trigger {
+    width: 16rem;
+  }
 }
 
 .moo-catalog__search-trigger svg {
@@ -49,17 +110,22 @@ body {
 }
 
 .moo-catalog__github-link {
-  color: var(--bs-secondary-color);
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  color: var(--bs-btn-color);
+  font-size: 0.875rem;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .moo-catalog__github-link svg {
   width: 1rem;
   height: 1rem;
-  padding: 0.125rem;
-  color: var(--bs-body-bg);
+  color: currentColor;
+}
+
+.moo-catalog__theme-toggle {
   border-radius: 50%;
-  background: var(--bs-body-color);
 }
 
 .moo-catalog__theme-toggle svg {
@@ -94,7 +160,7 @@ body {
 
 .moo-catalog__navbar-inner {
   width: 100%;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .moo-catalog__brand,
@@ -159,21 +225,42 @@ body {
 .moo-catalog__header-start {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
 }
 
+.moo-catalog__sidebar-toggle,
+.moo-catalog__nav-menu-trigger {
+  --bs-btn-bg: var(--bs-body-bg);
+  --bs-btn-border-color: var(--moo-border);
+  --bs-btn-hover-border-color: var(--moo-border);
+  --bs-btn-active-border-color: var(--moo-border);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+@include media-breakpoint-down(md) {
+  .moo-catalog__sidebar-toggle,
+  .moo-catalog__nav-menu-trigger {
+    inline-size: 2.25rem;
+    min-height: 2.25rem;
+  }
+}
+
+.moo-catalog__nav-dropdown .dropdown-menu {
+  min-width: 10rem;
+}
+
+.moo-catalog__header-nav,
 .moo-catalog__header-nav .nav {
   align-items: center;
-  gap: 0.25rem;
+  gap: 1rem;
 }
 
 .moo-catalog__header-nav .nav-link {
-  min-height: 2rem;
-  padding: 0.375rem 0.75rem;
+  min-height: 1.25rem;
+  padding: 0;
   color: var(--bs-secondary-color);
-  border-radius: var(--bs-border-radius);
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
@@ -182,7 +269,7 @@ body {
 .moo-catalog__header-nav .nav-link:hover,
 .moo-catalog__header-nav .nav-link.active {
   color: var(--bs-body-color);
-  background: var(--moo-muted-surface);
+  background: transparent;
 }
 
 .moo-catalog__header-nav .nav:has(.nav-link:hover) .nav-link.active:not(:hover) {
@@ -193,9 +280,20 @@ body {
 .moo-catalog__header-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex: 0 0 auto;
-  margin-left: auto;
+  gap: 1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@include media-breakpoint-up(md) {
+  .moo-catalog__header-start {
+    flex: 1 1 auto;
+  }
+
+  .moo-catalog__header-actions {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
 }
 
 .moo-catalog__main {
