@@ -15,8 +15,8 @@
   <div class="moo-component-examples">
     {% set default %}
       <div class="d-grid gap-2">
-        {{ switch("switch-default", label="Airplane mode") }}
-        {{ switch("switch-checked", label="Airplane mode", checked=true) }}
+        {{ switch("switch-default", label="Auto-lock screen") }}
+        {{ switch("switch-checked", label="Auto-lock screen", checked=true) }}
       </div>
     {% endset %}
     {{ render_example(
@@ -30,8 +30,8 @@
     {% set with_description %}
       {{ switch(
         "switch-description",
-        label="Share across devices",
-        description="Focus is shared across devices, and turns off when you leave the app.",
+        label="Background sync",
+        description="Keep your data up to date across devices while the app is closed.",
         checked=true
       ) }}
     {% endset %}
@@ -45,8 +45,8 @@
 
     {% set disabled %}
       <div class="d-grid gap-2">
-        {{ switch("switch-disabled", label="Enable notifications", disabled=true) }}
-        {{ switch("switch-disabled-checked", label="Enable notifications", checked=true, disabled=true) }}
+        {{ switch("switch-disabled", label="Two-factor authentication", disabled=true) }}
+        {{ switch("switch-disabled-checked", label="Two-factor authentication", checked=true, disabled=true) }}
       </div>
     {% endset %}
     {{ render_example(
@@ -58,7 +58,7 @@
     ) }}
 
     {% set invalid %}
-      {{ switch("switch-invalid", label="Accept terms and conditions", invalid=true) }}
+      {{ switch("switch-invalid", label="Enable analytics tracking", invalid=true) }}
     {% endset %}
     {{ render_example(
       "invalid",
@@ -70,7 +70,7 @@
 
     {% set rtl %}
       <div dir="rtl">
-        {{ switch("switch-rtl", label="وضع الطيران") }}
+        {{ switch("switch-rtl", label="القفل التلقائي للشاشة") }}
       </div>
     {% endset %}
     {{ render_example(

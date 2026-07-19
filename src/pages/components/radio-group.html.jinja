@@ -34,11 +34,11 @@
 
     {% set with_description %}
       {{ radio_group(
-        "radio-plan",
-        "Subscription plan",
+        "radio-format",
+        "Export format",
         [
-          {"id": "radio-plan-monthly", "label": "Monthly", "description": "Billed every month.", "checked": true},
-          {"id": "radio-plan-yearly", "label": "Yearly", "description": "Two months free versus monthly."}
+          {"id": "radio-format-csv", "label": "CSV", "description": "Comma-separated values, opens in any spreadsheet.", "checked": true},
+          {"id": "radio-format-json", "label": "JSON", "description": "Structured data for developers and APIs."}
         ]
       ) }}
     {% endset %}

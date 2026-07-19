@@ -18,19 +18,19 @@
         "tabs-basic",
         [
           {
-            "id": "overview",
-            "title": "Overview",
-            "content": "View your key metrics and recent project activity."
+            "id": "profile",
+            "title": "Profile",
+            "content": "Update your name, avatar, and public bio."
           },
           {
-            "id": "analytics",
-            "title": "Analytics",
-            "content": "Track progress across all your active projects."
+            "id": "security",
+            "title": "Security",
+            "content": "Manage your password and two-factor authentication."
           },
           {
-            "id": "reports",
-            "title": "Reports",
-            "content": "Export usage reports for the current billing period."
+            "id": "preferences",
+            "title": "Preferences",
+            "content": "Choose your language, timezone, and default notification settings."
           }
         ]
       ) }}
@@ -46,8 +46,8 @@
       {{ tabs(
         "tabs-disabled",
         [
-          {"id": "home", "title": "Home", "content": "Welcome back."},
-          {"id": "billing", "title": "Billing", "content": "Not available on your current plan.", "disabled": true}
+          {"id": "team", "title": "Team", "content": "See who has access to this project."},
+          {"id": "archive", "title": "Archive", "content": "Archived projects are read-only.", "disabled": true}
         ]
       ) }}
     {% endset %}
@@ -63,8 +63,8 @@
         {{ tabs(
           "tabs-rtl",
           [
-            {"id": "overview", "title": "نظرة عامة", "content": "عرض مقاييسك الرئيسية وأنشطة المشروع الأخيرة."},
-            {"id": "reports", "title": "التقارير", "content": "تصدير تقارير الاستخدام للفترة الحالية."}
+            {"id": "profile", "title": "الملف الشخصي", "content": "تحديث اسمك وصورتك الشخصية ونبذتك العامة."},
+            {"id": "security", "title": "الأمان", "content": "إدارة كلمة المرور والمصادقة الثنائية."}
           ]
         ) }}
       </div>

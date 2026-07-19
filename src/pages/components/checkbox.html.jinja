@@ -15,8 +15,8 @@
   <div class="moo-component-examples">
     {% set default %}
       <div class="d-grid gap-2">
-        {{ checkbox("checkbox-default", label="Accept terms and conditions") }}
-        {{ checkbox("checkbox-checked", label="Accept terms and conditions", checked=true) }}
+        {{ checkbox("checkbox-default", label="Subscribe to the newsletter") }}
+        {{ checkbox("checkbox-checked", label="Subscribe to the newsletter", checked=true) }}
       </div>
     {% endset %}
     {{ render_example(
@@ -30,8 +30,8 @@
     {% set with_description %}
       {{ checkbox(
         "checkbox-description",
-        label="Accept terms and conditions",
-        description="By checking this box, you agree to the terms.",
+        label="Subscribe to the newsletter",
+        description="You can unsubscribe at any time from your account settings.",
         checked=true
       ) }}
     {% endset %}
@@ -45,8 +45,8 @@
 
     {% set disabled %}
       <div class="d-grid gap-2">
-        {{ checkbox("checkbox-disabled", label="Enable notifications", disabled=true) }}
-        {{ checkbox("checkbox-disabled-checked", label="Enable notifications", checked=true, disabled=true) }}
+        {{ checkbox("checkbox-disabled", label="Sync files automatically", disabled=true) }}
+        {{ checkbox("checkbox-disabled-checked", label="Sync files automatically", checked=true, disabled=true) }}
       </div>
     {% endset %}
     {{ render_example(
@@ -58,7 +58,7 @@
     ) }}
 
     {% set invalid %}
-      {{ checkbox("checkbox-invalid", label="Accept terms and conditions", invalid=true) }}
+      {{ checkbox("checkbox-invalid", label="Subscribe to the newsletter", invalid=true) }}
     {% endset %}
     {{ render_example(
       "invalid",
@@ -70,7 +70,7 @@
 
     {% set rtl %}
       <div dir="rtl">
-        {{ checkbox("checkbox-rtl", label="الموافقة على الشروط والأحكام") }}
+        {{ checkbox("checkbox-rtl", label="الاشتراك في النشرة الإخبارية") }}
       </div>
     {% endset %}
     {{ render_example(

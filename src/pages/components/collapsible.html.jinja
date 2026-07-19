@@ -16,9 +16,9 @@
     {% set basic %}
       {{ collapsible(
         "collapsible-basic",
-        "Order #4189",
-        "Placed on March 14 &middot; 3 items &middot; Standard shipping (5-7 days).",
-        trigger_aria_label="Toggle order details"
+        "Task: Update dependencies",
+        "Assigned to Alex &middot; Due Friday &middot; Priority: Medium.",
+        trigger_aria_label="Toggle task details"
       ) }}
     {% endset %}
     {{ render_example(
@@ -31,9 +31,9 @@
     {% set open %}
       {{ collapsible(
         "collapsible-open",
-        "Notification settings",
-        "Email alerts are on. Push notifications are off.",
-        trigger_aria_label="Toggle notification settings",
+        "Sound settings",
+        "Notification sound is on. Vibration is off.",
+        trigger_aria_label="Toggle sound settings",
         open=true
       ) }}
     {% endset %}
@@ -48,9 +48,9 @@
       <div dir="rtl">
         {{ collapsible(
           "collapsible-rtl",
-          "الطلب #4189",
-          "تم الطلب في 14 مارس &middot; 3 عناصر &middot; شحن قياسي (5-7 أيام).",
-          trigger_aria_label="إظهار تفاصيل الطلب"
+          "المهمة: تحديث الاعتماديات",
+          "مسندة إلى أليكس &middot; موعد التسليم الجمعة &middot; الأولوية: متوسطة.",
+          trigger_aria_label="إظهار تفاصيل المهمة"
         ) }}
       </div>
     {% endset %}

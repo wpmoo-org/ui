@@ -16,8 +16,8 @@
   <div class="moo-component-examples">
     {% set default %}
       {{ alert(
-        "Heads up!",
-        description="You can add components and dependencies to your app using the CLI.",
+        "Scheduled maintenance",
+        description="The catalog will be briefly unavailable this weekend while we upgrade the build pipeline.",
         icon="info"
       ) }}
     {% endset %}
@@ -30,8 +30,8 @@
 
     {% set destructive %}
       {{ alert(
-        "Payment failed",
-        description="Your payment could not be processed. Please check your payment method and try again.",
+        "Build failed",
+        description="The last commit broke two tests. Check the CI log for details.",
         variant="destructive",
         icon="circle-alert"
       ) }}
@@ -45,10 +45,10 @@
 
     {% set with_action %}
       {{ alert(
-        "Dark mode is now available",
-        description="Enable it under your profile settings to get started.",
+        "A new component just shipped",
+        description="Collapsible is ready to use. Check the docs to get started.",
         icon="info",
-        action=button("Enable", variant="outline", size="sm")
+        action=button("View docs", variant="outline", size="sm")
       ) }}
     {% endset %}
     {{ render_example(
@@ -60,8 +60,8 @@
 
     {% set dismissible %}
       {{ alert(
-        "New feature available",
-        description="We've added dark mode support. You can enable it in your account settings.",
+        "Preview images refreshed",
+        description="Component preview thumbnails were regenerated for the latest release.",
         icon="info",
         dismissible=true
       ) }}

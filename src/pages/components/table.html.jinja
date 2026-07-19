@@ -16,14 +16,14 @@
   <div class="moo-component-examples">
     {% set default %}
       {{ table(
-        ["Invoice", "Status", "Method", "Amount"],
+        ["Server", "Region", "Status", "Uptime"],
         [
-          ["INV001", badge("Paid", variant="outline"), "Credit Card", "$250.00"],
-          ["INV002", badge("Pending", variant="outline"), "PayPal", "$150.00"],
-          ["INV003", badge("Unpaid", variant="outline"), "Bank Transfer", "$350.00"]
+          ["api-01", "eu-west", badge("Online", variant="outline"), "99.98%"],
+          ["api-02", "eu-west", badge("Degraded", variant="outline"), "97.40%"],
+          ["api-03", "us-east", badge("Offline", variant="outline"), "0.00%"]
         ],
         align=["", "", "", "end"],
-        caption="A list of recent invoices."
+        caption="Current status of production API servers."
       ) }}
     {% endset %}
     {{ render_example(
@@ -35,12 +35,12 @@
 
     {% set striped_hover %}
       {{ table(
-        ["Invoice", "Status", "Amount"],
+        ["Package", "Version", "Size"],
         [
-          ["INV001", "Paid", "$250.00"],
-          ["INV002", "Pending", "$150.00"],
-          ["INV003", "Unpaid", "$350.00"],
-          ["INV004", "Paid", "$450.00"]
+          ["moo-ui", "2.4.0", "48 KB"],
+          ["bootstrap", "5.3.3", "212 KB"],
+          ["lucide-icons", "0.462.0", "18 KB"],
+          ["geist-font", "1.0", "64 KB"]
         ],
         align=["", "", "end"],
         striped=true,
@@ -56,8 +56,8 @@
 
     {% set small %}
       {{ table(
-        ["Invoice", "Amount"],
-        [["INV001", "$250.00"], ["INV002", "$150.00"]],
+        ["Package", "Size"],
+        [["moo-ui", "48 KB"], ["bootstrap", "212 KB"]],
         align=["", "end"],
         small=true
       ) }}
@@ -73,9 +73,9 @@
     {% set rtl %}
       <div dir="rtl">
         {{ table(
-          ["الفاتورة", "الحالة", "المبلغ"],
-          [["INV001", "مدفوع", "٢٥٠ ريال"], ["INV002", "معلق", "١٥٠ ريال"]],
-          align=["", "", "end"]
+          ["الحزمة", "الحجم"],
+          [["moo-ui", "٤٨ ك.ب"], ["bootstrap", "٢١٢ ك.ب"]],
+          align=["", "end"]
         ) }}
       </div>
     {% endset %}
