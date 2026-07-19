@@ -39,6 +39,13 @@ class CloseButtonTests(CatalogTestCase):
             '<button type="button" class="btn-close" aria-label="Dismiss"></button>',
         )
 
+    def test_close_button_dismiss_adds_bootstrap_dismiss_attribute(self) -> None:
+        self.assertEqual(
+            self.render_close_button('close_button(dismiss="alert")'),
+            '<button type="button" class="btn-close" aria-label="Close"'
+            ' data-bs-dismiss="alert"></button>',
+        )
+
     def test_close_button_requires_visible_aria_label(self) -> None:
         with self.assertRaisesRegex(ValueError, "Close button aria_label is required"):
             self.render_close_button('close_button(aria_label="   ")')

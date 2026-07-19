@@ -16,7 +16,7 @@
   {% if variant not in alert_variants %}{{ fail("Unknown alert variant: " ~ variant) }}{% endif %}
   {% set classes = "alert" %}
   {% if variant == "destructive" %}{% set classes = classes ~ " alert-danger" %}{% endif %}
-  {% if dismissible %}{% set classes = classes ~ " alert-dismissible" %}{% endif %}
+  {% if dismissible %}{% set classes = classes ~ " alert-dismissible fade show" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <div class="{{ classes }}" role="alert">
     {% if icon %}<span class="alert-icon" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>{% endif %}
@@ -25,6 +25,6 @@
       {% if description %}<p class="mb-0">{{ description }}</p>{% endif %}
     </div>
     {% if action %}<div class="alert-action">{{ action | safe }}</div>{% endif %}
-    {% if dismissible %}{{ close_button(aria_label=dismiss_aria_label) }}{% endif %}
+    {% if dismissible %}{{ close_button(aria_label=dismiss_aria_label, dismiss="alert") }}{% endif %}
   </div>
 {%- endmacro %}

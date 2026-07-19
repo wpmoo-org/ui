@@ -48,8 +48,12 @@ class AlertTests(CatalogTestCase):
 
     def test_alert_dismissible_composes_close_button(self) -> None:
         output = self.render_alert('alert("Heads up!", dismissible=true)')
-        self.assertIn('class="alert alert-dismissible"', output)
-        self.assertIn('<button type="button" class="btn-close" aria-label="Close"></button>', output)
+        self.assertIn('class="alert alert-dismissible fade show"', output)
+        self.assertIn(
+            '<button type="button" class="btn-close" aria-label="Close"'
+            ' data-bs-dismiss="alert"></button>',
+            output,
+        )
 
     def test_alert_action_renders_trusted_markup(self) -> None:
         output = self.render_alert('alert("Heads up!", action="<button>Go</button>")')

@@ -1,4 +1,4 @@
-{% macro close_button(aria_label="Close", disabled=false, extra_class="") -%}
+{% macro close_button(aria_label="Close", disabled=false, dismiss="", extra_class="") -%}
   {% if not aria_label | trim %}{{ fail("Close button aria_label is required") }}{% endif %}
-  <button type="button" class="btn-close{% if extra_class %} {{ extra_class }}{% endif %}" aria-label="{{ aria_label }}"{% if disabled %} disabled{% endif %}></button>
+  <button type="button" class="btn-close{% if extra_class %} {{ extra_class }}{% endif %}" aria-label="{{ aria_label }}"{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if disabled %} disabled{% endif %}></button>
 {%- endmacro %}
