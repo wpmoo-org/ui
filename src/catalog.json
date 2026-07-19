@@ -133,5 +133,10 @@
     "slug": "accordion",
     "label": "Accordion",
     "status": "ready"
+  },
+  {
+    "slug": "tabs",
+    "label": "Tabs",
+    "status": "ready"
   }
 ]

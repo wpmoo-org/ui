@@ -1,0 +1,32 @@
+// shadcn's TabsList is a segmented control: a muted rounded track with an
+// inset, shadowed pill marking the active tab. Bootstrap's pills nav has
+// no shared track and colors the active pill with $primary directly, so
+// this styling is scoped to the tabs-list wrapper instead of the shared
+// pills class — Navigation's own pills variant already owns that class
+// and must keep its plain Bootstrap look.
+.tabs-list {
+  display: inline-flex;
+  gap: 0.125rem;
+  padding: 0.1875rem;
+  background-color: var(--moo-muted-surface);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.tabs-list .nav-link {
+  padding: 0.125rem 0.75rem;
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: var(--moo-muted-foreground);
+  border-radius: var(--bs-border-radius);
+  transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tabs-list .nav-link:hover {
+  color: var(--moo-foreground);
+}
+
+.tabs-list .nav-link.active {
+  color: var(--moo-foreground);
+  background-color: var(--moo-surface);
+  box-shadow: var(--bs-box-shadow-sm);
+}

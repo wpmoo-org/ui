@@ -1,0 +1,86 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/tabs.html.jinja" import tabs %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Tabs — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Tabs",
+    "Switch between related views in the same space using Bootstrap's Tab plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ tabs(
+        "tabs-basic",
+        [
+          {
+            "id": "overview",
+            "title": "Overview",
+            "content": "View your key metrics and recent project activity."
+          },
+          {
+            "id": "analytics",
+            "title": "Analytics",
+            "content": "Track progress across all your active projects."
+          },
+          {
+            "id": "reports",
+            "title": "Reports",
+            "content": "Export usage reports for the current billing period."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "The first item is active by default; set <code>active</code> on an item to override it.",
+      basic
+    ) }}
+
+    {% set disabled %}
+      {{ tabs(
+        "tabs-disabled",
+        [
+          {"id": "home", "title": "Home", "content": "Welcome back."},
+          {"id": "billing", "title": "Billing", "content": "Not available on your current plan.", "disabled": true}
+        ]
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",
+      disabled
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ tabs(
+          "tabs-rtl",
+          [
+            {"id": "overview", "title": "نظرة عامة", "content": "عرض مقاييسك الرئيسية وأنشطة المشروع الأخيرة."},
+            {"id": "reports", "title": "التقارير", "content": "تصدير تقارير الاستخدام للفترة الحالية."}
+          ]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The active tab's track and text swap sides without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Tab plugin behavior and keyboard interaction, see the",
+    "https://getbootstrap.com/docs/5.3/components/navs-tab/",
+    "Bootstrap Navs and tabs documentation"
+  ) }}
+
+{% endblock %}

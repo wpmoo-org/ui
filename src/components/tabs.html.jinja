@@ -1,0 +1,26 @@
+{% macro tabs(id, items, extra_class="") -%}
+  {% if not id | trim %}{{ fail("Tabs id is required") }}{% endif %}
+  {% if not items %}{{ fail("Tabs requires at least one item") }}{% endif %}
+  {% set has_explicit_active = items | selectattr("active", "defined") | selectattr("active") | list | length > 0 %}
+  <div{% if extra_class %} class="{{ extra_class }}"{% endif %}>
+    <div class="tabs-list nav nav-pills" id="{{ id }}-list" role="tablist">
+      {% for item in items %}
+        {% if not item.id | default("", true) | trim %}{{ fail("Tabs item id is required") }}{% endif %}
+        {% if not item.title | default("", true) | trim %}{{ fail("Tabs item title is required") }}{% endif %}
+        {% set is_active = (item.active is defined and item.active) or (not has_explicit_active and loop.first) %}
+        {% set is_disabled = item.disabled is defined and item.disabled %}
+        {% set tab_id = id ~ "-" ~ item.id ~ "-tab" %}
+        {% set pane_id = id ~ "-" ~ item.id ~ "-pane" %}
+        <button class="nav-link{% if is_active %} active{% endif %}" id="{{ tab_id }}" data-bs-toggle="tab" data-bs-target="#{{ pane_id }}" type="button" role="tab" aria-controls="{{ pane_id }}" aria-selected="{{ "true" if is_active else "false" }}"{% if is_disabled %} disabled{% endif %}>{{ item.title }}</button>
+      {% endfor %}
+    </div>
+    <div class="tab-content" id="{{ id }}-content">
+      {% for item in items %}
+        {% set is_active = (item.active is defined and item.active) or (not has_explicit_active and loop.first) %}
+        {% set tab_id = id ~ "-" ~ item.id ~ "-tab" %}
+        {% set pane_id = id ~ "-" ~ item.id ~ "-pane" %}
+        <div class="tab-pane fade{% if is_active %} show active{% endif %}" id="{{ pane_id }}" role="tabpanel" aria-labelledby="{{ tab_id }}" tabindex="0">{{ item.content | safe }}</div>
+      {% endfor %}
+    </div>
+  </div>
+{%- endmacro %}

@@ -81,6 +81,10 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's own Collapse plugin toggles the bare .collapsed
             # state class on the trigger; it is not "accordion-" prefixed.
             "accordion": ("accordion", "collapsed"),
+            # The segmented-control track styles Bootstrap's shared
+            # .nav-link/.active classes within its own .tabs-list scope,
+            # rather than the .nav-pills family Navigation already owns.
+            "tabs": ("tabs", "nav-link", "active"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
