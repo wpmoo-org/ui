@@ -7,10 +7,11 @@
     {% for item in items %}
       {% if not item.id | default("", true) | trim %}{{ fail("Radio Group item id is required") }}{% endif %}
       {% if not item.label | default("", true) | trim %}{{ fail("Radio Group item label is required") }}{% endif %}
+      {% set has_description = item.description is defined and item.description %}
       <div class="form-check">
-        <input class="form-check-input" type="radio" name="{{ name }}" id="{{ item.id }}"{% if item.value is defined %} value="{{ item.value }}"{% endif %}{% if item.checked is defined and item.checked %} checked{% endif %}{% if item.disabled is defined and item.disabled %} disabled{% endif %}>
+        <input class="form-check-input" type="radio" name="{{ name }}" id="{{ item.id }}"{% if item.value is defined %} value="{{ item.value }}"{% endif %}{% if item.checked is defined and item.checked %} checked{% endif %}{% if item.disabled is defined and item.disabled %} disabled{% endif %}{% if has_description %} aria-describedby="{{ item.id }}-description"{% endif %}>
         <label class="form-check-label" for="{{ item.id }}">{{ item.label }}</label>
-        {% if item.description is defined and item.description %}<div class="form-text">{{ item.description }}</div>{% endif %}
+        {% if has_description %}<div class="form-text" id="{{ item.id }}-description">{{ item.description }}</div>{% endif %}
       </div>
     {% endfor %}
   </fieldset>

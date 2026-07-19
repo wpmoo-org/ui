@@ -117,3 +117,10 @@ class InputTests(CatalogTestCase):
         self.assertIn(" is-invalid", output)
         self.assertIn(' aria-invalid="true"', output)
         self.assertIn(" required", output)
+
+    def test_input_describedby_links_helper_text(self) -> None:
+        output = self.render_input(
+            'input(label="Key", id="key", describedby="key-help")'
+        )
+
+        self.assertIn('aria-describedby="key-help"', output)

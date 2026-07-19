@@ -10,7 +10,8 @@
   aria_invalid=false,
   required=false,
   disabled=false,
-  readonly=false
+  readonly=false,
+  describedby=""
 ) -%}
   {% set has_label = label | trim %}
   {% set has_aria_label = aria_label | trim %}
@@ -19,5 +20,5 @@
   {% if type not in input_types %}{{ fail("Unknown input type: " ~ type) }}{% endif %}
 
   {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
-  <input class="form-control{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} type="{{ type }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if value %} value="{{ value }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+  <input class="form-control{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} type="{{ type }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if value %} value="{{ value }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}>
 {%- endmacro %}

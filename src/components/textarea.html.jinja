@@ -10,7 +10,8 @@
   size="",
   aria_invalid=false,
   disabled=false,
-  readonly=false
+  readonly=false,
+  describedby=""
 ) -%}
   {% set has_label = label | trim %}
   {% set has_aria_label = aria_label | trim %}
@@ -20,5 +21,5 @@
   {% if rows < 1 %}{{ fail("Textarea rows must be positive") }}{% endif %}
 
   {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
-  <textarea class="form-control{% if size %} form-control-{{ size }}{% endif %}{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} rows="{{ rows }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>{{ value }}</textarea>
+  <textarea class="form-control{% if size %} form-control-{{ size }}{% endif %}{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} rows="{{ rows }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}>{{ value }}</textarea>
 {%- endmacro %}

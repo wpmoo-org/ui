@@ -57,9 +57,11 @@ class SwitchTests(CatalogTestCase):
         )
 
     def test_switch_description_renders_form_text(self) -> None:
-        self.assertIn(
-            '<div class="form-text">Details here.</div>',
-            self.render_switch(
-                'switch("s5", label="Airplane mode", description="Details here.")'
-            ),
+        output = self.render_switch(
+            'switch("s5", label="Airplane mode", description="Details here.")'
         )
+        self.assertIn(
+            '<div class="form-text" id="s5-description">Details here.</div>',
+            output,
+        )
+        self.assertIn('aria-describedby="s5-description"', output)

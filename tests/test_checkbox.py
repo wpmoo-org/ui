@@ -57,9 +57,11 @@ class CheckboxTests(CatalogTestCase):
         )
 
     def test_checkbox_description_renders_form_text(self) -> None:
-        self.assertIn(
-            '<div class="form-text">Details here.</div>',
-            self.render_checkbox(
-                'checkbox("c5", label="Accept", description="Details here.")'
-            ),
+        output = self.render_checkbox(
+            'checkbox("c5", label="Accept", description="Details here.")'
         )
+        self.assertIn(
+            '<div class="form-text" id="c5-description">Details here.</div>',
+            output,
+        )
+        self.assertIn('aria-describedby="c5-description"', output)

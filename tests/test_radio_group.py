@@ -48,7 +48,11 @@ class RadioGroupTests(CatalogTestCase):
             'radio_group("plan", "Plan", '
             '[{"id": "plan-a", "label": "A", "description": "Details here."}])'
         )
-        self.assertIn('<div class="form-text">Details here.</div>', output)
+        self.assertIn(
+            '<div class="form-text" id="plan-a-description">Details here.</div>',
+            output,
+        )
+        self.assertIn('aria-describedby="plan-a-description"', output)
 
     def test_radio_group_supports_extra_class(self) -> None:
         output = self.render_radio_group(

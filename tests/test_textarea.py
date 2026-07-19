@@ -66,3 +66,10 @@ class TextareaTests(CatalogTestCase):
         self.assertIn(' aria-invalid="true"', output)
         self.assertIn(" disabled", output)
         self.assertIn(" readonly", output)
+
+    def test_textarea_describedby_links_helper_text(self) -> None:
+        output = self.render_textarea(
+            'textarea(label="Message", id="message", describedby="message-help")'
+        )
+
+        self.assertIn('aria-describedby="message-help"', output)

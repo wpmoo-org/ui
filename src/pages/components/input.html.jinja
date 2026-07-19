@@ -18,9 +18,10 @@
         {{ input(
           label="API Key",
           id="api-key",
-          placeholder="sk-..."
+          placeholder="sk-...",
+          describedby="api-key-help"
         ) }}
-        <div class="form-text">Your API key is encrypted and stored securely.</div>
+        <div class="form-text" id="api-key-help">Your API key is encrypted and stored securely.</div>
       </div>
     {% endset %}
     {{ render_example(
@@ -52,9 +53,10 @@
           id="disabled-email",
           type="text",
           value="team@example.com",
-          disabled=true
+          disabled=true,
+          describedby="disabled-email-help"
         ) }}
-        <div class="form-text">This field is currently disabled.</div>
+        <div class="form-text" id="disabled-email-help">This field is currently disabled.</div>
       </div>
     {% endset %}
     {{ render_example(
@@ -70,9 +72,10 @@
         {{ input(
           label="Picture",
           id="picture",
-          type="file"
+          type="file",
+          describedby="picture-help"
         ) }}
-        <div class="form-text">Select a picture to upload.</div>
+        <div class="form-text" id="picture-help">Select a picture to upload.</div>
       </div>
     {% endset %}
     {{ render_example(
