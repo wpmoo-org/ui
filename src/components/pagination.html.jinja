@@ -1,0 +1,54 @@
+{% set pagination_sizes = ["", "sm", "lg"] %}
+
+{% macro pagination(aria_label="Pagination", size="", extra_class="") -%}
+  {% if size not in pagination_sizes %}{{ fail("Unknown pagination size: " ~ size) }}{% endif %}
+  {% set classes = "pagination" %}
+  {% if size %}{% set classes = classes ~ " pagination-" ~ size %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <nav aria-label="{{ aria_label }}">
+    <ul class="{{ classes }}">
+      {{ caller() | trim | safe }}
+    </ul>
+  </nav>
+{%- endmacro %}
+
+{% macro pagination_item(label, href="#", active=false, disabled=false) -%}
+  {% if not label | trim %}{{ fail("Pagination item label is required") }}{% endif %}
+  {% set classes = "page-item" %}
+  {% if active %}{% set classes = classes ~ " active" %}{% endif %}
+  {% if disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
+  <li class="{{ classes }}"{% if active %} aria-current="page"{% endif %}>
+    {% if disabled %}
+      <span class="page-link">{{ label }}</span>
+    {% else %}
+      <a class="page-link" href="{{ href }}">{{ label }}</a>
+    {% endif %}
+  </li>
+{%- endmacro %}
+
+{% macro _pagination_nav_item(icon, label, href, disabled, icon_position) -%}
+  {% set icon_markup = render_icon(icon, icon_position) %}
+  {% set label_markup %}<span class="d-none d-sm-inline">{{ label }}</span>{% endset %}
+  {% set body = (icon_markup ~ label_markup) if icon_position == "inline-start" else (label_markup ~ icon_markup) %}
+  <li class="page-item{% if disabled %} disabled{% endif %}">
+    {% if disabled %}
+      <span class="page-link" aria-label="{{ label }}">{{ body | safe }}</span>
+    {% else %}
+      <a class="page-link" href="{{ href }}" aria-label="{{ label }}">{{ body | safe }}</a>
+    {% endif %}
+  </li>
+{%- endmacro %}
+
+{% macro pagination_prev(href="#", disabled=false, label="Previous") -%}
+  {{ _pagination_nav_item("chevron-left", label, href, disabled, "inline-start") }}
+{%- endmacro %}
+
+{% macro pagination_next(href="#", disabled=false, label="Next") -%}
+  {{ _pagination_nav_item("chevron-right", label, href, disabled, "inline-end") }}
+{%- endmacro %}
+
+{% macro pagination_ellipsis(label="More pages") -%}
+  <li class="page-item disabled">
+    <span class="page-link">{{ render_icon("ellipsis", "inline-start") }}<span class="visually-hidden">{{ label }}</span></span>
+  </li>
+{%- endmacro %}

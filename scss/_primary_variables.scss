@@ -50,6 +50,21 @@ $kbd-color: var(--bs-secondary-color) !default;
 $kbd-bg: var(--bs-secondary-bg) !default;
 // shadcn's breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
+// shadcn's pagination items sit separated with no border, ghost-hover, and
+// only the active page gets a bordered box; Bootstrap's default is a fully
+// bordered, edge-to-edge connected strip. A positive margin-start switches
+// Bootstrap's own pagination.scss out of connected-border mode.
+$pagination-margin-start: 0.25rem !default;
+$pagination-color: var(--moo-muted-foreground) !default;
+$pagination-border-color: transparent !default;
+$pagination-hover-color: var(--bs-body-color) !default;
+$pagination-hover-bg: var(--moo-muted-surface) !default;
+$pagination-hover-border-color: transparent !default;
+$pagination-focus-bg: var(--moo-muted-surface) !default;
+$pagination-active-color: var(--bs-body-color) !default;
+$pagination-active-bg: var(--moo-muted-surface) !default;
+$pagination-active-border-color: var(--moo-border) !default;
+$pagination-disabled-border-color: transparent !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;

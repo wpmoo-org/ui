@@ -66,6 +66,9 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap has no native sidebar component; its public namespace
             # is owned explicitly by the Sidebar partial and styles.
             "sidebar": ("sidebar",),
+            # Bootstrap's pagination markup uses .page-item/.page-link, not a
+            # "pagination-" prefixed family.
+            "pagination": ("pagination", "page"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -98,8 +101,8 @@ class CatalogContractTests(CatalogTestCase):
         component_class = re.compile(
             r"^(?:accordion|alert|badge|breadcrumb|btn|card|dropdown|"
             r"form-control|form-label|input-group|list-group|modal|nav|"
-            r"navbar|offcanvas|placeholder|popover|progress|spinner|"
-            r"toast)(?:-|$)"
+            r"navbar|offcanvas|page|pagination|placeholder|popover|"
+            r"progress|spinner|toast)(?:-|$)"
         )
 
         pages = [

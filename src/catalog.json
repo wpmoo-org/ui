@@ -93,5 +93,10 @@
     "slug": "breadcrumb",
     "label": "Breadcrumb",
     "status": "ready"
+  },
+  {
+    "slug": "pagination",
+    "label": "Pagination",
+    "status": "ready"
   }
 ]
