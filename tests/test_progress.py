@@ -54,3 +54,9 @@ class ProgressTests(CatalogTestCase):
             self.render_progress('progress(-1, aria_label="Invalid")')
         with self.assertRaisesRegex(ValueError, "Progress value must be between 0 and max"):
             self.render_progress('progress(150, aria_label="Invalid")')
+
+    def test_progress_rejects_non_positive_max(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Progress max must be positive"):
+            self.render_progress('progress(0, max=0, aria_label="Invalid")')
+        with self.assertRaisesRegex(ValueError, "Progress max must be positive"):
+            self.render_progress('progress(0, max=-10, aria_label="Invalid")')

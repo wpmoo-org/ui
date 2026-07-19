@@ -1,5 +1,6 @@
 {% macro progress(value, max=100, aria_label="", show_label=false, extra_class="") -%}
   {% if not aria_label | trim %}{{ fail("Progress aria_label is required") }}{% endif %}
+  {% if max <= 0 %}{{ fail("Progress max must be positive") }}{% endif %}
   {% if value < 0 or value > max %}{{ fail("Progress value must be between 0 and max") }}{% endif %}
   {% set percent = (value / max * 100) | round | int %}
   <div>
