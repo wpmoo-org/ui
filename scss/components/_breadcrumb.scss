@@ -9,9 +9,10 @@
 .breadcrumb-item a {
   color: var(--moo-muted-foreground);
   text-decoration: none;
+  transition: color 0.15s ease;
 }
 
 .breadcrumb-item a:hover {
   color: var(--moo-foreground);
-  text-decoration: underline;
+  text-decoration: none;
 }

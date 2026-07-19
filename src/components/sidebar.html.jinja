@@ -11,6 +11,7 @@
 {% set sidebar_variants = ["sidebar", "floating", "inset"] %}
 {% set sidebar_collapsible = ["icon", "offcanvas", "none"] %}
 {% set sidebar_button_sizes = ["default", "lg"] %}
+{% set sidebar_dropdown_directions = ["dropdown", "dropup", "dropend", "dropstart"] %}
 
 {% from "components/dropdown_menu.html.jinja" import dropdown_menu %}
 {% from "components/badge.html.jinja" import badge %}
@@ -169,9 +170,10 @@
   </span>
 {%- endmacro %}
 
-{% macro sidebar_menu_item(dropdown=false, extra_class="") -%}
+{% macro sidebar_menu_item(dropdown=false, extra_class="", dropdown_direction="dropdown") -%}
+  {% if dropdown and dropdown_direction not in sidebar_dropdown_directions %}{{ fail("Unknown sidebar dropdown direction: " ~ dropdown_direction) }}{% endif %}
   {% set classes = "sidebar-menu-item" %}
-  {% if dropdown %}{% set classes = classes ~ " dropdown" %}{% endif %}
+  {% if dropdown %}{% set classes = classes ~ " " ~ dropdown_direction %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <li class="{{ classes }}" data-slot="sidebar-menu-item">
     {{ caller() | trim | safe }}
@@ -203,6 +205,7 @@
   tooltip="",
   element="a",
   dropdown=false,
+  dropdown_offset="",
   collapse_target="",
   collapse_open=false,
   aria_label="",
@@ -211,6 +214,7 @@
 ) -%}
   {% if not title | trim %}{{ fail("Sidebar menu button title is required") }}{% endif %}
   {% if size not in sidebar_button_sizes %}{{ fail("Unknown sidebar menu button size: " ~ size) }}{% endif %}
+  {% if dropdown_offset and not dropdown %}{{ fail("Sidebar menu button dropdown_offset requires dropdown=true") }}{% endif %}
   {% set classes = "sidebar-menu-button" %}
   {% if size != "default" %}{% set classes = classes ~ " sidebar-menu-button--" ~ size %}{% endif %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
@@ -230,7 +234,7 @@
       class="{{ classes }}"
       type="button"
       data-slot="sidebar-menu-button"
-      {% if dropdown %}data-bs-toggle="dropdown" aria-expanded="false"{% endif %}
+      {% if dropdown %}data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}
       {% if collapse_target %}data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}
       data-moo-sidebar-tooltip="{{ tip }}"
       {% if aria_label %} aria-label="{{ aria_label }}"{% endif %}

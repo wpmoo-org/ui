@@ -1,47 +1,3 @@
-@property --scroll-fade-t {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0;
-}
-
-@property --scroll-fade-b {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0;
-}
-
-@property --scroll-fade-s {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0;
-}
-
-@property --scroll-fade-e {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0;
-}
-
-@keyframes scroll-fade-reveal-t {
-  from { --scroll-fade-t: 0; }
-  to { --scroll-fade-t: var(--scroll-fade-t-size); }
-}
-
-@keyframes scroll-fade-reveal-b {
-  from { --scroll-fade-b: var(--scroll-fade-b-size); }
-  to { --scroll-fade-b: 0; }
-}
-
-@keyframes scroll-fade-reveal-s {
-  from { --scroll-fade-s: 0; }
-  to { --scroll-fade-s: var(--scroll-fade-s-size); }
-}
-
-@keyframes scroll-fade-reveal-e {
-  from { --scroll-fade-e: var(--scroll-fade-e-size); }
-  to { --scroll-fade-e: 0; }
-}
-
 :where(
   .scroll-fade,
   .scroll-fade-y,
@@ -55,23 +11,23 @@
 ) {
   --scroll-fade-size: min(12%, 2.5rem);
   --scroll-fade-reveal: 6rem;
-  --scroll-fade-t-size: var(--scroll-fade-size);
-  --scroll-fade-b-size: var(--scroll-fade-size);
-  --scroll-fade-s-size: var(--scroll-fade-size);
-  --scroll-fade-e-size: var(--scroll-fade-size);
-  --scroll-fade-mask: linear-gradient(
+  --moo-scroll-fade-t-size: var(--scroll-fade-size);
+  --moo-scroll-fade-b-size: var(--scroll-fade-size);
+  --moo-scroll-fade-s-size: var(--scroll-fade-size);
+  --moo-scroll-fade-e-size: var(--scroll-fade-size);
+  --moo-scroll-fade-mask: linear-gradient(
     to bottom,
     transparent 0,
-    #000 var(--scroll-fade-t),
-    #000 calc(100% - var(--scroll-fade-b)),
+    #000 var(--moo-scroll-fade-t),
+    #000 calc(100% - var(--moo-scroll-fade-b)),
     transparent 100%
   );
-  mask-image: var(--scroll-fade-mask);
+  mask-image: var(--moo-scroll-fade-mask);
 }
 
 .scroll-fade,
 .scroll-fade-y {
-  animation-name: scroll-fade-reveal-t, scroll-fade-reveal-b;
+  animation-name: moo-scroll-fade-reveal-t, moo-scroll-fade-reveal-b;
   animation-duration: 1ms, 1ms;
   animation-fill-mode: both, both;
   animation-timing-function: linear, linear;
@@ -80,7 +36,7 @@
 }
 
 .scroll-fade-t {
-  animation-name: scroll-fade-reveal-t;
+  animation-name: moo-scroll-fade-reveal-t;
   animation-duration: 1ms;
   animation-fill-mode: both;
   animation-timing-function: linear;
@@ -89,7 +45,7 @@
 }
 
 .scroll-fade-b {
-  animation-name: scroll-fade-reveal-b;
+  animation-name: moo-scroll-fade-reveal-b;
   animation-duration: 1ms;
   animation-fill-mode: both;
   animation-timing-function: linear;
@@ -100,17 +56,17 @@
 .scroll-fade-x,
 .scroll-fade-s,
 .scroll-fade-e {
-  --scroll-fade-mask: linear-gradient(
+  --moo-scroll-fade-mask: linear-gradient(
     to right,
     transparent 0,
-    #000 var(--scroll-fade-s),
-    #000 calc(100% - var(--scroll-fade-e)),
+    #000 var(--moo-scroll-fade-s),
+    #000 calc(100% - var(--moo-scroll-fade-e)),
     transparent 100%
   );
 }
 
 .scroll-fade-x {
-  animation-name: scroll-fade-reveal-s, scroll-fade-reveal-e;
+  animation-name: moo-scroll-fade-reveal-s, moo-scroll-fade-reveal-e;
   animation-duration: 1ms, 1ms;
   animation-fill-mode: both, both;
   animation-timing-function: linear, linear;
@@ -119,7 +75,7 @@
 }
 
 .scroll-fade-s {
-  animation-name: scroll-fade-reveal-s;
+  animation-name: moo-scroll-fade-reveal-s;
   animation-duration: 1ms;
   animation-fill-mode: both;
   animation-timing-function: linear;
@@ -128,7 +84,7 @@
 }
 
 .scroll-fade-e {
-  animation-name: scroll-fade-reveal-e;
+  animation-name: moo-scroll-fade-reveal-e;
   animation-duration: 1ms;
   animation-fill-mode: both;
   animation-timing-function: linear;
@@ -139,28 +95,28 @@
 .scroll-fade-x:where([dir="rtl"], [dir="rtl"] *),
 .scroll-fade-s:where([dir="rtl"], [dir="rtl"] *),
 .scroll-fade-e:where([dir="rtl"], [dir="rtl"] *) {
-  --scroll-fade-mask: linear-gradient(
+  --moo-scroll-fade-mask: linear-gradient(
     to left,
     transparent 0,
-    #000 var(--scroll-fade-s),
-    #000 calc(100% - var(--scroll-fade-e)),
+    #000 var(--moo-scroll-fade-s),
+    #000 calc(100% - var(--moo-scroll-fade-e)),
     transparent 100%
   );
 }
 
 .scroll-fade-l,
 .scroll-fade-r {
-  --scroll-fade-mask: linear-gradient(
+  --moo-scroll-fade-mask: linear-gradient(
     to right,
     transparent 0,
-    #000 var(--scroll-fade-s),
-    #000 calc(100% - var(--scroll-fade-e)),
+    #000 var(--moo-scroll-fade-s),
+    #000 calc(100% - var(--moo-scroll-fade-e)),
     transparent 100%
   );
 }
 
 .scroll-fade-l {
-  animation-name: scroll-fade-reveal-s;
+  animation-name: moo-scroll-fade-reveal-s;
   animation-duration: 1ms;
   animation-fill-mode: both;
   animation-timing-function: linear;
@@ -169,7 +125,7 @@
 }
 
 .scroll-fade-r {
-  animation-name: scroll-fade-reveal-e;
+  animation-name: moo-scroll-fade-reveal-e;
   animation-duration: 1ms;
   animation-fill-mode: both;
   animation-timing-function: linear;
@@ -178,7 +134,7 @@
 }
 
 .scroll-fade-none {
-  --scroll-fade-mask: none;
+  --moo-scroll-fade-mask: none;
 }
 
 .no-scrollbar {
@@ -192,19 +148,19 @@
 @supports not (animation-timeline: scroll()) {
   .scroll-fade,
   .scroll-fade-y {
-    --scroll-fade-t: var(--scroll-fade-t-size);
-    --scroll-fade-b: var(--scroll-fade-b-size);
+    --moo-scroll-fade-t: var(--moo-scroll-fade-t-size);
+    --moo-scroll-fade-b: var(--moo-scroll-fade-b-size);
   }
 
   .scroll-fade-x {
-    --scroll-fade-s: var(--scroll-fade-s-size);
-    --scroll-fade-e: var(--scroll-fade-e-size);
+    --moo-scroll-fade-s: var(--moo-scroll-fade-s-size);
+    --moo-scroll-fade-e: var(--moo-scroll-fade-e-size);
   }
 
-  .scroll-fade-t { --scroll-fade-t: var(--scroll-fade-t-size); }
-  .scroll-fade-b { --scroll-fade-b: var(--scroll-fade-b-size); }
+  .scroll-fade-t { --moo-scroll-fade-t: var(--moo-scroll-fade-t-size); }
+  .scroll-fade-b { --moo-scroll-fade-b: var(--moo-scroll-fade-b-size); }
   .scroll-fade-l,
-  .scroll-fade-s { --scroll-fade-s: var(--scroll-fade-s-size); }
+  .scroll-fade-s { --moo-scroll-fade-s: var(--moo-scroll-fade-s-size); }
   .scroll-fade-r,
-  .scroll-fade-e { --scroll-fade-e: var(--scroll-fade-e-size); }
+  .scroll-fade-e { --moo-scroll-fade-e: var(--moo-scroll-fade-e-size); }
 }

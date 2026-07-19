@@ -1,0 +1,19 @@
+:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-select,
+.moo-ui[data-bs-theme="dark"] .form-select {
+  --#{$prefix}form-select-bg-img: #{escape-svg($form-select-indicator-dark)};
+}
+
+:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-switch .form-check-input:not(:checked):not(:focus),
+.moo-ui[data-bs-theme="dark"] .form-switch .form-check-input:not(:checked):not(:focus) {
+  --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-dark)};
+}
+
+:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-check-input:checked,
+.moo-ui[data-bs-theme="dark"] .form-check-input:checked {
+  filter: invert(1);
+}
+
+:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .btn-close,
+.moo-ui[data-bs-theme="dark"] .btn-close {
+  filter: var(--#{$prefix}btn-close-white-filter);
+}
