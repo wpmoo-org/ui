@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import hashlib
 import json
 import re
 import shutil
+import tempfile
 import textwrap
 import time
 from html import escape
@@ -13,6 +16,11 @@ from pathlib import Path
 import sass
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from markupsafe import Markup
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - POSIX workstation path owns locking.
+    fcntl = None
 
 
 ROOT = Path(__file__).resolve().parent
@@ -24,6 +32,10 @@ DIST = ROOT / "dist"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
+BUILD_LOCK = (
+    Path(tempfile.gettempdir())
+    / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
+)
 
 HTML_TOKEN = re.compile(
     r"<!--.*?-->|<![^>]*>|</?[A-Za-z][^>]*?>",
@@ -340,17 +352,36 @@ def load_catalog() -> list[dict[str, str]]:
     return load_entries("catalog.json")
 
 
+def compile_style(name: str) -> str:
+    include_paths = [str(SCSS), str(BOOTSTRAP / "scss")]
+    css = sass.compile(
+        filename=str(SCSS / f"{name}.scss"),
+        include_paths=include_paths,
+        output_style="expanded",
+    )
+    return css.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def compile_styles() -> None:
     css_dir = DIST / "assets/css"
     css_dir.mkdir(parents=True, exist_ok=True)
-    include_paths = [str(SCSS), str(BOOTSTRAP / "scss")]
-    for name in ("moo-ui", "catalog"):
-        css = sass.compile(
-            filename=str(SCSS / f"{name}.scss"),
-            include_paths=include_paths,
-            output_style="expanded",
-        )
+    for name in ("moo-ui", "catalog", "moo-core"):
+        css = compile_style(name)
         (css_dir / f"{name}.css").write_text(css, encoding="utf-8")
+
+
+def asset_version() -> str:
+    digest = hashlib.sha256()
+    for relative in (
+        "assets/css/moo-ui.css",
+        "assets/css/catalog.css",
+        "assets/js/bootstrap.bundle.min.js",
+        "assets/js/preview.js",
+    ):
+        path = DIST / relative
+        digest.update(relative.encode("utf-8"))
+        digest.update(path.read_bytes())
+    return digest.hexdigest()[:12]
 
 
 def copy_assets() -> None:
@@ -379,6 +410,7 @@ def render_pages() -> None:
     catalog = load_catalog()
     utilities = load_entries("utilities.json")
     blocks = load_entries("blocks.json")
+    version = asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
         output_relative = relative.with_suffix("")
@@ -399,17 +431,34 @@ def render_pages() -> None:
             current_section=current_section,
             current_slug=current_slug,
             root_path=root_path,
+            asset_version=version,
         )
         output_file.write_text(rendered, encoding="utf-8")
 
 
+@contextlib.contextmanager
+def build_lock():
+    if fcntl is None:
+        yield
+        return
+
+    BUILD_LOCK.parent.mkdir(parents=True, exist_ok=True)
+    with BUILD_LOCK.open("w", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
 def build() -> None:
-    if DIST.exists():
-        shutil.rmtree(DIST)
-    DIST.mkdir()
-    compile_styles()
-    copy_assets()
-    render_pages()
+    with build_lock():
+        if DIST.exists():
+            shutil.rmtree(DIST)
+        DIST.mkdir()
+        compile_styles()
+        copy_assets()
+        render_pages()
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:

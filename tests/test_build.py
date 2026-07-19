@@ -11,6 +11,7 @@ class BuildTests(CatalogTestCase):
         self.assertTrue((DIST / "index.html").is_file())
         self.assertTrue((DIST / "assets/css/moo-ui.css").is_file())
         self.assertTrue((DIST / "assets/css/catalog.css").is_file())
+        self.assertTrue((DIST / "assets/css/moo-core.css").is_file())
         self.assertTrue(
             (DIST / "assets/js/bootstrap.bundle.min.js").is_file()
         )

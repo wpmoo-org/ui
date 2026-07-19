@@ -367,4 +367,45 @@
       toggleSidebar(wrapper);
     }
   });
+
+  const blockFrameShells = Array.from(
+    document.querySelectorAll("[data-moo-block-frame-shell]")
+  );
+
+  const resizeBlockFrame = (shell) => {
+    const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
+    const frame = shell.querySelector("[data-moo-block-frame]");
+    const frameWidth = Number(shell.dataset.mooFrameWidth || frame?.getAttribute("width") || 1280);
+    const frameHeight = Number(shell.dataset.mooFrameHeight || frame?.getAttribute("height") || 720);
+
+    if (!viewport || !frame || !frameWidth || !frameHeight) {
+      return;
+    }
+
+    const scale = Math.min(1, viewport.clientWidth / frameWidth);
+    frame.style.width = `${frameWidth}px`;
+    frame.style.height = `${frameHeight}px`;
+    frame.style.transform = `scale(${scale})`;
+    viewport.style.height = `${Math.ceil(frameHeight * scale)}px`;
+  };
+
+  if (blockFrameShells.length > 0) {
+    const resizeBlockFrames = () => {
+      blockFrameShells.forEach((shell) => resizeBlockFrame(shell));
+    };
+
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(resizeBlockFrames);
+      blockFrameShells.forEach((shell) => observer.observe(shell));
+    }
+
+    blockFrameShells.forEach((shell) => {
+      shell.querySelector("[data-moo-block-frame]")?.addEventListener(
+        "load",
+        () => resizeBlockFrame(shell)
+      );
+    });
+    window.addEventListener("resize", resizeBlockFrames);
+    resizeBlockFrames();
+  }
 })();

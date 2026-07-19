@@ -1,0 +1,193 @@
+$moo-theme-colors-text-dark: (
+  "primary": $primary-text-emphasis-dark,
+  "secondary": $secondary-text-emphasis-dark,
+  "success": $success-text-emphasis-dark,
+  "info": $info-text-emphasis-dark,
+  "warning": $warning-text-emphasis-dark,
+  "danger": $danger-text-emphasis-dark,
+  "light": $light-text-emphasis-dark,
+  "dark": $dark-text-emphasis-dark,
+) !default;
+
+$moo-theme-colors-bg-subtle-dark: (
+  "primary": $primary-bg-subtle-dark,
+  "secondary": $secondary-bg-subtle-dark,
+  "success": $success-bg-subtle-dark,
+  "info": $info-bg-subtle-dark,
+  "warning": $warning-bg-subtle-dark,
+  "danger": $danger-bg-subtle-dark,
+  "light": $light-bg-subtle-dark,
+  "dark": $dark-bg-subtle-dark,
+) !default;
+
+$moo-theme-colors-border-subtle-dark: (
+  "primary": $primary-border-subtle-dark,
+  "secondary": $secondary-border-subtle-dark,
+  "success": $success-border-subtle-dark,
+  "info": $info-border-subtle-dark,
+  "warning": $warning-border-subtle-dark,
+  "danger": $danger-border-subtle-dark,
+  "light": $light-border-subtle-dark,
+  "dark": $dark-border-subtle-dark,
+) !default;
+
+@mixin moo-core-scales {
+  @each $color, $value in $colors {
+    --#{$prefix}#{$color}: #{$value};
+  }
+
+  @each $color, $value in $grays {
+    --#{$prefix}gray-#{$color}: #{$value};
+  }
+
+  @each $color, $value in $theme-colors {
+    --#{$prefix}#{$color}: #{$value};
+  }
+
+  @each $color, $value in $theme-colors-rgb {
+    --#{$prefix}#{$color}-rgb: #{$value};
+  }
+
+  --#{$prefix}white-rgb: #{to-rgb($white)};
+  --#{$prefix}black-rgb: #{to-rgb($black)};
+  --#{$prefix}font-sans-serif: #{inspect($font-family-sans-serif)};
+  --#{$prefix}font-monospace: #{inspect($font-family-monospace)};
+  --#{$prefix}gradient: #{$gradient};
+  --#{$prefix}body-font-family: #{inspect($font-family-base)};
+  @include rfs($font-size-base, --#{$prefix}body-font-size);
+  --#{$prefix}body-font-weight: #{$font-weight-base};
+  --#{$prefix}body-line-height: #{$line-height-base};
+  --#{$prefix}link-decoration: #{$link-decoration};
+  --#{$prefix}border-width: #{$border-width};
+  --#{$prefix}border-style: #{$border-style};
+  --#{$prefix}border-radius: #{$border-radius};
+  --#{$prefix}border-radius-sm: #{$border-radius-sm};
+  --#{$prefix}border-radius-lg: #{$border-radius-lg};
+  --#{$prefix}border-radius-xl: #{$border-radius-xl};
+  --#{$prefix}border-radius-xxl: #{$border-radius-xxl};
+  --#{$prefix}border-radius-2xl: var(--#{$prefix}border-radius-xxl);
+  --#{$prefix}border-radius-pill: #{$border-radius-pill};
+  --#{$prefix}box-shadow: #{$box-shadow};
+  --#{$prefix}box-shadow-sm: #{$box-shadow-sm};
+  --#{$prefix}box-shadow-lg: #{$box-shadow-lg};
+  --#{$prefix}box-shadow-inset: #{$box-shadow-inset};
+  --#{$prefix}focus-ring-width: #{$focus-ring-width};
+  --#{$prefix}focus-ring-opacity: #{$focus-ring-opacity};
+  --#{$prefix}focus-ring-color: var(--moo-ring);
+}
+
+@mixin moo-core-light {
+  color-scheme: light;
+  color: var(--#{$prefix}body-color);
+  background-color: var(--#{$prefix}body-bg);
+  --moo-surface: #fff;
+  --moo-muted-surface: #f4f4f5;
+  --moo-border: #e4e4e7;
+  --moo-foreground: #18181b;
+  --moo-muted-foreground: #71717a;
+  --moo-ring: #18181b;
+  --moo-destructive: #dc2626;
+  --moo-destructive-foreground: #fff;
+  --moo-sidebar: #fafafa;
+  --moo-sidebar-foreground: var(--moo-foreground);
+  --moo-sidebar-accent: var(--moo-muted-surface);
+  --moo-sidebar-border: var(--moo-border);
+  --#{$prefix}body-color: var(--moo-foreground);
+  --#{$prefix}body-color-rgb: 24, 24, 27;
+  --#{$prefix}body-bg: var(--moo-surface);
+  --#{$prefix}body-bg-rgb: 255, 255, 255;
+  --#{$prefix}emphasis-color: var(--moo-foreground);
+  --#{$prefix}emphasis-color-rgb: 24, 24, 27;
+  --#{$prefix}secondary-color: var(--moo-muted-foreground);
+  --#{$prefix}secondary-color-rgb: 113, 113, 122;
+  --#{$prefix}secondary-bg: var(--moo-muted-surface);
+  --#{$prefix}secondary-bg-rgb: 244, 244, 245;
+  --#{$prefix}tertiary-color: #a1a1aa;
+  --#{$prefix}tertiary-color-rgb: 161, 161, 170;
+  --#{$prefix}tertiary-bg: #fafafa;
+  --#{$prefix}tertiary-bg-rgb: 250, 250, 250;
+  --#{$prefix}heading-color: var(--moo-foreground);
+  --#{$prefix}link-color: var(--moo-foreground);
+  --#{$prefix}link-color-rgb: 24, 24, 27;
+  --#{$prefix}link-hover-color: var(--moo-muted-foreground);
+  --#{$prefix}link-hover-color-rgb: 113, 113, 122;
+  --#{$prefix}code-color: #d63384;
+  --#{$prefix}highlight-color: var(--moo-foreground);
+  --#{$prefix}highlight-bg: #fff3cd;
+  --#{$prefix}border-color: var(--moo-border);
+  --#{$prefix}border-color-translucent: rgba(24, 24, 27, 0.175);
+  --#{$prefix}form-valid-color: #{$form-valid-color};
+  --#{$prefix}form-valid-border-color: #{$form-valid-border-color};
+  --#{$prefix}form-invalid-color: #{$form-invalid-color};
+  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color};
+
+  @each $color, $value in $theme-colors-text {
+    --#{$prefix}#{$color}-text-emphasis: #{$value};
+  }
+
+  @each $color, $value in $theme-colors-bg-subtle {
+    --#{$prefix}#{$color}-bg-subtle: #{$value};
+  }
+
+  @each $color, $value in $theme-colors-border-subtle {
+    --#{$prefix}#{$color}-border-subtle: #{$value};
+  }
+}
+
+@mixin moo-core-dark {
+  color-scheme: dark;
+  color: var(--#{$prefix}body-color);
+  background-color: var(--#{$prefix}body-bg);
+  --moo-surface: #18181b;
+  --moo-muted-surface: #27272a;
+  --moo-border: #3f3f46;
+  --moo-foreground: #fafafa;
+  --moo-muted-foreground: #a1a1aa;
+  --moo-ring: #fafafa;
+  --moo-destructive: #f87171;
+  --moo-destructive-foreground: #18181b;
+  --moo-sidebar: #1c1c1f;
+  --moo-sidebar-foreground: var(--moo-foreground);
+  --moo-sidebar-accent: var(--moo-muted-surface);
+  --moo-sidebar-border: var(--moo-border);
+  --#{$prefix}body-color: var(--moo-foreground);
+  --#{$prefix}body-color-rgb: 250, 250, 250;
+  --#{$prefix}body-bg: var(--moo-surface);
+  --#{$prefix}body-bg-rgb: 24, 24, 27;
+  --#{$prefix}emphasis-color: var(--moo-foreground);
+  --#{$prefix}emphasis-color-rgb: 250, 250, 250;
+  --#{$prefix}secondary-color: var(--moo-muted-foreground);
+  --#{$prefix}secondary-color-rgb: 161, 161, 170;
+  --#{$prefix}secondary-bg: var(--moo-muted-surface);
+  --#{$prefix}secondary-bg-rgb: 39, 39, 42;
+  --#{$prefix}tertiary-color: #71717a;
+  --#{$prefix}tertiary-color-rgb: 113, 113, 122;
+  --#{$prefix}tertiary-bg: #202024;
+  --#{$prefix}tertiary-bg-rgb: 32, 32, 36;
+  --#{$prefix}heading-color: var(--moo-foreground);
+  --#{$prefix}link-color: var(--moo-foreground);
+  --#{$prefix}link-color-rgb: 250, 250, 250;
+  --#{$prefix}link-hover-color: var(--moo-muted-foreground);
+  --#{$prefix}link-hover-color-rgb: 161, 161, 170;
+  --#{$prefix}code-color: #e685b5;
+  --#{$prefix}highlight-color: var(--moo-foreground);
+  --#{$prefix}highlight-bg: #664d03;
+  --#{$prefix}border-color: var(--moo-border);
+  --#{$prefix}border-color-translucent: rgba(250, 250, 250, 0.15);
+  --#{$prefix}form-valid-color: #{$form-valid-color-dark};
+  --#{$prefix}form-valid-border-color: #{$form-valid-border-color-dark};
+  --#{$prefix}form-invalid-color: #{$form-invalid-color-dark};
+  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color-dark};
+
+  @each $color, $value in $moo-theme-colors-text-dark {
+    --#{$prefix}#{$color}-text-emphasis: #{$value};
+  }
+
+  @each $color, $value in $moo-theme-colors-bg-subtle-dark {
+    --#{$prefix}#{$color}-bg-subtle: #{$value};
+  }
+
+  @each $color, $value in $moo-theme-colors-border-subtle-dark {
+    --#{$prefix}#{$color}-border-subtle: #{$value};
+  }
+}

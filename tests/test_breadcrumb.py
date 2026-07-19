@@ -51,6 +51,16 @@ class BreadcrumbTests(CatalogTestCase):
             self.render_breadcrumb('breadcrumb([{"label": "Home"}], aria_label="trail")'),
         )
 
+    def test_breadcrumb_links_are_muted_without_hover_underline(self) -> None:
+        styles = (ROOT / "scss/components/_breadcrumb.scss").read_text(encoding="utf-8")
+
+        self.assertIn("color: var(--moo-muted-foreground)", styles)
+        self.assertIn("transition: color 0.15s ease", styles)
+        self.assertIn(
+            ".breadcrumb-item a:hover {\n  color: var(--moo-foreground);\n  text-decoration: none;\n}",
+            styles,
+        )
+
     def test_breadcrumb_requires_items(self) -> None:
         with self.assertRaisesRegex(ValueError, "Breadcrumb items are required"):
             self.render_breadcrumb("breadcrumb([])")

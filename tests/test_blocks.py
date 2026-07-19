@@ -42,18 +42,84 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn('data-moo-shell="catalog"', page)
                 self.assertIn(f'data-example="{slug}"', page)
                 self.assertIn("moo-example__surface", page)
-                self.assertIn(f'data-variant="{variant}"', page)
+                self.assertIn("moo-block-preview__frame", page)
+                self.assertIn(f'src="previews/{slug}.html"', page)
+                self.assertIn(f'href="previews/{slug}.html"', page)
+                self.assertIn("Open standalone", page)
 
             source = (
                 ROOT / f"src/pages/blocks/{slug}.html.jinja"
             ).read_text(encoding="utf-8")
             with self.subTest(slug=slug, contract="block-example macro"):
                 self.assertIn(
+                    '{% from "blocks/sidebar_shell.html.jinja" '
+                    "import render_sidebar_shell %}",
+                    source,
+                )
+                self.assertIn(
                     '{% from "includes/block-example.html.jinja" '
                     "import render_block_example %}",
                     source,
                 )
+                self.assertIn("render_sidebar_shell(", source)
                 self.assertIn("render_block_example(", source)
+
+            standalone = self.read_output(f"blocks/previews/{slug}.html")
+            with self.subTest(slug=slug, contract="standalone preview"):
+                self.assertNotIn('data-moo-shell="catalog"', standalone)
+                self.assertIn('class="moo-block-standalone moo-ui"', standalone)
+                self.assertIn('data-slot="sidebar-wrapper"', standalone)
+                self.assertIn(f'data-variant="{variant}"', standalone)
+                self.assertNotIn("moo-example__source", standalone)
+
+            if slug in {"sidebar-floating", "sidebar-inset"}:
+                with self.subTest(slug=slug, contract="portal demo copy"):
+                    self.assertIn("Moo Portal", standalone)
+                    self.assertIn("Portal Operations", standalone)
+                    self.assertIn("Request Review", standalone)
+                    self.assertIn("Workspace", standalone)
+                    self.assertIn("Approvals", standalone)
+                    self.assertIn("Customers", standalone)
+                    self.assertIn("Reports", standalone)
+                    self.assertIn("Preferences actions", standalone)
+                    self.assertIn("Open preferences", standalone)
+                    self.assertIn("Copy profile link", standalone)
+                    self.assertIn("Manage notifications", standalone)
+                    self.assertIn("Settings", standalone)
+                    self.assertIn("Get Help", standalone)
+                    self.assertIn("Search", standalone)
+                    self.assertIn("Upgrade workspace", standalone)
+                    self.assertIn("Billing", standalone)
+                    self.assertIn("Notifications", standalone)
+                    self.assertIn('data-bs-offset="0,4"', standalone)
+                    self.assertNotIn("Customer Spaces", standalone)
+                    self.assertNotIn("Client Onboarding", standalone)
+                    self.assertNotIn("Invoice Review", standalone)
+                    self.assertNotIn("Partner Access", standalone)
+                    self.assertNotIn("Duplicate flow", standalone)
+                    self.assertEqual(standalone.count('data-slot="sidebar-menu-action"'), 1)
+                    self.assertIn("moo-sidebar-demo--portal-shell", standalone)
+                    self.assertIn(
+                        'class="sidebar-menu-item dropend sidebar-menu-item--account"',
+                        standalone,
+                    )
+                    self.assertIn("sidebar-menu-button--account", standalone)
+                    self.assertIn("sidebar-account-menu", standalone)
+                    self.assertIn("sidebar-account-menu__item", standalone)
+                    self.assertIn("sidebar-account-menu__header", standalone)
+                    self.assertNotIn("Building Your Application", standalone)
+                    self.assertNotIn("Data Fetching", standalone)
+                    self.assertNotIn("Acme Inc", standalone)
+                    self.assertNotIn("Evil Corp.", standalone)
+                    self.assertIn(
+                        "sidebar-inset__content d-flex flex-column gap-3 p-3 pt-0",
+                        standalone,
+                    )
+                    self.assertIn('style="min-height: 0;"', standalone)
+                    if slug == "sidebar-inset":
+                        self.assertIn("moo-sidebar-demo--flat-inset", standalone)
+                    else:
+                        self.assertNotIn("moo-sidebar-demo--flat-inset", standalone)
 
     def test_blocks_index_page_lists_both_blocks(self) -> None:
         result = self.run_build()
@@ -113,3 +179,29 @@ class BlocksTests(CatalogTestCase):
         self.assertEqual(page.count("Sidebar (Inset)"), 1)
         self.assertEqual(page.count('href="../blocks/index.html"'), 3)
         self.assertNotIn('class="sidebar-group-label" data-slot="sidebar-group-label">Blocks<', page)
+
+    def test_block_preview_iframes_are_scaled_programmatically(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        styles = self.read_output("assets/css/catalog.css")
+        script = self.read_output("assets/js/preview.js")
+
+        self.assertIn(".moo-block-preview__viewport", styles)
+        self.assertIn(".moo-block-preview__frame", styles)
+        self.assertIn(
+            '.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) .sidebar-inset',
+            styles,
+        )
+        self.assertIn("box-shadow: none", styles)
+        self.assertIn(
+            '.moo-sidebar-demo--flat-inset .sidebar[data-side="left"] .sidebar-inner',
+            styles,
+        )
+        self.assertIn(
+            "border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border)",
+            styles,
+        )
+        self.assertIn(".moo-sidebar-demo--portal-shell .sidebar-inset__header", styles)
+        self.assertIn("data-moo-block-frame-shell", script)
+        self.assertIn("ResizeObserver", script)
