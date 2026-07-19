@@ -1,0 +1,99 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/alert.html.jinja" import alert %}
+{% from "components/button.html.jinja" import button %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Alert — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Alert",
+    "Surface a contextual message with Bootstrap's native alert region."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ alert(
+        "Heads up!",
+        description="You can add components and dependencies to your app using the CLI.",
+        icon="info"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Pair an icon with a title and description inside a quiet bordered region.",
+      default
+    ) }}
+
+    {% set destructive %}
+      {{ alert(
+        "Payment failed",
+        description="Your payment could not be processed. Please check your payment method and try again.",
+        variant="destructive",
+        icon="circle-alert"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "destructive",
+      "Destructive",
+      "Use <code>variant=\"destructive\"</code> for errors that need immediate attention.",
+      destructive
+    ) }}
+
+    {% set with_action %}
+      {{ alert(
+        "Dark mode is now available",
+        description="Enable it under your profile settings to get started.",
+        icon="info",
+        action=button("Enable", variant="outline", size="sm")
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "with-action",
+      "With action",
+      "Compose the ready Button macro into <code>action</code> for a single inline response.",
+      with_action
+    ) }}
+
+    {% set dismissible %}
+      {{ alert(
+        "New feature available",
+        description="We've added dark mode support. You can enable it in your account settings.",
+        icon="info",
+        dismissible=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "dismissible",
+      "Dismissible",
+      "Add a Close Button; wire <code>data-bs-dismiss=\"alert\"</code> when the alert should remove itself.",
+      dismissible
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ alert(
+          "تنبيه",
+          description="تمت معالجة طلبك بنجاح.",
+          icon="info"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The icon, body, and action stay in reading-direction order without mirrored custom CSS.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and contextual variants, see the",
+    "https://getbootstrap.com/docs/5.3/components/alerts/",
+    "Bootstrap Alerts documentation"
+  ) }}
+
+{% endblock %}

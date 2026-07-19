@@ -83,5 +83,10 @@
     "slug": "close-button",
     "label": "Close Button",
     "status": "ready"
+  },
+  {
+    "slug": "alert",
+    "label": "Alert",
+    "status": "ready"
   }
 ]
