@@ -1,0 +1,11 @@
+{% macro checkbox(id, label="", aria_label="", checked=false, disabled=false, invalid=false, description="", extra_class="") -%}
+  {% if not id | trim %}{{ fail("Checkbox id is required") }}{% endif %}
+  {% set has_label = label | trim %}
+  {% set has_aria_label = aria_label | trim %}
+  {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Checkbox requires exactly one of label or aria_label") }}{% endif %}
+  <div class="form-check{% if extra_class %} {{ extra_class }}{% endif %}">
+    <input class="form-check-input{% if invalid %} is-invalid{% endif %}" type="checkbox" id="{{ id }}"{% if checked %} checked{% endif %}{% if disabled %} disabled{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}>
+    {% if has_label %}<label class="form-check-label" for="{{ id }}">{{ label }}</label>{% endif %}
+    {% if description %}<div class="form-text">{{ description }}</div>{% endif %}
+  </div>
+{%- endmacro %}

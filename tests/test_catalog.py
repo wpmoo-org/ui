@@ -69,6 +69,9 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's pagination markup uses .page-item/.page-link, not a
             # "pagination-" prefixed family.
             "pagination": ("pagination", "page"),
+            # Bootstrap's checkbox markup uses the shared .form-check family,
+            # not a "checkbox-" prefixed one.
+            "checkbox": ("form-check",),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -100,9 +103,9 @@ class CatalogContractTests(CatalogTestCase):
         infrastructure = {"example"}
         component_class = re.compile(
             r"^(?:accordion|alert|badge|breadcrumb|btn|card|dropdown|"
-            r"form-control|form-label|input-group|list-group|modal|nav|"
-            r"navbar|offcanvas|page|pagination|placeholder|popover|"
-            r"progress|spinner|table|toast)(?:-|$)"
+            r"form-check|form-control|form-label|input-group|list-group|"
+            r"modal|nav|navbar|offcanvas|page|pagination|placeholder|"
+            r"popover|progress|spinner|table|toast)(?:-|$)"
         )
 
         pages = [

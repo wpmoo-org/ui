@@ -1,0 +1,91 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Checkbox — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Checkbox",
+    "Toggle a single option using Bootstrap's native checkbox contract."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      <div class="d-grid gap-2">
+        {{ checkbox("checkbox-default", label="Accept terms and conditions") }}
+        {{ checkbox("checkbox-checked", label="Accept terms and conditions", checked=true) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Unchecked and checked states share the same label contract.",
+      default,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set with_description %}
+      {{ checkbox(
+        "checkbox-description",
+        label="Accept terms and conditions",
+        description="By checking this box, you agree to the terms.",
+        checked=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "with-description",
+      "With description",
+      "Add supporting copy below the label with <code>description</code>.",
+      with_description,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      <div class="d-grid gap-2">
+        {{ checkbox("checkbox-disabled", label="Enable notifications", disabled=true) }}
+        {{ checkbox("checkbox-disabled-checked", label="Enable notifications", checked=true, disabled=true) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Disabled checkboxes lower opacity and drop pointer interaction in both states.",
+      disabled,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set invalid %}
+      {{ checkbox("checkbox-invalid", label="Accept terms and conditions", invalid=true) }}
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Invalid",
+      "Set <code>invalid=true</code> to pair with a form's validation state.",
+      invalid,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ checkbox("checkbox-rtl", label="الموافقة على الشروط والأحكام") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The input and label swap sides without mirrored custom CSS.",
+      rtl,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and the shared form-check family, see the",
+    "https://getbootstrap.com/docs/5.3/forms/checks-radios/",
+    "Bootstrap Checks and radios documentation"
+  ) }}
+
+{% endblock %}

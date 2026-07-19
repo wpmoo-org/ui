@@ -108,5 +108,10 @@
     "slug": "table",
     "label": "Table",
     "status": "ready"
+  },
+  {
+    "slug": "checkbox",
+    "label": "Checkbox",
+    "status": "ready"
   }
 ]
