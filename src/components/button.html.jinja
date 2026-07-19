@@ -79,8 +79,8 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}>
-      {% if loading %}<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if loading %} aria-busy="true"{% endif %}>
+      {% if loading %}{{ icon("loader-circle", "inline-start") }}{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
     </button>

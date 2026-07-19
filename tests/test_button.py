@@ -93,10 +93,10 @@ class ButtonTests(CatalogTestCase):
     def test_button_loading_renders_decorative_spinner(self) -> None:
         output = self.render_button('button("Saving...", loading=true, disabled=true)')
 
-        self.assertIn(
-            '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>',
-            output,
-        )
+        self.assertIn(lucide_body("loader-circle"), output)
+        self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('aria-hidden="true"', output)
+        self.assertIn('aria-busy="true"', output)
         self.assertNotIn('role="status"', output)
 
     def test_button_loading_and_icon_start_are_mutually_exclusive(self) -> None:

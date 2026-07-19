@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase, lucide_body
 
 
 COMPONENT = ROOT / "src/components/spinner.html.jinja"
@@ -17,12 +17,13 @@ class SpinnerTests(CatalogTestCase):
         )
         return " ".join(template.render().split())
 
-    def test_spinner_renders_default_border_ring_with_status_role(self) -> None:
-        self.assertEqual(
-            self.render_spinner("spinner()"),
-            '<div class="spinner-border" role="status">'
-            ' <span class="visually-hidden">Loading</span> </div>',
-        )
+    def test_spinner_renders_loader_circle_icon_with_status_role(self) -> None:
+        output = self.render_spinner("spinner()")
+
+        self.assertIn('<div class="spinner" role="status">', output)
+        self.assertIn(lucide_body("loader-circle"), output)
+        self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('<span class="visually-hidden">Loading</span>', output)
 
     def test_spinner_supports_custom_aria_label(self) -> None:
         self.assertIn(
@@ -32,7 +33,7 @@ class SpinnerTests(CatalogTestCase):
 
     def test_spinner_small_size_adds_modifier_class(self) -> None:
         self.assertIn(
-            'class="spinner-border spinner-border-sm"',
+            'class="spinner spinner-sm"',
             self.render_spinner('spinner(size="sm")'),
         )
 
@@ -46,6 +47,6 @@ class SpinnerTests(CatalogTestCase):
 
     def test_spinner_supports_extra_class(self) -> None:
         self.assertIn(
-            'class="spinner-border m-5"',
+            'class="spinner m-5"',
             self.render_spinner('spinner(extra_class="m-5")'),
         )
