@@ -3,7 +3,15 @@ from __future__ import annotations
 import json
 import re
 
-from tests.helpers import DIST, ICONS, ROOT, CatalogTestCase
+from tests.helpers import (
+    DIST,
+    ICONS,
+    PNG_COLOR_TYPE_RGBA,
+    ROOT,
+    STATIC,
+    CatalogTestCase,
+    read_png_ihdr,
+)
 
 
 class CatalogContractTests(CatalogTestCase):
@@ -174,6 +182,34 @@ class CatalogContractTests(CatalogTestCase):
                 )
             with self.subTest(page=path.name, contract="reference call"):
                 self.assertIn("render_reference(", source)
+
+    def test_ready_components_ship_a_real_preview_png(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
+        ready_slugs = [
+            item["slug"] for item in catalog if item["status"] == "ready"
+        ]
+        previews_dir = STATIC / "images/component-previews"
+
+        for slug in ready_slugs:
+            with self.subTest(slug=slug):
+                png_path = previews_dir / f"{slug}.png"
+                webp_path = previews_dir / f"{slug}.webp"
+                self.assertTrue(
+                    png_path.is_file() or webp_path.is_file(),
+                    f"{slug} has no preview PNG/WEBP and silently falls back "
+                    "to placeholder.svg",
+                )
+                if not png_path.is_file():
+                    continue
+                width, height, color_type = read_png_ihdr(png_path)
+                self.assertEqual((width, height), (1536, 1024), slug)
+                self.assertEqual(
+                    color_type,
+                    PNG_COLOR_TYPE_RGBA,
+                    f"{slug}.png is not RGBA (color type {color_type})",
+                )
 
     def test_components_index_uses_admin_shell_primitives(self) -> None:
         result = self.run_build()
