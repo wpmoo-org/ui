@@ -1,0 +1,139 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/dialog.html.jinja" import dialog, dialog_body, dialog_footer, dialog_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Dialog — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Dialog",
+    "A window overlaid on the page, built from Bootstrap's own Modal plugin and auto-initialized through its data attribute API."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ button("Open dialog", variant="outline", dialog_target="dialog-basic") }}
+      {% call dialog("dialog-basic", centered=true) %}
+        {{ dialog_header("dialog-basic", "Edit workspace name") }}
+        {% call dialog_body() %}
+          <p class="mb-0">Rename the workspace shown across the sidebar and shared links.</p>
+        {% endcall %}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Save changes", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Set <code>dialog_target</code> on the ready Button macro to point at a <code>dialog()</code> id; Bootstrap's data API opens and closes it automatically, no explicit init required.",
+      basic
+    ) }}
+
+    {% set sizes %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Small", variant="outline", dialog_target="dialog-sm") }}
+        {{ button("Large", variant="outline", dialog_target="dialog-lg") }}
+        {{ button("Extra large", variant="outline", dialog_target="dialog-xl") }}
+      </div>
+      {% call dialog("dialog-sm", size="sm", centered=true) %}
+        {{ dialog_header("dialog-sm", "Small dialog") }}
+        {% call dialog_body() %}
+          <p class="mb-0">Set <code>size="sm"</code> for compact confirmations.</p>
+        {% endcall %}
+      {% endcall %}
+      {% call dialog("dialog-lg", size="lg", centered=true) %}
+        {{ dialog_header("dialog-lg", "Large dialog") }}
+        {% call dialog_body() %}
+          <p class="mb-0">Set <code>size="lg"</code> for forms with more fields.</p>
+        {% endcall %}
+      {% endcall %}
+      {% call dialog("dialog-xl", size="xl", centered=true) %}
+        {{ dialog_header("dialog-xl", "Extra large dialog") }}
+        {% call dialog_body() %}
+          <p class="mb-0">Set <code>size="xl"</code> for dense tables or side-by-side layouts.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "sizes",
+      "Sizes",
+      "Set <code>size</code> to <code>sm</code>, <code>lg</code>, <code>xl</code>, or <code>fullscreen</code>; the default matches the basic example above.",
+      sizes
+    ) }}
+
+    {% set scrollable %}
+      {{ button("Open scrollable dialog", variant="outline", dialog_target="dialog-scrollable") }}
+      {% call dialog("dialog-scrollable", centered=true, scrollable=true) %}
+        {{ dialog_header("dialog-scrollable", "Release notes") }}
+        {% call dialog_body() %}
+          {% for paragraph in range(1, 9) %}
+            <p{% if loop.last %} class="mb-0"{% endif %}>Paragraph {{ paragraph }}. This body scrolls on its own once the content outgrows the dialog's height, while the header and footer stay put.</p>
+          {% endfor %}
+        {% endcall %}
+        {% call dialog_footer() %}
+          {{ button("Close", variant="outline", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "scrollable",
+      "Scrollable content",
+      "Set <code>scrollable=true</code> so the <code>dialog_body()</code> scrolls internally instead of the whole page.",
+      scrollable
+    ) }}
+
+    {% set static_backdrop %}
+      {{ button("Open static dialog", variant="outline", dialog_target="dialog-static") }}
+      {% call dialog("dialog-static", centered=true, static=true) %}
+        {{ dialog_header("dialog-static", "Confirm deletion") }}
+        {% call dialog_body() %}
+          <p class="mb-0">This dialog only closes via an explicit action, not by clicking the backdrop or pressing Escape.</p>
+        {% endcall %}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Delete", variant="destructive", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "static-backdrop",
+      "Static backdrop",
+      "Set <code>static=true</code> to disable backdrop-click and Escape dismissal for destructive or unsaved-state confirmations.",
+      static_backdrop
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ button("فتح الحوار", variant="outline", dialog_target="dialog-rtl") }}
+        {% call dialog("dialog-rtl", centered=true) %}
+          {{ dialog_header("dialog-rtl", "تعديل اسم مساحة العمل") }}
+          {% call dialog_body() %}
+            <p class="mb-0">أعد تسمية مساحة العمل الظاهرة في الشريط الجانبي والروابط المشتركة.</p>
+          {% endcall %}
+          {% call dialog_footer() %}
+            {{ button("إلغاء", variant="outline", dismiss="modal") }}
+            {{ button("حفظ", dismiss="modal") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Header, body, and footer mirror automatically; no extra CSS or markup is required.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Modal plugin options, focus management, and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/modal/",
+    "Bootstrap Modal documentation"
+  ) }}
+
+{% endblock %}

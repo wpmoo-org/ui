@@ -1,0 +1,55 @@
+{# Dialog is the Moo catalog name for Bootstrap's Modal component, matching
+   shadcn's Dialog naming. Structure, sizing, and dismissal all ride
+   Bootstrap's own .modal* classes and data-bs-* contract; nothing here is a
+   new Moo-owned selector. #}
+
+{% from "components/close_button.html.jinja" import close_button %}
+
+{% set dialog_sizes = ["default", "sm", "lg", "xl", "fullscreen"] %}
+
+{% macro dialog(id, size="default", centered=false, scrollable=false, static=false) -%}
+  {% if not id | trim %}{{ fail("Dialog id is required") }}{% endif %}
+  {% if size not in dialog_sizes %}{{ fail("Unknown dialog size: " ~ size) }}{% endif %}
+  {% set dialog_classes = "modal-dialog" %}
+  {% if size == "sm" %}{% set dialog_classes = dialog_classes ~ " modal-sm" %}{% endif %}
+  {% if size == "lg" %}{% set dialog_classes = dialog_classes ~ " modal-lg" %}{% endif %}
+  {% if size == "xl" %}{% set dialog_classes = dialog_classes ~ " modal-xl" %}{% endif %}
+  {% if size == "fullscreen" %}{% set dialog_classes = dialog_classes ~ " modal-fullscreen" %}{% endif %}
+  {% if centered %}{% set dialog_classes = dialog_classes ~ " modal-dialog-centered" %}{% endif %}
+  {% if scrollable %}{% set dialog_classes = dialog_classes ~ " modal-dialog-scrollable" %}{% endif %}
+  <div
+    class="modal fade"
+    id="{{ id }}"
+    tabindex="-1"
+    aria-labelledby="{{ id }}-title"
+    aria-hidden="true"
+    {% if static %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}
+  >
+    <div class="{{ dialog_classes }}">
+      <div class="modal-content">
+        {{ caller() | trim | safe }}
+      </div>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro dialog_header(id, title, dismiss_aria_label="Close") -%}
+  {% if not id | trim %}{{ fail("Dialog header id is required") }}{% endif %}
+  {% if not title | trim %}{{ fail("Dialog title is required") }}{% endif %}
+  <div class="modal-header">
+    <h1 class="modal-title fs-5" id="{{ id }}-title">{{ title }}</h1>
+    {{ close_button(aria_label=dismiss_aria_label, dismiss="modal") }}
+  </div>
+{%- endmacro %}
+
+{% macro dialog_body(extra_class="") -%}
+  <div class="modal-body{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro dialog_footer(extra_class="") -%}
+  <div class="modal-footer{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}

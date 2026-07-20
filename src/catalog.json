@@ -153,5 +153,10 @@
     "slug": "popover",
     "label": "Popover",
     "status": "ready"
+  },
+  {
+    "slug": "dialog",
+    "label": "Dialog",
+    "status": "ready"
   }
 ]
