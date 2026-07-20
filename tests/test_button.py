@@ -344,9 +344,31 @@ class ButtonTests(CatalogTestCase):
 
     def test_button_rejects_unknown_dismiss_target(self) -> None:
         with self.assertRaisesRegex(
-            ValueError, "Unknown button dismiss target: toast"
+            ValueError, "Unknown button dismiss target: alert"
         ):
-            self.render_button('button("Close", dismiss="toast")')
+            self.render_button('button("Close", dismiss="alert")')
+
+    def test_button_dismiss_accepts_toast(self) -> None:
+        output = self.render_button('button("Close", dismiss="toast")')
+
+        self.assertIn('data-bs-dismiss="toast"', output)
+
+    def test_button_toast_target_renders_moo_data_hook(self) -> None:
+        output = self.render_button(
+            'button("Show toast", toast_target="toast-basic")'
+        )
+
+        self.assertIn('data-moo-toast-target="#toast-basic"', output)
+        self.assertNotIn("data-bs-toggle", output)
+
+    def test_button_toast_target_requires_button_or_anchor_element(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button toast_target requires element=button or element=a",
+        ):
+            self.render_button(
+                'button("Show toast", element="input", toast_target="toast-basic")'
+            )
 
     def test_anchor_button_carries_role_button(self) -> None:
         output = self.render_button('button("Link", element="a", href="#")')

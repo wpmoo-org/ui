@@ -1,0 +1,49 @@
+{# Toast wraps Bootstrap's own opt-in Toast plugin. Unlike Dialog (Modal) or
+   Sheet (Offcanvas), Bootstrap ships no data-api click trigger for toasts —
+   its own docs recommend a hand-wired click listener that calls .show().
+   The catalog mirrors that with one generic, catalog-only convention:
+   button(toast_target=...) renders data-moo-toast-target (a Moo-owned data
+   hook, deliberately not data-bs-*) and static/js/preview.js wires a single
+   delegated click listener for it. A consuming app is expected to wire its
+   own trigger the same way Bootstrap's docs show; data-moo-toast-target is
+   catalog sugar, not a public Moo/Bootstrap contract. #}
+
+{% from "components/close_button.html.jinja" import close_button %}
+
+{% set toast_placements = {
+  "top-start": "top-0 start-0",
+  "top-center": "top-0 start-50 translate-middle-x",
+  "top-end": "top-0 end-0",
+  "bottom-start": "bottom-0 start-0",
+  "bottom-center": "bottom-0 start-50 translate-middle-x",
+  "bottom-end": "bottom-0 end-0"
+} %}
+
+{% macro toast_container(placement="bottom-end", extra_class="") -%}
+  {% if placement not in toast_placements %}{{ fail("Unknown toast placement: " ~ placement) }}{% endif %}
+  <div class="toast-container position-fixed {{ toast_placements[placement] }} p-3{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close") -%}
+  {% if not id | trim %}{{ fail("Toast id is required") }}{% endif %}
+  {% if not title | trim %}{{ fail("Toast title is required") }}{% endif %}
+  {% if not body | trim %}{{ fail("Toast body is required") }}{% endif %}
+  <div
+    id="{{ id }}"
+    class="toast"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    {% if not autohide %}data-bs-autohide="false"{% endif %}
+    {% if delay != 5000 %}data-bs-delay="{{ delay }}"{% endif %}
+  >
+    <div class="toast-header">
+      <strong class="me-auto">{{ title }}</strong>
+      {% if timestamp %}<small>{{ timestamp }}</small>{% endif %}
+      {{ close_button(aria_label=dismiss_aria_label, dismiss="toast") }}
+    </div>
+    <div class="toast-body">{{ body }}</div>
+  </div>
+{%- endmacro %}
