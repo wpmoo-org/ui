@@ -3,7 +3,12 @@
    .offcanvas* classes for its own mobile drawer, but drives it through its
    own data-moo-sidebar-trigger click handling rather than Bootstrap's native
    data-bs-toggle="offcanvas" data-api — the two never touch the same element,
-   so a Sheet trigger's native data-api toggle cannot collide with it. #}
+   so a Sheet trigger's native data-api toggle cannot collide with it.
+
+   Both do share the bare .offcanvas root class, though, so any Sheet-only
+   --bs-offcanvas-* retuning is scoped to the extra "sheet" marker class
+   below rather than the bare .offcanvas selector, or it would leak into
+   Sidebar's own mobile drawer sizing. #}
 
 {% from "components/close_button.html.jinja" import close_button %}
 
@@ -13,7 +18,7 @@
   {% if not id | trim %}{{ fail("Sheet id is required") }}{% endif %}
   {% if placement not in sheet_placements %}{{ fail("Unknown sheet placement: " ~ placement) }}{% endif %}
   <div
-    class="offcanvas offcanvas-{{ placement }}"
+    class="offcanvas offcanvas-{{ placement }} sheet"
     tabindex="-1"
     id="{{ id }}"
     aria-labelledby="{{ id }}-title"
@@ -28,7 +33,7 @@
   {% if not id | trim %}{{ fail("Sheet header id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Sheet title is required") }}{% endif %}
   <div class="offcanvas-header">
-    <h2 class="offcanvas-title fs-5" id="{{ id }}-title">{{ title }}</h2>
+    <h2 class="offcanvas-title" id="{{ id }}-title">{{ title }}</h2>
     {% if dismiss %}{{ close_button(aria_label=dismiss_aria_label, dismiss="offcanvas") }}{% endif %}
   </div>
 {%- endmacro %}

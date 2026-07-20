@@ -21,7 +21,7 @@ class SheetTests(CatalogTestCase):
     def test_sheet_renders_offcanvas_shell_with_aria_wiring(self) -> None:
         output = self.render('{% call sheet("example") %}Content{% endcall %}')
 
-        self.assertIn('class="offcanvas offcanvas-end"', output)
+        self.assertIn('class="offcanvas offcanvas-end sheet"', output)
         self.assertIn('id="example"', output)
         self.assertIn('aria-labelledby="example-title"', output)
         self.assertIn("Content", output)
@@ -44,7 +44,7 @@ class SheetTests(CatalogTestCase):
                 output = self.render(
                     f'{{% call sheet("example", placement="{placement}") %}}x{{% endcall %}}'
                 )
-                self.assertIn(f'class="offcanvas offcanvas-{placement}"', output)
+                self.assertIn(f'class="offcanvas offcanvas-{placement} sheet"', output)
 
     def test_sheet_backdrop_false_and_scroll_true_set_data_attributes(self) -> None:
         output = self.render(
