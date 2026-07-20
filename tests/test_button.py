@@ -195,7 +195,37 @@ class ButtonTests(CatalogTestCase):
         )
 
         self.assertIn('data-bs-html="true"', output)
-        self.assertIn('data-bs-title="Save draft <kbd>⌘S</kbd>"', output)
+        # The attribute value is HTML-escaped (Jinja's normal attribute
+        # escaping), not injected raw. Browsers decode entities back to the
+        # literal markup when JS reads the attribute via getAttribute(), so
+        # Bootstrap's own tooltip sanitizer still receives the real <kbd>
+        # tag; only the outer HTML attribute stays well-formed no matter
+        # what the content contains. See
+        # test_button_tooltip_html_content_cannot_break_out_of_the_attribute
+        # for the regression this protects against.
+        self.assertIn(
+            'data-bs-title="Save draft &lt;kbd&gt;⌘S&lt;/kbd&gt;"', output
+        )
+        self.assertNotIn('data-bs-title="Save draft <kbd>', output)
+
+    def test_button_tooltip_html_content_cannot_break_out_of_the_attribute(
+        self,
+    ) -> None:
+        # Regression test for a real attribute-injection bug: tooltip_html
+        # content used to be piped through |safe directly into
+        # data-bs-title="...", which only suppresses Jinja's tag escaping,
+        # not its quote escaping. A literal " in html=true content used to
+        # close the attribute early and let anything after it become a new,
+        # live HTML attribute (e.g. onclick="..."), completely bypassing
+        # Bootstrap's own content sanitizer, which never even runs.
+        output = self.render_button(
+            "button(\"X\", tooltip='safe <code>x</code> quote \" onclick=\"bad', "
+            "tooltip_html=true)"
+        )
+
+        self.assertEqual(output.count("data-bs-title="), 1)
+        self.assertNotIn('onclick="bad"', output)
+        self.assertIn("&#34;", output)
 
     def test_button_tooltip_html_requires_tooltip(self) -> None:
         with self.assertRaisesRegex(

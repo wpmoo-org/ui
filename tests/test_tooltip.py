@@ -72,7 +72,33 @@ class TooltipTests(CatalogTestCase):
         )
 
         self.assertIn("data-bs-html=\"true\"", output)
-        self.assertIn("<em>Tooltip</em>", output)
+        # The attribute value is HTML-escaped (Jinja's normal attribute
+        # escaping); browsers decode entities back to the literal markup
+        # when Bootstrap reads the attribute via getAttribute(), so its own
+        # sanitizer still receives the real <em> tag. Only the outer HTML
+        # attribute stays well-formed regardless of content -- see
+        # test_tooltip_trigger_html_content_cannot_break_out_of_the_attribute.
+        self.assertIn("&lt;em&gt;Tooltip&lt;/em&gt;", output)
+        self.assertNotIn('data-bs-title="<em>', output)
+
+    def test_tooltip_trigger_html_content_cannot_break_out_of_the_attribute(
+        self,
+    ) -> None:
+        # Regression test for a real attribute-injection bug: html=true
+        # content used to be piped through |safe directly into
+        # data-bs-title="...", which only suppresses Jinja's tag escaping,
+        # not its quote escaping. A literal " in the content used to close
+        # the attribute early and let anything after it become a new, live
+        # HTML attribute, bypassing Bootstrap's own content sanitizer, which
+        # never even runs on it.
+        output = self.render_tooltip(
+            "tooltip_trigger(\"Label\", 'safe <code>x</code> quote \" "
+            "onclick=\"bad', html=true)"
+        )
+
+        self.assertEqual(output.count("data-bs-title="), 1)
+        self.assertNotIn('onclick="bad"', output)
+        self.assertIn("&#34;", output)
 
     def test_tooltip_trigger_escapes_plain_text_by_default(self) -> None:
         output = self.render_tooltip(

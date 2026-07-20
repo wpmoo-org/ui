@@ -16,7 +16,7 @@
     class="tooltip-trigger{% if extra_class %} {{ extra_class }}{% endif %}"
     data-bs-toggle="tooltip"
     data-bs-placement="{{ placement }}"
-    data-bs-title="{{ text | safe if html else text }}"
+    data-bs-title="{{ text }}"
     {% if html %}data-bs-html="true"{% endif %}
   >{{ label }}</a>
 {%- endmacro %}
