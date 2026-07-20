@@ -1,3 +1,17 @@
+// Retuned against shadcn/ui's tooltip (bg-foreground text-background, px-3
+// py-1.5, text-xs, rounded-md, fully opaque, max-w-xs): Bootstrap's own
+// defaults are narrower, tighter, and dimmed to 90% opacity. All four
+// overrides route through Bootstrap's existing custom properties, so no new
+// selectors or hardcoded colors are introduced.
+.tooltip {
+  --bs-tooltip-max-width: 20rem;
+  --bs-tooltip-padding-x: 0.75rem;
+  --bs-tooltip-padding-y: 0.375rem;
+  --bs-tooltip-font-size: 0.75rem;
+  --bs-tooltip-opacity: 1;
+  line-height: 1.333;
+}
+
 // Bootstrap's tooltip bubble is fully token-driven already (see the vendored
 // Bootstrap tooltip partial), so this partial only owns the plain link
 // trigger's own text color. Unstyled, it falls through to Bootstrap's
