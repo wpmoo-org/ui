@@ -35,5 +35,9 @@
 // Sidebar's own mobile drawer first: unlike opacity, a blur doesn't cut
 // into legibility or contrast, so it reads fine shared across both.
 .offcanvas-backdrop {
+  // The project has no autoprefixer build step, and Safari specifically
+  // needs the -webkit- prefix to render backdrop-filter at all (it does
+  // not silently fall back to the unprefixed property).
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
