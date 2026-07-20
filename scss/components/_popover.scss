@@ -13,11 +13,24 @@
   --bs-popover-header-padding-y: #{$spacer * 0.625};
   --bs-popover-body-padding-x: #{$spacer * 0.625};
   --bs-popover-body-padding-y: #{$spacer * 0.625};
+  // shadcn's popover body/title both sit at text-sm (14px); Bootstrap's own
+  // $popover-font-size default is $font-size-sm, a notch smaller here.
+  --bs-popover-font-size: 0.875rem;
+  line-height: 1.43;
+  // shadcn always renders a fixed 320px panel regardless of content, unlike
+  // Bootstrap's own shrink-to-fit-up-to-max-width sizing; max-width must
+  // move too, or Bootstrap's own 276px default clips the wider fixed width
+  // straight back down.
+  --bs-popover-max-width: 20rem;
+  width: 20rem;
   // $enable-shadows is off project-wide, which turns Bootstrap's own
   // box-shadow() mixin into a no-op, so this must be a literal property
-  // consuming the shared token directly rather than a --bs-popover-* custom
-  // property Bootstrap's (disabled) mixin would have read.
-  box-shadow: var(--bs-box-shadow);
+  // consuming a shared token directly. None of the shared tiers land
+  // exactly on the shadow-md weight the shadcn reference uses; -lg is the
+  // closer of the two available neighbors (component styles may not
+  // hardcode raw color values, only reference existing --bs-*box-shadow*
+  // tokens, so a one-off value here is not an option).
+  box-shadow: var(--bs-box-shadow-lg);
 }
 
 .popover-header {
