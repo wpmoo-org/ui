@@ -66,3 +66,16 @@
   // (same technique already used for clamp() in the catalog stylesheet).
   min-width: #{unquote("max(100%, var(--moo-dropdown-sidebar-min-width))")};
 }
+
+@include media-breakpoint-up(lg) {
+  [data-slot="sidebar-header"] [data-moo-sidebar-dropdown-positioned] > .dropdown-menu {
+    position: fixed !important;
+    z-index: $zindex-dropdown;
+    inset-block-start: var(--moo-sidebar-dropdown-block-start) !important;
+    inset-inline-start: var(--moo-sidebar-dropdown-inline-start) !important;
+    width: var(--moo-dropdown-sidebar-min-width);
+    min-width: var(--moo-dropdown-sidebar-min-width);
+    margin: 0;
+    transform: none !important;
+  }
+}
