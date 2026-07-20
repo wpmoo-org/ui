@@ -216,6 +216,160 @@
   const SIDEBAR_STORAGE_PREFIX = "moo-sidebar:";
   const SIDEBAR_COLLAPSE_BREAKPOINT = "(min-width: 992px)";
 
+  const sidebarTooltipAnchor = (control) => control.closest("li") || control;
+
+  const isCollapsedSidebar = (wrapper) =>
+    window.matchMedia(SIDEBAR_COLLAPSE_BREAKPOINT).matches &&
+    wrapper?.dataset.mooSidebarState === "collapsed";
+
+  const isSidebarIdentityTrigger = (button) =>
+    button.closest(".sidebar-menu-item--account") ||
+    button.classList.contains("sidebar-menu-button--workspace");
+
+  let sidebarFlyout = null;
+  let sidebarFlyoutOwner = null;
+
+  const clearCollapsedSidebarDropdownPosition = (control) => {
+    const item = control?.matches?.(".sidebar-menu-item")
+      ? control
+      : control?.closest?.(".sidebar-menu-item");
+    if (!item) {
+      return;
+    }
+    delete item.dataset.mooSidebarDropdownPositioned;
+    item.style.removeProperty("--moo-sidebar-dropdown-block-start");
+    item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
+  };
+
+  const closeSidebarDropdowns = (wrapper, exceptControl = null) => {
+    const Dropdown = window.bootstrap?.Dropdown;
+    wrapper
+      ?.querySelectorAll('[data-bs-toggle="dropdown"][aria-expanded="true"]')
+      .forEach((control) => {
+        if (control === exceptControl) {
+          return;
+        }
+        if (Dropdown) {
+          Dropdown.getOrCreateInstance(control).hide();
+          return;
+        }
+        control.setAttribute("aria-expanded", "false");
+        control
+          .closest(".dropdown")
+          ?.querySelector(".dropdown-menu.show")
+          ?.classList.remove("show");
+        clearCollapsedSidebarDropdownPosition(control);
+      });
+  };
+
+  const positionCollapsedSidebarDropdown = (control) => {
+    const wrapper = control?.closest?.('[data-slot="sidebar-wrapper"]');
+    const item = control?.closest?.(".sidebar-menu-item");
+    const isHeaderWorkspace =
+      control?.classList.contains("sidebar-menu-button--workspace") &&
+      control.closest('[data-slot="sidebar-header"]');
+    const desktop = window.matchMedia(SIDEBAR_COLLAPSE_BREAKPOINT).matches;
+    if (!control || !wrapper || !item || !isHeaderWorkspace || !desktop) {
+      clearCollapsedSidebarDropdownPosition(control);
+      return;
+    }
+
+    closeSidebarFlyouts(wrapper);
+
+    const rect = control.getBoundingClientRect();
+    const gap = 4;
+    const inlineStart =
+      root.dir === "rtl"
+        ? window.innerWidth - rect.left + gap
+        : rect.right + gap;
+
+    item.style.setProperty("--moo-sidebar-dropdown-block-start", `${Math.round(rect.bottom + gap)}px`);
+    item.style.setProperty("--moo-sidebar-dropdown-inline-start", `${Math.round(inlineStart)}px`);
+    item.dataset.mooSidebarDropdownPositioned = "";
+  };
+
+  const resetSidebarFlyoutTrigger = (item, expanded = null) => {
+    const trigger = item?.querySelector(":scope > .sidebar-menu-sub-trigger");
+    const submenu = item?.querySelector(":scope > .sidebar-menu-sub");
+    if (trigger && submenu) {
+      const isExpanded = expanded ?? submenu.classList.contains("show");
+      trigger.setAttribute("aria-expanded", String(isExpanded));
+    }
+  };
+
+  const removeSidebarFlyoutPortal = () => {
+    sidebarFlyout?.remove();
+    if (sidebarFlyoutOwner) {
+      resetSidebarFlyoutTrigger(sidebarFlyoutOwner, false);
+    }
+    sidebarFlyout = null;
+    sidebarFlyoutOwner = null;
+  };
+
+  const closeSidebarFlyouts = (wrapper) => {
+    if (!wrapper || sidebarFlyoutOwner?.closest('[data-slot="sidebar-wrapper"]') === wrapper) {
+      removeSidebarFlyoutPortal();
+    }
+    wrapper?.querySelectorAll(".sidebar-menu-item--flyout-open").forEach((item) => {
+      item.classList.remove("sidebar-menu-item--flyout-open");
+      item.style.removeProperty("--moo-sidebar-flyout-block-start");
+      item.style.removeProperty("--moo-sidebar-flyout-inline-start");
+      resetSidebarFlyoutTrigger(item, false);
+    });
+  };
+
+  const openSidebarFlyout = (item) => {
+    const wrapper = item?.closest('[data-slot="sidebar-wrapper"]');
+    const submenu = item?.querySelector(":scope > .sidebar-menu-sub");
+    const trigger = item?.querySelector(":scope > .sidebar-menu-sub-trigger");
+    if (!item || !wrapper || !submenu || !isCollapsedSidebar(wrapper)) {
+      return;
+    }
+    if (sidebarFlyoutOwner === item && sidebarFlyout) {
+      return;
+    }
+    closeSidebarDropdowns(wrapper);
+    closeSidebarFlyouts(wrapper);
+
+    const rect = item.getBoundingClientRect();
+    const gap = 4;
+    const inlineStart =
+      root.dir === "rtl"
+        ? window.innerWidth - rect.left + gap
+        : rect.right + gap;
+
+    const flyout = submenu.cloneNode(true);
+    flyout.removeAttribute("id");
+    flyout.classList.remove("collapse", "show", "collapsing");
+    flyout.classList.add("sidebar-menu-flyout");
+    flyout.setAttribute("data-moo-sidebar-flyout", "");
+    flyout.style.setProperty("--moo-sidebar-flyout-block-start", `${Math.round(rect.top)}px`);
+    flyout.style.setProperty("--moo-sidebar-flyout-inline-start", `${Math.round(inlineStart)}px`);
+
+    const rootNode = wrapper.closest(".moo-ui") || document.body;
+    rootNode.appendChild(flyout);
+    sidebarFlyout = flyout;
+    sidebarFlyoutOwner = item;
+    item.classList.add("sidebar-menu-item--flyout-open");
+    trigger?.setAttribute("aria-expanded", "true");
+  };
+
+  const disposeSidebarTooltip = (control) => {
+    const Tooltip = window.bootstrap?.Tooltip;
+    if (!Tooltip || !control) {
+      return;
+    }
+    const anchor = sidebarTooltipAnchor(control);
+    const existing = Tooltip.getInstance(anchor);
+    if (existing) {
+      existing.dispose();
+    }
+    anchor.removeAttribute("title");
+    anchor.removeAttribute("data-bs-title");
+    anchor.removeAttribute("data-bs-original-title");
+    anchor.removeAttribute("aria-describedby");
+  };
+
   const syncSidebarTooltips = (wrapper) => {
     const Tooltip = window.bootstrap?.Tooltip;
     if (!Tooltip) {
@@ -226,6 +380,14 @@
       wrapper.dataset.mooSidebarState === "collapsed";
     const placement = root.dir === "rtl" ? "left" : "right";
     wrapper.querySelectorAll("[data-moo-sidebar-tooltip]").forEach((button) => {
+      if (isSidebarIdentityTrigger(button)) {
+        disposeSidebarTooltip(button);
+        return;
+      }
+      if (button.closest(".sidebar-menu-item")?.querySelector(":scope > .sidebar-menu-sub")) {
+        disposeSidebarTooltip(button);
+        return;
+      }
       // Bootstrap allows only one plugin instance per element (see
       // Data.set in bootstrap/js/dist/dom/data.js). A menu button with its
       // own data-bs-toggle (dropdown/collapse) already owns that element's
@@ -233,11 +395,8 @@
       // silently rejected and both plugins log a console error. Anchor the
       // tooltip to the row's <li> wrapper instead, which never owns a
       // competing Bootstrap instance.
-      const anchor = button.closest("li") || button;
-      const existing = Tooltip.getInstance(anchor);
-      if (existing) {
-        existing.dispose();
-      }
+      const anchor = sidebarTooltipAnchor(button);
+      disposeSidebarTooltip(button);
       if (collapsed) {
         new Tooltip(anchor, {
           title: button.getAttribute("data-moo-sidebar-tooltip"),
@@ -248,6 +407,33 @@
       }
     });
   };
+
+  document.addEventListener("show.bs.dropdown", (event) => {
+    const control = event.target.matches('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]')
+      ? event.target
+      : event.target.querySelector?.('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]');
+    if (control) {
+      closeSidebarDropdowns(
+        control.closest('[data-slot="sidebar-wrapper"]'),
+        control
+      );
+      disposeSidebarTooltip(control);
+      positionCollapsedSidebarDropdown(control);
+    }
+  });
+
+  document.addEventListener("hidden.bs.dropdown", (event) => {
+    const control = event.target.matches('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]')
+      ? event.target
+      : event.target.querySelector?.('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]');
+    if (control) {
+      clearCollapsedSidebarDropdownPosition(control);
+    }
+    const wrapper = event.target.closest?.('[data-slot="sidebar-wrapper"]');
+    if (wrapper) {
+      syncSidebarTooltips(wrapper);
+    }
+  });
 
   const setSidebarState = (wrapper, state, persist = true) => {
     state = state === "collapsed" ? "collapsed" : "expanded";
@@ -261,6 +447,11 @@
       }
     }
     syncSidebarControls(wrapper);
+    if (state === "expanded") {
+      wrapper
+        .querySelectorAll(".sidebar-menu-item")
+        .forEach((item) => resetSidebarFlyoutTrigger(item));
+    }
     syncSidebarTooltips(wrapper);
   };
 
@@ -321,6 +512,10 @@
 
   window.addEventListener("resize", () => {
     sidebarWrappers.forEach((wrapper) => {
+      closeSidebarFlyouts(wrapper);
+      wrapper
+        .querySelectorAll("[data-moo-sidebar-dropdown-positioned]")
+        .forEach((item) => clearCollapsedSidebarDropdownPosition(item));
       syncSidebarControls(wrapper);
       syncSidebarTooltips(wrapper);
     });
@@ -339,6 +534,7 @@
     }
     if (isDesktopSidebar()) {
       event.preventDefault();
+      closeSidebarFlyouts(wrapper);
       toggleSidebar(wrapper);
       return;
     }
@@ -349,6 +545,36 @@
         Offcanvas.getOrCreateInstance(sidebar).toggle();
       }
     }
+  });
+
+  window.addEventListener("click", (event) => {
+    const trigger = event.target.closest?.(".sidebar-menu-sub-trigger");
+    const item = trigger?.closest(".sidebar-menu-item");
+    const wrapper = item?.closest('[data-slot="sidebar-wrapper"]');
+    if (!trigger || !item || !wrapper || !isCollapsedSidebar(wrapper)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (sidebarFlyoutOwner === item && sidebarFlyout) {
+      closeSidebarFlyouts(wrapper);
+      return;
+    }
+    openSidebarFlyout(item);
+  }, true);
+
+  document.addEventListener("click", (event) => {
+    if (!sidebarFlyout) {
+      return;
+    }
+    if (sidebarFlyout.contains(event.target)) {
+      closeSidebarFlyouts(sidebarFlyoutOwner?.closest('[data-slot="sidebar-wrapper"]'));
+      return;
+    }
+    if (sidebarFlyoutOwner?.contains(event.target)) {
+      return;
+    }
+    closeSidebarFlyouts(sidebarFlyoutOwner?.closest('[data-slot="sidebar-wrapper"]'));
   });
 
   document.addEventListener("keydown", (event) => {
@@ -364,6 +590,7 @@
       ) || sidebarWrappers[0];
     if (wrapper) {
       event.preventDefault();
+      closeSidebarFlyouts(wrapper);
       toggleSidebar(wrapper);
     }
   });

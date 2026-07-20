@@ -1,7 +1,7 @@
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_badge, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
 
 {% macro render_sidebar_shell(key, sidebar_id, variant="sidebar", contained=false, sidebar_open=true, demo_copy="default") -%}
   {% set portal_copy = demo_copy == "portal" %}
@@ -63,14 +63,16 @@
     {% call sidebar(id=sidebar_id, variant=variant, aria_label="Sidebar block navigation") %}
       {% call sidebar_header() %}
         {% call sidebar_menu() %}
-          {% call sidebar_menu_item(dropdown=true) %}
+          {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend") %}
             {{ sidebar_menu_button(
               brand_name,
               subtitle=brand_subtitle,
               size="lg",
               dropdown=true,
+              dropdown_offset="0,4",
               lead=sidebar_brand_mark(brand_icon),
-              end_icon="chevrons-up-down"
+              end_icon="chevrons-up-down",
+              extra_class="sidebar-menu-button--workspace"
             ) }}
             {% call dropdown_menu() %}
               {{ dropdown_header(team_header) }}
@@ -98,6 +100,7 @@
                     {% endcall %}
                     {% call sidebar_menu_sub_item() %}
                       {{ sidebar_menu_button("Approvals", href="#") }}
+                      {{ sidebar_menu_badge("3", variant="secondary") }}
                     {% endcall %}
                     {% call sidebar_menu_sub_item() %}
                       {{ sidebar_menu_button("Activity", href="#") }}
