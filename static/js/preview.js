@@ -343,6 +343,7 @@
     flyout.classList.remove("collapse", "show", "collapsing");
     flyout.classList.add("sidebar-menu-flyout");
     flyout.setAttribute("data-moo-sidebar-flyout", "");
+    flyout.removeAttribute("style");
     flyout.style.setProperty("--moo-sidebar-flyout-block-start", `${Math.round(rect.top)}px`);
     flyout.style.setProperty("--moo-sidebar-flyout-inline-start", `${Math.round(inlineStart)}px`);
 
