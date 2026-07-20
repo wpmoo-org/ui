@@ -1,0 +1,25 @@
+{
+  "name": "@moo/ui",
+  "version": "0.1.0",
+  "description": "Alias package for the canonical @wpmoo/ui package.",
+  "license": "MIT",
+  "author": "WPMoo (https://wpmoo.org)",
+  "homepage": "https://ui.wpmoo.org/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wpmoo-org/ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wpmoo-org/ui/issues"
+  },
+  "private": false,
+  "dependencies": {
+    "@wpmoo/ui": "0.1.0"
+  },
+  "files": [
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
