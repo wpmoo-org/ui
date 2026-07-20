@@ -1,0 +1,18 @@
+// shadcn's own Toast page is deprecated in favor of Sonner, so this partial
+// retunes Bootstrap's own --bs-toast-* custom properties toward Sonner's
+// visual weight (larger radius, quieter border tone, a softer diffuse
+// shadow, fuller padding, a lighter-weight title) while keeping Bootstrap's
+// own header/body composition and the public "Toast" name and API.
+.toast {
+  --bs-toast-border-radius: var(--bs-border-radius-lg);
+  --bs-toast-border-color: var(--moo-border);
+  --bs-toast-box-shadow: var(--bs-box-shadow-lg);
+  --bs-toast-padding-x: #{$spacer};
+}
+
+.toast-header strong {
+  // Bootstrap's own toast markup titles with a bare <strong>, which
+  // renders at the browser's default bold (700); Sonner's title sits at a
+  // lighter 500.
+  font-weight: $font-weight-medium;
+}
