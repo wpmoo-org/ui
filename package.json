@@ -1,0 +1,56 @@
+{
+  "name": "@wpmoo/ui",
+  "version": "0.1.0",
+  "description": "Bootstrap-native HTML component system with a shadcn-inspired visual language.",
+  "license": "MIT",
+  "author": "WPMoo (https://wpmoo.org)",
+  "homepage": "https://ui.wpmoo.org/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wpmoo-org/ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wpmoo-org/ui/issues"
+  },
+  "private": false,
+  "workspaces": [
+    "packages/moo-ui-alias"
+  ],
+  "scripts": {
+    "build": ".venv/bin/python build.py",
+    "dev": ".venv/bin/python dev.py",
+    "test": ".venv/bin/python -m unittest discover -s tests -v"
+  },
+  "style": "dist/assets/css/moo-ui.css",
+  "exports": {
+    "./moo-ui.css": "./dist/assets/css/moo-ui.css",
+    "./moo-core.css": "./dist/assets/css/moo-core.css",
+    "./bootstrap.bundle.min.js": "./dist/assets/js/bootstrap.bundle.min.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/assets/css/moo-ui.css",
+    "dist/assets/css/moo-core.css",
+    "dist/assets/js/bootstrap.bundle.min.js",
+    "dist/assets/js/bootstrap.bundle.min.js.map",
+    "README.md",
+    "LICENSE",
+    "LICENSE-MOO-CORE.txt",
+    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "sideEffects": [
+    "dist/assets/css/*.css"
+  ],
+  "keywords": [
+    "bootstrap",
+    "components",
+    "css",
+    "html",
+    "moo-ui",
+    "shadcn"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
