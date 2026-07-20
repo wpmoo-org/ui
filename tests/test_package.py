@@ -19,6 +19,7 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["repository"]["url"], "git+https://github.com/wpmoo-org/ui.git")
         self.assertEqual(package["scripts"]["build"], ".venv/bin/python build.py")
         self.assertEqual(package["scripts"]["dev"], ".venv/bin/python dev.py")
+        self.assertNotIn("workspaces", package)
 
     def test_root_package_exports_built_css_without_protected_images(self) -> None:
         package = self._read_package()
@@ -49,6 +50,9 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertFalse(alias.get("private", True))
         self.assertEqual(alias["dependencies"]["@wpmoo/ui"], package["version"])
         self.assertEqual(alias["files"], ["README.md"])
+
+    def test_alias_package_is_not_part_of_root_install(self) -> None:
+        self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())
 
 
 if __name__ == "__main__":
