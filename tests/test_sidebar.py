@@ -726,6 +726,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('window.addEventListener("click"', script)
         self.assertIn("cloneNode(true)", script)
         self.assertIn("sidebar-menu-flyout", script)
+        self.assertIn('flyout.removeAttribute("style")', script)
         self.assertIn("sidebarFlyoutOwner === item", script)
         self.assertIn("data-moo-sidebar-flyout", script)
         self.assertIn("sidebar-menu-item--flyout-open", script)
