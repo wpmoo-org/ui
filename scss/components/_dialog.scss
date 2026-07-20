@@ -1,17 +1,33 @@
 // Dialog is the Moo catalog name for Bootstrap's Modal component, so this
 // partial retunes Bootstrap's own --bs-modal-* custom properties toward the
-// shadcn reference: a larger radius, a quieter border tone, a tinted
-// footer, and a lighter-weight title, instead of Bootstrap's own
-// sharper-cornered, heavier-titled look.
+// shadcn reference: a larger radius, a quieter border tone, a borderless
+// header, a tinted footer, and a lighter-weight tightly-set title, instead
+// of Bootstrap's own sharper-cornered, divided, heavier-titled look.
 .modal {
   --bs-modal-border-radius: var(--bs-border-radius-xl);
   --bs-modal-border-color: var(--moo-border);
-  --bs-modal-header-border-color: var(--moo-border);
+  --bs-modal-header-border-width: 0;
   --bs-modal-footer-border-color: var(--moo-border);
   --bs-modal-footer-bg: var(--moo-muted-surface);
+  --bs-modal-title-line-height: 1;
 }
 
 .modal-title {
-  font-size: $font-size-base;
+  // A literal size, not $font-size-base: this project's own base is 14px,
+  // but shadcn's dialog title sits at a plain, un-scaled 16px regardless.
+  font-size: 1rem;
   font-weight: $font-weight-medium;
+}
+
+.modal-footer {
+  // Bootstrap derives this from --bs-modal-padding minus half the button
+  // gap (12px here); shadcn's footer keeps the full 16px card padding.
+  padding: $spacer;
+}
+
+// shadcn's own backdrop reads as barely-there (roughly 10% black); Bootstrap
+// ships a much heavier 50% default that this project has otherwise never
+// retuned.
+.modal-backdrop {
+  --bs-backdrop-opacity: 0.1;
 }

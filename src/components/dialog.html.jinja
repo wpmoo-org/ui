@@ -37,7 +37,7 @@
   {% if not id | trim %}{{ fail("Dialog header id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Dialog title is required") }}{% endif %}
   <div class="modal-header">
-    <h1 class="modal-title fs-5" id="{{ id }}-title">{{ title }}</h1>
+    <h1 class="modal-title" id="{{ id }}-title">{{ title }}</h1>
     {{ close_button(aria_label=dismiss_aria_label, dismiss="modal") }}
   </div>
 {%- endmacro %}
