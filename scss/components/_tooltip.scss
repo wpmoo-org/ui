@@ -1,0 +1,13 @@
+// Bootstrap's tooltip bubble is fully token-driven already (see the vendored
+// Bootstrap tooltip partial), so this partial only owns the plain link
+// trigger's own text color. Unstyled, it falls through to Bootstrap's
+// un-themed --bs-link-color, which reads too low-contrast on dark surfaces;
+// a dotted underline also reads as "hover for more info" rather than a real
+// navigational link.
+.tooltip-trigger {
+  color: var(--moo-foreground);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--moo-muted-foreground);
+  text-underline-offset: 0.2em;
+}
