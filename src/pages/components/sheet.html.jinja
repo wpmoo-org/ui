@@ -17,9 +17,9 @@
     {% set basic %}
       {{ button("Open sheet", variant="outline", sheet_target="sheet-basic") }}
       {% call sheet("sheet-basic") %}
-        {{ sheet_header("sheet-basic", "Edit profile") }}
+        {{ sheet_header("sheet-basic", "Filter results") }}
         {% call sheet_body() %}
-          <p class="mb-0">Update the name and bio shown on your public profile.</p>
+          <p class="mb-0">Narrow the list below by status, owner, and date range.</p>
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -98,9 +98,9 @@
       <div dir="rtl">
         {{ button("فتح اللوحة", variant="outline", sheet_target="sheet-rtl") }}
         {% call sheet("sheet-rtl") %}
-          {{ sheet_header("sheet-rtl", "تعديل الملف الشخصي") }}
+          {{ sheet_header("sheet-rtl", "تصفية النتائج") }}
           {% call sheet_body() %}
-            <p class="mb-0">حدّث الاسم والنبذة الظاهرة في ملفك الشخصي العام.</p>
+            <p class="mb-0">ضيّق نطاق القائمة أدناه حسب الحالة والمالك والفترة الزمنية.</p>
           {% endcall %}
         {% endcall %}
       </div>
