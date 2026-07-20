@@ -40,14 +40,16 @@
     ) }}
 
     {% set with_shortcut %}
-      {{ button("", variant="outline", size="icon-sm", icon_start="save", aria_label="Save draft", tooltip="Save draft <code>⌘S</code>", tooltip_html=true) }}
+      {{ button("", variant="outline", size="icon-sm", icon_start="save", aria_label="Save draft", tooltip="Save draft <code class='tooltip-kbd'>⌘S</code>", tooltip_html=true) }}
     {% endset %}
     {{ render_example(
       "keyboard-shortcut",
       "With keyboard shortcut",
       "Set <code>tooltip_html=true</code> to render markup inside the tooltip body. Bootstrap runs it through its "
-      ~ "own default sanitizer allowlist first, so stick to allowlisted inline tags — <code>&lt;code&gt;</code> "
-      ~ "here, not <code>&lt;kbd&gt;</code>, which Bootstrap's allowlist does not include and would silently strip.",
+      ~ "own default sanitizer allowlist first, which has no <code>&lt;kbd&gt;</code> but does allow a "
+      ~ "<code>class</code> attribute on any tag, so the shortcut hint uses "
+      ~ "<code>&lt;code class=\"tooltip-kbd\"&gt;</code> to reproduce Bootstrap's native <code>&lt;kbd&gt;</code> "
+      ~ "look on an allowlisted tag.",
       with_shortcut
     ) }}
 
