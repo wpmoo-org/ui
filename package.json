@@ -13,9 +13,6 @@
     "url": "https://github.com/wpmoo-org/ui/issues"
   },
   "private": false,
-  "workspaces": [
-    "packages/moo-ui-alias"
-  ],
   "scripts": {
     "build": ".venv/bin/python build.py",
     "dev": ".venv/bin/python dev.py",
