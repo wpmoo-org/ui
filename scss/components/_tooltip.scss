@@ -11,3 +11,17 @@
   text-decoration-color: var(--moo-muted-foreground);
   text-underline-offset: 0.2em;
 }
+
+// Bootstrap's default sanitizer allowlist for data-bs-html tooltip content
+// has no <kbd>, only <code> among inline code tags, but does allow a
+// class="" attribute on any element. This reproduces Bootstrap's own native
+// <kbd> look (inverted body colors, same $kbd-* padding/font-size scale from
+// reboot) on a sanitizer-safe <code class="tooltip-kbd"> element instead of
+// inventing a new visual.
+.tooltip-kbd {
+  padding: $kbd-padding-y $kbd-padding-x;
+  font-size: $kbd-font-size;
+  color: var(--bs-body-bg);
+  background-color: var(--bs-body-color);
+  border-radius: var(--bs-border-radius-sm);
+}
