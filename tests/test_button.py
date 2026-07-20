@@ -297,6 +297,57 @@ class ButtonTests(CatalogTestCase):
         ):
             self.render_button('button("Open popover", popover_title="Dimensions")')
 
+    def test_button_dialog_target_uses_bootstrap_data_api_contract(self) -> None:
+        output = self.render_button(
+            'button("Open dialog", dialog_target="dialog-basic")'
+        )
+
+        self.assertIn('data-bs-toggle="modal"', output)
+        self.assertIn('data-bs-target="#dialog-basic"', output)
+
+    def test_button_dialog_target_works_on_anchor_element(self) -> None:
+        output = self.render_button(
+            'button("Open dialog", element="a", href="#", dialog_target="dialog-basic")'
+        )
+
+        self.assertIn('data-bs-toggle="modal"', output)
+        self.assertIn('data-bs-target="#dialog-basic"', output)
+
+    def test_button_dialog_target_requires_button_or_anchor_element(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button dialog_target requires element=button or element=a",
+        ):
+            self.render_button(
+                'button("Open dialog", element="input", dialog_target="dialog-basic")'
+            )
+
+    def test_button_dialog_target_cannot_combine_with_other_plugins(self) -> None:
+        for call in (
+            'button("Actions", dropdown=true, dialog_target="dialog-basic")',
+            'button("Toggle", collapse_target="panel-one", dialog_target="dialog-basic")',
+            'button("Save", tooltip="Saves the draft", dialog_target="dialog-basic")',
+            'button("Open popover", popover_content="Text", dialog_target="dialog-basic")',
+        ):
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "Button dialog_target cannot combine with toggle, dropdown, "
+                    "collapse_target, tooltip, or popover_content",
+                ):
+                    self.render_button(call)
+
+    def test_button_dismiss_renders_data_bs_dismiss(self) -> None:
+        output = self.render_button('button("Cancel", variant="outline", dismiss="modal")')
+
+        self.assertIn('data-bs-dismiss="modal"', output)
+
+    def test_button_rejects_unknown_dismiss_target(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Unknown button dismiss target: toast"
+        ):
+            self.render_button('button("Close", dismiss="toast")')
+
     def test_anchor_button_carries_role_button(self) -> None:
         output = self.render_button('button("Link", element="a", href="#")')
         self.assertIn('role="button"', output)

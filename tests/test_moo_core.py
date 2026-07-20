@@ -37,6 +37,7 @@ REQUIRED_BOOTSTRAP_IMPORTS = [
     "badge",
     "alert",
     "close",
+    "modal",
     "tooltip",
     "popover",
     "offcanvas",
