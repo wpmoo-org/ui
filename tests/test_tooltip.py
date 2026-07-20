@@ -38,6 +38,17 @@ class TooltipTests(CatalogTestCase):
 
         self.assertIn('data-bs-toggle="tooltip"', output)
         self.assertIn('data-bs-title="Default tooltip"', output)
+
+    def test_tooltip_trigger_default_href_does_not_jump_to_page_top(self) -> None:
+        # Regression test: href="#" is a real anchor navigation that browsers
+        # special-case to scroll to the very top of the document, and
+        # nothing here calls preventDefault() on the click. "#!" matches no
+        # element, so it stays a real, focusable anchor without the jump.
+        output = self.render_tooltip(
+            'tooltip_trigger("Hover over me", "Default tooltip")'
+        )
+
+        self.assertIn('href="#!"', output)
         self.assertIn('data-bs-placement="top"', output)
         self.assertIn(">Hover over me</a>", output)
         self.assertNotIn("data-bs-html", output)

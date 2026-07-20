@@ -45,6 +45,19 @@ class PopoverTests(CatalogTestCase):
         self.assertIn(">Dismissible popover</a>", output)
         self.assertNotIn("data-bs-html", output)
 
+    def test_popover_dismiss_trigger_default_href_does_not_jump_to_page_top(
+        self,
+    ) -> None:
+        # Regression test: href="#" is a real anchor navigation that browsers
+        # special-case to scroll to the very top of the document, and
+        # nothing here calls preventDefault() on the click. "#!" matches no
+        # element, so it stays a real, focusable anchor without the jump.
+        output = self.render_popover(
+            'popover_dismiss_trigger("Dismissible popover", "Some content.")'
+        )
+
+        self.assertIn('href="#!"', output)
+
     def test_popover_dismiss_trigger_title_is_optional(self) -> None:
         output = self.render_popover(
             'popover_dismiss_trigger("Label", "Content only.")'

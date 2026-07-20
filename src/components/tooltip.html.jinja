@@ -1,11 +1,15 @@
 {% set tooltip_placements = ["top", "right", "bottom", "left"] %}
 
+{# The default href is "#!", not "#": an empty fragment is the one browsers
+   special-case to scroll to the very top of the document on click, and
+   nothing here prevents that click; "#!" matches nothing, so nothing
+   scrolls, while the element stays a real, always-focusable anchor. #}
 {% macro tooltip_trigger(
   label,
   text,
   placement="top",
   html=false,
-  href="#",
+  href="#!",
   extra_class=""
 ) -%}
   {% if not label | trim %}{{ fail("Tooltip trigger label is required") }}{% endif %}
