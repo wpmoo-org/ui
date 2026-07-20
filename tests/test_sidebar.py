@@ -32,7 +32,7 @@ class SidebarTests(CatalogTestCase):
             'sidebar_menu_button, sidebar_menu_item, '
             'sidebar_group_action, sidebar_group_content, sidebar_menu_action, '
             'sidebar_menu_badge, sidebar_menu_skeleton, sidebar_menu_sub, '
-            'sidebar_menu_sub_button, sidebar_separator, sidebar_provider, '
+            'sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_separator, sidebar_provider, '
             'sidebar_trigger %}'
             + source
         )
@@ -274,6 +274,68 @@ class SidebarTests(CatalogTestCase):
         )
         self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-badge"))
 
+    def test_sidebar_menu_sub_item_badge_reserves_trailing_space(self) -> None:
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        output = self.render_sidebar(
+            """
+            {% call sidebar_menu_sub_item() %}
+              {{ sidebar_menu_button("Pending review", href="#") }}
+              {{ sidebar_menu_badge("3", variant="secondary") }}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn('class="sidebar-menu-sub-item"', output)
+        self.assertIn('data-slot="sidebar-menu-badge"', output)
+        self.assertIn("position: relative", _css_block(styles, ".sidebar-menu-sub-item"))
+        self.assertIn(
+            "padding-inline-end: $spacer * 2.5",
+            _css_block(
+                styles,
+                ".sidebar-menu-sub-item:has(> .sidebar-menu-badge) > .sidebar-menu-button",
+            ),
+        )
+
+    def test_collapsed_sidebar_submenus_render_as_side_flyouts(self) -> None:
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+
+        flyout = _css_block(
+            styles,
+            ".sidebar-menu-flyout",
+        )
+        collapsed_inset = _css_block(
+            styles,
+            '.sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar-inset',
+        )
+        flyout_layer = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"])',
+        )
+        flyout_text = _css_block(
+            styles,
+            ".sidebar-menu-flyout .sidebar-menu-button__text",
+        )
+        flyout_badge = _css_block(
+            styles,
+            ".sidebar-menu-flyout .sidebar-menu-badge",
+        )
+
+        self.assertIn("position: fixed", flyout)
+        self.assertIn("z-index: $zindex-dropdown", flyout)
+        self.assertIn("position: relative", collapsed_inset)
+        self.assertIn("z-index: 0", collapsed_inset)
+        self.assertIn("z-index: $zindex-dropdown", flyout_layer)
+        self.assertIn("inset-inline-start: var(--moo-sidebar-flyout-inline-start)", flyout)
+        self.assertIn("inset-block-start: var(--moo-sidebar-flyout-block-start)", flyout)
+        self.assertIn("min-width: $spacer * 10", flyout)
+        self.assertIn("list-style: none", flyout)
+        self.assertIn("background: var(--moo-surface)", flyout)
+        self.assertIn("box-shadow: var(--bs-box-shadow)", flyout)
+        self.assertIn("display: flex", flyout)
+        self.assertIn("display: grid", flyout_text)
+        self.assertIn("display: flex !important", flyout_badge)
+
     def test_sidebar_group_action_and_menu_badge_position_without_extra_classes(self) -> None:
         # Regression coverage: sidebar_group_action and sidebar_menu_badge must
         # overlay their trailing slot in their own documented default usage,
@@ -394,8 +456,8 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("min-height: $spacer * 3", account_button)
         self.assertIn("padding: $spacer * 0.5", account_button)
         account_menu = _css_block(styles, ".sidebar-footer .sidebar-account-menu")
-        self.assertIn("width: 100%", account_menu)
-        self.assertIn("min-width: 100%", account_menu)
+        self.assertIn("width: auto", account_menu)
+        self.assertIn("min-width: var(--moo-dropdown-sidebar-min-width)", account_menu)
         self.assertIn("padding: $spacer * 0.25", account_menu)
         self.assertIn("border-radius: var(--bs-border-radius-lg)", account_menu)
         self.assertIn("box-shadow: var(--bs-box-shadow)", account_menu)
@@ -408,6 +470,58 @@ class SidebarTests(CatalogTestCase):
             "margin: $spacer * 0.25 0",
             _css_block(styles, ".sidebar-account-menu__divider"),
         )
+        collapsed_account_hover = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:hover',
+        )
+        collapsed_account_open = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account[aria-expanded="true"]',
+        )
+        self.assertIn("background: transparent", collapsed_account_hover)
+        self.assertIn("background: transparent", collapsed_account_open)
+        self.assertIn("outline: 0", collapsed_account_open)
+        self.assertIn("box-shadow: none", collapsed_account_open)
+
+    def test_sidebar_workspace_dropdown_uses_identity_trigger_contract(self) -> None:
+        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        dropdown_styles = ROOT.joinpath("scss/components/_dropdown.scss").read_text()
+
+        identity_cursors = _css_block(
+            styles,
+            ".sidebar-menu-button.sidebar-menu-button--account,\n.sidebar-menu-button.sidebar-menu-button--workspace",
+        )
+        collapsed_workspace_hover = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:hover',
+        )
+        collapsed_workspace_open = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace[aria-expanded="true"]',
+        )
+        collapsed_header_dropdown = _css_block(
+            dropdown_styles,
+            '[data-slot="sidebar-header"] [data-moo-sidebar-dropdown-positioned] > .dropdown-menu',
+        )
+
+        self.assertIn("cursor: default", identity_cursors)
+        self.assertIn("background: transparent", collapsed_workspace_hover)
+        self.assertIn("background: transparent", collapsed_workspace_open)
+        self.assertIn("outline: 0", collapsed_workspace_open)
+        self.assertIn("box-shadow: none", collapsed_workspace_open)
+        self.assertIn("position: fixed !important", collapsed_header_dropdown)
+        self.assertIn("z-index: $zindex-dropdown", collapsed_header_dropdown)
+        self.assertIn("width: var(--moo-dropdown-sidebar-min-width)", collapsed_header_dropdown)
+        self.assertIn("min-width: var(--moo-dropdown-sidebar-min-width)", collapsed_header_dropdown)
+        self.assertIn(
+            "inset-inline-start: var(--moo-sidebar-dropdown-inline-start) !important",
+            collapsed_header_dropdown,
+        )
+        self.assertIn(
+            "inset-block-start: var(--moo-sidebar-dropdown-block-start) !important",
+            collapsed_header_dropdown,
+        )
+        self.assertIn("transform: none !important", collapsed_header_dropdown)
 
     def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
         # Regression coverage: sidebar(variant="floating") accepted the enum
@@ -588,3 +702,57 @@ class SidebarTests(CatalogTestCase):
             or "data-moo-sidebar-state" in preview_js,
             "Sidebar runtime state should be controlled in static/js/preview.js",
         )
+
+    def test_sidebar_dropdown_trigger_disables_collapsed_tooltip_while_open(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn("disposeSidebarTooltip", script)
+        self.assertIn('show.bs.dropdown', script)
+        self.assertIn('hidden.bs.dropdown', script)
+        self.assertIn('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]', script)
+
+    def test_sidebar_identity_triggers_skip_collapsed_tooltips(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn('closest(".sidebar-menu-item--account")', script)
+        self.assertIn('classList.contains("sidebar-menu-button--workspace")', script)
+        self.assertIn("return;", script)
+
+    def test_sidebar_disclosure_triggers_use_collapsed_flyout_instead_of_tooltip(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn("openSidebarFlyout", script)
+        self.assertIn("closeSidebarFlyouts", script)
+        self.assertIn('window.addEventListener("click"', script)
+        self.assertIn("cloneNode(true)", script)
+        self.assertIn("sidebar-menu-flyout", script)
+        self.assertIn("sidebarFlyoutOwner === item", script)
+        self.assertIn("data-moo-sidebar-flyout", script)
+        self.assertIn("sidebar-menu-item--flyout-open", script)
+        self.assertIn('querySelector(":scope > .sidebar-menu-sub")', script)
+        self.assertIn("stopImmediatePropagation", script)
+        self.assertIn("sidebarFlyout.contains(event.target)", script)
+        self.assertIn("resetSidebarFlyoutTrigger(sidebarFlyoutOwner, false)", script)
+        self.assertIn("closeSidebarDropdowns(wrapper)", script)
+        self.assertNotIn('document.addEventListener("pointerover"', script)
+        self.assertNotIn('document.addEventListener("focusin"', script)
+
+    def test_sidebar_overlays_close_siblings_before_opening(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn("const closeSidebarDropdowns = (wrapper, exceptControl = null)", script)
+        self.assertIn("control === exceptControl", script)
+        self.assertIn("Dropdown.getOrCreateInstance(control).hide()", script)
+        self.assertIn("closeSidebarDropdowns(", script)
+        self.assertIn("positionCollapsedSidebarDropdown(control)", script)
+
+    def test_sidebar_workspace_dropdown_is_positioned_from_collapsed_icon_rail(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn("positionCollapsedSidebarDropdown", script)
+        self.assertIn("clearCollapsedSidebarDropdownPosition", script)
+        self.assertIn("mooSidebarDropdownPositioned", script)
+        self.assertIn("[data-moo-sidebar-dropdown-positioned]", script)
+        self.assertIn("--moo-sidebar-dropdown-inline-start", script)
+        self.assertIn("--moo-sidebar-dropdown-block-start", script)
+        self.assertIn("rect.bottom + gap", script)

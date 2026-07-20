@@ -226,6 +226,11 @@
   color: var(--moo-sidebar-foreground);
 }
 
+.sidebar-menu-button.sidebar-menu-button--account,
+.sidebar-menu-button.sidebar-menu-button--workspace {
+  cursor: default;
+}
+
 .sidebar-menu-item--account {
   padding-inline: 0;
 }
@@ -332,6 +337,10 @@
   font-size: $font-size-base * 0.929;
 }
 
+.sidebar-menu-sub-item {
+  position: relative;
+}
+
 .sidebar-menu-action {
   position: absolute;
   inset-inline-end: $spacer * 0.25;
@@ -376,6 +385,10 @@
 
 // Reserve room so a long title doesn't run under the badge.
 .sidebar-menu-item:has(> .sidebar-menu-badge) > .sidebar-menu-button {
+  padding-inline-end: $spacer * 2.5;
+}
+
+.sidebar-menu-sub-item:has(> .sidebar-menu-badge) > .sidebar-menu-button {
   padding-inline-end: $spacer * 2.5;
 }
 
@@ -424,8 +437,8 @@
 }
 
 .sidebar-footer .sidebar-account-menu {
-  width: 100%;
-  min-width: 100%;
+  width: auto;
+  min-width: var(--moo-dropdown-sidebar-min-width);
   padding: $spacer * 0.25;
   border-radius: var(--bs-border-radius-lg);
   box-shadow: var(--bs-box-shadow);
@@ -574,6 +587,11 @@
     width: var(--moo-sidebar-width-icon);
   }
 
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar-inset {
+    position: relative;
+    z-index: 0;
+  }
+
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-group-label,
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__text,
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__subtitle,
@@ -588,9 +606,69 @@
     display: none !important;
   }
 
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"]) {
+    z-index: $zindex-dropdown;
+  }
+
+  .sidebar-menu-flyout {
+    position: fixed;
+    z-index: $zindex-dropdown;
+    inset-block-start: var(--moo-sidebar-flyout-block-start);
+    inset-inline-start: var(--moo-sidebar-flyout-inline-start);
+    display: flex;
+    flex-direction: column;
+    min-width: $spacer * 10;
+    max-width: $spacer * 14;
+    margin: 0;
+    padding: $spacer * 0.25;
+    list-style: none;
+    border: var(--bs-border-width) solid var(--moo-border);
+    border-radius: var(--bs-border-radius-lg);
+    background: var(--moo-surface);
+    box-shadow: var(--bs-box-shadow);
+  }
+
+  .sidebar-menu-flyout .sidebar-menu-sub-item {
+    position: relative;
+  }
+
+  .sidebar-menu-flyout .sidebar-menu-button {
+    justify-content: flex-start;
+    height: $spacer * 2;
+    padding-inline: $spacer * 0.5;
+  }
+
+  .sidebar-menu-flyout .sidebar-menu-button__text {
+    display: grid;
+  }
+
+  .sidebar-menu-flyout .sidebar-menu-badge {
+    display: flex !important;
+  }
+
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button {
     justify-content: center;
     padding-inline: 0;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:hover {
+    background: transparent;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace[aria-expanded="true"] {
+    background: transparent;
+    outline: 0;
+    box-shadow: none;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:hover {
+    background: transparent;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account[aria-expanded="true"] {
+    background: transparent;
+    outline: 0;
+    box-shadow: none;
   }
 
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--lg {
