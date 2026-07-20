@@ -661,11 +661,28 @@
     box-shadow: none;
   }
 
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:focus-visible {
+    background: transparent;
+    outline: 0;
+    box-shadow: none;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account {
+    padding: 0;
+    overflow: visible;
+  }
+
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:hover {
     background: transparent;
   }
 
   [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account[aria-expanded="true"] {
+    background: transparent;
+    outline: 0;
+    box-shadow: none;
+  }
+
+  [data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:focus-visible {
     background: transparent;
     outline: 0;
     box-shadow: none;
