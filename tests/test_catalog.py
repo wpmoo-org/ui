@@ -96,6 +96,9 @@ class CatalogContractTests(CatalogTestCase):
             # and also fixes the grid stacking on Bootstrap's own tab-content
             # and tab-pane classes.
             "tabs": ("tabs", "nav-link", "active", "tab-content", "tab-pane"),
+            # Dialog is the Moo catalog name for Bootstrap's Modal component;
+            # its native selector family is "modal-", not "dialog-".
+            "dialog": ("modal",),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
