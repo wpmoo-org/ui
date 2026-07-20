@@ -220,6 +220,83 @@ class ButtonTests(CatalogTestCase):
                 'button("Toggle", collapse_target="panel-one", tooltip="Toggle panel")'
             )
 
+    def test_button_popover_uses_bootstrap_plugin_contract(self) -> None:
+        output = self.render_button(
+            'button("Open popover", popover_title="Dimensions", '
+            'popover_content="Set the width and height.")'
+        )
+
+        self.assertIn('data-bs-toggle="popover"', output)
+        self.assertIn('data-bs-title="Dimensions"', output)
+        self.assertIn('data-bs-content="Set the width and height."', output)
+        self.assertIn('data-bs-placement="top"', output)
+
+    def test_button_popover_content_alone_omits_title(self) -> None:
+        output = self.render_button(
+            'button("Open popover", popover_content="Just the content.")'
+        )
+
+        self.assertIn('data-bs-content="Just the content."', output)
+        self.assertNotIn("data-bs-title", output)
+
+    def test_button_popover_placement_is_configurable(self) -> None:
+        output = self.render_button(
+            'button("Open popover", popover_content="Text", popover_placement="left")'
+        )
+
+        self.assertIn('data-bs-placement="left"', output)
+
+    def test_button_rejects_unknown_popover_placement(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Unknown button popover placement: huge"
+        ):
+            self.render_button(
+                'button("Open popover", popover_content="Text", popover_placement="huge")'
+            )
+
+    def test_button_popover_content_requires_button_or_anchor_element(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button popover_content requires element=button or element=a",
+        ):
+            self.render_button(
+                'button("Open popover", element="input", popover_content="Text")'
+            )
+
+    def test_button_popover_cannot_combine_with_other_plugins(self) -> None:
+        for call, message in (
+            (
+                'button("Actions", dropdown=true, popover_content="More actions")',
+                "Button popover_content cannot combine with toggle, dropdown, "
+                "collapse_target, or tooltip",
+            ),
+            (
+                'button("Toggle", collapse_target="panel-one", popover_content="Toggle panel")',
+                "Button popover_content cannot combine with toggle, dropdown, "
+                "collapse_target, or tooltip",
+            ),
+            (
+                'button("Save", tooltip="Saves the draft", popover_content="Also this")',
+                "Button popover_content cannot combine with toggle, dropdown, "
+                "collapse_target, or tooltip",
+            ),
+        ):
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(ValueError, message):
+                    self.render_button(call)
+
+    def test_button_popover_html_requires_popover_content(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Button popover_html requires popover_content"
+        ):
+            self.render_button('button("Open popover", popover_html=true)')
+
+    def test_button_popover_title_requires_popover_content(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Button popover_title requires popover_content"
+        ):
+            self.render_button('button("Open popover", popover_title="Dimensions")')
+
     def test_anchor_button_carries_role_button(self) -> None:
         output = self.render_button('button("Link", element="a", href="#")')
         self.assertIn('role="button"', output)

@@ -1,0 +1,95 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/popover.html.jinja" import popover_dismiss_trigger %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Popover — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Popover",
+    "Show richer, click-triggered content next to a trigger, powered by Bootstrap's own opt-in Popover plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ button("Open popover", variant="outline", popover_title="Dimensions", popover_content="Set the width and height for the selected layer.") }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Set <code>popover_content</code> (and optionally <code>popover_title</code>) on the ready Button macro. The catalog performs the one required explicit init pass; a consuming page must do the same.",
+      basic
+    ) }}
+
+    {% set placements %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Top", variant="outline", popover_content="Popover on top", popover_placement="top") }}
+        {{ button("Right", variant="outline", popover_content="Popover on right", popover_placement="right") }}
+        {{ button("Bottom", variant="outline", popover_content="Popover on bottom", popover_placement="bottom") }}
+        {{ button("Left", variant="outline", popover_content="Popover on left", popover_placement="left") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "placements",
+      "Side",
+      "Set <code>popover_placement</code> to <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code>; directions mirror automatically under RTL.",
+      placements
+    ) }}
+
+    {% set rich_content %}
+      {{ button("Learn more", variant="outline", popover_title="New feature", popover_content="See our <a href=\"#\">changelog</a> for details.", popover_html=true) }}
+    {% endset %}
+    {{ render_example(
+      "rich-content",
+      "Rich content",
+      "Set <code>popover_html=true</code> to render markup inside the popover body. Bootstrap runs it through its "
+      ~ "own default sanitizer allowlist first (same as Tooltip's <code>tooltip_html</code>), so stick to "
+      ~ "allowlisted inline tags — <code>&lt;a&gt;</code> here.",
+      rich_content
+    ) }}
+
+    {% set dismiss %}
+      {{ popover_dismiss_trigger("Dismissible popover", "Click anywhere else on the page to close this.", title="Dismissible") }}
+    {% endset %}
+    {{ render_example(
+      "dismiss",
+      "Dismiss on next click",
+      "Bootstrap only supports the focus-triggered dismiss pattern reliably on an <code>&lt;a&gt;</code> element with <code>tabindex=\"0\"</code>, not a <code>&lt;button&gt;</code>, so this ships as its own <code>popover_dismiss_trigger()</code> macro.",
+      dismiss
+    ) }}
+
+    {% set disabled %}
+      <span class="d-inline-block" tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="This action is currently unavailable">
+        {{ button("Archive", variant="outline", disabled=true) }}
+      </span>
+    {% endset %}
+    {{ render_example(
+      "disabled-trigger",
+      "Disabled trigger",
+      "A <code>disabled</code> element never fires hover, focus, or click events, so wrap it in a focusable <code>&lt;span&gt;</code> and attach the popover there. Bootstrap recommends <code>hover focus</code> as the trigger here, since a click may not be the first thing a user expects from something disabled.",
+      disabled
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ button("فتح النافذة", variant="outline", popover_title="الأبعاد", popover_content="حدد العرض والارتفاع للطبقة المحددة.") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Placement direction mirrors automatically; no extra CSS or markup is required.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Popover plugin options, positioning, and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/popovers/",
+    "Bootstrap Popovers documentation"
+  ) }}
+
+{% endblock %}
