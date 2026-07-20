@@ -26,8 +26,14 @@
 }
 
 // shadcn's own backdrop reads as barely-there (roughly 10% black) versus
-// Bootstrap's much heavier 50% default. Left unretuned on purpose: Bootstrap
-// renders .offcanvas-backdrop as one shared, unscoped element regardless of
-// which offcanvas instance opened it (there is no per-instance class to
-// hook into, and Sidebar's own mobile drawer opens the very same element),
-// so retuning it here would silently dim Sidebar's mobile backdrop too.
+// Bootstrap's much heavier 50% default. Opacity is left unretuned on
+// purpose: Bootstrap renders .offcanvas-backdrop as one shared, unscoped
+// element regardless of which offcanvas instance opened it (there is no
+// per-instance class to hook into, and Sidebar's own mobile drawer opens
+// the very same element), so dimming it here would silently dim Sidebar's
+// mobile backdrop too. The blur below is added anyway, confirmed against
+// Sidebar's own mobile drawer first: unlike opacity, a blur doesn't cut
+// into legibility or contrast, so it reads fine shared across both.
+.offcanvas-backdrop {
+  backdrop-filter: blur(4px);
+}
