@@ -99,6 +99,11 @@ class CatalogContractTests(CatalogTestCase):
             # Dialog is the Moo catalog name for Bootstrap's Modal component;
             # its native selector family is "modal-", not "dialog-".
             "dialog": ("modal",),
+            # Sheet is the Moo catalog name for Bootstrap's Offcanvas
+            # component; its native selector family is "offcanvas-", plus
+            # the "sheet" marker class used to scope Sheet-only overrides
+            # away from Sidebar's own bare .offcanvas usage.
+            "sheet": ("offcanvas", "sheet"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
