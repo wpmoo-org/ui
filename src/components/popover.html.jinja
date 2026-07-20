@@ -1,0 +1,30 @@
+{% set popover_placements = ["top", "right", "bottom", "left"] %}
+
+{# Bootstrap requires an <a>, not a <button>, for the focus-triggered
+   "dismiss on next click" pattern to behave consistently across browsers,
+   so this is a dedicated trigger rather than another button() option. #}
+{% macro popover_dismiss_trigger(
+  label,
+  content,
+  title="",
+  placement="top",
+  html=false,
+  href="#",
+  extra_class=""
+) -%}
+  {% if not label | trim %}{{ fail("Popover trigger label is required") }}{% endif %}
+  {% if not content | trim %}{{ fail("Popover content is required") }}{% endif %}
+  {% if placement not in popover_placements %}{{ fail("Unknown popover placement: " ~ placement) }}{% endif %}
+  <a
+    href="{{ href }}"
+    role="button"
+    tabindex="0"
+    class="btn btn-outline-secondary{% if extra_class %} {{ extra_class }}{% endif %}"
+    data-bs-toggle="popover"
+    data-bs-trigger="focus"
+    data-bs-placement="{{ placement }}"
+    {% if title %}data-bs-title="{{ title | safe if html else title }}"{% endif %}
+    data-bs-content="{{ content | safe if html else content }}"
+    {% if html %}data-bs-html="true"{% endif %}
+  >{{ label }}</a>
+{%- endmacro %}

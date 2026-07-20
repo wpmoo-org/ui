@@ -38,6 +38,7 @@ REQUIRED_BOOTSTRAP_IMPORTS = [
     "alert",
     "close",
     "tooltip",
+    "popover",
     "offcanvas",
     "helpers/color-bg",
 ]
