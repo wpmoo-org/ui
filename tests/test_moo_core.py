@@ -37,6 +37,7 @@ REQUIRED_BOOTSTRAP_IMPORTS = [
     "badge",
     "alert",
     "close",
+    "tooltip",
     "offcanvas",
     "helpers/color-bg",
 ]

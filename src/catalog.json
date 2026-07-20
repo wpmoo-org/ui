@@ -143,5 +143,10 @@
     "slug": "collapsible",
     "label": "Collapsible",
     "status": "ready"
+  },
+  {
+    "slug": "tooltip",
+    "label": "Tooltip",
+    "status": "ready"
   }
 ]
