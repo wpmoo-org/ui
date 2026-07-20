@@ -1,0 +1,33 @@
+// Bootstrap's popover is fully token-driven already (see the vendored
+// Bootstrap popover partial), so this partial only retunes those same
+// --bs-popover-* custom properties toward the shadcn reference: a single
+// borderless-feeling card (no two-tone header bar, no directional arrow,
+// larger radius, quieter shadow, uniform padding) instead of Bootstrap's
+// own outlined-header-plus-arrow look.
+.popover {
+  --bs-popover-border-radius: var(--bs-border-radius-lg);
+  --bs-popover-border-color: var(--moo-border);
+  --bs-popover-header-bg: var(--bs-popover-bg);
+  --bs-popover-header-color: var(--bs-popover-body-color);
+  --bs-popover-header-padding-x: #{$spacer * 0.625};
+  --bs-popover-header-padding-y: #{$spacer * 0.625};
+  --bs-popover-body-padding-x: #{$spacer * 0.625};
+  --bs-popover-body-padding-y: #{$spacer * 0.625};
+  // $enable-shadows is off project-wide, which turns Bootstrap's own
+  // box-shadow() mixin into a no-op, so this must be a literal property
+  // consuming the shared token directly rather than a --bs-popover-* custom
+  // property Bootstrap's (disabled) mixin would have read.
+  box-shadow: var(--bs-box-shadow);
+}
+
+.popover-header {
+  padding-bottom: 0;
+  border-bottom: 0;
+  font-weight: $font-weight-medium;
+}
+
+// shadcn's popover has no directional arrow; Bootstrap ships one by default,
+// nested under .popover so it must be matched at the same specificity here.
+.popover .popover-arrow {
+  display: none;
+}

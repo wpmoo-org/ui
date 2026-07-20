@@ -1,0 +1,17 @@
+// Dialog is the Moo catalog name for Bootstrap's Modal component, so this
+// partial retunes Bootstrap's own --bs-modal-* custom properties toward the
+// shadcn reference: a larger radius, a quieter border tone, a tinted
+// footer, and a lighter-weight title, instead of Bootstrap's own
+// sharper-cornered, heavier-titled look.
+.modal {
+  --bs-modal-border-radius: var(--bs-border-radius-xl);
+  --bs-modal-border-color: var(--moo-border);
+  --bs-modal-header-border-color: var(--moo-border);
+  --bs-modal-footer-border-color: var(--moo-border);
+  --bs-modal-footer-bg: var(--moo-muted-surface);
+}
+
+.modal-title {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+}
