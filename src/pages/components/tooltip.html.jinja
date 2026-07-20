@@ -1,0 +1,85 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/tooltip.html.jinja" import tooltip_trigger %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Tooltip — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Tooltip",
+    "Show a short, non-modal hint next to a trigger on hover or focus, powered by Bootstrap's own opt-in Tooltip plugin."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ tooltip_trigger("Hover over me", "Pinned to your workspace") }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "A plain link trigger with <code>data-bs-toggle=\"tooltip\"</code> and <code>data-bs-title</code>. The catalog performs the one required explicit init pass; a consuming page must do the same.",
+      basic
+    ) }}
+
+    {% set placements %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Top", variant="outline", tooltip="Tooltip on top", tooltip_placement="top") }}
+        {{ button("Right", variant="outline", tooltip="Tooltip on right", tooltip_placement="right") }}
+        {{ button("Bottom", variant="outline", tooltip="Tooltip on bottom", tooltip_placement="bottom") }}
+        {{ button("Left", variant="outline", tooltip="Tooltip on left", tooltip_placement="left") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "placements",
+      "Side",
+      "Set <code>tooltip_placement</code> to <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code>; directions mirror automatically under RTL.",
+      placements
+    ) }}
+
+    {% set with_shortcut %}
+      {{ button("", variant="outline", size="icon-sm", icon_start="save", aria_label="Save draft", tooltip="Save draft <code>⌘S</code>", tooltip_html=true) }}
+    {% endset %}
+    {{ render_example(
+      "keyboard-shortcut",
+      "With keyboard shortcut",
+      "Set <code>tooltip_html=true</code> to render markup inside the tooltip body. Bootstrap runs it through its "
+      ~ "own default sanitizer allowlist first, so stick to allowlisted inline tags — <code>&lt;code&gt;</code> "
+      ~ "here, not <code>&lt;kbd&gt;</code>, which Bootstrap's allowlist does not include and would silently strip.",
+      with_shortcut
+    ) }}
+
+    {% set disabled %}
+      <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="This action is currently unavailable">
+        {{ button("Archive", variant="outline", disabled=true) }}
+      </span>
+    {% endset %}
+    {{ render_example(
+      "disabled-button",
+      "Disabled button",
+      "A <code>disabled</code> element never fires hover or focus events, so wrap it in a focusable <code>&lt;span&gt;</code> and attach the tooltip there, per Bootstrap's own guidance.",
+      disabled
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ button("محفوظ", variant="outline", tooltip="محفوظ في مساحة العمل الخاصة بك") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Placement direction mirrors automatically; no extra CSS or markup is required.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Tooltip plugin options, positioning, and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/tooltips/",
+    "Bootstrap Tooltips documentation"
+  ) }}
+
+{% endblock %}

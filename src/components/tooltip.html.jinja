@@ -1,0 +1,22 @@
+{% set tooltip_placements = ["top", "right", "bottom", "left"] %}
+
+{% macro tooltip_trigger(
+  label,
+  text,
+  placement="top",
+  html=false,
+  href="#",
+  extra_class=""
+) -%}
+  {% if not label | trim %}{{ fail("Tooltip trigger label is required") }}{% endif %}
+  {% if not text | trim %}{{ fail("Tooltip text is required") }}{% endif %}
+  {% if placement not in tooltip_placements %}{{ fail("Unknown tooltip placement: " ~ placement) }}{% endif %}
+  <a
+    href="{{ href }}"
+    class="tooltip-trigger{% if extra_class %} {{ extra_class }}{% endif %}"
+    data-bs-toggle="tooltip"
+    data-bs-placement="{{ placement }}"
+    data-bs-title="{{ text | safe if html else text }}"
+    {% if html %}data-bs-html="true"{% endif %}
+  >{{ label }}</a>
+{%- endmacro %}

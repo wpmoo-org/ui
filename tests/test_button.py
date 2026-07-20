@@ -146,6 +146,80 @@ class ButtonTests(CatalogTestCase):
         ):
             self.render_button('button("Toggle", collapse_open=true)')
 
+    def test_button_tooltip_uses_bootstrap_plugin_contract(self) -> None:
+        output = self.render_button(
+            'button("Save", tooltip="Saves the current draft")'
+        )
+
+        self.assertIn('data-bs-toggle="tooltip"', output)
+        self.assertIn('data-bs-title="Saves the current draft"', output)
+        self.assertIn('data-bs-placement="top"', output)
+
+    def test_button_tooltip_placement_is_configurable(self) -> None:
+        output = self.render_button(
+            'button("Save", tooltip="Saves the draft", tooltip_placement="bottom")'
+        )
+
+        self.assertIn('data-bs-placement="bottom"', output)
+
+    def test_button_tooltip_works_on_anchor_element(self) -> None:
+        output = self.render_button(
+            'button("Docs", element="a", href="#", tooltip="Open documentation")'
+        )
+
+        self.assertIn('data-bs-toggle="tooltip"', output)
+        self.assertIn('data-bs-title="Open documentation"', output)
+
+    def test_button_rejects_unknown_tooltip_placement(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Unknown button tooltip placement: huge"
+        ):
+            self.render_button(
+                'button("Save", tooltip="Saves the draft", tooltip_placement="huge")'
+            )
+
+    def test_button_tooltip_requires_button_or_anchor_element(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button tooltip requires element=button or element=a",
+        ):
+            self.render_button(
+                'button("Save", element="input", tooltip="Saves the draft")'
+            )
+
+    def test_button_tooltip_html_renders_composed_markup(self) -> None:
+        output = self.render_button(
+            'button("", variant="outline", size="icon-sm", icon_start="save", '
+            'aria_label="Save draft", tooltip="Save draft <kbd>⌘S</kbd>", '
+            'tooltip_html=true)'
+        )
+
+        self.assertIn('data-bs-html="true"', output)
+        self.assertIn('data-bs-title="Save draft <kbd>⌘S</kbd>"', output)
+
+    def test_button_tooltip_html_requires_tooltip(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Button tooltip_html requires tooltip"
+        ):
+            self.render_button('button("Save", tooltip_html=true)')
+
+    def test_button_tooltip_cannot_combine_with_dropdown_or_collapse(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button tooltip cannot combine with toggle, dropdown, or collapse_target",
+        ):
+            self.render_button(
+                'button("Actions", dropdown=true, tooltip="More actions")'
+            )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button tooltip cannot combine with toggle, dropdown, or collapse_target",
+        ):
+            self.render_button(
+                'button("Toggle", collapse_target="panel-one", tooltip="Toggle panel")'
+            )
+
     def test_anchor_button_carries_role_button(self) -> None:
         output = self.render_button('button("Link", element="a", href="#")')
         self.assertIn('role="button"', output)

@@ -210,6 +210,20 @@
     });
   });
 
+  // Tooltip is opt-in per Bootstrap's own contract, so the catalog performs
+  // this one explicit init pass. getOrCreateInstance keeps it idempotent if
+  // this ever runs more than once against the same trigger (see the Wave 0
+  // preflight note: one DOM element may hold only one Bootstrap plugin
+  // instance). Sidebar tooltips are a separate, state-driven contract keyed
+  // off data-moo-sidebar-tooltip in the sidebar section below and are not
+  // touched here.
+  const Tooltip = window.bootstrap?.Tooltip;
+  if (Tooltip) {
+    document
+      .querySelectorAll('[data-bs-toggle="tooltip"]')
+      .forEach((trigger) => Tooltip.getOrCreateInstance(trigger));
+  }
+
   const sidebarWrappers = Array.from(
     document.querySelectorAll('[data-slot="sidebar-wrapper"]')
   );
