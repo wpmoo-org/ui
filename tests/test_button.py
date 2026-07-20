@@ -370,6 +370,47 @@ class ButtonTests(CatalogTestCase):
                 'button("Show toast", element="input", toast_target="toast-basic")'
             )
 
+    def test_button_sheet_target_uses_bootstrap_data_api_contract(self) -> None:
+        output = self.render_button(
+            'button("Open sheet", sheet_target="sheet-basic")'
+        )
+
+        self.assertIn('data-bs-toggle="offcanvas"', output)
+        self.assertIn('data-bs-target="#sheet-basic"', output)
+
+    def test_button_sheet_target_works_on_anchor_element(self) -> None:
+        output = self.render_button(
+            'button("Open sheet", element="a", href="#", sheet_target="sheet-basic")'
+        )
+
+        self.assertIn('data-bs-toggle="offcanvas"', output)
+        self.assertIn('data-bs-target="#sheet-basic"', output)
+
+    def test_button_sheet_target_requires_button_or_anchor_element(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button sheet_target requires element=button or element=a",
+        ):
+            self.render_button(
+                'button("Open sheet", element="input", sheet_target="sheet-basic")'
+            )
+
+    def test_button_sheet_target_cannot_combine_with_other_plugins(self) -> None:
+        for call in (
+            'button("Actions", dropdown=true, sheet_target="sheet-basic")',
+            'button("Toggle", collapse_target="panel-one", sheet_target="sheet-basic")',
+            'button("Save", tooltip="Saves the draft", sheet_target="sheet-basic")',
+            'button("Open popover", popover_content="Text", sheet_target="sheet-basic")',
+            'button("Open dialog", dialog_target="dialog-basic", sheet_target="sheet-basic")',
+        ):
+            with self.subTest(call=call):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "Button sheet_target cannot combine with toggle, dropdown, "
+                    "collapse_target, tooltip, popover_content, or dialog_target",
+                ):
+                    self.render_button(call)
+
     def test_anchor_button_carries_role_button(self) -> None:
         output = self.render_button('button("Link", element="a", href="#")')
         self.assertIn('role="button"', output)
