@@ -79,7 +79,33 @@ class PopoverTests(CatalogTestCase):
         )
 
         self.assertIn('data-bs-html="true"', output)
-        self.assertIn("<code>docs</code>", output)
+        # The attribute value is HTML-escaped (Jinja's normal attribute
+        # escaping); browsers decode entities back to the literal markup
+        # when Bootstrap reads the attribute via getAttribute(), so its own
+        # sanitizer still receives the real <code> tag. Only the outer HTML
+        # attribute stays well-formed regardless of content -- see
+        # test_popover_dismiss_trigger_html_content_cannot_break_out_of_the_attribute.
+        self.assertIn("data-bs-content=\"See &lt;code&gt;docs&lt;/code&gt;.\"", output)
+        self.assertNotIn('data-bs-content="See <code>', output)
+
+    def test_popover_dismiss_trigger_html_content_cannot_break_out_of_the_attribute(
+        self,
+    ) -> None:
+        # Regression test for a real attribute-injection bug: html=true
+        # content used to be piped through |safe directly into
+        # data-bs-content="...", which only suppresses Jinja's tag escaping,
+        # not its quote escaping. A literal " in the content used to close
+        # the attribute early and let anything after it become a new, live
+        # HTML attribute, bypassing Bootstrap's own content sanitizer, which
+        # never even runs on it.
+        output = self.render_popover(
+            "popover_dismiss_trigger(\"Label\", 'safe <code>x</code> quote \" "
+            "onclick=\"bad', html=true)"
+        )
+
+        self.assertEqual(output.count("data-bs-content="), 1)
+        self.assertNotIn('onclick="bad"', output)
+        self.assertIn("&#34;", output)
 
     def test_popover_dismiss_trigger_escapes_plain_text_by_default(self) -> None:
         output = self.render_popover(
