@@ -23,8 +23,8 @@
     data-bs-toggle="popover"
     data-bs-trigger="focus"
     data-bs-placement="{{ placement }}"
-    {% if title %}data-bs-title="{{ title | safe if html else title }}"{% endif %}
-    data-bs-content="{{ content | safe if html else content }}"
+    {% if title %}data-bs-title="{{ title }}"{% endif %}
+    data-bs-content="{{ content }}"
     {% if html %}data-bs-html="true"{% endif %}
   >{{ label }}</a>
 {%- endmacro %}
