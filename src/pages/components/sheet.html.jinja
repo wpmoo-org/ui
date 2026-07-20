@@ -1,0 +1,122 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Sheet — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Sheet",
+    "A panel that slides in from a screen edge, built from Bootstrap's own Offcanvas plugin and auto-initialized through its data attribute API."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ button("Open sheet", variant="outline", sheet_target="sheet-basic") }}
+      {% call sheet("sheet-basic") %}
+        {{ sheet_header("sheet-basic", "Edit profile") }}
+        {% call sheet_body() %}
+          <p class="mb-0">Update the name and bio shown on your public profile.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Set <code>sheet_target</code> on the ready Button macro to point at a <code>sheet()</code> id; Bootstrap's data API opens and closes it automatically, no explicit init required. The default <code>placement</code> is <code>end</code>.",
+      basic
+    ) }}
+
+    {% set placements %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Start", variant="outline", sheet_target="sheet-start") }}
+        {{ button("End", variant="outline", sheet_target="sheet-end") }}
+        {{ button("Top", variant="outline", sheet_target="sheet-top") }}
+        {{ button("Bottom", variant="outline", sheet_target="sheet-bottom") }}
+      </div>
+      {% call sheet("sheet-start", placement="start") %}
+        {{ sheet_header("sheet-start", "From the start edge") }}
+        {% call sheet_body() %}<p class="mb-0">Set <code>placement="start"</code>.</p>{% endcall %}
+      {% endcall %}
+      {% call sheet("sheet-end", placement="end") %}
+        {{ sheet_header("sheet-end", "From the end edge") }}
+        {% call sheet_body() %}<p class="mb-0">Set <code>placement="end"</code>, the default.</p>{% endcall %}
+      {% endcall %}
+      {% call sheet("sheet-top", placement="top") %}
+        {{ sheet_header("sheet-top", "From the top edge") }}
+        {% call sheet_body() %}<p class="mb-0">Set <code>placement="top"</code>.</p>{% endcall %}
+      {% endcall %}
+      {% call sheet("sheet-bottom", placement="bottom") %}
+        {{ sheet_header("sheet-bottom", "From the bottom edge") }}
+        {% call sheet_body() %}<p class="mb-0">Set <code>placement="bottom"</code>.</p>{% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "placements",
+      "Placement",
+      "Set <code>placement</code> to <code>start</code>, <code>end</code>, <code>top</code>, or <code>bottom</code>; <code>start</code>/<code>end</code> mirror automatically under RTL.",
+      placements
+    ) }}
+
+    {% set scroll %}
+      {{ button("Open with body scrolling", variant="outline", sheet_target="sheet-scroll") }}
+      {% call sheet("sheet-scroll", backdrop=false, scroll=true) %}
+        {{ sheet_header("sheet-scroll", "Body scrolling") }}
+        {% call sheet_body() %}
+          <p class="mb-0">Set <code>backdrop=false</code> and <code>scroll=true</code> to let the page keep scrolling behind an open sheet, per Bootstrap's own recommended combination.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "scroll",
+      "Body scrolling",
+      "By default the page behind a sheet is locked and dimmed by a backdrop, matching Dialog. Set <code>backdrop=false</code> with <code>scroll=true</code> to allow the page to keep scrolling instead.",
+      scroll
+    ) }}
+
+    {% set no_close %}
+      {{ button("Open without a close button", variant="outline", sheet_target="sheet-no-close") }}
+      {% call sheet("sheet-no-close") %}
+        {{ sheet_header("sheet-no-close", "Confirm export", dismiss=false) }}
+        {% call sheet_body() %}
+          {{ button("Cancel", variant="outline", dismiss="offcanvas") }}
+          {{ button("Export", dismiss="offcanvas") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "no-close-button",
+      "No close button",
+      "Set <code>dismiss=false</code> on <code>sheet_header()</code> when the body already offers an explicit action, such as a <code>Cancel</code> button using <code>dismiss=\"offcanvas\"</code>.",
+      no_close
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ button("فتح اللوحة", variant="outline", sheet_target="sheet-rtl") }}
+        {% call sheet("sheet-rtl") %}
+          {{ sheet_header("sheet-rtl", "تعديل الملف الشخصي") }}
+          {% call sheet_body() %}
+            <p class="mb-0">حدّث الاسم والنبذة الظاهرة في ملفك الشخصي العام.</p>
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "The start/end edges swap automatically; no extra CSS or markup is required.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's Offcanvas plugin options, focus management, and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/offcanvas/",
+    "Bootstrap Offcanvas documentation"
+  ) }}
+
+{% endblock %}

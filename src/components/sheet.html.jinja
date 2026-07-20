@@ -1,0 +1,40 @@
+{# Sheet is the Moo catalog name for Bootstrap's Offcanvas component, matching
+   shadcn's Sheet naming. The Sidebar component also rides Bootstrap's
+   .offcanvas* classes for its own mobile drawer, but drives it through its
+   own data-moo-sidebar-trigger click handling rather than Bootstrap's native
+   data-bs-toggle="offcanvas" data-api — the two never touch the same element,
+   so a Sheet trigger's native data-api toggle cannot collide with it. #}
+
+{% from "components/close_button.html.jinja" import close_button %}
+
+{% set sheet_placements = ["start", "end", "top", "bottom"] %}
+
+{% macro sheet(id, placement="end", backdrop=true, scroll=false) -%}
+  {% if not id | trim %}{{ fail("Sheet id is required") }}{% endif %}
+  {% if placement not in sheet_placements %}{{ fail("Unknown sheet placement: " ~ placement) }}{% endif %}
+  <div
+    class="offcanvas offcanvas-{{ placement }}"
+    tabindex="-1"
+    id="{{ id }}"
+    aria-labelledby="{{ id }}-title"
+    {% if not backdrop %}data-bs-backdrop="false"{% endif %}
+    {% if scroll %}data-bs-scroll="true"{% endif %}
+  >
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro sheet_header(id, title, dismiss=true, dismiss_aria_label="Close") -%}
+  {% if not id | trim %}{{ fail("Sheet header id is required") }}{% endif %}
+  {% if not title | trim %}{{ fail("Sheet title is required") }}{% endif %}
+  <div class="offcanvas-header">
+    <h2 class="offcanvas-title fs-5" id="{{ id }}-title">{{ title }}</h2>
+    {% if dismiss %}{{ close_button(aria_label=dismiss_aria_label, dismiss="offcanvas") }}{% endif %}
+  </div>
+{%- endmacro %}
+
+{% macro sheet_body(extra_class="") -%}
+  <div class="offcanvas-body{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
