@@ -33,6 +33,30 @@ Browse the catalog at [ui.wpmoo.org](https://ui.wpmoo.org/). Component pages,
 blocks, examples, local development notes, and implementation contracts belong
 in the documentation rather than this README.
 
+## Package
+
+The canonical npm package is `@wpmoo/ui`:
+
+```bash
+npm install @wpmoo/ui
+```
+
+For CDN usage, load the built CSS artifact from the canonical package:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui/dist/assets/css/moo-ui.css">
+```
+
+Bundlers can import the same stylesheet from the package export:
+
+```js
+import "@wpmoo/ui/moo-ui.css";
+```
+
+If the shorter `@moo/ui` scope is available to WPMoo, it is reserved as a
+small alias package only. Use `@wpmoo/ui` in documentation, CDN examples, and
+production installs.
+
 ## Build Outputs
 
 The static build emits three CSS artifacts under `dist/assets/css/`:
@@ -41,6 +65,10 @@ The static build emits three CSS artifacts under `dist/assets/css/`:
 - `catalog.css` for documentation chrome.
 - `moo-core.css` for integrations that need the Moo component surface as an
   opt-in native `@scope (.moo-ui)` layer.
+
+The npm package publishes only built component CSS, the optional Bootstrap
+bundle, and license/notice files. WPMoo-owned catalog and preview images are
+not included in the package.
 
 ## Licensing
 

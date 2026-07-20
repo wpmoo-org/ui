@@ -478,10 +478,23 @@ class SidebarTests(CatalogTestCase):
             styles,
             '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account[aria-expanded="true"]',
         )
+        collapsed_account_button = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account',
+        )
+        collapsed_account_focus = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:focus-visible',
+        )
         self.assertIn("background: transparent", collapsed_account_hover)
         self.assertIn("background: transparent", collapsed_account_open)
         self.assertIn("outline: 0", collapsed_account_open)
         self.assertIn("box-shadow: none", collapsed_account_open)
+        self.assertIn("padding: 0", collapsed_account_button)
+        self.assertIn("overflow: visible", collapsed_account_button)
+        self.assertIn("background: transparent", collapsed_account_focus)
+        self.assertIn("outline: 0", collapsed_account_focus)
+        self.assertIn("box-shadow: none", collapsed_account_focus)
 
     def test_sidebar_workspace_dropdown_uses_identity_trigger_contract(self) -> None:
         styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
@@ -499,6 +512,10 @@ class SidebarTests(CatalogTestCase):
             styles,
             '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace[aria-expanded="true"]',
         )
+        collapsed_workspace_focus = _css_block(
+            styles,
+            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:focus-visible',
+        )
         collapsed_header_dropdown = _css_block(
             dropdown_styles,
             '[data-slot="sidebar-header"] [data-moo-sidebar-dropdown-positioned] > .dropdown-menu',
@@ -509,6 +526,9 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("background: transparent", collapsed_workspace_open)
         self.assertIn("outline: 0", collapsed_workspace_open)
         self.assertIn("box-shadow: none", collapsed_workspace_open)
+        self.assertIn("background: transparent", collapsed_workspace_focus)
+        self.assertIn("outline: 0", collapsed_workspace_focus)
+        self.assertIn("box-shadow: none", collapsed_workspace_focus)
         self.assertIn("position: fixed !important", collapsed_header_dropdown)
         self.assertIn("z-index: $zindex-dropdown", collapsed_header_dropdown)
         self.assertIn("width: var(--moo-dropdown-sidebar-min-width)", collapsed_header_dropdown)
