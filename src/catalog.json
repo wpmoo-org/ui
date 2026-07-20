@@ -163,5 +163,10 @@
     "slug": "toast",
     "label": "Toast",
     "status": "ready"
+  },
+  {
+    "slug": "sheet",
+    "label": "Sheet",
+    "status": "ready"
   }
 ]
