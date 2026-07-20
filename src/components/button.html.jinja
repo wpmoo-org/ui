@@ -32,6 +32,8 @@
 
 {% set button_tooltip_placements = ["top", "right", "bottom", "left"] %}
 
+{% set button_popover_placements = ["top", "right", "bottom", "left"] %}
+
 {% macro icon(name, position) -%}
   {{ render_icon(name, position) }}
 {%- endmacro %}
@@ -57,7 +59,11 @@
   collapse_open=false,
   tooltip="",
   tooltip_placement="top",
-  tooltip_html=false
+  tooltip_html=false,
+  popover_content="",
+  popover_title="",
+  popover_placement="top",
+  popover_html=false
 ) -%}
   {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
@@ -75,6 +81,11 @@
   {% if tooltip and element not in ("button", "a") %}{{ fail("Button tooltip requires element=button or element=a") }}{% endif %}
   {% if tooltip and (toggle or dropdown or collapse_target) %}{{ fail("Button tooltip cannot combine with toggle, dropdown, or collapse_target; a Bootstrap element holds only one plugin instance") }}{% endif %}
   {% if tooltip_html and not tooltip %}{{ fail("Button tooltip_html requires tooltip") }}{% endif %}
+  {% if popover_placement not in button_popover_placements %}{{ fail("Unknown button popover placement: " ~ popover_placement) }}{% endif %}
+  {% if popover_content and element not in ("button", "a") %}{{ fail("Button popover_content requires element=button or element=a") }}{% endif %}
+  {% if popover_content and (toggle or dropdown or collapse_target or tooltip) %}{{ fail("Button popover_content cannot combine with toggle, dropdown, collapse_target, or tooltip; a Bootstrap element holds only one plugin instance") }}{% endif %}
+  {% if popover_html and not popover_content %}{{ fail("Button popover_html requires popover_content") }}{% endif %}
+  {% if popover_title and not popover_content %}{{ fail("Button popover_title requires popover_content") }}{% endif %}
   {% set variant_class = button_variants[variant] %}
   {% set size_config = button_sizes[size] %}
   {% set size_class = size_config["class"] %}
@@ -85,7 +96,7 @@
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
 
   {% if element == "a" %}
-    <a class="{{ classes }}" role="button"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}>
+    <a class="{{ classes }}" role="button"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title | safe if popover_html else popover_title }}"{% endif %} data-bs-content="{{ popover_content | safe if popover_html else popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}>
       {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
@@ -93,7 +104,7 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if loading %} aria-busy="true"{% endif %}>
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title | safe if popover_html else popover_title }}"{% endif %} data-bs-content="{{ popover_content | safe if popover_html else popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if loading %} aria-busy="true"{% endif %}>
       {% if loading %}{{ icon("loader-circle", "inline-start") }}{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}

@@ -224,6 +224,17 @@
       .forEach((trigger) => Tooltip.getOrCreateInstance(trigger));
   }
 
+  // Popover is opt-in for the same reason and gets the same idempotent
+  // explicit init pass; it is a distinct Bootstrap plugin from Tooltip, so a
+  // trigger must never carry both data-bs-toggle values at once (enforced by
+  // the button() macro's own fail() guards).
+  const Popover = window.bootstrap?.Popover;
+  if (Popover) {
+    document
+      .querySelectorAll('[data-bs-toggle="popover"]')
+      .forEach((trigger) => Popover.getOrCreateInstance(trigger));
+  }
+
   const sidebarWrappers = Array.from(
     document.querySelectorAll('[data-slot="sidebar-wrapper"]')
   );

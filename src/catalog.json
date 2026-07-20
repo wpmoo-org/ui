@@ -148,5 +148,10 @@
     "slug": "tooltip",
     "label": "Tooltip",
     "status": "ready"
+  },
+  {
+    "slug": "popover",
+    "label": "Popover",
+    "status": "ready"
   }
 ]
