@@ -2,14 +2,18 @@
 
 {# Bootstrap requires an <a>, not a <button>, for the focus-triggered
    "dismiss on next click" pattern to behave consistently across browsers,
-   so this is a dedicated trigger rather than another button() option. #}
+   so this is a dedicated trigger rather than another button() option.
+   The default href is "#!", not "#": an empty fragment is the one browsers
+   special-case to scroll to the very top of the document on click, which
+   Bootstrap's popover JS never prevents; "#!" matches nothing, so nothing
+   scrolls, while the element stays a real, always-focusable anchor. #}
 {% macro popover_dismiss_trigger(
   label,
   content,
   title="",
   placement="top",
   html=false,
-  href="#",
+  href="#!",
   extra_class=""
 ) -%}
   {% if not label | trim %}{{ fail("Popover trigger label is required") }}{% endif %}
