@@ -158,5 +158,10 @@
     "slug": "dialog",
     "label": "Dialog",
     "status": "ready"
+  },
+  {
+    "slug": "toast",
+    "label": "Toast",
+    "status": "ready"
   }
 ]

@@ -34,7 +34,7 @@
 
 {% set button_popover_placements = ["top", "right", "bottom", "left"] %}
 
-{% set button_dismiss_targets = ["modal", "offcanvas"] %}
+{% set button_dismiss_targets = ["modal", "offcanvas", "toast"] %}
 
 {% macro icon(name, position) -%}
   {{ render_icon(name, position) }}
@@ -67,7 +67,8 @@
   popover_placement="top",
   popover_html=false,
   dialog_target="",
-  dismiss=""
+  dismiss="",
+  toast_target=""
 ) -%}
   {% if variant not in button_variants %}{{ fail("Unknown button variant: " ~ variant) }}{% endif %}
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
@@ -93,6 +94,7 @@
   {% if dialog_target and element not in ("button", "a") %}{{ fail("Button dialog_target requires element=button or element=a") }}{% endif %}
   {% if dialog_target and (toggle or dropdown or collapse_target or tooltip or popover_content) %}{{ fail("Button dialog_target cannot combine with toggle, dropdown, collapse_target, tooltip, or popover_content; an element carries only one data-bs-toggle value") }}{% endif %}
   {% if dismiss and dismiss not in button_dismiss_targets %}{{ fail("Unknown button dismiss target: " ~ dismiss) }}{% endif %}
+  {% if toast_target and element not in ("button", "a") %}{{ fail("Button toast_target requires element=button or element=a") }}{% endif %}
   {% set variant_class = button_variants[variant] %}
   {% set size_config = button_sizes[size] %}
   {% set size_class = size_config["class"] %}
@@ -103,7 +105,7 @@
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
 
   {% if element == "a" %}
-    <a class="{{ classes }}" role="button"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title | safe if popover_html else popover_title }}"{% endif %} data-bs-content="{{ popover_content | safe if popover_html else popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}>
+    <a class="{{ classes }}" role="button"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title | safe if popover_html else popover_title }}"{% endif %} data-bs-content="{{ popover_content | safe if popover_html else popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if toast_target %} data-moo-toast-target="#{{ toast_target }}"{% endif %}>
       {% if icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}
@@ -111,7 +113,7 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title | safe if popover_html else popover_title }}"{% endif %} data-bs-content="{{ popover_content | safe if popover_html else popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}>
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip | safe if tooltip_html else tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title | safe if popover_html else popover_title }}"{% endif %} data-bs-content="{{ popover_content | safe if popover_html else popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if toast_target %} data-moo-toast-target="#{{ toast_target }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}>
       {% if loading %}{{ icon("loader-circle", "inline-start") }}{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}

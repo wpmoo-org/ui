@@ -235,6 +235,24 @@
       .forEach((trigger) => Popover.getOrCreateInstance(trigger));
   }
 
+  // Toast has no Bootstrap data-api click trigger (unlike Modal/Offcanvas),
+  // so Bootstrap's own docs recommend wiring a manual click listener that
+  // calls .show(). data-moo-toast-target is that wiring, generalized across
+  // every toast trigger on the page; it is catalog sugar, not a Bootstrap or
+  // public Moo data attribute, and getOrCreateInstance keeps repeated clicks
+  // idempotent.
+  const Toast = window.bootstrap?.Toast;
+  if (Toast) {
+    document.querySelectorAll("[data-moo-toast-target]").forEach((trigger) => {
+      trigger.addEventListener("click", () => {
+        const target = document.querySelector(trigger.dataset.mooToastTarget);
+        if (target) {
+          Toast.getOrCreateInstance(target).show();
+        }
+      });
+    });
+  }
+
   const sidebarWrappers = Array.from(
     document.querySelectorAll('[data-slot="sidebar-wrapper"]')
   );
