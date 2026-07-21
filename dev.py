@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import threading
 import webbrowser
 from functools import partial
@@ -10,7 +11,10 @@ from pathlib import Path
 
 
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 4173
+# Falls back to the harness-assigned PORT env var (set when 4173 is already
+# taken) so autoPort in .claude/launch.json can hand this server a free
+# port without needing a hardcoded --port flag.
+DEFAULT_PORT = int(os.environ.get("PORT", 4173))
 ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
 

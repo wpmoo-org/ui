@@ -1,7 +1,7 @@
 {
   "name": "@wpmoo/ui",
   "version": "0.1.0",
-  "description": "Bootstrap-native HTML component system with a shadcn-inspired visual language.",
+  "description": "Bootstrap-native HTML component system with a focused, modern visual language.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
   "homepage": "https://ui.wpmoo.org/",
@@ -45,7 +45,7 @@
     "css",
     "html",
     "moo-ui",
-    "shadcn"
+    "design-system"
   ],
   "publishConfig": {
     "access": "public"
