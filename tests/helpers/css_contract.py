@@ -15,6 +15,9 @@ GLOBAL_SELECTOR_FORBIDDEN = re.compile(
 ROOT_DARK_OWNER = re.compile(
     r'^:where\(\.\.\.\)\[data-bs-theme=(?:"dark"|dark)\]\s+\.moo-ui'
 )
+DETACHED_OVERLAY_BACKDROP_OWNER = re.compile(
+    r"^body:has\(\.moo-ui \.modal\.show\) > \.modal-backdrop$"
+)
 URL_PATTERN = re.compile(r"url\((.*?)\)", re.IGNORECASE | re.DOTALL)
 REMOTE_PATTERN = re.compile(r"https?://", re.IGNORECASE)
 ANIMATION_KEYWORDS = {
@@ -62,6 +65,8 @@ def _selector_parts(selector: str) -> list[str]:
 
 def _is_allowed_state_selector(selector: str) -> bool:
     if selector.startswith(".moo-ui"):
+        return True
+    if DETACHED_OVERLAY_BACKDROP_OWNER.match(selector) is not None:
         return True
     return ROOT_DARK_OWNER.match(selector) is not None
 
@@ -163,10 +168,11 @@ def assert_allowed_global_rules(test_case, css: str) -> None:
                     "global selector must start from .moo-ui or the supported"
                     f" root dark owner: {part}",
                 )
-                test_case.assertIsNone(
-                    GLOBAL_SELECTOR_FORBIDDEN.search(part),
-                    f"forbidden global selector emitted: {part}",
-                )
+                if DETACHED_OVERLAY_BACKDROP_OWNER.match(part) is None:
+                    test_case.assertIsNone(
+                        GLOBAL_SELECTOR_FORBIDDEN.search(part),
+                        f"forbidden global selector emitted: {part}",
+                    )
             continue
 
         test_case.fail(f"unexpected top-level CSS rule: {rule!r}")

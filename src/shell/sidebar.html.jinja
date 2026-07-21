@@ -24,7 +24,7 @@
     {% call sidebar_group() %}
       {{ sidebar_group_label("Components") }}
       {% call sidebar_menu() %}
-        {% for component in catalog %}
+        {% for component in catalog | sort(attribute="label") %}
           {% call sidebar_menu_item() %}
             {{ sidebar_menu_button(
               component.label,

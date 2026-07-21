@@ -243,13 +243,19 @@
   // idempotent.
   const Toast = window.bootstrap?.Toast;
   if (Toast) {
-    document.querySelectorAll("[data-moo-toast-target]").forEach((trigger) => {
-      trigger.addEventListener("click", () => {
-        const target = document.querySelector(trigger.dataset.mooToastTarget);
-        if (target) {
-          Toast.getOrCreateInstance(target).show();
-        }
-      });
+    document.addEventListener("click", (event) => {
+      const trigger =
+        event.target instanceof Element
+          ? event.target.closest("[data-moo-toast-target]")
+          : null;
+      const targetSelector = trigger?.dataset.mooToastTarget || "";
+      const targetId = targetSelector.startsWith("#")
+        ? targetSelector.slice(1)
+        : targetSelector;
+      const target = targetId ? document.getElementById(targetId) : null;
+      if (target) {
+        Toast.getOrCreateInstance(target).show();
+      }
     });
   }
 
