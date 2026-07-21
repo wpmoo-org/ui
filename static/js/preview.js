@@ -259,6 +259,22 @@
     });
   }
 
+  // Bootstrap ships no validation engine of its own -- .needs-validation is
+  // its own documented className for the recipe every consuming app is
+  // expected to copy: block submit while invalid and add .was-validated so
+  // its own :invalid/:invalid-feedback CSS takes over. The catalog's only
+  // addition is always calling preventDefault(), since this demo form has
+  // no real endpoint to submit to.
+  document.querySelectorAll("form.needs-validation").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        event.stopPropagation();
+      }
+      form.classList.add("was-validated");
+    });
+  });
+
   const sidebarWrappers = Array.from(
     document.querySelectorAll('[data-slot="sidebar-wrapper"]')
   );
