@@ -16,7 +16,9 @@
   "scripts": {
     "build": ".venv/bin/python build.py",
     "dev": ".venv/bin/python dev.py",
-    "test": ".venv/bin/python -m unittest discover -s tests -v"
+    "test": ".venv/bin/python -m unittest discover -s tests -v",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "style": "dist/assets/css/moo-ui.css",
   "exports": {
@@ -57,5 +59,8 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "wrangler": "^4.112.0"
   }
 }

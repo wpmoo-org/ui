@@ -63,7 +63,7 @@ documents for those plugins.
 | Situation | Use | Contract |
 | --- | --- | --- |
 | New page or whole application | `moo-ui.css` | Complete Bootstrap CSS build with Moo UI defaults; use it instead of your existing Bootstrap stylesheet. |
-| Gradual adoption inside an existing Bootstrap app | `moo.css` | Scoped Moo component layer under a `.moo-ui` boundary. Available in the source tree and planned for npm use after the release that publishes it. |
+| Gradual adoption inside an existing Bootstrap app | `moo.css` | Scoped Moo component layer under a `.moo-ui` boundary for gradual adoption inside an existing Bootstrap app. |
 
 ## Why Bootstrap Teams Try It
 
