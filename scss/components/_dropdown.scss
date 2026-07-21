@@ -1,5 +1,5 @@
-// Dropdown uses Bootstrap's own consumption variables. These aliases give the
-// native menu a shadcn-like surface without a private Moo token layer.
+// Dropdown uses Bootstrap's own consumption variables. These aliases give
+// the native menu the reference's surface without a private Moo token layer.
 .dropdown-menu {
   --bs-dropdown-bg: var(--moo-surface);
   --bs-dropdown-border-color: var(--moo-border);
@@ -51,8 +51,8 @@
 }
 
 // The Sidebar header/footer triggers (team switcher, account menu) span
-// the sidebar's full width, and shadcn's reference matches its menu width
-// to that trigger so it extends past the sidebar edge into the content
+// the sidebar's full width, and the design reference matches its menu
+// width to that trigger so it extends past the sidebar edge into the content
 // column. Bootstrap's own dropdown-menu only sizes to its own content, so
 // match the trigger via the shared positioned dropdown ancestor's width
 // instead. Scoped by data-slot attribute, not a sidebar class selector, so
