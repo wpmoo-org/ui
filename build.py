@@ -352,22 +352,35 @@ def load_catalog() -> list[dict[str, str]]:
     return load_entries("catalog.json")
 
 
-def compile_style(name: str) -> str:
+def compile_style(name: str, *, output_style: str = "expanded") -> str:
     include_paths = [str(SCSS), str(BOOTSTRAP / "scss")]
     css = sass.compile(
         filename=str(SCSS / f"{name}.scss"),
         include_paths=include_paths,
-        output_style="expanded",
+        output_style=output_style,
     )
-    return css.replace("\r\n", "\n").replace("\r", "\n")
+    return css.replace("\r\n", "\n").replace("\r", "\n").rstrip() + "\n"
+
+
+def write_compiled_style(
+    css_dir: Path,
+    source_name: str,
+    output_name: str,
+    *,
+    output_style: str = "expanded",
+) -> None:
+    css = compile_style(source_name, output_style=output_style)
+    (css_dir / output_name).write_text(css, encoding="utf-8")
 
 
 def compile_styles() -> None:
     css_dir = DIST / "assets/css"
     css_dir.mkdir(parents=True, exist_ok=True)
-    for name in ("moo-ui", "catalog", "moo-core"):
-        css = compile_style(name)
-        (css_dir / f"{name}.css").write_text(css, encoding="utf-8")
+    write_compiled_style(css_dir, "moo-ui", "moo-ui.css")
+    write_compiled_style(css_dir, "moo-ui", "moo-ui.min.css", output_style="compressed")
+    write_compiled_style(css_dir, "catalog", "catalog.css")
+    write_compiled_style(css_dir, "moo-core", "moo.css")
+    write_compiled_style(css_dir, "moo-core", "moo.min.css", output_style="compressed")
 
 
 def asset_version() -> str:
@@ -408,6 +421,7 @@ def copy_assets() -> None:
 def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
+    sections = load_entries("sections.json")
     utilities = load_entries("utilities.json")
     blocks = load_entries("blocks.json")
     version = asset_version()
@@ -421,11 +435,11 @@ def render_pages() -> None:
         current_section = output_relative.parent.name
         current_slug = output_relative.stem
         if current_section not in {"components", "utils", "blocks"}:
-            current_section = "index"
-            current_slug = "index"
+            current_section = "sections"
         template_name = page.relative_to(SRC).as_posix()
         rendered = environment.get_template(template_name).render(
             catalog=catalog,
+            sections=sections,
             utilities=utilities,
             blocks=blocks,
             current_section=current_section,

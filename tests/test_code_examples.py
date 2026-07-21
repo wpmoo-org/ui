@@ -165,3 +165,23 @@ class CodeExampleTests(CatalogTestCase):
             '[data-expanded="true"]:hover .moo-code__copy',
             catalog_css,
         )
+
+    def test_docs_code_snippets_use_copyable_code_panel(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("installation.html")
+
+        self.assertIn("moo-doc-code-panel", page)
+        self.assertIn('data-moo-code-panel data-expanded="true"', page)
+        self.assertIn('data-moo-code-copy aria-label="Copy code"', page)
+        self.assertIn('data-moo-copy-status role="status"', page)
+        self.assertNotIn("data-moo-code-copy hidden", page)
+        self.assertIn('class="moo-code scroll-fade-x no-scrollbar"', page)
+
+        catalog_css = self.read_output("assets/css/catalog.css")
+        self.assertIn(".moo-doc-code-panel {", catalog_css)
+        self.assertIn(
+            ".moo-doc-code-panel .moo-code {",
+            catalog_css,
+        )

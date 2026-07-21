@@ -26,7 +26,7 @@ class TypographyTests(CatalogTestCase):
                 '<h1 class="fw-semibold" id="catalog-title">Catalog</h1>'
             ),
             'typography("Supporting copy", variant="page-description")': (
-                '<p class="lead text-body-secondary mb-0">Supporting copy</p>'
+                '<p class="moo-page-description text-body-secondary mb-0">Supporting copy</p>'
             ),
             'typography("Section title", variant="section-title", id="section-title")': (
                 '<h2 class="h3" id="section-title">Section title</h2>'

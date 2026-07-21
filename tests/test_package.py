@@ -26,20 +26,36 @@ class PackageMetadataTests(unittest.TestCase):
         files = package["files"]
 
         self.assertIn("dist/assets/css/moo-ui.css", files)
-        self.assertIn("dist/assets/css/moo-core.css", files)
-        self.assertIn("dist/assets/js/bootstrap.bundle.min.js", files)
+        self.assertIn("dist/assets/css/moo-ui.min.css", files)
+        self.assertIn("dist/assets/css/moo.css", files)
+        self.assertIn("dist/assets/css/moo.min.css", files)
+        self.assertNotIn("dist/assets/css/moo-core.css", files)
+        self.assertNotIn("dist/assets/js/bootstrap.bundle.min.js", files)
+        self.assertNotIn("dist/assets/js/bootstrap.bundle.min.js.map", files)
         self.assertNotIn("dist", files)
         self.assertNotIn("static", files)
         self.assertNotIn("dist/assets/images", files)
         self.assertNotIn("static/images", files)
+        self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <6")
+        self.assertTrue(package["peerDependenciesMeta"]["bootstrap"]["optional"])
         self.assertEqual(
             package["exports"]["./moo-ui.css"],
             "./dist/assets/css/moo-ui.css",
         )
         self.assertEqual(
-            package["exports"]["./moo-core.css"],
-            "./dist/assets/css/moo-core.css",
+            package["exports"]["./moo-ui.min.css"],
+            "./dist/assets/css/moo-ui.min.css",
         )
+        self.assertEqual(
+            package["exports"]["./moo.css"],
+            "./dist/assets/css/moo.css",
+        )
+        self.assertEqual(
+            package["exports"]["./moo.min.css"],
+            "./dist/assets/css/moo.min.css",
+        )
+        self.assertNotIn("./moo-core.css", package["exports"])
+        self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
 
     def test_moo_scope_alias_package_points_to_canonical_package(self) -> None:
         package = self._read_package()

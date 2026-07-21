@@ -22,6 +22,22 @@
 
   {% call sidebar_content() %}
     {% call sidebar_group() %}
+      {{ sidebar_group_label("Sections") }}
+      {% call sidebar_menu() %}
+        {% for section in sections %}
+          {% call sidebar_menu_item() %}
+            {{ sidebar_menu_button(
+              section.label,
+              href=root_path ~ section.href,
+              active=(current_section == "sections" and current_slug == section.slug) or (current_section == section.slug and current_slug == "index"),
+              icon=section.icon
+            ) }}
+          {% endcall %}
+        {% endfor %}
+      {% endcall %}
+    {% endcall %}
+
+    {% call sidebar_group() %}
       {{ sidebar_group_label("Components") }}
       {% call sidebar_menu() %}
         {% for component in catalog | sort(attribute="label") %}

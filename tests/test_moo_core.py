@@ -12,7 +12,7 @@ from tests.helpers.css_contract import (
 from tests.test_design_gates import active_component_imports
 
 
-CORE_CSS = DIST / "assets/css/moo-core.css"
+CORE_CSS = DIST / "assets/css/moo.css"
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
 UTILITIES_SCSS = SCSS / "utilities"
@@ -95,11 +95,11 @@ class MooCoreTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(
             CORE_CSS.is_file(),
-            "build.py must emit dist/assets/css/moo-core.css",
+            "build.py must emit dist/assets/css/moo.css",
         )
         return CORE_CSS.read_text(encoding="utf-8")
 
-    def test_build_emits_moo_core_css(self) -> None:
+    def test_build_emits_moo_css(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
