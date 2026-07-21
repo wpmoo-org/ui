@@ -6,6 +6,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/dialog.html.jinja"
 PAGE = ROOT / "src/pages/components/dialog.html.jinja"
+STYLES = ROOT / "scss/components/_dialog.scss"
 
 
 class DialogTests(CatalogTestCase):
@@ -39,6 +40,15 @@ class DialogTests(CatalogTestCase):
         self.assertIn('class="modal-dialog"', output)
         self.assertIn('class="modal-content"', output)
         self.assertIn("Content", output)
+
+    def test_dialog_supports_explicit_aria_label_fallback(self) -> None:
+        output = self.render_dialog_block(
+            '{% call dialog("example", aria_label="Workspace settings") %}'
+            "Content{% endcall %}"
+        )
+
+        self.assertIn('aria-label="Workspace settings"', output)
+        self.assertNotIn("aria-labelledby", output)
 
     def test_dialog_requires_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Dialog id is required"):
@@ -132,3 +142,24 @@ class DialogTests(CatalogTestCase):
         self.assertIn("scrollable=true", source)
         self.assertIn("static=true", source)
         self.assertIn('dir="rtl"', source)
+
+    def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertNotIn("--bs-modal-footer-bg", styles)
+        self.assertIn(".modal-content", styles)
+        self.assertIn("box-shadow: var(--bs-box-shadow-lg)", styles)
+        self.assertIn(".modal[tabindex]:focus-visible", styles)
+        self.assertIn("outline: none", styles)
+
+    def test_dialog_backdrop_is_blurred_only_while_a_modal_is_open(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn("body:has(.modal.show) > .modal-backdrop", styles)
+        self.assertIn("--bs-backdrop-opacity: 1", styles)
+        self.assertIn(
+            "background-color: color-mix(in srgb, var(--bs-black) 10%, transparent)",
+            styles,
+        )
+        self.assertIn("-webkit-backdrop-filter: blur(4px)", styles)
+        self.assertIn("backdrop-filter: blur(4px)", styles)

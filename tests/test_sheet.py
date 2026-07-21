@@ -6,6 +6,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/sheet.html.jinja"
 PAGE = ROOT / "src/pages/components/sheet.html.jinja"
+STYLES = ROOT / "scss/components/_sheet.scss"
 
 
 class SheetTests(CatalogTestCase):
@@ -27,6 +28,15 @@ class SheetTests(CatalogTestCase):
         self.assertIn("Content", output)
         self.assertNotIn("data-bs-backdrop", output)
         self.assertNotIn("data-bs-scroll", output)
+
+    def test_sheet_supports_explicit_aria_label_fallback(self) -> None:
+        output = self.render(
+            '{% call sheet("example", aria_label="Filter results") %}'
+            "Content{% endcall %}"
+        )
+
+        self.assertIn('aria-label="Filter results"', output)
+        self.assertNotIn("aria-labelledby", output)
 
     def test_sheet_requires_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Sheet id is required"):
@@ -101,3 +111,46 @@ class SheetTests(CatalogTestCase):
         self.assertIn("dismiss=false", source)
         self.assertIn('dismiss="offcanvas"', source)
         self.assertIn('dir="rtl"', source)
+
+    def test_sheet_styles_are_isolated_from_other_offcanvas_components(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn(".offcanvas.sheet .offcanvas-title", styles)
+        self.assertNotRegex(styles, r"(?m)^\.offcanvas-title\s*\{")
+        self.assertNotRegex(styles, r"(?m)^\.offcanvas-backdrop\s*\{")
+
+    def test_sheet_preserves_shadow_when_bootstrap_focuses_the_panel(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn(".offcanvas.sheet[tabindex]:focus-visible", styles)
+        self.assertIn("outline: none", styles)
+        self.assertGreaterEqual(
+            styles.count("box-shadow: var(--bs-box-shadow-lg)"),
+            2,
+        )
+
+    def test_sheet_backdrop_is_blurred_only_while_a_sheet_is_open(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn(
+            ":has(> .offcanvas.sheet:is(.showing, .show)) > .offcanvas-backdrop",
+            styles,
+        )
+        self.assertIn(
+            ":has(> .offcanvas.sheet.hiding) > .offcanvas-backdrop",
+            styles,
+        )
+        self.assertNotIn("body:has(.offcanvas.sheet.show)", styles)
+        self.assertIn(
+            "background-color: color-mix(in srgb, var(--bs-black) 10%, transparent)",
+            styles,
+        )
+        self.assertIn("opacity: 1", styles)
+        self.assertIn("backdrop-filter: blur(0)", styles)
+        self.assertIn("$offcanvas-transition-duration ease-in-out", styles)
+        self.assertNotIn(
+            "background-color $offcanvas-transition-duration ease-in-out",
+            styles,
+        )
+        self.assertIn("-webkit-backdrop-filter: blur(4px)", styles)
+        self.assertIn("backdrop-filter: blur(4px)", styles)

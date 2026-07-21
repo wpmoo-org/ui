@@ -14,14 +14,24 @@
 
 {% set sheet_placements = ["start", "end", "top", "bottom"] %}
 
-{% macro sheet(id, placement="end", backdrop=true, scroll=false) -%}
+{% macro sheet(
+  id,
+  placement="end",
+  backdrop=true,
+  scroll=false,
+  aria_label=""
+) -%}
   {% if not id | trim %}{{ fail("Sheet id is required") }}{% endif %}
   {% if placement not in sheet_placements %}{{ fail("Unknown sheet placement: " ~ placement) }}{% endif %}
   <div
     class="offcanvas offcanvas-{{ placement }} sheet"
     tabindex="-1"
     id="{{ id }}"
-    aria-labelledby="{{ id }}-title"
+    {% if aria_label | trim %}
+      aria-label="{{ aria_label | trim }}"
+    {% else %}
+      aria-labelledby="{{ id }}-title"
+    {% endif %}
     {% if not backdrop %}data-bs-backdrop="false"{% endif %}
     {% if scroll %}data-bs-scroll="true"{% endif %}
   >

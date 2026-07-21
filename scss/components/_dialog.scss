@@ -1,15 +1,25 @@
 // Dialog is the Moo catalog name for Bootstrap's Modal component, so this
 // partial retunes Bootstrap's own --bs-modal-* custom properties toward the
 // shadcn reference: a larger radius, a quieter border tone, a borderless
-// header, a tinted footer, and a lighter-weight tightly-set title, instead
+// header, one shared surface, and a lighter-weight tightly-set title, instead
 // of Bootstrap's own sharper-cornered, divided, heavier-titled look.
 .modal {
   --bs-modal-border-radius: var(--bs-border-radius-xl);
   --bs-modal-border-color: var(--moo-border);
   --bs-modal-header-border-width: 0;
   --bs-modal-footer-border-color: var(--moo-border);
-  --bs-modal-footer-bg: var(--moo-muted-surface);
   --bs-modal-title-line-height: 1;
+}
+
+.modal[tabindex]:focus-visible {
+  // Bootstrap focuses the modal root when it opens. The shared focus rule
+  // intentionally covers generic tabindex controls, so reset that container
+  // ring here without weakening focus treatment for actual controls.
+  outline: none;
+}
+
+.modal-content {
+  box-shadow: var(--bs-box-shadow-lg);
 }
 
 .modal-title {
@@ -28,6 +38,9 @@
 // shadcn's own backdrop reads as barely-there (roughly 10% black); Bootstrap
 // ships a much heavier 50% default that this project has otherwise never
 // retuned.
-.modal-backdrop {
-  --bs-backdrop-opacity: 0.1;
+body:has(.modal.show) > .modal-backdrop {
+  --bs-backdrop-opacity: 1;
+  background-color: color-mix(in srgb, var(--bs-black) 10%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }

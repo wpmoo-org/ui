@@ -181,3 +181,20 @@ class PopoverTests(CatalogTestCase):
                     f"<{tag}> is not in Bootstrap's default Popover sanitizer "
                     "allowlist and would be silently stripped at runtime",
                 )
+
+    def test_html_popover_examples_do_not_embed_interactive_controls(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        html_true_calls = [
+            call
+            for call in re.findall(r"button\([^)]*\)", source)
+            if "popover_html=true" in call
+        ]
+        self.assertTrue(html_true_calls)
+        for call in html_true_calls:
+            self.assertNotRegex(
+                call,
+                r"<(?:a|button|input|select|textarea)\b",
+                "Bootstrap Popover is not a focus-managed dialog; interactive "
+                "content belongs in Dialog",
+            )

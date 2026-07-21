@@ -6,6 +6,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/toast.html.jinja"
 PAGE = ROOT / "src/pages/components/toast.html.jinja"
+PREVIEW_JS = ROOT / "static/js/preview.js"
 
 
 class ToastTests(CatalogTestCase):
@@ -107,3 +108,16 @@ class ToastTests(CatalogTestCase):
         self.assertIn('toast_target="toast-basic"', source)
         self.assertIn("autohide=false", source)
         self.assertIn('dir="rtl"', source)
+
+    def test_preview_uses_one_delegated_toast_listener(self) -> None:
+        script = PREVIEW_JS.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'event.target.closest("[data-moo-toast-target]")',
+            script,
+        )
+        self.assertIn("document.getElementById", script)
+        self.assertNotIn(
+            'document.querySelectorAll("[data-moo-toast-target]").forEach',
+            script,
+        )

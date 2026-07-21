@@ -7,7 +7,14 @@
 
 {% set dialog_sizes = ["default", "sm", "lg", "xl", "fullscreen"] %}
 
-{% macro dialog(id, size="default", centered=false, scrollable=false, static=false) -%}
+{% macro dialog(
+  id,
+  size="default",
+  centered=false,
+  scrollable=false,
+  static=false,
+  aria_label=""
+) -%}
   {% if not id | trim %}{{ fail("Dialog id is required") }}{% endif %}
   {% if size not in dialog_sizes %}{{ fail("Unknown dialog size: " ~ size) }}{% endif %}
   {% set dialog_classes = "modal-dialog" %}
@@ -21,7 +28,11 @@
     class="modal fade"
     id="{{ id }}"
     tabindex="-1"
-    aria-labelledby="{{ id }}-title"
+    {% if aria_label | trim %}
+      aria-label="{{ aria_label | trim }}"
+    {% else %}
+      aria-labelledby="{{ id }}-title"
+    {% endif %}
     aria-hidden="true"
     {% if static %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}
   >

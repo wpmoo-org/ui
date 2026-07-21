@@ -16,6 +16,21 @@ from tests.helpers import (
 
 
 class CatalogContractTests(CatalogTestCase):
+    def test_visible_component_lists_are_sorted_by_label(self) -> None:
+        sorted_loop = (
+            '{% for component in catalog | sort(attribute="label") %}'
+        )
+
+        for path in (
+            ROOT / "src/shell/sidebar.html.jinja",
+            ROOT / "src/pages/components/index.html.jinja",
+        ):
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                self.assertTrue(
+                    sorted_loop in path.read_text(encoding="utf-8"),
+                    f"{path.relative_to(ROOT)} must sort components by label",
+                )
+
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
 
@@ -98,12 +113,14 @@ class CatalogContractTests(CatalogTestCase):
             "tabs": ("tabs", "nav-link", "active", "tab-content", "tab-pane"),
             # Dialog is the Moo catalog name for Bootstrap's Modal component;
             # its native selector family is "modal-", not "dialog-".
-            "dialog": ("modal",),
+            "dialog": ("modal", "show"),
             # Sheet is the Moo catalog name for Bootstrap's Offcanvas
             # component; its native selector family is "offcanvas-", plus
             # the "sheet" marker class used to scope Sheet-only overrides
             # away from Sidebar's own bare .offcanvas usage.
-            "sheet": ("offcanvas", "sheet"),
+            # Bootstrap's Offcanvas source owns .showing and .hiding as
+            # transition lifecycle states alongside .show.
+            "sheet": ("offcanvas", "sheet", "show", "showing", "hiding"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
