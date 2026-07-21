@@ -1,6 +1,6 @@
 // Sheet is the Moo catalog name for Bootstrap's Offcanvas component, so this
 // partial retunes Bootstrap's own --bs-offcanvas-* custom properties toward
-// the shadcn reference: a narrower fixed width, a quieter border tone, and
+// the design reference: a narrower fixed width, a quieter border tone, and
 // a real elevation shadow, instead of Bootstrap's own wider, shadowless
 // panel. Scoped to .offcanvas.sheet (see the "sheet" marker class in the
 // sheet() macro) rather than the bare .offcanvas Bootstrap ships, because
@@ -26,7 +26,7 @@
 
 .offcanvas.sheet .offcanvas-title {
   // A literal size, not $font-size-base: this project's own base is 14px,
-  // but shadcn's sheet title sits at a plain, un-scaled 16px regardless.
+  // but the reference sheet title sits at a plain, un-scaled 16px regardless.
   font-size: 1rem;
   font-weight: $font-weight-medium;
 }

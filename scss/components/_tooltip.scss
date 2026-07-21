@@ -1,5 +1,6 @@
-// Retuned against shadcn/ui's tooltip (bg-foreground text-background, px-3
-// py-1.5, text-xs, rounded-md, fully opaque, max-w-xs): Bootstrap's own
+// Retuned against the design reference's tooltip (bg-foreground
+// text-background, px-3 py-1.5, text-xs, rounded-md, fully opaque,
+// max-w-xs): Bootstrap's own
 // defaults are narrower, tighter, and dimmed to 90% opacity. All four
 // overrides route through Bootstrap's existing custom properties, so no new
 // selectors or hardcoded colors are introduced.

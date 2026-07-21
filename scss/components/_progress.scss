@@ -1,8 +1,8 @@
 // $primary compiles to a literal color and does not invert with color
-// mode, but the shadcn reference's progress fill does (near-black in
-// light, near-white in dark) — verified against the live shadcn Progress
-// page. Anchor the fill to --moo-foreground, which already inverts
-// correctly per theme, instead of the non-inverting primary token.
+// mode, but the design reference's progress fill does (near-black in
+// light, near-white in dark) — verified against the live reference page.
+// Anchor the fill to --moo-foreground, which already inverts correctly
+// per theme, instead of the non-inverting primary token.
 .progress {
   --bs-progress-bar-bg: var(--moo-foreground);
 }

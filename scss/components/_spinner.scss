@@ -1,6 +1,7 @@
-// shadcn's Spinner is the Lucide loader-circle icon spun with CSS, not
-// Bootstrap's thicker spinner-border ring — render_icon already emits the
-// same stroke-width and line-cap Lucide markup shadcn uses, so only sizing
+// The design reference's Spinner is the Lucide loader-circle icon spun with
+// CSS, not Bootstrap's thicker spinner-border ring — render_icon already
+// emits the same stroke-width and line-cap Lucide markup the reference
+// uses, so only sizing
 // and rotation are needed here. The animation name is supplied by the active
 // build entry: Bootstrap's spinner-border for standalone, namespaced Moo for
 // the scoped core.

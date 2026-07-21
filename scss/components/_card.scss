@@ -1,6 +1,6 @@
 // Card: bridge Bootstrap's consumption variables to shared primitives
 // (UI-wide shadow and radius) and runtime theme tokens, then add the minimal
-// structure that gives Bootstrap's native card a shadcn silhouette.
+// structure that gives Bootstrap's native card the reference silhouette.
 .card {
   --bs-card-bg: var(--moo-surface);
   --bs-card-color: var(--moo-foreground);
@@ -22,7 +22,7 @@
   box-shadow: var(--bs-card-box-shadow);
 }
 
-// shadcn header stacks title and description; no cap background or divider.
+// The reference header stacks title and description; no cap background or divider.
 .card-header {
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@
   border-bottom: 0;
 }
 
-// shadcn footer lays actions in a row; no divider.
+// The reference footer lays actions in a row; no divider.
 .card-footer {
   display: flex;
   align-items: center;
