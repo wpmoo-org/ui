@@ -1,5 +1,6 @@
-// shadcn's own Toast page is deprecated in favor of Sonner, so this partial
-// retunes Bootstrap's own --bs-toast-* custom properties toward Sonner's
+// The design reference's own Toast page is deprecated in favor of Sonner,
+// so this partial retunes Bootstrap's own --bs-toast-* custom properties
+// toward Sonner's
 // visual weight (larger radius, quieter border tone, a softer diffuse
 // shadow, fuller padding, a lighter-weight title) while keeping Bootstrap's
 // own header/body composition and the public "Toast" name and API.

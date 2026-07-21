@@ -1,7 +1,7 @@
 // Bootstrap's .form-switch only overrides width; height still comes from
 // the shared $form-check-input-width (also used by Checkbox and Radio
-// Group), so matching shadcn's taller track needs an explicit height here
-// instead of a shared Bootstrap variable.
+// Group), so matching the design reference's taller track needs an
+// explicit height here instead of a shared Bootstrap variable.
 .form-switch .form-check-input {
   height: $moo-switch-height;
 }

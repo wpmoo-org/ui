@@ -1,6 +1,6 @@
 // Bootstrap's base .alert has a transparent bg/border until a contextual
-// .alert-{state} modifier sets them; shadcn's quiet style keeps a visible
-// neutral border even on the unmodified/default alert.
+// .alert-{state} modifier sets them; the design reference's quiet style
+// keeps a visible neutral border even on the unmodified/default alert.
 .alert {
   --bs-alert-border-color: var(--moo-border);
   --bs-alert-color: var(--moo-foreground);
@@ -10,9 +10,9 @@
   gap: $spacer * 0.75;
 }
 
-// shadcn's destructive alert keeps the same neutral surface and border as
-// the default alert and tints only the text/icon color — verified against
-// the live shadcn Alert reference page's Destructive example (bg-card,
+// The reference's destructive alert keeps the same neutral surface and
+// border as the default alert and tints only the text/icon color —
+// verified against the live reference page's Destructive example (bg-card,
 // text-destructive). Bootstrap's own alert-danger class instead fills a
 // saturated subtle-danger background, so re-anchor its consumption
 // variables back to the neutral ones and layer only the color shift on top.

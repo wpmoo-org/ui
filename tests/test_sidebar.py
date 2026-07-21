@@ -617,8 +617,9 @@ class SidebarTests(CatalogTestCase):
 
     def test_sidebar_variant_decoration_is_scoped_to_desktop(self) -> None:
         # The mobile offcanvas drawer ignores variant styling, matching
-        # shadcn's own md:-prefixed scoping, so both new blocks must live
-        # inside the same desktop-only breakpoint as the icon-collapse rules.
+        # the design reference's own md:-prefixed scoping, so both new
+        # blocks must live inside the same desktop-only breakpoint as the
+        # icon-collapse rules.
         styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
         up_lg_blocks = re.findall(
             r"@include media-breakpoint-up\(lg\)\s*\{(.*?)\n\}", styles, re.DOTALL

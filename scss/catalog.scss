@@ -668,7 +668,7 @@ body {
 }
 
 .moo-sidebar-demo__placeholder {
-  // shadcn sidebar-07 uses bg-muted/50 for these preview surfaces.
+  // The design reference uses bg-muted/50 for these preview surfaces.
   background: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent);
 }
 
@@ -744,7 +744,7 @@ body {
   width: 100%;
 }
 
-/* Match shadcn's command input: keep the border, drop the focus ring. */
+/* Match the reference command input: keep the border, drop the focus ring. */
 .moo-catalog__command-search:has(> .form-control:focus) {
   border-color: var(--moo-border);
   box-shadow: none;
