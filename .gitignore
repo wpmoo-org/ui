@@ -6,3 +6,10 @@ __pycache__/
 /references/
 .coverage
 /coverage.xml
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
