@@ -1,0 +1,124 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/field.html.jinja" import form, field, field_description, field_error, field_group, fieldset %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/textarea.html.jinja" import textarea %}
+{% from "components/select.html.jinja" import select %}
+{% from "components/switch.html.jinja" import switch %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Field — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Field",
+    "Compose the ready Input, Textarea, Select, and Switch macros into labeled, described, and validated fields, using Bootstrap's own native fieldset markup and client-side validation states."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {% call field() %}
+        {{ input(label="Display name", id="field-basic-name", placeholder="Ada Lovelace", describedby="field-basic-name-description") }}
+        {{ field_description("field-basic-name-description", "Shown across the workspace and on shared links.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic field",
+      "Wrap a label-carrying control and its <code>field_description()</code> in <code>field()</code> for a consistent vertical stack; pass the description's id back to the control's own <code>describedby</code>.",
+      basic
+    ) }}
+
+    {% set invalid %}
+      {% call field() %}
+        {{ input(label="Workspace slug", id="field-invalid-slug", value="my workspace", aria_invalid=true, describedby="field-invalid-slug-error") }}
+        {{ field_error("field-invalid-slug-error", "Slugs can only contain lowercase letters, numbers, and hyphens.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Field with an error",
+      "Set <code>aria_invalid=true</code> on the control and add <code>field_error()</code>; Bootstrap's own <code>.is-invalid</code> styling and <code>.invalid-feedback</code> display rule need no extra CSS.",
+      invalid
+    ) }}
+
+    {% set group %}
+      {% call field_group() %}
+        {% call field() %}
+          {{ input(label="First name", id="field-group-first", placeholder="Ada") }}
+        {% endcall %}
+        {% call field() %}
+          {{ input(label="Last name", id="field-group-last", placeholder="Lovelace") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "group",
+      "Field group",
+      "Wrap several <code>field()</code> blocks in <code>field_group()</code> for a consistent gap between related fields.",
+      group
+    ) }}
+
+    {% set fieldset_example %}
+      {% call fieldset("Notifications", description="Choose what you want to hear about.") %}
+        {% call field_group() %}
+          {{ switch(id="field-fieldset-product", label="Product updates", checked=true) }}
+          {{ switch(id="field-fieldset-billing", label="Billing alerts", checked=true) }}
+          {{ switch(id="field-fieldset-digest", label="Weekly digest") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "fieldset",
+      "Fieldset",
+      "<code>fieldset()</code> renders a native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and optional description, reusing Radio Group's own <code>.form-label</code> legend styling.",
+      fieldset_example
+    ) }}
+
+    {% set full %}
+      {% call form(extra_class="needs-validation", novalidate=true) %}
+        {% call field_group() %}
+          {% call field() %}
+            {{ input(label="Name", id="field-invite-name", placeholder="Grace Hopper", required=true, describedby="field-invite-name-error") }}
+            {{ field_error("field-invite-name-error", "Enter the teammate's name.") }}
+          {% endcall %}
+          {% call field() %}
+            {{ input(label="Email", id="field-invite-email", type="text", placeholder="grace@example.com", required=true, describedby="field-invite-email-error") }}
+            {{ field_error("field-invite-email-error", "Enter a valid email address.") }}
+          {% endcall %}
+          {% call field() %}
+            {{ select(label="Role", id="field-invite-role", options=[
+              {"label": "Member", "value": "member"},
+              {"label": "Admin", "value": "admin"},
+              {"label": "Billing only", "value": "billing"}
+            ], selected="member") }}
+          {% endcall %}
+          {% call field() %}
+            {{ textarea(label="Message", id="field-invite-message", placeholder="Add a short note to include in the invite email.", rows=3, describedby="field-invite-message-description") }}
+            {{ field_description("field-invite-message-description", "Optional. Shown in the invite email below the standard greeting.") }}
+          {% endcall %}
+          {{ switch(id="field-invite-welcome", label="Send a welcome email", checked=true) }}
+        {% endcall %}
+        <div class="d-flex gap-2 mt-4">
+          {{ button("Send invite", type="submit") }}
+          {{ button("Cancel", variant="outline", type="reset") }}
+        </div>
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "full",
+      "Full example",
+      "A complete form using <code>novalidate</code> and the <code>needs-validation</code> class; the catalog applies Bootstrap's own documented submit-time <code>.was-validated</code> pattern so <code>required</code> fields show their <code>field_error()</code> message client-side, with zero validation logic of Moo's own.",
+      full
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's own form layout, validation states, and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/forms/validation/",
+    "Bootstrap Validation documentation"
+  ) }}
+
+{% endblock %}

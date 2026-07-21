@@ -170,8 +170,8 @@
     "status": "ready"
   },
   {
-    "slug": "form",
-    "label": "Form",
+    "slug": "field",
+    "label": "Field",
     "status": "ready"
   }
 ]
