@@ -23,6 +23,7 @@
   <div class="moo-component-examples">
     {% set full %}
       {% call form(extra_class="needs-validation", novalidate=true) %}
+        {% call field_group() %}
         {% call fieldset("Deployment", description="Configure where and how this build ships.") %}
           {% call field_group() %}
             {% call field() %}
@@ -64,10 +65,11 @@
           {{ textarea(label="Notes", id="field-full-notes", placeholder="Add context for teammates watching the deploy log.", rows=3, describedby="field-full-notes-description") }}
           {{ field_description("field-full-notes-description", "Shown in the deploy log for teammates.") }}
         {% endcall %}
-        <div class="d-flex gap-2 mt-4">
+        <div class="d-flex gap-2">
           {{ button("Deploy", type="submit") }}
           {{ button("Cancel", variant="outline", type="reset") }}
         </div>
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -251,7 +253,7 @@
     {{ render_example(
       "separator",
       "Field group with a separator",
-      "Drop the ready <code>separator()</code> component between sections of a <code>field_group()</code> to divide them, matching shadcn's own FieldSeparator role with no new selector.",
+      "Drop the ready <code>separator()</code> component between sections of a <code>field_group()</code> to divide them, matching the design reference's own FieldSeparator role with no new selector.",
       separated_group
     ) }}
 

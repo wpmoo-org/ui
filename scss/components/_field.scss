@@ -1,61 +1,78 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: $spacer * 0.5;
+  gap: $moo-field-gap;
 
-  // Bootstrap's own .form-label/.form-text/.invalid-feedback all carry a
-  // margin of their own (form-label-margin-bottom, form-text-margin-top),
-  // which would stack on top of this flex gap and roughly double the real
-  // spacing shadcn's flat gap-only model produces.
+  // Bootstrap's own .form-label carries a margin-bottom of its own
+  // (form-label-margin-bottom), which would stack on top of this flex gap
+  // and roughly double the real spacing the design reference's flat
+  // gap-only model produces.
   > .form-label {
     margin-bottom: 0;
-    // $form-label-font-weight is unset (inherits normal body weight);
-    // shadcn's own FieldLabel sits at a medium weight instead.
+    // $form-label-font-weight is unset (inherits normal body weight); the
+    // reference's own field label sits at a medium weight instead.
     font-weight: $font-weight-medium;
   }
+}
 
-  > .form-text,
-  > .invalid-feedback {
-    margin-top: 0;
-    // .form-text/.invalid-feedback both default to the smaller $font-size-sm
-    // scale; shadcn's FieldDescription/FieldError sit at the same size as
-    // the label itself, which this project's own $font-size-base already
-    // matches exactly (0.875rem).
-    font-size: $font-size-base;
-  }
+// field_description()/field_error() keep Bootstrap's own .form-text /
+// .invalid-feedback class alongside these (the latter is load-bearing:
+// Bootstrap's own validity sibling-selector CSS targets that exact class
+// name to show/hide it), so every default here is a token override on top
+// of Bootstrap's own rule rather than a full replacement of it.
+.field-description,
+.field-error {
+  margin-top: 0;
+  // .form-text/.invalid-feedback both default to Bootstrap's smaller
+  // $font-size-sm scale; the reference's own description/error text sit
+  // at the same size as the label itself, which this project's own
+  // $font-size-base already matches exactly (0.875rem).
+  font-size: $font-size-base;
 }
 
 .field-group {
   display: flex;
   flex-direction: column;
-  // Matches shadcn's FieldGroup gap (20px); no step in Bootstrap's own
-  // spacer scale (16px, then 24px) lands on it.
-  gap: 1.25rem;
+  gap: $moo-field-group-gap;
+
+  // Inside a gap-managed group a separator adds no spacing of its own;
+  // Bootstrap's default block margins on <hr> would otherwise stack on
+  // top of the group gap and double the visual distance.
+  > hr {
+    margin-block: 0;
+  }
 }
 
-.field-fieldset {
-  & + & {
-    margin-top: 1.5rem;
-  }
+// Bootstrap's own <legend> reboot rule (float/width/padding/line-height)
+// still applies here; this only retunes its type scale. A dedicated class
+// rather than reusing .form-label, since Field owns this legend's styling
+// independently of Radio Group's own separate <legend class="form-label">
+// choice.
+.field-legend {
+  font-size: $moo-field-legend-font-size;
+  font-weight: $font-weight-medium;
+  margin-bottom: $moo-field-legend-margin-bottom;
+}
 
-  > legend.form-label {
-    // A literal size, not $font-size-base: this project's own base is
-    // 14px, but shadcn's FieldLegend sits at a plain, un-scaled 16px.
-    // Scoped to the legend tag specifically so it doesn't also bump the
-    // size of every other .form-label on the page.
-    font-size: 1rem;
-    font-weight: $font-weight-medium;
-    margin-bottom: 0.375rem;
-  }
+// One standard, token-based gap between a fieldset's direct building
+// blocks (the legend/description header, field groups, lone fields).
+// Sibling margins rather than flex gap: Bootstrap's reboot floats
+// <legend> to give it native block flow, and turning the fieldset into a
+// flex container would silently opt out of that contract.
+.field-fieldset > * + * {
+  margin-top: $moo-field-fieldset-gap;
+}
 
-  > .form-text {
-    font-size: $font-size-base;
-  }
+// The optional description directly under the legend is part of the
+// header unit: it sits on the legend's own tight margin instead of the
+// standard section gap.
+.field-fieldset > .field-legend + .field-description {
+  margin-top: 0;
 }
 
 // A separator() placed between two fieldsets (or field-group sections) is
-// a much quieter division in shadcn's own reference than Bootstrap's own
+// a much quieter division in the design reference than Bootstrap's own
 // default <hr> opacity renders.
 .field-fieldset + hr {
-  opacity: 0.1;
+  opacity: $moo-field-separator-opacity;
 }
