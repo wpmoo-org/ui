@@ -37,7 +37,17 @@ jobs:
         run: python -m pip install -r requirements-dev.txt
 
       - name: Run contract tests
-        run: python -m unittest discover -s tests -v
+        run: coverage run -m unittest discover -s tests -v
+
+      - name: Report coverage
+        run: coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
       - name: Build catalog
         run: python build.py
