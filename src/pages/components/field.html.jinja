@@ -15,268 +15,289 @@
 {% block title %}Field — Moo UI{% endblock %}
 
 {% block content %}
-  {{ render_page_header(
-    "Field",
-    "Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch macros into labeled, described, and validated fields, using Bootstrap's own native fieldset markup and client-side validation states."
-  ) }}
+{{ render_page_header(
+"Field",
+"Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch macros into labeled, described, and
+validated fields, using Bootstrap's own native fieldset markup and client-side validation states."
+) }}
 
-  <div class="moo-component-examples">
-    {% set full %}
-      {% call form(extra_class="needs-validation", novalidate=true) %}
-        {% call field_group() %}
-        {% call fieldset("Deployment", description="Configure where and how this build ships.") %}
-          {% call field_group() %}
-            {% call field() %}
-              {{ input(label="Project name", id="field-full-project", placeholder="marketing-site", required=true, describedby="field-full-project-error") }}
-              {{ field_error("field-full-project-error", "Enter a project name.") }}
-            {% endcall %}
-            {% call field() %}
-              {{ input(label="Build command", id="field-full-build", placeholder="npm run build", describedby="field-full-build-description") }}
-              {{ field_description("field-full-build-description", "Runs before every deploy.") }}
-            {% endcall %}
-            <div class="d-flex flex-wrap gap-3">
-              {% call field(extra_class="flex-fill") %}
-                {{ select(label="Region", id="field-full-region", options=[
-                  {"label": "US East", "value": "us-east"},
-                  {"label": "EU West", "value": "eu-west"},
-                  {"label": "AP Southeast", "value": "ap-southeast"}
-                ], selected="us-east") }}
-              {% endcall %}
-              {% call field(extra_class="flex-fill") %}
-                {{ select(label="Instance size", id="field-full-size", options=[
-                  {"label": "Small", "value": "small"},
-                  {"label": "Medium", "value": "medium"},
-                  {"label": "Large", "value": "large"}
-                ], selected="medium") }}
-              {% endcall %}
-              {% call field(extra_class="flex-fill") %}
-                {{ input(label="Replicas", id="field-full-replicas", value="2") }}
-              {% endcall %}
-            </div>
-          {% endcall %}
-        {% endcall %}
-        {{ separator() }}
-        {% call fieldset("Notifications", description="Who to notify when this deploy finishes.") %}
-          {% call field_group() %}
-            {{ switch(id="field-full-notify", label="Notify the whole channel", checked=true) }}
-          {% endcall %}
-        {% endcall %}
-        {% call field() %}
-          {{ textarea(label="Notes", id="field-full-notes", placeholder="Add context for teammates watching the deploy log.", rows=3, describedby="field-full-notes-description") }}
-          {{ field_description("field-full-notes-description", "Shown in the deploy log for teammates.") }}
-        {% endcall %}
-        <div class="d-flex gap-2">
-          {{ button("Deploy", type="submit") }}
-          {{ button("Cancel", variant="outline", type="reset") }}
-        </div>
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "full",
-      "Full example",
-      "A complete form combining <code>fieldset()</code>, <code>field_group()</code>, and every ready field control. Uses <code>novalidate</code> and the <code>needs-validation</code> class; the catalog applies Bootstrap's own documented submit-time <code>.was-validated</code> pattern so <code>required</code> fields show their <code>field_error()</code> message client-side, with zero validation logic of Moo's own.",
-      full
-    ) }}
-
-    {% set basic %}
-      {% call field() %}
-        {{ input(label="Display name", id="field-basic-name", placeholder="Ada Lovelace", describedby="field-basic-name-description") }}
-        {{ field_description("field-basic-name-description", "Shown across the workspace and on shared links.") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "basic",
-      "Basic field",
-      "Wrap a label-carrying control and its <code>field_description()</code> in <code>field()</code> for a consistent vertical stack; pass the description's id back to the control's own <code>describedby</code>.",
-      basic
-    ) }}
-
-    {% set invalid %}
-      {% call field() %}
-        {{ input(label="Workspace slug", id="field-invalid-slug", value="my workspace", aria_invalid=true, describedby="field-invalid-slug-error") }}
-        {{ field_error("field-invalid-slug-error", "Slugs can only contain lowercase letters, numbers, and hyphens.") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "invalid",
-      "Field with an error",
-      "Set <code>aria_invalid=true</code> on the control and add <code>field_error()</code>; Bootstrap's own <code>.is-invalid</code> styling and <code>.invalid-feedback</code> display rule need no extra CSS.",
-      invalid
-    ) }}
-
-    {% set group %}
-      {% call field_group() %}
-        {% call field() %}
-          {{ input(label="First name", id="field-group-first", placeholder="Ada") }}
-        {% endcall %}
-        {% call field() %}
-          {{ input(label="Last name", id="field-group-last", placeholder="Lovelace") }}
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "group",
-      "Field group",
-      "Wrap several <code>field()</code> blocks in <code>field_group()</code> for a consistent gap between related fields.",
-      group
-    ) }}
-
-    {% set textarea_field %}
-      {% call field() %}
-        {{ textarea(label="Release notes", id="field-textarea-notes", placeholder="What changed in this deploy?", rows=3, describedby="field-textarea-notes-description") }}
-        {{ field_description("field-textarea-notes-description", "Shown to your team in the changelog.") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "textarea",
-      "Textarea field",
-      "The same <code>field()</code> wrapper composes with Textarea just as it does with Input.",
-      textarea_field
-    ) }}
-
-    {% set select_field %}
-      {% call field() %}
-        {{ select(label="Time zone", id="field-select-timezone", options=[
-          {"label": "Pacific Time", "value": "pt"},
-          {"label": "Eastern Time", "value": "et"},
-          {"label": "Central European Time", "value": "cet"}
-        ], selected="et", describedby="field-select-timezone-description") }}
-        {{ field_description("field-select-timezone-description", "Used to schedule your deploy window.") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "select",
-      "Select field",
-      "And with Select, since <code>field()</code> only owns spacing, never the control itself.",
-      select_field
-    ) }}
-
-    {% set fieldset_example %}
-      {% call fieldset("Notifications", description="Choose what you want to hear about.") %}
-        {% call field_group() %}
-          {{ switch(id="field-fieldset-product", label="Product updates", checked=true) }}
-          {{ switch(id="field-fieldset-billing", label="Billing alerts", checked=true) }}
-          {{ switch(id="field-fieldset-digest", label="Weekly digest") }}
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "fieldset",
-      "Fieldset",
-      "<code>fieldset()</code> renders a native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and optional description, reusing Radio Group's own <code>.form-label</code> legend styling.",
-      fieldset_example
-    ) }}
-
-    {% set fieldset_group %}
-      {% call fieldset("Support contact", description="Who should we reach out to about this project?") %}
-        {% call field_group() %}
-          {% call field() %}
-            {{ input(label="Contact name", id="field-contact-name", placeholder="Grace Hopper") }}
-          {% endcall %}
-          <div class="d-flex flex-wrap gap-3">
-            {% call field(extra_class="flex-fill") %}
-              {{ input(label="Email", id="field-contact-email", type="text", placeholder="grace@example.com") }}
-            {% endcall %}
-            {% call field(extra_class="flex-fill") %}
-              {{ input(label="Phone", id="field-contact-phone", placeholder="+1 (555) 010-0100") }}
-            {% endcall %}
-          </div>
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "fieldset-group",
-      "Fieldset with a nested row",
-      "A row of side-by-side <code>field()</code> blocks nests inside <code>field_group()</code> just like any other field.",
-      fieldset_group
-    ) }}
-
-    {% set checkbox_group %}
-      {% call fieldset("Visible dashboard widgets", description="Choose what shows on your team's overview.") %}
-        {% call field_group() %}
-          {{ checkbox(id="field-widget-revenue", label="Revenue", checked=true) }}
-          {{ checkbox(id="field-widget-users", label="Active users", checked=true) }}
-          {{ checkbox(id="field-widget-errors", label="Error rate") }}
-          {{ checkbox(id="field-widget-deploys", label="Deploy history") }}
-        {% endcall %}
-      {% endcall %}
-      {% call field() %}
-        {{ checkbox(id="field-sync", label="Sync settings across devices", checked=true, description="Preferences carry over to any device you sign into.") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "checkbox",
-      "Checkbox group",
-      "Bare <code>checkbox()</code> calls stack fine inside <code>field_group()</code>, since each one already carries its own label.",
-      checkbox_group
-    ) }}
-
-    {% set radio_field %}
-      {{ radio_group("compute-tier", "Compute tier", [
-        {"id": "field-tier-standard", "label": "Standard ($0.02/min)", "value": "standard", "checked": true},
-        {"id": "field-tier-performance", "label": "Performance ($0.05/min)", "value": "performance"},
-        {"id": "field-tier-turbo", "label": "Turbo ($0.12/min)", "value": "turbo"}
-      ]) }}
-    {% endset %}
-    {{ render_example(
-      "radio",
-      "Radio group",
-      "Radio Group already renders its own native <code>&lt;fieldset&gt;</code> and legend, so it composes directly with no extra wrapper.",
-      radio_field
-    ) }}
-
-    {% set switch_field %}
-      {{ switch(id="field-2fa", label="Require two-factor sign-in") }}
-    {% endset %}
-    {{ render_example(
-      "switch",
-      "Switch",
-      "A single Switch needs no <code>field()</code> wrapper at all when it carries its own label and has no description or error to align.",
-      switch_field
-    ) }}
-
-    {% set separated_group %}
-      {% call field_group() %}
-        {% call fieldset("Build alerts", description="Notified the moment a deploy fails its build step.") %}
-          {{ checkbox(id="field-build-alerts", label="Notify on failure", checked=true) }}
-        {% endcall %}
-        {{ separator() }}
-        {% call fieldset("Usage alerts", description="Notified as this project approaches its monthly usage limit.") %}
-          {% call field_group() %}
-            {{ checkbox(id="field-usage-80", label="Notify at 80% quota", checked=true) }}
-            {{ checkbox(id="field-usage-100", label="Notify at 100% quota", checked=true) }}
-          {% endcall %}
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "separator",
-      "Field group with a separator",
-      "Drop the ready <code>separator()</code> component between sections of a <code>field_group()</code> to divide them, matching the design reference's own FieldSeparator role with no new selector.",
-      separated_group
-    ) }}
-
-    {% set rtl %}
-      <div dir="rtl">
-        {% call field() %}
-          {{ input(label="اسم المشروع", id="field-rtl-project", placeholder="marketing-site", describedby="field-rtl-project-description") }}
-          {{ field_description("field-rtl-project-description", "يظهر في لوحة النشر وفي روابط الفريق.") }}
-        {% endcall %}
-      </div>
-    {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Field's spacing is direction-agnostic; no extra CSS or markup is required under <code>dir=\"rtl\"</code>.",
-      rtl
-    ) }}
+<div class="moo-component-examples">
+  {% set full %}
+  {% call form(extra_class="needs-validation", novalidate=true) %}
+  {% call field_group() %}
+  {% call fieldset("Deployment", description="Configure where and how this build ships.") %}
+  {% call field_group() %}
+  {% call field() %}
+  {{ input(label="Project name", id="field-full-project", placeholder="marketing-site", required=true,
+  describedby="field-full-project-error") }}
+  {{ field_error("field-full-project-error", "Enter a project name.") }}
+  {% endcall %}
+  {% call field() %}
+  {{ input(label="Build command", id="field-full-build", placeholder="npm run build",
+  describedby="field-full-build-description") }}
+  {{ field_description("field-full-build-description", "Runs before every deploy.") }}
+  {% endcall %}
+  <div class="d-flex flex-wrap gap-3">
+    {% call field(extra_class="flex-fill") %}
+    {{ select(label="Region", id="field-full-region", options=[
+    {"label": "US East", "value": "us-east"},
+    {"label": "EU West", "value": "eu-west"},
+    {"label": "AP Southeast", "value": "ap-southeast"}
+    ], selected="us-east") }}
+    {% endcall %}
+    {% call field(extra_class="flex-fill") %}
+    {{ select(label="Instance size", id="field-full-size", options=[
+    {"label": "Small", "value": "small"},
+    {"label": "Medium", "value": "medium"},
+    {"label": "Large", "value": "large"}
+    ], selected="medium") }}
+    {% endcall %}
+    {% call field(extra_class="flex-fill") %}
+    {{ input(label="Replicas", id="field-full-replicas", value="2") }}
+    {% endcall %}
   </div>
-
-  {{ render_reference(
-    "For Bootstrap's own form layout, validation states, and accessibility notes, see the",
-    "https://getbootstrap.com/docs/5.3/forms/validation/",
-    "Bootstrap Validation documentation"
+  {% endcall %}
+  {% endcall %}
+  {{ separator() }}
+  {% call fieldset("Notifications", description="Who to notify when this deploy finishes.") %}
+  {% call field() %}
+  {{ switch(id="field-full-notify", label="Notify the whole channel", checked=true) }}
+  {% endcall %}
+  {% endcall %}
+  {% call field() %}
+  {{ textarea(label="Notes", id="field-full-notes", placeholder="Add context for teammates watching the deploy log.",
+  rows=3, describedby="field-full-notes-description") }}
+  {{ field_description("field-full-notes-description", "Shown in the deploy log for teammates.") }}
+  {% endcall %}
+  <div class="d-flex gap-2">
+    {{ button("Deploy", type="submit") }}
+    {{ button("Cancel", variant="outline", type="reset") }}
+  </div>
+  {% endcall %}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "full",
+  "Full example",
+  "A complete form combining <code>fieldset()</code>, <code>field_group()</code>, and every ready field control. Uses
+  <code>novalidate</code> and the <code>needs-validation</code> class; the catalog applies Bootstrap's own documented
+  submit-time <code>.was-validated</code> pattern so <code>required</code> fields show their <code>field_error()</code>
+  message client-side, with zero validation logic of Moo's own.",
+  full,
+  preview_class="moo-example__preview--narrow"
   ) }}
+
+  {% set basic %}
+  {% call field() %}
+  {{ input(label="Display name", id="field-basic-name", placeholder="Ada Lovelace",
+  describedby="field-basic-name-description") }}
+  {{ field_description("field-basic-name-description", "Shown across the workspace and on shared links.") }}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "basic",
+  "Basic field",
+  "Wrap a label-carrying control and its <code>field_description()</code> in <code>field()</code> for a consistent
+  vertical stack; pass the description's id back to the control's own <code>describedby</code>.",
+  basic
+  ) }}
+
+  {% set invalid %}
+  {% call field() %}
+  {{ input(label="Workspace slug", id="field-invalid-slug", value="my workspace", aria_invalid=true,
+  describedby="field-invalid-slug-error") }}
+  {{ field_error("field-invalid-slug-error", "Slugs can only contain lowercase letters, numbers, and hyphens.") }}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "invalid",
+  "Field with an error",
+  "Set <code>aria_invalid=true</code> on the control and add <code>field_error()</code>; Bootstrap's own
+  <code>.is-invalid</code> styling and <code>.invalid-feedback</code> display rule need no extra CSS.",
+  invalid
+  ) }}
+
+  {% set group %}
+  {% call field_group() %}
+  {% call field() %}
+  {{ input(label="First name", id="field-group-first", placeholder="Ada") }}
+  {% endcall %}
+  {% call field() %}
+  {{ input(label="Last name", id="field-group-last", placeholder="Lovelace") }}
+  {% endcall %}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "group",
+  "Field group",
+  "Wrap several <code>field()</code> blocks in <code>field_group()</code> for a consistent gap between related fields.",
+  group
+  ) }}
+
+  {% set textarea_field %}
+  {% call field() %}
+  {{ textarea(label="Release notes", id="field-textarea-notes", placeholder="What changed in this deploy?", rows=3,
+  describedby="field-textarea-notes-description") }}
+  {{ field_description("field-textarea-notes-description", "Shown to your team in the changelog.") }}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "textarea",
+  "Textarea field",
+  "The same <code>field()</code> wrapper composes with Textarea just as it does with Input.",
+  textarea_field
+  ) }}
+
+  {% set select_field %}
+  {% call field() %}
+  {{ select(label="Time zone", id="field-select-timezone", options=[
+  {"label": "Pacific Time", "value": "pt"},
+  {"label": "Eastern Time", "value": "et"},
+  {"label": "Central European Time", "value": "cet"}
+  ], selected="et", describedby="field-select-timezone-description") }}
+  {{ field_description("field-select-timezone-description", "Used to schedule your deploy window.") }}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "select",
+  "Select field",
+  "And with Select, since <code>field()</code> only owns spacing, never the control itself.",
+  select_field
+  ) }}
+
+  {% set fieldset_example %}
+  {% call fieldset("Notifications", description="Choose what you want to hear about.") %}
+  {% call field_group() %}
+  {{ switch(id="field-fieldset-product", label="Product updates", checked=true) }}
+  {{ switch(id="field-fieldset-billing", label="Billing alerts", checked=true) }}
+  {{ switch(id="field-fieldset-digest", label="Weekly digest") }}
+  {% endcall %}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "fieldset",
+  "Fieldset",
+  "<code>fieldset()</code> renders a native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and
+  optional description, reusing Radio Group's own <code>.form-label</code> legend styling.",
+  fieldset_example
+  ) }}
+
+  {% set fieldset_group %}
+  {% call fieldset("Support contact", description="Who should we reach out to about this project?") %}
+  {% call field_group() %}
+  {% call field() %}
+  {{ input(label="Contact name", id="field-contact-name", placeholder="Grace Hopper") }}
+  {% endcall %}
+  <div class="d-flex flex-wrap gap-3">
+    {% call field(extra_class="flex-fill") %}
+    {{ input(label="Email", id="field-contact-email", type="text", placeholder="grace@example.com") }}
+    {% endcall %}
+    {% call field(extra_class="flex-fill") %}
+    {{ input(label="Phone", id="field-contact-phone", placeholder="+1 (555) 010-0100") }}
+    {% endcall %}
+  </div>
+  {% endcall %}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "fieldset-group",
+  "Fieldset with a nested row",
+  "A row of side-by-side <code>field()</code> blocks nests inside <code>field_group()</code> just like any other
+  field.",
+  fieldset_group
+  ) }}
+
+  {% set checkbox_group %}
+  {% call fieldset("Visible dashboard widgets", description="Choose what shows on your team's overview.") %}
+  {% call field_group() %}
+  {{ checkbox(id="field-widget-revenue", label="Revenue", checked=true) }}
+  {{ checkbox(id="field-widget-users", label="Active users", checked=true) }}
+  {{ checkbox(id="field-widget-errors", label="Error rate") }}
+  {{ checkbox(id="field-widget-deploys", label="Deploy history") }}
+  {% endcall %}
+  {% endcall %}
+  {% call field() %}
+  {{ checkbox(id="field-sync", label="Sync settings across devices", checked=true, description="Preferences carry over
+  to any device you sign into.") }}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "checkbox",
+  "Checkbox group",
+  "Bare <code>checkbox()</code> calls stack fine inside <code>field_group()</code>, since each one already carries its
+  own label.",
+  checkbox_group
+  ) }}
+
+  {% set radio_field %}
+  {{ radio_group("compute-tier", "Compute tier", [
+  {"id": "field-tier-standard", "label": "Standard ($0.02/min)", "value": "standard", "checked": true},
+  {"id": "field-tier-performance", "label": "Performance ($0.05/min)", "value": "performance"},
+  {"id": "field-tier-turbo", "label": "Turbo ($0.12/min)", "value": "turbo"}
+  ]) }}
+  {% endset %}
+  {{ render_example(
+  "radio",
+  "Radio group",
+  "Radio Group already renders its own native <code>&lt;fieldset&gt;</code> and legend, so it composes directly with no
+  extra wrapper.",
+  radio_field
+  ) }}
+
+  {% set switch_field %}
+  {{ switch(id="field-2fa", label="Require two-factor sign-in") }}
+  {% endset %}
+  {{ render_example(
+  "switch",
+  "Switch",
+  "A single Switch needs no <code>field()</code> wrapper at all when it carries its own label and has no description or
+  error to align.",
+  switch_field
+  ) }}
+
+  {% set separated_group %}
+  {% call field_group() %}
+  {% call fieldset("Build alerts", description="Notified the moment a deploy fails its build step.") %}
+  {{ checkbox(id="field-build-alerts", label="Notify on failure", checked=true) }}
+  {% endcall %}
+  {{ separator() }}
+  {% call fieldset("Usage alerts", description="Notified as this project approaches its monthly usage limit.") %}
+  {% call field_group() %}
+  {{ checkbox(id="field-usage-80", label="Notify at 80% quota", checked=true) }}
+  {{ checkbox(id="field-usage-100", label="Notify at 100% quota", checked=true) }}
+  {% endcall %}
+  {% endcall %}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+  "separator",
+  "Field group with a separator",
+  "Drop the ready <code>separator()</code> component between sections of a <code>field_group()</code> to divide them,
+  matching the design reference's own FieldSeparator role with no new selector.",
+  separated_group
+  ) }}
+
+  {% set rtl %}
+  <div dir="rtl">
+    {% call field() %}
+    {{ input(label="اسم المشروع", id="field-rtl-project", placeholder="marketing-site",
+    describedby="field-rtl-project-description") }}
+    {{ field_description("field-rtl-project-description", "يظهر في لوحة النشر وفي روابط الفريق.") }}
+    {% endcall %}
+  </div>
+  {% endset %}
+  {{ render_example(
+  "rtl",
+  "Right-to-left layout",
+  "Field's spacing is direction-agnostic; no extra CSS or markup is required under <code>dir=\"rtl\"</code>.",
+  rtl
+  ) }}
+</div>
+
+{{ render_reference(
+"For Bootstrap's own form layout, validation states, and accessibility notes, see the",
+"https://getbootstrap.com/docs/5.3/forms/validation/",
+"Bootstrap Validation documentation"
+) }}
 
 {% endblock %}
