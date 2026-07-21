@@ -299,8 +299,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-moo-shell="catalog"', home)
         self.assertIn("Moo UI", home)
         self.assertIn(
-            "Bootstrap-native component system", home
+            "Bootstrap-native components with a calm, modern shadcn-style feel.",
+            home,
         )
+        self.assertIn("Bootstrap is the contract", home)
+        self.assertIn("Bootstrap primitives, modern shell", home)
+        self.assertIn("scroll-fade-x no-scrollbar overflow-x-auto", home)
         self.assertIn('href="components/index.html"', home)
         self.assertRegex(home, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
 
