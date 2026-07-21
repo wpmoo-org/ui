@@ -1,13 +1,28 @@
-// Field/FieldGroup grouping needs plain vertical flex stacks with a gap,
-// which Bootstrap's own flex and gap utility classes would cover in the
-// full standalone build -- but the scoped Odoo-vendored build deliberately
-// excludes Bootstrap's utility-class generator, so relying on utility
-// classes here would silently render unstyled there. These two rules exist
-// so the same markup works in both builds.
 .field {
   display: flex;
   flex-direction: column;
   gap: $spacer * 0.5;
+
+  // Bootstrap's own .form-label/.form-text/.invalid-feedback all carry a
+  // margin of their own (form-label-margin-bottom, form-text-margin-top),
+  // which would stack on top of this flex gap and roughly double the real
+  // spacing shadcn's flat gap-only model produces.
+  > .form-label {
+    margin-bottom: 0;
+    // $form-label-font-weight is unset (inherits normal body weight);
+    // shadcn's own FieldLabel sits at a medium weight instead.
+    font-weight: $font-weight-medium;
+  }
+
+  > .form-text,
+  > .invalid-feedback {
+    margin-top: 0;
+    // .form-text/.invalid-feedback both default to the smaller $font-size-sm
+    // scale; shadcn's FieldDescription/FieldError sit at the same size as
+    // the label itself, which this project's own $font-size-base already
+    // matches exactly (0.875rem).
+    font-size: $font-size-base;
+  }
 }
 
 .field-group {
@@ -16,4 +31,31 @@
   // Matches shadcn's FieldGroup gap (20px); no step in Bootstrap's own
   // spacer scale (16px, then 24px) lands on it.
   gap: 1.25rem;
+}
+
+.field-fieldset {
+  & + & {
+    margin-top: 1.5rem;
+  }
+
+  > legend.form-label {
+    // A literal size, not $font-size-base: this project's own base is
+    // 14px, but shadcn's FieldLegend sits at a plain, un-scaled 16px.
+    // Scoped to the legend tag specifically so it doesn't also bump the
+    // size of every other .form-label on the page.
+    font-size: 1rem;
+    font-weight: $font-weight-medium;
+    margin-bottom: 0.375rem;
+  }
+
+  > .form-text {
+    font-size: $font-size-base;
+  }
+}
+
+// A separator() placed between two fieldsets (or field-group sections) is
+// a much quieter division in shadcn's own reference than Bootstrap's own
+// default <hr> opacity renders.
+.field-fieldset + hr {
+  opacity: 0.1;
 }

@@ -121,6 +121,11 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's Offcanvas source owns .showing and .hiding as
             # transition lifecycle states alongside .show.
             "sheet": ("offcanvas", "sheet", "show", "showing", "hiding"),
+            # Field retunes the spacing of Bootstrap's own shared
+            # .form-label/.form-text/.invalid-feedback classes when they sit
+            # inside a .field, rather than owning a "field-" prefixed family
+            # of its own for them.
+            "field": ("field", "form-label", "form-text", "invalid-feedback"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):

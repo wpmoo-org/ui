@@ -41,7 +41,7 @@
 
 {% macro fieldset(legend, description="", extra_class="") -%}
   {% if not legend | trim %}{{ fail("Fieldset legend is required") }}{% endif %}
-  <fieldset{% if extra_class %} class="{{ extra_class }}"{% endif %}>
+  <fieldset class="field-fieldset{% if extra_class %} {{ extra_class }}{% endif %}">
     <legend class="form-label">{{ legend }}</legend>
     {% if description %}<div class="form-text mb-2">{{ description }}</div>{% endif %}
     {{ caller() | trim | safe }}
