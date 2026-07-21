@@ -54,7 +54,7 @@ class FieldTests(CatalogTestCase):
             '{{ field_description("field-1-description", "Helper text.") }}'
         )
 
-        self.assertIn('class="form-text"', output)
+        self.assertIn('class="field-description form-text"', output)
         self.assertIn('id="field-1-description"', output)
         self.assertIn("Helper text.", output)
 
@@ -75,7 +75,7 @@ class FieldTests(CatalogTestCase):
             '{{ field_error("field-1-error", "This field is required.") }}'
         )
 
-        self.assertIn('class="invalid-feedback"', output)
+        self.assertIn('class="field-error invalid-feedback"', output)
         self.assertIn('id="field-1-error"', output)
         self.assertIn("This field is required.", output)
 
@@ -103,9 +103,9 @@ class FieldTests(CatalogTestCase):
         )
 
         self.assertIn('<fieldset class="field-fieldset">', output)
-        self.assertIn('<legend class="form-label">Notifications</legend>', output)
+        self.assertIn('<legend class="field-legend">Notifications</legend>', output)
         self.assertIn("<p>Content</p>", output)
-        self.assertNotIn('class="form-text mb-2"', output)
+        self.assertNotIn('field-description', output)
 
     def test_fieldset_accepts_extra_class(self) -> None:
         output = self.render(
@@ -119,7 +119,7 @@ class FieldTests(CatalogTestCase):
             '{% call fieldset("Notifications", description="Choose what to hear about.") %}x{% endcall %}'
         )
 
-        self.assertIn('class="form-text mb-2"', output)
+        self.assertIn('class="field-description form-text"', output)
         self.assertIn("Choose what to hear about.", output)
 
     def test_fieldset_requires_legend(self) -> None:
