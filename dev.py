@@ -67,8 +67,16 @@ def watch_sources(stop_event: threading.Event) -> None:
         current = catalog_build.source_snapshot()
         if current == previous:
             continue
-        catalog_build.build()
-        print("Rebuilt Moo UI catalog.", flush=True)
+        # A failed build must not kill the watcher thread: sources are often
+        # transiently inconsistent mid-edit (an unbalanced template between
+        # two saves), and dying here would silently stop every future
+        # rebuild while the server keeps serving stale output.
+        try:
+            catalog_build.build()
+        except Exception as error:  # noqa: BLE001 - report and keep watching
+            print(f"Build failed, keeping last good output: {error}", flush=True)
+        else:
+            print("Rebuilt Moo UI catalog.", flush=True)
         previous = current
 
 
