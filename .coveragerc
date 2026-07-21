@@ -1,0 +1,10 @@
+[run]
+source = .
+omit =
+    tests/*
+    .venv/*
+    vendor/*
+
+[report]
+exclude_lines =
+    if __name__ == .__main__.:

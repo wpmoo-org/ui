@@ -4,6 +4,12 @@
 
 ![Moo UI catalog preview](static/images/readme-hero.webp)
 
+[![CI](https://img.shields.io/github/actions/workflow/status/wpmoo-org/ui/ui-ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/wpmoo-org/ui/actions/workflows/ui-ci.yml)
+[![coverage](https://img.shields.io/codecov/c/github/wpmoo-org/ui?branch=main&label=coverage&logo=codecov&style=flat-square&color=blue)](https://codecov.io/gh/wpmoo-org/ui)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&style=flat-square)](https://github.com/wpmoo-org/ui)
+[![npm](https://img.shields.io/npm/v/@wpmoo/ui?label=npm&logo=npm&style=flat-square&color=blue)](https://www.npmjs.com/package/@wpmoo/ui)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+
 Moo UI is a Bootstrap 5.3 component system for teams that want the calm,
 modern feel of shadcn/ui without leaving server-rendered HTML, Bootstrap
 classes, Bootstrap Sass, or Bootstrap JavaScript behind.
@@ -79,5 +85,4 @@ are not covered by the MIT source code license and remain copyright WPMoo, all
 rights reserved.
 
 Vendored third-party material keeps its original license and attribution. See
-`LICENSE`, `LICENSE-MOO-CORE.txt`, `ASSET_LICENSE.md`, and
-`THIRD_PARTY_NOTICES.md`.
+`LICENSE`, `ASSET_LICENSE.md`, and `THIRD_PARTY_NOTICES.md`.
