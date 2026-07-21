@@ -1,13 +1,23 @@
 {# Field is composition scaffolding around the already-ready Input, Textarea,
    Select, Checkbox, Radio Group, and Switch macros -- it owns no input
-   control of its own. It mirrors shadcn's own Field/FieldGroup/FieldSet
-   component (a distinct page from shadcn's "Forms" guide, which is just
-   React Hook Form/Zod wiring and has no portable static markup of its own),
-   built on Bootstrap's native fieldset/legend markup and its existing
+   control of its own. It mirrors the design reference's own
+   Field/FieldGroup/FieldSet component (a distinct page from the reference's
+   "Forms" guide, which is just React Hook Form/Zod wiring and has no
+   portable static markup of its own), built on Bootstrap's native
+   fieldset/legend markup and its existing
    client-side validation pseudo-classes (:invalid/:valid,
    .is-invalid/.is-valid, .was-validated), never a Moo-owned validation
    engine. form() is the one exception to the "field" naming: it renders a
-   literal <form> element, a real HTML concept rather than a Field synonym. #}
+   literal <form> element, a real HTML concept rather than a Field synonym.
+
+   Every default spacing, color, and type value lives on a token in the
+   matching scss/components/_field.scss rule (backed by the $moo-field-*
+   Sass knobs in _primary_variables.scss where no native Bootstrap variable
+   already covers it) rather than a utility class baked into this markup,
+   so a plain field()/fieldset() call always looks right with no per-use
+   classes required. A specific form that needs a one-off deviation reaches
+   for Bootstrap's own utility classes (gap-3, mb-4, ...) via extra_class
+   instead, the same way a plain Bootstrap form already would. #}
 
 {% macro form(extra_class="", novalidate=false) -%}
   <form{% if extra_class %} class="{{ extra_class }}"{% endif %}{% if novalidate %} novalidate{% endif %}>
@@ -24,13 +34,13 @@
 {% macro field_description(id, text) -%}
   {% if not id | trim %}{{ fail("Field description id is required") }}{% endif %}
   {% if not text | trim %}{{ fail("Field description text is required") }}{% endif %}
-  <div class="form-text" id="{{ id }}">{{ text }}</div>
+  <div class="field-description form-text" id="{{ id }}">{{ text }}</div>
 {%- endmacro %}
 
 {% macro field_error(id, text) -%}
   {% if not id | trim %}{{ fail("Field error id is required") }}{% endif %}
   {% if not text | trim %}{{ fail("Field error text is required") }}{% endif %}
-  <div class="invalid-feedback" id="{{ id }}">{{ text }}</div>
+  <div class="field-error invalid-feedback" id="{{ id }}">{{ text }}</div>
 {%- endmacro %}
 
 {% macro field_group(extra_class="") -%}
@@ -42,8 +52,8 @@
 {% macro fieldset(legend, description="", extra_class="") -%}
   {% if not legend | trim %}{{ fail("Fieldset legend is required") }}{% endif %}
   <fieldset class="field-fieldset{% if extra_class %} {{ extra_class }}{% endif %}">
-    <legend class="form-label">{{ legend }}</legend>
-    {% if description %}<div class="form-text mb-2">{{ description }}</div>{% endif %}
+    <legend class="field-legend">{{ legend }}</legend>
+    {% if description %}<div class="field-description form-text">{{ description }}</div>{% endif %}
     {{ caller() | trim | safe }}
   </fieldset>
 {%- endmacro %}

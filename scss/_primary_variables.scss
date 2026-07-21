@@ -22,7 +22,7 @@ $border-radius-lg: 0.625rem !default;
 
 // Bootstrap's form-control consumes these values directly. Keep the native
 // Sass contract, but give text controls the same quiet surface and compact
-// geometry as Moo's shadcn reference.
+// geometry as the design reference.
 $input-padding-y: 0.25rem !default;
 $input-padding-x: 0.625rem !default;
 $input-height: 2rem !default;
@@ -48,9 +48,9 @@ $kbd-padding-x: 0.375rem !default;
 $kbd-font-size: 0.75rem !default;
 $kbd-color: var(--bs-secondary-color) !default;
 $kbd-bg: var(--bs-secondary-bg) !default;
-// shadcn's breadcrumb uses a chevron divider; Bootstrap's own default is "/".
+// The reference breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
-// shadcn's pagination items sit separated with no border, ghost-hover, and
+// The reference pagination items sit separated with no border, ghost-hover, and
 // only the active page gets a bordered box; Bootstrap's default is a fully
 // bordered, edge-to-edge connected strip. A positive margin-start switches
 // Bootstrap's own pagination.scss out of connected-border mode.
@@ -65,9 +65,9 @@ $pagination-active-color: var(--bs-body-color) !default;
 $pagination-active-bg: var(--moo-muted-surface) !default;
 $pagination-active-border-color: var(--moo-border) !default;
 $pagination-disabled-border-color: transparent !default;
-// shadcn's progress track is a slim 4px bar; Bootstrap's default is 1rem.
+// The reference progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;
-// shadcn's switch track is chubbier than Bootstrap's default: 32x18.4px
+// The reference switch track is chubbier than Bootstrap's default: 32x18.4px
 // versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
 // Bootstrap's own customization point, but there is no matching height
 // variable — .form-switch inherits its height from the same
@@ -80,7 +80,7 @@ $form-switch-width: 2rem !default;
 // keep the same proportional gap Bootstrap's own default uses.
 $form-switch-padding-start: 2.5rem !default;
 $moo-switch-height: 1.15rem !default;
-// shadcn's accordion trigger stays fully neutral when expanded (only an
+// The reference accordion trigger stays fully neutral when expanded (only an
 // underline on hover); Bootstrap's default tints the expanded trigger with
 // $primary-bg-subtle / $primary-text-emphasis. Referencing the resting
 // --bs-accordion-bg/-color custom properties (rather than the Sass
@@ -135,11 +135,11 @@ $btn-padding-x-sm: 0.625rem !default;
 $btn-padding-y-lg: 0.4375rem !default;
 $btn-padding-x-lg: 0.625rem !default;
 
-// Shared focus primitive: shadcn-style 2px ring. Components consume
+// Shared focus primitive: a thin 2px ring. Components consume
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
 $focus-ring-width: 2px !default;
 
-// shadcn-style elevation and the extra radius step, applied UI-wide through
+// A quieter elevation scale and the extra radius step, applied UI-wide through
 // Bootstrap's own scales so every component consumes one shared primitive.
 $box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !default;
 $box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1) !default;
@@ -160,7 +160,7 @@ $moo-dropdown-item-icon-size: 1.5rem !default;
 
 // The Sidebar header/footer dropdown menus (team switcher, account menu)
 // intentionally overflow past the sidebar edge into the content column,
-// matching the shadcn reference's min-w-56. Bootstrap's shared
+// matching the design reference's min-w-56. Bootstrap's shared
 // $dropdown-min-width stays the default for every other dropdown in the
 // product; this is a sidebar-scoped floor, not a global change.
 $moo-dropdown-sidebar-min-width: 14rem !default;
@@ -178,3 +178,23 @@ $moo-dropdown-sidebar-min-width: 14rem !default;
 // This variable is evaluated before Bootstrap's own defaults exist, so it
 // cannot reference $font-family-sans-serif directly.
 $moo-catalog-font-family: "Geist" !default;
+
+// Field has no matching Bootstrap component of its own, so its spacing
+// scale and legend sizing live on dedicated Sass knobs instead of
+// per-instance utility classes. Changing spacing/type for every Field
+// usage means changing the token here; a specific form that needs a
+// one-off deviation reaches for Bootstrap's own utility classes (gap-3,
+// mb-4, ...) instead, the same way plain Bootstrap forms already do.
+// Literal values, not $spacer math: this file compiles before Bootstrap's
+// own variables (including $spacer) are defined.
+// - field-gap: inside one field (label / control / description / error)
+// - field-group-gap: between sibling fields, fieldsets, and separators
+//   inside a field_group()
+// - field-fieldset-gap: between a fieldset's direct building blocks
+//   (its legend/description header, field groups, lone fields)
+$moo-field-gap: 0.5rem !default;
+$moo-field-group-gap: 1.25rem !default;
+$moo-field-fieldset-gap: 1rem !default;
+$moo-field-legend-font-size: 1rem !default;
+$moo-field-legend-margin-bottom: 0.375rem !default;
+$moo-field-separator-opacity: 0.1 !default;
