@@ -4,3 +4,5 @@ node_modules/
 __pycache__/
 /dist/
 /references/
+.coverage
+/coverage.xml
