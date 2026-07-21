@@ -102,10 +102,17 @@ class FieldTests(CatalogTestCase):
             '{% call fieldset("Notifications") %}<p>Content</p>{% endcall %}'
         )
 
-        self.assertIn("<fieldset>", output)
+        self.assertIn('<fieldset class="field-fieldset">', output)
         self.assertIn('<legend class="form-label">Notifications</legend>', output)
         self.assertIn("<p>Content</p>", output)
         self.assertNotIn('class="form-text mb-2"', output)
+
+    def test_fieldset_accepts_extra_class(self) -> None:
+        output = self.render(
+            '{% call fieldset("Notifications", extra_class="mb-3") %}x{% endcall %}'
+        )
+
+        self.assertIn('<fieldset class="field-fieldset mb-3">', output)
 
     def test_fieldset_description_is_optional(self) -> None:
         output = self.render(
