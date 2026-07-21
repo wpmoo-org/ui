@@ -163,3 +163,28 @@ class MooCoreTests(CatalogTestCase):
                 if "url(" in path.read_text(encoding="utf-8").lower():
                     offenders.append(path.relative_to(ROOT).as_posix())
         self.assertEqual(offenders, [])
+
+    def test_core_state_layer_bridges_detached_overlay_backdrops(self) -> None:
+        state_layer = (SCSS / "_core_state_layer.scss").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "body:has(.moo-ui .modal.show) > .modal-backdrop",
+            state_layer,
+        )
+        self.assertIn("--#{$prefix}backdrop-opacity: 1", state_layer)
+        self.assertIn(
+            "var(--#{$prefix}black) 10%",
+            state_layer,
+        )
+        self.assertNotIn("offcanvas.sheet.show", state_layer)
+        self.assertEqual(state_layer.count("backdrop-filter: blur(4px)"), 2)
+
+        core_css = CORE_CSS.read_text(encoding="utf-8")
+        self.assertIn(
+            ":has(> .offcanvas.sheet:is(.showing, .show)) > .offcanvas-backdrop",
+            core_css,
+        )
+        self.assertIn(
+            ":has(> .offcanvas.sheet.hiding) > .offcanvas-backdrop",
+            core_css,
+        )

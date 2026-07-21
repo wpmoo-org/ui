@@ -87,7 +87,7 @@
     <section aria-labelledby="components-title" data-moo-catalog-section="components">
       {{ typography("Components", variant="section-title", id="components-title") }}
       <div class="moo-catalog__grid" id="components">
-        {% for component in catalog %}
+        {% for component in catalog | sort(attribute="label") %}
           {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
             <div class="moo-catalog__showcase-preview">
               {{ component_preview(component.slug, root_path) }}
