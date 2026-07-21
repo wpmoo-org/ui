@@ -2,7 +2,15 @@
 
 **Bootstrap markup. shadcn feel.**
 
-![Moo UI catalog preview](static/images/readme-hero.webp)
+Keep your Bootstrap 5.3 HTML and behavior. Replace the stylesheet and give
+your application a calmer, modern product interface without moving to React or
+Tailwind.
+
+[Explore the live catalog](https://ui.wpmoo.org/components/) ·
+[Try it in 30 seconds](#try-it-in-30-seconds) ·
+[View on npm](https://www.npmjs.com/package/@wpmoo/ui)
+
+![Moo UI catalog preview](https://ui.wpmoo.org/assets/images/readme-hero.webp)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/wpmoo-org/ui/ui-ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/wpmoo-org/ui/actions/workflows/ui-ci.yml)
 [![coverage](https://img.shields.io/codecov/c/github/wpmoo-org/ui?branch=main&label=coverage&logo=codecov&style=flat-square&color=blue)](https://codecov.io/gh/wpmoo-org/ui)
@@ -10,71 +18,121 @@
 [![npm](https://img.shields.io/npm/v/@wpmoo/ui?label=npm&logo=npm&style=flat-square&color=blue)](https://www.npmjs.com/package/@wpmoo/ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-Moo UI is a Bootstrap 5.3 component system for teams that want the calm,
-modern feel of shadcn/ui without leaving server-rendered HTML, Bootstrap
-classes, Bootstrap Sass, or Bootstrap JavaScript behind.
+Moo UI is for teams that already like Bootstrap's durability, documented
+components, and server-rendered friendliness, but want their customer portals,
+admin screens, and business applications to feel more like modern SaaS
+software.
 
-It keeps Bootstrap as the public contract, then shapes the catalog, component
-examples, and composed blocks into a quieter product interface language.
+It keeps Bootstrap as the public contract: familiar classes, `data-bs-*`
+behavior, CSS variables, Sass customization, and Bootstrap JavaScript plugins.
+Moo UI changes the visual language around that contract.
 
-## Philosophy
+## Try It in 30 Seconds
 
-- **Bootstrap is the contract.** Moo UI keeps Bootstrap markup, documented
-  behavior, `data-bs-*` APIs, Sass knobs, and `--bs-*` variables wherever
-  Bootstrap can express the need.
-- **shadcn is the visual language.** Moo UI studies shadcn/ui for restraint,
-  spacing, composition, and state language. It does not copy shadcn source,
-  React code, Tailwind code, Radix code, or example prose.
-- **HTML stays first-class.** Component examples are generated from Jinja
-  macros, so the preview and copyable source share one rendered output.
-- **No framework adoption tax.** The catalog can be browsed, built, and
-  shipped as static HTML without a SPA runtime.
-- **Product shells matter.** Moo UI includes primitives, utilities, and
-  composed blocks for Bootstrap applications that need to feel like modern
-  product software.
+Drop the stylesheet into ordinary Bootstrap markup:
 
-## Documentation
+```html
+<link rel="stylesheet"
+      href="https://unpkg.com/@wpmoo/ui@0.1.1/dist/assets/css/moo-ui.css">
 
-Browse the catalog at [ui.wpmoo.org](https://ui.wpmoo.org/). Component pages,
-blocks, examples, local development notes, and implementation contracts belong
-in the documentation rather than this README.
+<button type="button" class="btn btn-primary">Create workspace</button>
+```
 
-## Package
+That is the point of Moo UI: your markup still says Bootstrap, but the surface
+feels quieter, sharper, and more product-ready.
 
-The canonical npm package is `@wpmoo/ui`:
+## Install
+
+Use the published package when a bundler owns your build:
 
 ```bash
 npm install @wpmoo/ui
 ```
 
-For CDN usage, load the built CSS artifact from the canonical package:
-
-```html
-<link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui/dist/assets/css/moo-ui.css">
-```
-
-Bundlers can import the same stylesheet from the package export:
-
 ```js
 import "@wpmoo/ui/moo-ui.css";
 ```
 
-If the shorter `@moo/ui` scope is available to WPMoo, it is reserved as a
-small alias package only. Use `@wpmoo/ui` in documentation, CDN examples, and
-production installs.
+If a page uses Bootstrap plugins such as Dropdown, Tooltip, Popover, Modal,
+Toast, or Offcanvas, load Bootstrap's JavaScript bundle separately through your
+application. Tooltip and Popover also need the initialization Bootstrap
+documents for those plugins.
 
-## Build Outputs
+## Choose an Adoption Path
 
-The static build emits three CSS artifacts under `dist/assets/css/`:
+| Situation | Use | Contract |
+| --- | --- | --- |
+| New page or whole application | `moo-ui.css` | Complete Bootstrap CSS build with Moo UI defaults; use it instead of your existing Bootstrap stylesheet. |
+| Gradual adoption inside an existing Bootstrap app | `moo.css` | Scoped Moo component layer under a `.moo-ui` boundary. Available in the source tree and planned for npm use after the release that publishes it. |
 
-- `moo-ui.css` for the standalone catalog and examples.
-- `catalog.css` for documentation chrome.
-- `moo-core.css` for integrations that need the Moo component surface as an
-  opt-in native `@scope (.moo-ui)` layer.
+## Why Bootstrap Teams Try It
 
-The npm package publishes only built component CSS, the optional Bootstrap
-bundle, and license/notice files. WPMoo-owned catalog and preview images are
-not included in the package.
+- **No frontend rewrite.** Keep server-rendered HTML, Bootstrap classes, and
+  the component behavior your team already knows.
+- **Modern product rhythm.** Buttons, forms, overlays, navigation, data
+  display, and app shells are tuned toward a restrained shadcn-inspired feel.
+- **Inspectable examples.** The catalog is static HTML. Every component page
+  shows rendered examples and copyable markup.
+- **Bootstrap-native customization.** Moo UI uses Bootstrap Sass knobs and
+  `--bs-*` variables wherever Bootstrap can express the need, adding Moo-owned
+  tokens only for gaps Bootstrap does not model.
+- **Practical migration surface.** Start with one page, one scoped area, or a
+  full stylesheet replacement after visual review.
+
+## Philosophy
+
+- **Bootstrap is the contract.** Moo UI keeps Bootstrap markup, documented
+  behavior, Sass knobs, and `--bs-*` variables wherever Bootstrap can express
+  the need.
+- **shadcn is the feeling.** Moo UI studies restraint, rhythm, and product UI
+  sensibility without adopting React, Tailwind, Radix, or shadcn source.
+- **HTML stays first-class.** The catalog is static, inspectable, and friendly
+  to server-rendered applications.
+- **Extensions stay honest.** Moo-owned classes and behavior are added only
+  when Bootstrap has no native component contract for the pattern.
+
+## What Is Included
+
+The live catalog is the source of truth for current coverage:
+
+- [Components](https://ui.wpmoo.org/components/) for actions, forms,
+  data display, feedback, disclosure, overlays, and navigation.
+- [Blocks](https://ui.wpmoo.org/blocks/) for composed application
+  surfaces such as sidebar layouts.
+- A static documentation site that can be inspected without a client-side app
+  runtime.
+
+Representative components include Button, Field, Table, Dialog, Toast, Sheet,
+and Sidebar. More components are being added as the catalog roadmap continues.
+
+## Package Boundaries
+
+The npm package distributes compiled CSS and license/notice files. It does not
+ship the catalog's generated preview images, Jinja templates, Sass source, or
+Moo-owned catalog JavaScript.
+
+The source repository contains the static catalog, component templates, build
+tooling, tests, and documentation.
+
+## Development
+
+The catalog is intentionally small-tool friendly:
+
+```bash
+.venv/bin/python build.py
+.venv/bin/python dev.py
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+For developers who prefer npm scripts, the package also exposes:
+
+```bash
+npm run build
+npm run dev
+npm test
+```
+
+Browse the local catalog at `http://localhost:4173/` when `dev.py` is running.
 
 ## Licensing
 

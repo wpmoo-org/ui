@@ -9,6 +9,7 @@
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/component-previews.html.jinja" import component_preview %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Components — Moo UI{% endblock %}
 
@@ -45,12 +46,11 @@
 } %}
 
 {% block content %}
-  <section class="moo-catalog__intro" aria-labelledby="catalog-title">
-    {{ typography("Components", variant="page-title", id="catalog-title") }}
-    <p class="lead text-body-secondary mb-0">
-      Browse the Bootstrap-native primitives that make up the Moo UI shell.
-    </p>
-  </section>
+  {{ render_page_header(
+    "Components",
+    "Browse the Bootstrap-native primitives that make up the Moo UI shell.",
+    id="catalog-title"
+  ) }}
 
   <section class="moo-catalog__dashboard" aria-label="Catalog filters">
     <div class="moo-catalog__toolbar">

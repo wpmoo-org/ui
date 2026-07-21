@@ -7,12 +7,14 @@
       {% include "shell/sidebar.html.jinja" %}
       {% call sidebar_inset() %}
         {% include "shell/navbar.html.jinja" %}
-        <main class="moo-catalog__main sidebar-inset__content" id="main-content" tabindex="-1">
+        <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">
           <div class="moo-catalog__content">
             {% block content %}{% endblock %}
           </div>
         </main>
-        {% include "shell/footer.html.jinja" %}
+        {% block footer %}
+          {% include "shell/footer.html.jinja" %}
+        {% endblock %}
       {% endcall %}
     {% endcall %}
   </div>

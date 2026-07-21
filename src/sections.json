@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "introduction",
+    "label": "Introduction",
+    "href": "introduction.html",
+    "icon": "book-open"
+  },
+  {
+    "slug": "installation",
+    "label": "Installation",
+    "href": "installation.html",
+    "icon": "download"
+  },
+  {
+    "slug": "components",
+    "label": "Components",
+    "href": "components/index.html",
+    "icon": "component"
+  },
+  {
+    "slug": "blocks",
+    "label": "Blocks",
+    "href": "blocks/index.html",
+    "icon": "blocks"
+  },
+  {
+    "slug": "skills",
+    "label": "Skills",
+    "href": "skills.html",
+    "icon": "sparkles"
+  },
+  {
+    "slug": "changelog",
+    "label": "Changelog",
+    "href": "changelog.html",
+    "icon": "history"
+  }
+]

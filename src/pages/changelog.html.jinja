@@ -1,0 +1,48 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Changelog - Moo UI{% endblock %}
+
+{% block content %}
+  <article class="moo-doc-page">
+    {{ render_page_header(
+      "Changelog",
+      "Product-facing notes for the public Moo UI package and catalog.",
+      id="changelog-title"
+    ) }}
+
+    <section class="moo-changelog" aria-label="Moo UI release history">
+      <article class="moo-changelog__release" aria-labelledby="release-0-1-1">
+        <div class="moo-changelog__release-heading">
+          <span class="badge text-bg-dark">v0.1.1</span>
+          <span class="text-body-secondary">Public package refresh</span>
+        </div>
+        <h2 id="release-0-1-1">Catalog Polish</h2>
+        <p>Refined the public catalog, homepage, and package metadata for the npm release.</p>
+
+        <div class="moo-changelog__changes">
+          <div class="moo-changelog__change-row">
+            <span class="moo-changelog__change-label">Updated</span>
+            <span>Homepage, documentation pages, and npm package metadata.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="moo-changelog__release" aria-labelledby="release-0-1-0">
+        <div class="moo-changelog__release-heading">
+          <span class="badge text-bg-dark">v0.1.0</span>
+          <span class="text-body-secondary">Initial public package</span>
+        </div>
+        <h2 id="release-0-1-0">Initial Release</h2>
+        <p>First public release of Moo UI.</p>
+
+        <div class="moo-changelog__changes">
+          <div class="moo-changelog__change-row">
+            <span class="moo-changelog__change-label">Added</span>
+            <span>Initial Release</span>
+          </div>
+        </div>
+      </article>
+    </section>
+  </article>
+{% endblock %}

@@ -288,6 +288,27 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
+    def test_header_navigation_links_docs_between_home_and_components(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        header_start = index.index('<header class="moo-catalog__header">')
+        header_end = index.index("</header>", header_start)
+        header = index[header_start:header_end]
+
+        home_index = header.index('href="index.html"')
+        docs_index = header.index('href="introduction.html"')
+        components_index = header.index('href="components/index.html"')
+        blocks_index = header.index('href="blocks/index.html"')
+
+        self.assertLess(home_index, docs_index)
+        self.assertLess(docs_index, components_index)
+        self.assertLess(components_index, blocks_index)
+        self.assertIn(">Docs</", header)
+
     def test_home_page_introduces_the_product_and_links_to_components(
         self,
     ) -> None:
@@ -299,10 +320,196 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-moo-shell="catalog"', home)
         self.assertIn("Moo UI", home)
         self.assertIn(
-            "Bootstrap-native component system", home
+            "Bootstrap markup. shadcn feel.",
+            home,
         )
+        self.assertIn(
+            "A product interface layer for teams that already trust Bootstrap.",
+            home,
+        )
+        self.assertIn(
+            "Moo UI keeps Bootstrap as the public contract",
+            home,
+        )
+        self.assertIn(
+            "moo-home-showcase__image",
+            home,
+        )
+        self.assertIn(
+            "moo-home-proof-card",
+            home,
+        )
+        self.assertIn(
+            "moo-home-component-row moo-home-component-row--1 scroll-fade-x",
+            home,
+        )
+        self.assertIn('href="installation.html"', home)
         self.assertIn('href="components/index.html"', home)
+        self.assertIn('href="components/button.html"', home)
+        self.assertNotIn(
+            "Moo UI — Bootstrap components with a focused visual language.",
+            home,
+        )
         self.assertRegex(home, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
+
+    def test_sections_navigation_precedes_component_catalog(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        components = self.read_output("components/index.html")
+
+        sections_index = components.index(
+            'class="sidebar-group-label" data-slot="sidebar-group-label">Sections<'
+        )
+        components_index = components.index(
+            'class="sidebar-group-label" data-slot="sidebar-group-label">Components<'
+        )
+        self.assertLess(sections_index, components_index)
+
+        for label, href in (
+            ("Introduction", "../introduction.html"),
+            ("Installation", "../installation.html"),
+            ("Components", "../components/index.html"),
+            ("Blocks", "../blocks/index.html"),
+            ("Skills", "../skills.html"),
+            ("Changelog", "../changelog.html"),
+        ):
+            with self.subTest(label=label):
+                self.assertIn(f'href="{href}"', components)
+                self.assertIn(f">{label}</", components)
+
+    def test_introduction_page_states_moo_ui_positioning(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        introduction = self.read_output("introduction.html")
+
+        for copy in (
+            "Keep your Bootstrap 5.3 HTML and behavior. Change the visual language.",
+            "Bootstrap markup. shadcn feel.",
+            "Why Moo UI Exists",
+            "Bootstrap is the contract",
+            "shadcn is the feeling",
+            "Server-rendered UI stays first-class",
+            "Mission",
+            "Vision",
+        ):
+            with self.subTest(copy=copy):
+                self.assertIn(copy, introduction)
+        self.assertIn('href="installation.html"', introduction)
+        self.assertIn('href="components/index.html"', introduction)
+
+    def test_primary_pages_share_the_page_header_macro_surface(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        for path in (
+            "introduction.html",
+            "installation.html",
+            "skills.html",
+            "changelog.html",
+            "components/index.html",
+            "blocks/index.html",
+        ):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                header_start = page.index('<header class="moo-component-header"')
+                header_end = page.index("</header>", header_start)
+                header = page[header_start:header_end]
+
+                self.assertIn("<h1", header)
+                self.assertNotIn("moo-doc-hero", page)
+                self.assertNotIn("moo-catalog__intro", page)
+
+        home = self.read_output("index.html")
+        self.assertIn('<section class="moo-home-hero"', home)
+        self.assertIn('<h1 class="moo-home-hero__title" id="home-title">Moo UI</h1>', home)
+        self.assertNotIn("moo-doc-hero", home)
+        self.assertNotIn("moo-catalog__intro", home)
+
+        introduction = self.read_output("introduction.html")
+        self.assertIn("moo-component-header__actions", introduction)
+
+    def test_installation_page_uses_published_cdn_path(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        installation = self.read_output("installation.html")
+
+        self.assertIn(
+            "https://unpkg.com/@wpmoo/ui@0.1.1/dist/assets/css/moo-ui.css",
+            installation,
+        )
+        self.assertNotIn(
+            "https://unpkg.com/@wpmoo/ui/dist/assets/css/moo-ui.min.css",
+            installation,
+        )
+        self.assertIn("Create workspace", installation)
+        self.assertIn("Bootstrap's JavaScript bundle", installation)
+
+    def test_skills_page_documents_agent_component_guidance(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        skills = self.read_output("skills.html")
+
+        for copy in (
+            "Project-aware instructions for coding agents",
+            "What Skills Are For",
+            "What Agents Should Know",
+            "Bootstrap first",
+            "Taste, not source",
+            "Verify before ready",
+            "Expected Workflow",
+        ):
+            with self.subTest(copy=copy):
+                self.assertIn(copy, skills)
+
+    def test_changelog_page_documents_initial_release_without_timeline_chrome(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        changelog = self.read_output("changelog.html")
+
+        for copy in (
+            "Product-facing notes for the public Moo UI package and catalog.",
+            "v0.1.1",
+            "Public package refresh",
+            "Catalog Polish",
+            "Refined the public catalog, homepage, and package metadata for the npm release.",
+            "Updated",
+            "Homepage, documentation pages, and npm package metadata.",
+            "v0.1.0",
+            "Initial public package",
+            "Initial Release",
+            "First public release of Moo UI.",
+            "Added",
+        ):
+            with self.subTest(copy=copy):
+                self.assertIn(copy, changelog)
+
+        self.assertIn("moo-changelog__release", changelog)
+        self.assertIn("moo-changelog__change-row", changelog)
+        self.assertNotIn("moo-changelog__item", changelog)
+        self.assertNotIn("moo-changelog__date", changelog)
+
+    def test_command_palette_lists_primary_sections(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+
+        for href in (
+            "introduction.html",
+            "installation.html",
+            "components/index.html",
+            "blocks/index.html",
+            "skills.html",
+            "changelog.html",
+        ):
+            with self.subTest(href=href):
+                self.assertIn(f'href="{href}"', home)
 
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()

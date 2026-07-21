@@ -20,7 +20,7 @@
 
 // Bootstrap moves Modal backdrops under body, outside the native .moo-ui
 // scope. This state-gated bridge preserves Dialog's backdrop treatment in
-// moo-core.css. Offcanvas keeps its backdrop beside the Sheet, so its scoped
+// moo.css. Offcanvas keeps its backdrop beside the Sheet, so its scoped
 // component selector can own that behavior directly.
 body:has(.moo-ui .modal.show) > .modal-backdrop {
   --#{$prefix}backdrop-opacity: 1;

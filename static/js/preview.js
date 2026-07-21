@@ -661,6 +661,44 @@
     }
   });
 
+  const tiltTargets = Array.from(document.querySelectorAll("[data-moo-tilt]"));
+  const tiltMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const resetTilt = (target) => {
+    delete target.dataset.mooTiltActive;
+    target.style.removeProperty("--moo-tilt-x");
+    target.style.removeProperty("--moo-tilt-y");
+    target.style.removeProperty("--moo-tilt-shift-x");
+    target.style.removeProperty("--moo-tilt-shift-y");
+  };
+
+  if (!tiltMotionQuery.matches) {
+    tiltTargets.forEach((target) => {
+      target.addEventListener("pointermove", (event) => {
+        if (event.pointerType === "touch") {
+          return;
+        }
+        const rect = target.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+        const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+
+        target.dataset.mooTiltActive = "true";
+        target.style.setProperty("--moo-tilt-x", `${(-y * 5).toFixed(2)}deg`);
+        target.style.setProperty("--moo-tilt-y", `${(x * 6).toFixed(2)}deg`);
+        target.style.setProperty("--moo-tilt-shift-x", `${(x * 6).toFixed(1)}px`);
+        target.style.setProperty("--moo-tilt-shift-y", `${(y * 4).toFixed(1)}px`);
+      });
+      target.addEventListener("pointerleave", () => resetTilt(target));
+      target.addEventListener("blur", () => resetTilt(target), true);
+    });
+  }
+
+  tiltMotionQuery.addEventListener?.("change", () => {
+    if (tiltMotionQuery.matches) {
+      tiltTargets.forEach((target) => resetTilt(target));
+    }
+  });
+
   const blockFrameShells = Array.from(
     document.querySelectorAll("[data-moo-block-frame-shell]")
   );

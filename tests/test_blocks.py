@@ -169,9 +169,9 @@ class BlocksTests(CatalogTestCase):
         # header/palette navigation does. Reading a page unrelated to either
         # block's own content (the Components index) isolates the shell: each
         # block name should come from the command-palette loop only, and
-        # "blocks/index.html" should appear exactly three times: the compact
-        # dropdown, the desktop header nav link, and the palette's hardcoded
-        # Blocks entry.
+        # "blocks/index.html" should appear exactly four times: the Sections
+        # sidebar link, the compact dropdown, the desktop header nav link, and
+        # the palette's hardcoded Blocks entry.
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -179,7 +179,7 @@ class BlocksTests(CatalogTestCase):
 
         self.assertEqual(page.count("Sidebar (Floating)"), 1)
         self.assertEqual(page.count("Sidebar (Inset)"), 1)
-        self.assertEqual(page.count('href="../blocks/index.html"'), 3)
+        self.assertEqual(page.count('href="../blocks/index.html"'), 4)
         self.assertNotIn('class="sidebar-group-label" data-slot="sidebar-group-label">Blocks<', page)
 
     def test_block_preview_iframes_are_scaled_programmatically(self) -> None:

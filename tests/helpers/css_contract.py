@@ -119,7 +119,7 @@ def _walk_rules(rules: Iterable[object]) -> Iterable[object]:
 
 def assert_single_moo_scope(test_case, css: str) -> None:
     scopes = _scope_rules(css)
-    test_case.assertEqual(len(scopes), 1, "moo-core.css must emit one @scope")
+    test_case.assertEqual(len(scopes), 1, "moo.css must emit one @scope")
     prelude = _serialized(scopes[0].prelude).replace(" ", "")
     test_case.assertEqual(prelude, MOO_SCOPE, "@scope must target .moo-ui")
 

@@ -1,0 +1,10 @@
+{% macro render_code_snippet(id, content, language="text") %}
+  {% set source = content | dedent_html %}
+  <div class="moo-example__source moo-doc-code-panel" data-bs-theme="dark" data-moo-code-panel data-expanded="true">
+    <pre class="moo-code scroll-fade-x no-scrollbar" id="{{ id }}-code"><span class="moo-code__lines" aria-hidden="true">{{ source | line_numbers }}</span><code class="language-{{ language }}">{{ source | highlight_html }}</code></pre>
+    <button class="btn btn-outline-secondary btn-icon-sm moo-code__copy" type="button" data-moo-code-copy aria-label="Copy code" title="Copy code">
+      {{ render_icon("copy", "inline-start") }}
+    </button>
+    <span class="position-absolute top-0 end-0 mt-3 me-5 small text-body-secondary" data-moo-copy-status role="status"></span>
+  </div>
+{% endmacro %}

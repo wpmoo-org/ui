@@ -1,8 +1,13 @@
 {% from "components/typography.html.jinja" import typography %}
 
-{% macro render_page_header(title, description) %}
-  <header class="moo-component-header">
-    {{ typography(title, variant="page-title") }}
+{% macro render_page_header(title, description, id="") %}
+  <header class="moo-component-header"{% if id %} aria-labelledby="{{ id }}"{% endif %}>
+    {{ typography(title, variant="page-title", id=id) }}
     {{ typography(description, variant="page-description") }}
+    {% if caller is defined %}
+      <div class="moo-component-header__actions">
+        {{ caller() | trim | safe }}
+      </div>
+    {% endif %}
   </header>
 {% endmacro %}

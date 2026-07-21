@@ -1,54 +1,134 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/typography.html.jinja" import typography %}
+{% from "includes/component-previews.html.jinja" import component_preview %}
 
 {% block title %}Moo UI{% endblock %}
 
 {% block content %}
-  <section class="moo-catalog__intro" aria-labelledby="home-title">
-    {{ typography("Moo UI", variant="page-title", id="home-title") }}
-    <p class="lead text-body-secondary mb-0">
-      A Bootstrap-native component system with a focused, modern visual language.
-    </p>
+  <section class="moo-home-hero" aria-labelledby="home-title">
+    <div class="moo-home-hero__copy">
+      <h1 class="moo-home-hero__title" id="home-title">Moo UI</h1>
+      <p class="moo-home-hero__description text-body-secondary mb-0">
+        <span>Bootstrap markup. shadcn feel.</span>
+      </p>
+      <div class="moo-home-hero__actions">
+        {{ button(
+          "Get started",
+          variant="default",
+          element="a",
+          href=root_path ~ "installation.html",
+          icon_start="book-open-text",
+          extra_class="px-3"
+        ) }}
+        {{ button(
+          "Browse Components",
+          variant="outline",
+          element="a",
+          href=root_path ~ "components/index.html",
+          icon_end="arrow-right",
+          extra_class="px-3"
+        ) }}
+      </div>
+    </div>
+    <div class="moo-home-showcase__media" data-moo-tilt>
+      <img
+        class="moo-home-showcase__image"
+        src="{{ root_path }}assets/images/readme-hero.webp"
+        alt="A grid of Moo UI components rendered together in the catalog"
+        width="1280"
+        height="800"
+      >
+    </div>
   </section>
 
-  <section class="moo-catalog__dashboard" aria-label="Get started">
-    <div class="moo-catalog__grid moo-catalog__grid--compact">
-      {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}
+  <section class="moo-home-intro" aria-labelledby="home-intro-title">
+    <div class="moo-home-intro__copy">
+      <h2 class="h3 mb-0" id="home-intro-title">A product interface layer for teams that already trust Bootstrap.</h2>
+      <p class="moo-home-intro__description text-body-secondary mb-0">
+        Moo UI keeps Bootstrap as the public contract: familiar classes,
+        <code>data-bs-*</code> behavior, Sass customization, and Bootstrap
+        JavaScript plugins. It changes the visual language around that contract.
+      </p>
+    </div>
+
+    <div class="moo-home-proof-list" aria-label="What Moo UI keeps">
+      {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
+        <span class="moo-catalog__philosophy-icon">{{ render_icon("box", "inline-start") }}</span>
         <div>
-          <h2 class="h5 mb-2">Components</h2>
+          <h3 class="h6 mb-2">Bootstrap stays the API</h3>
           <p class="text-body-secondary mb-0">
-            Browse the Bootstrap-native primitives that make up the Moo UI shell.
+            Buttons, forms, overlays, navigation, and layout primitives keep
+            the markup model backend teams already understand.
           </p>
-        </div>
-        <div>
-          {{ button(
-            "Browse Components",
-            variant="outline",
-            size="sm",
-            element="a",
-            href=root_path ~ "components/index.html"
-          ) }}
         </div>
       {% endcall %}
-      {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}
+      {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
+        <span class="moo-catalog__philosophy-icon">{{ render_icon("sparkles", "inline-start") }}</span>
         <div>
-          <h2 class="h5 mb-2">Blocks</h2>
+          <h3 class="h6 mb-2">The surface feels calmer</h3>
           <p class="text-body-secondary mb-0">
-            Full composed screens built from ready component macros.
+            Radius, spacing, shadows, and state language are tuned toward
+            modern SaaS screens without adopting a second frontend stack.
           </p>
         </div>
+      {% endcall %}
+      {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
+        <span class="moo-catalog__philosophy-icon">{{ render_icon("server", "inline-start") }}</span>
         <div>
-          {{ button(
-            "Browse Blocks",
-            variant="outline",
-            size="sm",
-            element="a",
-            href=root_path ~ "blocks/index.html"
-          ) }}
+          <h3 class="h6 mb-2">Server-rendered UI stays first-class</h3>
+          <p class="text-body-secondary mb-0">
+            The catalog is static, inspectable HTML; no React, Tailwind, or
+            Radix runtime is required to browse or ship the interface.
+          </p>
         </div>
       {% endcall %}
     </div>
   </section>
+
+  <section class="moo-home-components" aria-labelledby="home-components-title">
+    <div class="moo-home-components__header">
+      <p class="moo-home-kicker">Ready primitives</p>
+      <h2 class="h4 mb-0" id="home-components-title">Browse the system by component.</h2>
+    </div>
+    {% for row in [
+      ["button", "input", "select", "dropdown-menu", "badge", "avatar", "dialog", "toast"],
+      ["sheet", "popover", "tooltip", "accordion", "sidebar", "table", "progress", "skeleton"]
+    ] %}
+      <div class="moo-home-component-row moo-home-component-row--{{ loop.index }} scroll-fade-x">
+        <div class="moo-home-component-track">
+          {% for pass in [1, 2] %}
+            {% for slug in row %}
+              {% set component = (catalog | selectattr("slug", "equalto", slug) | list | first) %}
+              {% if component %}
+                <div
+                  class="card moo-catalog__app-card moo-catalog__showcase-card moo-home-component-card"
+                  aria-label="{{ component.label }} component preview"
+                  {% if pass != 1 %}tabindex="-1" aria-hidden="true"{% endif %}
+                >
+                  <div class="moo-catalog__showcase-preview">
+                    {{ component_preview(component.slug, root_path) }}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+    <div class="moo-home-components__cta">
+      {{ button(
+        "Browse Components",
+        variant="default",
+        element="a",
+        href=root_path ~ "components/index.html"
+      ) }}
+    </div>
+    <p class="moo-home-attribution">
+      Built by <a href="https://wpmoo.org/">WPMoo</a> in Berlin. The source code
+      is available on <a href="https://github.com/wpmoo-org/ui">GitHub</a>.
+    </p>
+  </section>
 {% endblock %}
+
+{% block footer %}{% endblock %}

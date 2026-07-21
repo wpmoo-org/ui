@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Bootstrap-native HTML component system with a focused, modern visual language.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -21,21 +21,29 @@
   "style": "dist/assets/css/moo-ui.css",
   "exports": {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
-    "./moo-core.css": "./dist/assets/css/moo-core.css",
-    "./bootstrap.bundle.min.js": "./dist/assets/js/bootstrap.bundle.min.js",
+    "./moo-ui.min.css": "./dist/assets/css/moo-ui.min.css",
+    "./moo.css": "./dist/assets/css/moo.css",
+    "./moo.min.css": "./dist/assets/css/moo.min.css",
     "./package.json": "./package.json"
   },
   "files": [
     "dist/assets/css/moo-ui.css",
-    "dist/assets/css/moo-core.css",
-    "dist/assets/js/bootstrap.bundle.min.js",
-    "dist/assets/js/bootstrap.bundle.min.js.map",
+    "dist/assets/css/moo-ui.min.css",
+    "dist/assets/css/moo.css",
+    "dist/assets/css/moo.min.css",
     "README.md",
     "LICENSE",
-    "LICENSE-MOO-CORE.txt",
     "ASSET_LICENSE.md",
     "THIRD_PARTY_NOTICES.md"
   ],
+  "peerDependencies": {
+    "bootstrap": ">=5.3.0 <6"
+  },
+  "peerDependenciesMeta": {
+    "bootstrap": {
+      "optional": true
+    }
+  },
   "sideEffects": [
     "dist/assets/css/*.css"
   ],
