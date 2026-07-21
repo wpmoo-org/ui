@@ -1,0 +1,19 @@
+// Form's Field/FieldGroup grouping needs plain vertical flex stacks with a
+// gap, which Bootstrap's own flex and gap utility classes would cover in
+// the full standalone build -- but the scoped Odoo-vendored build
+// deliberately excludes Bootstrap's utility-class generator, so relying on
+// utility classes here would silently render unstyled there. These two
+// rules exist so the same markup works in both builds.
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.5;
+}
+
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  // Matches shadcn's FieldGroup gap (20px); no step in Bootstrap's own
+  // spacer scale (16px, then 24px) lands on it.
+  gap: 1.25rem;
+}
