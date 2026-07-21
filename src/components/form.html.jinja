@@ -1,0 +1,46 @@
+{# Form is composition scaffolding around the already-ready Input, Textarea,
+   Select, Checkbox, Radio Group, and Switch macros -- it owns no input
+   control of its own. It mirrors shadcn's Field/FieldGroup/FieldSet
+   grouping pattern, built on Bootstrap's own native fieldset/legend markup
+   and its existing client-side validation pseudo-classes
+   (:invalid/:valid, .is-invalid/.is-valid, .was-validated), never a
+   Moo-owned validation engine. #}
+
+{% macro form(extra_class="", novalidate=false) -%}
+  <form{% if extra_class %} class="{{ extra_class }}"{% endif %}{% if novalidate %} novalidate{% endif %}>
+    {{ caller() | trim | safe }}
+  </form>
+{%- endmacro %}
+
+{% macro form_field(extra_class="") -%}
+  <div class="form-field{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro form_field_description(id, text) -%}
+  {% if not id | trim %}{{ fail("Form field description id is required") }}{% endif %}
+  {% if not text | trim %}{{ fail("Form field description text is required") }}{% endif %}
+  <div class="form-text" id="{{ id }}">{{ text }}</div>
+{%- endmacro %}
+
+{% macro form_field_error(id, text) -%}
+  {% if not id | trim %}{{ fail("Form field error id is required") }}{% endif %}
+  {% if not text | trim %}{{ fail("Form field error text is required") }}{% endif %}
+  <div class="invalid-feedback" id="{{ id }}">{{ text }}</div>
+{%- endmacro %}
+
+{% macro form_field_group(extra_class="") -%}
+  <div class="form-field-group{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}
+
+{% macro form_fieldset(legend, description="", extra_class="") -%}
+  {% if not legend | trim %}{{ fail("Form fieldset legend is required") }}{% endif %}
+  <fieldset{% if extra_class %} class="{{ extra_class }}"{% endif %}>
+    <legend class="form-label">{{ legend }}</legend>
+    {% if description %}<div class="form-text mb-2">{{ description }}</div>{% endif %}
+    {{ caller() | trim | safe }}
+  </fieldset>
+{%- endmacro %}

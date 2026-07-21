@@ -168,5 +168,10 @@
     "slug": "sheet",
     "label": "Sheet",
     "status": "ready"
+  },
+  {
+    "slug": "form",
+    "label": "Form",
+    "status": "ready"
   }
 ]
