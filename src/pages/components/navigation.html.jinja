@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/navigation.html.jinja" import nav_item, nav_menu %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Navigation — Moo UI{% endblock %}
@@ -9,7 +9,7 @@
 {% block content %}
   {{ render_page_header(
     "Navigation",
-    "Group links into clear static navigation surfaces with Bootstrap's native nav classes."
+    "Create compact, semantic navigation surfaces with Bootstrap-native <code>nav</code> patterns for app shells."
   ) }}
 
   <div class="moo-component-examples">
@@ -24,12 +24,12 @@
     {{ render_example(
       "horizontal-pills",
       "Pills",
-      "Use <code>.nav-pills</code> for a compact row of related destinations. Add <code>aria-current=\"page\"</code> to the active link.",
+      "Use a compact pill row for workspace routes where current context should be clearly emphasized.",
       horizontal
     ) }}
 
     {% set sidebar %}
-      {% call nav_menu("App sections", vertical=true, extra_class="w-100") %}
+      {% call nav_menu("App sections", vertical=true) %}
         {{ nav_item("Dashboard", href="#", icon="layout-dashboard", active=true) }}
         {{ nav_item("Tasks", href="#", icon="list-check") }}
         {{ nav_item("Apps", href="#", icon="package") }}
@@ -41,9 +41,9 @@
     {{ render_example(
       "sidebar",
       "Sidebar list",
-      "Stack pills vertically for shell sidebars. Icons, counts, and end icons are decorative; keep the link itself as the only interactive target.",
+      "Use one-level, icon-led sidebar items for predictable routes; nested flyouts are handled in a dedicated sidebar pattern.",
       sidebar,
-      preview_class="moo-example__preview--narrow"
+      preview_class="moo-example__preview--fit"
     ) }}
 
     {% set underline %}
@@ -56,7 +56,7 @@
     {{ render_example(
       "underline",
       "Underline",
-      "Use Bootstrap's <code>.nav-underline</code> when the navigation should feel lighter than pills.",
+      "Use underlines for lightweight filters in narrow views where emphasis should stay subtle.",
       underline
     ) }}
 
@@ -70,23 +70,41 @@
     {{ render_example(
       "base",
       "Base nav",
-      "The base <code>.nav</code> class handles layout only. Use it when another surface owns the selected-state styling.",
+      "Use the base style when surrounding layout defines the visual weight and only the active link needs state.",
       base
     ) }}
 
-    {% set rtl %}
-      {% call nav_menu("Arabic sections", vertical=true, extra_class="w-100", dir="rtl") %}
+    {% set nav_rtl_arabic %}
+      {% call nav_menu("أقسام التطبيق", vertical=true, dir="rtl") %}
         {{ nav_item("لوحة التحكم", href="#", icon="layout-dashboard", active=true) }}
         {{ nav_item("المهام", href="#", icon="list-check") }}
-        {{ nav_item("التطبيقات", href="#", icon="package", badge_label="٤", badge_variant="secondary") }}
+        {{ nav_item("التطبيقات", href="#", icon="package", badge_label="3", badge_variant="default") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left",
-      "<code>dir=\"rtl\"</code> lets icon, label, and badge order follow the document direction without custom SVG flipping.",
-      rtl,
-      preview_class="moo-example__preview--narrow"
+
+    {% set nav_rtl_hebrew %}
+      {% call nav_menu("אזורי האפליקציה", vertical=true, dir="rtl") %}
+        {{ nav_item("לוח בקרה", href="#", icon="layout-dashboard", active=true) }}
+        {{ nav_item("משימות", href="#", icon="list-check") }}
+        {{ nav_item("יישומים", href="#", icon="package", badge_label="3", badge_variant="default") }}
+      {% endcall %}
+    {% endset %}
+
+    {% set nav_rtl_english %}
+      {% call nav_menu("App sections", vertical=true, dir="rtl") %}
+        {{ nav_item("Dashboard", href="#", icon="layout-dashboard", active=true) }}
+        {{ nav_item("Tasks", href="#", icon="list-check") }}
+        {{ nav_item("Apps", href="#", icon="package", badge_label="3", badge_variant="default") }}
+      {% endcall %}
+    {% endset %}
+
+    {{ render_rtl_example(
+      "navigation",
+      "Validate the same sidebar navigation pattern in Arabic, Hebrew, and English while rendering in RTL direction.",
+      nav_rtl_arabic,
+      nav_rtl_hebrew,
+      nav_rtl_english,
+      preview_class="moo-example__preview--fit"
     ) }}
   </div>
 
