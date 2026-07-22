@@ -1,9 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/accordion.html.jinja" import accordion %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Accordion — Moo UI{% endblock %}
@@ -178,25 +177,25 @@
     ) }}
 
     {% set arabic_accordion %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ accordion(
           "accordion-rtl-arabic",
           [
             {
               "id": "priority",
-              "title": "كيف نرتب الطلبات؟",
-              "content": "تظهر الطلبات العاجلة أولاً في قائمة الفريق.",
+              "title": "كيف تُرتب الطلبات؟",
+              "content": "تبقى العوائق التي تؤثر على العملاء في أعلى قائمة المراجعة.",
               "open": true
             },
             {
-              "id": "handoff",
+              "id": "summary",
               "title": "متى نرسل الملخص؟",
-              "content": "يرسل الملخص بعد اكتمال الفحوصات الأساسية."
+              "content": "يُرسل الملخص بعد اجتياز الفحوصات المطلوبة."
             },
             {
-              "id": "owner",
-              "title": "من يراجع النتيجة؟",
-              "content": "يراجعها مسؤول المساحة قبل الإغلاق."
+              "id": "reviewer",
+              "title": "من يعتمد النتيجة؟",
+              "content": "يؤكد مسؤول مساحة العمل النتيجة قبل الإغلاق."
             }
           ]
         ) }}
@@ -204,25 +203,25 @@
     {% endset %}
 
     {% set hebrew_accordion %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ accordion(
           "accordion-rtl-hebrew",
           [
             {
               "id": "priority",
-              "title": "איך מתעדפים בקשות?",
-              "content": "בקשות שחוסמות לקוחות עולות לראש התור.",
+              "title": "איך ממיינים בקשות?",
+              "content": "חסימות שמשפיעות על לקוחות נשארות בראש תור הביקורת.",
               "open": true
             },
             {
               "id": "summary",
               "title": "מתי שולחים סיכום?",
-              "content": "הסיכום נשלח אחרי השלמת הבדיקות העיקריות."
+              "content": "הסיכום נשלח אחרי שהבדיקות הנדרשות עוברות."
             },
             {
               "id": "reviewer",
-              "title": "מי מאשר את התוצאה?",
-              "content": "מנהל סביבת העבודה מאשר לפני סגירה."
+              "title": "מי מאשר סופית?",
+              "content": "מנהל סביבת עבודה מאשר את התוצאה לפני הסגירה."
             }
           ]
         ) }}
@@ -230,7 +229,7 @@
     {% endset %}
 
     {% set english_accordion %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ accordion(
           "accordion-rtl-english",
           [
@@ -255,34 +254,12 @@
       </div>
     {% endset %}
 
-    {% set rtl %}
-      {{ tabs(
-        "accordion-direction-tabs",
-        [
-          {
-            "id": "arabic",
-            "title": "Arabic",
-            "content": arabic_accordion,
-            "active": true
-          },
-          {
-            "id": "hebrew",
-            "title": "Hebrew",
-            "content": hebrew_accordion
-          },
-          {
-            "id": "english",
-            "title": "English",
-            "content": english_accordion
-          }
-        ]
-      ) }}
-    {% endset %}
-    {{ render_example(
-      "rtl",
-      "Direction aware",
+    {{ render_rtl_example(
+      "accordion",
       "Use tabs to compare Arabic, Hebrew, and English accordions without custom mirrored CSS.",
-      rtl,
+      arabic_accordion,
+      hebrew_accordion,
+      english_accordion,
       preview_class="moo-example__preview--medium"
     ) }}
   </div>
