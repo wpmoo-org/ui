@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/checkbox.html.jinja" import checkbox %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Checkbox — Moo UI{% endblock %}
@@ -14,7 +14,7 @@
 
   <div class="moo-component-examples">
     {% set default %}
-      <div class="d-grid gap-2">
+      <div class="d-inline-grid gap-2">
         {{ checkbox("checkbox-default", label="Subscribe to the newsletter") }}
         {{ checkbox("checkbox-checked", label="Subscribe to the newsletter", checked=true) }}
       </div>
@@ -44,7 +44,7 @@
     ) }}
 
     {% set disabled %}
-      <div class="d-grid gap-2">
+      <div class="d-inline-grid gap-2">
         {{ checkbox("checkbox-disabled", label="Sync files automatically", disabled=true) }}
         {{ checkbox("checkbox-disabled-checked", label="Sync files automatically", checked=true, disabled=true) }}
       </div>
@@ -68,16 +68,30 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
-        {{ checkbox("checkbox-rtl", label="الاشتراك في النشرة الإخبارية") }}
+    {% set rtl_arabic %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ checkbox("checkbox-rtl-arabic", label="الموافقة على طلب الوصول إلى مساحة العمل") }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The input and label swap sides without mirrored custom CSS.",
-      rtl,
+
+    {% set rtl_hebrew %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ checkbox("checkbox-rtl-hebrew", label="אישור בקשת גישה לסביבת העבודה") }}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ checkbox("checkbox-rtl-english", label="Approve workspace access request") }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "checkbox",
+      "Compare Arabic, Hebrew, and English checkbox labels in an RTL layout for support and access-control workflows.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
       preview_class="moo-example__preview--narrow"
     ) }}
   </div>
