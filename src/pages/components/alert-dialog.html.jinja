@@ -1,0 +1,133 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/alert_dialog.html.jinja" import alert_dialog, alert_dialog_header %}
+{% from "components/dialog.html.jinja" import dialog_footer %}
+{% from "components/button.html.jinja" import button %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Alert Dialog — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Alert Dialog",
+    "A modal dialog that interrupts the user with important content and expects a response, built on Dialog's static-backdrop option."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {{ button("Discard draft", variant="outline", dialog_target="alert-dialog-basic") }}
+      {% call alert_dialog("alert-dialog-basic", describedby="alert-dialog-basic-description") %}
+        {{ alert_dialog_header(
+          "alert-dialog-basic",
+          "Discard this draft invoice?",
+          "Any line items you have entered will be lost. This cannot be undone."
+        ) }}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Discard", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "A title, description, and Cancel/Continue-style actions; the backdrop and Escape key are both disabled.",
+      basic
+    ) }}
+
+    {% set small %}
+      {{ button("Leave without saving", variant="outline", dialog_target="alert-dialog-small") }}
+      {% call alert_dialog("alert-dialog-small", size="sm", describedby="alert-dialog-small-description") %}
+        {{ alert_dialog_header(
+          "alert-dialog-small",
+          "Leave without saving?",
+          "Your changes to this record will not be kept."
+        ) }}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Leave", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "small",
+      "Small",
+      "size=\"sm\" reuses Dialog's existing modal-sm class for compact confirmations.",
+      small
+    ) }}
+
+    {% set media %}
+      {{ button("Pause sync", variant="outline", dialog_target="alert-dialog-media") }}
+      {% call alert_dialog("alert-dialog-media", describedby="alert-dialog-media-description") %}
+        {{ alert_dialog_header(
+          "alert-dialog-media",
+          "Pause nightly synchronization?",
+          "New records will wait in the import queue until the next manual run.",
+          icon="cloud-off"
+        ) }}
+        {% call dialog_footer() %}
+          {{ button("Keep running", variant="outline", dismiss="modal") }}
+          {{ button("Pause sync", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "media",
+      "Media",
+      "Pass an icon name to <code>alert_dialog_header()</code> for confirmations that benefit from a small visual cue.",
+      media
+    ) }}
+
+    {% set destructive %}
+      {{ button("Delete customer", variant="outline", dialog_target="alert-dialog-destructive") }}
+      {% call alert_dialog("alert-dialog-destructive", describedby="alert-dialog-destructive-description") %}
+        {{ alert_dialog_header(
+          "alert-dialog-destructive",
+          "Delete this customer record?",
+          "This removes their profile and order history permanently."
+        ) }}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Delete", variant="destructive", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "destructive",
+      "Destructive action",
+      "Pair the outline Cancel button with a destructive-variant action for irreversible operations.",
+      destructive
+    ) }}
+
+    {% set rtl %}
+      <div dir="rtl">
+        {{ button("حذف بيانات العميل", variant="outline", dialog_target="alert-dialog-rtl") }}
+        {% call alert_dialog("alert-dialog-rtl", describedby="alert-dialog-rtl-description") %}
+          {{ alert_dialog_header(
+            "alert-dialog-rtl",
+            "هل تريد حذف بيانات هذا العميل؟",
+            "سيؤدي هذا إلى إزالة ملفه الشخصي وسجل الطلبات نهائيًا."
+          ) }}
+          {% call dialog_footer() %}
+            {{ button("إلغاء", variant="outline", dismiss="modal") }}
+            {{ button("حذف", variant="destructive", dismiss="modal") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "rtl",
+      "Right-to-left layout",
+      "Header, description, and footer actions mirror automatically; no extra CSS or markup is required.",
+      rtl
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For the underlying Modal plugin options, focus management, and accessibility notes, see the",
+    "https://getbootstrap.com/docs/5.3/components/modal/#static-backdrop",
+    "Bootstrap Modal documentation"
+  ) }}
+
+{% endblock %}

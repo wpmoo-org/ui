@@ -163,3 +163,13 @@ class DialogTests(CatalogTestCase):
         )
         self.assertIn("-webkit-backdrop-filter: blur(4px)", styles)
         self.assertIn("backdrop-filter: blur(4px)", styles)
+
+    def test_catalog_portals_nested_preview_modals_above_body_backdrops(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn('document.addEventListener("show.bs.modal"', script)
+        self.assertIn('document.addEventListener("hidden.bs.modal"', script)
+        self.assertIn('modal.closest(".moo-catalog")', script)
+        self.assertIn("document.body.appendChild(modal)", script)
+        self.assertIn("catalogModalPlaceholders", script)
+        self.assertIn("placeholder.parentNode.insertBefore(modal, placeholder)", script)

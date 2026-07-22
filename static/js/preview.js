@@ -182,6 +182,42 @@
     }
   });
 
+  // Bootstrap appends Modal backdrops directly to <body>. Component previews
+  // render examples inside clipped/nested catalog surfaces, so a nested modal
+  // can paint underneath its body-level backdrop even though Bootstrap's z-index
+  // scale is correct. Portal catalog-owned modals to <body> only while open,
+  // then restore their original DOM position after Bootstrap finishes hiding.
+  const catalogModalPlaceholders = new WeakMap();
+
+  document.addEventListener("show.bs.modal", (event) => {
+    const modal = event.target;
+    if (!(modal instanceof HTMLElement) || !modal.classList.contains("modal")) {
+      return;
+    }
+    if (!modal.closest(".moo-catalog") || modal.parentElement === document.body) {
+      return;
+    }
+
+    const placeholder = document.createComment("moo-modal-placeholder");
+    modal.parentNode?.insertBefore(placeholder, modal);
+    document.body.appendChild(modal);
+    catalogModalPlaceholders.set(modal, placeholder);
+  }, true);
+
+  document.addEventListener("hidden.bs.modal", (event) => {
+    const modal = event.target;
+    if (!(modal instanceof HTMLElement)) {
+      return;
+    }
+
+    const placeholder = catalogModalPlaceholders.get(modal);
+    if (placeholder?.parentNode) {
+      placeholder.parentNode.insertBefore(modal, placeholder);
+      placeholder.remove();
+    }
+    catalogModalPlaceholders.delete(modal);
+  }, true);
+
   document.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");

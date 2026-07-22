@@ -1,0 +1,46 @@
+{# Alert Dialog is a confirmation-only specialization of Dialog (Bootstrap
+   Modal). It keeps Bootstrap's native Modal classes and static-backdrop data
+   contract, but gives callers an explicit alert_dialog() entry point so pages
+   do not assemble the behavior by hand. #}
+
+{% from "components/dialog.html.jinja" import dialog %}
+
+{% macro alert_dialog(
+  id,
+  size="default",
+  centered=true,
+  aria_label="",
+  describedby=""
+) -%}
+  {% if not id | trim %}{{ fail("Alert Dialog id is required") }}{% endif %}
+  {% set alert_dialog_content = caller() | trim %}
+  {% call dialog(
+    id,
+    size=size,
+    centered=centered,
+    static=true,
+    aria_label=aria_label,
+    describedby=describedby
+  ) %}
+    {{ alert_dialog_content | safe }}
+  {% endcall %}
+{%- endmacro %}
+
+{% macro alert_dialog_header(id, title, description="", icon="") -%}
+  {% if not id | trim %}{{ fail("Alert Dialog header id is required") }}{% endif %}
+  {% if not title | trim %}{{ fail("Alert Dialog title is required") }}{% endif %}
+  {% set description = description | trim %}
+  <div class="modal-header modal-header--alert">
+    {% if icon | trim %}
+      <span class="btn btn-icon-sm btn-outline-secondary flex-shrink-0" aria-hidden="true">
+        {{ render_icon(icon | trim, "inline-start") }}
+      </span>
+    {% endif %}
+    <div class="modal-header__content">
+      <h1 class="modal-title" id="{{ id }}-title">{{ title }}</h1>
+      {% if description %}
+        <p class="modal-description" id="{{ id }}-description">{{ description }}</p>
+      {% endif %}
+    </div>
+  </div>
+{%- endmacro %}

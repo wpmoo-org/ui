@@ -173,5 +173,10 @@
     "slug": "field",
     "label": "Field",
     "status": "ready"
+  },
+  {
+    "slug": "alert-dialog",
+    "label": "Alert Dialog",
+    "status": "ready"
   }
 ]
