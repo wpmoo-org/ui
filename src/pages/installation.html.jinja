@@ -4,81 +4,90 @@
 {% from "components/card.html.jinja" import card %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Installation - Moo UI{% endblock %}
 
 {% block content %}
-<article class="moo-doc-page">
-  {{ render_page_header(
-  "Installation",
-  "Add Moo UI to a Bootstrap project without changing the markup contract your app already uses.",
-  id="installation-title"
-  ) }}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Installation",
+        "Add Moo UI to a Bootstrap project without changing the markup contract your app already uses.",
+        id="installation-title"
+      ) }}
 
-  {{ alert(
-  "Start with ordinary Bootstrap markup",
-  "Use the CDN snippet for a quick visual check, or install the npm package when your application build owns CSS imports.",
-  icon="info",
-  extra_class="text-bg-dark border-dark moo-doc-callout"
-  ) }}
+      {{ alert(
+        "Start with ordinary Bootstrap markup",
+        "Use the CDN snippet for a quick visual check, or install the npm package when your application build owns CSS imports.",
+        icon="info",
+        extra_class="text-bg-dark border-dark moo-doc-callout"
+      ) }}
 
-  <section class="moo-doc-section" aria-labelledby="cdn-title">
-    {{ typography("CDN", variant="section-title", id="cdn-title") }}
-    <p>
-      For a static page, prototype, or quick review, load the published
-      stylesheet from a CDN. The full <code>moo-ui.css</code> build replaces
-      Bootstrap's default stylesheet.
-    </p>
-    {% set cdn_example %}
-    <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@0.1.1/dist/assets/css/moo-ui.css">
+      <section class="moo-doc-section" aria-labelledby="cdn-title">
+        {{ typography("CDN", variant="section-title", id="cdn-title") }}
+        <p>
+          For a static page, prototype, or quick review, load the published
+          stylesheet from a CDN. The full <code>moo-ui.css</code> build replaces
+          Bootstrap's default stylesheet.
+        </p>
+        {% set cdn_example %}
+        <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@0.1.1/dist/assets/css/moo-ui.css">
 
-    <button type="button" class="btn btn-primary">Create workspace</button>
-    {% endset %}
-    {{ render_code_snippet("installation-cdn", cdn_example, "html") }}
-  </section>
+        <button type="button" class="btn btn-primary">Create workspace</button>
+        {% endset %}
+        {{ render_code_snippet("installation-cdn", cdn_example, "html") }}
+      </section>
 
-  <section class="moo-doc-section" aria-labelledby="npm-title">
-    {{ typography("npm", variant="section-title", id="npm-title") }}
-    <p>
-      For an application build, install the canonical package and import the
-      compiled stylesheet from your entrypoint.
-    </p>
-    {% set npm_example %}
-    npm install @wpmoo/ui
-    {% endset %}
-    {{ render_code_snippet("installation-npm", npm_example, "shell") }}
+      <section class="moo-doc-section" aria-labelledby="npm-title">
+        {{ typography("npm", variant="section-title", id="npm-title") }}
+        <p>
+          For an application build, install the canonical package and import the
+          compiled stylesheet from your entrypoint.
+        </p>
+        {% set npm_example %}
+        npm install @wpmoo/ui
+        {% endset %}
+        {{ render_code_snippet("installation-npm", npm_example, "shell") }}
 
-    {% set import_example %}
-    import "@wpmoo/ui/moo-ui.css";
-    {% endset %}
-    {{ render_code_snippet("installation-import", import_example, "js") }}
-  </section>
+        {% set import_example %}
+        import "@wpmoo/ui/moo-ui.css";
+        {% endset %}
+        {{ render_code_snippet("installation-import", import_example, "js") }}
+      </section>
 
-  <section class="moo-doc-section" aria-labelledby="javascript-title">
-    {{ typography("JavaScript", variant="section-title", id="javascript-title") }}
-    <p>
-      Moo UI styles Bootstrap-native components. When a page uses Bootstrap
-      plugins such as Dropdown, Tooltip, Popover, Modal, Toast, or Offcanvas,
-      load Bootstrap's JavaScript bundle through your own app. Tooltip and
-      Popover also need the initialization Bootstrap documents for those
-      plugins.
-    </p>
-    {% call card(extra_class="moo-doc-note", body_class="d-grid gap-3") %}
-    <div>
-      <h3 class="h5 mb-1">Adoption paths</h3>
-      <p class="text-body-secondary mb-0">
-        Use <code>moo-ui.css</code> as a whole-page Bootstrap stylesheet
-        replacement after visual review. For gradual adoption, the scoped
-        <code>moo.css</code> surface lives under a <code>.moo-ui</code>
-        boundary and should be used from npm after the release that
-        publishes it.
-      </p>
-    </div>
-    <div>
-      {{ button("View Components", variant="outline", size="sm", element="a", href="components/index.html") }}
-    </div>
-    {% endcall %}
-  </section>
-</article>
+      <section class="moo-doc-section" aria-labelledby="javascript-title">
+        {{ typography("JavaScript", variant="section-title", id="javascript-title") }}
+        <p>
+          Moo UI styles Bootstrap-native components. When a page uses Bootstrap
+          plugins such as Dropdown, Tooltip, Popover, Modal, Toast, or Offcanvas,
+          load Bootstrap's JavaScript bundle through your own app. Tooltip and
+          Popover also need the initialization Bootstrap documents for those
+          plugins.
+        </p>
+        {% call card(extra_class="moo-doc-note", body_class="d-grid gap-3") %}
+          <div>
+            <h3 class="h5 mb-1">Adoption paths</h3>
+            <p class="text-body-secondary mb-0">
+              Use <code>moo-ui.css</code> as a whole-page Bootstrap stylesheet
+              replacement after visual review. For gradual adoption, the scoped
+              <code>moo.css</code> surface lives under a <code>.moo-ui</code>
+              boundary and should be used from npm after the release that
+              publishes it.
+            </p>
+          </div>
+          <div>
+            {{ button("View Components", variant="outline", size="sm", element="a", href="components/index.html") }}
+          </div>
+        {% endcall %}
+      </section>
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "cdn-title", "label": "CDN"},
+      {"id": "npm-title", "label": "npm"},
+      {"id": "javascript-title", "label": "JavaScript"}
+    ]) }}
+  </div>
 {% endblock %}

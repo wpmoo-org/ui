@@ -19,7 +19,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("data-moo-code-copy", template)
         self.assertIn('data-bs-theme="dark"', template)
         self.assertEqual(template.count("{{ rendered | safe }}"), 1)
-        self.assertEqual(template.count("{% set source = rendered | format_html %}"), 1)
+        self.assertIn("portal_content=\"\"", template)
+        self.assertIn("{% set rendered_portal = portal_content | dedent_html %}", template)
+        self.assertIn("{{ rendered_portal | safe }}", template)
+        self.assertIn("portal_content=arabic_portal", template)
+        self.assertIn("portal_content=hebrew_portal", template)
+        self.assertIn("portal_content=english_portal", template)
         self.assertEqual(template.count("{{ source | highlight_html }}"), 1)
         self.assertEqual(template.count("{{ source | line_numbers }}"), 1)
 
@@ -41,6 +46,18 @@ class CodeExampleTests(CatalogTestCase):
             '  Create space\n'
             '</button>',
         )
+
+    def test_render_rtl_example_centralizes_tabbed_language_examples(self) -> None:
+        template = (
+            ROOT / "src/includes/example.html.jinja"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("{% macro render_rtl_example(", template)
+        self.assertIn('id ~ "-direction-tabs"', template)
+        self.assertIn('title="RTL"', template)
+        self.assertIn('title_id="rtl-title"', template)
+        self.assertIn('example_prefix="rtl"', template)
+        self.assertEqual(template.count("show_header=false"), 3)
 
     def test_catalog_example_surface_integrates_preview_and_code(self) -> None:
         result = self.run_build()
@@ -70,6 +87,9 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("padding: 0.875rem 0;", source_code)
         self.assertIn("font-size: 0.875rem;", source_code)
         self.assertIn("line-height: 1.75;", source_code)
+        nested_tab_example = css.split(".tab-content .moo-example {", 1)[1].split("}", 1)[0]
+        self.assertIn("max-width: 100%;", nested_tab_example)
+        self.assertIn("min-width: 0;", nested_tab_example)
         self.assertIn(
             '[data-expanded="true"] .moo-code {',
             css,

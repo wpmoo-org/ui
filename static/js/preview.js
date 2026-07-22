@@ -175,6 +175,155 @@
     filterCommand("");
   });
 
+  // Component pages derive their right-side table of contents from rendered
+  // example headings. The examples already own stable ids for code toggles and
+  // deep links, so new component examples join the TOC without per-page wiring.
+  const componentToc = document.querySelector("[data-moo-component-toc]");
+  const componentTocNav = componentToc?.querySelector("[data-moo-component-toc-nav]");
+  const componentExamples = Array.from(
+    document.querySelectorAll(".moo-component-examples > .moo-example[aria-labelledby]")
+  );
+  if (componentToc && componentTocNav && componentExamples.length > 0) {
+    componentExamples.forEach((example) => {
+      const titleId = example.getAttribute("aria-labelledby");
+      const title = titleId ? document.getElementById(titleId) : null;
+      if (!titleId || !title?.textContent?.trim()) {
+        return;
+      }
+      const link = document.createElement("a");
+      link.className = "nav-link";
+      link.href = `#${titleId}`;
+      link.textContent = title.textContent.trim();
+      componentTocNav.appendChild(link);
+    });
+    componentToc.hidden = componentTocNav.children.length === 0;
+  }
+
+  const docTocLinks = Array.from(document.querySelectorAll(".moo-doc-toc .nav-link"));
+  const docTocTargets = docTocLinks
+    .map((link) => {
+      const targetId = link.getAttribute("href")?.slice(1);
+      const target = targetId ? document.getElementById(targetId) : null;
+      return target ? { link, target } : null;
+    })
+    .filter(Boolean);
+  const catalogMain = document.querySelector(".moo-catalog__main");
+  let docTocFrame = 0;
+  let docTocClickUntil = 0;
+
+  const activateDocTocLink = (activeLink) => {
+    docTocTargets.forEach(({ link }) => {
+      const isActive = link === activeLink;
+      link.classList.toggle("active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  const setActiveDocTocLink = () => {
+    docTocFrame = 0;
+    if (docTocTargets.length === 0) {
+      return;
+    }
+    if (Date.now() < docTocClickUntil) {
+      return;
+    }
+
+    const offset = parseFloat(getComputedStyle(document.documentElement).fontSize) * 6;
+    let activeItem = docTocTargets[0];
+    docTocTargets.forEach((item) => {
+      if (item.target.getBoundingClientRect().top <= offset) {
+        activeItem = item;
+      }
+    });
+
+    activateDocTocLink(activeItem.link);
+  };
+
+  const requestDocTocUpdate = () => {
+    if (docTocFrame === 0) {
+      docTocFrame = window.requestAnimationFrame(setActiveDocTocLink);
+    }
+  };
+
+  if (docTocTargets.length > 0) {
+    docTocTargets.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        docTocClickUntil = Date.now() + 2500;
+        activateDocTocLink(link);
+      });
+    });
+    setActiveDocTocLink();
+    catalogMain?.addEventListener("scroll", requestDocTocUpdate, { passive: true });
+    window.addEventListener("resize", requestDocTocUpdate);
+    window.addEventListener("hashchange", requestDocTocUpdate);
+  }
+
+  // Hash navigation and TOC clicks use smooth scrolling in the catalog main
+  // pane. If a tab is switched while that smooth scroll is still settling, the
+  // browser keeps moving the scroll container and the tab list appears to jump.
+  // Capture scroll before pointer/key activation because focusing a visible
+  // tab can move the scroll container before Bootstrap emits show.bs.tab.
+  // Freeze that pre-focus position for the tab handoff only; the tab panel
+  // animation still runs, and normal smooth anchor scrolling resumes after it.
+  let pendingCatalogTabScrollTop = null;
+
+  const captureCatalogScrollForTab = () => {
+    if (catalogMain) {
+      pendingCatalogTabScrollTop = catalogMain.scrollTop;
+    }
+  };
+
+  const freezeCatalogScrollForTab = () => {
+    if (!catalogMain) {
+      return;
+    }
+
+    const currentScrollTop = pendingCatalogTabScrollTop ?? catalogMain.scrollTop;
+    pendingCatalogTabScrollTop = null;
+    const previousScrollBehavior = catalogMain.style.scrollBehavior;
+    catalogMain.style.scrollBehavior = "auto";
+    catalogMain.scrollTop = currentScrollTop;
+    window.requestAnimationFrame(() => {
+      catalogMain.scrollTop = currentScrollTop;
+      window.requestAnimationFrame(() => {
+        catalogMain.scrollTop = currentScrollTop;
+        window.setTimeout(() => {
+          catalogMain.scrollTop = currentScrollTop;
+          catalogMain.style.scrollBehavior = previousScrollBehavior;
+        }, 180);
+      });
+    });
+  };
+
+  document.addEventListener("pointerdown", (event) => {
+    const trigger = event.target;
+    if (trigger instanceof Element && trigger.closest(".tabs-list [data-bs-toggle='tab']")) {
+      captureCatalogScrollForTab();
+    }
+  }, true);
+
+  document.addEventListener("keydown", (event) => {
+    const trigger = event.target;
+    if (
+      trigger instanceof Element &&
+      trigger.closest(".tabs-list [data-bs-toggle='tab']") &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
+      captureCatalogScrollForTab();
+    }
+  }, true);
+
+  document.addEventListener("show.bs.tab", (event) => {
+    const trigger = event.target;
+    if (trigger instanceof Element && trigger.closest(".tabs-list")) {
+      freezeCatalogScrollForTab();
+    }
+  }, true);
+
   document.addEventListener("keydown", (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();

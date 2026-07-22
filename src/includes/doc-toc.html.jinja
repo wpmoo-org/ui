@@ -1,0 +1,12 @@
+{% macro render_doc_toc(items) -%}
+  <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page">
+    <div class="moo-doc-toc__inner">
+      <div class="moo-doc-toc__label">On this page</div>
+      <nav class="nav flex-column" aria-label="Page sections">
+        {% for item in items %}
+          <a class="nav-link" href="#{{ item.id }}">{{ item.label }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  </aside>
+{%- endmacro %}

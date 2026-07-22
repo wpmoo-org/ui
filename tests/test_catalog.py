@@ -431,6 +431,89 @@ class CatalogContractTests(CatalogTestCase):
         introduction = self.read_output("introduction.html")
         self.assertIn("moo-component-header__actions", introduction)
 
+    def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        expected_links = {
+            "introduction.html": (
+                ("why-title", "Why Moo UI Exists"),
+                ("principles-title", "Principles"),
+                ("mission-title", "Mission"),
+            ),
+            "installation.html": (
+                ("cdn-title", "CDN"),
+                ("npm-title", "npm"),
+                ("javascript-title", "JavaScript"),
+            ),
+            "skills.html": (
+                ("skills-roadmap-title", "What Skills Are For"),
+                ("skills-context-title", "What Agents Should Know"),
+                ("skills-workflow-title", "Expected Workflow"),
+            ),
+            "changelog.html": (
+                ("release-0-1-1", "Catalog Polish"),
+                ("release-0-1-0", "Initial Release"),
+            ),
+        }
+
+        for path, links in expected_links.items():
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                self.assertIn('class="moo-doc-layout"', page)
+                self.assertIn('class="moo-doc-toc d-none d-xl-block"', page)
+                self.assertIn('aria-label="On this page"', page)
+                for target, label in links:
+                    self.assertIn(f'href="#{target}"', page)
+                    self.assertIn(f">{label}</", page)
+
+        for path in ("components/index.html", "blocks/index.html"):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                self.assertNotIn("moo-doc-toc", page)
+
+        css = self.read_output("assets/css/catalog.css")
+        self.assertIn(".moo-doc-layout", css)
+        self.assertIn("@media (min-width: 1200px)", css)
+        self.assertIn("--moo-doc-toc-offset: calc(var(--moo-catalog-header-height) + 1rem)", css)
+        self.assertIn("scroll-behavior: smooth", css)
+        self.assertIn("@media (prefers-reduced-motion: reduce)", css)
+        self.assertRegex(
+            css,
+            r"\.moo-catalog__main\s*\{\s*scroll-behavior: auto;",
+        )
+        self.assertRegex(
+            css,
+            r"\.moo-doc-toc\s*\{\s*position: sticky;\s*top: var\(--moo-doc-toc-offset\);",
+        )
+        self.assertIn('.moo-doc-toc .nav-link:is(.active, [aria-current="true"])', css)
+        self.assertIn("color: var(--moo-foreground)", css)
+        self.assertIn("font-weight: 500", css)
+
+    def test_component_detail_pages_render_an_example_table_of_contents(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        component = self.read_output("components/accordion.html")
+        self.assertIn('data-moo-component-doc-layout', component)
+        self.assertIn('data-moo-component-toc', component)
+        self.assertIn('aria-label="Component examples"', component)
+        self.assertIn('class="moo-doc-main"', component)
+        self.assertIn('id="basic-title"', component)
+
+        components_index = self.read_output("components/index.html")
+        self.assertNotIn('data-moo-component-toc', components_index)
+        self.assertNotIn('data-moo-component-doc-layout', components_index)
+
+        preview = self.read_output("assets/js/preview.js")
+        self.assertIn("[data-moo-component-toc]", preview)
+        self.assertIn(".moo-component-examples > .moo-example[aria-labelledby]", preview)
+        self.assertIn("componentTocNav.appendChild(link)", preview)
+        self.assertIn('link.setAttribute("aria-current", "true")', preview)
+        self.assertIn('link.classList.toggle("active", isActive)', preview)
+
     def test_installation_page_uses_published_cdn_path(self) -> None:
         result = self.run_build()
 
