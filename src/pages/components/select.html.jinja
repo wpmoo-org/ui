@@ -1,140 +1,306 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/select.html.jinja" import select %}
+{% from "components/field.html.jinja" import field, field_description, field_error, field_group, fieldset %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Select — Moo UI{% endblock %}
 
 {% set fruit_options = [
-  {"value": "", "label": "Select a fruit", "selected": true, "disabled": true},
-  {"value": "apple", "label": "Apple"},
-  {"value": "banana", "label": "Banana"},
-  {"value": "blueberry", "label": "Blueberry"},
-  {"value": "grapes", "label": "Grapes"},
-  {"value": "pineapple", "label": "Pineapple"}
+  {"value": "", "label": "Choose a workspace", "selected": true, "disabled": true},
+  {"value": "ops", "label": "Operations"},
+  {"value": "design", "label": "Design"},
+  {"value": "analytics", "label": "Analytics"},
+  {"value": "shipping", "label": "Shipping"},
+  {"value": "docs", "label": "Documentation"}
 ] %}
 
 {% set grouped_options = [
   {
-    "label": "Fruits",
+    "label": "Primary queues",
     "options": [
-      {"value": "apple", "label": "Apple"},
-      {"value": "banana", "label": "Banana"},
-      {"value": "blueberry", "label": "Blueberry"},
-      {"value": "grapes", "label": "Grapes"},
-      {"value": "pineapple", "label": "Pineapple"}
+      {"value": "deploy", "label": "Deployment"},
+      {"value": "release", "label": "Release"},
+      {"value": "incident", "label": "Incident"}
     ]
   },
   {
-    "label": "Vegetables",
+    "label": "Secondary queues",
     "options": [
-      {"value": "aubergine", "label": "Aubergine"},
-      {"value": "broccoli", "label": "Broccoli"},
-      {"value": "carrot", "label": "Carrot"}
+      {"value": "internal", "label": "Internal"},
+      {"value": "partner", "label": "Partner"},
+      {"value": "open", "label": "Open"}
+    ]
+  },
+  {
+    "label": "Archive queues",
+    "disabled": true,
+    "options": [
+      {"value": "legacy", "label": "Legacy"},
+      {"value": "deprecated", "label": "Deprecated"}
     ]
   }
+] %}
+
+{% set quick_options = [
+  {"value": "small", "label": "Small"},
+  {"value": "medium", "label": "Medium"},
+  {"value": "large", "label": "Large"},
+  {"value": "xlarge", "label": "Extra large"},
+  {"value": "enterprise", "label": "Enterprise"},
+  {"value": "critical", "label": "Critical"},
+  {"value": "urgent", "label": "Urgent"},
+  {"value": "scheduled", "label": "Scheduled"},
+  {"value": "on-call", "label": "On call"},
+  {"value": "batch", "label": "Batch"},
+  {"value": "async", "label": "Async"}
 ] %}
 
 {% block content %}
   {{ render_page_header(
     "Select",
-    "Display a native select for choosing one option from a compact list."
+    "Choose one value from native option menus in admin forms."
   ) }}
 
   <div class="moo-component-examples">
+    {% set simple_options = [
+      {"value": "", "label": "Choose queue", "selected": true, "disabled": true},
+      {"value": "ops", "label": "Operations"},
+      {"value": "design", "label": "Design"},
+      {"value": "analytics", "label": "Analytics"},
+      {"value": "shipping", "label": "Shipping"},
+      {"value": "docs", "label": "Documentation"}
+    ] %}
+
     {% set default %}
-      <div class="d-grid gap-2">
+      <div class="d-flex justify-content-center">
         {{ select(
-          aria_label="Fruit",
-          options=fruit_options
+          aria_label="Route queue",
+          options=simple_options
         ) }}
       </div>
     {% endset %}
     {{ render_example(
       "default",
       "Default",
-      "Use <code>form-select</code> when the browser-owned menu is enough. Native option menus stay accessible and platform-correct.",
+      "Use one native `<code>form-select</code>` control for direct queue routing.",
       default,
-      "moo-example__preview--narrow"
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set groups %}
-      <div class="d-grid gap-2">
+      <div class="d-flex justify-content-center">
         {{ select(
-          aria_label="Grouped fruit and vegetable options",
+          aria_label="Grouped queue options",
           options=grouped_options,
-          selected="carrot"
+          selected="release"
         ) }}
       </div>
     {% endset %}
     {{ render_example(
       "groups",
       "Groups",
-      "Use native <code>optgroup</code> sections when a short menu benefits from labels but does not need search or custom actions.",
+      "Group related values with `<code>optgroup</code>` when a long list is still static.",
       groups,
-      "moo-example__preview--narrow"
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set disabled %}
-      <div class="d-grid gap-2">
+      <div class="d-flex justify-content-center">
         {{ select(
-          aria_label="Disabled fruit select",
-          options=fruit_options,
-          disabled=true
+          aria_label="Disabled queue select",
+          options=quick_options,
+          disabled=true,
+          selected="critical"
         ) }}
       </div>
     {% endset %}
     {{ render_example(
       "disabled",
       "Disabled",
-      "Use the native <code>disabled</code> attribute when a choice should remain visible but unavailable.",
+      "Keep the control visible and clear when route changes are temporarily blocked.",
       disabled,
-      "moo-example__preview--narrow"
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set invalid %}
-      <div class="moo-field w-100">
+      <div class="vstack gap-2 w-auto">
         {{ select(
-          label="Fruit",
-          id="fruit-invalid",
+          label="Route queue",
+          id="select-invalid-workspace",
           options=fruit_options,
           invalid=true,
           required=true,
-          describedby="fruit-invalid-feedback"
+          describedby="select-invalid-workspace-help select-invalid-workspace-error"
         ) }}
-        <div class="invalid-feedback d-block" id="fruit-invalid-feedback">Please select a fruit.</div>
+        {{ field_description("select-invalid-workspace-help", "Select a queue so the action has a valid target.") }}
+        {{ field_error("select-invalid-workspace-error", "Choose a valid queue before continuing.") }}
       </div>
     {% endset %}
     {{ render_example(
       "invalid",
       "Invalid",
-      "Pair <code>is-invalid</code> with <code>aria-invalid=\"true\"</code> and an error message when validation blocks submission.",
+      "Use `<code>is-invalid</code>` with helper/error messaging in the same control set.",
       invalid,
-      "moo-example__preview--narrow"
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
-      <div class="d-grid gap-2" dir="rtl">
+    {% set dense %}
+      <div class="d-flex justify-content-center">
         {{ select(
-          aria_label="فاكهة",
-          options=[
-            {"value": "", "label": "اختر فاكهة", "selected": true, "disabled": true},
-            {"value": "apple", "label": "تفاح"},
-            {"value": "banana", "label": "موز"},
-            {"value": "grapes", "label": "عنب"}
-          ],
-          dir="rtl"
+          aria_label="Priority",
+          id="select-priority",
+          options=quick_options,
+          selected="medium",
+          size="lg",
+          rows="6"
         ) }}
       </div>
     {% endset %}
     {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Use <code>dir=\"rtl\"</code> on the select or parent form when labels and options read right-to-left.",
-      rtl,
-      "moo-example__preview--narrow"
+      "dense",
+      "Dense list",
+      "Use the native `size` attribute for a denser, scroll-free queue picker.",
+      dense,
+      preview_class="moo-example__preview--narrow"
     ) }}
+
+    {% set multiple %}
+      <div class="d-flex justify-content-center">
+        {{ select(
+          aria_label="Assigned teams",
+          options=[
+            {"value": "platform", "label": "Platform"},
+            {"value": "support", "label": "Support"},
+            {"value": "customer", "label": "Customer Success"},
+            {"value": "qa", "label": "Quality"},
+            {"value": "finance", "label": "Finance"},
+            {"value": "security", "label": "Security"}
+          ],
+          multiple=true,
+          rows="5"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "multiple",
+      "Multiple",
+      "Use the native `multiple` selection mode when a task targets several teams.",
+      multiple,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set with_fieldset %}
+      <div class="vstack gap-2">
+        {% call fieldset("Delivery controls", "Select the target queue for each environment.") %}
+          {% call field_group() %}
+            {% call field() %}
+              {{ select(
+                label="Primary queue",
+                id="select-field-1",
+                options=[
+                  {"value": "", "label": "Choose queue", "disabled": true},
+                  {"value": "ops", "label": "Operations"},
+                  {"value": "support", "label": "Support"},
+                  {"value": "finance", "label": "Finance"}
+                ],
+                selected="ops",
+                describedby="select-field-1-help"
+              ) }}
+              {{ field_description("select-field-1-help", "Primary queue handles first pass routing.") }}
+            {% endcall %}
+            {% call field() %}
+              {{ select(
+                label="Fallback queue",
+                id="select-field-2",
+                options=[
+                  {"value": "", "label": "Choose queue", "selected": true, "disabled": true},
+                  {"value": "ops", "label": "Operations"},
+                  {"value": "support", "label": "Support"},
+                  {"value": "finance", "label": "Finance"}
+                ],
+                describedby="select-field-2-help"
+              ) }}
+              {{ field_description("select-field-2-help", "Fallback queue starts after retries are exhausted.") }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "field-form",
+      "Form rhythm",
+      "Use field grouping when multiple selects share one form decision.",
+      with_fieldset,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_arabic %}
+      <div dir="rtl" class="d-grid gap-2 w-auto">
+        {{ select(
+          label="مساحة العمل",
+          id="select-rtl-arabic",
+          options=[
+            {"value": "", "label": "اختر مساحة العمل", "selected": true, "disabled": true},
+            {"value": "ops", "label": "العمليات"},
+            {"value": "design", "label": "التصميم"},
+            {"value": "analytics", "label": "التحليلات"}
+          ],
+          dir="rtl",
+          required=true,
+          describedby="select-rtl-arabic-help"
+        ) }}
+        {{ field_description("select-rtl-arabic-help", "حدد مساحة العمل لتوجيه الإشعارات.") }}
+      </div>
+    {% endset %}
+
+    {% set rtl_hebrew %}
+      <div dir="rtl" class="d-grid gap-2 w-auto">
+        {{ select(
+          label="סביבת עבודה",
+          id="select-rtl-hebrew",
+          options=[
+            {"value": "", "label": "בחר סביבת עבודה", "selected": true, "disabled": true},
+            {"value": "ops", "label": "תפעול"},
+            {"value": "design", "label": "עיצוב"},
+            {"value": "analytics", "label": "אנליטיקה"}
+          ],
+          dir="rtl",
+          required=true,
+          describedby="select-rtl-hebrew-help"
+        ) }}
+        {{ field_description("select-rtl-hebrew-help", "בחר סביבת עבודה כדי להפנות התרעות.") }}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl" class="d-grid gap-2 w-auto">
+        {{ select(
+          label="Workspace",
+          id="select-rtl-english",
+          options=[
+            {"value": "", "label": "Choose workspace", "selected": true, "disabled": true},
+            {"value": "ops", "label": "Operations"},
+            {"value": "design", "label": "Design"},
+            {"value": "analytics", "label": "Analytics"}
+          ],
+          dir="rtl",
+          required=true,
+          describedby="select-rtl-english-help"
+        ) }}
+        {{ field_description("select-rtl-english-help", "Choose a workspace to route alerts.") }}
+      </div>
+    {% endset %}
+    {{ render_rtl_example(
+      "select-routes",
+      "Use the same labeled select control in Arabic, Hebrew, and English while rendering in RTL.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
   </div>
 
   {{ render_reference(
