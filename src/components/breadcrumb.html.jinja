@@ -1,13 +1,35 @@
-{% macro breadcrumb(items, aria_label="breadcrumb", extra_class="") -%}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
+
+{% macro breadcrumb(items, aria_label="breadcrumb", extra_class="", divider="") -%}
   {% if not items %}{{ fail("Breadcrumb items are required") }}{% endif %}
   <nav aria-label="{{ aria_label }}">
-    <ol class="breadcrumb{% if extra_class %} {{ extra_class }}{% endif %}">
+    <ol class="breadcrumb{% if extra_class %} {{ extra_class }}{% endif %}"{% if divider %} style="--bs-breadcrumb-divider: '{{ divider }}';"{% endif %}>
       {% for item in items %}
-        {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}
-        {% if loop.last %}
-          <li class="breadcrumb-item active" aria-current="page">{{ item.label }}</li>
+        {% if item.ellipsis is defined and item.ellipsis %}
+          <li class="breadcrumb-item">
+            <span class="breadcrumb-ellipsis">
+              {{ render_icon("ellipsis", "inline-start") }}
+              <span class="visually-hidden">{{ item.label if item.label is defined else "More" }}</span>
+            </span>
+          </li>
+        {% elif item.dropdown_items is defined %}
+          {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}
+          <li class="breadcrumb-item">
+            <span class="breadcrumb-dropdown-item">
+              {% call dropdown(item.label, variant="link", caret=true) %}
+                {% for entry in item.dropdown_items %}
+                  {{ dropdown_item(entry.label, href=entry.href if entry.href is defined else "#") }}
+                {% endfor %}
+              {% endcall %}
+            </span>
+          </li>
         {% else %}
-          <li class="breadcrumb-item"><a href="{{ item.href if item.href is defined else '#' }}">{{ item.label }}</a></li>
+          {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}
+          {% if loop.last %}
+            <li class="breadcrumb-item active" aria-current="page">{{ item.label }}</li>
+          {% else %}
+            <li class="breadcrumb-item"><a href="{{ item.href if item.href is defined else '#' }}">{{ item.label }}</a></li>
+          {% endif %}
         {% endif %}
       {% endfor %}
     </ol>

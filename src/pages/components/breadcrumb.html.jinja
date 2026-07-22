@@ -14,37 +14,82 @@
 
   <div class="moo-component-examples">
     {% set current_only %}
-      {{ breadcrumb([{"label": "Home"}]) }}
+      {{ breadcrumb([{"label": "Workspace"}]) }}
     {% endset %}
     {{ render_example(
       "current-only",
       "Current page only",
       "A single item renders as the current, non-linked page.",
-      current_only,
-      preview_class="moo-example__preview--narrow"
+      current_only
     ) }}
 
     {% set trail %}
       {{ breadcrumb([
-        {"label": "Home", "href": "#"},
-        {"label": "Components", "href": "#"},
-        {"label": "Breadcrumb"}
+        {"label": "Workspace", "href": "#"},
+        {"label": "Projects", "href": "#"},
+        {"label": "Growth dashboard"}
       ]) }}
     {% endset %}
     {{ render_example(
       "trail",
       "Trail",
       "Every item but the last links back up the hierarchy; the last item marks <code>aria-current=\"page\"</code>.",
-      trail,
-      preview_class="moo-example__preview--narrow"
+      trail
+    ) }}
+
+    {% set custom_separator %}
+      {{ breadcrumb([
+        {"label": "Workspace", "href": "#"},
+        {"label": "Projects", "href": "#"},
+        {"label": "Growth dashboard"}
+      ], divider="•") }}
+    {% endset %}
+    {{ render_example(
+      "custom-separator",
+      "Custom separator",
+      "Swap the divider glyph per instance through Bootstrap's own --bs-breadcrumb-divider custom property.",
+      custom_separator
+    ) }}
+
+    {% set dropdown_example %}
+      {{ breadcrumb([
+        {"label": "Workspace", "href": "#"},
+        {"label": "Projects", "dropdown_items": [
+          {"label": "Projects", "href": "#"},
+          {"label": "Reports", "href": "#"},
+          {"label": "Automations", "href": "#"}
+        ]},
+        {"label": "Growth dashboard"}
+      ]) }}
+    {% endset %}
+    {{ render_example(
+      "dropdown",
+      "Dropdown",
+      "Let a middle segment open a menu of sibling sections instead of linking to just one.",
+      dropdown_example
+    ) }}
+
+    {% set collapsed %}
+      {{ breadcrumb([
+        {"label": "Workspace", "href": "#"},
+        {"ellipsis": true},
+        {"label": "Projects", "href": "#"},
+        {"label": "Growth dashboard"}
+      ]) }}
+    {% endset %}
+    {{ render_example(
+      "collapsed",
+      "Collapsed",
+      "Mark skipped levels with an ellipsis segment when the full trail would crowd the layout.",
+      collapsed
     ) }}
 
     {% set rtl %}
       <div dir="rtl">
         {{ breadcrumb([
-          {"label": "الرئيسية", "href": "#"},
-          {"label": "المكونات", "href": "#"},
-          {"label": "فتات الخبز"}
+          {"label": "مساحة العمل", "href": "#"},
+          {"label": "المشاريع", "href": "#"},
+          {"label": "لوحة النمو"}
         ]) }}
       </div>
     {% endset %}
@@ -52,8 +97,7 @@
       "rtl",
       "Right-to-left layout",
       "The divider and item order follow reading direction without mirrored custom CSS.",
-      rtl,
-      preview_class="moo-example__preview--narrow"
+      rtl
     ) }}
   </div>
 

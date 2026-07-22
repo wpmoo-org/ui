@@ -61,6 +61,46 @@ class BreadcrumbTests(CatalogTestCase):
             styles,
         )
 
+    def test_breadcrumb_supports_custom_divider(self) -> None:
+        output = self.render_breadcrumb(
+            'breadcrumb([{"label": "Home"}, {"label": "Library"}], divider="•")'
+        )
+        self.assertIn(
+            'class="breadcrumb" style="--bs-breadcrumb-divider: \'•\';"',
+            output,
+        )
+
+    def test_breadcrumb_ellipsis_item_renders_a_static_marker(self) -> None:
+        output = self.render_breadcrumb(
+            'breadcrumb([{"label": "Home", "href": "#"}, {"ellipsis": true}, {"label": "Library"}])'
+        )
+        self.assertIn('<span class="breadcrumb-ellipsis">', output)
+        self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('<span class="visually-hidden">More</span>', output)
+        self.assertNotIn("<button", output)
+        self.assertNotIn("<a ", output.split("visually-hidden")[1])
+
+    def test_breadcrumb_dropdown_item_renders_via_ready_dropdown_macros(self) -> None:
+        output = self.render_breadcrumb(
+            'breadcrumb(['
+            '{"label": "Home", "href": "#"}, '
+            '{"label": "Projects", "dropdown_items": ['
+            '{"label": "Projects", "href": "/projects"}, '
+            '{"label": "Reports", "href": "/reports"}'
+            ']}, '
+            '{"label": "Library"}'
+            '])'
+        )
+        self.assertIn('<span class="breadcrumb-dropdown-item">', output)
+        self.assertIn('class="dropdown-item" href="/projects"', output)
+        self.assertIn('class="dropdown-item" href="/reports"', output)
+
+    def test_breadcrumb_dropdown_item_requires_label(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Breadcrumb item label is required"):
+            self.render_breadcrumb(
+                'breadcrumb([{"label": "   ", "dropdown_items": [{"label": "Projects"}]}])'
+            )
+
     def test_breadcrumb_requires_items(self) -> None:
         with self.assertRaisesRegex(ValueError, "Breadcrumb items are required"):
             self.render_breadcrumb("breadcrumb([])")
