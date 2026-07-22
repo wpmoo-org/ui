@@ -102,9 +102,18 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's switch markup uses the shared .form-switch and
             # .form-check families, not a "switch-" prefixed one.
             "switch": ("form-switch", "form-check"),
+            # Bootstrap's own placeholder markup uses the shared .placeholder
+            # family, not a "skeleton-" prefixed one.
+            "skeleton": ("skeleton", "placeholder"),
             # Bootstrap's own Collapse plugin toggles the bare .collapsed
             # state class on the trigger; it is not "accordion-" prefixed.
             "accordion": ("accordion", "collapsed"),
+            # Collapsible is a thin Bootstrap Collapse composition whose
+            # trigger is still a native .btn inside the component scope.
+            "collapsible": ("collapsible", "btn"),
+            # Menubar is backed by Bootstrap Dropdown triggers and menus; the
+            # shared dropdown/show state classes remain scoped under .menubar.
+            "menubar": ("menubar", "dropdown", "show"),
             # The segmented-control track styles Bootstrap's shared
             # .nav-link/.active classes within its own .tabs-list scope,
             # rather than the .nav-pills family Navigation already owns,

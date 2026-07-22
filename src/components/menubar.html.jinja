@@ -1,0 +1,23 @@
+{# Menubar is a bordered row of the already-ready Dropdown Menu macros
+   (dropdown/dropdown_menu/dropdown_item) -- it owns no menu, item, or
+   keyboard behavior of its own. Verified against the live reference
+   (ui.shadcn.com/docs/components/base/menubar): the container is role="menubar"
+   and triggers are role="menuitem" with hover-to-switch between open menus
+   plus roving Left/Right-arrow focus between top-level triggers. Bootstrap's
+   dropdown plugin does not provide any of that -- each .dropdown opens,
+   closes, and handles Up/Down/Home/End/Esc independently, with no
+   cross-trigger hover or roving tabindex. Rather than label plain,
+   independent dropdown-toggle buttons with role="menubar"/role="menuitem"
+   semantics we cannot back with matching keyboard behavior, this container
+   adds no ARIA role at all: each trigger stays a standard, already-accessible
+   Bootstrap dropdown-toggle button, just visually grouped in one bordered
+   row using Bootstrap's own border/rounded utilities, plus a private
+   padding/gap knob for the sub-utility-scale track spacing the live
+   reference uses (see $moo-menubar-gap/-padding). #}
+
+{% macro menubar(aria_label, extra_class="") -%}
+  {% if not aria_label | trim %}{{ fail("Menubar aria_label is required") }}{% endif %}
+  <div class="menubar d-inline-flex align-items-center border rounded-3{% if extra_class %} {{ extra_class }}{% endif %}" role="group" aria-label="{{ aria_label }}">
+    {{ caller() | trim | safe }}
+  </div>
+{%- endmacro %}

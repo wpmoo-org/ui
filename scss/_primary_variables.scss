@@ -100,6 +100,12 @@ $moo-tabs-list-gap: 0.125rem !default;
 $moo-tabs-content-gap: 0.75rem !default;
 $moo-tabs-trigger-padding-y: 0.125rem !default;
 $moo-tabs-trigger-padding-x: 0.75rem !default;
+
+// Bootstrap's own spacer scale has no 2px/3px step, so the Menubar row's
+// tight track padding/gap around its triggers (verified against the live
+// reference) are private knobs rather than a "gap-1"/"p-1" utility.
+$moo-menubar-gap: 0.125rem !default;
+$moo-menubar-padding: 0.1875rem !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;
