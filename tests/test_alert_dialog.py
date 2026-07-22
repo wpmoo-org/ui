@@ -81,6 +81,11 @@ class AlertDialogTests(CatalogTestCase):
         self.assertIn('data-bs-backdrop="static"', output)
         self.assertIn('data-bs-keyboard="false"', output)
 
+    def test_rendered_dialog_uses_alert_modal_modifier(self) -> None:
+        output = self.render_full_dialog()
+
+        self.assertIn('class="modal fade modal--alert"', output)
+
     def test_rendered_dialog_is_labelled_and_described(self) -> None:
         output = self.render_full_dialog()
         self.assertIn('aria-labelledby="alert-x-title"', output)

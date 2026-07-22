@@ -13,7 +13,9 @@
   centered=false,
   scrollable=false,
   static=false,
-  aria_label=""
+  aria_label="",
+  describedby="",
+  extra_class=""
 ) -%}
   {% if not id | trim %}{{ fail("Dialog id is required") }}{% endif %}
   {% if size not in dialog_sizes %}{{ fail("Unknown dialog size: " ~ size) }}{% endif %}
@@ -25,7 +27,7 @@
   {% if centered %}{% set dialog_classes = dialog_classes ~ " modal-dialog-centered" %}{% endif %}
   {% if scrollable %}{% set dialog_classes = dialog_classes ~ " modal-dialog-scrollable" %}{% endif %}
   <div
-    class="modal fade"
+    class="modal fade{% if extra_class | trim %} {{ extra_class | trim }}{% endif %}"
     id="{{ id }}"
     tabindex="-1"
     {% if aria_label | trim %}
@@ -33,6 +35,7 @@
     {% else %}
       aria-labelledby="{{ id }}-title"
     {% endif %}
+    {% if describedby | trim %}aria-describedby="{{ describedby | trim }}"{% endif %}
     aria-hidden="true"
     {% if static %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}
   >

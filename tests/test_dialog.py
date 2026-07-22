@@ -89,6 +89,13 @@ class DialogTests(CatalogTestCase):
         self.assertIn('data-bs-backdrop="static"', output)
         self.assertIn('data-bs-keyboard="false"', output)
 
+    def test_dialog_supports_extra_modal_class(self) -> None:
+        output = self.render_dialog_block(
+            '{% call dialog("example", extra_class="modal--alert") %}Content{% endcall %}'
+        )
+
+        self.assertIn('class="modal fade modal--alert"', output)
+
     def test_dialog_default_allows_backdrop_and_keyboard_dismiss(self) -> None:
         output = self.render_dialog_block(
             '{% call dialog("example") %}Content{% endcall %}'

@@ -33,9 +33,14 @@
   gap: calc(var(--bs-modal-padding) * 0.75);
 }
 
+.modal--alert {
+  --bs-modal-width: 28rem;
+  --bs-modal-padding: 1.5rem;
+}
+
 .modal-header--alert {
   align-items: flex-start;
-  padding-bottom: 0;
+  padding: var(--bs-modal-padding);
 }
 
 .modal-header__content {
@@ -43,9 +48,14 @@
 }
 
 .modal-description {
-  margin-top: calc(var(--bs-modal-padding) * 0.5);
+  margin-top: calc(var(--bs-modal-padding) * 0.375);
   margin-bottom: 0;
   color: var(--bs-secondary-color);
+}
+
+.modal--alert .modal-footer {
+  padding-right: var(--bs-modal-padding);
+  padding-left: var(--bs-modal-padding);
 }
 
 .modal-footer {
