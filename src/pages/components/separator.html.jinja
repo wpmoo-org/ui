@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Separator — Moo UI{% endblock %}
@@ -9,88 +9,163 @@
 {% block content %}
   {{ render_page_header(
     "Separator",
-    "Separate related content with Bootstrap's native horizontal rule and vertical rule helper."
+    "Split admin workflows and list sections with Bootstrap-native separators."
   ) }}
 
   <div class="moo-component-examples">
     {% set horizontal %}
-      <div class="d-grid w-100">
-        <div class="fw-medium">Workspace access</div>
-        <div class="text-body-secondary small">Invite collaborators after the project is ready.</div>
-        {{ separator(extra_class="my-4") }}
-        <div class="fw-medium">Billing owner</div>
-        <div class="text-body-secondary small">Only the owner can update payment settings.</div>
+      <div class="vstack gap-2">
+        <div>
+          <div class="fw-medium">Current objective</div>
+          <div class="text-body-secondary small">Finish release notes and confirm handoff criteria.</div>
+        </div>
+        {{ separator(extra_class="my-3") }}
+        <div>
+          <div class="fw-medium">Ownership check</div>
+          <div class="text-body-secondary small">Billing controls stay reserved for the primary account owner.</div>
+        </div>
       </div>
     {% endset %}
     {{ render_example(
       "horizontal",
-      "Horizontal rule",
-      "Use <code>&lt;hr&gt;</code> to divide stacked content. Bootstrap keeps the color inherited and the opacity low by default.",
+      "Horizontal divider",
+      "Use a horizontal separator to split stacked content blocks.",
       horizontal,
       preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set vertical %}
-      <div class="hstack gap-3" aria-label="Project status">
+      <div class="hstack align-items-center gap-3">
         <span class="fw-medium">Draft</span>
-        {{ separator("vertical") }}
-        <span class="text-body-secondary">Reviewed</span>
-        {{ separator("vertical") }}
+        {{ separator("vertical", decorative=false, extra_class="mx-1") }}
+        <span class="text-body-secondary">Review</span>
+        {{ separator("vertical", decorative=false, extra_class="mx-1") }}
         <span class="text-body-secondary">Published</span>
       </div>
     {% endset %}
     {{ render_example(
       "vertical",
-      "Vertical rule",
-      "Use Bootstrap's <code>.vr</code> helper inside flex rows when adjacent text or controls need a quiet divider.",
-      vertical
-    ) }}
-
-    {% set grouped %}
-      <div class="d-grid gap-3 w-100">
-        <div>
-          <div class="fw-medium">Profile</div>
-          <div class="text-body-secondary small">Name, avatar, and public details.</div>
-        </div>
-        {{ separator(extra_class="my-1") }}
-        <div>
-          <div class="fw-medium">Security</div>
-          <div class="text-body-secondary small">Password, sessions, and recovery options.</div>
-        </div>
-        {{ separator(extra_class="my-1") }}
-        <div>
-          <div class="fw-medium">Billing</div>
-          <div class="text-body-secondary small">Invoices and payment method.</div>
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "grouped",
-      "Grouped content",
-      "Place horizontal separators between related groups; keep the text or controls responsible for meaning.",
-      grouped,
+      "Vertical divider",
+      "Use <code>.vr</code> inside compact flex layouts to separate adjacent inline sections.",
+      vertical,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
-      <div class="hstack gap-3" dir="rtl" aria-label="حالة المشروع">
-        <span class="fw-medium">مسودة</span>
-        {{ separator("vertical") }}
-        <span class="text-body-secondary">مراجعة</span>
-        {{ separator("vertical") }}
-        <span class="text-body-secondary">منشور</span>
+    {% set menu %}
+      <div class="d-grid gap-2">
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-medium">Team</span>
+            {{ separator("vertical", extra_class="mx-2") }}
+            <span class="text-body-secondary small">Invite members, manage roles.</span>
+          </div>
+        </div>
+        {{ separator() }}
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-medium">Settings</span>
+            {{ separator("vertical", extra_class="mx-2") }}
+            <span class="text-body-secondary small">Security, integrations, and preferences.</span>
+          </div>
+        </div>
+        {{ separator() }}
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-medium">Support</span>
+            {{ separator("vertical", extra_class="mx-2") }}
+            <span class="text-body-secondary small">Knowledge base, status, and contact path.</span>
+          </div>
+        </div>
       </div>
     {% endset %}
     {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Use normal document direction; Bootstrap's vertical rule stays aligned without mirrored custom CSS.",
-      rtl
+      "menu",
+      "Menu-like grouping",
+      "For vertical stacks, pair short labels with separators to mimic sidebar menu rhythm.",
+      menu,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set list %}
+      <div class="vstack gap-2">
+        <div class="d-flex justify-content-between gap-3">
+          <span class="fw-medium">Task 1</span>
+          <span class="text-body-secondary">12 points</span>
+        </div>
+        {{ separator() }}
+        <div class="d-flex justify-content-between gap-3">
+          <span class="fw-medium">Task 2</span>
+          <span class="text-body-secondary">8 points</span>
+        </div>
+        {{ separator() }}
+        <div class="d-flex justify-content-between gap-3">
+          <span class="fw-medium">Task 3</span>
+          <span class="text-body-secondary">5 points</span>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "list",
+      "List divider",
+      "Separate list rows when content stays in the same visual density.",
+      list,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_arabic %}
+      <div class="vstack gap-2" dir="rtl">
+        <div>
+          <div class="fw-medium">الهدف الحالي</div>
+          <div class="text-body-secondary small">أكمل ملاحظات الإصدار وتحقق من شروط التسليم.</div>
+        </div>
+        {{ separator(extra_class="my-3") }}
+        <div>
+          <div class="fw-medium">فحص الملكية</div>
+          <div class="text-body-secondary small">تبقى إعدادات الفوترة مخصصة لمالك الحساب الرئيسي فقط.</div>
+        </div>
+      </div>
+    {% endset %}
+
+    {% set rtl_hebrew %}
+      <div class="vstack gap-2" dir="rtl">
+        <div>
+          <div class="fw-medium">המטרה הנוכחית</div>
+          <div class="text-body-secondary small">סיים את הערות השחרור ובדוק דרישות הסיום.</div>
+        </div>
+        {{ separator(extra_class="my-3") }}
+        <div>
+          <div class="fw-medium">בדיקת בעלות</div>
+          <div class="text-body-secondary small">הגדרות החיוב שמורות לבעל החשבון הראשי בלבד.</div>
+        </div>
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="vstack gap-2" dir="rtl">
+        <div>
+          <div class="fw-medium">Current objective</div>
+          <div class="text-body-secondary small">Finish release notes and confirm handoff criteria.</div>
+        </div>
+        {{ separator(extra_class="my-3") }}
+        <div>
+          <div class="fw-medium">Ownership check</div>
+          <div class="text-body-secondary small">Billing controls stay reserved for the primary account owner.</div>
+        </div>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "separator-rtl",
+      "Use the same separator pattern when content is mirrored by direction.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 
   {{ render_reference(
-    "For Bootstrap's source behavior and vertical rule helper details, see the",
+    "For Bootstrap's divider behavior and accessibility details, see the",
     "https://getbootstrap.com/docs/5.3/helpers/vertical-rule/",
     "Bootstrap Vertical rule documentation"
   ) }}
