@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/switch.html.jinja" import switch %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Switch — Moo UI{% endblock %}
@@ -9,20 +9,20 @@
 {% block content %}
   {{ render_page_header(
     "Switch",
-    "Toggle a setting on or off using Bootstrap's native switch contract."
+    "Activate feature flags and settings with Bootstrap's native form-switch control."
   ) }}
 
   <div class="moo-component-examples">
     {% set default %}
       <div class="d-grid gap-2">
-        {{ switch("switch-default", label="Auto-lock screen") }}
-        {{ switch("switch-checked", label="Auto-lock screen", checked=true) }}
+        {{ switch("switch-default", label="Enable workflow backup window") }}
+        {{ switch("switch-checked", label="Enable workflow backup window", checked=true) }}
       </div>
     {% endset %}
     {{ render_example(
       "default",
       "Default",
-      "Off and on states share the same label contract.",
+      "Show the same label with both off and on states when rollout toggles are introduced.",
       default,
       preview_class="moo-example__preview--narrow"
     ) }}
@@ -31,7 +31,7 @@
       {{ switch(
         "switch-description",
         label="Background sync",
-        description="Keep your data up to date across devices while the app is closed.",
+        description="Keep team data synchronized across all devices after a network reconnect.",
         checked=true
       ) }}
     {% endset %}
@@ -45,8 +45,8 @@
 
     {% set disabled %}
       <div class="d-grid gap-2">
-        {{ switch("switch-disabled", label="Two-factor authentication", disabled=true) }}
-        {{ switch("switch-disabled-checked", label="Two-factor authentication", checked=true, disabled=true) }}
+        {{ switch("switch-disabled", label="Force MFA at login", disabled=true) }}
+        {{ switch("switch-disabled-checked", label="Force MFA at login", checked=true, disabled=true) }}
       </div>
     {% endset %}
     {{ render_example(
@@ -58,7 +58,7 @@
     ) }}
 
     {% set invalid %}
-      {{ switch("switch-invalid", label="Enable analytics tracking", invalid=true) }}
+      {{ switch("switch-invalid", label="Collect usage analytics", invalid=true) }}
     {% endset %}
     {{ render_example(
       "invalid",
@@ -68,16 +68,30 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
-        {{ switch("switch-rtl", label="القفل التلقائي للشاشة") }}
+    {% set rtl_arabic %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ switch("switch-rtl-arabic", label="تفعيل المزامنة الخلفية", checked=true) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The input and label swap sides without mirrored custom CSS.",
-      rtl,
+
+    {% set rtl_hebrew %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ switch("switch-rtl-hebrew", label="הפעלת סנכרון רקע", checked=true) }}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ switch("switch-rtl-english", label="Enable background sync", checked=true) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "switch",
+      "RTL",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
       preview_class="moo-example__preview--narrow"
     ) }}
   </div>
