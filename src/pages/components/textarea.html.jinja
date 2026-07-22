@@ -1,8 +1,9 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "components/button.html.jinja" import button %}
+{% from "components/field.html.jinja" import field, field_group, field_description, field_error %}
 {% from "components/textarea.html.jinja" import textarea %}
 
 {% block title %}Textarea — Moo UI{% endblock %}
@@ -10,73 +11,170 @@
 {% block content %}
   {{ render_page_header(
     "Textarea",
-    "Displays a form textarea or a component that looks like a textarea."
+    "Use multiline input with Bootstrap-native textarea semantics for status notes, messages, and review context."
   ) }}
 
   <div class="moo-component-examples">
     {% set basic %}
+      {% call field_group() %}
+      {% call field() %}
       {{ textarea(
-        aria_label="Message",
-        placeholder="Type your message here."
+        label="Message",
+        id="textarea-basic-message",
+        placeholder="Describe the action in one short paragraph.",
+        describedby="textarea-basic-message-help"
       ) }}
+      {{ field_description(
+        "textarea-basic-message-help",
+        "Capture concise context so teammates can pick up the request quickly."
+      ) }}
+      {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "Use a textarea when a message needs more room than a single-line input.",
+      "Pair the control with `field_group()`/`field()` when it needs helper text and predictable spacing.",
       basic,
       "moo-example__preview--narrow"
     ) }}
 
     {% set disabled %}
+      {% call field_group() %}
+      {% call field() %}
       {{ textarea(
-        aria_label="Message",
-        placeholder="Message",
-        disabled=true
+        label="Message lock",
+        id="textarea-disabled-message",
+        placeholder="Editing is currently disabled.",
+        disabled=true,
+        describedby="textarea-disabled-message-help"
       ) }}
+      {{ field_description(
+        "textarea-disabled-message-help",
+        "Keep this note read-only while the automation sync is running."
+      ) }}
+      {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "disabled",
       "Disabled",
-      "Use the <code>disabled</code> attribute to prevent editing and focus while Bootstrap applies its disabled appearance.",
+      "Use <code>disabled</code> for controls that must stay visible but cannot be edited yet.",
       disabled,
       "moo-example__preview--narrow"
     ) }}
 
     {% set invalid %}
-      <div class="moo-field w-100">
-        {{ textarea(
-          label="Message",
-          id="invalid-message",
-          placeholder="Please enter a valid message.",
-          aria_invalid=true,
-          describedby="invalid-message-help"
-        ) }}
-        <div class="form-text text-danger" id="invalid-message-help">Please enter a valid message.</div>
-      </div>
+      {% call field_group() %}
+      {% call field() %}
+      {{ textarea(
+        label="Issue summary",
+        id="textarea-invalid-message",
+        placeholder="Paste the failing message here.",
+        aria_invalid=true,
+        value="",
+        describedby="textarea-invalid-message-help textarea-invalid-message-error"
+      ) }}
+      {{ field_description(
+        "textarea-invalid-message-help",
+        "Summaries should include at least one concrete step to reproduce."
+      ) }}
+      {{ field_error(
+        "textarea-invalid-message-error",
+        "This field is required before an issue can be submitted."
+      ) }}
+      {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "invalid",
       "Invalid",
-      "Use <code>aria-invalid</code> for the accessibility state; the macro adds Bootstrap's matching <code>is-invalid</code> class.",
+      "Show invalid state with <code>aria_invalid</code> and a helper/error pair for clear, accessible feedback.",
       invalid,
       "moo-example__preview--narrow"
     ) }}
 
     {% set with_button %}
-      <div class="d-grid gap-2">
-        {{ textarea(
-          aria_label="Message",
-          placeholder="Type your message here."
-        ) }}
-        {{ button("Send message", extra_class="w-100") }}
-      </div>
+      {% call field_group() %}
+      {% call field() %}
+      {{ textarea(
+        label="Message",
+        id="textarea-button-message",
+        rows=4,
+        placeholder="Type your note before sending."
+      ) }}
+      {% endcall %}
+      {{ button("Send message", extra_class="w-100") }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "button",
-      "Button",
-      "Pair the textarea with a button to submit the message.",
+      "Connect a compact textarea to a form action when composition needs a quick send step.",
       with_button,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_arabic %}
+      <div dir="rtl">
+        {% call field_group() %}
+        {% call field() %}
+        {{ textarea(
+          label="رسالة",
+          id="textarea-rtl-arabic",
+          placeholder="اكتب رسالتك هنا.",
+          describedby="textarea-rtl-arabic-help"
+        ) }}
+        {{ field_description(
+          "textarea-rtl-arabic-help",
+          "اكتب ملاحظة واضحة حتى يتمكن فريق الدعم من اتخاذ إجراء سريع."
+        ) }}
+        {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {% call field_group() %}
+        {% call field() %}
+        {{ textarea(
+          label="הודעה",
+          id="textarea-rtl-hebrew",
+          placeholder="כתוב כאן את ההודעה שלך.",
+          describedby="textarea-rtl-hebrew-help"
+        ) }}
+        {{ field_description(
+          "textarea-rtl-hebrew-help",
+          "כתוב הערה ברורה כדי שצוות התמיכה יוכל לפעול מהר."
+        ) }}
+        {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {% set rtl_english %}
+      <div dir="rtl">
+        {% call field_group() %}
+        {% call field() %}
+        {{ textarea(
+          label="Message",
+          id="textarea-rtl-english",
+          placeholder="Type your message here.",
+          describedby="textarea-rtl-english-help"
+        ) }}
+        {{ field_description(
+          "textarea-rtl-english-help",
+          "Write a clear note so support can act on it quickly."
+        ) }}
+        {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "textarea",
+      "Use the same labeled textarea + helper structure with text direction and language adapted per locale.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
       "moo-example__preview--narrow"
     ) }}
   </div>
