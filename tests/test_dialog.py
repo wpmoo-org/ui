@@ -154,14 +154,58 @@ class DialogTests(CatalogTestCase):
             "dialog_footer, dialog_header %}",
             source,
         )
+        self.assertIn('{% from "components/input.html.jinja" import input %}', source)
+        self.assertIn('{% from "components/textarea.html.jinja" import textarea %}', source)
         self.assertIn('dialog_target="dialog-basic"', source)
+        self.assertIn('dialog_target="dialog-custom-close"', source)
+        self.assertIn('dialog_target="dialog-no-close"', source)
         self.assertIn('dismiss="modal"', source)
+        self.assertIn('describedby="dialog-basic-description"', source)
         self.assertIn('size="sm"', source)
         self.assertIn('size="lg"', source)
         self.assertIn('size="xl"', source)
         self.assertIn("scrollable=true", source)
         self.assertIn("static=true", source)
+        self.assertIn('direction="rtl"', source)
         self.assertIn('dir="rtl"', source)
+        self.assertNotIn("Right-to-left layout", source)
+
+    def test_page_uses_render_rtl_example(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
+            source,
+        )
+        self.assertIn("render_rtl_example(", source)
+        self.assertIn('render_rtl_example(\n      "dialog"', source)
+        self.assertIn("rtl_arabic", source)
+        self.assertIn("rtl_hebrew", source)
+        self.assertIn("rtl_english", source)
+        self.assertIn('dir="rtl"', source)
+        self.assertIn(
+            "Compare Arabic, Hebrew, and English dialog flows used in operational workflows.",
+            source,
+        )
+        self.assertNotIn("title_id=", source)
+        self.assertNotIn('title="RTL"', source)
+        self.assertNotIn("example_prefix=", source)
+        self.assertNotIn(
+            '{% from "components/tabs.html.jinja" import tabs %}',
+            source,
+        )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/dialog.html")
+        self.assertIn("dialog-direction-tabs", output)
+        self.assertIn("rtl-arabic-code", output)
+        self.assertIn("rtl-hebrew-code", output)
+        self.assertIn("rtl-english-code", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
+        self.assertIn('id="rtl-title">RTL</h2>', output)
 
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
