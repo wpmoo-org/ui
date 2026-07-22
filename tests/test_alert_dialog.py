@@ -86,6 +86,15 @@ class AlertDialogTests(CatalogTestCase):
 
         self.assertIn('class="modal fade modal--alert"', output)
 
+    def test_rendered_dialog_can_carry_direction_on_modal_root(self) -> None:
+        template = create_environment().from_string(
+            '{% from "components/alert_dialog.html.jinja" import alert_dialog %}'
+            '{% call alert_dialog("alert-x", direction="rtl") %}Body{% endcall %}'
+        )
+        output = " ".join(template.render().split())
+
+        self.assertIn('dir="rtl"', output)
+
     def test_rendered_dialog_is_labelled_and_described(self) -> None:
         output = self.render_full_dialog()
         self.assertIn('aria-labelledby="alert-x-title"', output)
@@ -118,10 +127,34 @@ class AlertDialogTests(CatalogTestCase):
         for original_scenario in (
             "Discard this draft invoice",
             "Leave without saving",
+            "Stop this import",
             "Pause nightly synchronization",
             "Delete this customer record",
         ):
             self.assertIn(original_scenario, source)
+
+    def test_page_includes_small_media_and_tabbed_rtl_examples(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("Small with media", source)
+        self.assertIn('icon="circle-alert"', source)
+        self.assertIn("render_rtl_example", source)
+        self.assertIn('"alert-dialog"', source)
+        self.assertIn('preview_class="moo-example__preview--fit"', source)
+        self.assertGreaterEqual(source.count('direction="rtl"'), 3)
+        self.assertIn('button("Delete customer data", variant="outline"', source)
+        self.assertIn('button("Delete", variant="destructive", dismiss="modal")', source)
+        self.assertIn('"למחוק את נתוני הלקוח האלה?"', source)
+        self.assertNotIn("Archive workspace", source)
+        self.assertNotIn("הסרת סביבת עבודה", source)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/alert-dialog.html")
+        self.assertIn('id="rtl-title"', page)
+        self.assertIn("alert-dialog-direction-tabs", page)
+        self.assertIn("rtl-arabic-code", page)
 
     def test_requires_dialog_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Alert Dialog id is required"):

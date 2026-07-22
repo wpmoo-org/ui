@@ -3,7 +3,7 @@
 {% from "components/dialog.html.jinja" import dialog_footer %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Alert Dialog — Moo UI{% endblock %}
@@ -57,6 +57,28 @@
       small
     ) }}
 
+    {% set small_media %}
+      {{ button("Stop import", variant="outline", dialog_target="alert-dialog-small-media") }}
+      {% call alert_dialog("alert-dialog-small-media", size="sm", describedby="alert-dialog-small-media-description") %}
+        {{ alert_dialog_header(
+          "alert-dialog-small-media",
+          "Stop this import?",
+          "Rows that have not finished processing will stay queued for the next run.",
+          icon="circle-alert"
+        ) }}
+        {% call dialog_footer() %}
+          {{ button("Keep running", variant="outline", dismiss="modal") }}
+          {{ button("Stop import", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "small-media",
+      "Small with media",
+      "Use the compact size with a small icon when a short confirmation needs extra signal.",
+      small_media
+    ) }}
+
     {% set media %}
       {{ button("Pause sync", variant="outline", dialog_target="alert-dialog-media") }}
       {% call alert_dialog("alert-dialog-media", describedby="alert-dialog-media-description") %}
@@ -100,10 +122,10 @@
       destructive
     ) }}
 
-    {% set rtl %}
+    {% set rtl_arabic %}
       <div dir="rtl">
         {{ button("حذف بيانات العميل", variant="outline", dialog_target="alert-dialog-rtl") }}
-        {% call alert_dialog("alert-dialog-rtl", describedby="alert-dialog-rtl-description") %}
+        {% call alert_dialog("alert-dialog-rtl", direction="rtl", describedby="alert-dialog-rtl-description") %}
           {{ alert_dialog_header(
             "alert-dialog-rtl",
             "هل تريد حذف بيانات هذا العميل؟",
@@ -116,11 +138,48 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Header, description, and footer actions mirror automatically; no extra CSS or markup is required.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {{ button("מחיקת נתוני לקוח", variant="outline", dialog_target="alert-dialog-rtl-hebrew") }}
+        {% call alert_dialog("alert-dialog-rtl-hebrew", direction="rtl", describedby="alert-dialog-rtl-hebrew-description") %}
+          {{ alert_dialog_header(
+            "alert-dialog-rtl-hebrew",
+            "למחוק את נתוני הלקוח האלה?",
+            "פעולה זו מסירה את פרופיל הלקוח ואת היסטוריית ההזמנות לצמיתות."
+          ) }}
+          {% call dialog_footer() %}
+            {{ button("ביטול", variant="outline", dismiss="modal") }}
+            {{ button("מחיקה", variant="destructive", dismiss="modal") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {{ button("Delete customer data", variant="outline", dialog_target="alert-dialog-rtl-english") }}
+        {% call alert_dialog("alert-dialog-rtl-english", direction="rtl", describedby="alert-dialog-rtl-english-description") %}
+          {{ alert_dialog_header(
+            "alert-dialog-rtl-english",
+            "Delete this customer data?",
+            "This removes the customer profile and order history permanently."
+          ) }}
+          {% call dialog_footer() %}
+            {{ button("Cancel", variant="outline", dismiss="modal") }}
+            {{ button("Delete", variant="destructive", dismiss="modal") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "alert-dialog",
+      "Use tabs to compare Arabic, Hebrew, and English alert dialogs inside the same right-to-left layout.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--fit"
     ) }}
   </div>
 

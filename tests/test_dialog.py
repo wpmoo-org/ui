@@ -60,6 +60,19 @@ class DialogTests(CatalogTestCase):
                 '{% call dialog("example", size="huge") %}Content{% endcall %}'
             )
 
+    def test_dialog_supports_explicit_direction_for_portaled_rtl_modals(self) -> None:
+        output = self.render_dialog_block(
+            '{% call dialog("example", direction="rtl") %}Content{% endcall %}'
+        )
+
+        self.assertIn('dir="rtl"', output)
+
+    def test_dialog_rejects_unknown_direction(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown dialog direction: sideways"):
+            self.render_dialog_block(
+                '{% call dialog("example", direction="sideways") %}Content{% endcall %}'
+            )
+
     def test_dialog_size_classes(self) -> None:
         for size, expected_class in (
             ("sm", "modal-sm"),
