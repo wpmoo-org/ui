@@ -2,74 +2,93 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/toast.html.jinja" import toast, toast_container %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
-
 {% block title %}Toast — Moo UI{% endblock %}
 
 {% block content %}
   {{ render_page_header(
     "Toast",
-    "Push a lightweight, self-dismissing notification, built from Bootstrap's own opt-in Toast plugin."
+    "Surface short operational updates that should stay visible long enough to be noticed."
   ) }}
 
   <div class="moo-component-examples">
     {% set basic %}
-      {{ button("Show toast", variant="outline", toast_target="toast-basic") }}
+      {{ button("Show approval toast", variant="outline", toast_target="toast-basic") }}
       {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-basic", "Moo UI", "Changes saved.", timestamp="just now") }}
+        {{ toast("toast-basic", "Workflow", "Backup completed successfully.", timestamp="just now") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "Set <code>toast_target</code> on the ready Button macro; Bootstrap has no data-api trigger for toasts, so this attaches through a catalog-only <code>data-moo-toast-target</code> hook backed by one delegated click listener in <code>preview.js</code>. A consuming page wires its own trigger the same way Bootstrap's own docs show. <code>toast_container()</code> accepts <code>top-start</code>, <code>top-center</code>, <code>top-end</code>, <code>bottom-start</code>, <code>bottom-center</code>, or <code>bottom-end</code>.",
+      "Hook a toast to a Button with <code>toast_target</code>; Bootstrap handles the reveal/close behavior in the shared catalog wiring and toast macro.",
       basic
     ) }}
 
     {% set stacking %}
       <div class="d-flex flex-wrap gap-2">
-        {{ button("Show first", variant="outline", toast_target="toast-stack-1") }}
-        {{ button("Show second", variant="outline", toast_target="toast-stack-2") }}
+        {{ button("Show first alert", variant="outline", toast_target="toast-stack-1") }}
+        {{ button("Show second alert", variant="outline", toast_target="toast-stack-2") }}
       </div>
       {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-stack-1", "Upload", "invoice.pdf uploaded.", timestamp="1 min ago") }}
-        {{ toast("toast-stack-2", "Upload", "receipt.pdf uploaded.", timestamp="just now") }}
+        {{ toast("toast-stack-1", "Ingestion", "Invoice set synced.", timestamp="1 min ago") }}
+        {{ toast("toast-stack-2", "Ingestion", "Receipt batch synced.", timestamp="just now") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "stacking",
       "Stacking",
-      "Toasts in the same <code>toast_container()</code> stack with automatic spacing; trigger both buttons to see it.",
+      "Stack multiple follow-up events in one container so they retain spacing and timing.",
       stacking
     ) }}
 
     {% set persistent %}
       {{ button("Show persistent toast", variant="outline", toast_target="toast-persistent") }}
       {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-persistent", "Sync error", "Retry the last sync from the settings page.", autohide=false) }}
+        {{ toast("toast-persistent", "Queue", "Sync timed out — retry from the operations panel.", autohide=false) }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "persistent",
       "No autohide",
-      "Set <code>autohide=false</code> so the toast stays until the reader dismisses it, for messages worth guaranteeing they're seen.",
+      "Set <code>autohide=false</code> for actions that require manual acknowledgement.",
       persistent
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
-        {{ button("إظهار الإشعار", variant="outline", toast_target="toast-rtl") }}
+    {% set rtl_arabic %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ button("إظهار تنبيه المراجعة", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-arabic") }}
         {% call toast_container(placement="bottom-end") %}
-          {{ toast("toast-rtl", "Moo UI", "تم حفظ التغييرات.", timestamp="الآن") }}
+          {{ toast("toast-rtl-arabic", "المراجعة", "تمت مراجعة الطلب بنجاح.", timestamp="الآن") }}
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Header and body mirror automatically; no extra CSS or markup is required.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ button("הצג התראת סקירה", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-hebrew") }}
+        {% call toast_container(placement="bottom-end") %}
+          {{ toast("toast-rtl-hebrew", "סקירה", "הבקשה אושרה בהצלחה.", timestamp="כרגע") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-inline-flex" dir="rtl">
+        {{ button("Show review toast", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-english") }}
+        {% call toast_container(placement="bottom-end") %}
+          {{ toast("toast-rtl-english", "Review", "The request passed review.", timestamp="now") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "toast",
+      "Compare Arabic, Hebrew, and English toast actions inside a compact RTL shell.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english
     ) }}
   </div>
 
