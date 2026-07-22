@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/popover.html.jinja" import popover_dismiss_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Popover — Moo UI{% endblock %}
@@ -10,55 +10,68 @@
 {% block content %}
   {{ render_page_header(
     "Popover",
-    "Show richer, click-triggered content next to a trigger, powered by Bootstrap's own opt-in Popover plugin."
+    "Add compact, contextual details to workflow actions with Bootstrap's native popover behavior."
   ) }}
 
   <div class="moo-component-examples">
     {% set basic %}
-      {{ button("Open popover", variant="outline", popover_title="Notifications", popover_content="Choose how you want to be notified about activity.") }}
+      {{ button(
+        "Review update",
+        variant="outline",
+        popover_title="Routing review",
+        popover_content="Approve this request, reassign it, or return it for clarification."
+      ) }}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "Set <code>popover_content</code> (and optionally <code>popover_title</code>) on the ready Button macro. The catalog performs the one required explicit init pass; a consuming page must do the same.",
-      basic
+      "Use <code>popover_title</code> and <code>popover_content</code> on a standard button trigger for quick inline context.",
+      basic,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set placements %}
       <div class="d-flex flex-wrap gap-2">
-        {{ button("Top", variant="outline", popover_content="Popover on top", popover_placement="top") }}
-        {{ button("Right", variant="outline", popover_content="Popover on right", popover_placement="right") }}
-        {{ button("Bottom", variant="outline", popover_content="Popover on bottom", popover_placement="bottom") }}
-        {{ button("Left", variant="outline", popover_content="Popover on left", popover_placement="left") }}
+        {{ button("Top", variant="outline", popover_content="Keep the action rail visible while reviewing this item.", popover_placement="top") }}
+        {{ button("Right", variant="outline", popover_content="Open queue details to the right when space is available.", popover_placement="right") }}
+        {{ button("Bottom", variant="outline", popover_content="Show helper text underneath the current control.", popover_placement="bottom") }}
+        {{ button("Left", variant="outline", popover_content="Reserve space on the left for this control-heavy view.", popover_placement="left") }}
       </div>
     {% endset %}
     {{ render_example(
       "placements",
-      "Side",
-      "Set <code>popover_placement</code> to <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code>; directions mirror automatically under RTL.",
-      placements
+      "Placement",
+      "Set <code>popover_placement</code> to <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code> to position the popover close to the action.",
+      placements,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set rich_content %}
-      {{ button("Learn more", variant="outline", popover_title="New feature", popover_content="Rich text can emphasize <strong>important details</strong>.", popover_html=true) }}
+      {{ button(
+        "View guidance",
+        variant="outline",
+        popover_title="Queue notes",
+        popover_content="Review <strong>priority rules</strong> and <code>follow-up notes</code> before owners change.",
+        popover_html=true
+      ) }}
     {% endset %}
     {{ render_example(
       "rich-content",
       "Rich content",
-      "Set <code>popover_html=true</code> to render markup inside the popover body. Bootstrap runs it through its "
-      ~ "own default sanitizer allowlist first (same as Tooltip's <code>tooltip_html</code>), so stick to "
-      ~ "allowlisted inline tags — <code>&lt;a&gt;</code> here.",
-      rich_content
+      "Set <code>popover_html=true</code> to format body content. Bootstrap still applies its default sanitizer, so stay with allowlisted tags like <code>&lt;strong&gt;</code> and <code>&lt;code&gt;</code>.",
+      rich_content,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set dismiss %}
-      {{ popover_dismiss_trigger("Dismissible popover", "Click anywhere else on the page to close this.", title="Dismissible") }}
+      {{ popover_dismiss_trigger("Dismiss details", "Click anywhere outside this panel to close it.", title="Dismissible note") }}
     {% endset %}
     {{ render_example(
       "dismiss",
       "Dismiss on next click",
-      "Bootstrap only supports the focus-triggered dismiss pattern reliably on an <code>&lt;a&gt;</code> element with <code>tabindex=\"0\"</code>, not a <code>&lt;button&gt;</code>, so this ships as its own <code>popover_dismiss_trigger()</code> macro.",
-      dismiss
+      "Bootstrap only supports the focus-triggered dismiss pattern reliably on an <code>&lt;a&gt;</code> element with <code>tabindex=\"0\"</code>, not a <code>&lt;button&gt;</code>, so this uses the dedicated <code>popover_dismiss_trigger()</code> macro.",
+      dismiss,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set disabled %}
@@ -69,20 +82,57 @@
     {{ render_example(
       "disabled-trigger",
       "Disabled trigger",
-      "A <code>disabled</code> element never fires hover, focus, or click events, so wrap it in a focusable <code>&lt;span&gt;</code> and attach the popover there. Bootstrap recommends <code>hover focus</code> as the trigger here, since a click may not be the first thing a user expects from something disabled.",
-      disabled
+      "A <code>disabled</code> control does not receive pointer or focus events, so attach the popover to a focusable <code>&lt;span&gt;</code> wrapper.",
+      disabled,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
+    {% set rtl_arabic %}
       <div dir="rtl">
-        {{ button("فتح النافذة", variant="outline", popover_title="الإشعارات", popover_content="اختر كيف تريد أن يتم إشعارك بالنشاط.") }}
+        {{ button(
+          "فتح ملاحظة المراجعة",
+          variant="outline",
+          size="sm",
+          popover_title="ملاحظة المراجعة",
+          popover_content="تحقق من هذه الخطوة قبل إرسال الإشعار النهائي.",
+          popover_placement="bottom"
+        ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Placement direction mirrors automatically; no extra CSS or markup is required.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {{ button(
+          "פתח הערת ביקורת",
+          variant="outline",
+          size="sm",
+          popover_title="הערת ביקורת",
+          popover_content="בדוק את הצעד לפני שליחת ההתרעה הסופית.",
+          popover_placement="bottom"
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {{ button(
+          "Open review note",
+          variant="outline",
+          size="sm",
+          popover_title="Review note",
+          popover_content="Check this step before sending the final notice.",
+          popover_placement="bottom"
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "popover-rtl",
+      "Compare Arabic, Hebrew, and English popover triggers in the same review workflow.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 
