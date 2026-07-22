@@ -50,6 +50,7 @@ $kbd-color: var(--bs-secondary-color) !default;
 $kbd-bg: var(--bs-secondary-bg) !default;
 // The reference breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
+$breadcrumb-divider-flipped: quote("<") !default;
 // The reference pagination items sit separated with no border, ghost-hover, and
 // only the active page gets a bordered box; Bootstrap's default is a fully
 // bordered, edge-to-edge connected strip. A positive margin-start switches

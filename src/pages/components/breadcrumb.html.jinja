@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/breadcrumb.html.jinja" import breadcrumb %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Breadcrumb — Moo UI{% endblock %}
@@ -84,20 +84,43 @@
       collapsed
     ) }}
 
-    {% set rtl %}
+    {% set arabic_breadcrumb %}
       <div dir="rtl">
         {{ breadcrumb([
           {"label": "مساحة العمل", "href": "#"},
-          {"label": "المشاريع", "href": "#"},
-          {"label": "لوحة النمو"}
+          {"label": "المراجعات", "href": "#"},
+          {"label": "طلبات اليوم"}
         ]) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The divider and item order follow reading direction without mirrored custom CSS.",
-      rtl
+
+    {% set hebrew_breadcrumb %}
+      <div dir="rtl">
+        {{ breadcrumb([
+          {"label": "סביבת עבודה", "href": "#"},
+          {"label": "חיוב", "href": "#"},
+          {"label": "חשבוניות פתוחות"}
+        ]) }}
+      </div>
+    {% endset %}
+
+    {% set english_breadcrumb %}
+      <div dir="rtl">
+        {{ breadcrumb([
+          {"label": "Workspace", "href": "#"},
+          {"label": "Support queue", "href": "#"},
+          {"label": "Escalations"}
+        ]) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "breadcrumb",
+      "Use tabs to compare practical breadcrumb trails inside Arabic, Hebrew, and English right-to-left layouts.",
+      arabic_breadcrumb,
+      hebrew_breadcrumb,
+      english_breadcrumb,
+      preview_class="moo-example__preview--fit"
     ) }}
   </div>
 

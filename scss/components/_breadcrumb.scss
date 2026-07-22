@@ -6,6 +6,23 @@
   --bs-breadcrumb-item-active-color: var(--moo-foreground);
 }
 
+// Bootstrap emits these RTL changes through RTLCSS. The catalog serves one
+// runtime CSS file, so scoped RTL demos bridge that generated output.
+:dir(rtl) .breadcrumb {
+  --bs-breadcrumb-divider: "#{$breadcrumb-divider-flipped}";
+}
+
+:dir(rtl) .breadcrumb-item + .breadcrumb-item {
+  padding-right: var(--bs-breadcrumb-item-padding-x);
+  padding-left: 0;
+}
+
+:dir(rtl) .breadcrumb-item + .breadcrumb-item::before {
+  float: right;
+  padding-right: 0;
+  padding-left: var(--bs-breadcrumb-item-padding-x);
+}
+
 .breadcrumb-item a {
   color: var(--moo-muted-foreground);
   text-decoration: none;
