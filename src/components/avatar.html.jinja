@@ -1,17 +1,50 @@
 {% set avatar_sizes = ["", "sm", "lg"] %}
 
-{% macro avatar(name="", src="", alt="", initials="", size="", extra_class="") -%}
+{% macro avatar(
+  name="",
+  src="",
+  alt="",
+  initials="",
+  fallback="",
+  size="",
+  extra_class="",
+  badge="",
+  badge_icon="",
+  badge_dot=false,
+  badge_class="",
+  badge_aria_label=""
+) -%}
   {% if size not in avatar_sizes %}{{ fail("Unknown avatar size: " ~ size) }}{% endif %}
   {% if src and not alt | trim %}{{ fail("Avatar images require alt text") }}{% endif %}
-  {% if not src and not initials | trim %}{{ fail("Avatar fallback initials are required when src is empty") }}{% endif %}
+
+  {% set fallback_text = fallback | default(initials, true) | trim %}
+  {% if not src and not fallback_text %}
+    {{ fail("Avatar fallback initials are required when src is empty") }}
+  {% endif %}
+
   {% set classes = "avatar" %}
   {% if size %}{% set classes = classes ~ " avatar-" ~ size %}{% endif %}
+  {% if src %}{% set classes = classes ~ " avatar--has-image" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  <span class="{{ classes }}"{% if not src %} role="img" aria-label="{{ name if name else initials }}"{% endif %}>
+  {% set fallback_label = (name | trim) or fallback_text %}
+
+  <span class="{{ classes }}"{% if not src %} role="img" aria-label="{{ fallback_label }}"{% endif %}>
     {% if src %}
       <img src="{{ src }}" alt="{{ alt }}">
-    {% else %}
-      {{ initials }}
+    {% endif %}
+
+    {% if fallback_text %}
+      <span class="avatar-fallback">{{ fallback_text }}</span>
+    {% endif %}
+
+    {% if badge or badge_icon or badge_dot %}
+      <span
+        class="avatar-badge{% if badge_dot %} avatar-badge--dot{% endif %}{% if badge_icon and not badge %} avatar-badge--icon{% endif %}{% if badge_class %} {{ badge_class }}{% endif %}"
+        {% if badge_aria_label %} role="status" aria-label="{{ badge_aria_label }}"{% endif %}
+      >
+        {% if badge_icon %}{{ render_icon(badge_icon, "inline-start") }}{% endif %}
+        {% if badge %}{{ badge }}{% endif %}
+      </span>
     {% endif %}
   </span>
 {%- endmacro %}

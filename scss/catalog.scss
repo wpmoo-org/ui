@@ -1166,6 +1166,11 @@ body {
   max-width: 30rem;
 }
 
+.moo-example__preview--fit>* {
+  width: auto;
+  max-width: 100%;
+}
+
 .moo-example__preview--shell {
   display: block;
   min-height: 0;

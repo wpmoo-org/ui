@@ -1,13 +1,15 @@
 {% from "components/typography.html.jinja" import typography %}
 
-{% macro render_example(id, title, description, content, preview_class="") %}
+{% macro render_example(id, title, description, content, preview_class="", show_header=true) %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
-  <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
-    <div class="moo-example__header">
-      {{ typography(title, variant="example-title", id=id ~ "-title") }}
-      <p class="text-body-secondary mb-0">{{ description | safe }}</p>
-    </div>
+  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ id }}-title"{% else %} aria-label="{{ title }}"{% endif %}>
+    {% if show_header %}
+      <div class="moo-example__header">
+        {{ typography(title, variant="example-title", id=id ~ "-title") }}
+        <p class="text-body-secondary mb-0">{{ description | safe }}</p>
+      </div>
+    {% endif %}
     <div class="moo-example__surface">
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {{ rendered | safe }}

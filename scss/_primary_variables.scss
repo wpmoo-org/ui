@@ -114,6 +114,13 @@ $avatar-size-lg: $avatar-size * 1.25 !default;
 $avatar-font-size-sm: 0.75rem !default;
 $avatar-font-size-lg: 1rem !default;
 $avatar-line-height: 1 !default;
+// Verified against the live reference: a 32px avatar group overlaps by 8px
+// and a plain presence-dot badge (no text/icon) renders 10px square with a
+// 2px page-background ring cut into it.
+$avatar-group-overlap: -0.5rem !default;
+$avatar-badge-dot-size: 0.625rem !default;
+$avatar-badge-icon-size: 0.75rem !default;
+$avatar-badge-ring-width: 2px !default;
 
 $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
