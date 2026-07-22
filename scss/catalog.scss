@@ -302,11 +302,16 @@ body {
 }
 
 .moo-catalog__main {
-  --scroll-fade-size: min(12%, 5rem);
-  --scroll-fade-reveal: 10rem;
+  --scroll-fade-size: min(6%, 2rem);
+  --scroll-fade-reveal: 4rem;
   min-width: 0;
   flex: 1;
   overflow-y: auto;
+}
+
+.moo-catalog__main:has(.moo-home-hero) {
+  --scroll-fade-size: min(12%, 5rem);
+  --scroll-fade-reveal: 10rem;
 }
 
 .moo-catalog__content {
