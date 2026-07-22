@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/pagination.html.jinja" import pagination, pagination_ellipsis, pagination_item, pagination_next, pagination_prev %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Pagination — Moo UI{% endblock %}
@@ -9,13 +9,13 @@
 {% block content %}
   {{ render_page_header(
     "Pagination",
-    "Navigate a series of related pages using Bootstrap's native pagination list."
+    "Navigate paged results with native Bootstrap pagination controls."
   ) }}
 
   <div class="moo-component-examples">
     {% set default %}
       {% call pagination() %}
-        {{ pagination_prev() }}
+        {{ pagination_prev(label="Previous page") }}
         {{ pagination_item("1") }}
         {{ pagination_item("2", active=true) }}
         {{ pagination_item("3") }}
@@ -26,36 +26,38 @@
     {{ render_example(
       "default",
       "Default",
-      "Compose page numbers, an active state, and an ellipsis for skipped ranges.",
-      default
+      "Use page numbers with Previous/Next and an ellipsis for long result sets.",
+      default,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set disabled_ends %}
       {% call pagination() %}
-        {{ pagination_prev(disabled=true) }}
+        {{ pagination_prev(disabled=true, label="Previous") }}
         {{ pagination_item("1", active=true) }}
         {{ pagination_item("2") }}
         {{ pagination_item("3") }}
-        {{ pagination_next() }}
+        {{ pagination_next(label="Next") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "disabled-ends",
       "Disabled boundary",
-      "Disable Previous or Next at the start or end of a range.",
-      disabled_ends
+      "Keep Previous disabled on the first page while remaining actions stay available.",
+      disabled_ends,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set sizes %}
-      <div class="d-grid gap-3">
+      <div class="d-flex flex-column gap-3">
         {% call pagination(size="sm") %}
-          {{ pagination_prev() }}
+          {{ pagination_prev(label="Previous") }}
           {{ pagination_item("1", active=true) }}
           {{ pagination_item("2") }}
-          {{ pagination_next() }}
+          {{ pagination_next(label="Next") }}
         {% endcall %}
         {% call pagination(size="lg") %}
-          {{ pagination_prev() }}
+          {{ pagination_prev(label="Previous") }}
           {{ pagination_item("1", active=true) }}
           {{ pagination_item("2") }}
           {{ pagination_next() }}
@@ -65,26 +67,57 @@
     {{ render_example(
       "sizes",
       "Sizes",
-      "Use <code>size=\"sm\"</code> or <code>size=\"lg\"</code> for a denser or larger control.",
-      sizes
+      "Use compact and larger controls with Bootstrap size variants when the layout needs density.",
+      sizes,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
+    {% set rtl_arabic %}
       <div dir="rtl">
         {% call pagination() %}
-          {{ pagination_prev() }}
+          {{ pagination_prev(label="السابق") }}
           {{ pagination_item("1") }}
           {{ pagination_item("2", active=true) }}
           {{ pagination_item("3") }}
-          {{ pagination_next() }}
+          {{ pagination_ellipsis(label="صفحات إضافية") }}
+          {{ pagination_next(label="التالي") }}
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Previous and Next swap sides with the natural reading-direction order.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {% call pagination() %}
+          {{ pagination_prev(label="הקודם") }}
+          {{ pagination_item("1") }}
+          {{ pagination_item("2", active=true) }}
+          {{ pagination_item("3") }}
+          {{ pagination_ellipsis(label="עמודים נוספים") }}
+          {{ pagination_next(label="הבא") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {% call pagination() %}
+          {{ pagination_prev(label="Previous") }}
+          {{ pagination_item("1") }}
+          {{ pagination_item("2", active=true) }}
+          {{ pagination_item("3") }}
+          {{ pagination_ellipsis() }}
+          {{ pagination_next(label="Next") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "pagination",
+      "Use the same page range, active state, and skipped-pages marker across Arabic, Hebrew, and English in RTL direction.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 

@@ -78,3 +78,34 @@ class PaginationTests(CatalogTestCase):
         output = self.render_pagination("pagination_ellipsis()")
         self.assertIn('<li class="page-item disabled">', output)
         self.assertIn('<span class="visually-hidden">More pages</span>', output)
+
+    def test_page_uses_shared_rtl_example_tabs(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("render_rtl_example", source)
+        self.assertNotIn('title="RTL"', source)
+        self.assertIn("rtl_arabic", source)
+        self.assertIn("rtl_hebrew", source)
+        self.assertIn("rtl_english", source)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+
+        # The RTL rule requires exact translations of the same example:
+        # same page range (1/2/3, page 2 active) and ellipsis in all three.
+        for block_start in ("rtl_arabic %}", "rtl_hebrew %}", "rtl_english %}"):
+            block = source.split(block_start, 1)[1].split("{% endset %}", 1)[0]
+            with self.subTest(locale=block_start):
+                self.assertIn('pagination_item("1")', block)
+                self.assertIn('pagination_item("2", active=true)', block)
+                self.assertIn('pagination_item("3")', block)
+                self.assertIn("pagination_ellipsis(", block)
+                self.assertIn("pagination_prev(", block)
+                self.assertIn("pagination_next(", block)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/pagination.html")
+        self.assertIn("pagination-direction-tabs", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
