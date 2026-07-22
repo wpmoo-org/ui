@@ -6,7 +6,7 @@
 {% from "components/input_group.html.jinja" import input_group %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 
 {% block title %}Button Group — Moo UI{% endblock %}
 
@@ -181,20 +181,46 @@
       nested_groups
     ) }}
 
-    {% set rtl_preview %}
-      <div dir="rtl">
-        {% call button_group("إجراءات التذكرة") %}
+    {% set rtl_arabic %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call button_group("إجراءات قائمة انتظار مساحة العمل") %}
           {{ button("أرشفة", variant="outline") }}
-          {{ button("مراجعة", variant="outline") }}
+          {{ button("تصعيد", variant="outline") }}
           {{ button("تأجيل", variant="outline") }}
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl-preview",
-      "Right-to-left layout",
-      "With <code>dir=\"rtl\"</code>, Bootstrap keeps joined borders and action order coherent for right-to-left content.",
-      rtl_preview
+
+    {% set rtl_hebrew %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call button_group("פעולות תור סביבת העבודה") %}
+          {{ button("ארכוב", variant="outline") }}
+          {{ button("הסלמה", variant="outline") }}
+          {{ button("השהיה", variant="outline") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call button_group("Workspace queue actions") %}
+          {{ button("Archive", variant="outline") }}
+          {{ button("Escalate", variant="outline") }}
+          {{ button("Snooze", variant="outline") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "button-group-ribbon",
+      "Compare Arabic, Hebrew, and English command rails in an RTL shell for workspace admin workflows.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--fit",
+      title="RTL",
+      title_id="button-group-rtl-title",
+      example_prefix="rtl"
     ) }}
   </div>
 
