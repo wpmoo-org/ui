@@ -1,22 +1,35 @@
+<p align="center">
+  <img src="https://ui.wpmoo.org/assets/images/readme-hero.webp" alt="Moo UI catalog preview" width="760">
+</p>
+
+<p align="center">
+  <a href="https://github.com/wpmoo-org/ui/actions/workflows/ui-ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/wpmoo-org/ui/ui-ci.yml?branch=main&label=CI"></a>
+  <a href="https://github.com/wpmoo-org/ui"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white"></a>
+  <a href="https://www.npmjs.com/package/@wpmoo/ui"><img alt="npm" src="https://img.shields.io/npm/v/@wpmoo/ui?label=npm&logo=npm&color=cb3837"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+</p>
+
+<p align="center">
+  <strong>Bootstrap markup. shadcn feel.</strong>
+</p>
+
+<p align="center">
+  Keep your Bootstrap 5.3 HTML and behavior. Replace the stylesheet and give
+  your application a calmer, modern product interface without moving to React or
+  Tailwind.
+</p>
+
+<p align="center">
+  <a href="https://ui.wpmoo.org/"><strong>Explore Moo UI »</strong></a>
+</p>
+
+<p align="center">
+  <a href="#try-it-in-30-seconds">Try it in 30 seconds</a> ·
+  <a href="https://www.npmjs.com/package/@wpmoo/ui">View on npm</a> ·
+  <a href="https://github.com/wpmoo-org/ui/issues">Report bug</a>
+</p>
+
 # Moo UI
-
-**Bootstrap markup. shadcn feel.**
-
-Keep your Bootstrap 5.3 HTML and behavior. Replace the stylesheet and give
-your application a calmer, modern product interface without moving to React or
-Tailwind.
-
-[Explore the live catalog](https://ui.wpmoo.org/components/) ·
-[Try it in 30 seconds](#try-it-in-30-seconds) ·
-[View on npm](https://www.npmjs.com/package/@wpmoo/ui)
-
-![Moo UI catalog preview](https://ui.wpmoo.org/assets/images/readme-hero.webp)
-
-[![CI](https://img.shields.io/github/actions/workflow/status/wpmoo-org/ui/ui-ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/wpmoo-org/ui/actions/workflows/ui-ci.yml)
-[![coverage](https://img.shields.io/codecov/c/github/wpmoo-org/ui?branch=main&label=coverage&logo=codecov&style=flat-square&color=blue)](https://codecov.io/gh/wpmoo-org/ui)
-[![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&style=flat-square)](https://github.com/wpmoo-org/ui)
-[![npm](https://img.shields.io/npm/v/@wpmoo/ui?label=npm&logo=npm&style=flat-square&color=blue)](https://www.npmjs.com/package/@wpmoo/ui)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 Moo UI is for teams that already like Bootstrap's durability, documented
 components, and server-rendered friendliness, but want their customer portals,
@@ -104,6 +117,56 @@ The live catalog is the source of truth for current coverage:
 
 Representative components include Button, Field, Table, Dialog, Toast, Sheet,
 and Sidebar. More components are being added as the catalog roadmap continues.
+
+## Designed, Not Just Restyled
+
+Moo UI uses original sketch-style previews to show the thinking behind each
+primitive: states, spacing, hierarchy, and the product UI feeling Bootstrap
+projects often need. The README wraps a few of those transparent assets in
+theme-aware surfaces so they stay legible on GitHub.
+
+<p align="center">
+  <a href="https://ui.wpmoo.org/components/button.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/button-dark.svg">
+      <img src="static/images/readme/button-light.svg" alt="Button preview" width="31%">
+    </picture>
+  </a>
+  <a href="https://ui.wpmoo.org/components/dialog.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/dialog-dark.svg">
+      <img src="static/images/readme/dialog-light.svg" alt="Dialog preview" width="31%">
+    </picture>
+  </a>
+  <a href="https://ui.wpmoo.org/components/sidebar.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/sidebar-dark.svg">
+      <img src="static/images/readme/sidebar-light.svg" alt="Sidebar preview" width="31%">
+    </picture>
+  </a>
+  <a href="https://ui.wpmoo.org/components/toast.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/toast-dark.svg">
+      <img src="static/images/readme/toast-light.svg" alt="Toast preview" width="31%">
+    </picture>
+  </a>
+  <a href="https://ui.wpmoo.org/components/sheet.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/sheet-dark.svg">
+      <img src="static/images/readme/sheet-light.svg" alt="Sheet preview" width="31%">
+    </picture>
+  </a>
+  <a href="https://ui.wpmoo.org/components/input.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/input-dark.svg">
+      <img src="static/images/readme/input-light.svg" alt="Input preview" width="31%">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://ui.wpmoo.org/components/">Browse the full catalog →</a>
+</p>
 
 ## Package Boundaries
 
