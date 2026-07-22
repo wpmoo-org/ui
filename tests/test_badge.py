@@ -51,3 +51,26 @@ class BadgeTests(CatalogTestCase):
             '<span class="visually-hidden">unread messages</span>',
             output,
         )
+
+    def test_page_uses_shared_rtl_example_tabs(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("render_rtl_example", source)
+        self.assertNotIn('title="RTL"', source)
+        self.assertIn("arabic_badge", source)
+        self.assertIn("hebrew_badge", source)
+        self.assertIn("english_badge", source)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertIn("Access request", source)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/badge.html")
+        self.assertIn("badge-direction-tabs", output)
+        self.assertIn("rtl-arabic-code", output)
+        self.assertIn("rtl-hebrew-code", output)
+        self.assertIn("rtl-english-code", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
