@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/spinner.html.jinja" import spinner %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Spinner — Moo UI{% endblock %}
@@ -47,16 +47,33 @@
       in_button
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
-        {{ spinner(aria_label="جارٍ التحميل") }}
+    {% set rtl_arabic %}
+      <div class="d-flex align-items-center gap-2" dir="rtl">
+        {{ spinner(aria_label="جارٍ تحميل التحديثات") }}
+        <span>جارٍ تحميل التحديثات</span>
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The spinner has no directional geometry, so it renders identically under RTL.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div class="d-flex align-items-center gap-2" dir="rtl">
+        {{ spinner(aria_label="טוען עדכונים") }}
+        <span>טוען עדכונים</span>
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-flex align-items-center gap-2" dir="rtl">
+        {{ spinner(aria_label="Loading updates") }}
+        <span>Loading updates</span>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "spinner",
+      "Use the same loading row translated exactly into Arabic, Hebrew, and English; the spinner itself has no directional geometry, so only the label and its order change.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english
     ) }}
   </div>
 
