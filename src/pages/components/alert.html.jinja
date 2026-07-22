@@ -2,7 +2,7 @@
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Alert — Moo UI{% endblock %}
@@ -14,7 +14,7 @@
   ) }}
 
   <div class="moo-component-examples">
-    {% set default %}
+    {% set basic %}
       {{ alert(
         "Scheduled maintenance",
         description="The catalog will be briefly unavailable this weekend while we upgrade the build pipeline.",
@@ -22,10 +22,10 @@
       ) }}
     {% endset %}
     {{ render_example(
-      "default",
-      "Default",
+      "basic",
+      "Basic",
       "Pair an icon with a title and description inside a quiet bordered region.",
-      default
+      basic
     ) }}
 
     {% set destructive %}
@@ -43,19 +43,34 @@
       destructive
     ) }}
 
-    {% set with_action %}
+    {% set action %}
       {{ alert(
-        "A new component just shipped",
-        description="Collapsible is ready to use. Check the docs to get started.",
-        icon="info",
-        action=button("View docs", variant="outline", size="sm")
+        "Storage limit approaching",
+        description="This workspace has used 92% of its plan. Upgrade to avoid interrupted uploads.",
+        icon="triangle-alert",
+        action=button("Upgrade plan", variant="outline", size="sm")
       ) }}
     {% endset %}
     {{ render_example(
-      "with-action",
-      "With action",
+      "action",
+      "Action",
       "Compose the ready Button macro into <code>action</code> for a single inline response.",
-      with_action
+      action
+    ) }}
+
+    {% set custom_colors %}
+      {{ alert(
+        "Subscription renews in 3 days",
+        description="Confirm your payment method so the workspace doesn't lose access when the trial ends.",
+        icon="triangle-alert",
+        extra_class="border-warning-subtle bg-warning-subtle text-warning-emphasis"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "custom-colors",
+      "Custom colors",
+      "Layer Bootstrap's own subtle contextual utilities on <code>extra_class</code> instead of a filled, saturated alert color.",
+      custom_colors
     ) }}
 
     {% set dismissible %}
@@ -73,20 +88,43 @@
       dismissible
     ) }}
 
-    {% set rtl %}
+    {% set arabic_alert %}
       <div dir="rtl">
         {{ alert(
-          "تنبيه",
-          description="تمت معالجة طلبك بنجاح.",
+          "تمت الموافقة على الطلب",
+          description="تمت مراجعة طلب الوصول وسيصل صاحبه إلى مساحة العمل خلال دقائق.",
           icon="info"
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The icon, body, and action stay in reading-direction order without mirrored custom CSS.",
-      rtl
+
+    {% set hebrew_alert %}
+      <div dir="rtl">
+        {{ alert(
+          "הבקשה אושרה",
+          description="בקשת הגישה נבדקה והמשתמש יקבל גישה לסביבת העבודה בתוך דקות.",
+          icon="info"
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set english_rtl_alert %}
+      <div dir="rtl">
+        {{ alert(
+          "Access request approved",
+          description="The request was reviewed and the requester will reach the workspace within minutes.",
+          icon="info"
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "alert",
+      "Use tabs to compare Arabic, Hebrew, and English alerts inside the same RTL layout.",
+      arabic_alert,
+      hebrew_alert,
+      english_rtl_alert,
+      preview_class="moo-example__preview--fit"
     ) }}
   </div>
 
