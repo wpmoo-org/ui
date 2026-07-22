@@ -38,6 +38,7 @@
 // switching only toggles visibility, never the container's height.
 .tab-content {
   display: grid;
+  margin-top: $moo-tabs-content-gap;
 }
 
 .tab-content > .tab-pane {

@@ -1161,6 +1161,11 @@ body {
   max-width: 24rem;
 }
 
+.moo-example__preview--medium>* {
+  width: 100%;
+  max-width: 30rem;
+}
+
 .moo-example__preview--shell {
   display: block;
   min-height: 0;
