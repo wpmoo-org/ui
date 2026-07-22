@@ -38,6 +38,33 @@ class DropdownMenuTests(CatalogTestCase):
         self.assertIn('data-icon="inline-start"', output)
         self.assertIn('<span class="ms-auto small text-body-secondary">⌘O</span>', output)
 
+    def test_dropdown_auto_close_passes_through_to_the_trigger_button(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
+            '{% call dropdown("Actions", auto_close="outside") %}'
+            '{{ dropdown_item("Open") }}'
+            "{% endcall %}"
+        )
+        self.assertIn('data-bs-auto-close="outside"', output)
+
+        default_output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
+            '{% call dropdown("Actions") %}'
+            '{{ dropdown_item("Open") }}'
+            "{% endcall %}"
+        )
+        self.assertNotIn("data-bs-auto-close", default_output)
+
+    def test_dropdown_offset_passes_through_to_the_trigger_button(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
+            '{% call dropdown("Actions", offset="0,8") %}'
+            '{{ dropdown_item("Open") }}'
+            "{% endcall %}"
+        )
+
+        self.assertIn('data-bs-offset="0,8"', output)
+
     def test_dropdown_caret_is_explicit(self) -> None:
         output = self.render_template(
             '{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}'
@@ -109,6 +136,11 @@ class DropdownMenuTests(CatalogTestCase):
                 '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
                 '{{ dropdown_item("Acme Inc", icon_box=true) }}',
                 "Dropdown item icon_box requires an icon",
+            ),
+            (
+                '{% from "components/dropdown_menu.html.jinja" import dropdown %}'
+                '{% call dropdown("Actions", auto_close="maybe") %}x{% endcall %}',
+                "Unknown button dropdown_auto_close: maybe",
             ),
         )
 

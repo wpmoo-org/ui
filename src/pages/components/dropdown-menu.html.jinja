@@ -1,7 +1,10 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
+{% from "components/alert.html.jinja" import alert %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/radio_group.html.jinja" import radio_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Dropdown Menu — Moo UI{% endblock %}
@@ -9,99 +12,175 @@
 {% block content %}
   {{ render_page_header(
     "Dropdown Menu",
-    "Show contextual actions from a Bootstrap button trigger without replacing Bootstrap's dropdown plugin."
+    "Collect contextual actions in one compact surface using Bootstrap's native dropdown behavior and placement."
   ) }}
 
   <div class="moo-component-examples">
-    {% set basic %}
-      {% call dropdown("Open menu") %}
-        {{ dropdown_item("Edit project", icon="pencil", shortcut="⌘E") }}
-        {{ dropdown_item("Duplicate", icon="copy", shortcut="⌘D") }}
-        {{ dropdown_item("Archive", icon="archive") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "basic",
-      "Single button",
-      "Use <code>data-bs-toggle=\"dropdown\"</code> on the trigger. Bootstrap owns positioning, closing, and keyboard handling through its dropdown plugin.",
-      basic
-    ) }}
-
     {% set grouped %}
-      {% call dropdown("Workspace", align="end", caret=true) %}
-        {{ dropdown_header("Current workspace") }}
-        {{ dropdown_item("Olympiad", active=true, icon="check") }}
-        {{ dropdown_item("Kita", icon="folder") }}
-        {{ dropdown_item("Portal", icon="globe") }}
+      {% call dropdown("Project actions", align="start", offset="0,6") %}
+        {{ dropdown_header("Project") }}
+        {{ dropdown_item("Open project", icon="folder-open", shortcut="⌘O") }}
+        {{ dropdown_item("Rename project", icon="pencil") }}
         {{ dropdown_divider() }}
-        {{ dropdown_item("Manage workspaces", icon="settings") }}
+        {{ dropdown_item("Archive", icon="archive") }}
+        {{ dropdown_item("Delete", icon="trash-2", destructive=true) }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "grouped",
-      "Headers and dividers",
-      "Use <code>dropdown-header</code> for a quiet group label and <code>dropdown-divider</code> to separate unrelated actions.",
-      grouped
+      "Headers and separators",
+      "Use headers for workflow groups, then split dense items with a divider before destructive actions.",
+      grouped,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set states %}
-      {% call dropdown("More actions") %}
-        {{ dropdown_item("Publish", icon="send") }}
-        {{ dropdown_item("Waiting for review", disabled=true, icon="clock") }}
+    {% set shortcuts %}
+      {% call dropdown("Task queue", align="end", offset="0,6") %}
+        {{ dropdown_item("Mark complete", icon="check", shortcut="⌘D") }}
+        {{ dropdown_item("Add note", icon="pencil", shortcut="⌘N") }}
         {{ dropdown_divider() }}
-        {{ dropdown_item("Delete draft", icon="trash-2", destructive=true) }}
+        {{ dropdown_item("Assign owner", icon="users", shortcut="⌥⌘O") }}
+        {{ dropdown_item("Waiting on approval", icon="clock", disabled=true) }}
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "states",
-      "Disabled and destructive items",
-      "Disabled items use native disabled behavior. Destructive rows keep Bootstrap's item contract and add only the semantic <code>text-danger</code> utility.",
-      states
+      "shortcuts",
+      "Keyboard hints",
+      "Expose key equivalents beside actions so power users can run the same flow from keyboard and pointer.",
+      shortcuts,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set variants %}
-      <div class="d-flex flex-wrap gap-2">
-        {% call dropdown("Primary", variant="default") %}
-          {{ dropdown_item("Open") }}
-          {{ dropdown_item("Share") }}
-        {% endcall %}
-        {% call dropdown("Secondary", variant="secondary") %}
-          {{ dropdown_item("Open") }}
-          {{ dropdown_item("Share") }}
-        {% endcall %}
-        {% call dropdown("Outline", variant="outline") %}
-          {{ dropdown_item("Open") }}
-          {{ dropdown_item("Share") }}
-        {% endcall %}
-      </div>
+    {% set iconed %}
+      {% call dropdown("Workspace commands", offset="0,6") %}
+        {{ dropdown_item("Duplicate", icon="copy", icon_box=true, shortcut="⇧⌘D") }}
+        {{ dropdown_item("Share", icon="share", shortcut="⌘⇧S") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("New tab", icon="layout-dashboard", shortcut="⌘T") }}
+        {{ dropdown_item("Invite team", icon="plus", shortcut="⌘I") }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
-      "variants",
-      "Button variants",
-      "Any ready Button variant can trigger a dropdown; the menu contract stays the same.",
-      variants
+      "icons",
+      "Icon-led rows",
+      "Leading icons and optional shortcut text keep each command quickly recognizable in compact menus.",
+      iconed,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
-        {% call dropdown("الإجراءات", align="end") %}
-          {{ dropdown_item("فتح", icon="folder-open") }}
-          {{ dropdown_item("مشاركة", icon="share") }}
+    {% set toggles %}
+      {% call dropdown("View options", auto_close="outside", offset="0,6") %}
+        <li class="px-3 py-1 text-nowrap">
+          {{ checkbox("dropdown-closed-projects", label="Show closed projects", checked=true) }}
+        </li>
+        <li class="px-3 py-1 text-nowrap">
+          {{ checkbox("dropdown-notify-team", label="Notify teammates on updates") }}
+        </li>
+        <li class="px-3 py-1 text-nowrap">
+          {{ checkbox("dropdown-confidential", label="Allow confidential exports", disabled=true) }}
+        </li>
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Reset view", icon="undo") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "toggles",
+      "Checkbox-like actions",
+      "Stateful controls can live inside a dropdown for temporary view filters without leaving the current context.",
+      toggles,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set selection %}
+      {% call dropdown("Sort", auto_close="outside", offset="0,6") %}
+        <li class="px-3 py-1">
+          {{ radio_group(
+            "dropdown-sort", "Sort by", [
+              {"id": "dropdown-sort-recent", "label": "Most recent", "checked": true},
+              {"id": "dropdown-sort-name", "label": "Name"},
+              {"id": "dropdown-sort-urgency", "label": "Urgency"}
+            ])
+          }}
+        </li>
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Reverse order", icon="redo", shortcut="⇧⌘R") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "radios",
+      "Radio-like choices",
+      "Use exclusive choices inside a small open context when one sort mode must be selected before returning to the page.",
+      selection,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set destructive %}
+      {% call dropdown("Danger zone", variant="outline", align="end", offset="0,6") %}
+        {{ dropdown_item("Pause publishing", icon="clock") }}
+        {{ dropdown_item("Transfer ownership", icon="users") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Delete project", icon="trash-2", destructive=true, shortcut="⌘⌫") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "destructive",
+      "Destructive entry",
+      "Keep irreversible actions distinct and use a separate section or separator to reduce mis-clicks.",
+      destructive,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_arabic %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call dropdown("الإجراءات", offset="0,6") %}
+          {{ dropdown_item("فتح مساحة العمل", icon="folder-open", shortcut="⌘O") }}
           {{ dropdown_divider() }}
-          {{ dropdown_item("حذف", icon="trash-2", destructive=true) }}
+          {{ dropdown_item("مشاركة مساحة العمل", icon="share", shortcut="⌘S") }}
+          {{ dropdown_item("حذف مساحة العمل", icon="trash-2", destructive=true, shortcut="⌘⌫") }}
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Set <code>dir=\"rtl\"</code> on a parent when menu labels are right-to-left; Bootstrap keeps the trigger and menu semantics unchanged.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call dropdown("פעולות", offset="0,6") %}
+          {{ dropdown_item("פתח סביבת עבודה", icon="folder-open", shortcut="⌘O") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("שתף סביבת עבודה", icon="share", shortcut="⌘S") }}
+          {{ dropdown_item("מחק סביבת עבודה", icon="trash-2", destructive=true, shortcut="⌘⌫") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call dropdown("Actions", offset="0,6") %}
+          {{ dropdown_item("Open workspace", icon="folder-open", shortcut="⌘O") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Share workspace", icon="share", shortcut="⌘S") }}
+          {{ dropdown_item("Delete workspace", icon="trash-2", destructive=true, shortcut="⌘⌫") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "dropdown-menu",
+      "Compare Arabic, Hebrew, and English menu flows with the same trigger, icons, shortcuts, divider, and destructive action in RTL layout.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 
+  {{ alert(
+    "Submenu gap",
+    "Bootstrap has no native submenu in dropdowns, so this catalog keeps nested workflows as separate top-level commands to preserve keyboard behavior and predictable focus.",
+    icon="triangle-alert"
+  ) }}
+
   {{ render_reference(
-    "For positioning, split buttons, and JavaScript behavior, see the",
+    "For plugin behavior, alignment, and placement options, see the",
     "https://getbootstrap.com/docs/5.3/components/dropdowns/",
     "Bootstrap Dropdown documentation"
   ) }}
