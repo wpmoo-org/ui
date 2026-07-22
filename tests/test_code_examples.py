@@ -66,13 +66,19 @@ class CodeExampleTests(CatalogTestCase):
         css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-example__surface {", css)
         surface = css.split(".moo-example__surface {", 1)[1].split("}", 1)[0]
+        self.assertIn("min-width: 0;", surface)
         self.assertIn("overflow: hidden;", surface)
         self.assertIn(
             "border: var(--bs-border-width) solid var(--bs-border-color);",
             surface,
         )
+        preview = css.split(".moo-example__preview {", 1)[1].split("}", 1)[0]
+        self.assertIn("position: relative;", preview)
+        self.assertIn("z-index: 4;", preview)
+        self.assertIn("overflow: visible;", preview)
         self.assertIn(".moo-example__source {", css)
         source = css.split(".moo-example__source {", 1)[1].split("}", 1)[0]
+        self.assertIn("min-width: 0;", source)
         self.assertIn(
             "border-top: var(--bs-border-width) solid var(--bs-border-color);",
             source,

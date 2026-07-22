@@ -1231,21 +1231,61 @@ body {
   gap: 0.75rem;
   min-height: 18rem;
   padding: unquote("clamp(1.5rem, 5vw, 3rem)");
-  overflow-x: auto;
+  overflow: visible;
   // Live component previews stay on the real product default (Bootstrap's
   // system-ui stack) even though the surrounding catalog chrome uses
   // $moo-catalog-font-family — copied source must match what renders here.
   font-family: var(--bs-body-font-family);
 }
 
+.moo-example__preview--top-aligned {
+  align-items: flex-start;
+}
+
 .moo-example__preview--narrow>* {
-  width: 100%;
   max-width: 24rem;
 }
 
 .moo-example__preview--medium>* {
-  width: 100%;
   max-width: 30rem;
+}
+
+.moo-example__preview--narrow > :is(
+  .accordion,
+  .alert,
+  .card,
+  .d-grid,
+  .field,
+  .field-fieldset,
+  .field-group,
+  .input-group,
+  .list-group,
+  .progress,
+  .table-responsive,
+  .w-100,
+  fieldset,
+  form
+) {
+  width: 100%;
+}
+
+.moo-example__preview--medium > :is(
+  .accordion,
+  .alert,
+  .card,
+  .d-grid,
+  .field,
+  .field-fieldset,
+  .field-group,
+  .input-group,
+  .list-group,
+  .progress,
+  .table-responsive,
+  .w-100,
+  fieldset,
+  form
+) {
+  width: 100%;
 }
 
 .moo-example__preview--fit>* {
@@ -1302,10 +1342,6 @@ body {
 
 .moo-block-standalone>.sidebar-wrapper {
   min-height: 100vh;
-}
-
-.moo-example__preview>.d-grid {
-  width: 100%;
 }
 
 .moo-field {
