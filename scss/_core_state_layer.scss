@@ -17,18 +17,3 @@
 .moo-ui[data-bs-theme="dark"] .btn-close {
   filter: var(--#{$prefix}btn-close-white-filter);
 }
-
-// Bootstrap moves Modal backdrops under body, outside the native .moo-ui
-// scope. This state-gated bridge preserves Dialog's backdrop treatment in
-// moo.css. Offcanvas keeps its backdrop beside the Sheet, so its scoped
-// component selector can own that behavior directly.
-body:has(.moo-ui .modal.show) > .modal-backdrop {
-  --#{$prefix}backdrop-opacity: 1;
-  background-color: color-mix(
-    in srgb,
-    var(--#{$prefix}black) 10%,
-    transparent
-  );
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-}

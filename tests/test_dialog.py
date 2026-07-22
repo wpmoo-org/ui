@@ -159,17 +159,13 @@ class DialogTests(CatalogTestCase):
         self.assertIn(".modal[tabindex]:focus-visible", styles)
         self.assertIn("outline: none", styles)
 
-    def test_dialog_backdrop_is_blurred_only_while_a_modal_is_open(self) -> None:
+    def test_dialog_does_not_own_global_backdrop_blur(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertIn("body:has(.modal.show) > .modal-backdrop", styles)
-        self.assertIn("--bs-backdrop-opacity: 1", styles)
-        self.assertIn(
-            "background-color: color-mix(in srgb, var(--bs-black) 10%, transparent)",
-            styles,
-        )
-        self.assertIn("-webkit-backdrop-filter: blur(4px)", styles)
-        self.assertIn("backdrop-filter: blur(4px)", styles)
+        self.assertNotIn(".modal-backdrop", styles)
+        self.assertNotIn("body:has(.modal.show)", styles)
+        self.assertNotIn("backdrop-filter", styles)
+        self.assertNotIn("-webkit-backdrop-filter", styles)
 
     def test_catalog_portals_nested_preview_modals_above_body_backdrops(self) -> None:
         script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")

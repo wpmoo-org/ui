@@ -218,6 +218,42 @@
     catalogModalPlaceholders.delete(modal);
   }, true);
 
+  // Bootstrap creates an Offcanvas backdrop under the panel's parent node. Keep
+  // catalog Sheet panels at <body> level before Bootstrap creates an instance so
+  // Safari and other browsers dim the same page chrome as Bootstrap's examples.
+  const portalCatalogSheet = (sheet) => {
+    if (
+      !(sheet instanceof HTMLElement) ||
+      !sheet.classList.contains("sheet") ||
+      sheet.parentElement === document.body
+    ) {
+      return;
+    }
+
+    sheet.dataset.mooCatalogSheet = "true";
+    document.body.appendChild(sheet);
+  };
+
+  document.addEventListener("click", (event) => {
+    const targetElement =
+      event.target instanceof Element ? event.target : event.target?.parentElement;
+    const trigger = targetElement?.closest?.('[data-bs-toggle="offcanvas"][data-bs-target]');
+    const target = trigger?.getAttribute("data-bs-target");
+    if (!target?.startsWith("#")) {
+      return;
+    }
+    portalCatalogSheet(document.querySelector(target));
+  }, true);
+
+  document.addEventListener("show.bs.offcanvas", (event) => {
+    const sheet = event.target;
+    if (sheet instanceof HTMLElement && sheet.dataset.mooCatalogSheet === "true") {
+      portalCatalogSheet(sheet);
+    }
+  }, true);
+
+  document.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalCatalogSheet);
+
   document.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");

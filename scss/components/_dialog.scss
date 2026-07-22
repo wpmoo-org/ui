@@ -34,8 +34,8 @@
 }
 
 .modal--alert {
-  --bs-modal-width: 28rem;
-  --bs-modal-padding: 1.5rem;
+  --bs-modal-width: 24rem;
+  --bs-modal-padding: 1rem;
 }
 
 .modal-header--alert {
@@ -54,25 +54,11 @@
 }
 
 .modal--alert .modal-footer {
-  padding-right: var(--bs-modal-padding);
-  padding-left: var(--bs-modal-padding);
+  padding: var(--bs-modal-padding);
 }
 
 .modal-footer {
   // Bootstrap derives this from --bs-modal-padding minus half the button
   // gap (12px here); the reference footer keeps the full 16px card padding.
   padding: $spacer;
-}
-
-// The reference's own backdrop reads as barely-there (roughly 10% black)
-// plus a soft blur; Bootstrap ships a much heavier 50% opaque, unblurred
-// default that this project has otherwise never retuned. Every Modal user
-// (Dialog, Alert Dialog) gets the same treatment as Sheet's offcanvas
-// backdrop -- this is a shared focus-overlay convention, not a per-component
-// opt-in.
-body:has(.modal.show) > .modal-backdrop {
-  --bs-backdrop-opacity: 1;
-  background-color: color-mix(in srgb, var(--bs-black) 10%, transparent);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
 }

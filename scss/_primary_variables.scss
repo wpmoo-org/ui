@@ -147,6 +147,14 @@ $btn-padding-x-lg: 0.625rem !default;
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
 $focus-ring-width: 2px !default;
 
+// Shared overlay primitive for Bootstrap's native Modal and Offcanvas
+// backdrops. Bootstrap exposes separate .modal-backdrop and
+// .offcanvas-backdrop selectors; Moo keeps their visual treatment aligned via
+// one token set instead of per-component backdrop rules.
+$moo-overlay-backdrop-opacity: 1 !default;
+$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;
+$moo-overlay-backdrop-filter: blur(8px) !default;
+
 // A quieter elevation scale and the extra radius step, applied UI-wide through
 // Bootstrap's own scales so every component consumes one shared primitive.
 $box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !default;
