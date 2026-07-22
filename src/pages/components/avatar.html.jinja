@@ -1,10 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
-{% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
-{% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Avatar — Moo UI{% endblock %}
 
@@ -213,66 +211,14 @@
       </div>
     {% endset %}
 
-    {% set arabic_example %}
-      {{ render_example(
-        "rtl-arabic",
-        "Arabic",
-        "Use the same avatar composition inside Arabic right-to-left content.",
-        arabic_avatar,
-        preview_class="moo-example__preview--medium moo-example__preview--fit",
-        show_header=false
-      ) }}
-    {% endset %}
-
-    {% set hebrew_example %}
-      {{ render_example(
-        "rtl-hebrew",
-        "Hebrew",
-        "Keep identity and supporting text aligned inside Hebrew right-to-left content.",
-        hebrew_avatar,
-        preview_class="moo-example__preview--medium moo-example__preview--fit",
-        show_header=false
-      ) }}
-    {% endset %}
-
-    {% set english_rtl_example %}
-      {{ render_example(
-        "rtl-english",
-        "English RTL",
-        "Use English labels inside an RTL container when the surrounding product shell is mirrored.",
-        english_avatar,
-        preview_class="moo-example__preview--medium moo-example__preview--fit",
-        show_header=false
-      ) }}
-    {% endset %}
-
-    <section class="moo-example" aria-labelledby="rtl-title">
-      <div class="moo-example__header">
-        {{ typography("Direction aware", variant="example-title", id="rtl-title") }}
-        <p class="text-body-secondary mb-0">Use tabs to compare Arabic, Hebrew, and English avatars inside the same RTL layout.</p>
-      </div>
-      {{ tabs(
-        "avatar-direction-tabs",
-        [
-          {
-            "id": "arabic",
-            "title": "Arabic",
-            "content": arabic_example,
-            "active": true
-          },
-          {
-            "id": "hebrew",
-            "title": "Hebrew",
-            "content": hebrew_example
-          },
-          {
-            "id": "english",
-            "title": "English",
-            "content": english_rtl_example
-          }
-        ]
-      ) }}
-    </section>
+    {{ render_rtl_example(
+      "avatar",
+      "Use tabs to compare Arabic, Hebrew, and English avatars inside the same RTL layout.",
+      arabic_avatar,
+      hebrew_avatar,
+      english_avatar,
+      preview_class="moo-example__preview--medium moo-example__preview--fit"
+    ) }}
   </div>
 
   {{ render_reference(

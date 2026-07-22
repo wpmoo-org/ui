@@ -105,6 +105,8 @@ class AvatarTests(CatalogTestCase):
 
         self.assertIn("Moo Admin", page)
         self.assertIn("admin@example.com", page)
+        self.assertIn("render_rtl_example", page)
+        self.assertNotIn('title="Direction aware"', page)
         self.assertNotIn("badge_dot for", page)
         self.assertNotIn('style="width: 0.5rem; height: 0.5rem;"', page)
 
