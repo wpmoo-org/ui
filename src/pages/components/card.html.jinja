@@ -3,114 +3,155 @@
 {% from "components/card.html.jinja" import card %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 
 {% block title %}Card — Moo UI{% endblock %}
 
 {% block content %}
   {{ render_page_header(
     "Card",
-    "Group related content on one quiet, self-contained surface."
+    "Group related content into a compact, structured surface with predictable spacing."
   ) }}
 
   <div class="moo-component-examples">
     {% set content_card %}
       {% call card() %}
-        <p class="mb-0">A single content section works when the card holds one short, self-contained note.</p>
+        A short note can stay compact by using a single card body without a separate header or footer.
       {% endcall %}
     {% endset %}
     {{ render_example(
       "card-content",
       "Content only",
-      "A <code>card</code> with only a <code>card-body</code> is enough for one short, self-contained block of content.",
+      "Use a bare <code>card</code> for short notes, hints, and status messages where one section is enough.",
       content_card,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set basic_card %}
+    {% set summary_card %}
       {% call card(
-        "Team workspace",
-        "Everyone you invite can open and edit the shared boards."
+        "Incident recap",
+        "Recent checks and owner notes for the active release."
       ) %}
-        <p class="mb-0">Four members joined in the last update. Manage who stays from the access panel whenever the team changes.</p>
-        <div class="d-flex flex-wrap gap-2 mt-3">
-          {{ button("Open workspace", variant="outline") }}
-          {{ button("Invite member", variant="link") }}
+        <div class="d-grid gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">Service</span>
+            <span class="fw-medium">Payments</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">Status</span>
+            <span>In review</span>
+          </div>
         </div>
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "card-basic",
+      "card-summary",
       "Header and content",
-      "Add a <code>card-header</code> for the title and supporting text, then keep the main content in <code>card-body</code>.",
-      basic_card,
-      preview_class="moo-example__preview--narrow"
-    ) }}
-
-    {% set centered_card %}
-      {% call card(
-        "Design systems meetup",
-        "A practical session on component APIs and shipping faster.",
-        extra_class="text-center"
-      ) %}
-        <p class="mb-0">Keep the same card structure and let Bootstrap's text utilities change the alignment.</p>
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "card-alignment",
-      "Text alignment",
-      "Apply <code>text-center</code> or another Bootstrap text utility to the card when the content needs a different alignment.",
-      centered_card,
+      "Use <code>card-title</code> and <code>card-subtitle</code> to pair concise copy with focused body rows.",
+      summary_card,
       preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set actions_card %}
       {% set actions_footer %}
-        {{ button("Discard", variant="outline") }}
-        {{ button("Save changes") }}
+        {{ button("Keep for next pass", variant="outline") }}
+        {{ button("Mark complete") }}
       {% endset %}
       {% call card(
-        "Discard changes?",
-        "Your recent edits to this board are still unsaved.",
+        "Operational checkpoint",
+        "Publish the summary only when all verification steps are confirmed.",
         footer=actions_footer,
         footer_class="justify-content-end"
       ) %}
-        <p class="mb-0">Saving keeps the current layout for everyone. Discarding restores the last published version.</p>
+        <div class="small d-grid gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">Checks</span>
+            <span>4 / 5</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">Approver</span>
+            <span>Ops lead</span>
+          </div>
+        </div>
       {% endcall %}
     {% endset %}
     {{ render_example(
       "card-actions",
-      "Footer actions",
-      "Put related actions in <code>card-footer</code> and compose them from ready Button controls instead of hand-written controls.",
+      "Action footer",
+      "Keep actions in <code>card-footer</code> so copy and controls remain within one clear command surface.",
       actions_card,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl_card %}
-      {% set rtl_footer %}
-        {{ button("حفظ") }}
-      {% endset %}
+    {% set arabic_card %}
       {% call card(
-        "مساحة العمل",
-        "يمكن لكل شخص تدعوه فتح اللوحات المشتركة وتحريرها.",
-        footer=rtl_footer,
-        dir="rtl",
-        footer_class="justify-content-end"
+        "الموافقة على الإصدار مطلوبة",
+        "تأكيد القائمة قبل فتح نافذة النشر.",
+        dir="rtl"
       ) %}
-        <p class="mb-0">انضم أربعة أعضاء في آخر تحديث. يمكنك إدارة من يبقى من لوحة الوصول.</p>
+        <div class="d-grid gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">المسؤول</span>
+            <span class="fw-medium">مدير الإصدار</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">الحالة</span>
+            <span>بانتظار الاعتماد</span>
+          </div>
+        </div>
       {% endcall %}
     {% endset %}
-    {{ render_example(
-      "card-rtl",
-      "Right-to-left layout",
-      "Set <code>dir=\"rtl\"</code> on the card when its content is right-to-left; the same header, body, and footer structure remains usable.",
-      rtl_card,
+
+    {% set hebrew_card %}
+      {% call card(
+        "נדרש אישור לגרסה",
+        "יש לאשר את הרשימה לפני פתיחת חלון הפריסה.",
+        dir="rtl"
+      ) %}
+        <div class="d-grid gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">אחראי</span>
+            <span class="fw-medium">מנהל הגרסה</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">סטטוס</span>
+            <span>ממתין לאישור</span>
+          </div>
+        </div>
+      {% endcall %}
+    {% endset %}
+
+    {% set english_card %}
+      {% call card(
+        "Release approval needed",
+        "Confirm the checklist before the deploy window opens.",
+        dir="rtl"
+      ) %}
+        <div class="d-grid gap-2">
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">Owner</span>
+            <span class="fw-medium">Release manager</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-body-secondary">Status</span>
+            <span>Awaiting sign-off</span>
+          </div>
+        </div>
+      {% endcall %}
+    {% endset %}
+
+    {{ render_rtl_example(
+      "card",
+      "Use tabs to compare the same release-approval card translated exactly into Arabic, Hebrew, and English.",
+      arabic_card,
+      hebrew_card,
+      english_card,
       preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 
   {{ render_reference(
-    "For more content patterns, see the",
+    "For Bootstrap-native card semantics and options, see the",
     "https://getbootstrap.com/docs/5.3/components/card/",
     "Bootstrap Card documentation"
   ) }}
