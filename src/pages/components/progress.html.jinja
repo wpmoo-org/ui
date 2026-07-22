@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/progress.html.jinja" import progress %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Progress — Moo UI{% endblock %}
@@ -50,16 +50,27 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
+    {% set arabic_progress %}
       <div dir="rtl">
-        {{ progress(66, aria_label="نسبة التقدم") }}
+        {{ progress(40, aria_label="تقدم التنزيل", show_label=true) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The fill grows from the reading-direction start without mirrored custom CSS.",
-      rtl,
+    {% set hebrew_progress %}
+      <div dir="rtl">
+        {{ progress(40, aria_label="התקדמות ההורדה", show_label=true) }}
+      </div>
+    {% endset %}
+    {% set english_progress %}
+      <div dir="rtl">
+        {{ progress(40, aria_label="Download progress", show_label=true) }}
+      </div>
+    {% endset %}
+    {{ render_rtl_example(
+      id="progress",
+      description="Use tabs to compare Arabic, Hebrew, and English progress bars with the fill growing from the reading-direction start.",
+      arabic=arabic_progress,
+      hebrew=hebrew_progress,
+      english=english_progress,
       preview_class="moo-example__preview--narrow"
     ) }}
   </div>
