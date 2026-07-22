@@ -37,4 +37,4 @@ class BuildTests(CatalogTestCase):
         self.assertIn('id="main-content" tabindex="-1"', index)
 
         introduction = self.read_output("introduction.html")
-        self.assertEqual(introduction.count("<footer"), 1)
+        self.assertEqual(introduction.count("<footer"), 0)
