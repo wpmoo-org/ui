@@ -517,10 +517,28 @@ body {
 
 .moo-home-component-row {
   --scroll-fade-size: min(18%, 7rem);
-  --moo-scroll-fade-s: var(--scroll-fade-size);
-  --moo-scroll-fade-e: var(--scroll-fade-size);
+  position: relative;
   overflow: hidden;
-  animation: none;
+}
+
+.moo-home-component-row::before,
+.moo-home-component-row::after {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  width: var(--scroll-fade-size);
+  pointer-events: none;
+  content: "";
+}
+
+.moo-home-component-row::before {
+  inset-inline-start: 0;
+  background: linear-gradient(to right, var(--bs-body-bg), transparent);
+}
+
+.moo-home-component-row::after {
+  inset-inline-end: 0;
+  background: linear-gradient(to left, var(--bs-body-bg), transparent);
 }
 
 .moo-home-component-row--2 {
@@ -533,6 +551,7 @@ body {
   width: max-content;
   gap: 1rem;
   animation: moo-home-marquee-to-start 47s linear infinite;
+  animation-delay: -17s;
 }
 
 .moo-home-component-row--1 .moo-home-component-track {
@@ -542,18 +561,18 @@ body {
 
 .moo-home-component-row--2 .moo-home-component-track {
   animation-duration: 59s;
-  animation-delay: -13s;
+  animation-delay: -31s;
 }
 
 .moo-home-component-card {
+  --moo-home-component-card-size: calc((72rem - 2.5rem) / 3.5);
   --bs-card-border-radius: 0;
   --bs-card-inner-border-radius: 0;
   --bs-card-spacer-x: 0;
   --bs-card-spacer-y: 0;
   --bs-card-bg: transparent;
   --bs-card-border-color: transparent;
-  width: calc((100% - 2.5rem) / 3.5);
-  flex: 0 0 calc((72rem - 2.5rem) / 3.5);
+  flex: 0 0 var(--moo-home-component-card-size);
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -603,13 +622,13 @@ body {
 
 @media (max-width: 1199.98px) {
   .moo-home-component-card {
-    flex-basis: calc((100vw - 5rem) / 3.5);
+    --moo-home-component-card-size: calc((100vw - 5rem) / 3.5);
   }
 }
 
 @media (max-width: 767.98px) {
   .moo-home-component-card {
-    flex-basis: calc((100vw - 3rem) / 1.5);
+    --moo-home-component-card-size: calc((100vw - 3rem) / 1.5);
   }
 }
 

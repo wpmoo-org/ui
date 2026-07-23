@@ -10,20 +10,20 @@
    falling back to static/images/placeholder.webp otherwise — a slug with
    no art yet still renders a real card instead of a broken image. #}
 
-{% macro component_preview(slug, root_path) -%}
+{% macro component_preview(slug, root_path, loading="lazy") -%}
   <img
     class="moo-catalog__showcase-image"
     src="{{ component_preview_src(slug, root_path) }}"
     alt=""
-    loading="lazy"
+    loading="{{ loading }}"
   >
 {%- endmacro %}
 
-{% macro block_preview(slug, root_path) -%}
+{% macro block_preview(slug, root_path, loading="lazy") -%}
   <img
     class="moo-catalog__showcase-image"
     src="{{ block_preview_src(slug, root_path) }}"
     alt=""
-    loading="lazy"
+    loading="{{ loading }}"
   >
 {%- endmacro %}
