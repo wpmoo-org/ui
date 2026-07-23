@@ -16,6 +16,22 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="documentation-navigation">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.2.1</span>
+            <span class="text-body-secondary">Documentation navigation</span>
+          </div>
+          <h2 id="documentation-navigation">Documentation Navigation</h2>
+          <p>Added page-level copy, AI handoff, and previous/next navigation across the public documentation.</p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Section landing pages now share the same narrow documentation layout, TOC rhythm, and release-aware install links.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="wave-4-components">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.2.0</span>
@@ -73,6 +89,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "documentation-navigation", "label": "Documentation Navigation"},
       {"id": "wave-4-components", "label": "Wave 4 Components"},
       {"id": "catalog-polish", "label": "Catalog Polish"},
       {"id": "initial-release", "label": "Initial Release"}

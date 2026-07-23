@@ -689,7 +689,7 @@ class CatalogContractTests(CatalogTestCase):
         installation = self.read_output("installation.html")
 
         self.assertIn(
-            "https://unpkg.com/@wpmoo/ui@0.2.0/dist/assets/css/moo-ui.css",
+            "https://unpkg.com/@wpmoo/ui@0.2.1/dist/assets/css/moo-ui.css",
             installation,
         )
         self.assertNotIn(
@@ -727,6 +727,11 @@ class CatalogContractTests(CatalogTestCase):
 
         for copy in (
             "Product-facing notes for the public Moo UI package and catalog.",
+            "v0.2.1",
+            "Documentation navigation",
+            "Documentation Navigation",
+            "Added page-level copy, AI handoff, and previous/next navigation across the public documentation.",
+            "Section landing pages now share the same narrow documentation layout, TOC rhythm, and release-aware install links.",
             "v0.2.0",
             "Component catalog expansion",
             "Wave 4 Components",

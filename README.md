@@ -46,7 +46,7 @@ Drop the stylesheet into ordinary Bootstrap markup:
 
 ```html
 <link rel="stylesheet"
-      href="https://unpkg.com/@wpmoo/ui@0.2.0/dist/assets/css/moo-ui.css">
+      href="https://unpkg.com/@wpmoo/ui@0.2.1/dist/assets/css/moo-ui.css">
 
 <button type="button" class="btn btn-primary">Create workspace</button>
 ```
