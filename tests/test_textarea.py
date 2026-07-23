@@ -73,3 +73,15 @@ class TextareaTests(CatalogTestCase):
         )
 
         self.assertIn('aria-describedby="message-help"', output)
+
+    def test_button_example_uses_render_example_argument_order(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/textarea.html")
+        self.assertIn('id="button-title">Button</', output)
+        self.assertIn(
+            "Connect a compact textarea to a form action when composition needs a quick send step.",
+            output,
+        )
+        self.assertNotIn(">moo-example__preview--narrow<", output)

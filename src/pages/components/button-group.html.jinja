@@ -131,8 +131,8 @@
 
     {% set vertical_group %}
       {% call button_group("Quantity controls", vertical=true) %}
-        {{ button("", variant="outline", size="icon", aria_label="Increase value", icon_start="plus") }}
-        {{ button("", variant="outline", size="icon", aria_label="Decrease value", icon_start="minus") }}
+        {{ button("", variant="outline", aria_label="Increase value", icon_start="plus") }}
+        {{ button("", variant="outline", aria_label="Decrease value", icon_start="minus") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -167,10 +167,10 @@
 
     {% set nested_groups %}
       <div class="d-flex align-items-center gap-2 w-100">
-        {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus") }}
-        {% call input_group(extra_class="flex-grow-1") %}
+        {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus", extra_class="rounded-3") }}
+        {% call input_group(extra_class="flex-grow-1 rounded-3") %}
           {{ input(aria_label="Message body", placeholder="Send a message...") }}
-          {{ button("", variant="outline", size="icon", aria_label="Record voice note", icon_start="audio-lines") }}
+          {{ button("", variant="ghost", size="icon", aria_label="Record voice note", icon_start="audio-lines", extra_class="border-0") }}
         {% endcall %}
       </div>
     {% endset %}

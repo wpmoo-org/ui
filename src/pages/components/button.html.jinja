@@ -15,14 +15,18 @@
 
   <div class="moo-component-examples">
     {% set core_variants %}
-      <div class="d-flex flex-wrap gap-2">
-        {{ button("Publish") }}
-        {{ button("Reschedule", variant="secondary") }}
-        {{ button("Mark approved", variant="success") }}
-        {{ button("Needs review", variant="warning") }}
-        {{ button("Reject", variant="destructive") }}
-        {{ button("Open workspace", variant="outline") }}
-        {{ button("More options", variant="ghost") }}
+      <div class="d-flex flex-column align-items-center gap-2">
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          {{ button("Publish") }}
+          {{ button("Reschedule", variant="secondary") }}
+          {{ button("Mark approved", variant="success") }}
+          {{ button("Needs review", variant="warning") }}
+        </div>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          {{ button("Reject", variant="destructive") }}
+          {{ button("Open workspace", variant="outline") }}
+          {{ button("More options", variant="ghost") }}
+        </div>
       </div>
     {% endset %}
     {{ render_example(

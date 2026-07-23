@@ -1,17 +1,3 @@
 .form-control {
   min-height: $input-height;
-
-  // Bootstrap's own ::file-selector-button rule (vendor/bootstrap/scss/
-  // forms/_form-control.scss) sizes the button purely from its own padding
-  // + line-height, which stays ~1px short of the input's real content-box
-  // height once .form-control is pinned to $input-height above (min-height
-  // doesn't give the box a definite height for the button's own layout).
-  // That leaves a sliver of the input's background visible under the
-  // button before the shared border-radius clip. Bootstrap exposes no
-  // token for the button's own height, so this derives it from the same
-  // $input-height / $input-border-width knobs already driving the input.
-  &[type="file"]::file-selector-button {
-    line-height: inherit;
-    height: calc(#{$input-height} - #{$input-border-width} * 2);
-  }
 }

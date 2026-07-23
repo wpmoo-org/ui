@@ -130,6 +130,7 @@ def _inline_element(source: str, match: re.Match[str], tag_name: str, depth: int
 
 def format_html(value: object) -> str:
     source = dedent_html(value)
+    source = _compact_lucide_icons(source)
     lines: list[str] = []
     depth = 0
     position = 0
@@ -192,6 +193,26 @@ def format_html(value: object) -> str:
         lines.append(f"{'  ' * depth}{text_content}")
 
     return "\n".join(lines)
+
+
+LUCIDE_SVG = re.compile(
+    r"<svg\b(?P<attrs>[^>]*)\bdata-icon=\"(?P<position>[^\"]+)\""
+    r"(?P<tail>[^>]*)\bdata-lucide=\"(?P<name>[^\"]+)\""
+    r"(?P<rest>[^>]*)>.*?</svg>",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _compact_lucide_icons(source: str) -> str:
+    def replace(match: re.Match[str]) -> str:
+        icon_name = match.group("name")
+        position = match.group("position")
+        return (
+            f'<i class="lucide lucide-{icon_name}" '
+            f'data-icon="{position}" aria-hidden="true" />'
+        )
+
+    return LUCIDE_SVG.sub(replace, source)
 
 
 def _syntax_token(class_name: str, value: str) -> str:
@@ -299,6 +320,7 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
             (
                 "<svg",
                 f'  data-icon="{escape(position)}"',
+                f'  data-lucide="{escape(name)}"',
                 f'  viewBox="{left} {top} {width} {height}"',
                 '  fill="none"',
                 '  stroke="currentColor"',

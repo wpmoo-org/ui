@@ -297,6 +297,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
+        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
+        self.assertIn("background: $input-disabled-bg;", catalog_scss)
+
     def test_header_navigation_links_docs_between_home_and_components(
         self,
     ) -> None:

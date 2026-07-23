@@ -47,6 +47,12 @@ body {
   background: var(--moo-muted-surface);
 }
 
+.moo-catalog__search-trigger:focus-visible {
+  // Match Bootstrap form-control disabled surface so the focused catalog
+  // search still reads like an input while the border remains visible.
+  background: $input-disabled-bg;
+}
+
 .moo-catalog__search-trigger-lead {
   display: inline-flex;
   align-items: center;

@@ -634,8 +634,10 @@ class SidebarTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/sidebar.html")
         self.assertEqual(page.count('id="catalog-sidebar"'), 1)
-        self.assertEqual(page.count('id="components-sidebar-demo"'), 1)
-        self.assertIn('aria-controls="components-sidebar-demo"', page)
+        self.assertIn('data-moo-block-frame-shell', page)
+        self.assertIn('src="../blocks/previews/sidebar-floating.html"', page)
+        self.assertIn('title="Application shell preview"', page)
+        self.assertIn("components-sidebar-floating-demo", page)
         # Sidebar documents one full application-shell example; RTL is not part of this component contract.
         self.assertEqual(page.count('class="moo-example"'), 1)
 
@@ -665,6 +667,10 @@ class SidebarTests(CatalogTestCase):
         source = (ROOT / "src/pages/components/sidebar.html.jinja").read_text(
             encoding="utf-8"
         )
+        shell_source = (ROOT / "src/blocks/sidebar_shell.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        example_source = source + shell_source
         public_macros = (
             "sidebar_provider()",
             "sidebar()",
@@ -696,16 +702,16 @@ class SidebarTests(CatalogTestCase):
                 self.assertIn(f'"name": "{macro}"', source)
 
         self.assertNotIn("SidebarBrandMark", source)
-        self.assertIn("sidebar_brand_mark", source)
+        self.assertIn("sidebar_brand_mark", example_source)
         # The action-bearing Projects rows document the composable pattern
         # with no styling hook required (positioning is auto-detected).
-        self.assertIn("sidebar_menu_action(aria_label=", source)
-        self.assertNotIn("sidebar-menu-item--has-action", source)
+        self.assertIn("sidebar_menu_action(aria_label=", example_source)
+        self.assertNotIn("sidebar-menu-item--has-action", example_source)
         self.assertIn(
             "sidebar_group_content()",
             source,
         )
-        self.assertEqual(source.count("render_example("), 1)
+        self.assertEqual(source.count("render_block_example("), 1)
 
     def test_sidebar_catalog_page_documents_sidebar_state_mapping_without_fake_hook(self) -> None:
         result = self.run_build()

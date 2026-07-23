@@ -161,20 +161,18 @@
     ) }}
 
     {% set file_input %}
-      {% call field() %}
+      {% call input_group() %}
       {{ input(
-        label="Picture",
+        aria_label="Upload",
         id="input-picture",
-        type="file",
-        describedby="input-picture-help"
+        type="file"
       ) }}
-      {{ field_description("input-picture-help", "PNG or JPG up to 5MB.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "file",
       "File",
-      "Use <code>type=\"file\"</code> with helper text.",
+      "Use Bootstrap's native custom file input pattern inside an <code>.input-group</code>.",
       file_input,
       "moo-example__preview--narrow"
     ) }}

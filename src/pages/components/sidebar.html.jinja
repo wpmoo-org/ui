@@ -1,12 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/avatar.html.jinja" import avatar %}
-{% from "components/breadcrumb.html.jinja" import breadcrumb %}
-{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
-{% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger, sidebar_input, sidebar_group_action %}
+{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
 {% from "components/table.html.jinja" import table %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Sidebar — Moo UI{% endblock %}
@@ -25,176 +21,21 @@
       global actions in <code>sidebar_header()</code> and <code>sidebar_footer()</code>.
     </p>
 
-    {% set sidebar_open = true %}
     {% set app_shell %}
-      {% call sidebar_provider(contained=true, key="components-sidebar", default_open=sidebar_open) %}
-        {% call sidebar(id="components-sidebar-demo", aria_label="Operations workspace navigation") %}
-          {% call sidebar_header() %}
-            {% call sidebar_menu() %}
-              {% call sidebar_menu_item(dropdown=true) %}
-                {{ sidebar_menu_button(
-                  "Northstar",
-                  subtitle="Operations",
-                  size="lg",
-                  dropdown=true,
-                  lead=sidebar_brand_mark("gallery-vertical-end"),
-                  end_icon="chevrons-up-down"
-                ) }}
-                {% call dropdown_menu() %}
-                  {{ dropdown_header("Teams") }}
-                  {{ dropdown_item("Northstar", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
-                  {{ dropdown_item("Northstar Labs", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
-                  {{ dropdown_item("Field Ops", icon="command", icon_box=true, shortcut="⌘3") }}
-                  {{ dropdown_divider() }}
-                  {{ dropdown_item("Add team", icon="plus", icon_box=true) }}
-                {% endcall %}
-              {% endcall %}
-            {% endcall %}
-          {% endcall %}
-
-          {% call sidebar_content() %}
-            {% call sidebar_group() %}
-              {% call sidebar_group_content() %}
-                {{ sidebar_group_label("Workspace") }}
-                {{ sidebar_input(id="sidebar-search", placeholder="Search workspace", aria_label="Search workspace") }}
-                {% call sidebar_menu() %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Operations", "workspace-operations", icon="activity", open=true) }}
-                    {% call sidebar_menu_sub("workspace-operations", open=true) %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Campaign activity", href="#") }}
-                      {% endcall %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Approvals", href="#") }}
-                      {% endcall %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Audit logs", href="#", tooltip="View workspace audit logs") }}
-                      {% endcall %}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Assets", "workspace-assets", icon="bot") }}
-                    {% call sidebar_menu_sub("workspace-assets") %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Campaign packs", href="#", icon="sparkles") }}
-                      {% endcall %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Design system", href="#", icon="brain") }}
-                      {% endcall %}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Knowledge", "workspace-knowledge", icon="book-open") }}
-                    {% call sidebar_menu_sub("workspace-knowledge") %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Runbooks", href="#", icon="book-open") }}
-                      {% endcall %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("API guides", href="#", icon="code") }}
-                      {% endcall %}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
-                  {% endcall %}
-                {% endcall %}
-              {% endcall %}
-            {% endcall %}
-
-            {% call sidebar_group() %}
-              {% call sidebar_group_content() %}
-                {{ sidebar_group_label("Project views") }}
-                {{ sidebar_group_action(icon="plus", aria_label="Create project view") }}
-                {% call sidebar_menu() %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Campaigns", href="#", icon="frame") }}
-                    {% call sidebar_menu_action(aria_label="Campaigns actions") %}
-                      {{ dropdown_item("Rename", icon="pencil") }}
-                      {{ dropdown_item("Archive", icon="archive") }}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Content pipeline", href="#", icon="pie-chart") }}
-                    {% call sidebar_menu_action(aria_label="Content pipeline actions") %}
-                      {{ dropdown_item("Rename", icon="pencil") }}
-                      {{ dropdown_item("Archive", icon="archive") }}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Field operations", href="#", icon="map") }}
-                    {% call sidebar_menu_action(aria_label="Field operations actions") %}
-                      {{ dropdown_item("Rename", icon="pencil") }}
-                      {{ dropdown_item("Archive", icon="archive") }}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("More", href="#", icon="ellipsis") }}
-                  {% endcall %}
-                {% endcall %}
-              {% endcall %}
-            {% endcall %}
-          {% endcall %}
-
-          {% call sidebar_footer() %}
-            {% call sidebar_menu() %}
-              {% call sidebar_menu_item(dropdown=true) %}
-                {{ sidebar_menu_button(
-                  "ops-admin",
-                  subtitle="ops-admin@northstar.example",
-                  size="lg",
-                  dropdown=true,
-                  lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
-                  end_icon="chevrons-up-down"
-                ) }}
-                {% call dropdown_menu(align="end") %}
-                  {{ dropdown_header("ops-admin@northstar.example") }}
-                  {{ dropdown_item("Upgrade to Pro", icon="sparkles") }}
-                  {{ dropdown_divider() }}
-                  {{ dropdown_item("Account", icon="badge-check") }}
-                  {{ dropdown_item("Billing", icon="credit-card") }}
-                  {{ dropdown_item("Notifications", icon="bell") }}
-                  {{ dropdown_divider() }}
-                  {{ dropdown_item("Log out", icon="log-out") }}
-                {% endcall %}
-              {% endcall %}
-            {% endcall %}
-          {% endcall %}
-        {% endcall %}
-
-        {% call sidebar_inset() %}
-          <header class="sidebar-inset__header">
-            {{ sidebar_trigger(sidebar_id="components-sidebar-demo", expanded=sidebar_open) }}
-            {{ separator(orientation="vertical") }}
-            {{ breadcrumb([
-              {"label": "Workspace", "href": "#"},
-              {"label": "Campaigns"}
-            ], extra_class="mb-0") }}
-          </header>
-          <div class="sidebar-inset__content d-grid gap-3 p-3">
-            <div class="d-grid gap-3">
-              <div class="d-grid gap-3 row row-cols-1 row-cols-md-2 g-3">
-                <div class="ratio ratio-16x9">
-                  <div class="moo-sidebar-demo__placeholder rounded-3"></div>
-                </div>
-                <div class="ratio ratio-16x9">
-                  <div class="moo-sidebar-demo__placeholder rounded-3"></div>
-                </div>
-              </div>
-              <div class="rounded-3 p-4 moo-sidebar-demo__placeholder">
-                <p class="h6 mb-2">Campaign workspace snapshot</p>
-                <p class="small text-body-secondary mb-0">Review status, approvals, and latest comments before opening a ticket.</p>
-              </div>
-            </div>
-          </div>
-        {% endcall %}
-      {% endcall %}
+      {{ render_sidebar_shell(
+        key="components-sidebar-floating",
+        sidebar_id="components-sidebar-floating-demo",
+        variant="floating",
+        demo_copy="portal"
+      ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_block_example(
       "app-shell",
       "Application shell",
-      "Compose the shell from <code>sidebar_provider</code>, <code>sidebar</code>, and <code>sidebar_inset</code>. The header holds a team switcher, the content holds grouped menus, and the footer holds the account menu — each a ready Dropdown Menu and Avatar composition.",
+      "Compose the shell from <code>sidebar_provider</code>, <code>sidebar</code>, and <code>sidebar_inset</code>. The preview uses the same floating sidebar block frame so the application shell is exercised as a standalone viewport.",
       app_shell,
-      preview_class="moo-example__preview--shell"
+      preview_class="moo-example__preview--shell",
+      frame_src="../blocks/previews/sidebar-floating.html"
     ) }}
 
     <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>
