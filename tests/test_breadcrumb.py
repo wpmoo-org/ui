@@ -61,6 +61,88 @@ class BreadcrumbTests(CatalogTestCase):
             styles,
         )
 
+    def test_breadcrumb_supports_custom_divider(self) -> None:
+        output = self.render_breadcrumb(
+            'breadcrumb([{"label": "Home"}, {"label": "Library"}], divider="•")'
+        )
+        self.assertIn(
+            'class="breadcrumb" style="--bs-breadcrumb-divider: \'•\';"',
+            output,
+        )
+
+    def test_breadcrumb_bridges_bootstrap_rtl_chevron_output(self) -> None:
+        styles = (ROOT / "scss/components/_breadcrumb.scss").read_text(encoding="utf-8")
+        tokens = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+
+        self.assertIn('$breadcrumb-divider: quote(">") !default;', tokens)
+        self.assertIn('$breadcrumb-divider-flipped: quote("<") !default;', tokens)
+        self.assertIn(
+            ":dir(rtl) .breadcrumb {\n"
+            '  --bs-breadcrumb-divider: "#{$breadcrumb-divider-flipped}";\n'
+            "}",
+            styles,
+        )
+        self.assertIn(":dir(rtl) .breadcrumb-item + .breadcrumb-item {", styles)
+        self.assertIn("padding-right: var(--bs-breadcrumb-item-padding-x);", styles)
+        self.assertIn(":dir(rtl) .breadcrumb-item + .breadcrumb-item::before {", styles)
+        self.assertIn("float: right;", styles)
+        self.assertIn("padding-left: var(--bs-breadcrumb-item-padding-x);", styles)
+
+    def test_breadcrumb_ellipsis_item_renders_a_static_marker(self) -> None:
+        output = self.render_breadcrumb(
+            'breadcrumb([{"label": "Home", "href": "#"}, {"ellipsis": true}, {"label": "Library"}])'
+        )
+        self.assertIn('<span class="breadcrumb-ellipsis">', output)
+        self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('<span class="visually-hidden">More</span>', output)
+        self.assertNotIn("<button", output)
+        self.assertNotIn("<a ", output.split("visually-hidden")[1])
+
+    def test_breadcrumb_dropdown_item_renders_via_ready_dropdown_macros(self) -> None:
+        output = self.render_breadcrumb(
+            'breadcrumb(['
+            '{"label": "Home", "href": "#"}, '
+            '{"label": "Projects", "dropdown_items": ['
+            '{"label": "Projects", "href": "/projects"}, '
+            '{"label": "Reports", "href": "/reports"}'
+            ']}, '
+            '{"label": "Library"}'
+            '])'
+        )
+        self.assertIn('<span class="breadcrumb-dropdown-item">', output)
+        self.assertIn('class="dropdown-item" href="/projects"', output)
+        self.assertIn('class="dropdown-item" href="/reports"', output)
+
+    def test_breadcrumb_dropdown_item_requires_label(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Breadcrumb item label is required"):
+            self.render_breadcrumb(
+                'breadcrumb([{"label": "   ", "dropdown_items": [{"label": "Projects"}]}])'
+            )
+
+    def test_page_uses_shared_rtl_example_tabs(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("render_rtl_example", source)
+        self.assertNotIn('title="RTL"', source)
+        self.assertNotIn('"Right-to-left layout"', source)
+        self.assertIn("arabic_breadcrumb", source)
+        self.assertIn("hebrew_breadcrumb", source)
+        self.assertIn("english_breadcrumb", source)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertIn("Support queue", source)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/breadcrumb.html")
+        self.assertIn("breadcrumb-direction-tabs", output)
+        self.assertIn("rtl-arabic-code", output)
+        self.assertIn("rtl-hebrew-code", output)
+        self.assertIn("rtl-english-code", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
+
     def test_breadcrumb_requires_items(self) -> None:
         with self.assertRaisesRegex(ValueError, "Breadcrumb items are required"):
             self.render_breadcrumb("breadcrumb([])")

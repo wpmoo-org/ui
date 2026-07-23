@@ -9,6 +9,9 @@ from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase, lucide_body
 
 
+PAGE = ROOT / "src/pages/components/button.html.jinja"
+
+
 class ButtonTests(CatalogTestCase):
     def render_button(self, call: str) -> str:
         template = create_environment().from_string(
@@ -58,6 +61,29 @@ class ButtonTests(CatalogTestCase):
         ):
             self.render_button('button("Actions", dropdown_caret=true)')
 
+    def test_button_dropdown_auto_close_emits_bootstrap_data_attribute(self) -> None:
+        output = self.render_button(
+            'button("Actions", variant="outline", dropdown=true, dropdown_auto_close="outside")'
+        )
+        self.assertIn('data-bs-auto-close="outside"', output)
+
+        default_output = self.render_button('button("Actions", variant="outline", dropdown=true)')
+        self.assertNotIn("data-bs-auto-close", default_output)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Unknown button dropdown_auto_close: maybe",
+        ):
+            self.render_button(
+                'button("Actions", dropdown=true, dropdown_auto_close="maybe")'
+            )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Button dropdown_auto_close requires dropdown=true",
+        ):
+            self.render_button('button("Actions", dropdown_auto_close="outside")')
+
     def test_button_dropdown_offset_keeps_positional_compatibility(self) -> None:
         output = self.render_button(
             'button("Actions", "outline", "default", "button", "button", "", '
@@ -72,6 +98,7 @@ class ButtonTests(CatalogTestCase):
             'button("Actions", element="a", toggle=true)',
             'button("Actions", element="a", dropdown=true)',
             'button("Actions", element="a", dropdown_offset="0,8")',
+            'button("Actions", element="a", dropdown_auto_close="outside")',
             'button("Actions", element="a", dropdown_caret=true)',
             'button("Actions", element="a", dropdown=true, dropdown_offset="0,8")',
             'button("Actions", element="a", dropdown=true, dropdown_caret=true)',
@@ -518,3 +545,36 @@ class ButtonTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
         self.assertNotIn("example.com", page)
+
+    def test_page_uses_render_rtl_example_for_button_direction_examples(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
+            source,
+        )
+        self.assertIn("render_rtl_example(", source)
+        self.assertIn('render_rtl_example(\n      "button"', source)
+        self.assertIn("rtl_arabic", source)
+        self.assertIn("rtl_hebrew", source)
+        self.assertIn("rtl_english", source)
+        self.assertIn('{{ button("حفظ", variant="outline", icon_start="save") }}', source)
+        self.assertIn('{{ button("שמור", variant="outline", icon_start="save") }}', source)
+        self.assertIn('{{ button("Save", variant="outline", icon_start="save") }}', source)
+        self.assertIn('variant="outline", icon_start="save"', source)
+        self.assertIn('dir="rtl"', source)
+        self.assertIn("Use tabs to compare Arabic, Hebrew, and English button actions in RTL layout.", source)
+        self.assertNotIn("Right-to-left layout", source)
+        self.assertNotIn("title=\"RTL\"", source)
+        self.assertNotIn("title_id=", source)
+        self.assertNotIn("example_prefix=\"rtl\"", source)
+        self.assertNotIn("rtl-preview", source)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/button.html")
+        self.assertIn("button-direction-tabs", page)
+        self.assertIn('id="rtl-title">RTL</h2>', page)
+        self.assertIn('id="rtl-arabic-code"', page)
+        self.assertIn('id="rtl-hebrew-code"', page)
+        self.assertIn('id="rtl-english-code"', page)

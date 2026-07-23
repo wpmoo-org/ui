@@ -2,11 +2,11 @@
 
 {% set dropdown_alignments = ["", "start", "end"] %}
 
-{% macro dropdown(label, variant="outline", align="", extra_class="", caret=false) -%}
+{% macro dropdown(label, variant="outline", align="", extra_class="", caret=false, auto_close="", offset="") -%}
   {% if align not in dropdown_alignments %}{{ fail("Unknown dropdown alignment: " ~ align) }}{% endif %}
   {% set items %}{{ caller() | trim | safe }}{% endset %}
   <div class="dropdown{% if extra_class %} {{ extra_class }}{% endif %}">
-    {{ button(label, variant=variant, dropdown=true, dropdown_caret=caret) }}
+    {{ button(label, variant=variant, dropdown=true, dropdown_caret=caret, dropdown_auto_close=auto_close, dropdown_offset=offset) }}
     {% call dropdown_menu(align=align) %}{{ items | safe }}{% endcall %}
   </div>
 {%- endmacro %}

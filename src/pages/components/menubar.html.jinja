@@ -1,0 +1,224 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/menubar.html.jinja" import menubar %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item, dropdown_header, dropdown_divider %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/radio_group.html.jinja" import radio_group %}
+{% from "components/tabs.html.jinja" import tabs %}
+{% from "components/alert.html.jinja" import alert %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Menubar — Moo UI{% endblock %}
+
+{% block content %}
+  {% set menubar_dropdown_offset = "0,8" %}
+  {{ render_page_header(
+    "Menubar",
+    "A bordered row of the ready Dropdown Menu macros, for grouping several command menus in one toolbar."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set basic %}
+      {% call menubar("Document actions") %}
+        {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("New document", shortcut="⌘N") }}
+          {{ dropdown_item("Open workspace", shortcut="⌘O") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Export", shortcut="⌘E") }}
+          {{ dropdown_item("Print", shortcut="⌘P") }}
+        {% endcall %}
+        {% call dropdown("Edit", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("Undo", shortcut="⌘Z") }}
+          {{ dropdown_item("Redo", shortcut="⇧⌘Z") }}
+          {{ dropdown_item("Find") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Cut") }}
+          {{ dropdown_item("Copy") }}
+          {{ dropdown_item("Paste") }}
+        {% endcall %}
+        {% call dropdown("View", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("Zoom in") }}
+          {{ dropdown_item("Zoom out") }}
+          {{ dropdown_item("Reset zoom") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Each menu is the ready dropdown() macro; the bordered row is the only new markup.",
+      basic,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set with_header %}
+      {% call menubar("Workspace actions") %}
+        {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("New document", shortcut="⌘N") }}
+          {{ dropdown_item("Export as PDF") }}
+        {% endcall %}
+        {% call dropdown("Team", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_header("Members") }}
+          {{ dropdown_item("Invite teammate", shortcut="⇧⌘I") }}
+          {{ dropdown_item("Manage roles") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Leave workspace", destructive=true) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "with-header",
+      "With a header and destructive item",
+      "dropdown_header() and dropdown_item(destructive=true) compose the same way they do in a standalone Dropdown Menu.",
+      with_header,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set with_icons %}
+      {% call menubar("Document actions with icons") %}
+        {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("New document", icon="file-text", shortcut="⌘N") }}
+          {{ dropdown_item("Import file", icon="upload") }}
+          {{ dropdown_item("Export as PDF", icon="download") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Print", icon="printer", shortcut="⌘P") }}
+        {% endcall %}
+        {% call dropdown("Edit", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("Undo", icon="undo", shortcut="⌘Z") }}
+          {{ dropdown_item("Redo", icon="redo", shortcut="⇧⌘Z") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Duplicate page", icon="copy") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "with-icons",
+      "With icons",
+      "dropdown_item() already renders a leading icon; the menubar composes it the same way a standalone Dropdown Menu does.",
+      with_icons,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set checkbox_example %}
+      {% call menubar("View options") %}
+        {% call dropdown("View", variant="ghost", auto_close="outside", offset=menubar_dropdown_offset) %}
+          <li class="px-3 py-1 text-nowrap">
+            {{ checkbox(id="menubar-view-sidebar", label="Sidebar", checked=true) }}
+          </li>
+          <li class="px-3 py-1 text-nowrap">
+            {{ checkbox(id="menubar-view-compact", label="Compact mode") }}
+          </li>
+          <li class="px-3 py-1 text-nowrap">
+            {{ checkbox(id="menubar-view-focus", label="Focus mode") }}
+          </li>
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Refresh", shortcut="⌘R") }}
+          {{ dropdown_item("Force refresh", shortcut="⇧⌘R", disabled=true) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "checkbox",
+      "Checkbox",
+      "Toggleable menu options reuse the ready Checkbox macro, a real form control instead of a spoofed ARIA state. auto_close=\"outside\" keeps the menu open while a checkbox is toggled.",
+      checkbox_example,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set radio_example %}
+      {% call menubar("Profile options") %}
+        {% call dropdown("Profile", variant="ghost", auto_close="outside", offset=menubar_dropdown_offset) %}
+          <li class="px-3 py-2">
+            {{ radio_group(
+              name="menubar-profile",
+              legend="Profile",
+              items=[
+                {"id": "menubar-profile-priya", "label": "Priya"},
+                {"id": "menubar-profile-noah", "label": "Noah", "checked": true},
+                {"id": "menubar-profile-sana", "label": "Sana"}
+              ]
+            ) }}
+          </li>
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Edit profile…") }}
+          {{ dropdown_item("Add profile…") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "radio",
+      "Radio",
+      "Single-select menu options reuse the ready Radio Group macro's real fieldset and radio inputs. auto_close=\"outside\" keeps the menu open while a profile is picked.",
+      radio_example,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set menubar_rtl_arabic %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call menubar("إجراءات المستند") %}
+          {% call dropdown("ملف", variant="ghost", offset=menubar_dropdown_offset) %}
+            {{ dropdown_item("مستند جديد", shortcut="⌘N") }}
+            {{ dropdown_item("فتح الأخير") }}
+          {% endcall %}
+          {% call dropdown("تحرير", variant="ghost", offset=menubar_dropdown_offset) %}
+            {{ dropdown_item("تراجع", shortcut="⌘Z") }}
+            {{ dropdown_item("إعادة", shortcut="⇧⌘Z") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set menubar_rtl_hebrew %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call menubar("פעולות מסמך") %}
+          {% call dropdown("קובץ", variant="ghost", offset=menubar_dropdown_offset) %}
+            {{ dropdown_item("מסמך חדש", shortcut="⌘N") }}
+            {{ dropdown_item("פתח אחרון") }}
+          {% endcall %}
+          {% call dropdown("עריכה", variant="ghost", offset=menubar_dropdown_offset) %}
+            {{ dropdown_item("בטל", shortcut="⌘Z") }}
+            {{ dropdown_item("בצע שוב", shortcut="⇧⌘Z") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set menubar_rtl_english %}
+      <div class="d-inline-flex" dir="rtl">
+        {% call menubar("Document actions") %}
+          {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
+            {{ dropdown_item("New document", shortcut="⌘N") }}
+            {{ dropdown_item("Open recent") }}
+          {% endcall %}
+          {% call dropdown("Edit", variant="ghost", offset=menubar_dropdown_offset) %}
+            {{ dropdown_item("Undo", shortcut="⌘Z") }}
+            {{ dropdown_item("Redo", shortcut="⇧⌘Z") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "menubar",
+      "Switch between Arabic, Hebrew, and English labels to validate spacing and trigger alignment in RTL mode.",
+      menubar_rtl_arabic,
+      menubar_rtl_hebrew,
+      menubar_rtl_english,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ alert(
+    "Submenu is not yet supported",
+    "The reference nests a hover-opened flyout menu inside a menu item (for example Edit > Find, or File > Share). Bootstrap's dropdown plugin has no native nested-menu behavior, and faking one with plain markup would claim a keyboard/hover model this catalog cannot back yet. Items like Find above render as plain commands instead of a submenu trigger. Tracked as a gap rather than approximated with misleading markup.",
+    icon="triangle-alert"
+  ) }}
+
+  {{ render_reference(
+    "For Bootstrap's Dropdown plugin options, positioning, and keyboard behavior, see the",
+    "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+    "Bootstrap Dropdowns documentation"
+  ) }}
+
+{% endblock %}

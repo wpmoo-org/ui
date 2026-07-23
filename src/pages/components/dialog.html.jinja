@@ -1,8 +1,10 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/dialog.html.jinja" import dialog, dialog_body, dialog_footer, dialog_header %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Dialog — Moo UI{% endblock %}
@@ -16,22 +18,67 @@
   <div class="moo-component-examples">
     {% set basic %}
       {{ button("Open dialog", variant="outline", dialog_target="dialog-basic") }}
-      {% call dialog("dialog-basic", centered=true) %}
-        {{ dialog_header("dialog-basic", "Edit workspace name") }}
+      {% call dialog("dialog-basic", centered=true, describedby="dialog-basic-description") %}
+        {{ dialog_header("dialog-basic", "Edit project details") }}
         {% call dialog_body() %}
-          <p class="mb-0">Rename the workspace shown across the sidebar and shared links.</p>
+          <p class="text-body-secondary mb-3" id="dialog-basic-description">Update the public project label and a short note shown to team members.</p>
+          <div class="vstack gap-3">
+            {{ input(label="Project name", id="dialog-basic-name", value="Spring launch") }}
+            {{ textarea(label="Summary", id="dialog-basic-summary", rows=3, value="Prepare the launch checklist before the Friday review.") }}
+          </div>
         {% endcall %}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Save changes", dismiss="modal") }}
+          {{ button("Save project", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "Set <code>dialog_target</code> on the ready Button macro to point at a <code>dialog()</code> id; Bootstrap's data API opens and closes it automatically, no explicit init required.",
+      "Use a Button trigger, concise copy, and a focused form inside Bootstrap's modal structure.",
       basic
+    ) }}
+
+    {% set custom_close %}
+      {{ button("Share report", variant="outline", dialog_target="dialog-custom-close") }}
+      {% call dialog("dialog-custom-close", centered=true, describedby="dialog-custom-close-description") %}
+        {{ dialog_header("dialog-custom-close", "Share weekly report") }}
+        {% call dialog_body() %}
+          <p class="text-body-secondary mb-3" id="dialog-custom-close-description">Send a view-only link to the finance channel for review.</p>
+          <div class="rounded border bg-body-tertiary px-3 py-2 small text-body-secondary">https://app.example/reports/weekly-margin</div>
+        {% endcall %}
+        {% call dialog_footer() %}
+          {{ button("Copy link", variant="outline", dismiss="modal") }}
+          {{ button("Send to channel", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "custom-close",
+      "Custom close action",
+      "Keep Bootstrap's header close button available, then add task-specific actions in the footer.",
+      custom_close
+    ) }}
+
+    {% set no_close %}
+      {{ button("Review lock", variant="outline", dialog_target="dialog-no-close") }}
+      {% call dialog("dialog-no-close", centered=true, static=true, describedby="dialog-no-close-description") %}
+        {{ dialog_header("dialog-no-close", "Record locked for review") }}
+        {% call dialog_body() %}
+          <p class="mb-0 text-body-secondary" id="dialog-no-close-description">A reviewer is editing this record. Choose an explicit action to keep the workflow predictable.</p>
+        {% endcall %}
+        {% call dialog_footer() %}
+          {{ button("Return later", variant="outline", dismiss="modal") }}
+          {{ button("Request access", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "no-close",
+      "Explicit dismissal",
+      "Use a static backdrop when a dialog should close only through visible actions.",
+      no_close
     ) }}
 
     {% set sizes %}
@@ -41,21 +88,21 @@
         {{ button("Extra large", variant="outline", dialog_target="dialog-xl") }}
       </div>
       {% call dialog("dialog-sm", size="sm", centered=true) %}
-        {{ dialog_header("dialog-sm", "Small dialog") }}
+        {{ dialog_header("dialog-sm", "Quick note") }}
         {% call dialog_body() %}
-          <p class="mb-0">Set <code>size="sm"</code> for compact confirmations.</p>
+          <p class="mb-0 text-body-secondary">A compact surface for a short message or tiny form.</p>
         {% endcall %}
       {% endcall %}
       {% call dialog("dialog-lg", size="lg", centered=true) %}
-        {{ dialog_header("dialog-lg", "Large dialog") }}
+        {{ dialog_header("dialog-lg", "Schedule review") }}
         {% call dialog_body() %}
-          <p class="mb-0">Set <code>size="lg"</code> for forms with more fields.</p>
+          <p class="mb-0 text-body-secondary">A wider surface for a few related fields without feeling full screen.</p>
         {% endcall %}
       {% endcall %}
       {% call dialog("dialog-xl", size="xl", centered=true) %}
-        {{ dialog_header("dialog-xl", "Extra large dialog") }}
+        {{ dialog_header("dialog-xl", "Compare allocations") }}
         {% call dialog_body() %}
-          <p class="mb-0">Set <code>size="xl"</code> for dense tables or side-by-side layouts.</p>
+          <p class="mb-0 text-body-secondary">A roomy surface for dense previews that still need modal focus.</p>
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -69,10 +116,10 @@
     {% set scrollable %}
       {{ button("Open scrollable dialog", variant="outline", dialog_target="dialog-scrollable") }}
       {% call dialog("dialog-scrollable", centered=true, scrollable=true) %}
-        {{ dialog_header("dialog-scrollable", "Release notes") }}
+        {{ dialog_header("dialog-scrollable", "Release checklist") }}
         {% call dialog_body() %}
           {% for paragraph in range(1, 9) %}
-            <p{% if loop.last %} class="mb-0"{% endif %}>Paragraph {{ paragraph }}. This body scrolls on its own once the content outgrows the dialog's height, while the header and footer stay put.</p>
+            <p{% if loop.last %} class="mb-0"{% endif %}>Step {{ paragraph }}. Confirm owner, status, and dependency notes before moving this item into the release queue.</p>
           {% endfor %}
         {% endcall %}
         {% call dialog_footer() %}
@@ -90,43 +137,77 @@
     {% set static_backdrop %}
       {{ button("Open static dialog", variant="outline", dialog_target="dialog-static") }}
       {% call dialog("dialog-static", centered=true, static=true) %}
-        {{ dialog_header("dialog-static", "Confirm deletion") }}
+        {{ dialog_header("dialog-static", "Unsaved routing change") }}
         {% call dialog_body() %}
-          <p class="mb-0">This dialog only closes via an explicit action, not by clicking the backdrop or pressing Escape.</p>
+          <p class="mb-0 text-body-secondary">Backdrop clicks and Escape are ignored until the user chooses how to handle the pending routing update.</p>
         {% endcall %}
         {% call dialog_footer() %}
-          {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Delete", variant="destructive", dismiss="modal") }}
+          {{ button("Keep editing", variant="outline", dismiss="modal") }}
+          {{ button("Save route", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "static-backdrop",
       "Static backdrop",
-      "Set <code>static=true</code> to disable backdrop-click and Escape dismissal for destructive or unsaved-state confirmations.",
+      "Set <code>static=true</code> to disable backdrop-click and Escape dismissal for unsaved-state confirmations.",
       static_backdrop
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
-        {{ button("فتح الحوار", variant="outline", dialog_target="dialog-rtl") }}
-        {% call dialog("dialog-rtl", centered=true) %}
-          {{ dialog_header("dialog-rtl", "تعديل اسم مساحة العمل") }}
+    {% set rtl_arabic %}
+      <div class="d-inline-flex align-items-center gap-2" dir="rtl">
+        {{ button("فتح الحوار", variant="outline", dialog_target="dialog-rtl-arabic") }}
+        {% call dialog("dialog-rtl-arabic", centered=true, direction="rtl") %}
+          {{ dialog_header("dialog-rtl-arabic", "مراجعة التصعيد") }}
           {% call dialog_body() %}
-            <p class="mb-0">أعد تسمية مساحة العمل الظاهرة في الشريط الجانبي والروابط المشتركة.</p>
+            <p>وافق على تصعيد التذكرة فقط بعد اعتماد الدعم.</p>
           {% endcall %}
           {% call dialog_footer() %}
-            {{ button("إلغاء", variant="outline", dismiss="modal") }}
-            {{ button("حفظ", dismiss="modal") }}
+            {{ button("إغلاق", variant="outline", dismiss="modal") }}
+            {{ button("موافقة", dismiss="modal") }}
           {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Header, body, and footer mirror automatically; no extra CSS or markup is required.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div class="d-inline-flex align-items-center gap-2" dir="rtl">
+        {{ button("פתח דיאלוג", variant="outline", dialog_target="dialog-rtl-hebrew") }}
+        {% call dialog("dialog-rtl-hebrew", centered=true, direction="rtl") %}
+          {{ dialog_header("dialog-rtl-hebrew", "סקירת הסלמה") }}
+          {% call dialog_body() %}
+            <p>אשר את הסלמת הכרטיס רק לאחר אישור התמיכה.</p>
+          {% endcall %}
+          {% call dialog_footer() %}
+            {{ button("סגור", variant="outline", dismiss="modal") }}
+            {{ button("אשר", dismiss="modal") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-inline-flex align-items-center gap-2" dir="rtl">
+        {{ button("Open dialog", variant="outline", dialog_target="dialog-rtl-english") }}
+        {% call dialog("dialog-rtl-english", centered=true, direction="rtl") %}
+          {{ dialog_header("dialog-rtl-english", "Escalation review") }}
+          {% call dialog_body() %}
+            <p>Approve ticket escalation only after support sign-off.</p>
+          {% endcall %}
+          {% call dialog_footer() %}
+            {{ button("Close", variant="outline", dismiss="modal") }}
+            {{ button("Approve", dismiss="modal") }}
+          {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "dialog",
+      "Compare Arabic, Hebrew, and English dialog flows used in operational workflows.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english
     ) }}
   </div>
 

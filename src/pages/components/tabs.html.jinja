@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Tabs — Moo UI{% endblock %}
@@ -9,45 +9,60 @@
 {% block content %}
   {{ render_page_header(
     "Tabs",
-    "Switch between related views in the same space using Bootstrap's Tab plugin."
+    "Switch between compact operational views with Bootstrap's native tab behavior."
   ) }}
 
   <div class="moo-component-examples">
-    {% set basic %}
+    {% set operational_views %}
       {{ tabs(
-        "tabs-basic",
+        "tabs-operational",
         [
           {
-            "id": "profile",
-            "title": "Profile",
-            "content": "Update your name, avatar, and public bio."
+            "id": "overview",
+            "title": "Overview",
+            "content": "Track open requests, risk flags, and handoff status."
           },
           {
-            "id": "security",
-            "title": "Security",
-            "content": "Manage your password and two-factor authentication."
+            "id": "workflows",
+            "title": "Workflows",
+            "content": "Move items through review lanes with minimal context switching."
           },
           {
-            "id": "preferences",
-            "title": "Preferences",
-            "content": "Choose your language, timezone, and default notification settings."
+            "id": "settings",
+            "title": "Settings",
+            "content": "Set locale, notifications, and digest frequency from one place."
           }
         ]
       ) }}
     {% endset %}
     {{ render_example(
-      "basic",
-      "Basic",
-      "The first item is active by default; set <code>active</code> on an item to override it.",
-      basic
+      "operational-views",
+      "Operational views",
+      "Use tab sets when users need to move between related operational surfaces quickly.",
+      operational_views,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set disabled %}
       {{ tabs(
         "tabs-disabled",
         [
-          {"id": "team", "title": "Team", "content": "See who has access to this project."},
-          {"id": "archive", "title": "Archive", "content": "Archived projects are read-only.", "disabled": true}
+          {
+            "id": "active",
+            "title": "Active",
+            "content": "Open requests can be edited and reassigned from here."
+          },
+          {
+            "id": "locked",
+            "title": "Locked",
+            "content": "Historical items stay locked for audit safety.",
+            "disabled": true
+          },
+          {
+            "id": "archive",
+            "title": "Archive",
+            "content": "Completed cases remain searchable in read-only mode."
+          }
         ]
       ) }}
     {% endset %}
@@ -55,25 +70,92 @@
       "disabled",
       "Disabled",
       "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",
-      disabled
+      disabled,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
+    {% set tabs_rtl_arabic %}
       <div dir="rtl">
         {{ tabs(
-          "tabs-rtl",
+          "tabs-rtl-overview-arabic",
           [
-            {"id": "profile", "title": "الملف الشخصي", "content": "تحديث اسمك وصورتك الشخصية ونبذتك العامة."},
-            {"id": "security", "title": "الأمان", "content": "إدارة كلمة المرور والمصادقة الثنائية."}
+            {
+              "id": "overview",
+              "title": "نظرة عامة",
+              "content": "تتبّع الطلبات المفتوحة وعلامات المخاطر وحالة التسليم."
+            },
+            {
+              "id": "workflows",
+              "title": "تدفقات",
+              "content": "انقل العناصر عبر مسارات المراجعة دون تغييرات إضافية في السياق."
+            },
+            {
+              "id": "settings",
+              "title": "الإعدادات",
+              "content": "اضبط اللغة والإشعارات وتكرار الملخصات من مكان واحد."
+            }
           ]
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The active tab's track and text swap sides without mirrored custom CSS.",
-      rtl
+
+    {% set tabs_rtl_hebrew %}
+      <div dir="rtl">
+        {{ tabs(
+          "tabs-rtl-overview-hebrew",
+          [
+            {
+              "id": "overview",
+              "title": "סקירה כללית",
+              "content": "עקוב אחר הבקשות הפתוחות, דגלי הסיכון ומצב ההעברה."
+            },
+            {
+              "id": "workflows",
+              "title": "תהליכים",
+              "content": "העבר פריטים לאורך מסלולי הבדיקה ללא מעבר הקשר נוסף."
+            },
+            {
+              "id": "settings",
+              "title": "הגדרות",
+              "content": "הגדר שפה, התראות ותדירות סיכום במקום אחד."
+            }
+          ]
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set tabs_rtl_english %}
+      <div dir="rtl">
+        {{ tabs(
+          "tabs-rtl-overview-english",
+          [
+            {
+              "id": "overview",
+              "title": "Overview",
+              "content": "Track open requests, risk flags, and handoff status."
+            },
+            {
+              "id": "workflows",
+              "title": "Workflows",
+              "content": "Move items through review lanes without extra context switches."
+            },
+            {
+              "id": "settings",
+              "title": "Settings",
+              "content": "Set locale, notifications, and digest frequency from one place."
+            }
+          ]
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "tabs",
+      "RTL",
+      tabs_rtl_arabic,
+      tabs_rtl_hebrew,
+      tabs_rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 

@@ -1,0 +1,16 @@
+.menubar {
+  gap: $moo-menubar-gap;
+  padding: $moo-menubar-padding;
+}
+
+.menubar .dropdown-menu {
+  z-index: $zindex-dropdown;
+}
+
+.menubar [data-bs-toggle="dropdown"].show,
+.menubar .dropdown-toggle.show {
+  --bs-btn-color: var(--moo-foreground);
+
+  color: var(--bs-btn-color);
+  font-weight: $font-weight-medium;
+}

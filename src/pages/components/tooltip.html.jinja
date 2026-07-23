@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/tooltip.html.jinja" import tooltip_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Tooltip — Moo UI{% endblock %}
@@ -10,51 +10,62 @@
 {% block content %}
   {{ render_page_header(
     "Tooltip",
-    "Show a short, non-modal hint next to a trigger on hover or focus, powered by Bootstrap's own opt-in Tooltip plugin."
+    "Show compact context hints for controls and actions on hover or keyboard focus with Bootstrap's native tooltip plugin."
   ) }}
 
   <div class="moo-component-examples">
     {% set basic %}
-      {{ tooltip_trigger("Hover over me", "Pinned to your workspace") }}
+      {{ tooltip_trigger("Check sync status", "Workspace status is visible from the project settings panel.") }}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "A plain link trigger with <code>data-bs-toggle=\"tooltip\"</code> and <code>data-bs-title</code>. The catalog performs the one required explicit init pass; a consuming page must do the same.",
-      basic
+      "Use a focusable trigger for one-line operational context without opening modals.",
+      basic,
+      "moo-example__preview--narrow"
     ) }}
 
     {% set placements %}
       <div class="d-flex flex-wrap gap-2">
-        {{ button("Top", variant="outline", tooltip="Tooltip on top", tooltip_placement="top") }}
-        {{ button("Right", variant="outline", tooltip="Tooltip on right", tooltip_placement="right") }}
-        {{ button("Bottom", variant="outline", tooltip="Tooltip on bottom", tooltip_placement="bottom") }}
-        {{ button("Left", variant="outline", tooltip="Tooltip on left", tooltip_placement="left") }}
+        {{ button("Top", variant="outline", tooltip="Preview opens above", tooltip_placement="top") }}
+        {{ button("Right", variant="outline", tooltip="Preview opens to the right", tooltip_placement="right") }}
+        {{ button("Bottom", variant="outline", tooltip="Preview opens below", tooltip_placement="bottom") }}
+        {{ button("Left", variant="outline", tooltip="Preview opens to the left", tooltip_placement="left") }}
       </div>
     {% endset %}
     {{ render_example(
       "placements",
       "Side",
-      "Set <code>tooltip_placement</code> to <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code>; directions mirror automatically under RTL.",
-      placements
+      "Choose <code>tooltip_placement</code> for compact command bars and density-sensitive tooltips.",
+      placements,
+      "moo-example__preview--narrow"
     ) }}
 
     {% set with_shortcut %}
-      {{ button("", variant="outline", size="icon-sm", icon_start="save", aria_label="Save draft", tooltip="Save draft <code class='tooltip-kbd'>⌘S</code>", tooltip_html=true) }}
+      {{ button(
+        "Save draft",
+        variant="outline",
+        icon_start="save",
+        tooltip="Save draft <code class='tooltip-kbd'>⌘S</code>",
+        tooltip_html=true
+      ) }}
     {% endset %}
     {{ render_example(
       "keyboard-shortcut",
       "With keyboard shortcut",
-      "Set <code>tooltip_html=true</code> to render markup inside the tooltip body. Bootstrap runs it through its "
-      ~ "own default sanitizer allowlist first, which has no <code>&lt;kbd&gt;</code> but does allow a "
-      ~ "<code>class</code> attribute on any tag, so the shortcut hint uses "
-      ~ "<code>&lt;code class=\"tooltip-kbd\"&gt;</code> to reproduce Bootstrap's native <code>&lt;kbd&gt;</code> "
-      ~ "look on an allowlisted tag.",
-      with_shortcut
+      "Use compact shortcut badges in tooltip content and let Bootstrap sanitize the markup.",
+      with_shortcut,
+      "moo-example__preview--narrow"
     ) }}
 
     {% set disabled %}
-      <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="This action is currently unavailable">
+      <span
+        class="d-inline-block"
+        role="button"
+        tabindex="0"
+        data-bs-toggle="tooltip"
+        data-bs-title="This action is currently unavailable"
+      >
         {{ button("Archive", variant="outline", disabled=true) }}
       </span>
     {% endset %}
@@ -62,19 +73,32 @@
       "disabled-button",
       "Disabled button",
       "A <code>disabled</code> element never fires hover or focus events, so wrap it in a focusable <code>&lt;span&gt;</code> and attach the tooltip there, per Bootstrap's own guidance.",
-      disabled
+      disabled,
+      "moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
+    {% set tooltip_rtl_arabic %}
       <div dir="rtl">
-        {{ button("محفوظ", variant="outline", tooltip="محفوظ في مساحة العمل الخاصة بك") }}
+        {{ button("حالة المشروع", variant="outline", tooltip="تتبع حالة المشروع من هذه البطاقة.") }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Placement direction mirrors automatically; no extra CSS or markup is required.",
-      rtl
+    {% set tooltip_rtl_hebrew %}
+      <div dir="rtl">
+        {{ button("מצב הפרויקט", variant="outline", tooltip="בדוק את סטטוס הפרויקט מאותה כרטיסייה.") }}
+      </div>
+    {% endset %}
+    {% set tooltip_rtl_english %}
+      <div dir="rtl">
+        {{ button("Project status", variant="outline", tooltip="Check project status from this card.") }}
+      </div>
+    {% endset %}
+    {{ render_rtl_example(
+      "tooltip",
+      "Keep the same action context while previewing in RTL locales.",
+      tooltip_rtl_arabic,
+      tooltip_rtl_hebrew,
+      tooltip_rtl_english,
+      "moo-example__preview--narrow"
     ) }}
   </div>
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase, lucide_body
+from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/accordion.html.jinja"
@@ -17,14 +17,59 @@ class AccordionTests(CatalogTestCase):
         )
         return " ".join(template.render().split())
 
-    def test_accordion_renders_flush_container_and_chevron_icon(self) -> None:
+    def test_accordion_renders_flush_container_and_native_bootstrap_button(self) -> None:
         output = self.render_accordion(
             'accordion("faq", [{"id": "a", "title": "Q1", "content": "A1"}])'
         )
 
-        self.assertIn('<div class="accordion accordion-flush" id="faq">', output)
-        self.assertIn(lucide_body("chevron-down"), output)
+        self.assertIn('<div class="accordion w-100 accordion-flush" id="faq">', output)
+        self.assertIn('class="accordion-button collapsed"', output)
         self.assertIn('data-icon="inline-end"', output)
+
+    def test_accordion_can_render_contained_bootstrap_variant(self) -> None:
+        output = self.render_accordion(
+            'accordion("faq", [{"id": "a", "title": "Q1", "content": "A1"}], flush=false)'
+        )
+
+        self.assertIn('<div class="accordion w-100" id="faq">', output)
+        self.assertNotIn("accordion-flush", output)
+
+    def test_accordion_width_is_stable_inside_flex_catalog_previews(self) -> None:
+        output = self.render_accordion(
+            'accordion("faq", [{"id": "a", "title": "Q1", "content": "A1"}])'
+        )
+
+        self.assertIn("w-100", output)
+
+    def test_accordion_page_includes_reference_parity_examples(self) -> None:
+        page = PAGE.read_text()
+
+        self.assertIn('"bordered"', page)
+        self.assertIn('"disabled"', page)
+        self.assertIn('"in-card"', page)
+        self.assertGreaterEqual(
+            page.count('preview_class="moo-example__preview--medium"'), 6
+        )
+        self.assertIn("render_rtl_example", page)
+        self.assertIn('"accordion"', page)
+        self.assertIn('"accordion-rtl-arabic"', page)
+        self.assertIn('"accordion-rtl-hebrew"', page)
+        self.assertIn('"accordion-rtl-english"', page)
+        self.assertGreaterEqual(page.count('<div class="w-100" dir="rtl">'), 3)
+        self.assertIn('"من يعتمد النتيجة؟"', page)
+        self.assertIn('"מי מאשר סופית?"', page)
+        self.assertNotIn("قبل סגירה", page)
+        self.assertGreaterEqual(page.count('dir="rtl"'), 3)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/accordion.html")
+        self.assertIn("accordion-direction-tabs", output)
+        self.assertIn("rtl-arabic-code", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
 
     def test_accordion_item_defaults_to_collapsed(self) -> None:
         output = self.render_accordion(
@@ -59,6 +104,7 @@ class AccordionTests(CatalogTestCase):
         )
 
         self.assertIn("disabled>", output)
+        self.assertIn('class="accordion-button collapsed text-muted"', output)
 
     def test_accordion_content_is_not_escaped(self) -> None:
         output = self.render_accordion(

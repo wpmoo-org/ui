@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Typography — Moo UI{% endblock %}
@@ -9,75 +9,76 @@
 {% block content %}
   {{ render_page_header(
     "Typography",
-    "Give catalog content a consistent hierarchy with Bootstrap-native text roles."
+    "Align headings, labels, and body copy with Bootstrap's utility-first text semantics and Moo UI tokenized roles."
   ) }}
 
   <div class="moo-component-examples">
     {% set headings %}
       <div class="d-grid gap-3">
-        {{ typography("Section title", variant="section-title") }}
-        {{ typography("Example title", variant="example-title") }}
+        {{ typography("Product Console", variant="page-title") }}
+        {{ typography("Operations playbook", variant="section-title") }}
+        {{ typography("Incident summary", variant="example-title") }}
       </div>
     {% endset %}
     {{ render_example(
       "headings",
       "Headings",
-      "Choose the semantic heading level first; the catalog maps the roles to Bootstrap classes such as <code>display-5</code>, <code>h3</code>, and <code>h4</code>.",
+      "Map semantic intent to the heading roles first, then use utility classes when visual level and HTML level need to differ.",
       headings
     ) }}
 
     {% set semantic_headings %}
       <div class="d-grid gap-2">
-        <h1 class="mb-0">h1. Bootstrap heading</h1>
-        <h2 class="mb-0">h2. Bootstrap heading</h2>
-        <h3 class="mb-0">h3. Bootstrap heading</h3>
-        <h4 class="mb-0">h4. Bootstrap heading</h4>
-        <h5 class="mb-0">h5. Bootstrap heading</h5>
-        <h6 class="mb-0">h6. Bootstrap heading</h6>
+        <h1 class="mb-0">h1. Team roadmap</h1>
+        <h2 class="mb-0">h2. Sprint planning</h2>
+        <h3 class="mb-0">h3. Release checklist</h3>
+        <h4 class="mb-0">h4. Ticket priorities</h4>
+        <h5 class="mb-0">h5. Deployment notes</h5>
+        <h6 class="mb-0">h6. Open action items</h6>
       </div>
     {% endset %}
     {{ render_example(
       "semantic-headings",
       "Semantic headings",
-      "Use the native <code>h1</code> through <code>h6</code> elements when the document outline should carry the meaning.",
+      "Keep the document outline meaningful when screen readers and search indexing are reading this content.",
       semantic_headings
     ) }}
 
     {% set heading_utilities %}
       <div class="d-grid gap-2">
-        <p class="h1 mb-0">h1. Bootstrap heading</p>
-        <p class="h2 mb-0">h2. Bootstrap heading</p>
-        <p class="h3 mb-0">h3. Bootstrap heading</p>
-        <p class="h4 mb-0">h4. Bootstrap heading</p>
-        <p class="h5 mb-0">h5. Bootstrap heading</p>
-        <p class="h6 mb-0">h6. Bootstrap heading</p>
+        <p class="h1 mb-0">h1. Dashboard view</p>
+        <p class="h2 mb-0">h2. Usage analytics</p>
+        <p class="h3 mb-0">h3. Team activity</p>
+        <p class="h4 mb-0">h4. API usage</p>
+        <p class="h5 mb-0">h5. Integration status</p>
+        <p class="h6 mb-0">h6. Audit log</p>
       </div>
     {% endset %}
     {{ render_example(
       "heading-utilities",
       "Heading utilities",
-      "Use <code>.h1</code> through <code>.h6</code> when the visual heading level must not replace the element's semantic level.",
+      "Use heading utility classes when the visual style must stay large but the document structure should stay compact.",
       heading_utilities
     ) }}
 
     {% set customizing_headings %}
-      <h3 class="mb-0">Fancy display heading <small class="text-body-secondary">With faded secondary text</small></h3>
+      <h3 class="mb-0">Maintenance window <small class="text-body-secondary">Planned 02:00–03:00 UTC</small></h3>
     {% endset %}
     {{ render_example(
       "customizing-headings",
       "Customizing headings",
-      "Pair a heading with <code>small.text-body-secondary</code> when a secondary phrase should stay visually subordinate.",
+      "Use <code>small.text-body-secondary</code> for contextual metadata that should stay subordinate to the heading.",
       customizing_headings
     ) }}
 
     {% set display_headings %}
       <div class="d-grid gap-2">
-        <h1 class="display-1 mb-0">Display 1</h1>
-        <h1 class="display-2 mb-0">Display 2</h1>
-        <h1 class="display-3 mb-0">Display 3</h1>
-        <h1 class="display-4 mb-0">Display 4</h1>
-        <h1 class="display-5 mb-0">Display 5</h1>
-        <h1 class="display-6 mb-0">Display 6</h1>
+        <h1 class="display-1 mb-0">Display 1 · Operations pulse</h1>
+        <h1 class="display-2 mb-0">Display 2 · Capacity trend</h1>
+        <h1 class="display-3 mb-0">Display 3 · Release wave</h1>
+        <h1 class="display-4 mb-0">Display 4 · Delivery goals</h1>
+        <h1 class="display-5 mb-0">Display 5 · Quality checks</h1>
+        <h1 class="display-6 mb-0">Display 6 · Readability</h1>
       </div>
     {% endset %}
     {{ render_example(
@@ -89,8 +90,8 @@
 
     {% set supporting_text %}
       <div class="d-grid gap-3">
-        {{ typography("Lead copy introduces the purpose of a page.", variant="page-description") }}
-        {{ typography("Muted text adds quiet supporting context.", variant="muted") }}
+        {{ typography("Track status, ownership, and escalation points from one shared index.", variant="page-description") }}
+        {{ typography("Muted text fits status chips and non-blocking helper notes.", variant="muted") }}
         {{ typography("Section label", variant="section-label") }}
       </div>
     {% endset %}
@@ -102,7 +103,7 @@
     ) }}
 
     {% set lead %}
-      <p class="lead mb-0">This is a lead paragraph. It stands out from regular paragraphs.</p>
+      <p class="lead mb-0">Lead copy is useful for a short onboarding message or migration note.</p>
     {% endset %}
     {{ render_example(
       "lead",
@@ -268,8 +269,8 @@
 
     {% set text_decoration %}
       <div class="d-grid gap-2">
-        <p class="text-decoration-underline mb-0">Underline a supporting link-like phrase.</p>
-        <p class="text-decoration-line-through mb-0">Strike through a superseded phrase.</p>
+        <p class="text-decoration-underline mb-0">Underline a policy reference before users confirm action.</p>
+        <p class="text-decoration-line-through mb-0">Strike through an obsolete process step that was revised.</p>
       </div>
     {% endset %}
     {{ render_example(
@@ -280,7 +281,7 @@
     ) }}
 
     {% set monospace %}
-      <p class="font-monospace mb-0">moo-ui@button-group --watch</p>
+      <p class="font-monospace mb-0">npm run lint --workspace=ui</p>
     {% endset %}
     {{ render_example(
       "monospace",
@@ -290,13 +291,58 @@
     ) }}
 
     {% set inline_code %}
-      <p class="mb-0">Use {{ typography(".display-5", variant="inline-code") }} for the public Bootstrap class.</p>
+      <p class="mb-0">Use {{ typography("npm run format", variant="inline-code") }} for local CI-aligned formatting.</p>
     {% endset %}
     {{ render_example(
       "inline-code",
       "Inline code",
       "Wrap public classes, attributes, and contracts in <code>&lt;code&gt;</code> so technical names stay distinct inside prose.",
       inline_code
+    ) }}
+
+    {% set typography_rtl_arabic %}
+      <div dir="rtl" class="d-grid gap-3">
+        {{ typography("إرشادات التدقيق اليومي", variant="section-title") }}
+        <p class="lead mb-0">يبدأ كل يوم بفحص واضح للمؤشرات المفتاحية وسلامة عملية الإبلاغ.</p>
+        <p class="mb-0 text-body-secondary">تم تحديث الملخص في توقيت <strong>UTC 07:00</strong>، ويمكن مراجعة البنود المفتوحة بنفس التسلسل.</p>
+        <ul class="list-unstyled mb-0">
+          <li>تحقق من حالة الخدمة، وخطة الاسترجاع، ومسؤولية النشر.</li>
+          <li>سجل قرارات الحوكمة قبل اعتماد أي تغيير إضافي.</li>
+        </ul>
+      </div>
+    {% endset %}
+
+    {% set typography_rtl_hebrew %}
+      <div dir="rtl" class="d-grid gap-3">
+        {{ typography("הנחיות ביקורת יומית", variant="section-title") }}
+        <p class="lead mb-0">כל יום מתחיל בסקירה ברורה של מדדי מפתח ובטיחות תהליך הדיווח.</p>
+        <p class="mb-0 text-body-secondary">עדכון תקציר ב־<strong>UTC 07:00</strong>; פתיחת פריטים בהלימה קבועה.</p>
+        <ul class="list-unstyled mb-0">
+          <li>בדוק סטטוס שירות, תוכנית שחזור, ואחריות פריסה.</li>
+          <li>תעד החלטות ממשל לפני אימות שינוי נוסף.</li>
+        </ul>
+      </div>
+    {% endset %}
+
+    {% set typography_rtl_english %}
+      <div dir="rtl" class="d-grid gap-3">
+        {{ typography("Daily audit checklist", variant="section-title") }}
+        <p class="lead mb-0">Every shift begins with a clear review of key signals and reporting safety.</p>
+        <p class="mb-0 text-body-secondary">The summary refreshes at <strong>UTC 07:00</strong>, then open items are reviewed in order.</p>
+        <ul class="list-unstyled mb-0">
+          <li>Confirm service status, recovery plan, and deployment owner.</li>
+          <li>Log governance decisions before any additional rollout.</li>
+        </ul>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "typography-rtl",
+      "RTL",
+      typography_rtl_arabic,
+      typography_rtl_hebrew,
+      typography_rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 

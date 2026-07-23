@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Radio Group — Moo UI{% endblock %}
@@ -9,83 +9,120 @@
 {% block content %}
   {{ render_page_header(
     "Radio Group",
-    "Choose exactly one option from a set using Bootstrap's native radio contract."
+    "Let users choose one option from a related set using native Bootstrap radio controls."
   ) }}
 
   <div class="moo-component-examples">
     {% set default %}
       {{ radio_group(
         "radio-default",
-        "Notify me about",
+        "Incident alert channel",
         [
-          {"id": "radio-default-all", "label": "All new messages", "checked": true},
-          {"id": "radio-default-mentions", "label": "Direct messages and mentions"},
-          {"id": "radio-default-none", "label": "Nothing"}
+          {"id": "radio-default-email", "label": "Email", "checked": true},
+          {"id": "radio-default-sms", "label": "SMS"},
+          {"id": "radio-default-webhook", "label": "Webhook"}
         ]
       ) }}
     {% endset %}
     {{ render_example(
       "default",
       "Default",
-      "A fieldset and legend give the group its accessible name; items share one <code>name</code>.",
-      default,
-      preview_class="moo-example__preview--narrow"
+      "Use one compact set of mutually exclusive options for a common selection workflow.",
+      default
     ) }}
 
     {% set with_description %}
       {{ radio_group(
         "radio-format",
-        "Export format",
+        "Export destination",
         [
-          {"id": "radio-format-csv", "label": "CSV", "description": "Comma-separated values, opens in any spreadsheet.", "checked": true},
-          {"id": "radio-format-json", "label": "JSON", "description": "Structured data for developers and APIs."}
+          {
+            "id": "radio-format-drive",
+            "label": "Shared drive",
+            "description": "Saves to the operations drive folder.",
+            "checked": true
+          },
+          {
+            "id": "radio-format-sftp",
+            "label": "SFTP",
+            "description": "Available for scheduled sync jobs only."
+          }
         ]
       ) }}
     {% endset %}
     {{ render_example(
       "with-description",
       "With description",
-      "Add supporting copy below an item's label with <code>description</code>.",
-      with_description,
-      preview_class="moo-example__preview--narrow"
+      "Show option-level helper text when each choice has a different operational impact.",
+      with_description
     ) }}
 
     {% set disabled %}
       {{ radio_group(
         "radio-disabled",
-        "Delivery method",
+        "Task completion notification",
         [
-          {"id": "radio-disabled-standard", "label": "Standard", "checked": true},
-          {"id": "radio-disabled-express", "label": "Express (unavailable)", "disabled": true}
+          {"id": "radio-disabled-portal", "label": "Team portal", "checked": true},
+          {
+            "id": "radio-disabled-mobile",
+            "label": "Mobile push (temporarily paused)",
+            "disabled": true
+          }
         ]
       ) }}
     {% endset %}
     {{ render_example(
       "disabled",
       "Disabled",
-      "Set <code>disabled</code> on an individual item to remove it from selection.",
-      disabled,
-      preview_class="moo-example__preview--narrow"
+      "Disable only options that are currently unavailable in the current environment.",
+      disabled
     ) }}
 
-    {% set rtl %}
+    {% set radio_rtl_arabic %}
       <div dir="rtl">
         {{ radio_group(
-          "radio-rtl",
-          "طريقة الاستلام",
+          "radio-rtl-channel-arabic",
+          "قناة التنبيه",
           [
-            {"id": "radio-rtl-pickup", "label": "الاستلام من المتجر", "checked": true},
-            {"id": "radio-rtl-delivery", "label": "التوصيل إلى المنزل"}
+            {"id": "radio-rtl-email-arabic", "label": "البريد الإلكتروني", "checked": true},
+            {"id": "radio-rtl-sms-arabic", "label": "رسالة نصية قصيرة"}
           ]
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The input and label swap sides without mirrored custom CSS.",
-      rtl,
-      preview_class="moo-example__preview--narrow"
+
+    {% set radio_rtl_hebrew %}
+      <div dir="rtl">
+        {{ radio_group(
+          "radio-rtl-channel-hebrew",
+          "ערוץ התראות",
+          [
+            {"id": "radio-rtl-email-hebrew", "label": "דוא״ל", "checked": true},
+            {"id": "radio-rtl-sms-hebrew", "label": "מסרון"}
+          ]
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set radio_rtl_english %}
+      <div dir="rtl">
+        {{ radio_group(
+          "radio-rtl-channel-english",
+          "Notification channel",
+          [
+            {"id": "radio-rtl-email-english", "label": "Email", "checked": true},
+            {"id": "radio-rtl-sms-english", "label": "SMS"}
+          ]
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "radio-group",
+      "Choose the same notification channel in Arabic, Hebrew, and English, with RTL layout on each tab.",
+      radio_rtl_arabic,
+      radio_rtl_hebrew,
+      radio_rtl_english
     ) }}
   </div>
 

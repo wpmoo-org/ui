@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Skeleton — Moo UI{% endblock %}
@@ -9,35 +9,169 @@
 {% block content %}
   {{ render_page_header(
     "Skeleton",
-    "Render inert loading placeholders with Bootstrap-native placeholder classes for deterministic layout.",
+    "Show loading structure with Bootstrap-native placeholders so lists, cards, and tables stay stable while data fetches."
   ) }}
 
   <div class="moo-component-examples">
-    {% set line %}
-      {{ skeleton(width="100%", height="1rem") }}
+    {% set basic %}
+      {{ skeleton(width="9.5rem", height="1rem") }}
     {% endset %}
     {{ render_example(
-      "line",
-      "Line placeholder",
-      "Use a single-line placeholder when one row of content is loading.",
-      line
+      "basic",
+      "Basic",
+      "Use precise width/height values to reserve space before the final copy is available.",
+      basic
     ) }}
 
-    {% set card_stack %}
-      <div class="d-grid gap-2 w-100" style="max-width: 18rem;">
-        {{ skeleton(height="1.5rem") }}
-        {{ skeleton(height="7rem") }}
-        <div class="d-flex gap-2">
-          {{ skeleton(width="55%", height="1rem", extra_class="flex-grow-1") }}
-          {{ skeleton(width="30%", height="1rem", extra_class="flex-grow-1") }}
+    {% set profile_row %}
+      <div class="d-flex align-items-center gap-3">
+        {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="10rem", height=".875rem") }}
+          {{ skeleton(width="6.5rem", height=".875rem") }}
         </div>
       </div>
     {% endset %}
     {{ render_example(
-      "card-stack",
-      "Card stack",
-      "Compose a compact card-like block with stacked loading bars.",
-      card_stack
+      "profile-row",
+      "Profile row",
+      "Pair a circular avatar placeholder with name and role lines while a workspace member loads.",
+      profile_row
+    ) }}
+
+    {% set card %}
+      <div class="d-grid gap-3" style="width: 18rem;">
+        {{ skeleton(width="18rem", height="8rem") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="13rem", height=".875rem") }}
+          {{ skeleton(width="10rem", height=".875rem") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "card",
+      "Card",
+      "Keep the card frame and metadata rhythm consistent while a feed card prepares on the page.",
+      card
+    ) }}
+
+    {% set text %}
+      <div class="d-grid gap-2" style="width: 18rem;">
+        {{ skeleton(width="100%", height="1rem") }}
+        {{ skeleton(width="95%", height=".875rem") }}
+        {{ skeleton(width="85%", height=".875rem") }}
+        {{ skeleton(width="72%", height=".875rem") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "text",
+      "Text block",
+      "Use varying line lengths to preserve paragraph alignment when prose arrives.",
+      text
+    ) }}
+
+    {% set form %}
+      <div class="d-grid gap-3" style="width: 16rem;">
+        <div class="d-grid gap-2">
+          {{ skeleton(width="5rem", height=".875rem") }}
+          {{ skeleton(height="2rem") }}
+        </div>
+        <div class="d-grid gap-2">
+          {{ skeleton(width="6rem", height=".875rem") }}
+          {{ skeleton(height="2rem") }}
+        </div>
+        {{ skeleton(width="6rem", height="2rem") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "form",
+      "Form",
+      "Hold labels and control height while a billing form is still resolving.",
+      form
+    ) }}
+
+    {% set list_rows %}
+      <div class="d-grid gap-2" style="width: 20rem;">
+        {% for row in range(4) %}
+          <div class="d-flex align-items-center gap-3">
+            {{ skeleton(width="4rem", height=".875rem") }}
+            {{ skeleton(height=".875rem", extra_class="flex-grow-1") }}
+            {{ skeleton(width="3.25rem", height=".875rem") }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "list-rows",
+      "List rows",
+      "Hold row height for a repeated list, such as a support triage queue, while it loads.",
+      list_rows
+    ) }}
+
+    {% set table %}
+      <div class="d-grid gap-2" style="width: 20rem;">
+        <div class="d-flex gap-3">
+          {{ skeleton(width="4rem", height=".875rem") }}
+          {{ skeleton(width="8rem", height=".875rem") }}
+          {{ skeleton(width="5.25rem", height=".875rem") }}
+        </div>
+        {% for _ in range(3) %}
+          <div class="d-flex gap-3">
+            {{ skeleton(width="4rem", height=".75rem") }}
+            {{ skeleton(height=".75rem", extra_class="flex-grow-1") }}
+            {{ skeleton(width="4.5rem", height=".75rem") }}
+          </div>
+        {% endfor %}
+        <div class="d-flex gap-3">
+          {{ skeleton(width="7.25rem", height=".75rem") }}
+          {{ skeleton(width="4.5rem", height=".75rem") }}
+          {{ skeleton(width="3.25rem", height=".75rem") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "table",
+      "Table rows",
+      "Represent headers and rows with matching geometry so sorting and selection actions can appear without jump.",
+      table
+    ) }}
+
+    {% set rtl_arabic %}
+      <div class="d-flex align-items-center gap-3" dir="rtl">
+        {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="10rem", height=".875rem") }}
+          {{ skeleton(width="6.5rem", height=".875rem") }}
+        </div>
+      </div>
+    {% endset %}
+
+    {% set rtl_hebrew %}
+      <div class="d-flex align-items-center gap-3" dir="rtl">
+        {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="10rem", height=".875rem") }}
+          {{ skeleton(width="6.5rem", height=".875rem") }}
+        </div>
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div class="d-flex align-items-center gap-3" dir="rtl">
+        {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="10rem", height=".875rem") }}
+          {{ skeleton(width="6.5rem", height=".875rem") }}
+        </div>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "rtl",
+      "Use the same skeleton arrangement in Arabic, Hebrew, and English while mirroring direction only.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english
     ) }}
   </div>
 

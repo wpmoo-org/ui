@@ -6,6 +6,23 @@
   --bs-breadcrumb-item-active-color: var(--moo-foreground);
 }
 
+// Bootstrap emits these RTL changes through RTLCSS. The catalog serves one
+// runtime CSS file, so scoped RTL demos bridge that generated output.
+:dir(rtl) .breadcrumb {
+  --bs-breadcrumb-divider: "#{$breadcrumb-divider-flipped}";
+}
+
+:dir(rtl) .breadcrumb-item + .breadcrumb-item {
+  padding-right: var(--bs-breadcrumb-item-padding-x);
+  padding-left: 0;
+}
+
+:dir(rtl) .breadcrumb-item + .breadcrumb-item::before {
+  float: right;
+  padding-right: 0;
+  padding-left: var(--bs-breadcrumb-item-padding-x);
+}
+
 .breadcrumb-item a {
   color: var(--moo-muted-foreground);
   text-decoration: none;
@@ -15,4 +32,45 @@
 .breadcrumb-item a:hover {
   color: var(--moo-foreground);
   text-decoration: none;
+}
+
+// A static collapsed-segment marker (no interactive behavior of its own,
+// matching the reference's ellipsis placeholder).
+.breadcrumb-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  color: var(--moo-muted-foreground);
+}
+
+.breadcrumb-ellipsis [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+// Bootstrap's dropdown wrapper is a plain block box; inside a breadcrumb
+// item that sits beside a floated divider, a block box wraps its content
+// onto its own line instead of flowing beside the float. Making this
+// wrapper an atomic inline-flex box keeps it on the breadcrumb's line.
+.breadcrumb-dropdown-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+// The ready Dropdown macro only exposes an extra_class hook on its own
+// outer wrapper, not on the trigger button it renders internally, so the
+// button is reached here by element rather than by reopening Bootstrap's
+// own button/dropdown selector namespace. Bootstrap's link-styled button
+// variant also keeps full button padding; a breadcrumb segment that opens
+// a dropdown needs to read as inline text like its sibling links.
+.breadcrumb-dropdown-item button {
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--moo-muted-foreground);
+  text-decoration: none;
+}
+
+.breadcrumb-dropdown-item button:hover,
+.breadcrumb-dropdown-item button:focus {
+  color: var(--moo-foreground);
 }

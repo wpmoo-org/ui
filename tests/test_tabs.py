@@ -64,6 +64,43 @@ class TabsTests(CatalogTestCase):
 
         self.assertIn("See <code>docs</code>.", output)
 
+    def test_tabs_css_keeps_panes_stable_and_animates_switches(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        tab_content = css.rsplit(".tab-content {", 1)[1].split("}", 1)[0]
+        self.assertIn("width: 100%;", tab_content)
+        self.assertIn("max-width: 100%;", tab_content)
+        self.assertIn("min-width: 0;", tab_content)
+        tab_pane = css.rsplit(".tab-content > .tab-pane {", 1)[1].split("}", 1)[0]
+        self.assertIn("display: block;", tab_pane)
+        self.assertIn("width: 100%;", tab_pane)
+        self.assertIn("max-width: 100%;", tab_pane)
+        self.assertIn("min-width: 0;", tab_pane)
+        self.assertIn("opacity: 0;", tab_pane)
+        self.assertIn("transform: translateY(0.25rem);", tab_pane)
+        self.assertIn("pointer-events: none;", tab_pane)
+        self.assertIn("transition: opacity 0.16s ease", tab_pane)
+        active_tab_pane = css.rsplit(".tab-content > .active {", 1)[1].split("}", 1)[0]
+        self.assertIn("opacity: 1;", active_tab_pane)
+        self.assertIn("transform: none;", active_tab_pane)
+        self.assertIn("pointer-events: auto;", active_tab_pane)
+
+    def test_catalog_tabs_freeze_smooth_scroll_during_handoff(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        script = self.read_output("assets/js/preview.js")
+        self.assertIn("freezeCatalogScrollForTab", script)
+        self.assertIn("captureCatalogScrollForTab", script)
+        self.assertIn("pendingCatalogTabScrollTop", script)
+        self.assertIn('document.addEventListener("pointerdown"', script)
+        self.assertIn('document.addEventListener("show.bs.tab"', script)
+        self.assertIn('trigger.closest(".tabs-list")', script)
+        self.assertIn('catalogMain.style.scrollBehavior = "auto";', script)
+        self.assertIn("catalogMain.scrollTop = currentScrollTop;", script)
+
     def test_tabs_requires_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Tabs id is required"):
             self.render_tabs(

@@ -134,6 +134,9 @@ body {
 }
 
 .moo-catalog {
+  --moo-catalog-header-height: 4rem;
+  --moo-doc-toc-offset: calc(var(--moo-catalog-header-height) + 1rem);
+
   min-height: 100vh;
   font-family: $moo-catalog-font-family, var(--bs-body-font-family);
 }
@@ -147,13 +150,13 @@ body {
   position: sticky;
   z-index: 1030;
   top: 0;
-  min-height: 4rem;
+  min-height: var(--moo-catalog-header-height);
   background: rgba(var(--bs-body-bg-rgb), 0.94);
   backdrop-filter: blur(0.75rem);
 }
 
 .moo-catalog__navbar {
-  min-height: 4rem;
+  min-height: var(--moo-catalog-header-height);
 }
 
 .moo-catalog__content,
@@ -302,11 +305,17 @@ body {
 }
 
 .moo-catalog__main {
-  --scroll-fade-size: min(12%, 5rem);
-  --scroll-fade-reveal: 10rem;
+  --scroll-fade-size: min(6%, 2rem);
+  --scroll-fade-reveal: 4rem;
   min-width: 0;
   flex: 1;
   overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.moo-catalog__main:has(.moo-home-hero) {
+  --scroll-fade-size: min(12%, 5rem);
+  --scroll-fade-reveal: 10rem;
 }
 
 .moo-catalog__content {
@@ -637,6 +646,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .moo-catalog__main {
+    scroll-behavior: auto;
+  }
+
   .moo-home-showcase__image {
     transform: none;
     transition: none;
@@ -909,6 +922,67 @@ body {
   max-width: 52rem;
 }
 
+.moo-doc-main {
+  min-width: 0;
+}
+
+.moo-doc-layout {
+  display: grid;
+  align-items: start;
+  gap: 3rem;
+}
+
+@include media-breakpoint-up(xl) {
+  .moo-doc-layout {
+    grid-template-columns: minmax(0, 52rem) 12rem;
+    gap: 4rem;
+  }
+
+  .moo-doc-toc {
+    position: sticky;
+    top: var(--moo-doc-toc-offset);
+    align-self: start;
+    max-height: calc(100svh - var(--moo-doc-toc-offset) - 1rem);
+    overflow-y: auto;
+  }
+}
+
+.moo-doc-toc {
+  min-width: 0;
+}
+
+.moo-doc-toc__inner {
+  padding-inline-start: 1rem;
+  border-inline-start: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-doc-toc__label {
+  margin-bottom: 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.moo-doc-toc .nav {
+  gap: 0.125rem;
+}
+
+.moo-doc-toc .nav-link {
+  padding: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.moo-doc-toc .nav-link:hover {
+  color: var(--bs-body-color);
+}
+
+.moo-doc-toc .nav-link:is(.active, [aria-current="true"]) {
+  color: var(--moo-foreground);
+  font-weight: $font-weight-medium;
+}
+
 .moo-doc-callout {
   max-width: 48rem;
 }
@@ -1121,6 +1195,11 @@ body {
   margin-top: 3rem;
 }
 
+.tab-content .moo-example {
+  max-width: 100%;
+  min-width: 0;
+}
+
 .moo-example__header {
   max-width: 44rem;
   margin-bottom: 1rem;
@@ -1135,6 +1214,7 @@ body {
 }
 
 .moo-example__surface {
+  min-width: 0;
   overflow: hidden;
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius-xl);
@@ -1142,6 +1222,8 @@ body {
 }
 
 .moo-example__preview {
+  position: relative;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1149,16 +1231,66 @@ body {
   gap: 0.75rem;
   min-height: 18rem;
   padding: unquote("clamp(1.5rem, 5vw, 3rem)");
-  overflow-x: auto;
+  overflow: visible;
   // Live component previews stay on the real product default (Bootstrap's
   // system-ui stack) even though the surrounding catalog chrome uses
   // $moo-catalog-font-family — copied source must match what renders here.
   font-family: var(--bs-body-font-family);
 }
 
+.moo-example__preview--top-aligned {
+  align-items: flex-start;
+}
+
 .moo-example__preview--narrow>* {
-  width: 100%;
   max-width: 24rem;
+}
+
+.moo-example__preview--medium>* {
+  max-width: 30rem;
+}
+
+.moo-example__preview--narrow > :is(
+  .accordion,
+  .alert,
+  .card,
+  .d-grid,
+  .field,
+  .field-fieldset,
+  .field-group,
+  .input-group,
+  .list-group,
+  .progress,
+  .table-responsive,
+  .w-100,
+  fieldset,
+  form
+) {
+  width: 100%;
+}
+
+.moo-example__preview--medium > :is(
+  .accordion,
+  .alert,
+  .card,
+  .d-grid,
+  .field,
+  .field-fieldset,
+  .field-group,
+  .input-group,
+  .list-group,
+  .progress,
+  .table-responsive,
+  .w-100,
+  fieldset,
+  form
+) {
+  width: 100%;
+}
+
+.moo-example__preview--fit>* {
+  width: auto;
+  max-width: 100%;
 }
 
 .moo-example__preview--shell {
@@ -1212,10 +1344,6 @@ body {
   min-height: 100vh;
 }
 
-.moo-example__preview>.d-grid {
-  width: 100%;
-}
-
 .moo-field {
   display: grid;
   gap: 0;
@@ -1231,6 +1359,7 @@ body {
 
 .moo-example__source {
   position: relative;
+  min-width: 0;
   overflow: hidden;
   border-top: var(--bs-border-width) solid var(--bs-border-color);
   background: var(--bs-tertiary-bg);

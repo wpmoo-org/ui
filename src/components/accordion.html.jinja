@@ -1,7 +1,10 @@
-{% macro accordion(id, items, always_open=false, extra_class="") -%}
+{% macro accordion(id, items, always_open=false, flush=true, extra_class="") -%}
   {% if not id | trim %}{{ fail("Accordion id is required") }}{% endif %}
   {% if not items %}{{ fail("Accordion requires at least one item") }}{% endif %}
-  <div class="accordion accordion-flush{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}">
+  {% set accordion_classes = "accordion w-100" %}
+  {% if flush %}{% set accordion_classes = accordion_classes ~ " accordion-flush" %}{% endif %}
+  {% if extra_class %}{% set accordion_classes = accordion_classes ~ " " ~ extra_class %}{% endif %}
+  <div class="{{ accordion_classes }}" id="{{ id }}">
     {% for item in items %}
       {% if not item.id | default("", true) | trim %}{{ fail("Accordion item id is required") }}{% endif %}
       {% if not item.title | default("", true) | trim %}{{ fail("Accordion item title is required") }}{% endif %}
@@ -11,7 +14,7 @@
       {% set trigger_id = panel_id ~ "-trigger" %}
       <div class="accordion-item">
         <h3 class="accordion-header">
-          <button class="accordion-button{% if not is_open %} collapsed{% endif %}" type="button" id="{{ trigger_id }}" data-bs-toggle="collapse" data-bs-target="#{{ panel_id }}" aria-expanded="{{ "true" if is_open else "false" }}" aria-controls="{{ panel_id }}"{% if is_disabled %} disabled{% endif %}>
+          <button class="accordion-button{% if not is_open %} collapsed{% endif %}{% if is_disabled %} text-muted{% endif %}" type="button" id="{{ trigger_id }}" data-bs-toggle="collapse" data-bs-target="#{{ panel_id }}" aria-expanded="{{ "true" if is_open else "false" }}" aria-controls="{{ panel_id }}"{% if is_disabled %} disabled{% endif %}>
             {{ item.title }}
             {{ render_icon("chevron-down", "inline-end") }}
           </button>

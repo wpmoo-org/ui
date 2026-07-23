@@ -30,32 +30,3 @@
   font-size: 1rem;
   font-weight: $font-weight-medium;
 }
-
-// Bootstrap appends the generic backdrop to the Offcanvas element's parent,
-// not necessarily to body. Match that shared parent so the rule works in a
-// catalog preview, an Odoo portal shell, or a direct page composition while
-// remaining gated to Sheet instead of Sidebar's mobile offcanvas. Bootstrap
-// moves the panel through .showing -> .show -> .hiding, so the backdrop uses
-// the same native duration and starts changing before the panel settles.
-:has(> .offcanvas.sheet:is(.showing, .show, .hiding)) > .offcanvas-backdrop {
-  background-color: color-mix(in srgb, var(--bs-black) 10%, transparent);
-  transition:
-    opacity $offcanvas-transition-duration ease-in-out,
-    -webkit-backdrop-filter $offcanvas-transition-duration ease-in-out,
-    backdrop-filter $offcanvas-transition-duration ease-in-out;
-}
-
-:has(> .offcanvas.sheet:is(.showing, .show)) > .offcanvas-backdrop {
-  opacity: 1;
-  // The project has no autoprefixer build step, and Safari specifically
-  // needs the -webkit- prefix to render backdrop-filter at all (it does
-  // not silently fall back to the unprefixed property).
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-}
-
-:has(> .offcanvas.sheet.hiding) > .offcanvas-backdrop {
-  opacity: 0;
-  -webkit-backdrop-filter: blur(0);
-  backdrop-filter: blur(0);
-}

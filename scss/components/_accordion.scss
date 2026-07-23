@@ -1,25 +1,49 @@
-// The design reference's accordion trigger uses a real Lucide chevron-down icon that
-// rotates on expand, not Bootstrap's baked-in ::after background-image
-// glyph. Render the same icon our other components use and drive the
-// rotation off Bootstrap's own :not(.collapsed) state hook instead.
+// The reference trigger uses a real Lucide chevron-down icon that rotates
+// on expand, not Bootstrap's baked-in ::after background-image glyph.
+// Render the same icon our other components use and drive the rotation
+// off Bootstrap's own :not(.collapsed) state hook instead.
 .accordion-button::after {
   content: none;
 }
 
 .accordion-button [data-icon] {
+  position: absolute;
+  inset-inline-end: var(--bs-accordion-btn-padding-x);
+  top: 50%;
   width: 1rem;
   height: 1rem;
-  margin-inline-start: auto;
   flex-shrink: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
   transition: $accordion-icon-transition;
+  transform-origin: center;
 }
 
 .accordion-button:not(.collapsed) [data-icon] {
-  transform: $accordion-icon-transform;
+  transform: translateY(-50%) $accordion-icon-transform;
+}
+
+.accordion-flush .accordion-button {
+  text-align: start;
 }
 
 // The reference trigger has no active/pressed background — only a hover
 // underline signals interactivity, matching a plain text-link affordance.
 .accordion-button:hover {
   text-decoration: underline;
+}
+
+// The reference's flush trigger and body sit edge-to-edge with no
+// horizontal padding, and the trigger reads as medium weight, not
+// Bootstrap's own regular default -- both retune existing Bootstrap
+// accordion tokens/properties, not new selectors.
+.accordion-flush {
+  --bs-accordion-btn-padding-x: 0;
+  --bs-accordion-btn-padding-y: #{$spacer * 0.625};
+  --bs-accordion-body-padding-x: 0;
+  --bs-accordion-body-padding-y: #{$spacer * 0.625};
+}
+
+.accordion-flush .accordion-button {
+  font-weight: $font-weight-medium;
 }

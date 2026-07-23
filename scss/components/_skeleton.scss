@@ -1,3 +1,17 @@
 .skeleton {
+  // Bootstrap's placeholder utility paints via currentcolor; recolor it here
+  // (border token keeps contrast in both themes) instead of fighting bg directly.
+  color: var(--moo-border);
   border-radius: var(--bs-border-radius);
+  overflow: hidden;
+}
+
+// Bootstrap's .placeholder is inline-block with vertical-align:middle, meant
+// to sit inline within a line of real text it's replacing. Here it's the
+// sole content of a fixed-size block wrapper instead, where that inline
+// vertical alignment leaves a gap at the top of the wrapper and pushes the
+// bar's own bottom edge past it, clipped by the wrapper's overflow:hidden.
+// Block-level sizing removes the line-box alignment entirely.
+.skeleton > .placeholder {
+  display: block;
 }

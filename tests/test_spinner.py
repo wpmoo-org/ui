@@ -50,3 +50,30 @@ class SpinnerTests(CatalogTestCase):
             'class="spinner m-5"',
             self.render_spinner('spinner(extra_class="m-5")'),
         )
+
+    def test_page_uses_shared_rtl_example_tabs(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("render_rtl_example", source)
+        self.assertNotIn('title="RTL"', source)
+        self.assertIn("rtl_arabic", source)
+        self.assertIn("rtl_hebrew", source)
+        self.assertIn("rtl_english", source)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+
+        # RTL rule: exact translations of the same example, same structure.
+        for block_start in ("rtl_arabic %}", "rtl_hebrew %}", "rtl_english %}"):
+            block = source.split(block_start, 1)[1].split("{% endset %}", 1)[0]
+            with self.subTest(locale=block_start):
+                self.assertIn('class="d-flex align-items-center gap-2"', block)
+                self.assertIn("spinner(aria_label=", block)
+                self.assertEqual(block.count("<span>"), 1)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/spinner.html")
+        self.assertIn("spinner-direction-tabs", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)

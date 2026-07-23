@@ -1,13 +1,17 @@
 {% from "components/typography.html.jinja" import typography %}
+{% from "components/tabs.html.jinja" import tabs %}
 
-{% macro render_example(id, title, description, content, preview_class="") %}
+{% macro render_example(id, title, description, content, preview_class="", show_header=true, portal_content="") %}
   {% set rendered = content | dedent_html %}
-  {% set source = rendered | format_html %}
-  <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
-    <div class="moo-example__header">
-      {{ typography(title, variant="example-title", id=id ~ "-title") }}
-      <p class="text-body-secondary mb-0">{{ description | safe }}</p>
-    </div>
+  {% set rendered_portal = portal_content | dedent_html %}
+  {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
+  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ id }}-title"{% else %} aria-label="{{ title }}"{% endif %}>
+    {% if show_header %}
+      <div class="moo-example__header">
+        {{ typography(title, variant="example-title", id=id ~ "-title") }}
+        <p class="text-body-secondary mb-0">{{ description | safe }}</p>
+      </div>
+    {% endif %}
     <div class="moo-example__surface">
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {{ rendered | safe }}
@@ -25,5 +29,85 @@
         <span class="position-absolute top-0 end-0 mt-3 me-5 small text-body-secondary" data-moo-copy-status role="status"></span>
       </div>
     </div>
+  </section>
+  {% if rendered_portal %}{{ rendered_portal | safe }}{% endif %}
+{% endmacro %}
+
+{% macro render_rtl_example(
+  id,
+  description,
+  arabic,
+  hebrew,
+  english,
+  preview_class="",
+  arabic_portal="",
+  hebrew_portal="",
+  english_portal="",
+  title="RTL",
+  title_id="rtl-title",
+  example_prefix="rtl",
+  arabic_title="Arabic",
+  hebrew_title="Hebrew",
+  english_title="English"
+) %}
+  {% set arabic_example %}
+    {{ render_example(
+      example_prefix ~ "-arabic",
+      arabic_title,
+      "",
+      arabic,
+      preview_class=preview_class,
+      show_header=false,
+      portal_content=arabic_portal
+    ) }}
+  {% endset %}
+  {% set hebrew_example %}
+    {{ render_example(
+      example_prefix ~ "-hebrew",
+      hebrew_title,
+      "",
+      hebrew,
+      preview_class=preview_class,
+      show_header=false,
+      portal_content=hebrew_portal
+    ) }}
+  {% endset %}
+  {% set english_example %}
+    {{ render_example(
+      example_prefix ~ "-english",
+      english_title,
+      "",
+      english,
+      preview_class=preview_class,
+      show_header=false,
+      portal_content=english_portal
+    ) }}
+  {% endset %}
+  <section class="moo-example" aria-labelledby="{{ title_id }}">
+    <div class="moo-example__header">
+      {{ typography(title, variant="example-title", id=title_id) }}
+      <p class="text-body-secondary mb-0">{{ description | safe }}</p>
+    </div>
+    {{ tabs(
+      id ~ "-direction-tabs",
+      [
+        {
+          "id": "arabic",
+          "title": arabic_title,
+          "content": arabic_example,
+          "active": true
+        },
+        {
+          "id": "hebrew",
+          "title": hebrew_title,
+          "content": hebrew_example
+        },
+        {
+          "id": "english",
+          "title": english_title,
+          "content": english_example
+        }
+      ]
+    ) }}
   </section>
 {% endmacro %}

@@ -1,0 +1,196 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/toggle_group.html.jinja" import toggle_group %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/page-header.html.jinja" import render_page_header %}
+
+{% block title %}Toggle Group — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Toggle Group",
+    "Group related toggle buttons using Bootstrap's native checkbox and radio button-check contract."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set default %}
+      {{ toggle_group(
+        "notification-channels",
+        [
+          {"id": "notify-email", "icon": "mail", "aria_label": "Email"},
+          {"id": "notify-sms", "icon": "message-square", "aria_label": "SMS", "pressed": true},
+          {"id": "notify-push", "icon": "bell", "aria_label": "Push"}
+        ],
+        legend="Notification channels",
+        type="multiple"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "Independent checkbox items let more than one stay pressed at once.",
+      default,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set outline %}
+      {{ toggle_group(
+        "shipment-method",
+        [
+          {"id": "shipment-standard", "icon": "package", "label": "Standard", "pressed": true},
+          {"id": "shipment-express", "icon": "zap", "label": "Express"},
+          {"id": "shipment-overnight", "icon": "rocket", "label": "Overnight"}
+        ],
+        legend="Shipment method",
+        type="single",
+        variant="outline"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "outline",
+      "Outline variant, single selection",
+      "Radio items share one name so exactly one method stays pressed.",
+      outline,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set sizes %}
+      <div class="d-flex flex-column gap-3 align-items-center">
+        {{ toggle_group(
+          "task-priority-sm",
+          [
+            {"id": "priority-low-sm", "icon": "arrow-down", "aria_label": "Low priority"},
+            {"id": "priority-medium-sm", "icon": "minus", "aria_label": "Medium priority", "pressed": true},
+            {"id": "priority-high-sm", "icon": "arrow-up", "aria_label": "High priority"}
+          ],
+          legend="Task priority",
+          type="single",
+          size="sm"
+        ) }}
+        {{ toggle_group(
+          "task-priority-lg",
+          [
+            {"id": "priority-low-lg", "icon": "arrow-down", "aria_label": "Low priority"},
+            {"id": "priority-medium-lg", "icon": "minus", "aria_label": "Medium priority", "pressed": true},
+            {"id": "priority-high-lg", "icon": "arrow-up", "aria_label": "High priority"}
+          ],
+          legend="Task priority",
+          type="single",
+          size="lg"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "sizes",
+      "Sizes",
+      "size sets btn-sm/btn-lg directly on each item, the same scale a plain Button uses.",
+      sizes,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      {{ toggle_group(
+        "notification-channels-disabled",
+        [
+          {"id": "notify-email-disabled", "icon": "mail", "aria_label": "Email"},
+          {"id": "notify-sms-disabled", "icon": "message-square", "aria_label": "SMS", "pressed": true},
+          {"id": "notify-push-disabled", "icon": "bell", "aria_label": "Push", "disabled": true}
+        ],
+        legend="Notification channels",
+        type="multiple"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled item",
+      "A single item can be disabled without affecting its neighbors.",
+      disabled,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set vertical %}
+      {{ toggle_group(
+        "approval-stage",
+        [
+          {"id": "approval-draft", "icon": "pencil", "label": "Draft", "pressed": true},
+          {"id": "approval-review", "icon": "eye", "label": "Review"},
+          {"id": "approval-approved", "icon": "circle-check", "label": "Approved"}
+        ],
+        legend="Approval stage",
+        type="single",
+        vertical=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "vertical",
+      "Vertical",
+      "vertical=true switches the flex container to a column and applies the shared vertical spacing token.",
+      vertical,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set toggle_group_rtl_arabic %}
+      <div dir="rtl">
+        {{ toggle_group(
+          "shipment-method-rtl-arabic",
+          [
+            {"id": "shipment-standard-rtl-arabic", "icon": "package", "label": "قياسي", "pressed": true},
+            {"id": "shipment-express-rtl-arabic", "icon": "zap", "label": "سريع"},
+            {"id": "shipment-overnight-rtl-arabic", "icon": "rocket", "label": "فوري"}
+          ],
+          legend="Shipment method",
+          type="single",
+          variant="outline"
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set toggle_group_rtl_hebrew %}
+      <div dir="rtl">
+        {{ toggle_group(
+          "shipment-method-rtl-hebrew",
+          [
+            {"id": "shipment-standard-rtl-hebrew", "icon": "package", "label": "רגיל", "pressed": true},
+            {"id": "shipment-express-rtl-hebrew", "icon": "zap", "label": "מהיר"},
+            {"id": "shipment-overnight-rtl-hebrew", "icon": "rocket", "label": "דחוף"}
+          ],
+          legend="Shipment method",
+          type="single",
+          variant="outline"
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set toggle_group_rtl_english %}
+      <div dir="rtl">
+        {{ toggle_group(
+          "shipment-method-rtl-english",
+          [
+            {"id": "shipment-standard-rtl-english", "icon": "package", "label": "Standard", "pressed": true},
+            {"id": "shipment-express-rtl-english", "icon": "zap", "label": "Express"},
+            {"id": "shipment-overnight-rtl-english", "icon": "rocket", "label": "Overnight"}
+          ],
+          legend="Shipment method",
+          type="single",
+          variant="outline"
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "toggle-group",
+      "Use the same shipment method options across Arabic, Hebrew, and English RTL previews.",
+      toggle_group_rtl_arabic,
+      toggle_group_rtl_hebrew,
+      toggle_group_rtl_english,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "For Bootstrap's source behavior and the shared checkbox/radio toggle button contract, see the",
+    "https://getbootstrap.com/docs/5.3/components/button-group/#checkbox-and-radio-button-groups",
+    "Bootstrap Button group documentation"
+  ) }}
+
+{% endblock %}

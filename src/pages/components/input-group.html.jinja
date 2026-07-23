@@ -5,9 +5,9 @@
 {% from "components/input_group.html.jinja" import input_group, input_group_block_addon, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/textarea.html.jinja" import textarea %}
+{% from "components/field.html.jinja" import field, field_description %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
-{% from "includes/field.html.jinja" import render_field %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Input Group — Moo UI{% endblock %}
@@ -20,16 +20,18 @@
 
   <div class="moo-component-examples">
     {% set icon_start %}
-      {% call render_field("Search", "icon-start-search", "Icon positioned at the start.", "w-100") %}
+      {% call field() %}
         {% call input_group() %}
           {{ input_group_text(button_icon("search", "inline-start")) }}
           {{ input(
-            aria_label="Search",
             id="icon-start-search",
             type="search",
-            placeholder="Search..."
+            placeholder="Search queue conversations",
+            aria_label="Search queue conversations",
+            describedby="icon-start-search-help"
           ) }}
         {% endcall %}
+        {{ field_description("icon-start-search-help", "A leading icon keeps search intent visible before users type.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -41,15 +43,17 @@
     ) }}
 
     {% set icon_end %}
-      {% call render_field("Password", "icon-end-password", "Icon positioned at the end.", "w-100") %}
+      {% call field() %}
         {% call input_group() %}
           {{ input(
-            aria_label="Password",
             id="icon-end-password",
-            placeholder="Password"
+            placeholder="Current password",
+            aria_label="Current password",
+            describedby="icon-end-password-help"
           ) }}
           {{ input_group_text(button_icon("eye-off", "inline-start")) }}
         {% endcall %}
+        {{ field_description("icon-end-password-help", "Place trailing actions on the control edge where users expect validation and visibility actions.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -80,7 +84,7 @@
     ) }}
 
     {% set text_addons %}
-      <div class="d-grid gap-4 w-100">
+      <div class="d-grid gap-3">
         {% call input_group() %}
           {{ input_group_text("$") }}
           {{ input(aria_label="Amount", placeholder="0.00") }}
@@ -116,7 +120,7 @@
     ) }}
 
     {% set button_addon %}
-      <div class="d-grid gap-4 w-100">
+      <div class="d-grid gap-3">
         {% call input_group() %}
           {{ input(
             aria_label="Profile URL",
@@ -129,18 +133,18 @@
             size="icon-xs",
             aria_label="Copy profile URL",
             icon_start="copy",
-            extra_class="m-1 rounded-2 text-body-secondary"
+            extra_class="border-0"
           ) }}
         {% endcall %}
 
         {% call input_group("rounded-pill") %}
           {{ button(
             "",
-            variant="secondary",
+            variant="ghost",
             size="icon-xs",
             aria_label="About secure URLs",
             icon_start="info",
-            extra_class="m-1 rounded-circle"
+            extra_class="border-0"
           ) }}
           {{ input_group_text("https://") }}
           {{ input(aria_label="Secure URL") }}
@@ -150,8 +154,8 @@
             size="icon-xs",
             aria_label="Favorite URL",
             icon_start="star",
-            extra_class="m-1 rounded-circle text-body-secondary",
-            toggle=true
+            toggle=true,
+            extra_class="border-0"
           ) }}
         {% endcall %}
 
@@ -163,9 +167,9 @@
           ) }}
           {{ button(
             "Search",
-            variant="secondary",
+            variant="ghost",
             size="xs",
-            extra_class="m-1 rounded-2"
+            extra_class="border-0"
           ) }}
         {% endcall %}
       </div>
@@ -197,13 +201,13 @@
     ) }}
 
     {% set dropdown_groups %}
-      <div class="d-grid gap-3 w-100">
+      <div class="d-grid gap-3">
         {% call input_group() %}
           {{ input(
             aria_label="File name",
             placeholder="Enter file name"
           ) }}
-          {{ button("", variant="ghost", size="icon-xs", aria_label="More file actions", icon_start="ellipsis", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true, dropdown_offset="0,8") }}
+          {{ button("", variant="ghost", size="icon-xs", aria_label="More file actions", icon_start="ellipsis", dropdown=true, dropdown_offset="0,8", extra_class="border-0") }}
           {% call dropdown_menu(align="end") %}
             {{ dropdown_item("Settings") }}
             {{ dropdown_item("Copy path") }}
@@ -216,7 +220,13 @@
             type="search",
             placeholder="Enter search query"
           ) }}
-          {{ button("Search In...", variant="ghost", size="xs", extra_class="m-1 rounded-2 text-body-secondary", dropdown=true, dropdown_offset="0,8") }}
+          {{ button(
+            "Search In...",
+            variant="link",
+            size="xs",
+            dropdown=true,
+            dropdown_offset="0,8"
+          ) }}
           {% call dropdown_menu(align="end") %}
             {{ dropdown_item("Documentation") }}
             {{ dropdown_item("Blog Posts") }}
@@ -234,30 +244,27 @@
     ) }}
 
     {% set block_start %}
-      <div class="d-grid gap-3 w-100">
-        {% call render_field("Input", "block-start-input", "Header positioned above the input.") %}
-          {% call input_group() %}
-            {{ input(
-              aria_label="Input",
-              id="block-start-input",
-              placeholder="Enter your name"
-            ) }}
-            {% call input_group_block_addon("start") %}
-              {{ input_group_text("Full Name", extra_class="flex-grow-1", for_id="block-start-input") }}
-            {% endcall %}
+      <div class="d-grid gap-3">
+        {% call input_group() %}
+          {% call input_group_block_addon("start") %}
+            {{ input_group_text("Full Name", for_id="block-start-input") }}
           {% endcall %}
+          {{ input(
+            aria_label="Display name",
+            id="block-start-input",
+            placeholder="Enter your name"
+          ) }}
         {% endcall %}
-        {% call render_field("Textarea", "block-start-textarea", "Header positioned above the textarea.") %}
-          {% call input_group() %}
-            {{ textarea(
-              aria_label="Textarea",
-              id="block-start-textarea",
-              placeholder="console.log('Hello, world!');"
-            ) }}
-            {% call input_group_block_addon("start") %}
-              {{ input_group_text("script.js", extra_class="flex-grow-1", for_id="block-start-textarea") }}
-            {% endcall %}
+        {% call input_group() %}
+          {% call input_group_block_addon("start") %}
+            {{ input_group_text("script.js", for_id="block-start-textarea") }}
           {% endcall %}
+          {{ textarea(
+            aria_label="Code snippet",
+            id="block-start-textarea",
+            placeholder="console.log('Hello, world!');",
+            rows=3
+          ) }}
         {% endcall %}
       </div>
     {% endset %}
@@ -330,22 +337,55 @@
       "moo-example__preview--narrow"
     ) }}
 
-    {% set rtl_group %}
-      {% call input_group(dir="rtl") %}
-        {{ input(
-          aria_label="بحث",
-          type="search",
-          placeholder="بحث..."
-        ) }}
-        {{ input_group_text(kbd("⌘K")) }}
-      {% endcall %}
+    {% set rtl_arabic %}
+      <div dir="rtl">
+        {% call input_group() %}
+          {{ input(
+            aria_label="بحث",
+            id="input-group-rtl-arabic",
+            type="search",
+            placeholder="ابحث داخل المحادثة"
+          ) }}
+          {{ input_group_text(kbd("⌘K")) }}
+        {% endcall %}
+      </div>
     {% endset %}
-    {{ render_example(
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {% call input_group() %}
+          {{ input(
+            aria_label="חיפוש",
+            id="input-group-rtl-hebrew",
+            type="search",
+            placeholder="חפש בצ'אנל"
+          ) }}
+          {{ input_group_text(kbd("⌘K")) }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {% call input_group() %}
+          {{ input(
+            aria_label="Search",
+            id="input-group-rtl-english",
+            type="search",
+            placeholder="Search the channel"
+          ) }}
+          {{ input_group_text(kbd("⌘K")) }}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
       "rtl",
-      "Right-to-left layout",
-      "Use <code>dir=\"rtl\"</code> on the group or a parent container so Bootstrap keeps the joined borders and visual order aligned.",
-      rtl_group,
-      "moo-example__preview--narrow"
+      "Use one compact search control in Arabic, Hebrew, and English to verify mirrored composition inside RTL containers.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 

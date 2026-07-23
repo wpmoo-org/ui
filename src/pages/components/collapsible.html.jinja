@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/collapsible.html.jinja" import collapsible %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Collapsible — Moo UI{% endblock %}
@@ -9,56 +9,99 @@
 {% block content %}
   {{ render_page_header(
     "Collapsible",
-    "Toggle the visibility of a section of content using the ready Button macro and Bootstrap's Collapse plugin."
+    "Reveal secondary details in-place with Bootstrap's Collapse behavior and Moo's button macro."
   ) }}
 
   <div class="moo-component-examples">
     {% set basic %}
       {{ collapsible(
         "collapsible-basic",
-        "Task: Update dependencies",
-        "Assigned to Alex &middot; Due Friday &middot; Priority: Medium.",
+        "Can we use this flow in operations?",
+        "Yes. This pattern is safe for internal and client workflows, and no external attribution is needed.",
         trigger_aria_label="Toggle task details"
       ) }}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "The trigger is an icon-only Button; set <code>open=true</code> to start expanded.",
-      basic
+      "The trigger line stays fixed while details expand directly below without affecting horizontal measure.",
+      basic,
+      preview_class="moo-example__preview--narrow moo-example__preview--top-aligned"
+    ) }}
+
+    {% set product %}
+      {{ collapsible(
+        "collapsible-product",
+        "Product review details",
+        "SKU: F-2042 &middot; Warranty: 36 months. <p>Owner: Platform Team. Access level: restricted.</p><p>Priority review for this artifact is scheduled weekly.</p>",
+        trigger_aria_label="Toggle product details"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "product",
+      "Product review details",
+      "A compact header plus stacked metadata keeps this section readable even when expanded.",
+      product,
+      preview_class="moo-example__preview--narrow moo-example__preview--top-aligned"
     ) }}
 
     {% set open %}
       {{ collapsible(
         "collapsible-open",
-        "Sound settings",
-        "Notification sound is on. Vibration is off.",
-        trigger_aria_label="Toggle sound settings",
+        "Billing freeze window",
+        "Current period locked. Manual review requested for exceptions only.",
+        trigger_aria_label="Toggle billing window details",
         open=true
       ) }}
     {% endset %}
     {{ render_example(
       "open",
       "Open by default",
-      "Set <code>open=true</code> to start expanded and mark the trigger's <code>aria-expanded</code> accordingly.",
-      open
+      "Start open when the first render should show supporting details immediately.",
+      open,
+      preview_class="moo-example__preview--narrow moo-example__preview--top-aligned"
     ) }}
 
-    {% set rtl %}
+    {% set rtl_arabic %}
       <div dir="rtl">
         {{ collapsible(
           "collapsible-rtl",
-          "المهمة: تحديث الاعتماديات",
-          "مسندة إلى أليكس &middot; موعد التسليم الجمعة &middot; الأولوية: متوسطة.",
+          "المهمة: مراجعة يومية",
+          "مُسندة إلى أحمد · الموعد 17:00 · الحالة: بانتظار المراجعة.",
           trigger_aria_label="إظهار تفاصيل المهمة"
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The title and trigger swap sides without mirrored custom CSS.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {{ collapsible(
+          "collapsible-rtl-hebrew",
+          "משימה: ביקורת יומית",
+          "מוקצה למיכל · מועד 17:00 · סטטוס: ממתין לבדיקה.",
+          trigger_aria_label="הצג פרטי משימה"
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {{ collapsible(
+          "collapsible-rtl-english",
+          "Task: Daily audit sync",
+          "Assigned to Support Lead · Due Thu 5 PM · Status: Pending review.",
+          trigger_aria_label="Show task details"
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "collapsible-ribbon",
+      "Compare RTL behavior for task and workflow examples across Arabic, Hebrew, and English content.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow moo-example__preview--top-aligned"
     ) }}
   </div>
 

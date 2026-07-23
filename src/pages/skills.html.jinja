@@ -1,77 +1,86 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Skills - Moo UI{% endblock %}
 
 {% block content %}
-  <article class="moo-doc-page">
-    {{ render_page_header(
-      "Skills",
-      "Project-aware instructions for coding agents that generate or update Moo UI components.",
-      id="skills-title"
-    ) }}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Skills",
+        "Project-aware instructions for coding agents that generate or update Moo UI components.",
+        id="skills-title"
+      ) }}
 
-    <section class="moo-doc-section" aria-labelledby="skills-roadmap-title">
-      {{ typography("What Skills Are For", variant="section-title", id="skills-roadmap-title") }}
-      <p>
-        A Moo UI skill gives a coding agent the context it needs before it
-        touches the catalog: Bootstrap is the public contract, shadcn is the
-        visual reference point, and HTML stays first-class for server-rendered
-        products.
-      </p>
-      <p>
-        The goal is simple: an agent should be able to add a component, improve
-        an example, or compose a block without breaking Bootstrap markup,
-        documented plugin behavior, Sass variables, or the visual rhythm of the
-        system.
-      </p>
-    </section>
+      <section class="moo-doc-section" aria-labelledby="skills-roadmap-title">
+        {{ typography("What Skills Are For", variant="section-title", id="skills-roadmap-title") }}
+        <p>
+          A Moo UI skill gives a coding agent the context it needs before it
+          touches the catalog: Bootstrap is the public contract, shadcn is the
+          visual reference point, and HTML stays first-class for server-rendered
+          products.
+        </p>
+        <p>
+          The goal is simple: an agent should be able to add a component, improve
+          an example, or compose a block without breaking Bootstrap markup,
+          documented plugin behavior, Sass variables, or the visual rhythm of the
+          system.
+        </p>
+      </section>
 
-    <section class="moo-doc-section" aria-labelledby="skills-context-title">
-      {{ typography("What Agents Should Know", variant="section-title", id="skills-context-title") }}
-      <div class="moo-doc-card-grid">
-        {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-          <h3 class="h5 mb-0">Bootstrap first</h3>
-          <p class="text-body-secondary mb-0">
-            Prefer Bootstrap markup, classes, variables, and
-            <code>data-bs-*</code> APIs before adding Moo-owned surface area.
-          </p>
-        {% endcall %}
+      <section class="moo-doc-section" aria-labelledby="skills-context-title">
+        {{ typography("What Agents Should Know", variant="section-title", id="skills-context-title") }}
+        <div class="moo-doc-card-grid">
+          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
+            <h3 class="h5 mb-0">Bootstrap first</h3>
+            <p class="text-body-secondary mb-0">
+              Prefer Bootstrap markup, classes, variables, and
+              <code>data-bs-*</code> APIs before adding Moo-owned surface area.
+            </p>
+          {% endcall %}
 
-        {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-          <h3 class="h5 mb-0">Taste, not source</h3>
-          <p class="text-body-secondary mb-0">
-            Study shadcn/ui for spacing, restraint, and interaction feel, but
-            write original examples and keep the implementation Bootstrap-native.
-          </p>
-        {% endcall %}
+          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
+            <h3 class="h5 mb-0">Taste, not source</h3>
+            <p class="text-body-secondary mb-0">
+              Study shadcn/ui for spacing, restraint, and interaction feel, but
+              write original examples and keep the implementation Bootstrap-native.
+            </p>
+          {% endcall %}
 
-        {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-          <h3 class="h5 mb-0">Verify before ready</h3>
-          <p class="text-body-secondary mb-0">
-            A component is ready only after tests, generated examples, light and
-            dark states, and browser behavior all match the catalog contract.
-          </p>
-        {% endcall %}
-      </div>
-    </section>
+          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
+            <h3 class="h5 mb-0">Verify before ready</h3>
+            <p class="text-body-secondary mb-0">
+              A component is ready only after tests, generated examples, light and
+              dark states, and browser behavior all match the catalog contract.
+            </p>
+          {% endcall %}
+        </div>
+      </section>
 
-    <section class="moo-doc-section" aria-labelledby="skills-workflow-title">
-      {{ typography("Expected Workflow", variant="section-title", id="skills-workflow-title") }}
-      <p>
-        Start from the existing component page, read the related macro and Sass
-        files, then compare the live output with Bootstrap behavior and the Moo
-        UI visual language. Keep changes additive when possible, and preserve
-        existing class names unless a contract change is intentional.
-      </p>
-      <p>
-        Skills for Moo UI will document these checks in a reusable form so
-        future components can be built with the same discipline: inspect first,
-        keep Bootstrap native, verify in the browser, and update docs with the
-        same language as the public README.
-      </p>
-    </section>
-  </article>
+      <section class="moo-doc-section" aria-labelledby="skills-workflow-title">
+        {{ typography("Expected Workflow", variant="section-title", id="skills-workflow-title") }}
+        <p>
+          Start from the existing component page, read the related macro and Sass
+          files, then compare the live output with Bootstrap behavior and the Moo
+          UI visual language. Keep changes additive when possible, and preserve
+          existing class names unless a contract change is intentional.
+        </p>
+        <p>
+          Skills for Moo UI will document these checks in a reusable form so
+          future components can be built with the same discipline: inspect first,
+          keep Bootstrap native, verify in the browser, and update docs with the
+          same language as the public README.
+        </p>
+      </section>
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "skills-roadmap-title", "label": "What Skills Are For"},
+      {"id": "skills-context-title", "label": "What Agents Should Know"},
+      {"id": "skills-workflow-title", "label": "Expected Workflow"}
+    ]) }}
+  </div>
 {% endblock %}

@@ -36,6 +36,8 @@
 
 {% set button_dismiss_targets = ["modal", "offcanvas", "toast"] %}
 
+{% set button_dropdown_auto_close_values = ["", "true", "false", "inside", "outside"] %}
+
 {% macro icon(name, position) -%}
   {{ render_icon(name, position) }}
 {%- endmacro %}
@@ -55,6 +57,7 @@
   toggle=false,
   dropdown=false,
   dropdown_offset="",
+  dropdown_auto_close="",
   dropdown_caret=false,
   loading=false,
   collapse_target="",
@@ -75,10 +78,12 @@
   {% if size not in button_sizes %}{{ fail("Unknown button size: " ~ size) }}{% endif %}
   {% if element not in button_elements %}{{ fail("Unknown button element: " ~ element) }}{% endif %}
   {% if type not in button_types %}{{ fail("Unknown button type: " ~ type) }}{% endif %}
-  {% if element != "button" and (toggle or dropdown or dropdown_offset or dropdown_caret or loading or collapse_target) %}{{ fail("Button dropdown, toggle, loading, and collapse_target options require element=button") }}{% endif %}
+  {% if element != "button" and (toggle or dropdown or dropdown_offset or dropdown_auto_close or dropdown_caret or loading or collapse_target) %}{{ fail("Button dropdown, toggle, loading, and collapse_target options require element=button") }}{% endif %}
   {% if toggle and dropdown %}{{ fail("Button cannot be both toggle and dropdown") }}{% endif %}
   {% if dropdown_caret and not dropdown %}{{ fail("Button dropdown_caret requires dropdown=true") }}{% endif %}
   {% if dropdown_offset and not dropdown %}{{ fail("Button dropdown_offset requires dropdown=true") }}{% endif %}
+  {% if dropdown_auto_close and not dropdown %}{{ fail("Button dropdown_auto_close requires dropdown=true") }}{% endif %}
+  {% if dropdown_auto_close not in button_dropdown_auto_close_values %}{{ fail("Unknown button dropdown_auto_close: " ~ dropdown_auto_close) }}{% endif %}
   {% if loading and icon_start %}{{ fail("Button loading replaces icon_start; do not set both") }}{% endif %}
   {% if collapse_target and (toggle or dropdown) %}{{ fail("Button collapse_target cannot combine with toggle or dropdown") }}{% endif %}
   {% if collapse_open and not collapse_target %}{{ fail("Button collapse_open requires collapse_target") }}{% endif %}
@@ -116,7 +121,7 @@
   {% elif element == "input" %}
     <input class="{{ classes }}" type="{{ type }}" value="{{ label }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}>
   {% else %}
-    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title }}"{% endif %} data-bs-content="{{ popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if sheet_target %} data-bs-toggle="offcanvas" data-bs-target="#{{ sheet_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if toast_target %} data-moo-toast-target="#{{ toast_target }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}>
+    <button class="{{ classes }}" type="{{ type }}"{% if disabled %} disabled{% endif %}{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if toggle %} data-bs-toggle="button" aria-pressed="false"{% endif %}{% if dropdown %} data-bs-toggle="dropdown" aria-expanded="false"{% if dropdown_offset %} data-bs-offset="{{ dropdown_offset }}"{% endif %}{% if dropdown_auto_close %} data-bs-auto-close="{{ dropdown_auto_close }}"{% endif %}{% endif %}{% if collapse_target %} data-bs-toggle="collapse" data-bs-target="#{{ collapse_target }}" aria-expanded="{{ "true" if collapse_open else "false" }}" aria-controls="{{ collapse_target }}"{% endif %}{% if tooltip %} data-bs-toggle="tooltip" data-bs-title="{{ tooltip }}" data-bs-placement="{{ tooltip_placement }}"{% if tooltip_html %} data-bs-html="true"{% endif %}{% endif %}{% if popover_content %} data-bs-toggle="popover"{% if popover_title %} data-bs-title="{{ popover_title }}"{% endif %} data-bs-content="{{ popover_content }}" data-bs-placement="{{ popover_placement }}"{% if popover_html %} data-bs-html="true"{% endif %}{% endif %}{% if dialog_target %} data-bs-toggle="modal" data-bs-target="#{{ dialog_target }}"{% endif %}{% if sheet_target %} data-bs-toggle="offcanvas" data-bs-target="#{{ sheet_target }}"{% endif %}{% if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}{% if toast_target %} data-moo-toast-target="#{{ toast_target }}"{% endif %}{% if loading %} aria-busy="true"{% endif %}>
       {% if loading %}{{ icon("loader-circle", "inline-start") }}{% elif icon_start %}{{ icon(icon_start, "inline-start") }}{% endif %}
       {{ label }}
       {% if icon_end %}{{ icon(icon_end, "inline-end") }}{% endif %}

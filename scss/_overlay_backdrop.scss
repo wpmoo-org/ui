@@ -1,0 +1,19 @@
+// Bootstrap owns the overlay lifecycle for Dialog / Alert Dialog (Modal) and
+// Sheet (Offcanvas). Moo only retunes the native backdrop appearance through a
+// shared token primitive, so every opening surface gets the same treatment
+// without component-specific backdrop selectors.
+.modal-backdrop,
+.offcanvas-backdrop {
+  --#{$prefix}backdrop-opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
+  background-color: var(--moo-overlay-backdrop-bg, #{$moo-overlay-backdrop-bg});
+  -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+  backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+}
+
+.modal-backdrop.show,
+.offcanvas-backdrop.show {
+  // Bootstrap Modal routes opacity through --bs-backdrop-opacity, but
+  // Offcanvas 5.3 compiles the same state to a literal .5. Restate the shared
+  // token on both native show selectors so Dialog and Sheet dim equally.
+  opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
+}

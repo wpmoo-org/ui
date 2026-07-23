@@ -16,7 +16,7 @@ ROOT_DARK_OWNER = re.compile(
     r'^:where\(\.\.\.\)\[data-bs-theme=(?:"dark"|dark)\]\s+\.moo-ui'
 )
 DETACHED_OVERLAY_BACKDROP_OWNER = re.compile(
-    r"^body:has\(\.moo-ui \.modal\.show\) > \.modal-backdrop$"
+    r"^\.(?:modal|offcanvas)-backdrop(?:\.show)?$"
 )
 URL_PATTERN = re.compile(r"url\((.*?)\)", re.IGNORECASE | re.DOTALL)
 REMOTE_PATTERN = re.compile(r"https?://", re.IGNORECASE)
@@ -158,6 +158,8 @@ def assert_allowed_global_rules(test_case, css: str) -> None:
         if rule_type == "qualified-rule":
             selector = _serialized(rule.prelude)
             for part in _selector_parts(selector):
+                if DETACHED_OVERLAY_BACKDROP_OWNER.match(part) is not None:
+                    continue
                 test_case.assertIn(
                     ".moo-ui",
                     part,

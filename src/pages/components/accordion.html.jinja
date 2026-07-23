@@ -1,7 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/accordion.html.jinja" import accordion %}
+{% from "components/card.html.jinja" import card %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Accordion — Moo UI{% endblock %}
@@ -18,20 +19,20 @@
         "accordion-basic",
         [
           {
-            "id": "browsers",
-            "title": "What browsers are supported?",
-            "content": "The catalog is tested against the latest two versions of Chrome, Firefox, and Safari.",
+            "id": "priority",
+            "title": "How are review requests prioritized?",
+            "content": "Requests with customer-facing blockers move to the top of the queue. Routine copy or metadata changes stay grouped for the next review window.",
             "open": true
           },
           {
-            "id": "no-js",
-            "title": "Does this work without JavaScript?",
-            "content": "No. Interactive components rely on Bootstrap's bundled Collapse, Tab, and Dropdown plugins."
+            "id": "approval",
+            "title": "What happens after approval?",
+            "content": "The request is archived, the workspace owner is notified, and follow-up tasks stay attached to the same audit trail."
           },
           {
-            "id": "issues",
-            "title": "Where can I report an issue?",
-            "content": "Open an issue on the project's GitHub repository."
+            "id": "reopen",
+            "title": "Who can reopen a closed request?",
+            "content": "Administrators and assigned reviewers can reopen a request when the customer adds new evidence."
           }
         ]
       ) }}
@@ -40,7 +41,8 @@
       "basic",
       "Basic",
       "Only one item stays open at a time; opening another closes the current one.",
-      basic
+      basic,
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set multiple %}
@@ -48,21 +50,21 @@
         "accordion-multiple",
         [
           {
-            "id": "build",
-            "title": "Build status",
-            "content": "The last build passed all tests.",
+            "id": "intake",
+            "title": "Intake checks",
+            "content": "Identity, contact, and billing records passed the nightly validation.",
             "open": true
           },
           {
-            "id": "deploy",
-            "title": "Deploy status",
-            "content": "Deployed to the preview environment 2 minutes ago.",
+            "id": "documents",
+            "title": "Document review",
+            "content": "Two uploaded files are waiting for the operations team.",
             "open": true
           },
           {
-            "id": "deps",
-            "title": "Dependency status",
-            "content": "All dependencies are up to date."
+            "id": "handoff",
+            "title": "Handoff notes",
+            "content": "The customer success team will receive a summary when all open checks pass."
           }
         ],
         always_open=true
@@ -72,7 +74,39 @@
       "multiple",
       "Multiple",
       "Set <code>always_open=true</code> to let more than one item stay open at the same time.",
-      multiple
+      multiple,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set bordered %}
+      {{ accordion(
+        "accordion-borders",
+        [
+          {
+            "id": "plan",
+            "title": "How does workspace billing work?",
+            "content": "Invoicing is calculated at the end of each cycle. You can switch between monthly and annual plans, and the next renewal date is shown in the workspace summary."
+          },
+          {
+            "id": "security",
+            "title": "Are billing changes reviewed?",
+            "content": "Payment-method updates are logged and require one administrator confirmation before they are applied."
+          },
+          {
+            "id": "support",
+            "title": "What happens on a failed charge?",
+            "content": "Services move into a grace state and suspend after the grace period if the card cannot be recovered."
+          }
+        ],
+        flush=false
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "bordered",
+      "Bordered",
+      "Use a bordered accordion for policy blocks that sit directly on surface boundaries.",
+      bordered,
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set disabled %}
@@ -80,20 +114,20 @@
         "accordion-disabled",
         [
           {
-            "id": "export",
-            "title": "How do I export component previews?",
-            "content": "Download PNGs for any ready component from its catalog page."
+            "id": "owner",
+            "title": "Transfer workspace ownership",
+            "content": "Owners can move a workspace to another internal administrator."
           },
           {
-            "id": "themes",
-            "title": "Custom themes",
-            "content": "Only available on self-hosted installations.",
+            "id": "retention",
+            "title": "Change retention policy",
+            "content": "Policy changes are locked while the legal hold is active.",
             "disabled": true
           },
           {
-            "id": "request",
-            "title": "How do I request a new component?",
-            "content": "Open a feature request on the project's GitHub repository."
+            "id": "export",
+            "title": "Export audit history",
+            "content": "Exports include request status, reviewer notes, and attachment metadata."
           }
         ]
       ) }}
@@ -102,34 +136,131 @@
       "disabled",
       "Disabled",
       "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",
-      disabled
+      disabled,
+      preview_class="moo-example__preview--medium"
     ) }}
 
-    {% set rtl %}
-      <div dir="rtl">
+    {% set in_card %}
+      {% call card(
+        title="Workspace billing",
+        subtitle="Plan, invoice, and cancellation questions for operations teams."
+      ) %}
         {{ accordion(
-          "accordion-rtl",
+          "accordion-in-card",
           [
             {
-              "id": "browsers",
-              "title": "ما المتصفحات المدعومة؟",
-              "content": "يتم اختبار الكتالوج على آخر إصدارين من كروم وفايرفوكس وسفاري.",
+              "id": "plan",
+              "title": "Which plan should a team choose?",
+              "content": "Small teams usually start with shared operations, then move to dedicated review seats when approval volume grows.",
               "open": true
             },
             {
-              "id": "no-js",
-              "title": "هل يعمل هذا بدون جافاسكريبت؟",
-              "content": "لا. تعتمد المكونات التفاعلية على إضافات Collapse وTab وDropdown المرفقة مع Bootstrap."
+              "id": "invoice",
+              "title": "How are invoices reviewed?",
+              "content": "Invoices are grouped by workspace and include the renewal window, seats, and any service adjustments."
+            },
+            {
+              "id": "cancel",
+              "title": "Can a workspace cancel immediately?",
+              "content": "Owners can cancel renewal at any time. Active service continues until the current billing period ends."
+            }
+          ]
+        ) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "in-card",
+      "In a card",
+      "Wrap the accordion in a card for settings surfaces that need a clearer container boundary.",
+      in_card,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set arabic_accordion %}
+      <div class="w-100" dir="rtl">
+        {{ accordion(
+          "accordion-rtl-arabic",
+          [
+            {
+              "id": "priority",
+              "title": "كيف تُرتب الطلبات؟",
+              "content": "تبقى العوائق التي تؤثر على العملاء في أعلى قائمة المراجعة.",
+              "open": true
+            },
+            {
+              "id": "summary",
+              "title": "متى نرسل الملخص؟",
+              "content": "يُرسل الملخص بعد اجتياز الفحوصات المطلوبة."
+            },
+            {
+              "id": "reviewer",
+              "title": "من يعتمد النتيجة؟",
+              "content": "يؤكد مسؤول مساحة العمل النتيجة قبل الإغلاق."
             }
           ]
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "The trigger's chevron and text swap sides without mirrored custom CSS.",
-      rtl
+
+    {% set hebrew_accordion %}
+      <div class="w-100" dir="rtl">
+        {{ accordion(
+          "accordion-rtl-hebrew",
+          [
+            {
+              "id": "priority",
+              "title": "איך ממיינים בקשות?",
+              "content": "חסימות שמשפיעות על לקוחות נשארות בראש תור הביקורת.",
+              "open": true
+            },
+            {
+              "id": "summary",
+              "title": "מתי שולחים סיכום?",
+              "content": "הסיכום נשלח אחרי שהבדיקות הנדרשות עוברות."
+            },
+            {
+              "id": "reviewer",
+              "title": "מי מאשר סופית?",
+              "content": "מנהל סביבת עבודה מאשר את התוצאה לפני הסגירה."
+            }
+          ]
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set english_accordion %}
+      <div class="w-100" dir="rtl">
+        {{ accordion(
+          "accordion-rtl-english",
+          [
+            {
+              "id": "priority",
+              "title": "How are requests ordered?",
+              "content": "Customer-facing blockers stay at the top of the review queue.",
+              "open": true
+            },
+            {
+              "id": "summary",
+              "title": "When is the summary sent?",
+              "content": "The summary goes out after the required checks pass."
+            },
+            {
+              "id": "reviewer",
+              "title": "Who signs off?",
+              "content": "A workspace admin confirms the result before closure."
+            }
+          ]
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "accordion",
+      "Use tabs to compare Arabic, Hebrew, and English accordions without custom mirrored CSS.",
+      arabic_accordion,
+      hebrew_accordion,
+      english_accordion,
+      preview_class="moo-example__preview--medium"
     ) }}
   </div>
 

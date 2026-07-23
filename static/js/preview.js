@@ -175,12 +175,233 @@
     filterCommand("");
   });
 
+  // Component pages derive their right-side table of contents from rendered
+  // example headings. The examples already own stable ids for code toggles and
+  // deep links, so new component examples join the TOC without per-page wiring.
+  const componentToc = document.querySelector("[data-moo-component-toc]");
+  const componentTocNav = componentToc?.querySelector("[data-moo-component-toc-nav]");
+  const componentExamples = Array.from(
+    document.querySelectorAll(".moo-component-examples > .moo-example[aria-labelledby]")
+  );
+  if (componentToc && componentTocNav && componentExamples.length > 0) {
+    componentExamples.forEach((example) => {
+      const titleId = example.getAttribute("aria-labelledby");
+      const title = titleId ? document.getElementById(titleId) : null;
+      if (!titleId || !title?.textContent?.trim()) {
+        return;
+      }
+      const link = document.createElement("a");
+      link.className = "nav-link";
+      link.href = `#${titleId}`;
+      link.textContent = title.textContent.trim();
+      componentTocNav.appendChild(link);
+    });
+    componentToc.hidden = componentTocNav.children.length === 0;
+  }
+
+  const docTocLinks = Array.from(document.querySelectorAll(".moo-doc-toc .nav-link"));
+  const docTocTargets = docTocLinks
+    .map((link) => {
+      const targetId = link.getAttribute("href")?.slice(1);
+      const target = targetId ? document.getElementById(targetId) : null;
+      return target ? { link, target } : null;
+    })
+    .filter(Boolean);
+  const catalogMain = document.querySelector(".moo-catalog__main");
+  let docTocFrame = 0;
+  let docTocClickUntil = 0;
+
+  const activateDocTocLink = (activeLink) => {
+    docTocTargets.forEach(({ link }) => {
+      const isActive = link === activeLink;
+      link.classList.toggle("active", isActive);
+      if (isActive) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  const setActiveDocTocLink = () => {
+    docTocFrame = 0;
+    if (docTocTargets.length === 0) {
+      return;
+    }
+    if (Date.now() < docTocClickUntil) {
+      return;
+    }
+
+    const offset = parseFloat(getComputedStyle(document.documentElement).fontSize) * 6;
+    let activeItem = docTocTargets[0];
+    docTocTargets.forEach((item) => {
+      if (item.target.getBoundingClientRect().top <= offset) {
+        activeItem = item;
+      }
+    });
+
+    activateDocTocLink(activeItem.link);
+  };
+
+  const requestDocTocUpdate = () => {
+    if (docTocFrame === 0) {
+      docTocFrame = window.requestAnimationFrame(setActiveDocTocLink);
+    }
+  };
+
+  if (docTocTargets.length > 0) {
+    docTocTargets.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        docTocClickUntil = Date.now() + 2500;
+        activateDocTocLink(link);
+      });
+    });
+    setActiveDocTocLink();
+    catalogMain?.addEventListener("scroll", requestDocTocUpdate, { passive: true });
+    window.addEventListener("resize", requestDocTocUpdate);
+    window.addEventListener("hashchange", requestDocTocUpdate);
+  }
+
+  // Hash navigation and TOC clicks use smooth scrolling in the catalog main
+  // pane. If a tab is switched while that smooth scroll is still settling, the
+  // browser keeps moving the scroll container and the tab list appears to jump.
+  // Capture scroll before pointer/key activation because focusing a visible
+  // tab can move the scroll container before Bootstrap emits show.bs.tab.
+  // Freeze that pre-focus position for the tab handoff only; the tab panel
+  // animation still runs, and normal smooth anchor scrolling resumes after it.
+  let pendingCatalogTabScrollTop = null;
+
+  const captureCatalogScrollForTab = () => {
+    if (catalogMain) {
+      pendingCatalogTabScrollTop = catalogMain.scrollTop;
+    }
+  };
+
+  const freezeCatalogScrollForTab = () => {
+    if (!catalogMain) {
+      return;
+    }
+
+    const currentScrollTop = pendingCatalogTabScrollTop ?? catalogMain.scrollTop;
+    pendingCatalogTabScrollTop = null;
+    const previousScrollBehavior = catalogMain.style.scrollBehavior;
+    catalogMain.style.scrollBehavior = "auto";
+    catalogMain.scrollTop = currentScrollTop;
+    window.requestAnimationFrame(() => {
+      catalogMain.scrollTop = currentScrollTop;
+      window.requestAnimationFrame(() => {
+        catalogMain.scrollTop = currentScrollTop;
+        window.setTimeout(() => {
+          catalogMain.scrollTop = currentScrollTop;
+          catalogMain.style.scrollBehavior = previousScrollBehavior;
+        }, 180);
+      });
+    });
+  };
+
+  document.addEventListener("pointerdown", (event) => {
+    const trigger = event.target;
+    if (trigger instanceof Element && trigger.closest(".tabs-list [data-bs-toggle='tab']")) {
+      captureCatalogScrollForTab();
+    }
+  }, true);
+
+  document.addEventListener("keydown", (event) => {
+    const trigger = event.target;
+    if (
+      trigger instanceof Element &&
+      trigger.closest(".tabs-list [data-bs-toggle='tab']") &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
+      captureCatalogScrollForTab();
+    }
+  }, true);
+
+  document.addEventListener("show.bs.tab", (event) => {
+    const trigger = event.target;
+    if (trigger instanceof Element && trigger.closest(".tabs-list")) {
+      freezeCatalogScrollForTab();
+    }
+  }, true);
+
   document.addEventListener("keydown", (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
       openCommand();
     }
   });
+
+  // Bootstrap appends Modal backdrops directly to <body>. Component previews
+  // render examples inside clipped/nested catalog surfaces, so a nested modal
+  // can paint underneath its body-level backdrop even though Bootstrap's z-index
+  // scale is correct. Portal catalog-owned modals to <body> only while open,
+  // then restore their original DOM position after Bootstrap finishes hiding.
+  const catalogModalPlaceholders = new WeakMap();
+
+  document.addEventListener("show.bs.modal", (event) => {
+    const modal = event.target;
+    if (!(modal instanceof HTMLElement) || !modal.classList.contains("modal")) {
+      return;
+    }
+    if (!modal.closest(".moo-catalog") || modal.parentElement === document.body) {
+      return;
+    }
+
+    const placeholder = document.createComment("moo-modal-placeholder");
+    modal.parentNode?.insertBefore(placeholder, modal);
+    document.body.appendChild(modal);
+    catalogModalPlaceholders.set(modal, placeholder);
+  }, true);
+
+  document.addEventListener("hidden.bs.modal", (event) => {
+    const modal = event.target;
+    if (!(modal instanceof HTMLElement)) {
+      return;
+    }
+
+    const placeholder = catalogModalPlaceholders.get(modal);
+    if (placeholder?.parentNode) {
+      placeholder.parentNode.insertBefore(modal, placeholder);
+      placeholder.remove();
+    }
+    catalogModalPlaceholders.delete(modal);
+  }, true);
+
+  // Bootstrap creates an Offcanvas backdrop under the panel's parent node. Keep
+  // catalog Sheet panels at <body> level before Bootstrap creates an instance so
+  // Safari and other browsers dim the same page chrome as Bootstrap's examples.
+  const portalCatalogSheet = (sheet) => {
+    if (
+      !(sheet instanceof HTMLElement) ||
+      !sheet.classList.contains("sheet") ||
+      sheet.parentElement === document.body
+    ) {
+      return;
+    }
+
+    sheet.dataset.mooCatalogSheet = "true";
+    document.body.appendChild(sheet);
+  };
+
+  document.addEventListener("click", (event) => {
+    const targetElement =
+      event.target instanceof Element ? event.target : event.target?.parentElement;
+    const trigger = targetElement?.closest?.('[data-bs-toggle="offcanvas"][data-bs-target]');
+    const target = trigger?.getAttribute("data-bs-target");
+    if (!target?.startsWith("#")) {
+      return;
+    }
+    portalCatalogSheet(document.querySelector(target));
+  }, true);
+
+  document.addEventListener("show.bs.offcanvas", (event) => {
+    const sheet = event.target;
+    if (sheet instanceof HTMLElement && sheet.dataset.mooCatalogSheet === "true") {
+      portalCatalogSheet(sheet);
+    }
+  }, true);
+
+  document.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalCatalogSheet);
 
   document.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-moo-code-toggle]");

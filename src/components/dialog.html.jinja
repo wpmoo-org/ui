@@ -6,6 +6,7 @@
 {% from "components/close_button.html.jinja" import close_button %}
 
 {% set dialog_sizes = ["default", "sm", "lg", "xl", "fullscreen"] %}
+{% set dialog_directions = ["", "ltr", "rtl", "auto"] %}
 
 {% macro dialog(
   id,
@@ -13,10 +14,14 @@
   centered=false,
   scrollable=false,
   static=false,
-  aria_label=""
+  direction="",
+  aria_label="",
+  describedby="",
+  extra_class=""
 ) -%}
   {% if not id | trim %}{{ fail("Dialog id is required") }}{% endif %}
   {% if size not in dialog_sizes %}{{ fail("Unknown dialog size: " ~ size) }}{% endif %}
+  {% if direction not in dialog_directions %}{{ fail("Unknown dialog direction: " ~ direction) }}{% endif %}
   {% set dialog_classes = "modal-dialog" %}
   {% if size == "sm" %}{% set dialog_classes = dialog_classes ~ " modal-sm" %}{% endif %}
   {% if size == "lg" %}{% set dialog_classes = dialog_classes ~ " modal-lg" %}{% endif %}
@@ -25,7 +30,7 @@
   {% if centered %}{% set dialog_classes = dialog_classes ~ " modal-dialog-centered" %}{% endif %}
   {% if scrollable %}{% set dialog_classes = dialog_classes ~ " modal-dialog-scrollable" %}{% endif %}
   <div
-    class="modal fade"
+    class="modal fade{% if extra_class | trim %} {{ extra_class | trim }}{% endif %}"
     id="{{ id }}"
     tabindex="-1"
     {% if aria_label | trim %}
@@ -33,7 +38,9 @@
     {% else %}
       aria-labelledby="{{ id }}-title"
     {% endif %}
+    {% if describedby | trim %}aria-describedby="{{ describedby | trim }}"{% endif %}
     aria-hidden="true"
+    {% if direction | trim %}dir="{{ direction }}"{% endif %}
     {% if static %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}
   >
     <div class="{{ dialog_classes }}">

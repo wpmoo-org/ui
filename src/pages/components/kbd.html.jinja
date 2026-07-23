@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "components/kbd.html.jinja" import kbd %}
 
 {% block title %}Kbd — Moo UI{% endblock %}
@@ -9,28 +9,126 @@
 {% block content %}
   {{ render_page_header(
     "Kbd",
-    "Show keyboard input in clear, accessible surrounding instructions."
+    "Show keyboard shortcuts as readable command keys in concise operator and editor workflows."
   ) }}
 
   <div class="moo-component-examples">
     {% set single_key %}
-      <p class="mb-0">Press {{ kbd("Esc") }} to close the current surface.</p>
+      <div class="d-inline-flex align-items-center gap-2">
+        <span>Dismiss the panel with</span>
+        {{ kbd("Esc") }}
+      </div>
     {% endset %}
     {{ render_example(
       "single-key",
       "Single key",
-      "Use <code>&lt;kbd&gt;</code> inside a sentence so the key and the action it triggers are understandable together.",
-      single_key
+      "Use one key when the action is immediate and the intent is obvious.",
+      single_key,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set key_combination %}
-      <p class="mb-0">Use the Search documentation control in the catalog header to filter components.</p>
+      <div class="d-inline-flex align-items-center gap-2">
+        <span>Open the command palette with</span>
+        <span class="d-inline-flex align-items-center gap-1">
+          {{ kbd("Ctrl") }}
+          <span class="text-body-secondary">+</span>
+          {{ kbd("Shift") }}
+          <span class="text-body-secondary">+</span>
+          {{ kbd("K") }}
+        </span>
+      </div>
     {% endset %}
     {{ render_example(
       "key-combination",
       "Key combination",
-      "Render each key separately and explain the result in text; do not make a <code>+</code> symbol carry the instruction by itself.",
-      key_combination
+      "Render each key segment separately so combinations remain scannable.",
+      key_combination,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set sequence %}
+      <div class="d-inline-flex align-items-center flex-wrap gap-2">
+        <span>Use</span>
+        <span class="d-inline-flex align-items-center gap-1">
+          {{ kbd("Ctrl") }}
+          <span class="text-body-secondary">+</span>
+          {{ kbd("K") }}
+        </span>
+        <span>for quick actions, or</span>
+        <span class="d-inline-flex align-items-center gap-1">
+          {{ kbd("Ctrl") }}
+          <span class="text-body-secondary">+</span>
+          {{ kbd("Shift") }}
+          <span class="text-body-secondary">+</span>
+          {{ kbd("P") }}
+        </span>
+        <span>to switch to power mode.</span>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "shortcut-sequence",
+      "Shortcut sets",
+      "Offer alternate combos for one task so the same workflow remains discoverable.",
+      sequence,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set kbd_rtl_arabic %}
+      <div dir="rtl">
+        <div class="d-inline-flex align-items-center gap-2">
+          <span>استخدم</span>
+          <span class="d-inline-flex align-items-center gap-1">
+            {{ kbd("Ctrl") }}
+            <span class="text-body-secondary">+</span>
+            {{ kbd("Shift") }}
+            <span class="text-body-secondary">+</span>
+            {{ kbd("K") }}
+          </span>
+          <span>لفتح لوحة الأوامر.</span>
+        </div>
+      </div>
+    {% endset %}
+
+    {% set kbd_rtl_hebrew %}
+      <div dir="rtl">
+        <div class="d-inline-flex align-items-center gap-2">
+          <span>השתמש ב־</span>
+          <span class="d-inline-flex align-items-center gap-1">
+            {{ kbd("Ctrl") }}
+            <span class="text-body-secondary">+</span>
+            {{ kbd("Shift") }}
+            <span class="text-body-secondary">+</span>
+            {{ kbd("K") }}
+          </span>
+          <span>כדי לפתוח את חלון הפקודות.</span>
+        </div>
+      </div>
+    {% endset %}
+
+    {% set kbd_rtl_english %}
+      <div dir="rtl">
+        <div class="d-inline-flex align-items-center gap-2">
+          <span>Use</span>
+          <span class="d-inline-flex align-items-center gap-1">
+            {{ kbd("Ctrl") }}
+            <span class="text-body-secondary">+</span>
+            {{ kbd("Shift") }}
+            <span class="text-body-secondary">+</span>
+            {{ kbd("K") }}
+          </span>
+          <span>to open the command palette.</span>
+        </div>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "kbd",
+      "Compare the same shortcut pattern in RTL and English to validate copy and layout before documenting support workflows.",
+      kbd_rtl_arabic,
+      kbd_rtl_hebrew,
+      kbd_rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
 

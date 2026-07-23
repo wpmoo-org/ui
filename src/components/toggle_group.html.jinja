@@ -1,0 +1,110 @@
+{# Toggle Group composes Bootstrap's own native checkbox/radio toggle button
+   pattern (input.btn-check + label.btn, see button-group.md's "Checkbox and
+   radio button groups") with Bootstrap's own gap utility instead of
+   .btn-group -- it owns no input control or button styling of its own.
+   Verified against the reference's current Base UI implementation
+   (ui.shadcn.com/docs/components/base/toggle-group): every shown example,
+   in both variants, renders individually rounded, gapped items (a
+   `group-data-[spacing=0]` modifier collapses that to a joined/seamless
+   look, but no shown example opts into it) -- the opposite of Bootstrap's
+   .btn-group, which joins buttons into one seamless border by default and
+   only rounds the group's outer corners. A plain flex/gap container keeps
+   every native .btn at its own full border-radius with zero extra CSS,
+   matching the shown examples without inventing a join-suppressing
+   override. Measured gap on the live reference differs by orientation
+   (~8px horizontal, ~4px vertical); spacing picks Bootstrap's own gap-1/
+   gap-2/gap-3 scale and defaults to the orientation-matching value unless
+   the caller overrides it.
+
+   type="single" renders radio inputs sharing the caller's name (one active
+   item); type="multiple" renders checkboxes that all keep that same name
+   with distinct values, so unrelated checked items still serialize as one
+   repeated form field the way a native checkbox group would -- item ids
+   are DOM hooks only, never the wire name. variant follows the reference's
+   own two-variant API ("default" borderless, "outline" bordered) mapped
+   onto the existing btn-ghost / btn-outline-secondary tokens instead of
+   inventing new ones. #}
+
+{% set toggle_group_types = ["single", "multiple"] %}
+
+{% set toggle_group_variants = {
+  "default": "btn-ghost",
+  "outline": "btn-outline-secondary"
+} %}
+
+{% set toggle_group_sizes = {
+  "default": "",
+  "sm": "btn-sm",
+  "lg": "btn-lg"
+} %}
+
+{% set toggle_group_icon_sizes = {
+  "default": "btn-icon",
+  "sm": "btn-icon-sm",
+  "lg": "btn-icon-lg"
+} %}
+
+{% set toggle_group_spacings = {
+  "1": "gap-1",
+  "2": "gap-2",
+  "3": "gap-3"
+} %}
+
+{% macro toggle_group(
+  name,
+  items,
+  legend,
+  type="single",
+  variant="default",
+  size="default",
+  vertical=false,
+  spacing="auto",
+  disabled=false,
+  extra_class=""
+) -%}
+  {% if not name | trim %}{{ fail("Toggle Group name is required") }}{% endif %}
+  {% if not legend | trim %}{{ fail("Toggle Group legend is required") }}{% endif %}
+  {% if not items %}{{ fail("Toggle Group requires at least one item") }}{% endif %}
+  {% if type not in toggle_group_types %}{{ fail("Unknown toggle group type: " ~ type) }}{% endif %}
+  {% if variant not in toggle_group_variants %}{{ fail("Unknown toggle group variant: " ~ variant) }}{% endif %}
+  {% if size not in toggle_group_sizes %}{{ fail("Unknown toggle group size: " ~ size) }}{% endif %}
+  {% set item_ids = items | map(attribute="id") | list %}
+  {% if item_ids | unique | list | length != item_ids | length %}{{ fail("Toggle Group item ids must be unique") }}{% endif %}
+  {% set resolved_spacing = ("1" if vertical else "2") if spacing == "auto" else spacing %}
+  {% if resolved_spacing not in toggle_group_spacings %}{{ fail("Unknown toggle group spacing: " ~ spacing) }}{% endif %}
+  {% set variant_class = toggle_group_variants[variant] %}
+  {% set size_class = toggle_group_sizes[size] %}
+  {% set icon_size_class = toggle_group_icon_sizes[size] %}
+  {% set gap_class = toggle_group_spacings[resolved_spacing] %}
+  {% set group_classes = "toggle-group d-inline-flex " ~ gap_class ~ (" flex-column" if vertical else "") %}
+  {% if extra_class %}{% set group_classes = group_classes ~ " " ~ extra_class %}{% endif %}
+  <div class="{{ group_classes }}" role="group" aria-label="{{ legend }}">
+    {% for item in items %}
+      {% set item_id = item.id | default("", true) | trim %}
+      {% set item_label = item.label | default("", true) | trim %}
+      {% set item_icon = item.icon | default("", true) | trim %}
+      {% set item_aria_label = item.aria_label | default("", true) | trim %}
+      {% set item_value = item.value if item.value is defined else item_id %}
+      {% if not item_id %}{{ fail("Toggle Group item id is required") }}{% endif %}
+      {% if not item_label and not item_aria_label %}{{ fail("Toggle Group item without a visible label requires aria_label") }}{% endif %}
+      {% set item_disabled = disabled or (item.disabled | default(false, true)) %}
+      {% set item_pressed = item.pressed | default(false, true) %}
+      {% set item_size_class = icon_size_class if (item_icon and not item_label) else size_class %}
+      {% set item_classes = "btn " ~ variant_class ~ (" " ~ item_size_class if item_size_class else "") %}
+      <input
+        type="{{ 'radio' if type == 'single' else 'checkbox' }}"
+        class="btn-check"
+        name="{{ name }}"
+        id="{{ item_id }}"
+        value="{{ item_value }}"
+        autocomplete="off"
+        {%- if item_aria_label %} aria-label="{{ item_aria_label }}"{% endif %}
+        {%- if item_pressed %} checked{% endif %}
+        {%- if item_disabled %} disabled{% endif %}>
+      <label class="{{ item_classes }}" for="{{ item_id }}">
+        {% if item_icon %}{{ render_icon(item_icon, "inline-start") }}{% endif %}
+        {% if item_label %}{{ item_label }}{% endif %}
+      </label>
+    {% endfor %}
+  </div>
+{%- endmacro %}

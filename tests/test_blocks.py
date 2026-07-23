@@ -137,14 +137,20 @@ class BlocksTests(CatalogTestCase):
             with self.subTest(slug=slug):
                 self.assertIn(f'href="../blocks/{slug}.html"', index)
                 self.assertIn(label, index)
-        # Blocks cards mirror the Components index showcase-card layout: a
-        # preview image (falling back to the shared placeholder until real
-        # block art exists) with the whole card as a stretched-link.
+        # Blocks cards mirror the Components index showcase-card layout with
+        # real block preview art and the whole card as a stretched-link.
         self.assertRegex(index, r'class="[^"]*\bmoo-catalog__showcase-card\b')
         self.assertEqual(
             index.count("moo-catalog__showcase-preview"), 2
         )
-        self.assertIn('src="../assets/images/placeholder.webp"', index)
+        self.assertIn(
+            'src="../assets/images/blocks/sidebar-floating.webp"',
+            index,
+        )
+        self.assertIn(
+            'src="../assets/images/blocks/sidebar-inset.webp"',
+            index,
+        )
         self.assertRegex(index, r'class="[^"]*\bstretched-link\b')
 
     def test_navbar_and_command_palette_list_both_blocks_by_name(

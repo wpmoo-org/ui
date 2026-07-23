@@ -179,6 +179,8 @@ label.btn {
   --bs-btn-bg: transparent;
   --bs-btn-hover-bg: var(--moo-muted-surface);
   --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-bg: var(--bs-btn-hover-bg);
+  --bs-btn-active-color: var(--bs-btn-color);
   --bs-btn-active-border-color: transparent;
 }
 

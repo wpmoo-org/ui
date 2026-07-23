@@ -38,14 +38,29 @@
 // switching only toggles visibility, never the container's height.
 .tab-content {
   display: grid;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: $moo-tabs-content-gap;
 }
 
 .tab-content > .tab-pane {
   grid-area: 1 / 1;
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(0.25rem);
   visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
 }
 
 .tab-content > .active {
+  opacity: 1;
+  transform: none;
   visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
 }

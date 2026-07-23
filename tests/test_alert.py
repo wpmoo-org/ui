@@ -58,3 +58,21 @@ class AlertTests(CatalogTestCase):
     def test_alert_action_renders_trusted_markup(self) -> None:
         output = self.render_alert('alert("Heads up!", action="<button>Go</button>")')
         self.assertIn('<div class="alert-action"><button>Go</button></div>', output)
+
+    def test_rtl_tabbed_examples_do_not_mix_fit_and_medium_preview_widths(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("render_rtl_example", source)
+        self.assertIn('"alert"', source)
+        self.assertIn('preview_class="moo-example__preview--fit"', source)
+        self.assertNotIn(
+            'preview_class="moo-example__preview--medium moo-example__preview--fit"',
+            source,
+        )
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/alert.html")
+        self.assertIn("alert-direction-tabs", page)
+        self.assertIn("rtl-arabic-code", page)

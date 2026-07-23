@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Badge — Moo UI{% endblock %}
@@ -60,6 +60,42 @@
       "Counts",
       "When a badge is only a number, add visually hidden context so screen readers hear what the count means.",
       counts
+    ) }}
+
+    {% set arabic_badge %}
+      <div dir="rtl">
+        <span class="d-inline-flex align-items-center gap-2">
+          طلب الوصول
+          {{ badge("قيد المراجعة", variant="warning") }}
+        </span>
+      </div>
+    {% endset %}
+
+    {% set hebrew_badge %}
+      <div dir="rtl">
+        <span class="d-inline-flex align-items-center gap-2">
+          בקשת גישה
+          {{ badge("ממתינה לאישור", variant="warning") }}
+        </span>
+      </div>
+    {% endset %}
+
+    {% set english_badge %}
+      <div dir="rtl">
+        <span class="d-inline-flex align-items-center gap-2">
+          Access request
+          {{ badge("Pending approval", variant="warning") }}
+        </span>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "badge",
+      "RTL",
+      arabic_badge,
+      hebrew_badge,
+      english_badge,
+      preview_class="moo-example__preview--fit"
     ) }}
   </div>
 

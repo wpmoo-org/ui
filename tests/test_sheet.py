@@ -111,13 +111,39 @@ class SheetTests(CatalogTestCase):
         self.assertIn("dismiss=false", source)
         self.assertIn('dismiss="offcanvas"', source)
         self.assertIn('dir="rtl"', source)
+        self.assertIn("portal_content=basic_sheet", source)
+        self.assertIn("portal_content=placement_sheets", source)
+        self.assertIn("portal_content=scroll_sheet", source)
+        self.assertIn("portal_content=no_close_sheet", source)
+        self.assertIn("portal_content=workflow_sheet", source)
+        self.assertIn("arabic_portal=rtl_arabic_sheet", source)
+
+    def test_sheet_page_keeps_offcanvas_outside_example_preview(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/sheet.html")
+        basic_section = page.split('data-example="basic"', 1)[1].split(
+            'data-example="placements"', 1
+        )[0]
+        preview = basic_section.split('class="moo-example__preview"', 1)[1].split(
+            'class="moo-example__source"', 1
+        )[0]
+        section_markup = basic_section.split("</section>", 1)[0]
+        after_section = basic_section.split("</section>", 1)[1]
+
+        self.assertIn('data-bs-toggle="offcanvas"', preview)
+        self.assertNotIn('class="offcanvas offcanvas-end sheet"', preview)
+        self.assertNotIn('class="offcanvas offcanvas-end sheet"', section_markup)
+        self.assertIn('class="offcanvas offcanvas-end sheet"', after_section)
 
     def test_sheet_styles_are_isolated_from_other_offcanvas_components(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
         self.assertIn(".offcanvas.sheet .offcanvas-title", styles)
+        self.assertNotIn(".offcanvas-backdrop", styles)
+        self.assertNotIn("backdrop-filter", styles)
         self.assertNotRegex(styles, r"(?m)^\.offcanvas-title\s*\{")
-        self.assertNotRegex(styles, r"(?m)^\.offcanvas-backdrop\s*\{")
 
     def test_sheet_preserves_shadow_when_bootstrap_focuses_the_panel(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
@@ -129,28 +155,23 @@ class SheetTests(CatalogTestCase):
             2,
         )
 
-    def test_sheet_backdrop_is_blurred_only_while_a_sheet_is_open(self) -> None:
+    def test_sheet_does_not_own_global_backdrop_tokens(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertIn(
-            ":has(> .offcanvas.sheet:is(.showing, .show)) > .offcanvas-backdrop",
-            styles,
-        )
-        self.assertIn(
-            ":has(> .offcanvas.sheet.hiding) > .offcanvas-backdrop",
-            styles,
-        )
+        self.assertNotIn(".offcanvas-backdrop", styles)
+        self.assertNotIn(".modal-backdrop", styles)
+        self.assertNotIn("--moo-overlay-backdrop", styles)
+        self.assertNotIn("backdrop-filter", styles)
+        self.assertNotIn(".moo-example__surface:has(.offcanvas.sheet", styles)
         self.assertNotIn("body:has(.offcanvas.sheet.show)", styles)
+
+    def test_sheet_panels_are_portaled_before_bootstrap_creates_backdrop(self) -> None:
+        script = (ROOT / "static/js/preview.js").read_text(encoding="utf-8")
+
         self.assertIn(
-            "background-color: color-mix(in srgb, var(--bs-black) 10%, transparent)",
-            styles,
+            'document.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalCatalogSheet)',
+            script,
         )
-        self.assertIn("opacity: 1", styles)
-        self.assertIn("backdrop-filter: blur(0)", styles)
-        self.assertIn("$offcanvas-transition-duration ease-in-out", styles)
-        self.assertNotIn(
-            "background-color $offcanvas-transition-duration ease-in-out",
-            styles,
-        )
-        self.assertIn("-webkit-backdrop-filter: blur(4px)", styles)
-        self.assertIn("backdrop-filter: blur(4px)", styles)
+        self.assertIn("document.body.appendChild(sheet)", script)
+        self.assertNotIn("moo-sheet-placeholder", script)
+        self.assertNotIn("catalogSheetPlaceholders", script)

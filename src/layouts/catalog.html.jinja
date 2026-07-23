@@ -9,7 +9,21 @@
         {% include "shell/navbar.html.jinja" %}
         <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">
           <div class="moo-catalog__content">
+            {% if current_section == "components" and current_slug != "index" %}
+              <div class="moo-doc-layout" data-moo-component-doc-layout>
+                <div class="moo-doc-main">
+            {% endif %}
             {% block content %}{% endblock %}
+            {% if current_section == "components" and current_slug != "index" %}
+                </div>
+                <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc hidden>
+                  <div class="moo-doc-toc__inner">
+                    <div class="moo-doc-toc__label">On this page</div>
+                    <nav class="nav flex-column" aria-label="Component examples" data-moo-component-toc-nav></nav>
+                  </div>
+                </aside>
+              </div>
+            {% endif %}
           </div>
         </main>
         {% block footer %}

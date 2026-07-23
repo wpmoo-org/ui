@@ -60,6 +60,19 @@ class DialogTests(CatalogTestCase):
                 '{% call dialog("example", size="huge") %}Content{% endcall %}'
             )
 
+    def test_dialog_supports_explicit_direction_for_portaled_rtl_modals(self) -> None:
+        output = self.render_dialog_block(
+            '{% call dialog("example", direction="rtl") %}Content{% endcall %}'
+        )
+
+        self.assertIn('dir="rtl"', output)
+
+    def test_dialog_rejects_unknown_direction(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown dialog direction: sideways"):
+            self.render_dialog_block(
+                '{% call dialog("example", direction="sideways") %}Content{% endcall %}'
+            )
+
     def test_dialog_size_classes(self) -> None:
         for size, expected_class in (
             ("sm", "modal-sm"),
@@ -88,6 +101,13 @@ class DialogTests(CatalogTestCase):
 
         self.assertIn('data-bs-backdrop="static"', output)
         self.assertIn('data-bs-keyboard="false"', output)
+
+    def test_dialog_supports_extra_modal_class(self) -> None:
+        output = self.render_dialog_block(
+            '{% call dialog("example", extra_class="modal--alert") %}Content{% endcall %}'
+        )
+
+        self.assertIn('class="modal fade modal--alert"', output)
 
     def test_dialog_default_allows_backdrop_and_keyboard_dismiss(self) -> None:
         output = self.render_dialog_block(
@@ -134,14 +154,58 @@ class DialogTests(CatalogTestCase):
             "dialog_footer, dialog_header %}",
             source,
         )
+        self.assertIn('{% from "components/input.html.jinja" import input %}', source)
+        self.assertIn('{% from "components/textarea.html.jinja" import textarea %}', source)
         self.assertIn('dialog_target="dialog-basic"', source)
+        self.assertIn('dialog_target="dialog-custom-close"', source)
+        self.assertIn('dialog_target="dialog-no-close"', source)
         self.assertIn('dismiss="modal"', source)
+        self.assertIn('describedby="dialog-basic-description"', source)
         self.assertIn('size="sm"', source)
         self.assertIn('size="lg"', source)
         self.assertIn('size="xl"', source)
         self.assertIn("scrollable=true", source)
         self.assertIn("static=true", source)
+        self.assertIn('direction="rtl"', source)
         self.assertIn('dir="rtl"', source)
+        self.assertNotIn("Right-to-left layout", source)
+
+    def test_page_uses_render_rtl_example(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
+            source,
+        )
+        self.assertIn("render_rtl_example(", source)
+        self.assertIn('render_rtl_example(\n      "dialog"', source)
+        self.assertIn("rtl_arabic", source)
+        self.assertIn("rtl_hebrew", source)
+        self.assertIn("rtl_english", source)
+        self.assertIn('dir="rtl"', source)
+        self.assertIn(
+            "Compare Arabic, Hebrew, and English dialog flows used in operational workflows.",
+            source,
+        )
+        self.assertNotIn("title_id=", source)
+        self.assertNotIn('title="RTL"', source)
+        self.assertNotIn("example_prefix=", source)
+        self.assertNotIn(
+            '{% from "components/tabs.html.jinja" import tabs %}',
+            source,
+        )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/dialog.html")
+        self.assertIn("dialog-direction-tabs", output)
+        self.assertIn("rtl-arabic-code", output)
+        self.assertIn("rtl-hebrew-code", output)
+        self.assertIn("rtl-english-code", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
+        self.assertIn('id="rtl-title">RTL</h2>', output)
 
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
@@ -152,14 +216,20 @@ class DialogTests(CatalogTestCase):
         self.assertIn(".modal[tabindex]:focus-visible", styles)
         self.assertIn("outline: none", styles)
 
-    def test_dialog_backdrop_is_blurred_only_while_a_modal_is_open(self) -> None:
+    def test_dialog_does_not_own_global_backdrop_blur(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertIn("body:has(.modal.show) > .modal-backdrop", styles)
-        self.assertIn("--bs-backdrop-opacity: 1", styles)
-        self.assertIn(
-            "background-color: color-mix(in srgb, var(--bs-black) 10%, transparent)",
-            styles,
-        )
-        self.assertIn("-webkit-backdrop-filter: blur(4px)", styles)
-        self.assertIn("backdrop-filter: blur(4px)", styles)
+        self.assertNotIn(".modal-backdrop", styles)
+        self.assertNotIn("body:has(.modal.show)", styles)
+        self.assertNotIn("backdrop-filter", styles)
+        self.assertNotIn("-webkit-backdrop-filter", styles)
+
+    def test_catalog_portals_nested_preview_modals_above_body_backdrops(self) -> None:
+        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn('document.addEventListener("show.bs.modal"', script)
+        self.assertIn('document.addEventListener("hidden.bs.modal"', script)
+        self.assertIn('modal.closest(".moo-catalog")', script)
+        self.assertIn("document.body.appendChild(modal)", script)
+        self.assertIn("catalogModalPlaceholders", script)
+        self.assertIn("placeholder.parentNode.insertBefore(modal, placeholder)", script)

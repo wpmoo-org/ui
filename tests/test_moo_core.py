@@ -15,6 +15,7 @@ from tests.test_design_gates import active_component_imports
 CORE_CSS = DIST / "assets/css/moo.css"
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
+OVERLAY_BACKDROP_SCSS = SCSS / "_overlay_backdrop.scss"
 UTILITIES_SCSS = SCSS / "utilities"
 
 REQUIRED_BOOTSTRAP_IMPORTS = [
@@ -164,27 +165,72 @@ class MooCoreTests(CatalogTestCase):
                     offenders.append(path.relative_to(ROOT).as_posix())
         self.assertEqual(offenders, [])
 
-    def test_core_state_layer_bridges_detached_overlay_backdrops(self) -> None:
-        state_layer = (SCSS / "_core_state_layer.scss").read_text(encoding="utf-8")
+    def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
+        overlay_layer = OVERLAY_BACKDROP_SCSS.read_text(encoding="utf-8")
+        primary_variables = (SCSS / "_primary_variables.scss").read_text(
+            encoding="utf-8"
+        )
+        tokens_root = (SCSS / "_tokens_root.scss").read_text(encoding="utf-8")
+        core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
 
-        self.assertIn(
-            "body:has(.moo-ui .modal.show) > .modal-backdrop",
-            state_layer,
-        )
-        self.assertIn("--#{$prefix}backdrop-opacity: 1", state_layer)
-        self.assertIn(
-            "var(--#{$prefix}black) 10%",
-            state_layer,
-        )
-        self.assertNotIn("offcanvas.sheet.show", state_layer)
-        self.assertEqual(state_layer.count("backdrop-filter: blur(4px)"), 2)
+        for knob in (
+            "$moo-overlay-backdrop-opacity: 1 !default;",
+            "$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;",
+            "$moo-overlay-backdrop-filter: blur(8px) !default;",
+        ):
+            self.assertIn(knob, primary_variables)
+
+        for token in (
+            "--moo-overlay-backdrop-opacity: #{$moo-overlay-backdrop-opacity}",
+            "--moo-overlay-backdrop-bg: #{$moo-overlay-backdrop-bg}",
+            "--moo-overlay-backdrop-filter: #{$moo-overlay-backdrop-filter}",
+        ):
+            self.assertIn(token, tokens_root)
+            self.assertIn(token, core_theme)
+
+        self.assertIn(".modal-backdrop", overlay_layer)
+        self.assertIn(".offcanvas-backdrop", overlay_layer)
+        self.assertIn("--#{$prefix}backdrop-opacity: var(", overlay_layer)
+        self.assertIn("--moo-overlay-backdrop-opacity", overlay_layer)
+        self.assertIn("background-color: var(", overlay_layer)
+        self.assertIn("--moo-overlay-backdrop-bg", overlay_layer)
+        self.assertIn("-webkit-backdrop-filter: var(", overlay_layer)
+        self.assertIn("backdrop-filter: var(", overlay_layer)
+        self.assertIn("--moo-overlay-backdrop-filter", overlay_layer)
+        self.assertIn(".modal-backdrop.show", overlay_layer)
+        self.assertIn(".offcanvas-backdrop.show", overlay_layer)
+        self.assertIn("opacity: var(--moo-overlay-backdrop-opacity", overlay_layer)
+        self.assertNotIn("body:has(.modal.show)", overlay_layer)
+        self.assertNotIn("offcanvas.sheet.show", overlay_layer)
+
+        state_layer = (SCSS / "_core_state_layer.scss").read_text(encoding="utf-8")
+        self.assertNotIn(".modal-backdrop", state_layer)
+        self.assertNotIn(".offcanvas-backdrop", state_layer)
+        self.assertNotIn("backdrop-filter", state_layer)
 
         core_css = CORE_CSS.read_text(encoding="utf-8")
+        self.assertIn(".modal-backdrop", core_css)
+        self.assertIn(".offcanvas-backdrop", core_css)
+        self.assertIn("--moo-overlay-backdrop-filter: blur(8px)", core_css)
         self.assertIn(
-            ":has(> .offcanvas.sheet:is(.showing, .show)) > .offcanvas-backdrop",
+            "--bs-backdrop-opacity: var(--moo-overlay-backdrop-opacity, 1)",
             core_css,
         )
         self.assertIn(
-            ":has(> .offcanvas.sheet.hiding) > .offcanvas-backdrop",
+            "background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, var(--bs-black) 10%, transparent))",
             core_css,
         )
+        self.assertIn(
+            "backdrop-filter: var(--moo-overlay-backdrop-filter, blur(8px))",
+            core_css,
+        )
+        self.assertIn(".modal-backdrop.show", core_css)
+        self.assertIn(".offcanvas-backdrop.show", core_css)
+        self.assertIn(
+            "opacity: var(--moo-overlay-backdrop-opacity, 1)",
+            core_css,
+        )
+        self.assertNotIn("body:has(.moo-ui .modal.show) > .modal-backdrop", core_css)
+        self.assertNotIn("body:has(.modal.show) > .modal-backdrop", core_css)
+        self.assertNotIn("offcanvas.sheet:is(.showing, .show)", core_css)
+        self.assertNotIn("offcanvas.sheet.hiding", core_css)

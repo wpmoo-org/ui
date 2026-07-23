@@ -50,6 +50,7 @@ $kbd-color: var(--bs-secondary-color) !default;
 $kbd-bg: var(--bs-secondary-bg) !default;
 // The reference breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
+$breadcrumb-divider-flipped: quote("<") !default;
 // The reference pagination items sit separated with no border, ghost-hover, and
 // only the active page gets a bordered box; Bootstrap's default is a fully
 // bordered, edge-to-edge connected strip. A positive margin-start switches
@@ -96,14 +97,30 @@ $accordion-button-active-color: var(--bs-accordion-color) !default;
 // 2px item gap, and 2px/12px trigger padding.
 $moo-tabs-list-padding: 0.1875rem !default;
 $moo-tabs-list-gap: 0.125rem !default;
+$moo-tabs-content-gap: 0.75rem !default;
 $moo-tabs-trigger-padding-y: 0.125rem !default;
 $moo-tabs-trigger-padding-x: 0.75rem !default;
+
+// Bootstrap's own spacer scale has no 2px/3px step, so the Menubar row's
+// tight track padding/gap around its triggers (verified against the live
+// reference) are private knobs rather than a "gap-1"/"p-1" utility.
+$moo-menubar-gap: 0.125rem !default;
+$moo-menubar-padding: 0.1875rem !default;
 $card-spacer-y: 0 !default;
 $card-spacer-x: 1.5rem !default;
 $card-cap-padding-y: $card-spacer-y !default;
 $card-cap-padding-x: $card-spacer-x !default;
 $card-title-font-size: 1rem !default;
 $card-title-letter-spacing: -0.01em !default;
+
+// Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
+// at the browser's bold UA default; the reference renders both header
+// cells and the emphasized first body column (a <th scope="row">) at a
+// medium weight instead, verified against the live reference. Restated
+// as a literal rather than referencing Bootstrap's own
+// $font-weight-medium (500), since this file compiles before
+// Bootstrap's own variables exist.
+$table-th-font-weight: 500 !default;
 
 // Bootstrap has no native avatar component. Keep unmatched static values as
 // compile-time Sass knobs; exact shared typography reuses Bootstrap variables.
@@ -113,6 +130,13 @@ $avatar-size-lg: $avatar-size * 1.25 !default;
 $avatar-font-size-sm: 0.75rem !default;
 $avatar-font-size-lg: 1rem !default;
 $avatar-line-height: 1 !default;
+// Verified against the live reference: a 32px avatar group overlaps by 8px
+// and a plain presence-dot badge (no text/icon) renders 10px square with a
+// 2px page-background ring cut into it.
+$avatar-group-overlap: -0.5rem !default;
+$avatar-badge-dot-size: 0.625rem !default;
+$avatar-badge-icon-size: 0.75rem !default;
+$avatar-badge-ring-width: 2px !default;
 
 $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
@@ -138,6 +162,14 @@ $btn-padding-x-lg: 0.625rem !default;
 // Shared focus primitive: a thin 2px ring. Components consume
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
 $focus-ring-width: 2px !default;
+
+// Shared overlay primitive for Bootstrap's native Modal and Offcanvas
+// backdrops. Bootstrap exposes separate .modal-backdrop and
+// .offcanvas-backdrop selectors; Moo keeps their visual treatment aligned via
+// one token set instead of per-component backdrop rules.
+$moo-overlay-backdrop-opacity: 1 !default;
+$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;
+$moo-overlay-backdrop-filter: blur(8px) !default;
 
 // A quieter elevation scale and the extra radius step, applied UI-wide through
 // Bootstrap's own scales so every component consumes one shared primitive.

@@ -1,12 +1,15 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Avatar — Moo UI{% endblock %}
 
-{% set sample_avatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%23171717'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
+{% set avatar_blue = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%233b82f6'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
+{% set avatar_violet = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%238b5cf6'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
+{% set avatar_emerald = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%2310b981'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
+{% set avatar_error = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%23ef4444'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
 
 {% block content %}
   {{ render_page_header(
@@ -15,6 +18,28 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set composition %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(
+          name="Moo Admin",
+          initials="MO",
+          badge_dot=true,
+          badge_class="bg-success",
+          badge_aria_label="Available"
+        ) }}
+        <div class="min-w-0">
+          <div class="fw-medium">Moo Admin</div>
+          <div class="text-body-secondary small">admin@example.com</div>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "composition",
+      "Composition",
+      "Use a fallback avatar with a small presence mark for account rows, profile menus, and compact workspace headers.",
+      composition
+    ) }}
+
     {% set fallback %}
       <div class="d-flex align-items-center gap-3">
         {{ avatar(name="Moo UI", initials="MU") }}
@@ -31,20 +56,97 @@
       fallback
     ) }}
 
-    {% set image %}
+    {% set basic %}
       <div class="d-flex align-items-center gap-3">
-        {{ avatar(src=sample_avatar, alt="Moo mascot") }}
+        {{ avatar(name="Ticket review", src=avatar_violet, alt="Workspace mascot avatar", fallback="TR") }}
         <div>
-          <div class="fw-medium">Moo Mascot</div>
-          <div class="text-body-secondary small">Image avatar</div>
+          <div class="fw-medium">Ava Ward</div>
+          <div class="text-body-secondary small">Billing queue owner</div>
         </div>
       </div>
     {% endset %}
     {{ render_example(
-      "image",
-      "Image",
-      "Provide meaningful <code>alt</code> text for image avatars; use initials only as the fallback path.",
-      image
+      "basic",
+      "Basic",
+      "Image avatars keep people recognizable while initials stay ready for missing media.",
+      basic
+    ) }}
+
+    {% set badge %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(
+          name="Ops analyst",
+          src=avatar_emerald,
+          alt="Ops analyst portrait",
+          fallback="OA",
+          badge_dot=true,
+          badge_class="bg-success",
+          badge_aria_label="Available for incident response"
+        ) }}
+        <div>
+          <div class="fw-medium">Rafi Tarek</div>
+          <div class="text-body-secondary small">Incident response</div>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "badge",
+      "Badge",
+      "Use a small corner badge for queue status or attention counts without adding another column.",
+      badge
+    ) }}
+
+    {% set badge_with_icon %}
+      {{ avatar(
+        name="Add reviewer",
+        src=avatar_error,
+        alt="Reviewer avatar",
+        fallback="AR",
+        badge_icon="plus",
+        badge_class="bg-primary text-white",
+        badge_aria_label="Add reviewer"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "badge-with-icon",
+      "Badge with icon",
+      "Use an icon badge when the avatar needs one compact action cue.",
+      badge_with_icon
+    ) }}
+
+    {% set group %}
+      <div class="d-flex flex-column align-items-start gap-3">
+        <div class="avatar-group">
+          {{ avatar(name="Aya Nouri", src=avatar_blue, alt="Aya Nouri profile photo", fallback="AN") }}
+          {{ avatar(name="Diego Moss", src=avatar_emerald, alt="Diego Moss profile photo", fallback="DM") }}
+          {{ avatar(name="Lea Rowan", src=avatar_violet, alt="Lea Rowan profile photo", fallback="LR") }}
+        </div>
+        <div class="text-body-secondary small">Workspace reviewers</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "group",
+      "Avatar group",
+      "Stack reviewer avatars to represent team ownership at a glance.",
+      group
+    ) }}
+
+    {% set group_count %}
+      <div class="d-flex flex-column align-items-start gap-3">
+        <div class="avatar-group">
+          {{ avatar(name="Aya Nouri", src=avatar_blue, alt="Aya Nouri profile photo", fallback="AN") }}
+          {{ avatar(name="Diego Moss", src=avatar_emerald, alt="Diego Moss profile photo", fallback="DM") }}
+          {{ avatar(name="Lea Rowan", src=avatar_violet, alt="Lea Rowan profile photo", fallback="LR") }}
+          <span class="avatar avatar-count">3</span>
+        </div>
+        <div class="text-body-secondary small">Total review team: 3 shown, 6 waiting on handoff</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "group-count",
+      "Avatar group count",
+      "Use a grouped count chip when additional teammates are off-screen.",
+      group_count
     ) }}
 
     {% set sizes %}
@@ -61,20 +163,61 @@
       sizes
     ) }}
 
-    {% set rtl %}
-      <div class="d-flex align-items-center gap-3" dir="rtl">
-        {{ avatar(name="مروة", initials="مو") }}
+    {% set arabic_avatar %}
+      <div class="d-inline-flex align-items-center gap-3" dir="rtl">
+        {{ avatar(
+          name="مروة",
+          initials="مو",
+          badge_dot=true,
+          badge_class="bg-success",
+          badge_aria_label="متاحة"
+        ) }}
         <div>
           <div class="fw-medium">مروة</div>
-          <div class="text-body-secondary small">حساب مستخدم</div>
+          <div class="text-body-secondary small">مديرة العمليات</div>
         </div>
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Use the same avatar markup inside RTL content; logical spacing keeps the identity and label aligned.",
-      rtl
+
+    {% set hebrew_avatar %}
+      <div class="d-inline-flex align-items-center gap-3" dir="rtl">
+        {{ avatar(
+          name="נועה",
+          initials="נע",
+          badge_dot=true,
+          badge_class="bg-success",
+          badge_aria_label="זמינה"
+        ) }}
+        <div>
+          <div class="fw-medium">נועה</div>
+          <div class="text-body-secondary small">מנהלת סביבת עבודה</div>
+        </div>
+      </div>
+    {% endset %}
+
+    {% set english_avatar %}
+      <div class="d-inline-flex align-items-center gap-3" dir="rtl">
+        {{ avatar(
+          name="Moo Admin",
+          initials="MO",
+          badge_dot=true,
+          badge_class="bg-success",
+          badge_aria_label="Available"
+        ) }}
+        <div>
+          <div class="fw-medium">Moo Admin</div>
+          <div class="text-body-secondary small">Workspace owner</div>
+        </div>
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "avatar",
+      "Use tabs to compare Arabic, Hebrew, and English avatars inside the same RTL layout.",
+      arabic_avatar,
+      hebrew_avatar,
+      english_avatar,
+      preview_class="moo-example__preview--medium moo-example__preview--fit"
     ) }}
   </div>
 
