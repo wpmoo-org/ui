@@ -175,8 +175,18 @@
     "status": "ready"
   },
   {
+    "slug": "toggle-group",
+    "label": "Toggle Group",
+    "status": "ready"
+  },
+  {
     "slug": "alert-dialog",
     "label": "Alert Dialog",
+    "status": "ready"
+  },
+  {
+    "slug": "menubar",
+    "label": "Menubar",
     "status": "ready"
   }
 ]
