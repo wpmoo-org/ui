@@ -3,10 +3,10 @@
 {% from "components/breadcrumb.html.jinja" import breadcrumb %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger, sidebar_input, sidebar_group_action %}
 {% from "components/table.html.jinja" import table %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Sidebar — Moo UI{% endblock %}
@@ -14,28 +14,27 @@
 {% block content %}
   {{ render_page_header(
     "Sidebar",
-    "Compose a collapsible application shell from Bootstrap-native primitives — header, groups, menus, footer, and inset."
+    "Compose an application shell with Bootstrap-native sidebar primitives: provider, regions, menus, and inset content."
   ) }}
 
   <div class="moo-component-examples">
     <h2 id="usage" class="h4 mb-3">Usage</h2>
     <p class="mb-4">
       Start with <code>sidebar_provider()</code>, render one <code>sidebar()</code>,
-      and place page content in <code>sidebar_inset()</code>. Use
-      <code>sidebar_trigger()</code> when the shell needs a visible collapse
-      control.
+      and place page content in <code>sidebar_inset()</code>. Put team switching and
+      global actions in <code>sidebar_header()</code> and <code>sidebar_footer()</code>.
     </p>
 
     {% set sidebar_open = true %}
     {% set app_shell %}
       {% call sidebar_provider(contained=true, key="components-sidebar", default_open=sidebar_open) %}
-        {% call sidebar(id="components-sidebar-demo", aria_label="Sidebar demo navigation") %}
+        {% call sidebar(id="components-sidebar-demo", aria_label="Operations workspace navigation") %}
           {% call sidebar_header() %}
             {% call sidebar_menu() %}
               {% call sidebar_menu_item(dropdown=true) %}
                 {{ sidebar_menu_button(
-                  "Acme Inc",
-                  subtitle="Enterprise",
+                  "Northstar",
+                  subtitle="Operations",
                   size="lg",
                   dropdown=true,
                   lead=sidebar_brand_mark("gallery-vertical-end"),
@@ -43,9 +42,9 @@
                 ) }}
                 {% call dropdown_menu() %}
                   {{ dropdown_header("Teams") }}
-                  {{ dropdown_item("Acme Inc", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
-                  {{ dropdown_item("Acme Corp.", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
-                  {{ dropdown_item("Evil Corp.", icon="command", icon_box=true, shortcut="⌘3") }}
+                  {{ dropdown_item("Northstar", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
+                  {{ dropdown_item("Northstar Labs", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
+                  {{ dropdown_item("Field Ops", icon="command", icon_box=true, shortcut="⌘3") }}
                   {{ dropdown_divider() }}
                   {{ dropdown_item("Add team", icon="plus", icon_box=true) }}
                 {% endcall %}
@@ -56,41 +55,42 @@
           {% call sidebar_content() %}
             {% call sidebar_group() %}
               {% call sidebar_group_content() %}
-                {{ sidebar_group_label("Platform") }}
+                {{ sidebar_group_label("Workspace") }}
+                {{ sidebar_input(id="sidebar-search", placeholder="Search workspace", aria_label="Search workspace") }}
                 {% call sidebar_menu() %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Playground", "platform-playground", icon="square-terminal", open=true) }}
-                    {% call sidebar_menu_sub("platform-playground", open=true) %}
+                    {{ sidebar_menu_sub_button("Operations", "workspace-operations", icon="activity", open=true) }}
+                    {% call sidebar_menu_sub("workspace-operations", open=true) %}
                       {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("History", href="#") }}
+                        {{ sidebar_menu_button("Campaign activity", href="#") }}
                       {% endcall %}
                       {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Starred", href="#") }}
+                        {{ sidebar_menu_button("Approvals", href="#") }}
                       {% endcall %}
                       {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Settings", href="#") }}
-                      {% endcall %}
-                    {% endcall %}
-                  {% endcall %}
-                  {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Models", "platform-models", icon="bot") }}
-                    {% call sidebar_menu_sub("platform-models") %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("GPT-4o", href="#", icon="sparkles") }}
-                      {% endcall %}
-                      {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Claude 3.5", href="#", icon="brain") }}
+                        {{ sidebar_menu_button("Audit logs", href="#", tooltip="View workspace audit logs") }}
                       {% endcall %}
                     {% endcall %}
                   {% endcall %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_sub_button("Documentation", "platform-documentation", icon="book-open") }}
-                    {% call sidebar_menu_sub("platform-documentation") %}
+                    {{ sidebar_menu_sub_button("Assets", "workspace-assets", icon="bot") }}
+                    {% call sidebar_menu_sub("workspace-assets") %}
                       {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("Guides", href="#", icon="book-open") }}
+                        {{ sidebar_menu_button("Campaign packs", href="#", icon="sparkles") }}
                       {% endcall %}
                       {% call sidebar_menu_sub_item() %}
-                        {{ sidebar_menu_button("API reference", href="#", icon="code") }}
+                        {{ sidebar_menu_button("Design system", href="#", icon="brain") }}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                  {% call sidebar_menu_item() %}
+                    {{ sidebar_menu_sub_button("Knowledge", "workspace-knowledge", icon="book-open") }}
+                    {% call sidebar_menu_sub("workspace-knowledge") %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("Runbooks", href="#", icon="book-open") }}
+                      {% endcall %}
+                      {% call sidebar_menu_sub_item() %}
+                        {{ sidebar_menu_button("API guides", href="#", icon="code") }}
                       {% endcall %}
                     {% endcall %}
                   {% endcall %}
@@ -103,25 +103,26 @@
 
             {% call sidebar_group() %}
               {% call sidebar_group_content() %}
-                {{ sidebar_group_label("Projects") }}
+                {{ sidebar_group_label("Project views") }}
+                {{ sidebar_group_action(icon="plus", aria_label="Create project view") }}
                 {% call sidebar_menu() %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Design Engineering", href="#", icon="frame") }}
-                    {% call sidebar_menu_action(aria_label="Design Engineering actions") %}
+                    {{ sidebar_menu_button("Campaigns", href="#", icon="frame") }}
+                    {% call sidebar_menu_action(aria_label="Campaigns actions") %}
                       {{ dropdown_item("Rename", icon="pencil") }}
                       {{ dropdown_item("Archive", icon="archive") }}
                     {% endcall %}
                   {% endcall %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Sales & Marketing", href="#", icon="pie-chart") }}
-                    {% call sidebar_menu_action(aria_label="Sales and Marketing actions") %}
+                    {{ sidebar_menu_button("Content pipeline", href="#", icon="pie-chart") }}
+                    {% call sidebar_menu_action(aria_label="Content pipeline actions") %}
                       {{ dropdown_item("Rename", icon="pencil") }}
                       {{ dropdown_item("Archive", icon="archive") }}
                     {% endcall %}
                   {% endcall %}
                   {% call sidebar_menu_item() %}
-                    {{ sidebar_menu_button("Travel", href="#", icon="map") }}
-                    {% call sidebar_menu_action(aria_label="Travel actions") %}
+                    {{ sidebar_menu_button("Field operations", href="#", icon="map") }}
+                    {% call sidebar_menu_action(aria_label="Field operations actions") %}
                       {{ dropdown_item("Rename", icon="pencil") }}
                       {{ dropdown_item("Archive", icon="archive") }}
                     {% endcall %}
@@ -138,15 +139,15 @@
             {% call sidebar_menu() %}
               {% call sidebar_menu_item(dropdown=true) %}
                 {{ sidebar_menu_button(
-                  "wpmoo",
-                  subtitle="hello@wpmoo.org",
+                  "ops-admin",
+                  subtitle="ops-admin@northstar.example",
                   size="lg",
                   dropdown=true,
                   lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
                   end_icon="chevrons-up-down"
                 ) }}
                 {% call dropdown_menu(align="end") %}
-                  {{ dropdown_header("hello@wpmoo.org") }}
+                  {{ dropdown_header("ops-admin@northstar.example") }}
                   {{ dropdown_item("Upgrade to Pro", icon="sparkles") }}
                   {{ dropdown_divider() }}
                   {{ dropdown_item("Account", icon="badge-check") }}
@@ -165,17 +166,25 @@
             {{ sidebar_trigger(sidebar_id="components-sidebar-demo", expanded=sidebar_open) }}
             {{ separator(orientation="vertical") }}
             {{ breadcrumb([
-              {"label": "Building Your Application", "href": "#"},
-              {"label": "Data Fetching"}
+              {"label": "Workspace", "href": "#"},
+              {"label": "Campaigns"}
             ], extra_class="mb-0") }}
           </header>
           <div class="sidebar-inset__content d-grid gap-3 p-3">
-            <div class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
-              <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
-              <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
-              <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+            <div class="d-grid gap-3">
+              <div class="d-grid gap-3 row row-cols-1 row-cols-md-2 g-3">
+                <div class="ratio ratio-16x9">
+                  <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                </div>
+                <div class="ratio ratio-16x9">
+                  <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                </div>
+              </div>
+              <div class="rounded-3 p-4 moo-sidebar-demo__placeholder">
+                <p class="h6 mb-2">Campaign workspace snapshot</p>
+                <p class="small text-body-secondary mb-0">Review status, approvals, and latest comments before opening a ticket.</p>
+              </div>
             </div>
-            <div class="moo-sidebar-demo__placeholder rounded-3 flex-grow-1" style="min-height: 12rem;"></div>
           </div>
         {% endcall %}
       {% endcall %}
@@ -185,6 +194,517 @@
       "Application shell",
       "Compose the shell from <code>sidebar_provider</code>, <code>sidebar</code>, and <code>sidebar_inset</code>. The header holds a team switcher, the content holds grouped menus, and the footer holds the account menu — each a ready Dropdown Menu and Avatar composition.",
       app_shell,
+      preview_class="moo-example__preview--shell"
+    ) }}
+
+    {% set sidebar_rtl_arabic %}
+      <div dir="rtl">
+        {% set sidebar_open = true %}
+        {% set sidebar_rtl %}
+          {% call sidebar_provider(contained=true, key="components-sidebar-rtl-arabic", default_open=sidebar_open) %}
+            {% call sidebar(id="components-sidebar-rtl-arabic", aria_label="إدارة المحتوى") %}
+              {% call sidebar_header() %}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(dropdown=true) %}
+                    {{ sidebar_menu_button(
+                      "شمال النجم",
+                      subtitle="عمليات",
+                      size="lg",
+                      dropdown=true,
+                      lead=sidebar_brand_mark("gallery-vertical-end"),
+                      end_icon="chevrons-up-down"
+                    ) }}
+                    {% call dropdown_menu() %}
+                      {{ dropdown_header("الفرق") }}
+                      {{ dropdown_item("شمال النجم", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
+                      {{ dropdown_item("معملات", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
+                      {{ dropdown_item("أولويات", icon="command", icon_box=true, shortcut="⌘3") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("إضافة فريق", icon="plus", icon_box=true) }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+
+              {% call sidebar_content() %}
+                {% call sidebar_group() %}
+                  {% call sidebar_group_content() %}
+                    {{ sidebar_group_label("مساحة العمل") }}
+                    {{ sidebar_input(id="sidebar-search-arabic", placeholder="ابحث داخل مساحة العمل", aria_label="Search workspace") }}
+                    {% call sidebar_menu() %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("العمليات", "workspace-operations-arabic", icon="activity", open=true) }}
+                        {% call sidebar_menu_sub("workspace-operations-arabic", open=true) %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("أنشطة الحملة", href="#") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("الموافقات", href="#") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("سجلات التدقيق", href="#", tooltip="عرض سجلات تدقيق مساحة العمل") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("الأصول", "workspace-assets-arabic", icon="bot") }}
+                        {% call sidebar_menu_sub("workspace-assets-arabic") %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("مكتبات الحملات", href="#", icon="sparkles") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("نظام التصميم", href="#", icon="brain") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("المعارف", "workspace-knowledge-arabic", icon="book-open") }}
+                        {% call sidebar_menu_sub("workspace-knowledge-arabic") %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("العمليات", href="#", icon="book-open") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("أدلة API", href="#", icon="code") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("الإعدادات", href="#", icon="settings-2") }}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+
+                {% call sidebar_group() %}
+                  {% call sidebar_group_content() %}
+                    {{ sidebar_group_label("معارض المشاريع") }}
+                    {{ sidebar_group_action(icon="plus", aria_label="Create project view") }}
+                    {% call sidebar_menu() %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("الحملات", href="#", icon="frame") }}
+                        {% call sidebar_menu_action(aria_label="Campaign actions") %}
+                          {{ dropdown_item("إعادة التسمية", icon="pencil") }}
+                          {{ dropdown_item("الأرشفة", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("خط أنابيب المحتوى", href="#", icon="pie-chart") }}
+                        {% call sidebar_menu_action(aria_label="Pipeline actions") %}
+                          {{ dropdown_item("إعادة التسمية", icon="pencil") }}
+                          {{ dropdown_item("الأرشفة", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("عمليات ميدانية", href="#", icon="map") }}
+                        {% call sidebar_menu_action(aria_label="Field actions") %}
+                          {{ dropdown_item("إعادة التسمية", icon="pencil") }}
+                          {{ dropdown_item("الأرشفة", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+
+              {% call sidebar_footer() %}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(dropdown=true) %}
+                    {{ sidebar_menu_button(
+                      "ops-admin",
+                      subtitle="ops-admin@northstar.example",
+                      size="lg",
+                      dropdown=true,
+                      lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
+                      end_icon="chevrons-up-down"
+                    ) }}
+                    {% call dropdown_menu(align="end") %}
+                      {{ dropdown_header("ops-admin@northstar.example") }}
+                      {{ dropdown_item("الترقية إلى Pro", icon="sparkles") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("الحساب", icon="badge-check") }}
+                      {{ dropdown_item("الفوترة", icon="credit-card") }}
+                      {{ dropdown_item("الإشعارات", icon="bell") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("تسجيل الخروج", icon="log-out") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+
+            {% call sidebar_inset() %}
+              <header class="sidebar-inset__header">
+                {{ sidebar_trigger(sidebar_id="components-sidebar-rtl-arabic", expanded=sidebar_open) }}
+                {{ separator(orientation="vertical") }}
+                {{ breadcrumb([
+                  {"label": "مساحة العمل", "href": "#"},
+                  {"label": "الحملات"}
+                ], extra_class="mb-0") }}
+              </header>
+              <div class="sidebar-inset__content d-grid gap-3 p-3">
+                <div class="d-grid gap-3">
+                  <div class="d-grid gap-3 row row-cols-1 row-cols-md-2 g-3">
+                    <div class="ratio ratio-16x9">
+                      <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                    </div>
+                    <div class="ratio ratio-16x9">
+                      <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                    </div>
+                  </div>
+                  <div class="rounded-3 p-4 moo-sidebar-demo__placeholder">
+                    <p class="h6 mb-2">ملخص مساحة العمل</p>
+                    <p class="small text-body-secondary mb-0">راجع الحالة والموافقة والملاحظات الأحدث قبل فتح تذكرة جديدة.</p>
+                  </div>
+                </div>
+              </div>
+            {% endcall %}
+          {% endcall %}
+        {% endset %}
+        {{ sidebar_rtl | dedent_html }}
+      </div>
+    {% endset %}
+
+    {% set sidebar_rtl_hebrew %}
+      <div dir="rtl">
+        {% set sidebar_open = true %}
+        {% set sidebar_rtl %}
+          {% call sidebar_provider(contained=true, key="components-sidebar-rtl-hebrew", default_open=sidebar_open) %}
+            {% call sidebar(id="components-sidebar-rtl-hebrew", aria_label="ניהול תוכן") %}
+              {% call sidebar_header() %}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(dropdown=true) %}
+                    {{ sidebar_menu_button(
+                      "נורת'סטאר",
+                      subtitle="מבצעים",
+                      size="lg",
+                      dropdown=true,
+                      lead=sidebar_brand_mark("gallery-vertical-end"),
+                      end_icon="chevrons-up-down"
+                    ) }}
+                    {% call dropdown_menu() %}
+                      {{ dropdown_header("צוותים") }}
+                      {{ dropdown_item("נורת'סטאר", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
+                      {{ dropdown_item("מעבדות", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
+                      {{ dropdown_item("עדיפויות", icon="command", icon_box=true, shortcut="⌘3") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("הוספת צוות", icon="plus", icon_box=true) }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+
+              {% call sidebar_content() %}
+                {% call sidebar_group() %}
+                  {% call sidebar_group_content() %}
+                    {{ sidebar_group_label("אזור עבודה") }}
+                    {{ sidebar_input(id="sidebar-search-hebrew", placeholder="חפש באזור העבודה", aria_label="Search workspace") }}
+                    {% call sidebar_menu() %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("מבצעים", "workspace-operations-hebrew", icon="activity", open=true) }}
+                        {% call sidebar_menu_sub("workspace-operations-hebrew", open=true) %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("פעילות קמפיין", href="#") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("אישורים", href="#") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("יומני ביקורת", href="#", tooltip="צפייה ביומני ביקורת של האזור") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("נכסים", "workspace-assets-hebrew", icon="bot") }}
+                        {% call sidebar_menu_sub("workspace-assets-hebrew") %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("חבילות קמפיין", href="#", icon="sparkles") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("מערכת עיצוב", href="#", icon="brain") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("ידע", "workspace-knowledge-hebrew", icon="book-open") }}
+                        {% call sidebar_menu_sub("workspace-knowledge-hebrew") %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("מדריכי הפעלה", href="#", icon="book-open") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("מדריכי API", href="#", icon="code") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("הגדרות", href="#", icon="settings-2") }}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+
+                {% call sidebar_group() %}
+                  {% call sidebar_group_content() %}
+                    {{ sidebar_group_label("תצוגות פרויקט") }}
+                    {{ sidebar_group_action(icon="plus", aria_label="יצירת תצוגת פרויקט") }}
+                    {% call sidebar_menu() %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("קמפיינים", href="#", icon="frame") }}
+                        {% call sidebar_menu_action(aria_label="Campaign actions") %}
+                          {{ dropdown_item("שינוי שם", icon="pencil") }}
+                          {{ dropdown_item("העברה לארכיון", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("צינור תכנים", href="#", icon="pie-chart") }}
+                        {% call sidebar_menu_action(aria_label="Pipeline actions") %}
+                          {{ dropdown_item("שינוי שם", icon="pencil") }}
+                          {{ dropdown_item("העברה לארכיון", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("פעילות שטחית", href="#", icon="map") }}
+                        {% call sidebar_menu_action(aria_label="Field actions") %}
+                          {{ dropdown_item("שינוי שם", icon="pencil") }}
+                          {{ dropdown_item("העברה לארכיון", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+
+              {% call sidebar_footer() %}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(dropdown=true) %}
+                    {{ sidebar_menu_button(
+                      "ops-admin",
+                      subtitle="ops-admin@northstar.example",
+                      size="lg",
+                      dropdown=true,
+                      lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
+                      end_icon="chevrons-up-down"
+                    ) }}
+                    {% call dropdown_menu(align="end") %}
+                      {{ dropdown_header("ops-admin@northstar.example") }}
+                      {{ dropdown_item("שדרוג ל-Pro", icon="sparkles") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("חשבון", icon="badge-check") }}
+                      {{ dropdown_item("חיוב", icon="credit-card") }}
+                      {{ dropdown_item("התראות", icon="bell") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("התנתקות", icon="log-out") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+
+            {% call sidebar_inset() %}
+              <header class="sidebar-inset__header">
+                {{ sidebar_trigger(sidebar_id="components-sidebar-rtl-hebrew", expanded=sidebar_open) }}
+                {{ separator(orientation="vertical") }}
+                {{ breadcrumb([
+                  {"label": "אזור עבודה", "href": "#"},
+                  {"label": "קמפיינים"}
+                ], extra_class="mb-0") }}
+              </header>
+              <div class="sidebar-inset__content d-grid gap-3 p-3">
+                <div class="d-grid gap-3">
+                  <div class="d-grid gap-3 row row-cols-1 row-cols-md-2 g-3">
+                    <div class="ratio ratio-16x9">
+                      <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                    </div>
+                    <div class="ratio ratio-16x9">
+                      <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                    </div>
+                  </div>
+                  <div class="rounded-3 p-4 moo-sidebar-demo__placeholder">
+                    <p class="h6 mb-2">מצב עקרונית עבודה</p>
+                    <p class="small text-body-secondary mb-0">בדוק סטטוס, אישורים והערות אחרונות לפני פתיחת משימה.</p>
+                  </div>
+                </div>
+              </div>
+            {% endcall %}
+          {% endcall %}
+        {% endset %}
+        {{ sidebar_rtl | dedent_html }}
+      </div>
+    {% endset %}
+
+    {% set sidebar_rtl_english %}
+      <div dir="rtl">
+        {% set sidebar_open = true %}
+        {% set sidebar_rtl %}
+          {% call sidebar_provider(contained=true, key="components-sidebar-rtl-english", default_open=sidebar_open) %}
+            {% call sidebar(id="components-sidebar-rtl-english", aria_label="Operations workspace") %}
+              {% call sidebar_header() %}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(dropdown=true) %}
+                    {{ sidebar_menu_button(
+                      "Northstar",
+                      subtitle="Operations",
+                      size="lg",
+                      dropdown=true,
+                      lead=sidebar_brand_mark("gallery-vertical-end"),
+                      end_icon="chevrons-up-down"
+                    ) }}
+                    {% call dropdown_menu() %}
+                      {{ dropdown_header("Teams") }}
+                      {{ dropdown_item("Northstar", icon="gallery-vertical-end", icon_box=true, shortcut="⌘1") }}
+                      {{ dropdown_item("Northstar Labs", icon="audio-waveform", icon_box=true, shortcut="⌘2") }}
+                      {{ dropdown_item("Field Ops", icon="command", icon_box=true, shortcut="⌘3") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("Add team", icon="plus", icon_box=true) }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+
+              {% call sidebar_content() %}
+                {% call sidebar_group() %}
+                  {% call sidebar_group_content() %}
+                    {{ sidebar_group_label("Workspace") }}
+                    {{ sidebar_input(id="sidebar-search-english", placeholder="Search workspace", aria_label="Search workspace") }}
+                    {% call sidebar_menu() %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("Operations", "workspace-operations-english", icon="activity", open=true) }}
+                        {% call sidebar_menu_sub("workspace-operations-english", open=true) %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("Campaign activity", href="#") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("Approvals", href="#") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("Audit logs", href="#", tooltip="View workspace audit logs") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("Assets", "workspace-assets-english", icon="bot") }}
+                        {% call sidebar_menu_sub("workspace-assets-english") %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("Campaign packs", href="#", icon="sparkles") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("Design system", href="#", icon="brain") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_sub_button("Knowledge", "workspace-knowledge-english", icon="book-open") }}
+                        {% call sidebar_menu_sub("workspace-knowledge-english") %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("Runbooks", href="#", icon="book-open") }}
+                          {% endcall %}
+                          {% call sidebar_menu_sub_item() %}
+                            {{ sidebar_menu_button("API guides", href="#", icon="code") }}
+                          {% endcall %}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("Settings", href="#", icon="settings-2") }}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+
+                {% call sidebar_group() %}
+                  {% call sidebar_group_content() %}
+                    {{ sidebar_group_label("Project views") }}
+                    {{ sidebar_group_action(icon="plus", aria_label="Create project view") }}
+                    {% call sidebar_menu() %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("Campaigns", href="#", icon="frame") }}
+                        {% call sidebar_menu_action(aria_label="Campaign actions") %}
+                          {{ dropdown_item("Rename", icon="pencil") }}
+                          {{ dropdown_item("Archive", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("Content pipeline", href="#", icon="pie-chart") }}
+                        {% call sidebar_menu_action(aria_label="Pipeline actions") %}
+                          {{ dropdown_item("Rename", icon="pencil") }}
+                          {{ dropdown_item("Archive", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                      {% call sidebar_menu_item() %}
+                        {{ sidebar_menu_button("Field operations", href="#", icon="map") }}
+                        {% call sidebar_menu_action(aria_label="Field actions") %}
+                          {{ dropdown_item("Rename", icon="pencil") }}
+                          {{ dropdown_item("Archive", icon="archive") }}
+                        {% endcall %}
+                      {% endcall %}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+
+              {% call sidebar_footer() %}
+                {% call sidebar_menu() %}
+                  {% call sidebar_menu_item(dropdown=true) %}
+                    {{ sidebar_menu_button(
+                      "ops-admin",
+                      subtitle="ops-admin@northstar.example",
+                      size="lg",
+                      dropdown=true,
+                      lead=avatar(name="wpmoo", initials="SC", extra_class="sidebar-avatar"),
+                      end_icon="chevrons-up-down"
+                    ) }}
+                    {% call dropdown_menu(align="end") %}
+                      {{ dropdown_header("ops-admin@northstar.example") }}
+                      {{ dropdown_item("Upgrade to Pro", icon="sparkles") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("Account", icon="badge-check") }}
+                      {{ dropdown_item("Billing", icon="credit-card") }}
+                      {{ dropdown_item("Notifications", icon="bell") }}
+                      {{ dropdown_divider() }}
+                      {{ dropdown_item("Log out", icon="log-out") }}
+                    {% endcall %}
+                  {% endcall %}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+
+            {% call sidebar_inset() %}
+              <header class="sidebar-inset__header">
+                {{ sidebar_trigger(sidebar_id="components-sidebar-rtl-english", expanded=sidebar_open) }}
+                {{ separator(orientation="vertical") }}
+                {{ breadcrumb([
+                  {"label": "Workspace", "href": "#"},
+                  {"label": "Campaigns"}
+                ], extra_class="mb-0") }}
+              </header>
+              <div class="sidebar-inset__content d-grid gap-3 p-3">
+                <div class="d-grid gap-3">
+                  <div class="d-grid gap-3 row row-cols-1 row-cols-md-2 g-3">
+                    <div class="ratio ratio-16x9">
+                      <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                    </div>
+                    <div class="ratio ratio-16x9">
+                      <div class="moo-sidebar-demo__placeholder rounded-3"></div>
+                    </div>
+                  </div>
+                  <div class="rounded-3 p-4 moo-sidebar-demo__placeholder">
+                    <p class="h6 mb-2">Campaign workspace snapshot</p>
+                    <p class="small text-body-secondary mb-0">Review status, approvals, and latest comments before opening a ticket.</p>
+                  </div>
+                </div>
+              </div>
+            {% endcall %}
+          {% endcall %}
+        {% endset %}
+        {{ sidebar_rtl | dedent_html }}
+      </div>
+    {% endset %}
+
+    <h2 id="sidebar-rtl" class="h4 mt-5 mb-3">RTL</h2>
+    {{ render_rtl_example(
+      "sidebar-rtl",
+      "Validate the same app-shell sidebar pattern in Arabic, Hebrew, and English examples rendered with RTL direction.",
+      sidebar_rtl_arabic,
+      sidebar_rtl_hebrew,
+      sidebar_rtl_english,
       preview_class="moo-example__preview--shell"
     ) }}
 
@@ -205,12 +725,12 @@
 
     <h2 id="sidebar-api-reference" class="h4 mt-5 mb-3">Sidebar API Reference</h2>
     <p class="mb-4">
-      Public names follow the design reference's Sidebar conceptually; Moo UI
-      documents the Jinja API directly.
+      Public names follow Bootstrap-native shell primitives and the shared sidebar contract.
+      Use this list to wire page-level compositions quickly.
     </p>
 
     {% set sidebar_parts = [
-      {"id": "sidebar-provider", "name": "sidebar_provider()", "summary": "Owns persisted expanded/collapsed state and wraps the shell."},
+      {"id": "sidebar-provider", "name": "sidebar_provider()", "summary": "Owns expanded/collapsed state and wraps the shell."},
       {"id": "sidebar", "name": "sidebar()", "summary": "Renders the app navigation container."},
       {"id": "sidebar-input", "name": "sidebar_input()", "summary": "Composes Input for sidebar-local filtering fields."},
       {"id": "sidebar-header", "name": "sidebar_header()", "summary": "Hosts brand, team switcher, or primary header controls."},
