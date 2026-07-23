@@ -1466,6 +1466,18 @@ body {
   font: inherit;
 }
 
+// references/bootstrap/5.3.3/scss/_variables.scss:1739-1740 gives <code>
+// only $code-color/$code-font-size, no background/padding/radius token
+// (see $moo-code-* in _primary_variables.scss for the gap citation and
+// why this doesn't just reuse <kbd>'s own knobs). Scoped to prose so it
+// never touches the syntax-highlighted code panel's own <code> rule above.
+.moo-doc-main :where(p, li) code {
+  padding: $moo-code-padding-y $moo-code-padding-x;
+  color: $moo-code-color;
+  background: $moo-code-bg;
+  border-radius: $border-radius-sm;
+}
+
 .moo-sidebar-demo__placeholder {
   // The design reference uses bg-muted/50 for these preview surfaces.
   background: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent);

@@ -1,15 +1,32 @@
-// Bootstrap's native input-group keeps borders/radii on each child and trims the
-// seams between them. Moo intentionally promotes the border/radius to the parent
-// so icon/text addons behave like read-only regions inside one compound input,
-// while still consuming Bootstrap's $input-* sizing, border, and focus tokens.
+// Bootstrap's native input-group keeps borders/radii on each child and trims
+// only the inner-facing seams (references/bootstrap/5.3.3/scss/forms/
+// _input-group.scss:59, 74, 83 round every .form-control/.input-group-text/
+// .btn individually via @include border-radius(...); its "Rounded corners"
+// section at lines 90-130 then zeros just the inner side of non-edge
+// children). It never clips via overflow because it never needs to — every
+// child keeps its own native radius. Moo intentionally promotes the border to
+// the parent so icon/text addons read as regions inside one compound input,
+// but must still leave each edge child's own outer corner radius alone
+// instead of flattening it, or the parent's rounding has nothing to align
+// with (see the edge-child rules below, right after the blanket flatten).
 .input-group {
   border: $input-border-width solid $input-border-color;
   border-radius: $input-border-radius;
 }
 
+// references/bootstrap/5.3.3/scss/forms/_input-group.scss:9 sets align-items:
+// stretch on .input-group by default (this previously overrode it to center;
+// restored here since stretch is what makes children fill the row with no
+// centering rounding). Bootstrap's own .input-group carries no border of its
+// own — border-height math lives entirely on each child, which is why a
+// plain $input-height "just works" there. Moo moves that border to the
+// parent instead, so the parent's own border needs its own extra space on
+// top of $input-height, or children sized to a full $input-height (as
+// .form-control and .btn both are here) overflow the parent's inner content
+// box by exactly 2 * $input-border-width — this is what actually poked past
+// the rounded corner, not the corner radius itself.
 .input-group:not(:has(textarea)) {
-  align-items: center;
-  height: $input-height;
+  height: calc(#{$input-height} + #{$input-border-width} * 2);
 }
 
 .input-group:not(:has(textarea)) > .form-control {
@@ -27,6 +44,22 @@
 .input-group > :not(ul) {
   border: 0;
   border-radius: 0;
+}
+
+// Restore the outer corner Bootstrap's own edge child would already carry
+// (references/bootstrap/5.3.3/scss/forms/_input-group.scss:123-129 only ever
+// zeros the *inner*-facing side of a non-edge child, never the outer side of
+// an edge one). The trailing side also matches when a dropdown-menu is the
+// real last DOM child, since the menu itself is excluded above and the
+// visible trailing control sits right before it.
+.input-group > :first-child:not(ul) {
+  border-start-start-radius: $input-border-radius;
+  border-end-start-radius: $input-border-radius;
+}
+
+.input-group > :is(:last-child, :nth-last-child(2):has(+ .dropdown-menu)):not(ul) {
+  border-start-end-radius: $input-border-radius;
+  border-end-end-radius: $input-border-radius;
 }
 
 .input-group > :is(button, a) {

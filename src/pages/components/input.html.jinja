@@ -2,8 +2,13 @@
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
-{% from "components/field.html.jinja" import field, field_description, field_error, field_group, fieldset %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/button_group.html.jinja" import button_group %}
+{% from "components/field.html.jinja" import form, field, field_description, field_group, fieldset %}
 {% from "components/input.html.jinja" import input %}
+{% from "components/input_group.html.jinja" import input_group, input_group_text %}
+{% from "components/select.html.jinja" import select %}
 
 {% block title %}Input — Moo UI{% endblock %}
 
@@ -35,13 +40,8 @@
 
     {% set basic %}
       {{ input(
-        aria_label="Search records",
-        type="search",
-        placeholder="Filter by name or ID"
-      ) }}
-      {{ input(
-        aria_label="Fallback alias",
-        placeholder="Optional alternate reference"
+        aria_label="Input",
+        placeholder="Enter your text"
       ) }}
     {% endset %}
     {{ render_example(
@@ -52,67 +52,27 @@
       "moo-example__preview--narrow"
     ) }}
 
-    {% set readonly %}
-      {% call field() %}
-      {{ input(
-        label="Default region",
-        id="input-default-region",
-        value="us-east-1",
-        readonly=true
-      ) }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "readonly",
-      "Read-only",
-      "Use <code>readonly</code> on a single field to preserve visible context without editing.",
-      readonly,
-      "moo-example__preview--narrow"
-    ) }}
-
-    {% set disabled %}
+    {% set field_single %}
       {% call field() %}
       {{ input(
         label="Email",
-        id="input-disabled-email",
-        value="team@example.com",
-        disabled=true
+        id="input-field-email",
+        placeholder="you@example.com",
+        describedby="input-field-email-help"
       ) }}
+      {{ field_description("input-field-email-help", "We'll only use this to send you updates.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "disabled",
-      "Disabled",
-      "Use <code>disabled</code> on a control-level input to block interaction while keeping it readable.",
-      disabled,
-      "moo-example__preview--narrow"
-    ) }}
-
-    {% set invalid %}
-      {% call field() %}
-      {{ input(
-        label="Webhook URL",
-        id="input-webhook-url",
-        placeholder="https://hooks.example.com",
-        value="not a url",
-        aria_invalid=true,
-        required=true,
-        describedby="input-webhook-url-help input-webhook-url-error"
-      ) }}
-      {{ field_description("input-webhook-url-help", "This field must be a valid URL.") }}
-      {{ field_error("input-webhook-url-error", "This webhook URL is not valid.") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "invalid",
-      "Invalid",
-      "Pair invalid styles with helper text and inline error messaging.",
-      invalid,
+      "field",
+      "Field",
+      "Wrap a label and input together in a <code>.field</code> container to keep spacing consistent under Bootstrap form semantics.",
+      field_single,
       "moo-example__preview--narrow"
     ) }}
 
     {% set field_grouped %}
-      {% call fieldset("Developer profile") %}
+      {% call fieldset("Developer profile", description="Shown on the shared team roster.") %}
       {% call field_group() %}
       {% call field() %}
       {{ input(
@@ -138,8 +98,66 @@
     {{ render_example(
       "group",
       "Field group",
-      "Compose related controls with <code>field_group()</code> to keep rhythm and spacing token-driven.",
+      "Group related fields inside a <code>.field-group</code> to keep rhythm and spacing token-driven.",
       field_grouped,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set readonly %}
+      {% call field() %}
+      {{ input(
+        label="Default region",
+        id="input-default-region",
+        value="us-east-1",
+        readonly=true
+      ) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "readonly",
+      "Read-only",
+      "Use <code>readonly</code> on a single field to preserve visible context without editing.",
+      readonly,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      {% call field() %}
+      {{ input(
+        label="Workspace slug",
+        id="input-disabled-slug",
+        placeholder="acme-corp",
+        disabled=true,
+        describedby="input-disabled-slug-help"
+      ) }}
+      {{ field_description("input-disabled-slug-help", "Contact an owner to change the workspace slug.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "disabled",
+      "Disabled",
+      "Use <code>disabled</code> on a control-level input to block interaction while keeping it readable.",
+      disabled,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set invalid %}
+      {% call field() %}
+      {{ input(
+        label="Coupon Code",
+        id="input-invalid",
+        placeholder="Enter code",
+        aria_invalid=true,
+        describedby="input-invalid-help"
+      ) }}
+      {{ field_description("input-invalid-help", "That coupon code has expired.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Invalid",
+      "Use <code>aria-invalid=\"true\"</code> to mark a field as invalid alongside descriptive helper text.",
+      invalid,
       "moo-example__preview--narrow"
     ) }}
 
@@ -148,8 +166,10 @@
       {{ input(
         label="Picture",
         id="input-picture",
-        type="file"
+        type="file",
+        describedby="input-picture-help"
       ) }}
+      {{ field_description("input-picture-help", "PNG or JPG up to 5MB.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -157,6 +177,186 @@
       "File",
       "Use <code>type=\"file\"</code> with helper text.",
       file_input,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set inline %}
+      <div class="d-flex gap-2">
+        {{ input(
+          aria_label="Search",
+          type="search",
+          placeholder="Search..."
+        ) }}
+        {{ button("Search") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "inline",
+      "Inline",
+      "Place a bare input next to a button in a flex row to create a search input with a button.",
+      inline,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set grid %}
+      <div class="d-flex flex-wrap gap-3">
+        {% call field(extra_class="flex-fill") %}
+        {{ input(
+          label="City",
+          id="input-grid-city",
+          placeholder="Amsterdam"
+        ) }}
+        {% endcall %}
+        {% call field(extra_class="flex-fill") %}
+        {{ input(
+          label="Postal code",
+          id="input-grid-postal-code",
+          placeholder="1011 AB"
+        ) }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "grid",
+      "Grid",
+      "Use a flex row of <code>.field.flex-fill</code> containers to place multiple inputs side by side.",
+      grid,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set input_required %}
+      {% call field() %}
+      {{ input(
+        label="Project name",
+        id="input-required",
+        placeholder="marketing-site",
+        required=true,
+        describedby="input-required-help"
+      ) }}
+      {{ field_description("input-required-help", "Used to generate the deployment URL.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "required",
+      "Required",
+      "Use the <code>required</code> attribute to indicate required inputs.",
+      input_required,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set input_badge %}
+      {% call field() %}
+      {{ input(
+        label="API endpoint",
+        id="input-badge",
+        placeholder="https://api.acme.dev/v1/webhook",
+        label_extra=badge("Preview", variant="secondary")
+      ) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "badge",
+      "Badge",
+      "Add a <code>.badge</code> inside the label to highlight a recommended field.",
+      input_badge,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set input_group_example %}
+      {% call field() %}
+      {% call input_group() %}
+        {{ input_group_text("https://") }}
+        {{ input(aria_label="Website URL", id="input-group-url", placeholder="example.com") }}
+      {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "input-group",
+      "Input Group",
+      "To add icons or text inside an input, wrap it in a Bootstrap <code>.input-group</code>. See the <a href=\"../components/input-group.html\">Input Group</a> component for more examples.",
+      input_group_example,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set button_group_example %}
+      {% call field() %}
+      <label class="form-label" for="input-button-group-search">Search</label>
+      {% call button_group("Search actions") %}
+        {{ input(aria_label="Search", id="input-button-group-search", type="search", placeholder="Type to search...") }}
+        {{ button("Search", variant="outline") }}
+      {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "button-group",
+      "Button Group",
+      "Place a bare input inside a Bootstrap <code>.btn-group</code> to attach a button to it with a shared border. See the <a href=\"../components/button-group.html\">Button Group</a> component for more examples.",
+      button_group_example,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set full_form %}
+      {% call form(extra_class="mx-auto", novalidate=true) %}
+      {% call fieldset("Shipping details", description="Used to calculate delivery time and customs fees.") %}
+      {% call field_group() %}
+      {% call field() %}
+      {{ input(
+        label="Full name",
+        id="input-form-name",
+        placeholder="Ada Lovelace",
+        required=true
+      ) }}
+      {% endcall %}
+      {% call field() %}
+      {{ input(
+        label="Email",
+        id="input-form-email",
+        placeholder="you@example.com",
+        describedby="input-form-email-help"
+      ) }}
+      {{ field_description("input-form-email-help", "Order updates are sent to this address.") }}
+      {% endcall %}
+      <div class="d-flex flex-wrap gap-3">
+        {% call field(extra_class="flex-fill") %}
+        {{ input(
+          label="Phone",
+          id="input-form-phone",
+          placeholder="+31 20 123 4567"
+        ) }}
+        {% endcall %}
+        {% call field(extra_class="flex-fill") %}
+        {{ select(
+          label="Country",
+          id="input-form-country",
+          options=[
+            {"label": "Netherlands", "value": "nl"},
+            {"label": "Germany", "value": "de"},
+            {"label": "United States", "value": "us"}
+          ],
+          selected="nl"
+        ) }}
+        {% endcall %}
+      </div>
+      {% call field() %}
+      {{ input(
+        label="Address",
+        id="input-form-address",
+        placeholder="Damrak 1, 1012 LG"
+      ) }}
+      {% endcall %}
+      {% endcall %}
+      {% endcall %}
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        {{ button("Cancel", variant="outline", type="reset") }}
+        {{ button("Submit", type="submit") }}
+      </div>
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "form",
+      "Form",
+      "A full form example composed from a <code>&lt;fieldset&gt;</code>, a <code>.field-group</code>, and labeled fields. See the <a href=\"../components/field.html\">Fieldset</a> section for the legend/description contract.",
+      full_form,
       "moo-example__preview--narrow"
     ) }}
 
