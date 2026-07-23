@@ -6,6 +6,18 @@
   box-shadow: none;
 }
 
+// .btn-check toggle buttons (Toggle Group) put focus on the hidden input,
+// never the visible label, so the rule above can never match them; only
+// variants generated through Bootstrap's button-variant mixin (real theme
+// colors) get a working native focus glow, so btn-ghost/outline consumers
+// would otherwise show no ring at all. Share the same ring here instead of
+// patching --bs-btn-focus-box-shadow per variant.
+.btn-check:focus-visible + .btn {
+  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
+  outline-offset: var(--bs-focus-ring-width);
+  box-shadow: none;
+}
+
 .input-group > .dropdown-toggle[aria-expanded="true"]:focus-visible {
   outline: 0;
 }
