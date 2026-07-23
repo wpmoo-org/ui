@@ -636,8 +636,8 @@ class SidebarTests(CatalogTestCase):
         self.assertEqual(page.count('id="catalog-sidebar"'), 1)
         self.assertEqual(page.count('id="components-sidebar-demo"'), 1)
         self.assertIn('aria-controls="components-sidebar-demo"', page)
-        # App shell + 3 render examples inside the RTL tabs.
-        self.assertEqual(page.count('class="moo-example"'), 5)
+        # Sidebar documents one full application-shell example; RTL is not part of this component contract.
+        self.assertEqual(page.count('class="moo-example"'), 1)
 
     def test_sidebar_catalog_page_keeps_shell_example_before_reference_sections(self) -> None:
         result = self.run_build()
