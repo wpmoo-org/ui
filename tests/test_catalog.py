@@ -172,11 +172,31 @@ class CatalogContractTests(CatalogTestCase):
             # .form-label/.form-text/.invalid-feedback classes when they sit
             # inside a .field, rather than owning a "field-" prefixed family
             # of its own for them.
-            "field": ("field", "form-label", "form-text", "invalid-feedback"),
+            "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+            # Input group owns the compound surface around Bootstrap's native
+            # children, so its partial may retune the edge behavior of form,
+            # button, validation, and dropdown children while scoped under
+            # .input-group.
+            "input_group": (
+                "input-group",
+                "form-control",
+                "btn",
+                "dropdown-menu",
+                "valid-tooltip",
+                "valid-feedback",
+                "invalid-tooltip",
+                "invalid-feedback",
+                "rounded-pill",
+                "show",
+                "disabled",
+            ),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
-            source = path.read_text(encoding="utf-8")
+            source = "\n".join(
+                line.split("//", 1)[0]
+                for line in path.read_text(encoding="utf-8").splitlines()
+            )
             component = path.stem.removeprefix("_")
             prefixes = allowed_prefixes.get(
                 component,
@@ -208,6 +228,7 @@ class CatalogContractTests(CatalogTestCase):
             r"modal|nav|navbar|offcanvas|page|pagination|placeholder|"
             r"popover|progress|spinner|table|toast)(?:-|$)"
         )
+        page_level_classes = {"form-label"}
 
         pages = [
             *sorted((ROOT / "src/pages/components").glob("*.jinja")),
@@ -239,6 +260,8 @@ class CatalogContractTests(CatalogTestCase):
             for class_value in re.findall(r'class="([^"]*)"', source):
                 for class_name in class_value.split():
                     with self.subTest(page=path.name, class_name=class_name):
+                        if class_name in page_level_classes:
+                            continue
                         self.assertIsNone(
                             component_class.match(class_name),
                             f".{class_name} must come from a ready component macro",
@@ -260,6 +283,18 @@ class CatalogContractTests(CatalogTestCase):
                 )
             with self.subTest(page=path.name, contract="reference call"):
                 self.assertIn("render_reference(", source)
+
+    def test_external_blank_links_use_noopener_noreferrer(self) -> None:
+        for path in sorted((ROOT / "src").rglob("*.jinja")):
+            source = path.read_text(encoding="utf-8")
+            for tag in re.findall(r"<a\b[^>]*target=\"_blank\"[^>]*>", source):
+                with self.subTest(path=path.relative_to(ROOT), tag=tag):
+                    self.assertIn('rel="', tag)
+                    rel = re.search(r'rel="([^"]*)"', tag)
+                    self.assertIsNotNone(rel)
+                    tokens = set(rel.group(1).split())
+                    self.assertIn("noopener", tokens)
+                    self.assertIn("noreferrer", tokens)
 
     def test_ready_components_ship_a_real_preview_image(self) -> None:
         catalog = json.loads(
@@ -309,10 +344,15 @@ class CatalogContractTests(CatalogTestCase):
             'aria-label="Catalog navigation"',
             "input-group",
             "dropdown-menu",
+            "moo-catalog__status-menu",
+            'data-moo-catalog-section-filter="all"',
+            'data-moo-catalog-section-filter="components"',
+            'data-moo-catalog-section-filter="utilities"',
             "scroll-fade-y no-scrollbar",
         ):
             with self.subTest(contract=contract):
                 self.assertIn(contract, index)
+        self.assertNotIn("moo-catalog__status-select", index)
         self.assertRegex(index, r'class="[^"]*\bbadge\b')
         self.assertRegex(index, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
 
@@ -338,6 +378,16 @@ class CatalogContractTests(CatalogTestCase):
         catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
         self.assertIn("background: $input-disabled-bg;", catalog_scss)
+
+    def test_theme_toggle_persists_across_page_navigation(self) -> None:
+        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        preview = (ROOT / "static/js/preview.js").read_text(encoding="utf-8")
+
+        self.assertIn('window.localStorage.getItem("moo:theme")', base)
+        self.assertIn("document.documentElement.dataset.bsTheme = theme", base)
+        self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
+        self.assertIn("window.localStorage.getItem(THEME_STORAGE_KEY)", preview)
+        self.assertIn("window.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
         catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
@@ -495,6 +545,49 @@ class CatalogContractTests(CatalogTestCase):
         introduction = self.read_output("introduction.html")
         self.assertIn("moo-component-header__actions", introduction)
 
+    def test_section_pages_render_page_actions_and_pagination(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        introduction = self.read_output("introduction.html")
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', introduction)
+        self.assertIn("data-moo-copy-page", introduction)
+        self.assertIn("Copy Link", introduction)
+        self.assertIn("Open in ChatGPT", introduction)
+        self.assertIn("Open in Claude", introduction)
+        self.assertIn("Open in v0", introduction)
+        self.assertNotIn("Copy page link", introduction)
+        self.assertIn('class="moo-doc-page-actions__nav"', introduction)
+        self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', introduction)
+        self.assertIn('href="installation.html"', introduction)
+        self.assertNotIn('aria-label="Previous page: Changelog"', introduction)
+
+        installation = self.read_output("installation.html")
+        self.assertIn('aria-label="Previous page: Introduction"', installation)
+        self.assertIn('aria-label="Next page: Components"', installation)
+        self.assertIn('href="components/index.html"', installation)
+
+        components = self.read_output("components/index.html")
+        self.assertIn('aria-label="Previous page: Installation"', components)
+        self.assertIn('aria-label="Next page: Blocks"', components)
+        self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
+
+        blocks = self.read_output("blocks/index.html")
+        self.assertIn('aria-label="Previous page: Components"', blocks)
+        self.assertIn('aria-label="Next page: Skills"', blocks)
+        self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', blocks)
+
+        component = self.read_output("components/switch.html")
+        self.assertNotIn("moo-doc-page-actions", component)
+        self.assertNotIn("moo-doc-pagination", component)
+
+        preview = self.read_output("assets/js/preview.js")
+        self.assertIn("[data-moo-copy-page]", preview)
+        self.assertIn("navigator.clipboard.writeText(value)", preview)
+        self.assertIn("[data-moo-catalog-section-filter]", preview)
+        self.assertIn("selectedCatalogSection", preview)
+
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()
 
@@ -537,12 +630,18 @@ class CatalogContractTests(CatalogTestCase):
         for path in ("components/index.html", "blocks/index.html"):
             with self.subTest(path=path):
                 page = self.read_output(path)
-                self.assertNotIn("moo-doc-toc", page)
+                label = "Components" if path.startswith("components/") else "Blocks"
+                target = label.lower()
+                self.assertIn('class="moo-doc-layout"', page)
+                self.assertIn('class="moo-doc-toc d-none d-xl-block"', page)
+                self.assertIn('aria-label="On this page"', page)
+                self.assertIn(f'href="#{target}"', page)
+                self.assertIn(f">{label}</", page)
 
         css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-doc-layout", css)
         self.assertIn("@media (min-width: 1200px)", css)
-        self.assertIn("--moo-doc-toc-offset: calc(var(--moo-catalog-header-height) + 1rem)", css)
+        self.assertIn("--moo-doc-toc-offset: calc(2rem + 5px)", css)
         self.assertIn("scroll-behavior: smooth", css)
         self.assertIn("@media (prefers-reduced-motion: reduce)", css)
         self.assertRegex(
@@ -707,7 +806,7 @@ class CatalogContractTests(CatalogTestCase):
                     elif declaration.startswith("border-radius:"):
                         self.assertRegex(
                             declaration,
-                            r"^border-radius: (?:0|\$input-border-radius|var\(--bs-[a-z0-9-]*border-radius[a-z0-9-]*\));$",
+                            r"^border-radius: (?:0|\$input-border-radius|var\(--(?:bs|moo)-[a-z0-9-]*border-radius[a-z0-9-]*\)(?: !important)?);$",
                         )
                     elif declaration.startswith("--bs-"):
                         name, value = declaration.rstrip(";").split(":", 1)

@@ -46,6 +46,11 @@ $input-disabled-bg: color-mix(in srgb, var(--moo-border) 40%, transparent) !defa
 // both light and dark theme blocks (vendor/bootstrap/scss/forms/_form-control.scss).
 $form-file-button-hover-bg: var(--moo-border) !default;
 $form-text-margin-top: 0.5rem !default;
+// Moo promotes Bootstrap input groups from separate child borders to one
+// compound border. Bootstrap has no parent input-group radius knob, so the
+// default parent radius lives here while .rounded-pill can still opt into
+// Bootstrap's native pill radius utility.
+$moo-input-group-border-radius: var(--bs-border-radius-lg) !default;
 
 // Static component geometry belongs on Bootstrap's own Sass knobs. Bootstrap
 // then emits the matching --bs-* consumption variables for each component.

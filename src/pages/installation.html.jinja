@@ -5,6 +5,7 @@
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Installation - Moo UI{% endblock %}
 
@@ -14,7 +15,8 @@
       {{ render_page_header(
         "Installation",
         "Add Moo UI to a Bootstrap project without changing the markup contract your app already uses.",
-        id="installation"
+        id="installation",
+        actions=render_section_page_actions(current_slug, sections, root_path)
       ) }}
 
       {{ alert(
@@ -78,6 +80,8 @@
         </p>
         {{ button("View Components", variant="outline", size="sm", element="a", href="components/index.html") }}
       </section>
+
+      {{ render_section_page_pagination(current_slug, sections, root_path) }}
     </article>
 
     {{ render_doc_toc([

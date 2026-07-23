@@ -3,6 +3,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Skills - Moo UI{% endblock %}
 
@@ -12,7 +13,8 @@
       {{ render_page_header(
         "Skills",
         "Project-aware instructions for coding agents that generate or update Moo UI components.",
-        id="skills"
+        id="skills",
+        actions=render_section_page_actions(current_slug, sections, root_path)
       ) }}
 
       <section class="moo-doc-section" aria-labelledby="what-skills-are-for">
@@ -75,6 +77,8 @@
           same language as the public README.
         </p>
       </section>
+
+      {{ render_section_page_pagination(current_slug, sections, root_path) }}
     </article>
 
     {{ render_doc_toc([

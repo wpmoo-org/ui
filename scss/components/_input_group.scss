@@ -1,17 +1,15 @@
 // Bootstrap's native input-group keeps borders/radii on each child and trims
-// only the inner-facing seams (references/bootstrap/5.3.3/scss/forms/
-// _input-group.scss:59, 74, 83 round every .form-control/.input-group-text/
-// .btn individually via @include border-radius(...); its "Rounded corners"
-// section at lines 90-130 then zeros just the inner side of non-edge
-// children). It never clips via overflow because it never needs to — every
-// child keeps its own native radius. Moo intentionally promotes the border to
-// the parent so icon/text addons read as regions inside one compound input,
-// but must still leave each edge child's own outer corner radius alone
-// instead of flattening it, or the parent's rounding has nothing to align
-// with (see the edge-child rules below, right after the blanket flatten).
+// only the inner-facing seams (see the Bootstrap 5.3.3 input-group Sass
+// source). Moo promotes the border to the parent so icon/text addons read as
+// regions inside one compound input, but still leaves each edge child's own
+// outer corner radius aligned with the parent instead of flattening it.
 .input-group:not(:has(> .form-control[type="file"])) {
   border: $input-border-width solid $input-border-color;
-  border-radius: $input-border-radius;
+  border-radius: var(--moo-input-group-border-radius);
+}
+
+.input-group.rounded-pill:not(:has(> .form-control[type="file"])) {
+  --moo-input-group-border-radius: var(--bs-border-radius-pill);
 }
 
 // references/bootstrap/5.3.3/scss/forms/_input-group.scss:9 sets align-items:
@@ -46,20 +44,19 @@
   border-radius: 0;
 }
 
-// Restore the outer corner Bootstrap's own edge child would already carry
-// (references/bootstrap/5.3.3/scss/forms/_input-group.scss:123-129 only ever
-// zeros the *inner*-facing side of a non-edge child, never the outer side of
-// an edge one). The trailing side also matches when a dropdown-menu is the
-// real last DOM child, since the menu itself is excluded above and the
-// visible trailing control sits right before it.
+// Restore the outer corner Bootstrap's own edge child would already carry:
+// Bootstrap only zeros the inner-facing side of a non-edge child, never the
+// outer side of an edge one. The trailing side also matches when a dropdown
+// menu is the real last DOM child, since the visible trailing control sits
+// right before it.
 .input-group:not(:has(> .form-control[type="file"])) > :first-child:not(ul) {
-  border-start-start-radius: inherit;
-  border-end-start-radius: inherit;
+  border-start-start-radius: var(--moo-input-group-border-radius);
+  border-end-start-radius: var(--moo-input-group-border-radius);
 }
 
 .input-group:not(:has(> .form-control[type="file"])) > :is(:last-child, :nth-last-child(2):has(+ .dropdown-menu)):not(ul) {
-  border-start-end-radius: inherit;
-  border-end-end-radius: inherit;
+  border-start-end-radius: var(--moo-input-group-border-radius);
+  border-end-end-radius: var(--moo-input-group-border-radius);
 }
 
 .input-group > :is(button, a) {
@@ -75,7 +72,7 @@
   --bs-btn-active-bg: transparent;
   position: relative;
   isolation: isolate;
-  border-radius: inherit !important;
+  border-radius: var(--moo-input-group-border-radius) !important;
 }
 
 // Match the shadcn input-group affordance: the compound input stays clear,
@@ -87,7 +84,7 @@
   inset: $spacer * 0.25;
   z-index: -1;
   content: "";
-  border-radius: inherit;
+  border-radius: var(--moo-input-group-border-radius);
   background-color: var(--moo-muted-surface);
   opacity: 0;
   transition: opacity $transition-fade;

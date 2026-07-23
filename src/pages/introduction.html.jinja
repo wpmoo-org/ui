@@ -5,6 +5,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Introduction - Moo UI{% endblock %}
 
@@ -14,7 +15,8 @@
       {% call render_page_header(
         "Introduction",
         "Keep your Bootstrap 5.3 HTML and behavior. Change the visual language.",
-        id="introduction"
+        id="introduction",
+        actions=render_section_page_actions(current_slug, sections, root_path)
       ) %}
         {{ button("Install Moo UI", variant="default", element="a", href="installation.html") }}
         {{ button("Browse Components", variant="outline", element="a", href="components/index.html") }}
@@ -92,6 +94,8 @@
           Bootstrap-native markup.
         </p>
       </section>
+
+      {{ render_section_page_pagination(current_slug, sections, root_path) }}
     </article>
 
     {{ render_doc_toc([

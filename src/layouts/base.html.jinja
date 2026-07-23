@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Moo UI Bootstrap component catalog">
     <title>{% block title %}Moo UI{% endblock %}</title>
+    <script>
+      (() => {
+        try {
+          const theme = window.localStorage.getItem("moo:theme");
+          if (theme === "dark" || theme === "light") {
+            document.documentElement.dataset.bsTheme = theme;
+          }
+        } catch (_) {
+          /* localStorage can be unavailable in restricted browsing contexts. */
+        }
+      })();
+    </script>
     <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css?v={{ asset_version }}">
