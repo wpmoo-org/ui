@@ -135,6 +135,8 @@ body {
 
 .moo-catalog {
   --moo-catalog-header-height: 4rem;
+  --moo-catalog-header-bg-opacity: 0.94;
+  --moo-catalog-header-backdrop-filter: blur(0.75rem);
   --moo-doc-toc-offset: calc(var(--moo-catalog-header-height) + 1rem);
 
   min-height: 100vh;
@@ -151,8 +153,8 @@ body {
   z-index: $zindex-fixed;
   top: 0;
   min-height: var(--moo-catalog-header-height);
-  background: rgba(var(--bs-body-bg-rgb), 0.94);
-  backdrop-filter: blur(0.75rem);
+  background: rgba(var(--bs-body-bg-rgb), var(--moo-catalog-header-bg-opacity));
+  backdrop-filter: var(--moo-catalog-header-backdrop-filter);
 }
 
 .moo-catalog__navbar {

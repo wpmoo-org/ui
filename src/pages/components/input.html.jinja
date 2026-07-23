@@ -15,6 +15,7 @@
 
   <div class="moo-component-examples">
     {% set api_key %}
+      {% call field() %}
       {{ input(
         label="API Key",
         id="input-api-key",
@@ -22,6 +23,7 @@
         describedby="input-api-key-help"
       ) }}
       {{ field_description("input-api-key-help", "Your API key is encrypted and stored securely.") }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "api-key",
@@ -51,12 +53,14 @@
     ) }}
 
     {% set readonly %}
+      {% call field() %}
       {{ input(
         label="Default region",
         id="input-default-region",
         value="us-east-1",
         readonly=true
       ) }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "readonly",
@@ -67,12 +71,14 @@
     ) }}
 
     {% set disabled %}
+      {% call field() %}
       {{ input(
         label="Email",
         id="input-disabled-email",
         value="team@example.com",
         disabled=true
       ) }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "disabled",
@@ -83,6 +89,7 @@
     ) }}
 
     {% set invalid %}
+      {% call field() %}
       {{ input(
         label="Webhook URL",
         id="input-webhook-url",
@@ -94,6 +101,7 @@
       ) }}
       {{ field_description("input-webhook-url-help", "This field must be a valid URL.") }}
       {{ field_error("input-webhook-url-error", "This webhook URL is not valid.") }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "invalid",
@@ -136,11 +144,13 @@
     ) }}
 
     {% set file_input %}
+      {% call field() %}
       {{ input(
         label="Picture",
         id="input-picture",
         type="file"
       ) }}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "file",
@@ -152,6 +162,7 @@
 
     {% set rtl_arabic %}
       <div dir="rtl">
+        {% call field() %}
         {{ input(
           label="مفتاح API",
           id="input-rtl-arabic",
@@ -159,10 +170,12 @@
           describedby="input-rtl-arabic-help"
         ) }}
         {{ field_description("input-rtl-arabic-help", "مفتاح API الخاص بك آمن ومشفر.") }}
+        {% endcall %}
       </div>
     {% endset %}
     {% set rtl_hebrew %}
       <div dir="rtl">
+        {% call field() %}
         {{ input(
           label="מפתח API",
           id="input-rtl-hebrew",
@@ -170,10 +183,12 @@
           describedby="input-rtl-hebrew-help"
         ) }}
         {{ field_description("input-rtl-hebrew-help", "המפתח שלך מאובטח ומוצפן.") }}
+        {% endcall %}
       </div>
     {% endset %}
     {% set rtl_english %}
       <div dir="rtl">
+        {% call field() %}
         {{ input(
           label="API Key",
           id="input-rtl-english",
@@ -181,6 +196,7 @@
           describedby="input-rtl-english-help"
         ) }}
         {{ field_description("input-rtl-english-help", "Your key is encrypted and stored securely.") }}
+        {% endcall %}
       </div>
     {% endset %}
 

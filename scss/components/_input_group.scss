@@ -1,3 +1,7 @@
+// Bootstrap's native input-group keeps borders/radii on each child and trims the
+// seams between them. Moo intentionally promotes the border/radius to the parent
+// so icon/text addons behave like read-only regions inside one compound input,
+// while still consuming Bootstrap's $input-* sizing, border, and focus tokens.
 .input-group {
   border: $input-border-width solid $input-border-color;
   border-radius: $input-border-radius;
@@ -27,6 +31,30 @@
 
 .input-group > :is(button, a) {
   border: var(--bs-btn-border-width) var(--bs-border-style) var(--bs-btn-border-color);
+}
+
+// Ghost buttons inside a compound input should read as inline affordances, not
+// standalone buttons. Keep Bootstrap's --bs-btn-* contract, but scope the
+// hover/active surface to the small control instead of repainting the compound
+// input edge.
+.input-group > .btn-ghost {
+  --bs-btn-hover-bg: var(--moo-muted-surface);
+  --bs-btn-active-bg: var(--moo-muted-surface);
+}
+
+.input-group > .btn-ghost:is(.show, [aria-expanded="true"]) {
+  color: var(--bs-btn-active-color);
+  background-color: var(--bs-btn-active-bg);
+}
+
+.input-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
+  transform: none;
+}
+
+.input-group > :is(.btn-xs, .btn-icon-xs) {
+  --bs-btn-padding-y: #{$spacer * 0.125};
+  --bs-btn-padding-x: #{$spacer * 0.375};
+  --bs-btn-line-height: #{$spacer * 0.875};
 }
 
 .input-group > .input-group-text {

@@ -1,11 +1,12 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button, icon as button_icon %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
+{% from "components/field.html.jinja" import field, field_description %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_block_addon, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
+{% from "components/spinner.html.jinja" import spinner %}
 {% from "components/textarea.html.jinja" import textarea %}
-{% from "components/field.html.jinja" import field, field_description %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
@@ -20,18 +21,19 @@
 
   <div class="moo-component-examples">
     {% set icon_start %}
-      {% call field() %}
+      {% call field(extra_class="w-100") %}
+        <label class="form-label" for="icon-start-search">Input</label>
         {% call input_group() %}
           {{ input_group_text(button_icon("search", "inline-start")) }}
           {{ input(
             id="icon-start-search",
             type="search",
-            placeholder="Search queue conversations",
-            aria_label="Search queue conversations",
+            placeholder="Search...",
+            aria_label="Search",
             describedby="icon-start-search-help"
           ) }}
         {% endcall %}
-        {{ field_description("icon-start-search-help", "A leading icon keeps search intent visible before users type.") }}
+        {{ field_description("icon-start-search-help", "Icon positioned at the start.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -43,17 +45,18 @@
     ) }}
 
     {% set icon_end %}
-      {% call field() %}
+      {% call field(extra_class="w-100") %}
+        <label class="form-label" for="icon-end-password">Input</label>
         {% call input_group() %}
           {{ input(
             id="icon-end-password",
-            placeholder="Current password",
-            aria_label="Current password",
+            placeholder="Enter password",
+            aria_label="Password",
             describedby="icon-end-password-help"
           ) }}
           {{ input_group_text(button_icon("eye-off", "inline-start")) }}
         {% endcall %}
-        {{ field_description("icon-end-password-help", "Place trailing actions on the control edge where users expect validation and visibility actions.") }}
+        {{ field_description("icon-end-password-help", "Icon positioned at the end.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -124,8 +127,7 @@
         {% call input_group() %}
           {{ input(
             aria_label="Profile URL",
-            placeholder="https://example.com/moo",
-            readonly=true
+            placeholder="https://example.com/moo"
           ) }}
           {{ button(
             "",
@@ -144,7 +146,10 @@
             size="icon-xs",
             aria_label="About secure URLs",
             icon_start="info",
-            extra_class="border-0"
+            extra_class="border-0",
+            popover_title="Your connection is not secure.",
+            popover_content="You should not enter sensitive information on this site.",
+            popover_placement="bottom"
           ) }}
           {{ input_group_text("https://") }}
           {{ input(aria_label="Secure URL") }}
@@ -207,7 +212,7 @@
             aria_label="File name",
             placeholder="Enter file name"
           ) }}
-          {{ button("", variant="ghost", size="icon-xs", aria_label="More file actions", icon_start="ellipsis", dropdown=true, dropdown_offset="0,8", extra_class="border-0") }}
+          {{ button("", variant="ghost", size="icon-sm", aria_label="More file actions", icon_start="ellipsis", dropdown=true, dropdown_offset="0,8", extra_class="border-0") }}
           {% call dropdown_menu(align="end") %}
             {{ dropdown_item("Settings") }}
             {{ dropdown_item("Copy path") }}
@@ -222,10 +227,12 @@
           ) }}
           {{ button(
             "Search In...",
-            variant="link",
-            size="xs",
+            variant="ghost",
+            size="sm",
             dropdown=true,
-            dropdown_offset="0,8"
+            dropdown_offset="0,8",
+            icon_end="chevron-down",
+            extra_class="border-0"
           ) }}
           {% call dropdown_menu(align="end") %}
             {{ dropdown_item("Documentation") }}
@@ -240,6 +247,65 @@
       "Dropdown",
       "Use an icon-only menu for file actions or a labeled menu when the input action needs a search scope.",
       dropdown_groups,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set spinner_rows %}
+      {% set inline_spinner %}{{ spinner("Searching workspace", size="sm") }}{% endset %}
+      {% set processing_start %}
+        {{ spinner("Processing import", size="sm") }}
+        <span>Processing...</span>
+      {% endset %}
+      {% set saving_end %}
+        <span>Saving...</span>
+        {{ spinner("Saving changes", size="sm") }}
+      {% endset %}
+      {% set refresh_end %}
+        <span>Please wait...</span>
+        {{ spinner("Refreshing data", size="sm") }}
+      {% endset %}
+
+      <div class="d-grid gap-3">
+        {% call input_group() %}
+          {{ input(
+            aria_label="Search workspace",
+            type="search",
+            placeholder="Searching..."
+          ) }}
+          {{ input_group_text(inline_spinner, extra_class="px-2") }}
+        {% endcall %}
+        {% call input_group() %}
+          {{ input_group_text(processing_start, extra_class="gap-2") }}
+          {{ input(
+            aria_label="Processing import",
+            value="Import queue",
+            readonly=true
+          ) }}
+        {% endcall %}
+        {% call input_group() %}
+          {{ input(
+            aria_label="Saving changes",
+            value="Draft settings",
+            readonly=true
+          ) }}
+          {{ input_group_text(saving_end, extra_class="gap-2") }}
+        {% endcall %}
+        {% call input_group() %}
+          {{ input_group_text(button_icon("refresh-cw", "inline-start")) }}
+          {{ input(
+            aria_label="Refreshing data",
+            value="Refreshing data...",
+            readonly=true
+          ) }}
+          {{ input_group_text(refresh_end, extra_class="gap-2") }}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "spinner",
+      "Spinner",
+      "Use compact loading indicators inside addons when the input value is waiting on async work.",
+      spinner_rows,
       "moo-example__preview--narrow"
     ) }}
 
