@@ -2,17 +2,6 @@ MIT License
 
 Copyright (c) 2026 WPMoo (wpmoo.org)
 
-This license applies to the source code in this repository, except where a
-file, directory, or third-party notice states otherwise.
-
-WPMoo-generated visual assets are not licensed under the MIT License unless
-explicitly stated. This includes brand assets, component preview images,
-marketing images, screenshots, generated artwork, and other WPMoo-owned image
-assets under `static/images/`. See `ASSET_LICENSE.md`.
-
-Vendored third-party material keeps its original license and attribution.
-See `THIRD_PARTY_NOTICES.md`.
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
