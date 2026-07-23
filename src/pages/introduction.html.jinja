@@ -1,11 +1,11 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/card.html.jinja" import card %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Introduction - Moo UI{% endblock %}
 
@@ -15,7 +15,8 @@
       {% call render_page_header(
         "Introduction",
         "Keep your Bootstrap 5.3 HTML and behavior. Change the visual language.",
-        id="introduction-title"
+        id="introduction",
+        actions=render_section_page_actions(current_slug, sections, root_path)
       ) %}
         {{ button("Install Moo UI", variant="default", element="a", href="installation.html") }}
         {{ button("Browse Components", variant="outline", element="a", href="components/index.html") }}
@@ -28,8 +29,8 @@
         extra_class="text-bg-dark border-dark moo-doc-callout"
       ) }}
 
-      <section class="moo-doc-section" aria-labelledby="why-title">
-        {{ typography("Why Moo UI Exists", variant="section-title", id="why-title") }}
+      <section class="moo-doc-section" aria-labelledby="why-moo-ui-exists">
+        {{ typography("Why Moo UI Exists", variant="section-title", id="why-moo-ui-exists") }}
         <p>
           Bootstrap projects often have dependable behavior, mature JavaScript
           plugins, and a markup model that backend teams already understand.
@@ -43,66 +44,64 @@
         </p>
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="principles-title">
-        {{ typography("Principles", variant="section-title", id="principles-title") }}
-        <div class="moo-doc-card-grid">
-          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-            <span class="moo-doc-card-icon">{{ render_icon("layers", "inline-start") }}</span>
-            <h3 class="h5 mb-0">Bootstrap is the contract</h3>
-            <p class="text-body-secondary mb-0">
-              Components keep Bootstrap markup, variants, <code>data-bs-*</code>
-              behavior, Sass variables, and runtime <code>--bs-*</code> tokens.
-            </p>
-          {% endcall %}
+      <section class="moo-doc-section" aria-labelledby="principles">
+        {{ typography("Principles", variant="section-title", id="principles") }}
+        <ol class="moo-doc-principles">
+          <li class="moo-doc-principles__item">
+            <span class="moo-doc-principles__number" aria-hidden="true">1</span>
+            <div class="moo-doc-principles__content">
+              <h3 class="h5 mb-0">Bootstrap is the contract</h3>
+              <p>
+                Components keep Bootstrap markup, variants, <code>data-bs-*</code>
+                behavior, Sass variables, and runtime <code>--bs-*</code> tokens.
+              </p>
+            </div>
+          </li>
 
-          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-            <span class="moo-doc-card-icon">{{ render_icon("wand-sparkles", "inline-start") }}</span>
-            <h3 class="h5 mb-0">shadcn is the feeling</h3>
-            <p class="text-body-secondary mb-0">
-              The surface language is restrained, quiet, and modern. It studies
-              the taste, not another framework's implementation model.
-            </p>
-          {% endcall %}
+          <li class="moo-doc-principles__item">
+            <span class="moo-doc-principles__number" aria-hidden="true">2</span>
+            <div class="moo-doc-principles__content">
+              <h3 class="h5 mb-0">shadcn is the feeling</h3>
+              <p>
+                The surface language is restrained, quiet, and modern. It studies
+                the taste, not another framework's implementation model.
+              </p>
+            </div>
+          </li>
 
-          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-            <span class="moo-doc-card-icon">{{ render_icon("server", "inline-start") }}</span>
-            <h3 class="h5 mb-0">Server-rendered UI stays first-class</h3>
-            <p class="text-body-secondary mb-0">
-              The catalog is written as plain HTML templates and component macros,
-              so backend-rendered products can consume the same interface language.
-            </p>
-          {% endcall %}
-        </div>
+          <li class="moo-doc-principles__item">
+            <span class="moo-doc-principles__number" aria-hidden="true">3</span>
+            <div class="moo-doc-principles__content">
+              <h3 class="h5 mb-0">Server-rendered UI stays first-class</h3>
+              <p>
+                The catalog is written as plain HTML templates and component macros,
+                so backend-rendered products can consume the same interface language.
+              </p>
+            </div>
+          </li>
+        </ol>
       </section>
 
       {{ separator(extra_class="moo-doc-separator") }}
 
-      <section class="moo-doc-section" aria-labelledby="mission-title">
-        <div class="moo-doc-split">
-          <div>
-            {{ typography("Mission", variant="section-title", id="mission-title") }}
-            <p>
-              Make Bootstrap interfaces feel modern enough for serious portal,
-              SaaS, and operations work without forcing teams to rewrite the
-              frontend stack they already trust.
-            </p>
-          </div>
-          <div>
-            {{ typography("Vision", variant="section-title") }}
-            <p>
-              A shared library of primitives, blocks, docs, and design notes for
-              teams that want product-grade interfaces with Bootstrap-native
-              markup.
-            </p>
-          </div>
-        </div>
+      <section class="moo-doc-section" aria-labelledby="the-goal">
+        {{ typography("The Goal", variant="section-title", id="the-goal") }}
+        <p>
+          Make Bootstrap interfaces feel modern enough for serious portal,
+          SaaS, and operations work without forcing teams to rewrite the
+          frontend stack they already trust, while building a shared library of
+          primitives, blocks, docs, and design notes for product-grade
+          Bootstrap-native markup.
+        </p>
       </section>
+
+      {{ render_section_page_pagination(current_slug, sections, root_path) }}
     </article>
 
     {{ render_doc_toc([
-      {"id": "why-title", "label": "Why Moo UI Exists"},
-      {"id": "principles-title", "label": "Principles"},
-      {"id": "mission-title", "label": "Mission"}
+      {"id": "why-moo-ui-exists", "label": "Why Moo UI Exists"},
+      {"id": "principles", "label": "Principles"},
+      {"id": "the-goal", "label": "The Goal"}
     ]) }}
   </div>
 {% endblock %}

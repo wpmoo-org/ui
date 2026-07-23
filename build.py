@@ -29,6 +29,7 @@ PAGES = SRC / "pages"
 SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
+LLMS_TXT = ROOT / "llms.txt"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
@@ -130,6 +131,7 @@ def _inline_element(source: str, match: re.Match[str], tag_name: str, depth: int
 
 def format_html(value: object) -> str:
     source = dedent_html(value)
+    source = _compact_lucide_icons(source)
     lines: list[str] = []
     depth = 0
     position = 0
@@ -194,6 +196,26 @@ def format_html(value: object) -> str:
     return "\n".join(lines)
 
 
+LUCIDE_SVG = re.compile(
+    r"<svg\b(?P<attrs>[^>]*)\bdata-icon=\"(?P<position>[^\"]+)\""
+    r"(?P<tail>[^>]*)\bdata-lucide=\"(?P<name>[^\"]+)\""
+    r"(?P<rest>[^>]*)>.*?</svg>",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _compact_lucide_icons(source: str) -> str:
+    def replace(match: re.Match[str]) -> str:
+        icon_name = match.group("name")
+        position = match.group("position")
+        return (
+            f'<i class="lucide lucide-{icon_name}" '
+            f'data-icon="{position}" aria-hidden="true" />'
+        )
+
+    return LUCIDE_SVG.sub(replace, source)
+
+
 def _syntax_token(class_name: str, value: str) -> str:
     return f'<span class="token {class_name}">{value}</span>'
 
@@ -256,6 +278,11 @@ def line_numbers(value: object) -> Markup:
     return Markup("\n".join(str(number) for number in range(1, count + 1)))
 
 
+def slugify(value: object) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", str(value).lower()).strip("-")
+    return slug or "section"
+
+
 def fail(message: str) -> None:
     raise ValueError(message)
 
@@ -299,6 +326,7 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
             (
                 "<svg",
                 f'  data-icon="{escape(position)}"',
+                f'  data-lucide="{escape(name)}"',
                 f'  viewBox="{left} {top} {width} {height}"',
                 '  fill="none"',
                 '  stroke="currentColor"',
@@ -326,6 +354,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
     environment.filters["line_numbers"] = line_numbers
+    environment.filters["slugify"] = slugify
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
     environment.globals["block_preview_src"] = block_preview_src
@@ -418,6 +447,11 @@ def copy_assets() -> None:
         shutil.copytree(STATIC, DIST / "assets", dirs_exist_ok=True)
 
 
+def copy_site_metadata() -> None:
+    if LLMS_TXT.exists():
+        shutil.copy2(LLMS_TXT, DIST / "llms.txt")
+
+
 def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
@@ -472,11 +506,14 @@ def build() -> None:
         DIST.mkdir()
         compile_styles()
         copy_assets()
+        copy_site_metadata()
         render_pages()
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
+    if LLMS_TXT.exists():
+        paths.append(LLMS_TXT)
     for folder in (SRC, SCSS, STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())

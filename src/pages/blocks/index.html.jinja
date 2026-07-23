@@ -1,7 +1,9 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/card.html.jinja" import card %}
 {% from "includes/component-previews.html.jinja" import block_preview %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% set block_descriptions = {
   "sidebar-floating": "A composed application shell using the floating sidebar variant.",
@@ -11,29 +13,40 @@
 {% block title %}Blocks — Moo UI{% endblock %}
 
 {% block content %}
-  {{ render_page_header(
-    "Blocks",
-    "Full composed screens built from ready component macros.",
-    id="blocks-title"
-  ) }}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Blocks",
+        "Full composed screens built from ready component macros.",
+        id="blocks",
+        actions=render_section_page_actions("blocks", sections, root_path)
+      ) }}
 
-  <section class="moo-catalog__dashboard" aria-label="Blocks">
-    <div class="moo-catalog__grid" id="blocks">
-      {% for block in blocks %}
-        {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
-          <div class="moo-catalog__showcase-preview">
-            {{ block_preview(block.slug, root_path) }}
-          </div>
-          <div>
-            <h2 class="h5 mb-2">
-              <a class="stretched-link text-body text-decoration-none" href="{{ root_path ~ "blocks/" ~ block.slug ~ ".html" }}">{{ block.label }}</a>
-            </h2>
-            <p class="text-body-secondary mb-0">
-              {{ block_descriptions.get(block.slug, "Composed screen built from ready component macros.") }}
-            </p>
-          </div>
-        {% endcall %}
-      {% endfor %}
-    </div>
-  </section>
+      <section class="moo-catalog__dashboard" aria-label="Blocks">
+        <div class="moo-catalog__grid" id="blocks-grid">
+          {% for block in blocks %}
+            {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
+              <div class="moo-catalog__showcase-preview">
+                {{ block_preview(block.slug, root_path) }}
+              </div>
+              <div>
+                <h2 class="h5 mb-2">
+                  <a class="stretched-link text-body text-decoration-none" href="{{ root_path ~ "blocks/" ~ block.slug ~ ".html" }}">{{ block.label }}</a>
+                </h2>
+                <p class="text-body-secondary mb-0">
+                  {{ block_descriptions.get(block.slug, "Composed screen built from ready component macros.") }}
+                </p>
+              </div>
+            {% endcall %}
+          {% endfor %}
+        </div>
+      </section>
+
+      {{ render_section_page_pagination("blocks", sections, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "blocks", "label": "Blocks"}
+    ]) }}
+  </div>
 {% endblock %}

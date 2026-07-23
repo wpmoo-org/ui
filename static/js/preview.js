@@ -1,8 +1,32 @@
 (() => {
   const root = document.documentElement;
+  const THEME_STORAGE_KEY = "moo:theme";
   const themeButton = document.querySelector("[data-moo-theme], .moo-catalog__theme-toggle");
   const directionButton = document.querySelector("[data-moo-direction], .moo-catalog__direction-toggle");
   const themeIcons = Array.from(themeButton?.querySelectorAll("[data-moo-theme-icon]") || []);
+
+  const getStoredTheme = () => {
+    try {
+      const theme = window.localStorage.getItem(THEME_STORAGE_KEY);
+      return theme === "dark" || theme === "light" ? theme : null;
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const setStoredTheme = (theme) => {
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (_) {
+      /* localStorage can be unavailable in restricted browsing contexts. */
+    }
+  };
+
+  const storedTheme = getStoredTheme();
+
+  if (storedTheme) {
+    root.dataset.bsTheme = storedTheme;
+  }
 
   const updateThemeButton = () => {
     const theme = root.dataset.bsTheme || "light";
@@ -20,6 +44,7 @@
   themeButton?.addEventListener("click", () => {
     const theme = root.dataset.bsTheme === "dark" ? "light" : "dark";
     root.dataset.bsTheme = theme;
+    setStoredTheme(theme);
     updateThemeButton();
   });
 
@@ -28,15 +53,18 @@
   const searchControls = Array.from(
     document.querySelectorAll(".moo-catalog__toolbar input[type='search']")
   );
-  const sectionFilter = document.querySelector(".moo-catalog__status-select");
+  const sectionFilterItems = Array.from(
+    document.querySelectorAll("[data-moo-catalog-section-filter]")
+  );
+  const sectionFilterToggle = document.querySelector(".moo-catalog__status-menu > .btn");
   const catalogSections = Array.from(document.querySelectorAll("[data-moo-catalog-section]"));
   const catalogCards = Array.from(document.querySelectorAll(".moo-catalog__app-card"));
+  let selectedCatalogSection = "all";
 
   const normalize = (value) => value.trim().toLowerCase();
 
   const filterCatalog = (query = searchControls[0]?.value || "") => {
     const needle = normalize(query);
-    const selectedSection = sectionFilter?.value || "all";
 
     searchControls.forEach((control) => {
       if (control.value !== query) {
@@ -46,14 +74,16 @@
 
     catalogSections.forEach((section) => {
       const sectionName = section.dataset.mooCatalogSection;
-      section.hidden = selectedSection !== "all" && sectionName !== selectedSection;
+      section.hidden =
+        selectedCatalogSection !== "all" && sectionName !== selectedCatalogSection;
     });
 
     catalogCards.forEach((card) => {
       const matchesText = !needle || normalize(card.textContent).includes(needle);
       const section = card.closest("[data-moo-catalog-section]");
       const matchesSection =
-        selectedSection === "all" || section?.dataset.mooCatalogSection === selectedSection;
+        selectedCatalogSection === "all" ||
+        section?.dataset.mooCatalogSection === selectedCatalogSection;
       card.hidden = !matchesText || !matchesSection;
     });
 
@@ -63,7 +93,31 @@
     control.addEventListener("input", () => filterCatalog(control.value));
   });
 
-  sectionFilter?.addEventListener("change", () => filterCatalog());
+  sectionFilterItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      selectedCatalogSection = item.dataset.mooCatalogSectionFilter || "all";
+      sectionFilterItems.forEach((option) => {
+        const isActive = option === item;
+        option.classList.toggle("active", isActive);
+        if (isActive) {
+          option.setAttribute("aria-current", "true");
+        } else {
+          option.removeAttribute("aria-current");
+        }
+      });
+      if (sectionFilterToggle) {
+        const label = item.textContent.trim();
+        sectionFilterToggle.childNodes.forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+            node.textContent = label;
+          }
+        });
+      }
+      filterCatalog();
+    });
+  });
+
+  filterCatalog();
 
   // Command palette: the header search trigger and Cmd/Ctrl+K open a Bootstrap
   // modal that filters catalog pages; arrow keys move the highlight and Enter
@@ -261,6 +315,27 @@
     window.addEventListener("resize", requestDocTocUpdate);
     window.addEventListener("hashchange", requestDocTocUpdate);
   }
+
+  document.querySelectorAll("[data-moo-copy-page]").forEach((trigger) => {
+    trigger.addEventListener("click", async () => {
+      const value = trigger.getAttribute("data-moo-copy-value") || window.location.href.split("#")[0];
+      const label = trigger.querySelector("[data-moo-copy-page-label]");
+      const previousLabel = label?.textContent;
+
+      try {
+        await navigator.clipboard.writeText(value);
+        if (label) {
+          label.textContent = "Copied";
+          window.setTimeout(() => { label.textContent = previousLabel; }, 1600);
+        }
+      } catch {
+        if (label) {
+          label.textContent = "Copy failed";
+          window.setTimeout(() => { label.textContent = previousLabel; }, 1600);
+        }
+      }
+    });
+  });
 
   // Hash navigation and TOC clicks use smooth scrolling in the catalog main
   // pane. If a tab is switched while that smooth scroll is still settling, the

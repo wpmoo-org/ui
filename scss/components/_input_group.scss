@@ -1,14 +1,33 @@
-.input-group {
+// Bootstrap's native input-group keeps borders/radii on each child and trims
+// only the inner-facing seams (see the Bootstrap 5.3.3 input-group Sass
+// source). Moo promotes the border to the parent so icon/text addons read as
+// regions inside one compound input, but still leaves each edge child's own
+// outer corner radius aligned with the parent instead of flattening it.
+.input-group:not(:has(> .form-control[type="file"])) {
   border: $input-border-width solid $input-border-color;
-  border-radius: $input-border-radius;
+  border-radius: var(--moo-input-group-border-radius);
 }
 
-.input-group:not(:has(textarea)) {
-  align-items: center;
-  height: $input-height;
+.input-group.rounded-pill:not(:has(> .form-control[type="file"])) {
+  --moo-input-group-border-radius: var(--bs-border-radius-pill);
 }
 
-.input-group:not(:has(textarea)) > .form-control {
+// references/bootstrap/5.3.3/scss/forms/_input-group.scss:9 sets align-items:
+// stretch on .input-group by default (this previously overrode it to center;
+// restored here since stretch is what makes children fill the row with no
+// centering rounding). Bootstrap's own .input-group carries no border of its
+// own — border-height math lives entirely on each child, which is why a
+// plain $input-height "just works" there. Moo moves that border to the
+// parent instead, so the parent's own border needs its own extra space on
+// top of $input-height, or children sized to a full $input-height (as
+// .form-control and .btn both are here) overflow the parent's inner content
+// box by exactly 2 * $input-border-width — this is what actually poked past
+// the rounded corner, not the corner radius itself.
+.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])) {
+  height: calc(#{$input-height} + #{$input-border-width} * 2);
+}
+
+.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])) > .form-control {
   min-height: 0;
 }
 
@@ -16,17 +35,86 @@
   resize: none;
 }
 
-.input-group > :not(:first-child):not([class~="dropdown-menu"]):not([class~="valid-tooltip"]):not([class~="valid-feedback"]):not([class~="invalid-tooltip"]):not([class~="invalid-feedback"]) {
+.input-group:not(:has(> .form-control[type="file"])) > :not(:first-child):not([class~="dropdown-menu"]):not([class~="valid-tooltip"]):not([class~="valid-feedback"]):not([class~="invalid-tooltip"]):not([class~="invalid-feedback"]) {
   margin: 0;
 }
 
-.input-group > :not(ul) {
+.input-group:not(:has(> .form-control[type="file"])) > :not(ul) {
   border: 0;
   border-radius: 0;
 }
 
+// Restore the outer corner Bootstrap's own edge child would already carry:
+// Bootstrap only zeros the inner-facing side of a non-edge child, never the
+// outer side of an edge one. The trailing side also matches when a dropdown
+// menu is the real last DOM child, since the visible trailing control sits
+// right before it.
+.input-group:not(:has(> .form-control[type="file"])) > :first-child:not(ul) {
+  border-start-start-radius: var(--moo-input-group-border-radius);
+  border-end-start-radius: var(--moo-input-group-border-radius);
+}
+
+.input-group:not(:has(> .form-control[type="file"])) > :is(:last-child, :nth-last-child(2):has(+ .dropdown-menu)):not(ul) {
+  border-start-end-radius: var(--moo-input-group-border-radius);
+  border-end-end-radius: var(--moo-input-group-border-radius);
+}
+
 .input-group > :is(button, a) {
   border: var(--bs-btn-border-width) var(--bs-border-style) var(--bs-btn-border-color);
+}
+
+// Ghost buttons inside a compound input should read as inline affordances, not
+// standalone buttons. Keep Bootstrap's --bs-btn-* contract, but scope the
+// hover/active surface to the small control instead of repainting the compound
+// input edge.
+.input-group > .btn-ghost {
+  --bs-btn-hover-bg: transparent;
+  --bs-btn-active-bg: transparent;
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--moo-input-group-border-radius) !important;
+}
+
+// Match the shadcn input-group affordance: the compound input stays clear,
+// while the hovered control gets a small inset surface. The surface reuses
+// the existing Moo muted token and Bootstrap radius instead of adding a
+// component-specific color or geometry value.
+.input-group > .btn-ghost::before {
+  position: absolute;
+  inset: $spacer * 0.25;
+  z-index: -1;
+  content: "";
+  border-radius: var(--moo-input-group-border-radius);
+  background-color: var(--moo-muted-surface);
+  opacity: 0;
+  transition: opacity $transition-fade;
+}
+
+.input-group > .btn-ghost:hover::before,
+.input-group > .btn-ghost:is(.show, [aria-expanded="true"])::before {
+  opacity: 1;
+}
+
+.input-group > .btn-ghost:is(.show, [aria-expanded="true"]) {
+  color: var(--bs-btn-active-color);
+}
+
+.input-group > .btn-ghost[aria-pressed="true"] {
+  color: var(--bs-primary);
+}
+
+.input-group > .btn-ghost[aria-pressed="true"]::before {
+  opacity: 0;
+}
+
+.input-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
+  transform: none;
+}
+
+.input-group > :is(.btn-xs, .btn-icon-xs) {
+  --bs-btn-padding-y: #{$spacer * 0.125};
+  --bs-btn-padding-x: #{$spacer * 0.375};
+  --bs-btn-line-height: #{$spacer * 0.875};
 }
 
 .input-group > .input-group-text {
@@ -80,12 +168,12 @@
   background-color: transparent;
 }
 
-.input-group:has(> .form-control:focus) {
+.input-group:has(> .form-control:focus):not(:has(> .form-control[type="file"])) {
   border-color: $input-focus-border-color;
   box-shadow: $input-focus-box-shadow;
 }
 
-.input-group > :focus {
+.input-group:not(:has(> .form-control[type="file"])) > :focus {
   outline: 0;
   box-shadow: none;
 }
