@@ -99,3 +99,19 @@ class SkeletonTests(CatalogTestCase):
         self.assertIn("skeleton(", source)
         self.assertNotIn("class=\"placeholder", source)
         self.assertNotIn("placeholder-glow", source)
+
+    def test_skeleton_page_covers_the_reference_example_shapes(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        for example_id in ("basic", "profile-row", "card", "form", "list-rows", "rtl"):
+            self.assertIn(
+                f'"{example_id}"',
+                source,
+                f"Expected a render_example id of {example_id!r}",
+            )
+
+    def test_skeleton_page_does_not_stretch_examples_full_width_by_accident(
+        self,
+    ) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        self.assertNotIn("w-100", source)
+        self.assertNotIn("moo-example__preview--narrow", source)
