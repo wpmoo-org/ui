@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root_dir="$(git rev-parse --show-toplevel)"
+
+while read -r local_ref _local_sha remote_ref _remote_sha; do
+  [[ -n "${local_ref:-}" ]] && "$root_dir/scripts/check-public-git-labels.sh" ref-name "$local_ref"
+  [[ -n "${remote_ref:-}" ]] && "$root_dir/scripts/check-public-git-labels.sh" ref-name "$remote_ref"
+done
