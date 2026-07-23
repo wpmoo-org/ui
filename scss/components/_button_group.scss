@@ -11,21 +11,3 @@
 [dir="rtl"] .btn-toolbar > .btn {
   unicode-bidi: plaintext;
 }
-
-// Bootstrap's .btn-group corner-trimming only ever targets .btn/.btn-group
-// children (references/bootstrap/5.3.3/scss/_button-group.scss has no
-// .form-control selector at all — it was never designed to hold one). Moo
-// composes a bare input directly inside .btn-group (see the Input component's
-// "Button Group" example) to attach a single trailing button with a shared
-// border; without this, the input keeps its own full $input-border-radius on
-// every corner and its inner-facing corner pokes past the button's own
-// already-zeroed edge.
-.btn-group > .form-control:not(:last-child) {
-  border-start-end-radius: 0;
-  border-end-end-radius: 0;
-}
-
-.btn-group > .form-control:not(:first-child) {
-  border-start-start-radius: 0;
-  border-end-start-radius: 0;
-}

@@ -4,7 +4,6 @@
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/button_group.html.jinja" import button_group %}
 {% from "components/field.html.jinja" import form, field, field_description, field_group, fieldset %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
@@ -281,7 +280,7 @@
     {% set button_group_example %}
       {% call field() %}
       <label class="form-label" for="input-button-group-search">Search</label>
-      {% call button_group("Search actions") %}
+      {% call input_group() %}
         {{ input(aria_label="Search", id="input-button-group-search", type="search", placeholder="Type to search...") }}
         {{ button("Search", variant="outline") }}
       {% endcall %}
@@ -290,7 +289,7 @@
     {{ render_example(
       "button-group",
       "Button Group",
-      "Place a bare input inside a Bootstrap <code>.btn-group</code> to attach a button to it with a shared border. See the <a href=\"../components/button-group.html\">Button Group</a> component for more examples.",
+      "Use Bootstrap's native <code>.input-group</code> pattern to attach a button to a search input with a shared border. See the <a href=\"../components/button-group.html\">Button Group</a> component for button-only groups.",
       button_group_example,
       "moo-example__preview--narrow"
     ) }}
