@@ -1,20 +1,43 @@
-// Bootstrap has no header/title layout for a collapse trigger; the row
-// that pairs a title with the toggle button is entirely Moo-owned.
+.collapsible {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.5;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .collapsible-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: $spacer;
+  padding-inline: $spacer * 0.5;
+  gap: $spacer * 0.5;
 }
 
 .collapsible-title {
   margin-bottom: 0;
-  font-size: $font-size-base;
-  font-weight: 600;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: var(--moo-foreground);
 }
 
-.collapsible-content {
-  padding-top: $spacer * 0.5;
-  font-size: $font-size-base;
+.collapsible .btn[data-bs-toggle='collapse'] {
   color: var(--moo-muted-foreground);
+  line-height: 1;
+}
+
+.collapsible .btn[data-bs-toggle='collapse'] [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+}
+
+
+.collapsible-content {
+  padding: $spacer * 0.5 $spacer * 0.75;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  font-size: $font-size-sm;
+  color: var(--moo-muted-foreground);
+  width: 100%;
 }

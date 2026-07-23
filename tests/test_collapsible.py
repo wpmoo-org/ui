@@ -68,3 +68,39 @@ class CollapsibleTests(CatalogTestCase):
     def test_collapsible_requires_content(self) -> None:
         with self.assertRaisesRegex(ValueError, "Collapsible content is required"):
             self.render_collapsible('collapsible("panel", "Title", "   ")')
+
+    def test_page_uses_render_rtl_example(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
+            source,
+        )
+        self.assertIn("render_rtl_example(", source)
+        self.assertIn("collapsible-ribbon", source)
+        self.assertIn("rtl_arabic", source)
+        self.assertIn("rtl_hebrew", source)
+        self.assertIn("rtl_english", source)
+        self.assertIn('dir="rtl"', source)
+        self.assertIn(
+            "Compare RTL behavior for task and workflow examples across Arabic, Hebrew, and English content.",
+            source,
+        )
+        self.assertNotIn("Right-to-left layout", source)
+        self.assertNotIn("title_id=", source)
+        self.assertNotIn(
+            '{% from "components/tabs.html.jinja" import tabs %}',
+            source,
+        )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/collapsible.html")
+        self.assertIn("collapsible-ribbon-direction-tabs", output)
+        self.assertIn("rtl-arabic-code", output)
+        self.assertIn("rtl-hebrew-code", output)
+        self.assertIn("rtl-english-code", output)
+        self.assertIn(">Arabic</button>", output)
+        self.assertIn(">Hebrew</button>", output)
+        self.assertIn(">English</button>", output)
+        self.assertIn('id="rtl-title">RTL</h2>', output)
