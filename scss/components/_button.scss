@@ -118,6 +118,9 @@ label.btn {
   opacity: var(--bs-btn-disabled-opacity);
 }
 
+// Replaces Bootstrap's native inset active shadow disabled in
+// _bootstrap_overrides.scss; 0.5px keeps the press visible without shifting
+// adjacent inline controls.
 .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
   transform: translateY(0.5px);
 }

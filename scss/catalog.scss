@@ -148,7 +148,7 @@ body {
 
 .moo-catalog__header {
   position: sticky;
-  z-index: 1030;
+  z-index: $zindex-fixed;
   top: 0;
   min-height: var(--moo-catalog-header-height);
   background: rgba(var(--bs-body-bg-rgb), 0.94);
@@ -1128,7 +1128,7 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 0.1875rem 0.5rem;
-  border-radius: 999rem;
+  border-radius: var(--bs-border-radius-pill);
   color: var(--bs-success-text-emphasis);
   background: var(--bs-success-bg-subtle);
   font-size: 0.8125rem;
@@ -1526,7 +1526,10 @@ body {
 .moo-catalog__command-content {
   overflow: hidden;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--bs-border-radius-xl);
+  // The command palette is catalog chrome, not a shipped Bootstrap component.
+  // It needs a stronger focus-ring/elevation treatment than the shared
+  // $enable-shadows-off component scale, so the literal shadow is scoped here.
   box-shadow:
     0 0 0 4px var(--moo-border),
     0 24px 50px -12px rgba(0, 0, 0, 0.25);
@@ -1567,7 +1570,7 @@ body {
   gap: 0.625rem;
   padding: 0.5rem 0.625rem;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--bs-border-radius);
   color: var(--bs-body-color);
 }
 
