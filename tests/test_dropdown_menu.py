@@ -168,3 +168,14 @@ class DropdownMenuTests(CatalogTestCase):
 
         self.assertNotIn("dropdown-item__icon-box", plain)
         self.assertIn('data-icon="inline-start"', plain)
+
+    def test_dropdown_item_supports_external_link_contract(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
+            '{{ dropdown_item("Open", href="https://example.com", icon="external-link", target="_blank", rel="noopener noreferrer") }}'
+        )
+
+        self.assertIn('href="https://example.com"', output)
+        self.assertIn('target="_blank"', output)
+        self.assertIn('rel="noopener noreferrer"', output)
+        self.assertIn('data-icon="inline-start"', output)

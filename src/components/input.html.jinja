@@ -11,7 +11,8 @@
   required=false,
   disabled=false,
   readonly=false,
-  describedby=""
+  describedby="",
+  label_extra=""
 ) -%}
   {% set has_label = label | trim %}
   {% set has_aria_label = aria_label | trim %}
@@ -19,6 +20,6 @@
   {% if has_label and not id | trim %}{{ fail("Visible input labels require id") }}{% endif %}
   {% if type not in input_types %}{{ fail("Unknown input type: " ~ type) }}{% endif %}
 
-  {% if has_label %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
+  {% if has_label %}<label class="form-label{% if label_extra %} d-flex align-items-center justify-content-between{% endif %}" for="{{ id }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}{% if label_extra %}{{ label_extra | safe }}{% endif %}</label>{% endif %}
   <input class="form-control{% if aria_invalid %} is-invalid{% endif %}"{% if id %} id="{{ id }}"{% endif %} type="{{ type }}"{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if value %} value="{{ value }}"{% endif %}{% if aria_invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}{% if readonly %} readonly{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}>
 {%- endmacro %}

@@ -1,3 +1,5 @@
+// Moo buttons use a subtle transform for the pressed state, so Bootstrap's
+// native inset shadow press effect is disabled at the source.
 $btn-box-shadow: none !default;
 $btn-focus-box-shadow: none !default;
 $btn-active-box-shadow: none !default;

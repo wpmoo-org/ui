@@ -124,3 +124,18 @@ class InputTests(CatalogTestCase):
         )
 
         self.assertIn('aria-describedby="key-help"', output)
+
+    def test_file_example_uses_bare_bootstrap_file_input_group(self) -> None:
+        page_source = PAGE.read_text(encoding="utf-8")
+        file_block = page_source[
+            page_source.index("{% set file_input %}"):
+            page_source.index('{% set inline %}')
+        ]
+
+        self.assertIn("{% call input_group() %}", file_block)
+        self.assertIn('aria_label="Upload"', file_block)
+        self.assertIn('id="input-picture"', file_block)
+        self.assertIn('type="file"', file_block)
+        self.assertNotIn("input_group_text", file_block)
+        self.assertNotIn("field_description", file_block)
+        self.assertNotIn('label="Picture"', file_block)

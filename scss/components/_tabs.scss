@@ -54,6 +54,8 @@
   transform: translateY(0.25rem);
   visibility: hidden;
   pointer-events: none;
+  // Slightly longer than Bootstrap's .15s fade so tab panel motion finishes
+  // after the content handoff without making the tab trigger feel delayed.
   transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
 }
 

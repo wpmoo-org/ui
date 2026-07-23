@@ -47,6 +47,12 @@ body {
   background: var(--moo-muted-surface);
 }
 
+.moo-catalog__search-trigger:focus-visible {
+  // Match Bootstrap form-control disabled surface so the focused catalog
+  // search still reads like an input while the border remains visible.
+  background: $input-disabled-bg;
+}
+
 .moo-catalog__search-trigger-lead {
   display: inline-flex;
   align-items: center;
@@ -135,7 +141,10 @@ body {
 
 .moo-catalog {
   --moo-catalog-header-height: 4rem;
-  --moo-doc-toc-offset: calc(var(--moo-catalog-header-height) + 1rem);
+  --moo-catalog-header-bg-opacity: 0.94;
+  --moo-catalog-header-backdrop-filter: blur(0.75rem);
+  --moo-doc-body-font-size: 0.9375rem;
+  --moo-doc-toc-offset: calc(2rem + 5px);
 
   min-height: 100vh;
   font-family: $moo-catalog-font-family, var(--bs-body-font-family);
@@ -148,11 +157,11 @@ body {
 
 .moo-catalog__header {
   position: sticky;
-  z-index: 1030;
+  z-index: $zindex-fixed;
   top: 0;
   min-height: var(--moo-catalog-header-height);
-  background: rgba(var(--bs-body-bg-rgb), 0.94);
-  backdrop-filter: blur(0.75rem);
+  background: rgba(var(--bs-body-bg-rgb), var(--moo-catalog-header-bg-opacity));
+  backdrop-filter: var(--moo-catalog-header-backdrop-filter);
 }
 
 .moo-catalog__navbar {
@@ -839,9 +848,13 @@ body {
   gap: 0.75rem;
 }
 
-.moo-catalog__status-select,
+.moo-catalog__status-menu,
 .moo-catalog__toolbar-menu {
   width: 100%;
+}
+
+.moo-catalog__status-menu > .btn {
+  justify-content: space-between;
 }
 
 .moo-catalog__grid {
@@ -939,6 +952,7 @@ body {
   display: grid;
   gap: 3rem;
   max-width: 52rem;
+  font-size: var(--moo-doc-body-font-size);
 }
 
 .moo-doc-main {
@@ -1020,6 +1034,39 @@ body {
   margin-bottom: 0;
   color: var(--bs-secondary-color);
   line-height: 1.65;
+}
+
+.moo-doc-principles {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 44rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.moo-doc-principles__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.moo-doc-principles__number {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  color: var(--bs-body-bg);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--bs-body-color);
+  font-size: 0.875rem;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+}
+
+.moo-doc-principles__content {
+  display: grid;
+  gap: 0.375rem;
 }
 
 .moo-doc-card-grid {
@@ -1128,7 +1175,7 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 0.1875rem 0.5rem;
-  border-radius: 999rem;
+  border-radius: var(--bs-border-radius-pill);
   color: var(--bs-success-text-emphasis);
   background: var(--bs-success-bg-subtle);
   font-size: 0.8125rem;
@@ -1184,8 +1231,20 @@ body {
   max-width: 44rem;
 }
 
+.moo-doc-page>.moo-component-header {
+  max-width: 100%;
+}
+
 .moo-component-header>*+* {
   margin-top: 1rem;
+}
+
+.moo-component-header__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
 }
 
 .moo-component-header h1 {
@@ -1204,6 +1263,46 @@ body {
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+.moo-doc-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+.moo-doc-page-actions .btn {
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-doc-page-actions .btn:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.moo-doc-page-actions .btn-group > .btn + .btn {
+  border-inline-start-color: var(--bs-border-color);
+}
+
+.moo-doc-page-actions__nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.moo-doc-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-doc-pagination .btn {
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-doc-pagination .btn:hover {
+  background: var(--bs-secondary-bg);
 }
 
 .moo-component-examples {
@@ -1464,6 +1563,18 @@ body {
   font: inherit;
 }
 
+// references/bootstrap/5.3.3/scss/_variables.scss:1739-1740 gives <code>
+// only $code-color/$code-font-size, no background/padding/radius token
+// (see $moo-code-* in _primary_variables.scss for the gap citation and
+// why this doesn't just reuse <kbd>'s own knobs). Scoped to prose so it
+// never touches the syntax-highlighted code panel's own <code> rule above.
+.moo-doc-main :where(p, li) code {
+  padding: $moo-code-padding-y $moo-code-padding-x;
+  color: $moo-code-color;
+  background: $moo-code-bg;
+  border-radius: $border-radius-sm;
+}
+
 .moo-sidebar-demo__placeholder {
   // The design reference uses bg-muted/50 for these preview surfaces.
   background: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent);
@@ -1526,7 +1637,10 @@ body {
 .moo-catalog__command-content {
   overflow: hidden;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--bs-border-radius-xl);
+  // The command palette is catalog chrome, not a shipped Bootstrap component.
+  // It needs a stronger focus-ring/elevation treatment than the shared
+  // $enable-shadows-off component scale, so the literal shadow is scoped here.
   box-shadow:
     0 0 0 4px var(--moo-border),
     0 24px 50px -12px rgba(0, 0, 0, 0.25);
@@ -1567,7 +1681,7 @@ body {
   gap: 0.625rem;
   padding: 0.5rem 0.625rem;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--bs-border-radius);
   color: var(--bs-body-color);
 }
 

@@ -3,9 +3,10 @@
 {% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720) %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
-  <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ id }}-title">
+  {% set title_slug = title | slugify %}
+  <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ title_slug }}">
     <div class="moo-example__header">
-      {{ typography(title, variant="example-title", id=id ~ "-title") }}
+      {{ typography(title, variant="example-title", id=title_slug) }}
       <p class="text-body-secondary mb-0">{{ description | safe }}</p>
     </div>
     <div class="moo-example__surface">
@@ -19,7 +20,7 @@
           >
             <div class="moo-block-preview__toolbar">
               <span class="small text-body-secondary">{{ frame_width }} x {{ frame_height }}</span>
-              <a class="btn btn-sm btn-outline-secondary" href="{{ frame_src }}" target="_blank" rel="noopener">
+              <a class="btn btn-sm btn-outline-secondary" href="{{ frame_src }}" target="_blank" rel="noopener noreferrer">
                 {{ render_icon("external-link", "inline-start") }}
                 Open standalone
               </a>

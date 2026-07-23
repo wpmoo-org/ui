@@ -3,6 +3,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Skills - Moo UI{% endblock %}
 
@@ -12,11 +13,12 @@
       {{ render_page_header(
         "Skills",
         "Project-aware instructions for coding agents that generate or update Moo UI components.",
-        id="skills-title"
+        id="skills",
+        actions=render_section_page_actions(current_slug, sections, root_path)
       ) }}
 
-      <section class="moo-doc-section" aria-labelledby="skills-roadmap-title">
-        {{ typography("What Skills Are For", variant="section-title", id="skills-roadmap-title") }}
+      <section class="moo-doc-section" aria-labelledby="what-skills-are-for">
+        {{ typography("What Skills Are For", variant="section-title", id="what-skills-are-for") }}
         <p>
           A Moo UI skill gives a coding agent the context it needs before it
           touches the catalog: Bootstrap is the public contract, shadcn is the
@@ -31,8 +33,8 @@
         </p>
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="skills-context-title">
-        {{ typography("What Agents Should Know", variant="section-title", id="skills-context-title") }}
+      <section class="moo-doc-section" aria-labelledby="what-agents-should-know">
+        {{ typography("What Agents Should Know", variant="section-title", id="what-agents-should-know") }}
         <div class="moo-doc-card-grid">
           {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
             <h3 class="h5 mb-0">Bootstrap first</h3>
@@ -60,8 +62,8 @@
         </div>
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="skills-workflow-title">
-        {{ typography("Expected Workflow", variant="section-title", id="skills-workflow-title") }}
+      <section class="moo-doc-section" aria-labelledby="expected-workflow">
+        {{ typography("Expected Workflow", variant="section-title", id="expected-workflow") }}
         <p>
           Start from the existing component page, read the related macro and Sass
           files, then compare the live output with Bootstrap behavior and the Moo
@@ -75,12 +77,14 @@
           same language as the public README.
         </p>
       </section>
+
+      {{ render_section_page_pagination(current_slug, sections, root_path) }}
     </article>
 
     {{ render_doc_toc([
-      {"id": "skills-roadmap-title", "label": "What Skills Are For"},
-      {"id": "skills-context-title", "label": "What Agents Should Know"},
-      {"id": "skills-workflow-title", "label": "Expected Workflow"}
+      {"id": "what-skills-are-for", "label": "What Skills Are For"},
+      {"id": "what-agents-should-know", "label": "What Agents Should Know"},
+      {"id": "expected-workflow", "label": "Expected Workflow"}
     ]) }}
   </div>
 {% endblock %}

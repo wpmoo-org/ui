@@ -52,6 +52,13 @@ class BadgeTests(CatalogTestCase):
             output,
         )
 
+    def test_badge_uses_medium_bootstrap_font_weight_token(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+        self.assertRegex(css, r"--bs-badge-font-weight:\s*500;")
+
     def test_page_uses_shared_rtl_example_tabs(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 

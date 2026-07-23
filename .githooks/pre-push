@@ -2,8 +2,14 @@
 set -euo pipefail
 
 root_dir="$(git rev-parse --show-toplevel)"
+workspace_root="$(cd "$root_dir/../../.." && pwd)"
+guard="$workspace_root/scripts/ui/git-label-guard.sh"
+
+if [[ ! -x "$guard" ]]; then
+  exit 0
+fi
 
 while read -r local_ref _local_sha remote_ref _remote_sha; do
-  [[ -n "${local_ref:-}" ]] && "$root_dir/scripts/check-public-git-labels.sh" ref-name "$local_ref"
-  [[ -n "${remote_ref:-}" ]] && "$root_dir/scripts/check-public-git-labels.sh" ref-name "$remote_ref"
+  [[ -n "${local_ref:-}" ]] && "$guard" ref-name "$local_ref"
+  [[ -n "${remote_ref:-}" ]] && "$guard" ref-name "$remote_ref"
 done

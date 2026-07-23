@@ -47,6 +47,33 @@ class CodeExampleTests(CatalogTestCase):
             '</button>',
         )
 
+    def test_source_formatter_compacts_build_time_lucide_icons(self) -> None:
+        source = """
+          <button class="btn btn-ghost" type="button" aria-label="Copy profile URL">
+            <svg
+              data-icon="inline-start"
+              data-lucide="copy"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+          </button>
+        """
+
+        self.assertEqual(
+            format_html(source),
+            '<button class="btn btn-ghost" type="button" aria-label="Copy profile URL">\n'
+            '  <i class="lucide lucide-copy" data-icon="inline-start" aria-hidden="true" />\n'
+            "</button>",
+        )
+
     def test_render_rtl_example_centralizes_tabbed_language_examples(self) -> None:
         template = (
             ROOT / "src/includes/example.html.jinja"
@@ -55,7 +82,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("{% macro render_rtl_example(", template)
         self.assertIn('id ~ "-direction-tabs"', template)
         self.assertIn('title="RTL"', template)
-        self.assertIn('title_id="rtl-title"', template)
+        self.assertIn('title_id="rtl"', template)
         self.assertIn('example_prefix="rtl"', template)
         self.assertEqual(template.count("show_header=false"), 3)
 

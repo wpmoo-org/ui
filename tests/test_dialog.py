@@ -205,7 +205,7 @@ class DialogTests(CatalogTestCase):
         self.assertIn(">Arabic</button>", output)
         self.assertIn(">Hebrew</button>", output)
         self.assertIn(">English</button>", output)
-        self.assertIn('id="rtl-title">RTL</h2>', output)
+        self.assertIn('id="rtl">RTL</h2>', output)
 
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
