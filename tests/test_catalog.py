@@ -349,7 +349,7 @@ class CatalogContractTests(CatalogTestCase):
             home,
         )
         self.assertIn(
-            "moo-home-component-row moo-home-component-row--1 scroll-fade-x",
+            "moo-home-component-row moo-home-component-row--1",
             home,
         )
         self.assertIn('href="installation.html"', home)

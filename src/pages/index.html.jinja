@@ -95,7 +95,7 @@
       ["button", "input", "select", "dropdown-menu", "badge", "avatar", "dialog", "toast"],
       ["sheet", "popover", "tooltip", "accordion", "sidebar", "table", "progress", "skeleton"]
     ] %}
-      <div class="moo-home-component-row moo-home-component-row--{{ loop.index }} scroll-fade-x">
+      <div class="moo-home-component-row moo-home-component-row--{{ loop.index }}">
         <div class="moo-home-component-track">
           {% for pass in [1, 2] %}
             {% for slug in row %}
@@ -107,7 +107,7 @@
                   {% if pass != 1 %}tabindex="-1" aria-hidden="true"{% endif %}
                 >
                   <div class="moo-catalog__showcase-preview">
-                    {{ component_preview(component.slug, root_path) }}
+                    {{ component_preview(component.slug, root_path, loading="eager") }}
                   </div>
                 </div>
               {% endif %}
