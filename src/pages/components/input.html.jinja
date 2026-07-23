@@ -1,7 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "components/field.html.jinja" import field, field_description, field_error, field_group, fieldset %}
 {% from "components/input.html.jinja" import input %}
 
 {% block title %}Input — Moo UI{% endblock %}
@@ -9,80 +10,186 @@
 {% block content %}
   {{ render_page_header(
     "Input",
-    "A text input component for forms and user data entry with built-in styling and accessibility features."
+    "A native input primitive with Bootstrap form semantics for labeled, helper-aware, and validated fields."
   ) }}
 
   <div class="moo-component-examples">
     {% set api_key %}
-      <div class="moo-field w-100">
-        {{ input(
-          label="API Key",
-          id="api-key",
-          placeholder="sk-...",
-          describedby="api-key-help"
-        ) }}
-        <div class="form-text" id="api-key-help">Your API key is encrypted and stored securely.</div>
-      </div>
+      {{ input(
+        label="API Key",
+        id="input-api-key",
+        placeholder="sk-...",
+        describedby="input-api-key-help"
+      ) }}
+      {{ field_description("input-api-key-help", "Your API key is encrypted and stored securely.") }}
     {% endset %}
     {{ render_example(
       "api-key",
       "API Key",
-      "Keep the visible label, input, and helper text together when the field needs context.",
+      "Use a labeled single input with helper text.",
       api_key,
       "moo-example__preview--narrow"
     ) }}
 
     {% set basic %}
       {{ input(
-        aria_label="Enter text",
-        placeholder="Enter text"
+        aria_label="Search records",
+        type="search",
+        placeholder="Filter by name or ID"
+      ) }}
+      {{ input(
+        aria_label="Fallback alias",
+        placeholder="Optional alternate reference"
       ) }}
     {% endset %}
     {{ render_example(
       "basic",
       "Basic",
-      "Use a plain text input when the surrounding layout already explains the field.",
+      "Use standalone bare inputs when surrounding context already provides the label.",
       basic,
       "moo-example__preview--narrow"
     ) }}
 
+    {% set readonly %}
+      {{ input(
+        label="Default region",
+        id="input-default-region",
+        value="us-east-1",
+        readonly=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "readonly",
+      "Read-only",
+      "Use <code>readonly</code> on a single field to preserve visible context without editing.",
+      readonly,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set disabled %}
-      <div class="moo-field w-100">
-        {{ input(
-          label="Email",
-          id="disabled-email",
-          type="text",
-          value="team@example.com",
-          disabled=true,
-          describedby="disabled-email-help"
-        ) }}
-        <div class="form-text" id="disabled-email-help">This field is currently disabled.</div>
-      </div>
+      {{ input(
+        label="Email",
+        id="input-disabled-email",
+        value="team@example.com",
+        disabled=true
+      ) }}
     {% endset %}
     {{ render_example(
       "disabled",
       "Disabled",
-      "Use the <code>disabled</code> attribute when the value is visible but cannot be edited.",
+      "Use <code>disabled</code> on a control-level input to block interaction while keeping it readable.",
       disabled,
       "moo-example__preview--narrow"
     ) }}
 
+    {% set invalid %}
+      {{ input(
+        label="Webhook URL",
+        id="input-webhook-url",
+        placeholder="https://hooks.example.com",
+        value="not a url",
+        aria_invalid=true,
+        required=true,
+        describedby="input-webhook-url-help input-webhook-url-error"
+      ) }}
+      {{ field_description("input-webhook-url-help", "This field must be a valid URL.") }}
+      {{ field_error("input-webhook-url-error", "This webhook URL is not valid.") }}
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Invalid",
+      "Pair invalid styles with helper text and inline error messaging.",
+      invalid,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set field_grouped %}
+      {% call fieldset("Developer profile") %}
+      {% call field_group() %}
+      {% call field() %}
+      {{ input(
+        label="First name",
+        id="input-first-name",
+        describedby="input-first-name-help",
+        placeholder="Ada"
+      ) }}
+      {{ field_description("input-first-name-help", "Displayed in activity headers.") }}
+      {% endcall %}
+      {% call field() %}
+      {{ input(
+        label="Last name",
+        id="input-last-name",
+        describedby="input-last-name-help",
+        placeholder="Lovelace"
+      ) }}
+      {{ field_description("input-last-name-help", "Used for routing and search matching.") }}
+      {% endcall %}
+      {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "group",
+      "Field group",
+      "Compose related controls with <code>field_group()</code> to keep rhythm and spacing token-driven.",
+      field_grouped,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set file_input %}
-      <div class="moo-field w-100">
-        {{ input(
-          label="Picture",
-          id="picture",
-          type="file",
-          describedby="picture-help"
-        ) }}
-        <div class="form-text" id="picture-help">Select a picture to upload.</div>
-      </div>
+      {{ input(
+        label="Picture",
+        id="input-picture",
+        type="file"
+      ) }}
     {% endset %}
     {{ render_example(
       "file",
       "File",
-      "Use the <code>type=\"file\"</code> input for a native file picker.",
+      "Use <code>type=\"file\"</code> with helper text.",
       file_input,
+      "moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_arabic %}
+      <div dir="rtl">
+        {{ input(
+          label="مفتاح API",
+          id="input-rtl-arabic",
+          placeholder="sk-...",
+          describedby="input-rtl-arabic-help"
+        ) }}
+        {{ field_description("input-rtl-arabic-help", "مفتاح API الخاص بك آمن ومشفر.") }}
+      </div>
+    {% endset %}
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {{ input(
+          label="מפתח API",
+          id="input-rtl-hebrew",
+          placeholder="sk-...",
+          describedby="input-rtl-hebrew-help"
+        ) }}
+        {{ field_description("input-rtl-hebrew-help", "המפתח שלך מאובטח ומוצפן.") }}
+      </div>
+    {% endset %}
+    {% set rtl_english %}
+      <div dir="rtl">
+        {{ input(
+          label="API Key",
+          id="input-rtl-english",
+          placeholder="sk-...",
+          describedby="input-rtl-english-help"
+        ) }}
+        {{ field_description("input-rtl-english-help", "Your key is encrypted and stored securely.") }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "input",
+      "Use the same labeled helper-text pattern across languages with RTL direction.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
       "moo-example__preview--narrow"
     ) }}
   </div>
