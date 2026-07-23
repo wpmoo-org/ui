@@ -31,6 +31,44 @@ class CatalogContractTests(CatalogTestCase):
                     f"{path.relative_to(ROOT)} must sort components by label",
                 )
 
+    def test_llms_txt_lists_ready_components_alphabetically(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+        )
+        expected = [
+            f"- [{item['label']}](https://ui.wpmoo.org/components/{item['slug']}.html)"
+            for item in sorted(
+                (item for item in catalog if item["status"] == "ready"),
+                key=lambda item: item["label"].casefold(),
+            )
+        ]
+
+        lines = (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines()
+        start = lines.index("## Component Catalog")
+        end = lines.index("## Utilities And Blocks")
+        component_lines = [
+            line
+            for line in lines[start + 1 : end]
+            if line.startswith("- [")
+            and "/components/" in line
+            and not line.startswith("- [Components]")
+        ]
+
+        self.assertEqual(component_lines, expected)
+
+    def test_llms_txt_cdn_example_tracks_package_version(self) -> None:
+        package = json.loads(
+            (ROOT / "package.json").read_text(encoding="utf-8")
+        )
+        llms = (ROOT / "llms.txt").read_text(encoding="utf-8")
+        match = re.search(
+            r"https://unpkg\.com/@wpmoo/ui@([^/]+)/dist/assets/css/moo-ui\.css",
+            llms,
+        )
+
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), package["version"])
+
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
 
@@ -301,6 +339,15 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
         self.assertIn("background: $input-disabled-bg;", catalog_scss)
 
+    def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
+        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+
+        self.assertIn("--moo-doc-body-font-size: 0.9375rem;", catalog_scss)
+        self.assertIn(
+            "font-size: var(--moo-doc-body-font-size);",
+            catalog_scss,
+        )
+
     def test_header_navigation_links_docs_between_home_and_components(
         self,
     ) -> None:
@@ -404,11 +451,15 @@ class CatalogContractTests(CatalogTestCase):
             "Bootstrap is the contract",
             "shadcn is the feeling",
             "Server-rendered UI stays first-class",
-            "Mission",
-            "Vision",
+            "The Goal",
+            "while building a shared library of",
+            "Bootstrap-native markup",
         ):
             with self.subTest(copy=copy):
                 self.assertIn(copy, introduction)
+        self.assertIn('<ol class="moo-doc-principles">', introduction)
+        self.assertIn('class="moo-doc-principles__number" aria-hidden="true">1</span>', introduction)
+        self.assertNotIn("moo-doc-card-icon", introduction)
         self.assertIn('href="installation.html"', introduction)
         self.assertIn('href="components/index.html"', introduction)
 
@@ -437,7 +488,7 @@ class CatalogContractTests(CatalogTestCase):
 
         home = self.read_output("index.html")
         self.assertIn('<section class="moo-home-hero"', home)
-        self.assertIn('<h1 class="moo-home-hero__title" id="home-title">Moo UI</h1>', home)
+        self.assertIn('<h1 class="moo-home-hero__title" id="home">Moo UI</h1>', home)
         self.assertNotIn("moo-doc-hero", home)
         self.assertNotIn("moo-catalog__intro", home)
 
@@ -451,23 +502,25 @@ class CatalogContractTests(CatalogTestCase):
 
         expected_links = {
             "introduction.html": (
-                ("why-title", "Why Moo UI Exists"),
-                ("principles-title", "Principles"),
-                ("mission-title", "Mission"),
+                ("why-moo-ui-exists", "Why Moo UI Exists"),
+                ("principles", "Principles"),
+                ("the-goal", "The Goal"),
             ),
             "installation.html": (
-                ("cdn-title", "CDN"),
-                ("npm-title", "npm"),
-                ("javascript-title", "JavaScript"),
+                ("cdn", "CDN"),
+                ("npm", "npm"),
+                ("javascript", "JavaScript"),
+                ("adoption-paths", "Adoption Paths"),
             ),
             "skills.html": (
-                ("skills-roadmap-title", "What Skills Are For"),
-                ("skills-context-title", "What Agents Should Know"),
-                ("skills-workflow-title", "Expected Workflow"),
+                ("what-skills-are-for", "What Skills Are For"),
+                ("what-agents-should-know", "What Agents Should Know"),
+                ("expected-workflow", "Expected Workflow"),
             ),
             "changelog.html": (
-                ("release-0-1-1", "Catalog Polish"),
-                ("release-0-1-0", "Initial Release"),
+                ("wave-4-components", "Wave 4 Components"),
+                ("catalog-polish", "Catalog Polish"),
+                ("initial-release", "Initial Release"),
             ),
         }
 
@@ -514,7 +567,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-moo-component-toc', component)
         self.assertIn('aria-label="Component examples"', component)
         self.assertIn('class="moo-doc-main"', component)
-        self.assertIn('id="basic-title"', component)
+        self.assertIn('data-example="basic" aria-labelledby="basic"', component)
+        self.assertIn('id="basic">Basic</h2>', component)
+        self.assertNotIn('aria-labelledby="basic-title"', component)
+        self.assertNotIn('id="basic-title"', component)
 
         components_index = self.read_output("components/index.html")
         self.assertNotIn('data-moo-component-toc', components_index)
@@ -543,6 +599,8 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn("Create workspace", installation)
         self.assertIn("Bootstrap's JavaScript bundle", installation)
+        self.assertIn('id="adoption-paths">Adoption Paths</h2>', installation)
+        self.assertNotIn("moo-doc-note", installation)
 
     def test_skills_page_documents_agent_component_guidance(self) -> None:
         result = self.run_build()

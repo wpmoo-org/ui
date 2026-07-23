@@ -87,4 +87,4 @@ class CloseButtonTests(CatalogTestCase):
         self.assertIn(">Arabic</button>", output)
         self.assertIn(">Hebrew</button>", output)
         self.assertIn(">English</button>", output)
-        self.assertIn('id="rtl-title">RTL</h2>', output)
+        self.assertIn('id="rtl">RTL</h2>', output)

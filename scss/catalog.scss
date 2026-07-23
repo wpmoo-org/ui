@@ -143,6 +143,7 @@ body {
   --moo-catalog-header-height: 4rem;
   --moo-catalog-header-bg-opacity: 0.94;
   --moo-catalog-header-backdrop-filter: blur(0.75rem);
+  --moo-doc-body-font-size: 0.9375rem;
   --moo-doc-toc-offset: calc(var(--moo-catalog-header-height) + 1rem);
 
   min-height: 100vh;
@@ -947,6 +948,7 @@ body {
   display: grid;
   gap: 3rem;
   max-width: 52rem;
+  font-size: var(--moo-doc-body-font-size);
 }
 
 .moo-doc-main {
@@ -1028,6 +1030,39 @@ body {
   margin-bottom: 0;
   color: var(--bs-secondary-color);
   line-height: 1.65;
+}
+
+.moo-doc-principles {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 44rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.moo-doc-principles__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.moo-doc-principles__number {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  color: var(--bs-body-bg);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--bs-body-color);
+  font-size: 0.875rem;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+}
+
+.moo-doc-principles__content {
+  display: grid;
+  gap: 0.375rem;
 }
 
 .moo-doc-card-grid {

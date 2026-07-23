@@ -5,10 +5,11 @@
   {% set rendered = content | dedent_html %}
   {% set rendered_portal = portal_content | dedent_html %}
   {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
-  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ id }}-title"{% else %} aria-label="{{ title }}"{% endif %}>
+  {% set title_slug = title | slugify %}
+  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
     {% if show_header %}
       <div class="moo-example__header">
-        {{ typography(title, variant="example-title", id=id ~ "-title") }}
+        {{ typography(title, variant="example-title", id=title_slug) }}
         <p class="text-body-secondary mb-0">{{ description | safe }}</p>
       </div>
     {% endif %}
@@ -44,12 +45,13 @@
   hebrew_portal="",
   english_portal="",
   title="RTL",
-  title_id="rtl-title",
+  title_id="rtl",
   example_prefix="rtl",
   arabic_title="Arabic",
   hebrew_title="Hebrew",
   english_title="English"
 ) %}
+  {% set title_slug = title | slugify %}
   {% set arabic_example %}
     {{ render_example(
       example_prefix ~ "-arabic",
@@ -83,9 +85,9 @@
       portal_content=english_portal
     ) }}
   {% endset %}
-  <section class="moo-example" aria-labelledby="{{ title_id }}">
+  <section class="moo-example" aria-labelledby="{{ title_slug }}">
     <div class="moo-example__header">
-      {{ typography(title, variant="example-title", id=title_id) }}
+      {{ typography(title, variant="example-title", id=title_slug) }}
       <p class="text-body-secondary mb-0">{{ description | safe }}</p>
     </div>
     {{ tabs(

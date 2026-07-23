@@ -47,7 +47,7 @@ class CardTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/card.html")
         self.assertIn('id="card-direction-tabs-list"', page)
-        self.assertIn('id="rtl-title"', page)
+        self.assertIn('id="rtl"', page)
         self.assertIn('id="card-direction-tabs-arabic-tab"', page)
         self.assertIn('id="card-direction-tabs-hebrew-tab"', page)
         self.assertIn('id="card-direction-tabs-english-tab"', page)

@@ -152,7 +152,7 @@ class AlertDialogTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/alert-dialog.html")
-        self.assertIn('id="rtl-title"', page)
+        self.assertIn('id="rtl"', page)
         self.assertIn("alert-dialog-direction-tabs", page)
         self.assertIn("rtl-arabic-code", page)
 

@@ -82,7 +82,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("{% macro render_rtl_example(", template)
         self.assertIn('id ~ "-direction-tabs"', template)
         self.assertIn('title="RTL"', template)
-        self.assertIn('title_id="rtl-title"', template)
+        self.assertIn('title_id="rtl"', template)
         self.assertIn('example_prefix="rtl"', template)
         self.assertEqual(template.count("show_header=false"), 3)
 

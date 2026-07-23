@@ -649,7 +649,7 @@ class SidebarTests(CatalogTestCase):
 
         positions = [
             page.index('id="usage"'),
-            page.index('id="app-shell-title"'),
+            page.index('id="application-shell"'),
             page.index('id="composition"'),
             page.index('assets/images/sidebar-structure.webp'),
             page.index('id="sidebar-api-reference"'),

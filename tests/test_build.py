@@ -21,6 +21,7 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
+        self.assertTrue((DIST / "llms.txt").is_file())
 
     def test_build_uses_one_shared_catalog_shell(self) -> None:
         result = self.run_build()

@@ -98,4 +98,4 @@ class CheckboxTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn('id="rtl-title">RTL</h2>', output)
+        self.assertIn('id="rtl">RTL</h2>', output)

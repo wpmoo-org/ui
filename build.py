@@ -29,6 +29,7 @@ PAGES = SRC / "pages"
 SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
+LLMS_TXT = ROOT / "llms.txt"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
@@ -277,6 +278,11 @@ def line_numbers(value: object) -> Markup:
     return Markup("\n".join(str(number) for number in range(1, count + 1)))
 
 
+def slugify(value: object) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", str(value).lower()).strip("-")
+    return slug or "section"
+
+
 def fail(message: str) -> None:
     raise ValueError(message)
 
@@ -348,6 +354,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
     environment.filters["line_numbers"] = line_numbers
+    environment.filters["slugify"] = slugify
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
     environment.globals["block_preview_src"] = block_preview_src
@@ -440,6 +447,11 @@ def copy_assets() -> None:
         shutil.copytree(STATIC, DIST / "assets", dirs_exist_ok=True)
 
 
+def copy_site_metadata() -> None:
+    if LLMS_TXT.exists():
+        shutil.copy2(LLMS_TXT, DIST / "llms.txt")
+
+
 def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
@@ -494,11 +506,14 @@ def build() -> None:
         DIST.mkdir()
         compile_styles()
         copy_assets()
+        copy_site_metadata()
         render_pages()
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
+    if LLMS_TXT.exists():
+        paths.append(LLMS_TXT)
     for folder in (SRC, SCSS, STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())

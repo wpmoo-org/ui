@@ -38,6 +38,10 @@ class ScrollFadeTests(CatalogTestCase):
         utility = self.read_output("utils/scroll-fade.html")
         self.assertIn('aria-current="page"', utility)
         self.assertIn("Scroll Fade", utility)
+        self.assertIn('data-moo-component-doc-layout', utility)
+        self.assertIn('class="moo-doc-main"', utility)
+        self.assertIn('data-moo-component-toc', utility)
+        self.assertIn('aria-label="Utility examples"', utility)
 
     def test_scroll_fade_utility_contract_is_complete(self) -> None:
         result = self.run_build()
@@ -89,15 +93,18 @@ class ScrollFadeTests(CatalogTestCase):
         self.assertIn('.scroll-fade-e:where([dir="rtl"], [dir="rtl"] *)', css)
 
         page = self.read_output("utils/scroll-fade.html")
-        for example in (
-            "vertical-scroll",
-            "no-overflow",
-            "horizontal-scroll",
-            "edge-fades",
-            "fade-size",
-            "disabled-fade",
-        ):
+        example_headings = {
+            "vertical-scroll": "vertical-scrolling",
+            "no-overflow": "no-overflow",
+            "horizontal-scroll": "horizontal-scrolling",
+            "edge-fades": "single-edges",
+            "fade-size": "fade-size",
+            "disabled-fade": "disable-the-fade",
+        }
+        for example, heading in example_headings.items():
             self.assertIn(f'data-example="{example}"', page)
+            self.assertIn(f'aria-labelledby="{heading}"', page)
+            self.assertIn(f'id="{heading}"', page)
         for contract in (
             "scroll-fade",
             "scroll-fade-y",

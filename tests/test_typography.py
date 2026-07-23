@@ -22,17 +22,17 @@ class TypographyTests(CatalogTestCase):
 
     def test_typography_macro_renders_only_the_catalog_text_roles(self) -> None:
         expected = {
-            'typography("Catalog", variant="page-title", id="catalog-title")': (
-                '<h1 class="fw-semibold" id="catalog-title">Catalog</h1>'
+            'typography("Catalog", variant="page-title", id="catalog")': (
+                '<h1 class="fw-semibold" id="catalog">Catalog</h1>'
             ),
             'typography("Supporting copy", variant="page-description")': (
                 '<p class="moo-page-description text-body-secondary mb-0">Supporting copy</p>'
             ),
-            'typography("Section title", variant="section-title", id="section-title")': (
-                '<h2 class="h3" id="section-title">Section title</h2>'
+            'typography("Section title", variant="section-title", id="section")': (
+                '<h2 class="h3" id="section">Section title</h2>'
             ),
-            'typography("Example", variant="example-title", id="example-title")': (
-                '<h2 class="h4" id="example-title">Example</h2>'
+            'typography("Example", variant="example-title", id="example")': (
+                '<h2 class="h4" id="example">Example</h2>'
             ),
             'typography("Quiet context", variant="muted")': (
                 '<span class="text-body-secondary">Quiet context</span>'

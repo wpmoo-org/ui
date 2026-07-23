@@ -10,16 +10,16 @@
       {{ render_page_header(
         "Changelog",
         "Product-facing notes for the public Moo UI package and catalog.",
-        id="changelog-title"
+        id="changelog"
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
-        <article class="moo-changelog__release" aria-labelledby="release-0-2-0">
+        <article class="moo-changelog__release" aria-labelledby="wave-4-components">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.2.0</span>
             <span class="text-body-secondary">Component catalog expansion</span>
           </div>
-          <h2 id="release-0-2-0">Wave 4 Components</h2>
+          <h2 id="wave-4-components">Wave 4 Components</h2>
           <p>Expanded the Bootstrap-native catalog with polished component examples, shared RTL previews, and refreshed overlay behavior.</p>
 
           <div class="moo-changelog__changes">
@@ -34,12 +34,12 @@
           </div>
         </article>
 
-        <article class="moo-changelog__release" aria-labelledby="release-0-1-1">
+        <article class="moo-changelog__release" aria-labelledby="catalog-polish">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.1.1</span>
             <span class="text-body-secondary">Public package refresh</span>
           </div>
-          <h2 id="release-0-1-1">Catalog Polish</h2>
+          <h2 id="catalog-polish">Catalog Polish</h2>
           <p>Refined the public catalog, homepage, and package metadata for the npm release.</p>
 
           <div class="moo-changelog__changes">
@@ -50,12 +50,12 @@
           </div>
         </article>
 
-        <article class="moo-changelog__release" aria-labelledby="release-0-1-0">
+        <article class="moo-changelog__release" aria-labelledby="initial-release">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.1.0</span>
             <span class="text-body-secondary">Initial public package</span>
           </div>
-          <h2 id="release-0-1-0">Initial Release</h2>
+          <h2 id="initial-release">Initial Release</h2>
           <p>First public release of Moo UI.</p>
 
           <div class="moo-changelog__changes">
@@ -69,9 +69,9 @@
     </article>
 
     {{ render_doc_toc([
-      {"id": "release-0-2-0", "label": "Wave 4 Components"},
-      {"id": "release-0-1-1", "label": "Catalog Polish"},
-      {"id": "release-0-1-0", "label": "Initial Release"}
+      {"id": "wave-4-components", "label": "Wave 4 Components"},
+      {"id": "catalog-polish", "label": "Catalog Polish"},
+      {"id": "initial-release", "label": "Initial Release"}
     ]) }}
   </div>
 {% endblock %}

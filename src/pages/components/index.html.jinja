@@ -49,7 +49,7 @@
   {{ render_page_header(
     "Components",
     "Browse the Bootstrap-native primitives that make up the Moo UI shell.",
-    id="catalog-title"
+    id="catalog"
   ) }}
 
   <section class="moo-catalog__dashboard" aria-label="Catalog filters">
@@ -84,8 +84,8 @@
 
     {{ separator(extra_class="my-4") }}
 
-    <section aria-labelledby="components-title" data-moo-catalog-section="components">
-      {{ typography("Components", variant="section-title", id="components-title") }}
+    <section aria-labelledby="components" data-moo-catalog-section="components">
+      {{ typography("Components", variant="section-title", id="components") }}
       <div class="moo-catalog__grid" id="components">
         {% for component in catalog | sort(attribute="label") %}
           {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
@@ -105,8 +105,8 @@
       </div>
     </section>
 
-    <section class="mt-5" aria-labelledby="utilities-title" data-moo-catalog-section="utilities">
-      {{ typography("Utilities", variant="section-title", id="utilities-title") }}
+    <section class="mt-5" aria-labelledby="utilities" data-moo-catalog-section="utilities">
+      {{ typography("Utilities", variant="section-title", id="utilities") }}
       <div class="moo-catalog__grid moo-catalog__grid--compact" id="utilities">
         {% for utility in utilities %}
           {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}

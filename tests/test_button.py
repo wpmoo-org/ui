@@ -574,7 +574,7 @@ class ButtonTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
         self.assertIn("button-direction-tabs", page)
-        self.assertIn('id="rtl-title">RTL</h2>', page)
+        self.assertIn('id="rtl">RTL</h2>', page)
         self.assertIn('id="rtl-arabic-code"', page)
         self.assertIn('id="rtl-hebrew-code"', page)
         self.assertIn('id="rtl-english-code"', page)

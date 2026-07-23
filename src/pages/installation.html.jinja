@@ -1,7 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/card.html.jinja" import card %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
@@ -15,7 +14,7 @@
       {{ render_page_header(
         "Installation",
         "Add Moo UI to a Bootstrap project without changing the markup contract your app already uses.",
-        id="installation-title"
+        id="installation"
       ) }}
 
       {{ alert(
@@ -25,8 +24,8 @@
         extra_class="text-bg-dark border-dark moo-doc-callout"
       ) }}
 
-      <section class="moo-doc-section" aria-labelledby="cdn-title">
-        {{ typography("CDN", variant="section-title", id="cdn-title") }}
+      <section class="moo-doc-section" aria-labelledby="cdn">
+        {{ typography("CDN", variant="section-title", id="cdn") }}
         <p>
           For a static page, prototype, or quick review, load the published
           stylesheet from a CDN. The full <code>moo-ui.css</code> build replaces
@@ -40,8 +39,8 @@
         {{ render_code_snippet("installation-cdn", cdn_example, "html") }}
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="npm-title">
-        {{ typography("npm", variant="section-title", id="npm-title") }}
+      <section class="moo-doc-section" aria-labelledby="npm">
+        {{ typography("npm", variant="section-title", id="npm") }}
         <p>
           For an application build, install the canonical package and import the
           compiled stylesheet from your entrypoint.
@@ -57,8 +56,8 @@
         {{ render_code_snippet("installation-import", import_example, "js") }}
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="javascript-title">
-        {{ typography("JavaScript", variant="section-title", id="javascript-title") }}
+      <section class="moo-doc-section" aria-labelledby="javascript">
+        {{ typography("JavaScript", variant="section-title", id="javascript") }}
         <p>
           Moo UI styles Bootstrap-native components. When a page uses Bootstrap
           plugins such as Dropdown, Tooltip, Popover, Modal, Toast, or Offcanvas,
@@ -66,28 +65,26 @@
           Popover also need the initialization Bootstrap documents for those
           plugins.
         </p>
-        {% call card(extra_class="moo-doc-note", body_class="d-grid gap-3") %}
-          <div>
-            <h3 class="h5 mb-1">Adoption paths</h3>
-            <p class="text-body-secondary mb-0">
-              Use <code>moo-ui.css</code> as a whole-page Bootstrap stylesheet
-              replacement after visual review. For gradual adoption, the scoped
-              <code>moo.css</code> surface lives under a <code>.moo-ui</code>
-              boundary and should be used from npm after the release that
-              publishes it.
-            </p>
-          </div>
-          <div>
-            {{ button("View Components", variant="outline", size="sm", element="a", href="components/index.html") }}
-          </div>
-        {% endcall %}
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="adoption-paths">
+        {{ typography("Adoption Paths", variant="section-title", id="adoption-paths") }}
+        <p>
+          Use <code>moo-ui.css</code> as a whole-page Bootstrap stylesheet
+          replacement after visual review. For gradual adoption, the scoped
+          <code>moo.css</code> surface lives under a <code>.moo-ui</code>
+          boundary and should be used from npm after the release that publishes
+          it.
+        </p>
+        {{ button("View Components", variant="outline", size="sm", element="a", href="components/index.html") }}
       </section>
     </article>
 
     {{ render_doc_toc([
-      {"id": "cdn-title", "label": "CDN"},
-      {"id": "npm-title", "label": "npm"},
-      {"id": "javascript-title", "label": "JavaScript"}
+      {"id": "cdn", "label": "CDN"},
+      {"id": "npm", "label": "npm"},
+      {"id": "javascript", "label": "JavaScript"},
+      {"id": "adoption-paths", "label": "Adoption Paths"}
     ]) }}
   </div>
 {% endblock %}
