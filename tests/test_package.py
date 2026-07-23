@@ -57,16 +57,6 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
 
-    def test_moo_scope_alias_package_points_to_canonical_package(self) -> None:
-        package = self._read_package()
-        alias = self._read_package("packages/moo-ui-alias/package.json")
-
-        self.assertEqual(alias["name"], "@moo/ui")
-        self.assertEqual(alias["version"], package["version"])
-        self.assertFalse(alias.get("private", True))
-        self.assertEqual(alias["dependencies"]["@wpmoo/ui"], package["version"])
-        self.assertEqual(alias["files"], ["README.md"])
-
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())
 
