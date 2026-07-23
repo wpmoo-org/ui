@@ -1,8 +1,9 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/badge.html.jinja" import badge %}
-{% from "components/table.html.jinja" import table %}
+{% from "components/table.html.jinja" import table, table_row_actions %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header %}
 
 {% block title %}Table — Moo UI{% endblock %}
@@ -10,82 +11,178 @@
 {% block content %}
   {{ render_page_header(
     "Table",
-    "Display rows and columns of related data using Bootstrap's native, opt-in table styling."
+    "Display related rows and columns with Bootstrap's native, responsive table markup."
   ) }}
 
   <div class="moo-component-examples">
-    {% set default %}
+    {% set basic %}
       {{ table(
-        ["Server", "Region", "Status", "Uptime"],
+        ["Request", "Owner", "Status", "SLA"],
         [
-          ["api-01", "eu-west", badge("Online", variant="outline"), "99.98%"],
-          ["api-02", "eu-west", badge("Degraded", variant="outline"), "97.40%"],
-          ["api-03", "us-east", badge("Offline", variant="outline"), "0.00%"]
+          ["Partner agreement", "Mira Kaya", badge("Pending", variant="warning"), "2h 12m"],
+          ["Compliance review", "Noah Demir", badge("Ready", variant="outline"), "4h 05m"],
+          ["Workspace access", "Lena Aras", badge("Done", variant="success"), "Closed"]
         ],
         align=["", "", "", "end"],
-        caption="Current status of production API servers."
+        caption="Customer service desk queue at a glance.",
+        row_header=true
       ) }}
     {% endset %}
     {{ render_example(
-      "default",
-      "Default",
+      "basic",
+      "Basic",
       "Compose statuses from the ready Badge macro; right-align the numeric column.",
-      default
+      basic,
+      preview_class="moo-example__preview--medium"
     ) }}
 
-    {% set striped_hover %}
+    {% set footer %}
       {{ table(
-        ["Package", "Version", "Size"],
-        [
-          ["moo-ui", "2.4.0", "48 KB"],
-          ["bootstrap", "5.3.3", "212 KB"],
-          ["lucide-icons", "0.462.0", "18 KB"],
-          ["geist-font", "1.0", "64 KB"]
-        ],
-        align=["", "", "end"],
-        striped=true,
-        hover=true
-      ) }}
-    {% endset %}
-    {{ render_example(
-      "striped-hover",
-      "Striped and hoverable",
-      "Set <code>striped=true</code> and <code>hover=true</code> for denser, scannable rows.",
-      striped_hover
-    ) }}
-
-    {% set small %}
-      {{ table(
-        ["Package", "Size"],
-        [["moo-ui", "48 KB"], ["bootstrap", "212 KB"]],
+        ["Line item", "Amount"],
+        [["Portal seats", "$240"], ["Storage add-on", "$36"], ["Credit", "-$20"]],
+        footer=["Total", "$256"],
         align=["", "end"],
-        small=true
+        row_header=true
       ) }}
     {% endset %}
     {{ render_example(
-      "small",
-      "Compact",
-      "Set <code>small=true</code> for tighter cell padding.",
-      small,
+      "footer",
+      "Footer",
+      "Pass <code>footer</code> for a summary row that closes out a usage ledger.",
+      footer,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set rtl %}
+    {% set actions %}
+      {% set web_actions %}
+        {% call table_row_actions(aria_label="Open actions for Web frontend") %}
+          {{ dropdown_item("View logs") }}
+          {{ dropdown_item("Redeploy") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Roll back", destructive=true) }}
+        {% endcall %}
+      {% endset %}
+      {% set api_actions %}
+        {% call table_row_actions(aria_label="Open actions for API gateway") %}
+          {{ dropdown_item("View logs") }}
+          {{ dropdown_item("Redeploy") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Roll back", destructive=true) }}
+        {% endcall %}
+      {% endset %}
+      {% set worker_actions %}
+        {% call table_row_actions(aria_label="Open actions for Batch worker") %}
+          {{ dropdown_item("View logs") }}
+          {{ dropdown_item("Redeploy") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Roll back", destructive=true) }}
+        {% endcall %}
+      {% endset %}
+      {{ table(
+        ["Deployment", "Status", "Actions"],
+        [
+          ["Web frontend", badge("Live", variant="success"), web_actions],
+          ["API gateway", badge("Rolling out", variant="warning"), api_actions],
+          ["Batch worker", badge("Failed", variant="destructive"), worker_actions]
+        ],
+        align=["", "", "end"],
+        row_header=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "actions",
+      "Actions",
+      "A row actions column composed from the ready table_row_actions() trigger and the standalone Dropdown Menu macros.",
+      actions,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set compact %}
+      {{ table(
+        ["Workspace ID", "Workspace", "Plan", "Requests"],
+        [
+          ["m00-portal", "Moo Portal", "Growth", "18"],
+          ["m01-partners", "Partner Desk", "Business", "9"],
+          ["m02-billing", "Billing Hub", "Starter", "4"],
+          ["m03-support", "Support Lab", "Trial", "2"]
+        ],
+        align=["", "", "", "end"],
+        row_ids=["m00-portal", "m01-partners", "m02-billing", "m03-support"],
+        striped=true,
+        hover=true,
+        small=true,
+        caption="Compact admin usage rows for a support team.",
+        caption_top=true,
+        row_header=true
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "compact",
+      "Compact, striped, and hoverable",
+      "Bootstrap's own <code>striped</code>, <code>hover</code>, and <code>small</code> modifiers combine freely for denser, scannable rows.",
+      compact,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set rtl_arabic %}
       <div dir="rtl">
         {{ table(
-          ["الحزمة", "الحجم"],
-          [["moo-ui", "٤٨ ك.ب"], ["bootstrap", "٢١٢ ك.ب"]],
-          align=["", "end"]
+          ["التكرار", "المالك", "الحالة", "الوقت المقدر"],
+          [
+            ["مراجعة العميل", "محمد", badge("معلق", variant="warning"), "6h 40m"],
+            ["إصدار الفاتورة", "سارة", badge("جاهز", variant="outline"), "2h 11m"],
+            ["وصول المنصة", "ليلى", badge("مكتمل", variant="success"), "مغلق"]
+          ],
+          align=["", "", "", "end"],
+          row_header=true
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "Right-to-left layout",
-      "Column order and text alignment follow reading direction without mirrored custom CSS.",
-      rtl
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {{ table(
+          ["בקשה", "אחראי", "סטטוס", "זמן משוער"],
+          [
+            ["סקירת לקוח", "מיכאל", badge("ממתין", variant="warning"), "6h 40m"],
+            ["הפקת חשבונית", "סערה", badge("מוכן", variant="outline"), "2h 11m"],
+            ["גישה לפלטפורמה", "לירון", badge("בוצע", variant="success"), "סגור"]
+          ],
+          align=["", "", "", "end"],
+          row_header=true
+        ) }}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {{ table(
+          ["Request", "Owner", "Status", "SLA"],
+          [
+            ["Customer review", "Michael", badge("Pending", variant="warning"), "6h 40m"],
+            ["Invoice build", "Sara", badge("Ready", variant="outline"), "2h 11m"],
+            ["Platform access", "Liron", badge("Done", variant="success"), "Closed"]
+          ],
+          align=["", "", "", "end"],
+          row_header=true
+        ) }}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "table",
+      "Use one compact queue summary table in Arabic, Hebrew, and English.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
     ) }}
   </div>
+
+  <p class="text-body-secondary">
+    Need sorting, filtering, or pagination on top of this? That calls for a dedicated Data Table
+    component built on top of this Table; it isn't part of this catalog yet.
+  </p>
 
   {{ render_reference(
     "For Bootstrap's source behavior and contextual row/cell variants, see the",

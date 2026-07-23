@@ -2,7 +2,9 @@
   headers,
   rows,
   caption="",
+  caption_top=false,
   align=[],
+  footer=[],
   row_ids=[],
   row_header=false,
   striped=false,
@@ -16,6 +18,7 @@
   {% if striped %}{% set classes = classes ~ " table-striped" %}{% endif %}
   {% if hover %}{% set classes = classes ~ " table-hover" %}{% endif %}
   {% if small %}{% set classes = classes ~ " table-sm" %}{% endif %}
+  {% if caption_top %}{% set classes = classes ~ " caption-top" %}{% endif %}
   {% if borderless %}{% set classes = classes ~ " table-borderless" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <div class="table-responsive">
@@ -44,6 +47,48 @@
           </tr>
         {% endfor %}
       </tbody>
+      {% if footer %}
+        <tfoot>
+          <tr>
+            {% for cell in footer %}
+              {% set column_align = align[loop.index0] if loop.index0 < align | length else "" %}
+              {% if loop.first %}
+                <th scope="row"{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</th>
+              {% else %}
+                <td{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        </tfoot>
+      {% endif %}
     </table>
+  </div>
+{%- endmacro %}
+
+{% from "components/dropdown_menu.html.jinja" import dropdown_menu %}
+
+{# A per-row actions trigger for a Table cell: an icon-only ellipsis
+   button (real accessible name via aria_label, no visible label) that
+   opens the same ready dropdown_menu() panel a standalone Dropdown Menu
+   uses. Mirrors the existing Sidebar menu-action trigger, which builds
+   this exact icon-only-button-plus-dropdown_menu() shape rather than
+   going through the dropdown() macro (whose label is always visible
+   text). Pass the caller's dropdown_item()/dropdown_divider() calls as
+   the row's cell value, same as any other rich, caller-controlled
+   table cell. #}
+{% macro table_row_actions(aria_label="Open menu", align="end", extra_class="") -%}
+  {% if not aria_label | trim %}{{ fail("Table row actions aria_label is required") }}{% endif %}
+  {% set items %}{{ caller() | trim | safe }}{% endset %}
+  <div class="table-row-actions dropdown{% if extra_class %} {{ extra_class }}{% endif %}">
+    <button
+      class="btn btn-ghost btn-icon-sm"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+      aria-label="{{ aria_label }}"
+    >
+      {{ render_icon("ellipsis", "inline-start") }}
+    </button>
+    {% call dropdown_menu(align=align) %}{{ items | safe }}{% endcall %}
   </div>
 {%- endmacro %}

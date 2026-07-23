@@ -113,6 +113,15 @@ $card-cap-padding-x: $card-spacer-x !default;
 $card-title-font-size: 1rem !default;
 $card-title-letter-spacing: -0.01em !default;
 
+// Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
+// at the browser's bold UA default; the reference renders both header
+// cells and the emphasized first body column (a <th scope="row">) at a
+// medium weight instead, verified against the live reference. Restated
+// as a literal rather than referencing Bootstrap's own
+// $font-weight-medium (500), since this file compiles before
+// Bootstrap's own variables exist.
+$table-th-font-weight: 500 !default;
+
 // Bootstrap has no native avatar component. Keep unmatched static values as
 // compile-time Sass knobs; exact shared typography reuses Bootstrap variables.
 $avatar-size: 2rem !default;
