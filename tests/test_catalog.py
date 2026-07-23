@@ -530,7 +530,7 @@ class CatalogContractTests(CatalogTestCase):
         installation = self.read_output("installation.html")
 
         self.assertIn(
-            "https://unpkg.com/@wpmoo/ui@0.1.1/dist/assets/css/moo-ui.css",
+            "https://unpkg.com/@wpmoo/ui@0.2.0/dist/assets/css/moo-ui.css",
             installation,
         )
         self.assertNotIn(
@@ -566,6 +566,12 @@ class CatalogContractTests(CatalogTestCase):
 
         for copy in (
             "Product-facing notes for the public Moo UI package and catalog.",
+            "v0.2.0",
+            "Component catalog expansion",
+            "Wave 4 Components",
+            "Expanded the Bootstrap-native catalog with polished component examples, shared RTL previews, and refreshed overlay behavior.",
+            "New and refined examples for the Wave 4 component set, including tables, toggle groups, menus, overlays, and form controls.",
+            "RTL examples now use a shared tabbed preview pattern across component pages.",
             "v0.1.1",
             "Public package refresh",
             "Catalog Polish",

@@ -14,6 +14,26 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-0-2-0">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.2.0</span>
+            <span class="text-body-secondary">Component catalog expansion</span>
+          </div>
+          <h2 id="release-0-2-0">Wave 4 Components</h2>
+          <p>Expanded the Bootstrap-native catalog with polished component examples, shared RTL previews, and refreshed overlay behavior.</p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>New and refined examples for the Wave 4 component set, including tables, toggle groups, menus, overlays, and form controls.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>RTL examples now use a shared tabbed preview pattern across component pages.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-0-1-1">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.1.1</span>
@@ -49,6 +69,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-0-2-0", "label": "Wave 4 Components"},
       {"id": "release-0-1-1", "label": "Catalog Polish"},
       {"id": "release-0-1-0", "label": "Initial Release"}
     ]) }}
