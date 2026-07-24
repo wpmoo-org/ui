@@ -1668,6 +1668,11 @@ body {
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
 
+.moo-catalog__command-group + .moo-catalog__command-group {
+  margin-top: 1rem;
+  padding-top: 0.25rem;
+}
+
 .moo-catalog__command-section {
   padding: 0.5rem 0.5rem 0.375rem;
   color: var(--bs-secondary-color);

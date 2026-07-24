@@ -33,10 +33,10 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_llms_txt_lists_ready_components_alphabetically(self) -> None:
         catalog = json.loads(
-            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
         expected = [
-            f"- [{item['label']}](https://ui.wpmoo.org/components/{item['slug']}.html)"
+            f"- [{item['label']}](https://ui.wpmoo.org/components/{item['slug']}/)"
             for item in sorted(
                 (item for item in catalog if item["status"] == "ready"),
                 key=lambda item: item["label"].casefold(),
@@ -216,7 +216,7 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_component_pages_compose_ready_macros_only(self) -> None:
         catalog = json.loads(
-            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
         ready = {
             item["slug"] for item in catalog if item["status"] == "ready"
@@ -298,7 +298,7 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_ready_components_ship_a_real_preview_image(self) -> None:
         catalog = json.loads(
-            (ROOT / "src/catalog.json").read_text(encoding="utf-8")
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
         ready_slugs = [
             item["slug"] for item in catalog if item["status"] == "ready"
@@ -368,9 +368,9 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-catalog__search-trigger", index)
         self.assertIn('id="catalog-command"', index)
         self.assertIn("data-moo-command-item", index)
-        self.assertIn('href="index.html"', index)
-        self.assertIn('href="components/index.html"', index)
-        self.assertIn('href="components/button.html"', index)
+        self.assertIn('href="./"', index)
+        self.assertIn('href="components/"', index)
+        self.assertIn('href="components/button/"', index)
         # Open + filter + keyboard navigation behavior lives in preview.js.
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
@@ -409,10 +409,10 @@ class CatalogContractTests(CatalogTestCase):
         header_end = index.index("</header>", header_start)
         header = index[header_start:header_end]
 
-        home_index = header.index('href="index.html"')
-        docs_index = header.index('href="introduction.html"')
-        components_index = header.index('href="components/index.html"')
-        blocks_index = header.index('href="blocks/index.html"')
+        home_index = header.index('href="./"')
+        docs_index = header.index('href="introduction/"')
+        components_index = header.index('href="components/"')
+        blocks_index = header.index('href="blocks/"')
 
         self.assertLess(home_index, docs_index)
         self.assertLess(docs_index, components_index)
@@ -453,9 +453,9 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-component-row moo-home-component-row--1",
             home,
         )
-        self.assertIn('href="installation.html"', home)
-        self.assertIn('href="components/index.html"', home)
-        self.assertIn('href="components/button.html"', home)
+        self.assertIn('href="installation/"', home)
+        self.assertIn('href="components/"', home)
+        self.assertIn('href="components/button/"', home)
         self.assertNotIn(
             "Moo UI — Bootstrap components with a focused visual language.",
             home,
@@ -477,12 +477,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertLess(sections_index, components_index)
 
         for label, href in (
-            ("Introduction", "../introduction.html"),
-            ("Installation", "../installation.html"),
-            ("Components", "../components/index.html"),
-            ("Blocks", "../blocks/index.html"),
-            ("Skills", "../skills.html"),
-            ("Changelog", "../changelog.html"),
+            ("Introduction", "../introduction/"),
+            ("Installation", "../installation/"),
+            ("Components", "../components/"),
+            ("Blocks", "../blocks/"),
+            ("Skills", "../skills/"),
+            ("Changelog", "../changelog/"),
         ):
             with self.subTest(label=label):
                 self.assertIn(f'href="{href}"', components)
@@ -510,8 +510,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('<ol class="moo-doc-principles">', introduction)
         self.assertIn('class="moo-doc-principles__number" aria-hidden="true">1</span>', introduction)
         self.assertNotIn("moo-doc-card-icon", introduction)
-        self.assertIn('href="installation.html"', introduction)
-        self.assertIn('href="components/index.html"', introduction)
+        self.assertIn('href="../installation/"', introduction)
+        self.assertIn('href="../components/"', introduction)
 
     def test_primary_pages_share_the_page_header_macro_surface(self) -> None:
         result = self.run_build()
@@ -560,27 +560,62 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("Copy page link", introduction)
         self.assertIn('class="moo-doc-page-actions__nav"', introduction)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', introduction)
-        self.assertIn('href="installation.html"', introduction)
+        self.assertIn('aria-label="Previous page: Home"', introduction)
+        self.assertIn('href="../installation/"', introduction)
         self.assertNotIn('aria-label="Previous page: Changelog"', introduction)
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
         self.assertIn('aria-label="Next page: Components"', installation)
-        self.assertIn('href="components/index.html"', installation)
+        self.assertIn('href="../components/"', installation)
 
         components = self.read_output("components/index.html")
         self.assertIn('aria-label="Previous page: Installation"', components)
-        self.assertIn('aria-label="Next page: Blocks"', components)
+        self.assertIn('aria-label="Next page: Accordion"', components)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
         blocks = self.read_output("blocks/index.html")
-        self.assertIn('aria-label="Previous page: Components"', blocks)
-        self.assertIn('aria-label="Next page: Skills"', blocks)
+        self.assertIn('aria-label="Previous page: Scroll Fade"', blocks)
+        self.assertIn('aria-label="Next page: Sidebar (Floating)"', blocks)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', blocks)
 
         component = self.read_output("components/switch.html")
-        self.assertNotIn("moo-doc-page-actions", component)
-        self.assertNotIn("moo-doc-pagination", component)
+        component_header_start = component.index('<header class="moo-component-header"')
+        component_header = component[
+            component_header_start : component.index("</header>", component_header_start)
+        ]
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', component_header)
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', component)
+        self.assertIn('aria-label="Previous page: Spinner"', component)
+        self.assertIn('aria-label="Next page: Table"', component)
+        self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', component)
+
+        utility = self.read_output("utils/scroll-fade.html")
+        utility_header_start = utility.index('<header class="moo-component-header"')
+        utility_header = utility[
+            utility_header_start : utility.index("</header>", utility_header_start)
+        ]
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
+        self.assertIn('aria-label="Previous page: Typography"', utility)
+        self.assertIn('aria-label="Next page: Blocks"', utility)
+
+        block = self.read_output("blocks/sidebar-floating.html")
+        block_header_start = block.index('<header class="moo-component-header"')
+        block_header = block[
+            block_header_start : block.index("</header>", block_header_start)
+        ]
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', block_header)
+        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', block)
+        self.assertIn('aria-label="Previous page: Blocks"', block)
+        self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
+
+        last_block = self.read_output("blocks/sidebar-inset.html")
+        self.assertIn('aria-label="Next page: Skills"', last_block)
+
+        skills = self.read_output("skills.html")
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
+        self.assertIn('aria-label="Next page: Changelog"', skills)
 
         preview = self.read_output("assets/js/preview.js")
         self.assertIn("[data-moo-copy-page]", preview)
@@ -765,12 +800,12 @@ class CatalogContractTests(CatalogTestCase):
         home = self.read_output("index.html")
 
         for href in (
-            "introduction.html",
-            "installation.html",
-            "components/index.html",
-            "blocks/index.html",
-            "skills.html",
-            "changelog.html",
+            "introduction/",
+            "installation/",
+            "components/",
+            "blocks/",
+            "skills/",
+            "changelog/",
         ):
             with self.subTest(href=href):
                 self.assertIn(f'href="{href}"', home)

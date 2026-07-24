@@ -11,10 +11,10 @@ class ScrollFadeTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertTrue((DIST / "utils/scroll-fade.html").is_file())
+        self.assertTrue((DIST / "utils/scroll-fade/index.html").is_file())
 
         utilities = json.loads(
-            (ROOT / "src/utilities.json").read_text(encoding="utf-8")
+            (ROOT / "src/registry/utilities.json").read_text(encoding="utf-8")
         )
         self.assertEqual(
             utilities,
@@ -30,10 +30,10 @@ class ScrollFadeTests(CatalogTestCase):
         index = self.read_output("components/index.html")
         self.assertIn(">Components</h2>", index)
         self.assertIn(">Utilities</h2>", index)
-        self.assertIn('href="../utils/scroll-fade.html"', index)
+        self.assertIn('href="../utils/scroll-fade/"', index)
 
         component = self.read_output("components/button.html")
-        self.assertIn('href="../utils/scroll-fade.html"', component)
+        self.assertIn('href="../../utils/scroll-fade/"', component)
 
         utility = self.read_output("utils/scroll-fade.html")
         self.assertIn('aria-current="page"', utility)

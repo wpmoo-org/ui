@@ -1,6 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Changelog - Moo UI{% endblock %}
@@ -12,7 +12,7 @@
         "Changelog",
         "Product-facing notes for the public Moo UI package and catalog.",
         id="changelog",
-        actions=render_section_page_actions(current_slug, sections, root_path)
+        actions=render_section_page_actions(current_slug, site_pages, root_path)
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
@@ -85,7 +85,7 @@
         </article>
       </section>
 
-      {{ render_section_page_pagination(current_slug, sections, root_path) }}
+      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([

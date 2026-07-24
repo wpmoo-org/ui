@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 
@@ -151,7 +151,7 @@
       </div>
     {% endset %}
     {% set related_button_group_description %}
-      Group adjacent actions that belong together. See the <a href="../components/button-group.html">Button Group</a> component for broader toolbar behavior.
+      Group adjacent actions that belong together. See the <a href="{{ site_href("components/button-group.html", root_path) }}">Button Group</a> component for broader toolbar behavior.
     {% endset %}
     {{ render_example(
       "related-button-group",

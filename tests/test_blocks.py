@@ -8,7 +8,7 @@ from tests.helpers import ROOT, CatalogTestCase
 class BlocksTests(CatalogTestCase):
     def test_blocks_json_entries_are_ready(self) -> None:
         blocks = json.loads(
-            (ROOT / "src/blocks.json").read_text(encoding="utf-8")
+            (ROOT / "src/registry/blocks.json").read_text(encoding="utf-8")
         )
         self.assertEqual(
             blocks,
@@ -43,8 +43,8 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn(f'data-example="{slug}"', page)
                 self.assertIn("moo-example__surface", page)
                 self.assertIn("moo-block-preview__frame", page)
-                self.assertIn(f'src="previews/{slug}.html"', page)
-                self.assertIn(f'href="previews/{slug}.html"', page)
+                self.assertIn(f'src="../../blocks/previews/{slug}/"', page)
+                self.assertIn(f'href="../../blocks/previews/{slug}/"', page)
                 self.assertIn("Open standalone", page)
 
             source = (
@@ -135,7 +135,7 @@ class BlocksTests(CatalogTestCase):
             ("sidebar-inset", "Sidebar (Inset)"),
         ):
             with self.subTest(slug=slug):
-                self.assertIn(f'href="../blocks/{slug}.html"', index)
+                self.assertIn(f'href="../blocks/{slug}/"', index)
                 self.assertIn(label, index)
         # Blocks cards mirror the Components index showcase-card layout with
         # real block preview art and the whole card as a stretched-link.
@@ -161,13 +161,13 @@ class BlocksTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         home = self.read_output("index.html")
 
-        self.assertIn('href="blocks/index.html"', home)
+        self.assertIn('href="blocks/"', home)
         for slug, label in (
             ("sidebar-floating", "Sidebar (Floating)"),
             ("sidebar-inset", "Sidebar (Inset)"),
         ):
             with self.subTest(slug=slug):
-                self.assertIn(f'href="blocks/{slug}.html"', home)
+                self.assertIn(f'href="blocks/{slug}/"', home)
                 self.assertIn(label, home)
 
     def test_catalog_sidebar_has_no_blocks_group(self) -> None:
@@ -175,10 +175,10 @@ class BlocksTests(CatalogTestCase):
         # header/palette navigation does. Reading a page unrelated to either
         # block's own content (the Components index) isolates the shell: each
         # block name should come from the command-palette loop only, and
-        # "blocks/index.html" should appear exactly six times: the Sections
+        # "../blocks/" should appear exactly four times: the Sections
         # sidebar link, the compact dropdown, the desktop header nav link, the
-        # palette's hardcoded Blocks entry, plus the Components page action and
-        # bottom pagination links.
+        # palette's hardcoded Blocks entry. Page navigation now follows the
+        # global docs order, so Components advances to the first component page.
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -186,7 +186,7 @@ class BlocksTests(CatalogTestCase):
 
         self.assertEqual(page.count("Sidebar (Floating)"), 1)
         self.assertEqual(page.count("Sidebar (Inset)"), 1)
-        self.assertEqual(page.count('href="../blocks/index.html"'), 6)
+        self.assertEqual(page.count('href="../blocks/"'), 4)
         self.assertNotIn('class="sidebar-group-label" data-slot="sidebar-group-label">Blocks<', page)
 
     def test_block_preview_iframes_are_scaled_programmatically(self) -> None:

@@ -128,6 +128,9 @@
     commandModalEl?.querySelectorAll("[data-moo-command-item]") || []
   );
   const commandEmpty = commandModalEl?.querySelector(".moo-catalog__command-empty");
+  const commandGroups = Array.from(
+    commandModalEl?.querySelectorAll("[data-moo-command-group]") || []
+  );
   const searchTrigger = document.querySelector(".moo-catalog__search-trigger");
   let commandActive = -1;
 
@@ -187,6 +190,12 @@
       if (matches) {
         visible += 1;
       }
+    });
+    commandGroups.forEach((group) => {
+      const hasVisibleItems = Array.from(
+        group.querySelectorAll("[data-moo-command-item]")
+      ).some((item) => !item.hidden);
+      group.hidden = !hasVisibleItems;
     });
     if (commandEmpty) {
       commandEmpty.hidden = visible !== 0;

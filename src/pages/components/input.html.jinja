@@ -1,5 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "components/badge.html.jinja" import badge %}
@@ -270,7 +270,7 @@
     {{ render_example(
       "input-group",
       "Input Group",
-      "To add icons or text inside an input, wrap it in a Bootstrap <code>.input-group</code>. See the <a href=\"../components/input-group.html\">Input Group</a> component for more examples.",
+      'To add icons or text inside an input, wrap it in a Bootstrap <code>.input-group</code>. See the <a href="' ~ site_href("components/input-group.html", root_path) ~ '">Input Group</a> component for more examples.',
       input_group_example,
       "moo-example__preview--narrow"
     ) }}
@@ -287,7 +287,7 @@
     {{ render_example(
       "button-group",
       "Button Group",
-      "Use Bootstrap's native <code>.input-group</code> pattern to attach a button to a search input with a shared border. See the <a href=\"../components/button-group.html\">Button Group</a> component for button-only groups.",
+      'Use Bootstrap\'s native <code>.input-group</code> pattern to attach a button to a search input with a shared border. See the <a href="' ~ site_href("components/button-group.html", root_path) ~ '">Button Group</a> component for button-only groups.',
       button_group_example,
       "moo-example__preview--narrow"
     ) }}
@@ -352,7 +352,7 @@
     {{ render_example(
       "form",
       "Form",
-      "A full form example composed from a <code>&lt;fieldset&gt;</code>, a <code>.field-group</code>, and labeled fields. See the <a href=\"../components/field.html\">Fieldset</a> section for the legend/description contract.",
+      'A full form example composed from a <code>&lt;fieldset&gt;</code>, a <code>.field-group</code>, and labeled fields. See the <a href="' ~ site_href("components/field.html", root_path) ~ '">Fieldset</a> section for the legend/description contract.',
       full_form,
       "moo-example__preview--narrow"
     ) }}

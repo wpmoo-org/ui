@@ -1,11 +1,16 @@
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions %}
 
 {% macro render_page_header(title, description, id="", actions="") %}
+  {% set resolved_actions = actions %}
+  {% if not resolved_actions and current_page_kind is defined and current_page_kind in ["component", "utility", "block"] and site_pages is defined %}
+    {% set resolved_actions = render_section_page_actions(current_slug, site_pages, root_path) %}
+  {% endif %}
   <header class="moo-component-header"{% if id %} aria-labelledby="{{ id }}"{% endif %}>
     <div class="moo-component-header__title-row">
       {{ typography(title, variant="page-title", id=id) }}
-      {% if actions %}
-        {{ actions | safe }}
+      {% if resolved_actions %}
+        {{ resolved_actions | safe }}
       {% endif %}
     </div>
     {{ typography(description, variant="page-description") }}

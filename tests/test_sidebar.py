@@ -635,7 +635,7 @@ class SidebarTests(CatalogTestCase):
         page = self.read_output("components/sidebar.html")
         self.assertEqual(page.count('id="catalog-sidebar"'), 1)
         self.assertIn('data-moo-block-frame-shell', page)
-        self.assertIn('src="../blocks/previews/sidebar-floating.html"', page)
+        self.assertIn('src="../../blocks/previews/sidebar-floating/"', page)
         self.assertIn('title="Application shell preview"', page)
         self.assertIn("components-sidebar-floating-demo", page)
         # Sidebar documents one full application-shell example; RTL is not part of this component contract.

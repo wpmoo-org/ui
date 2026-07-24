@@ -1,5 +1,6 @@
 {% extends "layouts/base.html.jinja" %}
 {% from "components/sidebar.html.jinja" import sidebar_inset, sidebar_provider %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
@@ -9,20 +10,27 @@
         {% include "shell/navbar.html.jinja" %}
         <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">
           <div class="moo-catalog__content">
-            {% set has_example_toc = current_section in ["components", "utils"] and current_slug != "index" %}
-            {% if has_example_toc %}
+            {% set has_example_toc = current_page_kind in ["component", "utility"] %}
+            {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
+            {% set child_page_navigation_items = site_pages %}
+            {% if has_example_toc or has_child_page_navigation %}
               <div class="moo-doc-layout" data-moo-component-doc-layout>
                 <div class="moo-doc-main">
             {% endif %}
             {% block content %}{% endblock %}
-            {% if has_example_toc %}
+            {% if has_child_page_navigation %}
+              {{ render_section_page_pagination(current_slug, child_page_navigation_items, root_path) }}
+            {% endif %}
+            {% if has_example_toc or has_child_page_navigation %}
                 </div>
-                <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc hidden>
+                {% if has_example_toc %}
+                  <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc hidden>
                   <div class="moo-doc-toc__inner">
                     <div class="moo-doc-toc__label">On this page</div>
                     <nav class="nav flex-column" aria-label="{% if current_section == 'utils' %}Utility examples{% else %}Component examples{% endif %}" data-moo-component-toc-nav></nav>
                   </div>
-                </aside>
+                  </aside>
+                {% endif %}
               </div>
             {% endif %}
           </div>

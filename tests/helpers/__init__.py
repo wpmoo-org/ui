@@ -17,6 +17,13 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 PNG_COLOR_TYPE_RGBA = 6
 
 
+def pretty_output_path(relative_path: str) -> Path:
+    path = Path(relative_path)
+    if path.name == "index.html" or path.suffix != ".html":
+        return path
+    return path.with_suffix("") / "index.html"
+
+
 def lucide_body(name: str) -> str:
     return json.loads(ICONS.read_text(encoding="utf-8"))["icons"][name]["body"]
 
@@ -47,4 +54,6 @@ class CatalogTestCase(unittest.TestCase):
         )
 
     def read_output(self, relative_path: str) -> str:
-        return (DIST / relative_path).read_text(encoding="utf-8")
+        return (DIST / pretty_output_path(relative_path)).read_text(
+            encoding="utf-8"
+        )
