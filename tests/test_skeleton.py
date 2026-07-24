@@ -83,7 +83,7 @@ class SkeletonTests(CatalogTestCase):
         self.assertIn('@import "components/skeleton";', component_layer)
 
     def test_skeleton_is_ready_in_catalog_and_pages_build(self) -> None:
-        catalog = json.loads((ROOT / "src/catalog.json").read_text(encoding="utf-8"))
+        catalog = json.loads((ROOT / "src/registry/components.json").read_text(encoding="utf-8"))
         self.assertIn(
             {"slug": "skeleton", "label": "Skeleton", "status": "ready"},
             catalog,
@@ -91,7 +91,7 @@ class SkeletonTests(CatalogTestCase):
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertTrue((DIST / "components/skeleton.html").is_file())
+        self.assertTrue((DIST / "components/skeleton/index.html").is_file())
 
     def test_skeleton_catalog_page_uses_macro_not_raw_placeholder_markup(self) -> None:
         self.assertTrue(PAGE.is_file(), "Skeleton catalog page is not implemented")

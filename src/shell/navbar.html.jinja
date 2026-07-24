@@ -26,17 +26,17 @@
         <div class="dropdown moo-catalog__nav-dropdown d-md-none">
           {{ button("", variant="ghost", size="icon-sm", element="button", aria_label="Toggle navigation menu", icon_start="menu", dropdown=true, extra_class="moo-catalog__nav-menu-trigger") }}
           {% call dropdown_menu() %}
-            {{ dropdown_item("Home", href=root_path ~ "index.html") }}
-            {{ dropdown_item("Docs", href=root_path ~ "introduction.html") }}
-            {{ dropdown_item("Components", href=root_path ~ "components/index.html") }}
-            {{ dropdown_item("Blocks", href=root_path ~ "blocks/index.html") }}
+            {{ dropdown_item("Home", href=site_href("index.html", root_path)) }}
+            {{ dropdown_item("Docs", href=site_href("introduction.html", root_path)) }}
+            {{ dropdown_item("Components", href=site_href("components/index.html", root_path)) }}
+            {{ dropdown_item("Blocks", href=site_href("blocks/index.html", root_path)) }}
           {% endcall %}
         </div>
         {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav d-none d-md-flex") %}
-          {{ nav_item("Home", href=root_path ~ "index.html") }}
-          {{ nav_item("Docs", href=root_path ~ "introduction.html") }}
-          {{ nav_item("Components", href=root_path ~ "components/index.html") }}
-          {{ nav_item("Blocks", href=root_path ~ "blocks/index.html") }}
+          {{ nav_item("Home", href=site_href("index.html", root_path)) }}
+          {{ nav_item("Docs", href=site_href("introduction.html", root_path)) }}
+          {{ nav_item("Components", href=site_href("components/index.html", root_path)) }}
+          {{ nav_item("Blocks", href=site_href("blocks/index.html", root_path)) }}
         {% endcall %}
       </div>
 
@@ -105,20 +105,25 @@
         {% endcall %}
       </div>
       <div class="modal-body moo-catalog__command-body scroll-fade-y no-scrollbar">
-        <div class="moo-catalog__command-section" id="catalog-command-pages">Pages</div>
-        <div class="list-group list-group-flush" role="listbox" aria-labelledby="catalog-command-pages">
-          {{ _command_item(root_path ~ "index.html", "Home") }}
-          {% for section in sections %}
-            {{ _command_item(root_path ~ section.href, section.label) }}
-          {% endfor %}
-          {% for component in catalog %}
-            {{ _command_item(root_path ~ "components/" ~ component.slug ~ ".html", component.label) }}
-          {% endfor %}
-          {% for utility in utilities %}
-            {{ _command_item(root_path ~ "utils/" ~ utility.slug ~ ".html", utility.label) }}
-          {% endfor %}
-          {% for block in blocks %}
-            {{ _command_item(root_path ~ "blocks/" ~ block.slug ~ ".html", block.label) }}
+        {% set command_groups = [
+          ("Pages", "doc"),
+          ("Components", "component"),
+          ("Utilities", "utility"),
+          ("Blocks", "block"),
+        ] %}
+        <div class="moo-catalog__command-list" role="listbox">
+          {% for group_label, group_kind in command_groups %}
+            {% set group_pages = site_pages | selectattr("kind", "equalto", group_kind) | list %}
+            {% if group_pages %}
+              <div class="moo-catalog__command-group" data-moo-command-group>
+                <div class="moo-catalog__command-section" id="catalog-command-{{ group_kind }}">{{ group_label }}</div>
+                <div class="list-group list-group-flush" aria-labelledby="catalog-command-{{ group_kind }}">
+                  {% for page in group_pages %}
+                    {{ _command_item(site_href(page.href, root_path), page.label) }}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
         <p class="moo-catalog__command-empty" hidden>No matching pages.</p>

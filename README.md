@@ -126,37 +126,37 @@ projects often need. The README wraps a few of those transparent assets in
 theme-aware surfaces so they stay legible on GitHub.
 
 <p align="center">
-  <a href="https://ui.wpmoo.org/components/button.html">
+  <a href="https://ui.wpmoo.org/components/button/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/button-dark.svg">
       <img src="static/images/readme/button-light.svg" alt="Button preview" width="31%">
     </picture>
   </a>
-  <a href="https://ui.wpmoo.org/components/dialog.html">
+  <a href="https://ui.wpmoo.org/components/dialog/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/dialog-dark.svg">
       <img src="static/images/readme/dialog-light.svg" alt="Dialog preview" width="31%">
     </picture>
   </a>
-  <a href="https://ui.wpmoo.org/components/sidebar.html">
+  <a href="https://ui.wpmoo.org/components/sidebar/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/sidebar-dark.svg">
       <img src="static/images/readme/sidebar-light.svg" alt="Sidebar preview" width="31%">
     </picture>
   </a>
-  <a href="https://ui.wpmoo.org/components/toast.html">
+  <a href="https://ui.wpmoo.org/components/toast/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/toast-dark.svg">
       <img src="static/images/readme/toast-light.svg" alt="Toast preview" width="31%">
     </picture>
   </a>
-  <a href="https://ui.wpmoo.org/components/sheet.html">
+  <a href="https://ui.wpmoo.org/components/sheet/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/sheet-dark.svg">
       <img src="static/images/readme/sheet-light.svg" alt="Sheet preview" width="31%">
     </picture>
   </a>
-  <a href="https://ui.wpmoo.org/components/input.html">
+  <a href="https://ui.wpmoo.org/components/input/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/input-dark.svg">
       <img src="static/images/readme/input-light.svg" alt="Input preview" width="31%">

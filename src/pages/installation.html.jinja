@@ -4,7 +4,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Installation - Moo UI{% endblock %}
@@ -16,7 +16,7 @@
         "Installation",
         "Add Moo UI to a Bootstrap project without changing the markup contract your app already uses.",
         id="installation",
-        actions=render_section_page_actions(current_slug, sections, root_path)
+        actions=render_section_page_actions(current_slug, site_pages, root_path)
       ) }}
 
       {{ alert(
@@ -78,10 +78,10 @@
           boundary and should be used from npm after the release that publishes
           it.
         </p>
-        {{ button("View Components", variant="outline", size="sm", element="a", href="components/index.html") }}
+        {{ button("View Components", variant="outline", size="sm", element="a", href=site_href("components/index.html", root_path)) }}
       </section>
 
-      {{ render_section_page_pagination(current_slug, sections, root_path) }}
+      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([

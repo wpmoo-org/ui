@@ -2,7 +2,7 @@
 {% from "components/card.html.jinja" import card %}
 {% from "includes/component-previews.html.jinja" import block_preview %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% set block_descriptions = {
@@ -19,7 +19,7 @@
         "Blocks",
         "Full composed screens built from ready component macros.",
         id="blocks",
-        actions=render_section_page_actions("blocks", sections, root_path)
+        actions=render_section_page_actions("blocks", site_pages, root_path)
       ) }}
 
       <section class="moo-catalog__dashboard" aria-label="Blocks">
@@ -31,7 +31,7 @@
               </div>
               <div>
                 <h2 class="h5 mb-2">
-                  <a class="stretched-link text-body text-decoration-none" href="{{ root_path ~ "blocks/" ~ block.slug ~ ".html" }}">{{ block.label }}</a>
+                  <a class="stretched-link text-body text-decoration-none" href="{{ site_href("blocks/" ~ block.slug ~ ".html", root_path) }}">{{ block.label }}</a>
                 </h2>
                 <p class="text-body-secondary mb-0">
                   {{ block_descriptions.get(block.slug, "Composed screen built from ready component macros.") }}
@@ -42,7 +42,7 @@
         </div>
       </section>
 
-      {{ render_section_page_pagination("blocks", sections, root_path) }}
+      {{ render_section_page_pagination("blocks", site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([

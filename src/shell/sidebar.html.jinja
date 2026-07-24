@@ -13,7 +13,7 @@
           "Moo UI",
           subtitle="Component system",
           size="lg",
-          href=root_path ~ "index.html",
+          href=site_href("index.html", root_path),
           lead=sidebar_brand_mark("blocks")
         ) }}
       {% endcall %}
@@ -28,8 +28,8 @@
           {% call sidebar_menu_item() %}
             {{ sidebar_menu_button(
               section.label,
-              href=root_path ~ section.href,
-              active=(current_section == "sections" and current_slug == section.slug) or (current_section == section.slug and current_slug == "index"),
+              href=site_href(section.href, root_path),
+              active=(current_section == "sections" and current_slug == section.slug) or (current_section == section.slug),
               icon=section.icon
             ) }}
           {% endcall %}
@@ -44,7 +44,7 @@
           {% call sidebar_menu_item() %}
             {{ sidebar_menu_button(
               component.label,
-              href=root_path ~ "components/" ~ component.slug ~ ".html",
+              href=site_href("components/" ~ component.slug ~ ".html", root_path),
               active=current_section == "components" and current_slug == component.slug,
               icon=component_icons.get(component.slug, "component")
             ) }}
@@ -60,7 +60,7 @@
           {% call sidebar_menu_item() %}
             {{ sidebar_menu_button(
               utility.label,
-              href=root_path ~ "utils/" ~ utility.slug ~ ".html",
+              href=site_href("utils/" ~ utility.slug ~ ".html", root_path),
               active=current_section == "utils" and current_slug == utility.slug,
               icon=utility_icons.get(utility.slug, "sparkles")
             ) }}

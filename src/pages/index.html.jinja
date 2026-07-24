@@ -17,7 +17,7 @@
           "Get started",
           variant="default",
           element="a",
-          href=root_path ~ "installation.html",
+          href=site_href("installation.html", root_path),
           icon_start="book-open",
           extra_class="px-3"
         ) }}
@@ -25,7 +25,7 @@
           "Browse Components",
           variant="outline",
           element="a",
-          href=root_path ~ "components/index.html",
+          href=site_href("components/index.html", root_path),
           icon_end="arrow-right",
           extra_class="px-3"
         ) }}
@@ -121,7 +121,7 @@
         "Browse Components",
         variant="default",
         element="a",
-        href=root_path ~ "components/index.html"
+        href=site_href("components/index.html", root_path)
       ) }}
     </div>
     <p class="moo-home-attribution">

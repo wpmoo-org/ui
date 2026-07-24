@@ -37,7 +37,12 @@ BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
 )
-
+SITE_NAME = "Moo UI"
+SITE_ORIGIN = "https://ui.wpmoo.org"
+DEFAULT_META_DESCRIPTION = (
+    "Moo UI is a Bootstrap 5.3-compatible HTML component system with "
+    "Bootstrap markup and a shadcn-like product interface feel."
+)
 HTML_TOKEN = re.compile(
     r"<!--.*?-->|<![^>]*>|</?[A-Za-z][^>]*?>",
     re.DOTALL,
@@ -283,6 +288,37 @@ def slugify(value: object) -> str:
     return slug or "section"
 
 
+def pretty_url(path: object) -> str:
+    value = str(path).strip()
+    if value in {"", "index.html", "./"}:
+        return "./"
+    if value.endswith("/index.html"):
+        return value[: -len("index.html")]
+    if value.endswith(".html"):
+        return value[: -len(".html")] + "/"
+    return value
+
+
+def site_href(path: object, root_path: str = "") -> str:
+    value = pretty_url(path)
+    if value == "./":
+        return root_path or "./"
+    return f"{root_path}{value}"
+
+
+def canonical_url(path: object) -> str:
+    value = pretty_url(path)
+    if value == "./":
+        return "https://ui.wpmoo.org/"
+    return f"https://ui.wpmoo.org/{value}"
+
+
+def pretty_output_path(path: Path) -> Path:
+    if path.name == "index.html" or path.suffix != ".html":
+        return path
+    return path.with_suffix("") / "index.html"
+
+
 def fail(message: str) -> None:
     raise ValueError(message)
 
@@ -301,6 +337,198 @@ def component_preview_src(slug: str, root_path: str) -> str:
 
 def block_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("blocks", slug, root_path)
+
+
+PAGE_META_SET = re.compile(
+    r"\{%\s*set\s+(?P<name>page_(?:title|description|image|image_alt))\s*=\s*"
+    r"(?P<quote>['\"])(?P<value>.*?)(?P=quote)\s*%\}",
+    re.DOTALL,
+)
+PAGE_HEADER_CALL = re.compile(
+    r"render_page_header\(\s*(?P<title_quote>['\"])(?P<title>.*?)(?P=title_quote)\s*,\s*"
+    r"(?P<description_quote>['\"])(?P<description>.*?)(?P=description_quote)",
+    re.DOTALL,
+)
+TITLE_BLOCK = re.compile(
+    r"\{%\s*block\s+title\s*%\}(?P<title>.*?)\{%\s*endblock\s*%\}",
+    re.DOTALL,
+)
+
+
+def absolute_asset_url(relative_path: str) -> str:
+    return f"{SITE_ORIGIN}/{relative_path.lstrip('/')}"
+
+
+def seo_image_src(category: str | None = None, slug: str | None = None) -> str:
+    if category and slug:
+        for extension in ("webp", "png"):
+            candidate = STATIC / "images" / category / f"{slug}.{extension}"
+            if candidate.is_file():
+                return absolute_asset_url(f"assets/images/{category}/{slug}.{extension}")
+    return absolute_asset_url("assets/images/readme-hero.webp")
+
+
+def _clean_meta_text(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _strip_site_suffix(title: str) -> str:
+    return re.sub(r"\s+[—-]\s+Moo UI$", "", title).strip()
+
+
+def extract_template_metadata(page: Path) -> dict[str, str]:
+    source = page.read_text(encoding="utf-8")
+    metadata = {
+        match.group("name"): _clean_meta_text(match.group("value"))
+        for match in PAGE_META_SET.finditer(source)
+    }
+
+    header = PAGE_HEADER_CALL.search(source)
+    if header:
+        metadata.setdefault("page_title", _clean_meta_text(header.group("title")))
+        metadata.setdefault(
+            "page_description",
+            _clean_meta_text(header.group("description")),
+        )
+
+    title_block = TITLE_BLOCK.search(source)
+    if title_block:
+        metadata.setdefault(
+            "page_title",
+            _strip_site_suffix(_clean_meta_text(title_block.group("title"))),
+        )
+
+    return metadata
+
+
+def _find_entry(entries: list[dict[str, str]], slug: str) -> dict[str, str] | None:
+    return next((entry for entry in entries if entry.get("slug") == slug), None)
+
+
+def _entry_description(entry: dict[str, str] | None) -> str:
+    if not entry:
+        return DEFAULT_META_DESCRIPTION
+    return entry.get("description") or entry.get("summary") or DEFAULT_META_DESCRIPTION
+
+
+def build_site_pages(
+    sections: list[dict[str, str]],
+    catalog: list[dict[str, str]],
+    utilities: list[dict[str, str]],
+    blocks: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    def section_page(slug: str) -> dict[str, str] | None:
+        section = _find_entry(sections, slug)
+        if not section:
+            return None
+        return {**section, "kind": "doc"}
+
+    def child_pages(
+        entries: list[dict[str, str]], section: str, kind: str
+    ) -> list[dict[str, str]]:
+        return [
+            {
+                "slug": entry["slug"],
+                "label": entry["label"],
+                "href": f"{section}/{entry['slug']}/",
+                "kind": kind,
+            }
+            for entry in sorted(entries, key=lambda item: item["label"].lower())
+        ]
+
+    pages: list[dict[str, str]] = [
+        {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
+    ]
+    consumed_sections = {"components", "blocks"}
+
+    remaining_sections: list[dict[str, str]] = []
+    for section in sections:
+        slug = section.get("slug", "")
+        if slug in consumed_sections:
+            continue
+        if slug in {"introduction", "installation"}:
+            pages.append({**section, "kind": "doc"})
+        else:
+            remaining_sections.append(section)
+        if slug == "installation":
+            components = section_page("components")
+            if components:
+                pages.append(components)
+            pages.extend(child_pages(catalog, "components", "component"))
+            pages.extend(child_pages(utilities, "utils", "utility"))
+            blocks_page = section_page("blocks")
+            if blocks_page:
+                pages.append(blocks_page)
+            pages.extend(child_pages(blocks, "blocks", "block"))
+
+    tail_order = {"skills": 0, "changelog": 1, "disclaimer": 2, "license": 3}
+    pages.extend(
+        {**section, "kind": "doc"}
+        for section in sorted(
+            remaining_sections,
+            key=lambda item: (tail_order.get(item.get("slug", ""), 99),),
+        )
+    )
+
+    return pages
+
+
+def page_metadata(
+    page: Path,
+    logical_relative: Path,
+    sections: list[dict[str, str]],
+    catalog: list[dict[str, str]],
+    utilities: list[dict[str, str]],
+    blocks: list[dict[str, str]],
+) -> dict[str, str]:
+    path = logical_relative.as_posix()
+    slug = logical_relative.stem
+    kind = "doc"
+    entry: dict[str, str] | None = None
+    image = seo_image_src()
+
+    if path == "index.html":
+        slug = "index"
+        entry = {"label": "Moo UI", "description": DEFAULT_META_DESCRIPTION}
+    elif path.startswith("components/") and path != "components/index.html":
+        kind = "component"
+        entry = _find_entry(catalog, slug)
+        image = seo_image_src("components", slug)
+    elif path.startswith("utils/"):
+        kind = "utility"
+        entry = _find_entry(utilities, slug)
+        image = seo_image_src("utilities", slug)
+    elif path.startswith("blocks/") and path != "blocks/index.html" and "previews" not in path:
+        kind = "block"
+        entry = _find_entry(blocks, slug)
+        image = seo_image_src("blocks", slug)
+    else:
+        normalized_path = pretty_url(path)
+        entry = next(
+            (section for section in sections if pretty_url(section.get("href", "")) == normalized_path),
+            None,
+        )
+        if entry:
+            slug = entry.get("slug", slug)
+
+    template_meta = extract_template_metadata(page)
+    raw_title = template_meta.get("page_title") or (entry or {}).get("label") or SITE_NAME
+    description = template_meta.get("page_description") or _entry_description(entry)
+    image = template_meta.get("page_image") or image
+    image_alt = template_meta.get("page_image_alt") or f"{raw_title} page preview"
+    title = raw_title if raw_title == SITE_NAME or raw_title.endswith("Moo UI") else f"{raw_title} — {SITE_NAME}"
+
+    return {
+        "site_name": SITE_NAME,
+        "title": title,
+        "description": description,
+        "url": canonical_url(path),
+        "image": image,
+        "image_alt": image_alt,
+        "type": "website" if kind == "doc" else "article",
+        "slug": slug,
+        "kind": kind,
+    }
 
 
 def load_lucide_icons() -> dict[str, object]:
@@ -355,6 +583,9 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["highlight_html"] = highlight_html
     environment.filters["line_numbers"] = line_numbers
     environment.filters["slugify"] = slugify
+    environment.globals["pretty_url"] = pretty_url
+    environment.globals["site_href"] = site_href
+    environment.globals["canonical_url"] = canonical_url
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
     environment.globals["block_preview_src"] = block_preview_src
@@ -377,8 +608,57 @@ def load_entries(filename: str) -> list[dict[str, str]]:
     return json.loads(source_file.read_text(encoding="utf-8"))
 
 
+def _fallback_label(slug: str) -> str:
+    return " ".join(part.capitalize() for part in slug.split("-"))
+
+
+def _registry_overrides(filename: str) -> dict[str, dict[str, str]]:
+    return {entry["slug"]: entry for entry in load_entries(filename) if entry.get("slug")}
+
+
+def _load_page_registry(
+    pages_dir: Path,
+    registry_filename: str,
+    *,
+    fallback_status: str = "ready",
+) -> list[dict[str, str]]:
+    overrides = _registry_overrides(registry_filename)
+    entries: list[dict[str, str]] = []
+    for page in sorted(pages_dir.glob("*.html.jinja")):
+        if page.name == "index.html.jinja":
+            continue
+        slug = page.with_suffix("").stem
+        metadata = extract_template_metadata(page)
+        override = overrides.get(slug, {})
+        label = metadata.get("page_title") or override.get("label") or _fallback_label(slug)
+        description = (
+            metadata.get("page_description")
+            or override.get("description")
+            or override.get("summary")
+            or DEFAULT_META_DESCRIPTION
+        )
+        entries.append(
+            {
+                **override,
+                "slug": slug,
+                "label": label,
+                "description": description,
+                "status": override.get("status", fallback_status),
+            }
+        )
+    return sorted(entries, key=lambda entry: entry["label"].lower())
+
+
 def load_catalog() -> list[dict[str, str]]:
-    return load_entries("catalog.json")
+    return _load_page_registry(PAGES / "components", "registry/components.json")
+
+
+def load_utilities() -> list[dict[str, str]]:
+    return _load_page_registry(PAGES / "utils", "registry/utilities.json")
+
+
+def load_blocks() -> list[dict[str, str]]:
+    return _load_page_registry(PAGES / "blocks", "registry/blocks.json")
 
 
 def compile_style(name: str, *, output_style: str = "expanded") -> str:
@@ -452,33 +732,99 @@ def copy_site_metadata() -> None:
         shutil.copy2(LLMS_TXT, DIST / "llms.txt")
 
 
+def public_page_paths() -> list[str]:
+    paths: list[str] = []
+    for page in sorted(PAGES.rglob("*.html.jinja")):
+        relative = page.relative_to(PAGES)
+        if "previews" in relative.parts:
+            continue
+        logical_relative = relative.with_suffix("")
+        paths.append(logical_relative.as_posix())
+    return paths
+
+
+def public_canonical_urls() -> list[str]:
+    urls = [canonical_url(path) for path in public_page_paths()]
+    if LLMS_TXT.exists():
+        urls.append("https://ui.wpmoo.org/llms.txt")
+    return urls
+
+
+def write_sitemap() -> None:
+    urls = "\n".join(
+        "\n".join(
+            (
+                "  <url>",
+                f"    <loc>{escape(url, quote=True)}</loc>",
+                "  </url>",
+            )
+        )
+        for url in public_canonical_urls()
+    )
+    sitemap = "\n".join(
+        (
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            urls,
+            "</urlset>",
+            "",
+        )
+    )
+    (DIST / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+    (DIST / "robots.txt").write_text(
+        "\n".join(
+            (
+                "User-agent: *",
+                "Allow: /",
+                "Sitemap: https://ui.wpmoo.org/sitemap.xml",
+                "",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+
 def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
-    sections = load_entries("sections.json")
-    utilities = load_entries("utilities.json")
-    blocks = load_entries("blocks.json")
+    sections = load_entries("registry/sections.json")
+    utilities = load_utilities()
+    blocks = load_blocks()
+    site_pages = build_site_pages(sections, catalog, utilities, blocks)
     version = asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
-        output_relative = relative.with_suffix("")
+        logical_relative = relative.with_suffix("")
+        output_relative = pretty_output_path(logical_relative)
         output_file = DIST / output_relative
         output_file.parent.mkdir(parents=True, exist_ok=True)
         depth = len(output_relative.parents) - 1
         root_path = "../" * depth
-        current_section = output_relative.parent.name
-        current_slug = output_relative.stem
+        current_section = logical_relative.parent.name
+        current_slug = logical_relative.stem
         if current_section not in {"components", "utils", "blocks"}:
             current_section = "sections"
         template_name = page.relative_to(SRC).as_posix()
+        metadata = page_metadata(
+            page,
+            logical_relative,
+            sections,
+            catalog,
+            utilities,
+            blocks,
+        )
         rendered = environment.get_template(template_name).render(
             catalog=catalog,
             sections=sections,
             utilities=utilities,
             blocks=blocks,
+            site_pages=site_pages,
             current_section=current_section,
-            current_slug=current_slug,
+            current_slug=metadata["slug"],
+            current_page_kind=metadata["kind"],
             root_path=root_path,
+            page_meta=metadata,
+            page_canonical_url=metadata["url"],
             asset_version=version,
         )
         output_file.write_text(rendered, encoding="utf-8")
@@ -508,6 +854,7 @@ def build() -> None:
         copy_assets()
         copy_site_metadata()
         render_pages()
+        write_sitemap()
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:

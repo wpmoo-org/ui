@@ -3,7 +3,7 @@
 {% from "components/table.html.jinja" import table %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Sidebar — Moo UI{% endblock %}
 
@@ -35,7 +35,7 @@
       "Compose the shell from <code>sidebar_provider</code>, <code>sidebar</code>, and <code>sidebar_inset</code>. The preview uses the same floating sidebar block frame so the application shell is exercised as a standalone viewport.",
       app_shell,
       preview_class="moo-example__preview--shell",
-      frame_src="../blocks/previews/sidebar-floating.html"
+      frame_src=site_href("blocks/previews/sidebar-floating.html", root_path)
     ) }}
 
     <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>

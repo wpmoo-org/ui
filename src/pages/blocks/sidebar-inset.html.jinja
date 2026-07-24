@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Sidebar (Inset) — Moo UI{% endblock %}
 
@@ -26,7 +26,7 @@
       "The page content becomes a floating, rounded card inset from the sidebar, using the same header, content, and footer macros as the default variant.",
       screen,
       preview_class="moo-example__preview--shell",
-      frame_src="previews/sidebar-inset.html"
+      frame_src=site_href("blocks/previews/sidebar-inset.html", root_path)
     ) }}
   </div>
 {% endblock %}

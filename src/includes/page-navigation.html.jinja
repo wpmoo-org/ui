@@ -16,7 +16,7 @@
     {%- set ns.next = sections[ns.index + 1] -%}
   {%- endif -%}
   {%- if ns.current -%}
-    {%- set page_url = "https://ui.wpmoo.org/" ~ ns.current.href -%}
+    {%- set page_url = canonical_url(ns.current.href) -%}
     {%- set prompt -%}
 I'm looking at this Moo UI documentation:
 {{ page_url }}
@@ -47,14 +47,22 @@ Help me understand how to use it. Be ready to explain concepts, give examples, o
       </div>
       <div class="moo-doc-page-actions__nav" role="group" aria-label="Page navigation">
         {% if ns.previous %}
-          <a class="btn btn-ghost btn-icon-sm" href="{{ root_path }}{{ ns.previous.href }}" aria-label="Previous page: {{ ns.previous.label }}">
+          <a class="btn btn-ghost btn-icon-sm" href="{{ site_href(ns.previous.href, root_path) }}" aria-label="Previous page: {{ ns.previous.label }}">
             {{ render_icon("arrow-left", "inline-start") }}
           </a>
+        {% else %}
+          <button class="btn btn-ghost btn-icon-sm disabled" type="button" disabled aria-disabled="true" aria-label="Previous page unavailable">
+            {{ render_icon("arrow-left", "inline-start") }}
+          </button>
         {% endif %}
         {% if ns.next %}
-          <a class="btn btn-ghost btn-icon-sm" href="{{ root_path }}{{ ns.next.href }}" aria-label="Next page: {{ ns.next.label }}">
+          <a class="btn btn-ghost btn-icon-sm" href="{{ site_href(ns.next.href, root_path) }}" aria-label="Next page: {{ ns.next.label }}">
             {{ render_icon("arrow-right", "inline-start") }}
           </a>
+        {% else %}
+          <button class="btn btn-ghost btn-icon-sm disabled" type="button" disabled aria-disabled="true" aria-label="Next page unavailable">
+            {{ render_icon("arrow-right", "inline-start") }}
+          </button>
         {% endif %}
       </div>
     </div>
@@ -77,13 +85,13 @@ Help me understand how to use it. Be ready to explain concepts, give examples, o
   {%- if ns.previous or ns.next -%}
     <nav class="moo-doc-pagination" aria-label="Docs pagination">
       {% if ns.previous %}
-        <a class="btn btn-ghost btn-sm" href="{{ root_path }}{{ ns.previous.href }}">
+        <a class="btn btn-ghost btn-sm" href="{{ site_href(ns.previous.href, root_path) }}">
           {{ render_icon("arrow-left", "inline-start") }}
           {{ ns.previous.label }}
         </a>
       {% endif %}
       {% if ns.next %}
-        <a class="btn btn-ghost btn-sm ms-auto" href="{{ root_path }}{{ ns.next.href }}">
+        <a class="btn btn-ghost btn-sm ms-auto" href="{{ site_href(ns.next.href, root_path) }}">
           {{ ns.next.label }}
           {{ render_icon("arrow-right", "inline-end") }}
         </a>

@@ -21,7 +21,7 @@ class InputTests(CatalogTestCase):
         return " ".join(template.render().split())
 
     def read_input_output(self) -> str:
-        output = DIST / "components/input.html"
+        output = DIST / "components/input/index.html"
         self.assertTrue(
             output.is_file(),
             "Input catalog output is not implemented",

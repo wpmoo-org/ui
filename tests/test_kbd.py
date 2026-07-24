@@ -21,7 +21,7 @@ class KbdTests(CatalogTestCase):
         return template.render().strip()
 
     def read_kbd_output(self) -> str:
-        output = DIST / "components/kbd.html"
+        output = DIST / "components/kbd/index.html"
         self.assertTrue(output.is_file(), "Kbd catalog output is not implemented")
         return output.read_text(encoding="utf-8")
 

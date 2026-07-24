@@ -1,8 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/card.html.jinja" import card %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
-{% from "includes/page-header.html.jinja" import render_page_header %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Skills - Moo UI{% endblock %}
@@ -14,7 +13,7 @@
         "Skills",
         "Project-aware instructions for coding agents that generate or update Moo UI components.",
         id="skills",
-        actions=render_section_page_actions(current_slug, sections, root_path)
+        actions=render_section_page_actions(current_slug, site_pages, root_path)
       ) }}
 
       <section class="moo-doc-section" aria-labelledby="what-skills-are-for">
@@ -35,31 +34,40 @@
 
       <section class="moo-doc-section" aria-labelledby="what-agents-should-know">
         {{ typography("What Agents Should Know", variant="section-title", id="what-agents-should-know") }}
-        <div class="moo-doc-card-grid">
-          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-            <h3 class="h5 mb-0">Bootstrap first</h3>
-            <p class="text-body-secondary mb-0">
-              Prefer Bootstrap markup, classes, variables, and
-              <code>data-bs-*</code> APIs before adding Moo-owned surface area.
-            </p>
-          {% endcall %}
+        <ol class="moo-doc-principles">
+          <li class="moo-doc-principles__item">
+            <span class="moo-doc-principles__number" aria-hidden="true">1</span>
+            <div class="moo-doc-principles__content">
+              <h3 class="h5 mb-0">Bootstrap first</h3>
+              <p>
+                Prefer Bootstrap markup, classes, variables, and
+                <code>data-bs-*</code> APIs before adding Moo-owned surface area.
+              </p>
+            </div>
+          </li>
 
-          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-            <h3 class="h5 mb-0">Taste, not source</h3>
-            <p class="text-body-secondary mb-0">
-              Study shadcn/ui for spacing, restraint, and interaction feel, but
-              write original examples and keep the implementation Bootstrap-native.
-            </p>
-          {% endcall %}
+          <li class="moo-doc-principles__item">
+            <span class="moo-doc-principles__number" aria-hidden="true">2</span>
+            <div class="moo-doc-principles__content">
+              <h3 class="h5 mb-0">Taste, not source</h3>
+              <p>
+                Study shadcn/ui for spacing, restraint, and interaction feel, but
+                write original examples and keep the implementation Bootstrap-native.
+              </p>
+            </div>
+          </li>
 
-          {% call card(extra_class="h-100", body_class="d-grid gap-2") %}
-            <h3 class="h5 mb-0">Verify before ready</h3>
-            <p class="text-body-secondary mb-0">
-              A component is ready only after tests, generated examples, light and
-              dark states, and browser behavior all match the catalog contract.
-            </p>
-          {% endcall %}
-        </div>
+          <li class="moo-doc-principles__item">
+            <span class="moo-doc-principles__number" aria-hidden="true">3</span>
+            <div class="moo-doc-principles__content">
+              <h3 class="h5 mb-0">Verify before ready</h3>
+              <p>
+                A component is ready only after tests, generated examples, light and
+                dark states, and browser behavior all match the catalog contract.
+              </p>
+            </div>
+          </li>
+        </ol>
       </section>
 
       <section class="moo-doc-section" aria-labelledby="expected-workflow">
@@ -78,7 +86,7 @@
         </p>
       </section>
 
-      {{ render_section_page_pagination(current_slug, sections, root_path) }}
+      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([
