@@ -724,7 +724,7 @@ class CatalogContractTests(CatalogTestCase):
         installation = self.read_output("installation.html")
 
         self.assertIn(
-            "https://unpkg.com/@wpmoo/ui@0.2.1/dist/assets/css/moo-ui.css",
+            "https://unpkg.com/@wpmoo/ui@0.3.0/dist/assets/css/moo-ui.css",
             installation,
         )
         self.assertNotIn(
