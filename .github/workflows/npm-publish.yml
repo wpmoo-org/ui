@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: npm-publish-${{ github.ref }}
@@ -42,7 +43,7 @@ jobs:
       - name: Set up Node for npm
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "22.14.0"
           registry-url: "https://registry.npmjs.org"
 
       - name: Check package version
@@ -70,9 +71,7 @@ jobs:
 
       - name: Publish to npm
         if: steps.package.outputs.published == 'false'
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
 
       - name: Create GitHub release notes
         if: startsWith(github.ref_name, 'v')
