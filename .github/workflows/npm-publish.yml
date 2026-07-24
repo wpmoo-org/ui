@@ -46,7 +46,7 @@ jobs:
           node-version: "22.14.0"
 
       - name: Upgrade npm for OIDC trusted publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@11
 
       - name: Configure npm registry
         run: echo "registry=https://registry.npmjs.org/" >> .npmrc
