@@ -45,6 +45,9 @@ jobs:
         with:
           node-version: "22.14.0"
 
+      - name: Configure npm registry
+        run: echo "registry=https://registry.npmjs.org/" >> .npmrc
+
       - name: Check package version
         id: package
         run: |
