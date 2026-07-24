@@ -957,6 +957,7 @@ body {
 
 .moo-doc-main {
   min-width: 0;
+  max-width: 52rem;
 }
 
 .moo-doc-layout {
@@ -1294,6 +1295,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-top: 2rem;
   padding-top: 1rem;
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
