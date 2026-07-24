@@ -528,7 +528,7 @@ class CatalogContractTests(CatalogTestCase):
         ):
             with self.subTest(path=path):
                 page = self.read_output(path)
-                header_start = page.index('<header class="moo-component-header"')
+                header_start = page.index('<header class="moo-component-header')
                 header_end = page.index("</header>", header_start)
                 header = page[header_start:header_end]
 
@@ -580,7 +580,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', blocks)
 
         component = self.read_output("components/switch.html")
-        component_header_start = component.index('<header class="moo-component-header"')
+        component_header_start = component.index('<header class="moo-component-header')
         component_header = component[
             component_header_start : component.index("</header>", component_header_start)
         ]
@@ -591,7 +591,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', component)
 
         utility = self.read_output("utils/scroll-fade.html")
-        utility_header_start = utility.index('<header class="moo-component-header"')
+        utility_header_start = utility.index('<header class="moo-component-header')
         utility_header = utility[
             utility_header_start : utility.index("</header>", utility_header_start)
         ]
@@ -601,7 +601,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Blocks"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
-        block_header_start = block.index('<header class="moo-component-header"')
+        block_header_start = block.index('<header class="moo-component-header')
         block_header = block[
             block_header_start : block.index("</header>", block_header_start)
         ]
@@ -724,7 +724,7 @@ class CatalogContractTests(CatalogTestCase):
         installation = self.read_output("installation.html")
 
         self.assertIn(
-            "https://unpkg.com/@wpmoo/ui@0.3.0/dist/assets/css/moo-ui.css",
+            "https://unpkg.com/@wpmoo/ui@0.3.1/dist/assets/css/moo-ui.css",
             installation,
         )
         self.assertNotIn(
