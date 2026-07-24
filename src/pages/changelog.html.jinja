@@ -16,6 +16,30 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="metadata-driven-docs">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.3.0</span>
+            <span class="text-body-secondary">Metadata-driven docs navigation</span>
+          </div>
+          <h2 id="metadata-driven-docs">Metadata-Driven Docs Navigation</h2>
+          <p>Converted the documentation flow to a registry-based metadata system integrated with page navigation, link generation, and SEO/LLM-oriented outputs.</p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Component, utility, and block pages now derive titles, descriptions, and navigation ordering from a single metadata source under <code>src/registry/</code>.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span><code>llms.txt</code> generation and <code>sitemap.xml</code> are now connected to the metadata pipeline.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>A license page and improved consistency in external link handling and institutional references.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="documentation-navigation">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.2.1</span>
@@ -89,6 +113,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "metadata-driven-docs", "label": "Metadata-Driven Docs Navigation"},
       {"id": "documentation-navigation", "label": "Documentation Navigation"},
       {"id": "wave-4-components", "label": "Wave 4 Components"},
       {"id": "catalog-polish", "label": "Catalog Polish"},
