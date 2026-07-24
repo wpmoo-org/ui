@@ -1231,7 +1231,8 @@ body {
   max-width: 44rem;
 }
 
-.moo-doc-page>.moo-component-header {
+.moo-doc-page>.moo-component-header,
+.moo-component-header--has-actions {
   max-width: 100%;
 }
 
