@@ -49,6 +49,7 @@
   flex-wrap: wrap;
   padding-block: $input-padding-y;
   padding-inline: $input-padding-x;
+  cursor: text;
 }
 
 .combobox-chips:focus-within {
@@ -69,6 +70,7 @@
   max-width: 100%;
   align-items: center;
   gap: $spacer * 0.25;
+  cursor: default;
 }
 
 .combobox-chip__label {
@@ -86,6 +88,7 @@
   border-radius: var(--bs-border-radius-pill);
   background: transparent;
   color: inherit;
+  cursor: pointer;
   opacity: 0.65;
 }
 

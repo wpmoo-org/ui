@@ -598,12 +598,15 @@
         event.target instanceof Element
           ? event.target.closest("[data-moo-combobox-chip-remove]")
           : null;
-      if (!trigger) {
+      if (trigger) {
+        event.preventDefault();
+        removeChip(trigger.dataset.value || "");
+        input.focus();
         return;
       }
-      event.preventDefault();
-      removeChip(trigger.dataset.value || "");
-      input.focus();
+      if (isMultiple && event.target instanceof Element && event.target.closest(".combobox-chips")) {
+        input.focus();
+      }
     });
     input.addEventListener("click", openMenu);
     filterOptions();

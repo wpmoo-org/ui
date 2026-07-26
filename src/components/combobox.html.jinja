@@ -1,6 +1,6 @@
 {% set combobox_directions = ["", "ltr", "rtl"] %}
 
-{% macro combobox_option_content(item, selected=false) -%}
+{% macro combobox_option_content(item) -%}
   <span class="combobox-option__label">{{ item["label"] }}</span>
   <span class="combobox-option__check" aria-hidden="true">{{ render_icon("check", "inline-end") }}</span>
 {%- endmacro %}
@@ -22,7 +22,7 @@
     {% set is_highlighted = item["value"] == state.highlighted %}
     <li>
       <button class="dropdown-item combobox-option" id="{{ option_id }}" type="button" role="option" data-value="{{ item["value"] }}"{% if is_selected %} aria-selected="true"{% else %} aria-selected="false"{% endif %}{% if is_highlighted %} aria-current="true"{% endif %}{% if item.get("disabled") %} disabled{% endif %}>
-        {{ combobox_option_content(item, is_selected) }}
+        {{ combobox_option_content(item) }}
       </button>
     </li>
   {% endfor %}

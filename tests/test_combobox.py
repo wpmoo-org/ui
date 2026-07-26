@@ -138,6 +138,25 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('data-value="billing" aria-selected="true"', output)
         self.assertIn('data-value="ops" aria-selected="false"', output)
 
+    def test_combobox_option_content_keeps_minimal_item_api(self) -> None:
+        source = COMPONENT.read_text(encoding="utf-8")
+
+        self.assertIn("{% macro combobox_option_content(item) -%}", source)
+        self.assertNotIn("combobox_option_content(item, selected", source)
+        self.assertNotIn("combobox_option_content(item, is_selected)", source)
+
+    def test_combobox_multiple_chips_surface_focuses_like_input(self) -> None:
+        script = PREVIEW_JS.read_text(encoding="utf-8")
+        scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
+        chips_block = scss.split(".combobox-chips {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("cursor: text;", chips_block)
+        self.assertIn('event.target.closest(".combobox-chips")', script)
+        self.assertRegex(
+            script,
+            r"event\.target\.closest\(\"\.combobox-chips\"\)[\s\S]*input\.focus\(\);",
+        )
+
     def test_combobox_fails_fast_for_invalid_basic_contracts(self) -> None:
         invalid_calls = (
             (
