@@ -278,6 +278,7 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn("Add review area", source)
         self.assertIn('"clear-button"', source)
         self.assertIn('"Clear Button"', source)
+        self.assertIn('selected="ada"', source)
         self.assertIn("show_clear=true", source)
         self.assertNotIn('"Groups"', source)
         self.assertNotIn('"Custom Items"', source)
@@ -314,9 +315,25 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('event.key === "Tab"', source)
         self.assertIn("data-moo-combobox-clear", source)
         self.assertIn('clearTrigger.addEventListener("click"', source)
+        clear_handler = source.split('clearTrigger.addEventListener("click"', 1)[1].split("});", 1)[0]
+        self.assertNotIn("event.stopPropagation();", clear_handler)
         self.assertIn("toggleClear", source)
         self.assertIn("indicator.hidden = selected;", source)
         self.assertNotIn("combobox-popup-trigger", source)
+
+    def test_preview_js_does_not_scroll_closed_comboboxes_on_initialization(self) -> None:
+        source = PREVIEW_JS.read_text(encoding="utf-8")
+        combobox_block = source.split('document.querySelectorAll(".combobox").forEach', 1)[1].split(
+            'document.addEventListener("click", (event) => {\n    document.querySelectorAll(".combobox")',
+            1,
+        )[0]
+
+        self.assertIn("const filterOptions = ({ open = true, activate = true } = {}) => {", source)
+        self.assertIn("filterOptions({ open: startsOpen, activate: startsOpen });", source)
+        self.assertIn("const scrollOptionIntoMenu = (option) => {", combobox_block)
+        self.assertIn("menu.scrollTop", combobox_block)
+        self.assertNotIn("scrollIntoView", combobox_block)
+        self.assertNotIn("    filterOptions();\n    if (!startsOpen)", source)
 
     def test_combobox_is_ready_in_catalog_registry(self) -> None:
         catalog = json.loads(REGISTRY.read_text(encoding="utf-8"))

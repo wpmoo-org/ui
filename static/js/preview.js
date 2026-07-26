@@ -492,6 +492,16 @@
       input.value = "";
     };
 
+    const scrollOptionIntoMenu = (option) => {
+      const optionRect = option.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      if (optionRect.top < menuRect.top) {
+        menu.scrollTop -= menuRect.top - optionRect.top;
+      } else if (optionRect.bottom > menuRect.bottom) {
+        menu.scrollTop += optionRect.bottom - menuRect.bottom;
+      }
+    };
+
     const setActiveOption = (option) => {
       options.forEach((candidate) => {
         const isActive = candidate === option;
@@ -499,7 +509,7 @@
       });
       if (option) {
         input.setAttribute("aria-activedescendant", option.id);
-        option.scrollIntoView({ block: "nearest" });
+        scrollOptionIntoMenu(option);
       } else {
         input.removeAttribute("aria-activedescendant");
       }
@@ -531,8 +541,10 @@
       setActiveOption(option);
     };
 
-    const filterOptions = () => {
-      openMenu();
+    const filterOptions = ({ open = true, activate = true } = {}) => {
+      if (open) {
+        openMenu();
+      }
       const needle = normalize(input.value);
       let count = 0;
       options.forEach((option) => {
@@ -544,7 +556,9 @@
       });
       empty.hidden = count !== 0;
       liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
-      setActiveOption(visibleOptions()[0] || null);
+      if (activate) {
+        setActiveOption(visibleOptions()[0] || null);
+      }
     };
 
     toggleClear(
@@ -614,7 +628,6 @@
     if (clearTrigger) {
       clearTrigger.addEventListener("click", (event) => {
         event.preventDefault();
-        event.stopPropagation();
         clearSelection();
         input.value = "";
         input.focus();
@@ -637,7 +650,7 @@
       }
     });
     input.addEventListener("click", openMenu);
-    filterOptions();
+    filterOptions({ open: startsOpen, activate: startsOpen });
     if (!startsOpen) {
       closeMenu();
     }
