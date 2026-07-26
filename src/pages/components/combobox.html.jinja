@@ -22,6 +22,23 @@
   {"value": "compliance", "label": "Compliance"}
 ] %}
 
+{% set timezone_items = [
+  {"label": "Americas", "options": [
+    {"value": "new-york", "label": "(GMT-5) New York"},
+    {"value": "los-angeles", "label": "(GMT-8) Los Angeles"},
+    {"value": "chicago", "label": "(GMT-6) Chicago"},
+    {"value": "toronto", "label": "(GMT-5) Toronto"},
+    {"value": "vancouver", "label": "(GMT-8) Vancouver"},
+    {"value": "sao-paulo", "label": "(GMT-3) Sao Paulo"}
+  ]},
+  {"label": "Europe", "options": [
+    {"value": "london", "label": "(GMT+0) London"},
+    {"value": "paris", "label": "(GMT+1) Paris"},
+    {"value": "berlin", "label": "(GMT+1) Berlin"},
+    {"value": "istanbul", "label": "(GMT+3) Istanbul"}
+  ]}
+] %}
+
 {% block content %}
 {{ render_page_header(
 "Combobox",
@@ -81,6 +98,23 @@
     "Clear Button",
     "A single-select combobox that reveals a clear button after a reviewer is selected.",
     clear_button,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set groups %}
+    {{ combobox(
+      id="combobox-timezone",
+      aria_label="Timezone",
+      name="timezone",
+      placeholder="Select a timezone",
+      items=timezone_items
+    ) }}
+  {% endset %}
+  {{ render_example(
+    "groups",
+    "Groups",
+    "Group related options with Bootstrap dropdown headers and dividers inside the listbox.",
+    groups,
     preview_class="moo-example__preview--narrow"
   ) }}
 </div>

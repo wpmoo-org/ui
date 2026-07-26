@@ -184,6 +184,40 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('data-moo-combobox-clear="true" hidden', empty_output)
         self.assertIn('class="combobox-indicator" aria-hidden="true">', empty_output)
 
+    def test_combobox_renders_grouped_items_anatomy(self) -> None:
+        output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-timezone", '
+            'aria_label="Timezone", '
+            'name="timezone", '
+            'placeholder="Select a timezone", '
+            'items=['
+            '{"label": "Americas", "options": ['
+            '{"value": "nyc", "label": "(GMT-5) New York"}, '
+            '{"value": "chi", "label": "(GMT-6) Chicago"}'
+            ']}, '
+            '{"label": "Europe", "options": ['
+            '{"value": "lon", "label": "(GMT+0) London", "selected": true}, '
+            '{"value": "par", "label": "(GMT+1) Paris"}'
+            ']}'
+            ']'
+            ') }}'
+        )
+
+        self.assertIn('class="combobox combobox--grouped"', output)
+        self.assertIn('placeholder="Select a timezone"', output)
+        self.assertIn('value="(GMT+0) London"', output)
+        self.assertIn('type="hidden" name="timezone" value="lon"', output)
+        self.assertIn('role="group" aria-labelledby="combo-timezone-group-1"', output)
+        self.assertIn('class="dropdown-header combobox-group-label" id="combo-timezone-group-1"', output)
+        self.assertIn(">Americas<", output)
+        self.assertIn('role="group" aria-labelledby="combo-timezone-group-2"', output)
+        self.assertIn('class="dropdown-header combobox-group-label" id="combo-timezone-group-2"', output)
+        self.assertIn(">Europe<", output)
+        self.assertIn('class="dropdown-divider combobox-separator"', output)
+        self.assertIn('data-value="lon" aria-selected="true"', output)
+        self.assertEqual(output.count('role="option"'), 4)
+
     def test_combobox_option_content_keeps_minimal_item_api(self) -> None:
         source = COMPONENT.read_text(encoding="utf-8")
 
@@ -210,6 +244,7 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn("max-width: var(--moo-combobox-width);", catalog_scss)
         self.assertIn(".moo-example__preview--narrow > .combobox--multiple", catalog_scss)
         self.assertIn("max-width: var(--moo-combobox-multiple-width);", catalog_scss)
+        self.assertIn(".moo-example__preview--narrow > .combobox--grouped", catalog_scss)
 
     def test_combobox_fails_fast_for_invalid_basic_contracts(self) -> None:
         invalid_calls = (
@@ -234,8 +269,12 @@ class ComboboxTests(CatalogTestCase):
                 "Combobox item value and label are required",
             ),
             (
-                'combobox(id="combo", aria_label="Reviewer", items=[{"label": "Team", "options": [{"value": "x", "label": "X"}]}])',
-                "Combobox Basic supports flat items only",
+                'combobox(id="combo", aria_label="Reviewer", items=[{"options": [{"value": "x", "label": "X"}]}])',
+                "Combobox group label is required",
+            ),
+            (
+                'combobox(id="combo", aria_label="Reviewer", items=[{"label": "Team", "options": []}])',
+                "Combobox group options are required",
             ),
         )
 
@@ -280,7 +319,12 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('"Clear Button"', source)
         self.assertIn('selected="ada"', source)
         self.assertIn("show_clear=true", source)
-        self.assertNotIn('"Groups"', source)
+        self.assertIn('"groups"', source)
+        self.assertIn('"Groups"', source)
+        self.assertIn("Select a timezone", source)
+        self.assertIn("Bootstrap dropdown headers and dividers", source)
+        self.assertNotIn("ComboboxGroup", source)
+        self.assertNotIn("ComboboxSeparator", source)
         self.assertNotIn('"Custom Items"', source)
         self.assertNotIn('"Popup"', source)
         self.assertNotIn('"Input Group"', source)
@@ -319,6 +363,8 @@ class ComboboxTests(CatalogTestCase):
         self.assertNotIn("event.stopPropagation();", clear_handler)
         self.assertIn("toggleClear", source)
         self.assertIn("indicator.hidden = selected;", source)
+        self.assertIn("data-moo-combobox-group", source)
+        self.assertIn("syncGroupVisibility", source)
         self.assertNotIn("combobox-popup-trigger", source)
 
     def test_preview_js_does_not_scroll_closed_comboboxes_on_initialization(self) -> None:

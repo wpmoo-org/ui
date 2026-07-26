@@ -10,7 +10,8 @@
   max-width: var(--moo-combobox-width);
 }
 
-.combobox--multiple {
+.combobox--multiple,
+.combobox--grouped {
   max-width: var(--moo-combobox-multiple-width);
 }
 

@@ -335,6 +335,10 @@
     const clearTrigger = combobox.querySelector("[data-moo-combobox-clear]");
     const indicator = combobox.querySelector(".combobox-indicator");
     const options = Array.from(combobox.querySelectorAll(".combobox-option"));
+    const groups = Array.from(combobox.querySelectorAll("[data-moo-combobox-group]"));
+    const separators = Array.from(
+      combobox.querySelectorAll("[data-moo-combobox-separator]")
+    );
     const menu = combobox.querySelector(".combobox-menu");
     const startsOpen = menu?.classList.contains("show");
     let empty = menu?.querySelector("[data-moo-combobox-empty]");
@@ -361,7 +365,30 @@
       combobox.appendChild(liveRegion);
     }
 
-    const visibleOptions = () => options.filter((option) => !option.hidden && !option.disabled);
+    const optionGroupIsHidden = (option) =>
+      option.closest("[data-moo-combobox-group]")?.hidden || false;
+
+    const visibleOptions = () =>
+      options.filter((option) => !option.hidden && !option.disabled && !optionGroupIsHidden(option));
+
+    const syncGroupVisibility = () => {
+      if (groups.length === 0) {
+        return;
+      }
+      let visibleGroupCount = 0;
+      groups.forEach((group) => {
+        const hasVisibleOption = Array.from(group.querySelectorAll(".combobox-option")).some(
+          (option) => !option.hidden
+        );
+        group.hidden = !hasVisibleOption;
+        if (hasVisibleOption) {
+          visibleGroupCount += 1;
+        }
+      });
+      separators.forEach((separator) => {
+        separator.hidden = visibleGroupCount < 2;
+      });
+    };
 
     const setExpanded = (expanded) => {
       input.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -480,6 +507,7 @@
         options.forEach((option) => {
           option.hidden = false;
         });
+        syncGroupVisibility();
         empty.hidden = true;
         return;
       }
@@ -554,6 +582,7 @@
           count += 1;
         }
       });
+      syncGroupVisibility();
       empty.hidden = count !== 0;
       liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
       if (activate) {

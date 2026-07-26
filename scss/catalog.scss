@@ -1371,7 +1371,8 @@ body {
   max-width: var(--moo-combobox-width);
 }
 
-.moo-example__preview--narrow > .combobox--multiple {
+.moo-example__preview--narrow > .combobox--multiple,
+.moo-example__preview--narrow > .combobox--grouped {
   max-width: var(--moo-combobox-multiple-width);
 }
 
