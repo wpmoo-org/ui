@@ -1,300 +1,48 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/badge.html.jinja" import badge %}
 {% from "components/combobox.html.jinja" import combobox %}
-{% from "components/field.html.jinja" import field, field_description, field_error %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Combobox — Moo UI{% endblock %}
 
-{% set owner_items = [
-  {"value": "ada", "label": "Ada Lovelace", "selected": true, "icon": "user"},
-  {"value": "grace", "label": "Grace Hopper", "icon": "user"},
-  {"value": "katherine", "label": "Katherine Johnson", "icon": "user"},
-  {"value": "margaret", "label": "Margaret Hamilton", "icon": "user"}
-] %}
-
-{% set workspace_items = [
-  {"value": "portal", "label": "Portal workspace", "selected": true},
-  {"value": "catalog", "label": "Catalog workspace"},
-  {"value": "billing", "label": "Billing workspace"},
-  {"value": "support", "label": "Support workspace"}
-] %}
-
-{% set release_items = [
-  {"value": "morning", "label": "Morning release window"},
-  {"value": "midday", "label": "Midday low-traffic window", "selected": true},
-  {"value": "evening", "label": "Evening maintenance window"},
-  {"value": "freeze", "label": "Release freeze", "disabled": true}
-] %}
-
-{% set grouped_items = [
-  {"label": "Teams", "options": [
-    {"value": "portal-squad", "label": "Portal Squad", "description": "Customer-facing portal delivery", "icon": "layers", "selected": true},
-    {"value": "catalog-squad", "label": "Catalog Squad", "description": "Moo UI examples and docs", "icon": "package-check"}
-  ]},
-  {"label": "Operations", "options": [
-    {"value": "support-ops", "label": "Support Ops", "description": "Production handoff and incidents", "icon": "headphones"},
-    {"value": "finance-ops", "label": "Finance Ops", "description": "Billing and renewals", "icon": "building"}
-  ]}
-] %}
-
-{% set custom_items = [
-  {"value": "approval", "label": "Approval queue", "description": "12 requests waiting for review", "meta": "Today", "icon": "circle-check", "selected": true},
-  {"value": "incident", "label": "Incident desk", "description": "Customer-facing escalations", "badge": "Hot", "badge_variant": "danger", "icon": "shield-alert"},
-  {"value": "release", "label": "Release train", "description": "Next deploy window and owners", "meta": "19:00", "icon": "rocket"}
-] %}
-
-{% set status_items = [
-  {"value": "draft", "label": "Draft"},
-  {"value": "review", "label": "In review"},
-  {"value": "approved", "label": "Approved"},
-  {"value": "archived", "label": "Archived"}
+{% set reviewer_items = [
+  {"value": "ada", "label": "Ada Lovelace"},
+  {"value": "grace", "label": "Grace Hopper"},
+  {"value": "katherine", "label": "Katherine Johnson"},
+  {"value": "margaret", "label": "Margaret Hamilton"},
+  {"value": "dorothy", "label": "Dorothy Vaughan"}
 ] %}
 
 {% block content %}
 {{ render_page_header(
 "Combobox",
-"Autocomplete input with a list of suggestions, built from Bootstrap Input Group, Button, and Dropdown contracts."
+"Autocomplete input for selecting one item from a suggestion list."
 ) }}
 
 <div class="moo-component-examples">
   {% set basic %}
     {{ combobox(
-      id="combobox-owner",
-      aria_label="Assign reviewer",
+      id="combobox-reviewer",
+      aria_label="Select reviewer",
       name="reviewer",
-      placeholder="Assign reviewer",
-      items=owner_items
+      placeholder="Select a reviewer",
+      items=reviewer_items
     ) }}
   {% endset %}
   {{ render_example(
     "basic",
     "Basic",
-    "A compact combobox for choosing one teammate from a short server-rendered list.",
+    "A single-line input with a flat suggestion list, matching the shadcn Basic combobox anatomy before any advanced variants are added.",
     basic,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set multiple %}
-    <div class="d-grid gap-2">
-      <div class="d-flex flex-wrap gap-2">
-        {{ badge("Portal workspace", variant="secondary") }}
-        {{ badge("Billing workspace", variant="outline") }}
-      </div>
-      {{ combobox(
-        id="combobox-access",
-        aria_label="Workspace access",
-        name="workspace-access",
-        placeholder="Add workspace",
-        items=workspace_items,
-        multiple=true
-      ) }}
-    </div>
-  {% endset %}
-  {{ render_example(
-    "multiple",
-    "Multiple",
-    "Use multiple selection with nearby Badges when the UI needs a With chips interaction without leaving Bootstrap.",
-    multiple,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set clear_button %}
-    {{ combobox(
-      id="combobox-window",
-      aria_label="Release window",
-      name="release-window",
-      placeholder="Select release window",
-      items=release_items,
-      clearable=true
-    ) }}
-  {% endset %}
-  {{ render_example(
-    "clear-button",
-    "Clear Button",
-    "Show a clear button when the selection is optional and returning to an empty state is common.",
-    clear_button,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set groups %}
-    {{ combobox(
-      id="combobox-groups",
-      aria_label="Grouped collection",
-      name="team",
-      placeholder="Search teams",
-      items=grouped_items
-    ) }}
-  {% endset %}
-  {{ render_example(
-    "groups",
-    "Groups",
-    "Group related options when the same list mixes teams, queues, or departments.",
-    groups,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set custom %}
-    {{ combobox(
-      id="combobox-custom",
-      aria_label="Custom items",
-      name="surface",
-      placeholder="Search surfaces",
-      items=custom_items,
-      clearable=true
-    ) }}
-  {% endset %}
-  {{ render_example(
-    "custom-items",
-    "Custom Items",
-    "Render richer option rows with descriptions, badges, and trailing metadata while the selected string stays simple.",
-    custom,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set invalid %}
-    {% call field() %}
-      {{ combobox(
-        id="combobox-invalid-owner",
-        label="Escalation owner",
-        name="escalation-owner",
-        placeholder="Choose owner",
-        items=owner_items,
-        selected="",
-        invalid=true,
-        required=true,
-        describedby="combobox-invalid-owner-help combobox-invalid-owner-error"
-      ) }}
-      {{ field_description("combobox-invalid-owner-help", "Required when the incident is customer-facing.") }}
-      {{ field_error("combobox-invalid-owner-error", "Choose an owner before escalating.") }}
-    {% endcall %}
-  {% endset %}
-  {{ render_example(
-    "invalid",
-    "Invalid",
-    "Combobox participates in the same Field validation rhythm as Input and Select.",
-    invalid,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set disabled %}
-    {{ combobox(
-      id="combobox-disabled",
-      aria_label="Locked queue",
-      placeholder="Release freeze",
-      items=release_items,
-      selected="freeze",
-      disabled=true
-    ) }}
-  {% endset %}
-  {{ render_example(
-    "disabled",
-    "Disabled",
-    "Keep the chosen value visible when routing is locked by a freeze or policy.",
-    disabled,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set auto_highlight %}
-    {{ combobox(
-      id="combobox-auto-highlight",
-      aria_label="Auto highlight",
-      placeholder="Search statuses",
-      items=status_items,
-      open=true,
-      highlight_first=true
-    ) }}
-  {% endset %}
-  {{ render_example(
-    "auto-highlight",
-    "Auto Highlight",
-    "Pre-highlight the first available option when the popup opens without an existing selection.",
-    auto_highlight,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set popup %}
-    {{ combobox(
-      id="combobox-popup",
-      aria_label="Command destination",
-      placeholder="Search surfaces",
-      trigger_label="Select surface",
-      items=custom_items,
-      open=true
-    ) }}
-  {% endset %}
-  {{ render_example(
-    "popup",
-    "Popup",
-    "Use a button trigger when the input should live inside the dropdown content.",
-    popup,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set input_group_example %}
-    {% call field() %}
-      {{ combobox(
-        id="combobox-input-group",
-        aria_label="Input group route",
-        name="route",
-        placeholder="Search routes",
-        items=status_items,
-        describedby="combobox-input-group-help"
-      ) }}
-      {{ field_description("combobox-input-group-help", "The surface stays a Bootstrap Input Group: icon addon, form-control, ghost button, and dropdown menu.") }}
-    {% endcall %}
-  {% endset %}
-  {{ render_example(
-    "input-group",
-    "Input Group",
-    "Addons stay in the same compound-control surface instead of introducing a separate custom shell.",
-    input_group_example,
-    preview_class="moo-example__preview--narrow"
-  ) }}
-
-  {% set rtl_arabic %}
-    <div dir="rtl">
-      {{ combobox(id="combobox-rtl-arabic", aria_label="المراجع", placeholder="أضف مراجع", items=[
-        {"value": "nour", "label": "نور", "selected": true},
-        {"value": "layla", "label": "ليلى"},
-        {"value": "omar", "label": "عمر"}
-      ], dir="rtl", multiple=true) }}
-    </div>
-  {% endset %}
-  {% set rtl_hebrew %}
-    <div dir="rtl">
-      {{ combobox(id="combobox-rtl-hebrew", aria_label="בודק", placeholder="הוסף בודק", items=[
-        {"value": "noa", "label": "נועה", "selected": true},
-        {"value": "tamar", "label": "תמר"},
-        {"value": "ori", "label": "אורי"}
-      ], dir="rtl", multiple=true) }}
-    </div>
-  {% endset %}
-  {% set rtl_english %}
-    <div dir="rtl">
-      {{ combobox(id="combobox-rtl-english", aria_label="Reviewer", placeholder="Add reviewer", items=[
-        {"value": "ada", "label": "Ada Lovelace", "selected": true},
-        {"value": "grace", "label": "Grace Hopper"},
-        {"value": "katherine", "label": "Katherine Johnson"}
-      ], dir="rtl", multiple=true) }}
-    </div>
-  {% endset %}
-  {{ render_rtl_example(
-    "combobox-rtl",
-    "Compare Arabic, Hebrew, and English multiselect combobox geometry in right-to-left layouts.",
-    rtl_arabic,
-    rtl_hebrew,
-    rtl_english,
     preview_class="moo-example__preview--narrow"
   ) }}
 </div>
 
 {{ render_reference(
-"Combobox composes Bootstrap's native form control, input group, button, and dropdown patterns. For the underlying markup contracts, see the",
-"https://getbootstrap.com/docs/5.3/forms/input-group/",
-"Bootstrap Input Group documentation"
+"Combobox starts from Bootstrap's native form-control and dropdown menu contracts. For the underlying menu behavior, see the",
+"https://getbootstrap.com/docs/5.3/components/dropdowns/",
+"Bootstrap Dropdown documentation"
 ) }}
 
 {% endblock %}

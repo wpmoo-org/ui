@@ -330,9 +330,6 @@
     const hidden = combobox.querySelector('input[type="hidden"]');
     const options = Array.from(combobox.querySelectorAll(".combobox-option"));
     const menu = combobox.querySelector(".combobox-menu");
-    const triggers = Array.from(
-      combobox.querySelectorAll(".combobox-popup-trigger")
-    );
     const startsOpen = menu?.classList.contains("show");
     let empty = menu?.querySelector("[data-moo-combobox-empty]");
 
@@ -349,24 +346,28 @@
       menu.appendChild(empty);
     }
 
+    let liveRegion = combobox.querySelector("[data-moo-combobox-live]");
+    if (!liveRegion) {
+      liveRegion = document.createElement("span");
+      liveRegion.className = "visually-hidden";
+      liveRegion.setAttribute("aria-live", "polite");
+      liveRegion.setAttribute("data-moo-combobox-live", "true");
+      combobox.appendChild(liveRegion);
+    }
+
     const visibleOptions = () => options.filter((option) => !option.hidden && !option.disabled);
 
     const setExpanded = (expanded) => {
       input.setAttribute("aria-expanded", expanded ? "true" : "false");
-      triggers.forEach((trigger) => {
-        trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-      });
     };
 
     const openMenu = () => {
       menu.classList.add("show");
-      menu.dataset.bsPopper = "static";
       setExpanded(true);
     };
 
     const closeMenu = () => {
       menu.classList.remove("show");
-      menu.removeAttribute("data-bs-popper");
       setExpanded(false);
     };
 
@@ -393,6 +394,7 @@
       });
       const label = option.querySelector(".combobox-option__label")?.textContent?.trim() || "";
       input.value = label;
+      input.dataset.mooComboboxSelected = "true";
       if (hidden) {
         hidden.value = option.dataset.value || "";
       }
@@ -410,29 +412,22 @@
           count += 1;
         }
       });
-      Array.from(menu.querySelectorAll(".combobox-group-label")).forEach((label) => {
-        const groupItem = label.closest("li");
-        let sibling = groupItem?.nextElementSibling;
-        let hasVisibleOption = false;
-        while (sibling && !sibling.querySelector(".combobox-group-label")) {
-          if (sibling.querySelector(".combobox-option:not([hidden])")) {
-            hasVisibleOption = true;
-          }
-          sibling = sibling.nextElementSibling;
-        }
-        if (groupItem) {
-          groupItem.hidden = !hasVisibleOption;
-        }
-      });
       empty.hidden = count !== 0;
+      liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
       setActiveOption(visibleOptions()[0] || null);
     };
 
     input.addEventListener("focus", () => {
       openMenu();
+      if (input.dataset.mooComboboxSelected === "true") {
+        input.select();
+      }
       setActiveOption(visibleOptions()[0] || null);
     });
-    input.addEventListener("input", filterOptions);
+    input.addEventListener("input", () => {
+      input.dataset.mooComboboxSelected = "false";
+      filterOptions();
+    });
     input.addEventListener("keydown", (event) => {
       const available = visibleOptions();
       const current = available.findIndex(
@@ -440,6 +435,7 @@
       );
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
+        openMenu();
         const offset = event.key === "ArrowDown" ? 1 : -1;
         const next = current === -1 ? 0 : (current + offset + available.length) % available.length;
         setActiveOption(available[next]);
@@ -453,6 +449,8 @@
       } else if (event.key === "Escape") {
         closeMenu();
         input.blur();
+      } else if (event.key === "Tab") {
+        closeMenu();
       }
     });
     options.forEach((option) => {
@@ -461,15 +459,7 @@
         closeMenu();
       });
     });
-    combobox.querySelector(".combobox-clear")?.addEventListener("click", () => {
-      input.value = "";
-      if (hidden) {
-        hidden.value = "";
-      }
-      options.forEach((option) => option.setAttribute("aria-selected", "false"));
-      filterOptions();
-      input.focus();
-    });
+    input.addEventListener("click", openMenu);
     filterOptions();
     if (!startsOpen) {
       closeMenu();
@@ -484,13 +474,8 @@
       ) {
         const menu = combobox.querySelector(".combobox-menu");
         const input = combobox.querySelector(".combobox-input");
-        const triggers = Array.from(
-          combobox.querySelectorAll(".combobox-popup-trigger")
-        );
         menu?.classList.remove("show");
-        menu?.removeAttribute("data-bs-popper");
         input?.setAttribute("aria-expanded", "false");
-        triggers.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"));
       }
     });
   });

@@ -1,133 +1,87 @@
-// Bootstrap does not ship a Combobox component. Moo composes one from
-// Bootstrap's native Input Group, form-control, Button, and Dropdown menu
-// contracts, then scopes the missing combobox geometry under .combobox.
+// Bootstrap has no native Combobox component. The Basic pass composes a
+// form-control with a dropdown-menu and keeps only the missing positioning
+// and inline affordance in this component namespace.
 .combobox {
-  width: 12.5rem;
+  --moo-combobox-width: #{$moo-combobox-width};
+  --moo-combobox-menu-max-height: #{$moo-combobox-menu-max-height};
+
+  width: 100%;
+  max-width: var(--moo-combobox-width);
 }
 
 .combobox-control {
+  position: relative;
   width: 100%;
-}
-
-.combobox-control > .combobox-addon,
-.combobox-control > .combobox-input,
-.combobox-control > .combobox-clear,
-.combobox-control > .combobox-indicator {
-  min-height: 2rem;
-  padding-top: $spacer * .25;
-  padding-bottom: $spacer * .25;
-}
-
-.combobox-control > .combobox-addon {
-  width: 2rem;
-  justify-content: center;
-  padding-right: 0;
-  padding-left: 0;
 }
 
 .combobox-input {
-  min-width: 0;
-  font-size: $font-size-sm;
+  padding-inline-end: calc(#{$input-padding-x} + #{$input-height});
 }
 
-.combobox-control > .combobox-clear,
-.combobox-control > .combobox-indicator {
-  width: 2rem;
-  padding-right: 0;
-  padding-left: 0;
-}
-
-.combobox-control > .combobox-clear,
-.combobox-control > .combobox-indicator {
-  color: var(--bs-secondary-color);
-}
-
-.combobox-control > .combobox-indicator {
-  justify-content: center;
-}
-
-.combobox-popup-trigger {
-  display: inline-flex;
-  width: 100%;
-  min-height: 2rem;
+.combobox-indicator {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: $spacer * .5;
-  padding: $spacer * .25 $spacer * .5;
-  font-size: $font-size-sm;
+  justify-content: center;
+  width: $input-height;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+}
+
+.combobox-indicator > [data-icon] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
 }
 
 .combobox-menu {
+  position: absolute;
+  inset-block-start: calc(100% + #{$dropdown-spacer});
+  inset-inline-start: 0;
+  z-index: $zindex-dropdown;
   width: 100%;
-  min-width: 12.5rem;
-  max-height: 16rem;
-  padding: $spacer * .25;
+  min-width: 100%;
+  max-height: var(--moo-combobox-menu-max-height);
   overflow-y: auto;
-}
-
-.combobox-search-row {
-  padding: $spacer * .25;
-}
-
-.combobox-control--popup {
-  margin-bottom: $spacer * .25;
-}
-
-.combobox-group-label {
-  margin: $spacer * .25 0;
-  padding: $spacer * .375 $spacer * .5 $spacer * .25;
-  font-size: $font-size-sm * .85;
-  font-weight: $font-weight-medium;
 }
 
 .combobox-option {
   display: flex;
-  min-height: 2rem;
+  min-height: $input-height;
   align-items: center;
-  gap: $spacer * .5;
-  border-radius: var(--bs-border-radius-sm);
-  padding: $spacer * .375 $spacer * .5;
-  font-size: $font-size-sm;
-  line-height: $line-height-sm;
+  gap: $spacer * 0.5;
 }
 
-.combobox-option[aria-current="true"],
+.combobox-option[aria-current="true"] {
+  background-color: var(--bs-dropdown-link-hover-bg);
+}
+
 .combobox-option[aria-selected="true"] {
   font-weight: $font-weight-medium;
 }
 
-.combobox-option[aria-current="true"] {
-  background-color: var(--bs-tertiary-bg);
-}
-
-.combobox-option__body {
-  display: grid;
-  min-width: 0;
-}
-
 .combobox-option__label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.combobox-option__description,
-.combobox-option__meta,
-.combobox-empty {
-  color: var(--bs-secondary-color);
-  font-size: $font-size-sm;
-}
-
-.combobox-option__description {
-  white-space: normal;
-}
-
-.combobox-option__meta,
-.combobox-option__badge,
 .combobox-option__check {
-  margin-left: auto;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+
+.combobox-option__check > [data-icon] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
 }
 
 .combobox-empty {
-  padding: $spacer * .75 $spacer * .5;
+  padding: $dropdown-item-padding-y $dropdown-item-padding-x;
+  color: var(--bs-secondary-color);
   text-align: center;
 }

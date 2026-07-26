@@ -62,6 +62,11 @@ $dropdown-padding-y: 0.25rem !default;
 $dropdown-item-padding-y: 0.25rem !default;
 $dropdown-item-padding-x: 0.375rem !default;
 $dropdown-header-padding-x: $dropdown-item-padding-x !default;
+// Bootstrap has no Combobox component. The Basic pass uses Bootstrap's input
+// height and dropdown menu surface, but the reference control width and list
+// scroll ceiling have no Bootstrap knob, so they live on component Sass knobs.
+$moo-combobox-width: 12.5rem !default;
+$moo-combobox-menu-max-height: 16rem !default;
 // Bootstrap defaults badges to $font-weight-bold. The reference badge reads as
 // a compact medium label, so keep the native $badge-font-weight knob at 500.
 $badge-font-weight: 500 !default;
