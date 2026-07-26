@@ -41,6 +41,32 @@
   flex: 0 0 auto;
 }
 
+.combobox-clear {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: flex;
+  width: $input-height;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+}
+
+.combobox-clear:hover,
+.combobox-clear:focus-visible {
+  color: var(--bs-body-color);
+}
+
+.combobox-clear > [data-icon] {
+  width: $small-font-size;
+  height: $small-font-size;
+  flex: 0 0 auto;
+}
+
 .combobox-chips {
   display: flex;
   min-height: $input-height;

@@ -332,6 +332,8 @@
     const chipValue = combobox.querySelector(".combobox-value");
     const valueStore = combobox.querySelector("[data-moo-combobox-value-store]");
     const chipIconTemplate = combobox.querySelector("[data-moo-combobox-chip-icon]");
+    const clearTrigger = combobox.querySelector("[data-moo-combobox-clear]");
+    const indicator = combobox.querySelector(".combobox-indicator");
     const options = Array.from(combobox.querySelectorAll(".combobox-option"));
     const menu = combobox.querySelector(".combobox-menu");
     const startsOpen = menu?.classList.contains("show");
@@ -388,6 +390,18 @@
     const selectedOptions = () =>
       options.filter((option) => option.getAttribute("aria-selected") === "true");
 
+    const toggleClear = (selected) => {
+      const value = selected ? "true" : "false";
+      combobox.dataset.mooComboboxSelected = value;
+      input.dataset.mooComboboxSelected = value;
+      if (clearTrigger) {
+        clearTrigger.hidden = !selected;
+        if (indicator) {
+          indicator.hidden = selected;
+        }
+      }
+    };
+
     const createChip = (option) => {
       const value = option.dataset.value || "";
       const label = optionLabel(option);
@@ -431,7 +445,7 @@
           valueStore.appendChild(field);
         });
       }
-      input.dataset.mooComboboxSelected = selected.length > 0 ? "true" : "false";
+      toggleClear(selected.length > 0);
     };
 
     const removeChip = (value) => {
@@ -457,7 +471,7 @@
       options.forEach((candidate) => {
         candidate.setAttribute("aria-selected", "false");
       });
-      input.dataset.mooComboboxSelected = "false";
+      toggleClear(false);
     };
 
     const clearStaleSelection = () => {
@@ -510,7 +524,7 @@
       });
       const label = optionLabel(option);
       input.value = label;
-      input.dataset.mooComboboxSelected = "true";
+      toggleClear(true);
       if (hidden) {
         hidden.value = option.dataset.value || "";
       }
@@ -533,6 +547,10 @@
       setActiveOption(visibleOptions()[0] || null);
     };
 
+    toggleClear(
+      input.dataset.mooComboboxSelected === "true" ||
+        combobox.dataset.mooComboboxSelected === "true"
+    );
     syncMultipleValue();
 
     input.addEventListener("focus", () => {
@@ -593,6 +611,16 @@
         }
       });
     });
+    if (clearTrigger) {
+      clearTrigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        clearSelection();
+        input.value = "";
+        input.focus();
+        filterOptions();
+      });
+    }
     combobox.addEventListener("click", (event) => {
       const trigger =
         event.target instanceof Element

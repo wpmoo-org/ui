@@ -43,6 +43,8 @@
   open=false,
   highlight_first=false,
   multiple=false,
+  show_clear=false,
+  clear_aria_label="Clear selection",
   dir="",
   extra_class=""
 ) -%}
@@ -54,6 +56,8 @@
   {% if dir not in combobox_directions %}{{ fail("Unknown combobox direction: " ~ dir) }}{% endif %}
   {% if multiple and selected is string and selected | trim %}{{ fail("Combobox multiple selected values must be a list") }}{% endif %}
   {% if not multiple and selected is not string %}{{ fail("Combobox single selected value must be a string") }}{% endif %}
+  {% if multiple and show_clear %}{{ fail("Combobox clear button supports single selection only") }}{% endif %}
+  {% if show_clear and not clear_aria_label | trim %}{{ fail("Combobox clear button aria_label is required") }}{% endif %}
 
   {% set input_id = id ~ "-input" %}
   {% set listbox_id = id ~ "-listbox" %}
@@ -82,8 +86,9 @@
   {% endfor %}
 
   {% set expanded = "true" if open else "false" %}
+  {% set has_selected_value = state.selected_values | length > 0 if multiple else state.label %}
 
-  <div class="combobox{% if multiple %} combobox--multiple{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"{% if multiple %} data-moo-combobox-multiple="true"{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
+  <div class="combobox{% if multiple %} combobox--multiple{% endif %}{% if show_clear and not multiple %} combobox--clearable{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" data-moo-combobox-selected="{{ "true" if has_selected_value else "false" }}"{% if multiple %} data-moo-combobox-multiple="true"{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
     {% if has_label %}<label class="form-label" for="{{ input_id }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label>{% endif %}
     <div class="combobox-control">
       {% if multiple %}
@@ -104,9 +109,10 @@
           <template data-moo-combobox-chip-icon>{{ render_icon("x", "inline-end") }}</template>
         </div>
       {% else %}
-        <input class="form-control combobox-input{% if invalid %} is-invalid{% endif %}" id="{{ input_id }}" type="text" role="combobox" autocomplete="off" aria-expanded="{{ expanded }}" aria-controls="{{ listbox_id }}" aria-autocomplete="list"{% if state.highlighted_id %} aria-activedescendant="{{ state.highlighted_id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if state.label %} value="{{ state.label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
+        <input class="form-control combobox-input{% if invalid %} is-invalid{% endif %}" id="{{ input_id }}" type="text" role="combobox" autocomplete="off" aria-expanded="{{ expanded }}" aria-controls="{{ listbox_id }}" aria-autocomplete="list" data-moo-combobox-selected="{{ "true" if state.label else "false" }}"{% if state.highlighted_id %} aria-activedescendant="{{ state.highlighted_id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if state.label %} value="{{ state.label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
         {% if name %}<input type="hidden" name="{{ name }}" value="{{ state.selected }}">{% endif %}
-        <span class="combobox-indicator" aria-hidden="true">{{ render_icon("chevron-down", "inline-end") }}</span>
+        {% if show_clear %}<button type="button" class="combobox-clear" aria-label="{{ clear_aria_label }}" data-moo-combobox-clear="true"{% if not state.label %} hidden{% endif %}{% if disabled %} disabled{% endif %}>{{ render_icon("x", "inline-end") }}</button>{% endif %}
+        <span class="combobox-indicator" aria-hidden="true"{% if show_clear and state.label %} hidden{% endif %}>{{ render_icon("chevron-down", "inline-end") }}</span>
       {% endif %}
       <ul class="dropdown-menu combobox-menu{% if open %} show{% endif %}" id="{{ listbox_id }}" role="listbox"{% if multiple %} aria-multiselectable="true"{% endif %}>
         {% set state.option_index = 0 %}

@@ -138,6 +138,52 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('data-value="billing" aria-selected="true"', output)
         self.assertIn('data-value="ops" aria-selected="false"', output)
 
+    def test_combobox_renders_clear_button_anatomy(self) -> None:
+        selected_output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-clear-selected", '
+            'aria_label="Reviewer", '
+            'name="reviewer", '
+            'placeholder="Select a reviewer", '
+            'show_clear=true, '
+            'selected="grace", '
+            'items=['
+            '{"value": "ada", "label": "Ada Lovelace"}, '
+            '{"value": "grace", "label": "Grace Hopper"}'
+            ']'
+            ') }}'
+        )
+        empty_output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-clear-empty", '
+            'aria_label="Reviewer", '
+            'name="reviewer", '
+            'placeholder="Select a reviewer", '
+            'show_clear=true, '
+            'items=['
+            '{"value": "ada", "label": "Ada Lovelace"}, '
+            '{"value": "grace", "label": "Grace Hopper"}'
+            ']'
+            ') }}'
+        )
+
+        self.assertIn('class="combobox combobox--clearable"', selected_output)
+        self.assertIn('data-moo-combobox-selected="true"', selected_output)
+        self.assertIn('class="form-control combobox-input"', selected_output)
+        self.assertIn('value="Grace Hopper"', selected_output)
+        self.assertIn('type="hidden" name="reviewer" value="grace"', selected_output)
+        self.assertIn('class="combobox-clear"', selected_output)
+        self.assertIn('aria-label="Clear selection"', selected_output)
+        self.assertIn('data-moo-combobox-clear="true"', selected_output)
+        self.assertIn('data-lucide="x"', selected_output)
+        self.assertNotIn("btn-close", selected_output)
+        self.assertNotIn('data-moo-combobox-clear="true" hidden', selected_output)
+        self.assertIn('class="combobox-indicator" aria-hidden="true" hidden', selected_output)
+        self.assertIn('data-lucide="chevron-down"', selected_output)
+        self.assertIn('data-moo-combobox-selected="false"', empty_output)
+        self.assertIn('data-moo-combobox-clear="true" hidden', empty_output)
+        self.assertIn('class="combobox-indicator" aria-hidden="true">', empty_output)
+
     def test_combobox_option_content_keeps_minimal_item_api(self) -> None:
         source = COMPONENT.read_text(encoding="utf-8")
 
@@ -156,6 +202,14 @@ class ComboboxTests(CatalogTestCase):
             script,
             r"event\.target\.closest\(\"\.combobox-chips\"\)[\s\S]*input\.focus\(\);",
         )
+
+    def test_combobox_preview_keeps_component_width_tokens(self) -> None:
+        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".moo-example__preview--narrow > .combobox", catalog_scss)
+        self.assertIn("max-width: var(--moo-combobox-width);", catalog_scss)
+        self.assertIn(".moo-example__preview--narrow > .combobox--multiple", catalog_scss)
+        self.assertIn("max-width: var(--moo-combobox-multiple-width);", catalog_scss)
 
     def test_combobox_fails_fast_for_invalid_basic_contracts(self) -> None:
         invalid_calls = (
@@ -200,6 +254,10 @@ class ComboboxTests(CatalogTestCase):
                 'combobox(id="combo", aria_label="Reviewer", multiple=false, selected=["x"], items=[{"value": "x", "label": "X"}])',
                 "Combobox single selected value must be a string",
             ),
+            (
+                'combobox(id="combo", aria_label="Reviewer", multiple=true, show_clear=true, items=[{"value": "x", "label": "X"}])',
+                "Combobox clear button supports single selection only",
+            ),
         )
 
         for call, message in invalid_calls:
@@ -207,7 +265,7 @@ class ComboboxTests(CatalogTestCase):
                 with self.assertRaisesRegex(ValueError, message):
                     self.render_combobox(f"{{{{ {call} }}}}")
 
-    def test_combobox_page_contains_basic_and_multiple_only_for_current_phase(self) -> None:
+    def test_combobox_page_contains_basic_multiple_and_clear_button_for_current_phase(self) -> None:
         self.assertTrue(PAGE.is_file(), "Combobox page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
 
@@ -218,7 +276,9 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('"multiple"', source)
         self.assertIn('"Multiple"', source)
         self.assertIn("Add review area", source)
-        self.assertNotIn('"Clear Button"', source)
+        self.assertIn('"clear-button"', source)
+        self.assertIn('"Clear Button"', source)
+        self.assertIn("show_clear=true", source)
         self.assertNotIn('"Groups"', source)
         self.assertNotIn('"Custom Items"', source)
         self.assertNotIn('"Popup"', source)
@@ -252,6 +312,10 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('hidden.value = "";', source)
         self.assertIn('input.addEventListener("blur", clearStaleSelection);', source)
         self.assertIn('event.key === "Tab"', source)
+        self.assertIn("data-moo-combobox-clear", source)
+        self.assertIn('clearTrigger.addEventListener("click"', source)
+        self.assertIn("toggleClear", source)
+        self.assertIn("indicator.hidden = selected;", source)
         self.assertNotIn("combobox-popup-trigger", source)
 
     def test_combobox_is_ready_in_catalog_registry(self) -> None:

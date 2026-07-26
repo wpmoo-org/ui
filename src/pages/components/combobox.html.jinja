@@ -64,6 +64,24 @@
     multiple,
     preview_class="moo-example__preview--narrow"
   ) }}
+
+  {% set clear_button %}
+    {{ combobox(
+      id="combobox-clear-reviewer",
+      aria_label="Reviewer with clear button",
+      name="clear_reviewer",
+      placeholder="Select a reviewer",
+      items=reviewer_items,
+      show_clear=true
+    ) }}
+  {% endset %}
+  {{ render_example(
+    "clear-button",
+    "Clear Button",
+    "A single-select combobox that reveals a clear button after a reviewer is selected.",
+    clear_button,
+    preview_class="moo-example__preview--narrow"
+  ) }}
 </div>
 
 {{ render_reference(

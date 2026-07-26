@@ -1367,6 +1367,14 @@ body {
   max-width: 24rem;
 }
 
+.moo-example__preview--narrow > .combobox {
+  max-width: var(--moo-combobox-width);
+}
+
+.moo-example__preview--narrow > .combobox--multiple {
+  max-width: var(--moo-combobox-multiple-width);
+}
+
 .moo-example__preview--medium>* {
   max-width: 30rem;
 }
