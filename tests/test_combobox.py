@@ -100,6 +100,44 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('class="dropdown-menu combobox-menu show"', output)
         self.assertNotIn('data-bs-popper="static"', output)
 
+    def test_combobox_renders_multiple_chips_anatomy(self) -> None:
+        output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-areas", '
+            'aria_label="Review areas", '
+            'name="review_areas", '
+            'placeholder="Add review area", '
+            'multiple=true, '
+            'selected=["security", "billing"], '
+            'items=['
+            '{"value": "security", "label": "Security"}, '
+            '{"value": "billing", "label": "Billing"}, '
+            '{"value": "ops", "label": "Operations"}'
+            ']'
+            ') }}'
+        )
+
+        self.assertIn('class="combobox combobox--multiple"', output)
+        self.assertIn('data-moo-combobox-multiple="true"', output)
+        self.assertIn('class="form-control combobox-chips"', output)
+        self.assertIn('class="combobox-value"', output)
+        self.assertEqual(output.count('class="badge text-bg-secondary combobox-chip"'), 2)
+        self.assertIn('aria-label="Remove Security"', output)
+        self.assertIn('aria-label="Remove Billing"', output)
+        self.assertIn('data-moo-combobox-chip-remove="true"', output)
+        self.assertIn("combobox-chips-input", output)
+        self.assertIn('role="combobox"', output)
+        self.assertIn('placeholder="Add review area"', output)
+        self.assertIn('aria-controls="combo-areas-listbox"', output)
+        self.assertIn('role="listbox" aria-multiselectable="true"', output)
+        self.assertEqual(output.count('type="hidden" name="review_areas"'), 2)
+        self.assertIn('type="hidden" name="review_areas" value="security"', output)
+        self.assertIn('type="hidden" name="review_areas" value="billing"', output)
+        self.assertNotIn('name="review_areas" role="combobox"', output)
+        self.assertIn('data-value="security" aria-selected="true"', output)
+        self.assertIn('data-value="billing" aria-selected="true"', output)
+        self.assertIn('data-value="ops" aria-selected="false"', output)
+
     def test_combobox_fails_fast_for_invalid_basic_contracts(self) -> None:
         invalid_calls = (
             (
@@ -133,7 +171,24 @@ class ComboboxTests(CatalogTestCase):
                 with self.assertRaisesRegex(ValueError, message):
                     self.render_combobox(f"{{{{ {call} }}}}")
 
-    def test_combobox_page_contains_basic_only_until_user_approves_more(self) -> None:
+    def test_combobox_multiple_requires_list_selection(self) -> None:
+        invalid_calls = (
+            (
+                'combobox(id="combo", aria_label="Reviewer", multiple=true, selected="x", items=[{"value": "x", "label": "X"}])',
+                "Combobox multiple selected values must be a list",
+            ),
+            (
+                'combobox(id="combo", aria_label="Reviewer", multiple=false, selected=["x"], items=[{"value": "x", "label": "X"}])',
+                "Combobox single selected value must be a string",
+            ),
+        )
+
+        for call, message in invalid_calls:
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(ValueError, message):
+                    self.render_combobox(f"{{{{ {call} }}}}")
+
+    def test_combobox_page_contains_basic_and_multiple_only_for_current_phase(self) -> None:
         self.assertTrue(PAGE.is_file(), "Combobox page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
 
@@ -141,7 +196,9 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('"basic"', source)
         self.assertIn('"Basic"', source)
         self.assertIn("Select a reviewer", source)
-        self.assertNotIn('"multiple"', source)
+        self.assertIn('"multiple"', source)
+        self.assertIn('"Multiple"', source)
+        self.assertIn("Add review area", source)
         self.assertNotIn('"Clear Button"', source)
         self.assertNotIn('"Groups"', source)
         self.assertNotIn('"Custom Items"', source)
@@ -158,16 +215,22 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn(".combobox-input", source)
         self.assertIn(".combobox-option", source)
         self.assertIn("data-moo-combobox-empty", source)
+        self.assertIn("mooComboboxMultiple", source)
+        self.assertIn("data-moo-combobox-chip-remove", source)
         self.assertIn('menu.classList.add("show")', source)
         self.assertIn('input.addEventListener("focus"', source)
         self.assertIn('setAttribute("aria-selected",', source)
+        self.assertIn("syncMultipleValue", source)
+        self.assertIn("removeChip", source)
+        self.assertIn('event.key === "Backspace"', source)
         self.assertIn('input.setAttribute("aria-activedescendant"', source)
         self.assertIn("hidden.value = option.dataset.value || \"\"", source)
         self.assertRegex(
             source,
             r"const closeMenu = \(\) => \{[^}]*input\.removeAttribute\(\"aria-activedescendant\"\);",
         )
-        self.assertRegex(source, r"const clearSelection = \(\) => \{[^}]*hidden\.value = \"\";")
+        self.assertIn("const clearSelection = () => {", source)
+        self.assertIn('hidden.value = "";', source)
         self.assertIn('input.addEventListener("blur", clearStaleSelection);', source)
         self.assertIn('event.key === "Tab"', source)
         self.assertNotIn("combobox-popup-trigger", source)

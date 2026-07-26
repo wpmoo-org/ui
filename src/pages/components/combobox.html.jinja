@@ -14,10 +14,18 @@
   {"value": "dorothy", "label": "Dorothy Vaughan"}
 ] %}
 
+{% set review_area_items = [
+  {"value": "security", "label": "Security"},
+  {"value": "billing", "label": "Billing"},
+  {"value": "ops", "label": "Operations"},
+  {"value": "support", "label": "Support"},
+  {"value": "compliance", "label": "Compliance"}
+] %}
+
 {% block content %}
 {{ render_page_header(
 "Combobox",
-"Autocomplete input for selecting one item from a suggestion list."
+"Autocomplete input for selecting one or more items from a suggestion list."
 ) }}
 
 <div class="moo-component-examples">
@@ -35,6 +43,25 @@
     "Basic",
     "A single-line input with a flat suggestion list, matching the shadcn Basic combobox anatomy before any advanced variants are added.",
     basic,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set multiple %}
+    {{ combobox(
+      id="combobox-review-areas",
+      aria_label="Review areas",
+      name="review_areas",
+      placeholder="Add review area",
+      items=review_area_items,
+      selected=["security", "billing", "ops"],
+      multiple=true
+    ) }}
+  {% endset %}
+  {{ render_example(
+    "multiple",
+    "Multiple",
+    "A chip input that keeps multiple selected review areas in the same searchable suggestion list.",
+    multiple,
     preview_class="moo-example__preview--narrow"
   ) }}
 </div>

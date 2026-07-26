@@ -3,10 +3,15 @@
 // and inline affordance in this component namespace.
 .combobox {
   --moo-combobox-width: #{$moo-combobox-width};
+  --moo-combobox-multiple-width: #{$moo-combobox-multiple-width};
   --moo-combobox-menu-max-height: #{$moo-combobox-menu-max-height};
 
   width: 100%;
   max-width: var(--moo-combobox-width);
+}
+
+.combobox--multiple {
+  max-width: var(--moo-combobox-multiple-width);
 }
 
 .combobox-control {
@@ -34,6 +39,79 @@
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
+}
+
+.combobox-chips {
+  display: flex;
+  min-height: $input-height;
+  align-items: center;
+  gap: $spacer * 0.25;
+  flex-wrap: wrap;
+  padding-block: $input-padding-y;
+  padding-inline: $input-padding-x;
+}
+
+.combobox-chips:focus-within {
+  border-color: $input-focus-border-color;
+  box-shadow: $input-focus-box-shadow;
+}
+
+.combobox-value {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: $spacer * 0.25;
+  flex-wrap: wrap;
+}
+
+.combobox-chip {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: $spacer * 0.25;
+}
+
+.combobox-chip__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combobox-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--bs-border-radius-pill);
+  background: transparent;
+  color: inherit;
+  opacity: 0.65;
+}
+
+.combobox-chip__remove:hover,
+.combobox-chip__remove:focus-visible {
+  opacity: 1;
+}
+
+.combobox-chip__remove > [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+  flex: 0 0 auto;
+}
+
+.combobox-chips-input {
+  min-width: $input-height * 2.5;
+  flex: 1 1 $input-height * 2.5;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.combobox-chips-input::placeholder {
+  color: var(--bs-tertiary-color);
 }
 
 .combobox-menu {

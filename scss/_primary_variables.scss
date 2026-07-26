@@ -66,6 +66,7 @@ $dropdown-header-padding-x: $dropdown-item-padding-x !default;
 // height and dropdown menu surface, but the reference control width and list
 // scroll ceiling have no Bootstrap knob, so they live on component Sass knobs.
 $moo-combobox-width: 12.5rem !default;
+$moo-combobox-multiple-width: $moo-combobox-width * 1.6 !default;
 $moo-combobox-menu-max-height: 16rem !default;
 // Bootstrap defaults badges to $font-weight-bold. The reference badge reads as
 // a compact medium label, so keep the native $badge-font-weight knob at 500.

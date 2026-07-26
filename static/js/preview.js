@@ -327,7 +327,11 @@
 
   document.querySelectorAll(".combobox").forEach((combobox) => {
     const input = combobox.querySelector(".combobox-input");
-    const hidden = combobox.querySelector('input[type="hidden"]');
+    const isMultiple = combobox.dataset.mooComboboxMultiple === "true";
+    const hidden = isMultiple ? null : combobox.querySelector('input[type="hidden"]');
+    const chipValue = combobox.querySelector(".combobox-value");
+    const valueStore = combobox.querySelector("[data-moo-combobox-value-store]");
+    const chipIconTemplate = combobox.querySelector("[data-moo-combobox-chip-icon]");
     const options = Array.from(combobox.querySelectorAll(".combobox-option"));
     const menu = combobox.querySelector(".combobox-menu");
     const startsOpen = menu?.classList.contains("show");
@@ -381,7 +385,72 @@
     const selectedOption = () =>
       options.find((option) => option.getAttribute("aria-selected") === "true") || null;
 
+    const selectedOptions = () =>
+      options.filter((option) => option.getAttribute("aria-selected") === "true");
+
+    const createChip = (option) => {
+      const value = option.dataset.value || "";
+      const label = optionLabel(option);
+      const chip = document.createElement("span");
+      chip.className = "badge text-bg-secondary combobox-chip";
+      chip.dataset.value = value;
+
+      const labelEl = document.createElement("span");
+      labelEl.className = "combobox-chip__label";
+      labelEl.textContent = label;
+      chip.appendChild(labelEl);
+
+      const remove = document.createElement("button");
+      remove.className = "combobox-chip__remove";
+      remove.type = "button";
+      remove.dataset.value = value;
+      remove.setAttribute("aria-label", `Remove ${label}`);
+      remove.setAttribute("data-moo-combobox-chip-remove", "true");
+      remove.append(chipIconTemplate?.content.cloneNode(true) || "x");
+      chip.appendChild(remove);
+
+      return chip;
+    };
+
+    const syncMultipleValue = () => {
+      if (!isMultiple) {
+        return;
+      }
+      const selected = selectedOptions();
+      if (chipValue) {
+        chipValue.replaceChildren(...selected.map((option) => createChip(option)));
+      }
+      if (valueStore) {
+        valueStore.replaceChildren();
+        const name = valueStore.dataset.mooComboboxName || "";
+        selected.forEach((option) => {
+          const field = document.createElement("input");
+          field.type = "hidden";
+          field.name = name;
+          field.value = option.dataset.value || "";
+          valueStore.appendChild(field);
+        });
+      }
+      input.dataset.mooComboboxSelected = selected.length > 0 ? "true" : "false";
+    };
+
+    const removeChip = (value) => {
+      const option = options.find((candidate) => candidate.dataset.value === value);
+      if (!option) {
+        return;
+      }
+      option.setAttribute("aria-selected", "false");
+      syncMultipleValue();
+    };
+
     const clearSelection = () => {
+      if (isMultiple) {
+        options.forEach((candidate) => {
+          candidate.setAttribute("aria-selected", "false");
+        });
+        syncMultipleValue();
+        return;
+      }
       if (hidden) {
         hidden.value = "";
       }
@@ -392,6 +461,14 @@
     };
 
     const clearStaleSelection = () => {
+      if (isMultiple) {
+        input.value = "";
+        options.forEach((option) => {
+          option.hidden = false;
+        });
+        empty.hidden = true;
+        return;
+      }
       const selected = selectedOption();
       const selectedLabel = optionLabel(selected);
       if (!input.value || (selectedLabel && normalize(input.value) === normalize(selectedLabel))) {
@@ -416,6 +493,15 @@
 
     const chooseOption = (option) => {
       if (!option || option.disabled) {
+        return;
+      }
+      if (isMultiple) {
+        const nextSelected = option.getAttribute("aria-selected") !== "true";
+        option.setAttribute("aria-selected", nextSelected ? "true" : "false");
+        input.value = "";
+        syncMultipleValue();
+        filterOptions();
+        setActiveOption(option);
         return;
       }
       options.forEach((candidate) => {
@@ -447,15 +533,19 @@
       setActiveOption(visibleOptions()[0] || null);
     };
 
+    syncMultipleValue();
+
     input.addEventListener("focus", () => {
       openMenu();
-      if (input.dataset.mooComboboxSelected === "true") {
+      if (!isMultiple && input.dataset.mooComboboxSelected === "true") {
         input.select();
       }
       setActiveOption(visibleOptions()[0] || null);
     });
     input.addEventListener("input", () => {
-      clearSelection();
+      if (!isMultiple) {
+        clearSelection();
+      }
       filterOptions();
     });
     input.addEventListener("blur", clearStaleSelection);
@@ -464,7 +554,14 @@
       const current = available.findIndex(
         (option) => option.id === input.getAttribute("aria-activedescendant")
       );
-      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (isMultiple && event.key === "Backspace" && input.value === "") {
+        const selected = selectedOptions();
+        const last = selected[selected.length - 1];
+        if (last) {
+          event.preventDefault();
+          removeChip(last.dataset.value || "");
+        }
+      } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         openMenu();
         const offset = event.key === "ArrowDown" ? 1 : -1;
@@ -475,7 +572,9 @@
         if (option) {
           event.preventDefault();
           chooseOption(option);
-          closeMenu();
+          if (!isMultiple) {
+            closeMenu();
+          }
         }
       } else if (event.key === "Escape") {
         closeMenu();
@@ -487,8 +586,24 @@
     options.forEach((option) => {
       option.addEventListener("click", () => {
         chooseOption(option);
-        closeMenu();
+        if (isMultiple) {
+          input.focus();
+        } else {
+          closeMenu();
+        }
       });
+    });
+    combobox.addEventListener("click", (event) => {
+      const trigger =
+        event.target instanceof Element
+          ? event.target.closest("[data-moo-combobox-chip-remove]")
+          : null;
+      if (!trigger) {
+        return;
+      }
+      event.preventDefault();
+      removeChip(trigger.dataset.value || "");
+      input.focus();
     });
     input.addEventListener("click", openMenu);
     filterOptions();
