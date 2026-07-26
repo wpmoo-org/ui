@@ -72,6 +72,11 @@
   display: inline-flex;
   flex: 0 0 auto;
   margin-inline-start: auto;
+  visibility: hidden;
+}
+
+.combobox-option[aria-selected="true"] .combobox-option__check {
+  visibility: visible;
 }
 
 .combobox-option__check > [data-icon] {

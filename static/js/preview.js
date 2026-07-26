@@ -369,6 +369,36 @@
     const closeMenu = () => {
       menu.classList.remove("show");
       setExpanded(false);
+      input.removeAttribute("aria-activedescendant");
+      options.forEach((candidate) => {
+        candidate.removeAttribute("aria-current");
+      });
+    };
+
+    const optionLabel = (option) =>
+      option?.querySelector(".combobox-option__label")?.textContent?.trim() || "";
+
+    const selectedOption = () =>
+      options.find((option) => option.getAttribute("aria-selected") === "true") || null;
+
+    const clearSelection = () => {
+      if (hidden) {
+        hidden.value = "";
+      }
+      options.forEach((candidate) => {
+        candidate.setAttribute("aria-selected", "false");
+      });
+      input.dataset.mooComboboxSelected = "false";
+    };
+
+    const clearStaleSelection = () => {
+      const selected = selectedOption();
+      const selectedLabel = optionLabel(selected);
+      if (!input.value || (selectedLabel && normalize(input.value) === normalize(selectedLabel))) {
+        return;
+      }
+      clearSelection();
+      input.value = "";
     };
 
     const setActiveOption = (option) => {
@@ -392,7 +422,7 @@
         const isSelected = candidate === option;
         candidate.setAttribute("aria-selected", isSelected ? "true" : "false");
       });
-      const label = option.querySelector(".combobox-option__label")?.textContent?.trim() || "";
+      const label = optionLabel(option);
       input.value = label;
       input.dataset.mooComboboxSelected = "true";
       if (hidden) {
@@ -425,9 +455,10 @@
       setActiveOption(visibleOptions()[0] || null);
     });
     input.addEventListener("input", () => {
-      input.dataset.mooComboboxSelected = "false";
+      clearSelection();
       filterOptions();
     });
+    input.addEventListener("blur", clearStaleSelection);
     input.addEventListener("keydown", (event) => {
       const available = visibleOptions();
       const current = available.findIndex(
@@ -474,8 +505,13 @@
       ) {
         const menu = combobox.querySelector(".combobox-menu");
         const input = combobox.querySelector(".combobox-input");
+        const options = combobox.querySelectorAll(".combobox-option");
         menu?.classList.remove("show");
         input?.setAttribute("aria-expanded", "false");
+        input?.removeAttribute("aria-activedescendant");
+        options.forEach((option) => {
+          option.removeAttribute("aria-current");
+        });
       }
     });
   });

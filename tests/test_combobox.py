@@ -59,9 +59,27 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('role="option"', output)
         self.assertIn('data-value="grace"', output)
         self.assertIn('aria-selected="true"', output)
-        self.assertIn('class="combobox-option__check"', output)
+        self.assertEqual(output.count('class="combobox-option__check"'), 2)
         self.assertNotIn("aria-multiselectable", output)
         self.assertNotIn("combobox-popup", output)
+
+    def test_combobox_check_icon_is_css_driven_for_runtime_selection(self) -> None:
+        output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-runtime", '
+            'aria_label="Reviewer", '
+            'items=['
+            '{"value": "ada", "label": "Ada Lovelace"}, '
+            '{"value": "grace", "label": "Grace Hopper"}'
+            ']'
+            ') }}'
+        )
+        scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
+
+        self.assertEqual(output.count('class="combobox-option__check"'), 2)
+        self.assertIn(".combobox-option__check", scss)
+        self.assertIn("visibility: hidden;", scss)
+        self.assertIn('.combobox-option[aria-selected="true"] .combobox-option__check', scss)
 
     def test_combobox_can_render_open_basic_list(self) -> None:
         output = self.render_combobox(
@@ -145,6 +163,12 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('setAttribute("aria-selected",', source)
         self.assertIn('input.setAttribute("aria-activedescendant"', source)
         self.assertIn("hidden.value = option.dataset.value || \"\"", source)
+        self.assertRegex(
+            source,
+            r"const closeMenu = \(\) => \{[^}]*input\.removeAttribute\(\"aria-activedescendant\"\);",
+        )
+        self.assertRegex(source, r"const clearSelection = \(\) => \{[^}]*hidden\.value = \"\";")
+        self.assertIn('input.addEventListener("blur", clearStaleSelection);', source)
         self.assertIn('event.key === "Tab"', source)
         self.assertNotIn("combobox-popup-trigger", source)
 

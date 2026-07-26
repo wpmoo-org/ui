@@ -2,7 +2,7 @@
 
 {% macro combobox_option_content(item, selected=false) -%}
   <span class="combobox-option__label">{{ item["label"] }}</span>
-  {% if selected %}<span class="combobox-option__check" aria-hidden="true">{{ render_icon("check", "inline-end") }}</span>{% endif %}
+  <span class="combobox-option__check" aria-hidden="true">{{ render_icon("check", "inline-end") }}</span>
 {%- endmacro %}
 
 {% macro combobox_options(id, items, state) -%}
