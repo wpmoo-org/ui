@@ -1,0 +1,142 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/field.html.jinja" import form, field, field_description, field_error, field_group, fieldset %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/radio_group.html.jinja" import radio_group %}
+{% from "components/select.html.jinja" import select %}
+{% from "components/switch.html.jinja" import switch %}
+{% from "components/textarea.html.jinja" import textarea %}
+{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Form — Moo UI{% endblock %}
+
+{% block content %}
+{{ render_page_header(
+"Form",
+"Bootstrap Forms are represented in Moo UI by the Field line: <code>form()</code>,
+<code>field()</code>, <code>fieldset()</code>, and <code>field_group()</code>. Use this page when you are building a whole form, then use Field for the individual primitives."
+) }}
+
+<div class="moo-component-examples">
+  {% set account_settings %}
+  {% call form(extra_class="needs-validation", novalidate=true) %}
+    {% call fieldset("Account profile", description="Update the details teammates see in shared project tools.") %}
+      {% call field_group() %}
+        {% call field() %}
+          {{ input(label="Display name", id="form-profile-name", placeholder="Ada Lovelace", required=true, describedby="form-profile-name-error") }}
+          {{ field_error("form-profile-name-error", "Enter a display name.") }}
+        {% endcall %}
+        {% call field() %}
+          {{ input(label="Role", id="form-profile-role", placeholder="Release coordinator", describedby="form-profile-role-help") }}
+          {{ field_description("form-profile-role-help", "Shown next to your avatar in handoff notes.") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+    {% call fieldset("Preferences", description="Choose how this workspace should notify you.") %}
+      {% call field_group() %}
+        {% call field() %}
+          {{ select(label="Default queue", id="form-profile-queue", options=[
+            {"value": "", "label": "Choose queue", "disabled": true},
+            {"value": "ops", "label": "Operations"},
+            {"value": "support", "label": "Support"},
+            {"value": "finance", "label": "Finance"}
+          ], selected="ops") }}
+        {% endcall %}
+        {% call field() %}
+          {{ switch(id="form-profile-digest", label="Send a daily digest", checked=true) }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+    <div class="d-flex flex-wrap gap-2">
+      {{ button("Save changes", type="submit") }}
+      {{ button("Reset", variant="outline", type="reset") }}
+    </div>
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+    "account-settings",
+    "Account settings",
+    "Use <code>form()</code> for the native form element and compose every visible row from the Field primitives.",
+    account_settings,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set deploy_request %}
+  {% call form(extra_class="needs-validation", novalidate=true) %}
+    {% call fieldset("Deploy request", description="Capture the minimum context needed before a release moves forward.") %}
+      {% call field_group() %}
+        {% call field() %}
+          {{ input(label="Release name", id="form-deploy-name", placeholder="billing-dashboard-v2", required=true, describedby="form-deploy-name-error") }}
+          {{ field_error("form-deploy-name-error", "Release name is required.") }}
+        {% endcall %}
+        {% call field() %}
+          {{ textarea(label="Reviewer notes", id="form-deploy-notes", placeholder="Call out database changes or rollback concerns.", rows=3, describedby="form-deploy-notes-help") }}
+          {{ field_description("form-deploy-notes-help", "Visible in the approval queue.") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+    {% call fieldset("Approval policy", description="Pick the checks this deploy must pass.") %}
+      {% call field_group() %}
+        {% call field() %}
+          {{ checkbox(id="form-deploy-security", label="Security review", checked=true) }}
+        {% endcall %}
+        {% call field() %}
+          {{ checkbox(id="form-deploy-backup", label="Backup verified", checked=true) }}
+        {% endcall %}
+        {% call field() %}
+          {{ checkbox(id="form-deploy-window", label="Maintenance window scheduled") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+    <div class="d-flex flex-wrap gap-2">
+      {{ button("Request deploy", type="submit") }}
+      {{ button("Save draft", variant="outline") }}
+    </div>
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+    "deploy-request",
+    "Deploy request",
+    "A complete form remains plain Bootstrap form markup underneath; Moo only standardizes the Field composition.",
+    deploy_request,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set access_policy %}
+  {% call form() %}
+    {% call fieldset("Workspace access", description="Set the default access level for new collaborators.") %}
+      {{ radio_group("form-access-policy", "Default access", [
+        {"id": "form-access-viewer", "label": "Viewer", "value": "viewer", "checked": true},
+        {"id": "form-access-editor", "label": "Editor", "value": "editor"},
+        {"id": "form-access-admin", "label": "Administrator", "value": "admin"}
+      ]) }}
+      {% call field_group() %}
+        {% call field() %}
+          {{ switch(id="form-access-expire", label="Expire guest access after 30 days", checked=true) }}
+        {% endcall %}
+        {% call field() %}
+          {{ switch(id="form-access-alert", label="Notify owners when access changes") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+  {% endset %}
+  {{ render_example(
+    "access-policy",
+    "Access policy",
+    "Use Fieldset for semantic grouping even when the child controls already own their labels.",
+    access_policy,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+</div>
+
+{{ render_reference(
+"For Bootstrap's underlying form controls, layout, validation, and accessibility model, see the",
+"https://getbootstrap.com/docs/5.3/forms/overview/",
+"Bootstrap Forms documentation"
+) }}
+
+{% endblock %}

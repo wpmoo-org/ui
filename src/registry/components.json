@@ -175,6 +175,16 @@
     "status": "ready"
   },
   {
+    "slug": "form",
+    "label": "Form",
+    "status": "ready"
+  },
+  {
+    "slug": "combobox",
+    "label": "Combobox",
+    "status": "ready"
+  },
+  {
     "slug": "toggle-group",
     "label": "Toggle Group",
     "status": "ready"

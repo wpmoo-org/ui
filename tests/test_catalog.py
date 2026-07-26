@@ -173,6 +173,10 @@ class CatalogContractTests(CatalogTestCase):
             # inside a .field, rather than owning a "field-" prefixed family
             # of its own for them.
             "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+            # Bootstrap has no native Combobox component. The public
+            # namespace is a composition of Bootstrap Input Group, Button,
+            # form-control, and Dropdown pieces.
+            "combobox": ("combobox",),
             # Input group owns the compound surface around Bootstrap's native
             # children, so its partial may retune the edge behavior of form,
             # button, validation, and dropdown children while scoped under

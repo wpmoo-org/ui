@@ -325,6 +325,176 @@
     window.addEventListener("hashchange", requestDocTocUpdate);
   }
 
+  document.querySelectorAll(".combobox").forEach((combobox) => {
+    const input = combobox.querySelector(".combobox-input");
+    const hidden = combobox.querySelector('input[type="hidden"]');
+    const options = Array.from(combobox.querySelectorAll(".combobox-option"));
+    const menu = combobox.querySelector(".combobox-menu");
+    const triggers = Array.from(
+      combobox.querySelectorAll(".combobox-popup-trigger")
+    );
+    const startsOpen = menu?.classList.contains("show");
+    let empty = menu?.querySelector("[data-moo-combobox-empty]");
+
+    if (!input || !menu || options.length === 0) {
+      return;
+    }
+
+    if (!empty) {
+      empty = document.createElement("li");
+      empty.className = "combobox-empty";
+      empty.hidden = true;
+      empty.dataset.mooComboboxEmpty = "true";
+      empty.textContent = "No results found.";
+      menu.appendChild(empty);
+    }
+
+    const visibleOptions = () => options.filter((option) => !option.hidden && !option.disabled);
+
+    const setExpanded = (expanded) => {
+      input.setAttribute("aria-expanded", expanded ? "true" : "false");
+      triggers.forEach((trigger) => {
+        trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
+      });
+    };
+
+    const openMenu = () => {
+      menu.classList.add("show");
+      menu.dataset.bsPopper = "static";
+      setExpanded(true);
+    };
+
+    const closeMenu = () => {
+      menu.classList.remove("show");
+      menu.removeAttribute("data-bs-popper");
+      setExpanded(false);
+    };
+
+    const setActiveOption = (option) => {
+      options.forEach((candidate) => {
+        const isActive = candidate === option;
+        candidate.toggleAttribute("aria-current", isActive);
+      });
+      if (option) {
+        input.setAttribute("aria-activedescendant", option.id);
+        option.scrollIntoView({ block: "nearest" });
+      } else {
+        input.removeAttribute("aria-activedescendant");
+      }
+    };
+
+    const chooseOption = (option) => {
+      if (!option || option.disabled) {
+        return;
+      }
+      options.forEach((candidate) => {
+        const isSelected = candidate === option;
+        candidate.setAttribute("aria-selected", isSelected ? "true" : "false");
+      });
+      const label = option.querySelector(".combobox-option__label")?.textContent?.trim() || "";
+      input.value = label;
+      if (hidden) {
+        hidden.value = option.dataset.value || "";
+      }
+      setActiveOption(option);
+    };
+
+    const filterOptions = () => {
+      openMenu();
+      const needle = normalize(input.value);
+      let count = 0;
+      options.forEach((option) => {
+        const matches = !needle || normalize(option.textContent).includes(needle);
+        option.hidden = !matches;
+        if (matches) {
+          count += 1;
+        }
+      });
+      Array.from(menu.querySelectorAll(".combobox-group-label")).forEach((label) => {
+        const groupItem = label.closest("li");
+        let sibling = groupItem?.nextElementSibling;
+        let hasVisibleOption = false;
+        while (sibling && !sibling.querySelector(".combobox-group-label")) {
+          if (sibling.querySelector(".combobox-option:not([hidden])")) {
+            hasVisibleOption = true;
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        if (groupItem) {
+          groupItem.hidden = !hasVisibleOption;
+        }
+      });
+      empty.hidden = count !== 0;
+      setActiveOption(visibleOptions()[0] || null);
+    };
+
+    input.addEventListener("focus", () => {
+      openMenu();
+      setActiveOption(visibleOptions()[0] || null);
+    });
+    input.addEventListener("input", filterOptions);
+    input.addEventListener("keydown", (event) => {
+      const available = visibleOptions();
+      const current = available.findIndex(
+        (option) => option.id === input.getAttribute("aria-activedescendant")
+      );
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const offset = event.key === "ArrowDown" ? 1 : -1;
+        const next = current === -1 ? 0 : (current + offset + available.length) % available.length;
+        setActiveOption(available[next]);
+      } else if (event.key === "Enter") {
+        const option = available[current];
+        if (option) {
+          event.preventDefault();
+          chooseOption(option);
+          closeMenu();
+        }
+      } else if (event.key === "Escape") {
+        closeMenu();
+        input.blur();
+      }
+    });
+    options.forEach((option) => {
+      option.addEventListener("click", () => {
+        chooseOption(option);
+        closeMenu();
+      });
+    });
+    combobox.querySelector(".combobox-clear")?.addEventListener("click", () => {
+      input.value = "";
+      if (hidden) {
+        hidden.value = "";
+      }
+      options.forEach((option) => option.setAttribute("aria-selected", "false"));
+      filterOptions();
+      input.focus();
+    });
+    filterOptions();
+    if (!startsOpen) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".combobox").forEach((combobox) => {
+      if (
+        event.target instanceof Node &&
+        !combobox.contains(event.target)
+      ) {
+        const menu = combobox.querySelector(".combobox-menu");
+        const input = combobox.querySelector(".combobox-input");
+        const triggers = Array.from(
+          combobox.querySelectorAll(".combobox-popup-trigger")
+        );
+        menu?.classList.remove("show");
+        menu?.removeAttribute("data-bs-popper");
+        input?.setAttribute("aria-expanded", "false");
+        triggers.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"));
+      }
+    });
+  });
+
   document.querySelectorAll("[data-moo-copy-page]").forEach((trigger) => {
     trigger.addEventListener("click", async () => {
       const value = trigger.getAttribute("data-moo-copy-value") || window.location.href.split("#")[0];
