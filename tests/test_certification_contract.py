@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
@@ -72,6 +75,78 @@ class CertificationContractTests(unittest.TestCase):
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
+
+    def test_preview_attestation_is_built_from_the_real_tarball(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            pack_result = subprocess.run(
+                [
+                    "npm",
+                    "pack",
+                    "--json",
+                    "--pack-destination",
+                    str(temporary_root),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+            pack_payload = json.loads(pack_result.stdout)
+            tarball = temporary_root / pack_payload[0]["filename"]
+            output = temporary_root / "attestation.json"
+            build_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/build-certification-attestation.py"),
+                    "--package",
+                    str(tarball),
+                    "--output",
+                    str(output),
+                    "--source-commit",
+                    "a" * 40,
+                    "--browser-name",
+                    "Chromium",
+                    "--browser-version",
+                    "test",
+                    "--operating-system",
+                    "test",
+                    "--automated-evidence",
+                    "https://github.com/wpmoo-org/ui/actions/runs/example",
+                    "--created-at",
+                    "2026-07-27T00:00:00Z",
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(build_result.returncode, 0, build_result.stderr)
+            attestation = json.loads(output.read_text(encoding="utf-8"))
+
+            self.assertEqual(attestation["status"], "preview")
+            self.assertEqual(attestation["scope"], "phase-0-pilot")
+            self.assertEqual(attestation["result"], "passed")
+            self.assertEqual(attestation["sourceCommit"], "a" * 40)
+            self.assertEqual(attestation["createdAt"], "2026-07-27T00:00:00Z")
+            self.assertEqual(
+                attestation["package"]["version"],
+                self._read_json("package.json")["version"],
+            )
+            self.assertRegex(attestation["package"]["sha256"], r"^[0-9a-f]{64}$")
+            self.assertRegex(
+                attestation["package"]["manifestSha256"],
+                r"^[0-9a-f]{64}$",
+            )
+            self.assertEqual(
+                [component["slug"] for component in attestation["components"]],
+                ["badge", "accordion", "dialog", "combobox", "sidebar"],
+            )
+            self.assertEqual(attestation["manualReviews"], [])
+            self.assertEqual(attestation["realDevices"], [])
+            self.assertEqual(attestation["waivers"], [])
+            self.assertIn("not a complete release certification", attestation["limitations"][0]["description"])
 
     def test_core_certification_sources_do_not_name_commercial_bridges(self) -> None:
         public_sources = [

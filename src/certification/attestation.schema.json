@@ -7,6 +7,8 @@
   "additionalProperties": false,
   "required": [
     "schemaVersion",
+    "status",
+    "scope",
     "coreVersion",
     "sourceCommit",
     "createdAt",
@@ -25,6 +27,13 @@
     "schemaVersion": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "enum": ["preview", "certified"]
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
     },
     "coreVersion": {
       "$ref": "#/$defs/semanticVersion"
