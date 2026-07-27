@@ -751,7 +751,9 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Bootstrap's JavaScript bundle", installation)
         self.assertIn("optional ESM only for components", installation)
         self.assertIn('href="../components/combobox/">Combobox</a>', installation)
+        self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
         self.assertNotIn('import Combobox from "@wpmoo/ui/combobox.js"', installation)
+        self.assertNotIn('import Sidebar from "@wpmoo/ui/sidebar.js"', installation)
         self.assertIn('id="adoption-paths">Adoption Paths</h2>', installation)
         self.assertNotIn("moo-doc-note", installation)
 

@@ -21,12 +21,13 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
-        self.assertTrue((DIST / "assets/js/components/combobox.js").is_file())
-        self.assertTrue((DIST / "js/combobox.js").is_file())
-        self.assertEqual(
-            (DIST / "assets/js/components/combobox.js").read_bytes(),
-            (DIST / "js/combobox.js").read_bytes(),
-        )
+        for module_name in ("combobox.js", "sidebar.js"):
+            self.assertTrue((DIST / f"assets/js/components/{module_name}").is_file())
+            self.assertTrue((DIST / f"js/{module_name}").is_file())
+            self.assertEqual(
+                (DIST / f"assets/js/components/{module_name}").read_bytes(),
+                (DIST / f"js/{module_name}").read_bytes(),
+            )
         index = (DIST / "index.html").read_text(encoding="utf-8")
         self.assertIn('<script type="module" src="assets/js/preview.js?', index)
         self.assertTrue((DIST / "llms.txt").is_file())

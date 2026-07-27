@@ -57,26 +57,30 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertEqual(package["type"], "module")
         self.assertEqual(package["exports"]["./combobox.js"], "./dist/js/combobox.js")
+        self.assertEqual(package["exports"]["./sidebar.js"], "./dist/js/sidebar.js")
         self.assertIn("dist/js/combobox.js", files)
+        self.assertIn("dist/js/sidebar.js", files)
         self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
 
-    def test_combobox_module_import_has_no_document_side_effect(self) -> None:
-        result = subprocess.run(
-            [
-                "node",
-                "--input-type=module",
-                "--eval",
-                'import("./src/js/components/combobox.js")',
-            ],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+    def test_component_module_imports_have_no_document_side_effect(self) -> None:
+        for module_name in ("combobox.js", "sidebar.js"):
+            with self.subTest(module_name=module_name):
+                result = subprocess.run(
+                    [
+                        "node",
+                        "--input-type=module",
+                        "--eval",
+                        f'import("./src/js/components/{module_name}")',
+                    ],
+                    cwd=ROOT,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
 
-        self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())

@@ -6,6 +6,10 @@ from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
+SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
+CATALOG_JS = ROOT / "static/js/preview.js"
+
+
 def _css_block(styles: str, selector: str) -> str:
     # Brace-depth aware so a rule containing Sass interpolation (`#{...}`) or
     # any other nested `{}` pair doesn't truncate the match at the wrong `}`.
@@ -720,66 +724,86 @@ class SidebarTests(CatalogTestCase):
         page = self.read_output("components/sidebar.html")
         self.assertIn("useSidebar", page)
         self.assertIn("data-moo-sidebar-state", page)
-        self.assertIn("static/js/preview.js", page)
+        self.assertIn("@wpmoo/ui/sidebar.js", page)
         self.assertIn("runtime mapping", page)
+        self.assertIn("Sidebar.getOrCreateInstance(element)", page)
+        self.assertIn("sidebar.dispose()", page)
+        self.assertNotIn("static/js/preview.js", page)
         self.assertNotIn("useSidebar()", page)
 
-        preview_js = self.read_output("assets/js/preview.js")
-        self.assertTrue(
-            "dataset.mooSidebarState" in preview_js
-            or "data-moo-sidebar-state" in preview_js,
-            "Sidebar runtime state should be controlled in static/js/preview.js",
-        )
+        sidebar_js = self.read_output("assets/js/components/sidebar.js")
+        self.assertIn("dataset.mooSidebarState", sidebar_js)
+        catalog_js = self.read_output("assets/js/preview.js")
+        self.assertIn('import Sidebar from "./components/sidebar.js";', catalog_js)
+        self.assertIn("Sidebar.getOrCreateInstance(element);", catalog_js)
+        self.assertNotIn("dataset.mooSidebarState", catalog_js)
+
+    def test_public_sidebar_module_owns_instance_lifecycle(self) -> None:
+        source = SIDEBAR_JS.read_text(encoding="utf-8")
+        catalog = CATALOG_JS.read_text(encoding="utf-8")
+
+        self.assertIn("export default class Sidebar", source)
+        self.assertIn("static getInstance(element)", source)
+        self.assertIn("static getOrCreateInstance(element, config = {})", source)
+        self.assertIn("instances.set(element, this);", source)
+        self.assertIn("instances.delete(this._element);", source)
+        self.assertIn("removeEventListener(type, handler, options)", source)
+        self.assertIn("this._directionObserver?.disconnect();", source)
+        self.assertIn("this._offcanvas?.dispose();", source)
+        self.assertIn('import Sidebar from "./components/sidebar.js";', catalog)
+        self.assertIn("Sidebar.getOrCreateInstance(element);", catalog)
+        self.assertNotIn("SIDEBAR_STORAGE_PREFIX", catalog)
+        self.assertNotIn("openSidebarFlyout", catalog)
 
     def test_sidebar_dropdown_trigger_disables_collapsed_tooltip_while_open(self) -> None:
-        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
 
-        self.assertIn("disposeSidebarTooltip", script)
+        self.assertIn("_disposeTooltip", script)
         self.assertIn('show.bs.dropdown', script)
         self.assertIn('hidden.bs.dropdown', script)
         self.assertIn('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]', script)
 
     def test_sidebar_identity_triggers_skip_collapsed_tooltips(self) -> None:
-        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
 
         self.assertIn('closest(".sidebar-menu-item--account")', script)
         self.assertIn('classList.contains("sidebar-menu-button--workspace")', script)
         self.assertIn("return;", script)
 
     def test_sidebar_disclosure_triggers_use_collapsed_flyout_instead_of_tooltip(self) -> None:
-        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
 
-        self.assertIn("openSidebarFlyout", script)
-        self.assertIn("closeSidebarFlyouts", script)
-        self.assertIn('window.addEventListener("click"', script)
+        self.assertIn("_openFlyout", script)
+        self.assertIn("_closeFlyouts", script)
+        self.assertIn('this._listen(this._window, "click"', script)
         self.assertIn("cloneNode(true)", script)
         self.assertIn("sidebar-menu-flyout", script)
         self.assertIn('flyout.removeAttribute("style")', script)
-        self.assertIn("sidebarFlyoutOwner === item", script)
-        self.assertIn("data-moo-sidebar-flyout", script)
+        self.assertIn("this._flyoutOwner === item", script)
+        self.assertIn("mooSidebarFlyout", script)
         self.assertIn("sidebar-menu-item--flyout-open", script)
         self.assertIn('querySelector(":scope > .sidebar-menu-sub")', script)
         self.assertIn("stopImmediatePropagation", script)
-        self.assertIn("sidebarFlyout.contains(event.target)", script)
-        self.assertIn("resetSidebarFlyoutTrigger(sidebarFlyoutOwner, false)", script)
-        self.assertIn("closeSidebarDropdowns(wrapper)", script)
+        self.assertIn("this._flyout.contains(event.target)", script)
+        self.assertIn("this._resetFlyoutTrigger(this._flyoutOwner, false)", script)
+        self.assertIn("this._closeDropdowns()", script)
         self.assertNotIn('document.addEventListener("pointerover"', script)
         self.assertNotIn('document.addEventListener("focusin"', script)
 
     def test_sidebar_overlays_close_siblings_before_opening(self) -> None:
-        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
 
-        self.assertIn("const closeSidebarDropdowns = (wrapper, exceptControl = null)", script)
+        self.assertIn("_closeDropdowns(exceptControl = null)", script)
         self.assertIn("control === exceptControl", script)
         self.assertIn("Dropdown.getOrCreateInstance(control).hide()", script)
-        self.assertIn("closeSidebarDropdowns(", script)
-        self.assertIn("positionCollapsedSidebarDropdown(control)", script)
+        self.assertIn("this._closeDropdowns(", script)
+        self.assertIn("this._positionDropdown(control)", script)
 
     def test_sidebar_workspace_dropdown_is_positioned_from_collapsed_icon_rail(self) -> None:
-        script = ROOT.joinpath("static/js/preview.js").read_text(encoding="utf-8")
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
 
-        self.assertIn("positionCollapsedSidebarDropdown", script)
-        self.assertIn("clearCollapsedSidebarDropdownPosition", script)
+        self.assertIn("_positionDropdown", script)
+        self.assertIn("_clearDropdownPosition", script)
         self.assertIn("mooSidebarDropdownPositioned", script)
         self.assertIn("[data-moo-sidebar-dropdown-positioned]", script)
         self.assertIn("--moo-sidebar-dropdown-inline-start", script)

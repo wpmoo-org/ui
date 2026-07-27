@@ -701,6 +701,7 @@ def asset_version() -> str:
         "assets/js/bootstrap.bundle.min.js",
         "assets/js/preview.js",
         "assets/js/components/combobox.js",
+        "assets/js/components/sidebar.js",
     ):
         path = DIST / relative
         digest.update(relative.encode("utf-8"))
@@ -720,11 +721,11 @@ def copy_assets() -> None:
         js_dir / "bootstrap.bundle.min.js.map",
     )
     component_js_dir = js_dir / "components"
-    component_js_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(JS_COMPONENTS / "combobox.js", component_js_dir / "combobox.js")
+    shutil.copytree(JS_COMPONENTS, component_js_dir, dirs_exist_ok=True)
     package_js_dir = DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(JS_COMPONENTS / "combobox.js", package_js_dir / "combobox.js")
+    for module_name in ("combobox.js", "sidebar.js"):
+        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
     fonts_dir = DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(

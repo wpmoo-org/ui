@@ -28,6 +28,7 @@
     "./moo.css": "./dist/assets/css/moo.css",
     "./moo.min.css": "./dist/assets/css/moo.min.css",
     "./combobox.js": "./dist/js/combobox.js",
+    "./sidebar.js": "./dist/js/sidebar.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -36,6 +37,7 @@
     "dist/assets/css/moo.css",
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
+    "dist/js/sidebar.js",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
