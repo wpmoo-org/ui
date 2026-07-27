@@ -20,6 +20,28 @@ $border-radius: 0.5rem !default;
 $border-radius-sm: 0.375rem !default;
 $border-radius-lg: 0.625rem !default;
 
+// Moo's runtime palette is emitted by both the standalone :root build and the
+// scoped Odoo core build. Keep values centralized here so the two entrypoints
+// cannot drift while still using their own selector ownership.
+$moo-surface: $body-bg !default;
+$moo-muted-surface: $secondary !default;
+$moo-border: $border-color !default;
+$moo-foreground: $body-color !default;
+$moo-muted-foreground: #71717a !default;
+$moo-ring: $body-color !default;
+$moo-destructive: $danger !default;
+$moo-destructive-foreground: $white !default;
+$moo-sidebar: $light !default;
+$moo-surface-dark: $dark !default;
+$moo-muted-surface-dark: #27272a !default;
+$moo-border-dark: #3f3f46 !default;
+$moo-foreground-dark: $light !default;
+$moo-muted-foreground-dark: #a1a1aa !default;
+$moo-ring-dark: $light !default;
+$moo-destructive-dark: #f87171 !default;
+$moo-destructive-foreground-dark: $dark !default;
+$moo-sidebar-dark: #1c1c1f !default;
+
 // Bootstrap's form-control consumes these values directly. Keep the native
 // Sass contract, but give text controls the same quiet surface and compact
 // geometry as the design reference.

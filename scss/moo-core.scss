@@ -20,6 +20,7 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 
 .moo-ui {
   @include moo-core-scales;
+  @include moo-core-shared;
   @include moo-core-light;
 }
 

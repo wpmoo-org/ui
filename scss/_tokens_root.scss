@@ -1,22 +1,25 @@
-:root,
-[data-bs-theme="light"] {
-  --moo-surface: #fff;
-  --moo-muted-surface: #f4f4f5;
-  --moo-border: #e4e4e7;
-  --moo-foreground: #18181b;
-  --moo-muted-foreground: #71717a;
-  --moo-ring: #18181b;
-  --moo-destructive: #dc2626;
-  --moo-destructive-foreground: #fff;
+:root {
   --moo-overlay-backdrop-opacity: #{$moo-overlay-backdrop-opacity};
   --moo-overlay-backdrop-bg: #{$moo-overlay-backdrop-bg};
   --moo-overlay-backdrop-filter: #{$moo-overlay-backdrop-filter};
   --moo-input-group-border-radius: #{$moo-input-group-border-radius};
   --moo-disabled-control-opacity: #{$moo-disabled-control-opacity};
-  --moo-sidebar: #fafafa;
   --moo-sidebar-foreground: var(--moo-foreground);
   --moo-sidebar-accent: var(--moo-muted-surface);
   --moo-sidebar-border: var(--moo-border);
+}
+
+:root,
+[data-bs-theme="light"] {
+  --moo-surface: #{$moo-surface};
+  --moo-muted-surface: #{$moo-muted-surface};
+  --moo-border: #{$moo-border};
+  --moo-foreground: #{$moo-foreground};
+  --moo-muted-foreground: #{$moo-muted-foreground};
+  --moo-ring: #{$moo-ring};
+  --moo-destructive: #{$moo-destructive};
+  --moo-destructive-foreground: #{$moo-destructive-foreground};
+  --moo-sidebar: #{$moo-sidebar};
   --bs-body-color: var(--moo-foreground);
   --bs-body-color-rgb: 24, 24, 27;
   --bs-heading-color: var(--moo-foreground);
@@ -24,23 +27,15 @@
 }
 
 [data-bs-theme="dark"] {
-  --moo-surface: #18181b;
-  --moo-muted-surface: #27272a;
-  --moo-border: #3f3f46;
-  --moo-foreground: #fafafa;
-  --moo-muted-foreground: #a1a1aa;
-  --moo-ring: #fafafa;
-  --moo-destructive: #f87171;
-  --moo-destructive-foreground: #18181b;
-  --moo-overlay-backdrop-opacity: #{$moo-overlay-backdrop-opacity};
-  --moo-overlay-backdrop-bg: #{$moo-overlay-backdrop-bg};
-  --moo-overlay-backdrop-filter: #{$moo-overlay-backdrop-filter};
-  --moo-input-group-border-radius: #{$moo-input-group-border-radius};
-  --moo-disabled-control-opacity: #{$moo-disabled-control-opacity};
-  --moo-sidebar: #1c1c1f;
-  --moo-sidebar-foreground: var(--moo-foreground);
-  --moo-sidebar-accent: var(--moo-muted-surface);
-  --moo-sidebar-border: var(--moo-border);
+  --moo-surface: #{$moo-surface-dark};
+  --moo-muted-surface: #{$moo-muted-surface-dark};
+  --moo-border: #{$moo-border-dark};
+  --moo-foreground: #{$moo-foreground-dark};
+  --moo-muted-foreground: #{$moo-muted-foreground-dark};
+  --moo-ring: #{$moo-ring-dark};
+  --moo-destructive: #{$moo-destructive-dark};
+  --moo-destructive-foreground: #{$moo-destructive-foreground-dark};
+  --moo-sidebar: #{$moo-sidebar-dark};
   --bs-body-color: var(--moo-foreground);
   --bs-body-color-rgb: 250, 250, 250;
   --bs-heading-color: var(--moo-foreground);

@@ -6,6 +6,33 @@ from tests.helpers import ROOT, CatalogTestCase
 
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
+MOO_THEME_TOKENS = {
+    "--moo-surface": ("$moo-surface", "$moo-surface-dark"),
+    "--moo-muted-surface": ("$moo-muted-surface", "$moo-muted-surface-dark"),
+    "--moo-border": ("$moo-border", "$moo-border-dark"),
+    "--moo-foreground": ("$moo-foreground", "$moo-foreground-dark"),
+    "--moo-muted-foreground": (
+        "$moo-muted-foreground",
+        "$moo-muted-foreground-dark",
+    ),
+    "--moo-ring": ("$moo-ring", "$moo-ring-dark"),
+    "--moo-destructive": ("$moo-destructive", "$moo-destructive-dark"),
+    "--moo-destructive-foreground": (
+        "$moo-destructive-foreground",
+        "$moo-destructive-foreground-dark",
+    ),
+    "--moo-sidebar": ("$moo-sidebar", "$moo-sidebar-dark"),
+}
+MOO_SHARED_TOKENS = {
+    "--moo-overlay-backdrop-opacity": "$moo-overlay-backdrop-opacity",
+    "--moo-overlay-backdrop-bg": "$moo-overlay-backdrop-bg",
+    "--moo-overlay-backdrop-filter": "$moo-overlay-backdrop-filter",
+    "--moo-input-group-border-radius": "$moo-input-group-border-radius",
+    "--moo-disabled-control-opacity": "$moo-disabled-control-opacity",
+    "--moo-sidebar-foreground": "var(--moo-foreground)",
+    "--moo-sidebar-accent": "var(--moo-muted-surface)",
+    "--moo-sidebar-border": "var(--moo-border)",
+}
 
 # Component partials must consume shared primitives (Bootstrap Sass/CSS scales
 # and --moo-* theme tokens); literal colors, shadows, and radii are defects.
@@ -27,6 +54,30 @@ def active_component_imports(source: str) -> set[str]:
             re.MULTILINE,
         )
     )
+
+
+def sass_var_reference(variable: str) -> str:
+    return f"#{{{variable}}}"
+
+
+def declarations_for(source: str) -> dict[str, set[str]]:
+    declarations: dict[str, set[str]] = {}
+    for line in source.splitlines():
+        match = DECLARATION.match(line)
+        if match:
+            prop, value = match.groups()
+            declarations.setdefault(prop, set()).add(value.strip())
+    return declarations
+
+
+def declaration_values_for(source: str) -> dict[str, list[str]]:
+    declarations: dict[str, list[str]] = {}
+    for line in source.splitlines():
+        match = DECLARATION.match(line)
+        if match:
+            prop, value = match.groups()
+            declarations.setdefault(prop, []).append(value.strip())
+    return declarations
 
 
 class DesignGateTests(CatalogTestCase):
@@ -134,6 +185,56 @@ class DesignGateTests(CatalogTestCase):
                     rf"{re.escape(knob)}\s*:[^;]+!default;",
                     f"{token} must have a matching {knob} !default Sass knob",
                 )
+
+    def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
+        primary_variables = (SCSS / "_primary_variables.scss").read_text(
+            encoding="utf-8"
+        )
+        tokens_root = (SCSS / "_tokens_root.scss").read_text(encoding="utf-8")
+        core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
+
+        for token, variables in MOO_THEME_TOKENS.items():
+            for variable in variables:
+                self.assertRegex(
+                    primary_variables,
+                    rf"{re.escape(variable)}\s*:[^;]+!default;",
+                    f"{token} must be backed by {variable} in primary variables",
+                )
+
+        for token, (light_variable, dark_variable) in MOO_THEME_TOKENS.items():
+            self.assertEqual(
+                declarations_for(tokens_root).get(token),
+                {
+                    sass_var_reference(light_variable),
+                    sass_var_reference(dark_variable),
+                },
+                f"{token} must use shared Sass variables in _tokens_root.scss",
+            )
+            self.assertEqual(
+                declarations_for(core_theme).get(token),
+                {
+                    sass_var_reference(light_variable),
+                    sass_var_reference(dark_variable),
+                },
+                f"{token} must use shared Sass variables in _core_theme.scss",
+            )
+
+        for token, variable in MOO_SHARED_TOKENS.items():
+            expected = (
+                sass_var_reference(variable)
+                if variable.startswith("$")
+                else variable
+            )
+            self.assertEqual(
+                declaration_values_for(tokens_root).get(token),
+                [expected],
+                f"{token} must be emitted once in _tokens_root.scss",
+            )
+            self.assertEqual(
+                declaration_values_for(core_theme).get(token),
+                [expected],
+                f"{token} must be emitted once in _core_theme.scss",
+            )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:
         primary_variables = (ROOT / "scss/_primary_variables.scss").read_text(
