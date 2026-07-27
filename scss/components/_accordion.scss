@@ -33,6 +33,16 @@
   text-decoration: underline;
 }
 
+.accordion-button:disabled {
+  color: var(--moo-muted-foreground);
+  opacity: var(--moo-disabled-control-opacity);
+  pointer-events: none;
+}
+
+.accordion-button:disabled:hover {
+  text-decoration: none;
+}
+
 // The reference's flush trigger and body sit edge-to-edge with no
 // horizontal padding, and the trigger reads as medium weight, not
 // Bootstrap's own regular default -- both retune existing Bootstrap

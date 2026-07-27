@@ -74,6 +74,12 @@ class TextareaTests(CatalogTestCase):
 
         self.assertIn('aria-describedby="message-help"', output)
 
+    def test_disabled_textarea_cannot_be_resized(self) -> None:
+        scss = (ROOT / "scss/components/_textarea.scss").read_text(encoding="utf-8")
+
+        self.assertIn("textarea.form-control:disabled {", scss)
+        self.assertIn("resize: none;", scss)
+
     def test_button_example_uses_render_example_argument_order(self) -> None:
         result = self.run_build()
 

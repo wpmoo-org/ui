@@ -6,6 +6,17 @@
   box-shadow: none;
 }
 
+// Bootstrap shows validation glow only on :focus, while the reference keeps a
+// subtle destructive ring visible for invalid controls. Keep it on native
+// form-control/form-select classes so Input, Select, Field, and Combobox share
+// the same validation affordance.
+.form-control.is-invalid,
+.form-control.is-invalid:focus,
+.form-select.is-invalid,
+.form-select.is-invalid:focus {
+  box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--bs-form-invalid-border-color) 20%, transparent);
+}
+
 // .btn-check toggle buttons (Toggle Group) put focus on the hidden input,
 // never the visible label, so the rule above can never match them; only
 // variants generated through Bootstrap's button-variant mixin (real theme

@@ -106,6 +106,16 @@ class AccordionTests(CatalogTestCase):
         self.assertIn("disabled>", output)
         self.assertIn('class="accordion-button collapsed text-muted"', output)
 
+    def test_disabled_accordion_triggers_use_shared_disabled_opacity(self) -> None:
+        scss = (ROOT / "scss/components/_accordion.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".accordion-button:disabled {", scss)
+        self.assertIn("color: var(--moo-muted-foreground);", scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
+        self.assertIn("pointer-events: none;", scss)
+        self.assertIn(".accordion-button:disabled:hover {", scss)
+        self.assertIn("text-decoration: none;", scss)
+
     def test_accordion_content_is_not_escaped(self) -> None:
         output = self.render_accordion(
             'accordion("faq", [{"id": "a", "title": "Q1", "content": "See <code>docs</code>."}])'

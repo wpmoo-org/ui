@@ -1,3 +1,8 @@
 .form-control {
   min-height: $input-height;
 }
+
+.form-control:disabled,
+.form-select:disabled {
+  opacity: var(--moo-disabled-control-opacity);
+}
