@@ -119,7 +119,12 @@ def new_case_context(browser: Browser, case: BrowserCase) -> BrowserContext:
     )
 
 
-def prepare_page(page: Page, case: BrowserCase) -> None:
+def prepare_page(
+    page: Page,
+    case: BrowserCase,
+    *,
+    normalize_screenshot: bool = False,
+) -> None:
     page.locator("html").evaluate(
         """
         (element, values) => {
@@ -129,7 +134,8 @@ def prepare_page(page: Page, case: BrowserCase) -> None:
         """,
         {"direction": case.direction, "colorScheme": case.color_scheme},
     )
-    page.add_style_tag(content=SCREENSHOT_NORMALIZATION_CSS)
+    if normalize_screenshot:
+        page.add_style_tag(content=SCREENSHOT_NORMALIZATION_CSS)
 
 
 def run_axe(page: Page) -> list[dict[str, object]]:
