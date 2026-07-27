@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Badge certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        max-width: 36rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Badge certification fixture</h1>
+      <section aria-label="Semantic badge variants" data-certification-surface>
+        <span class="badge text-bg-primary">Default</span>
+        <span class="badge text-bg-secondary">Secondary</span>
+        <span class="badge text-bg-danger">Destructive</span>
+        <span class="badge border text-body-secondary">Outline</span>
+        <span class="badge text-bg-success">Success</span>
+        <span class="badge text-bg-warning">Warning</span>
+        <span class="badge text-bg-info">Info</span>
+      </section>
+      <section aria-label="Badge shape and accessible context" data-certification-surface>
+        <span class="badge rounded-pill text-bg-primary">Pill</span>
+        <span class="badge text-bg-secondary">
+          4<span class="visually-hidden"> unread notifications</span>
+        </span>
+      </section>
+    </main>
+  </body>
+</html>

@@ -68,6 +68,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "axe-core": "4.12.1",
     "wrangler": "^4.112.0"
   }
 }
