@@ -50,6 +50,9 @@ ALLOWED_LITERALS = {"0", "none", "transparent", "inherit", "currentcolor"}
 TOKEN_COMPOSED_COLOR_FUNCTION = re.compile(
     r"\b(?:rgba?|hsla?|oklch)\(\s*var\("
 )
+RAW_RGB_TRIPLET = re.compile(
+    r"--[^:]+-rgb:\s*\d+\s*,\s*\d+\s*,\s*\d+\s*;"
+)
 
 
 def active_component_imports(source: str) -> set[str]:
@@ -200,6 +203,11 @@ class DesignGateTests(CatalogTestCase):
 
     def test_catalog_chrome_uses_tokens_for_color_literals(self) -> None:
         self.assertEqual(catalog_literal_offenders(SCSS / "catalog.scss"), [])
+
+    def test_scoped_theme_rgb_values_derive_from_sass_colors(self) -> None:
+        core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
+
+        self.assertEqual(RAW_RGB_TRIPLET.findall(core_theme), [])
 
     def test_sidebar_styles_own_the_public_sidebar_namespace(self) -> None:
         source = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
