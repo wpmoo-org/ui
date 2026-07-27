@@ -1,0 +1,173 @@
+// Bootstrap has no native sidebar, so this owned sidebar selector namespace
+// styles the app-shell primitive (same precedent as the avatar component).
+// Geometry rides the $moo-sidebar-* Sass knobs; every color consumes a
+// runtime --moo-* token.
+
+.sidebar-wrapper {
+  --moo-sidebar-width: #{$moo-sidebar-width};
+  --moo-sidebar-width-icon: #{$moo-sidebar-width-icon};
+  display: flex;
+  width: 100%;
+  min-height: 100svh;
+}
+
+.sidebar-wrapper--contained {
+  min-height: 0;
+  height: 34rem;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--moo-border);
+  border-radius: var(--bs-border-radius-xl);
+}
+
+// Sidebar column ---------------------------------------------------------
+.sidebar {
+  --bs-offcanvas-width: var(--moo-sidebar-width);
+  flex: 0 0 var(--moo-sidebar-width);
+  width: var(--moo-sidebar-width);
+  color: var(--moo-sidebar-foreground);
+  transition: flex-basis 0.2s ease, width 0.2s ease;
+}
+
+.sidebar[data-side="left"] .sidebar-inner {
+  border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.sidebar[data-side="right"] {
+  order: 1;
+}
+
+.sidebar[data-side="right"] .sidebar-inner {
+  border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+// Floating variant: the surface detaches from the viewport edge with a
+// margin gap on every side and gains a full rounded border and shadow,
+// replacing the flush single-edge border the default variant uses. Scoped
+// to desktop, matching how the mobile offcanvas drawer ignores variant.
+@include media-breakpoint-up(lg) {
+  .sidebar[data-variant="floating"] .sidebar-inner {
+    width: auto;
+    height: calc(100svh - #{$spacer});
+    max-height: calc(100svh - #{$spacer});
+    margin: $spacer * 0.5;
+    border: var(--bs-border-width) solid var(--moo-sidebar-border);
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: var(--bs-box-shadow-sm);
+  }
+
+  .sidebar-wrapper--contained .sidebar[data-variant="floating"] .sidebar-inner {
+    height: calc(100% - #{$spacer});
+    max-height: calc(100% - #{$spacer});
+  }
+
+  // At icon-rail width the detached card reads as floating mostly through
+  // elevation and breathing room, since the margin/border alone are hard to
+  // read at the base icon width; step up to Bootstrap's base shadow scale
+  // (still a shared token, no new value) and widen the column by the same
+  // margin the card's sides consume, so the icon rail itself keeps its full
+  // width instead of shrinking.
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] {
+    flex-basis: calc(var(--moo-sidebar-width-icon) + #{$spacer});
+    width: calc(var(--moo-sidebar-width-icon) + #{$spacer});
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] .sidebar-inner {
+    box-shadow: var(--bs-box-shadow);
+  }
+}
+
+.sidebar-inner {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100svh;
+  max-height: 100svh;
+  background: var(--moo-sidebar);
+}
+
+.sidebar-wrapper--contained .sidebar-inner {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+}
+
+.sidebar-header,
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.25;
+  padding: $spacer * 0.5;
+}
+
+.sidebar-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: $spacer * 0.5;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sidebar-input {
+  width: 100%;
+  padding: $spacer * 0.25;
+}
+
+.sidebar-separator {
+  display: flex;
+}
+
+.sidebar-menu-skeleton {
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.25;
+  min-height: $spacer * 2;
+  padding-inline: $spacer * 0.5;
+}
+
+.sidebar-menu-skeleton__icon {
+  width: $spacer;
+  height: $spacer;
+}
+
+.sidebar-menu-skeleton__line {
+  flex: 1 1 auto;
+}
+
+.sidebar-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: $spacer * 0.5;
+}
+
+.sidebar-group-content {
+  display: block;
+}
+
+.sidebar-group-content--inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacer * 0.25;
+}
+
+.sidebar-group-label {
+  display: flex;
+  align-items: center;
+  height: $spacer * 2;
+  padding-inline: $spacer * 0.5;
+  color: var(--moo-muted-foreground);
+  font-size: $font-size-base * 0.857;
+  font-weight: $font-weight-medium;
+}
+
+// Reserve room so a long label doesn't run under the absolutely positioned
+// group action button (see .sidebar-group-action below). A descendant match
+// covers both a group action placed directly in .sidebar-group and one
+// nested inside .sidebar-group-content alongside the label.
+.sidebar-group:has(.sidebar-group-action) .sidebar-group-label {
+  padding-inline-end: $spacer * 2.5;
+}

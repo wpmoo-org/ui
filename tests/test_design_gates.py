@@ -337,6 +337,24 @@ class DesignGateTests(CatalogTestCase):
                     f"{path.relative_to(SCSS)} is not imported",
                 )
 
+    def test_sidebar_aggregate_imports_ownership_layers_in_order(self) -> None:
+        sidebar = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
+
+        self.assertEqual(
+            re.findall(
+                r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
+                sidebar,
+                re.MULTILINE,
+            ),
+            [
+                "components/sidebar/layout",
+                "components/sidebar/menus",
+                "components/sidebar/identity",
+                "components/sidebar/inset",
+                "components/sidebar/collapsed",
+            ],
+        )
+
     def test_catalog_settings_own_catalog_knobs_only(self) -> None:
         catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
             encoding="utf-8"

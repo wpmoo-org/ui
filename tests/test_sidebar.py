@@ -8,6 +8,19 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
 CATALOG_JS = ROOT / "src/js/catalog/index.js"
+SIDEBAR_SCSS = ROOT / "scss/components"
+SIDEBAR_PARTIALS = (
+    SIDEBAR_SCSS / "_sidebar.scss",
+    SIDEBAR_SCSS / "sidebar/_layout.scss",
+    SIDEBAR_SCSS / "sidebar/_menus.scss",
+    SIDEBAR_SCSS / "sidebar/_identity.scss",
+    SIDEBAR_SCSS / "sidebar/_inset.scss",
+    SIDEBAR_SCSS / "sidebar/_collapsed.scss",
+)
+
+
+def read_sidebar_styles() -> str:
+    return "\n".join(path.read_text(encoding="utf-8") for path in SIDEBAR_PARTIALS)
 
 
 def _css_block(styles: str, selector: str) -> str:
@@ -227,7 +240,7 @@ class SidebarTests(CatalogTestCase):
                     self.render_sidebar("{{ " + call + " }}")
 
     def test_sidebar_collapsed_state_scoped_classes_are_present_in_css(self) -> None:
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
         self.assertIn(".sidebar-group-content", styles)
         self.assertIn(".sidebar-group-action", styles)
         self.assertIn(".sidebar-menu-badge", styles)
@@ -255,7 +268,7 @@ class SidebarTests(CatalogTestCase):
         )
 
     def test_sidebar_group_content_is_neutral_and_inline_modifier_is_scoped(self) -> None:
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
         self.assertIn("display: block", _css_block(styles, ".sidebar-group-content"))
         self.assertIn("width: 100%", _css_block(styles, ".sidebar-input"))
         self.assertIn("padding: $spacer * 0.25", _css_block(styles, ".sidebar-input"))
@@ -279,7 +292,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-badge"))
 
     def test_sidebar_menu_sub_item_badge_reserves_trailing_space(self) -> None:
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         output = self.render_sidebar(
             """
@@ -302,7 +315,7 @@ class SidebarTests(CatalogTestCase):
         )
 
     def test_collapsed_sidebar_submenus_render_as_side_flyouts(self) -> None:
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         flyout = _css_block(
             styles,
@@ -345,7 +358,7 @@ class SidebarTests(CatalogTestCase):
         # overlay their trailing slot in their own documented default usage,
         # as a sibling of sidebar_group_label / sidebar_menu_button, not only
         # when an extra `--has-action` class is added by the consumer.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         self.assertIn("position: relative", _css_block(styles, ".sidebar-group"))
         self.assertIn("position: absolute", _css_block(styles, ".sidebar-group-action"))
@@ -386,7 +399,7 @@ class SidebarTests(CatalogTestCase):
         # default to the same inset-inline-end slot, so the combined case
         # must shift the badge inward instead of overlapping the action. The
         # combination is auto-detected via :has() — no extra class required.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         base_badge_end = _css_block(styles, ".sidebar-menu-badge")
         action_end = _css_block(styles, ".sidebar-menu-action")
@@ -445,7 +458,7 @@ class SidebarTests(CatalogTestCase):
         self.assertNotIn('class="sidebar-menu-item dropdown dropend"', output)
 
     def test_sidebar_account_dropdown_open_state_is_visible(self) -> None:
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         open_account = _css_block(
             styles, '.sidebar-menu-button--account[aria-expanded="true"]'
@@ -501,7 +514,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("box-shadow: none", collapsed_account_focus)
 
     def test_sidebar_workspace_dropdown_uses_identity_trigger_contract(self) -> None:
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
         dropdown_styles = ROOT.joinpath("scss/components/_dropdown.scss").read_text()
 
         identity_cursors = _css_block(
@@ -550,7 +563,7 @@ class SidebarTests(CatalogTestCase):
     def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
         # Regression coverage: sidebar(variant="floating") accepted the enum
         # value but produced no visual difference from the default variant.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         floating = _css_block(styles, '.sidebar[data-variant="floating"] .sidebar-inner')
         self.assertIn("margin: $spacer * 0.5", floating)
@@ -570,14 +583,14 @@ class SidebarTests(CatalogTestCase):
         # adding a margin on top of that (without resetting width) makes the
         # card's border box extend past the fixed-width .sidebar column by
         # the margin amount on each side.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
         floating = _css_block(styles, '.sidebar[data-variant="floating"] .sidebar-inner')
         self.assertIn("width: auto", floating)
 
     def test_sidebar_inset_variant_turns_main_content_into_a_floating_card(self) -> None:
         # Regression coverage: sidebar(variant="inset") accepted the enum
         # value but produced no visual difference from the default variant.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         self.assertIn(
             "background: var(--moo-sidebar)",
@@ -603,7 +616,7 @@ class SidebarTests(CatalogTestCase):
         # position, so combining it with variant="inset" must flush the
         # content card against the end side, not the start side the
         # left-sidebar default assumes.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
 
         right_inset = _css_block(
             styles,
@@ -624,7 +637,7 @@ class SidebarTests(CatalogTestCase):
         # the design reference's own md:-prefixed scoping, so both new
         # blocks must live inside the same desktop-only breakpoint as the
         # icon-collapse rules.
-        styles = ROOT.joinpath("scss/components/_sidebar.scss").read_text()
+        styles = read_sidebar_styles()
         up_lg_blocks = re.findall(
             r"@include media-breakpoint-up\(lg\)\s*\{(.*?)\n\}", styles, re.DOTALL
         )

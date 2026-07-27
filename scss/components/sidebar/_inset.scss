@@ -1,0 +1,59 @@
+// Inset (content area) ---------------------------------------------------
+.sidebar-inset {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bs-body-bg);
+}
+
+.sidebar-inset__header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.5;
+  height: $spacer * 4;
+  padding-inline: $spacer;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+}
+
+.sidebar-inset__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// Inset variant: the sidebar itself stays flush; the main content becomes a
+// rounded, shadowed card with a gap around it, and the page background
+// switches to the sidebar's own surface color so the card reads as inset.
+// Collapsing to the icon rail restores the inline-start gap. Scoped to
+// desktop, matching how the mobile offcanvas drawer ignores variant.
+@include media-breakpoint-up(lg) {
+  .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {
+    background: var(--moo-sidebar);
+  }
+
+  .sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+    margin: $spacer * 0.5;
+    margin-inline-start: 0;
+    border-radius: var(--bs-border-radius-xl);
+    box-shadow: var(--bs-box-shadow-sm);
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+    margin-inline-start: $spacer * 0.5;
+  }
+
+  // A right-side sidebar sits on the opposite edge, so the content card must
+  // flush against the end side instead of the start side.
+  .sidebar-wrapper:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset {
+    margin-inline-start: $spacer * 0.5;
+    margin-inline-end: 0;
+  }
+
+  .sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset {
+    margin-inline-end: $spacer * 0.5;
+  }
+}

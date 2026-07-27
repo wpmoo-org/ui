@@ -1,0 +1,78 @@
+// Leading brand/avatar tiles for the team switcher and user rows.
+.sidebar-brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: $spacer * 2;
+  height: $spacer * 2;
+  flex: 0 0 auto;
+  border-radius: var(--bs-border-radius);
+}
+
+.sidebar-brand-mark [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+}
+
+.sidebar-brand-mark--primary {
+  color: var(--moo-sidebar);
+  background: var(--moo-sidebar-foreground);
+}
+
+.sidebar-brand-mark--muted {
+  color: var(--moo-sidebar-foreground);
+  border: var(--bs-border-width) solid var(--moo-sidebar-border);
+  background: var(--moo-sidebar-accent);
+}
+
+// Applied to the footer user avatar via the avatar macro's extra_class so the
+// override stays inside the sidebar's owned selector namespace.
+.sidebar-avatar {
+  border-radius: var(--bs-border-radius);
+}
+
+.sidebar-footer .sidebar-account-menu {
+  width: auto;
+  min-width: var(--moo-dropdown-sidebar-min-width);
+  padding: $spacer * 0.25;
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--bs-box-shadow);
+}
+
+.sidebar-account-menu__header {
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.5;
+  min-width: 0;
+  padding: $spacer * 0.375 $spacer * 0.25;
+}
+
+.sidebar-account-menu__item {
+  min-height: $spacer * 2;
+  padding: $spacer * 0.375 $spacer * 0.5;
+  line-height: $line-height-sm;
+  border-radius: var(--bs-border-radius);
+}
+
+.sidebar-account-menu__divider {
+  margin: $spacer * 0.25 0;
+}
+
+.sidebar-account-menu__identity {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.sidebar-account-menu__name {
+  overflow: hidden;
+  font-weight: $font-weight-medium;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-account-menu__email {
+  overflow: hidden;
+  color: var(--moo-muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
