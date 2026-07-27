@@ -32,6 +32,21 @@ def read_primary_variables() -> str:
     )
 
 
+def read_catalog_styles() -> str:
+    scss = ROOT / "scss"
+    paths = (
+        scss / "catalog.scss",
+        scss / "catalog/_shell.scss",
+        scss / "catalog/_home.scss",
+        scss / "catalog/_docs.scss",
+        scss / "catalog/_examples.scss",
+        scss / "catalog/_blocks.scss",
+        scss / "catalog/_code.scss",
+        scss / "catalog/_command.scss",
+    )
+    return "\n".join(path.read_text(encoding="utf-8") for path in paths)
+
+
 def pretty_output_path(relative_path: str) -> Path:
     path = Path(relative_path)
     if path.name == "index.html" or path.suffix != ".html":

@@ -3,7 +3,12 @@ from __future__ import annotations
 import json
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import (
+    ROOT,
+    CatalogTestCase,
+    read_catalog_styles,
+    read_primary_variables,
+)
 
 
 COMPONENT = ROOT / "src/components/combobox.html.jinja"
@@ -349,7 +354,7 @@ class ComboboxTests(CatalogTestCase):
         )
 
     def test_combobox_preview_keeps_component_width_tokens(self) -> None:
-        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        catalog_scss = read_catalog_styles()
         component_scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
 
         self.assertIn(".moo-example__preview--narrow > .combobox", catalog_scss)

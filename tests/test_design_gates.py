@@ -355,6 +355,30 @@ class DesignGateTests(CatalogTestCase):
             ],
         )
 
+    def test_catalog_aggregate_imports_ownership_layers_in_order(self) -> None:
+        catalog = (SCSS / "catalog.scss").read_text(encoding="utf-8")
+
+        self.assertEqual(
+            [
+                target
+                for target in re.findall(
+                    r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
+                    catalog,
+                    re.MULTILINE,
+                )
+                if target.startswith("catalog/")
+            ],
+            [
+                "catalog/shell",
+                "catalog/home",
+                "catalog/docs",
+                "catalog/examples",
+                "catalog/blocks",
+                "catalog/code",
+                "catalog/command",
+            ],
+        )
+
     def test_catalog_settings_own_catalog_knobs_only(self) -> None:
         catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
             encoding="utf-8"

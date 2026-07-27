@@ -1,0 +1,315 @@
+body {
+  min-height: 100vh;
+  background: var(--bs-tertiary-bg);
+}
+
+// Catalog-chrome-only display typeface. The Moo UI product itself
+// (moo-ui.scss) stays on Bootstrap's system-ui default; see the
+// $moo-catalog-font-family knob in _primary_variables.scss for the single
+// swap point if this font is ever replaced.
+@font-face {
+  font-family: "Geist";
+  src: url("../fonts/geist/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  // optional (not swap): a page either has the font in time for first paint
+  // or keeps the fallback for that render. No post-paint swap means no
+  // layout jump on slower connections, in any browser.
+  font-display: optional;
+}
+
+// Styled like a real search input (border + body background) rather than a
+// filled pill, so the Cmd/Ctrl+K hint on the right reads as a shortcut on a
+// field, not decoration on a button.
+.moo-catalog__search-trigger {
+  height: 2rem;
+  flex: 1 1 10rem;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  color: var(--bs-secondary-color);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  font-size: 0.875rem;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+.moo-catalog__search-trigger:hover {
+  background: var(--moo-muted-surface);
+}
+
+.moo-catalog__search-trigger:focus-visible {
+  // Match Bootstrap form-control disabled surface so the focused catalog
+  // search still reads like an input while the border remains visible.
+  background: $input-disabled-bg;
+}
+
+.moo-catalog__search-trigger-lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.moo-catalog__search-trigger-shortcut {
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// Below sm the trigger is icon-only, so it keeps the base .btn centering.
+// From sm up the visible "Search" label reads like input text, not a
+// centered button caption.
+@include media-breakpoint-up(sm) {
+  .moo-catalog__search-trigger {
+    justify-content: flex-start;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .moo-catalog__search-trigger {
+    flex: 0 0 auto;
+    justify-content: space-between;
+  }
+}
+
+@include media-breakpoint-up(sm) {
+  .moo-catalog__search-trigger {
+    width: 10rem;
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  .moo-catalog__search-trigger {
+    width: 13rem;
+  }
+}
+
+@include media-breakpoint-up(xxl) {
+  .moo-catalog__search-trigger {
+    width: 16rem;
+  }
+}
+
+.moo-catalog__search-trigger svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--bs-secondary-color);
+}
+
+.moo-catalog__header-divider--leading {
+  margin-inline-start: 0.5rem;
+}
+
+.moo-catalog__header-divider {
+  height: 1rem;
+  align-self: center;
+  background-color: var(--bs-border-color);
+}
+
+.moo-catalog__github-link {
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+  color: var(--bs-btn-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.moo-catalog__github-link svg {
+  width: 1rem;
+  height: 1rem;
+  color: currentColor;
+}
+
+.moo-catalog__theme-toggle {
+  border-radius: 50%;
+}
+
+.moo-catalog__theme-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-catalog {
+  --moo-catalog-header-height: 4rem;
+  --moo-catalog-header-bg-opacity: 0.94;
+  --moo-catalog-header-backdrop-filter: blur(0.75rem);
+  --moo-doc-body-font-size: 0.9375rem;
+  --moo-doc-toc-offset: calc(2rem + 5px);
+
+  min-height: 100vh;
+  font-family: $moo-catalog-font-family, var(--bs-body-font-family);
+}
+
+.moo-catalog > .sidebar-wrapper {
+  height: 100svh;
+  overflow: hidden;
+}
+
+.moo-catalog__header {
+  position: sticky;
+  z-index: $zindex-fixed;
+  top: 0;
+  min-height: var(--moo-catalog-header-height);
+  background: rgba(var(--bs-body-bg-rgb), var(--moo-catalog-header-bg-opacity));
+  backdrop-filter: var(--moo-catalog-header-backdrop-filter);
+}
+
+.moo-catalog__navbar {
+  min-height: var(--moo-catalog-header-height);
+}
+
+.moo-catalog__content,
+.moo-catalog__footer-inner {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+.moo-catalog__navbar-inner {
+  width: 100%;
+  gap: 1rem;
+}
+
+.moo-catalog__brand,
+.moo-catalog__sidebar-brand,
+.moo-catalog__sidebar-account {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  color: var(--bs-body-color);
+  text-decoration: none;
+}
+
+.moo-catalog__brand {
+  flex: 0 0 auto;
+}
+
+.moo-catalog__brand:hover,
+.moo-catalog__sidebar-brand:hover {
+  color: var(--bs-body-color);
+}
+
+.moo-catalog__brand-mark {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--bs-primary-text-emphasis);
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-secondary-bg);
+}
+
+.moo-catalog__brand-mark svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-catalog__brand-copy {
+  display: grid;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.moo-catalog__brand-title {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.moo-catalog__brand-subtitle {
+  overflow: hidden;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.moo-catalog__header-start {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.moo-catalog__sidebar-toggle,
+.moo-catalog__nav-menu-trigger {
+  --bs-btn-bg: var(--bs-body-bg);
+  --bs-btn-border-color: var(--moo-border);
+  --bs-btn-hover-border-color: var(--moo-border);
+  --bs-btn-active-border-color: var(--moo-border);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+@include media-breakpoint-down(md) {
+  .moo-catalog__sidebar-toggle,
+  .moo-catalog__nav-menu-trigger {
+    inline-size: 2.25rem;
+    min-height: 2.25rem;
+  }
+}
+
+.moo-catalog__nav-dropdown .dropdown-menu {
+  min-width: 10rem;
+}
+
+.moo-catalog__header-nav,
+.moo-catalog__header-nav .nav {
+  align-items: center;
+  gap: 1rem;
+}
+
+.moo-catalog__header-nav .nav-link {
+  min-height: 1.25rem;
+  padding: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.moo-catalog__header-nav .nav-link:hover,
+.moo-catalog__header-nav .nav-link.active {
+  color: var(--bs-body-color);
+  background: transparent;
+}
+
+.moo-catalog__header-nav .nav:has(.nav-link:hover) .nav-link.active:not(:hover) {
+  color: var(--bs-secondary-color);
+  background: transparent;
+}
+
+.moo-catalog__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@include media-breakpoint-up(md) {
+  .moo-catalog__header-start {
+    flex: 1 1 auto;
+  }
+
+  .moo-catalog__header-actions {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+}
+
+.moo-catalog__main {
+  --scroll-fade-size: min(6%, 2rem);
+  --scroll-fade-reveal: 4rem;
+  min-width: 0;
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}

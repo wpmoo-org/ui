@@ -1,0 +1,153 @@
+.moo-example__source {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  overflow: hidden;
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-code__reveal {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 1rem;
+  pointer-events: none;
+  background: linear-gradient(to top,
+      var(--bs-tertiary-bg),
+      color-mix(in srgb, var(--bs-tertiary-bg) 65%, transparent),
+      transparent);
+}
+
+.moo-code__reveal .btn {
+  pointer-events: auto;
+}
+
+[data-expanded="true"] .moo-code__reveal {
+  display: none;
+}
+
+.moo-example__source pre {
+  display: flex;
+  max-height: 6.75rem;
+  margin: 0;
+  padding: 0.875rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  line-height: 1.75;
+  white-space: pre;
+  direction: ltr;
+  text-align: left;
+}
+
+[data-expanded="true"] .moo-code {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+[data-expanded="true"] .moo-code--scrolling {
+  margin-bottom: 0.625rem;
+}
+
+.moo-code__copy {
+  position: absolute;
+  z-index: 3;
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+[data-expanded="true"] .moo-code__copy {
+  display: inline-flex;
+}
+
+.moo-code__lines {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: block;
+  min-width: 3.5rem;
+  padding: 0 0.75rem 0 1.25rem;
+  flex: 0 0 auto;
+  color: var(--bs-tertiary-color);
+  text-align: right;
+  pointer-events: none;
+  user-select: none;
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-code code {
+  display: block;
+  min-width: max-content;
+  padding-right: 2rem;
+  color: var(--bs-secondary-color);
+  font: inherit;
+}
+
+// references/bootstrap/5.3.3/scss/_variables.scss:1739-1740 gives <code>
+// only $code-color/$code-font-size, no background/padding/radius token
+// (see $moo-code-* in _primary_variables.scss for the gap citation and
+// why this doesn't just reuse <kbd>'s own knobs). Scoped to prose so it
+// never touches the syntax-highlighted code panel's own <code> rule above.
+.moo-doc-main :where(p, li) code {
+  padding: $moo-code-padding-y $moo-code-padding-x;
+  color: $moo-code-color;
+  background: $moo-code-bg;
+  border-radius: $border-radius-sm;
+}
+
+.moo-sidebar-demo__placeholder {
+  // The design reference uses bg-muted/50 for these preview surfaces.
+  background: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent);
+}
+
+.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) {
+  background: var(--bs-body-bg);
+}
+
+.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.moo-sidebar-demo--flat-inset .sidebar[data-side="left"] .sidebar-inner {
+  border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.moo-sidebar-demo--flat-inset .sidebar[data-side="right"] .sidebar-inner {
+  border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.moo-sidebar-demo--portal-shell .sidebar-inset__header {
+  border-bottom: 0;
+}
+
+.moo-sidebar-demo--portal-shell .sidebar-inset__header>.vr {
+  display: none;
+}
+
+.token.comment,
+.token.doctype,
+.token.punctuation {
+  color: var(--bs-tertiary-color);
+}
+
+.token.tag {
+  color: var(--bs-info-text-emphasis);
+}
+
+.token.attr-name {
+  color: var(--bs-success-text-emphasis);
+}
+
+.token.attr-value {
+  color: var(--bs-code-color);
+}
+
+[dir="rtl"] .moo-example__preview {
+  text-align: right;
+}

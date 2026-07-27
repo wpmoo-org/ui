@@ -12,6 +12,7 @@ from tests.helpers import (
     STATIC,
     CatalogTestCase,
     is_valid_webp,
+    read_catalog_styles,
     read_png_ihdr,
     read_primary_variables,
 )
@@ -392,7 +393,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
-        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        catalog_scss = read_catalog_styles()
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
         self.assertIn("background: $input-disabled-bg;", catalog_scss)
 
@@ -407,7 +408,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
-        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        catalog_scss = read_catalog_styles()
 
         self.assertIn("--moo-doc-body-font-size: 0.9375rem;", catalog_scss)
         self.assertIn(
