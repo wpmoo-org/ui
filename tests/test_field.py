@@ -6,7 +6,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/field.html.jinja"
 PAGE = ROOT / "src/pages/components/field.html.jinja"
-PREVIEW_JS = ROOT / "static/js/preview.js"
+BOOTSTRAP_PREVIEW_JS = ROOT / "src/js/catalog/bootstrap-preview.js"
 
 
 class FieldTests(CatalogTestCase):
@@ -156,9 +156,9 @@ class FieldTests(CatalogTestCase):
         self.assertIn("fieldset(", source)
         self.assertIn('type="submit"', source)
 
-    def test_preview_js_wires_needs_validation_forms(self) -> None:
-        self.assertTrue(PREVIEW_JS.is_file())
-        source = PREVIEW_JS.read_text(encoding="utf-8")
+    def test_catalog_bootstrap_module_wires_needs_validation_forms(self) -> None:
+        self.assertTrue(BOOTSTRAP_PREVIEW_JS.is_file())
+        source = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
 
         self.assertIn('form.needs-validation', source)
         self.assertIn("checkValidity", source)

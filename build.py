@@ -33,7 +33,8 @@ LLMS_TXT = ROOT / "llms.txt"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
-JS_COMPONENTS = SRC / "js/components"
+JS_SOURCE = SRC / "js"
+JS_COMPONENTS = JS_SOURCE / "components"
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -695,15 +696,13 @@ def compile_styles() -> None:
 
 def asset_version() -> str:
     digest = hashlib.sha256()
-    for relative in (
-        "assets/css/moo-ui.css",
-        "assets/css/catalog.css",
-        "assets/js/bootstrap.bundle.min.js",
-        "assets/js/preview.js",
-        "assets/js/components/combobox.js",
-        "assets/js/components/sidebar.js",
-    ):
-        path = DIST / relative
+    paths = [
+        DIST / "assets/css/moo-ui.css",
+        DIST / "assets/css/catalog.css",
+        *sorted((DIST / "assets/js").rglob("*.js")),
+    ]
+    for path in paths:
+        relative = path.relative_to(DIST).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]
@@ -720,8 +719,7 @@ def copy_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
-    component_js_dir = js_dir / "components"
-    shutil.copytree(JS_COMPONENTS, component_js_dir, dirs_exist_ok=True)
+    shutil.copytree(JS_SOURCE, js_dir, dirs_exist_ok=True)
     package_js_dir = DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
     for module_name in ("combobox.js", "sidebar.js"):

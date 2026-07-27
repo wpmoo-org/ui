@@ -7,7 +7,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
-CATALOG_JS = ROOT / "static/js/preview.js"
+CATALOG_JS = ROOT / "src/js/catalog/index.js"
 
 
 def _css_block(styles: str, selector: str) -> str:
@@ -733,8 +733,8 @@ class SidebarTests(CatalogTestCase):
 
         sidebar_js = self.read_output("assets/js/components/sidebar.js")
         self.assertIn("dataset.mooSidebarState", sidebar_js)
-        catalog_js = self.read_output("assets/js/preview.js")
-        self.assertIn('import Sidebar from "./components/sidebar.js";', catalog_js)
+        catalog_js = self.read_output("assets/js/catalog/index.js")
+        self.assertIn('import Sidebar from "../components/sidebar.js";', catalog_js)
         self.assertIn("Sidebar.getOrCreateInstance(element);", catalog_js)
         self.assertNotIn("dataset.mooSidebarState", catalog_js)
 
@@ -750,7 +750,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("removeEventListener(type, handler, options)", source)
         self.assertIn("this._directionObserver?.disconnect();", source)
         self.assertIn("this._offcanvas?.dispose();", source)
-        self.assertIn('import Sidebar from "./components/sidebar.js";', catalog)
+        self.assertIn('import Sidebar from "../components/sidebar.js";', catalog)
         self.assertIn("Sidebar.getOrCreateInstance(element);", catalog)
         self.assertNotIn("SIDEBAR_STORAGE_PREFIX", catalog)
         self.assertNotIn("openSidebarFlyout", catalog)

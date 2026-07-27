@@ -29,7 +29,7 @@ class BuildTests(CatalogTestCase):
                 (DIST / f"js/{module_name}").read_bytes(),
             )
         index = (DIST / "index.html").read_text(encoding="utf-8")
-        self.assertIn('<script type="module" src="assets/js/preview.js?', index)
+        self.assertIn('<script type="module" src="assets/js/catalog/index.js?', index)
         self.assertTrue((DIST / "llms.txt").is_file())
         self.assertTrue((DIST / "sitemap.xml").is_file())
         self.assertTrue((DIST / "robots.txt").is_file())

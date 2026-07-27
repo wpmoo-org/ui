@@ -377,7 +377,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         index = self.read_output("index.html")
-        preview = self.read_output("assets/js/preview.js")
+        preview = self.read_output("assets/js/catalog/command.js")
 
         # The header search trigger opens a command-palette modal listing the
         # catalog pages; it no longer deep-links to the index filter field.
@@ -387,7 +387,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="./"', index)
         self.assertIn('href="components/"', index)
         self.assertIn('href="components/button/"', index)
-        # Open + filter + keyboard navigation behavior lives in preview.js.
+        # Open + filter + keyboard navigation behavior lives in command.js.
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
@@ -397,13 +397,13 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        preview = (ROOT / "static/js/preview.js").read_text(encoding="utf-8")
+        preview = (ROOT / "src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
         self.assertIn("document.documentElement.dataset.bsTheme = theme", base)
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
-        self.assertIn("window.localStorage.getItem(THEME_STORAGE_KEY)", preview)
-        self.assertIn("window.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+        self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
+        self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
         catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
@@ -633,11 +633,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
         self.assertIn('aria-label="Next page: Changelog"', skills)
 
-        preview = self.read_output("assets/js/preview.js")
-        self.assertIn("[data-moo-copy-page]", preview)
-        self.assertIn("navigator.clipboard.writeText(value)", preview)
-        self.assertIn("[data-moo-catalog-section-filter]", preview)
-        self.assertIn("selectedCatalogSection", preview)
+        code_preview = self.read_output("assets/js/catalog/code-preview.js")
+        catalog_filter = self.read_output("assets/js/catalog/catalog-filter.js")
+        self.assertIn("[data-moo-copy-page]", code_preview)
+        self.assertIn("navigator.clipboard.writeText(value)", code_preview)
+        self.assertIn("[data-moo-catalog-section-filter]", catalog_filter)
+        self.assertIn("selectedSection", catalog_filter)
 
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()
@@ -726,12 +727,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn('data-moo-component-toc', components_index)
         self.assertNotIn('data-moo-component-doc-layout', components_index)
 
-        preview = self.read_output("assets/js/preview.js")
+        preview = self.read_output("assets/js/catalog/toc.js")
         self.assertIn("[data-moo-component-toc]", preview)
         self.assertIn(".moo-component-examples > .moo-example[aria-labelledby]", preview)
-        self.assertIn("componentTocNav.appendChild(link)", preview)
+        self.assertIn("componentNav.appendChild(link)", preview)
         self.assertIn('link.setAttribute("aria-current", "true")', preview)
-        self.assertIn('link.classList.toggle("active", isActive)', preview)
+        self.assertIn('link.classList.toggle("active", active)', preview)
 
     def test_installation_page_uses_published_cdn_path(self) -> None:
         result = self.run_build()

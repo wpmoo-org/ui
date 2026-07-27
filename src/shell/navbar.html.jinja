@@ -49,8 +49,8 @@
             {{ render_icon("search", "inline-start") }}
             <span class="d-none d-sm-inline">Search</span>
           </span>
-          {#- Real shortcut, not decoration: Cmd/Ctrl+K already opens this
-             same command palette (see the keydown listener in preview.js). #}
+          {#- Real shortcut, not decoration: Cmd/Ctrl+K opens this same
+             command palette through the catalog command module. #}
           <span class="moo-catalog__search-trigger-shortcut d-none d-md-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
         {% endset %}
         {{ button(

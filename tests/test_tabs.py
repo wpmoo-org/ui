@@ -99,15 +99,15 @@ class TabsTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        script = self.read_output("assets/js/preview.js")
-        self.assertIn("freezeCatalogScrollForTab", script)
-        self.assertIn("captureCatalogScrollForTab", script)
-        self.assertIn("pendingCatalogTabScrollTop", script)
-        self.assertIn('document.addEventListener("pointerdown"', script)
-        self.assertIn('document.addEventListener("show.bs.tab"', script)
-        self.assertIn('trigger.closest(".tabs-list")', script)
-        self.assertIn('catalogMain.style.scrollBehavior = "auto";', script)
-        self.assertIn("catalogMain.scrollTop = currentScrollTop;", script)
+        script = self.read_output("assets/js/catalog/code-preview.js")
+        self.assertIn("freezeTabScroll", script)
+        self.assertIn("captureTabScroll", script)
+        self.assertIn("pendingScrollTop", script)
+        self.assertIn('listen(root, "pointerdown"', script)
+        self.assertIn('listen(root, "show.bs.tab"', script)
+        self.assertIn('target.closest(".tabs-list")', script)
+        self.assertIn('main.style.scrollBehavior = "auto";', script)
+        self.assertIn("main.scrollTop = scrollTop;", script)
 
     def test_tabs_requires_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Tabs id is required"):
