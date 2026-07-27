@@ -1000,6 +1000,121 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_radio_group_fixture_proves_native_form_check_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/radio-group.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                default = page.locator("#certification-radio-email")
+                default_label = page.locator(
+                    'label[for="certification-radio-email"]'
+                )
+                alternate = page.locator("#certification-radio-sms")
+                described = page.locator("#certification-radio-drive")
+                described_alternate = page.locator("#certification-radio-sftp")
+                invalid = page.locator("#certification-radio-invalid-admin")
+                disabled = page.locator("#certification-radio-disabled-mobile")
+                disabled_label = page.locator(
+                    'label[for="certification-radio-disabled-mobile"]'
+                )
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(default.locator("xpath=ancestor::fieldset[1]")).to_have_class(
+                    "radio-group"
+                )
+                expect(default.locator("xpath=ancestor::fieldset[1]/legend")).to_have_class(
+                    "form-label"
+                )
+                expect(default.locator("xpath=ancestor::div[1]")).to_have_class(
+                    "form-check"
+                )
+                expect(default).to_have_class("form-check-input")
+                expect(default).to_have_attribute("type", "radio")
+                expect(default).to_have_attribute("name", "certification-channel")
+                expect(alternate).to_have_attribute("name", "certification-channel")
+                expect(default_label).to_have_class("form-check-label")
+                expect(default).to_be_checked()
+                default_label.click()
+                expect(default).to_be_checked()
+                alternate.check()
+                expect(alternate).to_be_checked()
+                self.assertFalse(default.is_checked())
+
+                described.check()
+                expect(described).to_be_checked()
+                self.assertFalse(described_alternate.is_checked())
+                expect(described).to_have_attribute(
+                    "aria-describedby",
+                    "certification-radio-drive-description",
+                )
+                expect(
+                    page.locator("#certification-radio-drive-description")
+                ).to_have_class("form-text")
+
+                expect(invalid).to_have_class("form-check-input is-invalid")
+                expect(invalid).to_have_attribute("required", "")
+                expect(invalid).to_have_attribute("aria-invalid", "true")
+                expect(invalid).to_have_attribute(
+                    "aria-describedby",
+                    "certification-radio-invalid-feedback",
+                )
+                expect(
+                    page.locator("#certification-radio-invalid-feedback")
+                ).to_have_class("invalid-feedback d-block")
+                self.assertTrue(
+                    invalid.evaluate("element => element.validity.valueMissing")
+                )
+
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+                self.assertLess(
+                    disabled_label.evaluate(
+                        "element => Number(getComputedStyle(element).opacity)"
+                    ),
+                    default_label.evaluate(
+                        "element => Number(getComputedStyle(element).opacity)"
+                    ),
+                )
+
+                default.check()
+                expect(default).to_be_checked()
+                default.focus()
+                expect(default).to_be_focused()
+                page.keyboard.press("ArrowDown")
+                expect(alternate).to_be_checked()
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
