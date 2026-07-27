@@ -1,0 +1,17 @@
+// The Moo UI product stylesheet (moo-ui.scss) stays on Bootstrap's
+// $font-family-sans-serif default. The catalog's own documentation chrome
+// (scss/catalog.scss, .moo-catalog scope only) may use a distinct display
+// typeface; this is the single swap point — vendor the font under
+// vendor/<font>/ (see vendor/geist/), add a matching @font-face block, and
+// change this variable. Never applied to .moo-example__preview, so a
+// component's live preview always matches its real Bootstrap-default
+// typography. The fallback stack is not duplicated here — catalog.scss
+// chains this onto the runtime --bs-body-font-family consumption value, so
+// it tracks Bootstrap's actual default instead of a second copy of it.
+// This variable is evaluated before Bootstrap's own defaults exist, so it
+// cannot reference $font-family-sans-serif directly.
+$moo-catalog-font-family: "Geist" !default;
+// Catalog chrome only: the command palette needs a stronger floating shadow
+// than the product component shadow scale. Keep the literal at the Sass
+// definition site so catalog.scss stays token-driven.
+$moo-catalog-command-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.25) !default;

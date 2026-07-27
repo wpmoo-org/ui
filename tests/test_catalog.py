@@ -13,6 +13,7 @@ from tests.helpers import (
     CatalogTestCase,
     is_valid_webp,
     read_png_ihdr,
+    read_primary_variables,
 )
 
 
@@ -841,9 +842,7 @@ class CatalogContractTests(CatalogTestCase):
             "--bs-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);", css
         )
         self.assertIn("--bs-border-radius-xl: 0.75rem;", css)
-        variables = (
-            ROOT / "scss/_primary_variables.scss"
-        ).read_text(encoding="utf-8")
+        variables = read_primary_variables()
         self.assertIn("$box-shadow-sm:", variables)
         self.assertIn("$border-radius-xl:", variables)
 

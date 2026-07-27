@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import tempfile
 
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
@@ -264,6 +264,46 @@ def catalog_literal_offenders(path: Path) -> list[str]:
 
 
 class DesignGateTests(CatalogTestCase):
+    def test_primary_variables_import_settings_in_dependency_order(self) -> None:
+        primary_variables = (SCSS / "_primary_variables.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(
+            [
+                target
+                for target in re.findall(
+                    r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
+                    primary_variables,
+                    re.MULTILINE,
+                )
+                if target.startswith("settings/")
+            ],
+            [
+                "settings/palette",
+                "settings/forms",
+                "settings/components",
+                "settings/catalog",
+                "settings/bootstrap_overrides",
+            ],
+        )
+
+    def test_catalog_settings_own_catalog_knobs_only(self) -> None:
+        catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
+            encoding="utf-8"
+        )
+        variables = re.findall(
+            r"^\s*(\$[\w-]+)\s*:",
+            catalog_settings,
+            re.MULTILINE,
+        )
+
+        self.assertTrue(variables)
+        self.assertTrue(
+            all(variable.startswith("$moo-catalog-") for variable in variables),
+            variables,
+        )
+
     def test_commented_component_imports_are_not_active(self) -> None:
         source = """
             @import "components/active";
@@ -391,9 +431,7 @@ class DesignGateTests(CatalogTestCase):
         )
 
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:
-        primary_variables = (
-            ROOT / "scss/_primary_variables.scss"
-        ).read_text(encoding="utf-8")
+        primary_variables = read_primary_variables()
         primary_lines = primary_variables.splitlines()
 
         for path in sorted(component_partials()):
@@ -439,9 +477,7 @@ class DesignGateTests(CatalogTestCase):
                 )
 
     def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
-        primary_variables = (SCSS / "_primary_variables.scss").read_text(
-            encoding="utf-8"
-        )
+        primary_variables = read_primary_variables()
         tokens_root = (SCSS / "_tokens_root.scss").read_text(encoding="utf-8")
         core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
 
@@ -489,9 +525,7 @@ class DesignGateTests(CatalogTestCase):
             )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:
-        primary_variables = (ROOT / "scss/_primary_variables.scss").read_text(
-            encoding="utf-8"
-        )
+        primary_variables = read_primary_variables()
         for scale_variable in (
             "$box-shadow-sm:",
             "$box-shadow:",

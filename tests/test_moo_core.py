@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_primary_variables
 from tests.helpers.css_contract import (
     assert_allowed_global_rules,
     assert_animation_closure,
@@ -167,9 +167,7 @@ class MooCoreTests(CatalogTestCase):
 
     def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
         overlay_layer = OVERLAY_BACKDROP_SCSS.read_text(encoding="utf-8")
-        primary_variables = (SCSS / "_primary_variables.scss").read_text(
-            encoding="utf-8"
-        )
+        primary_variables = read_primary_variables()
         tokens_root = (SCSS / "_tokens_root.scss").read_text(encoding="utf-8")
         core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
 

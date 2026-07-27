@@ -17,6 +17,21 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 PNG_COLOR_TYPE_RGBA = 6
 
 
+def read_primary_variables() -> str:
+    scss = ROOT / "scss"
+    paths = (
+        scss / "_primary_variables.scss",
+        scss / "settings/_palette.scss",
+        scss / "settings/_forms.scss",
+        scss / "settings/_components.scss",
+        scss / "settings/_catalog.scss",
+        scss / "settings/_bootstrap_overrides.scss",
+    )
+    return "\n".join(
+        path.read_text(encoding="utf-8") for path in paths if path.exists()
+    )
+
+
 def pretty_output_path(relative_path: str) -> Path:
     path = Path(relative_path)
     if path.name == "index.html" or path.suffix != ".html":
