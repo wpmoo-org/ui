@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "0.1",
+  "status": "baseline",
+  "description": "Pre-certification evidence inventory for the 40 components ready in Moo UI Core 0.4.0. Profile status is conservative: static source assertions count as existing contract evidence, while browser, accessibility-engine, visual, lifecycle, and host-conformance evidence remains missing until the certification harness proves it.",
+  "categories": [
+    "contract",
+    "markup",
+    "theme",
+    "rtl",
+    "responsive",
+    "keyboard",
+    "focus",
+    "lifecycle",
+    "accessibility",
+    "visual",
+    "real-device",
+    "host-conformance"
+  ],
+  "statusDefinitions": {
+    "existing": "Current repository evidence satisfies the baseline category.",
+    "missing": "Certification evidence still has to be implemented or completed.",
+    "not-applicable": "The category does not apply to this component contract.",
+    "manual": "The category requires structured human evidence for a release."
+  },
+  "profiles": {
+    "t0-static": {
+      "tier": 0,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "accessibility", "visual", "host-conformance"],
+      "not-applicable": ["keyboard", "focus", "lifecycle"],
+      "manual": ["real-device"]
+    },
+    "t0-interactive": {
+      "tier": 0,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual", "host-conformance"],
+      "not-applicable": ["lifecycle"],
+      "manual": ["real-device"]
+    },
+    "t1-bootstrap-data": {
+      "tier": 1,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual", "host-conformance"],
+      "not-applicable": [],
+      "manual": ["real-device"]
+    },
+    "t1-native-state": {
+      "tier": 1,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual", "host-conformance"],
+      "not-applicable": ["lifecycle"],
+      "manual": ["real-device"]
+    },
+    "t2-overlay": {
+      "tier": 2,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual", "host-conformance"],
+      "not-applicable": [],
+      "manual": ["real-device"]
+    },
+    "t3-runtime-composite": {
+      "tier": 3,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual", "host-conformance"],
+      "not-applicable": [],
+      "manual": ["real-device"]
+    },
+    "t3-static-composite": {
+      "tier": 3,
+      "existing": ["contract", "markup"],
+      "missing": ["theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual", "host-conformance"],
+      "not-applicable": ["lifecycle"],
+      "manual": ["real-device"]
+    }
+  },
+  "components": [
+    {"slug": "button", "profile": "t0-interactive", "evidence": ["tests/test_button.py"]},
+    {"slug": "button-group", "profile": "t0-interactive", "evidence": ["tests/test_button_group.py"]},
+    {"slug": "card", "profile": "t0-static", "evidence": ["tests/test_card.py"]},
+    {"slug": "typography", "profile": "t0-static", "evidence": ["tests/test_typography.py"]},
+    {"slug": "kbd", "profile": "t0-static", "evidence": ["tests/test_kbd.py"]},
+    {"slug": "input", "profile": "t0-interactive", "evidence": ["tests/test_input.py"]},
+    {"slug": "textarea", "profile": "t0-interactive", "evidence": ["tests/test_textarea.py"]},
+    {"slug": "input-group", "profile": "t0-interactive", "evidence": ["tests/test_input_group.py"]},
+    {"slug": "select", "profile": "t0-interactive", "evidence": ["tests/test_select.py"]},
+    {"slug": "dropdown-menu", "profile": "t1-bootstrap-data", "evidence": ["tests/test_dropdown_menu.py"]},
+    {"slug": "badge", "profile": "t0-static", "evidence": ["tests/test_badge.py"]},
+    {"slug": "avatar", "profile": "t0-static", "evidence": ["tests/test_avatar.py"]},
+    {"slug": "navigation", "profile": "t0-interactive", "evidence": ["tests/test_navigation.py"]},
+    {"slug": "separator", "profile": "t0-static", "evidence": ["tests/test_separator.py"]},
+    {"slug": "skeleton", "profile": "t0-static", "evidence": ["tests/test_skeleton.py"]},
+    {"slug": "sidebar", "profile": "t3-runtime-composite", "evidence": ["tests/test_sidebar.py", "src/js/components/sidebar.js"]},
+    {"slug": "close-button", "profile": "t0-interactive", "evidence": ["tests/test_close_button.py"]},
+    {"slug": "alert", "profile": "t1-bootstrap-data", "evidence": ["tests/test_alert.py"]},
+    {"slug": "breadcrumb", "profile": "t0-interactive", "evidence": ["tests/test_breadcrumb.py"]},
+    {"slug": "pagination", "profile": "t0-interactive", "evidence": ["tests/test_pagination.py"]},
+    {"slug": "progress", "profile": "t0-static", "evidence": ["tests/test_progress.py"]},
+    {"slug": "table", "profile": "t0-static", "evidence": ["tests/test_table.py"]},
+    {"slug": "checkbox", "profile": "t0-interactive", "evidence": ["tests/test_checkbox.py"]},
+    {"slug": "radio-group", "profile": "t0-interactive", "evidence": ["tests/test_radio_group.py"]},
+    {"slug": "switch", "profile": "t0-interactive", "evidence": ["tests/test_switch.py"]},
+    {"slug": "spinner", "profile": "t0-static", "evidence": ["tests/test_spinner.py"]},
+    {"slug": "accordion", "profile": "t1-bootstrap-data", "evidence": ["tests/test_accordion.py"]},
+    {"slug": "tabs", "profile": "t1-bootstrap-data", "evidence": ["tests/test_tabs.py"]},
+    {"slug": "collapsible", "profile": "t1-bootstrap-data", "evidence": ["tests/test_collapsible.py"]},
+    {"slug": "tooltip", "profile": "t2-overlay", "evidence": ["tests/test_tooltip.py"]},
+    {"slug": "popover", "profile": "t2-overlay", "evidence": ["tests/test_popover.py"]},
+    {"slug": "dialog", "profile": "t2-overlay", "evidence": ["tests/test_dialog.py"]},
+    {"slug": "toast", "profile": "t2-overlay", "evidence": ["tests/test_toast.py"]},
+    {"slug": "sheet", "profile": "t2-overlay", "evidence": ["tests/test_sheet.py"]},
+    {"slug": "field", "profile": "t0-interactive", "evidence": ["tests/test_field.py"]},
+    {"slug": "form", "profile": "t3-static-composite", "evidence": ["tests/test_form.py", "tests/test_field.py"]},
+    {"slug": "combobox", "profile": "t3-runtime-composite", "evidence": ["tests/test_combobox.py", "src/js/components/combobox.js"]},
+    {"slug": "toggle-group", "profile": "t1-native-state", "evidence": ["tests/test_toggle_group.py"]},
+    {"slug": "alert-dialog", "profile": "t3-runtime-composite", "evidence": ["tests/test_alert_dialog.py", "tests/test_dialog.py"]},
+    {"slug": "menubar", "profile": "t3-runtime-composite", "evidence": ["tests/test_menubar.py", "tests/test_dropdown_menu.py"]}
+  ],
+  "plannedComponents": [
+    {"slug": "context-menu", "tier": 3},
+    {"slug": "data-table", "tier": 3}
+  ]
+}
