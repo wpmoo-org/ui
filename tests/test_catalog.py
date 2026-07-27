@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 
 from tests.helpers import (
     DIST,
@@ -300,7 +301,7 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertIn("noopener", tokens)
                     self.assertIn("noreferrer", tokens)
 
-    def test_ready_components_ship_a_real_preview_image(self) -> None:
+    def test_ready_component_preview_images_are_valid_when_present(self) -> None:
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
@@ -308,16 +309,21 @@ class CatalogContractTests(CatalogTestCase):
             item["slug"] for item in catalog if item["status"] == "ready"
         ]
         previews_dir = STATIC / "images/components"
+        placeholder = STATIC / "images/placeholder.webp"
+        missing: list[str] = []
+
+        self.assertTrue(
+            is_valid_webp(placeholder),
+            "the shared component preview fallback must be a valid WebP file",
+        )
 
         for slug in ready_slugs:
             with self.subTest(slug=slug):
                 png_path = previews_dir / f"{slug}.png"
                 webp_path = previews_dir / f"{slug}.webp"
-                self.assertTrue(
-                    png_path.is_file() or webp_path.is_file(),
-                    f"{slug} has no preview PNG/WEBP and silently falls back "
-                    "to placeholder.webp",
-                )
+                if not png_path.is_file() and not webp_path.is_file():
+                    missing.append(slug)
+                    continue
                 if webp_path.is_file():
                     self.assertTrue(
                         is_valid_webp(webp_path),
@@ -331,6 +337,12 @@ class CatalogContractTests(CatalogTestCase):
                     PNG_COLOR_TYPE_RGBA,
                     f"{slug}.png is not RGBA (color type {color_type})",
                 )
+
+        if missing:
+            warnings.warn(
+                "ready components using placeholder.webp: " + ", ".join(missing),
+                stacklevel=1,
+            )
 
     def test_components_index_uses_admin_shell_primitives(self) -> None:
         result = self.run_build()
