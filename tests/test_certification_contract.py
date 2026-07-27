@@ -77,7 +77,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 
-    def test_phase_one_evidence_starts_with_input_backfill(self) -> None:
+    def test_phase_one_evidence_tracks_form_primitive_backfill(self) -> None:
         phase_one = self._read_json("src/certification/phase-1-evidence.json")
         manifest = self._read_json("certification.json")
         components = {
@@ -87,21 +87,26 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(phase_one["status"], "backfill")
         self.assertEqual(phase_one["releaseTarget"], "0.6.0")
         self.assertEqual(phase_one["releaseClaim"], "none")
-        self.assertEqual(list(components), ["input"])
-        self.assertEqual(components["input"]["phase"], "1A")
-        self.assertEqual(components["input"]["status"], "backfill-passed")
-        self.assertEqual(components["input"]["tier"], 0)
-        self.assertIn("lifecycle", components["input"]["evidence"]["not-applicable"])
-        for evidence_path in components["input"]["automatedEvidence"]:
-            self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
-        for evidence_url in components["input"]["bootstrapEvidence"]:
-            parsed_url = urlparse(evidence_url)
-            self.assertEqual(parsed_url.scheme, "https", evidence_url)
-            self.assertIn(
-                parsed_url.netloc,
-                {"getbootstrap.com", "github.com"},
-                evidence_url,
-            )
+        self.assertEqual(list(components), ["input", "textarea"])
+        for component_slug in components:
+            with self.subTest(component=component_slug):
+                self.assertEqual(components[component_slug]["phase"], "1A")
+                self.assertEqual(components[component_slug]["status"], "backfill-passed")
+                self.assertEqual(components[component_slug]["tier"], 0)
+                self.assertIn(
+                    "lifecycle",
+                    components[component_slug]["evidence"]["not-applicable"],
+                )
+                for evidence_path in components[component_slug]["automatedEvidence"]:
+                    self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+                for evidence_url in components[component_slug]["bootstrapEvidence"]:
+                    parsed_url = urlparse(evidence_url)
+                    self.assertEqual(parsed_url.scheme, "https", evidence_url)
+                    self.assertIn(
+                        parsed_url.netloc,
+                        {"getbootstrap.com", "github.com"},
+                        evidence_url,
+                    )
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 

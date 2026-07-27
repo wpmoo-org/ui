@@ -582,6 +582,91 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_textarea_fixture_proves_native_multiline_control_states(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/textarea.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                message = page.locator("#certification-textarea-message")
+                required = page.locator("#certification-textarea-required")
+                readonly = page.locator("#certification-textarea-readonly")
+                disabled = page.locator("#certification-textarea-disabled")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(
+                    page.locator('label[for="certification-textarea-message"]')
+                ).to_have_text("Review notes")
+                expect(message).to_have_attribute(
+                    "aria-describedby",
+                    "certification-textarea-message-help",
+                )
+                expect(message).to_have_attribute("rows", "4")
+                expect(page.locator("#certification-textarea-message-help")).to_have_class(
+                    "form-text"
+                )
+                expect(required).to_have_class("form-control is-invalid")
+                expect(required).to_have_attribute("aria-invalid", "true")
+                expect(required).to_have_attribute(
+                    "aria-describedby",
+                    "certification-textarea-required-help "
+                    "certification-textarea-required-feedback",
+                )
+                expect(page.locator("#certification-textarea-required-feedback")).to_be_visible()
+
+                message.focus()
+                expect(message).to_be_focused()
+                message.fill("First line\nSecond line")
+                expect(message).to_have_value("First line\nSecond line")
+                page.keyboard.press("Tab")
+                expect(required).to_be_focused()
+                self.assertTrue(
+                    required.evaluate("element => element.validity.valueMissing")
+                )
+
+                expect(readonly).to_have_attribute("readonly", "")
+                readonly.focus()
+                expect(readonly).to_be_focused()
+                readonly.press("X")
+                expect(readonly).to_have_value("Sync is paused until approval.")
+                expect(disabled).to_be_disabled()
+                self.assertEqual(
+                    disabled.evaluate("element => getComputedStyle(element).resize"),
+                    "none",
+                )
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
