@@ -57,6 +57,14 @@ class TabsTests(CatalogTestCase):
 
         self.assertIn("disabled>", output)
 
+    def test_disabled_tab_triggers_use_shared_disabled_opacity(self) -> None:
+        scss = (ROOT / "scss/components/_tabs.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".tabs-list .nav-link:disabled,", scss)
+        self.assertIn(".tabs-list .nav-link.disabled", scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
+        self.assertIn("pointer-events: none;", scss)
+
     def test_tabs_content_is_not_escaped(self) -> None:
         output = self.render_tabs(
             'tabs("t", [{"id": "a", "title": "A", "content": "See <code>docs</code>."}])'

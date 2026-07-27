@@ -1342,6 +1342,15 @@ body {
   background: var(--bs-body-bg);
 }
 
+.moo-example:has(.dropdown-menu.show) {
+  position: relative;
+  z-index: 5;
+}
+
+.moo-example__surface:has(.dropdown-menu.show) {
+  overflow: visible;
+}
+
 .moo-example__preview {
   position: relative;
   z-index: 4;
@@ -1365,6 +1374,14 @@ body {
 
 .moo-example__preview--narrow>* {
   max-width: 24rem;
+}
+
+.moo-example__preview--narrow > .combobox {
+  max-width: var(--moo-combobox-width);
+}
+
+.moo-example__preview--narrow > .combobox--multiple {
+  max-width: var(--moo-combobox-multiple-width);
 }
 
 .moo-example__preview--medium>* {
@@ -1480,6 +1497,7 @@ body {
 
 .moo-example__source {
   position: relative;
+  z-index: 1;
   min-width: 0;
   overflow: hidden;
   border-top: var(--bs-border-width) solid var(--bs-border-color);
@@ -1643,10 +1661,10 @@ body {
   border-radius: var(--bs-border-radius-xl);
   // The command palette is catalog chrome, not a shipped Bootstrap component.
   // It needs a stronger focus-ring/elevation treatment than the shared
-  // $enable-shadows-off component scale, so the literal shadow is scoped here.
+  // $enable-shadows-off component scale, so the shadow has a catalog Sass knob.
   box-shadow:
     0 0 0 4px var(--moo-border),
-    0 24px 50px -12px rgba(0, 0, 0, 0.25);
+    $moo-catalog-command-shadow;
 }
 
 .moo-catalog__command-header {

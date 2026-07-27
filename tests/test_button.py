@@ -126,6 +126,15 @@ class ButtonTests(CatalogTestCase):
         self.assertIn('aria-busy="true"', output)
         self.assertNotIn('role="status"', output)
 
+    def test_disabled_buttons_use_shared_disabled_opacity(self) -> None:
+        scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".btn:disabled,", scss)
+        self.assertIn(".btn.disabled,", scss)
+        self.assertIn('.btn[aria-disabled="true"]', scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
+        self.assertNotIn("opacity: var(--bs-btn-disabled-opacity);", scss)
+
     def test_button_loading_and_icon_start_are_mutually_exclusive(self) -> None:
         with self.assertRaisesRegex(
             ValueError, "Button loading replaces icon_start; do not set both"

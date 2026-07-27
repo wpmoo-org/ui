@@ -109,6 +109,36 @@ class InputTests(CatalogTestCase):
         self.assertIn(" readonly", readonly)
         self.assertNotIn(" disabled", readonly)
 
+    def test_disabled_form_controls_share_muted_text_color(self) -> None:
+        variables = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+        tokens_root = (ROOT / "scss/_tokens_root.scss").read_text(encoding="utf-8")
+        core_theme = (ROOT / "scss/_core_theme.scss").read_text(encoding="utf-8")
+        input_scss = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
+
+        self.assertIn("$input-disabled-color: var(--bs-tertiary-color) !default;", variables)
+        self.assertIn("$form-select-disabled-color: $input-disabled-color !default;", variables)
+        self.assertIn("$moo-disabled-control-opacity: 0.5 !default;", variables)
+        self.assertIn("--moo-disabled-control-opacity: #{$moo-disabled-control-opacity};", tokens_root)
+        self.assertIn("--moo-disabled-control-opacity: #{$moo-disabled-control-opacity};", core_theme)
+        self.assertIn(".form-control:disabled,", input_scss)
+        self.assertIn(".form-select:disabled", input_scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", input_scss)
+
+    def test_text_controls_use_compact_reference_line_height(self) -> None:
+        variables = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+
+        self.assertIn("$font-size-base: 0.875rem !default;", variables)
+        self.assertIn("$input-line-height: 1.4285714286 !default;", variables)
+
+    def test_invalid_form_controls_share_destructive_ring(self) -> None:
+        focus = (ROOT / "scss/_focus.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".form-control.is-invalid,", focus)
+        self.assertIn(".form-control.is-invalid:focus,", focus)
+        self.assertIn(".form-select.is-invalid,", focus)
+        self.assertIn(".form-select.is-invalid:focus", focus)
+        self.assertIn("box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--bs-form-invalid-border-color) 20%, transparent);", focus)
+
     def test_input_emits_validation_and_required_states(self) -> None:
         output = self.render_input(
             'input(label="Key", id="key", aria_invalid=true, required=true)'

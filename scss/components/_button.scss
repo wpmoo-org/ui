@@ -115,7 +115,12 @@ label.btn {
 .btn.disabled,
 .btn[aria-disabled="true"] {
   pointer-events: none;
-  opacity: var(--bs-btn-disabled-opacity);
+  opacity: var(--moo-disabled-control-opacity);
+}
+
+.btn-check:disabled + .btn {
+  pointer-events: none;
+  opacity: var(--moo-disabled-control-opacity);
 }
 
 // Replaces Bootstrap's native inset active shadow disabled in

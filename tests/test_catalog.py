@@ -114,7 +114,7 @@ class CatalogContractTests(CatalogTestCase):
             "button": ("btn", "disabled"),
             "button_group": ("btn",),
             "card": ("card",),
-            "input": ("form-control",),
+            "input": ("form-control", "form-select"),
             # Bootstrap renders both single-line inputs and textareas through
             # the shared `.form-control` family.
             "textarea": ("form-control",),
@@ -130,7 +130,7 @@ class CatalogContractTests(CatalogTestCase):
             "sidebar": ("sidebar",),
             # Bootstrap's pagination markup uses .page-item/.page-link, not a
             # "pagination-" prefixed family.
-            "pagination": ("pagination", "page"),
+            "pagination": ("pagination", "page", "disabled"),
             # Bootstrap's checkbox markup uses the shared .form-check family,
             # not a "checkbox-" prefixed one.
             "checkbox": ("form-check",),
@@ -157,7 +157,7 @@ class CatalogContractTests(CatalogTestCase):
             # rather than the .nav-pills family Navigation already owns,
             # and also fixes the grid stacking on Bootstrap's own tab-content
             # and tab-pane classes.
-            "tabs": ("tabs", "nav-link", "active", "tab-content", "tab-pane"),
+            "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
             # Dialog is the Moo catalog name for Bootstrap's Modal component;
             # its native selector family is "modal-", not "dialog-".
             "dialog": ("modal", "show"),
@@ -173,6 +173,10 @@ class CatalogContractTests(CatalogTestCase):
             # inside a .field, rather than owning a "field-" prefixed family
             # of its own for them.
             "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+            # Bootstrap has no native Combobox component. The public
+            # namespace is a composition of Bootstrap form-control,
+            # validation, and Dropdown pieces.
+            "combobox": ("combobox", "is-invalid"),
             # Input group owns the compound surface around Bootstrap's native
             # children, so its partial may retune the edge behavior of form,
             # button, validation, and dropdown children while scoped under

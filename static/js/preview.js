@@ -325,6 +325,385 @@
     window.addEventListener("hashchange", requestDocTocUpdate);
   }
 
+  document.querySelectorAll(".combobox").forEach((combobox) => {
+    const input = combobox.querySelector(".combobox-input");
+    const isMultiple = combobox.dataset.mooComboboxMultiple === "true";
+    const hidden = isMultiple ? null : combobox.querySelector('input[type="hidden"]');
+    const chipValue = combobox.querySelector(".combobox-value");
+    const valueStore = combobox.querySelector("[data-moo-combobox-value-store]");
+    const chipIconTemplate = combobox.querySelector("[data-moo-combobox-chip-icon]");
+    const clearTrigger = combobox.querySelector("[data-moo-combobox-clear]");
+    const indicator = combobox.querySelector(".combobox-indicator");
+    const options = Array.from(combobox.querySelectorAll(".combobox-option"));
+    const groups = Array.from(combobox.querySelectorAll("[data-moo-combobox-group]"));
+    const separators = Array.from(
+      combobox.querySelectorAll("[data-moo-combobox-separator]")
+    );
+    const menu = combobox.querySelector(".combobox-menu");
+    const startsOpen = menu?.classList.contains("show");
+    let empty = menu?.querySelector("[data-moo-combobox-empty]");
+
+    if (!input || !menu || options.length === 0) {
+      return;
+    }
+
+    if (!empty) {
+      empty = document.createElement("li");
+      empty.className = "combobox-empty";
+      empty.hidden = true;
+      empty.dataset.mooComboboxEmpty = "true";
+      empty.textContent = "No results found.";
+      menu.appendChild(empty);
+    }
+
+    let liveRegion = combobox.querySelector("[data-moo-combobox-live]");
+    if (!liveRegion) {
+      liveRegion = document.createElement("span");
+      liveRegion.className = "visually-hidden";
+      liveRegion.setAttribute("aria-live", "polite");
+      liveRegion.setAttribute("data-moo-combobox-live", "true");
+      combobox.appendChild(liveRegion);
+    }
+
+    const optionGroupIsHidden = (option) =>
+      option.closest("[data-moo-combobox-group]")?.hidden || false;
+
+    const visibleOptions = () =>
+      options.filter((option) => !option.hidden && !option.disabled && !optionGroupIsHidden(option));
+
+    const syncGroupVisibility = () => {
+      if (groups.length === 0) {
+        return;
+      }
+      let visibleGroupCount = 0;
+      groups.forEach((group) => {
+        const hasVisibleOption = Array.from(group.querySelectorAll(".combobox-option")).some(
+          (option) => !option.hidden
+        );
+        group.hidden = !hasVisibleOption;
+        if (hasVisibleOption) {
+          visibleGroupCount += 1;
+        }
+      });
+      separators.forEach((separator) => {
+        separator.hidden = visibleGroupCount < 2;
+      });
+    };
+
+    const setExpanded = (expanded) => {
+      input.setAttribute("aria-expanded", expanded ? "true" : "false");
+    };
+
+    const openMenu = () => {
+      menu.classList.add("show");
+      setExpanded(true);
+    };
+
+    const closeMenu = () => {
+      menu.classList.remove("show");
+      setExpanded(false);
+      input.removeAttribute("aria-activedescendant");
+      options.forEach((candidate) => {
+        candidate.removeAttribute("aria-current");
+      });
+    };
+
+    const optionLabel = (option) =>
+      option?.querySelector(".combobox-option__label")?.textContent?.trim() || "";
+
+    const selectedOption = () =>
+      options.find((option) => option.getAttribute("aria-selected") === "true") || null;
+
+    const selectedOptions = () =>
+      options.filter((option) => option.getAttribute("aria-selected") === "true");
+
+    const toggleClear = (selected) => {
+      const value = selected ? "true" : "false";
+      combobox.dataset.mooComboboxSelected = value;
+      input.dataset.mooComboboxSelected = value;
+      if (clearTrigger) {
+        clearTrigger.hidden = !selected;
+        if (indicator) {
+          indicator.hidden = selected;
+        }
+      }
+    };
+
+    const createChip = (option) => {
+      const value = option.dataset.value || "";
+      const label = optionLabel(option);
+      const chip = document.createElement("span");
+      chip.className = "badge text-bg-secondary combobox-chip";
+      chip.dataset.value = value;
+
+      const labelEl = document.createElement("span");
+      labelEl.className = "combobox-chip__label";
+      labelEl.textContent = label;
+      chip.appendChild(labelEl);
+
+      const remove = document.createElement("button");
+      remove.className = "combobox-chip__remove";
+      remove.type = "button";
+      remove.dataset.value = value;
+      remove.setAttribute("aria-label", `Remove ${label}`);
+      remove.setAttribute("data-moo-combobox-chip-remove", "true");
+      remove.append(chipIconTemplate?.content.cloneNode(true) || "x");
+      chip.appendChild(remove);
+
+      return chip;
+    };
+
+    const syncMultipleValue = () => {
+      if (!isMultiple) {
+        return;
+      }
+      const selected = selectedOptions();
+      if (chipValue) {
+        chipValue.replaceChildren(...selected.map((option) => createChip(option)));
+      }
+      if (valueStore) {
+        valueStore.replaceChildren();
+        const name = valueStore.dataset.mooComboboxName || "";
+        selected.forEach((option) => {
+          const field = document.createElement("input");
+          field.type = "hidden";
+          field.name = name;
+          field.value = option.dataset.value || "";
+          valueStore.appendChild(field);
+        });
+      }
+      toggleClear(selected.length > 0);
+    };
+
+    const removeChip = (value) => {
+      const option = options.find((candidate) => candidate.dataset.value === value);
+      if (!option) {
+        return;
+      }
+      option.setAttribute("aria-selected", "false");
+      syncMultipleValue();
+    };
+
+    const clearSelection = () => {
+      if (isMultiple) {
+        options.forEach((candidate) => {
+          candidate.setAttribute("aria-selected", "false");
+        });
+        syncMultipleValue();
+        return;
+      }
+      if (hidden) {
+        hidden.value = "";
+      }
+      options.forEach((candidate) => {
+        candidate.setAttribute("aria-selected", "false");
+      });
+      toggleClear(false);
+    };
+
+    const clearStaleSelection = () => {
+      if (isMultiple) {
+        input.value = "";
+        options.forEach((option) => {
+          option.hidden = false;
+        });
+        syncGroupVisibility();
+        empty.hidden = true;
+        return;
+      }
+      const selected = selectedOption();
+      const selectedLabel = optionLabel(selected);
+      if (!input.value || (selectedLabel && normalize(input.value) === normalize(selectedLabel))) {
+        return;
+      }
+      clearSelection();
+      input.value = "";
+    };
+
+    const scrollOptionIntoMenu = (option) => {
+      const optionRect = option.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      if (optionRect.top < menuRect.top) {
+        menu.scrollTop -= menuRect.top - optionRect.top;
+      } else if (optionRect.bottom > menuRect.bottom) {
+        menu.scrollTop += optionRect.bottom - menuRect.bottom;
+      }
+    };
+
+    const setActiveOption = (option) => {
+      options.forEach((candidate) => {
+        const isActive = candidate === option;
+        candidate.toggleAttribute("aria-current", isActive);
+      });
+      if (option) {
+        input.setAttribute("aria-activedescendant", option.id);
+        scrollOptionIntoMenu(option);
+      } else {
+        input.removeAttribute("aria-activedescendant");
+      }
+    };
+
+    const chooseOption = (option) => {
+      if (!option || option.disabled) {
+        return;
+      }
+      if (isMultiple) {
+        const nextSelected = option.getAttribute("aria-selected") !== "true";
+        option.setAttribute("aria-selected", nextSelected ? "true" : "false");
+        input.value = "";
+        syncMultipleValue();
+        filterOptions();
+        setActiveOption(option);
+        return;
+      }
+      options.forEach((candidate) => {
+        const isSelected = candidate === option;
+        candidate.setAttribute("aria-selected", isSelected ? "true" : "false");
+      });
+      const label = optionLabel(option);
+      input.value = label;
+      toggleClear(true);
+      if (hidden) {
+        hidden.value = option.dataset.value || "";
+      }
+      setActiveOption(option);
+    };
+
+    const filterOptions = ({ open = true, activate = true } = {}) => {
+      if (open) {
+        openMenu();
+      }
+      const needle = normalize(input.value);
+      let count = 0;
+      options.forEach((option) => {
+        const matches = !needle || normalize(option.textContent).includes(needle);
+        option.hidden = !matches;
+        if (matches) {
+          count += 1;
+        }
+      });
+      syncGroupVisibility();
+      empty.hidden = count !== 0;
+      liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
+      if (activate) {
+        setActiveOption(visibleOptions()[0] || null);
+      }
+    };
+
+    toggleClear(
+      input.dataset.mooComboboxSelected === "true" ||
+        combobox.dataset.mooComboboxSelected === "true"
+    );
+    syncMultipleValue();
+
+    input.addEventListener("focus", () => {
+      openMenu();
+      if (!isMultiple && input.dataset.mooComboboxSelected === "true") {
+        input.select();
+      }
+      setActiveOption(visibleOptions()[0] || null);
+    });
+    input.addEventListener("input", () => {
+      if (!isMultiple) {
+        clearSelection();
+      }
+      filterOptions();
+    });
+    input.addEventListener("blur", clearStaleSelection);
+    input.addEventListener("keydown", (event) => {
+      const available = visibleOptions();
+      const current = available.findIndex(
+        (option) => option.id === input.getAttribute("aria-activedescendant")
+      );
+      if (isMultiple && event.key === "Backspace" && input.value === "") {
+        const selected = selectedOptions();
+        const last = selected[selected.length - 1];
+        if (last) {
+          event.preventDefault();
+          removeChip(last.dataset.value || "");
+        }
+      } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        openMenu();
+        const offset = event.key === "ArrowDown" ? 1 : -1;
+        const next = current === -1 ? 0 : (current + offset + available.length) % available.length;
+        setActiveOption(available[next]);
+      } else if (event.key === "Enter") {
+        const option = available[current];
+        if (option) {
+          event.preventDefault();
+          chooseOption(option);
+          if (!isMultiple) {
+            closeMenu();
+          }
+        }
+      } else if (event.key === "Escape") {
+        closeMenu();
+        input.blur();
+      } else if (event.key === "Tab") {
+        closeMenu();
+      }
+    });
+    options.forEach((option) => {
+      option.addEventListener("click", () => {
+        chooseOption(option);
+        if (isMultiple) {
+          input.focus();
+        } else {
+          closeMenu();
+        }
+      });
+    });
+    if (clearTrigger) {
+      clearTrigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        clearSelection();
+        input.value = "";
+        input.focus();
+        filterOptions();
+      });
+    }
+    combobox.addEventListener("click", (event) => {
+      const trigger =
+        event.target instanceof Element
+          ? event.target.closest("[data-moo-combobox-chip-remove]")
+          : null;
+      if (trigger) {
+        event.preventDefault();
+        removeChip(trigger.dataset.value || "");
+        input.focus();
+        return;
+      }
+      if (isMultiple && event.target instanceof Element && event.target.closest(".combobox-chips")) {
+        input.focus();
+      }
+    });
+    input.addEventListener("click", openMenu);
+    filterOptions({ open: startsOpen, activate: startsOpen });
+    if (!startsOpen) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".combobox").forEach((combobox) => {
+      if (
+        event.target instanceof Node &&
+        !combobox.contains(event.target)
+      ) {
+        const menu = combobox.querySelector(".combobox-menu");
+        const input = combobox.querySelector(".combobox-input");
+        const options = combobox.querySelectorAll(".combobox-option");
+        menu?.classList.remove("show");
+        input?.setAttribute("aria-expanded", "false");
+        input?.removeAttribute("aria-activedescendant");
+        options.forEach((option) => {
+          option.removeAttribute("aria-current");
+        });
+      }
+    });
+  });
+
   document.querySelectorAll("[data-moo-copy-page]").forEach((trigger) => {
     trigger.addEventListener("click", async () => {
       const value = trigger.getAttribute("data-moo-copy-value") || window.location.href.split("#")[0];
