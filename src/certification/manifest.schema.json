@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.wpmoo.org/schemas/certification-manifest.schema.json",
+  "title": "Moo UI Core Certification Manifest",
+  "description": "Immutable Core-only certification summary distributed with a Moo UI npm release.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "status",
+    "coreVersion",
+    "bootstrap",
+    "browserPolicy",
+    "certifiedComponents",
+    "publicEntrypoints",
+    "supportPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "Version of this manifest contract, independent from the Core package version."
+    },
+    "status": {
+      "enum": ["preview", "certified"],
+      "description": "Preview manifests make no complete release-certification claim."
+    },
+    "coreVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "sourceCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "bootstrap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalVersion", "targetRange", "verifiedRange", "testedVersions"],
+      "properties": {
+        "canonicalVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "targetRange": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verifiedRange": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "testedVersions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          }
+        }
+      }
+    },
+    "browserPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "exactEvidenceInAttestation"],
+      "properties": {
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exactEvidenceInAttestation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "certifiedComponents": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "tier", "status"],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "tier": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "status": {
+            "const": "certified"
+          }
+        }
+      }
+    },
+    "publicEntrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["css", "esm", "sass"],
+      "properties": {
+        "css": {
+          "$ref": "#/$defs/packageExports"
+        },
+        "esm": {
+          "$ref": "#/$defs/packageExports"
+        },
+        "sass": {
+          "$ref": "#/$defs/packageExports"
+        }
+      }
+    },
+    "supportPolicy": {
+      "type": "string",
+      "format": "uri"
+    },
+    "knownLimitations": {
+      "type": "string",
+      "format": "uri"
+    },
+    "attestation": {
+      "type": "string",
+      "format": "uri"
+    },
+    "conformanceArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractVersion", "url", "sha256"],
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {"const": "certified"}
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["sourceCommit", "attestation"],
+        "properties": {
+          "bootstrap": {
+            "properties": {
+              "verifiedRange": {"type": "string", "minLength": 1},
+              "testedVersions": {"minItems": 1}
+            }
+          },
+          "browserPolicy": {
+            "properties": {
+              "exactEvidenceInAttestation": {"const": true}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "packageExports": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^\\./[A-Za-z0-9][A-Za-z0-9._/-]*$"
+      }
+    }
+  }
+}

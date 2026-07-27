@@ -1,0 +1,503 @@
+import unittest
+
+from playwright.sync_api import expect, sync_playwright
+
+from tests.helpers.browser_harness import (
+    BrowserEvidence,
+    CANONICAL_BOOTSTRAP,
+    CERTIFICATION_BOOTSTRAP_LANES,
+    CERTIFICATION_CASES,
+    launch_certification_browser,
+    new_case_context,
+    prepare_page,
+    run_axe,
+    serve_repository,
+)
+
+
+class CertificationBrowserHarnessTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.server = serve_repository()
+        cls.base_url = cls.server.__enter__()
+        cls.playwright_manager = sync_playwright()
+        cls.playwright = cls.playwright_manager.__enter__()
+        cls.browser = launch_certification_browser(cls.playwright)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.browser.close()
+        cls.playwright_manager.__exit__(None, None, None)
+        cls.server.__exit__(None, None, None)
+
+    def test_accordion_fixture_proves_data_api_state_and_keyboard_flow(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/accordion.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                first_trigger = page.locator("#certification-first-trigger")
+                first_panel = page.locator("#certification-first")
+                second_trigger = page.locator("#certification-second-trigger")
+                second_panel = page.locator("#certification-second")
+                self.assertEqual(first_trigger.get_attribute("aria-expanded"), "true")
+                self.assertTrue(first_panel.evaluate("element => element.classList.contains('show')"))
+                self.assertEqual(second_trigger.get_attribute("aria-expanded"), "false")
+                self.assertEqual(
+                    page.evaluate(
+                        """
+                        () => bootstrap.Collapse.getOrCreateInstance(
+                          document.querySelector("#certification-second"),
+                          { toggle: false },
+                        )._config.parent?.id
+                        """
+                    ),
+                    "certification-accordion",
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const panel = document.querySelector("#certification-second");
+                      panel.addEventListener("shown.bs.collapse", resolve, { once: true });
+                      document.querySelector("#certification-second-trigger").click();
+                    })
+                    """
+                )
+                expect(second_trigger).to_have_attribute("aria-expanded", "true")
+                expect(first_trigger).to_have_attribute("aria-expanded", "false")
+                self.assertTrue(second_panel.evaluate("element => element.classList.contains('show')"))
+                self.assertFalse(first_panel.evaluate("element => element.classList.contains('show')"))
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const panel = document.querySelector("#certification-second");
+                      panel.addEventListener("hidden.bs.collapse", resolve, { once: true });
+                      document.querySelector("#certification-second-trigger").click();
+                    })
+                    """
+                )
+                expect(second_trigger).to_have_attribute("aria-expanded", "false")
+                first_trigger.focus()
+                first_trigger.press("Enter")
+                expect(first_trigger).to_have_attribute("aria-expanded", "true")
+                expect(first_panel).to_have_class("accordion-collapse collapse show")
+                first_trigger.press("Space")
+                expect(first_panel).to_have_class("accordion-collapse collapse")
+                expect(first_trigger).to_have_attribute("aria-expanded", "false")
+                self.assertTrue(
+                    first_trigger.evaluate(
+                        "element => document.activeElement === element"
+                    )
+                )
+
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_combobox_fixture_proves_public_esm_keyboard_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/combobox.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                root = page.locator("#certification-combobox")
+                combobox_input = page.locator("#certification-combobox-input")
+                menu = page.locator("#certification-combobox-listbox")
+                hidden_value = root.locator('input[type="hidden"]')
+                empty_state = root.locator("[data-moo-combobox-empty]")
+                live_region = root.locator("[data-moo-combobox-live]")
+                expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => window.CertificationCombobox.getInstance(element)
+                          === window.certificationCombobox
+                        """
+                    )
+                )
+
+                combobox_input.focus()
+                expect(combobox_input).to_have_attribute("aria-expanded", "true")
+                expect(menu).to_have_class("dropdown-menu combobox-menu show")
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-1",
+                )
+                combobox_input.press("ArrowDown")
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-2",
+                )
+                self.assertEqual(run_axe(page), [])
+
+                combobox_input.press("Enter")
+                expect(combobox_input).to_have_value("Grace Hopper")
+                expect(hidden_value).to_have_value("grace")
+                expect(combobox_input).to_have_attribute("aria-expanded", "false")
+                expect(page.locator("body")).to_have_attribute(
+                    "data-combobox-values",
+                    "grace",
+                )
+                expect(page.locator("#certification-combobox-option-2")).to_have_attribute(
+                    "aria-selected",
+                    "true",
+                )
+
+                combobox_input.focus()
+                combobox_input.fill("not-a-reviewer")
+                expect(empty_state).to_be_visible()
+                expect(live_region).to_have_text("No results")
+                expect(combobox_input).to_have_attribute("aria-expanded", "true")
+                combobox_input.press("Escape")
+                expect(combobox_input).to_have_attribute("aria-expanded", "false")
+
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationCombobox.dispose();
+                          return window.CertificationCombobox.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertEqual(root.locator("[data-moo-combobox-empty]").count(), 0)
+                self.assertEqual(root.locator("[data-moo-combobox-live]").count(), 0)
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationCombobox = window.CertificationCombobox
+                            .getOrCreateInstance(element);
+                          return window.CertificationCombobox.getInstance(element)
+                            === window.certificationCombobox;
+                        }
+                        """
+                    )
+                )
+                self.assertEqual(root.locator("[data-moo-combobox-empty]").count(), 1)
+                self.assertEqual(root.locator("[data-moo-combobox-live]").count(), 1)
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/sidebar.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                root = page.locator('[data-slot="sidebar-wrapper"]')
+                sidebar = page.locator("#certification-sidebar")
+                trigger = page.locator("#certification-sidebar-trigger")
+                search = page.locator("#certification-sidebar-search")
+                expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+                expect(root).to_have_attribute("data-moo-sidebar-ready", "")
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => window.CertificationSidebar.getInstance(element)
+                          === window.certificationSidebar
+                        """
+                    )
+                )
+
+                if case.is_mobile:
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+                    page.evaluate(
+                        """
+                        () => {
+                          document.querySelector("#certification-sidebar").addEventListener(
+                            "shown.bs.offcanvas",
+                            () => document.body.dataset.sidebarShown = "true",
+                            { once: true },
+                          );
+                        }
+                        """
+                    )
+                    trigger.click()
+                    expect(page.locator("body")).to_have_attribute("data-sidebar-shown", "true")
+                    expect(sidebar).to_have_class("sidebar offcanvas-lg offcanvas-start show")
+                    expect(trigger).to_have_attribute("aria-expanded", "true")
+                    self.assertEqual(page.locator(".offcanvas-backdrop.show").count(), 1)
+                    self.assertEqual(run_axe(page), [])
+
+                    page.evaluate(
+                        """
+                        () => {
+                          document.querySelector("#certification-sidebar").addEventListener(
+                            "hidden.bs.offcanvas",
+                            () => document.body.dataset.sidebarHidden = "true",
+                            { once: true },
+                          );
+                        }
+                        """
+                    )
+                    page.keyboard.press("Escape")
+                    expect(page.locator("body")).to_have_attribute("data-sidebar-hidden", "true")
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+                    expect(trigger).to_be_focused()
+                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                else:
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    expect(trigger).to_have_attribute("aria-expanded", "true")
+                    trigger.click()
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "collapsed")
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+                    expect(page.locator("body")).to_have_attribute(
+                        "data-sidebar-state",
+                        "collapsed",
+                    )
+                    self.assertEqual(
+                        page.evaluate(
+                            "localStorage.getItem('moo-sidebar:certification-shell')"
+                        ),
+                        "collapsed",
+                    )
+                    page.keyboard.press("Control+b")
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    search.focus()
+                    page.keyboard.press("Control+b")
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    self.assertEqual(run_axe(page), [])
+
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationSidebar.dispose();
+                          return window.CertificationSidebar.getInstance(element) === null
+                            && !element.hasAttribute("data-moo-sidebar-ready");
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationSidebar = window.CertificationSidebar
+                            .getOrCreateInstance(element);
+                          return window.CertificationSidebar.getInstance(element)
+                            === window.certificationSidebar
+                            && element.hasAttribute("data-moo-sidebar-ready");
+                        }
+                        """
+                    )
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/dialog.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#open-certification-dialog")
+                dialog = page.locator("#certification-dialog")
+                close_button = dialog.locator(".btn-close")
+                display_name = page.locator("#certification-display-name")
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-dialog").click();
+                    })
+                    """
+                )
+                expect(dialog).to_have_class("modal fade show")
+                expect(dialog).to_have_attribute("aria-modal", "true")
+                expect(dialog).to_have_attribute("role", "dialog")
+                self.assertIsNone(dialog.get_attribute("aria-hidden"))
+                self.assertEqual(page.locator(".modal-backdrop.show").count(), 1)
+                self.assertTrue(
+                    dialog.evaluate("element => document.activeElement === element")
+                )
+
+                close_button.focus()
+                page.keyboard.press("Tab")
+                expect(display_name).to_be_focused()
+                trigger.focus()
+                expect(close_button).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+
+                page.evaluate(
+                    """
+                    () => {
+                      document.querySelector("#certification-dialog").addEventListener(
+                        "hidden.bs.modal",
+                        () => document.body.dataset.dialogHidden = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute("data-dialog-hidden", "true")
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-dialog").click();
+                    })
+                    """
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-dialog");
+                      dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
+                      dialog.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+                evidence.assert_clean()
+                context.close()
+
+    def test_canonical_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
+        self.assertEqual(CERTIFICATION_BOOTSTRAP_LANES, (CANONICAL_BOOTSTRAP,))
+        self.assertEqual(CANONICAL_BOOTSTRAP.version, "5.3.3")
+        context = self.browser.new_context()
+        response = context.request.get(CANONICAL_BOOTSTRAP.bundle_url(self.base_url))
+        self.assertTrue(response.ok)
+        self.assertIn("Bootstrap v5.3.3", response.text())
+        context.close()
+
+    def test_badge_fixture_proves_the_browser_evidence_pipeline(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/badge.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case, normalize_screenshot=True)
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                self.assertEqual(page.locator(".badge").count(), 9)
+                self.assertEqual(
+                    page.locator(".visually-hidden").inner_text(),
+                    "unread notifications",
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+
+                violations = run_axe(page)
+                self.assertEqual(
+                    violations,
+                    [],
+                    "axe violations: "
+                    + ", ".join(
+                        str(violation.get("id", "unknown"))
+                        for violation in violations
+                    ),
+                )
+
+                badge_style = page.locator(".badge").first.evaluate(
+                    """
+                    element => {
+                      const style = getComputedStyle(element);
+                      return {
+                        animationDuration: style.animationDuration,
+                        transitionDuration: style.transitionDuration,
+                      };
+                    }
+                    """
+                )
+                self.assertEqual(badge_style["animationDuration"], "0s")
+                self.assertEqual(badge_style["transitionDuration"], "0s")
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
+if __name__ == "__main__":
+    unittest.main()

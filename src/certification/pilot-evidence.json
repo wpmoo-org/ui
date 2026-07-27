@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "0.1",
+  "status": "preview",
+  "releaseClaim": "none",
+  "description": "Incremental Phase 0E evidence. Passing preview evidence does not add a component to the package manifest's certifiedComponents list.",
+  "components": [
+    {
+      "slug": "badge",
+      "tier": 0,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["keyboard", "focus", "lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_badge.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "accordion",
+      "tier": 1,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "lifecycle",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_accordion.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "dialog",
+      "tier": 2,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "lifecycle",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_dialog.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "combobox",
+      "tier": 3,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "lifecycle",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_combobox.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "resolvedFindings": [
+        "Listbox option wrappers and grouped lists now use presentation roles so axe recognizes the required option ownership chain."
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "sidebar",
+      "tier": 3,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "lifecycle",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_sidebar.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    }
+  ]
+}

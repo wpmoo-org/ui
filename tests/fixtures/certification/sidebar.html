@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sidebar certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      .sidebar-inset main {
+        padding: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="sidebar-wrapper"
+      data-slot="sidebar-wrapper"
+      data-moo-sidebar-state="expanded"
+      data-moo-sidebar-key="certification-shell"
+    >
+      <aside
+        id="certification-sidebar"
+        class="sidebar offcanvas-lg offcanvas-start"
+        tabindex="-1"
+        data-slot="sidebar"
+        aria-label="Certification navigation"
+        data-side="left"
+        data-variant="sidebar"
+        data-collapsible="icon"
+      >
+        <div class="sidebar-inner" data-slot="sidebar-inner">
+          <div class="sidebar-header" data-slot="sidebar-header">
+            <a class="sidebar-menu-button" href="#overview" data-slot="sidebar-menu-button">
+              <span class="sidebar-menu-button__text">
+                <span class="sidebar-menu-button__title">Moo UI</span>
+              </span>
+            </a>
+          </div>
+          <div class="sidebar-content" data-slot="sidebar-content">
+            <div class="sidebar-group" data-slot="sidebar-group">
+              <div class="sidebar-group-label" data-slot="sidebar-group-label">Workspace</div>
+              <div class="sidebar-group-content" data-slot="sidebar-group-content">
+                <ul class="sidebar-menu" data-slot="sidebar-menu">
+                  <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
+                    <a
+                      class="sidebar-menu-button active"
+                      href="#overview"
+                      data-slot="sidebar-menu-button"
+                      data-moo-sidebar-tooltip="Overview"
+                      aria-current="page"
+                    >
+                      <span class="sidebar-menu-button__text">
+                        <span class="sidebar-menu-button__title">Overview</span>
+                      </span>
+                    </a>
+                  </li>
+                  <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
+                    <a
+                      class="sidebar-menu-button"
+                      href="#activity"
+                      data-slot="sidebar-menu-button"
+                      data-moo-sidebar-tooltip="Activity"
+                    >
+                      <span class="sidebar-menu-button__text">
+                        <span class="sidebar-menu-button__title">Activity</span>
+                      </span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-footer" data-slot="sidebar-footer">
+            <label class="form-label" for="certification-sidebar-search">Search navigation</label>
+            <input
+              class="form-control sidebar-input"
+              id="certification-sidebar-search"
+              type="search"
+            >
+          </div>
+        </div>
+        <button
+          class="sidebar-rail"
+          type="button"
+          data-moo-sidebar-rail
+          aria-label="Toggle sidebar"
+          tabindex="-1"
+        ></button>
+      </aside>
+
+      <div class="sidebar-inset" data-slot="sidebar-inset">
+        <header class="border-bottom p-3">
+          <button
+            class="btn btn-ghost btn-icon-sm sidebar-trigger"
+            id="certification-sidebar-trigger"
+            type="button"
+            data-moo-sidebar-trigger
+            data-bs-target="#certification-sidebar"
+            aria-label="Toggle sidebar"
+            aria-controls="certification-sidebar"
+            aria-expanded="true"
+          >
+            Toggle
+          </button>
+        </header>
+        <main id="overview" tabindex="-1">
+          <h1>Sidebar certification fixture</h1>
+          <p id="activity">The main application surface remains independently focusable.</p>
+        </main>
+      </div>
+    </div>
+
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+      import Sidebar from "/dist/js/sidebar.js";
+
+      const root = document.querySelector('[data-slot="sidebar-wrapper"]');
+      root.addEventListener("change.moo.sidebar", event => {
+        document.body.dataset.sidebarState = event.detail.state;
+      });
+      window.CertificationSidebar = Sidebar;
+      window.certificationSidebar = Sidebar.getOrCreateInstance(root);
+      document.body.dataset.sidebarReady = "true";
+    </script>
+  </body>
+</html>

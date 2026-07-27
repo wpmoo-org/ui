@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "0.1",
+  "status": "preview",
+  "coreVersion": "0.5.0",
+  "bootstrap": {
+    "canonicalVersion": "5.3.3",
+    "targetRange": ">=5.3.0 <6",
+    "verifiedRange": null,
+    "testedVersions": []
+  },
+  "browserPolicy": {
+    "policy": "Certification is in progress; see SUPPORT.md for the intended browser policy.",
+    "exactEvidenceInAttestation": false
+  },
+  "certifiedComponents": [],
+  "publicEntrypoints": {
+    "css": [
+      "./moo-ui.css",
+      "./moo-ui.min.css",
+      "./moo.css",
+      "./moo.min.css"
+    ],
+    "esm": [
+      "./combobox.js",
+      "./sidebar.js"
+    ],
+    "sass": []
+  },
+  "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
+}

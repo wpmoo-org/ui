@@ -1,7 +1,7 @@
 {
   "name": "@wpmoo/ui",
-  "version": "0.4.0",
-  "description": "Bootstrap-native HTML component system with a focused, modern visual language.",
+  "version": "0.5.0",
+  "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
   "homepage": "https://ui.wpmoo.org/",
@@ -29,6 +29,7 @@
     "./moo.min.css": "./dist/assets/css/moo.min.css",
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
+    "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
   "files": [
@@ -38,6 +39,7 @@
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
+    "certification.json",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
@@ -66,6 +68,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "axe-core": "4.12.1",
     "wrangler": "^4.112.0"
   }
 }

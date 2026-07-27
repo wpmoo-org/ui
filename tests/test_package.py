@@ -1,5 +1,8 @@
 import json
+import shutil
 import subprocess
+import tarfile
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,6 +15,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
+    "certification.json",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
@@ -24,6 +28,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./moo.min.css": "./dist/assets/css/moo.min.css",
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
+    "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
 
@@ -84,8 +89,45 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertIn("dist/js/combobox.js", files)
         self.assertIn("dist/js/sidebar.js", files)
         self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
+        self.assertEqual(
+            package["exports"]["./certification.json"],
+            "./certification.json",
+        )
+        self.assertIn("certification.json", files)
+        self.assertNotIn("src/certification", files)
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
+
+    def test_certification_preview_matches_package_metadata(self) -> None:
+        package = self._read_package()
+        certification = self._read_package("certification.json")
+        schema = self._read_package("src/certification/manifest.schema.json")
+
+        self.assertEqual(certification["schemaVersion"], "0.1")
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["coreVersion"], package["version"])
+        self.assertEqual(
+            certification["bootstrap"]["targetRange"],
+            package["peerDependencies"]["bootstrap"],
+        )
+        self.assertIsNone(certification["bootstrap"]["verifiedRange"])
+        self.assertEqual(certification["bootstrap"]["testedVersions"], [])
+        self.assertEqual(certification["certifiedComponents"], [])
+        self.assertFalse(
+            certification["browserPolicy"]["exactEvidenceInAttestation"]
+        )
+        self.assertNotIn("sourceCommit", certification)
+        self.assertNotIn("attestation", certification)
+        self.assertEqual(
+            set(certification["publicEntrypoints"]["css"])
+            | set(certification["publicEntrypoints"]["esm"])
+            | set(certification["publicEntrypoints"]["sass"]),
+            set(package["exports"]) - {"./certification.json", "./package.json"},
+        )
+        self.assertEqual(
+            schema["properties"]["status"]["enum"],
+            ["preview", "certified"],
+        )
 
     def test_public_component_module_surface_is_explicit(self) -> None:
         directory = ROOT / "src/js/components"
@@ -108,6 +150,93 @@ class PackageMetadataTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         packed_files = {entry["path"] for entry in payload[0]["files"]}
         self.assertEqual(packed_files, EXPECTED_PACKAGE_FILES | {"package.json"})
+
+    def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            pack_result = subprocess.run(
+                [
+                    "npm",
+                    "pack",
+                    "--json",
+                    "--pack-destination",
+                    str(temporary_root),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+            pack_payload = json.loads(pack_result.stdout)
+            tarball = temporary_root / pack_payload[0]["filename"]
+            self.assertTrue(tarball.is_file())
+
+            unpack_root = temporary_root / "unpacked"
+            with tarfile.open(tarball, mode="r:gz") as archive:
+                self.assertTrue(
+                    all(
+                        member.name == "package"
+                        or member.name.startswith("package/")
+                        for member in archive.getmembers()
+                    )
+                )
+                archive.extractall(unpack_root)
+
+            consumer_root = temporary_root / "consumer"
+            installed_package = consumer_root / "node_modules/@wpmoo/ui"
+            installed_package.parent.mkdir(parents=True)
+            shutil.move(unpack_root / "package", installed_package)
+
+            installed_metadata = json.loads(
+                (installed_package / "package.json").read_text(encoding="utf-8")
+            )
+            source_metadata = self._read_package()
+            self.assertEqual(installed_metadata["name"], "@wpmoo/ui")
+            self.assertEqual(installed_metadata["version"], source_metadata["version"])
+            self.assertEqual(installed_metadata["exports"], EXPECTED_PACKAGE_EXPORTS)
+            installed_certification = json.loads(
+                (installed_package / "certification.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                installed_certification["coreVersion"],
+                installed_metadata["version"],
+            )
+
+            consumer_check = consumer_root / "verify-package.mjs"
+            consumer_check.write_text(
+                """
+import Combobox from "@wpmoo/ui/combobox.js";
+import Sidebar from "@wpmoo/ui/sidebar.js";
+
+if (Combobox.name !== "Combobox" || Sidebar.name !== "Sidebar") {
+  throw new Error("Unexpected public ESM default export");
+}
+
+for (const specifier of [
+  "@wpmoo/ui/moo-ui.css",
+  "@wpmoo/ui/moo-ui.min.css",
+  "@wpmoo/ui/moo.css",
+  "@wpmoo/ui/moo.min.css",
+  "@wpmoo/ui/certification.json",
+]) {
+  const resolved = import.meta.resolve(specifier);
+  if (!resolved.startsWith("file:")) {
+    throw new Error(`Package export did not resolve locally: ${specifier}`);
+  }
+}
+""".lstrip(),
+                encoding="utf-8",
+            )
+            consumer_result = subprocess.run(
+                ["node", consumer_check.name],
+                cwd=consumer_root,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
         for module_name in ("combobox.js", "sidebar.js"):

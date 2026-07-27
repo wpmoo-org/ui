@@ -63,6 +63,7 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('id="combo-reviewer-listbox"', output)
         self.assertIn('role="listbox"', output)
         self.assertIn('role="option"', output)
+        self.assertEqual(output.count('<li role="presentation">'), 2)
         self.assertIn('data-value="grace"', output)
         self.assertIn('aria-selected="true"', output)
         self.assertEqual(output.count('class="combobox-option__check"'), 2)
@@ -221,6 +222,11 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('role="group" aria-labelledby="combo-timezone-group-2"', output)
         self.assertIn('class="dropdown-header combobox-group-label" id="combo-timezone-group-2"', output)
         self.assertIn(">Europe<", output)
+        self.assertIn('class="list-unstyled mb-0" role="presentation"', output)
+        self.assertIn(
+            '<li role="presentation" aria-hidden="true" data-moo-combobox-separator>',
+            output,
+        )
         self.assertIn('class="dropdown-divider combobox-separator"', output)
         self.assertIn('data-value="london" aria-selected="true"', output)
         self.assertEqual(output.count('role="option"'), 4)

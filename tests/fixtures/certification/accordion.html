@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accordion certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 42rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Accordion certification fixture</h1>
+      <div class="accordion w-100 accordion-flush" id="certification-accordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button
+              class="accordion-button"
+              type="button"
+              id="certification-first-trigger"
+              data-bs-toggle="collapse"
+              data-bs-target="#certification-first"
+              aria-expanded="true"
+              aria-controls="certification-first"
+            >
+              Account details
+            </button>
+          </h2>
+          <div
+            id="certification-first"
+            class="accordion-collapse collapse show"
+            data-bs-parent="#certification-accordion"
+            aria-labelledby="certification-first-trigger"
+          >
+            <div class="accordion-body">Manage the public profile and account details.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              id="certification-second-trigger"
+              data-bs-toggle="collapse"
+              data-bs-target="#certification-second"
+              aria-expanded="false"
+              aria-controls="certification-second"
+            >
+              Security settings
+            </button>
+          </h2>
+          <div
+            id="certification-second"
+            class="accordion-collapse collapse"
+            data-bs-parent="#certification-accordion"
+            aria-labelledby="certification-second-trigger"
+          >
+            <div class="accordion-body">Review authentication and active sessions.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
