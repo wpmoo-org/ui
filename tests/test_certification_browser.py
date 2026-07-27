@@ -214,6 +214,129 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/sidebar.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                root = page.locator('[data-slot="sidebar-wrapper"]')
+                sidebar = page.locator("#certification-sidebar")
+                trigger = page.locator("#certification-sidebar-trigger")
+                search = page.locator("#certification-sidebar-search")
+                expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+                expect(root).to_have_attribute("data-moo-sidebar-ready", "")
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => window.CertificationSidebar.getInstance(element)
+                          === window.certificationSidebar
+                        """
+                    )
+                )
+
+                if case.is_mobile:
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+                    page.evaluate(
+                        """
+                        () => {
+                          document.querySelector("#certification-sidebar").addEventListener(
+                            "shown.bs.offcanvas",
+                            () => document.body.dataset.sidebarShown = "true",
+                            { once: true },
+                          );
+                        }
+                        """
+                    )
+                    trigger.click()
+                    expect(page.locator("body")).to_have_attribute("data-sidebar-shown", "true")
+                    expect(sidebar).to_have_class("sidebar offcanvas-lg offcanvas-start show")
+                    expect(trigger).to_have_attribute("aria-expanded", "true")
+                    self.assertEqual(page.locator(".offcanvas-backdrop.show").count(), 1)
+                    self.assertEqual(run_axe(page), [])
+
+                    page.evaluate(
+                        """
+                        () => {
+                          document.querySelector("#certification-sidebar").addEventListener(
+                            "hidden.bs.offcanvas",
+                            () => document.body.dataset.sidebarHidden = "true",
+                            { once: true },
+                          );
+                        }
+                        """
+                    )
+                    page.keyboard.press("Escape")
+                    expect(page.locator("body")).to_have_attribute("data-sidebar-hidden", "true")
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+                    expect(trigger).to_be_focused()
+                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                else:
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    expect(trigger).to_have_attribute("aria-expanded", "true")
+                    trigger.click()
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "collapsed")
+                    expect(trigger).to_have_attribute("aria-expanded", "false")
+                    expect(page.locator("body")).to_have_attribute(
+                        "data-sidebar-state",
+                        "collapsed",
+                    )
+                    self.assertEqual(
+                        page.evaluate(
+                            "localStorage.getItem('moo-sidebar:certification-shell')"
+                        ),
+                        "collapsed",
+                    )
+                    page.keyboard.press("Control+b")
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    search.focus()
+                    page.keyboard.press("Control+b")
+                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    self.assertEqual(run_axe(page), [])
+
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationSidebar.dispose();
+                          return window.CertificationSidebar.getInstance(element) === null
+                            && !element.hasAttribute("data-moo-sidebar-ready");
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationSidebar = window.CertificationSidebar
+                            .getOrCreateInstance(element);
+                          return window.CertificationSidebar.getInstance(element)
+                            === window.certificationSidebar
+                            && element.hasAttribute("data-moo-sidebar-ready");
+                        }
+                        """
+                    )
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):

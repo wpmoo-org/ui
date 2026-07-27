@@ -144,6 +144,40 @@
         "Real-device and generic host-conformance evidence remain pending."
       ]
     },
-    {"slug": "sidebar", "tier": 3, "status": "planned"}
+    {
+      "slug": "sidebar",
+      "tier": 3,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "lifecycle",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_sidebar.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    }
   ]
 }
