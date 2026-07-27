@@ -256,15 +256,20 @@ for (const specifier of [
 
                 self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_publish_workflow_requires_a_matching_tag_ref(self) -> None:
+    def test_publish_workflow_requires_a_matching_existing_tag_ref(self) -> None:
         workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text(
             encoding="utf-8"
         )
 
+        self.assertIn("release_ref:", workflow)
+        self.assertIn("ref: ${{ inputs.release_ref || github.ref }}", workflow)
+        self.assertIn('tag="${RELEASE_REF:-${GITHUB_REF_NAME}}"', workflow)
+        self.assertIn('git show-ref --verify --quiet "refs/tags/${tag}"', workflow)
         self.assertIn('${GITHUB_REF_TYPE}" != "tag', workflow)
         self.assertIn('${tag}" != "v${version}', workflow)
+        self.assertIn('source_commit="$(git rev-parse HEAD)"', workflow)
         self.assertIn(
-            'git merge-base --is-ancestor "${GITHUB_SHA}" origin/main',
+            'git merge-base --is-ancestor "${source_commit}" origin/main',
             workflow,
         )
 
