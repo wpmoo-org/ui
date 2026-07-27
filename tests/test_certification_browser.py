@@ -112,6 +112,95 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/dialog.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#open-certification-dialog")
+                dialog = page.locator("#certification-dialog")
+                close_button = dialog.locator(".btn-close")
+                display_name = page.locator("#certification-display-name")
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-dialog").click();
+                    })
+                    """
+                )
+                expect(dialog).to_have_class("modal fade show")
+                expect(dialog).to_have_attribute("aria-modal", "true")
+                expect(dialog).to_have_attribute("role", "dialog")
+                self.assertIsNone(dialog.get_attribute("aria-hidden"))
+                self.assertEqual(page.locator(".modal-backdrop.show").count(), 1)
+                self.assertTrue(
+                    dialog.evaluate("element => document.activeElement === element")
+                )
+
+                close_button.focus()
+                page.keyboard.press("Tab")
+                expect(display_name).to_be_focused()
+                trigger.focus()
+                expect(close_button).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+
+                page.evaluate(
+                    """
+                    () => {
+                      document.querySelector("#certification-dialog").addEventListener(
+                        "hidden.bs.modal",
+                        () => document.body.dataset.dialogHidden = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute("data-dialog-hidden", "true")
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-dialog").click();
+                    })
+                    """
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-dialog");
+                      dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
+                      dialog.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+                evidence.assert_clean()
+                context.close()
+
     def test_canonical_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
         self.assertEqual(CERTIFICATION_BOOTSTRAP_LANES, (CANONICAL_BOOTSTRAP,))
         self.assertEqual(CANONICAL_BOOTSTRAP.version, "5.3.3")
