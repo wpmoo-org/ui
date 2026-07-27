@@ -21,7 +21,7 @@
   --moo-destructive-foreground: #{$moo-destructive-foreground};
   --moo-sidebar: #{$moo-sidebar};
   --bs-body-color: var(--moo-foreground);
-  --bs-body-color-rgb: 24, 24, 27;
+  --bs-body-color-rgb: #{to-rgb($moo-foreground)};
   --bs-heading-color: var(--moo-foreground);
   --bs-secondary-color: var(--moo-muted-foreground);
 }
@@ -37,7 +37,7 @@
   --moo-destructive-foreground: #{$moo-destructive-foreground-dark};
   --moo-sidebar: #{$moo-sidebar-dark};
   --bs-body-color: var(--moo-foreground);
-  --bs-body-color-rgb: 250, 250, 250;
+  --bs-body-color-rgb: #{to-rgb($moo-foreground-dark)};
   --bs-heading-color: var(--moo-foreground);
   --bs-secondary-color: var(--moo-muted-foreground);
 }

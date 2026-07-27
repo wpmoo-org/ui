@@ -42,6 +42,20 @@ $moo-destructive-dark: #f87171 !default;
 $moo-destructive-foreground-dark: $dark !default;
 $moo-sidebar-dark: #1c1c1f !default;
 
+// Bootstrap root variables consumed by the scoped core build. Define them
+// here so _core_theme.scss can emit Bootstrap's own root contract without
+// hardcoded consumer-side literals.
+$body-tertiary-color: #a1a1aa !default;
+$body-tertiary-bg: $light !default;
+$code-color: #d63384 !default;
+$mark-bg: #fff3cd !default;
+$border-color-translucent: rgba(24, 24, 27, 0.175) !default;
+$body-tertiary-color-dark: $moo-muted-foreground !default;
+$body-tertiary-bg-dark: #202024 !default;
+$code-color-dark: #e685b5 !default;
+$mark-bg-dark: #664d03 !default;
+$border-color-translucent-dark: rgba(250, 250, 250, 0.15) !default;
+
 // Bootstrap's form-control consumes these values directly. Keep the native
 // Sass contract, but give text controls the same quiet surface and compact
 // geometry as the design reference.
@@ -286,6 +300,10 @@ $moo-dropdown-sidebar-min-width: 14rem !default;
 // This variable is evaluated before Bootstrap's own defaults exist, so it
 // cannot reference $font-family-sans-serif directly.
 $moo-catalog-font-family: "Geist" !default;
+// Catalog chrome only: the command palette needs a stronger floating shadow
+// than the product component shadow scale. Keep the literal at the Sass
+// definition site so catalog.scss stays token-driven.
+$moo-catalog-command-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.25) !default;
 
 // Field has no matching Bootstrap component of its own, so its spacing
 // scale and legend sizing live on dedicated Sass knobs instead of
