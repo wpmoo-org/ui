@@ -774,6 +774,115 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_select_fixture_proves_native_select_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/select.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                workspace = page.locator("#certification-select-workspace")
+                grouped = page.locator("#certification-select-queue")
+                invalid = page.locator("#certification-select-invalid")
+                multiple = page.locator("#certification-select-teams")
+                sized = page.locator("#certification-select-priority")
+                disabled = page.locator("#certification-select-disabled")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(
+                    page.locator('label[for="certification-select-workspace"]')
+                ).to_have_text("Workspace")
+                expect(workspace).to_have_class("form-select")
+                expect(workspace).to_have_attribute(
+                    "aria-describedby",
+                    "certification-select-workspace-help",
+                )
+                expect(workspace).to_have_attribute("data-selected", "ops")
+                self.assertEqual(workspace.input_value(), "ops")
+                workspace.focus()
+                expect(workspace).to_be_focused()
+                workspace.select_option("design")
+                self.assertEqual(workspace.input_value(), "design")
+
+                expect(grouped.locator('optgroup[label="Primary queues"]')).to_have_count(1)
+                expect(
+                    grouped.locator('optgroup[label="Archive queues"]')
+                ).to_have_attribute("disabled", "")
+                grouped.select_option("incident")
+                self.assertEqual(grouped.input_value(), "incident")
+
+                expect(invalid).to_have_class("form-select is-invalid")
+                expect(invalid).to_have_attribute("required", "")
+                expect(invalid).to_have_attribute("aria-invalid", "true")
+                expect(invalid).to_have_attribute(
+                    "aria-describedby",
+                    "certification-select-invalid-help "
+                    "certification-select-invalid-feedback",
+                )
+                expect(
+                    page.locator("#certification-select-invalid-feedback")
+                ).to_have_class("invalid-feedback")
+                invalid.focus()
+                expect(invalid).to_be_focused()
+                self.assertTrue(
+                    invalid.evaluate("element => element.validity.valueMissing")
+                )
+
+                expect(multiple).to_have_attribute("multiple", "")
+                expect(multiple).to_have_attribute("size", "5")
+                multiple.select_option(["platform", "security"])
+                self.assertEqual(
+                    multiple.evaluate(
+                        """
+                        element => Array.from(element.selectedOptions)
+                          .map(option => option.value)
+                        """
+                    ),
+                    ["platform", "security"],
+                )
+
+                expect(sized).to_have_class("form-select form-select-lg")
+                expect(sized).to_have_attribute("size", "4")
+                self.assertEqual(
+                    sized.evaluate("element => getComputedStyle(element).backgroundImage"),
+                    "none",
+                )
+                sized.select_option("high")
+                self.assertEqual(sized.input_value(), "high")
+
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
