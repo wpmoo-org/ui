@@ -9,14 +9,13 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 
 @import "functions";
 @import "primary_variables";
-@import "bootstrap_overrides";
 @import "variables";
 @import "variables-dark";
 @import "maps";
 @import "mixins";
 @import "utilities";
-@import "core_theme";
-@import "core_global_primitives";
+@import "themes/scoped_core";
+@import "foundations/core_global_primitives";
 
 .moo-ui {
   @include moo-core-scales;
@@ -42,9 +41,9 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 
 @scope (.moo-ui) {
   @import "bootstrap_component_layer";
-  @import "focus";
+  @import "foundations/focus";
   @import "component_layer";
 }
 
-@import "core_state_layer";
-@import "overlay_backdrop";
+@import "foundations/core_state_layer";
+@import "foundations/overlay_backdrop";

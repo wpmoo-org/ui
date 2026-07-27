@@ -198,12 +198,11 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('data-moo-copy-status role="status"', page)
         self.assertIn('aria-controls="core-variants-code"', page)
 
-        script = self.read_output("assets/js/preview.js")
+        script = self.read_output("assets/js/catalog/code-preview.js")
         self.assertIn('panel.dataset.expanded = "true";', script)
-        self.assertIn(
-            'scroller.classList.toggle("moo-code--scrolling", scroller.scrollHeight > scroller.clientHeight);',
-            script,
-        )
+        self.assertIn("scroller.classList.toggle(", script)
+        self.assertIn('"moo-code--scrolling",', script)
+        self.assertIn("scroller.scrollHeight > scroller.clientHeight", script)
         self.assertIn('toggle.setAttribute("aria-expanded", "true")', script)
         self.assertIn("copyButton.hidden = false;", script)
         self.assertIn("navigator.clipboard.writeText(code.textContent)", script)

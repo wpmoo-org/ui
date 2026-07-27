@@ -48,15 +48,34 @@ def normalize_standalone_css(css: str) -> str:
 
 
 class StyleEquivalenceTests(CatalogTestCase):
-    def test_standalone_moo_ui_output_matches_accepted_baseline(self) -> None:
-        result = self.run_build()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+    def assert_css_matches_baseline(
+        self,
+        css_name: str,
+        baseline_name: str,
+    ) -> None:
+        css = (DIST / f"assets/css/{css_name}").read_text(encoding="utf-8")
         digest = hashlib.sha256(
             normalize_standalone_css(css).encode("utf-8")
         ).hexdigest()
         baseline = (
-            ROOT / "tests/fixtures/moo-ui-baseline.sha256"
+            ROOT / f"tests/fixtures/{baseline_name}"
         ).read_text(encoding="utf-8").strip()
         self.assertEqual(digest, baseline)
+
+    def test_standalone_moo_ui_output_matches_accepted_baseline(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assert_css_matches_baseline(
+            "moo-ui.css",
+            "moo-ui-baseline.sha256",
+        )
+
+    def test_scoped_moo_output_matches_accepted_baseline(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assert_css_matches_baseline(
+            "moo.css",
+            "moo-core-baseline.sha256",
+        )

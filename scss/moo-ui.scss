@@ -1,8 +1,7 @@
 @import "primary_variables";
-@import "bootstrap_overrides";
 @import "../vendor/bootstrap/scss/bootstrap";
-@import "tokens_root";
-@import "focus";
+@import "themes/standalone_root";
+@import "foundations/focus";
 @import "utilities/scroll_fade_primitives";
 @import "component_layer";
-@import "overlay_backdrop";
+@import "foundations/overlay_backdrop";

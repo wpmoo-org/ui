@@ -12,11 +12,22 @@ from tests.helpers import (
     STATIC,
     CatalogTestCase,
     is_valid_webp,
+    read_catalog_styles,
     read_png_ihdr,
+    read_primary_variables,
 )
 
 
 class CatalogContractTests(CatalogTestCase):
+    def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
+        styles = read_catalog_styles()
+        match = re.search(r"\.moo-catalog__main\s*\{(?P<body>[^}]*)\}", styles)
+
+        self.assertIsNotNone(match)
+        body = match.group("body")
+        self.assertIn("overflow-y: auto", body)
+        self.assertNotIn("scroll-behavior: smooth", body)
+
     def test_visible_component_lists_are_sorted_by_label(self) -> None:
         sorted_loop = (
             '{% for component in catalog | sort(attribute="label") %}'
@@ -344,6 +355,65 @@ class CatalogContractTests(CatalogTestCase):
                 stacklevel=1,
             )
 
+    def test_catalog_builds_the_complete_root_favicon_set(self) -> None:
+        svg = (ROOT / "favicon.svg").read_text(encoding="utf-8")
+        self.assertIn('viewBox="0 0 24 24"', svg)
+        self.assertIn("prefers-color-scheme: dark", svg)
+        self.assertIn('stroke="currentColor"', svg)
+        self.assertNotRegex(
+            svg,
+            r"(?i)<script|javascript:|foreignObject|(?:xlink:)?href=|@import|url\(",
+        )
+
+        expected_png_sizes = {
+            "apple-touch-icon.png": (180, 180),
+            "icon-192.png": (192, 192),
+            "icon-512.png": (512, 512),
+        }
+        for name, expected_size in expected_png_sizes.items():
+            with self.subTest(name=name):
+                width, height, _ = read_png_ihdr(ROOT / name)
+                self.assertEqual((width, height), expected_size)
+
+        ico = (ROOT / "favicon.ico").read_bytes()
+        self.assertEqual(ico[:6], b"\x00\x00\x01\x00\x03\x00")
+        self.assertEqual(
+            [(ico[6 + index * 16] or 256, ico[7 + index * 16] or 256) for index in range(3)],
+            [(16, 16), (32, 32), (48, 48)],
+        )
+
+        manifest = json.loads((ROOT / "site.webmanifest").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["name"], "Moo UI")
+        self.assertEqual(manifest["short_name"], "Moo UI")
+        self.assertEqual(manifest["display"], "standalone")
+        self.assertEqual(
+            [(icon["src"], icon["sizes"], icon["type"]) for icon in manifest["icons"]],
+            [
+                ("/icon-192.png", "192x192", "image/png"),
+                ("/icon-512.png", "512x512", "image/png"),
+            ],
+        )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        root_assets = (
+            "favicon.svg",
+            "favicon.ico",
+            "apple-touch-icon.png",
+            "icon-192.png",
+            "icon-512.png",
+            "site.webmanifest",
+        )
+        for name in root_assets:
+            self.assertTrue((DIST / name).is_file(), name)
+
+        page = self.read_output("introduction/index.html")
+        self.assertIn('<link rel="icon" type="image/svg+xml" href="../favicon.svg">', page)
+        self.assertIn('<link rel="icon" href="../favicon.ico" sizes="any">', page)
+        self.assertIn('<link rel="apple-touch-icon" href="../apple-touch-icon.png">', page)
+        self.assertIn('<link rel="manifest" href="../site.webmanifest">', page)
+        self.assertNotIn("data-moo-favicon", page)
+
     def test_components_index_uses_admin_shell_primitives(self) -> None:
         result = self.run_build()
 
@@ -377,7 +447,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         index = self.read_output("index.html")
-        preview = self.read_output("assets/js/preview.js")
+        preview = self.read_output("assets/js/catalog/command.js")
 
         # The header search trigger opens a command-palette modal listing the
         # catalog pages; it no longer deep-links to the index filter field.
@@ -387,26 +457,57 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="./"', index)
         self.assertIn('href="components/"', index)
         self.assertIn('href="components/button/"', index)
-        # Open + filter + keyboard navigation behavior lives in preview.js.
+        # Open + filter + keyboard navigation behavior lives in command.js.
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
-        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        catalog_scss = read_catalog_styles()
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
         self.assertIn("background: $input-disabled-bg;", catalog_scss)
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        preview = (ROOT / "static/js/preview.js").read_text(encoding="utf-8")
+        preview = (ROOT / "src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
         self.assertIn("document.documentElement.dataset.bsTheme = theme", base)
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
-        self.assertIn("window.localStorage.getItem(THEME_STORAGE_KEY)", preview)
-        self.assertIn("window.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+        self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
+        self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+
+    def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
+        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+
+        handoff = 'document.documentElement.dataset.mooSidebarCatalogState'
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertIn(handoff, base)
+        self.assertLess(
+            base.index(handoff),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+        )
+        self.assertLess(
+            base.index(handoff),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css'),
+        )
+
+    def test_built_catalog_sidebar_persisted_state_handoff_is_in_head(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("introduction.html")
+        head = page.split("</head>", 1)[0]
+        handoff = "dataset.mooSidebarCatalogState"
+        self.assertIn(handoff, head)
+        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.css"))
+        self.assertLess(head.index(handoff), head.index("assets/css/catalog.css"))
+        wrapper_index = page.index('data-moo-sidebar-key="catalog-shell"')
+        handoff_index = page.index("shell.dataset.mooSidebarState = state")
+        sidebar_index = page.index('<aside', handoff_index)
+        self.assertLess(wrapper_index, handoff_index)
+        self.assertLess(handoff_index, sidebar_index)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
-        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        catalog_scss = read_catalog_styles()
 
         self.assertIn("--moo-doc-body-font-size: 0.9375rem;", catalog_scss)
         self.assertIn(
@@ -633,11 +734,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
         self.assertIn('aria-label="Next page: Changelog"', skills)
 
-        preview = self.read_output("assets/js/preview.js")
-        self.assertIn("[data-moo-copy-page]", preview)
-        self.assertIn("navigator.clipboard.writeText(value)", preview)
-        self.assertIn("[data-moo-catalog-section-filter]", preview)
-        self.assertIn("selectedCatalogSection", preview)
+        code_preview = self.read_output("assets/js/catalog/code-preview.js")
+        catalog_filter = self.read_output("assets/js/catalog/catalog-filter.js")
+        self.assertIn("[data-moo-copy-page]", code_preview)
+        self.assertIn("navigator.clipboard.writeText(value)", code_preview)
+        self.assertIn("[data-moo-catalog-section-filter]", catalog_filter)
+        self.assertIn("selectedSection", catalog_filter)
 
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()
@@ -693,7 +795,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(".moo-doc-layout", css)
         self.assertIn("@media (min-width: 1200px)", css)
         self.assertIn("--moo-doc-toc-offset: calc(2rem + 5px)", css)
-        self.assertIn("scroll-behavior: smooth", css)
+        self.assertNotIn("scroll-behavior: smooth", css)
         self.assertIn("@media (prefers-reduced-motion: reduce)", css)
         self.assertRegex(
             css,
@@ -726,12 +828,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn('data-moo-component-toc', components_index)
         self.assertNotIn('data-moo-component-doc-layout', components_index)
 
-        preview = self.read_output("assets/js/preview.js")
+        preview = self.read_output("assets/js/catalog/toc.js")
         self.assertIn("[data-moo-component-toc]", preview)
         self.assertIn(".moo-component-examples > .moo-example[aria-labelledby]", preview)
-        self.assertIn("componentTocNav.appendChild(link)", preview)
+        self.assertIn("componentNav.appendChild(link)", preview)
         self.assertIn('link.setAttribute("aria-current", "true")', preview)
-        self.assertIn('link.classList.toggle("active", isActive)', preview)
+        self.assertIn('link.classList.toggle("active", active)', preview)
 
     def test_installation_page_uses_published_cdn_path(self) -> None:
         result = self.run_build()
@@ -749,6 +851,11 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn("Create workspace", installation)
         self.assertIn("Bootstrap's JavaScript bundle", installation)
+        self.assertIn("optional ESM only for components", installation)
+        self.assertIn('href="../components/combobox/">Combobox</a>', installation)
+        self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
+        self.assertNotIn('import Combobox from "@wpmoo/ui/combobox.js"', installation)
+        self.assertNotIn('import Sidebar from "@wpmoo/ui/sidebar.js"', installation)
         self.assertIn('id="adoption-paths">Adoption Paths</h2>', installation)
         self.assertNotIn("moo-doc-note", installation)
 
@@ -835,9 +942,7 @@ class CatalogContractTests(CatalogTestCase):
             "--bs-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);", css
         )
         self.assertIn("--bs-border-radius-xl: 0.75rem;", css)
-        variables = (
-            ROOT / "scss/_primary_variables.scss"
-        ).read_text(encoding="utf-8")
+        variables = read_primary_variables()
         self.assertIn("$box-shadow-sm:", variables)
         self.assertIn("$border-radius-xl:", variables)
 

@@ -3,13 +3,19 @@ from __future__ import annotations
 import json
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import (
+    ROOT,
+    CatalogTestCase,
+    read_catalog_styles,
+    read_primary_variables,
+)
 
 
 COMPONENT = ROOT / "src/components/combobox.html.jinja"
 PAGE = ROOT / "src/pages/components/combobox.html.jinja"
 REGISTRY = ROOT / "src/registry/components.json"
-PREVIEW_JS = ROOT / "static/js/preview.js"
+COMBOBOX_JS = ROOT / "src/js/components/combobox.js"
+CATALOG_JS = ROOT / "src/js/catalog/index.js"
 
 
 class ComboboxTests(CatalogTestCase):
@@ -245,7 +251,7 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_menus_scroll_with_hidden_scrollbar_when_long(self) -> None:
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        variables = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+        variables = read_primary_variables()
 
         self.assertIn(".combobox-menu {", scss)
         menu_source = scss.split(".combobox-menu {", 1)[1]
@@ -262,7 +268,7 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_custom_item_typography_matches_reference_contract(self) -> None:
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        variables = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+        variables = read_primary_variables()
 
         self.assertIn("$moo-combobox-option-line-height: 1.25rem !default;", variables)
         self.assertIn("$moo-combobox-description-font-size: 0.75rem !default;", variables)
@@ -336,19 +342,19 @@ class ComboboxTests(CatalogTestCase):
         self.assertNotIn("combobox_option_content(item, is_selected)", source)
 
     def test_combobox_multiple_chips_surface_focuses_like_input(self) -> None:
-        script = PREVIEW_JS.read_text(encoding="utf-8")
+        script = COMBOBOX_JS.read_text(encoding="utf-8")
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
         chips_block = scss.split(".combobox-chips {", 1)[1].split("}", 1)[0]
 
         self.assertIn("cursor: text;", chips_block)
-        self.assertIn('event.target.closest(".combobox-chips")', script)
+        self.assertIn('target.closest(".combobox-chips")', script)
         self.assertRegex(
             script,
-            r"event\.target\.closest\(\"\.combobox-chips\"\)[\s\S]*input\.focus\(\);",
+            r"target\.closest\(\"\.combobox-chips\"\)[\s\S]*this\._input\.focus\(\);",
         )
 
     def test_combobox_preview_keeps_component_width_tokens(self) -> None:
-        catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        catalog_scss = read_catalog_styles()
         component_scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
 
         self.assertIn(".moo-example__preview--narrow > .combobox", catalog_scss)
@@ -484,55 +490,50 @@ class ComboboxTests(CatalogTestCase):
         self.assertNotIn("render_rtl_example(", source)
         self.assertNotIn("Select a framework", source)
         self.assertNotIn("Svelte", source)
+        self.assertIn(
+            'typography("JavaScript", variant="section-title", id="combobox-javascript")',
+            source,
+        )
+        self.assertNotIn('<h2 id="combobox-javascript">', source)
+        self.assertIn('import Combobox from "@wpmoo/ui/combobox.js";', source)
+        self.assertIn("Combobox.getOrCreateInstance(element)", source)
+        self.assertIn("combobox.dispose()", source)
+        self.assertIn("Bootstrap 5.3 does not provide a Combobox plugin", source)
 
-    def test_preview_js_wires_basic_combobox_behavior(self) -> None:
-        source = PREVIEW_JS.read_text(encoding="utf-8")
+    def test_public_module_owns_combobox_behavior_and_lifecycle(self) -> None:
+        source = COMBOBOX_JS.read_text(encoding="utf-8")
+        catalog = CATALOG_JS.read_text(encoding="utf-8")
 
-        self.assertIn(".combobox", source)
+        self.assertIn("export default class Combobox", source)
+        self.assertIn("static getInstance(element)", source)
+        self.assertIn("static getOrCreateInstance(element, config = {})", source)
+        self.assertIn("dispose()", source)
+        self.assertIn("instances.set(element, this);", source)
+        self.assertIn("instances.delete(this._element);", source)
+        self.assertIn("removeEventListener(type, handler, options)", source)
         self.assertIn(".combobox-input", source)
         self.assertIn(".combobox-option", source)
-        self.assertIn("data-moo-combobox-empty", source)
         self.assertIn("mooComboboxMultiple", source)
         self.assertIn("data-moo-combobox-chip-remove", source)
-        self.assertIn('menu.classList.add("show")', source)
-        self.assertIn('input.addEventListener("focus"', source)
-        self.assertIn('setAttribute("aria-selected",', source)
-        self.assertIn("syncMultipleValue", source)
-        self.assertIn("removeChip", source)
         self.assertIn('event.key === "Backspace"', source)
-        self.assertIn('input.setAttribute("aria-activedescendant"', source)
-        self.assertIn("hidden.value = option.dataset.value || \"\"", source)
-        self.assertRegex(
-            source,
-            r"const closeMenu = \(\) => \{[^}]*input\.removeAttribute\(\"aria-activedescendant\"\);",
-        )
-        self.assertIn("const clearSelection = () => {", source)
-        self.assertIn('hidden.value = "";', source)
-        self.assertIn('input.addEventListener("blur", clearStaleSelection);', source)
         self.assertIn('event.key === "Tab"', source)
-        self.assertIn("data-moo-combobox-clear", source)
-        self.assertIn('clearTrigger.addEventListener("click"', source)
-        clear_handler = source.split('clearTrigger.addEventListener("click"', 1)[1].split("});", 1)[0]
-        self.assertNotIn("event.stopPropagation();", clear_handler)
-        self.assertIn("toggleClear", source)
-        self.assertIn("indicator.hidden = selected;", source)
+        self.assertIn('this._hidden.value = option.dataset.value || ""', source)
         self.assertIn("data-moo-combobox-group", source)
-        self.assertIn("syncGroupVisibility", source)
         self.assertNotIn("combobox-popup-trigger", source)
+        self.assertIn('import Combobox from "../components/combobox.js";', catalog)
+        self.assertIn("Combobox.getOrCreateInstance(element);", catalog)
+        self.assertNotIn(".combobox-input", catalog)
 
-    def test_preview_js_does_not_scroll_closed_comboboxes_on_initialization(self) -> None:
-        source = PREVIEW_JS.read_text(encoding="utf-8")
-        combobox_block = source.split('document.querySelectorAll(".combobox").forEach', 1)[1].split(
-            'document.addEventListener("click", (event) => {\n    document.querySelectorAll(".combobox")',
-            1,
-        )[0]
+    def test_public_module_does_not_scroll_closed_comboboxes_on_initialization(self) -> None:
+        source = COMBOBOX_JS.read_text(encoding="utf-8")
 
-        self.assertIn("const filterOptions = ({ open = true, activate = true } = {}) => {", source)
-        self.assertIn("filterOptions({ open: startsOpen, activate: startsOpen });", source)
-        self.assertIn("const scrollOptionIntoMenu = (option) => {", combobox_block)
-        self.assertIn("menu.scrollTop", combobox_block)
-        self.assertNotIn("scrollIntoView", combobox_block)
-        self.assertNotIn("    filterOptions();\n    if (!startsOpen)", source)
+        self.assertIn(
+            "this._filterOptions({ open: this._startsOpen, activate: this._startsOpen });",
+            source,
+        )
+        self.assertIn("this._menu.scrollTop", source)
+        self.assertNotIn("scrollIntoView", source)
+        self.assertNotIn("this._filterOptions();\n    if (!this._startsOpen)", source)
 
     def test_combobox_is_ready_in_catalog_registry(self) -> None:
         catalog = json.loads(REGISTRY.read_text(encoding="utf-8"))

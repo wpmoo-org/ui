@@ -166,12 +166,14 @@ class SheetTests(CatalogTestCase):
         self.assertNotIn("body:has(.offcanvas.sheet.show)", styles)
 
     def test_sheet_panels_are_portaled_before_bootstrap_creates_backdrop(self) -> None:
-        script = (ROOT / "static/js/preview.js").read_text(encoding="utf-8")
+        script = (
+            ROOT / "src/js/catalog/bootstrap-preview.js"
+        ).read_text(encoding="utf-8")
 
         self.assertIn(
-            'document.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalCatalogSheet)',
+            'root.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalSheet)',
             script,
         )
-        self.assertIn("document.body.appendChild(sheet)", script)
+        self.assertIn("root.body.appendChild(sheet)", script)
         self.assertNotIn("moo-sheet-placeholder", script)
         self.assertNotIn("catalogSheetPlaceholders", script)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import struct
 import subprocess
 import sys
@@ -15,6 +16,40 @@ STATIC = ROOT / "static"
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 PNG_COLOR_TYPE_RGBA = 6
+
+
+SCSS_IMPORT = re.compile(
+    r'^[ \t]*@import[ \t]+["\']([^"\']+)["\'][ \t]*;',
+    re.MULTILINE,
+)
+
+
+def active_scss_imports(source: str) -> list[str]:
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    source = "\n".join(line.split("//", 1)[0] for line in source.splitlines())
+    return SCSS_IMPORT.findall(source)
+
+
+def read_scss_aggregate(entrypoint: Path, prefix: str) -> str:
+    source = entrypoint.read_text(encoding="utf-8")
+    paths = [entrypoint]
+    for target in active_scss_imports(source):
+        if not target.startswith(f"{prefix}/"):
+            continue
+        relative = Path(target)
+        partial = ROOT / "scss" / relative.parent / f"_{relative.name}.scss"
+        if not partial.is_file():
+            raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
+        paths.append(partial)
+    return "\n".join(path.read_text(encoding="utf-8") for path in paths)
+
+
+def read_primary_variables() -> str:
+    return read_scss_aggregate(ROOT / "scss/_primary_variables.scss", "settings")
+
+
+def read_catalog_styles() -> str:
+    return read_scss_aggregate(ROOT / "scss/catalog.scss", "catalog")
 
 
 def pretty_output_path(relative_path: str) -> Path:

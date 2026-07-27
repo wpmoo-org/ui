@@ -194,7 +194,7 @@ class BlocksTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         styles = self.read_output("assets/css/catalog.css")
-        script = self.read_output("assets/js/preview.js")
+        script = self.read_output("assets/js/catalog/block-frame.js")
 
         self.assertIn(".moo-block-preview__viewport", styles)
         self.assertIn(".moo-block-preview__frame", styles)

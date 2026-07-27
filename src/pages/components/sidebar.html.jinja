@@ -2,6 +2,7 @@
 {% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
 {% from "components/table.html.jinja" import table %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -97,11 +98,39 @@
       extra_class="align-middle mb-5"
     ) }}
 
+    <h2 id="sidebar-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
+    <p>
+      Bootstrap owns Dropdown, Collapse, Offcanvas, and Tooltip. Moo UI's
+      optional Sidebar module coordinates the shell state Bootstrap does not
+      provide: desktop collapse and persistence, the rail and keyboard shortcut,
+      collapsed flyouts, RTL placement, and responsive tooltip ownership.
+    </p>
+    <p>
+      Importing the module never scans the document. Initialize only a
+      <code>sidebar_provider()</code> root your application owns; repeated
+      initialization returns the same instance, and <code>dispose()</code>
+      releases listeners, generated flyouts, positioning, tooltips, and the
+      mobile Offcanvas instance owned by Sidebar.
+    </p>
+    {% set sidebar_import_example %}
+    import Sidebar from "@wpmoo/ui/sidebar.js";
+
+    const element = document.querySelector('[data-slot="sidebar-wrapper"]');
+
+    if (element) {
+      const sidebar = Sidebar.getOrCreateInstance(element);
+
+      // Later, release Sidebar-owned runtime resources.
+      sidebar.dispose();
+    }
+    {% endset %}
+    {{ render_code_snippet("sidebar-javascript-import", sidebar_import_example, "js") }}
+
     <h2 id="usesidebar" class="h4 mt-5 mb-3">useSidebar</h2>
     <p class="mb-0">
       <strong>useSidebar</strong> is a runtime mapping only:
       <code>sidebar_provider()</code> writes <code>data-moo-sidebar-state</code>,
-      and the integration logic reads it from <code>static/js/preview.js</code>.
+      and the public Sidebar instance owns its state transitions.
     </p>
   </div>
 

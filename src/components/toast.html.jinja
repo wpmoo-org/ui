@@ -3,8 +3,8 @@
    its own docs recommend a hand-wired click listener that calls .show().
    The catalog mirrors that with one generic, catalog-only convention:
    button(toast_target=...) renders data-moo-toast-target (a Moo-owned data
-   hook, deliberately not data-bs-*) and static/js/preview.js wires a single
-   delegated click listener for it. A consuming app is expected to wire its
+   hook, deliberately not data-bs-*) and the catalog Bootstrap preview module
+   wires one delegated listener. A consuming app is expected to wire its
    own trigger the same way Bootstrap's docs show; data-moo-toast-target is
    catalog sugar, not a public Moo/Bootstrap contract. #}
 

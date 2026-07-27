@@ -17,12 +17,29 @@
     <meta name="twitter:image" content="{{ page_meta.image }}">
     <link rel="canonical" href="{{ page_meta.url }}">
     <title>{% block title %}{{ page_meta.title }}{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ root_path }}favicon.svg">
+    <link rel="icon" href="{{ root_path }}favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="{{ root_path }}apple-touch-icon.png">
+    <link rel="manifest" href="{{ root_path }}site.webmanifest">
     <script>
       (() => {
         try {
           const theme = window.localStorage.getItem("moo:theme");
           if (theme === "dark" || theme === "light") {
             document.documentElement.dataset.bsTheme = theme;
+          }
+          const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
+          if (sidebar === "collapsed" || sidebar === "expanded") {
+            document.documentElement.dataset.mooSidebarCatalogState = sidebar;
+            window.setTimeout(() => {
+              const shell = document.querySelector(
+                '[data-slot="sidebar-wrapper"][data-moo-sidebar-key="catalog-shell"]'
+              );
+              if (shell && !shell.hasAttribute("data-moo-sidebar-ready")) {
+                shell.dataset.mooSidebarState = "expanded";
+                delete document.documentElement.dataset.mooSidebarCatalogState;
+              }
+            }, 1500);
           }
         } catch (_) {
           /* localStorage can be unavailable in restricted browsing contexts. */
@@ -39,6 +56,6 @@
     </a>
     {% block body %}{% endblock %}
     <script defer src="{{ root_path }}assets/js/bootstrap.bundle.min.js?v={{ asset_version }}"></script>
-    <script defer src="{{ root_path }}assets/js/preview.js?v={{ asset_version }}"></script>
+    <script type="module" src="{{ root_path }}assets/js/catalog/index.js?v={{ asset_version }}"></script>
   </body>
 </html>

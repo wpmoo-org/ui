@@ -30,9 +30,22 @@ SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
 LLMS_TXT = ROOT / "llms.txt"
+SITE_ROOT_ASSETS = tuple(
+    ROOT / name
+    for name in (
+        "favicon.svg",
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "icon-192.png",
+        "icon-512.png",
+        "site.webmanifest",
+    )
+)
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
+JS_SOURCE = SRC / "js"
+JS_COMPONENTS = JS_SOURCE / "components"
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -694,13 +707,13 @@ def compile_styles() -> None:
 
 def asset_version() -> str:
     digest = hashlib.sha256()
-    for relative in (
-        "assets/css/moo-ui.css",
-        "assets/css/catalog.css",
-        "assets/js/bootstrap.bundle.min.js",
-        "assets/js/preview.js",
-    ):
-        path = DIST / relative
+    paths = [
+        DIST / "assets/css/moo-ui.css",
+        DIST / "assets/css/catalog.css",
+        *sorted((DIST / "assets/js").rglob("*.js")),
+    ]
+    for path in paths:
+        relative = path.relative_to(DIST).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]
@@ -717,6 +730,11 @@ def copy_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
+    shutil.copytree(JS_SOURCE, js_dir, dirs_exist_ok=True)
+    package_js_dir = DIST / "js"
+    package_js_dir.mkdir(parents=True, exist_ok=True)
+    for module_name in ("combobox.js", "sidebar.js"):
+        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
     fonts_dir = DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
@@ -730,6 +748,9 @@ def copy_assets() -> None:
 def copy_site_metadata() -> None:
     if LLMS_TXT.exists():
         shutil.copy2(LLMS_TXT, DIST / "llms.txt")
+    for path in SITE_ROOT_ASSETS:
+        if path.exists():
+            shutil.copy2(path, DIST / path.name)
 
 
 def public_page_paths() -> list[str]:
@@ -861,6 +882,7 @@ def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
     if LLMS_TXT.exists():
         paths.append(LLMS_TXT)
+    paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
     for folder in (SRC, SCSS, STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())

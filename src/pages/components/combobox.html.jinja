@@ -1,6 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/combobox.html.jinja" import combobox %}
 {% from "components/field.html.jinja" import field, field_description %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -192,6 +194,35 @@
     preview_class="moo-example__preview--narrow"
   ) }}
 </div>
+
+<section class="moo-doc-section" aria-labelledby="combobox-javascript">
+  {{ typography("JavaScript", variant="section-title", id="combobox-javascript") }}
+  <p>
+    Bootstrap 5.3 does not provide a Combobox plugin. Moo UI therefore owns the
+    filtering, single and multiple selection, keyboard navigation, hidden value,
+    and ARIA state behavior for this component only. It does not replace any
+    Bootstrap plugin.
+  </p>
+  <p>
+    Importing the optional module has no document-wide side effect. Initialize
+    only a Combobox root your application owns; repeated initialization returns
+    the same instance, and <code>dispose()</code> removes its listeners and
+    generated runtime nodes.
+  </p>
+  {% set combobox_import_example %}
+  import Combobox from "@wpmoo/ui/combobox.js";
+
+  const element = document.querySelector(".combobox");
+
+  if (element) {
+    const combobox = Combobox.getOrCreateInstance(element);
+
+    // Later, release listeners and generated runtime nodes.
+    combobox.dispose();
+  }
+  {% endset %}
+  {{ render_code_snippet("combobox-javascript-import", combobox_import_example, "js") }}
+</section>
 
 {{ render_reference(
 "Combobox starts from Bootstrap's native form-control and dropdown menu contracts. For the underlying menu behavior, see the",

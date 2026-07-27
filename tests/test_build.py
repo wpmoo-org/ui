@@ -21,6 +21,15 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
+        for module_name in ("combobox.js", "sidebar.js"):
+            self.assertTrue((DIST / f"assets/js/components/{module_name}").is_file())
+            self.assertTrue((DIST / f"js/{module_name}").is_file())
+            self.assertEqual(
+                (DIST / f"assets/js/components/{module_name}").read_bytes(),
+                (DIST / f"js/{module_name}").read_bytes(),
+            )
+        index = (DIST / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<script type="module" src="assets/js/catalog/index.js?', index)
         self.assertTrue((DIST / "llms.txt").is_file())
         self.assertTrue((DIST / "sitemap.xml").is_file())
         self.assertTrue((DIST / "robots.txt").is_file())

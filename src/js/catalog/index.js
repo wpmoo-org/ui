@@ -1,0 +1,56 @@
+import Combobox from "../components/combobox.js";
+import Sidebar from "../components/sidebar.js";
+import { initBlockFrames } from "./block-frame.js";
+import { initBootstrapPreview } from "./bootstrap-preview.js";
+import { initCatalogFilter } from "./catalog-filter.js";
+import { initCodePreview } from "./code-preview.js";
+import { initCommand } from "./command.js";
+import { initHomeMotion } from "./home-motion.js";
+import { initTheme } from "./theme.js";
+import { initToc } from "./toc.js";
+
+const states = new WeakMap();
+
+export function initCatalog(root = document) {
+  if (states.has(root)) {
+    return states.get(root);
+  }
+
+  const disposers = [
+    initTheme(root),
+    initCatalogFilter(root),
+    initCommand(root),
+    initToc(root),
+  ];
+
+  root.querySelectorAll(".combobox").forEach((element) => {
+    const instance = Combobox.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  disposers.push(initCodePreview(root));
+  disposers.push(initBootstrapPreview(root));
+
+  root.querySelectorAll('[data-slot="sidebar-wrapper"]').forEach((element) => {
+    const instance = Sidebar.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  disposers.push(initHomeMotion(root));
+  disposers.push(initBlockFrames(root));
+
+  const dispose = () => {
+    [...disposers].reverse().forEach((release) => release?.());
+    states.delete(root);
+  };
+  states.set(root, dispose);
+  return dispose;
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => initCatalog(document), {
+    once: true,
+  });
+} else {
+  initCatalog(document);
+}

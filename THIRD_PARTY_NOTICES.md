@@ -24,7 +24,9 @@ Moo UI vendors a build-time icon metadata subset from Iconify's Lucide icon
 set at `src/icons/lucide-icons.json` and renders selected icons into the
 generated catalog. Lucide is licensed under the ISC License. The source
 metadata identifies the Lucide project, its contributors, and the upstream
-license URL.
+license URL. The root favicon set (`favicon.svg`, `favicon.ico`,
+`apple-touch-icon.png`, `icon-192.png`, and `icon-512.png`) uses the Lucide
+Blocks geometry and remains covered by the same ISC license notice.
 
 ## Geist
 

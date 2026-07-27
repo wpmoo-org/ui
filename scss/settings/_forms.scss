@@ -1,0 +1,41 @@
+// Bootstrap's form-control consumes these values directly. Keep the native
+// Sass contract, but give text controls the same quiet surface and compact
+// geometry as the design reference.
+$input-padding-y: 0.25rem !default;
+$input-padding-x: 0.625rem !default;
+$input-height: 2rem !default;
+$input-line-height: 1.4285714286 !default;
+$input-bg: transparent !default;
+$input-border-color: var(--moo-border) !default;
+$input-border-radius: 0.625rem !default;
+$input-placeholder-color: var(--bs-tertiary-color) !default;
+$input-focus-bg: transparent !default;
+// Bootstrap leaves disabled text-control foregrounds null by default
+// (vendor/bootstrap/scss/_variables.scss), which lets real values inherit the
+// normal input color. Use the same muted foreground as placeholders for all
+// disabled form-control and form-select states.
+$input-disabled-color: var(--bs-tertiary-color) !default;
+$form-select-disabled-color: $input-disabled-color !default;
+// Disabled controls need the whole affordance to fade, including native select
+// arrows and Moo-owned trailing icons, so opacity is a shared state token.
+$moo-disabled-control-opacity: 0.5 !default;
+// Bootstrap's own $input-disabled-bg defaults to the opaque $secondary-bg
+// (vendor/bootstrap/scss/_variables.scss), which reads much darker/heavier
+// than the disabled reference: a faint translucent tint over the input
+// border color, not a solid fill. Bootstrap exposes no subtler disabled
+// surface token, so this stays on the existing $input-border-color knob at
+// low opacity instead of a new private --moo-* token.
+$input-disabled-bg: color-mix(in srgb, var(--moo-border) 40%, transparent) !default;
+// Bootstrap's own $form-file-button-hover-bg defaults to --bs-secondary-bg,
+// which is nearly identical to $form-file-button-bg (--bs-tertiary-bg) in
+// both themes, so hovering the file input's button gives almost no visible
+// feedback. Point the hover state at the existing border token instead of
+// introducing a new one; it stays distinct from the button's resting bg in
+// both light and dark theme blocks (vendor/bootstrap/scss/forms/_form-control.scss).
+$form-file-button-hover-bg: var(--moo-border) !default;
+$form-text-margin-top: 0.5rem !default;
+// Moo promotes Bootstrap input groups from separate child borders to one
+// compound border. Bootstrap has no parent input-group radius knob, so the
+// default parent radius lives here while .rounded-pill can still opt into
+// Bootstrap's native pill radius utility.
+$moo-input-group-border-radius: var(--bs-border-radius-lg) !default;

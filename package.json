@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Bootstrap-native HTML component system with a focused, modern visual language.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -13,6 +13,7 @@
     "url": "https://github.com/wpmoo-org/ui/issues"
   },
   "private": false,
+  "type": "module",
   "scripts": {
     "build": ".venv/bin/python build.py",
     "dev": ".venv/bin/python dev.py",
@@ -26,6 +27,8 @@
     "./moo-ui.min.css": "./dist/assets/css/moo-ui.min.css",
     "./moo.css": "./dist/assets/css/moo.css",
     "./moo.min.css": "./dist/assets/css/moo.min.css",
+    "./combobox.js": "./dist/js/combobox.js",
+    "./sidebar.js": "./dist/js/sidebar.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -33,6 +36,8 @@
     "dist/assets/css/moo-ui.min.css",
     "dist/assets/css/moo.css",
     "dist/assets/css/moo.min.css",
+    "dist/js/combobox.js",
+    "dist/js/sidebar.js",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
