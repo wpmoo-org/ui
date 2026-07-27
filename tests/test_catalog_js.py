@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 
 from tests.helpers import DIST, ROOT, CatalogTestCase
@@ -18,11 +19,25 @@ MODULES = {
 }
 
 
+def without_comments(source: str) -> str:
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    return re.sub(r"^[ \t]*//.*$", "", source, flags=re.MULTILINE)
+
+
 class CatalogJavaScriptTests(CatalogTestCase):
+    def test_catalog_module_surface_is_explicit(self) -> None:
+        discovered = {
+            path.relative_to(CATALOG_JS).as_posix()
+            for path in CATALOG_JS.rglob("*.js")
+        }
+        self.assertEqual(discovered, {*MODULES, "index.js"})
+
     def test_catalog_features_have_idempotent_init_and_disposal(self) -> None:
         for module_name, initializer in MODULES.items():
             with self.subTest(module_name=module_name):
-                source = (CATALOG_JS / module_name).read_text(encoding="utf-8")
+                source = without_comments(
+                    (CATALOG_JS / module_name).read_text(encoding="utf-8")
+                )
                 self.assertIn(f"export function {initializer}(root = document)", source)
                 self.assertIn("if (states.has(root))", source)
                 self.assertIn("states.set(root, dispose);", source)
@@ -30,7 +45,9 @@ class CatalogJavaScriptTests(CatalogTestCase):
 
     def test_catalog_feature_imports_have_no_document_side_effect(self) -> None:
         imports = "\n".join(
-            f'import "./src/js/catalog/{module_name}";' for module_name in MODULES
+            f'import * as module{index} from "./src/js/catalog/{module_name}";\n'
+            f'if (typeof module{index}.{initializer} !== "function") process.exit(2);'
+            for index, (module_name, initializer) in enumerate(MODULES.items())
         )
         result = subprocess.run(
             ["node", "--input-type=module", "--eval", imports],
@@ -43,7 +60,16 @@ class CatalogJavaScriptTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
-        source = (CATALOG_JS / "index.js").read_text(encoding="utf-8")
+        source = without_comments(
+            (CATALOG_JS / "index.js").read_text(encoding="utf-8")
+        )
+
+        for module_name, initializer in MODULES.items():
+            self.assertRegex(
+                source,
+                rf'import \{{ {initializer} \}} from "\./{re.escape(module_name)}";',
+            )
+            self.assertIn(f"{initializer}(root)", source)
 
         self.assertIn('import Combobox from "../components/combobox.js";', source)
         self.assertIn('import Sidebar from "../components/sidebar.js";', source)

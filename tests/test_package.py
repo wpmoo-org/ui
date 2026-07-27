@@ -5,6 +5,27 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_PACKAGE_FILES = {
+    "dist/assets/css/moo-ui.css",
+    "dist/assets/css/moo-ui.min.css",
+    "dist/assets/css/moo.css",
+    "dist/assets/css/moo.min.css",
+    "dist/js/combobox.js",
+    "dist/js/sidebar.js",
+    "README.md",
+    "LICENSE",
+    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md",
+}
+EXPECTED_PACKAGE_EXPORTS = {
+    "./moo-ui.css": "./dist/assets/css/moo-ui.css",
+    "./moo-ui.min.css": "./dist/assets/css/moo-ui.min.css",
+    "./moo.css": "./dist/assets/css/moo.css",
+    "./moo.min.css": "./dist/assets/css/moo.min.css",
+    "./combobox.js": "./dist/js/combobox.js",
+    "./sidebar.js": "./dist/js/sidebar.js",
+    "./package.json": "./package.json",
+}
 
 
 class PackageMetadataTests(unittest.TestCase):
@@ -26,6 +47,8 @@ class PackageMetadataTests(unittest.TestCase):
         package = self._read_package()
         files = package["files"]
 
+        self.assertEqual(set(files), EXPECTED_PACKAGE_FILES)
+        self.assertEqual(package["exports"], EXPECTED_PACKAGE_EXPORTS)
         self.assertIn("dist/assets/css/moo-ui.css", files)
         self.assertIn("dist/assets/css/moo-ui.min.css", files)
         self.assertIn("dist/assets/css/moo.css", files)
@@ -64,6 +87,28 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
 
+    def test_public_component_module_surface_is_explicit(self) -> None:
+        directory = ROOT / "src/js/components"
+        modules = {
+            path.relative_to(directory).as_posix()
+            for path in directory.rglob("*.js")
+        }
+        self.assertEqual(modules, {"combobox.js", "sidebar.js"})
+
+    def test_npm_pack_contains_only_the_approved_files(self) -> None:
+        result = subprocess.run(
+            ["npm", "pack", "--dry-run", "--json"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        packed_files = {entry["path"] for entry in payload[0]["files"]}
+        self.assertEqual(packed_files, EXPECTED_PACKAGE_FILES | {"package.json"})
+
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
         for module_name in ("combobox.js", "sidebar.js"):
             with self.subTest(module_name=module_name):
@@ -81,6 +126,30 @@ class PackageMetadataTests(unittest.TestCase):
                 )
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_publish_workflow_requires_a_matching_tag_ref(self) -> None:
+        workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('${GITHUB_REF_TYPE}" != "tag', workflow)
+        self.assertIn('${tag}" != "v${version}', workflow)
+        self.assertIn(
+            'git merge-base --is-ancestor "${GITHUB_SHA}" origin/main',
+            workflow,
+        )
+
+    def test_ci_runs_for_main_and_dev_pushes(self) -> None:
+        workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
+            encoding="utf-8"
+        )
+        push_block = workflow.split("  push:\n", 1)[1].split(
+            "  workflow_dispatch:",
+            1,
+        )[0]
+
+        self.assertIn("      - main", push_block)
+        self.assertIn("      - dev", push_block)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())

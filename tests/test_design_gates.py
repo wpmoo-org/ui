@@ -45,7 +45,10 @@ MOO_SHARED_TOKENS = {
 LITERAL_COLOR = re.compile(
     r"#[0-9a-fA-F]{3,8}\b|(?<![\w-])(?:rgba?|hsla?|oklch)\("
 )
-DECLARATION = re.compile(r"^\s*(--[\w-]+|[a-z-]+)\s*:\s*([^;]+);")
+DECLARATION = re.compile(
+    r"^[ \t]*(--(?:[\w-]|#\{\$[\w-]+\})+|[a-z-]+)[ \t]*:[ \t]*([^;]+);",
+    re.MULTILINE,
+)
 GATED_PROP = re.compile(r"color|background|-bg$|shadow|radius|outline|border")
 ALLOWED_LITERALS = {"0", "none", "transparent", "inherit", "currentcolor"}
 TOKEN_COMPOSED_COLOR_FUNCTION = re.compile(
@@ -54,13 +57,24 @@ TOKEN_COMPOSED_COLOR_FUNCTION = re.compile(
 RAW_RGB_TRIPLET = re.compile(
     r"--[^:]+-rgb:\s*\d+\s*,\s*\d+\s*,\s*\d+\s*;"
 )
-CSS_VAR = re.compile(r"var\((--[\w-]+)")
+NONZERO_DIMENSION = re.compile(
+    r"(?<![\w.-])(?:\d*\.\d+|[1-9]\d*)(?:px|rem|em|vw|vh|ch|ex)\b"
+)
+NONZERO_PERCENT = re.compile(r"(?<![\w.-])(?:\d*\.\d+|[1-9]\d*)%\b")
+CSS_VAR = re.compile(r"var\((--(?:[\w-]|#\{\$[\w-]+\})+)")
 SASS_VAR = re.compile(r"\$[\w-]+")
-APPROVED_CSS_TOKEN = re.compile(r"--(?:bs|moo)-")
+SINGLE_SASS_INTERPOLATION = re.compile(r"^#\{\s*(\$[\w-]+)\s*\}$")
+TO_RGB_INTERPOLATION = re.compile(r"^#\{\s*to-rgb\((\$[\w-]+)\)\s*\}$")
+ESCAPE_SVG_INTERPOLATION = re.compile(
+    r"^#\{\s*escape-svg\((\$[\w-]+)\)\s*\}$"
+)
+APPROVED_CSS_TOKEN = re.compile(r"--(?:(?:bs|moo)-|#\{\$prefix\})")
 
 
 def token_names(value: str) -> tuple[set[str], set[str]]:
-    return set(CSS_VAR.findall(value)), set(SASS_VAR.findall(value))
+    css_tokens = set(CSS_VAR.findall(value))
+    without_css_tokens = CSS_VAR.sub("var(--token", value)
+    return css_tokens, set(SASS_VAR.findall(without_css_tokens))
 
 
 def approved_token_names(value: str) -> bool:
@@ -104,12 +118,34 @@ def approved_border_shorthand(value: str) -> bool:
     return bool(width_tokens and color_tokens and has_style)
 
 
-def approved_shared_value(prop: str, value: str, allow_sass_interpolation: bool) -> bool:
-    clean = value.replace("!important", "").strip()
+def approved_shared_value(prop: str, value: str) -> bool:
+    clean = " ".join(value.replace("!important", "").split())
     if clean.lower() in ALLOWED_LITERALS:
         return True
-    if allow_sass_interpolation and "#{" in clean:
-        return True
+    if NONZERO_DIMENSION.search(clean):
+        return False
+    if "radius" in prop and NONZERO_PERCENT.search(clean):
+        return False
+
+    interpolation = SINGLE_SASS_INTERPOLATION.fullmatch(clean)
+    if interpolation:
+        clean = interpolation.group(1)
+    rgb_interpolation = TO_RGB_INTERPOLATION.fullmatch(clean)
+    if rgb_interpolation:
+        return prop.endswith("-rgb")
+    svg_interpolation = ESCAPE_SVG_INTERPOLATION.fullmatch(clean)
+    if svg_interpolation:
+        return "bg" in prop and "image" in svg_interpolation.group(1)
+
+    interpolation_probe = clean.replace("#{$prefix}", "")
+    interpolation_probe = re.sub(
+        r"#\{\s*(\$[\w-]+)\s*\}",
+        r"\1",
+        interpolation_probe,
+    )
+    if "#{" in interpolation_probe:
+        return False
+
     if prop.startswith("--"):
         if "radius" in prop:
             return semantic_tokens_only(clean, "radius")
@@ -121,7 +157,16 @@ def approved_shared_value(prop: str, value: str, allow_sass_interpolation: bool)
     if "radius" in prop:
         return semantic_tokens_only(clean, "radius")
     if "shadow" in prop:
-        return semantic_tokens_only(clean, "shadow")
+        if semantic_tokens_only(clean, "shadow"):
+            return True
+        css_tokens, sass_tokens = token_names(clean)
+        names = css_tokens | sass_tokens
+        return (
+            "0 0 0" in clean
+            and all(APPROVED_CSS_TOKEN.match(token) for token in css_tokens)
+            and any("ring-width" in name for name in names)
+            and any("color" in name or "border" in name for name in names)
+        )
     if "border" in prop:
         if prop.endswith("border-color") or prop == "border-color":
             return approved_token_names(clean) or bool(
@@ -144,18 +189,35 @@ def approved_shared_value(prop: str, value: str, allow_sass_interpolation: bool)
     return False
 
 
-def active_scss_imports(source: str) -> set[str]:
+def strip_scss_comments(source: str) -> str:
     source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
-    active_source = "\n".join(
-        line.split("//", 1)[0] for line in source.splitlines()
+    return "\n".join(line.split("//", 1)[0] for line in source.splitlines())
+
+
+def active_scss_import_list(source: str) -> list[str]:
+    return re.findall(
+        r'^[ \t]*@import[ \t]+["\']([^"\']+)["\'][ \t]*;',
+        strip_scss_comments(source),
+        re.MULTILINE,
     )
-    return set(
-        re.findall(
-            r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
-            active_source,
-            re.MULTILINE,
-        )
-    )
+
+
+def active_scss_imports(source: str) -> set[str]:
+    return set(active_scss_import_list(source))
+
+
+def partial_import_target(path: Path) -> str:
+    relative = path.relative_to(SCSS)
+    return relative.with_name(
+        relative.stem.removeprefix("_")
+    ).with_suffix("").as_posix()
+
+
+def owned_partial_targets(directory: Path) -> set[str]:
+    return {
+        partial_import_target(path)
+        for path in directory.rglob("_*.scss")
+    }
 
 
 def active_component_imports(source: str) -> set[str]:
@@ -199,127 +261,143 @@ def sass_var_reference(variable: str) -> str:
 
 def declarations_for(source: str) -> dict[str, set[str]]:
     declarations: dict[str, set[str]] = {}
-    for line in source.splitlines():
-        match = DECLARATION.match(line)
-        if match:
-            prop, value = match.groups()
-            declarations.setdefault(prop, set()).add(value.strip())
+    for match in DECLARATION.finditer(strip_scss_comments(source)):
+        prop, value = match.groups()
+        declarations.setdefault(prop, set()).add(" ".join(value.split()))
     return declarations
 
 
 def declaration_values_for(source: str) -> dict[str, list[str]]:
     declarations: dict[str, list[str]] = {}
-    for line in source.splitlines():
-        match = DECLARATION.match(line)
-        if match:
-            prop, value = match.groups()
-            declarations.setdefault(prop, []).append(value.strip())
+    for match in DECLARATION.finditer(strip_scss_comments(source)):
+        prop, value = match.groups()
+        declarations.setdefault(prop, []).append(" ".join(value.split()))
     return declarations
 
 
-def shared_primitive_offenders(
-    paths: tuple[Path, ...],
-    *,
-    allow_sass_interpolation: bool = False,
-) -> list[str]:
+def display_path(path: Path) -> Path:
+    try:
+        return path.relative_to(ROOT)
+    except ValueError:
+        return Path(path.name)
+
+
+def shared_primitive_offenders(paths: tuple[Path, ...]) -> list[str]:
     offenders: list[str] = []
-    for path in sorted(paths, key=lambda item: item.name):
-        lines = path.read_text(encoding="utf-8").splitlines()
-        for lineno, raw in enumerate(lines, start=1):
-            line = raw.split("//", 1)[0]
-            if LITERAL_COLOR.search(line):
-                offenders.append(f"{path.name}:{lineno}: literal color value")
+    for path in sorted(paths, key=lambda item: item.as_posix()):
+        source = strip_scss_comments(path.read_text(encoding="utf-8"))
+        for match in LITERAL_COLOR.finditer(source):
+            lineno = source.count("\n", 0, match.start()) + 1
+            offenders.append(f"{display_path(path)}:{lineno}: literal color value")
+        for match in DECLARATION.finditer(source):
+            prop, value = match.group(1), " ".join(match.group(2).split())
+            lineno = source.count("\n", 0, match.start()) + 1
+            if prop == "color-scheme" or not GATED_PROP.search(prop):
                 continue
-            match = DECLARATION.match(line)
-            if not match:
-                continue
-            prop, value = match.group(1), match.group(2).strip()
-            if prop == "color-scheme":
-                continue
-            if not GATED_PROP.search(prop):
-                continue
-            if approved_shared_value(prop, value, allow_sass_interpolation):
+            if approved_shared_value(prop, value):
                 continue
             offenders.append(
-                f"{path.name}:{lineno}: '{prop}: {value}' must consume"
+                f"{display_path(path)}:{lineno}: '{prop}: {value}' must consume"
                 " a shared Bootstrap Sass/CSS scale or --moo-* token"
             )
     return offenders
 
 
 def catalog_literal_offenders(path: Path) -> list[str]:
-    offenders: list[str] = []
-    for lineno, raw in enumerate(
-        path.read_text(encoding="utf-8").splitlines(),
-        start=1,
-    ):
-        line = raw.split("//", 1)[0]
-        line_without_token_color_functions = TOKEN_COMPOSED_COLOR_FUNCTION.sub(
-            "var(",
-            line,
-        )
-        if LITERAL_COLOR.search(line_without_token_color_functions):
-            offenders.append(f"{path.name}:{lineno}: literal color value")
-    return offenders
+    source = strip_scss_comments(path.read_text(encoding="utf-8"))
+    source = TOKEN_COMPOSED_COLOR_FUNCTION.sub("var(", source)
+    return [
+        f"{display_path(path)}:{source.count(chr(10), 0, match.start()) + 1}: literal color value"
+        for match in LITERAL_COLOR.finditer(source)
+    ]
 
 
 class DesignGateTests(CatalogTestCase):
+    def test_scss_source_surface_uses_only_owned_layers(self) -> None:
+        root_files = {
+            path.name for path in SCSS.glob("*.scss")
+        }
+        self.assertEqual(
+            root_files,
+            {
+                "_bootstrap_component_layer.scss",
+                "_component_layer.scss",
+                "_primary_variables.scss",
+                "catalog.scss",
+                "moo-core.scss",
+                "moo-ui.scss",
+            },
+        )
+        directories = {
+            path.name for path in SCSS.iterdir() if path.is_dir()
+        }
+        self.assertEqual(
+            directories,
+            {"catalog", "components", "foundations", "settings", "themes", "utilities"},
+        )
+        self.assertEqual(
+            {
+                path.relative_to(SCSS / "utilities").as_posix()
+                for path in (SCSS / "utilities").rglob("*.scss")
+            },
+            {"_scroll_fade.scss", "_scroll_fade_primitives.scss"},
+        )
+
     def test_primary_variables_import_settings_in_dependency_order(self) -> None:
         primary_variables = (SCSS / "_primary_variables.scss").read_text(
             encoding="utf-8"
         )
+        expected = [
+            "settings/palette",
+            "settings/forms",
+            "settings/components",
+            "settings/catalog",
+            "settings/bootstrap_overrides",
+        ]
+        imports = [
+            target
+            for target in active_scss_import_list(primary_variables)
+            if target.startswith("settings/")
+        ]
 
-        self.assertEqual(
-            [
-                target
-                for target in re.findall(
-                    r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
-                    primary_variables,
-                    re.MULTILINE,
-                )
-                if target.startswith("settings/")
-            ],
-            [
-                "settings/palette",
-                "settings/forms",
-                "settings/components",
-                "settings/catalog",
-                "settings/bootstrap_overrides",
-            ],
-        )
+        self.assertEqual(imports, expected)
+        self.assertEqual(owned_partial_targets(SCSS / "settings"), set(expected))
 
     def test_entrypoints_import_theme_and_foundation_layers_in_order(self) -> None:
-        entrypoint_imports: dict[str, list[str]] = {}
-        for entrypoint in ("moo-ui.scss", "moo-core.scss"):
-            source = (SCSS / entrypoint).read_text(encoding="utf-8")
-            entrypoint_imports[entrypoint] = re.findall(
-                r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
-                source,
-                re.MULTILINE,
+        entrypoint_imports = {
+            entrypoint: active_scss_import_list(
+                (SCSS / entrypoint).read_text(encoding="utf-8")
             )
+            for entrypoint in ("moo-ui.scss", "moo-core.scss")
+        }
 
         self.assertEqual(
+            entrypoint_imports["moo-ui.scss"],
             [
-                target
-                for target in entrypoint_imports["moo-ui.scss"]
-                if target.startswith(("themes/", "foundations/"))
-            ],
-            [
+                "primary_variables",
+                "../vendor/bootstrap/scss/bootstrap",
                 "themes/standalone_root",
                 "foundations/focus",
+                "utilities/scroll_fade_primitives",
+                "component_layer",
                 "foundations/overlay_backdrop",
             ],
         )
         self.assertEqual(
+            entrypoint_imports["moo-core.scss"],
             [
-                target
-                for target in entrypoint_imports["moo-core.scss"]
-                if target.startswith(("themes/", "foundations/"))
-            ],
-            [
+                "functions",
+                "primary_variables",
+                "variables",
+                "variables-dark",
+                "maps",
+                "mixins",
+                "utilities",
                 "themes/scoped_core",
                 "foundations/core_global_primitives",
+                "bootstrap_component_layer",
                 "foundations/focus",
+                "component_layer",
                 "foundations/core_state_layer",
                 "foundations/overlay_backdrop",
             ],
@@ -327,57 +405,45 @@ class DesignGateTests(CatalogTestCase):
 
         imported = set().union(*entrypoint_imports.values())
         for directory in (SCSS / "themes", SCSS / "foundations"):
-            for path in directory.glob("_*.scss"):
-                target = path.relative_to(SCSS).with_name(
-                    path.stem.removeprefix("_")
-                ).with_suffix("").as_posix()
-                self.assertIn(
-                    target,
-                    imported,
-                    f"{path.relative_to(SCSS)} is not imported",
-                )
+            for target in owned_partial_targets(directory):
+                self.assertIn(target, imported, f"{target} is not imported")
 
     def test_sidebar_aggregate_imports_ownership_layers_in_order(self) -> None:
         sidebar = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
+        expected = [
+            "components/sidebar/layout",
+            "components/sidebar/menus",
+            "components/sidebar/identity",
+            "components/sidebar/inset",
+            "components/sidebar/collapsed",
+        ]
+        imports = active_scss_import_list(sidebar)
 
+        self.assertEqual(imports, expected)
         self.assertEqual(
-            re.findall(
-                r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
-                sidebar,
-                re.MULTILINE,
-            ),
-            [
-                "components/sidebar/layout",
-                "components/sidebar/menus",
-                "components/sidebar/identity",
-                "components/sidebar/inset",
-                "components/sidebar/collapsed",
-            ],
+            owned_partial_targets(COMPONENTS_SCSS / "sidebar"),
+            set(expected),
         )
 
     def test_catalog_aggregate_imports_ownership_layers_in_order(self) -> None:
         catalog = (SCSS / "catalog.scss").read_text(encoding="utf-8")
+        expected = [
+            "catalog/shell",
+            "catalog/home",
+            "catalog/docs",
+            "catalog/examples",
+            "catalog/blocks",
+            "catalog/code",
+            "catalog/command",
+        ]
+        imports = [
+            target
+            for target in active_scss_import_list(catalog)
+            if target.startswith("catalog/")
+        ]
 
-        self.assertEqual(
-            [
-                target
-                for target in re.findall(
-                    r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
-                    catalog,
-                    re.MULTILINE,
-                )
-                if target.startswith("catalog/")
-            ],
-            [
-                "catalog/shell",
-                "catalog/home",
-                "catalog/docs",
-                "catalog/examples",
-                "catalog/blocks",
-                "catalog/code",
-                "catalog/command",
-            ],
-        )
+        self.assertEqual(imports, expected)
+        self.assertEqual(owned_partial_targets(SCSS / "catalog"), set(expected))
 
     def test_catalog_settings_own_catalog_knobs_only(self) -> None:
         catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
@@ -442,13 +508,51 @@ class DesignGateTests(CatalogTestCase):
 
         self.assertEqual(offenders, [])
 
+    def test_property_aware_gate_rejects_multiline_literals_and_interpolation(self) -> None:
+        source = """
+        .bad {
+          border-width:
+            999px;
+          border-radius: #{999px};
+          border-width: calc(var(--bs-border-width) + 1px);
+        }
+        """
+        with tempfile.TemporaryDirectory(dir=ROOT) as directory:
+            path = Path(directory) / "_bad.scss"
+            path.write_text(source, encoding="utf-8")
+            offenders = shared_primitive_offenders((path,))
+
+        self.assertEqual(len(offenders), 3)
+        self.assertEqual(
+            sum("border-width" in offender for offender in offenders),
+            2,
+        )
+        self.assertTrue(any("border-radius" in offender for offender in offenders))
+
+    def test_ordered_import_parser_ignores_commented_imports(self) -> None:
+        source = """
+        /* @import "catalog/block-commented"; */
+        // @import "catalog/line-commented";
+        @import "catalog/active";
+        """
+
+        self.assertEqual(active_scss_import_list(source), ["catalog/active"])
+
     def test_all_component_partials_are_imported(self) -> None:
         entrypoint = (SCSS / "moo-ui.scss").read_text(encoding="utf-8")
+        component_layer = (SCSS / "_component_layer.scss").read_text(
+            encoding="utf-8"
+        )
         if '@import "component_layer"' in entrypoint:
-            entrypoint += "\n" + (SCSS / "_component_layer.scss").read_text(
-                encoding="utf-8"
-            )
+            entrypoint += "\n" + component_layer
         imported_components = active_component_imports(entrypoint)
+
+        layer_imports = active_scss_import_list(component_layer)
+        self.assertEqual(layer_imports[0], "utilities/scroll_fade")
+        self.assertTrue(
+            all(target.startswith("components/") for target in layer_imports[1:])
+        )
+        self.assertEqual(len(layer_imports), len(set(layer_imports)))
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
             component = path.stem.removeprefix("_")
@@ -474,11 +578,8 @@ class DesignGateTests(CatalogTestCase):
         imports = active_scss_imports(source)
 
         for path in component_partials():
-            relative = path.relative_to(SCSS)
-            target = relative.with_name(
-                relative.stem.removeprefix("_")
-            ).with_suffix("").as_posix()
-            self.assertIn(target, imports, f"{relative} is not imported")
+            target = partial_import_target(path)
+            self.assertIn(target, imports, f"{target} is not imported")
 
     def test_component_styles_consume_shared_primitives_only(self) -> None:
         self.assertEqual(
@@ -487,11 +588,11 @@ class DesignGateTests(CatalogTestCase):
         )
 
     def test_root_theme_consumers_use_shared_primitives_only(self) -> None:
+        self.assertEqual(shared_primitive_offenders(ROOT_THEME_CONSUMER_SCSS), [])
+
+    def test_foundations_use_shared_primitives_only(self) -> None:
         self.assertEqual(
-            shared_primitive_offenders(
-                ROOT_THEME_CONSUMER_SCSS,
-                allow_sass_interpolation=True,
-            ),
+            shared_primitive_offenders(tuple((SCSS / "foundations").rglob("_*.scss"))),
             [],
         )
 
