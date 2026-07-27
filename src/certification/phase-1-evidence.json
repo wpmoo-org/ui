@@ -35,10 +35,10 @@
         "mobile-dark-rtl"
       ],
       "bootstrapEvidence": [
-        "references/bootstrap/5.3.3/site/content/docs/5.3/forms/form-control.md",
-        "references/bootstrap/5.3.3/site/content/docs/5.3/forms/validation.md",
-        "references/bootstrap/5.3.3/scss/forms/_form-control.scss",
-        "references/bootstrap/5.3.3/scss/forms/_validation.scss"
+        "https://getbootstrap.com/docs/5.3/forms/form-control/",
+        "https://getbootstrap.com/docs/5.3/forms/validation/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-control.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
         "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",

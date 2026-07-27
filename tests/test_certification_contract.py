@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,8 +94,14 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("lifecycle", components["input"]["evidence"]["not-applicable"])
         for evidence_path in components["input"]["automatedEvidence"]:
             self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
-        for evidence_path in components["input"]["bootstrapEvidence"]:
-            self.assertTrue((ROOT.parents[2] / evidence_path).is_file(), evidence_path)
+        for evidence_url in components["input"]["bootstrapEvidence"]:
+            parsed_url = urlparse(evidence_url)
+            self.assertEqual(parsed_url.scheme, "https", evidence_url)
+            self.assertIn(
+                parsed_url.netloc,
+                {"getbootstrap.com", "github.com"},
+                evidence_url,
+            )
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 
