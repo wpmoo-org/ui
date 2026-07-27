@@ -9,8 +9,8 @@ from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
 ROOT_THEME_CONSUMER_SCSS = (
-    SCSS / "_tokens_root.scss",
-    SCSS / "_core_theme.scss",
+    SCSS / "themes/_standalone_root.scss",
+    SCSS / "themes/_scoped_core.scss",
 )
 MOO_THEME_TOKENS = {
     "--moo-surface": ("$moo-surface", "$moo-surface-dark"),
@@ -288,6 +288,55 @@ class DesignGateTests(CatalogTestCase):
             ],
         )
 
+    def test_entrypoints_import_theme_and_foundation_layers_in_order(self) -> None:
+        entrypoint_imports: dict[str, list[str]] = {}
+        for entrypoint in ("moo-ui.scss", "moo-core.scss"):
+            source = (SCSS / entrypoint).read_text(encoding="utf-8")
+            entrypoint_imports[entrypoint] = re.findall(
+                r'^\s*@import\s+["\']([^"\']+)["\']\s*;',
+                source,
+                re.MULTILINE,
+            )
+
+        self.assertEqual(
+            [
+                target
+                for target in entrypoint_imports["moo-ui.scss"]
+                if target.startswith(("themes/", "foundations/"))
+            ],
+            [
+                "themes/standalone_root",
+                "foundations/focus",
+                "foundations/overlay_backdrop",
+            ],
+        )
+        self.assertEqual(
+            [
+                target
+                for target in entrypoint_imports["moo-core.scss"]
+                if target.startswith(("themes/", "foundations/"))
+            ],
+            [
+                "themes/scoped_core",
+                "foundations/core_global_primitives",
+                "foundations/focus",
+                "foundations/core_state_layer",
+                "foundations/overlay_backdrop",
+            ],
+        )
+
+        imported = set().union(*entrypoint_imports.values())
+        for directory in (SCSS / "themes", SCSS / "foundations"):
+            for path in directory.glob("_*.scss"):
+                target = path.relative_to(SCSS).with_name(
+                    path.stem.removeprefix("_")
+                ).with_suffix("").as_posix()
+                self.assertIn(
+                    target,
+                    imported,
+                    f"{path.relative_to(SCSS)} is not imported",
+                )
+
     def test_catalog_settings_own_catalog_knobs_only(self) -> None:
         catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
             encoding="utf-8"
@@ -413,7 +462,9 @@ class DesignGateTests(CatalogTestCase):
         self.assertEqual(offenders, [])
 
     def test_scoped_theme_rgb_values_derive_from_sass_colors(self) -> None:
-        core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
+        core_theme = (SCSS / "themes/_scoped_core.scss").read_text(
+            encoding="utf-8"
+        )
 
         self.assertEqual(RAW_RGB_TRIPLET.findall(core_theme), [])
 
@@ -478,8 +529,12 @@ class DesignGateTests(CatalogTestCase):
 
     def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
         primary_variables = read_primary_variables()
-        tokens_root = (SCSS / "_tokens_root.scss").read_text(encoding="utf-8")
-        core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
+        tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
+            encoding="utf-8"
+        )
+        core_theme = (SCSS / "themes/_scoped_core.scss").read_text(
+            encoding="utf-8"
+        )
 
         for token, variables in MOO_THEME_TOKENS.items():
             for variable in variables:
@@ -496,7 +551,7 @@ class DesignGateTests(CatalogTestCase):
                     sass_var_reference(light_variable),
                     sass_var_reference(dark_variable),
                 },
-                f"{token} must use shared Sass variables in _tokens_root.scss",
+                f"{token} must use shared Sass variables in themes/_standalone_root.scss",
             )
             self.assertEqual(
                 declarations_for(core_theme).get(token),
@@ -504,7 +559,7 @@ class DesignGateTests(CatalogTestCase):
                     sass_var_reference(light_variable),
                     sass_var_reference(dark_variable),
                 },
-                f"{token} must use shared Sass variables in _core_theme.scss",
+                f"{token} must use shared Sass variables in themes/_scoped_core.scss",
             )
 
         for token, variable in MOO_SHARED_TOKENS.items():
@@ -516,12 +571,12 @@ class DesignGateTests(CatalogTestCase):
             self.assertEqual(
                 declaration_values_for(tokens_root).get(token),
                 [expected],
-                f"{token} must be emitted once in _tokens_root.scss",
+                f"{token} must be emitted once in themes/_standalone_root.scss",
             )
             self.assertEqual(
                 declaration_values_for(core_theme).get(token),
                 [expected],
-                f"{token} must be emitted once in _core_theme.scss",
+                f"{token} must be emitted once in themes/_scoped_core.scss",
             )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:

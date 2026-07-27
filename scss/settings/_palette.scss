@@ -43,7 +43,7 @@ $moo-destructive-foreground-dark: $dark !default;
 $moo-sidebar-dark: #1c1c1f !default;
 
 // Bootstrap root variables consumed by the scoped core build. Define them
-// here so _core_theme.scss can emit Bootstrap's own root contract without
+// here so themes/_scoped_core.scss can emit Bootstrap's root contract without
 // hardcoded consumer-side literals.
 $body-tertiary-color: #a1a1aa !default;
 $body-tertiary-bg: $light !default;

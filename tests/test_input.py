@@ -111,8 +111,12 @@ class InputTests(CatalogTestCase):
 
     def test_disabled_form_controls_share_muted_text_color(self) -> None:
         variables = read_primary_variables()
-        tokens_root = (ROOT / "scss/_tokens_root.scss").read_text(encoding="utf-8")
-        core_theme = (ROOT / "scss/_core_theme.scss").read_text(encoding="utf-8")
+        tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
+            encoding="utf-8"
+        )
+        core_theme = (ROOT / "scss/themes/_scoped_core.scss").read_text(
+            encoding="utf-8"
+        )
         input_scss = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
 
         self.assertIn("$input-disabled-color: var(--bs-tertiary-color) !default;", variables)
@@ -131,7 +135,9 @@ class InputTests(CatalogTestCase):
         self.assertIn("$input-line-height: 1.4285714286 !default;", variables)
 
     def test_invalid_form_controls_share_destructive_ring(self) -> None:
-        focus = (ROOT / "scss/_focus.scss").read_text(encoding="utf-8")
+        focus = (ROOT / "scss/foundations/_focus.scss").read_text(
+            encoding="utf-8"
+        )
 
         self.assertIn(".form-control.is-invalid,", focus)
         self.assertIn(".form-control.is-invalid:focus,", focus)

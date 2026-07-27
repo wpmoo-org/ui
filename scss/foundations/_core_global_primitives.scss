@@ -1,4 +1,4 @@
-@import "utilities/scroll_fade_primitives";
+@import "../utilities/scroll_fade_primitives";
 
 @keyframes moo-spinner-rotate {
   to { transform: rotate(360deg) #{"/* rtl:ignore */"}; }

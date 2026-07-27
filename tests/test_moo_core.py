@@ -15,7 +15,7 @@ from tests.test_design_gates import active_component_imports
 CORE_CSS = DIST / "assets/css/moo.css"
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
-OVERLAY_BACKDROP_SCSS = SCSS / "_overlay_backdrop.scss"
+OVERLAY_BACKDROP_SCSS = SCSS / "foundations/_overlay_backdrop.scss"
 UTILITIES_SCSS = SCSS / "utilities"
 
 REQUIRED_BOOTSTRAP_IMPORTS = [
@@ -168,8 +168,12 @@ class MooCoreTests(CatalogTestCase):
     def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
         overlay_layer = OVERLAY_BACKDROP_SCSS.read_text(encoding="utf-8")
         primary_variables = read_primary_variables()
-        tokens_root = (SCSS / "_tokens_root.scss").read_text(encoding="utf-8")
-        core_theme = (SCSS / "_core_theme.scss").read_text(encoding="utf-8")
+        tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
+            encoding="utf-8"
+        )
+        core_theme = (SCSS / "themes/_scoped_core.scss").read_text(
+            encoding="utf-8"
+        )
 
         for knob in (
             "$moo-overlay-backdrop-opacity: 1 !default;",
@@ -201,7 +205,9 @@ class MooCoreTests(CatalogTestCase):
         self.assertNotIn("body:has(.modal.show)", overlay_layer)
         self.assertNotIn("offcanvas.sheet.show", overlay_layer)
 
-        state_layer = (SCSS / "_core_state_layer.scss").read_text(encoding="utf-8")
+        state_layer = (SCSS / "foundations/_core_state_layer.scss").read_text(
+            encoding="utf-8"
+        )
         self.assertNotIn(".modal-backdrop", state_layer)
         self.assertNotIn(".offcanvas-backdrop", state_layer)
         self.assertNotIn("backdrop-filter", state_layer)
