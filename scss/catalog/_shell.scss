@@ -147,6 +147,12 @@ body {
   overflow: hidden;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .moo-catalog .sidebar {
+    transition: none;
+  }
+}
+
 .moo-catalog__header {
   position: sticky;
   z-index: $zindex-fixed;
@@ -311,5 +317,4 @@ body {
   min-width: 0;
   flex: 1;
   overflow-y: auto;
-  scroll-behavior: smooth;
 }

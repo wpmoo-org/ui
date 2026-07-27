@@ -19,6 +19,15 @@ from tests.helpers import (
 
 
 class CatalogContractTests(CatalogTestCase):
+    def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
+        styles = read_catalog_styles()
+        match = re.search(r"\.moo-catalog__main\s*\{(?P<body>[^}]*)\}", styles)
+
+        self.assertIsNotNone(match)
+        body = match.group("body")
+        self.assertIn("overflow-y: auto", body)
+        self.assertNotIn("scroll-behavior: smooth", body)
+
     def test_visible_component_lists_are_sorted_by_label(self) -> None:
         sorted_loop = (
             '{% for component in catalog | sort(attribute="label") %}'
@@ -346,6 +355,65 @@ class CatalogContractTests(CatalogTestCase):
                 stacklevel=1,
             )
 
+    def test_catalog_builds_the_complete_root_favicon_set(self) -> None:
+        svg = (ROOT / "favicon.svg").read_text(encoding="utf-8")
+        self.assertIn('viewBox="0 0 24 24"', svg)
+        self.assertIn("prefers-color-scheme: dark", svg)
+        self.assertIn('stroke="currentColor"', svg)
+        self.assertNotRegex(
+            svg,
+            r"(?i)<script|javascript:|foreignObject|(?:xlink:)?href=|@import|url\(",
+        )
+
+        expected_png_sizes = {
+            "apple-touch-icon.png": (180, 180),
+            "icon-192.png": (192, 192),
+            "icon-512.png": (512, 512),
+        }
+        for name, expected_size in expected_png_sizes.items():
+            with self.subTest(name=name):
+                width, height, _ = read_png_ihdr(ROOT / name)
+                self.assertEqual((width, height), expected_size)
+
+        ico = (ROOT / "favicon.ico").read_bytes()
+        self.assertEqual(ico[:6], b"\x00\x00\x01\x00\x03\x00")
+        self.assertEqual(
+            [(ico[6 + index * 16] or 256, ico[7 + index * 16] or 256) for index in range(3)],
+            [(16, 16), (32, 32), (48, 48)],
+        )
+
+        manifest = json.loads((ROOT / "site.webmanifest").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["name"], "Moo UI")
+        self.assertEqual(manifest["short_name"], "Moo UI")
+        self.assertEqual(manifest["display"], "standalone")
+        self.assertEqual(
+            [(icon["src"], icon["sizes"], icon["type"]) for icon in manifest["icons"]],
+            [
+                ("/icon-192.png", "192x192", "image/png"),
+                ("/icon-512.png", "512x512", "image/png"),
+            ],
+        )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        root_assets = (
+            "favicon.svg",
+            "favicon.ico",
+            "apple-touch-icon.png",
+            "icon-192.png",
+            "icon-512.png",
+            "site.webmanifest",
+        )
+        for name in root_assets:
+            self.assertTrue((DIST / name).is_file(), name)
+
+        page = self.read_output("introduction/index.html")
+        self.assertIn('<link rel="icon" type="image/svg+xml" href="../favicon.svg">', page)
+        self.assertIn('<link rel="icon" href="../favicon.ico" sizes="any">', page)
+        self.assertIn('<link rel="apple-touch-icon" href="../apple-touch-icon.png">', page)
+        self.assertIn('<link rel="manifest" href="../site.webmanifest">', page)
+        self.assertNotIn("data-moo-favicon", page)
+
     def test_components_index_uses_admin_shell_primitives(self) -> None:
         result = self.run_build()
 
@@ -406,6 +474,37 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+
+    def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
+        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+
+        handoff = 'document.documentElement.dataset.mooSidebarCatalogState'
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertIn(handoff, base)
+        self.assertLess(
+            base.index(handoff),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+        )
+        self.assertLess(
+            base.index(handoff),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css'),
+        )
+
+    def test_built_catalog_sidebar_persisted_state_handoff_is_in_head(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("introduction.html")
+        head = page.split("</head>", 1)[0]
+        handoff = "dataset.mooSidebarCatalogState"
+        self.assertIn(handoff, head)
+        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.css"))
+        self.assertLess(head.index(handoff), head.index("assets/css/catalog.css"))
+        wrapper_index = page.index('data-moo-sidebar-key="catalog-shell"')
+        handoff_index = page.index("shell.dataset.mooSidebarState = state")
+        sidebar_index = page.index('<aside', handoff_index)
+        self.assertLess(wrapper_index, handoff_index)
+        self.assertLess(handoff_index, sidebar_index)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
         catalog_scss = read_catalog_styles()
@@ -696,7 +795,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(".moo-doc-layout", css)
         self.assertIn("@media (min-width: 1200px)", css)
         self.assertIn("--moo-doc-toc-offset: calc(2rem + 5px)", css)
-        self.assertIn("scroll-behavior: smooth", css)
+        self.assertNotIn("scroll-behavior: smooth", css)
         self.assertIn("@media (prefers-reduced-motion: reduce)", css)
         self.assertRegex(
             css,

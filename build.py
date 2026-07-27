@@ -30,6 +30,17 @@ SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
 LLMS_TXT = ROOT / "llms.txt"
+SITE_ROOT_ASSETS = tuple(
+    ROOT / name
+    for name in (
+        "favicon.svg",
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "icon-192.png",
+        "icon-512.png",
+        "site.webmanifest",
+    )
+)
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
@@ -737,6 +748,9 @@ def copy_assets() -> None:
 def copy_site_metadata() -> None:
     if LLMS_TXT.exists():
         shutil.copy2(LLMS_TXT, DIST / "llms.txt")
+    for path in SITE_ROOT_ASSETS:
+        if path.exists():
+            shutil.copy2(path, DIST / path.name)
 
 
 def public_page_paths() -> list[str]:
@@ -868,6 +882,7 @@ def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
     if LLMS_TXT.exists():
         paths.append(LLMS_TXT)
+    paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
     for folder in (SRC, SCSS, STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())

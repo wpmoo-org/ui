@@ -3,24 +3,16 @@ from __future__ import annotations
 import re
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_scss_aggregate
 
 
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
 CATALOG_JS = ROOT / "src/js/catalog/index.js"
-SIDEBAR_SCSS = ROOT / "scss/components"
-SIDEBAR_PARTIALS = (
-    SIDEBAR_SCSS / "_sidebar.scss",
-    SIDEBAR_SCSS / "sidebar/_layout.scss",
-    SIDEBAR_SCSS / "sidebar/_menus.scss",
-    SIDEBAR_SCSS / "sidebar/_identity.scss",
-    SIDEBAR_SCSS / "sidebar/_inset.scss",
-    SIDEBAR_SCSS / "sidebar/_collapsed.scss",
-)
+SIDEBAR_SCSS = ROOT / "scss/components/_sidebar.scss"
 
 
 def read_sidebar_styles() -> str:
-    return "\n".join(path.read_text(encoding="utf-8") for path in SIDEBAR_PARTIALS)
+    return read_scss_aggregate(SIDEBAR_SCSS, "components/sidebar")
 
 
 def _css_block(styles: str, selector: str) -> str:
@@ -767,6 +759,57 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("Sidebar.getOrCreateInstance(element);", catalog)
         self.assertNotIn("SIDEBAR_STORAGE_PREFIX", catalog)
         self.assertNotIn("openSidebarFlyout", catalog)
+
+    def test_catalog_hands_off_persisted_state_before_sidebar_content(self) -> None:
+        source = SIDEBAR_JS.read_text(encoding="utf-8")
+        styles = read_sidebar_styles()
+        catalog_styles = (ROOT / "scss/catalog/_shell.scss").read_text(encoding="utf-8")
+        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        layout = (ROOT / "src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+
+        restore_index = source.index("this._restoreState();")
+        ready_index = source.index('setAttribute("data-moo-sidebar-ready", "")')
+        self.assertLess(restore_index, ready_index)
+        self.assertNotIn("requestAnimationFrame", source[restore_index:ready_index])
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertLess(
+            layout.index('{% call sidebar_provider(key="catalog-shell") %}'),
+            layout.index("shell.dataset.mooSidebarState = state"),
+        )
+        self.assertLess(
+            layout.index("shell.dataset.mooSidebarState = state"),
+            layout.index('{% include "shell/sidebar.html.jinja" %}'),
+        )
+        self.assertIn('removeAttribute("data-moo-sidebar-ready")', source)
+        self.assertRegex(
+            styles,
+            r"(?m)^\.sidebar\s*\{[^}]*transition:\s*flex-basis",
+        )
+        self.assertNotIn("moo-sidebar-catalog-state", styles)
+        self.assertRegex(
+            catalog_styles,
+            r"@media \(prefers-reduced-motion: reduce\)\s*\{\s*"
+            r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
+        )
+
+    def test_sidebar_shortcut_ignores_editable_targets(self) -> None:
+        source = SIDEBAR_JS.read_text(encoding="utf-8")
+
+        self.assertIn('target.matches("input, textarea, select")', source)
+        self.assertIn("target.isContentEditable", source)
+        self.assertIn("event.defaultPrevented", source)
+        self.assertIn("event.isComposing", source)
+        self.assertIn("isEditable ||", source)
+
+    def test_mobile_offcanvas_restores_focus_to_its_trigger(self) -> None:
+        source = SIDEBAR_JS.read_text(encoding="utf-8")
+
+        self.assertIn("this._offcanvasTrigger = control;", source)
+        self.assertIn('this._sidebar, "hidden.bs.offcanvas"', source)
+        self.assertIn("const trigger = this._offcanvasTrigger;", source)
+        self.assertIn("this._offcanvasTrigger = null;", source)
+        self.assertIn("trigger?.isConnected", source)
+        self.assertIn("trigger.focus();", source)
 
     def test_sidebar_dropdown_trigger_disables_collapsed_tooltip_while_open(self) -> None:
         script = SIDEBAR_JS.read_text(encoding="utf-8")

@@ -34,10 +34,12 @@ export default class Sidebar {
     this._flyout = null;
     this._flyoutOwner = null;
     this._offcanvas = null;
+    this._offcanvasTrigger = null;
 
     instances.set(element, this);
     this._bindEvents();
     this._restoreState();
+    this._element.setAttribute("data-moo-sidebar-ready", "");
     this._observeDirection();
   }
 
@@ -56,6 +58,8 @@ export default class Sidebar {
       .forEach((control) => this._disposeTooltip(control));
     this._offcanvas?.dispose();
     this._offcanvas = null;
+    this._offcanvasTrigger = null;
+    this._element.removeAttribute("data-moo-sidebar-ready");
     instances.delete(this._element);
   }
 
@@ -127,6 +131,9 @@ export default class Sidebar {
     const previous = this._element.dataset.mooSidebarState;
     this._element.dataset.mooSidebarState = next;
     const key = this._element.dataset.mooSidebarKey;
+    if (key === "catalog-shell") {
+      this._root.dataset.mooSidebarCatalogState = next;
+    }
     if (persist && key) {
       try {
         this._window.localStorage.setItem(this._config.storagePrefix + key, next);
@@ -347,7 +354,14 @@ export default class Sidebar {
 
   _bindEvents() {
     this._listen(this._sidebar, "shown.bs.offcanvas", () => this._syncControls());
-    this._listen(this._sidebar, "hidden.bs.offcanvas", () => this._syncControls());
+    this._listen(this._sidebar, "hidden.bs.offcanvas", () => {
+      this._syncControls();
+      const trigger = this._offcanvasTrigger;
+      this._offcanvasTrigger = null;
+      if (trigger?.isConnected) {
+        trigger.focus();
+      }
+    });
     this._listen(this._document, "show.bs.dropdown", (event) => {
       const control = this._dropdownControl(event.target);
       if (!control) {
@@ -411,6 +425,7 @@ export default class Sidebar {
     const sidebar = this._document.getElementById(control.getAttribute("aria-controls"));
     const Offcanvas = this._bootstrap("Offcanvas");
     if (sidebar && Offcanvas) {
+      this._offcanvasTrigger = control;
       this._offcanvas = Offcanvas.getOrCreateInstance(sidebar);
       this._offcanvas.toggle();
     }
@@ -446,7 +461,14 @@ export default class Sidebar {
   }
 
   _handleShortcut(event) {
+    const target = event.target;
+    const isEditable =
+      target instanceof this._window.Element &&
+      (target.matches("input, textarea, select") || target.isContentEditable);
     if (
+      event.defaultPrevented ||
+      event.isComposing ||
+      isEditable ||
       !this._config.keyboard ||
       !(event.metaKey || event.ctrlKey) ||
       event.key.toLowerCase() !== "b" ||

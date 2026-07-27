@@ -5,6 +5,18 @@
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
     {% call sidebar_provider(key="catalog-shell") %}
+      <script>
+        (() => {
+          const state = document.documentElement.dataset.mooSidebarCatalogState;
+          const shell = document.currentScript.parentElement;
+          if (
+            (state === "collapsed" || state === "expanded") &&
+            shell?.dataset.mooSidebarKey === "catalog-shell"
+          ) {
+            shell.dataset.mooSidebarState = state;
+          }
+        })();
+      </script>
       {% include "shell/sidebar.html.jinja" %}
       {% call sidebar_inset() %}
         {% include "shell/navbar.html.jinja" %}
