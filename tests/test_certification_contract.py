@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+import json
+import unittest
+from collections import Counter
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CERTIFICATION_ROOT = ROOT / "src/certification"
+
+
+class CertificationContractTests(unittest.TestCase):
+    def _read_json(self, relative_path: str) -> dict | list:
+        return json.loads((ROOT / relative_path).read_text(encoding="utf-8"))
+
+    def test_evidence_inventory_matches_the_live_component_registry(self) -> None:
+        inventory = self._read_json("src/certification/evidence-inventory.json")
+        registry = self._read_json("src/registry/components.json")
+        inventory_slugs = {component["slug"] for component in inventory["components"]}
+        registry_slugs = {component["slug"] for component in registry}
+
+        self.assertEqual(len(inventory["components"]), 40)
+        self.assertEqual(inventory_slugs, registry_slugs)
+        self.assertEqual(
+            {component["slug"] for component in inventory["plannedComponents"]},
+            {"context-menu", "data-table"},
+        )
+
+    def test_every_evidence_profile_partitions_all_categories_once(self) -> None:
+        inventory = self._read_json("src/certification/evidence-inventory.json")
+        categories = set(inventory["categories"])
+        tier_counts = Counter()
+
+        for profile_name, profile in inventory["profiles"].items():
+            with self.subTest(profile=profile_name):
+                values = (
+                    profile["existing"]
+                    + profile["missing"]
+                    + profile["not-applicable"]
+                    + profile["manual"]
+                )
+                self.assertEqual(len(values), len(set(values)))
+                self.assertEqual(set(values), categories)
+
+        for component in inventory["components"]:
+            profile = inventory["profiles"][component["profile"]]
+            tier_counts[profile["tier"]] += 1
+            for evidence_path in component["evidence"]:
+                self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+
+        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 5})
+
+    def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
+        pilot = self._read_json("src/certification/pilot-evidence.json")
+        manifest = self._read_json("certification.json")
+        components = {component["slug"]: component for component in pilot["components"]}
+
+        self.assertEqual(pilot["status"], "preview")
+        self.assertEqual(pilot["releaseClaim"], "none")
+        self.assertEqual(
+            list(components),
+            ["badge", "accordion", "dialog", "combobox", "sidebar"],
+        )
+        self.assertEqual(components["badge"]["status"], "preview-passed")
+        self.assertEqual(
+            [components[slug]["status"] for slug in list(components)[1:]],
+            ["planned", "planned", "planned", "planned"],
+        )
+        for evidence_path in components["badge"]["automatedEvidence"]:
+            self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+        self.assertEqual(manifest["status"], "preview")
+        self.assertEqual(manifest["certifiedComponents"], [])
+
+    def test_core_certification_sources_do_not_name_commercial_bridges(self) -> None:
+        public_sources = [
+            ROOT / "SUPPORT.md",
+            ROOT / "certification.json",
+            *CERTIFICATION_ROOT.glob("*.json"),
+        ]
+        forbidden_terms = ("wordpress", "odoo")
+
+        for source_path in public_sources:
+            content = source_path.read_text(encoding="utf-8").lower()
+            with self.subTest(source=source_path.name):
+                for term in forbidden_terms:
+                    self.assertNotIn(term, content)
+
+
+if __name__ == "__main__":
+    unittest.main()

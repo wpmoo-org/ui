@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "0.1",
+  "status": "preview",
+  "releaseClaim": "none",
+  "description": "Incremental Phase 0E evidence. Passing preview evidence does not add a component to the package manifest's certifiedComponents list.",
+  "components": [
+    {
+      "slug": "badge",
+      "tier": 0,
+      "status": "preview-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["keyboard", "focus", "lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_badge.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "limitations": [
+        "Phase 0 browser automation covers Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {"slug": "accordion", "tier": 1, "status": "planned"},
+    {"slug": "dialog", "tier": 2, "status": "planned"},
+    {"slug": "combobox", "tier": 3, "status": "planned"},
+    {"slug": "sidebar", "tier": 3, "status": "planned"}
+  ]
+}
