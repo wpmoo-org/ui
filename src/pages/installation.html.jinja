@@ -65,8 +65,21 @@
           plugins such as Dropdown, Tooltip, Popover, Modal, Toast, or Offcanvas,
           load Bootstrap's JavaScript bundle through your own app. Tooltip and
           Popover also need the initialization Bootstrap documents for those
-          plugins.
+          plugins. Moo UI does not replace or automatically initialize those
+          Bootstrap plugins.
         </p>
+        <p>
+          Moo UI publishes optional ESM only for components whose behavior does
+          not exist in Bootstrap. Each component page documents its own import,
+          lifecycle, and Bootstrap ownership boundary:
+        </p>
+        <ul>
+          <li>
+            <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>
+            provides filtering, selection, keyboard, and ARIA behavior without
+            scanning the document at import time.
+          </li>
+        </ul>
       </section>
 
       <section class="moo-doc-section" aria-labelledby="adoption-paths">

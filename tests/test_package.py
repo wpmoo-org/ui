@@ -1,4 +1,5 @@
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -54,8 +55,28 @@ class PackageMetadataTests(unittest.TestCase):
             package["exports"]["./moo.min.css"],
             "./dist/assets/css/moo.min.css",
         )
+        self.assertEqual(package["type"], "module")
+        self.assertEqual(package["exports"]["./combobox.js"], "./dist/js/combobox.js")
+        self.assertIn("dist/js/combobox.js", files)
+        self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
+
+    def test_combobox_module_import_has_no_document_side_effect(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                'import("./src/js/components/combobox.js")',
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())

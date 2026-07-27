@@ -33,6 +33,7 @@ LLMS_TXT = ROOT / "llms.txt"
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
+JS_COMPONENTS = SRC / "js/components"
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -699,6 +700,7 @@ def asset_version() -> str:
         "assets/css/catalog.css",
         "assets/js/bootstrap.bundle.min.js",
         "assets/js/preview.js",
+        "assets/js/components/combobox.js",
     ):
         path = DIST / relative
         digest.update(relative.encode("utf-8"))
@@ -717,6 +719,12 @@ def copy_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
+    component_js_dir = js_dir / "components"
+    component_js_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(JS_COMPONENTS / "combobox.js", component_js_dir / "combobox.js")
+    package_js_dir = DIST / "js"
+    package_js_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(JS_COMPONENTS / "combobox.js", package_js_dir / "combobox.js")
     fonts_dir = DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(

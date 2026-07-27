@@ -13,6 +13,7 @@
     "url": "https://github.com/wpmoo-org/ui/issues"
   },
   "private": false,
+  "type": "module",
   "scripts": {
     "build": ".venv/bin/python build.py",
     "dev": ".venv/bin/python dev.py",
@@ -26,6 +27,7 @@
     "./moo-ui.min.css": "./dist/assets/css/moo-ui.min.css",
     "./moo.css": "./dist/assets/css/moo.css",
     "./moo.min.css": "./dist/assets/css/moo.min.css",
+    "./combobox.js": "./dist/js/combobox.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -33,6 +35,7 @@
     "dist/assets/css/moo-ui.min.css",
     "dist/assets/css/moo.css",
     "dist/assets/css/moo.min.css",
+    "dist/js/combobox.js",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",

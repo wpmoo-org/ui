@@ -21,6 +21,14 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
+        self.assertTrue((DIST / "assets/js/components/combobox.js").is_file())
+        self.assertTrue((DIST / "js/combobox.js").is_file())
+        self.assertEqual(
+            (DIST / "assets/js/components/combobox.js").read_bytes(),
+            (DIST / "js/combobox.js").read_bytes(),
+        )
+        index = (DIST / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<script type="module" src="assets/js/preview.js?', index)
         self.assertTrue((DIST / "llms.txt").is_file())
         self.assertTrue((DIST / "sitemap.xml").is_file())
         self.assertTrue((DIST / "robots.txt").is_file())
