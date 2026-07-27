@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Input certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Input certification fixture</h1>
+
+      <section aria-labelledby="input-basic-title" data-certification-surface>
+        <h2 id="input-basic-title" class="h5">Labeled input</h2>
+        <label class="form-label" for="certification-input-name">Display name</label>
+        <input
+          class="form-control"
+          id="certification-input-name"
+          type="text"
+          placeholder="Ada Lovelace"
+          aria-describedby="certification-input-name-help"
+        >
+        <div id="certification-input-name-help" class="form-text">
+          This name appears in shared review history.
+        </div>
+      </section>
+
+      <section aria-labelledby="input-search-title" data-certification-surface>
+        <h2 id="input-search-title" class="h5">Search input</h2>
+        <label class="form-label" for="certification-input-search">Search reviewers</label>
+        <input
+          class="form-control"
+          id="certification-input-search"
+          type="search"
+          placeholder="Search..."
+        >
+      </section>
+
+      <section aria-labelledby="input-invalid-title" data-certification-surface>
+        <h2 id="input-invalid-title" class="h5">Required invalid input</h2>
+        <label class="form-label" for="certification-input-required">Workspace slug</label>
+        <input
+          class="form-control is-invalid"
+          id="certification-input-required"
+          type="text"
+          required
+          aria-invalid="true"
+          aria-describedby="certification-input-required-help certification-input-required-feedback"
+        >
+        <div id="certification-input-required-help" class="form-text">
+          Use lowercase letters, numbers, and hyphens.
+        </div>
+        <div id="certification-input-required-feedback" class="invalid-feedback">
+          Enter a workspace slug before continuing.
+        </div>
+      </section>
+
+      <section aria-labelledby="input-state-title" data-certification-surface>
+        <h2 id="input-state-title" class="h5">Read-only and disabled states</h2>
+        <label class="form-label" for="certification-input-readonly">Account region</label>
+        <input
+          class="form-control"
+          id="certification-input-readonly"
+          type="text"
+          value="eu-central-1"
+          readonly
+        >
+        <label class="form-label" for="certification-input-disabled">Locked tenant</label>
+        <input
+          class="form-control"
+          id="certification-input-disabled"
+          type="text"
+          value="acme-production"
+          disabled
+        >
+      </section>
+    </main>
+  </body>
+</html>

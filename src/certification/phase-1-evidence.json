@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "0.1",
+  "status": "backfill",
+  "releaseTarget": "0.6.0",
+  "releaseClaim": "none",
+  "description": "Incremental Phase 1 evidence for the 0.6.0 T0/T1 backfill. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.6.0 release gate is complete.",
+  "components": [
+    {
+      "slug": "input",
+      "tier": 0,
+      "phase": "1A",
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_input.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "references/bootstrap/5.3.3/site/content/docs/5.3/forms/form-control.md",
+        "references/bootstrap/5.3.3/site/content/docs/5.3/forms/validation.md",
+        "references/bootstrap/5.3.3/scss/forms/_form-control.scss",
+        "references/bootstrap/5.3.3/scss/forms/_validation.scss"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
+    }
+  ]
+}

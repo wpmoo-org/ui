@@ -498,6 +498,90 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_input_fixture_proves_native_form_control_states(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/input.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                name = page.locator("#certification-input-name")
+                search = page.locator("#certification-input-search")
+                required = page.locator("#certification-input-required")
+                readonly = page.locator("#certification-input-readonly")
+                disabled = page.locator("#certification-input-disabled")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(page.locator('label[for="certification-input-name"]')).to_have_text(
+                    "Display name"
+                )
+                expect(name).to_have_attribute(
+                    "aria-describedby",
+                    "certification-input-name-help",
+                )
+                expect(page.locator("#certification-input-name-help")).to_have_class(
+                    "form-text"
+                )
+                expect(search).to_have_attribute("type", "search")
+                expect(required).to_have_class("form-control is-invalid")
+                expect(required).to_have_attribute("aria-invalid", "true")
+                expect(required).to_have_attribute(
+                    "aria-describedby",
+                    "certification-input-required-help "
+                    "certification-input-required-feedback",
+                )
+                expect(page.locator("#certification-input-required-feedback")).to_be_visible()
+
+                name.focus()
+                expect(name).to_be_focused()
+                name.fill("Grace Hopper")
+                expect(name).to_have_value("Grace Hopper")
+                page.keyboard.press("Tab")
+                expect(search).to_be_focused()
+                search.fill("Ada")
+                expect(search).to_have_value("Ada")
+
+                expect(readonly).to_have_attribute("readonly", "")
+                readonly.focus()
+                expect(readonly).to_be_focused()
+                readonly.press("X")
+                expect(readonly).to_have_value("eu-central-1")
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+                self.assertTrue(
+                    required.evaluate("element => element.validity.valueMissing")
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

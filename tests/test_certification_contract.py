@@ -76,6 +76,28 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 
+    def test_phase_one_evidence_starts_with_input_backfill(self) -> None:
+        phase_one = self._read_json("src/certification/phase-1-evidence.json")
+        manifest = self._read_json("certification.json")
+        components = {
+            component["slug"]: component for component in phase_one["components"]
+        }
+
+        self.assertEqual(phase_one["status"], "backfill")
+        self.assertEqual(phase_one["releaseTarget"], "0.6.0")
+        self.assertEqual(phase_one["releaseClaim"], "none")
+        self.assertEqual(list(components), ["input"])
+        self.assertEqual(components["input"]["phase"], "1A")
+        self.assertEqual(components["input"]["status"], "backfill-passed")
+        self.assertEqual(components["input"]["tier"], 0)
+        self.assertIn("lifecycle", components["input"]["evidence"]["not-applicable"])
+        for evidence_path in components["input"]["automatedEvidence"]:
+            self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+        for evidence_path in components["input"]["bootstrapEvidence"]:
+            self.assertTrue((ROOT.parents[2] / evidence_path).is_file(), evidence_path)
+        self.assertEqual(manifest["status"], "preview")
+        self.assertEqual(manifest["certifiedComponents"], [])
+
     def test_preview_attestation_is_built_from_the_real_tarball(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             temporary_root = Path(temporary_directory)
