@@ -26,11 +26,21 @@ $border-radius-lg: 0.625rem !default;
 $input-padding-y: 0.25rem !default;
 $input-padding-x: 0.625rem !default;
 $input-height: 2rem !default;
+$input-line-height: 1.4285714286 !default;
 $input-bg: transparent !default;
 $input-border-color: var(--moo-border) !default;
 $input-border-radius: 0.625rem !default;
 $input-placeholder-color: var(--bs-tertiary-color) !default;
 $input-focus-bg: transparent !default;
+// Bootstrap leaves disabled text-control foregrounds null by default
+// (vendor/bootstrap/scss/_variables.scss), which lets real values inherit the
+// normal input color. Use the same muted foreground as placeholders for all
+// disabled form-control and form-select states.
+$input-disabled-color: var(--bs-tertiary-color) !default;
+$form-select-disabled-color: $input-disabled-color !default;
+// Disabled controls need the whole affordance to fade, including native select
+// arrows and Moo-owned trailing icons, so opacity is a shared state token.
+$moo-disabled-control-opacity: 0.5 !default;
 // Bootstrap's own $input-disabled-bg defaults to the opaque $secondary-bg
 // (vendor/bootstrap/scss/_variables.scss), which reads much darker/heavier
 // than the disabled reference: a faint translucent tint over the input
@@ -63,11 +73,14 @@ $dropdown-item-padding-y: 0.25rem !default;
 $dropdown-item-padding-x: 0.375rem !default;
 $dropdown-header-padding-x: $dropdown-item-padding-x !default;
 // Bootstrap has no Combobox component. The Basic pass uses Bootstrap's input
-// height and dropdown menu surface, but the reference control width and list
-// scroll ceiling have no Bootstrap knob, so they live on component Sass knobs.
+// height and dropdown menu surface, but the reference control widths,
+// item line-height, and secondary-row size have no Bootstrap knob, so they
+// live on component Sass knobs.
 $moo-combobox-width: 12.5rem !default;
 $moo-combobox-multiple-width: $moo-combobox-width * 1.6 !default;
-$moo-combobox-menu-max-height: 16rem !default;
+$moo-combobox-menu-max-height: $input-height * 8 !default;
+$moo-combobox-option-line-height: 1.25rem !default;
+$moo-combobox-description-font-size: 0.75rem !default;
 // Bootstrap defaults badges to $font-weight-bold. The reference badge reads as
 // a compact medium label, so keep the native $badge-font-weight knob at 500.
 $badge-font-weight: 500 !default;

@@ -74,6 +74,12 @@ class PaginationTests(CatalogTestCase):
         self.assertIn('<li class="page-item disabled">', output)
         self.assertIn('<span class="page-link" aria-label="Previous">', output)
 
+    def test_disabled_pagination_items_use_shared_disabled_opacity(self) -> None:
+        scss = (ROOT / "scss/components/_pagination.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".page-item.disabled {", scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
+
     def test_pagination_ellipsis_is_non_interactive(self) -> None:
         output = self.render_pagination("pagination_ellipsis()")
         self.assertIn('<li class="page-item disabled">', output)

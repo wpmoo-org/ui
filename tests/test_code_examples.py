@@ -99,6 +99,11 @@ class CodeExampleTests(CatalogTestCase):
             "border: var(--bs-border-width) solid var(--bs-border-color);",
             surface,
         )
+        active_example = css.split(".moo-example:has(.dropdown-menu.show) {", 1)[1].split("}", 1)[0]
+        active_surface = css.split(".moo-example__surface:has(.dropdown-menu.show) {", 1)[1].split("}", 1)[0]
+        self.assertIn("position: relative;", active_example)
+        self.assertIn("z-index: 5;", active_example)
+        self.assertIn("overflow: visible;", active_surface)
         preview = css.split(".moo-example__preview {", 1)[1].split("}", 1)[0]
         self.assertIn("position: relative;", preview)
         self.assertIn("z-index: 4;", preview)
@@ -106,6 +111,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn(".moo-example__source {", css)
         source = css.split(".moo-example__source {", 1)[1].split("}", 1)[0]
         self.assertIn("min-width: 0;", source)
+        self.assertIn("z-index: 1;", source)
         self.assertIn(
             "border-top: var(--bs-border-width) solid var(--bs-border-color);",
             source,

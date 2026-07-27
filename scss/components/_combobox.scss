@@ -5,13 +5,14 @@
   --moo-combobox-width: #{$moo-combobox-width};
   --moo-combobox-multiple-width: #{$moo-combobox-multiple-width};
   --moo-combobox-menu-max-height: #{$moo-combobox-menu-max-height};
+  --moo-combobox-option-line-height: #{$moo-combobox-option-line-height};
+  --moo-combobox-description-font-size: #{$moo-combobox-description-font-size};
 
   width: 100%;
   max-width: var(--moo-combobox-width);
 }
 
-.combobox--multiple,
-.combobox--grouped {
+.combobox--multiple {
   max-width: var(--moo-combobox-multiple-width);
 }
 
@@ -20,8 +21,21 @@
   width: 100%;
 }
 
+.combobox-control:has(.combobox-input:disabled) {
+  opacity: var(--moo-disabled-control-opacity);
+}
+
+.combobox-control:has(.combobox-input:disabled) .combobox-input:disabled {
+  opacity: 1;
+}
+
 .combobox-input {
   padding-inline-end: calc(#{$input-padding-x} + #{$input-height});
+}
+
+.combobox-input.is-invalid {
+  padding-inline-end: calc(#{$input-padding-x} + #{$input-height});
+  background-image: none;
 }
 
 .combobox-indicator {
@@ -149,17 +163,32 @@
   inset-block-start: calc(100% + #{$dropdown-spacer});
   inset-inline-start: 0;
   z-index: $zindex-dropdown;
-  width: 100%;
+  width: max-content;
   min-width: 100%;
+  max-width: calc(100vw - #{$spacer});
   max-height: var(--moo-combobox-menu-max-height);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.combobox-menu::-webkit-scrollbar {
+  display: none;
 }
 
 .combobox-option {
   display: flex;
-  min-height: $input-height;
   align-items: center;
   gap: $spacer * 0.5;
+  padding-inline-end: $input-height;
+  line-height: var(--moo-combobox-option-line-height);
+}
+
+.combobox-option__content {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 
 .combobox-option[aria-current="true"] {
@@ -173,6 +202,19 @@
 .combobox-option__label {
   min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combobox--custom-items .combobox-option__label {
+  font-weight: $font-weight-medium;
+}
+
+.combobox-option__description {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--bs-secondary-color);
+  font-size: var(--moo-combobox-description-font-size);
+  line-height: $line-height-base;
   text-overflow: ellipsis;
 }
 
@@ -191,6 +233,13 @@
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
+}
+
+.combobox-group-label {
+  padding: ($spacer * 0.375) ($spacer * 0.5);
+  font-size: var(--moo-combobox-description-font-size);
+  font-weight: $font-weight-normal;
+  line-height: $spacer;
 }
 
 .combobox-empty {

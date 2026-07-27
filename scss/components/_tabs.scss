@@ -31,6 +31,13 @@
   box-shadow: var(--bs-box-shadow-sm);
 }
 
+.tabs-list .nav-link:disabled,
+.tabs-list .nav-link.disabled {
+  color: var(--moo-muted-foreground);
+  opacity: var(--moo-disabled-control-opacity);
+  pointer-events: none;
+}
+
 // Bootstrap hides inactive panes with display:none, so the pane height
 // changes the moment a shorter or taller tab becomes active — the
 // surrounding page jumps to the new height on every switch. Stacking every

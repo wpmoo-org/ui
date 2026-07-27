@@ -1,3 +1,7 @@
 textarea.form-control:not(.form-control-sm, .form-control-lg) {
   padding: $input-btn-padding-y-lg $input-btn-padding-x;
 }
+
+textarea.form-control:disabled {
+  resize: none;
+}

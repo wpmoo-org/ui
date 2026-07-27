@@ -193,21 +193,22 @@ class ComboboxTests(CatalogTestCase):
             'placeholder="Select a timezone", '
             'items=['
             '{"label": "Americas", "options": ['
-            '{"value": "nyc", "label": "(GMT-5) New York"}, '
-            '{"value": "chi", "label": "(GMT-6) Chicago"}'
+            '{"value": "new-york", "label": "(GMT-5) New York"}, '
+            '{"value": "los-angeles", "label": "(GMT-8) Los Angeles"}'
             ']}, '
             '{"label": "Europe", "options": ['
-            '{"value": "lon", "label": "(GMT+0) London", "selected": true}, '
-            '{"value": "par", "label": "(GMT+1) Paris"}'
+            '{"value": "london", "label": "(GMT+0) London", "selected": true}, '
+            '{"value": "paris", "label": "(GMT+1) Paris"}'
             ']}'
             ']'
             ') }}'
         )
 
-        self.assertIn('class="combobox combobox--grouped"', output)
+        self.assertIn('class="combobox"', output)
+        self.assertNotIn("combobox--grouped", output)
         self.assertIn('placeholder="Select a timezone"', output)
         self.assertIn('value="(GMT+0) London"', output)
-        self.assertIn('type="hidden" name="timezone" value="lon"', output)
+        self.assertIn('type="hidden" name="timezone" value="london"', output)
         self.assertIn('role="group" aria-labelledby="combo-timezone-group-1"', output)
         self.assertIn('class="dropdown-header combobox-group-label" id="combo-timezone-group-1"', output)
         self.assertIn(">Americas<", output)
@@ -215,8 +216,117 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('class="dropdown-header combobox-group-label" id="combo-timezone-group-2"', output)
         self.assertIn(">Europe<", output)
         self.assertIn('class="dropdown-divider combobox-separator"', output)
-        self.assertIn('data-value="lon" aria-selected="true"', output)
+        self.assertIn('data-value="london" aria-selected="true"', output)
         self.assertEqual(output.count('role="option"'), 4)
+
+    def test_combobox_renders_custom_item_rows_anatomy(self) -> None:
+        output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-request-type", '
+            'aria_label="Request type", '
+            'name="request_type", '
+            'placeholder="Search request types...", '
+            'items=['
+            '{"value": "sla-risk", "label": "SLA risk", "description": "Support queue"}, '
+            '{"value": "plan-change", "label": "Plan change", "description": "Billing workflow"}, '
+            '{"value": "portal-bug", "label": "Portal bug", "description": "Customer portal", "selected": true}'
+            ']'
+            ') }}'
+        )
+
+        self.assertIn('class="combobox combobox--custom-items"', output)
+        self.assertIn('placeholder="Search request types..."', output)
+        self.assertIn('value="Portal bug"', output)
+        self.assertIn('type="hidden" name="request_type" value="portal-bug"', output)
+        self.assertEqual(output.count('class="combobox-option__content"'), 3)
+        self.assertIn('class="combobox-option__description">Support queue</span>', output)
+        self.assertIn('class="combobox-option__description">Billing workflow</span>', output)
+        self.assertIn('data-value="portal-bug" aria-selected="true"', output)
+
+    def test_combobox_menus_scroll_with_hidden_scrollbar_when_long(self) -> None:
+        scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
+        variables = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".combobox-menu {", scss)
+        menu_source = scss.split(".combobox-menu {", 1)[1]
+        menu_end = "\n}\n\n.combobox--custom-items" if ".combobox--custom-items .combobox-menu" in scss else "\n}\n\n.combobox-option"
+        menu = menu_source.split(menu_end, 1)[0]
+        self.assertIn("max-height: var(--moo-combobox-menu-max-height);", menu)
+        self.assertIn("overflow-y: auto;", menu)
+        self.assertIn("overscroll-behavior: contain;", menu)
+        self.assertIn("scrollbar-width: none;", menu)
+        self.assertIn(".combobox-menu::-webkit-scrollbar", scss)
+        self.assertIn("--moo-combobox-menu-max-height", scss)
+        self.assertIn("$moo-combobox-menu-max-height: $input-height * 8 !default;", variables)
+        self.assertNotIn(".combobox--custom-items .combobox-menu", scss)
+
+    def test_combobox_custom_item_typography_matches_reference_contract(self) -> None:
+        scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
+        variables = (ROOT / "scss/_primary_variables.scss").read_text(encoding="utf-8")
+
+        self.assertIn("$moo-combobox-option-line-height: 1.25rem !default;", variables)
+        self.assertIn("$moo-combobox-description-font-size: 0.75rem !default;", variables)
+        self.assertIn("--moo-combobox-option-line-height", scss)
+        self.assertIn("--moo-combobox-description-font-size", scss)
+
+        option_block = scss.split(".combobox-option {", 1)[1].split("}", 1)[0]
+        description_block = scss.split(".combobox-option__description {", 1)[1].split("}", 1)[0]
+        group_label_block = scss.split(".combobox-group-label {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("line-height: var(--moo-combobox-option-line-height);", option_block)
+        self.assertNotIn("min-height: $input-height;", option_block)
+        self.assertIn("padding-inline-end: $input-height;", option_block)
+        self.assertIn("font-size: var(--moo-combobox-description-font-size);", group_label_block)
+        self.assertIn("font-weight: $font-weight-normal;", group_label_block)
+        self.assertIn("line-height: $spacer;", group_label_block)
+        self.assertIn("font-size: var(--moo-combobox-description-font-size);", description_block)
+        self.assertIn("line-height: $line-height-base;", description_block)
+        self.assertIn(".combobox--custom-items .combobox-option__label", scss)
+        self.assertIn("font-weight: $font-weight-medium;", scss)
+
+    def test_combobox_renders_invalid_and_disabled_states(self) -> None:
+        invalid_output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-invalid", '
+            'aria_label="Reviewer", '
+            'placeholder="Select a reviewer", '
+            'invalid=true, '
+            'items=[{"value": "ada", "label": "Ada Lovelace"}]'
+            ') }}'
+        )
+        disabled_output = self.render_combobox(
+            '{{ combobox('
+            'id="combo-disabled", '
+            'aria_label="Reviewer", '
+            'placeholder="Select a reviewer", '
+            'disabled=true, '
+            'items=[{"value": "ada", "label": "Ada Lovelace"}]'
+            ') }}'
+        )
+
+        self.assertIn('class="form-control combobox-input is-invalid"', invalid_output)
+        self.assertIn('aria-invalid="true"', invalid_output)
+        self.assertIn('class="form-control combobox-input"', disabled_output)
+        self.assertIn('disabled', disabled_output)
+        self.assertNotIn('aria-invalid="true"', disabled_output)
+
+    def test_combobox_invalid_state_keeps_single_inline_affordance(self) -> None:
+        scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".combobox-input.is-invalid {", scss)
+        invalid_input = scss.split(".combobox-input.is-invalid {", 1)[1].split(
+            "\n}\n\n.combobox-indicator",
+            1,
+        )[0]
+        self.assertIn("background-image: none;", invalid_input)
+
+    def test_combobox_disabled_state_fades_indicator_with_input(self) -> None:
+        scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".combobox-control:has(.combobox-input:disabled)", scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
+        self.assertIn(".combobox-control:has(.combobox-input:disabled) .combobox-input:disabled", scss)
+        self.assertIn("opacity: 1;", scss)
 
     def test_combobox_option_content_keeps_minimal_item_api(self) -> None:
         source = COMPONENT.read_text(encoding="utf-8")
@@ -239,12 +349,27 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_preview_keeps_component_width_tokens(self) -> None:
         catalog_scss = (ROOT / "scss/catalog.scss").read_text(encoding="utf-8")
+        component_scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
 
         self.assertIn(".moo-example__preview--narrow > .combobox", catalog_scss)
         self.assertIn("max-width: var(--moo-combobox-width);", catalog_scss)
         self.assertIn(".moo-example__preview--narrow > .combobox--multiple", catalog_scss)
         self.assertIn("max-width: var(--moo-combobox-multiple-width);", catalog_scss)
-        self.assertIn(".moo-example__preview--narrow > .combobox--grouped", catalog_scss)
+        multiple_block = component_scss.split(".combobox--multiple {", 1)[1].split("}", 1)[0]
+        catalog_multiple_block = catalog_scss.split(
+            ".moo-example__preview--narrow > .combobox--multiple {",
+            1,
+        )[1].split("}", 1)[0]
+
+        self.assertIn("max-width: var(--moo-combobox-multiple-width);", multiple_block)
+        self.assertIn(
+            "max-width: var(--moo-combobox-multiple-width);",
+            catalog_multiple_block,
+        )
+        self.assertNotIn(".combobox--grouped", multiple_block)
+        self.assertNotIn(".combobox--custom-items", multiple_block)
+        self.assertNotIn(".moo-example__preview--narrow > .combobox--grouped", catalog_scss)
+        self.assertNotIn(".moo-example__preview--narrow > .combobox--custom-items", catalog_scss)
 
     def test_combobox_fails_fast_for_invalid_basic_contracts(self) -> None:
         invalid_calls = (
@@ -309,12 +434,16 @@ class ComboboxTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn('{% from "components/combobox.html.jinja" import combobox %}', source)
+        self.assertIn('{% from "components/field.html.jinja" import field, field_description %}', source)
         self.assertIn('"basic"', source)
         self.assertIn('"Basic"', source)
         self.assertIn("Select a reviewer", source)
         self.assertIn('"multiple"', source)
         self.assertIn('"Multiple"', source)
-        self.assertIn("Add review area", source)
+        self.assertIn('label="Review areas"', source)
+        self.assertIn('describedby="combobox-review-areas-help"', source)
+        self.assertIn("Choose every area this review should cover.", source)
+        self.assertNotIn("Add review area", source)
         self.assertIn('"clear-button"', source)
         self.assertIn('"Clear Button"', source)
         self.assertIn('selected="ada"', source)
@@ -323,9 +452,33 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('"Groups"', source)
         self.assertIn("Select a timezone", source)
         self.assertIn("Bootstrap dropdown headers and dividers", source)
+        self.assertIn('"Americas"', source)
+        self.assertIn('"Europe"', source)
+        self.assertIn('"Asia/Pacific"', source)
+        self.assertIn("(GMT-5) New York", source)
+        self.assertIn("(GMT-8) Los Angeles", source)
+        self.assertIn("(GMT-5) Toronto", source)
+        self.assertIn("(GMT-8) Vancouver", source)
+        self.assertIn("(GMT-3) São Paulo", source)
+        self.assertIn("(GMT+1) Amsterdam", source)
+        self.assertIn("(GMT+11) Sydney", source)
         self.assertNotIn("ComboboxGroup", source)
         self.assertNotIn("ComboboxSeparator", source)
-        self.assertNotIn('"Custom Items"', source)
+        self.assertIn('"custom-items"', source)
+        self.assertIn('"Custom Items"', source)
+        self.assertIn("Search request types...", source)
+        self.assertIn("secondary text", source)
+        self.assertNotIn("South America", source)
+        self.assertNotIn("Argentina", source)
+        self.assertNotIn("Brazil", source)
+        self.assertNotIn("Search countries", source)
+        self.assertIn('"invalid"', source)
+        self.assertIn('"Invalid"', source)
+        self.assertIn("invalid=true", source)
+        self.assertIn('"disabled"', source)
+        self.assertIn('"Disabled"', source)
+        self.assertIn("disabled=true", source)
+        self.assertNotIn('"Auto Highlight"', source)
         self.assertNotIn('"Popup"', source)
         self.assertNotIn('"Input Group"', source)
         self.assertNotIn("render_rtl_example(", source)

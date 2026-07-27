@@ -12,3 +12,7 @@
   width: $spacer;
   height: $spacer;
 }
+
+.page-item.disabled {
+  opacity: var(--moo-disabled-control-opacity);
+}

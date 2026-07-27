@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/combobox.html.jinja" import combobox %}
+{% from "components/field.html.jinja" import field, field_description %}
 {% from "includes/documentation-reference.html.jinja" import render_reference %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -29,14 +30,31 @@
     {"value": "chicago", "label": "(GMT-6) Chicago"},
     {"value": "toronto", "label": "(GMT-5) Toronto"},
     {"value": "vancouver", "label": "(GMT-8) Vancouver"},
-    {"value": "sao-paulo", "label": "(GMT-3) Sao Paulo"}
+    {"value": "sao-paulo", "label": "(GMT-3) São Paulo"}
   ]},
   {"label": "Europe", "options": [
     {"value": "london", "label": "(GMT+0) London"},
     {"value": "paris", "label": "(GMT+1) Paris"},
     {"value": "berlin", "label": "(GMT+1) Berlin"},
-    {"value": "istanbul", "label": "(GMT+3) Istanbul"}
+    {"value": "rome", "label": "(GMT+1) Rome"},
+    {"value": "madrid", "label": "(GMT+1) Madrid"},
+    {"value": "amsterdam", "label": "(GMT+1) Amsterdam"}
+  ]},
+  {"label": "Asia/Pacific", "options": [
+    {"value": "tokyo", "label": "(GMT+9) Tokyo"},
+    {"value": "shanghai", "label": "(GMT+8) Shanghai"},
+    {"value": "singapore", "label": "(GMT+8) Singapore"},
+    {"value": "dubai", "label": "(GMT+4) Dubai"},
+    {"value": "sydney", "label": "(GMT+11) Sydney"},
+    {"value": "seoul", "label": "(GMT+9) Seoul"}
   ]}
+] %}
+
+{% set request_type_items = [
+  {"value": "sla-risk", "label": "SLA risk", "description": "Support queue"},
+  {"value": "plan-change", "label": "Plan change", "description": "Billing workflow"},
+  {"value": "portal-bug", "label": "Portal bug", "description": "Customer portal"},
+  {"value": "data-export", "label": "Data export", "description": "Compliance request"}
 ] %}
 
 {% block content %}
@@ -64,15 +82,18 @@
   ) }}
 
   {% set multiple %}
-    {{ combobox(
-      id="combobox-review-areas",
-      aria_label="Review areas",
-      name="review_areas",
-      placeholder="Add review area",
-      items=review_area_items,
-      selected=["security", "billing", "ops"],
-      multiple=true
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-review-areas",
+        label="Review areas",
+        name="review_areas",
+        describedby="combobox-review-areas-help",
+        items=review_area_items,
+        selected=["security", "billing", "ops"],
+        multiple=true
+      ) }}
+      {{ field_description("combobox-review-areas-help", "Choose every area this review should cover.") }}
+    {% endcall %}
   {% endset %}
   {{ render_example(
     "multiple",
@@ -115,6 +136,59 @@
     "Groups",
     "Group related options with Bootstrap dropdown headers and dividers inside the listbox.",
     groups,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set custom_items %}
+    {{ combobox(
+      id="combobox-request-type",
+      aria_label="Request type",
+      name="request_type",
+      placeholder="Search request types...",
+      items=request_type_items
+    ) }}
+  {% endset %}
+  {{ render_example(
+    "custom-items",
+    "Custom Items",
+    "Show richer option rows with secondary text while keeping the same Bootstrap dropdown item structure.",
+    custom_items,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set invalid %}
+    {{ combobox(
+      id="combobox-invalid-reviewer",
+      aria_label="Invalid reviewer",
+      name="invalid_reviewer",
+      placeholder="Select a reviewer",
+      items=reviewer_items,
+      invalid=true
+    ) }}
+  {% endset %}
+  {{ render_example(
+    "invalid",
+    "Invalid",
+    "Use Bootstrap validation styling and aria-invalid for inputs that fail validation.",
+    invalid,
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set disabled %}
+    {{ combobox(
+      id="combobox-disabled-reviewer",
+      aria_label="Disabled reviewer",
+      name="disabled_reviewer",
+      placeholder="Select a reviewer",
+      items=reviewer_items,
+      disabled=true
+    ) }}
+  {% endset %}
+  {{ render_example(
+    "disabled",
+    "Disabled",
+    "Disable the input when the combobox is unavailable.",
+    disabled,
     preview_class="moo-example__preview--narrow"
   ) }}
 </div>

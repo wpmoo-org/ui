@@ -91,6 +91,15 @@ class ToggleGroupTests(CatalogTestCase):
         )
         self.assertEqual(output.count("disabled>"), 2)
 
+    def test_disabled_toggle_items_use_shared_disabled_opacity(self) -> None:
+        button_scss = (ROOT / "scss/components/_button.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(".btn-check:disabled + .btn {", button_scss)
+        self.assertIn("pointer-events: none;", button_scss)
+        self.assertIn("opacity: var(--moo-disabled-control-opacity);", button_scss)
+
     def test_spacing_defaults_to_gap_2_horizontal_and_gap_1_vertical(self) -> None:
         horizontal = self.render_toggle_group(
             'toggle_group("view", [{"id": "view-list", "label": "List"}], legend="View")'
