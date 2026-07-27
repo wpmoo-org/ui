@@ -485,7 +485,11 @@ class ComboboxTests(CatalogTestCase):
         self.assertNotIn("render_rtl_example(", source)
         self.assertNotIn("Select a framework", source)
         self.assertNotIn("Svelte", source)
-        self.assertIn('id="combobox-javascript"', source)
+        self.assertIn(
+            'typography("JavaScript", variant="section-title", id="combobox-javascript")',
+            source,
+        )
+        self.assertNotIn('<h2 id="combobox-javascript">', source)
         self.assertIn('import Combobox from "@wpmoo/ui/combobox.js";', source)
         self.assertIn("Combobox.getOrCreateInstance(element)", source)
         self.assertIn("combobox.dispose()", source)
