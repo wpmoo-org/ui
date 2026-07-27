@@ -87,7 +87,10 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(phase_one["status"], "backfill")
         self.assertEqual(phase_one["releaseTarget"], "0.6.0")
         self.assertEqual(phase_one["releaseClaim"], "none")
-        self.assertEqual(list(components), ["input", "textarea", "input-group", "select"])
+        self.assertEqual(
+            list(components),
+            ["input", "textarea", "input-group", "select", "checkbox"],
+        )
         for component_slug in components:
             with self.subTest(component=component_slug):
                 self.assertEqual(components[component_slug]["phase"], "1A")
