@@ -667,6 +667,113 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_input_group_fixture_proves_bootstrap_grouped_control_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/input-group.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                url_group = page.locator("#certification-input-group-url")
+                url_input = page.locator("#certification-input-group-url-input")
+                invalid_group = page.locator("#certification-input-group-invalid")
+                invalid_input = page.locator("#certification-input-group-token")
+                search_input = page.locator("#certification-input-group-search")
+                search_button = page.locator("#certification-input-group-search-button")
+                textarea = page.locator("#certification-input-group-notes")
+                readonly = page.locator("#certification-input-group-readonly")
+                disabled = page.locator("#certification-input-group-disabled")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(url_group).to_have_class("input-group")
+                expect(
+                    page.locator('label[for="certification-input-group-url-input"]')
+                ).to_have_text("Project URL")
+                self.assertFalse(
+                    page.locator('label[for="certification-input-group-url-input"]')
+                    .evaluate("element => Boolean(element.closest('.input-group'))")
+                )
+                expect(url_input).to_have_attribute(
+                    "aria-describedby",
+                    "certification-input-group-url-addon "
+                    "certification-input-group-url-help",
+                )
+                expect(page.locator("#certification-input-group-url-addon")).to_have_class(
+                    "input-group-text"
+                )
+                expect(page.locator("#certification-input-group-url-help")).to_have_class(
+                    "form-text"
+                )
+
+                expect(invalid_group).to_have_class("input-group has-validation")
+                expect(invalid_input).to_have_class("form-control is-invalid")
+                expect(invalid_input).to_have_attribute("required", "")
+                expect(invalid_input).to_have_attribute("aria-invalid", "true")
+                expect(invalid_input).to_have_attribute(
+                    "aria-describedby",
+                    "certification-input-group-token-addon "
+                    "certification-input-group-token-feedback",
+                )
+                expect(
+                    page.locator("#certification-input-group-token-feedback")
+                ).to_have_class("invalid-feedback")
+
+                url_input.focus()
+                expect(url_input).to_be_focused()
+                url_input.fill("release-notes")
+                expect(url_input).to_have_value("release-notes")
+                page.keyboard.press("Tab")
+                expect(invalid_input).to_be_focused()
+                self.assertTrue(
+                    invalid_input.evaluate("element => element.validity.valueMissing")
+                )
+                page.keyboard.press("Tab")
+                expect(search_input).to_be_focused()
+                page.keyboard.press("Tab")
+                expect(search_button).to_be_focused()
+                expect(search_button).to_have_attribute("type", "button")
+
+                expect(textarea).to_have_attribute("aria-label", "Review notes")
+                textarea.fill("Grouped text area")
+                expect(textarea).to_have_value("Grouped text area")
+                expect(readonly).to_have_attribute("readonly", "")
+                readonly.focus()
+                expect(readonly).to_be_focused()
+                readonly.press("X")
+                expect(readonly).to_have_value("eu-west-1")
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

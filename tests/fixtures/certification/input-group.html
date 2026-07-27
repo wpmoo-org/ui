@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Input Group certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Input Group certification fixture</h1>
+
+      <section aria-labelledby="input-group-url-title" data-certification-surface>
+        <h2 id="input-group-url-title" class="h5">Text addon</h2>
+        <label class="form-label" for="certification-input-group-url-input">Project URL</label>
+        <div class="input-group" id="certification-input-group-url">
+          <span class="input-group-text" id="certification-input-group-url-addon">https://example.com/</span>
+          <input
+            class="form-control"
+            id="certification-input-group-url-input"
+            type="text"
+            placeholder="project"
+            aria-describedby="certification-input-group-url-addon certification-input-group-url-help"
+          >
+        </div>
+        <div id="certification-input-group-url-help" class="form-text">
+          Example help text stays outside the input group.
+        </div>
+      </section>
+
+      <section aria-labelledby="input-group-invalid-title" data-certification-surface>
+        <h2 id="input-group-invalid-title" class="h5">Validation</h2>
+        <label class="form-label" for="certification-input-group-token">Access token</label>
+        <div class="input-group has-validation" id="certification-input-group-invalid">
+          <span class="input-group-text" id="certification-input-group-token-addon">token</span>
+          <input
+            class="form-control is-invalid"
+            id="certification-input-group-token"
+            type="text"
+            required
+            aria-invalid="true"
+            aria-describedby="certification-input-group-token-addon certification-input-group-token-feedback"
+          >
+          <div id="certification-input-group-token-feedback" class="invalid-feedback">
+            Enter an access token before continuing.
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="input-group-button-title" data-certification-surface>
+        <h2 id="input-group-button-title" class="h5">Button addon</h2>
+        <div class="input-group" id="certification-input-group-actions">
+          <input
+            class="form-control"
+            id="certification-input-group-search"
+            type="search"
+            placeholder="Search..."
+            aria-label="Search audit records"
+          >
+          <button
+            class="btn btn-outline-secondary"
+            id="certification-input-group-search-button"
+            type="button"
+          >Search</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="input-group-textarea-title" data-certification-surface>
+        <h2 id="input-group-textarea-title" class="h5">Textarea addon</h2>
+        <div class="input-group" id="certification-input-group-textarea">
+          <span class="input-group-text">With textarea</span>
+          <textarea
+            class="form-control"
+            id="certification-input-group-notes"
+            rows="3"
+            aria-label="Review notes"
+          ></textarea>
+        </div>
+      </section>
+
+      <section aria-labelledby="input-group-state-title" data-certification-surface>
+        <h2 id="input-group-state-title" class="h5">Native states</h2>
+        <div class="input-group">
+          <span class="input-group-text" id="certification-input-group-readonly-addon">Region</span>
+          <input
+            class="form-control"
+            id="certification-input-group-readonly"
+            type="text"
+            value="eu-west-1"
+            readonly
+            aria-label="Region"
+            aria-describedby="certification-input-group-readonly-addon"
+          >
+        </div>
+        <div class="input-group">
+          <span class="input-group-text" id="certification-input-group-disabled-addon">Tenant</span>
+          <input
+            class="form-control"
+            id="certification-input-group-disabled"
+            type="text"
+            value="locked-production"
+            disabled
+            aria-label="Tenant"
+            aria-describedby="certification-input-group-disabled-addon"
+          >
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
