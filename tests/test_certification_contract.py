@@ -65,11 +65,9 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(components["badge"]["status"], "preview-passed")
         self.assertEqual(components["accordion"]["status"], "preview-passed")
         self.assertEqual(components["dialog"]["status"], "preview-passed")
-        self.assertEqual(
-            [components[slug]["status"] for slug in list(components)[3:]],
-            ["planned", "planned"],
-        )
-        for component_slug in ("badge", "accordion", "dialog"):
+        self.assertEqual(components["combobox"]["status"], "preview-passed")
+        self.assertEqual(components["sidebar"]["status"], "planned")
+        for component_slug in ("badge", "accordion", "dialog", "combobox"):
             for evidence_path in components[component_slug]["automatedEvidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
         self.assertEqual(manifest["status"], "preview")

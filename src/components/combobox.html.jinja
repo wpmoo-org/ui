@@ -26,17 +26,17 @@
       {% set group_id = id ~ "-group-" ~ state.group_index %}
       <li role="group" aria-labelledby="{{ group_id }}" class="combobox-group" data-moo-combobox-group>
         <div class="dropdown-header combobox-group-label" id="{{ group_id }}">{{ item["label"] }}</div>
-        <ul class="list-unstyled mb-0">
+        <ul class="list-unstyled mb-0" role="presentation">
           {{ combobox_options(id, item["options"], state) }}
         </ul>
       </li>
-      {% if not loop.last %}<li aria-hidden="true" data-moo-combobox-separator><hr class="dropdown-divider combobox-separator"></li>{% endif %}
+      {% if not loop.last %}<li role="presentation" aria-hidden="true" data-moo-combobox-separator><hr class="dropdown-divider combobox-separator"></li>{% endif %}
     {% else %}
       {% set state.option_index = state.option_index + 1 %}
       {% set option_id = id ~ "-option-" ~ state.option_index %}
       {% set is_selected = item["value"] in state.selected_values if state.multiple else item["value"] == state.selected %}
       {% set is_highlighted = item["value"] == state.highlighted %}
-      <li>
+      <li role="presentation">
         <button class="dropdown-item combobox-option" id="{{ option_id }}" type="button" role="option" data-value="{{ item["value"] }}"{% if is_selected %} aria-selected="true"{% else %} aria-selected="false"{% endif %}{% if is_highlighted %} aria-current="true"{% endif %}{% if item.get("disabled") %} disabled{% endif %}>
           {{ combobox_option_content(item) }}
         </button>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Combobox certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 28rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Combobox certification fixture</h1>
+      <div class="combobox" id="certification-combobox" data-moo-combobox-selected="false">
+        <label class="form-label" for="certification-combobox-input">Reviewer</label>
+        <div class="combobox-control">
+          <input
+            class="form-control combobox-input"
+            id="certification-combobox-input"
+            type="text"
+            role="combobox"
+            autocomplete="off"
+            aria-expanded="false"
+            aria-controls="certification-combobox-listbox"
+            aria-autocomplete="list"
+            data-moo-combobox-selected="false"
+            placeholder="Select a reviewer"
+          >
+          <input type="hidden" name="reviewer" value="">
+          <span class="combobox-indicator" aria-hidden="true">⌄</span>
+          <ul
+            class="dropdown-menu combobox-menu"
+            id="certification-combobox-listbox"
+            role="listbox"
+          >
+            <li role="presentation">
+              <button
+                class="dropdown-item combobox-option"
+                id="certification-combobox-option-1"
+                type="button"
+                role="option"
+                data-value="ada"
+                aria-selected="false"
+              >
+                <span class="combobox-option__content">
+                  <span class="combobox-option__label">Ada Lovelace</span>
+                </span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button
+                class="dropdown-item combobox-option"
+                id="certification-combobox-option-2"
+                type="button"
+                role="option"
+                data-value="grace"
+                aria-selected="false"
+              >
+                <span class="combobox-option__content">
+                  <span class="combobox-option__label">Grace Hopper</span>
+                </span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button
+                class="dropdown-item combobox-option"
+                id="certification-combobox-option-3"
+                type="button"
+                role="option"
+                data-value="margaret"
+                aria-selected="false"
+              >
+                <span class="combobox-option__content">
+                  <span class="combobox-option__label">Margaret Hamilton</span>
+                </span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+    <script type="module">
+      import Combobox from "/dist/js/combobox.js";
+
+      const root = document.querySelector("#certification-combobox");
+      root.addEventListener("change.moo.combobox", event => {
+        document.body.dataset.comboboxValues = event.detail.values.join(",");
+      });
+      window.CertificationCombobox = Combobox;
+      window.certificationCombobox = Combobox.getOrCreateInstance(root);
+      document.body.dataset.comboboxReady = "true";
+    </script>
+  </body>
+</html>

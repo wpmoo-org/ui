@@ -112,6 +112,108 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_combobox_fixture_proves_public_esm_keyboard_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/combobox.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                root = page.locator("#certification-combobox")
+                combobox_input = page.locator("#certification-combobox-input")
+                menu = page.locator("#certification-combobox-listbox")
+                hidden_value = root.locator('input[type="hidden"]')
+                empty_state = root.locator("[data-moo-combobox-empty]")
+                live_region = root.locator("[data-moo-combobox-live]")
+                expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => window.CertificationCombobox.getInstance(element)
+                          === window.certificationCombobox
+                        """
+                    )
+                )
+
+                combobox_input.focus()
+                expect(combobox_input).to_have_attribute("aria-expanded", "true")
+                expect(menu).to_have_class("dropdown-menu combobox-menu show")
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-1",
+                )
+                combobox_input.press("ArrowDown")
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-2",
+                )
+                self.assertEqual(run_axe(page), [])
+
+                combobox_input.press("Enter")
+                expect(combobox_input).to_have_value("Grace Hopper")
+                expect(hidden_value).to_have_value("grace")
+                expect(combobox_input).to_have_attribute("aria-expanded", "false")
+                expect(page.locator("body")).to_have_attribute(
+                    "data-combobox-values",
+                    "grace",
+                )
+                expect(page.locator("#certification-combobox-option-2")).to_have_attribute(
+                    "aria-selected",
+                    "true",
+                )
+
+                combobox_input.focus()
+                combobox_input.fill("not-a-reviewer")
+                expect(empty_state).to_be_visible()
+                expect(live_region).to_have_text("No results")
+                expect(combobox_input).to_have_attribute("aria-expanded", "true")
+                combobox_input.press("Escape")
+                expect(combobox_input).to_have_attribute("aria-expanded", "false")
+
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationCombobox.dispose();
+                          return window.CertificationCombobox.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertEqual(root.locator("[data-moo-combobox-empty]").count(), 0)
+                self.assertEqual(root.locator("[data-moo-combobox-live]").count(), 0)
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationCombobox = window.CertificationCombobox
+                            .getOrCreateInstance(element);
+                          return window.CertificationCombobox.getInstance(element)
+                            === window.certificationCombobox;
+                        }
+                        """
+                    )
+                )
+                self.assertEqual(root.locator("[data-moo-combobox-empty]").count(), 1)
+                self.assertEqual(root.locator("[data-moo-combobox-live]").count(), 1)
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
