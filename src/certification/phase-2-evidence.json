@@ -69,6 +69,39 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "dialog",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_dialog.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/modal/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/modal.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/focustrap.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_modal.scss"
+      ],
+      "limitations": [
+        "Phase 2 promotes the existing Phase 0E Dialog pilot evidence into the complete Tier 2 report; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The existing fixture proves Data API initialization, semantic title/description wiring, focus entry and trapping, backdrop creation/removal, Escape dismissal, trigger focus return, repeated open/close use, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Bootstrap Modal owns the runtime lifecycle; Dialog adds no parallel JavaScript implementation.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }
