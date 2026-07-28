@@ -588,6 +588,47 @@
         "Real-device and generic host-conformance evidence remain pending.",
         "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
       ]
+    },
+    {
+      "slug": "navigation",
+      "tier": 0,
+      "phase": "1B",
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_navigation.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/navs-tabs/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_nav.scss"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Navigation has no roving-tabindex or arrow-key behavior; each item is an independent native anchor tab stop, matching Bootstrap's own nav-link pattern.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
     }
   ]
 }

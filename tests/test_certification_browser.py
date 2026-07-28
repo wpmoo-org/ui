@@ -1679,6 +1679,67 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_navigation_fixture_proves_style_state_and_keyboard_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/navigation.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                pills = page.locator("#certification-navigation-pills ul")
+                expect(pills).to_have_class("nav nav-pills")
+
+                overview = page.locator("#certification-navigation-overview")
+                expect(overview).to_have_class("nav-link active")
+                expect(overview).to_have_attribute("aria-current", "page")
+
+                billing = page.locator("#certification-navigation-billing")
+                expect(billing).to_have_attribute("aria-disabled", "true")
+                expect(billing).to_have_attribute("tabindex", "-1")
+                self.assertFalse(billing.evaluate("element => element.hasAttribute('href')"))
+
+                members = page.locator("#certification-navigation-members")
+                overview.focus()
+                expect(overview).to_be_focused()
+                overview.press("Tab")
+                expect(members).to_be_focused()
+
+                underline = page.locator("#certification-navigation-underline ul")
+                expect(underline).to_have_class("nav nav-underline flex-column gap-1")
+
+                notifications = page.locator("#certification-navigation-notifications")
+                expect(notifications.locator(".badge")).to_have_text("3")
+                expect(notifications.locator(".badge")).to_have_class(
+                    "badge text-bg-secondary rounded-pill ms-auto"
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
