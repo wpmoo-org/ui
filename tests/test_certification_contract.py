@@ -110,6 +110,7 @@ class CertificationContractTests(unittest.TestCase):
             "dropdown-menu": "1C",
             "alert": "1C",
             "tabs": "1C",
+            "collapsible": "1C",
         }
         # 1A/1B are Tier 0 form/display primitives where lifecycle never
         # applies (no init/dispose Bootstrap plugin involved). 1C backfills
@@ -119,7 +120,7 @@ class CertificationContractTests(unittest.TestCase):
         # a later native-state 1C component (Toggle Group) owns no JS plugin,
         # so it stays not-applicable like every Tier 0 component.
         expected_tiers = {slug: 0 for slug in expected_phases}
-        for slug in ("dropdown-menu", "alert", "tabs"):
+        for slug in ("dropdown-menu", "alert", "tabs", "collapsible"):
             expected_tiers[slug] = 1
         lifecycle_not_applicable = {
             slug for slug in expected_phases if expected_phases[slug] != "1C"
