@@ -2041,6 +2041,61 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_progress_fixture_proves_value_bounds_and_label_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/progress.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                basic = page.locator("#certification-progress-basic")
+                expect(basic).to_have_attribute("role", "progressbar")
+                expect(basic).to_have_attribute("aria-valuenow", "40")
+                expect(basic).to_have_attribute("aria-valuemin", "0")
+                expect(basic).to_have_attribute("aria-valuemax", "100")
+                self.assertGreater(
+                    basic.locator(".progress-bar").evaluate(
+                        "element => element.getBoundingClientRect().width"
+                    ),
+                    0,
+                )
+
+                labeled = page.locator("#certification-progress-labeled")
+                expect(labeled).to_have_attribute("aria-valuenow", "75")
+                expect(page.locator("#certification-progress-labeled-percent")).to_have_text("75%")
+
+                empty = page.locator("#certification-progress-empty")
+                expect(empty).to_have_attribute("aria-valuenow", "0")
+                complete = page.locator("#certification-progress-complete")
+                expect(complete).to_have_attribute("aria-valuenow", "100")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
