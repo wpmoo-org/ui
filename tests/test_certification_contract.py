@@ -77,32 +77,34 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 
-    def test_phase_one_evidence_tracks_form_primitive_backfill(self) -> None:
+    def test_phase_one_evidence_tracks_t0_backfill(self) -> None:
         phase_one = self._read_json("src/certification/phase-1-evidence.json")
         manifest = self._read_json("certification.json")
         components = {
             component["slug"]: component for component in phase_one["components"]
         }
+        expected_phases = {
+            "input": "1A",
+            "textarea": "1A",
+            "input-group": "1A",
+            "select": "1A",
+            "checkbox": "1A",
+            "radio-group": "1A",
+            "switch": "1A",
+            "field": "1A",
+            "button": "1B",
+        }
 
         self.assertEqual(phase_one["status"], "backfill")
         self.assertEqual(phase_one["releaseTarget"], "0.6.0")
         self.assertEqual(phase_one["releaseClaim"], "none")
-        self.assertEqual(
-            list(components),
-            [
-                "input",
-                "textarea",
-                "input-group",
-                "select",
-                "checkbox",
-                "radio-group",
-                "switch",
-                "field",
-            ],
-        )
+        self.assertEqual(list(components), list(expected_phases))
         for component_slug in components:
             with self.subTest(component=component_slug):
-                self.assertEqual(components[component_slug]["phase"], "1A")
+                self.assertEqual(
+                    components[component_slug]["phase"],
+                    expected_phases[component_slug],
+                )
                 self.assertEqual(components[component_slug]["status"], "backfill-passed")
                 self.assertEqual(components[component_slug]["tier"], 0)
                 self.assertIn(

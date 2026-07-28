@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Button certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Button certification fixture</h1>
+
+      <section aria-labelledby="button-variants-title" data-certification-surface>
+        <h2 id="button-variants-title" class="h5 w-100">Variants</h2>
+        <button class="btn btn-primary" type="button">Deploy</button>
+        <button class="btn btn-secondary" type="button">Save draft</button>
+        <button class="btn btn-outline-secondary" type="button">Cancel</button>
+        <button class="btn btn-ghost" type="button">Dismiss</button>
+        <button class="btn btn-danger" type="button">Delete workspace</button>
+      </section>
+
+      <section aria-labelledby="button-sizes-title" data-certification-surface>
+        <h2 id="button-sizes-title" class="h5 w-100">Sizes and icon-only</h2>
+        <button class="btn btn-primary btn-sm" type="button">Retry</button>
+        <button class="btn btn-primary btn-lg" type="button">Continue</button>
+        <button
+          class="btn btn-ghost btn-icon"
+          type="button"
+          id="certification-button-icon-only"
+          aria-label="Open menu"
+        >
+          <svg
+            data-icon="inline-start"
+            data-lucide="ellipsis"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+        </button>
+      </section>
+
+      <section aria-labelledby="button-states-title" data-certification-surface>
+        <h2 id="button-states-title" class="h5 w-100">States</h2>
+        <button
+          class="btn btn-primary"
+          type="button"
+          id="certification-button-disabled"
+          disabled
+        >
+          Publish release
+        </button>
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          id="certification-button-toggle"
+          data-bs-toggle="button"
+          aria-pressed="false"
+        >
+          Mute alerts
+        </button>
+        <a
+          class="btn btn-outline-secondary disabled"
+          role="button"
+          id="certification-button-disabled-link"
+          aria-disabled="true"
+          tabindex="-1"
+        >
+          Archive project
+        </a>
+        <a
+          class="btn btn-primary"
+          role="button"
+          href="#certification-button-link-target"
+          id="certification-button-link"
+        >
+          View changelog
+        </a>
+      </section>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -1315,6 +1315,74 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_button_fixture_proves_variant_size_and_state_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/button.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                self.assertEqual(page.locator(".btn").count(), 12)
+
+                icon_only = page.locator("#certification-button-icon-only")
+                expect(icon_only).to_have_class("btn btn-ghost btn-icon")
+                expect(icon_only).to_have_attribute("aria-label", "Open menu")
+                self.assertEqual(icon_only.inner_text().strip(), "")
+
+                disabled = page.locator("#certification-button-disabled")
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                toggle = page.locator("#certification-button-toggle")
+                expect(toggle).to_have_attribute("aria-pressed", "false")
+                toggle.click()
+                expect(toggle).to_have_attribute("aria-pressed", "true")
+                toggle.press("Enter")
+                expect(toggle).to_have_attribute("aria-pressed", "false")
+                self.assertTrue(
+                    toggle.evaluate("element => document.activeElement === element")
+                )
+
+                disabled_link = page.locator("#certification-button-disabled-link")
+                expect(disabled_link).to_have_attribute("aria-disabled", "true")
+                expect(disabled_link).to_have_attribute("tabindex", "-1")
+                self.assertFalse(disabled_link.evaluate("element => element.hasAttribute('href')"))
+
+                link = page.locator("#certification-button-link")
+                link.focus()
+                expect(link).to_be_focused()
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
