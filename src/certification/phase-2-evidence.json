@@ -167,6 +167,40 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "sidebar",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_sidebar.py",
+        "tests/test_certification_browser.py",
+        "dist/js/sidebar.js"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/offcanvas/",
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/offcanvas.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js"
+      ],
+      "limitations": [
+        "Phase 2 promotes the existing Phase 0E Sidebar pilot evidence into the complete Tier 3 report; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The existing fixture proves public side-effect-free ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, desktop expanded/collapsed persistence and keyboard shortcut flow, editable-target shortcut isolation, mobile Offcanvas backdrop/Escape/focus-return behavior, responsive composition, accessibility, RTL/theme rendering, and clean console/page-error evidence.",
+        "Sidebar composes ready Button, Input, Separator, Skeleton, Dropdown Menu, and Bootstrap Offcanvas contracts while Moo-owned ESM supplies only the source-verified responsive shell/state gap.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }

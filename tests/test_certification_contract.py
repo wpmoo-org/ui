@@ -194,6 +194,7 @@ class CertificationContractTests(unittest.TestCase):
             "dialog": {"phase": "2A", "tier": 2},
             "toast": {"phase": "2A", "tier": 2},
             "sheet": {"phase": "2A", "tier": 2},
+            "sidebar": {"phase": "2B", "tier": 3},
         }
 
         self.assertEqual(phase_two["status"], "backfill")
