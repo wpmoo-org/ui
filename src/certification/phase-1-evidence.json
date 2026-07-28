@@ -950,6 +950,37 @@
         "Real-device and generic host-conformance evidence remain pending.",
         "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
       ]
+    },
+    {
+      "slug": "dropdown-menu",
+      "phase": "1C",
+      "tier": 1,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["lifecycle", "host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_dropdown_menu.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Dropdown Menu composes Bootstrap's own Dropdown Data API plugin; lifecycle (init/dispose/repeated-use evidence) is deferred to the Phase 2 overlay backfill that covers Bootstrap plugin lifecycle more broadly.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
     }
   ]
 }

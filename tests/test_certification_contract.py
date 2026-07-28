@@ -107,6 +107,19 @@ class CertificationContractTests(unittest.TestCase):
             "progress": "1B",
             "table": "1B",
             "spinner": "1B",
+            "dropdown-menu": "1C",
+        }
+        # 1A/1B are Tier 0 form/display primitives where lifecycle never
+        # applies (no init/dispose Bootstrap plugin involved). 1C backfills
+        # Tier 1 Bootstrap Data API / native-state components: most compose
+        # a Bootstrap JS plugin, so lifecycle evidence is real but deferred
+        # to the Phase 2 overlay backfill ("missing", not "not-applicable");
+        # a later native-state 1C component (Toggle Group) owns no JS plugin,
+        # so it stays not-applicable like every Tier 0 component.
+        expected_tiers = {slug: 0 for slug in expected_phases}
+        expected_tiers["dropdown-menu"] = 1
+        lifecycle_not_applicable = {
+            slug for slug in expected_phases if expected_phases[slug] != "1C"
         }
 
         self.assertEqual(phase_one["status"], "backfill")
@@ -120,11 +133,20 @@ class CertificationContractTests(unittest.TestCase):
                     expected_phases[component_slug],
                 )
                 self.assertEqual(components[component_slug]["status"], "backfill-passed")
-                self.assertEqual(components[component_slug]["tier"], 0)
-                self.assertIn(
-                    "lifecycle",
-                    components[component_slug]["evidence"]["not-applicable"],
+                self.assertEqual(
+                    components[component_slug]["tier"],
+                    expected_tiers[component_slug],
                 )
+                if component_slug in lifecycle_not_applicable:
+                    self.assertIn(
+                        "lifecycle",
+                        components[component_slug]["evidence"]["not-applicable"],
+                    )
+                else:
+                    self.assertIn(
+                        "lifecycle",
+                        components[component_slug]["evidence"]["missing"],
+                    )
                 for evidence_path in components[component_slug]["automatedEvidence"]:
                     self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
                 for evidence_url in components[component_slug]["bootstrapEvidence"]:

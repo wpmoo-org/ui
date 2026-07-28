@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dropdown Menu certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 8rem;
+        max-width: 24rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Dropdown Menu certification fixture</h1>
+
+      <section aria-label="Default dropdown">
+        <div class="dropdown">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            id="certification-dropdown-trigger"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >Project actions</button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="#open" id="certification-dropdown-first-item"><span>Open project</span></a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#rename" id="certification-dropdown-second-item"><span>Rename project</span></a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item disabled" href="#archive" aria-disabled="true" tabindex="-1" id="certification-dropdown-disabled-item"><span>Archive</span></a>
+            </li>
+            <li>
+              <a class="dropdown-item text-danger" href="#delete" id="certification-dropdown-last-item"><span>Delete</span></a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-label="Auto-close outside dropdown">
+        <div class="dropdown">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            id="certification-dropdown-outside-trigger"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            aria-expanded="false"
+          >View options</button>
+          <ul class="dropdown-menu">
+            <li>
+              <button class="dropdown-item" type="button" id="certification-dropdown-outside-item"><span>Reset view</span></button>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <p id="certification-outside-target">Outside content used to test auto_close="outside".</p>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

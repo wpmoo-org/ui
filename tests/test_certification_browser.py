@@ -2210,5 +2210,78 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 context.close()
 
 
+    def test_dropdown_menu_fixture_proves_data_api_keyboard_and_auto_close(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/dropdown-menu.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#certification-dropdown-trigger")
+                menu = trigger.locator("xpath=following-sibling::ul[1]")
+                first_item = page.locator("#certification-dropdown-first-item")
+                disabled_item = page.locator("#certification-dropdown-disabled-item")
+                self.assertEqual(trigger.get_attribute("aria-expanded"), "false")
+                self.assertFalse(menu.evaluate("element => element.classList.contains('show')"))
+                expect(disabled_item).to_have_attribute("aria-disabled", "true")
+                expect(disabled_item).to_have_attribute("tabindex", "-1")
+
+                trigger.click()
+                expect(trigger).to_have_attribute("aria-expanded", "true")
+                self.assertTrue(menu.evaluate("element => element.classList.contains('show')"))
+
+                page.keyboard.press("ArrowDown")
+                self.assertTrue(
+                    first_item.evaluate("element => document.activeElement === element")
+                )
+
+                page.keyboard.press("Escape")
+                expect(trigger).to_have_attribute("aria-expanded", "false")
+                self.assertTrue(trigger.evaluate("element => document.activeElement === element"))
+
+                # data-bs-auto-close="outside" means the opposite of its
+                # name suggests: an outside click *does* close the menu
+                # (Bootstrap's default "true" behavior already covers that);
+                # what "outside" actually suppresses is closing on an
+                # *inside* click, which the outside item's own click below
+                # proves by leaving the menu open.
+                outside_trigger = page.locator("#certification-dropdown-outside-trigger")
+                outside_target = page.locator("#certification-outside-target")
+                outside_item = page.locator("#certification-dropdown-outside-item")
+                outside_trigger.click()
+                expect(outside_trigger).to_have_attribute("aria-expanded", "true")
+                outside_item.click()
+                expect(outside_trigger).to_have_attribute("aria-expanded", "true")
+                outside_target.click()
+                expect(outside_trigger).to_have_attribute("aria-expanded", "false")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
 if __name__ == "__main__":
     unittest.main()
