@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,6 +76,151 @@ class CertificationContractTests(unittest.TestCase):
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
+
+    def test_phase_one_evidence_tracks_t0_backfill(self) -> None:
+        phase_one = self._read_json("src/certification/phase-1-evidence.json")
+        manifest = self._read_json("certification.json")
+        components = {
+            component["slug"]: component for component in phase_one["components"]
+        }
+        expected_phases = {
+            "accordion": "1C",
+            "input": "1A",
+            "textarea": "1A",
+            "input-group": "1A",
+            "select": "1A",
+            "checkbox": "1A",
+            "radio-group": "1A",
+            "switch": "1A",
+            "field": "1A",
+            "button": "1B",
+            "button-group": "1B",
+            "card": "1B",
+            "typography": "1B",
+            "kbd": "1B",
+            "avatar": "1B",
+            "navigation": "1B",
+            "separator": "1B",
+            "skeleton": "1B",
+            "close-button": "1B",
+            "breadcrumb": "1B",
+            "pagination": "1B",
+            "progress": "1B",
+            "table": "1B",
+            "spinner": "1B",
+            "dropdown-menu": "1C",
+            "alert": "1C",
+            "tabs": "1C",
+            "collapsible": "1C",
+            "toggle-group": "1C",
+        }
+        # 1A/1B are Tier 0 form/display primitives where lifecycle never
+        # applies (no init/dispose Bootstrap plugin involved). 1C backfills
+        # Tier 1 Bootstrap Data API / native-state components: most compose
+        # a Bootstrap JS plugin, so lifecycle evidence is real but deferred
+        # to the Phase 2 overlay backfill ("missing", not "not-applicable");
+        # a later native-state 1C component (Toggle Group) owns no JS plugin,
+        # so it stays not-applicable like every Tier 0 component.
+        expected_tiers = {slug: 0 for slug in expected_phases}
+        for slug in ("accordion", "dropdown-menu", "alert", "tabs", "collapsible", "toggle-group"):
+            expected_tiers[slug] = 1
+        lifecycle_not_applicable = {
+            slug for slug in expected_phases if expected_phases[slug] != "1C"
+        }
+        lifecycle_not_applicable.add("toggle-group")
+        # Accordion was the Phase 0E T1 pilot and already carries full
+        # lifecycle evidence (unlike the other 1C components, where it is
+        # real but deferred to Phase 2), so it is neither not-applicable
+        # nor missing here.
+        lifecycle_existing = {"accordion"}
+
+        self.assertEqual(phase_one["status"], "backfill")
+        self.assertEqual(phase_one["releaseTarget"], "0.6.0")
+        self.assertEqual(phase_one["releaseClaim"], "none")
+        self.assertEqual(
+            phase_one["bootstrapCompatibility"]["evidence"],
+            "src/certification/bootstrap-compatibility.json",
+        )
+        self.assertEqual(phase_one["bootstrapCompatibility"]["status"], "passed")
+        self.assertEqual(list(components), list(expected_phases))
+        for component_slug in components:
+            with self.subTest(component=component_slug):
+                self.assertEqual(
+                    components[component_slug]["phase"],
+                    expected_phases[component_slug],
+                )
+                self.assertEqual(components[component_slug]["status"], "backfill-passed")
+                self.assertEqual(
+                    components[component_slug]["tier"],
+                    expected_tiers[component_slug],
+                )
+                if component_slug in lifecycle_existing:
+                    self.assertIn(
+                        "lifecycle",
+                        components[component_slug]["evidence"]["existing"],
+                    )
+                elif component_slug in lifecycle_not_applicable:
+                    self.assertIn(
+                        "lifecycle",
+                        components[component_slug]["evidence"]["not-applicable"],
+                    )
+                else:
+                    self.assertIn(
+                        "lifecycle",
+                        components[component_slug]["evidence"]["missing"],
+                    )
+                for evidence_path in components[component_slug]["automatedEvidence"]:
+                    self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+                for evidence_url in components[component_slug]["bootstrapEvidence"]:
+                    parsed_url = urlparse(evidence_url)
+                    self.assertEqual(parsed_url.scheme, "https", evidence_url)
+                    self.assertIn(
+                        parsed_url.netloc,
+                        {"getbootstrap.com", "github.com"},
+                        evidence_url,
+                    )
+        self.assertEqual(manifest["status"], "preview")
+        self.assertEqual(manifest["certifiedComponents"], [])
+
+    def test_bootstrap_compatibility_evidence_backs_manifest_range(self) -> None:
+        compatibility = self._read_json("src/certification/bootstrap-compatibility.json")
+        manifest = self._read_json("certification.json")
+        package = self._read_json("package.json")
+        lanes = compatibility["lanes"]
+        lane_versions = [lane["version"] for lane in lanes]
+
+        self.assertEqual(compatibility["status"], "passed")
+        self.assertEqual(compatibility["phase"], "1D")
+        self.assertEqual(compatibility["releaseTarget"], "0.6.0")
+        self.assertTrue((ROOT / compatibility["runner"]).is_file())
+        self.assertEqual(
+            compatibility["verifiedRange"],
+            package["peerDependencies"]["bootstrap"],
+        )
+        self.assertEqual(
+            manifest["bootstrap"]["targetRange"],
+            package["peerDependencies"]["bootstrap"],
+        )
+        self.assertEqual(
+            manifest["bootstrap"]["verifiedRange"],
+            compatibility["verifiedRange"],
+        )
+        self.assertEqual(manifest["bootstrap"]["testedVersions"], lane_versions)
+        self.assertEqual(
+            [lane["name"] for lane in lanes],
+            ["minimum", "canonical", "latest-5.3.x"],
+        )
+        self.assertEqual(lane_versions, ["5.3.0", "5.3.3", "5.3.8"])
+        self.assertEqual(compatibility["latestResolvedVersion"], "5.3.8")
+        self.assertEqual(
+            compatibility["browserCases"],
+            ["desktop-light-ltr", "mobile-dark-rtl"],
+        )
+        for lane in lanes:
+            with self.subTest(lane=lane["name"]):
+                self.assertEqual(lane["source"], f"npm:bootstrap@{lane['version']}")
+                self.assertEqual(lane["build"], "passed")
+                self.assertEqual(lane["browserCertification"], "passed")
 
     def test_preview_attestation_is_built_from_the_real_tarball(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

@@ -16,7 +16,18 @@
   padding: $moo-tabs-trigger-padding-y $moo-tabs-trigger-padding-x;
   font-size: $font-size-base;
   font-weight: 500;
-  color: var(--moo-muted-foreground);
+  // var(--moo-muted-foreground) on the track's own var(--moo-muted-surface)
+  // background measures 4.40:1 in light mode, under the 4.5:1 WCAG AA
+  // minimum for normal text (axe caught this in the certification fixture).
+  // var(--bs-secondary-color) is not a usable substitute here -- Moo UI's
+  // own theme sets --bs-secondary-color: var(--moo-muted-foreground)
+  // (scss/themes/_standalone_root.scss), so it resolves to the exact same
+  // failing color. var(--bs-secondary-text-emphasis) is a different,
+  // untouched Bootstrap token (Moo UI does not override it) built for
+  // accessible colored text against a tinted "subtle" surface -- the same
+  // category of fix the Kbd contrast defect used -- and measures 5.55:1
+  // light / 14.03:1 dark against this track's own background.
+  color: var(--bs-secondary-text-emphasis);
   border-radius: var(--bs-border-radius);
   @include transition($transition-base);
 }

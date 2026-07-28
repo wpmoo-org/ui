@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Select certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Select certification fixture</h1>
+
+      <section aria-labelledby="select-default-title" data-certification-surface>
+        <h2 id="select-default-title" class="h5">Default</h2>
+        <label class="form-label" for="certification-select-workspace">Workspace</label>
+        <select
+          class="form-select"
+          id="certification-select-workspace"
+          data-selected="ops"
+          aria-describedby="certification-select-workspace-help"
+        >
+          <option value="" disabled>Choose workspace</option>
+          <option value="ops" selected>Operations</option>
+          <option value="design">Design</option>
+          <option value="analytics">Analytics</option>
+        </select>
+        <div id="certification-select-workspace-help" class="form-text">
+          Native select controls keep option rendering in the browser.
+        </div>
+      </section>
+
+      <section aria-labelledby="select-groups-title" data-certification-surface>
+        <h2 id="select-groups-title" class="h5">Grouped options</h2>
+        <label class="form-label" for="certification-select-queue">Queue</label>
+        <select class="form-select" id="certification-select-queue">
+          <optgroup label="Primary queues">
+            <option value="deploy">Deployment</option>
+            <option value="release" selected>Release</option>
+            <option value="incident">Incident</option>
+          </optgroup>
+          <optgroup label="Secondary queues">
+            <option value="internal">Internal</option>
+            <option value="partner">Partner</option>
+          </optgroup>
+          <optgroup label="Archive queues" disabled>
+            <option value="legacy">Legacy</option>
+            <option value="deprecated">Deprecated</option>
+          </optgroup>
+        </select>
+      </section>
+
+      <section aria-labelledby="select-invalid-title" data-certification-surface>
+        <h2 id="select-invalid-title" class="h5">Invalid</h2>
+        <label class="form-label" for="certification-select-invalid">Required queue</label>
+        <select
+          class="form-select is-invalid"
+          id="certification-select-invalid"
+          required
+          aria-invalid="true"
+          aria-describedby="certification-select-invalid-help certification-select-invalid-feedback"
+        >
+          <option value="" selected disabled>Choose queue</option>
+          <option value="ops">Operations</option>
+          <option value="support">Support</option>
+          <option value="finance">Finance</option>
+        </select>
+        <div id="certification-select-invalid-help" class="form-text">
+          Select a queue before the routing rule can be saved.
+        </div>
+        <div id="certification-select-invalid-feedback" class="invalid-feedback">
+          Choose a valid queue before continuing.
+        </div>
+      </section>
+
+      <section aria-labelledby="select-multiple-title" data-certification-surface>
+        <h2 id="select-multiple-title" class="h5">Multiple and size</h2>
+        <select
+          class="form-select"
+          id="certification-select-teams"
+          multiple
+          size="5"
+          aria-label="Assigned teams"
+        >
+          <option value="platform">Platform</option>
+          <option value="support">Support</option>
+          <option value="security">Security</option>
+          <option value="quality">Quality</option>
+          <option value="finance">Finance</option>
+        </select>
+      </section>
+
+      <section aria-labelledby="select-sized-title" data-certification-surface>
+        <h2 id="select-sized-title" class="h5">Dense list</h2>
+        <label class="form-label" for="certification-select-priority">Priority</label>
+        <select
+          class="form-select form-select-lg"
+          id="certification-select-priority"
+          size="4"
+        >
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </section>
+
+      <section aria-labelledby="select-disabled-title" data-certification-surface>
+        <h2 id="select-disabled-title" class="h5">Disabled</h2>
+        <label class="form-label" for="certification-select-disabled">Locked route</label>
+        <select class="form-select" id="certification-select-disabled" disabled>
+          <option value="production" selected>Production</option>
+          <option value="staging">Staging</option>
+        </select>
+      </section>
+    </main>
+  </body>
+</html>

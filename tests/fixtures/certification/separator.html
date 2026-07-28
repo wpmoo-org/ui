@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Separator certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        max-width: 32rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Separator certification fixture</h1>
+
+      <section aria-label="Horizontal decorative separator">
+        <p class="mb-0">Account settings</p>
+        <hr aria-hidden="true" id="certification-separator-horizontal">
+        <p class="mb-0">Billing settings</p>
+      </section>
+
+      <section aria-label="Vertical decorative separator" data-certification-surface>
+        <span>Overview</span>
+        <div class="vr" aria-hidden="true" id="certification-separator-vertical"></div>
+        <span>Members</span>
+      </section>
+
+      <section aria-label="Semantic separator" data-certification-surface>
+        <span>Draft</span>
+        <div
+          class="vr"
+          role="separator"
+          aria-orientation="vertical"
+          id="certification-separator-semantic"
+        ></div>
+        <span>Published</span>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radio Group certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Radio Group certification fixture</h1>
+
+      <section aria-labelledby="radio-default-title" data-certification-surface>
+        <h2 id="radio-default-title" class="h5">Default</h2>
+        <fieldset class="radio-group">
+          <legend class="form-label">Incident alert channel</legend>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="certification-channel"
+              id="certification-radio-email"
+              value="email"
+              checked
+            >
+            <label class="form-check-label" for="certification-radio-email">
+              Email
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="certification-channel"
+              id="certification-radio-sms"
+              value="sms"
+            >
+            <label class="form-check-label" for="certification-radio-sms">
+              SMS
+            </label>
+          </div>
+        </fieldset>
+      </section>
+
+      <section aria-labelledby="radio-description-title" data-certification-surface>
+        <h2 id="radio-description-title" class="h5">Descriptions</h2>
+        <fieldset class="radio-group">
+          <legend class="form-label">Export destination</legend>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="certification-destination"
+              id="certification-radio-drive"
+              value="drive"
+              aria-describedby="certification-radio-drive-description"
+            >
+            <label class="form-check-label" for="certification-radio-drive">
+              Shared drive
+            </label>
+            <div class="form-text" id="certification-radio-drive-description">
+              Saves to the operations drive folder.
+            </div>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="certification-destination"
+              id="certification-radio-sftp"
+              value="sftp"
+              aria-describedby="certification-radio-sftp-description"
+            >
+            <label class="form-check-label" for="certification-radio-sftp">
+              SFTP
+            </label>
+            <div class="form-text" id="certification-radio-sftp-description">
+              Available for scheduled sync jobs only.
+            </div>
+          </div>
+        </fieldset>
+      </section>
+
+      <section aria-labelledby="radio-invalid-title" data-certification-surface>
+        <h2 id="radio-invalid-title" class="h5">Invalid</h2>
+        <fieldset
+          class="radio-group"
+          aria-describedby="certification-radio-invalid-feedback"
+        >
+          <legend class="form-label">Access level</legend>
+          <div class="form-check">
+            <input
+              class="form-check-input is-invalid"
+              type="radio"
+              name="certification-access"
+              id="certification-radio-invalid-admin"
+              value="admin"
+              required
+              aria-invalid="true"
+              aria-describedby="certification-radio-invalid-feedback"
+            >
+            <label class="form-check-label" for="certification-radio-invalid-admin">
+              Administrator
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input is-invalid"
+              type="radio"
+              name="certification-access"
+              id="certification-radio-invalid-member"
+              value="member"
+              required
+              aria-invalid="true"
+              aria-describedby="certification-radio-invalid-feedback"
+            >
+            <label class="form-check-label" for="certification-radio-invalid-member">
+              Member
+            </label>
+          </div>
+          <div class="invalid-feedback d-block" id="certification-radio-invalid-feedback">
+            Choose an access level before continuing.
+          </div>
+        </fieldset>
+      </section>
+
+      <section aria-labelledby="radio-disabled-title" data-certification-surface>
+        <h2 id="radio-disabled-title" class="h5">Disabled</h2>
+        <fieldset class="radio-group">
+          <legend class="form-label">Task completion notification</legend>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="certification-notification"
+              id="certification-radio-disabled-portal"
+              value="portal"
+              checked
+            >
+            <label class="form-check-label" for="certification-radio-disabled-portal">
+              Team portal
+            </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="certification-notification"
+              id="certification-radio-disabled-mobile"
+              value="mobile"
+              disabled
+            >
+            <label class="form-check-label" for="certification-radio-disabled-mobile">
+              Mobile push (temporarily paused)
+            </label>
+          </div>
+        </fieldset>
+      </section>
+    </main>
+  </body>
+</html>

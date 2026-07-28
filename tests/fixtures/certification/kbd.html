@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kbd certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        max-width: 36rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Kbd certification fixture</h1>
+      <section aria-label="Keyboard shortcut" data-certification-surface>
+        <p class="mb-0">
+          Press
+          <kbd id="certification-kbd-first">Ctrl</kbd>
+          +
+          <kbd id="certification-kbd-second">K</kbd>
+          to open the command palette.
+        </p>
+      </section>
+      <section aria-label="Single key" data-certification-surface>
+        <kbd id="certification-kbd-single">Esc</kbd>
+        <span>closes the dialog.</span>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tabs certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 32rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Tabs certification fixture</h1>
+      <div>
+        <div class="tabs-list nav nav-pills" id="certification-tabs-list" role="tablist">
+          <button class="nav-link active" id="certification-tabs-account-tab" data-bs-toggle="tab" data-bs-target="#certification-tabs-account-pane" type="button" role="tab" aria-controls="certification-tabs-account-pane" aria-selected="true">Account</button>
+          <button class="nav-link" id="certification-tabs-security-tab" data-bs-toggle="tab" data-bs-target="#certification-tabs-security-pane" type="button" role="tab" aria-controls="certification-tabs-security-pane" aria-selected="false">Security</button>
+          <button class="nav-link" id="certification-tabs-billing-tab" data-bs-toggle="tab" data-bs-target="#certification-tabs-billing-pane" type="button" role="tab" aria-controls="certification-tabs-billing-pane" aria-selected="false" disabled>Billing</button>
+        </div>
+        <div class="tab-content" id="certification-tabs-content">
+          <div class="tab-pane fade show active" id="certification-tabs-account-pane" role="tabpanel" aria-labelledby="certification-tabs-account-tab" tabindex="0">Manage the public profile and account details.</div>
+          <div class="tab-pane fade" id="certification-tabs-security-pane" role="tabpanel" aria-labelledby="certification-tabs-security-tab" tabindex="0">Review authentication and active sessions.</div>
+          <div class="tab-pane fade" id="certification-tabs-billing-pane" role="tabpanel" aria-labelledby="certification-tabs-billing-tab" tabindex="0">Billing is unavailable on the current plan.</div>
+        </div>
+      </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

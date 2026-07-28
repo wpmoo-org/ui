@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spinner certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        max-width: 24rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Spinner certification fixture</h1>
+
+      <section aria-label="Spinner sizes and labels" data-certification-surface>
+        <div class="spinner" role="status" id="certification-spinner-default">
+          <svg data-icon="inline-start" data-lucide="loader-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <span class="visually-hidden">Loading</span>
+        </div>
+        <div class="spinner spinner-sm" role="status" id="certification-spinner-small">
+          <svg data-icon="inline-start" data-lucide="loader-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <span class="visually-hidden">Saving changes</span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -19,20 +19,27 @@
   {% if disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
   <li class="{{ classes }}"{% if active %} aria-current="page"{% endif %}>
     {% if disabled %}
-      <span class="page-link">{{ label }}</span>
+      <span class="page-link" aria-disabled="true">{{ label }}</span>
     {% else %}
       <a class="page-link" href="{{ href }}">{{ label }}</a>
     {% endif %}
   </li>
 {%- endmacro %}
 
+{# The disabled branch below needs role="link" alongside aria-label: aria-label
+   is only permitted on elements that have (or inherit) an ARIA role, and a bare
+   <span> has none. aria-disabled is a global ARIA property valid on any element,
+   but pairing it with an explicit role is what lets assistive tech and axe's
+   own disabled-widget exemption recognize this as a disabled link rather than
+   plain low-contrast text (references/bootstrap/5.3.3 has no icon+hidden-label
+   nav-item pattern to cite; this composition is Moo-owned). #}
 {% macro _pagination_nav_item(icon, label, href, disabled, icon_position) -%}
   {% set icon_markup = render_icon(icon, icon_position) %}
   {% set label_markup %}<span class="d-none d-sm-inline">{{ label }}</span>{% endset %}
   {% set body = (icon_markup ~ label_markup) if icon_position == "inline-start" else (label_markup ~ icon_markup) %}
   <li class="page-item{% if disabled %} disabled{% endif %}">
     {% if disabled %}
-      <span class="page-link" aria-label="{{ label }}">{{ body | safe }}</span>
+      <span class="page-link" role="link" aria-disabled="true" aria-label="{{ label }}">{{ body | safe }}</span>
     {% else %}
       <a class="page-link" href="{{ href }}" aria-label="{{ label }}">{{ body | safe }}</a>
     {% endif %}

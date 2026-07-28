@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alert certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 32rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Alert certification fixture</h1>
+
+      <div class="alert alert-dismissible fade show" role="alert" id="certification-alert-dismissible">
+        <div class="alert-body">
+          <div class="alert-heading">Heads up!</div>
+          <p class="mb-0">Body text.</p>
+        </div>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="alert" id="certification-alert-dismiss-button"></button>
+      </div>
+
+      <div class="alert alert-danger" role="alert" id="certification-alert-destructive">
+        <span class="alert-icon" aria-hidden="true">
+          <svg data-icon="inline-start" data-lucide="triangle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"/></svg>
+        </span>
+        <div class="alert-body">
+          <div class="alert-heading">Payment failed</div>
+          <p class="mb-0">Please retry.</p>
+        </div>
+      </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

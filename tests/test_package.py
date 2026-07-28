@@ -65,7 +65,7 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("static", files)
         self.assertNotIn("dist/assets/images", files)
         self.assertNotIn("static/images", files)
-        self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <6")
+        self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <5.4")
         self.assertTrue(package["peerDependenciesMeta"]["bootstrap"]["optional"])
         self.assertEqual(
             package["exports"]["./moo-ui.css"],
@@ -110,8 +110,14 @@ class PackageMetadataTests(unittest.TestCase):
             certification["bootstrap"]["targetRange"],
             package["peerDependencies"]["bootstrap"],
         )
-        self.assertIsNone(certification["bootstrap"]["verifiedRange"])
-        self.assertEqual(certification["bootstrap"]["testedVersions"], [])
+        self.assertEqual(
+            certification["bootstrap"]["verifiedRange"],
+            package["peerDependencies"]["bootstrap"],
+        )
+        self.assertEqual(
+            certification["bootstrap"]["testedVersions"],
+            ["5.3.0", "5.3.3", "5.3.8"],
+        )
         self.assertEqual(certification["certifiedComponents"], [])
         self.assertFalse(
             certification["browserPolicy"]["exactEvidenceInAttestation"]

@@ -21,7 +21,7 @@
   // (vendor/bootstrap/scss/forms/_validation.scss) rather than introducing
   // a new invalid-state class or attribute.
   &:has(> .is-invalid) > .form-label {
-    color: var(--bs-danger);
+    color: var(--bs-form-invalid-color);
   }
 }
 

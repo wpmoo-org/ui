@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pagination certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 32rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Pagination certification fixture</h1>
+
+      <section aria-labelledby="pagination-default-title">
+        <h2 id="pagination-default-title" class="h5">Default</h2>
+        <nav aria-label="Search results" id="certification-pagination-default">
+          <ul class="pagination">
+            <li class="page-item">
+              <a class="page-link" href="#prev" aria-label="Previous" id="certification-pagination-prev">
+                <svg data-icon="inline-start" data-lucide="chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6"/></svg>
+                <span class="d-none d-sm-inline">Previous</span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#1" id="certification-pagination-page-1">1</a>
+            </li>
+            <li class="page-item active" aria-current="page">
+              <a class="page-link" href="#2" id="certification-pagination-page-2">2</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#3" id="certification-pagination-page-3">3</a>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">
+                <svg data-icon="inline-start" data-lucide="ellipsis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+                <span class="visually-hidden">More pages</span>
+              </span>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#next" aria-label="Next" id="certification-pagination-next">
+                <span class="d-none d-sm-inline">Next</span>
+                <svg data-icon="inline-end" data-lucide="chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </section>
+
+      <section aria-labelledby="pagination-small-title">
+        <h2 id="pagination-small-title" class="h5">Small with disabled boundary</h2>
+        <nav aria-label="Compact results" id="certification-pagination-small">
+          <ul class="pagination pagination-sm">
+            <li class="page-item disabled">
+              <span class="page-link" role="link" aria-disabled="true" aria-label="Previous" id="certification-pagination-small-prev-disabled">
+                <svg data-icon="inline-start" data-lucide="chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6"/></svg>
+                <span class="d-none d-sm-inline">Previous</span>
+              </span>
+            </li>
+            <li class="page-item active" aria-current="page"><a class="page-link" href="#1">1</a></li>
+            <li class="page-item"><a class="page-link" href="#2">2</a></li>
+          </ul>
+        </nav>
+      </section>
+    </main>
+  </body>
+</html>

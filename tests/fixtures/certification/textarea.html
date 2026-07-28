@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Textarea certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Textarea certification fixture</h1>
+
+      <section aria-labelledby="textarea-basic-title" data-certification-surface>
+        <h2 id="textarea-basic-title" class="h5">Labeled textarea</h2>
+        <label class="form-label" for="certification-textarea-message">Review notes</label>
+        <textarea
+          class="form-control"
+          id="certification-textarea-message"
+          rows="4"
+          placeholder="Summarize the deployment review."
+          aria-describedby="certification-textarea-message-help"
+        ></textarea>
+        <div id="certification-textarea-message-help" class="form-text">
+          Keep this short enough for the release timeline.
+        </div>
+      </section>
+
+      <section aria-labelledby="textarea-invalid-title" data-certification-surface>
+        <h2 id="textarea-invalid-title" class="h5">Required invalid textarea</h2>
+        <label class="form-label" for="certification-textarea-required">Incident summary</label>
+        <textarea
+          class="form-control is-invalid"
+          id="certification-textarea-required"
+          rows="3"
+          required
+          aria-invalid="true"
+          aria-describedby="certification-textarea-required-help certification-textarea-required-feedback"
+        ></textarea>
+        <div id="certification-textarea-required-help" class="form-text">
+          Include the customer-visible impact.
+        </div>
+        <div id="certification-textarea-required-feedback" class="invalid-feedback">
+          Enter an incident summary before continuing.
+        </div>
+      </section>
+
+      <section aria-labelledby="textarea-state-title" data-certification-surface>
+        <h2 id="textarea-state-title" class="h5">Read-only and disabled states</h2>
+        <label class="form-label" for="certification-textarea-readonly">Sync note</label>
+        <textarea
+          class="form-control"
+          id="certification-textarea-readonly"
+          rows="2"
+          readonly
+        >Sync is paused until approval.</textarea>
+        <label class="form-label" for="certification-textarea-disabled">Locked message</label>
+        <textarea
+          class="form-control"
+          id="certification-textarea-disabled"
+          rows="2"
+          disabled
+        >This message is managed by policy.</textarea>
+      </section>
+    </main>
+  </body>
+</html>

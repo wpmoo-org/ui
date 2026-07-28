@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Card certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Card certification fixture</h1>
+
+      <section aria-labelledby="card-content-title" data-certification-surface>
+        <h2 id="card-content-title" class="h5" style="grid-column: 1 / -1;">Content only</h2>
+        <div class="card" id="certification-card-content-only">
+          <div class="card-body">Body preview</div>
+        </div>
+      </section>
+
+      <section aria-labelledby="card-header-title" data-certification-surface>
+        <h2 id="card-header-title" class="h5" style="grid-column: 1 / -1;">Header and content</h2>
+        <div class="card" id="certification-card-header">
+          <div class="card-header">
+            <h3 class="card-title">Incident status</h3>
+            <p class="card-subtitle">Validation summary is shown per environment.</p>
+          </div>
+          <div class="card-body">Escalation is paused until the on-call engineer confirms rollback.</div>
+        </div>
+      </section>
+
+      <section aria-labelledby="card-footer-title" data-certification-surface>
+        <h2 id="card-footer-title" class="h5" style="grid-column: 1 / -1;">Footer actions</h2>
+        <div class="card" id="certification-card-footer">
+          <div class="card-header">
+            <h3 class="card-title">Deployment window</h3>
+          </div>
+          <div class="card-body">Review the change log before approving this release.</div>
+          <div class="card-footer justify-content-end d-flex gap-2">
+            <button class="btn btn-outline-secondary" type="button">Dismiss</button>
+            <button class="btn btn-primary" type="button" id="certification-card-footer-button">View ticket</button>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="card-rtl-title" data-certification-surface>
+        <h2 id="card-rtl-title" class="h5" style="grid-column: 1 / -1;">RTL content</h2>
+        <div class="card" dir="rtl" id="certification-card-rtl">
+          <div class="card-header">
+            <h3 class="card-title">مراجعة</h3>
+            <p class="card-subtitle">النسخة التجريبية</p>
+          </div>
+          <div class="card-body">الحالة</div>
+          <div class="card-footer">
+            <button class="btn btn-outline-secondary" type="button">حفظ</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

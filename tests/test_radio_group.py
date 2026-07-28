@@ -54,6 +54,21 @@ class RadioGroupTests(CatalogTestCase):
         )
         self.assertIn('aria-describedby="plan-a-description"', output)
 
+    def test_radio_group_invalid_required_state_renders_feedback(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("plan", "Plan", '
+            '[{"id": "plan-a", "label": "A"}], '
+            'required=true, invalid=true, feedback="Choose a plan.")'
+        )
+
+        self.assertIn('class="form-check-input is-invalid"', output)
+        self.assertIn('required aria-invalid="true"', output)
+        self.assertIn('aria-describedby="plan-feedback"', output)
+        self.assertIn(
+            '<div class="invalid-feedback d-block" id="plan-feedback">Choose a plan.</div>',
+            output,
+        )
+
     def test_radio_group_supports_extra_class(self) -> None:
         output = self.render_radio_group(
             'radio_group("plan", "Plan", [{"id": "plan-a", "label": "A"}], extra_class="mb-3")'

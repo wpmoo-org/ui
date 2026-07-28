@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Toggle Group certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Toggle Group certification fixture</h1>
+      <div class="toggle-group d-inline-flex gap-2" role="group" aria-label="Text alignment">
+        <input type="radio" class="btn-check" name="certification-toggle-group" id="certification-toggle-left" value="left" autocomplete="off" checked>
+        <label class="btn btn-ghost" for="certification-toggle-left">Left</label>
+        <input type="radio" class="btn-check" name="certification-toggle-group" id="certification-toggle-center" value="center" autocomplete="off">
+        <label class="btn btn-ghost" for="certification-toggle-center">Center</label>
+        <input type="radio" class="btn-check" name="certification-toggle-group" id="certification-toggle-right" value="right" autocomplete="off" disabled>
+        <label class="btn btn-ghost" for="certification-toggle-right">Right</label>
+      </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

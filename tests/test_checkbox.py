@@ -51,10 +51,10 @@ class CheckboxTests(CatalogTestCase):
             self.render_checkbox('checkbox("   ", label="Accept")')
 
     def test_checkbox_invalid_adds_is_invalid_class(self) -> None:
-        self.assertIn(
-            'class="form-check-input is-invalid"',
-            self.render_checkbox('checkbox("c4", label="Accept", invalid=true)'),
-        )
+        output = self.render_checkbox('checkbox("c4", label="Accept", invalid=true)')
+
+        self.assertIn('class="form-check-input is-invalid"', output)
+        self.assertIn('aria-invalid="true"', output)
 
     def test_checkbox_description_renders_form_text(self) -> None:
         output = self.render_checkbox(

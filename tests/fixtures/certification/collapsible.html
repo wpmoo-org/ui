@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Collapsible certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 28rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Collapsible certification fixture</h1>
+      <div class="collapsible">
+        <div class="collapsible-header">
+          <h4 class="collapsible-title">Recent activity</h4>
+          <button
+            class="btn btn-ghost btn-icon-sm"
+            type="button"
+            aria-label="Toggle"
+            id="certification-collapsible-trigger"
+            data-bs-toggle="collapse"
+            data-bs-target="#certification-collapsible-panel"
+            aria-expanded="false"
+            aria-controls="certification-collapsible-panel"
+          >
+            <svg data-icon="inline-start" data-lucide="chevrons-up-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 15l5 5l5-5M7 9l5-5l5 5"/></svg>
+          </button>
+        </div>
+        <div id="certification-collapsible-panel" class="collapse">
+          <div class="collapsible-content">Three new comments were added to the shared document.</div>
+        </div>
+      </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
