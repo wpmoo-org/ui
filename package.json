@@ -46,7 +46,7 @@
     "THIRD_PARTY_NOTICES.md"
   ],
   "peerDependencies": {
-    "bootstrap": ">=5.3.0 <6"
+    "bootstrap": ">=5.3.0 <5.4"
   },
   "peerDependenciesMeta": {
     "bootstrap": {

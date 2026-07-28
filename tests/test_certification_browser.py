@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from playwright.sync_api import expect, sync_playwright
@@ -426,13 +427,18 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
-    def test_canonical_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
-        self.assertEqual(CERTIFICATION_BOOTSTRAP_LANES, (CANONICAL_BOOTSTRAP,))
-        self.assertEqual(CANONICAL_BOOTSTRAP.version, "5.3.3")
+    def test_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
+        expected_version = os.environ.get(
+            "MOO_UI_BOOTSTRAP_EXPECTED_VERSION",
+            CANONICAL_BOOTSTRAP.version,
+        )
+        if expected_version == CANONICAL_BOOTSTRAP.version:
+            self.assertEqual(CERTIFICATION_BOOTSTRAP_LANES, (CANONICAL_BOOTSTRAP,))
+            self.assertEqual(CANONICAL_BOOTSTRAP.version, "5.3.3")
         context = self.browser.new_context()
         response = context.request.get(CANONICAL_BOOTSTRAP.bundle_url(self.base_url))
         self.assertTrue(response.ok)
-        self.assertIn("Bootstrap v5.3.3", response.text())
+        self.assertIn(f"Bootstrap v{expected_version}", response.text())
         context.close()
 
     def test_badge_fixture_proves_the_browser_evidence_pipeline(self) -> None:

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "0.1",
+  "phase": "1D",
+  "releaseTarget": "0.6.0",
+  "status": "passed",
+  "runner": "scripts/run-bootstrap-compatibility.py",
+  "verifiedRange": ">=5.3.0 <5.4",
+  "latestResolvedAt": "2026-07-28",
+  "latestResolvedVersion": "5.3.8",
+  "lanes": [
+    {
+      "name": "minimum",
+      "version": "5.3.0",
+      "source": "npm:bootstrap@5.3.0",
+      "build": "passed",
+      "browserCertification": "passed"
+    },
+    {
+      "name": "canonical",
+      "version": "5.3.3",
+      "source": "npm:bootstrap@5.3.3",
+      "build": "passed",
+      "browserCertification": "passed"
+    },
+    {
+      "name": "latest-5.3.x",
+      "version": "5.3.8",
+      "source": "npm:bootstrap@5.3.8",
+      "build": "passed",
+      "browserCertification": "passed"
+    }
+  ],
+  "browserCases": [
+    "desktop-light-ltr",
+    "mobile-dark-rtl"
+  ],
+  "browserTestModule": "tests.test_certification_browser",
+  "notes": [
+    "Each lane installs the requested Bootstrap package into a temporary tracked checkout and never mutates the source vendor/bootstrap directory.",
+    "Build-only lane checks were also run in codex-spark workers; browser lanes were run locally because spark workers cannot bind the local HTTP server used by the browser harness."
+  ]
+}

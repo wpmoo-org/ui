@@ -4,9 +4,9 @@
   "coreVersion": "0.5.0",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
-    "targetRange": ">=5.3.0 <6",
-    "verifiedRange": null,
-    "testedVersions": []
+    "targetRange": ">=5.3.0 <5.4",
+    "verifiedRange": ">=5.3.0 <5.4",
+    "testedVersions": ["5.3.0", "5.3.3", "5.3.8"]
   },
   "browserPolicy": {
     "policy": "Certification is in progress; see SUPPORT.md for the intended browser policy.",

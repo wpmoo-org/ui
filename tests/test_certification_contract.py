@@ -137,6 +137,11 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(phase_one["status"], "backfill")
         self.assertEqual(phase_one["releaseTarget"], "0.6.0")
         self.assertEqual(phase_one["releaseClaim"], "none")
+        self.assertEqual(
+            phase_one["bootstrapCompatibility"]["evidence"],
+            "src/certification/bootstrap-compatibility.json",
+        )
+        self.assertEqual(phase_one["bootstrapCompatibility"]["status"], "passed")
         self.assertEqual(list(components), list(expected_phases))
         for component_slug in components:
             with self.subTest(component=component_slug):
@@ -176,6 +181,46 @@ class CertificationContractTests(unittest.TestCase):
                     )
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
+
+    def test_bootstrap_compatibility_evidence_backs_manifest_range(self) -> None:
+        compatibility = self._read_json("src/certification/bootstrap-compatibility.json")
+        manifest = self._read_json("certification.json")
+        package = self._read_json("package.json")
+        lanes = compatibility["lanes"]
+        lane_versions = [lane["version"] for lane in lanes]
+
+        self.assertEqual(compatibility["status"], "passed")
+        self.assertEqual(compatibility["phase"], "1D")
+        self.assertEqual(compatibility["releaseTarget"], "0.6.0")
+        self.assertTrue((ROOT / compatibility["runner"]).is_file())
+        self.assertEqual(
+            compatibility["verifiedRange"],
+            package["peerDependencies"]["bootstrap"],
+        )
+        self.assertEqual(
+            manifest["bootstrap"]["targetRange"],
+            package["peerDependencies"]["bootstrap"],
+        )
+        self.assertEqual(
+            manifest["bootstrap"]["verifiedRange"],
+            compatibility["verifiedRange"],
+        )
+        self.assertEqual(manifest["bootstrap"]["testedVersions"], lane_versions)
+        self.assertEqual(
+            [lane["name"] for lane in lanes],
+            ["minimum", "canonical", "latest-5.3.x"],
+        )
+        self.assertEqual(lane_versions, ["5.3.0", "5.3.3", "5.3.8"])
+        self.assertEqual(compatibility["latestResolvedVersion"], "5.3.8")
+        self.assertEqual(
+            compatibility["browserCases"],
+            ["desktop-light-ltr", "mobile-dark-rtl"],
+        )
+        for lane in lanes:
+            with self.subTest(lane=lane["name"]):
+                self.assertEqual(lane["source"], f"npm:bootstrap@{lane['version']}")
+                self.assertEqual(lane["build"], "passed")
+                self.assertEqual(lane["browserCertification"], "passed")
 
     def test_preview_attestation_is_built_from_the_real_tarball(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

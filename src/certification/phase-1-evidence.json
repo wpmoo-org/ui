@@ -4,6 +4,12 @@
   "releaseTarget": "0.6.0",
   "releaseClaim": "none",
   "description": "Incremental Phase 1 evidence for the 0.6.0 T0/T1 backfill. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.6.0 release gate is complete.",
+  "bootstrapCompatibility": {
+    "status": "passed",
+    "verifiedRange": ">=5.3.0 <5.4",
+    "testedVersions": ["5.3.0", "5.3.3", "5.3.8"],
+    "evidence": "src/certification/bootstrap-compatibility.json"
+  },
   "components": [
     {
       "slug": "accordion",
@@ -29,11 +35,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/collapse.js"
       ],
       "limitations": [
-        "Phase 0/1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 0/1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Accordion was the Phase 0E T1 pilot and already carries full lifecycle evidence (shown.bs.collapse/hidden.bs.collapse, parent-scoped single-open behavior), unlike the other Phase 1C components where lifecycle is deferred -- this entry re-lists that same evidence here so the Phase 1 tier report includes every Tier 1 Bootstrap Data API component, not only the ones freshly backfilled in this phase.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -72,10 +78,10 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -114,10 +120,10 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -156,10 +162,10 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -198,11 +204,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Native select controls leave option popup rendering to the browser and operating system.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -241,10 +247,10 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -283,11 +289,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Native radio groups leave arrow-key selection behavior to the browser while preserving the Bootstrap form-check markup contract.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -326,11 +332,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Switches use Bootstrap's checkbox-backed form-switch contract, so checked state remains native checkbox state with role=\"switch\" semantics.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -371,11 +377,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Field is composition scaffolding around native form controls and Bootstrap form classes, so it owns no runtime lifecycle.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -413,11 +419,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_buttons.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The ghost variant is a documented Moo-owned Bootstrap extension (2026-07-16 decision); every other variant maps to a native Bootstrap button class.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -454,11 +460,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_button-group.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Button Group has no keyboard roving-tabindex behavior; each member button is an independent native tab stop, matching Bootstrap's own joined-button pattern.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -493,11 +499,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_card.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Card is a static content container; keyboard and focus categories are not applicable to the card shell itself, only to controls composed inside it (already covered by Button).",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -533,11 +539,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_type.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Typography renders semantic native elements with Bootstrap utility classes only; it owns no interactive state, so keyboard and focus categories do not apply.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -573,11 +579,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_variables.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "This backfill found and fixed a real WCAG 2 AA contrast defect: $kbd-color/$kbd-bg previously resolved to var(--bs-secondary-color) on var(--bs-secondary-bg), which axe measured at 4.07:1 (light) and 4.48:1 (dark) against the 4.5:1 minimum for normal text. They now use Bootstrap's own var(--bs-secondary-text-emphasis) / var(--bs-secondary-bg-subtle) pair, already used by Alert and List Group, which is accessible by construction.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -612,12 +618,12 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/helpers/_ratio.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Avatar has no native Bootstrap component; its image/fallback/badge shape is a documented Moo-owned extension on a public .avatar selector (2026-07-16 decision: native component required before a private .moo-* namespace).",
         "Avatar is a non-interactive presentational element (role=img when no image loads); keyboard and focus categories are not applicable.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -654,11 +660,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_nav.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Navigation has no roving-tabindex or arrow-key behavior; each item is an independent native anchor tab stop, matching Bootstrap's own nav-link pattern.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -694,11 +700,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/helpers/_vr.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Separator is a non-interactive presentational or semantic divider; keyboard and focus categories are not applicable.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -733,11 +739,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_placeholders.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Skeleton is a non-interactive, aria-hidden loading placeholder built on Bootstrap's native placeholder utility; keyboard and focus categories are not applicable.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -775,11 +781,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_close.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The dismiss composition case proves Bootstrap's native Alert plugin close() lifecycle (data-bs-dismiss=\"alert\"); Close Button itself owns no JavaScript.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -816,11 +822,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_breadcrumb.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "The dropdown segment case proves Bootstrap's native Dropdown plugin (open/Escape-close) reused inside a breadcrumb item; Breadcrumb itself owns no JavaScript beyond composing that ready primitive.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -857,11 +863,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_pagination.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "This backfill found and fixed two real defects in the disabled prev/next nav item: aria-label is not a permitted attribute on a bare span with no role (axe aria-prohibited-attr), and the disabled span carried no aria-disabled marker, so axe's disabled-widget exemption could not apply and flagged the intentionally muted disabled text as a normal-text contrast failure. The disabled branch now renders role=\"link\" aria-disabled=\"true\" alongside aria-label. The numbered pagination_item's disabled span also gained aria-disabled=\"true\" for the same reason.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -896,11 +902,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_progress.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Progress is a non-interactive status indicator (role=progressbar, no native keyboard interaction); keyboard and focus categories are not applicable.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -936,11 +942,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_tables.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Table itself owns no interactive state (keyboard/focus not applicable); the row-actions dropdown composition proves Bootstrap's native Dropdown open/Escape-close/focus-return lifecycle, reusing the ready Dropdown Menu contract rather than duplicating it.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -975,11 +981,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_spinners.scss"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Spinner is a non-interactive role=status indicator; keyboard and focus categories are not applicable.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -1006,11 +1012,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Dropdown Menu composes Bootstrap's own Dropdown Data API plugin; lifecycle (init/dispose/repeated-use evidence) is deferred to the Phase 2 overlay backfill that covers Bootstrap plugin lifecycle more broadly.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -1037,12 +1043,12 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/alert.js"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Alert's only interactive element is the optional dismiss button, which is the existing Close Button contract (already certified in Phase 1B); this fixture's keyboard/focus evidence covers that button's focusability and Enter-to-dismiss behavior, not a separate control owned by Alert itself.",
         "Alert composes Bootstrap's own Alert Data API plugin for dismissal; lifecycle (init/dispose/repeated-use evidence) is deferred to the Phase 2 overlay backfill that covers Bootstrap plugin lifecycle more broadly.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -1069,12 +1075,12 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/tab.js"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "This backfill found and fixed a real WCAG 2 AA contrast defect: the inactive tab trigger's var(--moo-muted-foreground) text measured 4.40:1 against the tabs-list track's var(--moo-muted-surface) background, under the 4.5:1 minimum. Fixed with var(--bs-secondary-text-emphasis), a Bootstrap token Moo UI's own theme does not override (unlike --bs-secondary-color, which Moo UI's theme redefines to the same failing --moo-muted-foreground value) -- verified at 5.55:1 light / 14.03:1 dark.",
         "Tabs composes Bootstrap's own Tab Data API plugin; lifecycle (init/dispose/repeated-use evidence) is deferred to the Phase 2 overlay backfill that covers Bootstrap plugin lifecycle more broadly.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -1101,11 +1107,11 @@
         "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/collapse.js"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Collapsible composes Bootstrap's own Collapse Data API plugin for toggle behavior; lifecycle (init/dispose/repeated-use evidence) is deferred to the Phase 2 overlay backfill that covers Bootstrap plugin lifecycle more broadly.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     },
     {
@@ -1131,11 +1137,11 @@
         "https://getbootstrap.com/docs/5.3/components/button-group/#checkbox-and-radio-button-groups"
       ],
       "limitations": [
-        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Phase 1 browser automation covers Bootstrap 5.3.0, 5.3.3, and 5.3.8 compatibility lanes in Chromium.",
         "Toggle Group renders plain native input.btn-check/label.btn radio or checkbox pairs with no JS plugin of its own, so lifecycle (init/dispose/repeated-use) is not-applicable, the same as Kbd and Pagination.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending.",
-        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+        "Bootstrap 5.3.0 minimum, 5.3.3 canonical, and latest 5.3.x (5.3.8 at verification time) compatibility lanes passed for the 0.6.0 exit."
       ]
     }
   ]

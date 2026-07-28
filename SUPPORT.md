@@ -46,18 +46,18 @@ record readiness only; certification evidence is maintained separately.
 ## Bootstrap Compatibility
 
 Moo UI is built reproducibly against Bootstrap 5.3.3. The package currently
-declares Bootstrap `>=5.3.0 <6` as an optional peer dependency.
+declares Bootstrap `>=5.3.0 <5.4` as an optional peer dependency.
 
-The production-certification program will verify each release against:
+The production-certification program verifies each release against:
 
 1. Bootstrap 5.3.0 as the declared minimum;
 2. Bootstrap 5.3.3 as the canonical build;
 3. the latest Bootstrap 5.3.x available at release time.
 
-Until that matrix is published with a release attestation, the peer range is a
-package compatibility target rather than a completed certification claim. If a
-supported fixture fails, Moo UI will either fix the incompatibility or narrow
-the declared range. It will not retain a range that evidence does not support.
+Until the complete release attestation is published, the package manifest stays
+in preview. If a supported fixture fails, Moo UI will either fix the
+incompatibility or narrow the declared range. It will not retain a range that
+evidence does not support.
 
 Bootstrap 6 is outside the current contract and will require a separate
 compatibility program.
