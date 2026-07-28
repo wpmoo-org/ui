@@ -388,6 +388,47 @@
         "Real-device and generic host-conformance evidence remain pending.",
         "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
       ]
+    },
+    {
+      "slug": "button-group",
+      "tier": 0,
+      "phase": "1B",
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_button_group.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/button-group/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_button-group.scss"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Button Group has no keyboard roving-tabindex behavior; each member button is an independent native tab stop, matching Bootstrap's own joined-button pattern.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
     }
   ]
 }

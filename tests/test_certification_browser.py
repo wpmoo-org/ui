@@ -1383,6 +1383,69 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_button_group_fixture_proves_grouping_and_layout_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/button-group.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                self.assertEqual(page.locator("h1").count(), 1)
+
+                toolbar = page.locator("#certification-button-group-toolbar")
+                expect(toolbar).to_have_attribute("role", "toolbar")
+                expect(toolbar).to_have_attribute("aria-label", "Ticket actions")
+                self.assertEqual(toolbar.locator(".btn-group").count(), 2)
+                for nested_group in toolbar.locator(".btn-group").all():
+                    expect(nested_group).to_have_attribute("role", "group")
+
+                vertical = page.locator("#certification-button-group-vertical")
+                expect(vertical).to_have_class("btn-group-vertical")
+                expect(vertical).to_have_attribute("role", "group")
+
+                small_group = page.locator("#certification-button-group-sm")
+                expect(small_group).to_have_class("btn-group btn-group-sm")
+                disabled = page.locator("#certification-button-group-disabled")
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                archive = page.locator("#certification-button-group-archive")
+                report = page.locator("#certification-button-group-report")
+                archive.focus()
+                expect(archive).to_be_focused()
+                archive.press("Tab")
+                expect(report).to_be_focused()
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

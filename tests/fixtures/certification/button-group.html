@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Button Group certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Button Group certification fixture</h1>
+
+      <section aria-labelledby="button-group-toolbar-title" data-certification-surface>
+        <h2 id="button-group-toolbar-title" class="h5 w-100">Toolbar composition</h2>
+        <div
+          class="btn-toolbar gap-2"
+          role="toolbar"
+          aria-label="Ticket actions"
+          id="certification-button-group-toolbar"
+        >
+          <div class="btn-group" role="group" aria-label="Ticket navigation">
+            <button
+              class="btn btn-outline-secondary btn-icon"
+              type="button"
+              aria-label="Go back"
+            >
+              <svg
+                data-icon="inline-start"
+                data-lucide="arrow-left"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"/></svg>
+            </button>
+          </div>
+          <div class="btn-group" role="group" aria-label="Ticket review">
+            <button class="btn btn-outline-secondary" type="button" id="certification-button-group-archive">Archive</button>
+            <button class="btn btn-outline-secondary" type="button" id="certification-button-group-report">Report</button>
+            <button class="btn btn-outline-secondary" type="button">Snooze</button>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="button-group-vertical-title" data-certification-surface>
+        <h2 id="button-group-vertical-title" class="h5 w-100">Vertical</h2>
+        <div
+          class="btn-group-vertical"
+          role="group"
+          aria-label="Playback controls"
+          id="certification-button-group-vertical"
+        >
+          <button class="btn btn-outline-secondary" type="button">Play</button>
+          <button class="btn btn-outline-secondary" type="button">Pause</button>
+          <button class="btn btn-outline-secondary" type="button">Stop</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="button-group-sizes-title" data-certification-surface>
+        <h2 id="button-group-sizes-title" class="h5 w-100">Sizes and disabled item</h2>
+        <div
+          class="btn-group btn-group-sm"
+          role="group"
+          aria-label="Compact filters"
+          id="certification-button-group-sm"
+        >
+          <button class="btn btn-outline-secondary" type="button">Open</button>
+          <button class="btn btn-outline-secondary" type="button">Closed</button>
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            id="certification-button-group-disabled"
+            disabled
+          >
+            Archived
+          </button>
+        </div>
+        <div class="btn-group btn-group-lg" role="group" aria-label="Compact filters (large)">
+          <button class="btn btn-outline-secondary" type="button">Open</button>
+          <button class="btn btn-outline-secondary" type="button">Closed</button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
