@@ -1218,6 +1218,103 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_field_fixture_proves_composition_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/field.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                form = page.locator("#certification-field-form")
+                project = page.locator("#certification-field-project")
+                project_label = page.locator(
+                    'label[for="certification-field-project"]'
+                )
+                project_help = page.locator("#certification-field-project-help")
+                slug = page.locator("#certification-field-slug")
+                slug_feedback = page.locator("#certification-field-slug-feedback")
+                disabled = page.locator("#certification-field-disabled")
+                switch = page.locator("#certification-field-notifications")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(form).to_have_class("needs-validation")
+                expect(form).to_have_attribute("novalidate", "")
+                expect(project.locator("xpath=ancestor::div[1]")).to_have_class(
+                    "field"
+                )
+                expect(project_label).to_have_class("form-label")
+                expect(project).to_have_class("form-control")
+                expect(project).to_have_attribute(
+                    "aria-describedby",
+                    "certification-field-project-help",
+                )
+                expect(project_help).to_have_class("field-description form-text")
+                project.fill("Moo UI")
+                expect(project).to_have_value("Moo UI")
+
+                expect(slug).to_have_class("form-control is-invalid")
+                expect(slug).to_have_attribute("required", "")
+                expect(slug).to_have_attribute("aria-invalid", "true")
+                expect(slug).to_have_attribute(
+                    "aria-describedby",
+                    "certification-field-slug-feedback",
+                )
+                expect(slug_feedback).to_have_class("field-error invalid-feedback")
+                expect(slug_feedback).to_be_visible()
+                self.assertTrue(slug.evaluate("element => element.validity.valueMissing"))
+
+                expect(page.locator("#certification-fieldset")).to_have_class(
+                    "field-fieldset"
+                )
+                expect(page.locator("#certification-fieldset > legend")).to_have_class(
+                    "field-legend"
+                )
+                expect(page.locator("#certification-fieldset-description")).to_have_class(
+                    "field-description form-text"
+                )
+                expect(page.locator("#certification-field-group")).to_have_class(
+                    "field-group"
+                )
+                expect(switch.locator("xpath=ancestor::div[1]")).to_have_class(
+                    "form-check form-switch"
+                )
+                expect(switch).to_have_attribute("role", "switch")
+                switch.press("Space")
+                expect(switch).to_be_checked()
+
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

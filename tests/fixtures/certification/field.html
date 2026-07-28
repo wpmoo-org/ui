@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Field certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 42rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Field certification fixture</h1>
+
+      <form
+        class="needs-validation"
+        id="certification-field-form"
+        novalidate
+        data-certification-surface
+      >
+        <div class="field">
+          <label class="form-label" for="certification-field-project">
+            Project name
+          </label>
+          <input
+            class="form-control"
+            id="certification-field-project"
+            type="text"
+            aria-describedby="certification-field-project-help"
+          >
+          <div
+            class="field-description form-text"
+            id="certification-field-project-help"
+          >
+            This name appears in release history and deployment comments.
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="form-label" for="certification-field-slug">
+            Workspace slug
+          </label>
+          <input
+            class="form-control is-invalid"
+            id="certification-field-slug"
+            type="text"
+            required
+            aria-invalid="true"
+            aria-describedby="certification-field-slug-feedback"
+          >
+          <div
+            class="field-error invalid-feedback"
+            id="certification-field-slug-feedback"
+          >
+            Enter a workspace slug before continuing.
+          </div>
+        </div>
+
+        <fieldset class="field-fieldset" id="certification-fieldset">
+          <legend class="field-legend">Notifications</legend>
+          <div
+            class="field-description form-text"
+            id="certification-fieldset-description"
+          >
+            Choose which updates should be sent after a deployment.
+          </div>
+          <div class="field-group" id="certification-field-group">
+            <div class="field">
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="certification-field-notifications"
+                >
+                <label
+                  class="form-check-label"
+                  for="certification-field-notifications"
+                >
+                  Notify the deployment channel
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <label class="form-label" for="certification-field-disabled">
+                Locked reviewer
+              </label>
+              <input
+                class="form-control"
+                id="certification-field-disabled"
+                type="text"
+                value="Release owner"
+                disabled
+              >
+            </div>
+          </div>
+        </fieldset>
+
+        <button class="btn btn-primary" type="submit">Save settings</button>
+      </form>
+    </main>
+  </body>
+</html>
