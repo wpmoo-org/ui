@@ -99,6 +99,7 @@ class CertificationContractTests(unittest.TestCase):
             "kbd": "1B",
             "avatar": "1B",
             "navigation": "1B",
+            "separator": "1B",
         }
 
         self.assertEqual(phase_one["status"], "backfill")

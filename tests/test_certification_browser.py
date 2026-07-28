@@ -1740,6 +1740,54 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_separator_fixture_proves_orientation_and_decorative_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/separator.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                horizontal = page.locator("#certification-separator-horizontal")
+                self.assertEqual(horizontal.evaluate("element => element.tagName"), "HR")
+                expect(horizontal).to_have_attribute("aria-hidden", "true")
+
+                vertical = page.locator("#certification-separator-vertical")
+                expect(vertical).to_have_class("vr")
+                expect(vertical).to_have_attribute("aria-hidden", "true")
+                self.assertEqual(vertical.get_attribute("role"), None)
+
+                semantic = page.locator("#certification-separator-semantic")
+                expect(semantic).to_have_attribute("role", "separator")
+                expect(semantic).to_have_attribute("aria-orientation", "vertical")
+                self.assertEqual(semantic.get_attribute("aria-hidden"), None)
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
