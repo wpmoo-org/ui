@@ -2154,6 +2154,61 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_spinner_fixture_proves_status_role_and_size_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/spinner.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                default = page.locator("#certification-spinner-default")
+                expect(default).to_have_attribute("role", "status")
+                expect(default.locator(".visually-hidden")).to_have_text("Loading")
+
+                small = page.locator("#certification-spinner-small")
+                expect(small).to_have_class("spinner spinner-sm")
+                expect(small.locator(".visually-hidden")).to_have_text("Saving changes")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                spinner_style = page.locator(".spinner").first.evaluate(
+                    """
+                    element => {
+                      const style = getComputedStyle(element);
+                      return {
+                        animationDuration: style.animationDuration,
+                        transitionDuration: style.transitionDuration,
+                      };
+                    }
+                    """
+                )
+                self.assertEqual(spinner_style["animationDuration"], "0s")
+                self.assertEqual(spinner_style["transitionDuration"], "0s")
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

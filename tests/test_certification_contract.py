@@ -106,6 +106,7 @@ class CertificationContractTests(unittest.TestCase):
             "pagination": "1B",
             "progress": "1B",
             "table": "1B",
+            "spinner": "1B",
         }
 
         self.assertEqual(phase_one["status"], "backfill")
