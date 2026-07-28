@@ -96,6 +96,7 @@ class CertificationContractTests(unittest.TestCase):
                 "select",
                 "checkbox",
                 "radio-group",
+                "switch",
             ],
         )
         for component_slug in components:

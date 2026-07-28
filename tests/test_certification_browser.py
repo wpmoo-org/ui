@@ -1115,6 +1115,109 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_switch_fixture_proves_native_form_switch_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/switch.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                default = page.locator("#certification-switch-default")
+                default_label = page.locator(
+                    'label[for="certification-switch-default"]'
+                )
+                checked = page.locator("#certification-switch-checked")
+                described = page.locator("#certification-switch-described")
+                standalone = page.locator("#certification-switch-standalone")
+                invalid = page.locator("#certification-switch-invalid")
+                disabled = page.locator("#certification-switch-disabled")
+                disabled_label = page.locator(
+                    'label[for="certification-switch-disabled"]'
+                )
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(default.locator("xpath=ancestor::div[1]")).to_have_class(
+                    "form-check form-switch"
+                )
+                expect(default).to_have_class("form-check-input")
+                expect(default).to_have_attribute("type", "checkbox")
+                expect(default).to_have_attribute("role", "switch")
+                expect(default_label).to_have_class("form-check-label")
+                default_label.click()
+                expect(default).to_be_checked()
+                default.press("Space")
+                self.assertFalse(default.is_checked())
+
+                expect(checked).to_be_checked()
+                checked.focus()
+                expect(checked).to_be_focused()
+                checked.press("Space")
+                self.assertFalse(checked.is_checked())
+
+                expect(described).to_have_attribute(
+                    "aria-describedby",
+                    "certification-switch-described-description",
+                )
+                expect(
+                    page.locator("#certification-switch-described-description")
+                ).to_have_class("form-text")
+
+                expect(standalone).to_have_attribute(
+                    "aria-label",
+                    "Enable audit mode",
+                )
+                self.assertEqual(
+                    standalone.locator(
+                        'xpath=following-sibling::label[contains(@class, "form-check-label")]'
+                    ).count(),
+                    0,
+                )
+
+                expect(invalid).to_have_class("form-check-input is-invalid")
+                expect(invalid).to_have_attribute("role", "switch")
+                expect(invalid).to_have_attribute("aria-invalid", "true")
+
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+                self.assertLess(
+                    disabled_label.evaluate(
+                        "element => Number(getComputedStyle(element).opacity)"
+                    ),
+                    default_label.evaluate(
+                        "element => Number(getComputedStyle(element).opacity)"
+                    ),
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

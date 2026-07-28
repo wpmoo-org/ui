@@ -51,10 +51,10 @@ class SwitchTests(CatalogTestCase):
             self.render_switch('switch("   ", label="Airplane mode")')
 
     def test_switch_invalid_adds_is_invalid_class(self) -> None:
-        self.assertIn(
-            'class="form-check-input is-invalid"',
-            self.render_switch('switch("s4", label="Airplane mode", invalid=true)'),
-        )
+        output = self.render_switch('switch("s4", label="Airplane mode", invalid=true)')
+
+        self.assertIn('class="form-check-input is-invalid"', output)
+        self.assertIn('aria-invalid="true"', output)
 
     def test_switch_description_renders_form_text(self) -> None:
         output = self.render_switch(
