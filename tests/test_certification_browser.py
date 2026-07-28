@@ -493,6 +493,156 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_popover_fixture_proves_dismissal_placement_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/popover.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                body = page.locator("body")
+                focus_trigger = page.locator("#certification-popover-focus-trigger")
+                edge_trigger = page.locator("#certification-popover-edge-trigger")
+                next_target = page.locator("#certification-popover-next")
+                expect(body).to_have_attribute("data-popover-ready", "true")
+                self.assertTrue(
+                    focus_trigger.evaluate(
+                        "element => bootstrap.Popover.getInstance(element) "
+                        "=== window.certificationFocusPopover"
+                    )
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-focus-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.popover", resolve, { once: true });
+                      trigger.focus();
+                    })
+                    """
+                )
+                focus_tip_id = focus_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(focus_tip_id)
+                focus_tip = page.locator(f"#{focus_tip_id}")
+                expect(focus_tip).to_have_attribute("role", "tooltip")
+                expect(focus_tip.locator(".popover-header")).to_have_text("Review status")
+                expect(focus_tip.locator(".popover-body")).to_have_text(
+                    "The change is ready for a final review."
+                )
+                expect(focus_trigger).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-focus-trigger"
+                      );
+                      trigger.addEventListener("hidden.bs.popover", resolve, { once: true });
+                      document.querySelector("#certification-popover-next").focus();
+                    })
+                    """
+                )
+                self.assertIsNone(focus_trigger.get_attribute("aria-describedby"))
+                expect(next_target).to_be_focused()
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-edge-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.popover", resolve, { once: true });
+                      trigger.click();
+                    })
+                    """
+                )
+                edge_tip_id = edge_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(edge_tip_id)
+                edge_tip = page.locator(f"#{edge_tip_id}")
+                self.assertIn(
+                    edge_tip.get_attribute("data-popper-placement"),
+                    {"top", "right", "bottom"},
+                )
+                edge_box = edge_tip.bounding_box()
+                self.assertIsNotNone(edge_box)
+                self.assertGreaterEqual(edge_box["x"], -1)
+                self.assertLessEqual(
+                    edge_box["x"] + edge_box["width"],
+                    case.viewport["width"] + 1,
+                )
+                self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-edge-trigger"
+                      );
+                      trigger.addEventListener("hidden.bs.popover", resolve, { once: true });
+                      trigger.click();
+                    })
+                    """
+                )
+                self.assertIsNone(edge_trigger.get_attribute("aria-describedby"))
+                self.assertTrue(
+                    edge_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationEdgePopover.dispose();
+                          return bootstrap.Popover.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    edge_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationEdgePopover = bootstrap.Popover
+                            .getOrCreateInstance(element, {
+                              boundary: document.body,
+                              container: document.body,
+                            });
+                          return bootstrap.Popover.getInstance(element)
+                            === window.certificationEdgePopover;
+                        }
+                        """
+                    )
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-edge-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.popover", resolve, { once: true });
+                      trigger.click();
+                    })
+                    """
+                )
+                self.assertIsNotNone(edge_trigger.get_attribute("aria-describedby"))
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
