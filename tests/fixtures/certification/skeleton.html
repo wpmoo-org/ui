@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Skeleton certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        max-width: 24rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Skeleton certification fixture</h1>
+
+      <section aria-label="Loading placeholders">
+        <div
+          class="skeleton placeholder-glow"
+          aria-hidden="true"
+          style="width: 8rem;"
+          id="certification-skeleton-text"
+        >
+          <span class="placeholder" style="width: 100%"></span>
+        </div>
+        <div
+          class="skeleton placeholder-glow"
+          aria-hidden="true"
+          style="width: 2.5rem; height: 2.5rem;"
+          id="certification-skeleton-avatar"
+        >
+          <span class="placeholder" style="width: 100%; height: 100%"></span>
+        </div>
+        <div
+          class="skeleton placeholder-glow"
+          aria-hidden="true"
+          style="width: 100%; height: 6rem;"
+          id="certification-skeleton-block"
+        >
+          <span class="placeholder" style="width: 100%; height: 100%"></span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

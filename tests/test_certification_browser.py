@@ -1788,6 +1788,64 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_skeleton_fixture_proves_placeholder_shape_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/skeleton.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                self.assertEqual(page.locator(".skeleton").count(), 3)
+                for locator_id in (
+                    "#certification-skeleton-text",
+                    "#certification-skeleton-avatar",
+                    "#certification-skeleton-block",
+                ):
+                    skeleton = page.locator(locator_id)
+                    expect(skeleton).to_have_class("skeleton placeholder-glow")
+                    expect(skeleton).to_have_attribute("aria-hidden", "true")
+                    expect(skeleton.locator(".placeholder")).to_have_count(1)
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                skeleton_style = page.locator(".skeleton").first.evaluate(
+                    """
+                    element => {
+                      const style = getComputedStyle(element);
+                      return {
+                        animationDuration: style.animationDuration,
+                        transitionDuration: style.transitionDuration,
+                      };
+                    }
+                    """
+                )
+                self.assertEqual(skeleton_style["animationDuration"], "0s")
+                self.assertEqual(skeleton_style["transitionDuration"], "0s")
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
