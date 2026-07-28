@@ -2336,5 +2336,76 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 context.close()
 
 
+    def test_tabs_fixture_proves_data_api_state_and_keyboard_flow(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/tabs.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                account_tab = page.locator("#certification-tabs-account-tab")
+                security_tab = page.locator("#certification-tabs-security-tab")
+                billing_tab = page.locator("#certification-tabs-billing-tab")
+                account_pane = page.locator("#certification-tabs-account-pane")
+                security_pane = page.locator("#certification-tabs-security-pane")
+
+                expect(account_tab).to_have_attribute("aria-selected", "true")
+                expect(security_tab).to_have_attribute("aria-selected", "false")
+                self.assertTrue(account_pane.evaluate("element => element.classList.contains('active')"))
+                expect(billing_tab).to_be_disabled()
+
+                security_tab.click()
+                expect(security_tab).to_have_attribute("aria-selected", "true")
+                expect(account_tab).to_have_attribute("aria-selected", "false")
+                self.assertTrue(security_pane.evaluate("element => element.classList.contains('active')"))
+                self.assertFalse(account_pane.evaluate("element => element.classList.contains('active')"))
+                # The pane switch's own 0.16s opacity/transform CSS transition
+                # (not a Bootstrap-fired event this harness can await) is still
+                # in flight the instant .active toggles; wait for the fade to
+                # actually finish so the later axe pass never samples a
+                # transient blended color mid-fade as a false contrast defect.
+                page.wait_for_function(
+                    """
+                    () => getComputedStyle(
+                      document.querySelector("#certification-tabs-security-pane")
+                    ).opacity === "1"
+                    """
+                )
+
+                account_tab.focus()
+                page.keyboard.press("ArrowRight")
+                self.assertTrue(
+                    security_tab.evaluate("element => document.activeElement === element")
+                )
+                expect(security_tab).to_have_attribute("aria-selected", "true")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
 if __name__ == "__main__":
     unittest.main()
