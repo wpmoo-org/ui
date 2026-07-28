@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "0.1",
+  "status": "backfill",
+  "releaseTarget": "0.7.0",
+  "releaseClaim": "none",
+  "description": "Incremental Phase 2 evidence for the 0.7.0 T2/T3 backfill. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.7.0 release gate is complete.",
+  "components": [
+    {
+      "slug": "tooltip",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_tooltip.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/tooltips/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/tooltip.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_tooltip.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit opt-in initialization, keyboard-focus show/focusout dismissal, aria-describedby ownership, viewport-edge placement flipping, repeated use, hidden-state disposal and reinitialization, no backdrop or scroll lock, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Bootstrap Tooltip does not own an Escape-key listener; its applicable keyboard dismissal contract is focusout. Tooltip does not create a backdrop or scroll lock.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    }
+  ]
+}

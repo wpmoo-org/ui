@@ -182,6 +182,42 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 
+    def test_phase_two_evidence_tracks_t2_t3_backfill(self) -> None:
+        phase_two = self._read_json("src/certification/phase-2-evidence.json")
+        manifest = self._read_json("certification.json")
+        components = {
+            component["slug"]: component for component in phase_two["components"]
+        }
+        expected_components = {
+            "tooltip": {"phase": "2A", "tier": 2},
+        }
+
+        self.assertEqual(phase_two["status"], "backfill")
+        self.assertEqual(phase_two["releaseTarget"], "0.7.0")
+        self.assertEqual(phase_two["releaseClaim"], "none")
+        self.assertEqual(list(components), list(expected_components))
+        for component_slug, expected in expected_components.items():
+            with self.subTest(component=component_slug):
+                component = components[component_slug]
+                self.assertEqual(component["phase"], expected["phase"])
+                self.assertEqual(component["tier"], expected["tier"])
+                self.assertEqual(component["status"], "backfill-passed")
+                self.assertIn("lifecycle", component["evidence"]["existing"])
+                self.assertIn("real-device", component["evidence"]["manual"])
+                self.assertIn("host-conformance", component["evidence"]["missing"])
+                for evidence_path in component["automatedEvidence"]:
+                    self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+                for evidence_url in component["bootstrapEvidence"]:
+                    parsed_url = urlparse(evidence_url)
+                    self.assertEqual(parsed_url.scheme, "https", evidence_url)
+                    self.assertIn(
+                        parsed_url.netloc,
+                        {"getbootstrap.com", "github.com"},
+                        evidence_url,
+                    )
+        self.assertEqual(manifest["status"], "preview")
+        self.assertEqual(manifest["certifiedComponents"], [])
+
     def test_bootstrap_compatibility_evidence_backs_manifest_range(self) -> None:
         compatibility = self._read_json("src/certification/bootstrap-compatibility.json")
         manifest = self._read_json("certification.json")

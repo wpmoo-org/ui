@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tooltip certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 0.25rem 2rem 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 12rem;
+        justify-items: start;
+        max-width: 28rem;
+      }
+
+      .certification-clipping-region {
+        max-width: 12rem;
+        overflow: auto;
+        padding: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Tooltip certification fixture</h1>
+
+      <div class="certification-clipping-region">
+        <button
+          class="btn btn-outline-secondary"
+          id="certification-tooltip-edge-trigger"
+          type="button"
+          data-bs-toggle="tooltip"
+          data-bs-placement="left"
+          data-bs-title="Placement flips away from the viewport edge"
+        >Edge placement</button>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        id="certification-tooltip-repeat-trigger"
+        type="button"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        data-bs-title="Reusable focus hint"
+      >Repeat tooltip</button>
+    </main>
+
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const edgeTrigger = document.querySelector("#certification-tooltip-edge-trigger");
+      const repeatTrigger = document.querySelector("#certification-tooltip-repeat-trigger");
+      window.certificationEdgeTooltip = new bootstrap.Tooltip(edgeTrigger, {
+        boundary: document.body,
+        container: document.body,
+      });
+      window.certificationRepeatTooltip = new bootstrap.Tooltip(repeatTrigger, {
+        container: document.body,
+      });
+      document.body.dataset.tooltipReady = "true";
+    </script>
+  </body>
+</html>

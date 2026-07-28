@@ -338,6 +338,161 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_tooltip_fixture_proves_placement_focus_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/tooltip.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                body = page.locator("body")
+                edge_trigger = page.locator("#certification-tooltip-edge-trigger")
+                repeat_trigger = page.locator("#certification-tooltip-repeat-trigger")
+                expect(body).to_have_attribute("data-tooltip-ready", "true")
+                self.assertTrue(
+                    edge_trigger.evaluate(
+                        "element => bootstrap.Tooltip.getInstance(element) "
+                        "=== window.certificationEdgeTooltip"
+                    )
+                )
+                self.assertTrue(
+                    repeat_trigger.evaluate(
+                        "element => bootstrap.Tooltip.getInstance(element) "
+                        "=== window.certificationRepeatTooltip"
+                    )
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-tooltip-edge-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.tooltip", resolve, { once: true });
+                      trigger.focus();
+                    })
+                    """
+                )
+                described_by = edge_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(described_by)
+                edge_tip = page.locator(f"#{described_by}")
+                expect(edge_tip).to_have_attribute("role", "tooltip")
+                edge_placement = edge_tip.get_attribute("data-popper-placement")
+                self.assertIn(edge_placement, {"top", "right", "bottom"})
+                if not case.is_mobile:
+                    self.assertEqual(edge_placement, "right")
+                expect(edge_tip.locator(".tooltip-inner")).to_have_text(
+                    "Placement flips away from the viewport edge"
+                )
+                edge_box = edge_tip.bounding_box()
+                self.assertIsNotNone(edge_box)
+                self.assertGreaterEqual(edge_box["x"], 0)
+                self.assertLessEqual(
+                    edge_box["x"] + edge_box["width"],
+                    case.viewport["width"] + 1,
+                )
+                self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+                self.assertEqual(run_axe(page), [])
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const edge = document.querySelector(
+                        "#certification-tooltip-edge-trigger"
+                      );
+                      const repeat = document.querySelector(
+                        "#certification-tooltip-repeat-trigger"
+                      );
+                      let hidden = false;
+                      let shown = false;
+                      const finish = () => hidden && shown && resolve();
+                      edge.addEventListener("hidden.bs.tooltip", () => {
+                        hidden = true;
+                        finish();
+                      }, { once: true });
+                      repeat.addEventListener("shown.bs.tooltip", () => {
+                        shown = true;
+                        finish();
+                      }, { once: true });
+                      repeat.focus();
+                    })
+                    """
+                )
+                self.assertIsNone(edge_trigger.get_attribute("aria-describedby"))
+                repeat_tip_id = repeat_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(repeat_tip_id)
+                self.assertTrue(
+                    page.locator(f"#{repeat_tip_id}").evaluate(
+                        "element => element.classList.contains('tooltip') "
+                        "&& element.classList.contains('show')"
+                    )
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-tooltip-repeat-trigger"
+                      );
+                      trigger.addEventListener("hidden.bs.tooltip", resolve, { once: true });
+                      trigger.blur();
+                    })
+                    """
+                )
+                self.assertIsNone(repeat_trigger.get_attribute("aria-describedby"))
+                self.assertTrue(
+                    repeat_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationRepeatTooltip.dispose();
+                          return bootstrap.Tooltip.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    repeat_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationRepeatTooltip = bootstrap.Tooltip
+                            .getOrCreateInstance(element, { container: document.body });
+                          return bootstrap.Tooltip.getInstance(element)
+                            === window.certificationRepeatTooltip;
+                        }
+                        """
+                    )
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-tooltip-repeat-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.tooltip", resolve, { once: true });
+                      trigger.focus();
+                    })
+                    """
+                )
+                self.assertIsNotNone(repeat_trigger.get_attribute("aria-describedby"))
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
