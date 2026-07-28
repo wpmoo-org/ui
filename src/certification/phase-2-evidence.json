@@ -102,6 +102,38 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "toast",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_toast.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/toasts/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/toast.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_toasts.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit initialization, polite atomic status semantics, viewport-safe fixed placement, trigger-focus preservation, keyboard-focusable dismissal, repeated show/hide use, hidden-state disposal and reinitialization, no backdrop or scroll lock, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Toast is a non-modal status surface: Bootstrap does not move focus into it, return focus after dismissal, create a backdrop, lock scroll, or own an Escape-key listener.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }

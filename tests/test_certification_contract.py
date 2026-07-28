@@ -192,6 +192,7 @@ class CertificationContractTests(unittest.TestCase):
             "tooltip": {"phase": "2A", "tier": 2},
             "popover": {"phase": "2A", "tier": 2},
             "dialog": {"phase": "2A", "tier": 2},
+            "toast": {"phase": "2A", "tier": 2},
         }
 
         self.assertEqual(phase_two["status"], "backfill")

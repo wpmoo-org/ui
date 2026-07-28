@@ -643,6 +643,112 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_toast_fixture_proves_status_dismissal_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/toast.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                body = page.locator("body")
+                trigger = page.locator("#certification-toast-trigger")
+                toast = page.locator("#certification-toast")
+                close_button = toast.locator(".btn-close")
+                expect(body).to_have_attribute("data-toast-ready", "true")
+                self.assertTrue(
+                    toast.evaluate(
+                        "element => bootstrap.Toast.getInstance(element) "
+                        "=== window.certificationToast"
+                    )
+                )
+                expect(toast).to_have_attribute("role", "status")
+                expect(toast).to_have_attribute("aria-live", "polite")
+                expect(toast).to_have_attribute("aria-atomic", "true")
+
+                trigger.focus()
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const toast = document.querySelector("#certification-toast");
+                      toast.addEventListener("shown.bs.toast", resolve, { once: true });
+                      document.querySelector("#certification-toast-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(toast.evaluate("element => element.classList.contains('show')"))
+                expect(trigger).to_be_focused()
+                toast_box = toast.bounding_box()
+                self.assertIsNotNone(toast_box)
+                self.assertGreaterEqual(toast_box["x"], -1)
+                self.assertLessEqual(
+                    toast_box["x"] + toast_box["width"],
+                    case.viewport["width"] + 1,
+                )
+                self.assertEqual(run_axe(page), [])
+
+                close_button.focus()
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const toast = document.querySelector("#certification-toast");
+                      toast.addEventListener("hidden.bs.toast", resolve, { once: true });
+                      toast.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                self.assertFalse(toast.evaluate("element => element.classList.contains('show')"))
+                self.assertTrue(
+                    toast.evaluate(
+                        """
+                        element => {
+                          window.certificationToast.dispose();
+                          return bootstrap.Toast.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    toast.evaluate(
+                        """
+                        element => {
+                          window.certificationToast = bootstrap.Toast
+                            .getOrCreateInstance(element, { autohide: false });
+                          return bootstrap.Toast.getInstance(element)
+                            === window.certificationToast;
+                        }
+                        """
+                    )
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const toast = document.querySelector("#certification-toast");
+                      toast.addEventListener("shown.bs.toast", resolve, { once: true });
+                      document.querySelector("#certification-toast-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(toast.evaluate("element => element.classList.contains('show')"))
+                self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
