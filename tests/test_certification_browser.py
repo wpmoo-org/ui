@@ -2096,6 +2096,64 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_table_fixture_proves_semantic_structure_and_row_actions_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/table.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                table = page.locator("#certification-table")
+                expect(table).to_have_class("table table-striped table-hover")
+                expect(table.locator("caption")).to_have_text(
+                    "Recent deployments across environments"
+                )
+                self.assertEqual(table.locator("thead th[scope='col']").count(), 4)
+
+                production_row = page.locator("#certification-table-row-production")
+                expect(production_row.locator("th[scope='row']")).to_have_text("Production")
+                expect(production_row.locator("td").nth(1)).to_have_class("text-end")
+
+                expect(table.locator("tfoot th[scope='row']")).to_have_text("Total")
+
+                trigger = page.locator("#certification-table-row-actions-trigger")
+                expect(trigger).to_have_attribute("aria-expanded", "false")
+                trigger.click()
+                expect(trigger).to_have_attribute("aria-expanded", "true")
+                menu = production_row.locator(".dropdown-menu")
+                expect(menu).to_be_visible()
+                self.assertEqual(menu.locator(".dropdown-item").count(), 2)
+                trigger.press("Escape")
+                expect(trigger).to_have_attribute("aria-expanded", "false")
+                expect(trigger).to_be_focused()
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

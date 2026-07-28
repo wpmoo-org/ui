@@ -871,6 +871,46 @@
         "Real-device and generic host-conformance evidence remain pending.",
         "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
       ]
+    },
+    {
+      "slug": "table",
+      "tier": 0,
+      "phase": "1B",
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["keyboard", "focus", "lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_table.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/content/tables/",
+        "https://getbootstrap.com/docs/5.3/content/tables/#responsive-tables",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_tables.scss"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Table itself owns no interactive state (keyboard/focus not applicable); the row-actions dropdown composition proves Bootstrap's native Dropdown open/Escape-close/focus-return lifecycle, reusing the ready Dropdown Menu contract rather than duplicating it.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
     }
   ]
 }
