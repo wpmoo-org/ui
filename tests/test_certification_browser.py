@@ -1846,6 +1846,72 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_close_button_fixture_proves_state_and_dismiss_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/close-button.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                default = page.locator("#certification-close-button-default")
+                expect(default).to_have_class("btn-close")
+                expect(default).to_have_attribute("aria-label", "Close")
+                default.focus()
+                expect(default).to_be_focused()
+
+                custom_label = page.locator("#certification-close-button-custom-label")
+                expect(custom_label).to_have_attribute(
+                    "aria-label", "Dismiss notification"
+                )
+
+                disabled = page.locator("#certification-close-button-disabled")
+                expect(disabled).to_be_disabled()
+                disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    disabled.evaluate("element => document.activeElement === element")
+                )
+
+                alert = page.locator("#certification-close-button-alert")
+                dismiss = page.locator("#certification-close-button-dismiss")
+                expect(dismiss).to_have_attribute("data-bs-dismiss", "alert")
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const alert = document.querySelector("#certification-close-button-alert");
+                      alert.addEventListener("closed.bs.alert", resolve, { once: true });
+                      document.querySelector("#certification-close-button-dismiss").click();
+                    })
+                    """
+                )
+                self.assertEqual(alert.count(), 0)
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

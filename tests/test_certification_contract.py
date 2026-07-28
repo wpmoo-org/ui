@@ -101,6 +101,7 @@ class CertificationContractTests(unittest.TestCase):
             "navigation": "1B",
             "separator": "1B",
             "skeleton": "1B",
+            "close-button": "1B",
         }
 
         self.assertEqual(phase_one["status"], "backfill")
