@@ -2283,5 +2283,58 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 context.close()
 
 
+    def test_alert_fixture_proves_role_dismissal_and_variant_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/alert.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                dismissible = page.locator("#certification-alert-dismissible")
+                destructive = page.locator("#certification-alert-destructive")
+                expect(dismissible).to_have_attribute("role", "alert")
+                expect(destructive).to_have_attribute("role", "alert")
+                expect(destructive).to_have_class("alert alert-danger")
+
+                dismiss_button = page.locator("#certification-alert-dismiss-button")
+                dismiss_button.focus()
+                self.assertTrue(
+                    dismiss_button.evaluate("element => document.activeElement === element")
+                )
+                self.assertTrue(dismissible.evaluate("element => element.classList.contains('show')"))
+                page.keyboard.press("Enter")
+                page.wait_for_function(
+                    "document.querySelector('#certification-alert-dismissible') === null"
+                )
+                self.assertEqual(dismissible.count(), 0)
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
 if __name__ == "__main__":
     unittest.main()

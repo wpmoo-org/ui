@@ -981,6 +981,38 @@
         "Real-device and generic host-conformance evidence remain pending.",
         "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
       ]
+    },
+    {
+      "slug": "alert",
+      "phase": "1C",
+      "tier": 1,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["lifecycle", "host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_alert.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/alerts/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/alert.js"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "Alert's only interactive element is the optional dismiss button, which is the existing Close Button contract (already certified in Phase 1B); this fixture's keyboard/focus evidence covers that button's focusability and Enter-to-dismiss behavior, not a separate control owned by Alert itself.",
+        "Alert composes Bootstrap's own Alert Data API plugin for dismissal; lifecycle (init/dispose/repeated-use evidence) is deferred to the Phase 2 overlay backfill that covers Bootstrap plugin lifecycle more broadly.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
     }
   ]
 }
