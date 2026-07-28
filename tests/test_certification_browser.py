@@ -1505,6 +1505,67 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_typography_fixture_proves_variant_element_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/typography.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                page_title = page.locator("#certification-typography-page-title")
+                self.assertEqual(page_title.evaluate("element => element.tagName"), "H1")
+                expect(page_title).to_have_class("fw-semibold")
+
+                page_description = page.locator("#certification-typography-page-description")
+                self.assertEqual(page_description.evaluate("element => element.tagName"), "P")
+                expect(page_description).to_have_class("moo-page-description text-body-secondary mb-0")
+
+                section_title = page.locator("#certification-typography-section-title")
+                self.assertEqual(section_title.evaluate("element => element.tagName"), "H2")
+                expect(section_title).to_have_class("h3")
+
+                example_title = page.locator("#certification-typography-example-title")
+                self.assertEqual(example_title.evaluate("element => element.tagName"), "H2")
+                expect(example_title).to_have_class("h4")
+
+                muted = page.locator("#certification-typography-muted")
+                self.assertEqual(muted.evaluate("element => element.tagName"), "SPAN")
+                expect(muted).to_have_class("text-body-secondary")
+
+                section_label = page.locator("#certification-typography-section-label")
+                self.assertEqual(section_label.evaluate("element => element.tagName"), "SPAN")
+                expect(section_label).to_have_class("small fw-semibold")
+
+                inline_code = page.locator("#certification-typography-inline-code")
+                self.assertEqual(inline_code.evaluate("element => element.tagName"), "CODE")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
