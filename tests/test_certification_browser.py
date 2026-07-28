@@ -2495,5 +2495,73 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 context.close()
 
 
+    def test_toggle_group_fixture_proves_native_radio_state_and_keyboard_flow(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/toggle-group.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                left = page.locator("#certification-toggle-left")
+                center = page.locator("#certification-toggle-center")
+                right = page.locator("#certification-toggle-right")
+                self.assertTrue(left.is_checked())
+                self.assertFalse(center.is_checked())
+                expect(right).to_be_disabled()
+
+                page.locator("label[for='certification-toggle-center']").click()
+                self.assertTrue(center.is_checked())
+                self.assertFalse(left.is_checked())
+
+                # A disabled native radio cannot become checked, by construction
+                # (force=True bypasses Playwright's actionability check, proving
+                # the browser itself -- not merely a missing click handler --
+                # rejects the interaction).
+                page.locator("label[for='certification-toggle-right']").click(force=True)
+                self.assertFalse(right.is_checked())
+                self.assertTrue(center.is_checked())
+
+                left.focus()
+                self.assertTrue(
+                    left.evaluate("element => document.activeElement === element")
+                )
+                # Native grouped radio inputs move both focus and the checked
+                # state together on arrow keys, skipping the disabled item
+                # automatically -- this is browser-native radio-group behavior,
+                # not anything Toggle Group's markup implements itself.
+                page.keyboard.press("ArrowRight")
+                self.assertTrue(
+                    center.evaluate("element => document.activeElement === element")
+                )
+                self.assertTrue(center.is_checked())
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
 if __name__ == "__main__":
     unittest.main()
