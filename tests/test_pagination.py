@@ -48,7 +48,8 @@ class PaginationTests(CatalogTestCase):
     def test_pagination_item_disabled_renders_span_not_link(self) -> None:
         self.assertEqual(
             self.render_pagination('pagination_item("3", disabled=true)'),
-            '<li class="page-item disabled"> <span class="page-link">3</span> </li>',
+            '<li class="page-item disabled">'
+            ' <span class="page-link" aria-disabled="true">3</span> </li>',
         )
 
     def test_pagination_item_requires_visible_label(self) -> None:
@@ -72,7 +73,10 @@ class PaginationTests(CatalogTestCase):
     def test_pagination_nav_item_disabled_renders_span_not_link(self) -> None:
         output = self.render_pagination("pagination_prev(disabled=true)")
         self.assertIn('<li class="page-item disabled">', output)
-        self.assertIn('<span class="page-link" aria-label="Previous">', output)
+        self.assertIn(
+            '<span class="page-link" role="link" aria-disabled="true" aria-label="Previous">',
+            output,
+        )
 
     def test_disabled_pagination_items_use_shared_disabled_opacity(self) -> None:
         scss = (ROOT / "scss/components/_pagination.scss").read_text(encoding="utf-8")

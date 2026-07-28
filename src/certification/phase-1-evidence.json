@@ -791,6 +791,47 @@
         "Real-device and generic host-conformance evidence remain pending.",
         "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
       ]
+    },
+    {
+      "slug": "pagination",
+      "tier": 0,
+      "phase": "1B",
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": [
+          "contract",
+          "markup",
+          "theme",
+          "rtl",
+          "responsive",
+          "keyboard",
+          "focus",
+          "accessibility",
+          "visual"
+        ],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_pagination.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/pagination/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_pagination.scss"
+      ],
+      "limitations": [
+        "Phase 1 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium only.",
+        "This backfill found and fixed two real defects in the disabled prev/next nav item: aria-label is not a permitted attribute on a bare span with no role (axe aria-prohibited-attr), and the disabled span carried no aria-disabled marker, so axe's disabled-widget exemption could not apply and flagged the intentionally muted disabled text as a normal-text contrast failure. The disabled branch now renders role=\"link\" aria-disabled=\"true\" alongside aria-label. The numbered pagination_item's disabled span also gained aria-disabled=\"true\" for the same reason.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending.",
+        "Bootstrap minimum and latest 5.3.x compatibility lanes are still pending for the 0.6.0 exit."
+      ]
     }
   ]
 }

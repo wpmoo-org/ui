@@ -1975,6 +1975,72 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_pagination_fixture_proves_nav_state_and_size_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/pagination.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                default_nav = page.locator("#certification-pagination-default")
+                expect(default_nav).to_have_attribute("aria-label", "Search results")
+                expect(default_nav.locator("ul")).to_have_class("pagination")
+                self.assertEqual(default_nav.locator(".page-item").count(), 6)
+
+                page_2 = page.locator("#certification-pagination-page-2")
+                expect(page_2.locator("xpath=..")).to_have_class("page-item active")
+                expect(page_2.locator("xpath=..")).to_have_attribute("aria-current", "page")
+
+                prev = page.locator("#certification-pagination-prev")
+                page_1 = page.locator("#certification-pagination-page-1")
+                expect(prev).to_have_attribute("aria-label", "Previous")
+                prev.focus()
+                expect(prev).to_be_focused()
+                prev.press("Tab")
+                expect(page_1).to_be_focused()
+
+                small_nav = page.locator("#certification-pagination-small")
+                expect(small_nav.locator("ul")).to_have_class("pagination pagination-sm")
+                small_prev_disabled = page.locator(
+                    "#certification-pagination-small-prev-disabled"
+                )
+                self.assertEqual(small_prev_disabled.evaluate("element => element.tagName"), "SPAN")
+                expect(small_prev_disabled).to_have_attribute("role", "link")
+                expect(small_prev_disabled).to_have_attribute("aria-disabled", "true")
+                small_prev_disabled.evaluate("element => element.focus()")
+                self.assertFalse(
+                    small_prev_disabled.evaluate(
+                        "element => document.activeElement === element"
+                    )
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
