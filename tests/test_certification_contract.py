@@ -84,6 +84,7 @@ class CertificationContractTests(unittest.TestCase):
             component["slug"]: component for component in phase_one["components"]
         }
         expected_phases = {
+            "accordion": "1C",
             "input": "1A",
             "textarea": "1A",
             "input-group": "1A",
@@ -121,12 +122,17 @@ class CertificationContractTests(unittest.TestCase):
         # a later native-state 1C component (Toggle Group) owns no JS plugin,
         # so it stays not-applicable like every Tier 0 component.
         expected_tiers = {slug: 0 for slug in expected_phases}
-        for slug in ("dropdown-menu", "alert", "tabs", "collapsible", "toggle-group"):
+        for slug in ("accordion", "dropdown-menu", "alert", "tabs", "collapsible", "toggle-group"):
             expected_tiers[slug] = 1
         lifecycle_not_applicable = {
             slug for slug in expected_phases if expected_phases[slug] != "1C"
         }
         lifecycle_not_applicable.add("toggle-group")
+        # Accordion was the Phase 0E T1 pilot and already carries full
+        # lifecycle evidence (unlike the other 1C components, where it is
+        # real but deferred to Phase 2), so it is neither not-applicable
+        # nor missing here.
+        lifecycle_existing = {"accordion"}
 
         self.assertEqual(phase_one["status"], "backfill")
         self.assertEqual(phase_one["releaseTarget"], "0.6.0")
@@ -143,7 +149,12 @@ class CertificationContractTests(unittest.TestCase):
                     components[component_slug]["tier"],
                     expected_tiers[component_slug],
                 )
-                if component_slug in lifecycle_not_applicable:
+                if component_slug in lifecycle_existing:
+                    self.assertIn(
+                        "lifecycle",
+                        components[component_slug]["evidence"]["existing"],
+                    )
+                elif component_slug in lifecycle_not_applicable:
                     self.assertIn(
                         "lifecycle",
                         components[component_slug]["evidence"]["not-applicable"],
