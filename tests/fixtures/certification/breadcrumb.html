@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Breadcrumb certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 32rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Breadcrumb certification fixture</h1>
+
+      <section aria-labelledby="breadcrumb-basic-title">
+        <h2 id="breadcrumb-basic-title" class="h5">Basic trail with ellipsis</h2>
+        <nav aria-label="breadcrumb" id="certification-breadcrumb-basic">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="#workspace" id="certification-breadcrumb-workspace">Workspace</a>
+            </li>
+            <li class="breadcrumb-item">
+              <span class="breadcrumb-ellipsis">
+                <svg data-icon="inline-start" data-lucide="ellipsis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+                <span class="visually-hidden">More</span>
+              </span>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="#projects" id="certification-breadcrumb-projects">Projects</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" id="certification-breadcrumb-active">Settings</li>
+          </ol>
+        </nav>
+      </section>
+
+      <section aria-labelledby="breadcrumb-dropdown-title">
+        <h2 id="breadcrumb-dropdown-title" class="h5">Dropdown segment</h2>
+        <nav aria-label="breadcrumb" id="certification-breadcrumb-dropdown-nav">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#home">Home</a></li>
+            <li class="breadcrumb-item">
+              <span class="breadcrumb-dropdown-item">
+                <div class="dropdown">
+                  <button
+                    class="btn btn-link dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    id="certification-breadcrumb-dropdown-trigger"
+                  >
+                    Engineering
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#frontend">Frontend</a></li>
+                    <li><a class="dropdown-item" href="#backend">Backend</a></li>
+                  </ul>
+                </div>
+              </span>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Sprint Board</li>
+          </ol>
+        </nav>
+      </section>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

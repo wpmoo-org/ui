@@ -1912,6 +1912,69 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_breadcrumb_fixture_proves_trail_and_dropdown_segment_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/breadcrumb.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                basic_nav = page.locator("#certification-breadcrumb-basic")
+                expect(basic_nav).to_have_attribute("aria-label", "breadcrumb")
+                expect(basic_nav.locator("ol")).to_have_class("breadcrumb")
+                self.assertEqual(basic_nav.locator(".breadcrumb-item").count(), 4)
+
+                active = page.locator("#certification-breadcrumb-active")
+                expect(active).to_have_class("breadcrumb-item active")
+                expect(active).to_have_attribute("aria-current", "page")
+
+                ellipsis = basic_nav.locator(".breadcrumb-ellipsis")
+                expect(ellipsis.locator(".visually-hidden")).to_have_text("More")
+
+                workspace = page.locator("#certification-breadcrumb-workspace")
+                projects = page.locator("#certification-breadcrumb-projects")
+                workspace.focus()
+                expect(workspace).to_be_focused()
+                workspace.press("Tab")
+                expect(projects).to_be_focused()
+
+                trigger = page.locator("#certification-breadcrumb-dropdown-trigger")
+                expect(trigger).to_have_attribute("aria-expanded", "false")
+                trigger.click()
+                expect(trigger).to_have_attribute("aria-expanded", "true")
+                menu = page.locator("#certification-breadcrumb-dropdown-nav .dropdown-menu")
+                expect(menu).to_be_visible()
+                self.assertEqual(menu.locator(".dropdown-item").count(), 2)
+                trigger.press("Escape")
+                expect(trigger).to_have_attribute("aria-expanded", "false")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
