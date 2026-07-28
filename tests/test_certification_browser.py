@@ -1609,6 +1609,76 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_avatar_fixture_proves_fallback_size_and_badge_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/avatar.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                self.assertEqual(page.locator(".avatar").count(), 7)
+
+                image_avatar = page.locator("#certification-avatar-image")
+                expect(image_avatar).to_have_class("avatar avatar--has-image")
+                expect(image_avatar.locator("img")).to_have_attribute("alt", "Grace Hopper")
+
+                initials = page.locator("#certification-avatar-initials")
+                expect(initials).to_have_attribute("role", "img")
+                expect(initials).to_have_attribute("aria-label", "Ada Lovelace")
+                expect(initials.locator(".avatar-fallback")).to_have_text("AL")
+
+                small = page.locator("#certification-avatar-sm")
+                default = page.locator("#certification-avatar-default")
+                large = page.locator("#certification-avatar-lg")
+                expect(small).to_have_class("avatar avatar-sm")
+                expect(large).to_have_class("avatar avatar-lg")
+                small_box = small.bounding_box()
+                default_box = default.bounding_box()
+                large_box = large.bounding_box()
+                self.assertLess(small_box["width"], default_box["width"])
+                self.assertLess(default_box["width"], large_box["width"])
+
+                badge_dot = page.locator("#certification-avatar-badge-dot")
+                expect(badge_dot.locator(".avatar-badge")).to_have_class(
+                    "avatar-badge avatar-badge--dot"
+                )
+                expect(badge_dot.locator(".avatar-badge")).to_have_attribute(
+                    "aria-label", "Online"
+                )
+
+                badge_count = page.locator("#certification-avatar-badge-count")
+                expect(badge_count.locator(".avatar-badge")).to_have_text("3")
+                expect(badge_count.locator(".avatar-badge")).to_have_attribute(
+                    "aria-label", "3 unread messages"
+                )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

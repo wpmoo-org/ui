@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Avatar certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        max-width: 36rem;
+      }
+
+      [data-certification-surface] {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Avatar certification fixture</h1>
+
+      <section aria-labelledby="avatar-image-title" data-certification-surface>
+        <h2 id="avatar-image-title" class="h5 w-100">Image with fallback</h2>
+        <span class="avatar avatar--has-image" id="certification-avatar-image">
+          <img
+            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7"
+            alt="Grace Hopper"
+          >
+          <span class="avatar-fallback">GH</span>
+        </span>
+      </section>
+
+      <section aria-labelledby="avatar-initials-title" data-certification-surface>
+        <h2 id="avatar-initials-title" class="h5 w-100">Initials fallback</h2>
+        <span class="avatar" role="img" aria-label="Ada Lovelace" id="certification-avatar-initials">
+          <span class="avatar-fallback">AL</span>
+        </span>
+      </section>
+
+      <section aria-labelledby="avatar-sizes-title" data-certification-surface>
+        <h2 id="avatar-sizes-title" class="h5 w-100">Sizes</h2>
+        <span class="avatar avatar-sm" role="img" aria-label="Katherine Johnson" id="certification-avatar-sm">
+          <span class="avatar-fallback">KJ</span>
+        </span>
+        <span class="avatar" role="img" aria-label="Katherine Johnson" id="certification-avatar-default">
+          <span class="avatar-fallback">KJ</span>
+        </span>
+        <span class="avatar avatar-lg" role="img" aria-label="Katherine Johnson" id="certification-avatar-lg">
+          <span class="avatar-fallback">KJ</span>
+        </span>
+      </section>
+
+      <section aria-labelledby="avatar-badge-title" data-certification-surface>
+        <h2 id="avatar-badge-title" class="h5 w-100">Status badges</h2>
+        <span class="avatar" role="img" aria-label="Margaret Hamilton" id="certification-avatar-badge-dot">
+          <span class="avatar-fallback">MH</span>
+          <span class="avatar-badge avatar-badge--dot" role="status" aria-label="Online"></span>
+        </span>
+        <span class="avatar" role="img" aria-label="Radia Perlman" id="certification-avatar-badge-count">
+          <span class="avatar-fallback">RP</span>
+          <span class="avatar-badge" role="status" aria-label="3 unread messages">3</span>
+        </span>
+      </section>
+    </main>
+  </body>
+</html>
