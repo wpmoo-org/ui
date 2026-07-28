@@ -1446,6 +1446,65 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_card_fixture_proves_section_composition_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/card.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                self.assertEqual(page.locator(".card").count(), 4)
+
+                content_only = page.locator("#certification-card-content-only")
+                self.assertEqual(content_only.locator(".card-header").count(), 0)
+                expect(content_only.locator(".card-body")).to_have_text("Body preview")
+
+                header = page.locator("#certification-card-header")
+                expect(header.locator(".card-title")).to_have_text("Incident status")
+                expect(header.locator(".card-subtitle")).to_have_text(
+                    "Validation summary is shown per environment."
+                )
+
+                footer = page.locator("#certification-card-footer")
+                expect(footer.locator(".card-footer")).to_have_class(
+                    "card-footer justify-content-end d-flex gap-2"
+                )
+                footer_button = page.locator("#certification-card-footer-button")
+                footer_button.focus()
+                expect(footer_button).to_be_focused()
+
+                rtl_card = page.locator("#certification-card-rtl")
+                expect(rtl_card).to_have_attribute("dir", "rtl")
+                expect(rtl_card.locator(".card-title")).to_have_text("مراجعة")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

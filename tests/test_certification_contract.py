@@ -94,6 +94,7 @@ class CertificationContractTests(unittest.TestCase):
             "field": "1A",
             "button": "1B",
             "button-group": "1B",
+            "card": "1B",
         }
 
         self.assertEqual(phase_one["status"], "backfill")
