@@ -134,6 +134,39 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "sheet",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_sheet.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/offcanvas/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/offcanvas.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/focustrap.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_offcanvas.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves Data API initialization, semantic dialog wiring, focus entry and trapping, default backdrop and scroll lock, Escape and close-button dismissal, trigger focus return, repeated use, hidden-state disposal and reinitialization, the scroll-enabled/no-backdrop variant, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Sheet is Moo UI's Bootstrap-native Offcanvas composition; Bootstrap owns its runtime lifecycle and focus trap. With scroll=true and backdrop=false Bootstrap intentionally does not activate that focus trap, so Escape is handled while focus is within the sheet rather than globally.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }

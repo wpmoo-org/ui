@@ -749,6 +749,147 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_sheet_fixture_proves_focus_backdrop_scroll_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/sheet.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#certification-sheet-trigger")
+                sheet = page.locator("#certification-sheet")
+                close_button = sheet.locator(".btn-close")
+                name_input = page.locator("#certification-sheet-name")
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-sheet");
+                      sheet.addEventListener("shown.bs.offcanvas", resolve, { once: true });
+                      document.querySelector("#certification-sheet-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(sheet.evaluate("element => element.classList.contains('show')"))
+                expect(sheet).to_have_attribute("role", "dialog")
+                expect(sheet).to_have_attribute("aria-modal", "true")
+                expect(sheet).to_be_focused()
+                self.assertEqual(page.locator(".offcanvas-backdrop.show").count(), 1)
+                self.assertEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+
+                close_button.focus()
+                page.keyboard.press("Tab")
+                expect(name_input).to_be_focused()
+                trigger.focus()
+                expect(close_button).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+
+                page.evaluate(
+                    """
+                    () => {
+                      document.querySelector("#certification-sheet").addEventListener(
+                        "hidden.bs.offcanvas",
+                        () => document.body.dataset.sheetHidden = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute("data-sheet-hidden", "true")
+                expect(trigger).to_be_focused()
+                self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-sheet");
+                      sheet.addEventListener("shown.bs.offcanvas", resolve, { once: true });
+                      document.querySelector("#certification-sheet-trigger").click();
+                    })
+                    """
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-sheet");
+                      sheet.addEventListener("hidden.bs.offcanvas", resolve, { once: true });
+                      sheet.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                expect(trigger).to_be_focused()
+                self.assertTrue(
+                    sheet.evaluate(
+                        """
+                        element => {
+                          const instance = bootstrap.Offcanvas.getInstance(element);
+                          instance.dispose();
+                          return bootstrap.Offcanvas.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    sheet.evaluate(
+                        """
+                        element => bootstrap.Offcanvas.getOrCreateInstance(element)
+                          === bootstrap.Offcanvas.getInstance(element)
+                        """
+                    )
+                )
+
+                scroll_trigger = page.locator("#certification-scroll-sheet-trigger")
+                scroll_sheet = page.locator("#certification-scroll-sheet")
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-scroll-sheet");
+                      sheet.addEventListener("shown.bs.offcanvas", resolve, { once: true });
+                      document.querySelector("#certification-scroll-sheet-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(
+                    scroll_sheet.evaluate("element => element.classList.contains('show')")
+                )
+                self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+                scroll_sheet.focus()
+                page.evaluate(
+                    """
+                    () => {
+                      document.querySelector("#certification-scroll-sheet").addEventListener(
+                        "hidden.bs.offcanvas",
+                        () => document.body.dataset.scrollSheetHidden = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute(
+                    "data-scroll-sheet-hidden",
+                    "true",
+                )
+                expect(scroll_trigger).to_be_focused()
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
