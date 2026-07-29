@@ -19,6 +19,11 @@
   "bottom-end": "bottom-0 end-0"
 } %}
 
+{% set toast_priorities = {
+  "polite": {"role": "status", "live": "polite"},
+  "assertive": {"role": "alert", "live": "assertive"}
+} %}
+
 {% macro toast_container(placement="bottom-end", extra_class="") -%}
   {% if placement not in toast_placements %}{{ fail("Unknown toast placement: " ~ placement) }}{% endif %}
   <div class="toast-container position-fixed {{ toast_placements[placement] }} p-3{% if extra_class %} {{ extra_class }}{% endif %}">
@@ -26,15 +31,17 @@
   </div>
 {%- endmacro %}
 
-{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close") -%}
+{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite") -%}
   {% if not id | trim %}{{ fail("Toast id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Toast title is required") }}{% endif %}
   {% if not body | trim %}{{ fail("Toast body is required") }}{% endif %}
+  {% if priority not in toast_priorities %}{{ fail("Unknown toast priority: " ~ priority) }}{% endif %}
+  {% set semantics = toast_priorities[priority] %}
   <div
     id="{{ id }}"
     class="toast"
-    role="alert"
-    aria-live="assertive"
+    role="{{ semantics.role }}"
+    aria-live="{{ semantics.live }}"
     aria-atomic="true"
     {% if not autohide %}data-bs-autohide="false"{% endif %}
     {% if delay != 5000 %}data-bs-delay="{{ delay }}"{% endif %}

@@ -643,6 +643,96 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_toast_catalog_portals_viewport_and_keyboard_contracts(self) -> None:
+        context = self.browser.new_context(
+            viewport={"width": 390, "height": 844},
+            reduced_motion="no-preference",
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        response = page.goto(
+            f"{self.base_url}/dist/components/toast/index.html",
+            wait_until="networkidle",
+        )
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
+
+        trigger = page.locator('[data-moo-toast-target="#toast-basic"]')
+        toast = page.locator("#toast-basic")
+        close_button = toast.locator(".btn-close")
+        container = toast.locator("xpath=..")
+        preview_ancestors = toast.locator(
+            "xpath=ancestor::div[contains(@class, 'moo-example__preview')]"
+        )
+        self.assertEqual(container.locator(".toast").count(), 1)
+        self.assertEqual(preview_ancestors.count(), 0)
+        expect(toast).to_have_attribute("role", "status")
+        expect(toast).to_have_attribute("aria-live", "polite")
+        expect(close_button).to_have_attribute("aria-label", "Close")
+
+        trigger.focus()
+        trigger.press("Enter")
+        expect(toast).to_be_visible()
+        self.assertTrue(
+            toast.evaluate(
+                """
+                element => {
+                  window.__catalogToastInstance = bootstrap.Toast.getInstance(element);
+                  const box = element.getBoundingClientRect();
+                  const viewport = window.visualViewport;
+                  return box.left >= viewport.offsetLeft - 1
+                    && box.top >= viewport.offsetTop - 1
+                    && box.right <= viewport.offsetLeft + viewport.width + 1
+                    && box.bottom <= viewport.offsetTop + viewport.height + 1;
+                }
+                """
+            )
+        )
+        close_button.click()
+        expect(toast).not_to_be_visible()
+
+        trigger.focus()
+        trigger.press("Space")
+        expect(toast).to_be_visible()
+        self.assertTrue(
+            toast.evaluate(
+                "element => bootstrap.Toast.getInstance(element) === window.__catalogToastInstance"
+            )
+        )
+        close_button.focus()
+        close_button.press("Space")
+        expect(toast).not_to_be_visible()
+
+        trigger.press("Enter")
+        expect(toast).to_be_visible()
+        close_button.focus()
+        close_button.press("Enter")
+        expect(toast).not_to_be_visible()
+
+        persistent_trigger = page.locator('[data-moo-toast-target="#toast-persistent"]')
+        persistent_toast = page.locator("#toast-persistent")
+        persistent_trigger.click()
+        expect(persistent_toast).to_be_visible()
+        persistent_toast.locator(".btn-close").click()
+        expect(persistent_toast).not_to_be_visible()
+
+        first_stack_trigger = page.locator('[data-moo-toast-target="#toast-stack-1"]')
+        second_stack_trigger = page.locator('[data-moo-toast-target="#toast-stack-2"]')
+        first_stack_trigger.click()
+        second_stack_trigger.click()
+        expect(page.locator("#toast-stack-1")).to_be_visible()
+        expect(page.locator("#toast-stack-2")).to_be_visible()
+        self.assertTrue(
+            page.evaluate(
+                """
+                () => document.querySelector('#toast-stack-1').parentElement
+                  === document.querySelector('#toast-stack-2').parentElement
+                """
+            )
+        )
+        evidence.assert_clean()
+        context.close()
+
     def test_toast_fixture_proves_status_dismissal_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
