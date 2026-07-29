@@ -1,7 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/menubar.html.jinja" import menubar %}
-{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item, dropdown_header, dropdown_divider %}
-{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item, dropdown_toggle_item, dropdown_header, dropdown_divider %}
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "components/alert.html.jinja" import alert %}
@@ -103,15 +102,9 @@
     {% set checkbox_example %}
       {% call menubar("View options") %}
         {% call dropdown("View", variant="ghost", auto_close="outside", offset=menubar_dropdown_offset) %}
-          <li class="px-3 py-1 text-nowrap">
-            {{ checkbox(id="menubar-view-sidebar", label="Sidebar", checked=true) }}
-          </li>
-          <li class="px-3 py-1 text-nowrap">
-            {{ checkbox(id="menubar-view-compact", label="Compact mode") }}
-          </li>
-          <li class="px-3 py-1 text-nowrap">
-            {{ checkbox(id="menubar-view-focus", label="Focus mode") }}
-          </li>
+          {{ dropdown_toggle_item("Sidebar", pressed=true) }}
+          {{ dropdown_toggle_item("Compact mode") }}
+          {{ dropdown_toggle_item("Focus mode") }}
           {{ dropdown_divider() }}
           {{ dropdown_item("Refresh", shortcut="⌘R") }}
           {{ dropdown_item("Force refresh", shortcut="⇧⌘R", disabled=true) }}
@@ -121,7 +114,7 @@
     {{ render_example(
       "checkbox",
       "Checkbox",
-      "Toggleable menu options reuse the ready Checkbox macro, a real form control instead of a spoofed ARIA state. auto_close=\"outside\" keeps the menu open while a checkbox is toggled.",
+      "Toggleable menu options use Bootstrap's button toggle data-api inside dropdown_item-compatible rows, so Arrow keys, Space, Enter, and auto_close=\"outside\" keep the same Bootstrap contract.",
       checkbox_example,
       preview_class="moo-example__preview--narrow"
     ) }}

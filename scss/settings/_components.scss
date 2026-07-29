@@ -202,13 +202,17 @@ $moo-dropdown-sidebar-min-width: 14rem !default;
 // Literal values, not $spacer math: this file compiles before Bootstrap's
 // own variables (including $spacer) are defined.
 // - field-gap: inside one field (label / control / description / error)
+// - field-form-gap: between direct children in a composed form
 // - field-group-gap: between sibling fields, fieldsets, and separators
 //   inside a field_group()
 // - field-fieldset-gap: between a fieldset's direct building blocks
 //   (its legend/description header, field groups, lone fields)
+// - field-fieldset-sibling-gap: between consecutive fieldsets in one form
 $moo-field-gap: 0.5rem !default;
 $moo-field-group-gap: 1.25rem !default;
+$moo-field-form-gap: $moo-field-group-gap !default;
 $moo-field-fieldset-gap: 1rem !default;
+$moo-field-fieldset-sibling-gap: $moo-field-group-gap !default;
 $moo-field-legend-font-size: 1rem !default;
 $moo-field-legend-margin-bottom: 0.375rem !default;
 $moo-field-separator-opacity: 0.1 !default;

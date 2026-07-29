@@ -1,4 +1,5 @@
 import os
+import re
 import unittest
 
 from playwright.sync_api import expect, sync_playwright
@@ -129,11 +130,14 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 root = page.locator("#certification-combobox")
                 combobox_input = page.locator("#certification-combobox-input")
+                indicator = root.locator(".combobox-indicator")
                 menu = page.locator("#certification-combobox-listbox")
                 hidden_value = root.locator('input[type="hidden"]')
                 empty_state = root.locator("[data-moo-combobox-empty]")
                 live_region = root.locator("[data-moo-combobox-live]")
                 expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
+                expect(indicator.locator('[data-lucide="chevron-down"]')).to_have_count(1)
+                self.assertEqual(indicator.inner_text().strip(), "")
                 self.assertTrue(
                     root.evaluate(
                         """
@@ -2073,8 +2077,13 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 switch = page.locator("#certification-field-notifications")
 
                 self.assertEqual(page.locator("h1").count(), 1)
-                expect(form).to_have_class("needs-validation")
+                expect(form).to_have_class("field-form needs-validation")
                 expect(form).to_have_attribute("novalidate", "")
+                expect(form).to_have_css("display", "flex")
+                self.assertEqual(
+                    form.evaluate("element => getComputedStyle(element).rowGap"),
+                    "20px",
+                )
                 expect(project.locator("xpath=ancestor::div[1]")).to_have_class(
                     "field"
                 )
@@ -2170,8 +2179,13 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 digest = page.locator("#certification-form-digest")
 
                 self.assertEqual(page.locator("h1").count(), 1)
-                expect(form).to_have_class("needs-validation")
+                expect(form).to_have_class("field-form needs-validation")
                 expect(form).to_have_attribute("novalidate", "")
+                expect(form).to_have_css("display", "flex")
+                self.assertEqual(
+                    form.evaluate("element => getComputedStyle(element).rowGap"),
+                    "20px",
+                )
                 self.assertEqual(page.locator("fieldset").count(), 3)
                 expect(page.locator("#certification-form-profile")).to_have_class(
                     "field-fieldset"
@@ -3227,7 +3241,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 edit_menu = edit_trigger.locator("xpath=following-sibling::ul[1]")
                 checkbox_trigger = page.locator("#certification-menubar-view")
                 checkbox_menu = checkbox_trigger.locator("xpath=following-sibling::ul[1]")
-                sidebar_checkbox = page.locator("#certification-menubar-view-sidebar")
+                sidebar_toggle = page.locator("#certification-menubar-view-sidebar")
+                compact_toggle = page.locator("#certification-menubar-view-compact")
                 outside_target = page.locator("#certification-menubar-outside-target")
 
                 expect(menubar).to_have_attribute("role", "group")
@@ -3257,8 +3272,60 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 checkbox_trigger.click()
                 expect(checkbox_trigger).to_have_attribute("aria-expanded", "true")
-                sidebar_checkbox.click()
-                expect(sidebar_checkbox).not_to_be_checked()
+                page.keyboard.press("ArrowDown")
+                self.assertEqual(
+                    page.evaluate(
+                        """
+                        () => {
+                          const active = document.activeElement;
+                          if (!active) {
+                            return "";
+                          }
+                          const ownText = active.textContent?.trim();
+                          if (ownText) {
+                            return ownText;
+                          }
+                          return document
+                            .querySelector(`label[for="${active.id}"]`)
+                            ?.textContent
+                            .trim() || "";
+                        }
+                        """
+                    ),
+                    "Sidebar",
+                )
+                page.keyboard.press("ArrowDown")
+                self.assertEqual(
+                    page.evaluate(
+                        """
+                        () => {
+                          const active = document.activeElement;
+                          if (!active) {
+                            return "";
+                          }
+                          const ownText = active.textContent?.trim();
+                          if (ownText) {
+                            return ownText;
+                          }
+                          return document
+                            .querySelector(`label[for="${active.id}"]`)
+                            ?.textContent
+                            .trim() || "";
+                        }
+                        """
+                    ),
+                    "Compact mode",
+                )
+                expect(compact_toggle).to_have_attribute("aria-pressed", "false")
+                page.keyboard.press("Space")
+                expect(compact_toggle).to_have_attribute("aria-pressed", "true")
+                page.keyboard.press("Enter")
+                expect(compact_toggle).to_have_attribute("aria-pressed", "false")
+                expect(sidebar_toggle).to_have_attribute("aria-pressed", "true")
+                sidebar_toggle.click()
+                expect(sidebar_toggle).to_have_attribute("aria-pressed", "false")
+                expect(sidebar_toggle).not_to_have_class(re.compile(r"\bactive\b"))
+                expect(compact_toggle).to_have_attribute("aria-pressed", "false")
                 expect(checkbox_trigger).to_have_attribute("aria-expanded", "true")
                 expect(checkbox_menu).to_have_class("dropdown-menu show")
                 outside_target.click()

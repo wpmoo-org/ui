@@ -20,7 +20,7 @@
    instead, the same way a plain Bootstrap form already would. #}
 
 {% macro form(extra_class="", novalidate=false) -%}
-  <form{% if extra_class %} class="{{ extra_class }}"{% endif %}{% if novalidate %} novalidate{% endif %}>
+  <form class="field-form{% if extra_class %} {{ extra_class }}{% endif %}"{% if novalidate %} novalidate{% endif %}>
     {{ caller() | trim | safe }}
   </form>
 {%- endmacro %}

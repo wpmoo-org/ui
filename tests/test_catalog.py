@@ -126,6 +126,9 @@ class CatalogContractTests(CatalogTestCase):
             "button": ("btn", "disabled"),
             "button_group": ("btn",),
             "card": ("card",),
+            # Dropdown toggle rows use Bootstrap Button's .active data-api
+            # state while scoped under .dropdown-item-check.
+            "dropdown": ("dropdown", "active"),
             "input": ("form-control", "form-select"),
             # Bootstrap renders both single-line inputs and textareas through
             # the shared `.form-control` family.

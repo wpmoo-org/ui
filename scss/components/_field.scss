@@ -53,6 +53,12 @@
   }
 }
 
+.field-form {
+  display: flex;
+  flex-direction: column;
+  gap: $moo-field-form-gap;
+}
+
 // Bootstrap's own <legend> reboot rule (float/width/padding/line-height)
 // still applies here; this only retunes its type scale. A dedicated class
 // rather than reusing .form-label, since Field owns this legend's styling
@@ -77,6 +83,14 @@
 // header unit: it sits on the legend's own tight margin instead of the
 // standard section gap.
 .field-fieldset > .field-legend + .field-description {
+  margin-top: 0;
+}
+
+.field-fieldset + .field-fieldset {
+  margin-top: $moo-field-fieldset-sibling-gap;
+}
+
+.field-form > .field-fieldset + .field-fieldset {
   margin-top: 0;
 }
 

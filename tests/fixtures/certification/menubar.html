@@ -106,30 +106,57 @@
             View
           </button>
           <ul class="dropdown-menu">
-            <li class="px-3 py-1 text-nowrap">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  id="certification-menubar-view-sidebar"
-                  type="checkbox"
-                  checked
-                >
-                <label class="form-check-label" for="certification-menubar-view-sidebar">
-                  Sidebar
-                </label>
-              </div>
+            <li>
+              <button
+                class="dropdown-item dropdown-item-check active"
+                id="certification-menubar-view-sidebar"
+                type="button"
+                data-bs-toggle="button"
+                aria-pressed="true"
+              >
+                <span class="dropdown-item-check__indicator" aria-hidden="true">
+                  <svg
+                    data-icon="inline-start"
+                    data-lucide="check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Sidebar</span>
+              </button>
             </li>
-            <li class="px-3 py-1 text-nowrap">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  id="certification-menubar-view-compact"
-                  type="checkbox"
-                >
-                <label class="form-check-label" for="certification-menubar-view-compact">
-                  Compact mode
-                </label>
-              </div>
+            <li>
+              <button
+                class="dropdown-item dropdown-item-check"
+                id="certification-menubar-view-compact"
+                type="button"
+                data-bs-toggle="button"
+                aria-pressed="false"
+              >
+                <span class="dropdown-item-check__indicator" aria-hidden="true">
+                  <svg
+                    data-icon="inline-start"
+                    data-lucide="check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Compact mode</span>
+              </button>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
