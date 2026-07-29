@@ -125,7 +125,7 @@ class ToastTests(CatalogTestCase):
         self.assertIn("autohide=false", source)
         self.assertIn('dir="rtl"', source)
 
-    def test_catalog_bootstrap_module_uses_one_delegated_toast_listener(self) -> None:
+    def test_catalog_bootstrap_module_delegates_toast_triggers(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
 
         self.assertIn(

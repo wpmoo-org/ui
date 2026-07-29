@@ -92,6 +92,20 @@ export function initBootstrapPreview(root = document) {
   }
   const Toast = view.bootstrap?.Toast;
   if (Toast) {
+    const hideToastFromDismissControl = (dismiss) => {
+      if (
+        !(dismiss instanceof view.HTMLElement) ||
+        dismiss.matches(":disabled, [aria-disabled='true']")
+      ) {
+        return;
+      }
+      const target = dismiss.closest(".toast");
+      if (target) {
+        const instance = Toast.getOrCreateInstance(target);
+        bootstrapInstances.add(instance);
+        instance.hide();
+      }
+    };
     listen(root, "click", (event) => {
       const trigger = event.target instanceof view.Element
         ? event.target.closest("[data-moo-toast-target]")
@@ -104,6 +118,21 @@ export function initBootstrapPreview(root = document) {
         bootstrapInstances.add(instance);
         instance.show();
       }
+    });
+    listen(root, "keydown", (event) => {
+      const dismiss = event.target instanceof view.Element
+        ? event.target.closest('[data-bs-dismiss="toast"]')
+        : null;
+      if (
+        !dismiss ||
+        !event.ctrlKey ||
+        !event.altKey ||
+        (event.key !== " " && event.key !== "Spacebar")
+      ) {
+        return;
+      }
+      event.preventDefault();
+      hideToastFromDismissControl(dismiss);
     });
   }
 

@@ -757,6 +757,24 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         close_button.press("Enter")
         expect(toast).not_to_be_visible()
 
+        trigger.press("Enter")
+        expect(toast).to_be_visible()
+        close_button.focus()
+        page.evaluate(
+            """
+            () => document
+              .querySelector("#toast-basic .btn-close")
+              .dispatchEvent(new KeyboardEvent("keydown", {
+                key: " ",
+                bubbles: true,
+                cancelable: true,
+                ctrlKey: true,
+                altKey: true,
+              }))
+            """
+        )
+        expect(toast).not_to_be_visible()
+
         persistent_trigger = page.locator('[data-moo-toast-target="#toast-persistent"]')
         persistent_toast = page.locator("#toast-persistent")
         persistent_trigger.click()
