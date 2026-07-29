@@ -3206,6 +3206,93 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 context.close()
 
 
+    def test_menubar_fixture_proves_grouped_dropdown_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/menubar.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                menubar = page.locator("#certification-menubar")
+                file_trigger = page.locator("#certification-menubar-file")
+                edit_trigger = page.locator("#certification-menubar-edit")
+                first_file_item = page.locator("#certification-menubar-new-document")
+                edit_menu = edit_trigger.locator("xpath=following-sibling::ul[1]")
+                checkbox_trigger = page.locator("#certification-menubar-view")
+                checkbox_menu = checkbox_trigger.locator("xpath=following-sibling::ul[1]")
+                sidebar_checkbox = page.locator("#certification-menubar-view-sidebar")
+                outside_target = page.locator("#certification-menubar-outside-target")
+
+                expect(menubar).to_have_attribute("role", "group")
+                expect(menubar).to_have_attribute("aria-label", "Document actions")
+                self.assertEqual(menubar.locator('[role="menubar"], [role="menuitem"]').count(), 0)
+
+                file_trigger.click()
+                expect(file_trigger).to_have_attribute("aria-expanded", "true")
+                expect(file_trigger.locator("xpath=following-sibling::ul[1]")).to_have_class(
+                    "dropdown-menu show"
+                )
+                page.keyboard.press("ArrowDown")
+                self.assertTrue(
+                    first_file_item.evaluate("element => document.activeElement === element")
+                )
+
+                edit_trigger.click()
+                expect(file_trigger).to_have_attribute("aria-expanded", "false")
+                expect(edit_trigger).to_have_attribute("aria-expanded", "true")
+                expect(edit_menu).to_have_class("dropdown-menu show")
+
+                page.keyboard.press("Escape")
+                expect(edit_trigger).to_have_attribute("aria-expanded", "false")
+                self.assertTrue(
+                    edit_trigger.evaluate("element => document.activeElement === element")
+                )
+
+                checkbox_trigger.click()
+                expect(checkbox_trigger).to_have_attribute("aria-expanded", "true")
+                sidebar_checkbox.click()
+                expect(sidebar_checkbox).not_to_be_checked()
+                expect(checkbox_trigger).to_have_attribute("aria-expanded", "true")
+                expect(checkbox_menu).to_have_class("dropdown-menu show")
+                outside_target.click()
+                expect(checkbox_trigger).to_have_attribute("aria-expanded", "false")
+
+                self.assertTrue(
+                    file_trigger.evaluate(
+                        """
+                        element => bootstrap.Dropdown.getOrCreateInstance(element)
+                          === bootstrap.Dropdown.getInstance(element)
+                        """
+                    )
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
     def test_alert_fixture_proves_role_dismissal_and_variant_contracts(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
