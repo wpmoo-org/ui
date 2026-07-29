@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alert Dialog certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Alert Dialog certification fixture</h1>
+      <button
+        class="btn btn-outline-secondary"
+        id="open-certification-alert-dialog"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#certification-alert-dialog"
+      >
+        Discard draft
+      </button>
+    </main>
+
+    <div
+      class="modal fade modal--alert"
+      id="certification-alert-dialog"
+      tabindex="-1"
+      aria-labelledby="certification-alert-dialog-title"
+      aria-describedby="certification-alert-dialog-description"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header modal-header--alert">
+            <div class="modal-header__content">
+              <h2 class="modal-title" id="certification-alert-dialog-title">
+                Discard this draft invoice?
+              </h2>
+              <p class="modal-description" id="certification-alert-dialog-description">
+                Any line items you have entered will be lost. This cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              class="btn btn-outline-secondary"
+              id="cancel-certification-alert-dialog"
+              type="button"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              class="btn btn-primary"
+              id="confirm-certification-alert-dialog"
+              type="button"
+              data-bs-dismiss="modal"
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

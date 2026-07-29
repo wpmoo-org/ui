@@ -1135,6 +1135,121 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_alert_dialog_fixture_proves_static_confirmation_contract(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/alert-dialog.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#open-certification-alert-dialog")
+                dialog = page.locator("#certification-alert-dialog")
+                title = page.locator("#certification-alert-dialog-title")
+                cancel = page.locator("#cancel-certification-alert-dialog")
+                confirm = page.locator("#confirm-certification-alert-dialog")
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                expect(dialog).to_have_class("modal fade modal--alert show")
+                expect(dialog).to_have_attribute("data-bs-backdrop", "static")
+                expect(dialog).to_have_attribute("data-bs-keyboard", "false")
+                expect(dialog).to_have_attribute("aria-modal", "true")
+                expect(dialog).to_have_attribute("role", "dialog")
+                expect(dialog).to_have_attribute(
+                    "aria-describedby",
+                    "certification-alert-dialog-description",
+                )
+                expect(title).to_have_text("Discard this draft invoice?")
+                self.assertEqual(dialog.locator(".btn-close").count(), 0)
+                self.assertEqual(page.locator(".modal-backdrop.show").count(), 1)
+                self.assertTrue(
+                    dialog.evaluate("element => document.activeElement === element")
+                )
+
+                page.evaluate(
+                    """
+                    () => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener(
+                        "hidden.bs.modal",
+                        () => document.body.dataset.alertDialogHidden = "true",
+                      );
+                      dialog.addEventListener(
+                        "hidePrevented.bs.modal",
+                        () => document.body.dataset.alertDialogPrevented = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute(
+                    "data-alert-dialog-prevented",
+                    "true",
+                )
+                self.assertIsNone(page.locator("body").get_attribute("data-alert-dialog-hidden"))
+                expect(dialog).to_have_class("modal fade modal--alert show")
+
+                cancel.focus()
+                page.keyboard.press("Tab")
+                expect(confirm).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
+                      document.querySelector("#cancel-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
+                      document.querySelector("#confirm-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+                evidence.assert_clean()
+                context.close()
+
     def test_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
         expected_version = os.environ.get(
             "MOO_UI_BOOTSTRAP_EXPECTED_VERSION",

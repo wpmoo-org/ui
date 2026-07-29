@@ -197,6 +197,7 @@ class CertificationContractTests(unittest.TestCase):
             "sidebar": {"phase": "2B", "tier": 3},
             "form": {"phase": "2B", "tier": 3, "lifecycle": "not-applicable"},
             "combobox": {"phase": "2B", "tier": 3},
+            "alert-dialog": {"phase": "2B", "tier": 3},
         }
 
         self.assertEqual(phase_two["status"], "backfill")

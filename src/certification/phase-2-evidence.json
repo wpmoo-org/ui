@@ -279,6 +279,43 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "alert-dialog",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_alert_dialog.py",
+        "tests/test_dialog.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/modal/#static-backdrop",
+        "https://getbootstrap.com/docs/5.3/components/modal/#via-data-attributes",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/modal.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/backdrop.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/focustrap.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_modal.scss"
+      ],
+      "limitations": [
+        "Phase 2 records Alert Dialog as a Tier 3 confirmation composition of Dialog, Button, and the Bootstrap Modal static-backdrop contract; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves static backdrop and disabled Escape dismissal, Bootstrap hidePrevented feedback, title/description wiring, no header close button, action-button dismissal, focus traversal, focus return, repeated use, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Alert Dialog owns no separate JavaScript implementation: Bootstrap Modal owns the backdrop, focus trap, scroll lock, and lifecycle while the Alert Dialog macro fixes the confirmation-only structure and static options.",
+        "No empty, loading, or async error state applies to this synchronous confirmation primitive; longer workflows should compose Dialog with application-specific content.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }
