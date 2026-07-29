@@ -240,6 +240,45 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "combobox",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_combobox.py",
+        "tests/test_certification_browser.py",
+        "dist/js/combobox.js"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://getbootstrap.com/docs/5.3/forms/form-control/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_dropdown.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-control.scss"
+      ],
+      "resolvedFindings": [
+        "Listbox option wrappers and grouped lists use presentation roles so axe recognizes the required option ownership chain.",
+        "The public ESM module owns Combobox behavior and lifecycle while the catalog imports the same module instead of carrying a private duplicate."
+      ],
+      "limitations": [
+        "Phase 2 promotes the existing Phase 0E Combobox pilot evidence into the complete Tier 3 report; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The existing fixture proves public side-effect-free ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, single-select keyboard navigation, active-descendant state, filtering, empty state, live-region updates, change events, hidden-value serialization, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Bootstrap does not ship a native Combobox component; Moo UI composes Bootstrap form-control and dropdown/menu structure while the optional public ESM module supplies only the verified behavior gap.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }
