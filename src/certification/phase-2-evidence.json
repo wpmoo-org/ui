@@ -201,6 +201,45 @@
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
+    },
+    {
+      "slug": "form",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual"],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_form.py",
+        "tests/test_field.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/forms/overview/",
+        "https://getbootstrap.com/docs/5.3/forms/form-control/",
+        "https://getbootstrap.com/docs/5.3/forms/select/",
+        "https://getbootstrap.com/docs/5.3/forms/checks-radios/",
+        "https://getbootstrap.com/docs/5.3/forms/validation/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-control.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-select.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-check.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
+      ],
+      "limitations": [
+        "Phase 2 records Form as a static Tier 3 composition of already-certified Field, Input, Textarea, Select, Checkbox, Radio Group, Switch, and Button primitives; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves native form markup, semantic fieldset grouping, validation classes and native validity, labels and descriptions, text input, select, textarea, checkbox, radio, switch, submit/reset buttons, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Form owns no JavaScript runtime lifecycle: native HTML forms and the child controls own keyboard/focus behavior, while Bootstrap validation styles are class and pseudo-class driven.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
     }
   ]
 }

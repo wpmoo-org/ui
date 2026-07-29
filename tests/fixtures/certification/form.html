@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Form certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 1.5rem;
+        max-width: 44rem;
+      }
+
+      [data-certification-surface] {
+        display: grid;
+        gap: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Form certification fixture</h1>
+
+      <form
+        class="needs-validation"
+        id="certification-form"
+        novalidate
+        data-certification-surface
+      >
+        <fieldset class="field-fieldset" id="certification-form-profile">
+          <legend class="field-legend">Release profile</legend>
+          <div class="field-description form-text">
+            Capture the visible metadata and reviewer queue for this release.
+          </div>
+          <div class="field-group">
+            <div class="field">
+              <label class="form-label" for="certification-form-name">Release name</label>
+              <input
+                class="form-control is-invalid"
+                id="certification-form-name"
+                type="text"
+                required
+                aria-invalid="true"
+                aria-describedby="certification-form-name-feedback"
+              >
+              <div
+                class="field-error invalid-feedback"
+                id="certification-form-name-feedback"
+              >
+                Enter a release name before submitting.
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="form-label" for="certification-form-queue">Reviewer queue</label>
+              <select class="form-select" id="certification-form-queue">
+                <option value="ops" selected>Operations</option>
+                <option value="support">Support</option>
+                <option value="finance">Finance</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="form-label" for="certification-form-notes">Reviewer notes</label>
+              <textarea
+                class="form-control"
+                id="certification-form-notes"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="field-fieldset" id="certification-form-checks">
+          <legend class="field-legend">Required checks</legend>
+          <div class="field-group">
+            <div class="field">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  id="certification-form-security"
+                  type="checkbox"
+                  checked
+                >
+                <label class="form-check-label" for="certification-form-security">
+                  Security review
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  id="certification-form-backups"
+                  type="checkbox"
+                >
+                <label class="form-check-label" for="certification-form-backups">
+                  Backups verified
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  id="certification-form-digest"
+                  type="checkbox"
+                  role="switch"
+                >
+                <label class="form-check-label" for="certification-form-digest">
+                  Send reviewer digest
+                </label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="field-fieldset" id="certification-form-policy">
+          <legend class="field-legend">Default access policy</legend>
+          <div class="field-group">
+            <div class="field">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  id="certification-form-policy-viewer"
+                  name="certification-form-policy"
+                  type="radio"
+                  value="viewer"
+                  checked
+                >
+                <label class="form-check-label" for="certification-form-policy-viewer">
+                  Viewer
+                </label>
+              </div>
+            </div>
+            <div class="field">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  id="certification-form-policy-editor"
+                  name="certification-form-policy"
+                  type="radio"
+                  value="editor"
+                >
+                <label class="form-check-label" for="certification-form-policy-editor">
+                  Editor
+                </label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">Submit release</button>
+          <button class="btn btn-outline-secondary" type="reset">Reset</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

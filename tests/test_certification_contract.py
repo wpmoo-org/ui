@@ -195,6 +195,7 @@ class CertificationContractTests(unittest.TestCase):
             "toast": {"phase": "2A", "tier": 2},
             "sheet": {"phase": "2A", "tier": 2},
             "sidebar": {"phase": "2B", "tier": 3},
+            "form": {"phase": "2B", "tier": 3, "lifecycle": "not-applicable"},
         }
 
         self.assertEqual(phase_two["status"], "backfill")
@@ -207,7 +208,13 @@ class CertificationContractTests(unittest.TestCase):
                 self.assertEqual(component["phase"], expected["phase"])
                 self.assertEqual(component["tier"], expected["tier"])
                 self.assertEqual(component["status"], "backfill-passed")
-                self.assertIn("lifecycle", component["evidence"]["existing"])
+                if expected.get("lifecycle") == "not-applicable":
+                    self.assertIn(
+                        "lifecycle",
+                        component["evidence"]["not-applicable"],
+                    )
+                else:
+                    self.assertIn("lifecycle", component["evidence"]["existing"])
                 self.assertIn("real-device", component["evidence"]["manual"])
                 self.assertIn("host-conformance", component["evidence"]["missing"])
                 for evidence_path in component["automatedEvidence"]:

@@ -2029,6 +2029,100 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_form_fixture_proves_static_composite_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/form.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                form = page.locator("#certification-form")
+                name = page.locator("#certification-form-name")
+                name_feedback = page.locator("#certification-form-name-feedback")
+                queue = page.locator("#certification-form-queue")
+                notes = page.locator("#certification-form-notes")
+                security = page.locator("#certification-form-security")
+                backups = page.locator("#certification-form-backups")
+                policy_viewer = page.locator("#certification-form-policy-viewer")
+                policy_editor = page.locator("#certification-form-policy-editor")
+                digest = page.locator("#certification-form-digest")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(form).to_have_class("needs-validation")
+                expect(form).to_have_attribute("novalidate", "")
+                self.assertEqual(page.locator("fieldset").count(), 3)
+                expect(page.locator("#certification-form-profile")).to_have_class(
+                    "field-fieldset"
+                )
+                expect(page.locator("#certification-form-checks")).to_have_class(
+                    "field-fieldset"
+                )
+                expect(page.locator("#certification-form-policy")).to_have_class(
+                    "field-fieldset"
+                )
+
+                expect(name.locator("xpath=ancestor::div[1]")).to_have_class("field")
+                expect(name).to_have_class("form-control is-invalid")
+                expect(name).to_have_attribute("required", "")
+                expect(name).to_have_attribute("aria-invalid", "true")
+                expect(name).to_have_attribute(
+                    "aria-describedby",
+                    "certification-form-name-feedback",
+                )
+                expect(name_feedback).to_have_class("field-error invalid-feedback")
+                name.fill("Moo UI release")
+                expect(name).to_have_value("Moo UI release")
+
+                expect(queue).to_have_class("form-select")
+                expect(queue).to_have_value("ops")
+                queue.select_option("support")
+                expect(queue).to_have_value("support")
+
+                expect(notes).to_have_class("form-control")
+                notes.fill("Validated on local devices.")
+                expect(notes).to_have_value("Validated on local devices.")
+
+                expect(security).to_be_checked()
+                expect(backups).not_to_be_checked()
+                backups.check()
+                expect(backups).to_be_checked()
+
+                expect(policy_viewer).to_be_checked()
+                policy_editor.check()
+                expect(policy_editor).to_be_checked()
+                expect(policy_viewer).not_to_be_checked()
+
+                expect(digest).to_have_attribute("role", "switch")
+                digest.press("Space")
+                expect(digest).to_be_checked()
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_button_fixture_proves_variant_size_and_state_contracts(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
