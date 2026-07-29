@@ -781,9 +781,11 @@ class SidebarTests(CatalogTestCase):
             layout.index('{% include "shell/sidebar.html.jinja" %}'),
         )
         self.assertIn('removeAttribute("data-moo-sidebar-ready")', source)
+        self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
         self.assertRegex(
             styles,
-            r"(?m)^\.sidebar\s*\{[^}]*transition:\s*flex-basis",
+            r"@include media-breakpoint-up\(lg\)\s*\{\s*"
+            r"\.sidebar\s*\{[^}]*transition:\s*flex-basis",
         )
         self.assertNotIn("moo-sidebar-catalog-state", styles)
         self.assertRegex(

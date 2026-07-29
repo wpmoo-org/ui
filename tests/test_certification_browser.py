@@ -338,6 +338,54 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_sidebar_mobile_offcanvas_keeps_bootstrap_transform_transition(self) -> None:
+        context = self.browser.new_context(
+            viewport={"width": 390, "height": 844},
+            color_scheme="light",
+            is_mobile=True,
+            has_touch=True,
+            reduced_motion="no-preference",
+            locale="en-US",
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        response = page.goto(
+            f"{self.base_url}/tests/fixtures/certification/sidebar.html",
+            wait_until="networkidle",
+        )
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
+        page.locator("html").evaluate(
+            """
+            element => {
+              element.setAttribute("dir", "ltr");
+              element.setAttribute("data-bs-theme", "light");
+            }
+            """
+        )
+        expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+
+        transition = page.locator("#certification-sidebar").evaluate(
+            """
+            element => {
+              const style = getComputedStyle(element);
+              return {
+                property: style.transitionProperty,
+                duration: style.transitionDuration,
+                timing: style.transitionTimingFunction,
+                transform: style.transform,
+                variable: style.getPropertyValue("--bs-offcanvas-transition").trim(),
+              };
+            }
+            """
+        )
+        self.assertIn("transform", transition["variable"])
+        self.assertIn("transform", transition["property"])
+        self.assertNotEqual(transition["duration"], "0s")
+        self.assertNotEqual(transition["transform"], "none")
+        evidence.assert_clean()
+        context.close()
+
     def test_tooltip_fixture_proves_placement_focus_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
