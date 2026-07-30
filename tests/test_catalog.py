@@ -965,6 +965,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("after the release that publishes", installation)
 
     def test_public_docs_track_package_manifest_and_exports(self) -> None:
+        # Drift class: public install/support facts must follow package and
+        # certification sources, not stale handwritten release copy.
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -985,6 +987,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(f"@wpmoo/ui@{version}", surface)
 
         self.assertIn(f"v{version}", changelog)
+        self.assertIn(package["peerDependencies"]["bootstrap"], llms)
         self.assertIn(certification["status"], support)
         self.assertIn(certification["status"], skills)
         self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
@@ -1004,6 +1007,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("CSS-only library", readme)
 
     def test_public_docs_limit_latest_to_readme_quick_demo(self) -> None:
+        # Drift class: only the README quick demo may float; rendered docs and
+        # machine handoff files must use versioned installation paths.
         paths = [
             ROOT / "README.md",
             ROOT / "site/public/llms.txt",
@@ -1192,6 +1197,8 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(f"Markup: {details['markupOwner']}.", components_index)
 
         expected_classifications = {
+            # Drift class: representative ownership values must remain
+            # source-derived while avoiding a second public registry.
             "card": ("native HTML/CSS", "Bootstrap/native HTML"),
             "dropdown-menu": ("Bootstrap plugin", "Bootstrap/native HTML"),
             "combobox": ("optional Moo ESM", "Moo documented extension"),
@@ -1312,6 +1319,7 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         skills = self.read_output("skills.html")
 
         for copy in (
@@ -1321,7 +1329,7 @@ class CatalogContractTests(CatalogTestCase):
             "Installation Facts",
             "Public Exports",
             "Editing Guidance",
-            "@wpmoo/ui@0.7.0",
+            f"@wpmoo/ui@{package['version']}",
             "@wpmoo/ui/combobox.js",
             "@wpmoo/ui/sidebar.js",
             "No public Sass entrypoint is published yet.",
