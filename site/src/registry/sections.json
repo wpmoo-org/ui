@@ -18,6 +18,12 @@
     "icon": "shield-check"
   },
   {
+    "slug": "contributing",
+    "label": "Contributing",
+    "href": "contributing/",
+    "icon": "git-pull-request"
+  },
+  {
     "slug": "components",
     "label": "Components",
     "href": "components/",

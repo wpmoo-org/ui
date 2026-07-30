@@ -154,7 +154,10 @@
           or review complete release notes on
           <a href="https://github.com/wpmoo-org/ui/releases">GitHub Releases</a>.
         </p>
-        {{ button("Report an issue", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues") }}
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("Report an issue", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues") }}
+          {{ button("Contribute", variant="outline", size="sm", element="a", href=site_href("contributing.html", root_path)) }}
+        </div>
       </section>
 
       {{ render_section_page_pagination(current_slug, site_pages, root_path) }}

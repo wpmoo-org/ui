@@ -1,0 +1,108 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block title %}Contributing - Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Contributing",
+        "Small, source-backed fixes are the fastest way to improve Moo UI.",
+        id="contributing",
+        actions=render_section_page_actions(current_slug, site_pages, root_path)
+      ) }}
+
+      <section class="moo-doc-section" aria-labelledby="what-helps">
+        {{ typography("What Helps", variant="section-title", id="what-helps") }}
+        <ul>
+          <li>Documentation fixes with the affected page or file linked.</li>
+          <li>Reduced reproductions for visual, keyboard, focus, or browser issues.</li>
+          <li>Accessibility observations that name the device, browser, and assistive technology used.</li>
+          <li>Focused component improvements that preserve Bootstrap markup and public behavior.</li>
+          <li>Tests that lock public contracts without freezing incidental prose or DOM details.</li>
+        </ul>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="local-setup">
+        {{ typography("Local Setup", variant="section-title", id="local-setup") }}
+        {% set setup_example %}
+        python3 -m venv .venv
+        .venv/bin/pip install -r requirements-dev.txt
+        env npm_config_cache=/private/tmp/wpmoo-npm-cache npm install
+        .venv/bin/python build.py
+        .venv/bin/python dev.py
+        {% endset %}
+        {{ render_code_snippet("contributing-local-setup", setup_example, "shell") }}
+        <p class="text-body-secondary mb-0">
+          Browse the local catalog at <code>http://localhost:4173/</code>.
+        </p>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="workflow">
+        {{ typography("Workflow", variant="section-title", id="workflow") }}
+        <ul>
+          <li>Work from <code>dev</code>; <code>main</code> is released through PRs.</li>
+          <li>Keep each PR focused on one public concern.</li>
+          <li>Do not mix docs copy, runtime behavior, release automation, and version bumps unless the release scope says so.</li>
+          <li>Preserve package exports, public URLs, and the Core/Docs boundary unless the PR is explicitly about those contracts.</li>
+        </ul>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="boundary">
+        {{ typography("Core / Docs Boundary", variant="section-title", id="boundary") }}
+        <p>
+          Moo UI Core source and package outputs live outside <code>site/</code>;
+          <code>dist/</code> is the npm package build. The <code>site/</code>
+          tree owns ui.wpmoo.org templates, catalog chrome, metadata, and
+          preview artwork. Internal Jinja macros are repository build tools, not
+          npm APIs.
+        </p>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="issue-types">
+        {{ typography("Issue Types", variant="section-title", id="issue-types") }}
+        <p>
+          Use the focused issue forms so reports carry the information needed for
+          review.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("Bug report", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues/new?template=bug_report.yml") }}
+          {{ button("Docs feedback", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues/new?template=docs_feedback.yml") }}
+          {{ button("Accessibility report", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues/new?template=accessibility.yml") }}
+          {{ button("Feature request", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues/new?template=feature_request.yml") }}
+        </div>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="private-reports">
+        {{ typography("Private Reports", variant="section-title", id="private-reports") }}
+        <p>
+          Do not report suspected vulnerabilities or private conduct concerns in
+          public issues. Use the repository security policy or the private
+          contact route listed by the WPMoo organization.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("Read CONTRIBUTING.md", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/blob/main/CONTRIBUTING.md") }}
+          {{ button("Security policy", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/blob/main/SECURITY.md") }}
+          {{ button("Code of Conduct", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/blob/main/CODE_OF_CONDUCT.md") }}
+        </div>
+      </section>
+
+      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "what-helps", "label": "What Helps"},
+      {"id": "local-setup", "label": "Local Setup"},
+      {"id": "workflow", "label": "Workflow"},
+      {"id": "boundary", "label": "Core / Docs Boundary"},
+      {"id": "issue-types", "label": "Issue Types"},
+      {"id": "private-reports", "label": "Private Reports"}
+    ]) }}
+  </div>
+{% endblock %}
