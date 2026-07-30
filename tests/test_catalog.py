@@ -55,7 +55,7 @@ class CatalogContractTests(CatalogTestCase):
             )
         ]
 
-        lines = (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines()
+        lines = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8").splitlines()
         start = lines.index("## Component Catalog")
         end = lines.index("## Utilities And Blocks")
         component_lines = [
@@ -72,7 +72,7 @@ class CatalogContractTests(CatalogTestCase):
         package = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )
-        llms = (ROOT / "llms.txt").read_text(encoding="utf-8")
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
         match = re.search(
             r"https://unpkg\.com/@wpmoo/ui@([^/]+)/dist/assets/css/moo-ui\.css",
             llms,
@@ -359,7 +359,7 @@ class CatalogContractTests(CatalogTestCase):
             )
 
     def test_catalog_builds_the_complete_root_favicon_set(self) -> None:
-        svg = (ROOT / "favicon.svg").read_text(encoding="utf-8")
+        svg = (ROOT / "site/public/favicon.svg").read_text(encoding="utf-8")
         self.assertIn('viewBox="0 0 24 24"', svg)
         self.assertIn("prefers-color-scheme: dark", svg)
         self.assertIn('stroke="currentColor"', svg)
@@ -375,17 +375,19 @@ class CatalogContractTests(CatalogTestCase):
         }
         for name, expected_size in expected_png_sizes.items():
             with self.subTest(name=name):
-                width, height, _ = read_png_ihdr(ROOT / name)
+                width, height, _ = read_png_ihdr(ROOT / "site/public" / name)
                 self.assertEqual((width, height), expected_size)
 
-        ico = (ROOT / "favicon.ico").read_bytes()
+        ico = (ROOT / "site/public/favicon.ico").read_bytes()
         self.assertEqual(ico[:6], b"\x00\x00\x01\x00\x03\x00")
         self.assertEqual(
             [(ico[6 + index * 16] or 256, ico[7 + index * 16] or 256) for index in range(3)],
             [(16, 16), (32, 32), (48, 48)],
         )
 
-        manifest = json.loads((ROOT / "site.webmanifest").read_text(encoding="utf-8"))
+        manifest = json.loads(
+            (ROOT / "site/public/site.webmanifest").read_text(encoding="utf-8")
+        )
         self.assertEqual(manifest["name"], "Moo UI")
         self.assertEqual(manifest["short_name"], "Moo UI")
         self.assertEqual(manifest["display"], "standalone")

@@ -87,6 +87,22 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             expected["peerDependencies"],
         )
 
+    def test_site_public_assets_are_site_owned(self) -> None:
+        metadata_files = (
+            "favicon.svg",
+            "favicon.ico",
+            "apple-touch-icon.png",
+            "icon-192.png",
+            "icon-512.png",
+            "site.webmanifest",
+            "llms.txt",
+        )
+
+        for name in metadata_files:
+            with self.subTest(name=name):
+                self.assertFalse((ROOT / name).exists())
+                self.assertTrue((ROOT / "site/public" / name).is_file())
+
     def test_recorder_reproduces_stable_baseline_sections(self) -> None:
         recorder = load_recorder()
         payload = recorder.record_boundary_baseline(ROOT)

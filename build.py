@@ -29,9 +29,11 @@ PAGES = SRC / "pages"
 SCSS = ROOT / "scss"
 STATIC = ROOT / "static"
 DIST = ROOT / "dist"
-LLMS_TXT = ROOT / "llms.txt"
+SITE = ROOT / "site"
+SITE_PUBLIC = SITE / "public"
+LLMS_TXT = SITE_PUBLIC / "llms.txt"
 SITE_ROOT_ASSETS = tuple(
-    ROOT / name
+    SITE_PUBLIC / name
     for name in (
         "favicon.svg",
         "favicon.ico",
