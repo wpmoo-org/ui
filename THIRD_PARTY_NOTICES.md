@@ -36,6 +36,6 @@ license is stored at `vendor/geist/LICENSE`.
 
 ## WPMoo visual assets
 
-WPMoo-generated visual assets, including image assets under `static/images/`,
+WPMoo-generated visual assets, including image assets under `site/static/images/`,
 are original WPMoo work and are not licensed under MIT unless explicitly
 stated. See `ASSET_LICENSE.md`.

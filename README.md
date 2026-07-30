@@ -128,38 +128,38 @@ theme-aware surfaces so they stay legible on GitHub.
 <p align="center">
   <a href="https://ui.wpmoo.org/components/button/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/button-dark.svg">
-      <img src="static/images/readme/button-light.svg" alt="Button preview" width="31%">
+      <source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/button-dark.svg">
+      <img src="site/static/images/readme/button-light.svg" alt="Button preview" width="31%">
     </picture>
   </a>
   <a href="https://ui.wpmoo.org/components/dialog/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/dialog-dark.svg">
-      <img src="static/images/readme/dialog-light.svg" alt="Dialog preview" width="31%">
+      <source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/dialog-dark.svg">
+      <img src="site/static/images/readme/dialog-light.svg" alt="Dialog preview" width="31%">
     </picture>
   </a>
   <a href="https://ui.wpmoo.org/components/sidebar/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/sidebar-dark.svg">
-      <img src="static/images/readme/sidebar-light.svg" alt="Sidebar preview" width="31%">
+      <source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/sidebar-dark.svg">
+      <img src="site/static/images/readme/sidebar-light.svg" alt="Sidebar preview" width="31%">
     </picture>
   </a>
   <a href="https://ui.wpmoo.org/components/toast/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/toast-dark.svg">
-      <img src="static/images/readme/toast-light.svg" alt="Toast preview" width="31%">
+      <source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/toast-dark.svg">
+      <img src="site/static/images/readme/toast-light.svg" alt="Toast preview" width="31%">
     </picture>
   </a>
   <a href="https://ui.wpmoo.org/components/sheet/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/sheet-dark.svg">
-      <img src="static/images/readme/sheet-light.svg" alt="Sheet preview" width="31%">
+      <source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/sheet-dark.svg">
+      <img src="site/static/images/readme/sheet-light.svg" alt="Sheet preview" width="31%">
     </picture>
   </a>
   <a href="https://ui.wpmoo.org/components/input/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="static/images/readme/input-dark.svg">
-      <img src="static/images/readme/input-light.svg" alt="Input preview" width="31%">
+      <source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/input-dark.svg">
+      <img src="site/static/images/readme/input-light.svg" alt="Input preview" width="31%">
     </picture>
   </a>
 </p>
@@ -201,7 +201,7 @@ Browse the local catalog at `http://localhost:4173/` when `dev.py` is running.
 
 Moo UI source code is licensed under the MIT License by WPMoo (`wpmoo.org`).
 
-WPMoo-generated visual assets, including image assets under `static/images/`,
+WPMoo-generated visual assets, including image assets under `site/static/images/`,
 are not covered by the MIT source code license and remain copyright WPMoo, all
 rights reserved.
 

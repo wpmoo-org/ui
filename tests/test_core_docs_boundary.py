@@ -117,6 +117,23 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertTrue((ROOT / "site/static").is_dir())
         self.assertTrue(protected_paths.isdisjoint(package["files"]))
 
+    def test_public_asset_prose_uses_site_static_source_path(self) -> None:
+        source_paths = (
+            ROOT / "README.md",
+            ROOT / "ASSET_LICENSE.md",
+            ROOT / "THIRD_PARTY_NOTICES.md",
+            ROOT / "src/pages/license.html.jinja",
+        )
+
+        for path in source_paths:
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                source = path.read_text(encoding="utf-8")
+                self.assertIn("site/static/images/", source)
+                self.assertNotIn(
+                    "static/images/",
+                    source.replace("site/static/images/", ""),
+                )
+
     def test_recorder_reproduces_stable_baseline_sections(self) -> None:
         recorder = load_recorder()
         payload = recorder.record_boundary_baseline(ROOT)

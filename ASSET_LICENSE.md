@@ -6,7 +6,7 @@ WPMoo-generated visual assets are copyright (c) 2026 WPMoo
 These assets are not licensed under the repository's MIT source code license
 unless an individual file or directory states otherwise. This includes brand
 assets, component preview images, marketing images, screenshots, generated
-artwork, and other WPMoo-owned image assets under `static/images/`.
+artwork, and other WPMoo-owned image assets under `site/static/images/`.
 
 You may view these assets as part of the Moo UI documentation and demo site.
 You may not copy, redistribute, modify, sell, sublicense, or use them in another
