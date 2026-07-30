@@ -106,7 +106,7 @@ jobs:
           fi
 
       - name: Verify package contents
-        run: npm pack --dry-run --json
+        run: npm pack --dry-run --json | .venv/bin/python scripts/verify_package_contents.py
 
       - name: Publish to npm
         if: steps.package.outputs.published == 'false'

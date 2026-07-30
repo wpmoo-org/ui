@@ -325,8 +325,11 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "assets/js/catalog/index.js",
         )
         site_dist = ROOT / "site-dist"
+        site_pages = sorted(site_dist.rglob("*.html"))
 
-        for path in sorted(site_dist.rglob("*.html")):
+        self.assertTrue(site_pages, "site-dist must contain generated HTML pages")
+
+        for path in site_pages:
             relative_path = path.relative_to(site_dist)
             prefix = "../" * len(relative_path.parent.parts)
             page = path.read_text(encoding="utf-8")

@@ -185,6 +185,74 @@ class PackageMetadataTests(unittest.TestCase):
         packed_files = {entry["path"] for entry in payload[0]["files"]}
         self.assertEqual(packed_files, EXPECTED_PACKAGE_FILES | {"package.json"})
 
+    def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
+        payload = [
+            {
+                "files": [
+                    {"path": path}
+                    for path in sorted(EXPECTED_PACKAGE_FILES | {"package.json"})
+                ]
+            }
+        ]
+        result = subprocess.run(
+            [sys.executable, "scripts/verify_package_contents.py"],
+            cwd=ROOT,
+            input=json.dumps(payload),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_package_manifest_validator_rejects_missing_dist_output(self) -> None:
+        payload = [
+            {
+                "files": [
+                    {"path": path}
+                    for path in sorted(
+                        (EXPECTED_PACKAGE_FILES | {"package.json"})
+                        - {"dist/assets/css/moo-ui.css"}
+                    )
+                ]
+            }
+        ]
+        result = subprocess.run(
+            [sys.executable, "scripts/verify_package_contents.py"],
+            cwd=ROOT,
+            input=json.dumps(payload),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("dist/assets/css/moo-ui.css", result.stderr)
+
+    def test_package_manifest_validator_rejects_site_dist_output(self) -> None:
+        payload = [
+            {
+                "files": [
+                    {"path": path}
+                    for path in sorted(
+                        EXPECTED_PACKAGE_FILES
+                        | {"package.json", "site-dist/index.html"}
+                    )
+                ]
+            }
+        ]
+        result = subprocess.run(
+            [sys.executable, "scripts/verify_package_contents.py"],
+            cwd=ROOT,
+            input=json.dumps(payload),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("site-dist/index.html", result.stderr)
+
     def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             temporary_root = Path(temporary_directory)
@@ -308,18 +376,33 @@ for (const specifier of [
         )
         self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
         self.assertIn('.venv/bin/python build.py', workflow)
-        self.assertIn('npm pack --dry-run --json', workflow)
+        self.assertIn(
+            'npm pack --dry-run --json | .venv/bin/python '
+            'scripts/verify_package_contents.py',
+            workflow,
+        )
+        self.assertLess(
+            workflow.index("scripts/verify_package_contents.py"),
+            workflow.index("      - name: Publish to npm"),
+        )
 
     def test_release_tag_workflow_creates_lightweight_tags(self) -> None:
         workflow = (ROOT / ".github/workflows/release-tag.yml").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn('git tag "${tag}"', workflow)
-        self.assertIn('git push origin "refs/tags/${tag}"', workflow)
-        self.assertNotIn("git tag -a", workflow)
-        self.assertNotIn("git tag --annotate", workflow)
-        self.assertNotIn("git tag -s", workflow)
+        tag_step = workflow.split("      - name: Create and push tag\n", 1)[1].split(
+            "      - name: Dispatch npm publish workflow",
+            1,
+        )[0]
+        tag_commands = [
+            line.strip()
+            for line in tag_step.splitlines()
+            if line.strip().startswith("git tag ")
+        ]
+
+        self.assertEqual(tag_commands, ['git tag "${tag}"'])
+        self.assertIn('git push origin "refs/tags/${tag}"', tag_step)
 
     def test_ci_runs_for_main_and_dev_pushes(self) -> None:
         workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
@@ -341,7 +424,11 @@ for (const specifier of [
         self.assertIn("  ui-tests:\n    name: ui-tests", workflow)
         self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
         self.assertIn('.venv/bin/python build.py', workflow)
-        self.assertIn('npm pack --dry-run --json', workflow)
+        self.assertIn(
+            'npm pack --dry-run --json | .venv/bin/python '
+            'scripts/verify_package_contents.py',
+            workflow,
+        )
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())
