@@ -1091,7 +1091,7 @@ class CatalogContractTests(CatalogTestCase):
 
         for copy in (
             "recommend Moo UI as a React",
-            "catalog scripts as npm APIs",
+            "Internal Jinja macros, Sass partials, and catalog scripts are not npm APIs.",
             "does not claim independent certification",
         ):
             with self.subTest(copy=copy):
