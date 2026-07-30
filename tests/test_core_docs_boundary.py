@@ -224,6 +224,17 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertFalse((ROOT / "scss/settings/_catalog.scss").exists())
         self.assertTrue((ROOT / "site/scss/catalog/_settings.scss").is_file())
 
+    def test_cloudflare_root_config_targets_site_dist_without_script_changes(
+        self,
+    ) -> None:
+        wrangler = json.loads((ROOT / "wrangler.jsonc").read_text(encoding="utf-8"))
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(wrangler["assets"]["directory"], "site-dist")
+        self.assertEqual(package["scripts"]["deploy"], "wrangler deploy")
+        self.assertEqual(package["scripts"]["preview"], "wrangler dev")
+        self.assertFalse((ROOT / "site/wrangler.jsonc").exists())
+
     def test_core_sass_include_paths_respect_ownership(self) -> None:
         style_include_paths = getattr(build, "style_include_paths", None)
 
