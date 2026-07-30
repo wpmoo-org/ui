@@ -136,6 +136,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "robots.txt",
             "assets/css/catalog.css",
             "assets/js/bootstrap.bundle.min.js",
+            "js/combobox.js",
+            "js/sidebar.js",
             "components/button/index.html",
             "blocks/sidebar-floating/index.html",
             "utils/scroll-fade/index.html",

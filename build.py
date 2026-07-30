@@ -824,9 +824,13 @@ def copy_core_outputs_to_site() -> None:
         shutil.copy2(PACKAGE_DIST / "assets/css" / css_name, css_dir / css_name)
 
     components_dir = SITE_DIST / "assets/js/components"
+    legacy_js_dir = SITE_DIST / "js"
     components_dir.mkdir(parents=True, exist_ok=True)
+    legacy_js_dir.mkdir(parents=True, exist_ok=True)
     for module_name in CORE_JS_MODULES:
-        shutil.copy2(PACKAGE_DIST / "js" / module_name, components_dir / module_name)
+        package_module = PACKAGE_DIST / "js" / module_name
+        shutil.copy2(package_module, components_dir / module_name)
+        shutil.copy2(package_module, legacy_js_dir / module_name)
 
 
 def copy_site_assets() -> None:

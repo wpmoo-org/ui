@@ -32,11 +32,20 @@ class BuildTests(CatalogTestCase):
             (SITE_DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
         for module_name in ("combobox.js", "sidebar.js"):
-            self.assertTrue((SITE_DIST / f"assets/js/components/{module_name}").is_file())
+            site_component_module = SITE_DIST / f"assets/js/components/{module_name}"
+            site_legacy_module = SITE_DIST / f"js/{module_name}"
+            package_module = PACKAGE_DIST / f"js/{module_name}"
+
+            self.assertTrue(site_component_module.is_file())
+            self.assertTrue(site_legacy_module.is_file())
             self.assertTrue((PACKAGE_DIST / f"js/{module_name}").is_file())
             self.assertEqual(
-                (SITE_DIST / f"assets/js/components/{module_name}").read_bytes(),
-                (PACKAGE_DIST / f"js/{module_name}").read_bytes(),
+                site_component_module.read_bytes(),
+                package_module.read_bytes(),
+            )
+            self.assertEqual(
+                site_legacy_module.read_bytes(),
+                package_module.read_bytes(),
             )
         index = (SITE_DIST / "index.html").read_text(encoding="utf-8")
         self.assertIn('<script type="module" src="assets/js/catalog/index.js?', index)
@@ -154,9 +163,14 @@ class BuildTests(CatalogTestCase):
             )
 
             self.assertEqual(site_result.returncode, 0, site_result.stderr)
-            site_module = SITE_DIST / "assets/js/components/combobox.js"
-            self.assertEqual(site_module.read_bytes(), sentinel_module)
-            self.assertNotEqual(site_module.read_bytes(), source_module.read_bytes())
+            for site_module in (
+                SITE_DIST / "assets/js/components/combobox.js",
+                SITE_DIST / "js/combobox.js",
+            ):
+                with self.subTest(site_module=site_module.relative_to(SITE_DIST)):
+                    self.assertTrue(site_module.is_file())
+                    self.assertEqual(site_module.read_bytes(), sentinel_module)
+                    self.assertNotEqual(site_module.read_bytes(), source_module.read_bytes())
             self.assertTrue((SITE_DIST / "assets/js/catalog/index.js").is_file())
         finally:
             self.run_build()
