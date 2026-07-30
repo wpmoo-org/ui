@@ -79,7 +79,7 @@ class CatalogJavaScriptTests(CatalogTestCase):
         self.assertIn("[...disposers].reverse()", source)
         self.assertNotIn(".combobox-input", source)
         self.assertNotIn("mooSidebarState", source)
-        self.assertFalse((ROOT / "static/js/preview.js").exists())
+        self.assertFalse((ROOT / "site/static/js/preview.js").exists())
 
     def test_build_copies_catalog_tree_recursively(self) -> None:
         result = self.run_build()

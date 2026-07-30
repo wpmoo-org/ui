@@ -103,6 +103,20 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertFalse((ROOT / name).exists())
                 self.assertTrue((ROOT / "site/public" / name).is_file())
 
+    def test_site_static_assets_are_not_package_owned(self) -> None:
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        protected_paths = {
+            "site/static",
+            "static",
+            "site",
+            "site-dist",
+            "dist/assets/images",
+        }
+
+        self.assertFalse((ROOT / "static").exists())
+        self.assertTrue((ROOT / "site/static").is_dir())
+        self.assertTrue(protected_paths.isdisjoint(package["files"]))
+
     def test_recorder_reproduces_stable_baseline_sections(self) -> None:
         recorder = load_recorder()
         payload = recorder.record_boundary_baseline(ROOT)

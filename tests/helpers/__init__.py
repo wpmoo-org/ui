@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
 ICONS = ROOT / "src/icons/lucide-icons.json"
-STATIC = ROOT / "static"
+STATIC = ROOT / "site/static"
 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 PNG_COLOR_TYPE_RGBA = 6

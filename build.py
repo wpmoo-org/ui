@@ -27,9 +27,9 @@ ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
 PAGES = SRC / "pages"
 SCSS = ROOT / "scss"
-STATIC = ROOT / "static"
-DIST = ROOT / "dist"
 SITE = ROOT / "site"
+SITE_STATIC = SITE / "static"
+DIST = ROOT / "dist"
 SITE_PUBLIC = SITE / "public"
 LLMS_TXT = SITE_PUBLIC / "llms.txt"
 SITE_ROOT_ASSETS = tuple(
@@ -341,7 +341,7 @@ def fail(message: str) -> None:
 def _preview_src(category: str, slug: str, root_path: str) -> str:
     directory = f"assets/images/{category}"
     for extension in ("webp", "png"):
-        if (STATIC / "images" / category / f"{slug}.{extension}").is_file():
+        if (SITE_STATIC / "images" / category / f"{slug}.{extension}").is_file():
             return f"{root_path}{directory}/{slug}.{extension}"
     return f"{root_path}assets/images/placeholder.webp"
 
@@ -377,7 +377,7 @@ def absolute_asset_url(relative_path: str) -> str:
 def seo_image_src(category: str | None = None, slug: str | None = None) -> str:
     if category and slug:
         for extension in ("webp", "png"):
-            candidate = STATIC / "images" / category / f"{slug}.{extension}"
+            candidate = SITE_STATIC / "images" / category / f"{slug}.{extension}"
             if candidate.is_file():
                 return absolute_asset_url(f"assets/images/{category}/{slug}.{extension}")
     return absolute_asset_url("assets/images/readme-hero.webp")
@@ -743,8 +743,8 @@ def copy_assets() -> None:
         GEIST / "Geist-Variable.woff2",
         fonts_dir / "Geist-Variable.woff2",
     )
-    if STATIC.exists():
-        shutil.copytree(STATIC, DIST / "assets", dirs_exist_ok=True)
+    if SITE_STATIC.exists():
+        shutil.copytree(SITE_STATIC, DIST / "assets", dirs_exist_ok=True)
 
 
 def copy_site_metadata() -> None:
@@ -885,7 +885,7 @@ def source_snapshot() -> tuple[tuple[str, int], ...]:
     if LLMS_TXT.exists():
         paths.append(LLMS_TXT)
     paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
-    for folder in (SRC, SCSS, STATIC):
+    for folder in (SRC, SCSS, SITE_STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())
     return tuple(
