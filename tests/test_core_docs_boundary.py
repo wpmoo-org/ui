@@ -247,6 +247,25 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
         self.assertIn(str(template), snapshot_paths)
 
+    def test_source_snapshot_covers_required_dev_server_watch_roots(self) -> None:
+        snapshot_paths = {path for path, _ in build.source_snapshot()}
+        required_paths = (
+            ROOT / "build.py",
+            ROOT / "site/public/llms.txt",
+            ROOT / "site/src/pages/index.html.jinja",
+            ROOT / "site/scss/catalog.scss",
+            ROOT / "site/static/images/components/sidebar.webp",
+            ROOT / "src/components/input.html.jinja",
+            ROOT / "src/js/components/combobox.js",
+            ROOT / "src/icons/lucide-icons.json",
+            ROOT / "src/registry/components.json",
+            ROOT / "scss/_primary_variables.scss",
+        )
+
+        for path in required_paths:
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                self.assertIn(str(path), snapshot_paths)
+
     def test_core_source_does_not_import_site_source(self) -> None:
         self.assertEqual(core_source_boundary_offenders(ROOT), [])
 

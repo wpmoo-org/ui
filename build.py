@@ -55,6 +55,17 @@ JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = ("combobox.js", "sidebar.js")
+SOURCE_SNAPSHOT_DIRS = (
+    SITE_PUBLIC,
+    SITE_SRC,
+    SITE_SCSS,
+    SITE_STATIC,
+    SRC / "components",
+    JS_COMPONENTS,
+    SRC / "icons",
+    CORE_REGISTRY,
+    SCSS,
+)
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -999,10 +1010,7 @@ def build_site() -> None:
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
-    if LLMS_TXT.exists():
-        paths.append(LLMS_TXT)
-    paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
-    for folder in (SRC, SITE_SRC, SCSS, SITE_SCSS, SITE_STATIC):
+    for folder in SOURCE_SNAPSHOT_DIRS:
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())
     return tuple(

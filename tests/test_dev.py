@@ -7,7 +7,7 @@ import unittest
 from functools import partial
 from http.server import SimpleHTTPRequestHandler
 
-from tests.helpers import PACKAGE_DIST, ROOT
+from tests.helpers import ROOT, SITE_DIST
 
 
 def load_dev_module():
@@ -53,14 +53,14 @@ class DevRunnerTests(unittest.TestCase):
             "http://localhost:4173/",
         )
 
-    def test_server_handler_serves_dist_as_root(self) -> None:
+    def test_server_handler_serves_site_dist_as_root(self) -> None:
         dev = load_dev_module()
 
         handler = dev.create_handler()
 
         self.assertIsInstance(handler, partial)
         self.assertIs(handler.func, SimpleHTTPRequestHandler)
-        self.assertEqual(handler.keywords, {"directory": str(PACKAGE_DIST)})
+        self.assertEqual(handler.keywords, {"directory": str(SITE_DIST)})
 
 
 if __name__ == "__main__":
