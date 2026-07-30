@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
 SCSS = ROOT / "scss"
 SITE = ROOT / "site"
+SITE_SCSS = SITE / "scss"
 SITE_SRC = SITE / "src"
 CORE_REGISTRY = SRC / "registry"
 SITE_REGISTRY = SITE_SRC / "registry"
@@ -49,8 +50,8 @@ SITE_ROOT_ASSETS = tuple(
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
-JS_SOURCE = SRC / "js"
-JS_COMPONENTS = JS_SOURCE / "components"
+JS_COMPONENTS = SRC / "js/components"
+JS_CATALOG = SITE_SRC / "js/catalog"
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -699,10 +700,10 @@ def load_blocks() -> list[dict[str, str]]:
     )
 
 
-def compile_style(name: str, *, output_style: str = "expanded") -> str:
-    include_paths = [str(SCSS), str(BOOTSTRAP / "scss")]
+def compile_style(entrypoint: Path, *, output_style: str = "expanded") -> str:
+    include_paths = [str(SCSS), str(SITE_SCSS), str(BOOTSTRAP / "scss")]
     css = sass.compile(
-        filename=str(SCSS / f"{name}.scss"),
+        filename=str(entrypoint),
         include_paths=include_paths,
         output_style=output_style,
     )
@@ -711,23 +712,33 @@ def compile_style(name: str, *, output_style: str = "expanded") -> str:
 
 def write_compiled_style(
     css_dir: Path,
-    source_name: str,
+    entrypoint: Path,
     output_name: str,
     *,
     output_style: str = "expanded",
 ) -> None:
-    css = compile_style(source_name, output_style=output_style)
+    css = compile_style(entrypoint, output_style=output_style)
     (css_dir / output_name).write_text(css, encoding="utf-8")
 
 
 def compile_styles() -> None:
     css_dir = DIST / "assets/css"
     css_dir.mkdir(parents=True, exist_ok=True)
-    write_compiled_style(css_dir, "moo-ui", "moo-ui.css")
-    write_compiled_style(css_dir, "moo-ui", "moo-ui.min.css", output_style="compressed")
-    write_compiled_style(css_dir, "catalog", "catalog.css")
-    write_compiled_style(css_dir, "moo-core", "moo.css")
-    write_compiled_style(css_dir, "moo-core", "moo.min.css", output_style="compressed")
+    write_compiled_style(css_dir, SCSS / "moo-ui.scss", "moo-ui.css")
+    write_compiled_style(
+        css_dir,
+        SCSS / "moo-ui.scss",
+        "moo-ui.min.css",
+        output_style="compressed",
+    )
+    write_compiled_style(css_dir, SITE_SCSS / "catalog.scss", "catalog.css")
+    write_compiled_style(css_dir, SCSS / "moo-core.scss", "moo.css")
+    write_compiled_style(
+        css_dir,
+        SCSS / "moo-core.scss",
+        "moo.min.css",
+        output_style="compressed",
+    )
 
 
 def asset_version() -> str:
@@ -755,7 +766,17 @@ def copy_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
-    shutil.copytree(JS_SOURCE, js_dir, dirs_exist_ok=True)
+    shutil.copytree(JS_COMPONENTS, js_dir / "components", dirs_exist_ok=True)
+    if JS_CATALOG.exists():
+        shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
+        catalog_index = js_dir / "catalog/index.js"
+        catalog_index.write_text(
+            catalog_index.read_text(encoding="utf-8").replace(
+                "../../../../src/js/components/",
+                "../components/",
+            ),
+            encoding="utf-8",
+        )
     package_js_dir = DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
     for module_name in ("combobox.js", "sidebar.js"):
@@ -908,7 +929,7 @@ def source_snapshot() -> tuple[tuple[str, int], ...]:
     if LLMS_TXT.exists():
         paths.append(LLMS_TXT)
     paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
-    for folder in (SRC, SITE_SRC, SCSS, SITE_STATIC):
+    for folder in (SRC, SITE_SRC, SCSS, SITE_SCSS, SITE_STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())
     return tuple(

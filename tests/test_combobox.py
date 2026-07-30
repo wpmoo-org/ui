@@ -15,7 +15,7 @@ COMPONENT = ROOT / "src/components/combobox.html.jinja"
 PAGE = ROOT / "site/src/pages/components/combobox.html.jinja"
 REGISTRY = ROOT / "src/registry/components.json"
 COMBOBOX_JS = ROOT / "src/js/components/combobox.js"
-CATALOG_JS = ROOT / "src/js/catalog/index.js"
+CATALOG_JS = ROOT / "site/src/js/catalog/index.js"
 
 
 class ComboboxTests(CatalogTestCase):
@@ -526,7 +526,10 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('this._hidden.value = option.dataset.value || ""', source)
         self.assertIn("data-moo-combobox-group", source)
         self.assertNotIn("combobox-popup-trigger", source)
-        self.assertIn('import Combobox from "../components/combobox.js";', catalog)
+        self.assertIn(
+            'import Combobox from "../../../../src/js/components/combobox.js";',
+            catalog,
+        )
         self.assertIn("Combobox.getOrCreateInstance(element);", catalog)
         self.assertNotIn(".combobox-input", catalog)
 

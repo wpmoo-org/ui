@@ -6,7 +6,7 @@ import subprocess
 from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
-CATALOG_JS = ROOT / "src/js/catalog"
+CATALOG_JS = ROOT / "site/src/js/catalog"
 MODULES = {
     "theme.js": "initTheme",
     "catalog-filter.js": "initCatalogFilter",
@@ -45,7 +45,7 @@ class CatalogJavaScriptTests(CatalogTestCase):
 
     def test_catalog_feature_imports_have_no_document_side_effect(self) -> None:
         imports = "\n".join(
-            f'import * as module{index} from "./src/js/catalog/{module_name}";\n'
+            f'import * as module{index} from "./site/src/js/catalog/{module_name}";\n'
             f'if (typeof module{index}.{initializer} !== "function") process.exit(2);'
             for index, (module_name, initializer) in enumerate(MODULES.items())
         )
@@ -71,8 +71,14 @@ class CatalogJavaScriptTests(CatalogTestCase):
             )
             self.assertIn(f"{initializer}(root)", source)
 
-        self.assertIn('import Combobox from "../components/combobox.js";', source)
-        self.assertIn('import Sidebar from "../components/sidebar.js";', source)
+        self.assertIn(
+            'import Combobox from "../../../../src/js/components/combobox.js";',
+            source,
+        )
+        self.assertIn(
+            'import Sidebar from "../../../../src/js/components/sidebar.js";',
+            source,
+        )
         self.assertIn("Combobox.getOrCreateInstance(element)", source)
         self.assertIn("Sidebar.getOrCreateInstance(element)", source)
         self.assertIn("export function initCatalog(root = document)", source)

@@ -173,6 +173,14 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertTrue((ROOT / "site/src/includes").is_dir())
         self.assertTrue((ROOT / "site/src/registry").is_dir())
 
+    def test_catalog_assets_are_site_owned(self) -> None:
+        self.assertFalse((ROOT / "scss/catalog.scss").exists())
+        self.assertFalse((ROOT / "scss/catalog").exists())
+        self.assertFalse((ROOT / "src/js/catalog").exists())
+        self.assertTrue((ROOT / "site/scss/catalog.scss").is_file())
+        self.assertTrue((ROOT / "site/scss/catalog").is_dir())
+        self.assertTrue((ROOT / "site/src/js/catalog").is_dir())
+
     def test_site_templates_are_in_source_snapshot(self) -> None:
         snapshot_paths = {path for path, _ in build.source_snapshot()}
         template = ROOT / "site/src/pages/index.html.jinja"

@@ -226,7 +226,7 @@ class DialogTests(CatalogTestCase):
 
     def test_catalog_portals_nested_preview_modals_above_body_backdrops(self) -> None:
         script = ROOT.joinpath(
-            "src/js/catalog/bootstrap-preview.js"
+            "site/src/js/catalog/bootstrap-preview.js"
         ).read_text(encoding="utf-8")
 
         self.assertIn('listen(root, "show.bs.modal"', script)

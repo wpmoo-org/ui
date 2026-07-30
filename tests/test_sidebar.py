@@ -7,7 +7,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase, read_scss_aggregate
 
 
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
-CATALOG_JS = ROOT / "src/js/catalog/index.js"
+CATALOG_JS = ROOT / "site/src/js/catalog/index.js"
 SIDEBAR_SCSS = ROOT / "scss/components/_sidebar.scss"
 
 
@@ -755,7 +755,10 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("removeEventListener(type, handler, options)", source)
         self.assertIn("this._directionObserver?.disconnect();", source)
         self.assertIn("this._offcanvas?.dispose();", source)
-        self.assertIn('import Sidebar from "../components/sidebar.js";', catalog)
+        self.assertIn(
+            'import Sidebar from "../../../../src/js/components/sidebar.js";',
+            catalog,
+        )
         self.assertIn("Sidebar.getOrCreateInstance(element);", catalog)
         self.assertNotIn("SIDEBAR_STORAGE_PREFIX", catalog)
         self.assertNotIn("openSidebarFlyout", catalog)
@@ -763,7 +766,9 @@ class SidebarTests(CatalogTestCase):
     def test_catalog_hands_off_persisted_state_before_sidebar_content(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_sidebar_styles()
-        catalog_styles = (ROOT / "scss/catalog/_shell.scss").read_text(encoding="utf-8")
+        catalog_styles = (ROOT / "site/scss/catalog/_shell.scss").read_text(
+            encoding="utf-8"
+        )
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 

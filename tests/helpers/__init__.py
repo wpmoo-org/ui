@@ -30,14 +30,21 @@ def active_scss_imports(source: str) -> list[str]:
     return SCSS_IMPORT.findall(source)
 
 
-def read_scss_aggregate(entrypoint: Path, prefix: str) -> str:
+def read_scss_aggregate(
+    entrypoint: Path,
+    prefix: str,
+    *,
+    source_root: Path | None = None,
+) -> str:
     source = entrypoint.read_text(encoding="utf-8")
+    if source_root is None:
+        source_root = ROOT / "scss"
     paths = [entrypoint]
     for target in active_scss_imports(source):
         if not target.startswith(f"{prefix}/"):
             continue
         relative = Path(target)
-        partial = ROOT / "scss" / relative.parent / f"_{relative.name}.scss"
+        partial = source_root / relative.parent / f"_{relative.name}.scss"
         if not partial.is_file():
             raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
         paths.append(partial)
@@ -49,7 +56,11 @@ def read_primary_variables() -> str:
 
 
 def read_catalog_styles() -> str:
-    return read_scss_aggregate(ROOT / "scss/catalog.scss", "catalog")
+    return read_scss_aggregate(
+        ROOT / "site/scss/catalog.scss",
+        "catalog",
+        source_root=ROOT / "site/scss",
+    )
 
 
 def pretty_output_path(relative_path: str) -> Path:

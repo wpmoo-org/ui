@@ -473,7 +473,7 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        preview = (ROOT / "src/js/catalog/theme.js").read_text(encoding="utf-8")
+        preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
         self.assertIn("document.documentElement.dataset.bsTheme = theme", base)
