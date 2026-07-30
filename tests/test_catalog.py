@@ -3,6 +3,9 @@ from __future__ import annotations
 import json
 import re
 import warnings
+from pathlib import Path
+
+import build as site_build
 
 from tests.helpers import (
     DIST,
@@ -890,6 +893,180 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
         self.assertNotIn("after the release that publishes", installation)
+
+    def test_public_docs_track_package_manifest_and_exports(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        installation = self.read_output("installation.html")
+        support = self.read_output("support.html")
+        skills = self.read_output("skills.html")
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
+        changelog = self.read_output("changelog.html")
+
+        version = package["version"]
+        for surface in (readme, installation, support, skills, llms):
+            with self.subTest(surface=surface[:24]):
+                self.assertIn(f"@wpmoo/ui@{version}", surface)
+
+        self.assertIn(f"v{version}", changelog)
+        self.assertIn(certification["status"], support)
+        self.assertIn(certification["status"], skills)
+        self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
+
+        for export in package["exports"]:
+            public_name = export.removeprefix("./")
+            if public_name == "package.json":
+                continue
+            with self.subTest(export=export):
+                self.assertIn(public_name, readme)
+                self.assertIn(public_name, llms)
+
+        self.assertIn("@wpmoo/ui/combobox.js", readme)
+        self.assertIn("@wpmoo/ui/sidebar.js", readme)
+        self.assertIn("@wpmoo/ui/certification.json", readme)
+        self.assertNotIn("compiled CSS and notices only", readme)
+        self.assertNotIn("CSS-only library", readme)
+
+    def test_public_docs_limit_latest_to_readme_quick_demo(self) -> None:
+        paths = [
+            ROOT / "README.md",
+            ROOT / "site/public/llms.txt",
+            *sorted((ROOT / "site/src/pages").glob("*.html.jinja")),
+        ]
+        occurrences: list[Path] = []
+        for path in paths:
+            if "@latest" in path.read_text(encoding="utf-8"):
+                occurrences.append(path.relative_to(ROOT))
+
+        self.assertEqual(occurrences, [Path("README.md")])
+        self.assertEqual(
+            (ROOT / "README.md").read_text(encoding="utf-8").count("@latest"),
+            1,
+        )
+
+    def test_preview_certification_is_not_marketed_as_certified(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        support = self.read_output("support.html")
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        ownership = site_build.derive_component_ownership(catalog, certification)
+
+        self.assertIn("WPMoo-maintained preview evidence", support)
+        self.assertIn(
+            "not independent or accredited certification",
+            " ".join(readme.split()),
+        )
+        self.assertIn("not independent or accredited certification", llms)
+        self.assertNotIn(
+            "certified",
+            {details["maturity"] for details in ownership.values()},
+        )
+
+    def test_consumer_docs_do_not_present_internal_macros_as_package_api(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        public_surfaces = {
+            "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "index.html": self.read_output("index.html"),
+            "introduction.html": self.read_output("introduction.html"),
+            "installation.html": self.read_output("installation.html"),
+            "support.html": self.read_output("support.html"),
+            "contributing.html": self.read_output("contributing.html"),
+            "skills.html": self.read_output("skills.html"),
+            "blocks/index.html": self.read_output("blocks/index.html"),
+        }
+
+        for path, surface in public_surfaces.items():
+            with self.subTest(path=path):
+                self.assertNotIn("Jinja macro API", surface)
+                self.assertNotIn("public macro API", surface)
+                self.assertNotIn("distributed macro", surface)
+
+        readme = public_surfaces["README.md"]
+        self.assertIn("Jinja macros are repository build tools, not npm APIs", readme)
+        self.assertIn("not npm APIs", public_surfaces["skills.html"])
+
+    def test_readme_artwork_paths_exist_after_site_boundary(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        referenced = sorted(
+            set(
+                re.findall(
+                    r'(?:src|srcset)="(site/static/images/[^"]+)"',
+                    readme,
+                )
+            )
+        )
+
+        self.assertGreaterEqual(len(referenced), 3)
+        for relative in referenced:
+            with self.subTest(relative=relative):
+                self.assertTrue((ROOT / relative).is_file())
+
+        self.assertIn("site/static/images/", readme)
+        self.assertNotIn(
+            "static/images/",
+            readme.replace("site/static/images/", ""),
+        )
+
+    def test_registered_components_have_pages_and_ownership_classification(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        ownership = site_build.derive_component_ownership(catalog, certification)
+        components_index = self.read_output("components/index.html")
+        allowed_runtime = {
+            "native HTML/CSS",
+            "Bootstrap plugin",
+            "optional Moo ESM",
+        }
+        allowed_markup = {
+            "Bootstrap/native HTML",
+            "Moo documented extension",
+            "not applicable",
+        }
+        allowed_maturity = {"ready", "accepted", "certified"}
+
+        self.assertEqual(set(ownership), {component["slug"] for component in catalog})
+        for component in catalog:
+            slug = component["slug"]
+            with self.subTest(slug=slug):
+                self.assertTrue(
+                    (ROOT / "site/src/pages/components" / f"{slug}.html.jinja").is_file()
+                )
+                self.assertTrue((DIST / "components" / slug / "index.html").is_file())
+                self.assertIn(f'href="../components/{slug}/"', components_index)
+                self.assertIn(component["label"], components_index)
+
+                details = ownership[slug]
+                self.assertIn(details["runtimeOwner"], allowed_runtime)
+                self.assertIn(details["markupOwner"], allowed_markup)
+                self.assertIn(details["maturity"], allowed_maturity)
+                self.assertIn(details["runtimeOwner"], components_index)
+                self.assertIn(f"Markup: {details['markupOwner']}.", components_index)
 
     def test_skills_page_documents_agent_component_guidance(self) -> None:
         result = self.run_build()

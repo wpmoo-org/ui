@@ -38,7 +38,7 @@ Combobox and Sidebar.
 
 ## Try It in 30 Seconds
 
-The quick demo intentionally follows `@latest`:
+The quick demo intentionally follows the floating npm tag:
 
 ```html
 <link rel="stylesheet"
@@ -165,9 +165,10 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is in the `0.x` series. The package's certification manifest currently
-has `preview` status; catalog availability does not by itself mean independent
-or accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
+Moo UI is in the `0.x` series. Current package: `@wpmoo/ui@0.7.0`. The
+package's certification manifest currently has `preview` status; catalog
+availability is WPMoo-maintained preview evidence, not independent or
+accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
 for the Bootstrap range, browser policy, maturity definitions, limitations, and
 release evidence. Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
