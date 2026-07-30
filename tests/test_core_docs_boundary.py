@@ -317,6 +317,24 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertIn(stylesheet_href, fixture)
                 self.assertNotIn("/site-dist/", fixture)
 
+    def test_site_pages_load_core_artifacts_from_public_asset_urls(self) -> None:
+        assets = (
+            "assets/css/moo-ui.css",
+            "assets/css/catalog.css",
+            "assets/js/bootstrap.bundle.min.js",
+            "assets/js/catalog/index.js",
+        )
+        site_dist = ROOT / "site-dist"
+
+        for path in sorted(site_dist.rglob("*.html")):
+            relative_path = path.relative_to(site_dist)
+            prefix = "../" * len(relative_path.parent.parts)
+            page = path.read_text(encoding="utf-8")
+
+            for asset in assets:
+                with self.subTest(page=relative_path.as_posix(), asset=asset):
+                    self.assertIn(f'"{prefix}{asset}?', page)
+
     def test_public_asset_prose_uses_site_static_source_path(self) -> None:
         source_paths = (
             ROOT / "README.md",

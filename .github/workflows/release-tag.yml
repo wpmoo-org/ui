@@ -49,10 +49,8 @@ jobs:
         if: steps.release_tag.outputs.exists == 'false'
         run: |
           tag="${{ steps.package.outputs.tag }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${tag}" -m "Release ${tag}"
-          git push origin "${tag}"
+          git tag "${tag}"
+          git push origin "refs/tags/${tag}"
 
       - name: Dispatch npm publish workflow
         if: steps.release_tag.outputs.exists == 'false'

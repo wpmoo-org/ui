@@ -306,6 +306,20 @@ for (const specifier of [
             'git merge-base --is-ancestor "${source_commit}" origin/main',
             workflow,
         )
+        self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
+        self.assertIn('.venv/bin/python build.py', workflow)
+        self.assertIn('npm pack --dry-run --json', workflow)
+
+    def test_release_tag_workflow_creates_lightweight_tags(self) -> None:
+        workflow = (ROOT / ".github/workflows/release-tag.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('git tag "${tag}"', workflow)
+        self.assertIn('git push origin "refs/tags/${tag}"', workflow)
+        self.assertNotIn("git tag -a", workflow)
+        self.assertNotIn("git tag --annotate", workflow)
+        self.assertNotIn("git tag -s", workflow)
 
     def test_ci_runs_for_main_and_dev_pushes(self) -> None:
         workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
@@ -318,6 +332,16 @@ for (const specifier of [
 
         self.assertIn("      - main", push_block)
         self.assertIn("      - dev", push_block)
+
+    def test_ci_keeps_ui_tests_name_and_verifies_both_output_boundaries(self) -> None:
+        workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("  ui-tests:\n    name: ui-tests", workflow)
+        self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
+        self.assertIn('.venv/bin/python build.py', workflow)
+        self.assertIn('npm pack --dry-run --json', workflow)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())
