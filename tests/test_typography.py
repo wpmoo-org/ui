@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/typography.html.jinja"
-PAGE = ROOT / "src/pages/components/typography.html.jinja"
+PAGE = ROOT / "site/src/pages/components/typography.html.jinja"
 
 
 class TypographyTests(CatalogTestCase):

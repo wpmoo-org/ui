@@ -34,8 +34,8 @@ class CatalogContractTests(CatalogTestCase):
         )
 
         for path in (
-            ROOT / "src/shell/sidebar.html.jinja",
-            ROOT / "src/pages/components/index.html.jinja",
+            ROOT / "site/src/shell/sidebar.html.jinja",
+            ROOT / "site/src/pages/components/index.html.jinja",
         ):
             with self.subTest(path=path.relative_to(ROOT).as_posix()):
                 self.assertTrue(
@@ -250,10 +250,10 @@ class CatalogContractTests(CatalogTestCase):
         page_level_classes = {"form-label"}
 
         pages = [
-            *sorted((ROOT / "src/pages/components").glob("*.jinja")),
+            *sorted((ROOT / "site/src/pages/components").glob("*.jinja")),
             # The components index composes the same ready macros; it gets no
             # exemption.
-            ROOT / "src/pages/components/index.html.jinja",
+            ROOT / "site/src/pages/components/index.html.jinja",
         ]
         for path in pages:
             source = path.read_text(encoding="utf-8")
@@ -287,7 +287,7 @@ class CatalogContractTests(CatalogTestCase):
                         )
 
     def test_component_pages_link_to_bootstrap_documentation(self) -> None:
-        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+        for path in sorted((ROOT / "site/src/pages/components").glob("*.jinja")):
             # The components index lists every component; it documents no
             # single Bootstrap component itself, so it carries no reference.
             if path.name == "index.html.jinja":
@@ -304,16 +304,17 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn("render_reference(", source)
 
     def test_external_blank_links_use_noopener_noreferrer(self) -> None:
-        for path in sorted((ROOT / "src").rglob("*.jinja")):
-            source = path.read_text(encoding="utf-8")
-            for tag in re.findall(r"<a\b[^>]*target=\"_blank\"[^>]*>", source):
-                with self.subTest(path=path.relative_to(ROOT), tag=tag):
-                    self.assertIn('rel="', tag)
-                    rel = re.search(r'rel="([^"]*)"', tag)
-                    self.assertIsNotNone(rel)
-                    tokens = set(rel.group(1).split())
-                    self.assertIn("noopener", tokens)
-                    self.assertIn("noreferrer", tokens)
+        for source_root in (ROOT / "site/src", ROOT / "src"):
+            for path in sorted(source_root.rglob("*.jinja")):
+                source = path.read_text(encoding="utf-8")
+                for tag in re.findall(r"<a\b[^>]*target=\"_blank\"[^>]*>", source):
+                    with self.subTest(path=path.relative_to(ROOT), tag=tag):
+                        self.assertIn('rel="', tag)
+                        rel = re.search(r'rel="([^"]*)"', tag)
+                        self.assertIsNotNone(rel)
+                        tokens = set(rel.group(1).split())
+                        self.assertIn("noopener", tokens)
+                        self.assertIn("noreferrer", tokens)
 
     def test_ready_component_preview_images_are_valid_when_present(self) -> None:
         catalog = json.loads(
@@ -471,7 +472,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("background: $input-disabled-bg;", catalog_scss)
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
-        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         preview = (ROOT / "src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
@@ -481,7 +482,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
-        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
 
         handoff = 'document.documentElement.dataset.mooSidebarCatalogState'
         self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)

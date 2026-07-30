@@ -25,9 +25,10 @@ except ImportError:  # pragma: no cover - POSIX workstation path owns locking.
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
-PAGES = SRC / "pages"
 SCSS = ROOT / "scss"
 SITE = ROOT / "site"
+SITE_SRC = SITE / "src"
+PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
 DIST = ROOT / "dist"
 SITE_PUBLIC = SITE / "public"
@@ -587,7 +588,7 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
 
 def create_environment(icon_renderer=None) -> Environment:
     environment = Environment(
-        loader=FileSystemLoader(SRC),
+        loader=FileSystemLoader((str(SITE_SRC), str(SRC))),
         autoescape=select_autoescape(("html", "jinja")),
         undefined=StrictUndefined,
         trim_blocks=True,
@@ -827,7 +828,7 @@ def render_pages() -> None:
         current_slug = logical_relative.stem
         if current_section not in {"components", "utils", "blocks"}:
             current_section = "sections"
-        template_name = page.relative_to(SRC).as_posix()
+        template_name = page.relative_to(SITE_SRC).as_posix()
         metadata = page_metadata(
             page,
             logical_relative,

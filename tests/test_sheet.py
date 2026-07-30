@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/sheet.html.jinja"
-PAGE = ROOT / "src/pages/components/sheet.html.jinja"
+PAGE = ROOT / "site/src/pages/components/sheet.html.jinja"
 STYLES = ROOT / "scss/components/_sheet.scss"
 
 

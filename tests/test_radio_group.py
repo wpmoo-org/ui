@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/radio_group.html.jinja"
-PAGE = ROOT / "src/pages/components/radio-group.html.jinja"
+PAGE = ROOT / "site/src/pages/components/radio-group.html.jinja"
 
 
 class RadioGroupTests(CatalogTestCase):

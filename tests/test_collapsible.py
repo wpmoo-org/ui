@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase, lucide_body
 
 
 COMPONENT = ROOT / "src/components/collapsible.html.jinja"
-PAGE = ROOT / "src/pages/components/collapsible.html.jinja"
+PAGE = ROOT / "site/src/pages/components/collapsible.html.jinja"
 
 
 class CollapsibleTests(CatalogTestCase):

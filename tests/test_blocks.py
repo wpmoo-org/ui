@@ -48,7 +48,7 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn("Open standalone", page)
 
             source = (
-                ROOT / f"src/pages/blocks/{slug}.html.jinja"
+                ROOT / f"site/src/pages/blocks/{slug}.html.jinja"
             ).read_text(encoding="utf-8")
             with self.subTest(slug=slug, contract="block-example macro"):
                 self.assertIn(

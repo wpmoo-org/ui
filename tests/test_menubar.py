@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/menubar.html.jinja"
-PAGE = ROOT / "src/pages/components/menubar.html.jinja"
+PAGE = ROOT / "site/src/pages/components/menubar.html.jinja"
 
 
 class MenubarTests(CatalogTestCase):

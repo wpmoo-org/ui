@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase, lucide_body
 
 
 COMPONENT = ROOT / "src/components/spinner.html.jinja"
-PAGE = ROOT / "src/pages/components/spinner.html.jinja"
+PAGE = ROOT / "site/src/pages/components/spinner.html.jinja"
 
 
 class SpinnerTests(CatalogTestCase):

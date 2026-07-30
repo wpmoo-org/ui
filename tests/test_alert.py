@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/alert.html.jinja"
-PAGE = ROOT / "src/pages/components/alert.html.jinja"
+PAGE = ROOT / "site/src/pages/components/alert.html.jinja"
 
 
 class AlertTests(CatalogTestCase):

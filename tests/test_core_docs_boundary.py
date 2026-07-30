@@ -117,12 +117,19 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertTrue((ROOT / "site/static").is_dir())
         self.assertTrue(protected_paths.isdisjoint(package["files"]))
 
+    def test_site_templates_are_under_site_src(self) -> None:
+        self.assertFalse((ROOT / "src/pages").exists())
+        self.assertTrue((ROOT / "site/src/pages").is_dir())
+        self.assertTrue((ROOT / "site/src/layouts").is_dir())
+        self.assertTrue((ROOT / "site/src/shell").is_dir())
+        self.assertTrue((ROOT / "site/src/blocks").is_dir())
+
     def test_public_asset_prose_uses_site_static_source_path(self) -> None:
         source_paths = (
             ROOT / "README.md",
             ROOT / "ASSET_LICENSE.md",
             ROOT / "THIRD_PARTY_NOTICES.md",
-            ROOT / "src/pages/license.html.jinja",
+            ROOT / "site/src/pages/license.html.jinja",
         )
 
         for path in source_paths:

@@ -5,7 +5,7 @@ import json
 from tests.helpers import ROOT, CatalogTestCase
 
 
-PAGE = ROOT / "src/pages/components/form.html.jinja"
+PAGE = ROOT / "site/src/pages/components/form.html.jinja"
 REGISTRY = ROOT / "src/registry/components.json"
 
 

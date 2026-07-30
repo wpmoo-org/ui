@@ -7,7 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/popover.html.jinja"
-PAGE = ROOT / "src/pages/components/popover.html.jinja"
+PAGE = ROOT / "site/src/pages/components/popover.html.jinja"
 
 # Bootstrap's Popover shares Tooltip's sanitizer contract: data-bs-html
 # content is run through the same default allowlist (see

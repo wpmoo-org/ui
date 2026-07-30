@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/textarea.html.jinja"
-PAGE = ROOT / "src/pages/components/textarea.html.jinja"
+PAGE = ROOT / "site/src/pages/components/textarea.html.jinja"
 
 
 class TextareaTests(CatalogTestCase):

@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/navigation.html.jinja"
-PAGE = ROOT / "src/pages/components/navigation.html.jinja"
+PAGE = ROOT / "site/src/pages/components/navigation.html.jinja"
 
 
 class NavigationTests(CatalogTestCase):

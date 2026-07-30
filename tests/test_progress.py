@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/progress.html.jinja"
-PAGE = ROOT / "src/pages/components/progress.html.jinja"
+PAGE = ROOT / "site/src/pages/components/progress.html.jinja"
 
 
 class ProgressTests(CatalogTestCase):

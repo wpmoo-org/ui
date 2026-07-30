@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/pagination.html.jinja"
-PAGE = ROOT / "src/pages/components/pagination.html.jinja"
+PAGE = ROOT / "site/src/pages/components/pagination.html.jinja"
 
 
 class PaginationTests(CatalogTestCase):

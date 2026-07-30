@@ -12,7 +12,7 @@ from tests.helpers import (
 
 
 COMPONENT = ROOT / "src/components/combobox.html.jinja"
-PAGE = ROOT / "src/pages/components/combobox.html.jinja"
+PAGE = ROOT / "site/src/pages/components/combobox.html.jinja"
 REGISTRY = ROOT / "src/registry/components.json"
 COMBOBOX_JS = ROOT / "src/js/components/combobox.js"
 CATALOG_JS = ROOT / "src/js/catalog/index.js"

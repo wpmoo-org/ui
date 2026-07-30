@@ -7,7 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/tooltip.html.jinja"
-PAGE = ROOT / "src/pages/components/tooltip.html.jinja"
+PAGE = ROOT / "site/src/pages/components/tooltip.html.jinja"
 
 # Bootstrap's Tooltip runs data-bs-html content through its own default
 # sanitizer allowlist before it ever reaches the page (see

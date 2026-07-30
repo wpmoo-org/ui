@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/input_group.html.jinja"
-PAGE = ROOT / "src/pages/components/input-group.html.jinja"
+PAGE = ROOT / "site/src/pages/components/input-group.html.jinja"
 
 
 class InputGroupTests(CatalogTestCase):

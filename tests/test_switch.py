@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/switch.html.jinja"
-PAGE = ROOT / "src/pages/components/switch.html.jinja"
+PAGE = ROOT / "site/src/pages/components/switch.html.jinja"
 
 
 class SwitchTests(CatalogTestCase):

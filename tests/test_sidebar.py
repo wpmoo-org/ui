@@ -673,10 +673,10 @@ class SidebarTests(CatalogTestCase):
         self.assertTrue((DIST / "assets/images/sidebar-structure.webp").is_file())
 
     def test_sidebar_catalog_page_documents_public_macro_reference(self) -> None:
-        source = (ROOT / "src/pages/components/sidebar.html.jinja").read_text(
+        source = (ROOT / "site/src/pages/components/sidebar.html.jinja").read_text(
             encoding="utf-8"
         )
-        shell_source = (ROOT / "src/blocks/sidebar_shell.html.jinja").read_text(
+        shell_source = (ROOT / "site/src/blocks/sidebar_shell.html.jinja").read_text(
             encoding="utf-8"
         )
         example_source = source + shell_source
@@ -764,8 +764,8 @@ class SidebarTests(CatalogTestCase):
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_sidebar_styles()
         catalog_styles = (ROOT / "scss/catalog/_shell.scss").read_text(encoding="utf-8")
-        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        layout = (ROOT / "src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
         restore_index = source.index("this._restoreState();")
         ready_index = source.index('setAttribute("data-moo-sidebar-ready", "")')

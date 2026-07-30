@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/dialog.html.jinja"
-PAGE = ROOT / "src/pages/components/dialog.html.jinja"
+PAGE = ROOT / "site/src/pages/components/dialog.html.jinja"
 STYLES = ROOT / "scss/components/_dialog.scss"
 
 

@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/kbd.html.jinja"
-PAGE = ROOT / "src/pages/components/kbd.html.jinja"
+PAGE = ROOT / "site/src/pages/components/kbd.html.jinja"
 
 
 class KbdTests(CatalogTestCase):

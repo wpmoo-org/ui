@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/close_button.html.jinja"
-PAGE = ROOT / "src/pages/components/close-button.html.jinja"
+PAGE = ROOT / "site/src/pages/components/close-button.html.jinja"
 
 
 class CloseButtonTests(CatalogTestCase):

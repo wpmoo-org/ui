@@ -4,7 +4,7 @@ from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/card.html.jinja"
-PAGE = ROOT / "src/pages/components/card.html.jinja"
+PAGE = ROOT / "site/src/pages/components/card.html.jinja"
 
 
 class CardTests(CatalogTestCase):

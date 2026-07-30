@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/select.html.jinja"
-PAGE = ROOT / "src/pages/components/select.html.jinja"
+PAGE = ROOT / "site/src/pages/components/select.html.jinja"
 
 
 class SelectTests(CatalogTestCase):
