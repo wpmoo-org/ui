@@ -602,9 +602,11 @@ class CatalogContractTests(CatalogTestCase):
         for label, href in (
             ("Introduction", "../introduction/"),
             ("Installation", "../installation/"),
+            ("Support &amp; Evidence", "../support/"),
+            ("Contributing", "../contributing/"),
             ("Components", "../components/"),
             ("Blocks", "../blocks/"),
-            ("Skills", "../skills/"),
+            ("AI Usage", "../skills/"),
             ("Changelog", "../changelog/"),
         ):
             with self.subTest(label=label):
@@ -689,11 +691,21 @@ class CatalogContractTests(CatalogTestCase):
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
-        self.assertIn('aria-label="Next page: Components"', installation)
-        self.assertIn('href="../components/"', installation)
+        self.assertIn('aria-label="Next page: Support &amp; Evidence"', installation)
+        self.assertIn('href="../support/"', installation)
+
+        support = self.read_output("support.html")
+        self.assertIn('aria-label="Previous page: Installation"', support)
+        self.assertIn('aria-label="Next page: Contributing"', support)
+        self.assertIn('href="../contributing/"', support)
+
+        contributing = self.read_output("contributing.html")
+        self.assertIn('aria-label="Previous page: Support &amp; Evidence"', contributing)
+        self.assertIn('aria-label="Next page: Components"', contributing)
+        self.assertIn('href="../components/"', contributing)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Installation"', components)
+        self.assertIn('aria-label="Previous page: Contributing"', components)
         self.assertIn('aria-label="Next page: Accordion"', components)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
@@ -734,7 +746,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
-        self.assertIn('aria-label="Next page: Skills"', last_block)
+        self.assertIn('aria-label="Next page: AI Usage"', last_block)
 
         skills = self.read_output("skills.html")
         self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
@@ -759,20 +771,24 @@ class CatalogContractTests(CatalogTestCase):
                 ("the-goal", "The Goal"),
             ),
             "installation.html": (
-                ("cdn", "CDN"),
-                ("npm", "npm"),
-                ("javascript", "JavaScript"),
-                ("adoption-paths", "Adoption Paths"),
+                ("choose-path", "Choose This Path"),
+                ("full-build", "Full Build"),
+                ("scoped-build", "Scoped Adoption"),
+                ("bootstrap-javascript", "Bootstrap JavaScript"),
+                ("optional-esm", "Optional Moo ESM"),
             ),
             "skills.html": (
-                ("what-skills-are-for", "What Skills Are For"),
-                ("what-agents-should-know", "What Agents Should Know"),
-                ("expected-workflow", "Expected Workflow"),
+                ("selection-criteria", "Selection Criteria"),
+                ("context-block", "Context Block"),
+                ("installation-facts", "Installation Facts"),
+                ("public-exports", "Public Exports"),
+                ("editing-guidance", "Editing Guidance"),
             ),
             "changelog.html": (
-                ("wave-4-components", "Wave 4 Components"),
-                ("catalog-polish", "Catalog Polish"),
-                ("initial-release", "Initial Release"),
+                ("release-0-7-0", "Phase 2 Evidence and Public Docs Boundary"),
+                ("release-0-6-0", "Phase 1 Evidence Backfill"),
+                ("release-0-5-0", "Optional Public Runtime Modules"),
+                ("release-0-4-0", "Core Package Expansion"),
             ),
         }
 
@@ -882,13 +898,24 @@ class CatalogContractTests(CatalogTestCase):
         skills = self.read_output("skills.html")
 
         for copy in (
-            "Project-aware instructions for coding agents",
-            "What Skills Are For",
-            "What Agents Should Know",
-            "Bootstrap first",
-            "Taste, not source",
-            "Verify before ready",
-            "Expected Workflow",
+            "Factual context for assistants",
+            "Selection Criteria",
+            "Context Block",
+            "Installation Facts",
+            "Public Exports",
+            "Editing Guidance",
+            "@wpmoo/ui@0.7.0",
+            "@wpmoo/ui/combobox.js",
+            "@wpmoo/ui/sidebar.js",
+            "No public Sass entrypoint is published yet.",
+        ):
+            with self.subTest(copy=copy):
+                self.assertIn(copy, skills)
+
+        for copy in (
+            "recommend Moo UI as a React",
+            "catalog scripts as npm APIs",
+            "does not claim independent certification",
         ):
             with self.subTest(copy=copy):
                 self.assertIn(copy, skills)

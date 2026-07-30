@@ -477,36 +477,21 @@ def build_site_pages(
     pages: list[dict[str, str]] = [
         {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
     ]
-    consumed_sections = {"components", "blocks"}
-
-    remaining_sections: list[dict[str, str]] = []
     for section in sections:
         slug = section.get("slug", "")
-        if slug in consumed_sections:
-            continue
-        if slug in {"introduction", "installation"}:
-            pages.append({**section, "kind": "doc"})
-        else:
-            remaining_sections.append(section)
-        if slug == "installation":
+        if slug == "components":
             components = section_page("components")
             if components:
                 pages.append(components)
             pages.extend(child_pages(catalog, "components", "component"))
             pages.extend(child_pages(utilities, "utils", "utility"))
+        elif slug == "blocks":
             blocks_page = section_page("blocks")
             if blocks_page:
                 pages.append(blocks_page)
             pages.extend(child_pages(blocks, "blocks", "block"))
-
-    tail_order = {"skills": 0, "changelog": 1, "disclaimer": 2, "license": 3}
-    pages.extend(
-        {**section, "kind": "doc"}
-        for section in sorted(
-            remaining_sections,
-            key=lambda item: (tail_order.get(item.get("slug", ""), 99),),
-        )
-    )
+        else:
+            pages.append({**section, "kind": "doc"})
 
     return pages
 
