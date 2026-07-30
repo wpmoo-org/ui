@@ -1,6 +1,7 @@
 import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -8,6 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_DIST = ROOT / "dist"
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -31,9 +33,26 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
+EXPECTED_PACKAGE_OUTPUT_FILES = {
+    path
+    for path in EXPECTED_PACKAGE_FILES
+    if path.startswith("dist/")
+}
 
 
 class PackageMetadataTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        result = subprocess.run(
+            [sys.executable, "build.py", "--core"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode:
+            raise AssertionError(result.stderr)
+
     def _read_package(self, relative_path: str = "package.json") -> dict:
         return json.loads((ROOT / relative_path).read_text(encoding="utf-8"))
 
@@ -98,6 +117,15 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
 
+    def test_package_dist_contains_only_published_outputs(self) -> None:
+        package_files = {
+            path.relative_to(ROOT).as_posix()
+            for path in PACKAGE_DIST.rglob("*")
+            if path.is_file()
+        }
+
+        self.assertEqual(package_files, EXPECTED_PACKAGE_OUTPUT_FILES)
+
     def test_certification_preview_matches_package_metadata(self) -> None:
         package = self._read_package()
         certification = self._read_package("certification.json")
@@ -156,6 +184,74 @@ class PackageMetadataTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         packed_files = {entry["path"] for entry in payload[0]["files"]}
         self.assertEqual(packed_files, EXPECTED_PACKAGE_FILES | {"package.json"})
+
+    def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
+        payload = [
+            {
+                "files": [
+                    {"path": path}
+                    for path in sorted(EXPECTED_PACKAGE_FILES | {"package.json"})
+                ]
+            }
+        ]
+        result = subprocess.run(
+            [sys.executable, "scripts/verify_package_contents.py"],
+            cwd=ROOT,
+            input=json.dumps(payload),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_package_manifest_validator_rejects_missing_dist_output(self) -> None:
+        payload = [
+            {
+                "files": [
+                    {"path": path}
+                    for path in sorted(
+                        (EXPECTED_PACKAGE_FILES | {"package.json"})
+                        - {"dist/assets/css/moo-ui.css"}
+                    )
+                ]
+            }
+        ]
+        result = subprocess.run(
+            [sys.executable, "scripts/verify_package_contents.py"],
+            cwd=ROOT,
+            input=json.dumps(payload),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("dist/assets/css/moo-ui.css", result.stderr)
+
+    def test_package_manifest_validator_rejects_site_dist_output(self) -> None:
+        payload = [
+            {
+                "files": [
+                    {"path": path}
+                    for path in sorted(
+                        EXPECTED_PACKAGE_FILES
+                        | {"package.json", "site-dist/index.html"}
+                    )
+                ]
+            }
+        ]
+        result = subprocess.run(
+            [sys.executable, "scripts/verify_package_contents.py"],
+            cwd=ROOT,
+            input=json.dumps(payload),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("site-dist/index.html", result.stderr)
 
     def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -290,6 +386,20 @@ for (const specifier of [
 
         self.assertIn("      - main", push_block)
         self.assertIn("      - dev", push_block)
+
+    def test_ci_keeps_ui_tests_name_and_verifies_both_output_boundaries(self) -> None:
+        workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("  ui-tests:\n    name: ui-tests", workflow)
+        self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
+        self.assertIn('.venv/bin/python build.py', workflow)
+        self.assertIn(
+            'npm pack --dry-run --json | .venv/bin/python '
+            'scripts/verify_package_contents.py',
+            workflow,
+        )
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())

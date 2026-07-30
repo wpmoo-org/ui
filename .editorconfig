@@ -16,7 +16,7 @@ indent_size = 4
 indent_style = space
 indent_size = 2
 
-[{dist,vendor}/**]
+[{dist,site-dist,vendor}/**]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset

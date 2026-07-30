@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/sheet.html.jinja"
-PAGE = ROOT / "src/pages/components/sheet.html.jinja"
+PAGE = ROOT / "site/src/pages/components/sheet.html.jinja"
 STYLES = ROOT / "scss/components/_sheet.scss"
 
 
@@ -167,7 +167,7 @@ class SheetTests(CatalogTestCase):
 
     def test_sheet_panels_are_portaled_before_bootstrap_creates_backdrop(self) -> None:
         script = (
-            ROOT / "src/js/catalog/bootstrap-preview.js"
+            ROOT / "site/src/js/catalog/bootstrap-preview.js"
         ).read_text(encoding="utf-8")
 
         self.assertIn(

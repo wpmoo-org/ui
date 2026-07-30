@@ -3,6 +3,7 @@
 node_modules/
 __pycache__/
 /dist/
+/site-dist/
 /references/
 .coverage
 /coverage.xml

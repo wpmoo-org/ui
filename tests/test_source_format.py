@@ -14,6 +14,7 @@ EXCLUDED_PARTS = {
     "external",
     "node_modules",
     "references",
+    "site-dist",
     "third-party",
     "third_party",
     "vendor",
@@ -101,7 +102,7 @@ class SourceFormatTests(CatalogTestCase):
                 "indent_size",
             )
         }
-        self.assertEqual(sections.get("{dist,vendor}/**"), unset_settings)
+        self.assertEqual(sections.get("{dist,site-dist,vendor}/**"), unset_settings)
         self.assertEqual(
             sections.get("src/icons/lucide-icons.json"),
             unset_settings,

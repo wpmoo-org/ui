@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/badge.html.jinja"
-PAGE = ROOT / "src/pages/components/badge.html.jinja"
+PAGE = ROOT / "site/src/pages/components/badge.html.jinja"
 
 
 class BadgeTests(CatalogTestCase):

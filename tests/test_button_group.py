@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/button_group.html.jinja"
-PAGE = ROOT / "src/pages/components/button-group.html.jinja"
+PAGE = ROOT / "site/src/pages/components/button-group.html.jinja"
 
 
 class ButtonGroupTests(CatalogTestCase):

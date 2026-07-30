@@ -1,10 +1,11 @@
 @import "primary_variables";
 // Sass-only (no CSS output): just for responsive mixins below, so this
 // entrypoint does not pull in the full Bootstrap bundle shipped by moo-ui.scss.
-@import "../vendor/bootstrap/scss/functions";
-@import "../vendor/bootstrap/scss/variables";
-@import "../vendor/bootstrap/scss/mixins/breakpoints";
+@import "../../vendor/bootstrap/scss/functions";
+@import "../../vendor/bootstrap/scss/variables";
+@import "../../vendor/bootstrap/scss/mixins/breakpoints";
 
+@import "catalog/settings";
 @import "catalog/shell";
 @import "catalog/home";
 @import "catalog/docs";

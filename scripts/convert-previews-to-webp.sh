@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Mirrors every PNG under the private assets source tree into a WebP at the
-# same relative path under static/images/. build.py's preview lookups
+# same relative path under site/static/images/. build.py's preview lookups
 # resolve .webp first, so publishing a new or updated preview is just:
 # drop the PNG under the source tree (in the same relative subfolder you
 # want it to land in) and re-run this script — no code changes required
@@ -26,7 +26,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DEST_ROOT="$ROOT_DIR/static/images"
+DEST_ROOT="$ROOT_DIR/site/static/images"
 SOURCE_ROOT="${SOURCE_DIR:-$ROOT_DIR/../assets}"
 FORCE="${FORCE:-0}"
 

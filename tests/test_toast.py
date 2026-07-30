@@ -5,8 +5,8 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/toast.html.jinja"
-PAGE = ROOT / "src/pages/components/toast.html.jinja"
-BOOTSTRAP_PREVIEW_JS = ROOT / "src/js/catalog/bootstrap-preview.js"
+PAGE = ROOT / "site/src/pages/components/toast.html.jinja"
+BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
 
 class ToastTests(CatalogTestCase):

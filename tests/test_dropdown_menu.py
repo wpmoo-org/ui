@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/dropdown_menu.html.jinja"
-PAGE = ROOT / "src/pages/components/dropdown-menu.html.jinja"
+PAGE = ROOT / "site/src/pages/components/dropdown-menu.html.jinja"
 
 
 class DropdownMenuTests(CatalogTestCase):

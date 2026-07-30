@@ -16,7 +16,7 @@ DEFAULT_HOST = "127.0.0.1"
 # port without needing a hardcoded --port flag.
 DEFAULT_PORT = int(os.environ.get("PORT", 4173))
 ROOT = Path(__file__).resolve().parent
-DIST = ROOT / "dist"
+SITE_DIST = ROOT / "site-dist"
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -50,7 +50,7 @@ def display_url(host: str, port: int) -> str:
 def create_handler():
     return partial(
         SimpleHTTPRequestHandler,
-        directory=str(DIST),
+        directory=str(SITE_DIST),
     )
 
 

@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/checkbox.html.jinja"
-PAGE = ROOT / "src/pages/components/checkbox.html.jinja"
+PAGE = ROOT / "site/src/pages/components/checkbox.html.jinja"
 
 
 class CheckboxTests(CatalogTestCase):

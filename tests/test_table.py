@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/table.html.jinja"
-PAGE = ROOT / "src/pages/components/table.html.jinja"
+PAGE = ROOT / "site/src/pages/components/table.html.jinja"
 
 
 class TableTests(CatalogTestCase):

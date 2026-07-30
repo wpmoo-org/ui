@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/toggle_group.html.jinja"
-PAGE = ROOT / "src/pages/components/toggle-group.html.jinja"
+PAGE = ROOT / "site/src/pages/components/toggle-group.html.jinja"
 
 
 class ToggleGroupTests(CatalogTestCase):

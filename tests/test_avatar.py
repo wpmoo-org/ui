@@ -9,7 +9,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/avatar.html.jinja"
-PAGE = ROOT / "src/pages/components/avatar.html.jinja"
+PAGE = ROOT / "site/src/pages/components/avatar.html.jinja"
 STYLE = ROOT / "scss/components/_avatar.scss"
 
 

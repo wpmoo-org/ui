@@ -25,13 +25,20 @@ except ImportError:  # pragma: no cover - POSIX workstation path owns locking.
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
-PAGES = SRC / "pages"
 SCSS = ROOT / "scss"
-STATIC = ROOT / "static"
-DIST = ROOT / "dist"
-LLMS_TXT = ROOT / "llms.txt"
+SITE = ROOT / "site"
+SITE_SCSS = SITE / "scss"
+SITE_SRC = SITE / "src"
+CORE_REGISTRY = SRC / "registry"
+SITE_REGISTRY = SITE_SRC / "registry"
+PAGES = SITE_SRC / "pages"
+SITE_STATIC = SITE / "static"
+PACKAGE_DIST = ROOT / "dist"
+SITE_DIST = ROOT / "site-dist"
+SITE_PUBLIC = SITE / "public"
+LLMS_TXT = SITE_PUBLIC / "llms.txt"
 SITE_ROOT_ASSETS = tuple(
-    ROOT / name
+    SITE_PUBLIC / name
     for name in (
         "favicon.svg",
         "favicon.ico",
@@ -44,8 +51,21 @@ SITE_ROOT_ASSETS = tuple(
 BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
-JS_SOURCE = SRC / "js"
-JS_COMPONENTS = JS_SOURCE / "components"
+JS_COMPONENTS = SRC / "js/components"
+JS_CATALOG = SITE_SRC / "js/catalog"
+CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
+CORE_JS_MODULES = ("combobox.js", "sidebar.js")
+SOURCE_SNAPSHOT_DIRS = (
+    SITE_PUBLIC,
+    SITE_SRC,
+    SITE_SCSS,
+    SITE_STATIC,
+    SRC / "components",
+    JS_COMPONENTS,
+    SRC / "icons",
+    CORE_REGISTRY,
+    SCSS,
+)
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -105,6 +125,10 @@ INLINE_CHILD_ELEMENTS = {
     "u",
     "var",
 }
+
+
+class MissingCoreOutputsError(RuntimeError):
+    """Raised when the docs build is run before the package build."""
 
 
 def dedent_html(value: object) -> str:
@@ -339,7 +363,7 @@ def fail(message: str) -> None:
 def _preview_src(category: str, slug: str, root_path: str) -> str:
     directory = f"assets/images/{category}"
     for extension in ("webp", "png"):
-        if (STATIC / "images" / category / f"{slug}.{extension}").is_file():
+        if (SITE_STATIC / "images" / category / f"{slug}.{extension}").is_file():
             return f"{root_path}{directory}/{slug}.{extension}"
     return f"{root_path}assets/images/placeholder.webp"
 
@@ -375,7 +399,7 @@ def absolute_asset_url(relative_path: str) -> str:
 def seo_image_src(category: str | None = None, slug: str | None = None) -> str:
     if category and slug:
         for extension in ("webp", "png"):
-            candidate = STATIC / "images" / category / f"{slug}.{extension}"
+            candidate = SITE_STATIC / "images" / category / f"{slug}.{extension}"
             if candidate.is_file():
                 return absolute_asset_url(f"assets/images/{category}/{slug}.{extension}")
     return absolute_asset_url("assets/images/readme-hero.webp")
@@ -585,7 +609,7 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
 
 def create_environment(icon_renderer=None) -> Environment:
     environment = Environment(
-        loader=FileSystemLoader(SRC),
+        loader=FileSystemLoader((str(SITE_SRC), str(SRC))),
         autoescape=select_autoescape(("html", "jinja")),
         undefined=StrictUndefined,
         trim_blocks=True,
@@ -614,8 +638,8 @@ def create_environment(icon_renderer=None) -> Environment:
     return environment
 
 
-def load_entries(filename: str) -> list[dict[str, str]]:
-    source_file = SRC / filename
+def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
+    source_file = registry_root / filename
     if not source_file.exists():
         return []
     return json.loads(source_file.read_text(encoding="utf-8"))
@@ -625,17 +649,25 @@ def _fallback_label(slug: str) -> str:
     return " ".join(part.capitalize() for part in slug.split("-"))
 
 
-def _registry_overrides(filename: str) -> dict[str, dict[str, str]]:
-    return {entry["slug"]: entry for entry in load_entries(filename) if entry.get("slug")}
+def _registry_overrides(
+    registry_root: Path,
+    filename: str,
+) -> dict[str, dict[str, str]]:
+    return {
+        entry["slug"]: entry
+        for entry in load_entries(registry_root, filename)
+        if entry.get("slug")
+    }
 
 
 def _load_page_registry(
     pages_dir: Path,
+    registry_root: Path,
     registry_filename: str,
     *,
     fallback_status: str = "ready",
 ) -> list[dict[str, str]]:
-    overrides = _registry_overrides(registry_filename)
+    overrides = _registry_overrides(registry_root, registry_filename)
     entries: list[dict[str, str]] = []
     for page in sorted(pages_dir.glob("*.html.jinja")):
         if page.name == "index.html.jinja":
@@ -663,22 +695,41 @@ def _load_page_registry(
 
 
 def load_catalog() -> list[dict[str, str]]:
-    return _load_page_registry(PAGES / "components", "registry/components.json")
+    return _load_page_registry(
+        PAGES / "components",
+        CORE_REGISTRY,
+        "components.json",
+    )
 
 
 def load_utilities() -> list[dict[str, str]]:
-    return _load_page_registry(PAGES / "utils", "registry/utilities.json")
+    return _load_page_registry(
+        PAGES / "utils",
+        SITE_REGISTRY,
+        "utilities.json",
+    )
 
 
 def load_blocks() -> list[dict[str, str]]:
-    return _load_page_registry(PAGES / "blocks", "registry/blocks.json")
+    return _load_page_registry(
+        PAGES / "blocks",
+        SITE_REGISTRY,
+        "blocks.json",
+    )
 
 
-def compile_style(name: str, *, output_style: str = "expanded") -> str:
-    include_paths = [str(SCSS), str(BOOTSTRAP / "scss")]
+def style_include_paths(entrypoint: Path) -> list[str]:
+    include_paths = [str(SCSS)]
+    if entrypoint.is_relative_to(SITE_SCSS):
+        include_paths.append(str(SITE_SCSS))
+    include_paths.append(str(BOOTSTRAP / "scss"))
+    return include_paths
+
+
+def compile_style(entrypoint: Path, *, output_style: str = "expanded") -> str:
     css = sass.compile(
-        filename=str(SCSS / f"{name}.scss"),
-        include_paths=include_paths,
+        filename=str(entrypoint),
+        include_paths=style_include_paths(entrypoint),
         output_style=output_style,
     )
     return css.replace("\r\n", "\n").replace("\r", "\n").rstrip() + "\n"
@@ -686,41 +737,104 @@ def compile_style(name: str, *, output_style: str = "expanded") -> str:
 
 def write_compiled_style(
     css_dir: Path,
-    source_name: str,
+    entrypoint: Path,
     output_name: str,
     *,
     output_style: str = "expanded",
 ) -> None:
-    css = compile_style(source_name, output_style=output_style)
+    css = compile_style(entrypoint, output_style=output_style)
     (css_dir / output_name).write_text(css, encoding="utf-8")
 
 
-def compile_styles() -> None:
-    css_dir = DIST / "assets/css"
+def compile_core_styles() -> None:
+    css_dir = PACKAGE_DIST / "assets/css"
     css_dir.mkdir(parents=True, exist_ok=True)
-    write_compiled_style(css_dir, "moo-ui", "moo-ui.css")
-    write_compiled_style(css_dir, "moo-ui", "moo-ui.min.css", output_style="compressed")
-    write_compiled_style(css_dir, "catalog", "catalog.css")
-    write_compiled_style(css_dir, "moo-core", "moo.css")
-    write_compiled_style(css_dir, "moo-core", "moo.min.css", output_style="compressed")
+    write_compiled_style(css_dir, SCSS / "moo-ui.scss", "moo-ui.css")
+    write_compiled_style(
+        css_dir,
+        SCSS / "moo-ui.scss",
+        "moo-ui.min.css",
+        output_style="compressed",
+    )
+    write_compiled_style(css_dir, SCSS / "moo-core.scss", "moo.css")
+    write_compiled_style(
+        css_dir,
+        SCSS / "moo-core.scss",
+        "moo.min.css",
+        output_style="compressed",
+    )
+
+
+def compile_catalog_styles() -> None:
+    css_dir = SITE_DIST / "assets/css"
+    css_dir.mkdir(parents=True, exist_ok=True)
+    write_compiled_style(css_dir, SITE_SCSS / "catalog.scss", "catalog.css")
 
 
 def asset_version() -> str:
     digest = hashlib.sha256()
     paths = [
-        DIST / "assets/css/moo-ui.css",
-        DIST / "assets/css/catalog.css",
-        *sorted((DIST / "assets/js").rglob("*.js")),
+        SITE_DIST / "assets/css/moo-ui.css",
+        SITE_DIST / "assets/css/catalog.css",
+        *sorted(
+            path
+            for path in (SITE_DIST / "assets/js").rglob("*")
+            if path.is_file()
+        ),
     ]
     for path in paths:
-        relative = path.relative_to(DIST).as_posix()
+        relative = path.relative_to(SITE_DIST).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]
 
 
-def copy_assets() -> None:
-    js_dir = DIST / "assets/js"
+def copy_package_js() -> None:
+    package_js_dir = PACKAGE_DIST / "js"
+    package_js_dir.mkdir(parents=True, exist_ok=True)
+    for module_name in CORE_JS_MODULES:
+        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
+
+
+def required_core_outputs() -> tuple[Path, ...]:
+    return (
+        *(PACKAGE_DIST / "assets/css" / name for name in CORE_CSS_OUTPUTS),
+        *(PACKAGE_DIST / "js" / name for name in CORE_JS_MODULES),
+    )
+
+
+def verify_core_outputs() -> None:
+    missing = [
+        path.relative_to(ROOT).as_posix()
+        for path in required_core_outputs()
+        if not path.is_file()
+    ]
+    if missing:
+        raise MissingCoreOutputsError(
+            "Required Core outputs are missing; run "
+            "`.venv/bin/python build.py --core` first: "
+            + ", ".join(missing)
+        )
+
+
+def copy_core_outputs_to_site() -> None:
+    css_dir = SITE_DIST / "assets/css"
+    css_dir.mkdir(parents=True, exist_ok=True)
+    for css_name in CORE_CSS_OUTPUTS:
+        shutil.copy2(PACKAGE_DIST / "assets/css" / css_name, css_dir / css_name)
+
+    components_dir = SITE_DIST / "assets/js/components"
+    legacy_js_dir = SITE_DIST / "js"
+    components_dir.mkdir(parents=True, exist_ok=True)
+    legacy_js_dir.mkdir(parents=True, exist_ok=True)
+    for module_name in CORE_JS_MODULES:
+        package_module = PACKAGE_DIST / "js" / module_name
+        shutil.copy2(package_module, components_dir / module_name)
+        shutil.copy2(package_module, legacy_js_dir / module_name)
+
+
+def copy_site_assets() -> None:
+    js_dir = SITE_DIST / "assets/js"
     js_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js",
@@ -730,27 +844,32 @@ def copy_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
-    shutil.copytree(JS_SOURCE, js_dir, dirs_exist_ok=True)
-    package_js_dir = DIST / "js"
-    package_js_dir.mkdir(parents=True, exist_ok=True)
-    for module_name in ("combobox.js", "sidebar.js"):
-        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
-    fonts_dir = DIST / "assets/fonts/geist"
+    if JS_CATALOG.exists():
+        shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
+        catalog_index = js_dir / "catalog/index.js"
+        catalog_index.write_text(
+            catalog_index.read_text(encoding="utf-8").replace(
+                "../../../../src/js/components/",
+                "../components/",
+            ),
+            encoding="utf-8",
+        )
+    fonts_dir = SITE_DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
         GEIST / "Geist-Variable.woff2",
         fonts_dir / "Geist-Variable.woff2",
     )
-    if STATIC.exists():
-        shutil.copytree(STATIC, DIST / "assets", dirs_exist_ok=True)
+    if SITE_STATIC.exists():
+        shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
 
 
 def copy_site_metadata() -> None:
     if LLMS_TXT.exists():
-        shutil.copy2(LLMS_TXT, DIST / "llms.txt")
+        shutil.copy2(LLMS_TXT, SITE_DIST / "llms.txt")
     for path in SITE_ROOT_ASSETS:
         if path.exists():
-            shutil.copy2(path, DIST / path.name)
+            shutil.copy2(path, SITE_DIST / path.name)
 
 
 def public_page_paths() -> list[str]:
@@ -791,8 +910,8 @@ def write_sitemap() -> None:
             "",
         )
     )
-    (DIST / "sitemap.xml").write_text(sitemap, encoding="utf-8")
-    (DIST / "robots.txt").write_text(
+    (SITE_DIST / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+    (SITE_DIST / "robots.txt").write_text(
         "\n".join(
             (
                 "User-agent: *",
@@ -808,7 +927,7 @@ def write_sitemap() -> None:
 def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
-    sections = load_entries("registry/sections.json")
+    sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
     site_pages = build_site_pages(sections, catalog, utilities, blocks)
@@ -817,7 +936,7 @@ def render_pages() -> None:
         relative = page.relative_to(PAGES)
         logical_relative = relative.with_suffix("")
         output_relative = pretty_output_path(logical_relative)
-        output_file = DIST / output_relative
+        output_file = SITE_DIST / output_relative
         output_file.parent.mkdir(parents=True, exist_ok=True)
         depth = len(output_relative.parents) - 1
         root_path = "../" * depth
@@ -825,7 +944,7 @@ def render_pages() -> None:
         current_slug = logical_relative.stem
         if current_section not in {"components", "utils", "blocks"}:
             current_section = "sections"
-        template_name = page.relative_to(SRC).as_posix()
+        template_name = page.relative_to(SITE_SRC).as_posix()
         metadata = page_metadata(
             page,
             logical_relative,
@@ -868,22 +987,34 @@ def build_lock():
 
 def build() -> None:
     with build_lock():
-        if DIST.exists():
-            shutil.rmtree(DIST)
-        DIST.mkdir()
-        compile_styles()
-        copy_assets()
-        copy_site_metadata()
-        render_pages()
-        write_sitemap()
+        build_core()
+        build_site()
+
+
+def build_core() -> None:
+    if PACKAGE_DIST.exists():
+        shutil.rmtree(PACKAGE_DIST)
+    PACKAGE_DIST.mkdir()
+    compile_core_styles()
+    copy_package_js()
+
+
+def build_site() -> None:
+    verify_core_outputs()
+    if SITE_DIST.exists():
+        shutil.rmtree(SITE_DIST)
+    SITE_DIST.mkdir()
+    copy_core_outputs_to_site()
+    compile_catalog_styles()
+    copy_site_assets()
+    copy_site_metadata()
+    render_pages()
+    write_sitemap()
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
-    if LLMS_TXT.exists():
-        paths.append(LLMS_TXT)
-    paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
-    for folder in (SRC, SCSS, STATIC):
+    for folder in SOURCE_SNAPSHOT_DIRS:
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())
     return tuple(
@@ -905,11 +1036,25 @@ def watch() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--watch", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--core", action="store_true")
+    mode.add_argument("--site", action="store_true")
     args = parser.parse_args()
-    if args.watch:
-        watch()
-    else:
-        build()
+    try:
+        if args.watch:
+            if args.core or args.site:
+                parser.error("--watch cannot be combined with --core or --site")
+            watch()
+        elif args.core:
+            with build_lock():
+                build_core()
+        elif args.site:
+            with build_lock():
+                build_site()
+        else:
+            build()
+    except MissingCoreOutputsError as error:
+        parser.exit(1, f"{error}\n")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-import Combobox from "../components/combobox.js";
-import Sidebar from "../components/sidebar.js";
+import Combobox from "../../../../src/js/components/combobox.js";
+import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
 import { initCatalogFilter } from "./catalog-filter.js";

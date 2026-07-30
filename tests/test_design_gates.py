@@ -7,6 +7,7 @@ import tempfile
 from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 
 SCSS = ROOT / "scss"
+SITE_SCSS = ROOT / "site/scss"
 COMPONENTS_SCSS = SCSS / "components"
 ROOT_THEME_CONSUMER_SCSS = (
     SCSS / "themes/_standalone_root.scss",
@@ -207,7 +208,14 @@ def active_scss_imports(source: str) -> set[str]:
 
 
 def partial_import_target(path: Path) -> str:
-    relative = path.relative_to(SCSS)
+    for root in (SCSS, SITE_SCSS):
+        try:
+            relative = path.relative_to(root)
+            break
+        except ValueError:
+            continue
+    else:
+        raise ValueError(f"Unsupported Sass partial path: {path}")
     return relative.with_name(
         relative.stem.removeprefix("_")
     ).with_suffix("").as_posix()
@@ -238,8 +246,8 @@ def component_owner(path: Path) -> str:
 
 
 def catalog_style_partials() -> tuple[Path, ...]:
-    paths = [SCSS / "catalog.scss"]
-    catalog_directory = SCSS / "catalog"
+    paths = [SITE_SCSS / "catalog.scss"]
+    catalog_directory = SITE_SCSS / "catalog"
     paths.extend(
         catalog_directory.rglob("_*.scss") if catalog_directory.exists() else ()
     )
@@ -323,7 +331,6 @@ class DesignGateTests(CatalogTestCase):
                 "_bootstrap_component_layer.scss",
                 "_component_layer.scss",
                 "_primary_variables.scss",
-                "catalog.scss",
                 "moo-core.scss",
                 "moo-ui.scss",
             },
@@ -333,7 +340,18 @@ class DesignGateTests(CatalogTestCase):
         }
         self.assertEqual(
             directories,
-            {"catalog", "components", "foundations", "settings", "themes", "utilities"},
+            {"components", "foundations", "settings", "themes", "utilities"},
+        )
+        site_root_files = {
+            path.name for path in SITE_SCSS.glob("*.scss")
+        }
+        self.assertEqual(site_root_files, {"catalog.scss"})
+        site_directories = {
+            path.name for path in SITE_SCSS.iterdir() if path.is_dir()
+        }
+        self.assertEqual(
+            site_directories,
+            {"catalog"},
         )
         self.assertEqual(
             {
@@ -351,7 +369,6 @@ class DesignGateTests(CatalogTestCase):
             "settings/palette",
             "settings/forms",
             "settings/components",
-            "settings/catalog",
             "settings/bootstrap_overrides",
         ]
         imports = [
@@ -426,8 +443,9 @@ class DesignGateTests(CatalogTestCase):
         )
 
     def test_catalog_aggregate_imports_ownership_layers_in_order(self) -> None:
-        catalog = (SCSS / "catalog.scss").read_text(encoding="utf-8")
+        catalog = (SITE_SCSS / "catalog.scss").read_text(encoding="utf-8")
         expected = [
+            "catalog/settings",
             "catalog/shell",
             "catalog/home",
             "catalog/docs",
@@ -443,10 +461,10 @@ class DesignGateTests(CatalogTestCase):
         ]
 
         self.assertEqual(imports, expected)
-        self.assertEqual(owned_partial_targets(SCSS / "catalog"), set(expected))
+        self.assertEqual(owned_partial_targets(SITE_SCSS / "catalog"), set(expected))
 
     def test_catalog_settings_own_catalog_knobs_only(self) -> None:
-        catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
+        catalog_settings = (SITE_SCSS / "catalog/_settings.scss").read_text(
             encoding="utf-8"
         )
         variables = re.findall(
@@ -600,6 +618,7 @@ class DesignGateTests(CatalogTestCase):
         offenders = [
             offender
             for path in catalog_style_partials()
+            if path.name != "_settings.scss"
             for offender in catalog_literal_offenders(path)
         ]
         self.assertEqual(offenders, [])

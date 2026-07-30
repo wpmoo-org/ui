@@ -1,6 +1,6 @@
 // The Moo UI product stylesheet (moo-ui.scss) stays on Bootstrap's
 // $font-family-sans-serif default. The catalog's own documentation chrome
-// (scss/catalog.scss, .moo-catalog scope only) may use a distinct display
+// (site/scss/catalog.scss, .moo-catalog scope only) may use a distinct display
 // typeface; this is the single swap point — vendor the font under
 // vendor/<font>/ (see vendor/geist/), add a matching @font-face block, and
 // change this variable. Never applied to .moo-example__preview, so a

@@ -5,10 +5,10 @@ from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/field.html.jinja"
-PAGE = ROOT / "src/pages/components/field.html.jinja"
+PAGE = ROOT / "site/src/pages/components/field.html.jinja"
 FIELD_SCSS = ROOT / "scss/components/_field.scss"
 COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_components.scss"
-BOOTSTRAP_PREVIEW_JS = ROOT / "src/js/catalog/bootstrap-preview.js"
+BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
 
 class FieldTests(CatalogTestCase):

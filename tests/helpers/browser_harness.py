@@ -6,11 +6,24 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Iterator
+from urllib.parse import urlsplit
 
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright
 
 
 ROOT = Path(__file__).resolve().parents[2]
+SITE_PUBLIC = ROOT / "site/public"
+SITE_PUBLIC_FILES = frozenset(
+    {
+        "favicon.svg",
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "icon-192.png",
+        "icon-512.png",
+        "site.webmanifest",
+        "llms.txt",
+    }
+)
 AXE_PATH = ROOT / "node_modules/axe-core/axe.min.js"
 LOCAL_CHROME = Path(
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -30,6 +43,12 @@ SCREENSHOT_NORMALIZATION_CSS = """
 class _QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         return
+
+    def translate_path(self, path: str) -> str:
+        public_path = urlsplit(path).path.lstrip("/")
+        if public_path in SITE_PUBLIC_FILES:
+            return str(SITE_PUBLIC / public_path)
+        return super().translate_path(path)
 
 
 @dataclass(frozen=True)

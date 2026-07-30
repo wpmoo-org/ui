@@ -34,8 +34,8 @@ class CatalogContractTests(CatalogTestCase):
         )
 
         for path in (
-            ROOT / "src/shell/sidebar.html.jinja",
-            ROOT / "src/pages/components/index.html.jinja",
+            ROOT / "site/src/shell/sidebar.html.jinja",
+            ROOT / "site/src/pages/components/index.html.jinja",
         ):
             with self.subTest(path=path.relative_to(ROOT).as_posix()):
                 self.assertTrue(
@@ -55,7 +55,7 @@ class CatalogContractTests(CatalogTestCase):
             )
         ]
 
-        lines = (ROOT / "llms.txt").read_text(encoding="utf-8").splitlines()
+        lines = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8").splitlines()
         start = lines.index("## Component Catalog")
         end = lines.index("## Utilities And Blocks")
         component_lines = [
@@ -72,7 +72,7 @@ class CatalogContractTests(CatalogTestCase):
         package = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )
-        llms = (ROOT / "llms.txt").read_text(encoding="utf-8")
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
         match = re.search(
             r"https://unpkg\.com/@wpmoo/ui@([^/]+)/dist/assets/css/moo-ui\.css",
             llms,
@@ -102,7 +102,7 @@ class CatalogContractTests(CatalogTestCase):
 
         for path in (
             ROOT / "src/components/dropdown_menu.html.jinja",
-            ROOT / "src/includes/example.html.jinja",
+            ROOT / "site/src/includes/example.html.jinja",
         ):
             source = path.read_text(encoding="utf-8")
             with self.subTest(path=path.name):
@@ -250,10 +250,10 @@ class CatalogContractTests(CatalogTestCase):
         page_level_classes = {"form-label"}
 
         pages = [
-            *sorted((ROOT / "src/pages/components").glob("*.jinja")),
+            *sorted((ROOT / "site/src/pages/components").glob("*.jinja")),
             # The components index composes the same ready macros; it gets no
             # exemption.
-            ROOT / "src/pages/components/index.html.jinja",
+            ROOT / "site/src/pages/components/index.html.jinja",
         ]
         for path in pages:
             source = path.read_text(encoding="utf-8")
@@ -287,7 +287,7 @@ class CatalogContractTests(CatalogTestCase):
                         )
 
     def test_component_pages_link_to_bootstrap_documentation(self) -> None:
-        for path in sorted((ROOT / "src/pages/components").glob("*.jinja")):
+        for path in sorted((ROOT / "site/src/pages/components").glob("*.jinja")):
             # The components index lists every component; it documents no
             # single Bootstrap component itself, so it carries no reference.
             if path.name == "index.html.jinja":
@@ -304,16 +304,17 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn("render_reference(", source)
 
     def test_external_blank_links_use_noopener_noreferrer(self) -> None:
-        for path in sorted((ROOT / "src").rglob("*.jinja")):
-            source = path.read_text(encoding="utf-8")
-            for tag in re.findall(r"<a\b[^>]*target=\"_blank\"[^>]*>", source):
-                with self.subTest(path=path.relative_to(ROOT), tag=tag):
-                    self.assertIn('rel="', tag)
-                    rel = re.search(r'rel="([^"]*)"', tag)
-                    self.assertIsNotNone(rel)
-                    tokens = set(rel.group(1).split())
-                    self.assertIn("noopener", tokens)
-                    self.assertIn("noreferrer", tokens)
+        for source_root in (ROOT / "site/src", ROOT / "src"):
+            for path in sorted(source_root.rglob("*.jinja")):
+                source = path.read_text(encoding="utf-8")
+                for tag in re.findall(r"<a\b[^>]*target=\"_blank\"[^>]*>", source):
+                    with self.subTest(path=path.relative_to(ROOT), tag=tag):
+                        self.assertIn('rel="', tag)
+                        rel = re.search(r'rel="([^"]*)"', tag)
+                        self.assertIsNotNone(rel)
+                        tokens = set(rel.group(1).split())
+                        self.assertIn("noopener", tokens)
+                        self.assertIn("noreferrer", tokens)
 
     def test_ready_component_preview_images_are_valid_when_present(self) -> None:
         catalog = json.loads(
@@ -359,7 +360,7 @@ class CatalogContractTests(CatalogTestCase):
             )
 
     def test_catalog_builds_the_complete_root_favicon_set(self) -> None:
-        svg = (ROOT / "favicon.svg").read_text(encoding="utf-8")
+        svg = (ROOT / "site/public/favicon.svg").read_text(encoding="utf-8")
         self.assertIn('viewBox="0 0 24 24"', svg)
         self.assertIn("prefers-color-scheme: dark", svg)
         self.assertIn('stroke="currentColor"', svg)
@@ -375,17 +376,19 @@ class CatalogContractTests(CatalogTestCase):
         }
         for name, expected_size in expected_png_sizes.items():
             with self.subTest(name=name):
-                width, height, _ = read_png_ihdr(ROOT / name)
+                width, height, _ = read_png_ihdr(ROOT / "site/public" / name)
                 self.assertEqual((width, height), expected_size)
 
-        ico = (ROOT / "favicon.ico").read_bytes()
+        ico = (ROOT / "site/public/favicon.ico").read_bytes()
         self.assertEqual(ico[:6], b"\x00\x00\x01\x00\x03\x00")
         self.assertEqual(
             [(ico[6 + index * 16] or 256, ico[7 + index * 16] or 256) for index in range(3)],
             [(16, 16), (32, 32), (48, 48)],
         )
 
-        manifest = json.loads((ROOT / "site.webmanifest").read_text(encoding="utf-8"))
+        manifest = json.loads(
+            (ROOT / "site/public/site.webmanifest").read_text(encoding="utf-8")
+        )
         self.assertEqual(manifest["name"], "Moo UI")
         self.assertEqual(manifest["short_name"], "Moo UI")
         self.assertEqual(manifest["display"], "standalone")
@@ -469,8 +472,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("background: $input-disabled-bg;", catalog_scss)
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
-        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        preview = (ROOT / "src/js/catalog/theme.js").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
         self.assertIn("document.documentElement.dataset.bsTheme = theme", base)
@@ -479,7 +482,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
-        base = (ROOT / "src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
 
         handoff = 'document.documentElement.dataset.mooSidebarCatalogState'
         self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)

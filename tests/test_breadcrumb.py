@@ -5,7 +5,7 @@ from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 
 
 COMPONENT = ROOT / "src/components/breadcrumb.html.jinja"
-PAGE = ROOT / "src/pages/components/breadcrumb.html.jinja"
+PAGE = ROOT / "site/src/pages/components/breadcrumb.html.jinja"
 
 
 class BreadcrumbTests(CatalogTestCase):

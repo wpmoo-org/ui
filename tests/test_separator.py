@@ -8,7 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/separator.html.jinja"
-PAGE = ROOT / "src/pages/components/separator.html.jinja"
+PAGE = ROOT / "site/src/pages/components/separator.html.jinja"
 
 
 class SeparatorTests(CatalogTestCase):

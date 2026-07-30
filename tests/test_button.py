@@ -9,7 +9,7 @@ from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase, lucide_body
 
 
-PAGE = ROOT / "src/pages/components/button.html.jinja"
+PAGE = ROOT / "site/src/pages/components/button.html.jinja"
 
 
 class ButtonTests(CatalogTestCase):
