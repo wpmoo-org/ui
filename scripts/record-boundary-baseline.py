@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import subprocess
 from pathlib import Path
 
@@ -19,10 +18,6 @@ CORE_OUTPUTS = {
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
 }
-NPM_PACK_ENV = {
-    **os.environ,
-    "npm_config_cache": "/private/tmp/wpmoo-npm-cache",
-}
 
 
 def sha256(path: Path) -> str:
@@ -32,16 +27,12 @@ def sha256(path: Path) -> str:
 
 
 def run(command: list[str], root: Path) -> subprocess.CompletedProcess[str]:
-    env = None
-    if command[:2] == ["npm", "pack"]:
-        env = NPM_PACK_ENV
     return subprocess.run(
         command,
         cwd=root,
         check=True,
         capture_output=True,
         text=True,
-        env=env,
     )
 
 

@@ -3,13 +3,14 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
-import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 import build
+from jinja2 import Environment, meta
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,10 +24,8 @@ CORE_OUTPUTS = {
     "dist/js/sidebar.js",
 }
 FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
-NPM_PACK_ENV = {
-    **os.environ,
-    "npm_config_cache": "/private/tmp/wpmoo-npm-cache",
-}
+CORE_SOURCE_ROOTS = ("src", "scss")
+CORE_SOURCE_SUFFIXES = {".py", ".js", ".jinja", ".scss"}
 
 
 def load_recorder():
@@ -44,6 +43,46 @@ def load_recorder():
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def core_source_boundary_offenders(root: Path) -> list[str]:
+    jinja_environment = Environment()
+    site_templates = {
+        path.relative_to(root / "site/src").as_posix()
+        for path in (root / "site/src").rglob("*.jinja")
+        if path.is_file()
+    }
+    offenders: list[str] = []
+
+    for root_name in CORE_SOURCE_ROOTS:
+        source_root = root / root_name
+        for path in sorted(source_root.rglob("*")):
+            if not path.is_file() or path.suffix not in CORE_SOURCE_SUFFIXES:
+                continue
+            source = path.read_text(encoding="utf-8")
+            matches = [
+                needle
+                for needle in FORBIDDEN_CORE_SITE_REFERENCES
+                if needle in source
+            ]
+            if matches:
+                offenders.append(
+                    f"{path.relative_to(root).as_posix()}: {', '.join(matches)}"
+                )
+            if path.suffix == ".jinja":
+                parsed = jinja_environment.parse(source)
+                for template_name in sorted(
+                    template
+                    for template in meta.find_referenced_templates(parsed)
+                    if isinstance(template, str)
+                ):
+                    if template_name in site_templates:
+                        offenders.append(
+                            f"{path.relative_to(root).as_posix()}: "
+                            f"imports site template {template_name}"
+                        )
+
+    return offenders
 
 
 class CoreDocsBoundaryTests(unittest.TestCase):
@@ -75,7 +114,6 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
-            env=NPM_PACK_ENV,
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -142,29 +180,33 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertIn(str(template), snapshot_paths)
 
     def test_core_source_does_not_import_site_source(self) -> None:
-        core_roots = (
-            ROOT / "src",
-            ROOT / "scss",
+        self.assertEqual(core_source_boundary_offenders(ROOT), [])
+
+    def test_core_jinja_source_cannot_logically_import_site_templates(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            core_template = root / "src/components/probe.html.jinja"
+            site_template = root / "site/src/includes/example.html.jinja"
+            core_template.parent.mkdir(parents=True)
+            site_template.parent.mkdir(parents=True)
+            core_template.write_text(
+                '{% from "includes/example.html.jinja" import render_example %}\n',
+                encoding="utf-8",
+            )
+            site_template.write_text(
+                "{% macro render_example() %}{% endmacro %}\n",
+                encoding="utf-8",
+            )
+
+            offenders = core_source_boundary_offenders(root)
+
+        self.assertEqual(
+            offenders,
+            [
+                "src/components/probe.html.jinja: "
+                "imports site template includes/example.html.jinja"
+            ],
         )
-        allowed_suffixes = {".py", ".js", ".jinja", ".scss"}
-        offenders: list[str] = []
-
-        for root in core_roots:
-            for path in sorted(root.rglob("*")):
-                if not path.is_file() or path.suffix not in allowed_suffixes:
-                    continue
-                source = path.read_text(encoding="utf-8")
-                matches = [
-                    needle
-                    for needle in FORBIDDEN_CORE_SITE_REFERENCES
-                    if needle in source
-                ]
-                if matches:
-                    offenders.append(
-                        f"{path.relative_to(ROOT).as_posix()}: {', '.join(matches)}"
-                    )
-
-        self.assertEqual(offenders, [])
 
     def test_certification_fixtures_use_core_dist_paths(self) -> None:
         stylesheet_href = "/dist/assets/css/moo-ui.css"
