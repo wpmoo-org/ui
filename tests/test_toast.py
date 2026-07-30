@@ -25,8 +25,8 @@ class ToastTests(CatalogTestCase):
 
         self.assertIn('id="toast-basic"', output)
         self.assertIn('class="toast"', output)
-        self.assertIn('role="alert"', output)
-        self.assertIn('aria-live="assertive"', output)
+        self.assertIn('role="status"', output)
+        self.assertIn('aria-live="polite"', output)
         self.assertIn('aria-atomic="true"', output)
         self.assertIn('class="toast-header"', output)
         self.assertIn("Moo UI", output)
@@ -38,13 +38,23 @@ class ToastTests(CatalogTestCase):
         self.assertNotIn("data-bs-autohide", output)
         self.assertNotIn("data-bs-delay", output)
 
-    def test_toast_requires_id_title_and_body(self) -> None:
+    def test_toast_supports_assertive_priority_for_urgent_messages(self) -> None:
+        output = self.render(
+            '{{ toast("toast-error", "Sync failed", "Try again.", priority="assertive") }}'
+        )
+
+        self.assertIn('role="alert"', output)
+        self.assertIn('aria-live="assertive"', output)
+
+    def test_toast_requires_id_title_body_and_known_priority(self) -> None:
         with self.assertRaisesRegex(ValueError, "Toast id is required"):
             self.render('{{ toast("   ", "Title", "Body") }}')
         with self.assertRaisesRegex(ValueError, "Toast title is required"):
             self.render('{{ toast("id", "   ", "Body") }}')
         with self.assertRaisesRegex(ValueError, "Toast body is required"):
             self.render('{{ toast("id", "Title", "   ") }}')
+        with self.assertRaisesRegex(ValueError, "Unknown toast priority: loud"):
+            self.render('{{ toast("id", "Title", "Body", priority="loud") }}')
 
     def test_toast_timestamp_is_optional(self) -> None:
         output = self.render('{{ toast("id", "Title", "Body") }}')
@@ -106,10 +116,16 @@ class ToastTests(CatalogTestCase):
             source,
         )
         self.assertIn('toast_target="toast-basic"', source)
+        self.assertIn("portal_content=basic_toast", source)
+        self.assertIn("portal_content=stacking_toasts", source)
+        self.assertIn("portal_content=persistent_toast", source)
+        self.assertIn("arabic_portal=rtl_arabic_toast", source)
+        self.assertIn("hebrew_portal=rtl_hebrew_toast", source)
+        self.assertIn("english_portal=rtl_english_toast", source)
         self.assertIn("autohide=false", source)
         self.assertIn('dir="rtl"', source)
 
-    def test_catalog_bootstrap_module_uses_one_delegated_toast_listener(self) -> None:
+    def test_catalog_bootstrap_module_delegates_toast_triggers(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
 
         self.assertIn(

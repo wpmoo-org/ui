@@ -6,6 +6,8 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/field.html.jinja"
 PAGE = ROOT / "src/pages/components/field.html.jinja"
+FIELD_SCSS = ROOT / "scss/components/_field.scss"
+COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_components.scss"
 BOOTSTRAP_PREVIEW_JS = ROOT / "src/js/catalog/bootstrap-preview.js"
 
 
@@ -24,14 +26,14 @@ class FieldTests(CatalogTestCase):
             '{% call form(extra_class="needs-validation", novalidate=true) %}<p>Content</p>{% endcall %}'
         )
 
-        self.assertIn('<form class="needs-validation" novalidate>', output)
+        self.assertIn('<form class="field-form needs-validation" novalidate>', output)
         self.assertIn("<p>Content</p>", output)
         self.assertIn("</form>", output)
 
-    def test_form_omits_class_and_novalidate_by_default(self) -> None:
+    def test_form_renders_field_form_class_by_default(self) -> None:
         output = self.render('{% call form() %}x{% endcall %}')
 
-        self.assertIn("<form>", output)
+        self.assertIn('<form class="field-form">', output)
         self.assertNotIn("novalidate", output)
 
     def test_field_wraps_caller_content(self) -> None:
@@ -121,6 +123,28 @@ class FieldTests(CatalogTestCase):
 
         self.assertIn('class="field-description form-text"', output)
         self.assertIn("Choose what to hear about.", output)
+
+    def test_fieldset_sibling_spacing_uses_dedicated_token(self) -> None:
+        field_source = FIELD_SCSS.read_text(encoding="utf-8")
+        settings_source = COMPONENT_SETTINGS_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "$moo-field-form-gap: $moo-field-group-gap !default;",
+            settings_source,
+        )
+        self.assertIn(
+            "$moo-field-fieldset-sibling-gap: "
+            "$moo-field-group-gap !default;",
+            settings_source,
+        )
+        self.assertIn(".field-form {", field_source)
+        self.assertIn("gap: $moo-field-form-gap;", field_source)
+        self.assertIn(".field-fieldset + .field-fieldset", field_source)
+        self.assertIn(
+            "margin-top: $moo-field-fieldset-sibling-gap;",
+            field_source,
+        )
+        self.assertIn(".field-form > .field-fieldset + .field-fieldset", field_source)
 
     def test_fieldset_requires_legend(self) -> None:
         with self.assertRaisesRegex(ValueError, "Fieldset legend is required"):

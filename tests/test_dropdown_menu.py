@@ -178,4 +178,28 @@ class DropdownMenuTests(CatalogTestCase):
         self.assertIn('href="https://example.com"', output)
         self.assertIn('target="_blank"', output)
         self.assertIn('rel="noopener noreferrer"', output)
+
+    def test_dropdown_toggle_item_uses_bootstrap_button_toggle_contract(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_toggle_item %}'
+            '{{ dropdown_toggle_item("Sidebar", pressed=true, shortcut="⌘S") }}'
+        )
+
+        self.assertIn(
+            '<button class="dropdown-item dropdown-item-check active" type="button" '
+            'data-bs-toggle="button" aria-pressed="true">',
+            output,
+        )
+        self.assertIn('class="dropdown-item-check__indicator"', output)
         self.assertIn('data-icon="inline-start"', output)
+        self.assertIn('<span>Sidebar</span>', output)
+        self.assertIn('<span class="ms-auto small text-body-secondary">⌘S</span>', output)
+        self.assertNotIn("menuitemcheckbox", output)
+        self.assertNotIn('role="checkbox"', output)
+
+    def test_dropdown_toggle_item_fails_fast_for_missing_label(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Dropdown toggle item label is required"):
+            self.render_template(
+                '{% from "components/dropdown_menu.html.jinja" import dropdown_toggle_item %}'
+                '{{ dropdown_toggle_item("   ") }}'
+            )

@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "0.1",
+  "status": "backfill",
+  "releaseTarget": "0.7.0",
+  "releaseClaim": "none",
+  "description": "Incremental Phase 2 evidence for the 0.7.0 T2/T3 backfill. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.7.0 release gate is complete.",
+  "components": [
+    {
+      "slug": "tooltip",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_tooltip.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/tooltips/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/tooltip.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_tooltip.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit opt-in initialization, keyboard-focus show/focusout dismissal, aria-describedby ownership, viewport-edge placement flipping, repeated use, hidden-state disposal and reinitialization, no backdrop or scroll lock, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Bootstrap Tooltip does not own an Escape-key listener; its applicable keyboard dismissal contract is focusout. Tooltip does not create a backdrop or scroll lock.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "popover",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_popover.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/popovers/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/popover.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/tooltip.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_popover.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit opt-in initialization, focus-triggered show and next-focus dismissal, aria-describedby ownership, non-interactive title/body content, viewport-edge placement fallback, repeated use, hidden-state disposal and reinitialization, no backdrop or scroll lock, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Bootstrap Popover does not manage focus inside its generated content and does not own an Escape-key listener; Moo UI keeps popover content non-interactive and uses Dialog for interactive focus boundaries.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "dialog",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_dialog.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/modal/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/modal.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/focustrap.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_modal.scss"
+      ],
+      "limitations": [
+        "Phase 2 promotes the existing Phase 0E Dialog pilot evidence into the complete Tier 2 report; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The existing fixture proves Data API initialization, semantic title/description wiring, focus entry and trapping, backdrop creation/removal, Escape dismissal, trigger focus return, repeated open/close use, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Bootstrap Modal owns the runtime lifecycle; Dialog adds no parallel JavaScript implementation.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "toast",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_toast.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/toasts/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/toast.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_toasts.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit initialization, polite atomic status semantics, viewport-safe fixed placement, trigger-focus preservation, keyboard-focusable dismissal, repeated show/hide use, hidden-state disposal and reinitialization, no backdrop or scroll lock, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Toast is a non-modal status surface: Bootstrap does not move focus into it, return focus after dismissal, create a backdrop, lock scroll, or own an Escape-key listener.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "sheet",
+      "phase": "2A",
+      "tier": 2,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_sheet.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/offcanvas/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/offcanvas.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/focustrap.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_offcanvas.scss"
+      ],
+      "limitations": [
+        "Phase 2 browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves Data API initialization, semantic dialog wiring, focus entry and trapping, default backdrop and scroll lock, Escape and close-button dismissal, trigger focus return, repeated use, hidden-state disposal and reinitialization, the scroll-enabled/no-backdrop variant, accessibility, responsive/RTL rendering, and clean console/page-error evidence.",
+        "Sheet is Moo UI's Bootstrap-native Offcanvas composition; Bootstrap owns its runtime lifecycle and focus trap. With scroll=true and backdrop=false Bootstrap intentionally does not activate that focus trap, so Escape is handled while focus is within the sheet rather than globally.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "sidebar",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_sidebar.py",
+        "tests/test_certification_browser.py",
+        "dist/js/sidebar.js"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/offcanvas/",
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/offcanvas.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js"
+      ],
+      "limitations": [
+        "Phase 2 promotes the existing Phase 0E Sidebar pilot evidence into the complete Tier 3 report; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The existing fixture proves public side-effect-free ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, desktop expanded/collapsed persistence and keyboard shortcut flow, editable-target shortcut isolation, mobile Offcanvas backdrop/Escape/focus-return behavior, responsive composition, accessibility, RTL/theme rendering, and clean console/page-error evidence.",
+        "Sidebar composes ready Button, Input, Separator, Skeleton, Dropdown Menu, and Bootstrap Offcanvas contracts while Moo-owned ESM supplies only the source-verified responsive shell/state gap.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "form",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "accessibility", "visual"],
+        "not-applicable": ["lifecycle"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_form.py",
+        "tests/test_field.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/forms/overview/",
+        "https://getbootstrap.com/docs/5.3/forms/form-control/",
+        "https://getbootstrap.com/docs/5.3/forms/select/",
+        "https://getbootstrap.com/docs/5.3/forms/checks-radios/",
+        "https://getbootstrap.com/docs/5.3/forms/validation/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-control.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-select.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-check.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_validation.scss"
+      ],
+      "limitations": [
+        "Phase 2 records Form as a static Tier 3 composition of already-certified Field, Input, Textarea, Select, Checkbox, Radio Group, Switch, and Button primitives; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves native form markup, semantic fieldset grouping, validation classes and native validity, labels and descriptions, text input, select, textarea, checkbox, radio, switch, submit/reset buttons, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Form owns no JavaScript runtime lifecycle: native HTML forms and the child controls own keyboard/focus behavior, while Bootstrap validation styles are class and pseudo-class driven.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "combobox",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_combobox.py",
+        "tests/test_certification_browser.py",
+        "dist/js/combobox.js"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://getbootstrap.com/docs/5.3/forms/form-control/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_dropdown.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-control.scss"
+      ],
+      "resolvedFindings": [
+        "Listbox option wrappers and grouped lists use presentation roles so axe recognizes the required option ownership chain.",
+        "The public ESM module owns Combobox behavior and lifecycle while the catalog imports the same module instead of carrying a private duplicate."
+      ],
+      "limitations": [
+        "Phase 2 promotes the existing Phase 0E Combobox pilot evidence into the complete Tier 3 report; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The existing fixture proves public side-effect-free ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, single-select keyboard navigation, active-descendant state, filtering, empty state, live-region updates, change events, hidden-value serialization, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Bootstrap does not ship a native Combobox component; Moo UI composes Bootstrap form-control and dropdown/menu structure while the optional public ESM module supplies only the verified behavior gap.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "alert-dialog",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_alert_dialog.py",
+        "tests/test_dialog.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/modal/#static-backdrop",
+        "https://getbootstrap.com/docs/5.3/components/modal/#via-data-attributes",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/modal.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/backdrop.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/util/focustrap.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_modal.scss"
+      ],
+      "limitations": [
+        "Phase 2 records Alert Dialog as a Tier 3 confirmation composition of Dialog, Button, and the Bootstrap Modal static-backdrop contract; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves static backdrop and disabled Escape dismissal, Bootstrap hidePrevented feedback, title/description wiring, no header close button, action-button dismissal, focus traversal, focus return, repeated use, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Alert Dialog owns no separate JavaScript implementation: Bootstrap Modal owns the backdrop, focus trap, scroll lock, and lifecycle while the Alert Dialog macro fixes the confirmation-only structure and static options.",
+        "No empty, loading, or async error state applies to this synchronous confirmation primitive; longer workflows should compose Dialog with application-specific content.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "menubar",
+      "phase": "2B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_menubar.py",
+        "tests/test_dropdown_menu.py",
+        "tests/test_certification_browser.py"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://getbootstrap.com/docs/5.3/forms/checks-radios/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_dropdown.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-check.scss"
+      ],
+      "limitations": [
+        "Phase 2 records Menubar as a Tier 3 composition of the already-certified Dropdown Menu, Checkbox, Radio Group, and Button primitives; the complete 0.7.0 gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves the accepted role=group container contract, absence of unsupported ARIA menubar/menuitem semantics, independent Bootstrap dropdown keyboard and Escape behavior, sibling menu closing, auto_close=\"outside\" for form controls inside menus, Dropdown instance lifecycle availability, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Bootstrap does not ship a shadcn-style roving menubar or nested submenu primitive. Moo UI intentionally documents submenu as an unsupported gap instead of spoofing roles or hover/roving behavior it cannot back.",
+        "Menubar owns no separate JavaScript implementation: Bootstrap Dropdown owns trigger state, menu positioning, keyboard handling, dismissal, and lifecycle for each grouped menu.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    }
+  ]
+}

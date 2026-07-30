@@ -52,6 +52,20 @@
   {% endif %}
 {%- endmacro %}
 
+{% macro dropdown_toggle_item(label, pressed=false, disabled=false, icon="check", shortcut="", extra_class="", attrs="") -%}
+  {% if not label | trim %}{{ fail("Dropdown toggle item label is required") }}{% endif %}
+  {% set classes = "dropdown-item dropdown-item-check" %}
+  {% if pressed %}{% set classes = classes ~ " active" %}{% endif %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <li>
+    <button class="{{ classes }}" type="button" data-bs-toggle="button" aria-pressed="{{ 'true' if pressed else 'false' }}"{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} disabled{% endif %}>
+      <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>
+      <span>{{ label }}</span>
+      {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
+    </button>
+  </li>
+{%- endmacro %}
+
 {% macro dropdown_header(label) -%}
   {% if not label | trim %}{{ fail("Dropdown header label is required") }}{% endif %}
   <li><h6 class="dropdown-header">{{ label }}</h6></li>

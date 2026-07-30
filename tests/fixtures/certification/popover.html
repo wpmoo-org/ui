@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Popover certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 8rem;
+        justify-items: start;
+        max-width: 28rem;
+      }
+
+      .certification-edge-region {
+        margin-inline-start: -1.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Popover certification fixture</h1>
+
+      <a
+        class="btn btn-outline-secondary"
+        href="#!"
+        id="certification-popover-focus-trigger"
+        role="button"
+        tabindex="0"
+        data-bs-toggle="popover"
+        data-bs-trigger="focus"
+        data-bs-placement="top"
+        data-bs-title="Review status"
+        data-bs-content="The change is ready for a final review."
+      >Show dismissible details</a>
+
+      <div class="certification-edge-region">
+        <button
+          class="btn btn-primary"
+          id="certification-popover-edge-trigger"
+          type="button"
+          data-bs-toggle="popover"
+          data-bs-placement="left"
+          data-bs-title="Edge placement"
+          data-bs-content="Popper keeps this content inside the viewport."
+        >Show edge popover</button>
+      </div>
+
+      <button class="btn btn-outline-secondary" id="certification-popover-next" type="button">
+        Next focus target
+      </button>
+    </main>
+
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const focusTrigger = document.querySelector("#certification-popover-focus-trigger");
+      const edgeTrigger = document.querySelector("#certification-popover-edge-trigger");
+      window.certificationFocusPopover = new bootstrap.Popover(focusTrigger, {
+        container: document.body,
+      });
+      window.certificationEdgePopover = new bootstrap.Popover(edgeTrigger, {
+        boundary: document.body,
+        container: document.body,
+      });
+      document.body.dataset.popoverReady = "true";
+    </script>
+  </body>
+</html>

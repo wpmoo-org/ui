@@ -15,6 +15,8 @@
   <div class="moo-component-examples">
     {% set basic %}
       {{ button("Show approval toast", variant="outline", toast_target="toast-basic") }}
+    {% endset %}
+    {% set basic_toast %}
       {% call toast_container(placement="bottom-end") %}
         {{ toast("toast-basic", "Workflow", "Backup completed successfully.", timestamp="just now") }}
       {% endcall %}
@@ -23,7 +25,8 @@
       "basic",
       "Basic",
       "Hook a toast to a Button with <code>toast_target</code>; Bootstrap handles the reveal/close behavior in the shared catalog wiring and toast macro.",
-      basic
+      basic,
+      portal_content=basic_toast
     ) }}
 
     {% set stacking %}
@@ -31,6 +34,8 @@
         {{ button("Show first alert", variant="outline", toast_target="toast-stack-1") }}
         {{ button("Show second alert", variant="outline", toast_target="toast-stack-2") }}
       </div>
+    {% endset %}
+    {% set stacking_toasts %}
       {% call toast_container(placement="bottom-end") %}
         {{ toast("toast-stack-1", "Ingestion", "Invoice set synced.", timestamp="1 min ago") }}
         {{ toast("toast-stack-2", "Ingestion", "Receipt batch synced.", timestamp="just now") }}
@@ -40,47 +45,57 @@
       "stacking",
       "Stacking",
       "Stack multiple follow-up events in one container so they retain spacing and timing.",
-      stacking
+      stacking,
+      portal_content=stacking_toasts
     ) }}
 
     {% set persistent %}
       {{ button("Show persistent toast", variant="outline", toast_target="toast-persistent") }}
+    {% endset %}
+    {% set persistent_toast %}
       {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-persistent", "Queue", "Sync timed out — retry from the operations panel.", autohide=false) }}
+        {{ toast("toast-persistent", "Queue", "Sync timed out — retry from the operations panel.", autohide=false, priority="assertive") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "persistent",
       "No autohide",
-      "Set <code>autohide=false</code> for actions that require manual acknowledgement.",
-      persistent
+      "Set <code>autohide=false</code> for actions that require manual acknowledgement; use <code>priority=\"assertive\"</code> only for an urgent interruption.",
+      persistent,
+      portal_content=persistent_toast
     ) }}
 
     {% set rtl_arabic %}
       <div class="d-inline-flex" dir="rtl">
         {{ button("إظهار تنبيه المراجعة", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-arabic") }}
-        {% call toast_container(placement="bottom-end") %}
-          {{ toast("toast-rtl-arabic", "المراجعة", "تمت مراجعة الطلب بنجاح.", timestamp="الآن") }}
-        {% endcall %}
       </div>
+    {% endset %}
+    {% set rtl_arabic_toast %}
+      {% call toast_container(placement="bottom-end") %}
+        {{ toast("toast-rtl-arabic", "المراجعة", "تمت مراجعة الطلب بنجاح.", timestamp="الآن") }}
+      {% endcall %}
     {% endset %}
 
     {% set rtl_hebrew %}
       <div class="d-inline-flex" dir="rtl">
         {{ button("הצג התראת סקירה", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-hebrew") }}
-        {% call toast_container(placement="bottom-end") %}
-          {{ toast("toast-rtl-hebrew", "סקירה", "הבקשה אושרה בהצלחה.", timestamp="כרגע") }}
-        {% endcall %}
       </div>
+    {% endset %}
+    {% set rtl_hebrew_toast %}
+      {% call toast_container(placement="bottom-end") %}
+        {{ toast("toast-rtl-hebrew", "סקירה", "הבקשה אושרה בהצלחה.", timestamp="כרגע") }}
+      {% endcall %}
     {% endset %}
 
     {% set rtl_english %}
       <div class="d-inline-flex" dir="rtl">
         {{ button("Show review toast", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-english") }}
-        {% call toast_container(placement="bottom-end") %}
-          {{ toast("toast-rtl-english", "Review", "The request passed review.", timestamp="now") }}
-        {% endcall %}
       </div>
+    {% endset %}
+    {% set rtl_english_toast %}
+      {% call toast_container(placement="bottom-end") %}
+        {{ toast("toast-rtl-english", "Review", "The request passed review.", timestamp="now") }}
+      {% endcall %}
     {% endset %}
 
     {{ render_rtl_example(
@@ -88,7 +103,10 @@
       "Compare Arabic, Hebrew, and English toast actions inside a compact RTL shell.",
       rtl_arabic,
       rtl_hebrew,
-      rtl_english
+      rtl_english,
+      arabic_portal=rtl_arabic_toast,
+      hebrew_portal=rtl_hebrew_toast,
+      english_portal=rtl_english_toast
     ) }}
   </div>
 

@@ -1,4 +1,5 @@
 import os
+import re
 import unittest
 
 from playwright.sync_api import expect, sync_playwright
@@ -129,11 +130,14 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 root = page.locator("#certification-combobox")
                 combobox_input = page.locator("#certification-combobox-input")
+                indicator = root.locator(".combobox-indicator")
                 menu = page.locator("#certification-combobox-listbox")
                 hidden_value = root.locator('input[type="hidden"]')
                 empty_state = root.locator("[data-moo-combobox-empty]")
                 live_region = root.locator("[data-moo-combobox-live]")
                 expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
+                expect(indicator.locator('[data-lucide="chevron-down"]')).to_have_count(1)
+                self.assertEqual(indicator.inner_text().strip(), "")
                 self.assertTrue(
                     root.evaluate(
                         """
@@ -338,6 +342,714 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_sidebar_mobile_offcanvas_keeps_bootstrap_transform_transition(self) -> None:
+        context = self.browser.new_context(
+            viewport={"width": 390, "height": 844},
+            color_scheme="light",
+            is_mobile=True,
+            has_touch=True,
+            reduced_motion="no-preference",
+            locale="en-US",
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        response = page.goto(
+            f"{self.base_url}/tests/fixtures/certification/sidebar.html",
+            wait_until="networkidle",
+        )
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
+        page.locator("html").evaluate(
+            """
+            element => {
+              element.setAttribute("dir", "ltr");
+              element.setAttribute("data-bs-theme", "light");
+            }
+            """
+        )
+        expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+
+        transition = page.locator("#certification-sidebar").evaluate(
+            """
+            element => {
+              const style = getComputedStyle(element);
+              return {
+                property: style.transitionProperty,
+                duration: style.transitionDuration,
+                timing: style.transitionTimingFunction,
+                transform: style.transform,
+                variable: style.getPropertyValue("--bs-offcanvas-transition").trim(),
+              };
+            }
+            """
+        )
+        self.assertIn("transform", transition["variable"])
+        self.assertIn("transform", transition["property"])
+        self.assertNotEqual(transition["duration"], "0s")
+        self.assertNotEqual(transition["transform"], "none")
+        evidence.assert_clean()
+        context.close()
+
+    def test_tooltip_fixture_proves_placement_focus_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/tooltip.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                body = page.locator("body")
+                edge_trigger = page.locator("#certification-tooltip-edge-trigger")
+                repeat_trigger = page.locator("#certification-tooltip-repeat-trigger")
+                expect(body).to_have_attribute("data-tooltip-ready", "true")
+                self.assertTrue(
+                    edge_trigger.evaluate(
+                        "element => bootstrap.Tooltip.getInstance(element) "
+                        "=== window.certificationEdgeTooltip"
+                    )
+                )
+                self.assertTrue(
+                    repeat_trigger.evaluate(
+                        "element => bootstrap.Tooltip.getInstance(element) "
+                        "=== window.certificationRepeatTooltip"
+                    )
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-tooltip-edge-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.tooltip", resolve, { once: true });
+                      trigger.focus();
+                    })
+                    """
+                )
+                described_by = edge_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(described_by)
+                edge_tip = page.locator(f"#{described_by}")
+                expect(edge_tip).to_have_attribute("role", "tooltip")
+                edge_placement = edge_tip.get_attribute("data-popper-placement")
+                self.assertIn(edge_placement, {"top", "right", "bottom"})
+                if not case.is_mobile:
+                    self.assertEqual(edge_placement, "right")
+                expect(edge_tip.locator(".tooltip-inner")).to_have_text(
+                    "Placement flips away from the viewport edge"
+                )
+                edge_box = edge_tip.bounding_box()
+                self.assertIsNotNone(edge_box)
+                self.assertGreaterEqual(edge_box["x"], 0)
+                self.assertLessEqual(
+                    edge_box["x"] + edge_box["width"],
+                    case.viewport["width"] + 1,
+                )
+                self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+                self.assertEqual(run_axe(page), [])
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const edge = document.querySelector(
+                        "#certification-tooltip-edge-trigger"
+                      );
+                      const repeat = document.querySelector(
+                        "#certification-tooltip-repeat-trigger"
+                      );
+                      let hidden = false;
+                      let shown = false;
+                      const finish = () => hidden && shown && resolve();
+                      edge.addEventListener("hidden.bs.tooltip", () => {
+                        hidden = true;
+                        finish();
+                      }, { once: true });
+                      repeat.addEventListener("shown.bs.tooltip", () => {
+                        shown = true;
+                        finish();
+                      }, { once: true });
+                      repeat.focus();
+                    })
+                    """
+                )
+                self.assertIsNone(edge_trigger.get_attribute("aria-describedby"))
+                repeat_tip_id = repeat_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(repeat_tip_id)
+                self.assertTrue(
+                    page.locator(f"#{repeat_tip_id}").evaluate(
+                        "element => element.classList.contains('tooltip') "
+                        "&& element.classList.contains('show')"
+                    )
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-tooltip-repeat-trigger"
+                      );
+                      trigger.addEventListener("hidden.bs.tooltip", resolve, { once: true });
+                      trigger.blur();
+                    })
+                    """
+                )
+                self.assertIsNone(repeat_trigger.get_attribute("aria-describedby"))
+                self.assertTrue(
+                    repeat_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationRepeatTooltip.dispose();
+                          return bootstrap.Tooltip.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    repeat_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationRepeatTooltip = bootstrap.Tooltip
+                            .getOrCreateInstance(element, { container: document.body });
+                          return bootstrap.Tooltip.getInstance(element)
+                            === window.certificationRepeatTooltip;
+                        }
+                        """
+                    )
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-tooltip-repeat-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.tooltip", resolve, { once: true });
+                      trigger.focus();
+                    })
+                    """
+                )
+                self.assertIsNotNone(repeat_trigger.get_attribute("aria-describedby"))
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_popover_fixture_proves_dismissal_placement_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/popover.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                body = page.locator("body")
+                focus_trigger = page.locator("#certification-popover-focus-trigger")
+                edge_trigger = page.locator("#certification-popover-edge-trigger")
+                next_target = page.locator("#certification-popover-next")
+                expect(body).to_have_attribute("data-popover-ready", "true")
+                self.assertTrue(
+                    focus_trigger.evaluate(
+                        "element => bootstrap.Popover.getInstance(element) "
+                        "=== window.certificationFocusPopover"
+                    )
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-focus-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.popover", resolve, { once: true });
+                      trigger.focus();
+                    })
+                    """
+                )
+                focus_tip_id = focus_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(focus_tip_id)
+                focus_tip = page.locator(f"#{focus_tip_id}")
+                expect(focus_tip).to_have_attribute("role", "tooltip")
+                expect(focus_tip.locator(".popover-header")).to_have_text("Review status")
+                expect(focus_tip.locator(".popover-body")).to_have_text(
+                    "The change is ready for a final review."
+                )
+                expect(focus_trigger).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-focus-trigger"
+                      );
+                      trigger.addEventListener("hidden.bs.popover", resolve, { once: true });
+                      document.querySelector("#certification-popover-next").focus();
+                    })
+                    """
+                )
+                self.assertIsNone(focus_trigger.get_attribute("aria-describedby"))
+                expect(next_target).to_be_focused()
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-edge-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.popover", resolve, { once: true });
+                      trigger.click();
+                    })
+                    """
+                )
+                edge_tip_id = edge_trigger.get_attribute("aria-describedby")
+                self.assertIsNotNone(edge_tip_id)
+                edge_tip = page.locator(f"#{edge_tip_id}")
+                self.assertIn(
+                    edge_tip.get_attribute("data-popper-placement"),
+                    {"top", "right", "bottom"},
+                )
+                edge_box = edge_tip.bounding_box()
+                self.assertIsNotNone(edge_box)
+                self.assertGreaterEqual(edge_box["x"], -1)
+                self.assertLessEqual(
+                    edge_box["x"] + edge_box["width"],
+                    case.viewport["width"] + 1,
+                )
+                self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-edge-trigger"
+                      );
+                      trigger.addEventListener("hidden.bs.popover", resolve, { once: true });
+                      trigger.click();
+                    })
+                    """
+                )
+                self.assertIsNone(edge_trigger.get_attribute("aria-describedby"))
+                self.assertTrue(
+                    edge_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationEdgePopover.dispose();
+                          return bootstrap.Popover.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    edge_trigger.evaluate(
+                        """
+                        element => {
+                          window.certificationEdgePopover = bootstrap.Popover
+                            .getOrCreateInstance(element, {
+                              boundary: document.body,
+                              container: document.body,
+                            });
+                          return bootstrap.Popover.getInstance(element)
+                            === window.certificationEdgePopover;
+                        }
+                        """
+                    )
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const trigger = document.querySelector(
+                        "#certification-popover-edge-trigger"
+                      );
+                      trigger.addEventListener("shown.bs.popover", resolve, { once: true });
+                      trigger.click();
+                    })
+                    """
+                )
+                self.assertIsNotNone(edge_trigger.get_attribute("aria-describedby"))
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_toast_catalog_portals_viewport_and_keyboard_contracts(self) -> None:
+        context = self.browser.new_context(
+            viewport={"width": 390, "height": 844},
+            reduced_motion="no-preference",
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        response = page.goto(
+            f"{self.base_url}/dist/components/toast/index.html",
+            wait_until="networkidle",
+        )
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
+
+        trigger = page.locator('[data-moo-toast-target="#toast-basic"]')
+        toast = page.locator("#toast-basic")
+        close_button = toast.locator(".btn-close")
+        container = toast.locator("xpath=..")
+        preview_ancestors = toast.locator(
+            "xpath=ancestor::div[contains(@class, 'moo-example__preview')]"
+        )
+        self.assertEqual(container.locator(".toast").count(), 1)
+        self.assertEqual(preview_ancestors.count(), 0)
+        expect(toast).to_have_attribute("role", "status")
+        expect(toast).to_have_attribute("aria-live", "polite")
+        expect(close_button).to_have_attribute("aria-label", "Close")
+
+        trigger.focus()
+        trigger.press("Enter")
+        expect(toast).to_be_visible()
+        self.assertTrue(
+            toast.evaluate(
+                """
+                element => {
+                  window.__catalogToastInstance = bootstrap.Toast.getInstance(element);
+                  const box = element.getBoundingClientRect();
+                  const viewport = window.visualViewport;
+                  return box.left >= viewport.offsetLeft - 1
+                    && box.top >= viewport.offsetTop - 1
+                    && box.right <= viewport.offsetLeft + viewport.width + 1
+                    && box.bottom <= viewport.offsetTop + viewport.height + 1;
+                }
+                """
+            )
+        )
+        close_button.click()
+        expect(toast).not_to_be_visible()
+
+        trigger.focus()
+        trigger.press("Space")
+        expect(toast).to_be_visible()
+        self.assertTrue(
+            toast.evaluate(
+                "element => bootstrap.Toast.getInstance(element) === window.__catalogToastInstance"
+            )
+        )
+        close_button.focus()
+        close_button.press("Space")
+        expect(toast).not_to_be_visible()
+
+        trigger.press("Enter")
+        expect(toast).to_be_visible()
+        close_button.focus()
+        close_button.press("Enter")
+        expect(toast).not_to_be_visible()
+
+        trigger.press("Enter")
+        expect(toast).to_be_visible()
+        close_button.focus()
+        page.evaluate(
+            """
+            () => document
+              .querySelector("#toast-basic .btn-close")
+              .dispatchEvent(new KeyboardEvent("keydown", {
+                key: " ",
+                bubbles: true,
+                cancelable: true,
+                ctrlKey: true,
+                altKey: true,
+              }))
+            """
+        )
+        expect(toast).not_to_be_visible()
+
+        persistent_trigger = page.locator('[data-moo-toast-target="#toast-persistent"]')
+        persistent_toast = page.locator("#toast-persistent")
+        persistent_trigger.click()
+        expect(persistent_toast).to_be_visible()
+        persistent_toast.locator(".btn-close").click()
+        expect(persistent_toast).not_to_be_visible()
+
+        first_stack_trigger = page.locator('[data-moo-toast-target="#toast-stack-1"]')
+        second_stack_trigger = page.locator('[data-moo-toast-target="#toast-stack-2"]')
+        first_stack_trigger.click()
+        second_stack_trigger.click()
+        expect(page.locator("#toast-stack-1")).to_be_visible()
+        expect(page.locator("#toast-stack-2")).to_be_visible()
+        self.assertTrue(
+            page.evaluate(
+                """
+                () => document.querySelector('#toast-stack-1').parentElement
+                  === document.querySelector('#toast-stack-2').parentElement
+                """
+            )
+        )
+        evidence.assert_clean()
+        context.close()
+
+    def test_toast_fixture_proves_status_dismissal_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/toast.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                body = page.locator("body")
+                trigger = page.locator("#certification-toast-trigger")
+                toast = page.locator("#certification-toast")
+                close_button = toast.locator(".btn-close")
+                expect(body).to_have_attribute("data-toast-ready", "true")
+                self.assertTrue(
+                    toast.evaluate(
+                        "element => bootstrap.Toast.getInstance(element) "
+                        "=== window.certificationToast"
+                    )
+                )
+                expect(toast).to_have_attribute("role", "status")
+                expect(toast).to_have_attribute("aria-live", "polite")
+                expect(toast).to_have_attribute("aria-atomic", "true")
+
+                trigger.focus()
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const toast = document.querySelector("#certification-toast");
+                      toast.addEventListener("shown.bs.toast", resolve, { once: true });
+                      document.querySelector("#certification-toast-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(toast.evaluate("element => element.classList.contains('show')"))
+                expect(trigger).to_be_focused()
+                toast_box = toast.bounding_box()
+                self.assertIsNotNone(toast_box)
+                self.assertGreaterEqual(toast_box["x"], -1)
+                self.assertLessEqual(
+                    toast_box["x"] + toast_box["width"],
+                    case.viewport["width"] + 1,
+                )
+                self.assertEqual(run_axe(page), [])
+
+                close_button.focus()
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const toast = document.querySelector("#certification-toast");
+                      toast.addEventListener("hidden.bs.toast", resolve, { once: true });
+                      toast.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                self.assertFalse(toast.evaluate("element => element.classList.contains('show')"))
+                self.assertTrue(
+                    toast.evaluate(
+                        """
+                        element => {
+                          window.certificationToast.dispose();
+                          return bootstrap.Toast.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    toast.evaluate(
+                        """
+                        element => {
+                          window.certificationToast = bootstrap.Toast
+                            .getOrCreateInstance(element, { autohide: false });
+                          return bootstrap.Toast.getInstance(element)
+                            === window.certificationToast;
+                        }
+                        """
+                    )
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const toast = document.querySelector("#certification-toast");
+                      toast.addEventListener("shown.bs.toast", resolve, { once: true });
+                      document.querySelector("#certification-toast-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(toast.evaluate("element => element.classList.contains('show')"))
+                self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_sheet_fixture_proves_focus_backdrop_scroll_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/sheet.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#certification-sheet-trigger")
+                sheet = page.locator("#certification-sheet")
+                close_button = sheet.locator(".btn-close")
+                name_input = page.locator("#certification-sheet-name")
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-sheet");
+                      sheet.addEventListener("shown.bs.offcanvas", resolve, { once: true });
+                      document.querySelector("#certification-sheet-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(sheet.evaluate("element => element.classList.contains('show')"))
+                expect(sheet).to_have_attribute("role", "dialog")
+                expect(sheet).to_have_attribute("aria-modal", "true")
+                expect(sheet).to_be_focused()
+                self.assertEqual(page.locator(".offcanvas-backdrop.show").count(), 1)
+                self.assertEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+
+                close_button.focus()
+                page.keyboard.press("Tab")
+                expect(name_input).to_be_focused()
+                trigger.focus()
+                expect(close_button).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+
+                page.evaluate(
+                    """
+                    () => {
+                      document.querySelector("#certification-sheet").addEventListener(
+                        "hidden.bs.offcanvas",
+                        () => document.body.dataset.sheetHidden = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute("data-sheet-hidden", "true")
+                expect(trigger).to_be_focused()
+                self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-sheet");
+                      sheet.addEventListener("shown.bs.offcanvas", resolve, { once: true });
+                      document.querySelector("#certification-sheet-trigger").click();
+                    })
+                    """
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-sheet");
+                      sheet.addEventListener("hidden.bs.offcanvas", resolve, { once: true });
+                      sheet.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                expect(trigger).to_be_focused()
+                self.assertTrue(
+                    sheet.evaluate(
+                        """
+                        element => {
+                          const instance = bootstrap.Offcanvas.getInstance(element);
+                          instance.dispose();
+                          return bootstrap.Offcanvas.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertTrue(
+                    sheet.evaluate(
+                        """
+                        element => bootstrap.Offcanvas.getOrCreateInstance(element)
+                          === bootstrap.Offcanvas.getInstance(element)
+                        """
+                    )
+                )
+
+                scroll_trigger = page.locator("#certification-scroll-sheet-trigger")
+                scroll_sheet = page.locator("#certification-scroll-sheet")
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const sheet = document.querySelector("#certification-scroll-sheet");
+                      sheet.addEventListener("shown.bs.offcanvas", resolve, { once: true });
+                      document.querySelector("#certification-scroll-sheet-trigger").click();
+                    })
+                    """
+                )
+                self.assertTrue(
+                    scroll_sheet.evaluate("element => element.classList.contains('show')")
+                )
+                self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
+                scroll_sheet.focus()
+                page.evaluate(
+                    """
+                    () => {
+                      document.querySelector("#certification-scroll-sheet").addEventListener(
+                        "hidden.bs.offcanvas",
+                        () => document.body.dataset.scrollSheetHidden = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute(
+                    "data-scroll-sheet-hidden",
+                    "true",
+                )
+                expect(scroll_trigger).to_be_focused()
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
     def test_dialog_fixture_proves_focus_backdrop_and_escape_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
@@ -417,6 +1129,121 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                       const dialog = document.querySelector("#certification-dialog");
                       dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
                       dialog.querySelector(".btn-close").click();
+                    })
+                    """
+                )
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+                evidence.assert_clean()
+                context.close()
+
+    def test_alert_dialog_fixture_proves_static_confirmation_contract(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/alert-dialog.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                trigger = page.locator("#open-certification-alert-dialog")
+                dialog = page.locator("#certification-alert-dialog")
+                title = page.locator("#certification-alert-dialog-title")
+                cancel = page.locator("#cancel-certification-alert-dialog")
+                confirm = page.locator("#confirm-certification-alert-dialog")
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                expect(dialog).to_have_class("modal fade modal--alert show")
+                expect(dialog).to_have_attribute("data-bs-backdrop", "static")
+                expect(dialog).to_have_attribute("data-bs-keyboard", "false")
+                expect(dialog).to_have_attribute("aria-modal", "true")
+                expect(dialog).to_have_attribute("role", "dialog")
+                expect(dialog).to_have_attribute(
+                    "aria-describedby",
+                    "certification-alert-dialog-description",
+                )
+                expect(title).to_have_text("Discard this draft invoice?")
+                self.assertEqual(dialog.locator(".btn-close").count(), 0)
+                self.assertEqual(page.locator(".modal-backdrop.show").count(), 1)
+                self.assertTrue(
+                    dialog.evaluate("element => document.activeElement === element")
+                )
+
+                page.evaluate(
+                    """
+                    () => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener(
+                        "hidden.bs.modal",
+                        () => document.body.dataset.alertDialogHidden = "true",
+                      );
+                      dialog.addEventListener(
+                        "hidePrevented.bs.modal",
+                        () => document.body.dataset.alertDialogPrevented = "true",
+                        { once: true },
+                      );
+                    }
+                    """
+                )
+                page.keyboard.press("Escape")
+                expect(page.locator("body")).to_have_attribute(
+                    "data-alert-dialog-prevented",
+                    "true",
+                )
+                self.assertIsNone(page.locator("body").get_attribute("data-alert-dialog-hidden"))
+                expect(dialog).to_have_class("modal fade modal--alert show")
+
+                cancel.focus()
+                page.keyboard.press("Tab")
+                expect(confirm).to_be_focused()
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
+                      document.querySelector("#cancel-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                self.assertEqual(page.locator(".modal-backdrop").count(), 0)
+                self.assertTrue(
+                    trigger.evaluate("element => document.activeElement === element")
+                )
+
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("shown.bs.modal", resolve, { once: true });
+                      document.querySelector("#open-certification-alert-dialog").click();
+                    })
+                    """
+                )
+                page.evaluate(
+                    """
+                    () => new Promise(resolve => {
+                      const dialog = document.querySelector("#certification-alert-dialog");
+                      dialog.addEventListener("hidden.bs.modal", resolve, { once: true });
+                      document.querySelector("#confirm-certification-alert-dialog").click();
                     })
                     """
                 )
@@ -1250,8 +2077,13 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 switch = page.locator("#certification-field-notifications")
 
                 self.assertEqual(page.locator("h1").count(), 1)
-                expect(form).to_have_class("needs-validation")
+                expect(form).to_have_class("field-form needs-validation")
                 expect(form).to_have_attribute("novalidate", "")
+                expect(form).to_have_css("display", "flex")
+                self.assertEqual(
+                    form.evaluate("element => getComputedStyle(element).rowGap"),
+                    "20px",
+                )
                 expect(project.locator("xpath=ancestor::div[1]")).to_have_class(
                     "field"
                 )
@@ -1300,6 +2132,105 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertFalse(
                     disabled.evaluate("element => document.activeElement === element")
                 )
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_form_fixture_proves_static_composite_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/form.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                form = page.locator("#certification-form")
+                name = page.locator("#certification-form-name")
+                name_feedback = page.locator("#certification-form-name-feedback")
+                queue = page.locator("#certification-form-queue")
+                notes = page.locator("#certification-form-notes")
+                security = page.locator("#certification-form-security")
+                backups = page.locator("#certification-form-backups")
+                policy_viewer = page.locator("#certification-form-policy-viewer")
+                policy_editor = page.locator("#certification-form-policy-editor")
+                digest = page.locator("#certification-form-digest")
+
+                self.assertEqual(page.locator("h1").count(), 1)
+                expect(form).to_have_class("field-form needs-validation")
+                expect(form).to_have_attribute("novalidate", "")
+                expect(form).to_have_css("display", "flex")
+                self.assertEqual(
+                    form.evaluate("element => getComputedStyle(element).rowGap"),
+                    "20px",
+                )
+                self.assertEqual(page.locator("fieldset").count(), 3)
+                expect(page.locator("#certification-form-profile")).to_have_class(
+                    "field-fieldset"
+                )
+                expect(page.locator("#certification-form-checks")).to_have_class(
+                    "field-fieldset"
+                )
+                expect(page.locator("#certification-form-policy")).to_have_class(
+                    "field-fieldset"
+                )
+
+                expect(name.locator("xpath=ancestor::div[1]")).to_have_class("field")
+                expect(name).to_have_class("form-control is-invalid")
+                expect(name).to_have_attribute("required", "")
+                expect(name).to_have_attribute("aria-invalid", "true")
+                expect(name).to_have_attribute(
+                    "aria-describedby",
+                    "certification-form-name-feedback",
+                )
+                expect(name_feedback).to_have_class("field-error invalid-feedback")
+                name.fill("Moo UI release")
+                expect(name).to_have_value("Moo UI release")
+
+                expect(queue).to_have_class("form-select")
+                expect(queue).to_have_value("ops")
+                queue.select_option("support")
+                expect(queue).to_have_value("support")
+
+                expect(notes).to_have_class("form-control")
+                notes.fill("Validated on local devices.")
+                expect(notes).to_have_value("Validated on local devices.")
+
+                expect(security).to_be_checked()
+                expect(backups).not_to_be_checked()
+                backups.check()
+                expect(backups).to_be_checked()
+
+                expect(policy_viewer).to_be_checked()
+                policy_editor.check()
+                expect(policy_editor).to_be_checked()
+                expect(policy_viewer).not_to_be_checked()
+
+                expect(digest).to_have_attribute("role", "switch")
+                digest.press("Space")
+                expect(digest).to_be_checked()
 
                 self.assertEqual(
                     page.locator("html").get_attribute("dir"),
@@ -2268,6 +3199,146 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 outside_target.click()
                 expect(outside_trigger).to_have_attribute("aria-expanded", "false")
 
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+
+    def test_menubar_fixture_proves_grouped_dropdown_contracts(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/menubar.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                menubar = page.locator("#certification-menubar")
+                file_trigger = page.locator("#certification-menubar-file")
+                edit_trigger = page.locator("#certification-menubar-edit")
+                first_file_item = page.locator("#certification-menubar-new-document")
+                edit_menu = edit_trigger.locator("xpath=following-sibling::ul[1]")
+                checkbox_trigger = page.locator("#certification-menubar-view")
+                checkbox_menu = checkbox_trigger.locator("xpath=following-sibling::ul[1]")
+                sidebar_toggle = page.locator("#certification-menubar-view-sidebar")
+                compact_toggle = page.locator("#certification-menubar-view-compact")
+                outside_target = page.locator("#certification-menubar-outside-target")
+
+                expect(menubar).to_have_attribute("role", "group")
+                expect(menubar).to_have_attribute("aria-label", "Document actions")
+                self.assertEqual(menubar.locator('[role="menubar"], [role="menuitem"]').count(), 0)
+
+                file_trigger.click()
+                expect(file_trigger).to_have_attribute("aria-expanded", "true")
+                expect(file_trigger.locator("xpath=following-sibling::ul[1]")).to_have_class(
+                    "dropdown-menu show"
+                )
+                page.keyboard.press("ArrowDown")
+                self.assertTrue(
+                    first_file_item.evaluate("element => document.activeElement === element")
+                )
+
+                edit_trigger.click()
+                expect(file_trigger).to_have_attribute("aria-expanded", "false")
+                expect(edit_trigger).to_have_attribute("aria-expanded", "true")
+                expect(edit_menu).to_have_class("dropdown-menu show")
+
+                page.keyboard.press("Escape")
+                expect(edit_trigger).to_have_attribute("aria-expanded", "false")
+                self.assertTrue(
+                    edit_trigger.evaluate("element => document.activeElement === element")
+                )
+
+                checkbox_trigger.click()
+                expect(checkbox_trigger).to_have_attribute("aria-expanded", "true")
+                page.keyboard.press("ArrowDown")
+                self.assertEqual(
+                    page.evaluate(
+                        """
+                        () => {
+                          const active = document.activeElement;
+                          if (!active) {
+                            return "";
+                          }
+                          const ownText = active.textContent?.trim();
+                          if (ownText) {
+                            return ownText;
+                          }
+                          return document
+                            .querySelector(`label[for="${active.id}"]`)
+                            ?.textContent
+                            .trim() || "";
+                        }
+                        """
+                    ),
+                    "Sidebar",
+                )
+                page.keyboard.press("ArrowDown")
+                self.assertEqual(
+                    page.evaluate(
+                        """
+                        () => {
+                          const active = document.activeElement;
+                          if (!active) {
+                            return "";
+                          }
+                          const ownText = active.textContent?.trim();
+                          if (ownText) {
+                            return ownText;
+                          }
+                          return document
+                            .querySelector(`label[for="${active.id}"]`)
+                            ?.textContent
+                            .trim() || "";
+                        }
+                        """
+                    ),
+                    "Compact mode",
+                )
+                expect(compact_toggle).to_have_attribute("aria-pressed", "false")
+                page.keyboard.press("Space")
+                expect(compact_toggle).to_have_attribute("aria-pressed", "true")
+                page.keyboard.press("Enter")
+                expect(compact_toggle).to_have_attribute("aria-pressed", "false")
+                expect(sidebar_toggle).to_have_attribute("aria-pressed", "true")
+                sidebar_toggle.click()
+                expect(sidebar_toggle).to_have_attribute("aria-pressed", "false")
+                expect(sidebar_toggle).not_to_have_class(re.compile(r"\bactive\b"))
+                expect(compact_toggle).to_have_attribute("aria-pressed", "false")
+                expect(checkbox_trigger).to_have_attribute("aria-expanded", "true")
+                expect(checkbox_menu).to_have_class("dropdown-menu show")
+                outside_target.click()
+                expect(checkbox_trigger).to_have_attribute("aria-expanded", "false")
+
+                self.assertTrue(
+                    file_trigger.evaluate(
+                        """
+                        element => bootstrap.Dropdown.getOrCreateInstance(element)
+                          === bootstrap.Dropdown.getInstance(element)
+                        """
+                    )
+                )
                 self.assertEqual(
                     page.locator("html").get_attribute("dir"),
                     case.direction,

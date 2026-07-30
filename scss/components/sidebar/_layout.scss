@@ -25,7 +25,6 @@
   flex: 0 0 var(--moo-sidebar-width);
   width: var(--moo-sidebar-width);
   color: var(--moo-sidebar-foreground);
-  transition: flex-basis 0.2s ease, width 0.2s ease;
 }
 
 .sidebar[data-side="left"] .sidebar-inner {
@@ -45,6 +44,10 @@
 // replacing the flush single-edge border the default variant uses. Scoped
 // to desktop, matching how the mobile offcanvas drawer ignores variant.
 @include media-breakpoint-up(lg) {
+  .sidebar {
+    transition: flex-basis 0.2s ease, width 0.2s ease;
+  }
+
   .sidebar[data-variant="floating"] .sidebar-inner {
     width: auto;
     height: calc(100svh - #{$spacer});

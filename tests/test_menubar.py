@@ -109,10 +109,11 @@ class MenubarTests(CatalogTestCase):
         self.assertIn('auto_close="outside"', checkbox_block)
         self.assertIn('auto_close="outside"', radio_block)
 
-    def test_page_reuses_ready_checkbox_and_radio_group_macros(self) -> None:
+    def test_page_uses_bootstrap_toggle_items_without_spoofed_menu_roles(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
         self.assertIn(
-            '{% from "components/checkbox.html.jinja" import checkbox %}', source
+            "dropdown_toggle_item",
+            source,
         )
         self.assertIn(
             '{% from "components/radio_group.html.jinja" import radio_group %}',
@@ -120,6 +121,7 @@ class MenubarTests(CatalogTestCase):
         )
         self.assertNotIn("menuitemcheckbox", source)
         self.assertNotIn("menuitemradio", source)
+        self.assertIn('auto_close="outside"', source)
 
     def test_page_documents_the_submenu_gap_without_faking_it(self) -> None:
         source = PAGE.read_text(encoding="utf-8")

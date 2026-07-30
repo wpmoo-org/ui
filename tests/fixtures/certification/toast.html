@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Toast certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Toast certification fixture</h1>
+      <button class="btn btn-primary" id="certification-toast-trigger" type="button">
+        Show notification
+      </button>
+    </main>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+      <div
+        class="toast"
+        id="certification-toast"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto">Deployment complete</strong>
+          <small>just now</small>
+          <button
+            class="btn-close"
+            type="button"
+            data-bs-dismiss="toast"
+            aria-label="Close notification"
+          ></button>
+        </div>
+        <div class="toast-body">The production bundle is ready for review.</div>
+      </div>
+    </div>
+
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const toastElement = document.querySelector("#certification-toast");
+      window.certificationToast = new bootstrap.Toast(toastElement, {
+        autohide: false,
+      });
+      document.querySelector("#certification-toast-trigger").addEventListener("click", () => {
+        window.certificationToast.show();
+      });
+      document.body.dataset.toastReady = "true";
+    </script>
+  </body>
+</html>

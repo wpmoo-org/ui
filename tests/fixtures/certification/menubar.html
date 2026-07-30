@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Menubar certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        display: grid;
+        gap: 8rem;
+        max-width: 32rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Menubar certification fixture</h1>
+
+      <div
+        class="menubar d-inline-flex align-items-center border rounded-3"
+        id="certification-menubar"
+        role="group"
+        aria-label="Document actions"
+      >
+        <div class="dropdown">
+          <button
+            class="btn btn-ghost"
+            id="certification-menubar-file"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-offset="0,8"
+            aria-expanded="false"
+          >
+            File
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <button class="dropdown-item" id="certification-menubar-new-document" type="button">
+                <span>New document</span>
+                <span class="ms-auto small text-body-secondary">⌘N</span>
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item" type="button">
+                <span>Export as PDF</span>
+              </button>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <button class="dropdown-item" type="button">
+                <span>Print</span>
+                <span class="ms-auto small text-body-secondary">⌘P</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="dropdown">
+          <button
+            class="btn btn-ghost"
+            id="certification-menubar-edit"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-offset="0,8"
+            aria-expanded="false"
+          >
+            Edit
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <button class="dropdown-item" type="button">
+                <span>Undo</span>
+                <span class="ms-auto small text-body-secondary">⌘Z</span>
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item" type="button">
+                <span>Redo</span>
+                <span class="ms-auto small text-body-secondary">⇧⌘Z</span>
+              </button>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <button class="dropdown-item" type="button"><span>Find</span></button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="dropdown">
+          <button
+            class="btn btn-ghost"
+            id="certification-menubar-view"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            data-bs-offset="0,8"
+            aria-expanded="false"
+          >
+            View
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <button
+                class="dropdown-item dropdown-item-check active"
+                id="certification-menubar-view-sidebar"
+                type="button"
+                data-bs-toggle="button"
+                aria-pressed="true"
+              >
+                <span class="dropdown-item-check__indicator" aria-hidden="true">
+                  <svg
+                    data-icon="inline-start"
+                    data-lucide="check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Sidebar</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="dropdown-item dropdown-item-check"
+                id="certification-menubar-view-compact"
+                type="button"
+                data-bs-toggle="button"
+                aria-pressed="false"
+              >
+                <span class="dropdown-item-check__indicator" aria-hidden="true">
+                  <svg
+                    data-icon="inline-start"
+                    data-lucide="check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                </span>
+                <span>Compact mode</span>
+              </button>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <button class="dropdown-item" type="button"><span>Refresh</span></button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <p id="certification-menubar-outside-target">
+        Outside content used to test auto_close="outside".
+      </p>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

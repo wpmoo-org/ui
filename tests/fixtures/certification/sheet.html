@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sheet certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 140vh;
+        padding: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Sheet certification fixture</h1>
+      <button
+        class="btn btn-primary"
+        id="certification-sheet-trigger"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#certification-sheet"
+        aria-controls="certification-sheet"
+      >Open settings</button>
+      <button
+        class="btn btn-outline-secondary"
+        id="certification-scroll-sheet-trigger"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#certification-scroll-sheet"
+        aria-controls="certification-scroll-sheet"
+      >Open non-modal filters</button>
+    </main>
+
+    <div
+      class="offcanvas offcanvas-end sheet"
+      id="certification-sheet"
+      tabindex="-1"
+      aria-labelledby="certification-sheet-title"
+    >
+      <div class="offcanvas-header">
+        <h2 class="offcanvas-title" id="certification-sheet-title">Project settings</h2>
+        <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <label class="form-label" for="certification-sheet-name">Project name</label>
+        <input class="form-control" id="certification-sheet-name" type="text" value="Moo UI">
+      </div>
+    </div>
+
+    <div
+      class="offcanvas offcanvas-start sheet"
+      id="certification-scroll-sheet"
+      tabindex="-1"
+      aria-labelledby="certification-scroll-sheet-title"
+      data-bs-backdrop="false"
+      data-bs-scroll="true"
+    >
+      <div class="offcanvas-header">
+        <h2 class="offcanvas-title" id="certification-scroll-sheet-title">Filters</h2>
+        <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">Filter controls remain available while the page can scroll.</div>
+    </div>
+
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
