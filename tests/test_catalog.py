@@ -841,29 +841,39 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('link.setAttribute("aria-current", "true")', preview)
         self.assertIn('link.classList.toggle("active", active)', preview)
 
-    def test_installation_page_uses_published_cdn_path(self) -> None:
+    def test_installation_page_uses_current_complete_adoption_paths(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         installation = self.read_output("installation.html")
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        version = package["version"]
 
         self.assertIn(
-            "https://unpkg.com/@wpmoo/ui@0.3.1/dist/assets/css/moo-ui.css",
+            f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo-ui.css",
             installation,
         )
-        self.assertNotIn(
-            "https://unpkg.com/@wpmoo/ui/dist/assets/css/moo-ui.min.css",
+        self.assertIn(
+            f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo.css",
             installation,
         )
         self.assertIn("Create workspace", installation)
-        self.assertIn("Bootstrap's JavaScript bundle", installation)
-        self.assertIn("optional ESM only for components", installation)
+        self.assertIn("Bootstrap JavaScript", installation)
+        self.assertIn("Optional Moo ESM", installation)
         self.assertIn('href="../components/combobox/">Combobox</a>', installation)
         self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
-        self.assertNotIn('import Combobox from "@wpmoo/ui/combobox.js"', installation)
-        self.assertNotIn('import Sidebar from "@wpmoo/ui/sidebar.js"', installation)
-        self.assertIn('id="adoption-paths">Adoption Paths</h2>', installation)
-        self.assertNotIn("moo-doc-note", installation)
+        self.assertIn(
+            'import Combobox from &quot;@wpmoo/ui/combobox.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import Sidebar from &quot;@wpmoo/ui/sidebar.js&quot;',
+            installation,
+        )
+        self.assertIn("Scoped Gradual Adoption", installation)
+        self.assertIn("moo-ui", installation)
+        self.assertIn("imports never auto-scan", installation)
+        self.assertNotIn("after the release that publishes", installation)
 
     def test_skills_page_documents_agent_component_guidance(self) -> None:
         result = self.run_build()

@@ -14,99 +14,152 @@
     <article class="moo-doc-page">
       {{ render_page_header(
         "Installation",
-        "Add Moo UI to a Bootstrap project without changing the markup contract your app already uses.",
+        "Choose a complete Bootstrap build or add Moo UI gradually to an existing Bootstrap 5.3 application.",
         id="installation",
         actions=render_section_page_actions(current_slug, site_pages, root_path)
       ) }}
 
       {{ alert(
-        "Start with ordinary Bootstrap markup",
-        "Use the CDN snippet for a quick visual check, or install the npm package when your application build owns CSS imports.",
+        "CSS-first, not JavaScript-free",
+        "Bootstrap owns its native plugins. Moo UI adds optional, explicitly initialized ESM only for Combobox and Sidebar.",
         icon="info",
         extra_class="text-bg-dark border-dark moo-doc-callout"
       ) }}
 
-      <section class="moo-doc-section" aria-labelledby="cdn">
-        {{ typography("CDN", variant="section-title", id="cdn") }}
+      <section class="moo-doc-section" aria-labelledby="choose-path">
+        {{ typography("Choose This Path", variant="section-title", id="choose-path") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th scope="col">Situation</th><th scope="col">Load</th></tr></thead>
+            <tbody>
+              <tr><td>New page or whole application</td><td><code>moo-ui.css</code> instead of Bootstrap CSS.</td></tr>
+              <tr><td>Gradual migration in an existing Bootstrap app</td><td>Bootstrap CSS, then <code>moo.css</code>, with a <code>.moo-ui</code> boundary.</td></tr>
+              <tr><td>Static page without interactive plugins</td><td>CSS only.</td></tr>
+              <tr><td>Bootstrap Dropdown, Modal, Offcanvas, Tooltip, Popover, or Toast</td><td>Keep Bootstrap's JavaScript bundle and documented initialization.</td></tr>
+              <tr><td>Combobox or Sidebar</td><td>Add only the corresponding optional Moo ESM module.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="full-build">
+        {{ typography("Full Build", variant="section-title", id="full-build") }}
         <p>
-          For a static page, prototype, or quick review, load the published
-          stylesheet from a CDN. The full <code>moo-ui.css</code> build replaces
-          Bootstrap's default stylesheet.
+          <code>moo-ui.css</code> is a complete Bootstrap CSS build with Moo UI
+          defaults. Do not load another Bootstrap stylesheet beside it.
         </p>
-        {% set cdn_example %}
-        <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@0.3.1/dist/assets/css/moo-ui.css">
+        {% set full_cdn_example %}
+        <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/assets/css/moo-ui.css">
 
         <button type="button" class="btn btn-primary">Create workspace</button>
         {% endset %}
-        {{ render_code_snippet("installation-cdn", cdn_example, "html") }}
-      </section>
+        {{ render_code_snippet("installation-full-cdn", full_cdn_example, "html") }}
 
-      <section class="moo-doc-section" aria-labelledby="npm">
-        {{ typography("npm", variant="section-title", id="npm") }}
-        <p>
-          For an application build, install the canonical package and import the
-          compiled stylesheet from your entrypoint.
-        </p>
-        {% set npm_example %}
-        npm install @wpmoo/ui
+        {% set npm_install_example %}
+        npm install @wpmoo/ui bootstrap
         {% endset %}
-        {{ render_code_snippet("installation-npm", npm_example, "shell") }}
+        {{ render_code_snippet("installation-npm", npm_install_example, "shell") }}
 
-        {% set import_example %}
+        {% set full_import_example %}
         import "@wpmoo/ui/moo-ui.css";
         {% endset %}
-        {{ render_code_snippet("installation-import", import_example, "js") }}
+        {{ render_code_snippet("installation-full-import", full_import_example, "js") }}
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="javascript">
-        {{ typography("JavaScript", variant="section-title", id="javascript") }}
+      <section class="moo-doc-section" aria-labelledby="scoped-build">
+        {{ typography("Scoped Gradual Adoption", variant="section-title", id="scoped-build") }}
         <p>
-          Moo UI styles Bootstrap-native components. When a page uses Bootstrap
-          plugins such as Dropdown, Tooltip, Popover, Modal, Toast, or Offcanvas,
-          load Bootstrap's JavaScript bundle through your own app. Tooltip and
-          Popover also need the initialization Bootstrap documents for those
-          plugins. Moo UI does not replace or automatically initialize those
-          Bootstrap plugins.
+          In an existing Bootstrap app, keep Bootstrap CSS first, load the
+          scoped Moo component layer second, and wrap only migrated regions in
+          <code>.moo-ui</code>.
         </p>
-        <p>
-          Moo UI publishes optional ESM only for components whose behavior does
-          not exist in Bootstrap. Each component page documents its own import,
-          lifecycle, and Bootstrap ownership boundary:
-        </p>
-        <ul>
-          <li>
-            <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>
-            provides filtering, selection, keyboard, and ARIA behavior without
-            scanning the document at import time.
-          </li>
-          <li>
-            <a href="{{ site_href('components/sidebar.html', root_path) }}">Sidebar</a>
-            coordinates persistent desktop state, collapsed flyouts, responsive
-            controls, and Bootstrap plugin ownership.
-          </li>
-        </ul>
+        {% set scoped_cdn_example %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/assets/css/moo.css">
+
+        <div class="moo-ui">
+          <button type="button" class="btn btn-primary">Create workspace</button>
+        </div>
+        {% endset %}
+        {{ render_code_snippet("installation-scoped-cdn", scoped_cdn_example, "html") }}
+
+        {% set scoped_import_example %}
+        import "bootstrap/dist/css/bootstrap.min.css";
+        import "@wpmoo/ui/moo.css";
+        {% endset %}
+        {{ render_code_snippet("installation-scoped-import", scoped_import_example, "js") }}
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="adoption-paths">
-        {{ typography("Adoption Paths", variant="section-title", id="adoption-paths") }}
+      <section class="moo-doc-section" aria-labelledby="bootstrap-javascript">
+        {{ typography("Bootstrap JavaScript", variant="section-title", id="bootstrap-javascript") }}
         <p>
-          Use <code>moo-ui.css</code> as a whole-page Bootstrap stylesheet
-          replacement after visual review. For gradual adoption, the scoped
-          <code>moo.css</code> surface lives under a <code>.moo-ui</code>
-          boundary and should be used from npm after the release that publishes
-          it.
+          Moo UI does not replace or automatically initialize Bootstrap
+          plugins. Load Bootstrap's bundle when your page uses plugin-owned
+          behavior; Tooltip and Popover still require Bootstrap's documented
+          opt-in initialization.
         </p>
-        {{ button("View Components", variant="outline", size="sm", element="a", href=site_href("components/index.html", root_path)) }}
+        {% set bootstrap_js_example %}
+        import "bootstrap/dist/js/bootstrap.bundle.min.js";
+        {% endset %}
+        {{ render_code_snippet("installation-bootstrap-js", bootstrap_js_example, "js") }}
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="optional-esm">
+        {{ typography("Optional Moo ESM", variant="section-title", id="optional-esm") }}
+        <p>
+          Combobox and Sidebar cover behavior gaps Bootstrap does not provide.
+          Their modules are side-effect-free: importing them does not scan the
+          document. Create instances explicitly and dispose them when your host
+          removes the corresponding UI.
+        </p>
+        {% set esm_example %}
+        import Combobox from "@wpmoo/ui/combobox.js";
+        import Sidebar from "@wpmoo/ui/sidebar.js";
+
+        const combobox = Combobox.getOrCreateInstance(
+          document.querySelector(".combobox")
+        );
+        const sidebar = Sidebar.getOrCreateInstance(
+          document.querySelector('[data-slot="sidebar-wrapper"]')
+        );
+
+        // Later, when the host removes the UI:
+        combobox.dispose();
+        sidebar.dispose();
+        {% endset %}
+        {{ render_code_snippet("installation-esm", esm_example, "js") }}
+        <p>
+          Review the <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>
+          and <a href="{{ site_href('components/sidebar.html', root_path) }}">Sidebar</a>
+          pages for their HTML, selectors, lifecycle, and Bootstrap ownership.
+        </p>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="troubleshooting">
+        {{ typography("Troubleshooting", variant="section-title", id="troubleshooting") }}
+        <dl>
+          <dt>Styles look duplicated or inconsistent</dt>
+          <dd>Use either the full <code>moo-ui.css</code> build or Bootstrap CSS followed by scoped <code>moo.css</code>; do not combine both Moo stylesheets.</dd>
+          <dt>Scoped styles do not appear</dt>
+          <dd>Confirm <code>moo.css</code> loads after Bootstrap CSS and the migrated markup has a <code>.moo-ui</code> ancestor.</dd>
+          <dt>A Bootstrap control does not open</dt>
+          <dd>Load Bootstrap's bundle and follow that plugin's documented initialization requirements.</dd>
+          <dt>Combobox or Sidebar does not respond</dt>
+          <dd>Import the matching Moo ESM module and initialize the rendered root explicitly; imports never auto-scan.</dd>
+        </dl>
+        {{ button("Browse Components", variant="outline", size="sm", element="a", href=site_href("components/index.html", root_path)) }}
       </section>
 
       {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([
-      {"id": "cdn", "label": "CDN"},
-      {"id": "npm", "label": "npm"},
-      {"id": "javascript", "label": "JavaScript"},
-      {"id": "adoption-paths", "label": "Adoption Paths"}
+      {"id": "choose-path", "label": "Choose This Path"},
+      {"id": "full-build", "label": "Full Build"},
+      {"id": "scoped-build", "label": "Scoped Adoption"},
+      {"id": "bootstrap-javascript", "label": "Bootstrap JavaScript"},
+      {"id": "optional-esm", "label": "Optional Moo ESM"},
+      {"id": "troubleshooting", "label": "Troubleshooting"}
     ]) }}
   </div>
 {% endblock %}

@@ -645,6 +645,19 @@ def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
     return json.loads(source_file.read_text(encoding="utf-8"))
 
 
+def load_product_facts() -> dict[str, object]:
+    package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+    certification = json.loads(
+        (ROOT / "certification.json").read_text(encoding="utf-8")
+    )
+    return {
+        "version": package["version"],
+        "bootstrapRange": package["peerDependencies"]["bootstrap"],
+        "exports": package["exports"],
+        "certification": certification,
+    }
+
+
 def _fallback_label(slug: str) -> str:
     return " ".join(part.capitalize() for part in slug.split("-"))
 
@@ -930,6 +943,7 @@ def render_pages() -> None:
     sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
+    product = load_product_facts()
     site_pages = build_site_pages(sections, catalog, utilities, blocks)
     version = asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
@@ -958,6 +972,7 @@ def render_pages() -> None:
             sections=sections,
             utilities=utilities,
             blocks=blocks,
+            product=product,
             site_pages=site_pages,
             current_section=current_section,
             current_slug=metadata["slug"],
