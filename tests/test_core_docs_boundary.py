@@ -8,6 +8,8 @@ import sys
 import unittest
 from pathlib import Path
 
+import build
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/boundary-baseline.json"
@@ -123,6 +125,12 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertTrue((ROOT / "site/src/layouts").is_dir())
         self.assertTrue((ROOT / "site/src/shell").is_dir())
         self.assertTrue((ROOT / "site/src/blocks").is_dir())
+
+    def test_site_templates_are_in_source_snapshot(self) -> None:
+        snapshot_paths = {path for path, _ in build.source_snapshot()}
+        template = ROOT / "site/src/pages/index.html.jinja"
+
+        self.assertIn(str(template), snapshot_paths)
 
     def test_public_asset_prose_uses_site_static_source_path(self) -> None:
         source_paths = (

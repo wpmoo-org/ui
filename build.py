@@ -886,7 +886,7 @@ def source_snapshot() -> tuple[tuple[str, int], ...]:
     if LLMS_TXT.exists():
         paths.append(LLMS_TXT)
     paths.extend(path for path in SITE_ROOT_ASSETS if path.exists())
-    for folder in (SRC, SCSS, SITE_STATIC):
+    for folder in (SRC, SITE_SRC, SCSS, SITE_STATIC):
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())
     return tuple(
