@@ -44,6 +44,21 @@
         </p>
       </section>
 
+      <section class="moo-doc-section" aria-labelledby="who-it-fits">
+        {{ typography("Who It Fits", variant="section-title", id="who-it-fits") }}
+        <p>
+          Moo UI is for server-rendered applications, admin portals, CMS themes,
+          Odoo portals, WordPress interfaces, and static product tools that
+          already want Bootstrap's HTML and JavaScript behavior but need a more
+          deliberate interface language.
+        </p>
+        <p>
+          It is not a React, Tailwind, Radix, or design-token runtime. The npm
+          package ships CSS, public metadata, and the documented optional ESM
+          modules listed in the package manifest.
+        </p>
+      </section>
+
       <section class="moo-doc-section" aria-labelledby="principles">
         {{ typography("Principles", variant="section-title", id="principles") }}
         <ol class="moo-doc-principles">
@@ -74,15 +89,54 @@
             <div class="moo-doc-principles__content">
               <h3 class="h5 mb-0">Server-rendered UI stays first-class</h3>
               <p>
-                The catalog is written as plain HTML templates and component macros,
-                so backend-rendered products can consume the same interface language.
+                The catalog is rendered as inspectable HTML, and the public
+                package documents the markup and runtime contracts backend teams
+                can copy into their own server-rendered products.
               </p>
             </div>
           </li>
         </ol>
       </section>
 
+      <section class="moo-doc-section" aria-labelledby="ownership">
+        {{ typography("Ownership", variant="section-title", id="ownership") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr><th scope="col">Layer</th><th scope="col">Owner</th><th scope="col">What it means</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Native patterns</th>
+                <td>Bootstrap and HTML</td>
+                <td>Buttons, forms, dropdowns, modals, offcanvas, tooltips, popovers, toasts, and related plugin behavior keep Bootstrap's contracts.</td>
+              </tr>
+              <tr>
+                <th scope="row">Visual system</th>
+                <td>Moo UI</td>
+                <td>Spacing, radius, borders, shadows, focus rings, density, dark mode, and component examples are tuned for the Moo UI surface.</td>
+              </tr>
+              <tr>
+                <th scope="row">Verified gaps</th>
+                <td>Moo UI optional ESM</td>
+                <td>Combobox and Sidebar add small documented JavaScript where Bootstrap 5.3 does not provide a plugin contract.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       {{ separator(extra_class="moo-doc-separator") }}
+
+      <section class="moo-doc-section" aria-labelledby="non-goals">
+        {{ typography("Non-goals", variant="section-title", id="non-goals") }}
+        <ul>
+          <li>Moo UI does not replace Bootstrap's JavaScript plugins.</li>
+          <li>Moo UI does not promise that every pattern is pure Bootstrap markup; documented gaps are named on their component pages.</li>
+          <li>Moo UI does not expose Sass source or a Sass facade as public package API yet.</li>
+          <li>Moo UI does not require a frontend framework runtime.</li>
+        </ul>
+      </section>
 
       <section class="moo-doc-section" aria-labelledby="the-goal">
         {{ typography("The Goal", variant="section-title", id="the-goal") }}
@@ -100,7 +154,10 @@
 
     {{ render_doc_toc([
       {"id": "why-moo-ui-exists", "label": "Why Moo UI Exists"},
+      {"id": "who-it-fits", "label": "Who It Fits"},
       {"id": "principles", "label": "Principles"},
+      {"id": "ownership", "label": "Ownership"},
+      {"id": "non-goals", "label": "Non-goals"},
       {"id": "the-goal", "label": "The Goal"}
     ]) }}
   </div>
