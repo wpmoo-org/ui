@@ -1,6 +1,7 @@
 import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -8,6 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_DIST = ROOT / "dist"
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -31,9 +33,26 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
+EXPECTED_PACKAGE_OUTPUT_FILES = {
+    path
+    for path in EXPECTED_PACKAGE_FILES
+    if path.startswith("dist/")
+}
 
 
 class PackageMetadataTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        result = subprocess.run(
+            [sys.executable, "build.py", "--core"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode:
+            raise AssertionError(result.stderr)
+
     def _read_package(self, relative_path: str = "package.json") -> dict:
         return json.loads((ROOT / relative_path).read_text(encoding="utf-8"))
 
@@ -97,6 +116,15 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("src/certification", files)
         self.assertNotIn("./moo-core.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
+
+    def test_package_dist_contains_only_published_outputs(self) -> None:
+        package_files = {
+            path.relative_to(ROOT).as_posix()
+            for path in PACKAGE_DIST.rglob("*")
+            if path.is_file()
+        }
+
+        self.assertEqual(package_files, EXPECTED_PACKAGE_OUTPUT_FILES)
 
     def test_certification_preview_matches_package_metadata(self) -> None:
         package = self._read_package()

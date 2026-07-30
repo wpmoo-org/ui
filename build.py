@@ -33,7 +33,8 @@ CORE_REGISTRY = SRC / "registry"
 SITE_REGISTRY = SITE_SRC / "registry"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
-DIST = ROOT / "dist"
+PACKAGE_DIST = ROOT / "dist"
+SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
 LLMS_TXT = SITE_PUBLIC / "llms.txt"
 SITE_ROOT_ASSETS = tuple(
@@ -52,6 +53,8 @@ GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
+CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
+CORE_JS_MODULES = ("combobox.js", "sidebar.js")
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
     / f"moo-ui-build-{hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]}.lock"
@@ -111,6 +114,10 @@ INLINE_CHILD_ELEMENTS = {
     "u",
     "var",
 }
+
+
+class MissingCoreOutputsError(RuntimeError):
+    """Raised when the docs build is run before the package build."""
 
 
 def dedent_html(value: object) -> str:
@@ -728,8 +735,8 @@ def write_compiled_style(
     (css_dir / output_name).write_text(css, encoding="utf-8")
 
 
-def compile_styles() -> None:
-    css_dir = DIST / "assets/css"
+def compile_core_styles() -> None:
+    css_dir = PACKAGE_DIST / "assets/css"
     css_dir.mkdir(parents=True, exist_ok=True)
     write_compiled_style(css_dir, SCSS / "moo-ui.scss", "moo-ui.css")
     write_compiled_style(
@@ -738,7 +745,6 @@ def compile_styles() -> None:
         "moo-ui.min.css",
         output_style="compressed",
     )
-    write_compiled_style(css_dir, SITE_SCSS / "catalog.scss", "catalog.css")
     write_compiled_style(css_dir, SCSS / "moo-core.scss", "moo.css")
     write_compiled_style(
         css_dir,
@@ -748,22 +754,72 @@ def compile_styles() -> None:
     )
 
 
+def compile_catalog_styles() -> None:
+    css_dir = SITE_DIST / "assets/css"
+    css_dir.mkdir(parents=True, exist_ok=True)
+    write_compiled_style(css_dir, SITE_SCSS / "catalog.scss", "catalog.css")
+
+
 def asset_version() -> str:
     digest = hashlib.sha256()
     paths = [
-        DIST / "assets/css/moo-ui.css",
-        DIST / "assets/css/catalog.css",
-        *sorted((DIST / "assets/js").rglob("*.js")),
+        SITE_DIST / "assets/css/moo-ui.css",
+        SITE_DIST / "assets/css/catalog.css",
+        *sorted(
+            path
+            for path in (SITE_DIST / "assets/js").rglob("*")
+            if path.is_file()
+        ),
     ]
     for path in paths:
-        relative = path.relative_to(DIST).as_posix()
+        relative = path.relative_to(SITE_DIST).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]
 
 
-def copy_assets() -> None:
-    js_dir = DIST / "assets/js"
+def copy_package_js() -> None:
+    package_js_dir = PACKAGE_DIST / "js"
+    package_js_dir.mkdir(parents=True, exist_ok=True)
+    for module_name in CORE_JS_MODULES:
+        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
+
+
+def required_core_outputs() -> tuple[Path, ...]:
+    return (
+        *(PACKAGE_DIST / "assets/css" / name for name in CORE_CSS_OUTPUTS),
+        *(PACKAGE_DIST / "js" / name for name in CORE_JS_MODULES),
+    )
+
+
+def verify_core_outputs() -> None:
+    missing = [
+        path.relative_to(ROOT).as_posix()
+        for path in required_core_outputs()
+        if not path.is_file()
+    ]
+    if missing:
+        raise MissingCoreOutputsError(
+            "Required Core outputs are missing; run "
+            "`.venv/bin/python build.py --core` first: "
+            + ", ".join(missing)
+        )
+
+
+def copy_core_outputs_to_site() -> None:
+    css_dir = SITE_DIST / "assets/css"
+    css_dir.mkdir(parents=True, exist_ok=True)
+    for css_name in CORE_CSS_OUTPUTS:
+        shutil.copy2(PACKAGE_DIST / "assets/css" / css_name, css_dir / css_name)
+
+    components_dir = SITE_DIST / "assets/js/components"
+    components_dir.mkdir(parents=True, exist_ok=True)
+    for module_name in CORE_JS_MODULES:
+        shutil.copy2(PACKAGE_DIST / "js" / module_name, components_dir / module_name)
+
+
+def copy_site_assets() -> None:
+    js_dir = SITE_DIST / "assets/js"
     js_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js",
@@ -784,26 +840,22 @@ def copy_assets() -> None:
             ),
             encoding="utf-8",
         )
-    package_js_dir = DIST / "js"
-    package_js_dir.mkdir(parents=True, exist_ok=True)
-    for module_name in ("combobox.js", "sidebar.js"):
-        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
-    fonts_dir = DIST / "assets/fonts/geist"
+    fonts_dir = SITE_DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
         GEIST / "Geist-Variable.woff2",
         fonts_dir / "Geist-Variable.woff2",
     )
     if SITE_STATIC.exists():
-        shutil.copytree(SITE_STATIC, DIST / "assets", dirs_exist_ok=True)
+        shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
 
 
 def copy_site_metadata() -> None:
     if LLMS_TXT.exists():
-        shutil.copy2(LLMS_TXT, DIST / "llms.txt")
+        shutil.copy2(LLMS_TXT, SITE_DIST / "llms.txt")
     for path in SITE_ROOT_ASSETS:
         if path.exists():
-            shutil.copy2(path, DIST / path.name)
+            shutil.copy2(path, SITE_DIST / path.name)
 
 
 def public_page_paths() -> list[str]:
@@ -844,8 +896,8 @@ def write_sitemap() -> None:
             "",
         )
     )
-    (DIST / "sitemap.xml").write_text(sitemap, encoding="utf-8")
-    (DIST / "robots.txt").write_text(
+    (SITE_DIST / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+    (SITE_DIST / "robots.txt").write_text(
         "\n".join(
             (
                 "User-agent: *",
@@ -870,7 +922,7 @@ def render_pages() -> None:
         relative = page.relative_to(PAGES)
         logical_relative = relative.with_suffix("")
         output_relative = pretty_output_path(logical_relative)
-        output_file = DIST / output_relative
+        output_file = SITE_DIST / output_relative
         output_file.parent.mkdir(parents=True, exist_ok=True)
         depth = len(output_relative.parents) - 1
         root_path = "../" * depth
@@ -921,14 +973,29 @@ def build_lock():
 
 def build() -> None:
     with build_lock():
-        if DIST.exists():
-            shutil.rmtree(DIST)
-        DIST.mkdir()
-        compile_styles()
-        copy_assets()
-        copy_site_metadata()
-        render_pages()
-        write_sitemap()
+        build_core()
+        build_site()
+
+
+def build_core() -> None:
+    if PACKAGE_DIST.exists():
+        shutil.rmtree(PACKAGE_DIST)
+    PACKAGE_DIST.mkdir()
+    compile_core_styles()
+    copy_package_js()
+
+
+def build_site() -> None:
+    verify_core_outputs()
+    if SITE_DIST.exists():
+        shutil.rmtree(SITE_DIST)
+    SITE_DIST.mkdir()
+    copy_core_outputs_to_site()
+    compile_catalog_styles()
+    copy_site_assets()
+    copy_site_metadata()
+    render_pages()
+    write_sitemap()
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
@@ -958,11 +1025,25 @@ def watch() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--watch", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--core", action="store_true")
+    mode.add_argument("--site", action="store_true")
     args = parser.parse_args()
-    if args.watch:
-        watch()
-    else:
-        build()
+    try:
+        if args.watch:
+            if args.core or args.site:
+                parser.error("--watch cannot be combined with --core or --site")
+            watch()
+        elif args.core:
+            with build_lock():
+                build_core()
+        elif args.site:
+            with build_lock():
+                build_site()
+        else:
+            build()
+    except MissingCoreOutputsError as error:
+        parser.exit(1, f"{error}\n")
 
 
 if __name__ == "__main__":

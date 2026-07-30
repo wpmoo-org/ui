@@ -7,7 +7,7 @@ import unittest
 from functools import partial
 from http.server import SimpleHTTPRequestHandler
 
-from tests.helpers import DIST, ROOT
+from tests.helpers import PACKAGE_DIST, ROOT
 
 
 def load_dev_module():
@@ -60,7 +60,7 @@ class DevRunnerTests(unittest.TestCase):
 
         self.assertIsInstance(handler, partial)
         self.assertIs(handler.func, SimpleHTTPRequestHandler)
-        self.assertEqual(handler.keywords, {"directory": str(DIST)})
+        self.assertEqual(handler.keywords, {"directory": str(PACKAGE_DIST)})
 
 
 if __name__ == "__main__":

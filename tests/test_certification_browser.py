@@ -703,7 +703,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         page = context.new_page()
         evidence = BrowserEvidence(page)
         response = page.goto(
-            f"{self.base_url}/dist/components/toast/index.html",
+            f"{self.base_url}/site-dist/components/toast/index.html",
             wait_until="networkidle",
         )
         self.assertIsNotNone(response)

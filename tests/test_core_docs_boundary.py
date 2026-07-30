@@ -107,6 +107,45 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertTrue(output.is_file(), relative_path)
                 self.assertEqual(sha256(output), expected_hash)
 
+    def test_package_and_site_outputs_are_separate(self) -> None:
+        package_dist = ROOT / "dist"
+        site_dist = ROOT / "site-dist"
+        package_files = {
+            path.relative_to(package_dist).as_posix()
+            for path in package_dist.rglob("*")
+            if path.is_file()
+        }
+        expected_package_files = {
+            "assets/css/moo-ui.css",
+            "assets/css/moo-ui.min.css",
+            "assets/css/moo.css",
+            "assets/css/moo.min.css",
+            "js/combobox.js",
+            "js/sidebar.js",
+        }
+        expected_site_files = {
+            "index.html",
+            "favicon.svg",
+            "favicon.ico",
+            "apple-touch-icon.png",
+            "icon-192.png",
+            "icon-512.png",
+            "site.webmanifest",
+            "llms.txt",
+            "sitemap.xml",
+            "robots.txt",
+            "assets/css/catalog.css",
+            "assets/js/bootstrap.bundle.min.js",
+            "components/button/index.html",
+            "blocks/sidebar-floating/index.html",
+            "utils/scroll-fade/index.html",
+        }
+
+        self.assertEqual(package_files, expected_package_files)
+        for relative_path in sorted(expected_site_files):
+            with self.subTest(relative_path=relative_path):
+                self.assertTrue((site_dist / relative_path).is_file())
+
     def test_npm_pack_files_match_recorded_baseline(self) -> None:
         result = subprocess.run(
             ["npm", "pack", "--dry-run", "--json"],

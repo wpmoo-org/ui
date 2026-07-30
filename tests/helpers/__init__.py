@@ -10,7 +10,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DIST = ROOT / "dist"
+PACKAGE_DIST = ROOT / "dist"
+SITE_DIST = ROOT / "site-dist"
+DIST = SITE_DIST
 ICONS = ROOT / "src/icons/lucide-icons.json"
 STATIC = ROOT / "site/static"
 

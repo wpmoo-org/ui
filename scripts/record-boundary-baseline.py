@@ -9,7 +9,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DIST = ROOT / "dist"
+PACKAGE_DIST = ROOT / "dist"
+SITE_DIST = ROOT / "site-dist"
 CORE_OUTPUTS = {
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -50,19 +51,25 @@ def relative_files(root: Path, base: Path) -> list[str]:
 
 def record_boundary_baseline(root: Path = ROOT) -> dict:
     root = Path(root).resolve()
-    dist = root / "dist"
+    package_dist = root / "dist"
+    site_dist = root / "site-dist"
 
     run([".venv/bin/python", "build.py"], root)
     pack = json.loads(
         run(["npm", "pack", "--dry-run", "--json"], root).stdout
     )[0]
     package = read_json(root / "package.json")
-    dist_files = relative_files(dist, root)
-    dist_hashes = {
+    package_dist_files = relative_files(package_dist, root)
+    site_dist_files = relative_files(site_dist, root)
+    package_hashes = {
         relative: sha256(root / relative)
-        for relative in dist_files
+        for relative in package_dist_files
     }
-    missing_core_outputs = sorted(CORE_OUTPUTS - set(dist_hashes))
+    site_hashes = {
+        relative: sha256(root / relative)
+        for relative in site_dist_files
+    }
+    missing_core_outputs = sorted(CORE_OUTPUTS - set(package_hashes))
     if missing_core_outputs:
         raise FileNotFoundError(
             "Build did not produce Core outputs: "
@@ -79,16 +86,13 @@ def record_boundary_baseline(root: Path = ROOT) -> dict:
             "peerDependencies": package["peerDependencies"],
         },
         "npmPackFiles": sorted(entry["path"] for entry in pack["files"]),
-        "distFiles": dist_files,
+        "distFiles": package_dist_files,
+        "siteDistFiles": site_dist_files,
         "coreOutputs": {
-            relative: dist_hashes[relative]
+            relative: package_hashes[relative]
             for relative in sorted(CORE_OUTPUTS)
         },
-        "siteOutputs": {
-            relative: digest
-            for relative, digest in dist_hashes.items()
-            if relative not in CORE_OUTPUTS
-        },
+        "siteOutputs": site_hashes,
     }
 
 
