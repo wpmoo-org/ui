@@ -177,6 +177,16 @@ Moo-owned catalog JavaScript.
 The source repository contains the static catalog, component templates, build
 tooling, tests, and documentation.
 
+## Repository Layout
+
+Moo UI Core is the npm package published from the repository root. Core source
+and package outputs live outside `site/`, and the package publishes only the
+allow-listed files in `package.json`.
+
+The `site/` tree owns ui.wpmoo.org documentation, catalog chrome, public
+metadata, and protected preview artwork. The site build emits `site-dist/`; the
+npm package build emits `dist/`.
+
 ## Development
 
 The catalog is intentionally small-tool friendly:
