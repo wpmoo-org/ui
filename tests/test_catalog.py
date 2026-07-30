@@ -1199,10 +1199,23 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(details["markupOwner"], allowed_markup)
                 self.assertIn(details["maturity"], allowed_maturity)
                 self.assertIn('data-moo-component-reference', component_page)
-                self.assertIn("Component reference", component_page)
-                self.assertIn(details["maturity"].capitalize(), component_page)
-                self.assertIn(details["runtimeOwner"], component_page)
-                self.assertIn(details["markupOwner"], component_page)
+                reference = re.search(
+                    r'<section\b[^>]*data-moo-component-reference[^>]*>'
+                    r"(?P<body>.*?)</section>",
+                    component_page,
+                    re.DOTALL,
+                )
+                self.assertIsNotNone(reference)
+                reference_body = reference.group("body")
+                self.assertIn('class="h3 pb-3 mb-3 border-bottom"', reference_body)
+                self.assertIn("Component reference", reference_body)
+                self.assertIn('<dl class="row gy-2 mb-3 small">', reference_body)
+                self.assertIn(details["maturity"].capitalize(), reference_body)
+                self.assertIn(details["runtimeOwner"], reference_body)
+                self.assertIn(details["markupOwner"], reference_body)
+                self.assertIn('target="_blank" rel="noopener noreferrer"', reference_body)
+                self.assertNotIn("border rounded", reference_body)
+                self.assertNotIn("p-3", reference_body)
 
         expected_classifications = {
             # Drift class: representative ownership values must remain

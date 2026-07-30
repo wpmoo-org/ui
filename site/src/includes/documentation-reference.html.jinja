@@ -3,23 +3,28 @@
   {% if show_details and component_ownership is defined and current_slug is defined and current_slug in component_ownership %}
     {% set details = component_ownership[current_slug] %}
   {% endif %}
-  <aside class="mt-5" aria-label="Component reference">
-    <p class="text-body-secondary mb-0">
-      {{ lead }}
-      <a href="{{ href }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>.
-    </p>
-    {% if details %}
-      <div class="border rounded p-3 mt-3" data-moo-component-reference>
-        <p class="fw-semibold text-body mb-3">Component reference</p>
-        <dl class="row g-2 small mb-0">
-          <dt class="col-sm-3 text-body">Status</dt>
-          <dd class="col-sm-9 mb-0">{{ details.maturity | capitalize }}</dd>
-          <dt class="col-sm-3 text-body">Runtime</dt>
-          <dd class="col-sm-9 mb-0">{{ details.runtimeOwner }}</dd>
-          <dt class="col-sm-3 text-body">Markup</dt>
-          <dd class="col-sm-9 mb-0">{{ details.markupOwner }}</dd>
-        </dl>
-      </div>
-    {% endif %}
-  </aside>
+  {% if details %}
+    <section class="mt-5" aria-labelledby="{{ current_slug }}-component-reference-title" data-moo-component-reference>
+      <h2 class="h3 pb-3 mb-3 border-bottom" id="{{ current_slug }}-component-reference-title">Component reference</h2>
+      <dl class="row gy-2 mb-3 small">
+        <dt class="col-sm-3 text-body">Status</dt>
+        <dd class="col-sm-9 mb-0">{{ details.maturity | capitalize }}</dd>
+        <dt class="col-sm-3 text-body">Runtime</dt>
+        <dd class="col-sm-9 mb-0">{{ details.runtimeOwner }}</dd>
+        <dt class="col-sm-3 text-body">Markup</dt>
+        <dd class="col-sm-9 mb-0">{{ details.markupOwner }}</dd>
+      </dl>
+      <p class="text-body-secondary mb-0">
+        {{ lead }}
+        <a href="{{ href }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>.
+      </p>
+    </section>
+  {% else %}
+    <aside class="mt-5" aria-label="Bootstrap reference">
+      <p class="text-body-secondary mb-0">
+        {{ lead }}
+        <a href="{{ href }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>.
+      </p>
+    </aside>
+  {% endif %}
 {% endmacro %}
