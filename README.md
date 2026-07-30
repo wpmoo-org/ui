@@ -170,9 +170,10 @@ theme-aware surfaces so they stay legible on GitHub.
 
 ## Package Boundaries
 
-The npm package distributes compiled CSS and license/notice files. It does not
-ship the catalog's generated preview images, Jinja templates, Sass source, or
-Moo-owned catalog JavaScript.
+The npm package distributes compiled CSS, public component JavaScript,
+`certification.json`, and license/notice files. It does not ship the catalog's
+generated preview images, Jinja templates, Sass source, or Moo-owned catalog
+JavaScript.
 
 The source repository contains the static catalog, component templates, build
 tooling, tests, and documentation.
