@@ -12,6 +12,12 @@
     "icon": "download"
   },
   {
+    "slug": "support",
+    "label": "Support & Evidence",
+    "href": "support/",
+    "icon": "shield-check"
+  },
+  {
     "slug": "components",
     "label": "Components",
     "href": "components/",

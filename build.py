@@ -646,6 +646,50 @@ def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
     return json.loads(source_file.read_text(encoding="utf-8"))
 
 
+def _markdown_section(source: str, heading: str) -> str:
+    pattern = re.compile(
+        rf"^## {re.escape(heading)}\n(?P<body>.*?)(?=^## |\Z)",
+        re.MULTILINE | re.DOTALL,
+    )
+    match = pattern.search(source)
+    if not match:
+        raise RuntimeError(f"SUPPORT.md is missing section: {heading}")
+    return match.group("body").strip()
+
+
+def _clean_markdown_inline(value: str) -> str:
+    cleaned = re.sub(r"\*\*([^*]+)\*\*", r"\1", value)
+    cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
+    return " ".join(cleaned.split())
+
+
+def load_support_facts() -> dict[str, object]:
+    source = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
+    browser_policy = [
+        _clean_markdown_inline(line.removeprefix("- "))
+        for line in _markdown_section(source, "Browser Policy").splitlines()
+        if line.startswith("- ")
+    ]
+    maturity_section = _markdown_section(source, "Component Maturity")
+    maturity = {}
+    for match in re.finditer(
+        r"\d+\.\s+\*\*(?P<label>Ready|Accepted|Certified)\*\* means "
+        r"(?P<body>.*?)(?=\n\d+\.|\n\n|\Z)",
+        maturity_section,
+        re.DOTALL,
+    ):
+        maturity[match.group("label").lower()] = _clean_markdown_inline(
+            match.group("body")
+        )
+    if sorted(maturity) != ["accepted", "certified", "ready"]:
+        raise RuntimeError("SUPPORT.md maturity definitions are incomplete")
+    return {
+        "browserPolicy": browser_policy,
+        "maturity": maturity,
+        "url": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md",
+    }
+
+
 def load_product_facts() -> dict[str, object]:
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     certification = json.loads(
@@ -653,9 +697,11 @@ def load_product_facts() -> dict[str, object]:
     )
     return {
         "version": package["version"],
+        "license": package["license"],
         "bootstrapRange": package["peerDependencies"]["bootstrap"],
         "exports": package["exports"],
         "certification": certification,
+        "support": load_support_facts(),
     }
 
 
