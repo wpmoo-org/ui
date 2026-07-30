@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import tarfile
@@ -8,6 +9,10 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+NPM_PACK_ENV = {
+    **os.environ,
+    "npm_config_cache": "/private/tmp/wpmoo-npm-cache",
+}
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -150,6 +155,7 @@ class PackageMetadataTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=NPM_PACK_ENV,
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -172,6 +178,7 @@ class PackageMetadataTests(unittest.TestCase):
                 check=False,
                 capture_output=True,
                 text=True,
+                env=NPM_PACK_ENV,
             )
 
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)

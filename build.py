@@ -28,6 +28,8 @@ SRC = ROOT / "src"
 SCSS = ROOT / "scss"
 SITE = ROOT / "site"
 SITE_SRC = SITE / "src"
+CORE_REGISTRY = SRC / "registry"
+SITE_REGISTRY = SITE_SRC / "registry"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
 DIST = ROOT / "dist"
@@ -617,8 +619,8 @@ def create_environment(icon_renderer=None) -> Environment:
     return environment
 
 
-def load_entries(filename: str) -> list[dict[str, str]]:
-    source_file = SRC / filename
+def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
+    source_file = registry_root / filename
     if not source_file.exists():
         return []
     return json.loads(source_file.read_text(encoding="utf-8"))
@@ -628,17 +630,25 @@ def _fallback_label(slug: str) -> str:
     return " ".join(part.capitalize() for part in slug.split("-"))
 
 
-def _registry_overrides(filename: str) -> dict[str, dict[str, str]]:
-    return {entry["slug"]: entry for entry in load_entries(filename) if entry.get("slug")}
+def _registry_overrides(
+    registry_root: Path,
+    filename: str,
+) -> dict[str, dict[str, str]]:
+    return {
+        entry["slug"]: entry
+        for entry in load_entries(registry_root, filename)
+        if entry.get("slug")
+    }
 
 
 def _load_page_registry(
     pages_dir: Path,
+    registry_root: Path,
     registry_filename: str,
     *,
     fallback_status: str = "ready",
 ) -> list[dict[str, str]]:
-    overrides = _registry_overrides(registry_filename)
+    overrides = _registry_overrides(registry_root, registry_filename)
     entries: list[dict[str, str]] = []
     for page in sorted(pages_dir.glob("*.html.jinja")):
         if page.name == "index.html.jinja":
@@ -666,15 +676,27 @@ def _load_page_registry(
 
 
 def load_catalog() -> list[dict[str, str]]:
-    return _load_page_registry(PAGES / "components", "registry/components.json")
+    return _load_page_registry(
+        PAGES / "components",
+        CORE_REGISTRY,
+        "components.json",
+    )
 
 
 def load_utilities() -> list[dict[str, str]]:
-    return _load_page_registry(PAGES / "utils", "registry/utilities.json")
+    return _load_page_registry(
+        PAGES / "utils",
+        SITE_REGISTRY,
+        "utilities.json",
+    )
 
 
 def load_blocks() -> list[dict[str, str]]:
-    return _load_page_registry(PAGES / "blocks", "registry/blocks.json")
+    return _load_page_registry(
+        PAGES / "blocks",
+        SITE_REGISTRY,
+        "blocks.json",
+    )
 
 
 def compile_style(name: str, *, output_style: str = "expanded") -> str:
@@ -811,7 +833,7 @@ def write_sitemap() -> None:
 def render_pages() -> None:
     environment = create_environment()
     catalog = load_catalog()
-    sections = load_entries("registry/sections.json")
+    sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
     site_pages = build_site_pages(sections, catalog, utilities, blocks)

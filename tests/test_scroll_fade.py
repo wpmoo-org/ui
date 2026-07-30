@@ -14,7 +14,7 @@ class ScrollFadeTests(CatalogTestCase):
         self.assertTrue((DIST / "utils/scroll-fade/index.html").is_file())
 
         utilities = json.loads(
-            (ROOT / "src/registry/utilities.json").read_text(encoding="utf-8")
+            (ROOT / "site/src/registry/utilities.json").read_text(encoding="utf-8")
         )
         self.assertEqual(
             utilities,

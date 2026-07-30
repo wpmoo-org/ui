@@ -8,7 +8,7 @@ from tests.helpers import ROOT, CatalogTestCase
 class BlocksTests(CatalogTestCase):
     def test_blocks_json_entries_are_ready(self) -> None:
         blocks = json.loads(
-            (ROOT / "src/registry/blocks.json").read_text(encoding="utf-8")
+            (ROOT / "site/src/registry/blocks.json").read_text(encoding="utf-8")
         )
         self.assertEqual(
             blocks,

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -20,6 +21,11 @@ CORE_OUTPUTS = {
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
+}
+FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
+NPM_PACK_ENV = {
+    **os.environ,
+    "npm_config_cache": "/private/tmp/wpmoo-npm-cache",
 }
 
 
@@ -69,6 +75,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=NPM_PACK_ENV,
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -125,12 +132,50 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertTrue((ROOT / "site/src/layouts").is_dir())
         self.assertTrue((ROOT / "site/src/shell").is_dir())
         self.assertTrue((ROOT / "site/src/blocks").is_dir())
+        self.assertTrue((ROOT / "site/src/includes").is_dir())
+        self.assertTrue((ROOT / "site/src/registry").is_dir())
 
     def test_site_templates_are_in_source_snapshot(self) -> None:
         snapshot_paths = {path for path, _ in build.source_snapshot()}
         template = ROOT / "site/src/pages/index.html.jinja"
 
         self.assertIn(str(template), snapshot_paths)
+
+    def test_core_source_does_not_import_site_source(self) -> None:
+        core_roots = (
+            ROOT / "src",
+            ROOT / "scss",
+        )
+        allowed_suffixes = {".py", ".js", ".jinja", ".scss"}
+        offenders: list[str] = []
+
+        for root in core_roots:
+            for path in sorted(root.rglob("*")):
+                if not path.is_file() or path.suffix not in allowed_suffixes:
+                    continue
+                source = path.read_text(encoding="utf-8")
+                matches = [
+                    needle
+                    for needle in FORBIDDEN_CORE_SITE_REFERENCES
+                    if needle in source
+                ]
+                if matches:
+                    offenders.append(
+                        f"{path.relative_to(ROOT).as_posix()}: {', '.join(matches)}"
+                    )
+
+        self.assertEqual(offenders, [])
+
+    def test_certification_fixtures_use_core_dist_paths(self) -> None:
+        stylesheet_href = "/dist/assets/css/moo-ui.css"
+
+        for path in sorted((ROOT / "tests/fixtures/certification").glob("*.html")):
+            fixture = path.read_text(encoding="utf-8")
+            if ".css" not in fixture:
+                continue
+            with self.subTest(path=path.name):
+                self.assertIn(stylesheet_href, fixture)
+                self.assertNotIn("/site-dist/", fixture)
 
     def test_public_asset_prose_uses_site_static_source_path(self) -> None:
         source_paths = (

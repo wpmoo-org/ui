@@ -102,7 +102,7 @@ class CatalogContractTests(CatalogTestCase):
 
         for path in (
             ROOT / "src/components/dropdown_menu.html.jinja",
-            ROOT / "src/includes/example.html.jinja",
+            ROOT / "site/src/includes/example.html.jinja",
         ):
             source = path.read_text(encoding="utf-8")
             with self.subTest(path=path.name):

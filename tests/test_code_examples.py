@@ -7,7 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 class CodeExampleTests(CatalogTestCase):
     def test_render_example_owns_one_preview_and_source_surface(self) -> None:
         template = (
-            ROOT / "src/includes/example.html.jinja"
+            ROOT / "site/src/includes/example.html.jinja"
         ).read_text(encoding="utf-8")
 
         self.assertEqual(template.count('class="moo-example__surface"'), 1)
@@ -76,7 +76,7 @@ class CodeExampleTests(CatalogTestCase):
 
     def test_render_rtl_example_centralizes_tabbed_language_examples(self) -> None:
         template = (
-            ROOT / "src/includes/example.html.jinja"
+            ROOT / "site/src/includes/example.html.jinja"
         ).read_text(encoding="utf-8")
 
         self.assertIn("{% macro render_rtl_example(", template)
