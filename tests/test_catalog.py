@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 import warnings
 from pathlib import Path
 
@@ -53,6 +54,16 @@ class CatalogContractTests(CatalogTestCase):
                 raise AssertionError(
                     f"{path} presents internal build API guidance: {snippet}"
                 )
+
+    def write_json_fixture(
+        self,
+        root: Path,
+        name: str,
+        payload: dict[str, object],
+    ) -> Path:
+        path = root / name
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        return path
 
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
         styles = read_catalog_styles()
@@ -1179,6 +1190,123 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(details["maturity"], allowed_maturity)
                 self.assertIn(details["runtimeOwner"], components_index)
                 self.assertIn(f"Markup: {details['markupOwner']}.", components_index)
+
+        expected_classifications = {
+            "card": ("native HTML/CSS", "Bootstrap/native HTML"),
+            "dropdown-menu": ("Bootstrap plugin", "Bootstrap/native HTML"),
+            "combobox": ("optional Moo ESM", "Moo documented extension"),
+            "sidebar": ("optional Moo ESM", "Moo documented extension"),
+            "avatar": ("native HTML/CSS", "Moo documented extension"),
+        }
+        for slug, expected in expected_classifications.items():
+            with self.subTest(representative_slug=slug):
+                self.assertEqual(
+                    (
+                        ownership[slug]["runtimeOwner"],
+                        ownership[slug]["markupOwner"],
+                    ),
+                    expected,
+                )
+
+    def test_ownership_evidence_index_rejects_malformed_records(self) -> None:
+        profiles = {
+            "t0-static": {"tier": 0},
+            "t1-bootstrap-data": {"tier": 1},
+        }
+        inventory_component = {"slug": "button", "profile": "t0-static"}
+        valid_evidence_component = {
+            "slug": "button",
+            "tier": 0,
+            "status": "preview-passed",
+            "limitations": [],
+        }
+        cases = (
+            (
+                "duplicate-inventory",
+                {
+                    "profiles": profiles,
+                    "components": [inventory_component, inventory_component],
+                },
+                {"components": [valid_evidence_component]},
+                "Duplicate evidence inventory entry for button",
+            ),
+            (
+                "missing-evidence",
+                {"profiles": profiles, "components": [inventory_component]},
+                {"components": []},
+                "Missing latest evidence record for components: button",
+            ),
+            (
+                "duplicate-evidence",
+                {"profiles": profiles, "components": [inventory_component]},
+                {"components": [valid_evidence_component, valid_evidence_component]},
+                "Duplicate evidence record for button in evidence.json",
+            ),
+            (
+                "unknown-status",
+                {"profiles": profiles, "components": [inventory_component]},
+                {
+                    "components": [
+                        {**valid_evidence_component, "status": "preview"}
+                    ]
+                },
+                "Unknown evidence status for button in evidence.json: preview",
+            ),
+            (
+                "tier-conflict",
+                {"profiles": profiles, "components": [inventory_component]},
+                {"components": [{**valid_evidence_component, "tier": 1}]},
+                "Evidence tier conflict for button in evidence.json",
+            ),
+            (
+                "profile-conflict",
+                {"profiles": profiles, "components": [inventory_component]},
+                {
+                    "components": [
+                        {
+                            **valid_evidence_component,
+                            "profile": "t1-bootstrap-data",
+                        }
+                    ]
+                },
+                "Evidence profile conflict for button in evidence.json",
+            ),
+        )
+
+        for name, inventory, evidence, message in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                fixture_root = Path(directory)
+                inventory_path = self.write_json_fixture(
+                    fixture_root,
+                    "inventory.json",
+                    inventory,
+                )
+                evidence_path = self.write_json_fixture(
+                    fixture_root,
+                    "evidence.json",
+                    evidence,
+                )
+
+                with self.assertRaisesRegex(RuntimeError, message):
+                    site_build._load_evidence_index(inventory_path, (evidence_path,))
+
+    def test_ownership_derivation_rejects_public_esm_export_source_mismatch(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        certification["publicEntrypoints"] = {
+            **certification["publicEntrypoints"],
+            "esm": ["./combobox.js"],
+        }
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "Optional Moo ESM exports do not match src/js/components sources",
+        ):
+            site_build.derive_component_ownership(catalog, certification)
 
     def test_skills_page_documents_agent_component_guidance(self) -> None:
         result = self.run_build()
