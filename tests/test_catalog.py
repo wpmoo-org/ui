@@ -1204,6 +1204,11 @@ class CatalogContractTests(CatalogTestCase):
             "combobox": ("optional Moo ESM", "Moo documented extension"),
             "sidebar": ("optional Moo ESM", "Moo documented extension"),
             "avatar": ("native HTML/CSS", "Moo documented extension"),
+            "field": ("native HTML/CSS", "Moo documented extension"),
+            "collapsible": ("Bootstrap plugin", "Moo documented extension"),
+            "radio-group": ("native HTML/CSS", "Moo documented extension"),
+            "skeleton": ("native HTML/CSS", "Moo documented extension"),
+            "toggle-group": ("native HTML/CSS", "Moo documented extension"),
         }
         for slug, expected in expected_classifications.items():
             with self.subTest(representative_slug=slug):

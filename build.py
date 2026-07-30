@@ -76,12 +76,17 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "alert-dialog": "src/components/alert_dialog.html.jinja",
     "avatar": "src/components/avatar.html.jinja",
     "button": "src/components/button.html.jinja",
+    "collapsible": "src/components/collapsible.html.jinja",
     "combobox": "src/components/combobox.html.jinja",
+    "field": "src/components/field.html.jinja",
     "form": "src/components/field.html.jinja",
     "menubar": "src/components/menubar.html.jinja",
+    "radio-group": "src/components/radio_group.html.jinja",
     "sheet": "src/components/sheet.html.jinja",
     "sidebar": "src/components/sidebar.html.jinja",
+    "skeleton": "src/components/skeleton.html.jinja",
     "toast": "src/components/toast.html.jinja",
+    "toggle-group": "src/components/toggle_group.html.jinja",
 }
 SOURCE_SNAPSHOT_DIRS = (
     SITE_PUBLIC,
