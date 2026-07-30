@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import sys
 
-from tests.helpers import PACKAGE_DIST, SITE_DIST, CatalogTestCase
+from tests.helpers import PACKAGE_DIST, ROOT, SITE_DIST, CatalogTestCase
 
 
 class BuildTests(CatalogTestCase):
@@ -123,6 +123,41 @@ class BuildTests(CatalogTestCase):
             self.assertIn("Required Core outputs are missing", result.stderr)
             self.assertIn("build.py --core", result.stderr)
             self.assertFalse(SITE_DIST.exists())
+        finally:
+            self.run_build()
+
+    def test_site_mode_copies_public_component_js_from_package_dist(self) -> None:
+        core_result = subprocess.run(
+            [sys.executable, "build.py", "--core"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(core_result.returncode, 0, core_result.stderr)
+
+        package_module = PACKAGE_DIST / "js/combobox.js"
+        source_module = ROOT / "src/js/components/combobox.js"
+        sentinel_module = (
+            package_module.read_bytes()
+            + b"\n// package-dist-sentinel-for-site-build\n"
+        )
+        package_module.write_bytes(sentinel_module)
+
+        try:
+            site_result = subprocess.run(
+                [sys.executable, "build.py", "--site"],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(site_result.returncode, 0, site_result.stderr)
+            site_module = SITE_DIST / "assets/js/components/combobox.js"
+            self.assertEqual(site_module.read_bytes(), sentinel_module)
+            self.assertNotEqual(site_module.read_bytes(), source_module.read_bytes())
+            self.assertTrue((SITE_DIST / "assets/js/catalog/index.js").is_file())
         finally:
             self.run_build()
 

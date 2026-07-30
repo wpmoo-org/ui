@@ -829,7 +829,6 @@ def copy_site_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
-    shutil.copytree(JS_COMPONENTS, js_dir / "components", dirs_exist_ok=True)
     if JS_CATALOG.exists():
         shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
         catalog_index = js_dir / "catalog/index.js"
