@@ -69,7 +69,7 @@
     {{ render_example(
       "dismiss",
       "Dismiss on next click",
-      "Bootstrap only supports the focus-triggered dismiss pattern reliably on an <code>&lt;a&gt;</code> element with <code>tabindex=\"0\"</code>, not a <code>&lt;button&gt;</code>, so this uses the dedicated <code>popover_dismiss_trigger()</code> macro.",
+      "Bootstrap's focus-triggered dismiss pattern uses an <code>&lt;a&gt;</code> element with <code>tabindex=&quot;0&quot;</code>, <code>data-bs-trigger=&quot;focus&quot;</code>, and the documented popover attributes rather than a button.",
       dismiss,
       preview_class="moo-example__preview--narrow"
     ) }}

@@ -16,15 +16,35 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
-        <article class="moo-changelog__release" aria-labelledby="release-0-7-0">
+        <article class="moo-changelog__release" aria-labelledby="post-release-docs-boundary">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">Post-release</span>
+            <span class="text-body-secondary">Catalog and documentation boundary</span>
+          </div>
+          <h2 id="post-release-docs-boundary">Catalog and Documentation Boundary</h2>
+          <p>
+            After v0.7.0, the catalog separated site-only assets from Core
+            package outputs and tightened public documentation claims without
+            changing the published package.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>PR #38 separated Core package outputs from site-only documentation and catalog assets.</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-{{ product.version | replace('.', '-') }}">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v{{ product.version }}</span>
-            <span class="text-body-secondary">Phase 2 evidence and public docs boundary</span>
+            <span class="text-body-secondary">Phase 2 evidence</span>
           </div>
-          <h2 id="release-0-7-0">Phase 2 Evidence and Public Docs Boundary</h2>
+          <h2 id="release-{{ product.version | replace('.', '-') }}">Phase 2 Evidence</h2>
           <p>
             Expanded the evidence program across overlay and composite
-            components while preserving the Core/Docs output boundary.
+            components.
           </p>
 
           <div class="moo-changelog__changes">
@@ -33,12 +53,8 @@
               <span>Phase 2 evidence for Tooltip, Popover, Toast, Sheet, Form, Alert Dialog, Menubar, and promoted Dialog, Sidebar, and Combobox evidence.</span>
             </div>
             <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Updated</span>
-              <span>Separated Core package outputs from site-only documentation and catalog assets.</span>
-            </div>
-            <div class="moo-changelog__change-row">
               <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.7.0">GitHub Release v0.7.0</a></span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v{{ product.version }}">GitHub Release v{{ product.version }}</a></span>
             </div>
           </div>
         </article>
@@ -249,7 +265,8 @@
     </article>
 
     {{ render_doc_toc([
-      {"id": "release-0-7-0", "label": "v0.7.0"},
+      {"id": "post-release-docs-boundary", "label": "Post-release"},
+      {"id": "release-" ~ (product.version | replace('.', '-')), "label": "v" ~ product.version},
       {"id": "release-0-6-0", "label": "v0.6.0"},
       {"id": "release-0-5-0", "label": "v0.5.0"},
       {"id": "release-0-4-0", "label": "v0.4.0"},

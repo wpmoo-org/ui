@@ -24,7 +24,7 @@
     {{ render_example(
       "basic",
       "Basic",
-      "Hook a toast to a Button with <code>toast_target</code>; Bootstrap handles the reveal/close behavior in the shared catalog wiring and toast macro.",
+      "Point a Button's <code>data-moo-toast-target</code> at the rendered toast ID; the catalog adapter initializes Bootstrap Toast for the preview while Bootstrap owns reveal and dismissal behavior.",
       basic,
       portal_content=basic_toast
     ) }}

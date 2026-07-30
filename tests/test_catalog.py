@@ -22,6 +22,38 @@ from tests.helpers import (
 
 
 class CatalogContractTests(CatalogTestCase):
+    INTERNAL_PUBLIC_API_SNIPPETS = (
+        "Jinja macro API",
+        "public macro API",
+        "distributed macro",
+        "ready Button macro",
+        "ready Badge macro",
+        "ready Dropdown Menu macro",
+        "ready Dropdown Menu macros",
+        "toast_target",
+        "popover_dismiss_trigger()",
+        "alert_dialog_header()",
+        "dialog_body()",
+        "table_row_actions()",
+        "sidebar_provider()",
+        "field_group()",
+        "field_description()",
+        "field_error()",
+        "fieldset()",
+        "field()",
+        "form()",
+    )
+    def assert_no_internal_public_api_guidance(
+        self,
+        surface: str,
+        path: str,
+    ) -> None:
+        for snippet in self.INTERNAL_PUBLIC_API_SNIPPETS:
+            if snippet in surface:
+                raise AssertionError(
+                    f"{path} presents internal build API guidance: {snippet}"
+                )
+
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
         styles = read_catalog_styles()
         match = re.search(r"\.moo-catalog__main\s*\{(?P<body>[^}]*)\}", styles)
@@ -788,7 +820,7 @@ class CatalogContractTests(CatalogTestCase):
                 ("editing-guidance", "Editing Guidance"),
             ),
             "changelog.html": (
-                ("release-0-7-0", "Phase 2 Evidence and Public Docs Boundary"),
+                ("release-0-7-0", "v0.7.0"),
                 ("release-0-6-0", "Phase 1 Evidence Backfill"),
                 ("release-0-5-0", "Optional Public Runtime Modules"),
                 ("release-0-4-0", "Core Package Expansion"),
@@ -866,7 +898,16 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         installation = self.read_output("installation.html")
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
         version = package["version"]
+        bootstrap_version = certification["bootstrap"]["canonicalVersion"]
+        combobox_export = package["exports"]["./combobox.js"].removeprefix("./")
+        sidebar_export = package["exports"]["./sidebar.js"].removeprefix("./")
+
+        self.assertIn(combobox_export, package["files"])
+        self.assertIn(sidebar_export, package["files"])
 
         self.assertIn(
             f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo-ui.css",
@@ -874,6 +915,14 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn(
             f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo.css",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/bootstrap@{bootstrap_version}/dist/css/bootstrap.min.css",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/bootstrap@{bootstrap_version}/dist/js/bootstrap.bundle.min.js",
             installation,
         )
         self.assertIn("Create workspace", installation)
@@ -889,6 +938,16 @@ class CatalogContractTests(CatalogTestCase):
             'import Sidebar from &quot;@wpmoo/ui/sidebar.js&quot;',
             installation,
         )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{combobox_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{sidebar_export}",
+            installation,
+        )
+        self.assertIn("Combobox.getOrCreateInstance", installation)
+        self.assertIn("Sidebar.getOrCreateInstance", installation)
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
@@ -937,7 +996,7 @@ class CatalogContractTests(CatalogTestCase):
         paths = [
             ROOT / "README.md",
             ROOT / "site/public/llms.txt",
-            *sorted((ROOT / "site/src/pages").glob("*.html.jinja")),
+            *sorted((ROOT / "site/src/pages").rglob("*.html.jinja")),
         ]
         occurrences: list[Path] = []
         for path in paths:
@@ -993,16 +1052,69 @@ class CatalogContractTests(CatalogTestCase):
             "skills.html": self.read_output("skills.html"),
             "blocks/index.html": self.read_output("blocks/index.html"),
         }
+        for path in sorted(DIST.rglob("*.html")):
+            relative = path.relative_to(DIST).as_posix()
+            if not relative.startswith(("components/", "blocks/")):
+                continue
+            public_surfaces[relative] = path.read_text(encoding="utf-8")
 
         for path, surface in public_surfaces.items():
-            with self.subTest(path=path):
-                self.assertNotIn("Jinja macro API", surface)
-                self.assertNotIn("public macro API", surface)
-                self.assertNotIn("distributed macro", surface)
+            self.assert_no_internal_public_api_guidance(surface, path)
 
         readme = public_surfaces["README.md"]
         self.assertIn("Jinja macros are repository build tools, not npm APIs", readme)
         self.assertIn("not npm APIs", public_surfaces["skills.html"])
+        combobox = public_surfaces["components/combobox/index.html"]
+        sidebar = public_surfaces["components/sidebar/index.html"]
+        self.assertIn("Combobox.getOrCreateInstance", combobox)
+        self.assertIn("dispose()", combobox)
+        self.assertIn("Sidebar.getOrCreateInstance", sidebar)
+        self.assertIn("dispose()", sidebar)
+
+    def test_macro_boundary_helper_rejects_nested_public_page_leaks(self) -> None:
+        with self.assertRaises(AssertionError):
+            self.assert_no_internal_public_api_guidance(
+                "Build the page with field() and field_group().",
+                "components/example/index.html",
+            )
+
+        self.assert_no_internal_public_api_guidance(
+            "Initialize with Combobox.getOrCreateInstance(element), then dispose().",
+            "components/combobox/index.html",
+        )
+
+    def test_consumer_docs_do_not_claim_public_sass_api_when_unpublished(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        if certification["publicEntrypoints"]["sass"]:
+            self.skipTest("Sass public entrypoints are present")
+
+        public_surfaces = {
+            "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "index.html": self.read_output("index.html"),
+            "introduction.html": self.read_output("introduction.html"),
+            "installation.html": self.read_output("installation.html"),
+            "support.html": self.read_output("support.html"),
+            "skills.html": self.read_output("skills.html"),
+            "llms.txt": (ROOT / "site/public/llms.txt").read_text(encoding="utf-8"),
+        }
+        prohibited = (
+            "Sass customization",
+            "Sass variables",
+            "public Sass facade",
+        )
+
+        for path, surface in public_surfaces.items():
+            for snippet in prohibited:
+                with self.subTest(path=path, snippet=snippet):
+                    self.assertNotIn(snippet, surface)
+
+        self.assertIn("No public Sass entrypoints yet", public_surfaces["support.html"])
+        self.assertIn("No public Sass entrypoint is published yet", public_surfaces["skills.html"])
 
     def test_readme_artwork_paths_exist_after_site_boundary(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -1102,6 +1214,13 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         changelog = self.read_output("changelog.html")
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+
+        self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
+        self.assertIn(f"GitHub Release v{package['version']}", changelog)
+        self.assertIn("Post-release", changelog)
+        self.assertIn("PR #38 separated Core package outputs", changelog)
+        self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)
 
         for copy in (
             "Product-facing notes for the public Moo UI package and catalog.",
