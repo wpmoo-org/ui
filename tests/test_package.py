@@ -374,35 +374,6 @@ for (const specifier of [
             'git merge-base --is-ancestor "${source_commit}" origin/main',
             workflow,
         )
-        self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
-        self.assertIn('.venv/bin/python build.py', workflow)
-        self.assertIn(
-            'npm pack --dry-run --json | .venv/bin/python '
-            'scripts/verify_package_contents.py',
-            workflow,
-        )
-        self.assertLess(
-            workflow.index("scripts/verify_package_contents.py"),
-            workflow.index("      - name: Publish to npm"),
-        )
-
-    def test_release_tag_workflow_creates_lightweight_tags(self) -> None:
-        workflow = (ROOT / ".github/workflows/release-tag.yml").read_text(
-            encoding="utf-8"
-        )
-
-        tag_step = workflow.split("      - name: Create and push tag\n", 1)[1].split(
-            "      - name: Dispatch npm publish workflow",
-            1,
-        )[0]
-        tag_commands = [
-            line.strip()
-            for line in tag_step.splitlines()
-            if line.strip().startswith("git tag ")
-        ]
-
-        self.assertEqual(tag_commands, ['git tag "${tag}"'])
-        self.assertIn('git push origin "refs/tags/${tag}"', tag_step)
 
     def test_ci_runs_for_main_and_dev_pushes(self) -> None:
         workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(

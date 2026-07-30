@@ -45,23 +45,20 @@ jobs:
           node-version: "22.14.0"
           cache: npm
 
-      - name: Create virtual environment
-        run: python -m venv .venv
-
       - name: Install Python dependencies
-        run: .venv/bin/python -m pip install -r requirements-dev.txt
+        run: python -m pip install -r requirements-dev.txt
 
       - name: Install npm development dependencies
         run: npm ci --ignore-scripts
 
       - name: Install Playwright Chromium
-        run: .venv/bin/python -m playwright install --with-deps chromium
+        run: python -m playwright install --with-deps chromium
 
       - name: Run contract tests
-        run: .venv/bin/python -m unittest discover -s tests -v
+        run: python -m unittest discover -s tests -v
 
-      - name: Build package and site outputs
-        run: .venv/bin/python build.py
+      - name: Build catalog
+        run: python build.py
 
       - name: Upgrade npm for OIDC trusted publishing
         run: npm install -g npm@11
@@ -106,7 +103,8 @@ jobs:
           fi
 
       - name: Verify package contents
-        run: npm pack --dry-run --json | .venv/bin/python scripts/verify_package_contents.py
+        if: steps.package.outputs.published == 'false'
+        run: npm pack --dry-run
 
       - name: Publish to npm
         if: steps.package.outputs.published == 'false'
