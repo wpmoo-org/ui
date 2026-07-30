@@ -700,11 +700,18 @@ def load_blocks() -> list[dict[str, str]]:
     )
 
 
+def style_include_paths(entrypoint: Path) -> list[str]:
+    include_paths = [str(SCSS)]
+    if entrypoint.is_relative_to(SITE_SCSS):
+        include_paths.append(str(SITE_SCSS))
+    include_paths.append(str(BOOTSTRAP / "scss"))
+    return include_paths
+
+
 def compile_style(entrypoint: Path, *, output_style: str = "expanded") -> str:
-    include_paths = [str(SCSS), str(SITE_SCSS), str(BOOTSTRAP / "scss")]
     css = sass.compile(
         filename=str(entrypoint),
-        include_paths=include_paths,
+        include_paths=style_include_paths(entrypoint),
         output_style=output_style,
     )
     return css.replace("\r\n", "\n").replace("\r", "\n").rstrip() + "\n"

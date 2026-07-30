@@ -181,6 +181,27 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertTrue((ROOT / "site/scss/catalog").is_dir())
         self.assertTrue((ROOT / "site/src/js/catalog").is_dir())
 
+    def test_catalog_sass_settings_are_site_owned(self) -> None:
+        self.assertFalse((ROOT / "scss/settings/_catalog.scss").exists())
+        self.assertTrue((ROOT / "site/scss/catalog/_settings.scss").is_file())
+
+    def test_core_sass_include_paths_respect_ownership(self) -> None:
+        style_include_paths = getattr(build, "style_include_paths", None)
+
+        self.assertIsNotNone(style_include_paths)
+        self.assertEqual(
+            style_include_paths(build.SCSS / "moo-ui.scss"),
+            [str(build.SCSS), str(build.BOOTSTRAP / "scss")],
+        )
+        self.assertEqual(
+            style_include_paths(build.SCSS / "moo-core.scss"),
+            [str(build.SCSS), str(build.BOOTSTRAP / "scss")],
+        )
+        self.assertEqual(
+            style_include_paths(build.SITE_SCSS / "catalog.scss"),
+            [str(build.SCSS), str(build.SITE_SCSS), str(build.BOOTSTRAP / "scss")],
+        )
+
     def test_site_templates_are_in_source_snapshot(self) -> None:
         snapshot_paths = {path for path, _ in build.source_snapshot()}
         template = ROOT / "site/src/pages/index.html.jinja"

@@ -369,7 +369,6 @@ class DesignGateTests(CatalogTestCase):
             "settings/palette",
             "settings/forms",
             "settings/components",
-            "settings/catalog",
             "settings/bootstrap_overrides",
         ]
         imports = [
@@ -446,6 +445,7 @@ class DesignGateTests(CatalogTestCase):
     def test_catalog_aggregate_imports_ownership_layers_in_order(self) -> None:
         catalog = (SITE_SCSS / "catalog.scss").read_text(encoding="utf-8")
         expected = [
+            "catalog/settings",
             "catalog/shell",
             "catalog/home",
             "catalog/docs",
@@ -464,7 +464,7 @@ class DesignGateTests(CatalogTestCase):
         self.assertEqual(owned_partial_targets(SITE_SCSS / "catalog"), set(expected))
 
     def test_catalog_settings_own_catalog_knobs_only(self) -> None:
-        catalog_settings = (SCSS / "settings/_catalog.scss").read_text(
+        catalog_settings = (SITE_SCSS / "catalog/_settings.scss").read_text(
             encoding="utf-8"
         )
         variables = re.findall(
@@ -618,6 +618,7 @@ class DesignGateTests(CatalogTestCase):
         offenders = [
             offender
             for path in catalog_style_partials()
+            if path.name != "_settings.scss"
             for offender in catalog_literal_offenders(path)
         ]
         self.assertEqual(offenders, [])
