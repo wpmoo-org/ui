@@ -17,9 +17,11 @@
   <div class="moo-component-examples">
     <h2 id="usage" class="h4 mb-3">Usage</h2>
     <p class="mb-4">
-      Start with <code>sidebar_provider()</code>, render one <code>sidebar()</code>,
-      and place page content in <code>sidebar_inset()</code>. Put team switching and
-      global actions in <code>sidebar_header()</code> and <code>sidebar_footer()</code>.
+      Render a <code>.sidebar-wrapper</code> with one <code>.sidebar</code>
+      region and one <code>.sidebar-inset</code> content region. Bootstrap owns
+      Offcanvas, Collapse, Dropdown, and Tooltip behavior; the optional Moo
+      Sidebar ESM coordinates the responsive shell state Bootstrap does not
+      provide.
     </p>
 
     {% set app_shell %}
@@ -33,7 +35,7 @@
     {{ render_block_example(
       "app-shell",
       "Application shell",
-      "Compose the shell from <code>sidebar_provider</code>, <code>sidebar</code>, and <code>sidebar_inset</code>. The preview uses the same floating sidebar block frame so the application shell is exercised as a standalone viewport.",
+      "Compose the shell from documented sidebar regions. The preview uses the same floating sidebar block frame so the application shell is exercised as a standalone viewport.",
       app_shell,
       preview_class="moo-example__preview--shell",
       frame_src=site_href("blocks/previews/sidebar-floating.html", root_path)
@@ -41,9 +43,9 @@
 
     <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>
     <p class="mb-4">
-      Sidebar parts compose existing ready macros. Actions use Button and
-      Dropdown Menu, metadata uses Badge, form fields use Input, separators use
-      Separator, and loading rows use Skeleton.
+      Sidebar parts compose public component contracts. Actions use Button and
+      Dropdown Menu markup, metadata uses Badge, form fields use Input,
+      separators use Separator, and loading rows use Skeleton.
     </p>
 
     <figure class="mb-5">
@@ -54,49 +56,57 @@
       >
     </figure>
 
-    <h2 id="sidebar-api-reference" class="h4 mt-5 mb-3">Sidebar API Reference</h2>
+    <h2 id="sidebar-html-anatomy" class="h4 mt-5 mb-3">HTML Anatomy</h2>
     <p class="mb-4">
-      Public names follow Bootstrap-native shell primitives and the shared sidebar contract.
-      Use this list to wire page-level compositions quickly.
+      These are the public HTML hooks that applications can inspect or target.
+      They describe rendered markup, not the repository's internal Jinja build
+      helpers.
     </p>
 
     {% set sidebar_parts = [
-      {"id": "sidebar-provider", "name": "sidebar_provider()", "summary": "Owns expanded/collapsed state and wraps the shell."},
-      {"id": "sidebar", "name": "sidebar()", "summary": "Renders the app navigation container."},
-      {"id": "sidebar-input", "name": "sidebar_input()", "summary": "Composes Input for sidebar-local filtering fields."},
-      {"id": "sidebar-header", "name": "sidebar_header()", "summary": "Hosts brand, team switcher, or primary header controls."},
-      {"id": "sidebar-footer", "name": "sidebar_footer()", "summary": "Hosts account menus and persistent footer actions."},
-      {"id": "sidebar-separator", "name": "sidebar_separator()", "summary": "Composes Separator for sidebar section breaks."},
-      {"id": "sidebar-content", "name": "sidebar_content()", "summary": "Provides the scrollable main navigation area."},
-      {"id": "sidebar-group", "name": "sidebar_group()", "summary": "Groups related navigation or action rows."},
-      {"id": "sidebar-group-label", "name": "sidebar_group_label()", "summary": "Labels a sidebar group with visible text."},
-      {"id": "sidebar-group-action", "name": "sidebar_group_action()", "summary": "Composes Button for icon-only group actions."},
-      {"id": "sidebar-group-content", "name": "sidebar_group_content()", "summary": "Wraps group children without adding layout policy by default."},
-      {"id": "sidebar-menu", "name": "sidebar_menu()", "summary": "Renders the menu list container."},
-      {"id": "sidebar-menu-item", "name": "sidebar_menu_item()", "summary": "Hosts one menu row, action row, or submenu trigger."},
-      {"id": "sidebar-menu-button", "name": "sidebar_menu_button()", "summary": "Renders a link-like or button-like menu row."},
-      {"id": "sidebar-menu-action", "name": "sidebar_menu_action()", "summary": "Composes Dropdown Menu for row-level overflow actions."},
-      {"id": "sidebar-menu-badge", "name": "sidebar_menu_badge()", "summary": "Composes Badge for trailing row metadata."},
-      {"id": "sidebar-menu-skeleton", "name": "sidebar_menu_skeleton()", "summary": "Composes Skeleton for deterministic loading rows."},
-      {"id": "sidebar-menu-sub", "name": "sidebar_menu_sub()", "summary": "Renders a Bootstrap Collapse-backed submenu container."},
-      {"id": "sidebar-menu-sub-item", "name": "sidebar_menu_sub_item()", "summary": "Hosts one nested submenu row."},
-      {"id": "sidebar-menu-sub-button", "name": "sidebar_menu_sub_button()", "summary": "Renders the disclosure control for a submenu."},
-      {"id": "sidebar-trigger", "name": "sidebar_trigger()", "summary": "Toggles the target sidebar."},
-      {"id": "sidebar-rail", "name": "sidebar_rail()", "summary": "Provides the collapsed rail hit target."},
-      {"id": "sidebar-inset", "name": "sidebar_inset()", "summary": "Hosts the page surface next to the sidebar."}
+      {"id": "sidebar-wrapper", "selector": '<code>.sidebar-wrapper[data-slot="sidebar-wrapper"]</code>', "summary": "Wraps the shell and stores <code>data-moo-sidebar-state</code>."},
+      {"id": "sidebar", "selector": '<code>.sidebar[data-slot="sidebar"]</code>', "summary": "Navigation region. It is also a Bootstrap <code>.offcanvas-lg</code> target on smaller viewports."},
+      {"id": "sidebar-trigger", "selector": '<code>[data-moo-sidebar-trigger]</code>', "summary": "Button that toggles the target sidebar and mirrors <code>aria-expanded</code>."},
+      {"id": "sidebar-rail", "selector": '<code>[data-moo-sidebar-rail]</code>', "summary": "Collapsed desktop rail hit target; hidden from normal tab order."},
+      {"id": "sidebar-content", "selector": '<code>[data-slot="sidebar-content"]</code>', "summary": "Scrollable navigation content."},
+      {"id": "sidebar-menu-button", "selector": '<code>[data-slot="sidebar-menu-button"]</code>', "summary": "Link, button, collapse trigger, or dropdown trigger row."},
+      {"id": "sidebar-submenu", "selector": '<code>.sidebar-menu-sub.collapse</code>', "summary": "Bootstrap Collapse-backed nested list."},
+      {"id": "sidebar-inset", "selector": '<code>.sidebar-inset</code>', "summary": "Page content surface next to the sidebar."}
     ] %}
 
     {% set sidebar_parts_rows = [] %}
     {% for part in sidebar_parts %}
-      {% set _ = sidebar_parts_rows.append(["<code>" ~ part["name"] ~ "</code>", part["summary"]]) %}
+      {% set _ = sidebar_parts_rows.append([part["selector"], part["summary"]]) %}
     {% endfor %}
     {{ table(
-      ["Macro", "Purpose"],
+      ["Selector", "Purpose"],
       sidebar_parts_rows,
       row_ids=sidebar_parts | map(attribute="id") | list,
       row_header=true,
       extra_class="align-middle mb-5"
     ) }}
+
+    {% set sidebar_aside_class = "sidebar offcanvas-lg offcanvas-start" %}
+    {% set sidebar_markup_example %}
+    <div class="sidebar-wrapper" data-slot="sidebar-wrapper" data-moo-sidebar-state="expanded">
+      <aside id="workspace-sidebar" class="{{ sidebar_aside_class }}" tabindex="-1" data-slot="sidebar">
+        <div class="sidebar-inner" data-slot="sidebar-inner">
+          <div class="sidebar-content" data-slot="sidebar-content">
+            <ul class="sidebar-menu" data-slot="sidebar-menu">
+              <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
+                <a class="sidebar-menu-button active" href="/projects" data-slot="sidebar-menu-button" aria-current="page">
+                  Projects
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <main class="sidebar-inset">...</main>
+    </div>
+    {% endset %}
+    {{ render_code_snippet("sidebar-html-anatomy-example", sidebar_markup_example, "html") }}
 
     <h2 id="sidebar-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
     <p>
@@ -107,7 +117,7 @@
     </p>
     <p>
       Importing the module never scans the document. Initialize only a
-      <code>sidebar_provider()</code> root your application owns; repeated
+      <code>[data-slot="sidebar-wrapper"]</code> root your application owns; repeated
       initialization returns the same instance, and <code>dispose()</code>
       releases listeners, generated flyouts, positioning, tooltips, and the
       mobile Offcanvas instance owned by Sidebar.
@@ -126,11 +136,12 @@
     {% endset %}
     {{ render_code_snippet("sidebar-javascript-import", sidebar_import_example, "js") }}
 
-    <h2 id="usesidebar" class="h4 mt-5 mb-3">useSidebar</h2>
+    <h2 id="sidebar-state" class="h4 mt-5 mb-3">Sidebar State</h2>
     <p class="mb-0">
-      <strong>useSidebar</strong> is a runtime mapping only:
-      <code>sidebar_provider()</code> writes <code>data-moo-sidebar-state</code>,
-      and the public Sidebar instance owns its state transitions.
+      Some design references call this state helper <strong>useSidebar</strong>.
+      In Moo UI it is not a React hook. It is the rendered
+      <code>data-moo-sidebar-state</code> attribute plus the public Sidebar
+      instance that updates it.
     </p>
   </div>
 

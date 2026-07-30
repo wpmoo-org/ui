@@ -31,6 +31,7 @@ SITE_SCSS = SITE / "scss"
 SITE_SRC = SITE / "src"
 CORE_REGISTRY = SRC / "registry"
 SITE_REGISTRY = SITE_SRC / "registry"
+CERTIFICATION = SRC / "certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
 PACKAGE_DIST = ROOT / "dist"
@@ -658,6 +659,125 @@ def load_product_facts() -> dict[str, object]:
     }
 
 
+def _component_source_file(slug: str) -> Path:
+    source_file = SRC / "components" / f"{slug.replace('-', '_')}.html.jinja"
+    if source_file.exists():
+        return source_file
+    if slug == "form":
+        return SRC / "components/field.html.jinja"
+    raise RuntimeError(f"Missing component source for ownership derivation: {slug}")
+
+
+def _load_evidence_index() -> dict[str, dict[str, object]]:
+    inventory = json.loads(
+        (CERTIFICATION / "evidence-inventory.json").read_text(encoding="utf-8")
+    )
+    profiles = inventory.get("profiles", {})
+    components: dict[str, dict[str, object]] = {}
+    for entry in inventory.get("components", []):
+        slug = entry["slug"]
+        profile = entry["profile"]
+        if profile not in profiles:
+            raise RuntimeError(f"Unknown evidence profile for {slug}: {profile}")
+        components[slug] = {
+            "profile": profile,
+            "profileTier": profiles[profile]["tier"],
+            "accepted": False,
+            "acceptedEvidence": [],
+            "latestEvidence": {},
+        }
+
+    for filename in (
+        "pilot-evidence.json",
+        "phase-1-evidence.json",
+        "phase-2-evidence.json",
+    ):
+        evidence = json.loads((CERTIFICATION / filename).read_text(encoding="utf-8"))
+        for component in evidence.get("components", []):
+            slug = component["slug"]
+            if slug not in components:
+                raise RuntimeError(f"Evidence references unknown component: {slug}")
+            status = component.get("status", "")
+            if status.endswith("-passed") or status == "preview-passed":
+                components[slug]["accepted"] = True
+                components[slug]["acceptedEvidence"].append(filename)
+            components[slug]["latestEvidence"] = component
+    return components
+
+
+def derive_component_ownership(
+    catalog: list[dict[str, str]],
+    certification: dict[str, object],
+) -> dict[str, dict[str, object]]:
+    evidence_index = _load_evidence_index()
+    exported_moo_modules = {
+        module.lstrip("./").removesuffix(".js")
+        for module in certification.get("publicEntrypoints", {}).get("esm", [])
+    }
+    source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
+    if exported_moo_modules != source_moo_modules:
+        raise RuntimeError(
+            "Optional Moo ESM exports do not match src/js/components sources"
+        )
+
+    certified = set(certification.get("certifiedComponents", []))
+    unknown_certified = certified.difference(entry["slug"] for entry in catalog)
+    if unknown_certified:
+        raise RuntimeError(
+            "certification.json lists unknown components: "
+            + ", ".join(sorted(unknown_certified))
+        )
+
+    ownership: dict[str, dict[str, object]] = {}
+    for component in catalog:
+        slug = component["slug"]
+        registry_status = component.get("status")
+        if registry_status != "ready":
+            raise RuntimeError(f"Unknown registry maturity for {slug}: {registry_status}")
+        if slug not in evidence_index:
+            raise RuntimeError(f"Missing evidence inventory entry for {slug}")
+
+        evidence = evidence_index[slug]
+        latest_evidence = evidence["latestEvidence"]
+        bootstrap_sources = latest_evidence.get("bootstrapEvidence", [])
+        runtime_owner = "native HTML/CSS"
+        if slug in exported_moo_modules:
+            runtime_owner = "optional Moo ESM"
+        elif any("js/src/" in source for source in bootstrap_sources):
+            runtime_owner = "Bootstrap plugin"
+
+        source_file = _component_source_file(slug)
+        source = source_file.read_text(encoding="utf-8")
+        markup_owner = "Bootstrap/native HTML"
+        if (
+            "data-moo-" in source
+            or "Moo documented extension" in source
+            or evidence["profile"].startswith("t3-")
+            or slug == "avatar"
+        ):
+            markup_owner = "Moo documented extension"
+        if "owns no input control of its own" in source and slug == "form":
+            markup_owner = "Moo documented extension"
+
+        maturity = "ready"
+        if evidence["accepted"]:
+            maturity = "accepted"
+        if slug in certified:
+            maturity = "certified"
+
+        ownership[slug] = {
+            "runtimeOwner": runtime_owner,
+            "markupOwner": markup_owner,
+            "maturity": maturity,
+            "tier": evidence["profileTier"],
+            "evidence": sorted(evidence["acceptedEvidence"]),
+            "knownLimitations": latest_evidence.get("limitations", [])[:2],
+            "source": source_file.relative_to(ROOT).as_posix(),
+        }
+
+    return ownership
+
+
 def _fallback_label(slug: str) -> str:
     return " ".join(part.capitalize() for part in slug.split("-"))
 
@@ -944,6 +1064,17 @@ def render_pages() -> None:
     utilities = load_utilities()
     blocks = load_blocks()
     product = load_product_facts()
+    component_ownership = derive_component_ownership(
+        catalog,
+        product["certification"],
+    )
+    catalog = [
+        {
+            **component,
+            "ownership": component_ownership[component["slug"]],
+        }
+        for component in catalog
+    ]
     site_pages = build_site_pages(sections, catalog, utilities, blocks)
     version = asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
@@ -973,6 +1104,7 @@ def render_pages() -> None:
             utilities=utilities,
             blocks=blocks,
             product=product,
+            component_ownership=component_ownership,
             site_pages=site_pages,
             current_section=current_section,
             current_slug=metadata["slug"],

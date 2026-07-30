@@ -62,12 +62,25 @@
     <article class="moo-doc-page">
       {{ render_page_header(
         "Components",
-        "Browse the Bootstrap-native primitives that make up the Moo UI shell.",
+        "Browse the Bootstrap-native primitives and documented Moo extensions that make up the public package.",
         id="catalog",
         actions=render_section_page_actions("components", site_pages, root_path)
       ) }}
 
       <section class="moo-catalog__dashboard" aria-label="Catalog filters">
+        {% call card(extra_class="mb-4", body_class="d-grid gap-2") %}
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            {{ badge("Ready", variant="outline") }}
+            {{ badge("Accepted", variant="secondary") }}
+            {{ badge("Certified", variant="success") }}
+          </div>
+          <p class="mb-0 text-body-secondary">
+            Maturity and ownership are derived at build time from the component
+            registry, certification evidence, the manifest, and runtime source.
+            Current manifest status is <code>{{ product.certification.status }}</code>.
+          </p>
+        {% endcall %}
+
         <div class="moo-catalog__toolbar">
           {% call input_group() %}
             {{ input(
@@ -102,12 +115,20 @@
                 <div class="moo-catalog__showcase-preview">
                   {{ component_preview(component.slug, root_path) }}
                 </div>
-                <div>
+              <div>
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    {% set maturity = component.ownership.maturity %}
+                    {{ badge(maturity | capitalize, variant="secondary" if maturity == "accepted" else ("success" if maturity == "certified" else "outline")) }}
+                    {{ badge(component.ownership.runtimeOwner, variant="outline") }}
+                  </div>
                   <h2 class="h5 mb-2">
                     <a class="stretched-link text-body text-decoration-none" href="{{ site_href("components/" ~ component.slug ~ ".html", root_path) }}">{{ component.label }}</a>
                   </h2>
                   <p class="text-body-secondary mb-0">
                     {{ component_descriptions.get(component.slug, "Bootstrap-native component primitive.") }}
+                  </p>
+                  <p class="small text-body-secondary mt-3 mb-0">
+                    Markup: {{ component.ownership.markupOwner }}.
                   </p>
                 </div>
               {% endcall %}
