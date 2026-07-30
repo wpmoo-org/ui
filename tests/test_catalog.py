@@ -341,10 +341,10 @@ class CatalogContractTests(CatalogTestCase):
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="reference import"):
-                self.assertIn(
-                    '{% from "includes/documentation-reference.html.jinja" '
-                    "import render_reference %}",
+                self.assertRegex(
                     source,
+                    r'{%\s*from\s+"includes/documentation-reference\.html\.jinja"\s+'
+                    r'import\s+render_reference\s+with\s+context\s*%}',
                 )
             with self.subTest(page=path.name, contract="reference call"):
                 self.assertIn("render_reference(", source)
@@ -1179,6 +1179,10 @@ class CatalogContractTests(CatalogTestCase):
         allowed_maturity = {"ready", "accepted", "certified"}
 
         self.assertEqual(set(ownership), {component["slug"] for component in catalog})
+        self.assertNotIn("Maturity and ownership are derived", components_index)
+        self.assertNotIn("Markup:", components_index)
+        self.assertNotIn("Component maturity legend", components_index)
+        self.assertNotIn("Explain component status levels", components_index)
         for component in catalog:
             slug = component["slug"]
             with self.subTest(slug=slug):
@@ -1190,11 +1194,15 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(component["label"], components_index)
 
                 details = ownership[slug]
+                component_page = self.read_output(f"components/{slug}/index.html")
                 self.assertIn(details["runtimeOwner"], allowed_runtime)
                 self.assertIn(details["markupOwner"], allowed_markup)
                 self.assertIn(details["maturity"], allowed_maturity)
-                self.assertIn(details["runtimeOwner"], components_index)
-                self.assertIn(f"Markup: {details['markupOwner']}.", components_index)
+                self.assertIn('data-moo-component-reference', component_page)
+                self.assertIn("Component reference", component_page)
+                self.assertIn(details["maturity"].capitalize(), component_page)
+                self.assertIn(details["runtimeOwner"], component_page)
+                self.assertIn(details["markupOwner"], component_page)
 
         expected_classifications = {
             # Drift class: representative ownership values must remain

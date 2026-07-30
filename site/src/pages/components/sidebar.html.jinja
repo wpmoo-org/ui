@@ -3,7 +3,7 @@
 {% from "components/table.html.jinja" import table %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Sidebar — Moo UI{% endblock %}
@@ -153,6 +153,7 @@
   {{ render_reference(
     "For the nested collapse behavior, see the",
     "https://getbootstrap.com/docs/5.3/components/collapse/",
-    "Bootstrap Collapse documentation"
+    "Bootstrap Collapse documentation",
+    show_details=false
   ) }}
 {% endblock %}
