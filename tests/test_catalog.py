@@ -831,6 +831,8 @@ class CatalogContractTests(CatalogTestCase):
                 ("editing-guidance", "Editing Guidance"),
             ),
             "changelog.html": (
+                ("release-0-7-1", "v0.7.1"),
+                ("post-release-docs-boundary", "Post-release"),
                 ("release-0-7-0", "v0.7.0"),
                 ("release-0-6-0", "Phase 1 Evidence Backfill"),
                 ("release-0-5-0", "Optional Public Runtime Modules"),
@@ -1134,25 +1136,31 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_readme_artwork_paths_exist_after_site_boundary(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        public_prefix = "https://ui.wpmoo.org/"
         referenced = sorted(
             set(
                 re.findall(
-                    r'(?:src|srcset)="(site/static/images/[^"]+)"',
+                    r'(?:src|srcset)="(https://ui\.wpmoo\.org/assets/images/readme[^"]+)"',
                     readme,
                 )
             )
         )
 
-        self.assertGreaterEqual(len(referenced), 3)
-        for relative in referenced:
-            with self.subTest(relative=relative):
-                self.assertTrue((ROOT / relative).is_file())
+        self.assertGreaterEqual(len(referenced), 7)
+        for url in referenced:
+            public_path = url.removeprefix(public_prefix)
+            source_path = ROOT / "site/static" / public_path.removeprefix("assets/")
+            output_path = ROOT / "site-dist" / public_path
+            with self.subTest(url=url):
+                self.assertTrue(source_path.is_file())
+                self.assertTrue(output_path.is_file())
 
-        self.assertIn("site/static/images/", readme)
-        self.assertNotIn(
-            "static/images/",
-            readme.replace("site/static/images/", ""),
+        self.assertIn("https://ui.wpmoo.org/assets/images/readme", readme)
+        self.assertIsNone(
+            re.search(r'(?:src|srcset)="site/static/images/[^"]+"', readme)
         )
+        self.assertNotIn('src="assets/images/', readme)
+        self.assertNotIn('srcset="assets/images/', readme)
 
     def test_registered_components_have_pages_and_ownership_classification(self) -> None:
         result = self.run_build()

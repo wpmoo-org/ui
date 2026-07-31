@@ -166,7 +166,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         expected = self.fixture["package"]
 
-        self.assertEqual(package["version"], "0.7.0")
+        self.assertEqual(package["version"], expected["version"])
         self.assertEqual(sorted(package["files"]), expected["files"])
         self.assertEqual(package["exports"], expected["exports"])
         self.assertEqual(package["sideEffects"], expected["sideEffects"])

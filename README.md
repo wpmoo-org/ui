@@ -158,14 +158,14 @@ The README uses original WPMoo preview artwork stored under
 are not part of the npm package.
 
 <p align="center">
-  <a href="https://ui.wpmoo.org/components/button/"><picture><source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/button-dark.svg"><img src="site/static/images/readme/button-light.svg" alt="Button preview" width="31%"></picture></a>
-  <a href="https://ui.wpmoo.org/components/dialog/"><picture><source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/dialog-dark.svg"><img src="site/static/images/readme/dialog-light.svg" alt="Dialog preview" width="31%"></picture></a>
-  <a href="https://ui.wpmoo.org/components/sidebar/"><picture><source media="(prefers-color-scheme: dark)" srcset="site/static/images/readme/sidebar-dark.svg"><img src="site/static/images/readme/sidebar-light.svg" alt="Sidebar preview" width="31%"></picture></a>
+  <a href="https://ui.wpmoo.org/components/button/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://ui.wpmoo.org/assets/images/readme/button-dark.svg"><img src="https://ui.wpmoo.org/assets/images/readme/button-light.svg" alt="Button preview" width="31%"></picture></a>
+  <a href="https://ui.wpmoo.org/components/dialog/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://ui.wpmoo.org/assets/images/readme/dialog-dark.svg"><img src="https://ui.wpmoo.org/assets/images/readme/dialog-light.svg" alt="Dialog preview" width="31%"></picture></a>
+  <a href="https://ui.wpmoo.org/components/sidebar/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://ui.wpmoo.org/assets/images/readme/sidebar-dark.svg"><img src="https://ui.wpmoo.org/assets/images/readme/sidebar-light.svg" alt="Sidebar preview" width="31%"></picture></a>
 </p>
 
 ## Status And Support
 
-Moo UI is in the `0.x` series. Current package: `@wpmoo/ui@0.7.0`. The
+Moo UI is in the `0.x` series. Current package: `@wpmoo/ui@0.7.1`. The
 package's certification manifest currently has `preview` status; catalog
 availability is WPMoo-maintained preview evidence, not independent or
 accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
