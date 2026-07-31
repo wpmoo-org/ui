@@ -1,4 +1,5 @@
 import Combobox from "../../../../src/js/components/combobox.js";
+import ContextMenu from "../../../../src/js/components/context-menu.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
@@ -33,6 +34,11 @@ export function initCatalog(root = document) {
 
   root.querySelectorAll('[data-slot="sidebar-wrapper"]').forEach((element) => {
     const instance = Sidebar.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll(".context-menu").forEach((element) => {
+    const instance = ContextMenu.getOrCreateInstance(element);
     disposers.push(() => instance.dispose());
   });
 

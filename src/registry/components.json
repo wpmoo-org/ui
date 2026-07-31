@@ -198,5 +198,10 @@
     "slug": "menubar",
     "label": "Menubar",
     "status": "ready"
+  },
+  {
+    "slug": "context-menu",
+    "label": "Context Menu",
+    "status": "ready"
   }
 ]

@@ -18,6 +18,7 @@ APPROVED_TARBALL_FILES = {
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
+    "dist/js/context-menu.js",
     "package.json",
 }
 

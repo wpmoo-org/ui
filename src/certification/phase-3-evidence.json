@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "0.1",
+  "status": "backfill",
+  "releaseTarget": "0.8.0",
+  "releaseClaim": "none",
+  "description": "Incremental Phase 3A evidence for the 0.8.0 Context Menu addition. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.8.0 release gate is complete.",
+  "components": [
+    {
+      "slug": "context-menu",
+      "phase": "3A",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_context_menu.py",
+        "tests/test_certification_browser.py",
+        "dist/js/context-menu.js"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_dropdown.scss"
+      ],
+      "resolvedFindings": [
+        "Bootstrap Dropdown's documented `reference` option (an object providing getBoundingClientRect, i.e. a Popper virtual element) cleanly supports pointer-coordinate placement; no separate Moo-owned positioning layer was needed. Moo owns only contextmenu/Shift+F10/ContextMenu-key invocation, the virtual-reference bridge, the explicit fallback trigger, focus-into-menu-on-open, and Escape focus return to the invoking trigger.",
+        "The fallback trigger keeps `data-bs-toggle=\"dropdown\"` as the sibling Bootstrap's own menu lookup and Up/Down/Escape-in-menu keydown delegation resolve against, so arrow-key roving focus and outside-click dismissal stay inherited from Bootstrap Dropdown rather than reimplemented."
+      ],
+      "limitations": [
+        "Phase 3A browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; a later gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit public ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, pointer right-click open at pointer coordinates, Shift+F10 and ContextMenu-key keyboard open anchored to the trigger, the explicit fallback trigger for touch/keyboard-only use, focus entry into the menu, Escape dismissal with focus return to the invoking trigger, outside-click dismissal, enabled item activation, disabled item non-activation and focus skip, viewport-edge collision clamping, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "Nested submenus are out of scope for Phase 3A; the component page documents this as an explicit known gap rather than approximating hover/roving submenu behavior it cannot back.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    }
+  ]
+}

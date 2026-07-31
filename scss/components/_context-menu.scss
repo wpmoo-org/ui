@@ -1,0 +1,28 @@
+// Bootstrap has no native context-menu or "explicit fallback trigger"
+// concept, so there is no Bootstrap token to consume here: the fallback
+// button is a Moo-owned corner affordance layered over arbitrary surface
+// content, verified in the browser to otherwise fall into normal block flow
+// below the surface instead of reading as a menu trigger for it.
+.context-menu {
+  position: relative;
+}
+
+.context-menu-trigger:not([data-context-menu-fallback]) {
+  cursor: default;
+}
+
+.context-menu-trigger[data-context-menu-fallback] {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+}
+
+// A pointer-driven open focuses the menu container itself, not an item, so
+// :hover carries the highlight instead of a focus ring competing with it
+// (verified in the browser: focusing the first item unconditionally left a
+// stray ring on it while a different item was hovered). The shared
+// [tabindex]:focus-visible ring in foundations/_focus.scss otherwise applies
+// here too, since a tabindex="-1" container still matches that selector.
+ul.context-menu-menu:focus-visible {
+  outline: 0;
+}

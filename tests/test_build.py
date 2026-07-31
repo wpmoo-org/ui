@@ -31,7 +31,7 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (SITE_DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
-        for module_name in ("combobox.js", "sidebar.js"):
+        for module_name in ("combobox.js", "sidebar.js", "context-menu.js"):
             site_component_module = SITE_DIST / f"assets/js/components/{module_name}"
             site_legacy_module = SITE_DIST / f"js/{module_name}"
             package_module = PACKAGE_DIST / f"js/{module_name}"

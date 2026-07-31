@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Context Menu certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 28rem;
+      }
+
+      #certification-context-menu-edge {
+        position: fixed;
+        inset-inline-end: 1rem;
+        inset-block-end: 1rem;
+        width: 10rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Context Menu certification fixture</h1>
+      <div class="context-menu" id="certification-context-menu">
+        <div
+          class="context-menu-trigger"
+          id="certification-context-menu-surface"
+          role="button"
+          tabindex="0"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="certification-context-menu-menu"
+        >
+          <div class="card">
+            <div class="card-body">
+              <p class="mb-0">Right-click, or focus and press Shift+F10.</p>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="context-menu-trigger btn btn-ghost btn-icon-sm"
+          id="certification-context-menu-fallback"
+          data-bs-toggle="dropdown"
+          data-context-menu-fallback
+          aria-expanded="false"
+          aria-controls="certification-context-menu-menu"
+          aria-label="Open File actions menu"
+        >
+          <svg
+            data-icon="inline-start"
+            data-lucide="ellipsis-vertical"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="12" cy="5" r="1" />
+            <circle cx="12" cy="19" r="1" />
+          </svg>
+        </button>
+        <ul class="dropdown-menu context-menu-menu" id="certification-context-menu-menu" tabindex="-1" aria-label="File actions">
+          <li>
+            <button class="dropdown-item" id="certification-context-menu-rename" type="button">
+              <span>Rename</span>
+            </button>
+          </li>
+          <li>
+            <button
+              class="dropdown-item dropdown-item-check"
+              id="certification-context-menu-toggle"
+              type="button"
+              data-bs-toggle="button"
+              aria-pressed="false"
+            >
+              <span class="dropdown-item-check__indicator" aria-hidden="true"></span>
+              <span>Show hidden files</span>
+            </button>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item" id="certification-context-menu-restore" type="button" disabled>
+              <span>Restore version</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="context-menu" id="certification-context-menu-edge">
+        <div
+          class="context-menu-trigger"
+          id="certification-context-menu-edge-surface"
+          role="button"
+          tabindex="0"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="certification-context-menu-edge-menu"
+        >
+          <div class="card">
+            <div class="card-body">
+              <p class="mb-0">Edge target</p>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="context-menu-trigger btn btn-ghost btn-icon-sm"
+          id="certification-context-menu-edge-fallback"
+          data-bs-toggle="dropdown"
+          data-context-menu-fallback
+          aria-expanded="false"
+          aria-controls="certification-context-menu-edge-menu"
+          aria-label="Open Edge actions menu"
+        >
+          <svg
+            data-icon="inline-start"
+            data-lucide="ellipsis-vertical"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="12" cy="5" r="1" />
+            <circle cx="12" cy="19" r="1" />
+          </svg>
+        </button>
+        <ul class="dropdown-menu context-menu-menu" id="certification-context-menu-edge-menu" tabindex="-1" aria-label="Edge actions">
+          <li>
+            <button class="dropdown-item" id="certification-context-menu-edge-item" type="button">
+              <span>Archive</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+      import ContextMenu from "/dist/js/context-menu.js";
+
+      const root = document.querySelector("#certification-context-menu");
+      const edgeRoot = document.querySelector("#certification-context-menu-edge");
+      window.CertificationContextMenu = ContextMenu;
+      window.certificationContextMenu = ContextMenu.getOrCreateInstance(root);
+      window.certificationContextMenuEdge = ContextMenu.getOrCreateInstance(edgeRoot);
+      document.body.dataset.contextMenuReady = "true";
+    </script>
+  </body>
+</html>

@@ -29,6 +29,7 @@
     "./moo.min.css": "./dist/assets/css/moo.min.css",
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
+    "./context-menu.js": "./dist/js/context-menu.js",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -39,6 +40,7 @@
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
+    "dist/js/context-menu.js",
     "certification.json",
     "README.md",
     "LICENSE",

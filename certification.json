@@ -22,7 +22,8 @@
     ],
     "esm": [
       "./combobox.js",
-      "./sidebar.js"
+      "./sidebar.js",
+      "./context-menu.js"
     ],
     "sass": []
   },
