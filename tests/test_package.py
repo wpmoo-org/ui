@@ -364,14 +364,25 @@ for (const specifier of [
         )
 
         self.assertIn("release_ref:", workflow)
-        self.assertIn("ref: ${{ inputs.release_ref || github.ref }}", workflow)
+        self.assertIn("tag/version guard", workflow)
+        self.assertIn("ref: ${{ github.ref }}", workflow)
+        self.assertNotIn("ref: ${{ inputs.release_ref || github.ref }}", workflow)
         self.assertIn('tag="${RELEASE_REF:-${GITHUB_REF_NAME}}"', workflow)
         self.assertIn('git show-ref --verify --quiet "refs/tags/${tag}"', workflow)
         self.assertIn('${GITHUB_REF_TYPE}" != "tag', workflow)
         self.assertIn('${tag}" != "v${version}', workflow)
         self.assertIn('source_commit="$(git rev-parse HEAD)"', workflow)
+        self.assertIn('release_commit="$(git rev-list -n 1 "${tag}")"', workflow)
+        self.assertIn(
+            'git merge-base --is-ancestor "${release_commit}" origin/main',
+            workflow,
+        )
         self.assertIn(
             'git merge-base --is-ancestor "${source_commit}" origin/main',
+            workflow,
+        )
+        self.assertIn(
+            'Workflow source commit ${source_commit} is not in origin/main history.',
             workflow,
         )
 
