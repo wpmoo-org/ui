@@ -661,18 +661,19 @@ class SidebarTests(CatalogTestCase):
             page.index('id="application-shell"'),
             page.index('id="composition"'),
             page.index('assets/images/sidebar-structure.webp'),
-            page.index('id="sidebar-api-reference"'),
-            page.index('id="usesidebar"'),
+            page.index('id="sidebar-html-anatomy"'),
+            page.index('id="sidebar-javascript"'),
+            page.index('id="sidebar-state"'),
         ]
         self.assertEqual(positions, sorted(positions))
         self.assertNotIn("SidebarProvider", page)
         self.assertIn("<table", page)
-        self.assertIn("<th scope=\"col\">Macro</th>", page)
+        self.assertIn("<th scope=\"col\">Selector</th>", page)
         self.assertIn("<th scope=\"col\">Purpose</th>", page)
-        self.assertIn("Diagram showing sidebar_provider", page)
+        self.assertIn("Diagram showing the sidebar wrapper", page)
         self.assertTrue((DIST / "assets/images/sidebar-structure.webp").is_file())
 
-    def test_sidebar_catalog_page_documents_public_macro_reference(self) -> None:
+    def test_sidebar_catalog_page_documents_public_html_anatomy(self) -> None:
         source = (ROOT / "site/src/pages/components/sidebar.html.jinja").read_text(
             encoding="utf-8"
         )
@@ -680,46 +681,30 @@ class SidebarTests(CatalogTestCase):
             encoding="utf-8"
         )
         example_source = source + shell_source
-        public_macros = (
-            "sidebar_provider()",
-            "sidebar()",
-            "sidebar_input()",
-            "sidebar_header()",
-            "sidebar_footer()",
-            "sidebar_separator()",
-            "sidebar_content()",
-            "sidebar_group()",
-            "sidebar_group_label()",
-            "sidebar_group_action()",
-            "sidebar_group_content()",
-            "sidebar_menu()",
-            "sidebar_menu_item()",
-            "sidebar_menu_button()",
-            "sidebar_menu_action()",
-            "sidebar_menu_badge()",
-            "sidebar_menu_skeleton()",
-            "sidebar_menu_sub()",
-            "sidebar_menu_sub_item()",
-            "sidebar_menu_sub_button()",
-            "sidebar_trigger()",
-            "sidebar_rail()",
-            "sidebar_inset()",
+        public_hooks = (
+            ".sidebar-wrapper",
+            ".sidebar",
+            "[data-moo-sidebar-trigger]",
+            "[data-moo-sidebar-rail]",
+            "[data-slot=\"sidebar-content\"]",
+            "[data-slot=\"sidebar-menu-button\"]",
+            ".sidebar-menu-sub.collapse",
+            ".sidebar-inset",
         )
 
-        for macro in public_macros:
-            with self.subTest(macro=macro):
-                self.assertIn(f'"name": "{macro}"', source)
+        for hook in public_hooks:
+            with self.subTest(hook=hook):
+                self.assertIn(hook, source)
 
         self.assertNotIn("SidebarBrandMark", source)
+        self.assertNotIn("sidebar_provider()", source)
+        self.assertNotIn("sidebar_header()", source)
+        self.assertNotIn("sidebar_menu_button()", source)
         self.assertIn("sidebar_brand_mark", example_source)
         # The action-bearing Projects rows document the composable pattern
         # with no styling hook required (positioning is auto-detected).
         self.assertIn("sidebar_menu_action(aria_label=", example_source)
         self.assertNotIn("sidebar-menu-item--has-action", example_source)
-        self.assertIn(
-            "sidebar_group_content()",
-            source,
-        )
         self.assertEqual(source.count("render_block_example("), 1)
 
     def test_sidebar_catalog_page_documents_sidebar_state_mapping_without_fake_hook(self) -> None:
@@ -730,7 +715,8 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("useSidebar", page)
         self.assertIn("data-moo-sidebar-state", page)
         self.assertIn("@wpmoo/ui/sidebar.js", page)
-        self.assertIn("runtime mapping", page)
+        self.assertIn("In Moo UI it is not a React hook.", page)
+        self.assertIn("public Sidebar", page)
         self.assertIn("Sidebar.getOrCreateInstance(element)", page)
         self.assertIn("sidebar.dispose()", page)
         self.assertNotIn("static/js/preview.js", page)

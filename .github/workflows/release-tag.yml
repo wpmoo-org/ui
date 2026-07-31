@@ -51,7 +51,7 @@ jobs:
           tag="${{ steps.package.outputs.tag }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${tag}" -m "Release ${tag}"
+          git tag "${tag}"
           git push origin "${tag}"
 
       - name: Dispatch npm publish workflow

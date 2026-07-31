@@ -4,7 +4,7 @@
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "components/alert.html.jinja" import alert %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -14,7 +14,7 @@
   {% set menubar_dropdown_offset = "0,8" %}
   {{ render_page_header(
     "Menubar",
-    "A bordered row of the ready Dropdown Menu macros, for grouping several command menus in one toolbar."
+    "A bordered toolbar row that groups several documented Bootstrap Dropdown Menu contracts."
   ) }}
 
   <div class="moo-component-examples">
@@ -46,7 +46,7 @@
     {{ render_example(
       "basic",
       "Basic",
-      "Each menu is the ready dropdown() macro; the bordered row is the only new markup.",
+      "Each menu keeps documented Bootstrap dropdown trigger and menu markup; the bordered toolbar row is the only additional composition.",
       basic,
       preview_class="moo-example__preview--narrow"
     ) }}
@@ -142,7 +142,7 @@
     {{ render_example(
       "radio",
       "Radio",
-      "Single-select menu options reuse the ready Radio Group macro's real fieldset and radio inputs. auto_close=\"outside\" keeps the menu open while a profile is picked.",
+      "Single-select menu options use a real fieldset and radio inputs. <code>data-bs-auto-close=&quot;outside&quot;</code> keeps the menu open while a profile is picked.",
       radio_example,
       preview_class="moo-example__preview--narrow"
     ) }}

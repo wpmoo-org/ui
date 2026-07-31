@@ -3,7 +3,7 @@
 {% from "components/dialog.html.jinja" import dialog, dialog_body, dialog_footer, dialog_header %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/textarea.html.jinja" import textarea %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -130,7 +130,7 @@
     {{ render_example(
       "scrollable",
       "Scrollable content",
-      "Set <code>scrollable=true</code> so the <code>dialog_body()</code> scrolls internally instead of the whole page.",
+      "Add <code>.modal-dialog-scrollable</code> so the dialog body scrolls internally instead of the whole page.",
       scrollable
     ) }}
 

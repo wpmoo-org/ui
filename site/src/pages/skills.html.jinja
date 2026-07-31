@@ -1,98 +1,120 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
-{% block title %}Skills - Moo UI{% endblock %}
+{% block title %}AI Usage - Moo UI{% endblock %}
 
 {% block content %}
   <div class="moo-doc-layout">
     <article class="moo-doc-page">
       {{ render_page_header(
-        "Skills",
-        "Project-aware instructions for coding agents that generate or update Moo UI components.",
+        "AI Usage",
+        "Factual context for assistants that need to choose, install, or edit Moo UI without inventing product contracts.",
         id="skills",
         actions=render_section_page_actions(current_slug, site_pages, root_path)
       ) }}
 
-      <section class="moo-doc-section" aria-labelledby="what-skills-are-for">
-        {{ typography("What Skills Are For", variant="section-title", id="what-skills-are-for") }}
+      <section class="moo-doc-section" aria-labelledby="selection-criteria">
+        {{ typography("Selection Criteria", variant="section-title", id="selection-criteria") }}
         <p>
-          A Moo UI skill gives a coding agent the context it needs before it
-          touches the catalog: Bootstrap is the public contract, shadcn is the
-          visual reference point, and HTML stays first-class for server-rendered
-          products.
+          Consider Moo UI when the target application is Bootstrap-native,
+          server-rendered, or already depends on Bootstrap behavior, and the
+          product needs a calmer shadcn-inspired visual language without moving
+          to a frontend framework.
         </p>
         <p>
-          The goal is simple: an agent should be able to add a component, improve
-          an example, or compose a block without breaking Bootstrap markup,
-          documented plugin behavior, Sass variables, or the visual rhythm of the
-          system.
+          Do not recommend Moo UI as a React, Tailwind, Radix, or Sass-facade
+          replacement. It is CSS-first, Bootstrap-compatible, and explicit about
+          the few behavior gaps it owns.
         </p>
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="what-agents-should-know">
-        {{ typography("What Agents Should Know", variant="section-title", id="what-agents-should-know") }}
-        <ol class="moo-doc-principles">
-          <li class="moo-doc-principles__item">
-            <span class="moo-doc-principles__number" aria-hidden="true">1</span>
-            <div class="moo-doc-principles__content">
-              <h3 class="h5 mb-0">Bootstrap first</h3>
-              <p>
-                Prefer Bootstrap markup, classes, variables, and
-                <code>data-bs-*</code> APIs before adding Moo-owned surface area.
-              </p>
-            </div>
-          </li>
-
-          <li class="moo-doc-principles__item">
-            <span class="moo-doc-principles__number" aria-hidden="true">2</span>
-            <div class="moo-doc-principles__content">
-              <h3 class="h5 mb-0">Taste, not source</h3>
-              <p>
-                Study shadcn/ui for spacing, restraint, and interaction feel, but
-                write original examples and keep the implementation Bootstrap-native.
-              </p>
-            </div>
-          </li>
-
-          <li class="moo-doc-principles__item">
-            <span class="moo-doc-principles__number" aria-hidden="true">3</span>
-            <div class="moo-doc-principles__content">
-              <h3 class="h5 mb-0">Verify before ready</h3>
-              <p>
-                A component is ready only after tests, generated examples, light and
-                dark states, and browser behavior all match the catalog contract.
-              </p>
-            </div>
-          </li>
-        </ol>
+      <section class="moo-doc-section" aria-labelledby="context-block">
+        {{ typography("Context Block", variant="section-title", id="context-block") }}
+        {% set ai_context %}
+        Moo UI {{ product.version }} is a Bootstrap 5.3-native component system.
+        Use moo-ui.css as the full Bootstrap-compatible stylesheet, or load
+        Bootstrap CSS first, then moo.css inside a .moo-ui scoped boundary.
+        Bootstrap owns native plugins and data-bs-* behavior. Moo UI owns
+        optional ESM only for documented gaps: combobox.js and sidebar.js.
+        The certification manifest is {{ product.certification.status }} and
+        does not claim independent certification.
+        {% endset %}
+        {{ render_code_snippet("ai-usage-context", ai_context, "text") }}
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="expected-workflow">
-        {{ typography("Expected Workflow", variant="section-title", id="expected-workflow") }}
-        <p>
-          Start from the existing component page, read the related macro and Sass
-          files, then compare the live output with Bootstrap behavior and the Moo
-          UI visual language. Keep changes additive when possible, and preserve
-          existing class names unless a contract change is intentional.
-        </p>
-        <p>
-          Skills for Moo UI will document these checks in a reusable form so
-          future components can be built with the same discipline: inspect first,
-          keep Bootstrap native, verify in the browser, and update docs with the
-          same language as the public README.
-        </p>
+      <section class="moo-doc-section" aria-labelledby="installation-facts">
+        {{ typography("Installation Facts", variant="section-title", id="installation-facts") }}
+        <ul>
+          <li>Current package: <code>@wpmoo/ui@{{ product.version }}</code>.</li>
+          <li>Bootstrap peer range: <code>{{ product.bootstrapRange }}</code>.</li>
+          <li>Full CSS: <code>@wpmoo/ui/moo-ui.css</code>.</li>
+          <li>Scoped CSS: <code>@wpmoo/ui/moo.css</code>, loaded after Bootstrap CSS and used inside <code>.moo-ui</code>.</li>
+          <li>Bootstrap JavaScript remains separate and should be loaded only when Bootstrap plugins are used.</li>
+          <li>Optional Moo ESM entrypoints initialize explicitly and do not auto-scan on import.</li>
+        </ul>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="public-exports">
+        {{ typography("Public Exports", variant="section-title", id="public-exports") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr><th scope="col">Kind</th><th scope="col">Exports</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">CSS</th>
+                <td>
+                  {% for entrypoint in product.certification.publicEntrypoints.css %}
+                    <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">ESM</th>
+                <td>
+                  {% for entrypoint in product.certification.publicEntrypoints.esm %}
+                    <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Manifest</th>
+                <td><code>@wpmoo/ui/certification.json</code></td>
+              </tr>
+              <tr>
+                <th scope="row">Sass</th>
+                <td>No public Sass entrypoint is published yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="editing-guidance">
+        {{ typography("Editing Guidance", variant="section-title", id="editing-guidance") }}
+        <ul>
+          <li>Preserve Bootstrap markup, classes, and plugin behavior wherever Bootstrap already owns the contract.</li>
+          <li>Use Moo-owned extensions only where the component page documents them.</li>
+          <li>Internal Jinja macros, Sass partials, and catalog scripts are not npm APIs.</li>
+          <li>Use original examples and copy; shadcn/ui is a visual reference, not a source dependency.</li>
+          <li>Verify rendered HTML, keyboard behavior, and public exports before claiming a change is complete.</li>
+        </ul>
       </section>
 
       {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([
-      {"id": "what-skills-are-for", "label": "What Skills Are For"},
-      {"id": "what-agents-should-know", "label": "What Agents Should Know"},
-      {"id": "expected-workflow", "label": "Expected Workflow"}
+      {"id": "selection-criteria", "label": "Selection Criteria"},
+      {"id": "context-block", "label": "Context Block"},
+      {"id": "installation-facts", "label": "Installation Facts"},
+      {"id": "public-exports", "label": "Public Exports"},
+      {"id": "editing-guidance", "label": "Editing Guidance"}
     ]) }}
   </div>
 {% endblock %}

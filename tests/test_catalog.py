@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 import warnings
+from pathlib import Path
+
+import build as site_build
 
 from tests.helpers import (
     DIST,
@@ -19,6 +23,48 @@ from tests.helpers import (
 
 
 class CatalogContractTests(CatalogTestCase):
+    INTERNAL_PUBLIC_API_SNIPPETS = (
+        "Jinja macro API",
+        "public macro API",
+        "distributed macro",
+        "ready Button macro",
+        "ready Badge macro",
+        "ready Dropdown Menu macro",
+        "ready Dropdown Menu macros",
+        "toast_target",
+        "popover_dismiss_trigger()",
+        "alert_dialog_header()",
+        "dialog_body()",
+        "table_row_actions()",
+        "sidebar_provider()",
+        "field_group()",
+        "field_description()",
+        "field_error()",
+        "fieldset()",
+        "field()",
+        "form()",
+    )
+    def assert_no_internal_public_api_guidance(
+        self,
+        surface: str,
+        path: str,
+    ) -> None:
+        for snippet in self.INTERNAL_PUBLIC_API_SNIPPETS:
+            if snippet in surface:
+                raise AssertionError(
+                    f"{path} presents internal build API guidance: {snippet}"
+                )
+
+    def write_json_fixture(
+        self,
+        root: Path,
+        name: str,
+        payload: dict[str, object],
+    ) -> Path:
+        path = root / name
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        return path
+
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
         styles = read_catalog_styles()
         match = re.search(r"\.moo-catalog__main\s*\{(?P<body>[^}]*)\}", styles)
@@ -295,10 +341,10 @@ class CatalogContractTests(CatalogTestCase):
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="reference import"):
-                self.assertIn(
-                    '{% from "includes/documentation-reference.html.jinja" '
-                    "import render_reference %}",
+                self.assertRegex(
                     source,
+                    r'{%\s*from\s+"includes/documentation-reference\.html\.jinja"\s+'
+                    r'import\s+render_reference\s+with\s+context\s*%}',
                 )
             with self.subTest(page=path.name, contract="reference call"):
                 self.assertIn("render_reference(", source)
@@ -602,9 +648,11 @@ class CatalogContractTests(CatalogTestCase):
         for label, href in (
             ("Introduction", "../introduction/"),
             ("Installation", "../installation/"),
+            ("Support &amp; Evidence", "../support/"),
+            ("Contributing", "../contributing/"),
             ("Components", "../components/"),
             ("Blocks", "../blocks/"),
-            ("Skills", "../skills/"),
+            ("AI Usage", "../skills/"),
             ("Changelog", "../changelog/"),
         ):
             with self.subTest(label=label):
@@ -689,11 +737,21 @@ class CatalogContractTests(CatalogTestCase):
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
-        self.assertIn('aria-label="Next page: Components"', installation)
-        self.assertIn('href="../components/"', installation)
+        self.assertIn('aria-label="Next page: Support &amp; Evidence"', installation)
+        self.assertIn('href="../support/"', installation)
+
+        support = self.read_output("support.html")
+        self.assertIn('aria-label="Previous page: Installation"', support)
+        self.assertIn('aria-label="Next page: Contributing"', support)
+        self.assertIn('href="../contributing/"', support)
+
+        contributing = self.read_output("contributing.html")
+        self.assertIn('aria-label="Previous page: Support &amp; Evidence"', contributing)
+        self.assertIn('aria-label="Next page: Components"', contributing)
+        self.assertIn('href="../components/"', contributing)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Installation"', components)
+        self.assertIn('aria-label="Previous page: Contributing"', components)
         self.assertIn('aria-label="Next page: Accordion"', components)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
@@ -734,7 +792,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
-        self.assertIn('aria-label="Next page: Skills"', last_block)
+        self.assertIn('aria-label="Next page: AI Usage"', last_block)
 
         skills = self.read_output("skills.html")
         self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
@@ -759,20 +817,26 @@ class CatalogContractTests(CatalogTestCase):
                 ("the-goal", "The Goal"),
             ),
             "installation.html": (
-                ("cdn", "CDN"),
-                ("npm", "npm"),
-                ("javascript", "JavaScript"),
-                ("adoption-paths", "Adoption Paths"),
+                ("choose-path", "Choose This Path"),
+                ("full-build", "Full Build"),
+                ("scoped-build", "Scoped Adoption"),
+                ("bootstrap-javascript", "Bootstrap JavaScript"),
+                ("optional-esm", "Optional Moo ESM"),
             ),
             "skills.html": (
-                ("what-skills-are-for", "What Skills Are For"),
-                ("what-agents-should-know", "What Agents Should Know"),
-                ("expected-workflow", "Expected Workflow"),
+                ("selection-criteria", "Selection Criteria"),
+                ("context-block", "Context Block"),
+                ("installation-facts", "Installation Facts"),
+                ("public-exports", "Public Exports"),
+                ("editing-guidance", "Editing Guidance"),
             ),
             "changelog.html": (
-                ("wave-4-components", "Wave 4 Components"),
-                ("catalog-polish", "Catalog Polish"),
-                ("initial-release", "Initial Release"),
+                ("release-0-7-1", "v0.7.1"),
+                ("post-release-docs-boundary", "Post-release"),
+                ("release-0-7-0", "v0.7.0"),
+                ("release-0-6-0", "Phase 1 Evidence Backfill"),
+                ("release-0-5-0", "Optional Public Runtime Modules"),
+                ("release-0-4-0", "Core Package Expansion"),
             ),
         }
 
@@ -841,44 +905,477 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('link.setAttribute("aria-current", "true")', preview)
         self.assertIn('link.classList.toggle("active", active)', preview)
 
-    def test_installation_page_uses_published_cdn_path(self) -> None:
+    def test_installation_page_uses_current_complete_adoption_paths(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         installation = self.read_output("installation.html")
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        version = package["version"]
+        bootstrap_version = certification["bootstrap"]["canonicalVersion"]
+        combobox_export = package["exports"]["./combobox.js"].removeprefix("./")
+        sidebar_export = package["exports"]["./sidebar.js"].removeprefix("./")
+
+        self.assertIn(combobox_export, package["files"])
+        self.assertIn(sidebar_export, package["files"])
 
         self.assertIn(
-            "https://unpkg.com/@wpmoo/ui@0.3.1/dist/assets/css/moo-ui.css",
+            f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo-ui.css",
             installation,
         )
-        self.assertNotIn(
-            "https://unpkg.com/@wpmoo/ui/dist/assets/css/moo-ui.min.css",
+        self.assertIn(
+            f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo.css",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/bootstrap@{bootstrap_version}/dist/css/bootstrap.min.css",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/bootstrap@{bootstrap_version}/dist/js/bootstrap.bundle.min.js",
             installation,
         )
         self.assertIn("Create workspace", installation)
-        self.assertIn("Bootstrap's JavaScript bundle", installation)
-        self.assertIn("optional ESM only for components", installation)
+        self.assertIn("Bootstrap JavaScript", installation)
+        self.assertIn("Optional Moo ESM", installation)
         self.assertIn('href="../components/combobox/">Combobox</a>', installation)
         self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
-        self.assertNotIn('import Combobox from "@wpmoo/ui/combobox.js"', installation)
-        self.assertNotIn('import Sidebar from "@wpmoo/ui/sidebar.js"', installation)
-        self.assertIn('id="adoption-paths">Adoption Paths</h2>', installation)
-        self.assertNotIn("moo-doc-note", installation)
+        self.assertIn(
+            'import Combobox from &quot;@wpmoo/ui/combobox.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import Sidebar from &quot;@wpmoo/ui/sidebar.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{combobox_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{sidebar_export}",
+            installation,
+        )
+        self.assertIn("Combobox.getOrCreateInstance", installation)
+        self.assertIn("Sidebar.getOrCreateInstance", installation)
+        self.assertIn("Scoped Gradual Adoption", installation)
+        self.assertIn("moo-ui", installation)
+        self.assertIn("imports never auto-scan", installation)
+        self.assertNotIn("after the release that publishes", installation)
+
+    def test_public_docs_track_package_manifest_and_exports(self) -> None:
+        # Drift class: public install/support facts must follow package and
+        # certification sources, not stale handwritten release copy.
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        installation = self.read_output("installation.html")
+        support = self.read_output("support.html")
+        skills = self.read_output("skills.html")
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
+        changelog = self.read_output("changelog.html")
+
+        version = package["version"]
+        for surface in (readme, installation, support, skills, llms):
+            with self.subTest(surface=surface[:24]):
+                self.assertIn(f"@wpmoo/ui@{version}", surface)
+
+        self.assertIn(f"v{version}", changelog)
+        self.assertIn(package["peerDependencies"]["bootstrap"], llms)
+        self.assertIn(certification["status"], support)
+        self.assertIn(certification["status"], skills)
+        self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
+
+        for export in package["exports"]:
+            public_name = export.removeprefix("./")
+            if public_name == "package.json":
+                continue
+            with self.subTest(export=export):
+                self.assertIn(public_name, readme)
+                self.assertIn(public_name, llms)
+
+        self.assertIn("@wpmoo/ui/combobox.js", readme)
+        self.assertIn("@wpmoo/ui/sidebar.js", readme)
+        self.assertIn("@wpmoo/ui/certification.json", readme)
+        self.assertNotIn("compiled CSS and notices only", readme)
+        self.assertNotIn("CSS-only library", readme)
+
+    def test_public_docs_limit_latest_to_readme_quick_demo(self) -> None:
+        # Drift class: only the README quick demo may float; rendered docs and
+        # machine handoff files must use versioned installation paths.
+        paths = [
+            ROOT / "README.md",
+            ROOT / "site/public/llms.txt",
+            *sorted((ROOT / "site/src/pages").rglob("*.html.jinja")),
+        ]
+        occurrences: list[Path] = []
+        for path in paths:
+            if "@latest" in path.read_text(encoding="utf-8"):
+                occurrences.append(path.relative_to(ROOT))
+
+        self.assertEqual(occurrences, [Path("README.md")])
+        self.assertEqual(
+            (ROOT / "README.md").read_text(encoding="utf-8").count("@latest"),
+            1,
+        )
+
+    def test_preview_certification_is_not_marketed_as_certified(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        support = self.read_output("support.html")
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        ownership = site_build.derive_component_ownership(catalog, certification)
+
+        self.assertIn("WPMoo-maintained preview evidence", support)
+        self.assertIn(
+            "not independent or accredited certification",
+            " ".join(readme.split()),
+        )
+        self.assertIn("not independent or accredited certification", llms)
+        self.assertNotIn(
+            "certified",
+            {details["maturity"] for details in ownership.values()},
+        )
+
+    def test_consumer_docs_do_not_present_internal_macros_as_package_api(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        public_surfaces = {
+            "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "index.html": self.read_output("index.html"),
+            "introduction.html": self.read_output("introduction.html"),
+            "installation.html": self.read_output("installation.html"),
+            "support.html": self.read_output("support.html"),
+            "contributing.html": self.read_output("contributing.html"),
+            "skills.html": self.read_output("skills.html"),
+            "blocks/index.html": self.read_output("blocks/index.html"),
+        }
+        for path in sorted(DIST.rglob("*.html")):
+            relative = path.relative_to(DIST).as_posix()
+            if not relative.startswith(("components/", "blocks/")):
+                continue
+            public_surfaces[relative] = path.read_text(encoding="utf-8")
+
+        for path, surface in public_surfaces.items():
+            self.assert_no_internal_public_api_guidance(surface, path)
+
+        readme = public_surfaces["README.md"]
+        self.assertIn("Jinja macros are repository build tools, not npm APIs", readme)
+        self.assertIn("not npm APIs", public_surfaces["skills.html"])
+        combobox = public_surfaces["components/combobox/index.html"]
+        sidebar = public_surfaces["components/sidebar/index.html"]
+        self.assertIn("Combobox.getOrCreateInstance", combobox)
+        self.assertIn("dispose()", combobox)
+        self.assertIn("Sidebar.getOrCreateInstance", sidebar)
+        self.assertIn("dispose()", sidebar)
+
+    def test_macro_boundary_helper_rejects_nested_public_page_leaks(self) -> None:
+        with self.assertRaises(AssertionError):
+            self.assert_no_internal_public_api_guidance(
+                "Build the page with field() and field_group().",
+                "components/example/index.html",
+            )
+
+        self.assert_no_internal_public_api_guidance(
+            "Initialize with Combobox.getOrCreateInstance(element), then dispose().",
+            "components/combobox/index.html",
+        )
+
+    def test_consumer_docs_do_not_claim_public_sass_api_when_unpublished(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        if certification["publicEntrypoints"]["sass"]:
+            self.skipTest("Sass public entrypoints are present")
+
+        public_surfaces = {
+            "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "index.html": self.read_output("index.html"),
+            "introduction.html": self.read_output("introduction.html"),
+            "installation.html": self.read_output("installation.html"),
+            "support.html": self.read_output("support.html"),
+            "skills.html": self.read_output("skills.html"),
+            "llms.txt": (ROOT / "site/public/llms.txt").read_text(encoding="utf-8"),
+        }
+        prohibited = (
+            "Sass customization",
+            "Sass variables",
+            "public Sass facade",
+        )
+
+        for path, surface in public_surfaces.items():
+            for snippet in prohibited:
+                with self.subTest(path=path, snippet=snippet):
+                    self.assertNotIn(snippet, surface)
+
+        self.assertIn("No public Sass entrypoints yet", public_surfaces["support.html"])
+        self.assertIn("No public Sass entrypoint is published yet", public_surfaces["skills.html"])
+
+    def test_readme_artwork_paths_exist_after_site_boundary(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        public_prefix = "https://ui.wpmoo.org/"
+        referenced = sorted(
+            set(
+                re.findall(
+                    r'(?:src|srcset)="(https://ui\.wpmoo\.org/assets/images/readme[^"]+)"',
+                    readme,
+                )
+            )
+        )
+
+        self.assertGreaterEqual(len(referenced), 7)
+        for url in referenced:
+            public_path = url.removeprefix(public_prefix)
+            source_path = ROOT / "site/static" / public_path.removeprefix("assets/")
+            output_path = ROOT / "site-dist" / public_path
+            with self.subTest(url=url):
+                self.assertTrue(source_path.is_file())
+                self.assertTrue(output_path.is_file())
+
+        self.assertIn("https://ui.wpmoo.org/assets/images/readme", readme)
+        self.assertIsNone(
+            re.search(r'(?:src|srcset)="site/static/images/[^"]+"', readme)
+        )
+        self.assertNotIn('src="assets/images/', readme)
+        self.assertNotIn('srcset="assets/images/', readme)
+
+    def test_registered_components_have_pages_and_ownership_classification(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        ownership = site_build.derive_component_ownership(catalog, certification)
+        components_index = self.read_output("components/index.html")
+        allowed_runtime = {
+            "native HTML/CSS",
+            "Bootstrap plugin",
+            "optional Moo ESM",
+        }
+        allowed_markup = {
+            "Bootstrap/native HTML",
+            "Moo documented extension",
+            "not applicable",
+        }
+        allowed_maturity = {"ready", "accepted", "certified"}
+
+        self.assertEqual(set(ownership), {component["slug"] for component in catalog})
+        self.assertNotIn("Maturity and ownership are derived", components_index)
+        self.assertNotIn("Markup:", components_index)
+        self.assertNotIn("Component maturity legend", components_index)
+        self.assertNotIn("Explain component status levels", components_index)
+        for component in catalog:
+            slug = component["slug"]
+            with self.subTest(slug=slug):
+                self.assertTrue(
+                    (ROOT / "site/src/pages/components" / f"{slug}.html.jinja").is_file()
+                )
+                self.assertTrue((DIST / "components" / slug / "index.html").is_file())
+                self.assertIn(f'href="../components/{slug}/"', components_index)
+                self.assertIn(component["label"], components_index)
+
+                details = ownership[slug]
+                component_page = self.read_output(f"components/{slug}/index.html")
+                self.assertIn(details["runtimeOwner"], allowed_runtime)
+                self.assertIn(details["markupOwner"], allowed_markup)
+                self.assertIn(details["maturity"], allowed_maturity)
+                self.assertIn('data-moo-component-reference', component_page)
+                reference = re.search(
+                    r'<section\b[^>]*data-moo-component-reference[^>]*>'
+                    r"(?P<body>.*?)</section>",
+                    component_page,
+                    re.DOTALL,
+                )
+                self.assertIsNotNone(reference)
+                reference_body = reference.group("body")
+                self.assertIn('class="h3 pb-3 mb-3 border-bottom"', reference_body)
+                self.assertIn("Component reference", reference_body)
+                self.assertIn('<dl class="row gy-2 mb-3">', reference_body)
+                self.assertNotIn('<dl class="row gy-2 mb-3 small">', reference_body)
+                self.assertIn(details["maturity"].capitalize(), reference_body)
+                self.assertIn(details["runtimeOwner"], reference_body)
+                self.assertIn(details["markupOwner"], reference_body)
+                self.assertIn('target="_blank" rel="noopener noreferrer"', reference_body)
+                self.assertNotIn("border rounded", reference_body)
+                self.assertNotIn("p-3", reference_body)
+
+        expected_classifications = {
+            # Drift class: representative ownership values must remain
+            # source-derived while avoiding a second public registry.
+            "card": ("native HTML/CSS", "Bootstrap/native HTML"),
+            "dropdown-menu": ("Bootstrap plugin", "Bootstrap/native HTML"),
+            "combobox": ("optional Moo ESM", "Moo documented extension"),
+            "sidebar": ("optional Moo ESM", "Moo documented extension"),
+            "avatar": ("native HTML/CSS", "Moo documented extension"),
+            "field": ("native HTML/CSS", "Moo documented extension"),
+            "collapsible": ("Bootstrap plugin", "Moo documented extension"),
+            "radio-group": ("native HTML/CSS", "Moo documented extension"),
+            "skeleton": ("native HTML/CSS", "Moo documented extension"),
+            "toggle-group": ("native HTML/CSS", "Moo documented extension"),
+        }
+        for slug, expected in expected_classifications.items():
+            with self.subTest(representative_slug=slug):
+                self.assertEqual(
+                    (
+                        ownership[slug]["runtimeOwner"],
+                        ownership[slug]["markupOwner"],
+                    ),
+                    expected,
+                )
+
+    def test_ownership_evidence_index_rejects_malformed_records(self) -> None:
+        profiles = {
+            "t0-static": {"tier": 0},
+            "t1-bootstrap-data": {"tier": 1},
+        }
+        inventory_component = {"slug": "button", "profile": "t0-static"}
+        valid_evidence_component = {
+            "slug": "button",
+            "tier": 0,
+            "status": "preview-passed",
+            "limitations": [],
+        }
+        cases = (
+            (
+                "duplicate-inventory",
+                {
+                    "profiles": profiles,
+                    "components": [inventory_component, inventory_component],
+                },
+                {"components": [valid_evidence_component]},
+                "Duplicate evidence inventory entry for button",
+            ),
+            (
+                "missing-evidence",
+                {"profiles": profiles, "components": [inventory_component]},
+                {"components": []},
+                "Missing latest evidence record for components: button",
+            ),
+            (
+                "duplicate-evidence",
+                {"profiles": profiles, "components": [inventory_component]},
+                {"components": [valid_evidence_component, valid_evidence_component]},
+                "Duplicate evidence record for button in evidence.json",
+            ),
+            (
+                "unknown-status",
+                {"profiles": profiles, "components": [inventory_component]},
+                {
+                    "components": [
+                        {**valid_evidence_component, "status": "preview"}
+                    ]
+                },
+                "Unknown evidence status for button in evidence.json: preview",
+            ),
+            (
+                "tier-conflict",
+                {"profiles": profiles, "components": [inventory_component]},
+                {"components": [{**valid_evidence_component, "tier": 1}]},
+                "Evidence tier conflict for button in evidence.json",
+            ),
+            (
+                "profile-conflict",
+                {"profiles": profiles, "components": [inventory_component]},
+                {
+                    "components": [
+                        {
+                            **valid_evidence_component,
+                            "profile": "t1-bootstrap-data",
+                        }
+                    ]
+                },
+                "Evidence profile conflict for button in evidence.json",
+            ),
+        )
+
+        for name, inventory, evidence, message in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                fixture_root = Path(directory)
+                inventory_path = self.write_json_fixture(
+                    fixture_root,
+                    "inventory.json",
+                    inventory,
+                )
+                evidence_path = self.write_json_fixture(
+                    fixture_root,
+                    "evidence.json",
+                    evidence,
+                )
+
+                with self.assertRaisesRegex(RuntimeError, message):
+                    site_build._load_evidence_index(inventory_path, (evidence_path,))
+
+    def test_ownership_derivation_rejects_public_esm_export_source_mismatch(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        certification["publicEntrypoints"] = {
+            **certification["publicEntrypoints"],
+            "esm": ["./combobox.js"],
+        }
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "Optional Moo ESM exports do not match src/js/components sources",
+        ):
+            site_build.derive_component_ownership(catalog, certification)
 
     def test_skills_page_documents_agent_component_guidance(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         skills = self.read_output("skills.html")
 
         for copy in (
-            "Project-aware instructions for coding agents",
-            "What Skills Are For",
-            "What Agents Should Know",
-            "Bootstrap first",
-            "Taste, not source",
-            "Verify before ready",
-            "Expected Workflow",
+            "Factual context for assistants",
+            "Selection Criteria",
+            "Context Block",
+            "Installation Facts",
+            "Public Exports",
+            "Editing Guidance",
+            f"@wpmoo/ui@{package['version']}",
+            "@wpmoo/ui/combobox.js",
+            "@wpmoo/ui/sidebar.js",
+            "No public Sass entrypoint is published yet.",
+        ):
+            with self.subTest(copy=copy):
+                self.assertIn(copy, skills)
+
+        for copy in (
+            "recommend Moo UI as a React",
+            "Internal Jinja macros, Sass partials, and catalog scripts are not npm APIs.",
+            "does not claim independent certification",
         ):
             with self.subTest(copy=copy):
                 self.assertIn(copy, skills)
@@ -888,6 +1385,13 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         changelog = self.read_output("changelog.html")
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+
+        self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
+        self.assertIn(f"GitHub Release v{package['version']}", changelog)
+        self.assertIn("Post-release", changelog)
+        self.assertIn("PR #38 separated Core package outputs", changelog)
+        self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)
 
         for copy in (
             "Product-facing notes for the public Moo UI package and catalog.",

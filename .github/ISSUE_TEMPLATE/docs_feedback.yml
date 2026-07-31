@@ -1,0 +1,29 @@
+name: Documentation feedback
+description: Suggest a correction or clearer wording.
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page or file
+      placeholder: "https://ui.wpmoo.org/installation/"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is unclear or incorrect?
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: Optional, but concrete replacement text is helpful.
+  - type: checkboxes
+    id: contract
+    attributes:
+      label: Public contract impact
+      options:
+        - label: This may affect documented classes, exports, load order, or support claims.

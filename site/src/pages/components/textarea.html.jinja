@@ -1,6 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import field, field_group, field_description, field_error %}
@@ -34,7 +34,7 @@
     {{ render_example(
       "basic",
       "Basic",
-      "Pair the control with `field_group()`/`field()` when it needs helper text and predictable spacing.",
+      "Pair the control with visible labels and helper text when it needs accessible context and predictable spacing.",
       basic,
       "moo-example__preview--narrow"
     ) }}

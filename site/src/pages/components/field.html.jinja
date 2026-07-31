@@ -8,7 +8,7 @@
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -83,9 +83,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "full",
   "Full example",
-  "Build one compact form from <code>fieldset()</code>, <code>field_group()</code>, and control macros. Native
-  Bootstrap validation is handled with <code>novalidate</code>, <code>needs-validation</code>, and standard
-  field-level feedback.",
+  "Build one compact native form from semantic fieldsets and grouped controls. Bootstrap validation uses
+  <code>novalidate</code>, <code>needs-validation</code>, and standard field-level feedback.",
   full,
   preview_class="moo-example__preview--narrow"
   ) }}
@@ -100,8 +99,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "basic",
   "Basic field",
-  "Pair <code>field()</code> with <code>field_description()</code> and connect it with
-  <code>describedby</code> for assistive relationships.",
+  "Place helper text next to its control and connect their IDs with <code>aria-describedby</code> for assistive relationships.",
   basic
   ) }}
 
@@ -115,8 +113,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "invalid",
   "Input with validation error",
-  "Add <code>aria_invalid=true</code> to the control and <code>field_error()</code> directly below it; Bootstrap's own
-  <code>.is-invalid</code> styling and <code>.invalid-feedback</code> display rule need no extra CSS.",
+  "Set <code>aria-invalid=&quot;true&quot;</code> on the control and render linked feedback directly below it; Bootstrap's
+  <code>.is-invalid</code> and <code>.invalid-feedback</code> rules need no extra CSS.",
   invalid
   ) }}
 
@@ -148,7 +146,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "group",
   "Field group",
-  "Wrap several <code>field()</code> blocks in <code>field_group()</code> for a consistent gap between related fields.",
+  "Group related labeled controls with a consistent gap while preserving each control's accessible relationships.",
   group
   ) }}
 
@@ -162,7 +160,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "textarea",
   "Textarea",
-  "The same <code>field()</code> wrapper works with multiline input while retaining the same spacing and helper-text contract.",
+  "Multiline controls retain the same label, spacing, and linked helper-text contract as single-line inputs.",
   textarea_field
   ) }}
 
@@ -179,7 +177,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "select",
   "Select",
-  "Use <code>field()</code> with <code>select()</code> for a consistent wrapper and helper-text flow.",
+  "Use native select markup with the same visible-label and helper-text flow as other fields.",
   select_field
   ) }}
 
@@ -201,8 +199,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "fieldset",
   "Fieldset",
-  "<code>fieldset()</code> renders a native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and optional
-  description, useful for semantic grouping with no extra styling.",
+  "A native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and optional description groups related controls semantically.",
   fieldset_example
   ) }}
 
@@ -226,8 +223,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "fieldset-group",
   "Fieldset with a nested row",
-  "A row of side-by-side <code>field()</code> blocks nests inside <code>field_group()</code> just like any other
-  field.",
+  "Side-by-side labeled controls can sit inside the same semantic group without changing their individual field contracts.",
   fieldset_group
   ) }}
 
@@ -256,8 +252,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "checkbox",
   "Checkbox group",
-  "<code>checkbox()</code> already carries its own label, so it can be composed directly inside
-  <code>field_group()</code> when only choices and no extra helper text are needed.",
+  "Each checkbox carries its own visible label, so related choices can be grouped directly when no additional helper text is needed.",
   checkbox_group
   ) }}
 
@@ -271,8 +266,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "radio",
   "Radio group",
-  "Radio Group renders a native structure internally, so it can be used as a complete unit next to other <code>field()</code>
-  compositions.",
+  "Radio Group renders a complete native fieldset and can sit beside other labeled field contracts.",
   radio_field
   ) }}
 
@@ -282,7 +276,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "switch",
   "Switch",
-  "When a switch has an inline label and no helper text, the control macro is sufficient by itself in a compact layout.",
+  "A switch with an inline label and no helper text is a complete compact field contract by itself.",
   switch_field
   ) }}
 
@@ -309,7 +303,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "separator",
   "Field group with a separator",
-  "Use the existing <code>separator()</code> between grouped sections to create a clear transition in long option sets.",
+  "Use a documented Separator between grouped sections to create a clear transition in long option sets.",
   separated_group
   ) }}
 
@@ -357,7 +351,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endset %}
   {{ render_rtl_example(
   "field-rtl",
-  "Spacing and relationships remain stable in right-to-left layouts when controls are composed with <code>field()</code>.",
+  "Spacing and label/helper relationships remain stable when documented field markup is rendered right-to-left.",
   arabic_rtl,
   hebrew_rtl,
   english_rtl,

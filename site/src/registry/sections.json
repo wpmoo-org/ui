@@ -12,6 +12,18 @@
     "icon": "download"
   },
   {
+    "slug": "support",
+    "label": "Support & Evidence",
+    "href": "support/",
+    "icon": "shield-check"
+  },
+  {
+    "slug": "contributing",
+    "label": "Contributing",
+    "href": "contributing/",
+    "icon": "git-pull-request"
+  },
+  {
     "slug": "components",
     "label": "Components",
     "href": "components/",
@@ -25,7 +37,7 @@
   },
   {
     "slug": "skills",
-    "label": "Skills",
+    "label": "AI Usage",
     "href": "skills/",
     "icon": "sparkles"
   },

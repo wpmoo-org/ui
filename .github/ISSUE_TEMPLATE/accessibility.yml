@@ -1,0 +1,36 @@
+name: Accessibility report
+description: Report keyboard, focus, contrast, or assistive-technology behavior.
+title: "[A11y]: "
+labels: ["accessibility"]
+body:
+  - type: input
+    id: component
+    attributes:
+      label: Component or page
+      placeholder: "Combobox, Sheet, or https://ui.wpmoo.org/components/dialog/"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include keyboard commands, pointer actions, or screen-reader gestures.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+  - type: textarea
+    id: environment
+    attributes:
+      label: Assistive technology and environment
+      description: Screen reader, browser, OS, device, viewport, and reduced-motion setting.
+    validations:
+      required: true

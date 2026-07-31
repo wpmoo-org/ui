@@ -16,6 +16,149 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-{{ product.version | replace('.', '-') }}">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v{{ product.version }}</span>
+            <span class="text-body-secondary">npm README links</span>
+          </div>
+          <h2 id="release-{{ product.version | replace('.', '-') }}">NPM README Links</h2>
+          <p>
+            Published the public documentation updates with npm-safe README
+            image URLs.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>README preview images now use absolute public catalog URLs so they render on npm.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v{{ product.version }}">GitHub Release v{{ product.version }}</a></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="post-release-docs-boundary">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">Post-release</span>
+            <span class="text-body-secondary">Catalog and documentation boundary</span>
+          </div>
+          <h2 id="post-release-docs-boundary">Catalog and Documentation Boundary</h2>
+          <p>
+            After v0.7.0, the catalog separated site-only assets from Core
+            package outputs and tightened public documentation claims without
+            changing the published package.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>PR #38 separated Core package outputs from site-only documentation and catalog assets.</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-0-7-0">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.7.0</span>
+            <span class="text-body-secondary">Phase 2 evidence</span>
+          </div>
+          <h2 id="release-0-7-0">Phase 2 Evidence</h2>
+          <p>
+            Expanded the evidence program across overlay and composite
+            components.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Phase 2 evidence for Tooltip, Popover, Toast, Sheet, Form, Alert Dialog, Menubar, and promoted Dialog, Sidebar, and Combobox evidence.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.7.0">GitHub Release v0.7.0</a></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-0-6-0">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.6.0</span>
+            <span class="text-body-secondary">Phase 1 evidence backfill</span>
+          </div>
+          <h2 id="release-0-6-0">Phase 1 Evidence Backfill</h2>
+          <p>
+            Completed the T0/T1 certification backfill and Bootstrap 5.3
+            compatibility lanes for the accepted Core surface.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Source-backed evidence for static, native-state, and Bootstrap Data API components.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Verified</span>
+              <span>Bootstrap 5.3.0, 5.3.3, and latest 5.3.x compatibility lanes for the release gate.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.6.0">GitHub Release v0.6.0</a></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-0-5-0">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.5.0</span>
+            <span class="text-body-secondary">Optional public runtime modules</span>
+          </div>
+          <h2 id="release-0-5-0">Optional Public Runtime Modules</h2>
+          <p>
+            Published side-effect-free public ESM entrypoints for the Bootstrap
+            gaps Moo UI owns.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span><code>@wpmoo/ui/combobox.js</code> and <code>@wpmoo/ui/sidebar.js</code> with explicit initialization and disposal lifecycle.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Catalog JavaScript consumes the same public modules instead of private duplicates.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.5.0">GitHub Release v0.5.0</a></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-0-4-0">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.4.0</span>
+            <span class="text-body-secondary">Core package expansion</span>
+          </div>
+          <h2 id="release-0-4-0">Core Package Expansion</h2>
+          <p>
+            Moved the package toward a supportable Core surface with a broader
+            component catalog and package manifest.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Complete scoped and full CSS outputs plus the package certification manifest.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v0.4.0">GitHub Release v0.4.0</a></span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="layout-and-polish-fixes">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v0.3.1</span>
@@ -43,7 +186,7 @@
             </div>
             <div class="moo-changelog__change-row">
               <span class="moo-changelog__change-label">Updated</span>
-              <span>README quickstart CDN link now floats <code>@latest</code> so it never goes stale.</span>
+              <span>README quickstart CDN link now follows the floating npm tag so it never goes stale.</span>
             </div>
           </div>
         </article>
@@ -145,6 +288,12 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-" ~ (product.version | replace('.', '-')), "label": "v" ~ product.version},
+      {"id": "post-release-docs-boundary", "label": "Post-release"},
+      {"id": "release-0-7-0", "label": "v0.7.0"},
+      {"id": "release-0-6-0", "label": "v0.6.0"},
+      {"id": "release-0-5-0", "label": "v0.5.0"},
+      {"id": "release-0-4-0", "label": "v0.4.0"},
       {"id": "metadata-driven-docs", "label": "Metadata-Driven Docs Navigation"},
       {"id": "documentation-navigation", "label": "Documentation Navigation"},
       {"id": "wave-4-components", "label": "Wave 4 Components"},

@@ -1,0 +1,175 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block title %}Support & Evidence - Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Support & Evidence",
+        "Current package facts, compatibility boundaries, maturity definitions, and certification status.",
+        id="support",
+        actions=render_section_page_actions(current_slug, site_pages, root_path)
+      ) }}
+
+      <section class="moo-doc-section" aria-labelledby="current-status">
+        {{ typography("Current Status", variant="section-title", id="current-status") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <tbody>
+              <tr>
+                <th scope="row">Core package</th>
+                <td><code>@wpmoo/ui@{{ product.version }}</code></td>
+              </tr>
+              <tr>
+                <th scope="row">License</th>
+                <td>{{ product.license }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Bootstrap peer range</th>
+                <td><code>{{ product.bootstrapRange }}</code></td>
+              </tr>
+              <tr>
+                <th scope="row">Tested Bootstrap versions</th>
+                <td>
+                  {% for version in product.certification.bootstrap.testedVersions %}
+                    <code>{{ version }}</code>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Manifest status</th>
+                <td>
+                  {{ badge(product.certification.status, variant="outline") }}
+                  <span class="text-body-secondary ms-2">WPMoo-maintained preview evidence, not independent certification.</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="public-entrypoints">
+        {{ typography("Public Entrypoints", variant="section-title", id="public-entrypoints") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr><th scope="col">Kind</th><th scope="col">Exports</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">CSS</th>
+                <td>
+                  {% for entrypoint in product.certification.publicEntrypoints.css %}
+                    <code>{{ entrypoint }}</code>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">ESM</th>
+                <td>
+                  {% for entrypoint in product.certification.publicEntrypoints.esm %}
+                    <code>{{ entrypoint }}</code>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Sass</th>
+                <td>
+                  {% if product.certification.publicEntrypoints.sass %}
+                    {% for entrypoint in product.certification.publicEntrypoints.sass %}
+                      <code>{{ entrypoint }}</code>{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    No public Sass entrypoints yet.
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="maturity">
+        {{ typography("Maturity", variant="section-title", id="maturity") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr><th scope="col">State</th><th scope="col">Definition</th></tr>
+            </thead>
+            <tbody>
+              {% for key, label in [("ready", "Ready"), ("accepted", "Accepted"), ("certified", "Certified")] %}
+                <tr>
+                  <th scope="row">{{ badge(label, variant="secondary" if key == "accepted" else ("success" if key == "certified" else "outline")) }}</th>
+                  <td>{{ product.support.maturity[key] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="text-body-secondary">
+          Current certified component count:
+          <code>{{ product.certification.certifiedComponents | length }}</code>.
+          The component browser shows accepted preview evidence separately from
+          certification.
+        </p>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="browser-policy">
+        {{ typography("Browser Policy", variant="section-title", id="browser-policy") }}
+        <ul>
+          {% for item in product.support.browserPolicy %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        <p class="text-body-secondary">
+          Release attestations record exact browser and operating-system
+          versions actually tested. Beta, embedded, and discontinued browsers
+          are outside the current policy.
+        </p>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="limitations">
+        {{ typography("Limitations", variant="section-title", id="limitations") }}
+        <ul>
+          <li>The certification manifest is currently <code>{{ product.certification.status }}</code>.</li>
+          <li>Generic host-conformance evidence remains pending in the source evidence inventory.</li>
+          <li>Bootstrap 6 is outside the current compatibility contract.</li>
+          <li>Sass source and a Sass facade are not public package entrypoints yet.</li>
+        </ul>
+      </section>
+
+      <section class="moo-doc-section" aria-labelledby="evidence-links">
+        {{ typography("Evidence Links", variant="section-title", id="evidence-links") }}
+        <p>
+          Read the source policy in
+          <a href="{{ product.support.url }}">SUPPORT.md</a>, inspect the
+          <a href="https://github.com/wpmoo-org/ui/blob/main/certification.json">certification manifest</a>,
+          or review complete release notes on
+          <a href="https://github.com/wpmoo-org/ui/releases">GitHub Releases</a>.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("Report an issue", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues") }}
+          {{ button("Contribute", variant="outline", size="sm", element="a", href=site_href("contributing.html", root_path)) }}
+        </div>
+      </section>
+
+      {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "current-status", "label": "Current Status"},
+      {"id": "public-entrypoints", "label": "Public Entrypoints"},
+      {"id": "maturity", "label": "Maturity"},
+      {"id": "browser-policy", "label": "Browser Policy"},
+      {"id": "limitations", "label": "Limitations"},
+      {"id": "evidence-links", "label": "Evidence Links"}
+    ]) }}
+  </div>
+{% endblock %}

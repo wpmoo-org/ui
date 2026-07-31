@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible problem in the package or catalog.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please keep it focused and reproducible.
+  - type: input
+    id: version
+    attributes:
+      label: Moo UI version
+      description: Use the npm version, release tag, or commit SHA.
+      placeholder: "@wpmoo/ui@0.7.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Package CSS
+        - Optional ESM
+        - Catalog documentation
+        - Component example
+        - Build or tests
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest HTML, JS, URL, or fixture needed to see the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, Bootstrap version, host framework, and viewport when relevant.

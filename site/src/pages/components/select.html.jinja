@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/select.html.jinja" import select %}
 {% from "components/field.html.jinja" import field, field_description, field_error, field_group, fieldset %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -304,7 +304,7 @@
   </div>
 
   {{ render_reference(
-    "For native select constraints and Sass variables, see the",
+    "For native select constraints and browser behavior, see the",
     "https://getbootstrap.com/docs/5.3/forms/select/",
     "Bootstrap Select documentation"
   ) }}

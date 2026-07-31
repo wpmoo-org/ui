@@ -7,7 +7,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
-{% from "includes/documentation-reference.html.jinja" import render_reference %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -16,8 +16,7 @@
 {% block content %}
 {{ render_page_header(
 "Form",
-"Bootstrap Forms are represented in Moo UI by the Field line: <code>form()</code>,
-<code>field()</code>, <code>fieldset()</code>, and <code>field_group()</code>. Use this page when you are building a whole form, then use Field for the individual primitives."
+"Build complete Bootstrap forms from native form and fieldset markup, visible labels, descriptions, validation feedback, and documented Field components."
 ) }}
 
 <div class="moo-component-examples">
@@ -59,7 +58,7 @@
   {{ render_example(
     "account-settings",
     "Account settings",
-    "Use <code>form()</code> for the native form element and compose every visible row from the Field primitives.",
+    "Use a native <code>&lt;form&gt;</code> element and compose each visible row from documented Field and form-control contracts.",
     account_settings,
     preview_class="moo-example__preview--narrow"
   ) }}

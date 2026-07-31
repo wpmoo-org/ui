@@ -31,6 +31,7 @@ SITE_SCSS = SITE / "scss"
 SITE_SRC = SITE / "src"
 CORE_REGISTRY = SRC / "registry"
 SITE_REGISTRY = SITE_SRC / "registry"
+CERTIFICATION = SRC / "certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
 PACKAGE_DIST = ROOT / "dist"
@@ -55,6 +56,38 @@ JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = ("combobox.js", "sidebar.js")
+EVIDENCE_FILES = (
+    "pilot-evidence.json",
+    "phase-1-evidence.json",
+    "phase-2-evidence.json",
+)
+ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
+    "preview-passed",
+    "backfill-passed",
+}
+BOOTSTRAP_JS_EVIDENCE_FRAGMENT = "js/src/"
+# Ownership matrix rules:
+# - runtimeOwner is derived from explicit Bootstrap JS evidence or public Moo
+#   ESM exports that also exist under src/js/components.
+# - markupOwner defaults to Bootstrap/native HTML. Components in this table add
+#   Moo-owned public selectors, attributes, or composition contracts on top of
+#   Bootstrap/native markup; the source path is the reviewable citation.
+MOO_MARKUP_EXTENSION_SOURCES = {
+    "alert-dialog": "src/components/alert_dialog.html.jinja",
+    "avatar": "src/components/avatar.html.jinja",
+    "button": "src/components/button.html.jinja",
+    "collapsible": "src/components/collapsible.html.jinja",
+    "combobox": "src/components/combobox.html.jinja",
+    "field": "src/components/field.html.jinja",
+    "form": "src/components/field.html.jinja",
+    "menubar": "src/components/menubar.html.jinja",
+    "radio-group": "src/components/radio_group.html.jinja",
+    "sheet": "src/components/sheet.html.jinja",
+    "sidebar": "src/components/sidebar.html.jinja",
+    "skeleton": "src/components/skeleton.html.jinja",
+    "toast": "src/components/toast.html.jinja",
+    "toggle-group": "src/components/toggle_group.html.jinja",
+}
 SOURCE_SNAPSHOT_DIRS = (
     SITE_PUBLIC,
     SITE_SRC,
@@ -476,36 +509,21 @@ def build_site_pages(
     pages: list[dict[str, str]] = [
         {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
     ]
-    consumed_sections = {"components", "blocks"}
-
-    remaining_sections: list[dict[str, str]] = []
     for section in sections:
         slug = section.get("slug", "")
-        if slug in consumed_sections:
-            continue
-        if slug in {"introduction", "installation"}:
-            pages.append({**section, "kind": "doc"})
-        else:
-            remaining_sections.append(section)
-        if slug == "installation":
+        if slug == "components":
             components = section_page("components")
             if components:
                 pages.append(components)
             pages.extend(child_pages(catalog, "components", "component"))
             pages.extend(child_pages(utilities, "utils", "utility"))
+        elif slug == "blocks":
             blocks_page = section_page("blocks")
             if blocks_page:
                 pages.append(blocks_page)
             pages.extend(child_pages(blocks, "blocks", "block"))
-
-    tail_order = {"skills": 0, "changelog": 1, "disclaimer": 2, "license": 3}
-    pages.extend(
-        {**section, "kind": "doc"}
-        for section in sorted(
-            remaining_sections,
-            key=lambda item: (tail_order.get(item.get("slug", ""), 99),),
-        )
-    )
+        else:
+            pages.append({**section, "kind": "doc"})
 
     return pages
 
@@ -643,6 +661,254 @@ def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
     if not source_file.exists():
         return []
     return json.loads(source_file.read_text(encoding="utf-8"))
+
+
+def _markdown_section(source: str, heading: str) -> str:
+    pattern = re.compile(
+        rf"^## {re.escape(heading)}\n(?P<body>.*?)(?=^## |\Z)",
+        re.MULTILINE | re.DOTALL,
+    )
+    match = pattern.search(source)
+    if not match:
+        raise RuntimeError(f"SUPPORT.md is missing section: {heading}")
+    return match.group("body").strip()
+
+
+def _clean_markdown_inline(value: str) -> str:
+    cleaned = re.sub(r"\*\*([^*]+)\*\*", r"\1", value)
+    cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
+    return " ".join(cleaned.split())
+
+
+def load_support_facts() -> dict[str, object]:
+    source = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
+    browser_policy = [
+        _clean_markdown_inline(line.removeprefix("- "))
+        for line in _markdown_section(source, "Browser Policy").splitlines()
+        if line.startswith("- ")
+    ]
+    maturity_section = _markdown_section(source, "Component Maturity")
+    maturity = {}
+    for match in re.finditer(
+        r"\d+\.\s+\*\*(?P<label>Ready|Accepted|Certified)\*\* means "
+        r"(?P<body>.*?)(?=\n\d+\.|\n\n|\Z)",
+        maturity_section,
+        re.DOTALL,
+    ):
+        maturity[match.group("label").lower()] = _clean_markdown_inline(
+            match.group("body")
+        )
+    if sorted(maturity) != ["accepted", "certified", "ready"]:
+        raise RuntimeError("SUPPORT.md maturity definitions are incomplete")
+    return {
+        "browserPolicy": browser_policy,
+        "maturity": maturity,
+        "url": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md",
+    }
+
+
+def load_product_facts() -> dict[str, object]:
+    package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+    certification = json.loads(
+        (ROOT / "certification.json").read_text(encoding="utf-8")
+    )
+    return {
+        "version": package["version"],
+        "license": package["license"],
+        "bootstrapRange": package["peerDependencies"]["bootstrap"],
+        "exports": package["exports"],
+        "certification": certification,
+        "support": load_support_facts(),
+    }
+
+
+def _component_source_file(slug: str) -> Path:
+    source_file = SRC / "components" / f"{slug.replace('-', '_')}.html.jinja"
+    if source_file.exists():
+        return source_file
+    if slug == "form":
+        return SRC / "components/field.html.jinja"
+    raise RuntimeError(f"Missing component source for ownership derivation: {slug}")
+
+
+def _load_evidence_index(inventory_path=None, evidence_paths=None) -> dict[str, dict[str, object]]:
+    if inventory_path is None:
+        inventory_path = CERTIFICATION / "evidence-inventory.json"
+    if evidence_paths is None:
+        evidence_paths = tuple(CERTIFICATION / filename for filename in EVIDENCE_FILES)
+
+    inventory_path = Path(inventory_path)
+    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    profiles = inventory.get("profiles", {})
+    components: dict[str, dict[str, object]] = {}
+    for entry in inventory.get("components", []):
+        slug = entry["slug"]
+        profile = entry["profile"]
+        if slug in components:
+            raise RuntimeError(f"Duplicate evidence inventory entry for {slug}")
+        if profile not in profiles:
+            raise RuntimeError(f"Unknown evidence profile for {slug}: {profile}")
+        components[slug] = {
+            "profile": profile,
+            "profileTier": profiles[profile]["tier"],
+            "accepted": False,
+            "acceptedEvidence": [],
+            "latestEvidence": {},
+        }
+
+    for evidence_path in evidence_paths:
+        evidence_path = Path(evidence_path)
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        seen_in_file: set[str] = set()
+        for component in evidence.get("components", []):
+            slug = component["slug"]
+            if slug in seen_in_file:
+                raise RuntimeError(
+                    f"Duplicate evidence record for {slug} in {evidence_path.name}"
+                )
+            seen_in_file.add(slug)
+            if slug not in components:
+                raise RuntimeError(f"Evidence references unknown component: {slug}")
+            status = component.get("status", "")
+            if status not in ACCEPTED_COMPONENT_EVIDENCE_STATUSES:
+                raise RuntimeError(
+                    f"Unknown evidence status for {slug} in {evidence_path.name}: "
+                    f"{status}"
+                )
+            expected_tier = components[slug]["profileTier"]
+            evidence_tier = component.get("tier")
+            if evidence_tier != expected_tier:
+                raise RuntimeError(
+                    f"Evidence tier conflict for {slug} in {evidence_path.name}: "
+                    f"inventory has {expected_tier}, evidence has {evidence_tier}"
+                )
+            evidence_profile = component.get("profile")
+            if evidence_profile is not None and evidence_profile != components[slug]["profile"]:
+                raise RuntimeError(
+                    f"Evidence profile conflict for {slug} in {evidence_path.name}: "
+                    f"inventory has {components[slug]['profile']}, "
+                    f"evidence has {evidence_profile}"
+                )
+            if status in ACCEPTED_COMPONENT_EVIDENCE_STATUSES:
+                components[slug]["accepted"] = True
+                components[slug]["acceptedEvidence"].append(evidence_path.name)
+            components[slug]["latestEvidence"] = component
+
+    missing_latest = [
+        slug for slug, component in components.items() if not component["latestEvidence"]
+    ]
+    if missing_latest:
+        raise RuntimeError(
+            "Missing latest evidence record for components: "
+            + ", ".join(sorted(missing_latest))
+        )
+    missing_accepted = [
+        slug for slug, component in components.items() if not component["accepted"]
+    ]
+    if missing_accepted:
+        raise RuntimeError(
+            "Missing accepted evidence record for components: "
+            + ", ".join(sorted(missing_accepted))
+        )
+    return components
+
+
+def _has_bootstrap_js_evidence(sources: list[str]) -> bool:
+    return any(BOOTSTRAP_JS_EVIDENCE_FRAGMENT in source for source in sources)
+
+
+def _markup_owner_for_component(slug: str, source_file: Path) -> str:
+    expected_source = MOO_MARKUP_EXTENSION_SOURCES.get(slug)
+    if expected_source is None:
+        return "Bootstrap/native HTML"
+
+    relative_source = source_file.relative_to(ROOT).as_posix()
+    if relative_source != expected_source:
+        raise RuntimeError(
+            f"Moo markup ownership for {slug} cites {expected_source}, "
+            f"but derivation loaded {relative_source}"
+        )
+    if not source_file.exists():
+        raise RuntimeError(f"Moo markup ownership source missing for {slug}")
+    return "Moo documented extension"
+
+
+def derive_component_ownership(
+    catalog: list[dict[str, str]],
+    certification: dict[str, object],
+) -> dict[str, dict[str, object]]:
+    evidence_index = _load_evidence_index()
+    exported_moo_modules = {
+        module.lstrip("./").removesuffix(".js")
+        for module in certification.get("publicEntrypoints", {}).get("esm", [])
+    }
+    source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
+    if exported_moo_modules != source_moo_modules:
+        raise RuntimeError(
+            "Optional Moo ESM exports do not match src/js/components sources"
+        )
+
+    certified = set(certification.get("certifiedComponents", []))
+    unknown_certified = certified.difference(entry["slug"] for entry in catalog)
+    if unknown_certified:
+        raise RuntimeError(
+            "certification.json lists unknown components: "
+            + ", ".join(sorted(unknown_certified))
+        )
+    incomplete_certified = [
+        slug
+        for slug in sorted(certified)
+        if slug not in evidence_index
+        or not evidence_index[slug]["accepted"]
+        or not evidence_index[slug]["latestEvidence"]
+    ]
+    if incomplete_certified:
+        raise RuntimeError(
+            "certification.json lists components without complete evidence: "
+            + ", ".join(incomplete_certified)
+        )
+
+    ownership: dict[str, dict[str, object]] = {}
+    for component in catalog:
+        slug = component["slug"]
+        registry_status = component.get("status")
+        if registry_status != "ready":
+            raise RuntimeError(f"Unknown registry maturity for {slug}: {registry_status}")
+        if slug not in evidence_index:
+            raise RuntimeError(f"Missing evidence inventory entry for {slug}")
+
+        evidence = evidence_index[slug]
+        latest_evidence = evidence["latestEvidence"]
+        bootstrap_sources = latest_evidence.get("bootstrapEvidence", [])
+        if not isinstance(bootstrap_sources, list):
+            raise RuntimeError(f"bootstrapEvidence must be a list for {slug}")
+        has_bootstrap_js = _has_bootstrap_js_evidence(bootstrap_sources)
+        runtime_owner = "native HTML/CSS"
+        if slug in exported_moo_modules:
+            runtime_owner = "optional Moo ESM"
+        elif has_bootstrap_js:
+            runtime_owner = "Bootstrap plugin"
+
+        source_file = _component_source_file(slug)
+        markup_owner = _markup_owner_for_component(slug, source_file)
+
+        maturity = "ready"
+        if evidence["accepted"]:
+            maturity = "accepted"
+        if slug in certified:
+            maturity = "certified"
+
+        ownership[slug] = {
+            "runtimeOwner": runtime_owner,
+            "markupOwner": markup_owner,
+            "maturity": maturity,
+            "tier": evidence["profileTier"],
+            "evidence": sorted(evidence["acceptedEvidence"]),
+            "knownLimitations": latest_evidence.get("limitations", [])[:2],
+            "source": source_file.relative_to(ROOT).as_posix(),
+        }
+
+    return ownership
 
 
 def _fallback_label(slug: str) -> str:
@@ -930,6 +1196,18 @@ def render_pages() -> None:
     sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
+    product = load_product_facts()
+    component_ownership = derive_component_ownership(
+        catalog,
+        product["certification"],
+    )
+    catalog = [
+        {
+            **component,
+            "ownership": component_ownership[component["slug"]],
+        }
+        for component in catalog
+    ]
     site_pages = build_site_pages(sections, catalog, utilities, blocks)
     version = asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
@@ -958,6 +1236,8 @@ def render_pages() -> None:
             sections=sections,
             utilities=utilities,
             blocks=blocks,
+            product=product,
+            component_ownership=component_ownership,
             site_pages=site_pages,
             current_section=current_section,
             current_slug=metadata["slug"],

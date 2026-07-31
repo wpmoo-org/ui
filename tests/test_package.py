@@ -375,6 +375,14 @@ for (const specifier of [
             workflow,
         )
 
+    def test_release_tag_workflow_creates_lightweight_tags(self) -> None:
+        workflow = (ROOT / ".github/workflows/release-tag.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('git tag "${tag}"', workflow)
+        self.assertNotIn("git tag -a", workflow)
+
     def test_ci_runs_for_main_and_dev_pushes(self) -> None:
         workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
             encoding="utf-8"

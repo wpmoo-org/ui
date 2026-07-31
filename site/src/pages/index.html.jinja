@@ -2,6 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "includes/component-previews.html.jinja" import component_preview %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 
 {% block title %}Moo UI{% endblock %}
 
@@ -30,6 +31,11 @@
           extra_class="px-3"
         ) }}
       </div>
+      <p class="small text-body-secondary mb-0">
+        Current package: <code>@wpmoo/ui@{{ product.version }}</code>. MIT
+        licensed. Certification status:
+        <code>{{ product.certification.status }}</code>.
+      </p>
     </div>
     <div class="moo-home-showcase__media" data-moo-tilt>
       <img
@@ -47,7 +53,7 @@
       <h2 class="h3 mb-0" id="home-intro">A product interface layer for teams that already trust Bootstrap.</h2>
       <p class="moo-home-intro__description text-body-secondary mb-0">
         Moo UI keeps Bootstrap as the public contract: familiar classes,
-        <code>data-bs-*</code> behavior, Sass customization, and Bootstrap
+        <code>data-bs-*</code> behavior, runtime CSS variables, and Bootstrap
         JavaScript plugins. It changes the visual language around that contract.
       </p>
     </div>
@@ -78,11 +84,67 @@
         <div>
           <h3 class="h6 mb-2">Server-rendered UI stays first-class</h3>
           <p class="text-body-secondary mb-0">
-            The catalog is static, inspectable HTML; no React, Tailwind, or
-            Radix runtime is required to browse or ship the interface.
+            The catalog documents public HTML and package contracts; no React,
+            Tailwind, or Radix runtime is required to browse or ship the
+            interface.
           </p>
         </div>
       {% endcall %}
+    </div>
+  </section>
+
+  <section class="moo-home-intro" aria-labelledby="home-quick-start">
+    <div class="moo-home-intro__copy">
+      <p class="moo-home-kicker">Quick start</p>
+      <h2 class="h4 mb-0" id="home-quick-start">Use the full build, or scope Moo UI inside an existing Bootstrap app.</h2>
+      <p class="moo-home-intro__description text-body-secondary mb-0">
+        Moo UI is CSS-first. Bootstrap owns native JavaScript plugins. Moo UI
+        adds optional ESM only for documented Bootstrap gaps such as Combobox
+        and Sidebar.
+      </p>
+    </div>
+    {% set quick_start_example %}
+    <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/assets/css/moo-ui.css">
+
+    <button type="button" class="btn btn-primary">Create workspace</button>
+    {% endset %}
+    {{ render_code_snippet("home-quick-start", quick_start_example, "html") }}
+
+    <div class="moo-home-proof-list" aria-label="Adoption paths">
+      {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
+        <span class="moo-catalog__philosophy-icon">{{ render_icon("package", "inline-start") }}</span>
+        <div>
+          <h3 class="h6 mb-2">Full replacement</h3>
+          <p class="text-body-secondary mb-0">
+            Load <code>moo-ui.css</code> as the complete Bootstrap-compatible
+            stylesheet for a new page or application.
+          </p>
+        </div>
+      {% endcall %}
+      {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
+        <span class="moo-catalog__philosophy-icon">{{ render_icon("layers", "inline-start") }}</span>
+        <div>
+          <h3 class="h6 mb-2">Scoped adoption</h3>
+          <p class="text-body-secondary mb-0">
+            Keep Bootstrap CSS, load <code>moo.css</code> after it, and wrap
+            migrated regions with <code>.moo-ui</code>.
+          </p>
+        </div>
+      {% endcall %}
+      {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
+        <span class="moo-catalog__philosophy-icon">{{ render_icon("plug", "inline-start") }}</span>
+        <div>
+          <h3 class="h6 mb-2">Optional gap modules</h3>
+          <p class="text-body-secondary mb-0">
+            Import <code>combobox.js</code> or <code>sidebar.js</code> only when
+            a rendered root needs Moo-owned behavior.
+          </p>
+        </div>
+      {% endcall %}
+    </div>
+    <div class="moo-home-components__cta">
+      {{ button("Report an issue", variant="outline", element="a", href="https://github.com/wpmoo-org/ui/issues") }}
+      {{ button("Contribute", variant="outline", element="a", href=site_href("contributing.html", root_path)) }}
     </div>
   </section>
 
@@ -126,7 +188,8 @@
     </div>
     <p class="moo-home-attribution">
       Built by <a href="https://wpmoo.org/">WPMoo</a> in Berlin. The source code
-      is available on <a href="https://github.com/wpmoo-org/ui">GitHub</a>.
+      is available on <a href="https://github.com/wpmoo-org/ui">GitHub</a>;
+      issues and small documentation fixes are welcome.
     </p>
   </section>
 {% endblock %}
