@@ -365,6 +365,14 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             with self.subTest(section=section):
                 self.assertEqual(payload[section], self.fixture[section])
 
+    def test_recorder_uses_the_active_python_interpreter(self) -> None:
+        source = (ROOT / "scripts/record-boundary-baseline.py").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("sys.executable", source)
+        self.assertNotIn('run([".venv/bin/python", "build.py"]', source)
+
 
 if __name__ == "__main__":
     unittest.main()

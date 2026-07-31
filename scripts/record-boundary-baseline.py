@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -54,7 +55,7 @@ def record_boundary_baseline(root: Path = ROOT) -> dict:
     package_dist = root / "dist"
     site_dist = root / "site-dist"
 
-    run([".venv/bin/python", "build.py"], root)
+    run([sys.executable, "build.py"], root)
     pack = json.loads(
         run(["npm", "pack", "--dry-run", "--json"], root).stdout
     )[0]
