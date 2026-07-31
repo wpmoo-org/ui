@@ -2,7 +2,6 @@
 {% from "components/context_menu.html.jinja" import context_menu %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_toggle_item, dropdown_header, dropdown_divider %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/alert.html.jinja" import alert %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
@@ -37,6 +36,73 @@
       basic
     ) }}
 
+    {% set shortcut_items %}
+      {{ dropdown_item("New file", icon="file-plus", shortcut="⌘N") }}
+      {{ dropdown_item("Rename", icon="pencil", shortcut="⌘R") }}
+      {{ dropdown_item("Duplicate", icon="copy", shortcut="⌘D") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Archive", icon="archive", shortcut="⇧⌘A") }}
+    {% endset %}
+    {% set shortcuts %}
+      {% call context_menu("context-menu-shortcuts", "Shortcut actions", shortcut_items) %}
+        {% call card(title="Release notes.md", subtitle="Right-click to reveal shortcut hints") %}
+          <p class="text-body-secondary mb-0">Shortcut text uses the same trailing slot as Dropdown Menu items.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "shortcuts",
+      "Shortcuts",
+      "Add compact shortcut text to the end of an item while preserving the Bootstrap dropdown-item structure.",
+      shortcuts
+    ) }}
+
+    {% set group_items %}
+      {{ dropdown_header("File") }}
+      {{ dropdown_item("Open in editor", icon="external-link") }}
+      {{ dropdown_item("Reveal in project", icon="folder-open") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_header("Share") }}
+      {{ dropdown_item("Copy public link", icon="link") }}
+      {{ dropdown_item("Send for review", icon="send") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Move to archive", icon="archive") }}
+    {% endset %}
+    {% set groups %}
+      {% call context_menu("context-menu-groups", "Grouped file actions", group_items) %}
+        {% call card(title="Brand guidelines.fig", subtitle="Grouped actions use Bootstrap headers and dividers") %}
+          <p class="text-body-secondary mb-0">Headers are semantic dropdown headers, not custom nested panels.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "groups",
+      "Groups",
+      "Group related actions with Bootstrap dropdown headers and dividers inside the same flat menu.",
+      groups
+    ) }}
+
+    {% set icon_items %}
+      {{ dropdown_item("Copy link", icon="link", icon_box=true) }}
+      {{ dropdown_item("Download", icon="download", icon_box=true) }}
+      {{ dropdown_item("Star file", icon="star", icon_box=true) }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("View details", icon="info", icon_box=true) }}
+    {% endset %}
+    {% set icons %}
+      {% call context_menu("context-menu-icons", "Icon actions", icon_items) %}
+        {% call card(title="Media pack.zip", subtitle="Icon affordances align with Dropdown Menu") %}
+          <p class="text-body-secondary mb-0">Icon boxes keep dense menus scannable without changing the item contract.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "icons",
+      "Icons",
+      "Use the Dropdown Menu icon slot when actions need quick visual recognition.",
+      icons
+    ) }}
+
     {% set disabled_items %}
       {{ dropdown_item("Share", icon="share-2") }}
       {{ dropdown_item("Move to…", icon="folder-input") }}
@@ -65,15 +131,15 @@
       {{ dropdown_item("Refresh", icon="refresh-cw") }}
     {% endset %}
     {% set checkbox %}
-      {% call context_menu("context-menu-checkbox", "Folder view options", checkbox_items) %}
+      {% call context_menu("context-menu-checkboxes", "Folder view options", checkbox_items) %}
         {% call card(title="Design assets", subtitle="Folder · 128 items") %}
           <p class="text-body-secondary mb-0">Toggle items keep the menu open, using Bootstrap's own button-toggle Data API.</p>
         {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "checkbox",
-      "Checkbox items",
+      "checkboxes",
+      "Checkboxes",
       "Toggleable options use Bootstrap's button toggle Data API, so selecting one keeps the menu open instead of closing it.",
       checkbox
     ) }}
@@ -95,9 +161,49 @@
     {% endset %}
     {{ render_example(
       "radio",
-      "Radio items",
+      "Radio",
       "Single-select options reuse the checkbox item's dropdown-item button so keyboard roving focus and Bootstrap's button-toggle Data API keep working; Moo adds only the mutual-exclusivity between grouped options.",
       radio
+    ) }}
+
+    {% set destructive_items %}
+      {{ dropdown_item("Rename", icon="pencil") }}
+      {{ dropdown_item("Duplicate", icon="copy") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Delete forever", icon="trash-2", destructive=true, shortcut="⌘⌫") }}
+    {% endset %}
+    {% set destructive %}
+      {% call context_menu("context-menu-destructive", "Dangerous file actions", destructive_items) %}
+        {% call card(title="Old backup.sql", subtitle="Destructive actions stay visually distinct") %}
+          <p class="text-body-secondary mb-0">The danger item still uses a normal dropdown-item so focus, hover, and click behavior remain consistent.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "destructive",
+      "Destructive",
+      "Mark destructive actions with the shared danger text utility while keeping the menu item anatomy unchanged.",
+      destructive
+    ) }}
+
+    {% set side_items %}
+      {{ dropdown_item("Open") }}
+      {{ dropdown_item("Copy path", icon="copy") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Inspect", icon="search") }}
+    {% endset %}
+    {% set sides %}
+      {% call context_menu("context-menu-sides", "End-aligned fallback actions", side_items, align="end") %}
+        {% call card(title="logs/production.log", subtitle="Fallback trigger aligns the menu to the end edge") %}
+          <p class="text-body-secondary mb-0">Pointer-open menus anchor to the click point; the explicit fallback trigger can use Bootstrap's end alignment.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "sides",
+      "Sides",
+      "Use Bootstrap's end alignment for the fallback trigger while pointer invocation continues to position from the right-click location.",
+      sides
     ) }}
 
     {% set rtl_items_arabic %}
@@ -151,14 +257,8 @@
     ) }}
   </div>
 
-  {{ alert(
-    "Nested submenus are not supported",
-    "Bootstrap's dropdown plugin has no native nested-menu behavior. Context Menu items stay a single flat list rather than approximating a hover/roving submenu contract this catalog cannot back yet.",
-    icon="triangle-alert"
-  ) }}
-
   {{ render_reference(
-    "Context Menu inherits Bootstrap's dropdown-menu surface, item states, and Popper positioning; for the underlying options and keyboard behavior see the",
+    "Context Menu inherits Bootstrap's dropdown-menu surface, item states, and Popper positioning. Nested submenus are not supported because Bootstrap does not provide a native nested-menu contract; for the underlying options and keyboard behavior see the",
     "https://getbootstrap.com/docs/5.3/components/dropdowns/",
     "Bootstrap Dropdowns documentation"
   ) }}

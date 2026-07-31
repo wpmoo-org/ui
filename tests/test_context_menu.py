@@ -218,4 +218,28 @@ class ContextMenuTests(CatalogTestCase):
 
         self.assertNotIn("API Reference", source)
         self.assertIn("Nested submenus are not supported", source)
+        self.assertNotIn('"submenu",', source)
+        self.assertNotIn('"Submenu",', source)
+        self.assertNotIn("context-menu-submenu-trigger", source)
+        self.assertNotIn('class="dropend"', source)
         self.assertIn("render_reference(", source)
+
+    def test_context_menu_page_covers_shadcn_flat_example_sections(self) -> None:
+        self.assertTrue(PAGE.is_file(), "Context Menu page is not implemented")
+        source = PAGE.read_text(encoding="utf-8")
+
+        for example_id, title in (
+            ("basic", "Basic"),
+            ("shortcuts", "Shortcuts"),
+            ("groups", "Groups"),
+            ("icons", "Icons"),
+            ("checkboxes", "Checkboxes"),
+            ("radio", "Radio"),
+            ("destructive", "Destructive"),
+            ("sides", "Sides"),
+        ):
+            self.assertIn(f'"{example_id}",', source)
+            self.assertIn(f'"{title}",', source)
+
+        self.assertIn("Bootstrap does not provide a native nested-menu contract", source)
+        self.assertIn('align="end"', source)
