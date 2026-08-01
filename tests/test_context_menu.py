@@ -14,6 +14,7 @@ EVIDENCE_INVENTORY = ROOT / "src/certification/evidence-inventory.json"
 CONTEXT_MENU_JS = ROOT / "src/js/components/context-menu.js"
 CATALOG_JS = ROOT / "site/src/js/catalog/index.js"
 CONTEXT_MENU_SCSS = ROOT / "scss/components/_context-menu.scss"
+FIXTURE = ROOT / "tests/fixtures/certification/context-menu.html"
 
 
 class ContextMenuTests(CatalogTestCase):
@@ -243,3 +244,17 @@ class ContextMenuTests(CatalogTestCase):
 
         self.assertIn("Bootstrap does not provide a native nested-menu contract", source)
         self.assertIn('align="end"', source)
+
+    def test_fixture_toggle_item_renders_a_real_check_indicator(self) -> None:
+        # dropdown_toggle_item() always renders an icon inside
+        # .dropdown-item-check__indicator (the CSS only toggles that span's
+        # opacity; it never supplies the checkmark itself), so a hand-authored
+        # fixture that leaves the indicator empty toggles aria-pressed/.active
+        # correctly but never shows anything -- a static parse catches that
+        # without needing a full browser run.
+        self.assertTrue(FIXTURE.is_file(), "Context Menu certification fixture is missing")
+        source = FIXTURE.read_text(encoding="utf-8")
+        indicator = source.split('class="dropdown-item-check__indicator"', 1)[1]
+        indicator_body = indicator.split(">", 1)[1].split("</span>", 1)[0]
+
+        self.assertIn("<svg", indicator_body)

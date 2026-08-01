@@ -3713,6 +3713,15 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertTrue(
                     menu.evaluate("element => element === document.activeElement")
                 )
+                fallback_box = fallback.bounding_box()
+                surface_box = surface.bounding_box()
+                self.assertIsNotNone(fallback_box)
+                self.assertIsNotNone(surface_box)
+                self.assertGreaterEqual(fallback_box["y"], surface_box["y"])
+                self.assertLessEqual(
+                    fallback_box["y"] + fallback_box["height"],
+                    surface_box["y"] + surface_box["height"],
+                )
                 page.keyboard.press("Escape")
                 expect(fallback).to_be_focused()
 
@@ -3725,11 +3734,23 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 rename_item.click()
                 expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
 
-                # A persistent checkbox item keeps the menu open.
+                # A persistent checkbox item keeps the menu open, toggles
+                # Bootstrap's own button-toggle Data API state, and shows its
+                # check indicator (not just the aria-pressed/.active state:
+                # a fixture missing the indicator's icon markup would still
+                # pass an aria-pressed-only assertion while rendering nothing
+                # visible).
                 fallback.click()
                 toggle_item.click()
                 expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                expect(toggle_item).to_have_class("dropdown-item dropdown-item-check active")
                 expect(toggle_item).to_have_attribute("aria-pressed", "true")
+                toggle_indicator = toggle_item.locator(".dropdown-item-check__indicator")
+                expect(toggle_indicator).to_have_css("opacity", "1")
+                indicator_box = toggle_indicator.locator("svg").bounding_box()
+                self.assertIsNotNone(indicator_box)
+                self.assertGreater(indicator_box["width"], 0)
+                self.assertGreater(indicator_box["height"], 0)
 
                 # Outside click closes the menu.
                 page.locator("h1").click()
