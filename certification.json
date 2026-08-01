@@ -23,7 +23,8 @@
     "esm": [
       "./combobox.js",
       "./sidebar.js",
-      "./context-menu.js"
+      "./context-menu.js",
+      "./data-table.js"
     ],
     "sass": []
   },

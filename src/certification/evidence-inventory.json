@@ -114,9 +114,8 @@
     {"slug": "toggle-group", "profile": "t1-native-state", "evidence": ["tests/test_toggle_group.py"]},
     {"slug": "alert-dialog", "profile": "t3-runtime-composite", "evidence": ["tests/test_alert_dialog.py", "tests/test_dialog.py"]},
     {"slug": "menubar", "profile": "t3-runtime-composite", "evidence": ["tests/test_menubar.py", "tests/test_dropdown_menu.py"]},
-    {"slug": "context-menu", "profile": "t3-runtime-composite", "evidence": ["tests/test_context_menu.py", "src/js/components/context-menu.js"]}
+    {"slug": "context-menu", "profile": "t3-runtime-composite", "evidence": ["tests/test_context_menu.py", "src/js/components/context-menu.js"]},
+    {"slug": "data-table", "profile": "t3-runtime-composite", "evidence": ["tests/test_data_table.py", "src/js/components/data-table.js"]}
   ],
-  "plannedComponents": [
-    {"slug": "data-table", "tier": 3}
-  ]
+  "plannedComponents": []
 }

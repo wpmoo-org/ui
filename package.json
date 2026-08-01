@@ -30,6 +30,7 @@
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
+    "./data-table.js": "./dist/js/data-table.js",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -41,6 +42,7 @@
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
+    "dist/js/data-table.js",
     "certification.json",
     "README.md",
     "LICENSE",

@@ -55,7 +55,7 @@ LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
-CORE_JS_MODULES = ("combobox.js", "sidebar.js", "context-menu.js")
+CORE_JS_MODULES = ("combobox.js", "sidebar.js", "context-menu.js", "data-table.js")
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
@@ -80,6 +80,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "collapsible": "src/components/collapsible.html.jinja",
     "combobox": "src/components/combobox.html.jinja",
     "context-menu": "src/components/context_menu.html.jinja",
+    "data-table": "src/components/data_table.html.jinja",
     "field": "src/components/field.html.jinja",
     "form": "src/components/field.html.jinja",
     "menubar": "src/components/menubar.html.jinja",

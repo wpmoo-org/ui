@@ -203,5 +203,10 @@
     "slug": "context-menu",
     "label": "Context Menu",
     "status": "ready"
+  },
+  {
+    "slug": "data-table",
+    "label": "Data Table",
+    "status": "ready"
   }
 ]

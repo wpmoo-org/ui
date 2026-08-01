@@ -3,7 +3,7 @@
   "status": "backfill",
   "releaseTarget": "0.8.0",
   "releaseClaim": "none",
-  "description": "Incremental Phase 3A evidence for the 0.8.0 Context Menu addition. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.8.0 release gate is complete.",
+  "description": "Incremental Phase 3 evidence for the 0.8.0 roadmap close-out: Phase 3A adds Context Menu, Phase 3B adds Data Table. Passing backfill evidence does not add a component to the package manifest's certifiedComponents list until the 0.8.0 release gate is complete.",
   "components": [
     {
       "slug": "context-menu",
@@ -38,6 +38,48 @@
         "Phase 3A browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; a later gate will rerun the supported Bootstrap and browser matrices.",
         "The fixture proves explicit public ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, pointer right-click open at pointer coordinates, Shift+F10 and ContextMenu-key keyboard open anchored to the trigger, the explicit fallback trigger for touch/keyboard-only use, focus entry into the menu, Escape dismissal with focus return to the invoking trigger, outside-click dismissal, enabled item activation, disabled item non-activation and focus skip, viewport-edge collision clamping, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
         "Nested submenus are out of scope for Phase 3A; the component page documents this as an explicit known gap rather than approximating hover/roving submenu behavior it cannot back.",
+        "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "data-table",
+      "phase": "3B",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_data_table.py",
+        "tests/test_certification_browser.py",
+        "dist/js/data-table.js"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/content/tables/",
+        "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "https://getbootstrap.com/docs/5.3/components/pagination/",
+        "https://getbootstrap.com/docs/5.3/forms/checks-radios/",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_tables.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/js/src/dropdown.js",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/_pagination.scss",
+        "https://github.com/twbs/bootstrap/blob/v5.3.3/scss/forms/_form-check.scss"
+      ],
+      "resolvedFindings": [
+        "Bootstrap ships no table JS plugin at all (verified: no js/src/table.js in the vendored or reference source), so sorting, free-text search, faceted multi-select filtering, column visibility, row selection, and client-side pagination are entirely Moo-owned, operating on a fully server-rendered table (every row exists in the DOM at load; the runtime only reorders, hides, or paginates existing rows).",
+        "The per-column sort menu and the toolbar's faceted filter/view-options menus reuse Bootstrap's own Dropdown Data API and dropdown-item markup; only the sort/filter/visibility state machine and the facet checkbox indicator (a persistent square with no Bootstrap dropdown-item equivalent) are Moo-owned."
+      ],
+      "limitations": [
+        "Phase 3B browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; a later gate will rerun the supported Bootstrap and browser matrices.",
+        "The fixture proves explicit public ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, text search, faceted Status/Priority filtering, single-column Asc/Desc/Hide sorting, column visibility toggling kept in sync between the column header and the View menu, row selection with an indeterminate select-all state, pagination composed with the active filter/sort state, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "No remote data engine: the component operates on a fixed, fully server-rendered dataset, matching the Phase 3B non-goal.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
