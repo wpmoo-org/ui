@@ -215,6 +215,15 @@
   padding: 0.375rem 0.875rem;
 }
 
+// .datatable-col-hidden is a single class (display: none) declared above
+// .datatable-card-row's own display: grid; a tied, later-wins cascade let
+// the row's grid display beat the hide, so the View dropdown's column
+// toggles never reached the card list. Two classes outrank one regardless
+// of source order.
+.datatable-card-row.datatable-col-hidden {
+  display: none;
+}
+
 .datatable-card-row:first-child {
   padding-top: 0.875rem;
 }
