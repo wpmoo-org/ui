@@ -17,6 +17,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
+    "dist/js/context-menu.js",
     "certification.json",
     "README.md",
     "LICENSE",
@@ -30,6 +31,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./moo.min.css": "./dist/assets/css/moo.min.css",
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
+    "./context-menu.js": "./dist/js/context-menu.js",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
@@ -105,8 +107,10 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["type"], "module")
         self.assertEqual(package["exports"]["./combobox.js"], "./dist/js/combobox.js")
         self.assertEqual(package["exports"]["./sidebar.js"], "./dist/js/sidebar.js")
+        self.assertEqual(package["exports"]["./context-menu.js"], "./dist/js/context-menu.js")
         self.assertIn("dist/js/combobox.js", files)
         self.assertIn("dist/js/sidebar.js", files)
+        self.assertIn("dist/js/context-menu.js", files)
         self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
         self.assertEqual(
             package["exports"]["./certification.json"],
@@ -169,7 +173,7 @@ class PackageMetadataTests(unittest.TestCase):
             path.relative_to(directory).as_posix()
             for path in directory.rglob("*.js")
         }
-        self.assertEqual(modules, {"combobox.js", "sidebar.js"})
+        self.assertEqual(modules, {"combobox.js", "sidebar.js", "context-menu.js"})
 
     def test_npm_pack_contains_only_the_approved_files(self) -> None:
         result = subprocess.run(
@@ -311,8 +315,9 @@ class PackageMetadataTests(unittest.TestCase):
                 """
 import Combobox from "@wpmoo/ui/combobox.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
+import ContextMenu from "@wpmoo/ui/context-menu.js";
 
-if (Combobox.name !== "Combobox" || Sidebar.name !== "Sidebar") {
+if (Combobox.name !== "Combobox" || Sidebar.name !== "Sidebar" || ContextMenu.name !== "ContextMenu") {
   throw new Error("Unexpected public ESM default export");
 }
 
@@ -341,7 +346,7 @@ for (const specifier of [
             self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
-        for module_name in ("combobox.js", "sidebar.js"):
+        for module_name in ("combobox.js", "sidebar.js", "context-menu.js"):
             with self.subTest(module_name=module_name):
                 result = subprocess.run(
                     [

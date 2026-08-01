@@ -61,6 +61,7 @@ $pagination-focus-bg: var(--moo-muted-surface) !default;
 $pagination-active-color: var(--bs-body-color) !default;
 $pagination-active-bg: var(--moo-muted-surface) !default;
 $pagination-active-border-color: var(--moo-border) !default;
+$pagination-disabled-color: var(--moo-disabled-foreground) !default;
 $pagination-disabled-border-color: transparent !default;
 // The reference progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;

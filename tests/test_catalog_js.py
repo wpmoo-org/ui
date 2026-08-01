@@ -79,8 +79,13 @@ class CatalogJavaScriptTests(CatalogTestCase):
             'import Sidebar from "../../../../src/js/components/sidebar.js";',
             source,
         )
+        self.assertIn(
+            'import ContextMenu from "../../../../src/js/components/context-menu.js";',
+            source,
+        )
         self.assertIn("Combobox.getOrCreateInstance(element)", source)
         self.assertIn("Sidebar.getOrCreateInstance(element)", source)
+        self.assertIn("ContextMenu.getOrCreateInstance(element)", source)
         self.assertIn("export function initCatalog(root = document)", source)
         self.assertIn("[...disposers].reverse()", source)
         self.assertNotIn(".combobox-input", source)

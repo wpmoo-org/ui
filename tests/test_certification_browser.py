@@ -3639,6 +3639,193 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_context_menu_fixture_proves_public_esm_pointer_keyboard_and_lifecycle(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/context-menu.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                root = page.locator("#certification-context-menu")
+                surface = page.locator("#certification-context-menu-surface")
+                fallback = page.locator("#certification-context-menu-fallback")
+                menu = page.locator("#certification-context-menu-menu")
+                rename_item = page.locator("#certification-context-menu-rename")
+                toggle_item = page.locator("#certification-context-menu-toggle")
+                restore_item = page.locator("#certification-context-menu-restore")
+                self.assertEqual(page.locator("body").get_attribute("data-context-menu-ready"), "true")
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => window.CertificationContextMenu.getInstance(element)
+                          === window.certificationContextMenu
+                        """
+                    )
+                )
+                self.assertEqual(surface.get_attribute("aria-expanded"), "false")
+                self.assertEqual(fallback.get_attribute("aria-expanded"), "false")
+                expect(restore_item).to_be_disabled()
+
+                # Pointer right-click open focuses the menu container (not an
+                # item), so :hover alone drives the highlight instead of a
+                # focus ring competing with it; Escape closes and returns
+                # focus to the invoking trigger.
+                surface.click(button="right")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                expect(surface).to_have_attribute("aria-expanded", "true")
+                expect(fallback).to_have_attribute("aria-expanded", "true")
+                self.assertTrue(
+                    menu.evaluate("element => element === document.activeElement")
+                )
+                page.keyboard.press("Escape")
+                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
+                expect(surface).to_be_focused()
+                self.assertEqual(surface.get_attribute("aria-expanded"), "false")
+
+                # Keyboard invocation: Shift+F10 and the ContextMenu key,
+                # anchored to the trigger rather than stale pointer coordinates.
+                surface.focus()
+                page.keyboard.press("Shift+F10")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                expect(rename_item).to_be_focused()
+                page.keyboard.press("Escape")
+                expect(surface).to_be_focused()
+
+                surface.focus()
+                page.keyboard.press("ContextMenu")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                expect(rename_item).to_be_focused()
+                page.keyboard.press("Escape")
+
+                # Explicit fallback trigger for touch/keyboard-only use opens
+                # anchored to itself; being a pointer-driven open, it also
+                # focuses the menu container rather than the first item, and
+                # returns focus to itself on Escape.
+                fallback.click()
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                self.assertTrue(
+                    menu.evaluate("element => element === document.activeElement")
+                )
+                fallback_box = fallback.bounding_box()
+                surface_box = surface.bounding_box()
+                self.assertIsNotNone(fallback_box)
+                self.assertIsNotNone(surface_box)
+                self.assertGreaterEqual(fallback_box["y"], surface_box["y"])
+                self.assertLessEqual(
+                    fallback_box["y"] + fallback_box["height"],
+                    surface_box["y"] + surface_box["height"],
+                )
+                page.keyboard.press("Escape")
+                expect(fallback).to_be_focused()
+
+                # Disabled item is skipped by roving focus and does not
+                # activate or close the menu; enabled item activation closes it.
+                fallback.click()
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                restore_item.click(force=True)
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                rename_item.click()
+                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
+
+                # A persistent checkbox item keeps the menu open, toggles
+                # Bootstrap's own button-toggle Data API state, and shows its
+                # check indicator (not just the aria-pressed/.active state:
+                # a fixture missing the indicator's icon markup would still
+                # pass an aria-pressed-only assertion while rendering nothing
+                # visible).
+                fallback.click()
+                toggle_item.click()
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                expect(toggle_item).to_have_class("dropdown-item dropdown-item-check active")
+                expect(toggle_item).to_have_attribute("aria-pressed", "true")
+                toggle_indicator = toggle_item.locator(".dropdown-item-check__indicator")
+                expect(toggle_indicator).to_have_css("opacity", "1")
+                indicator_box = toggle_indicator.locator("svg").bounding_box()
+                self.assertIsNotNone(indicator_box)
+                self.assertGreater(indicator_box["width"], 0)
+                self.assertGreater(indicator_box["height"], 0)
+
+                # Outside click closes the menu.
+                page.locator("h1").click()
+                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
+
+                self.assertEqual(run_axe(page), [])
+
+                # Viewport collision near the bottom-right edge stays clamped
+                # inside the viewport.
+                edge_surface = page.locator("#certification-context-menu-edge-surface")
+                edge_menu = page.locator("#certification-context-menu-edge-menu")
+                edge_surface.click(button="right")
+                expect(edge_menu).to_have_class("dropdown-menu context-menu-menu show")
+                viewport = page.viewport_size
+                edge_box = edge_menu.bounding_box()
+                self.assertIsNotNone(viewport)
+                self.assertIsNotNone(edge_box)
+                self.assertLessEqual(edge_box["x"] + edge_box["width"], viewport["width"] + 1)
+                self.assertLessEqual(edge_box["y"] + edge_box["height"], viewport["height"] + 1)
+                self.assertGreaterEqual(edge_box["x"], -1)
+                self.assertGreaterEqual(edge_box["y"], -1)
+                page.keyboard.press("Escape")
+
+                self.assertEqual(
+                    page.locator("html").get_attribute("dir"),
+                    case.direction,
+                )
+                self.assertEqual(
+                    page.locator("html").get_attribute("data-bs-theme"),
+                    case.color_scheme,
+                )
+                self.assertFalse(
+                    page.evaluate(
+                        "document.documentElement.scrollWidth > "
+                        "document.documentElement.clientWidth"
+                    )
+                )
+
+                # Repeated init returns the same instance; dispose removes
+                # listeners/generated state and permits re-initialization.
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationContextMenu.dispose();
+                          return window.CertificationContextMenu.getInstance(element) === null;
+                        }
+                        """
+                    )
+                )
+                self.assertEqual(surface.get_attribute("aria-expanded"), "false")
+                surface.click(button="right")
+                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
+                self.assertTrue(
+                    root.evaluate(
+                        """
+                        element => {
+                          window.certificationContextMenu = window.CertificationContextMenu
+                            .getOrCreateInstance(element);
+                          return window.CertificationContextMenu.getInstance(element)
+                            === window.certificationContextMenu;
+                        }
+                        """
+                    )
+                )
+                surface.click(button="right")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                page.keyboard.press("Escape")
+
+                self.assertEqual(run_axe(page), [])
+                prepare_page(page, case, normalize_screenshot=True)
+                self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

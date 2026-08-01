@@ -26,7 +26,7 @@
 Moo UI preserves Bootstrap markup, variables, and JavaScript plugins wherever
 Bootstrap already provides the contract. For patterns Bootstrap does not
 provide, Moo UI adds small documented extensions, including optional ESM for
-Combobox and Sidebar.
+Combobox, Context Menu, and Sidebar.
 
 - **CSS-first.** Most components need only the stylesheet and ordinary HTML.
 - **Bootstrap owns native behavior.** Keep using Bootstrap's bundle for its
@@ -57,6 +57,7 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | Static HTML and CSS components | Browser + Bootstrap markup | `moo-ui.css`, or Bootstrap CSS followed by scoped `moo.css` |
 | Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other Bootstrap plugins | Bootstrap | Bootstrap's JavaScript bundle and documented initialization |
 | Combobox | Optional Moo ESM | `@wpmoo/ui/combobox.js`, then explicit initialization |
+| Context Menu pointer and keyboard invocation | Optional Moo ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
 | Sidebar state and responsive coordination | Optional Moo ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
 
 Moo UI does not replace Bootstrap plugins and does not publish a mandatory
@@ -100,9 +101,11 @@ Initialize only the documented behavior gaps you use:
 
 ```js
 import Combobox from "@wpmoo/ui/combobox.js";
+import ContextMenu from "@wpmoo/ui/context-menu.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
 
 Combobox.getOrCreateInstance(document.querySelector(".combobox"));
+ContextMenu.getOrCreateInstance(document.querySelector(".context-menu"));
 Sidebar.getOrCreateInstance(document.querySelector('[data-slot="sidebar-wrapper"]'));
 ```
 
@@ -117,7 +120,7 @@ recipes, load order, and troubleshooting.
 | Existing Bootstrap application | Load `moo.css` after Bootstrap CSS and add `.moo-ui` around migrated regions. |
 | Static page with no interactive plugins | Load CSS only. |
 | Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
-| Page using Combobox or Sidebar | Add only the corresponding optional Moo ESM module. |
+| Page using Combobox, Context Menu, or Sidebar | Add only the corresponding optional Moo ESM module. |
 
 ## Public Package Surface
 
@@ -130,6 +133,7 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/moo.css` | Scoped expanded component layer for `.moo-ui` |
 | `@wpmoo/ui/moo.min.css` | Scoped minified component layer |
 | `@wpmoo/ui/combobox.js` | Optional Combobox ESM lifecycle |
+| `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
@@ -148,7 +152,7 @@ partials and Jinja macros are repository build tools, not npm APIs.
 - Start with one scoped region or replace the full stylesheet after review.
 
 Representative components include Button, Field, Table, Dialog, Toast, Sheet,
-Combobox, and Sidebar. Browse the [component catalog](https://ui.wpmoo.org/components/)
+Combobox, Context Menu, and Sidebar. Browse the [component catalog](https://ui.wpmoo.org/components/)
 and composed [blocks](https://ui.wpmoo.org/blocks/).
 
 ## Designed, Not Just Restyled

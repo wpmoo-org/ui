@@ -10,7 +10,7 @@
   --bs-dropdown-link-hover-bg: var(--moo-muted-surface);
   --bs-dropdown-link-active-color: var(--moo-foreground);
   --bs-dropdown-link-active-bg: var(--moo-muted-surface);
-  --bs-dropdown-link-disabled-color: var(--moo-muted-foreground);
+  --bs-dropdown-link-disabled-color: var(--moo-disabled-foreground);
   --bs-dropdown-header-color: var(--moo-muted-foreground);
 
   // Bootstrap gates dropdown shadow behind $enable-shadows, so apply the
@@ -30,6 +30,11 @@
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
+}
+
+.dropdown-menu .dropdown-divider {
+  margin-inline: calc(-1 * var(--bs-dropdown-padding-x));
+  border-block-start: var(--bs-border-width) solid var(--bs-dropdown-divider-bg);
 }
 
 .dropdown-item-check.active {

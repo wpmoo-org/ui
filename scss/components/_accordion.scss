@@ -34,7 +34,7 @@
 }
 
 .accordion-button:disabled {
-  color: var(--moo-muted-foreground);
+  color: var(--moo-disabled-foreground);
   opacity: var(--moo-disabled-control-opacity);
   pointer-events: none;
 }

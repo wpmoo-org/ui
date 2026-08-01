@@ -1,0 +1,41 @@
+{# Context Menu composes Bootstrap's dropdown-menu surface (the reference
+   docs and vendored source confirm: .dropdown-menu, .dropdown-item, headers,
+   dividers, disabled/active states, Popper positioning, and keyboard
+   navigation inside an open menu). Bootstrap has no first-class Context Menu
+   or right-click trigger contract, so Moo owns the .context-menu wrapper,
+   the .context-menu-trigger surface/fallback pair, and the runtime in
+   src/js/components/context-menu.js. The fallback button is the real
+   Bootstrap dropdown toggle (data-bs-toggle="dropdown") so it stays the
+   sibling Bootstrap's own menu/toggle lookup and Up/Down/Escape-in-menu
+   keydown handling resolve against; the surface region only adds the
+   contextmenu/Shift+F10/ContextMenu-key invocation Bootstrap does not
+   provide. #}
+
+{% macro context_menu(
+  id,
+  label,
+  items,
+  extra_class="",
+  trigger_class="",
+  menu_class="",
+  fallback_label="",
+  align="",
+  attrs=""
+) -%}
+  {% if not id | trim %}{{ fail("Context Menu id is required") }}{% endif %}
+  {% if not label | trim %}{{ fail("Context Menu label is required") }}{% endif %}
+  {% if not items | trim %}{{ fail("Context Menu items are required") }}{% endif %}
+  {% set menu_id = id ~ "-menu" %}
+  {% set resolved_fallback_label = fallback_label | trim if fallback_label | trim else "Open " ~ label ~ " menu" %}
+  <div class="context-menu{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}"{% if attrs %} {{ attrs | safe }}{% endif %}>
+    <div class="context-menu-trigger{% if trigger_class %} {{ trigger_class }}{% endif %}" id="{{ id }}-surface" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-controls="{{ menu_id }}">
+      {{ caller() | trim | safe }}
+    </div>
+    <button type="button" class="context-menu-trigger btn btn-ghost btn-icon-sm" id="{{ id }}-fallback" data-bs-toggle="dropdown" data-context-menu-fallback aria-expanded="false" aria-controls="{{ menu_id }}" aria-label="{{ resolved_fallback_label }}">
+      {{ render_icon("ellipsis-vertical", "inline-start") }}
+    </button>
+    <ul class="dropdown-menu context-menu-menu{% if align %} dropdown-menu-{{ align }}{% endif %}{% if menu_class %} {{ menu_class }}{% endif %}" id="{{ menu_id }}" tabindex="-1" aria-label="{{ label }}">
+      {{ items | trim | safe }}
+    </ul>
+  </div>
+{%- endmacro %}
