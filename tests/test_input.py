@@ -109,7 +109,7 @@ class InputTests(CatalogTestCase):
         self.assertIn(" readonly", readonly)
         self.assertNotIn(" disabled", readonly)
 
-    def test_disabled_form_controls_share_muted_text_color(self) -> None:
+    def test_disabled_form_controls_share_disabled_text_token(self) -> None:
         variables = read_primary_variables()
         tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
             encoding="utf-8"
@@ -119,9 +119,16 @@ class InputTests(CatalogTestCase):
         )
         input_scss = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
 
-        self.assertIn("$input-disabled-color: var(--bs-tertiary-color) !default;", variables)
+        self.assertIn("$moo-disabled-foreground: $body-tertiary-color !default;", variables)
+        self.assertIn(
+            "$moo-disabled-foreground-dark: $body-tertiary-color-dark !default;",
+            variables,
+        )
+        self.assertIn("$input-disabled-color: var(--moo-disabled-foreground) !default;", variables)
         self.assertIn("$form-select-disabled-color: $input-disabled-color !default;", variables)
         self.assertIn("$moo-disabled-control-opacity: 0.5 !default;", variables)
+        self.assertIn("--moo-disabled-foreground: #{$moo-disabled-foreground};", tokens_root)
+        self.assertIn("--moo-disabled-foreground: #{$moo-disabled-foreground};", core_theme)
         self.assertIn("--moo-disabled-control-opacity: #{$moo-disabled-control-opacity};", tokens_root)
         self.assertIn("--moo-disabled-control-opacity: #{$moo-disabled-control-opacity};", core_theme)
         self.assertIn(".form-control:disabled,", input_scss)

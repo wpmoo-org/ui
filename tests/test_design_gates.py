@@ -22,6 +22,10 @@ MOO_THEME_TOKENS = {
         "$moo-muted-foreground",
         "$moo-muted-foreground-dark",
     ),
+    "--moo-disabled-foreground": (
+        "$moo-disabled-foreground",
+        "$moo-disabled-foreground-dark",
+    ),
     "--moo-ring": ("$moo-ring", "$moo-ring-dark"),
     "--moo-destructive": ("$moo-destructive", "$moo-destructive-dark"),
     "--moo-destructive-foreground": (

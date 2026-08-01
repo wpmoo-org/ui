@@ -12,9 +12,9 @@ $input-placeholder-color: var(--bs-tertiary-color) !default;
 $input-focus-bg: transparent !default;
 // Bootstrap leaves disabled text-control foregrounds null by default
 // (vendor/bootstrap/scss/_variables.scss), which lets real values inherit the
-// normal input color. Use the same muted foreground as placeholders for all
-// disabled form-control and form-select states.
-$input-disabled-color: var(--bs-tertiary-color) !default;
+// normal input color. Use Moo's disabled foreground token so disabled values
+// stay quieter than ordinary secondary text across form-control and form-select.
+$input-disabled-color: var(--moo-disabled-foreground) !default;
 $form-select-disabled-color: $input-disabled-color !default;
 // Disabled controls need the whole affordance to fade, including native select
 // arrows and Moo-owned trailing icons, so opacity is a shared state token.

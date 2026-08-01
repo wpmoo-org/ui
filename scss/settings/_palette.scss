@@ -55,3 +55,9 @@ $body-tertiary-bg-dark: #202024 !default;
 $code-color-dark: #e685b5 !default;
 $mark-bg-dark: #664d03 !default;
 $border-color-translucent-dark: rgba(250, 250, 250, 0.15) !default;
+
+// Disabled foregrounds need to read quieter than secondary prose and icons.
+// Bootstrap's tertiary color is the closest native semantic for that state,
+// so expose it through a Moo token for components without a Bootstrap knob.
+$moo-disabled-foreground: $body-tertiary-color !default;
+$moo-disabled-foreground-dark: $body-tertiary-color-dark !default;

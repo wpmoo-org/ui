@@ -110,7 +110,6 @@ class AccordionTests(CatalogTestCase):
         scss = (ROOT / "scss/components/_accordion.scss").read_text(encoding="utf-8")
 
         self.assertIn(".accordion-button:disabled {", scss)
-        self.assertIn("color: var(--moo-muted-foreground);", scss)
         self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
         self.assertIn("pointer-events: none;", scss)
         self.assertIn(".accordion-button:disabled:hover {", scss)

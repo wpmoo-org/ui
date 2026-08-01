@@ -106,6 +106,24 @@ class DropdownMenuTests(CatalogTestCase):
             output,
         )
 
+    def test_dropdown_disabled_items_use_disabled_foreground_token(self) -> None:
+        styles = (ROOT / "scss/components/_dropdown.scss").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "--bs-dropdown-link-disabled-color: var(--moo-disabled-foreground);",
+            styles,
+        )
+
+    def test_dropdown_dividers_reach_menu_edges_with_bootstrap_tokens(self) -> None:
+        styles = (ROOT / "scss/components/_dropdown.scss").read_text(encoding="utf-8")
+
+        self.assertIn(".dropdown-menu .dropdown-divider", styles)
+        self.assertIn("margin-inline: calc(-1 * var(--bs-dropdown-padding-x));", styles)
+        self.assertIn(
+            "border-block-start: var(--bs-border-width) solid var(--bs-dropdown-divider-bg);",
+            styles,
+        )
+
     def test_dropdown_item_keeps_positional_state_compatibility(self) -> None:
         output = self.render_template(
             '{% from "components/dropdown_menu.html.jinja" import dropdown_item %}'
