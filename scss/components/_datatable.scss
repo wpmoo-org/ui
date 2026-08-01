@@ -17,8 +17,22 @@
   table-layout: fixed;
 }
 
-.datatable--responsive-scroll .datatable-table {
+.datatable--responsive-scroll .datatable-table,
+.datatable--responsive-toggle .datatable-table {
   min-width: var(--moo-datatable-min-width);
+}
+
+// Toggle mode renders both the table and the card list at once (unlike
+// cards mode, which swaps them by breakpoint) so a person, not a viewport,
+// can choose the layout the way Odoo's List/Kanban switcher works. Visibility
+// follows the root's own data-datatable-view state instead of a d-*-none
+// utility.
+.datatable--responsive-toggle[data-datatable-view="table"] .datatable-cards {
+  display: none;
+}
+
+.datatable--responsive-toggle[data-datatable-view="cards"] .datatable-frame {
+  display: none;
 }
 
 // Bootstrap's .table has no bordered/rounded container variant of its own
@@ -111,13 +125,21 @@
   display: inline-flex;
 }
 
+// A card view is a grid, not a stack: on md/lg/tablet-and-wider screens a
+// single edge-to-edge card reads as an oversized table row, not a card.
+// auto-fill + a minimum card width wraps into as many columns as the
+// viewport allows and falls back to one column once it can't.
 .datatable-cards {
+  --moo-datatable-card-min-width: #{$moo-datatable-card-min-width};
+
   display: grid;
   gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(var(--moo-datatable-card-min-width), 1fr));
 }
 
 .datatable-card-select-all {
   display: flex;
+  grid-column: 1 / -1;
   align-items: center;
   gap: 0.75rem;
   padding: 0 0.125rem;

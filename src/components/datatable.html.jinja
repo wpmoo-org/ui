@@ -132,25 +132,26 @@
   {% if not columns %}{{ fail("Data Table columns are required") }}{% endif %}
   {% if not rows %}{{ fail("Data Table rows are required") }}{% endif %}
   {% if default_page_size not in page_sizes %}{{ fail("Data Table default_page_size must be one of page_sizes") }}{% endif %}
-  {% if responsive_mode not in ["scroll", "cards"] %}{{ fail("Data Table responsive_mode must be 'scroll' or 'cards'") }}{% endif %}
+  {% if responsive_mode not in ["scroll", "cards", "toggle"] %}{{ fail("Data Table responsive_mode must be 'scroll', 'cards', or 'toggle'") }}{% endif %}
   {% if responsive_breakpoint not in ["sm", "md", "lg", "xl", "xxl"] %}{{ fail("Data Table responsive_breakpoint must be a Bootstrap breakpoint") }}{% endif %}
   {% set table_id = id ~ "-table" %}
-  {% set responsive_cards_enabled = responsive_mode == "cards" %}
+  {% set responsive_cards_enabled = responsive_mode in ["cards", "toggle"] %}
   {% set root_class = "datatable datatable--responsive-" ~ responsive_mode %}
   {% if responsive_cards_enabled %}{% set root_class = root_class ~ " datatable--responsive-cards-active" %}{% endif %}
   {% if extra_class %}{% set root_class = root_class ~ " " ~ extra_class %}{% endif %}
   {% set table_responsive_class = "table-responsive" %}
-  {% if responsive_mode == "scroll" %}{% set table_responsive_class = table_responsive_class ~ " scroll-fade-x" %}{% endif %}
+  {% if responsive_mode in ["scroll", "toggle"] %}{% set table_responsive_class = table_responsive_class ~ " scroll-fade-x" %}{% endif %}
   {% set frame_class = "datatable-frame" %}
-  {% if responsive_cards_enabled %}{% set frame_class = frame_class ~ " d-none d-" ~ responsive_breakpoint ~ "-block" %}{% endif %}
-  {% set cards_class = "datatable-cards d-" ~ responsive_breakpoint ~ "-none" %}
+  {% if responsive_mode == "cards" %}{% set frame_class = frame_class ~ " d-none d-" ~ responsive_breakpoint ~ "-block" %}{% endif %}
+  {% set cards_class = "datatable-cards" %}
+  {% if responsive_mode == "cards" %}{% set cards_class = cards_class ~ " d-" ~ responsive_breakpoint ~ "-none" %}{% endif %}
   {% set card_columns = namespace(title=none, code=none, actions=none) %}
   {% for column in columns %}
     {% if column.card_role | default("") == "title" %}{% set card_columns.title = column %}{% endif %}
     {% if column.card_role | default("") == "code" %}{% set card_columns.code = column %}{% endif %}
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
-  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}">
+  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
     <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-3" data-datatable-toolbar>
       <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
       {% for facet in facets %}
@@ -160,7 +161,20 @@
         Reset
         {{ render_icon("x", "inline-end") }}
       </button>
-      <div class="dropdown datatable-view ms-auto">
+      <div class="d-flex align-items-center gap-2 ms-auto">
+      {% if responsive_mode == "toggle" %}
+        <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
+          <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-table" value="table" autocomplete="off" checked>
+          <label class="btn btn-outline-secondary btn-icon-sm" for="{{ id }}-view-table" aria-label="Table view">
+            {{ render_icon("table", "inline-start") }}
+          </label>
+          <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-cards" value="cards" autocomplete="off">
+          <label class="btn btn-outline-secondary btn-icon-sm" for="{{ id }}-view-cards" aria-label="Card view">
+            {{ render_icon("layout-grid", "inline-start") }}
+          </label>
+        </div>
+      {% endif %}
+      <div class="dropdown datatable-view">
         <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
           {{ render_icon("sliders-horizontal", "inline-start") }}
           <span>View</span>
@@ -173,6 +187,7 @@
             {% endif %}
           {% endfor %}
         {% endcall %}
+      </div>
       </div>
     </div>
     <div class="{{ frame_class }}">

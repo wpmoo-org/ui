@@ -29,7 +29,7 @@
     {{ render_block_example(
       "release-review-queue",
       "Release review queue",
-      "A shadcn-admin-inspired work queue with original release-review content. Switch the preview between the full table and a responsive card mode without changing the desktop layout.",
+      "A shadcn-admin-inspired work queue with original release-review content. Switch the preview between the full table, a responsive card mode, and a reader-controlled toggle without changing the desktop layout.",
       release_review_table,
       preview_class="moo-example__preview--shell",
       frame_src=site_href("blocks/previews/datatable-release-review.html", root_path),
@@ -44,6 +44,10 @@
         {
           "label": "Responsive",
           "src": site_href("blocks/previews/datatable-release-review-responsive.html", root_path)
+        },
+        {
+          "label": "User toggle",
+          "src": site_href("blocks/previews/datatable-release-review-toggle.html", root_path)
         }
       ],
       frame_viewports=[
@@ -57,17 +61,20 @@
     <p class="mb-4">
       Use the full table when comparison across columns matters. Use responsive
       cards when the same data should stay readable on tablet and mobile
-      without squeezing every column into one narrow row.
+      without squeezing every column into one narrow row. Use the user toggle
+      when the layout should be the reader's own choice instead of a
+      breakpoint the developer picked, the way Odoo's List/Kanban switcher works.
     </p>
 
     {% set responsive_mode_rows = [
       ["Scroll", "Default. Keeps every column in the table and adds a horizontal scroll fade to Bootstrap's <code>.table-responsive</code> viewport."],
-      ["Cards", "Opt-in. Keeps the desktop table unchanged, then renders each paginated row as a mobile card with a primary header and compact label/value metadata below the configured Bootstrap breakpoint."]
+      ["Cards", "Opt-in. Keeps the desktop table unchanged, then renders each paginated row as a mobile card with a primary header and compact label/value metadata below the configured Bootstrap breakpoint."],
+      ["Toggle", "Opt-in. Renders both the table and the card list at once and adds a Table/Cards toggle to the toolbar so the reader picks, independent of viewport. The choice persists per table id in <code>localStorage</code>."]
     ] %}
     {{ table(
       ["Mode", "Behavior"],
       responsive_mode_rows,
-      row_ids=["responsive-scroll", "responsive-cards"],
+      row_ids=["responsive-scroll", "responsive-cards", "responsive-toggle"],
       row_header=true,
       extra_class="align-middle mb-4"
     ) }}
@@ -111,18 +118,19 @@
       ["<code>.datatable-frame</code>", "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."],
       ["<code>responsive_mode=\"scroll\"</code>", "Keeps all columns in the table and adds <code>.scroll-fade-x</code> to the horizontal viewport."],
       ["<code>responsive_mode=\"cards\"</code>", "Hides the table below the configured breakpoint and shows each row as a card. Columns can opt into <code>card_role=\"title\"</code>, <code>code</code>, or <code>actions</code> for the card header."],
+      ["<code>responsive_mode=\"toggle\"</code>", "Renders the table and the cards together and adds a <code>.datatable-view-toggle</code> Table/Cards control so the reader, not the breakpoint, picks the layout."],
       ["<code>[data-datatable-cards]</code>", "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."],
       ["<code>th[data-datatable-column]</code>", "Column ownership hook used by sorting, hiding, and cell updates."],
       ["<code>tr[data-datatable-row]</code>", "Server-rendered row with search text, facet values, and stable id."],
       ["<code>[data-datatable-select-row]</code>", "Native checkbox for row selection."],
       ["<code>td[data-datatable-sort-value]</code>", "Optional sort value that avoids parsing rich cell content."],
       ["<code>[data-datatable-bulk-actions]</code>", "Fixed selection toolbar shown after at least one row is selected."],
-      ["<code>[data-datatable-pagination]</code>", "Pagination region that owns page size, page status, and page navigation controls."]
+      ["<code>[data-datatable-pagination]</code>", "Pagination region that owns page size and page navigation controls."]
     ] %}
     {{ table(
       ["Selector", "Purpose"],
       anatomy_rows,
-      row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "cards", "column", "row", "select-row", "sort-value", "bulk-actions", "pagination"],
+      row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "responsive-toggle", "cards", "column", "row", "select-row", "sort-value", "bulk-actions", "pagination"],
       row_header=true,
       extra_class="align-middle mb-5"
     ) }}
@@ -200,6 +208,7 @@
       ["Sortable columns", "Mark sortable headers with <code>data-datatable-sort-key</code> and give cells stable <code>data-datatable-sort-value</code> values when rich markup is used."],
       ["Column visibility", "Keep hideable columns in the View dropdown. Columns with <code>hideable=false</code>, such as row actions, stay fixed."],
       ["Responsive cards", "Set <code>responsive_mode=\"cards\"</code> to keep the desktop table unchanged and render mobile/tablet rows as cards with title/code/actions in the header and secondary fields below."],
+      ["Reader-controlled layout", "Set <code>responsive_mode=\"toggle\"</code> to render the table and cards together with a Table/Cards toggle; the reader's choice persists per table id in <code>localStorage</code>, independent of viewport."],
       ["Row selection", "Render native row checkboxes with stable row ids. The bulk bar appears when one or more row ids are selected."],
       ["Bulk actions", "Use button or dropdown actions with <code>data-datatable-bulk-action</code> or <code>data-datatable-bulk-update</code>."],
       ["Pagination", "Set the default page size on the root and let the footer controls move through the filtered row set."]
@@ -207,7 +216,7 @@
     {{ table(
       ["Feature", "How to activate it"],
       feature_rows,
-      row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-selection", "feature-bulk", "feature-pagination"],
+      row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-toggle", "feature-selection", "feature-bulk", "feature-pagination"],
       row_header=true,
       extra_class="align-middle mb-0"
     ) }}

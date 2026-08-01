@@ -59,6 +59,7 @@ export default class DataTable {
     this._bindEvents();
     this._render();
     this._initBulkTooltips();
+    this._initViewToggle();
   }
 
   dispose() {
@@ -105,6 +106,43 @@ export default class DataTable {
     }
     this._element.querySelectorAll("[data-datatable-bulk-actions] [data-bs-title]").forEach((trigger) => {
       this._tooltips.push(Tooltip.getOrCreateInstance(trigger, { animation: false }));
+    });
+  }
+
+  // responsive_mode="toggle" renders both the table and the card list and
+  // lets the reader pick between them (Odoo's List/Kanban switcher, not a
+  // developer-chosen breakpoint), so the choice belongs to the reader across
+  // visits, not just the current render.
+  _initViewToggle() {
+    const toggle = this._element.querySelector(".datatable-view-toggle");
+    if (!toggle) {
+      return;
+    }
+    const inputs = Array.from(toggle.querySelectorAll("input"));
+    const storageKey = `moo-datatable-view:${this._element.id}`;
+    let stored = null;
+    try {
+      stored = this._window.localStorage.getItem(storageKey);
+    } catch {
+      stored = null;
+    }
+    if (stored === "table" || stored === "cards") {
+      this._element.dataset.datatableView = stored;
+      inputs.forEach((input) => {
+        input.checked = input.value === stored;
+      });
+    }
+    this._listen(toggle, "change", (event) => {
+      const value = event.target.value;
+      if (value !== "table" && value !== "cards") {
+        return;
+      }
+      this._element.dataset.datatableView = value;
+      try {
+        this._window.localStorage.setItem(storageKey, value);
+      } catch {
+        // Storage may be unavailable (private browsing); the toggle still works for this session.
+      }
     });
   }
 
