@@ -1,0 +1,227 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/datatable_release_review.html.jinja" import render_release_review_table %}
+{% from "components/table.html.jinja" import table %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Data Table - Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Data Table",
+    "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
+  ) }}
+
+  <div class="moo-component-examples">
+    <h2 id="usage" class="h4 mb-3">Usage</h2>
+    <p class="mb-4">
+      Data Table composes Bootstrap table markup with Moo's ready Checkbox,
+      Dropdown Menu, Button, Badge, Tooltip, and Pagination contracts. Every row
+      is rendered by the server first; the optional Moo runtime only reorders,
+      filters, paginates, or hides existing markup in the browser.
+    </p>
+
+    {% set release_review_table %}
+      {{ render_release_review_table(id="datatable-release-reviews") }}
+    {% endset %}
+    {{ render_block_example(
+      "release-review-queue",
+      "Release review queue",
+      "A shadcn-admin-inspired work queue with original release-review content. Switch the preview between the full table and a responsive card mode without changing the desktop layout.",
+      release_review_table,
+      preview_class="moo-example__preview--shell",
+      frame_src=site_href("blocks/previews/datatable-release-review.html", root_path),
+      frame_width=1440,
+      frame_height=900,
+      frame_variants=[
+        {
+          "label": "Full width",
+          "src": site_href("blocks/previews/datatable-release-review.html", root_path),
+          "active": true
+        },
+        {
+          "label": "Responsive",
+          "src": site_href("blocks/previews/datatable-release-review-responsive.html", root_path)
+        }
+      ],
+      frame_viewports=[
+        {"label": "Mobile", "icon": "smartphone", "width": 390, "height": 900},
+        {"label": "Tablet", "icon": "tablet", "width": 768, "height": 900},
+        {"label": "Desktop", "icon": "monitor", "width": 1440, "height": 900, "active": true}
+      ]
+    ) }}
+
+    <h2 id="responsive-modes" class="h4 mt-5 mb-3">Responsive modes</h2>
+    <p class="mb-4">
+      Use the full table when comparison across columns matters. Use responsive
+      cards when the same data should stay readable on tablet and mobile
+      without squeezing every column into one narrow row.
+    </p>
+
+    {% set responsive_mode_rows = [
+      ["Scroll", "Default. Keeps every column in the table and adds a horizontal scroll fade to Bootstrap's <code>.table-responsive</code> viewport."],
+      ["Cards", "Opt-in. Keeps the desktop table unchanged, then renders each paginated row as a mobile card with a primary header and compact label/value metadata below the configured Bootstrap breakpoint."]
+    ] %}
+    {{ table(
+      ["Mode", "Behavior"],
+      responsive_mode_rows,
+      row_ids=["responsive-scroll", "responsive-cards"],
+      row_header=true,
+      extra_class="align-middle mb-4"
+    ) }}
+
+    <h2 id="composition" class="h4 mt-5 mb-3">Composition</h2>
+    <p class="mb-4">
+      The table surface is intentionally built from smaller public contracts.
+      Facets and row actions are Dropdown Menu, selection uses Checkbox, the
+      floating action bar uses Button and Tooltip, status chips use Badge, and
+      the footer uses Bootstrap pagination markup.
+    </p>
+
+    {% set composition_rows = [
+      ["Search", "A Bootstrap <code>.form-control</code> search input filters rows by their server-rendered search text."],
+      ["Facets", "Dropdown Menu buttons toggle values stored on each row with <code>data-datatable-facet-*</code> attributes."],
+      ["Sorting", "Column headers expose <code>aria-sort</code>, neutral icons, and active asc/desc icons."],
+      ["Visibility", "The View dropdown toggles hideable columns without removing their data from the DOM."],
+      ["Selection", "Native checkboxes keep row and page selection state; the bulk bar appears only when rows are selected."],
+      ["Pagination", "Bootstrap pagination buttons move through the current filtered row set."]
+    ] %}
+    {{ table(
+      ["Feature", "Contract"],
+      composition_rows,
+      row_ids=["search", "facets", "sorting", "visibility", "selection", "pagination"],
+      row_header=true,
+      extra_class="align-middle mb-5"
+    ) }}
+
+    <h2 id="html-anatomy" class="h4 mt-5 mb-3">HTML Anatomy</h2>
+    <p class="mb-4">
+      These hooks describe the rendered public HTML. They are safe for
+      server-rendered apps to generate directly or through their own template
+      helpers.
+    </p>
+
+    {% set anatomy_rows = [
+      ["<code>.datatable</code>", "Root element for one interactive table instance and its page-size default."],
+      ["<code>[data-datatable-toolbar]</code>", "Search, facets, reset action, and column visibility controls."],
+      ["<code>[data-datatable-search]</code>", "Search input that filters against each row's server-rendered search string."],
+      ["<code>[data-datatable-facet]</code>", "Facet dropdown root that groups multi-select filter options by key."],
+      ["<code>.datatable-frame</code>", "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."],
+      ["<code>responsive_mode=\"scroll\"</code>", "Keeps all columns in the table and adds <code>.scroll-fade-x</code> to the horizontal viewport."],
+      ["<code>responsive_mode=\"cards\"</code>", "Hides the table below the configured breakpoint and shows each row as a card. Columns can opt into <code>card_role=\"title\"</code>, <code>code</code>, or <code>actions</code> for the card header."],
+      ["<code>[data-datatable-cards]</code>", "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."],
+      ["<code>th[data-datatable-column]</code>", "Column ownership hook used by sorting, hiding, and cell updates."],
+      ["<code>tr[data-datatable-row]</code>", "Server-rendered row with search text, facet values, and stable id."],
+      ["<code>[data-datatable-select-row]</code>", "Native checkbox for row selection."],
+      ["<code>td[data-datatable-sort-value]</code>", "Optional sort value that avoids parsing rich cell content."],
+      ["<code>[data-datatable-bulk-actions]</code>", "Fixed selection toolbar shown after at least one row is selected."],
+      ["<code>[data-datatable-pagination]</code>", "Pagination region that owns page size, page status, and page navigation controls."]
+    ] %}
+    {{ table(
+      ["Selector", "Purpose"],
+      anatomy_rows,
+      row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "cards", "column", "row", "select-row", "sort-value", "bulk-actions", "pagination"],
+      row_header=true,
+      extra_class="align-middle mb-5"
+    ) }}
+
+    {% set markup_example %}
+    <div class="datatable" data-datatable-page-size="10">
+      <div class="datatable-toolbar">
+        <input class="form-control form-control-sm datatable-search" type="search" data-datatable-search>
+      </div>
+
+      <div class="datatable-frame">
+        <div class="table-responsive">
+          <table class="table datatable-table">
+            <thead>
+              <tr>
+                <th scope="col" data-datatable-column="item" aria-sort="ascending">
+                  <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" data-datatable-sort-key="item">
+                    Item
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="review-1042" data-datatable-row data-datatable-search="REV-1042 Combobox keyboard pass" data-datatable-facet-status="ready">
+                <td data-datatable-column="item" data-datatable-sort-value="combobox keyboard pass">
+                  Combobox keyboard pass
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endset %}
+    {{ render_code_snippet("datatable-html-anatomy-example", markup_example, "html") }}
+
+    <h2 id="datatable-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
+    <p>
+      Bootstrap ships table styles, not a table behavior plugin. Moo UI owns
+      the optional Data Table module because sorting, free-text filtering,
+      faceted filtering, column visibility, row selection, bulk actions, and
+      pagination do not have a Bootstrap plugin counterpart.
+    </p>
+    <p>
+      Importing the module has no document-wide side effect. Initialize only a
+      <code>.datatable</code> root your application owns; repeated
+      initialization returns the same instance, and <code>dispose()</code>
+      releases listeners and Bootstrap tooltip instances owned by the table.
+    </p>
+
+    {% set datatable_import_example %}
+    import DataTable from "@wpmoo/ui/datatable.js";
+
+    const element = document.querySelector(".datatable");
+
+    if (element) {
+      const table = DataTable.getOrCreateInstance(element);
+
+      // Later, release listeners and tooltip instances.
+      table.dispose();
+    }
+    {% endset %}
+    {{ render_code_snippet("datatable-javascript-import", datatable_import_example, "js") }}
+
+    <h2 id="features" class="h4 mt-5 mb-3">Features</h2>
+    <p class="mb-4">
+      Enable features by rendering the matching public hooks. The runtime reads
+      those hooks from existing HTML instead of fetching data or mounting a
+      client-side table.
+    </p>
+
+    {% set feature_rows = [
+      ["Search", "Render <code>data-datatable-search</code> and put normalized search text on rows with <code>data-datatable-search</code>."],
+      ["Faceted filters", "Pass facet definitions and row facet attributes such as <code>data-datatable-facet-status</code>."],
+      ["Sortable columns", "Mark sortable headers with <code>data-datatable-sort-key</code> and give cells stable <code>data-datatable-sort-value</code> values when rich markup is used."],
+      ["Column visibility", "Keep hideable columns in the View dropdown. Columns with <code>hideable=false</code>, such as row actions, stay fixed."],
+      ["Responsive cards", "Set <code>responsive_mode=\"cards\"</code> to keep the desktop table unchanged and render mobile/tablet rows as cards with title/code/actions in the header and secondary fields below."],
+      ["Row selection", "Render native row checkboxes with stable row ids. The bulk bar appears when one or more row ids are selected."],
+      ["Bulk actions", "Use button or dropdown actions with <code>data-datatable-bulk-action</code> or <code>data-datatable-bulk-update</code>."],
+      ["Pagination", "Set the default page size on the root and let the footer controls move through the filtered row set."]
+    ] %}
+    {{ table(
+      ["Feature", "How to activate it"],
+      feature_rows,
+      row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-selection", "feature-bulk", "feature-pagination"],
+      row_header=true,
+      extra_class="align-middle mb-0"
+    ) }}
+  </div>
+
+  {{ render_reference(
+    "Data Table composes Bootstrap's table, dropdown, form, and pagination markup; for the base table structure see the",
+    "https://getbootstrap.com/docs/5.3/content/tables/",
+    "Bootstrap Tables documentation"
+  ) }}
+  {{ render_reference(
+    "For faceted filters, row actions, and bulk-action menus, see the",
+    "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+    "Bootstrap Dropdown documentation",
+    show_details=false
+  ) }}
+{% endblock %}

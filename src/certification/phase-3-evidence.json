@@ -43,7 +43,7 @@
       ]
     },
     {
-      "slug": "data-table",
+      "slug": "datatable",
       "phase": "3B",
       "tier": 3,
       "status": "backfill-passed",
@@ -54,9 +54,9 @@
         "missing": ["host-conformance"]
       },
       "automatedEvidence": [
-        "tests/test_data_table.py",
+        "tests/test_datatable.py",
         "tests/test_certification_browser.py",
-        "dist/js/data-table.js"
+        "dist/js/datatable.js"
       ],
       "browserCases": [
         "desktop-light-ltr",

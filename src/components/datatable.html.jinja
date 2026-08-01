@@ -1,0 +1,303 @@
+{# Data Table composes Bootstrap's own .table markup with the already-ready
+   Dropdown Menu, Pagination, Select, and Checkbox contracts. Bootstrap ships
+   no table JS plugin at all (verified: no js/src/table.js in the vendored or
+   reference source), so Moo owns 100% of the interactive behavior: sorting,
+   free-text search, faceted multi-select filtering, column visibility,
+   row selection, and client-side pagination in src/js/components/datatable.js.
+   The table stays fully server-rendered first -- every row exists in the DOM
+   at load; the runtime only reorders, hides, or paginates existing rows. No
+   remote data engine, per the Phase 3B non-goals. #}
+
+{% from "components/dropdown_menu.html.jinja" import dropdown_menu, dropdown_item, dropdown_toggle_item, dropdown_header, dropdown_divider %}
+{% from "components/separator.html.jinja" import separator %}
+
+{% macro datatable_bulk_actions(selection_noun, bulk_actions) -%}
+  <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden>
+    <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection (Escape)">
+      {{ render_icon("x", "inline-start") }}
+    </button>
+    {{ separator(orientation="vertical") }}
+    <span class="datatable-bulk-summary small">
+      <span class="badge text-bg-dark rounded-pill" data-datatable-bulk-count>0</span>
+      <span>{{ selection_noun }} selected</span>
+    </span>
+    {% if bulk_actions %}
+      {{ separator(orientation="vertical") }}
+      {% for action in bulk_actions %}
+        {% if not action.key | trim %}{{ fail("Data Table bulk action key is required") }}{% endif %}
+        {% if not action.label | trim %}{{ fail("Data Table bulk action label is required") }}{% endif %}
+        {% if action.options is defined %}
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-icon-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ action.label }}" data-bs-placement="top" data-bs-title="{{ action.label }}">
+              {{ render_icon(action.icon | default("circle"), "inline-start") }}
+            </button>
+            {% call dropdown_menu() %}
+              {% for option in action.options %}
+                {{ dropdown_item(option.label, icon=option.icon | default(""), attrs='data-datatable-bulk-update="' ~ action.key ~ '" data-datatable-bulk-update-value="' ~ option.value ~ '"') }}
+              {% endfor %}
+            {% endcall %}
+          </div>
+        {% else %}
+          <button type="button" class="btn btn-icon-sm{% if action.destructive | default(false) %} btn-danger{% else %} btn-outline-secondary{% endif %}" data-datatable-bulk-action="{{ action.key }}" aria-label="{{ action.label }}" data-bs-placement="top" data-bs-title="{{ action.label }}">
+            {{ render_icon(action.icon | default("circle"), "inline-start") }}
+          </button>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+{%- endmacro %}
+
+{% macro datatable_facet_item(label, icon="", count=none, attrs="") -%}
+  {% if not label | trim %}{{ fail("Data Table facet item label is required") }}{% endif %}
+  <li>
+    <button class="dropdown-item datatable-facet-item" type="button"{% if attrs %} {{ attrs | safe }}{% endif %} aria-pressed="false">
+      <span class="datatable-facet-item__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+      {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
+      <span data-datatable-facet-option-label>{{ label }}</span>
+      {% if count is not none %}<span class="ms-auto small text-body-secondary">{{ count }}</span>{% endif %}
+    </button>
+  </li>
+{%- endmacro %}
+
+{% macro datatable_facet(key, label, options) -%}
+  {% if not key | trim %}{{ fail("Data Table facet key is required") }}{% endif %}
+  {% if not label | trim %}{{ fail("Data Table facet label is required") }}{% endif %}
+  {% if not options %}{{ fail("Data Table facet options are required") }}{% endif %}
+  <div class="dropdown datatable-facet" data-datatable-facet="{{ key }}">
+    <button class="btn btn-sm datatable-facet-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+      {{ render_icon("circle-plus", "inline-start") }}
+      <span>{{ label }}</span>
+      <span class="datatable-facet-summary" data-datatable-facet-summary hidden></span>
+    </button>
+    {% call dropdown_menu(extra_class="datatable-facet-menu") %}
+      {% for option in options %}
+        {{ datatable_facet_item(option.label, icon=option.icon | default(""), count=option.count if option.count is defined else none, attrs='data-datatable-facet-option="' ~ option.value ~ '"') }}
+      {% endfor %}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Clear filters", attrs="data-datatable-facet-clear") }}
+    {% endcall %}
+  </div>
+{%- endmacro %}
+
+{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none") -%}
+  {% set th_class = "datatable-col" %}
+  {% if align %}{% set th_class = th_class ~ " text-" ~ align %}{% endif %}
+  {% set width_attr = ' style="width: ' ~ width ~ ';"' if width else "" %}
+  {% if sortable %}
+    {% set current_sort = sort_state if sort_state in ["asc", "desc"] else "none" %}
+    {% set aria_sort = "ascending" if current_sort == "asc" else "descending" if current_sort == "desc" else "none" %}
+    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}" data-datatable-sort-state="{{ current_sort }}"{% if current_sort != "none" %} data-datatable-initial-sort="{{ current_sort }}" data-datatable-sort-direction="{{ current_sort }}"{% endif %} aria-sort="{{ aria_sort }}"{{ width_attr | safe }}>
+      <div class="dropdown datatable-sort">
+        <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Sort by {{ label }}" data-datatable-sort-key="{{ key }}">
+          <span>{{ label }}</span>
+          <span class="datatable-sort-icon datatable-sort-icon-none" aria-hidden="true">{{ render_icon("chevrons-up-down", "inline-end") }}</span>
+          <span class="datatable-sort-icon datatable-sort-icon-asc" aria-hidden="true">{{ render_icon("arrow-up", "inline-end") }}</span>
+          <span class="datatable-sort-icon datatable-sort-icon-desc" aria-hidden="true">{{ render_icon("arrow-down", "inline-end") }}</span>
+        </button>
+        {% call dropdown_menu() %}
+          {{ dropdown_item("Asc", icon="arrow-up", attrs='data-datatable-sort-action="asc"') }}
+          {{ dropdown_item("Desc", icon="arrow-down", attrs='data-datatable-sort-action="desc"') }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Hide", icon="eye-off", attrs='data-datatable-sort-action="hide"') }}
+        {% endcall %}
+      </div>
+    </th>
+  {% else %}
+    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{{ width_attr | safe }}>
+      {% if label | trim %}
+        {{ label }}
+      {% elif sr_label | trim %}
+        <span class="visually-hidden">{{ sr_label }}</span>
+      {% endif %}
+    </th>
+  {% endif %}
+{%- endmacro %}
+
+{% macro datatable(
+  id,
+  columns,
+  rows,
+  facets=[],
+  search_placeholder="Filter...",
+  page_sizes=[10, 20, 30, 40, 50],
+  default_page_size=10,
+  selectable=true,
+  selection_noun="row(s)",
+  bulk_actions=[],
+  responsive_mode="scroll",
+  responsive_breakpoint="lg",
+  extra_class=""
+) -%}
+  {% if not id | trim %}{{ fail("Data Table id is required") }}{% endif %}
+  {% if not columns %}{{ fail("Data Table columns are required") }}{% endif %}
+  {% if not rows %}{{ fail("Data Table rows are required") }}{% endif %}
+  {% if default_page_size not in page_sizes %}{{ fail("Data Table default_page_size must be one of page_sizes") }}{% endif %}
+  {% if responsive_mode not in ["scroll", "cards"] %}{{ fail("Data Table responsive_mode must be 'scroll' or 'cards'") }}{% endif %}
+  {% if responsive_breakpoint not in ["sm", "md", "lg", "xl", "xxl"] %}{{ fail("Data Table responsive_breakpoint must be a Bootstrap breakpoint") }}{% endif %}
+  {% set table_id = id ~ "-table" %}
+  {% set responsive_cards_enabled = responsive_mode == "cards" %}
+  {% set root_class = "datatable datatable--responsive-" ~ responsive_mode %}
+  {% if responsive_cards_enabled %}{% set root_class = root_class ~ " datatable--responsive-cards-active" %}{% endif %}
+  {% if extra_class %}{% set root_class = root_class ~ " " ~ extra_class %}{% endif %}
+  {% set table_responsive_class = "table-responsive" %}
+  {% if responsive_mode == "scroll" %}{% set table_responsive_class = table_responsive_class ~ " scroll-fade-x" %}{% endif %}
+  {% set frame_class = "datatable-frame" %}
+  {% if responsive_cards_enabled %}{% set frame_class = frame_class ~ " d-none d-" ~ responsive_breakpoint ~ "-block" %}{% endif %}
+  {% set cards_class = "datatable-cards d-" ~ responsive_breakpoint ~ "-none" %}
+  {% set card_columns = namespace(title=none, code=none, actions=none) %}
+  {% for column in columns %}
+    {% if column.card_role | default("") == "title" %}{% set card_columns.title = column %}{% endif %}
+    {% if column.card_role | default("") == "code" %}{% set card_columns.code = column %}{% endif %}
+    {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
+  {% endfor %}
+  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}">
+    <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-3" data-datatable-toolbar>
+      <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
+      {% for facet in facets %}
+        {{ datatable_facet(facet.key, facet.label, facet.options) }}
+      {% endfor %}
+      <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
+        Reset
+        {{ render_icon("x", "inline-end") }}
+      </button>
+      <div class="dropdown datatable-view ms-auto">
+        <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+          {{ render_icon("sliders-horizontal", "inline-start") }}
+          <span>View</span>
+        </button>
+        {% call dropdown_menu(align="end") %}
+          {{ dropdown_header("Toggle columns") }}
+          {% for column in columns %}
+            {% if column.hideable | default(true) %}
+              {{ dropdown_toggle_item(column.label, pressed=true, attrs='data-datatable-column-toggle="' ~ column.key ~ '"') }}
+            {% endif %}
+          {% endfor %}
+        {% endcall %}
+      </div>
+    </div>
+    <div class="{{ frame_class }}">
+    <div class="{{ table_responsive_class }}">
+      <table class="table datatable-table" id="{{ table_id }}">
+        <thead>
+          <tr>
+            {% if selectable %}
+              <th scope="col" class="datatable-col-select">
+                <input class="form-check-input" type="checkbox" aria-label="Select all rows" data-datatable-select-all>
+              </th>
+            {% endif %}
+            {% for column in columns %}
+              {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none")) }}
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr id="{{ row.id }}" data-datatable-row{% if row.search is defined %} data-datatable-search="{{ row.search }}"{% endif %}{% for facet_key, facet_value in (row.facets | default({})).items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}>
+              {% if selectable %}
+                <td class="datatable-col-select">
+                  <input class="form-check-input" type="checkbox" aria-label="Select {{ row.label | default(row.id) }}" data-datatable-select-row>
+                </td>
+              {% endif %}
+              {% for column in columns %}
+                {% set align = column.align | default("") %}
+                {% set td_class = "datatable-col" %}
+                {% if align %}{% set td_class = td_class ~ " text-" ~ align %}{% endif %}
+                <td class="{{ td_class }}" data-datatable-column="{{ column.key }}"{% if row.sort is defined and column.key in row.sort %} data-datatable-sort-value="{{ row.sort[column.key] }}"{% endif %}>{{ row.cells[column.key] | safe }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    </div>
+    {% if responsive_cards_enabled %}
+      <div class="{{ cards_class }}" data-datatable-cards aria-label="Responsive {{ table_id }} cards">
+        {% if selectable %}
+          <label class="datatable-card-select-all">
+            <input class="form-check-input" type="checkbox" aria-label="Select visible {{ selection_noun }}" data-datatable-select-all>
+            <span>Select visible {{ selection_noun }}</span>
+          </label>
+        {% endif %}
+        {% for row in rows %}
+          <article class="datatable-card" data-datatable-card data-datatable-card-for="{{ row.id }}"{% if loop.index > default_page_size %} hidden{% endif %}>
+            <div class="datatable-card-header">
+              {% if selectable %}
+                <div class="datatable-card-select">
+                    <input class="form-check-input" type="checkbox" aria-label="Select {{ row.label | default(row.id) }}" data-datatable-select-row>
+                </div>
+              {% endif %}
+              <div class="datatable-card-heading">
+                {% if row.card is defined and row.card.title is defined %}
+                  <div class="datatable-card-title">{{ row.card.title | safe }}</div>
+                {% elif card_columns.title %}
+                  <div class="datatable-card-title">{{ row.cells[card_columns.title.key] | safe }}</div>
+                {% endif %}
+                {% if row.card is defined and row.card.code is defined %}
+                  <div class="datatable-card-code">{{ row.card.code | safe }}</div>
+                {% elif card_columns.code %}
+                  <div class="datatable-card-code">{{ row.cells[card_columns.code.key] | safe }}</div>
+                {% endif %}
+              </div>
+              {% if row.card is defined and row.card.actions is defined %}
+                <div class="datatable-card-actions">{{ row.card.actions | safe }}</div>
+              {% elif card_columns.actions %}
+                <div class="datatable-card-actions">{{ row.cells[card_columns.actions.key] | safe }}</div>
+              {% endif %}
+            </div>
+            <dl class="datatable-card-list">
+              {% for column in columns %}
+                {% if column.card_role | default("") not in ["title", "code", "actions"] %}
+                  {% set detail_label = column.detail_label | default(column.label | default("")) %}
+                  {% if not detail_label | trim and column.sr_label is defined %}
+                    {% set detail_label = column.sr_label %}
+                  {% endif %}
+                  {% if not detail_label | trim %}
+                    {% set detail_label = column.key | replace("_", " ") | title %}
+                  {% endif %}
+                  {% set value_class = "datatable-card-value" %}
+                  {% if column.align | default("") %}{% set value_class = value_class ~ " text-" ~ column.align %}{% endif %}
+                  <div class="datatable-card-row" data-datatable-detail-column="{{ column.key }}">
+                    <dt>{{ detail_label }}</dt>
+                    <dd class="{{ value_class }}">{{ row.cells[column.key] | safe }}</dd>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </dl>
+          </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="datatable-pagination d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3" data-datatable-pagination>
+      <div class="datatable-pagination-controls d-flex flex-fill flex-wrap align-items-center justify-content-between gap-3">
+        <div class="datatable-page-size d-flex align-items-center gap-2">
+          <select class="form-select form-select-sm" id="{{ id }}-page-size" data-datatable-page-size-select>
+            {% for size in page_sizes %}
+              <option value="{{ size }}"{% if size == default_page_size %} selected{% endif %}>{{ size }}</option>
+            {% endfor %}
+          </select>
+          <label class="small text-body-secondary text-nowrap" for="{{ id }}-page-size">Rows per page</label>
+        </div>
+        <nav aria-label="Table pagination" class="datatable-page-nav">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first>{{ render_icon("chevrons-left", "inline-start") }}</button>
+            </li>
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev>{{ render_icon("chevron-left", "inline-start") }}</button>
+            </li>
+            <template data-datatable-page-numbers></template>
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next>{{ render_icon("chevron-right", "inline-start") }}</button>
+            </li>
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last>{{ render_icon("chevrons-right", "inline-start") }}</button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    {% if selectable %}
+      {{ datatable_bulk_actions(selection_noun, bulk_actions) }}
+    {% endif %}
+  </div>
+{%- endmacro %}

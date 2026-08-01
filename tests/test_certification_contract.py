@@ -28,7 +28,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(inventory_slugs, registry_slugs)
         self.assertEqual(
             {component["slug"] for component in inventory["plannedComponents"]},
-            {"data-table"},
+            {"datatable"},
         )
 
     def test_every_evidence_profile_partitions_all_categories_once(self) -> None:

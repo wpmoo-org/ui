@@ -19,7 +19,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
-    "dist/js/data-table.js",
+    "dist/js/datatable.js",
     "package.json",
 }
 

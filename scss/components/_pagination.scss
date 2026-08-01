@@ -2,10 +2,27 @@
 // SVGs render at an oversized default (~55px), breaking Previous/Next and
 // the ellipsis item. Size and align icons the same way other components
 // with inline icons already constrain their own [data-icon] children.
+//
+// Bootstrap's own padding is asymmetric (more horizontal than vertical), so
+// a single digit or icon renders narrower than it is tall -- a squashed
+// look next to the surrounding icon-only buttons. min-width/min-height (not
+// width/height) square up short content without constraining longer labels
+// like the optional "Previous"/"Next" text. Both are needed, not just
+// width: the 1rem icon glyph is shorter than a text digit's own line-height,
+// so icon-only page-links (Prev/Next/First/Last) would otherwise render a
+// couple pixels shorter than the numbered page-links next to them.
 .page-link {
+  $page-link-square-size: calc(
+    1em * var(--bs-body-line-height, #{$line-height-base}) + var(--bs-pagination-padding-y) * 2 +
+      var(--bs-pagination-border-width) * 2
+  );
+
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: $spacer * 0.25;
+  min-width: $page-link-square-size;
+  min-height: $page-link-square-size;
 }
 
 .page-link [data-icon] {

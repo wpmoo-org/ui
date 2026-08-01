@@ -24,7 +24,7 @@
       "./combobox.js",
       "./sidebar.js",
       "./context-menu.js",
-      "./data-table.js"
+      "./datatable.js"
     ],
     "sass": []
   },

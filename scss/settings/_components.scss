@@ -217,3 +217,12 @@ $moo-field-fieldset-sibling-gap: $moo-field-group-gap !default;
 $moo-field-legend-font-size: 1rem !default;
 $moo-field-legend-margin-bottom: 0.375rem !default;
 $moo-field-separator-opacity: 0.1 !default;
+
+// Bootstrap has no floating/overlay toolbar primitive, so the Data Table
+// bulk-actions bar's hover affordance (the whole bar scaling up slightly,
+// not a per-button state) has no Bootstrap knob to consume. Exposed as a
+// scoped, consumer-overridable knob: set to 1 to turn the effect off, or
+// raise it for a more pronounced zoom.
+$moo-datatable-bulk-actions-hover-scale: 1.02 !default;
+$moo-datatable-min-width: 48rem !default;
+$moo-datatable-release-review-min-width: 64rem !default;

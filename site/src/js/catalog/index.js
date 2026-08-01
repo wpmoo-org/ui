@@ -1,6 +1,6 @@
 import Combobox from "../../../../src/js/components/combobox.js";
 import ContextMenu from "../../../../src/js/components/context-menu.js";
-import DataTable from "../../../../src/js/components/data-table.js";
+import DataTable from "../../../../src/js/components/datatable.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
@@ -43,7 +43,7 @@ export function initCatalog(root = document) {
     disposers.push(() => instance.dispose());
   });
 
-  root.querySelectorAll(".data-table").forEach((element) => {
+  root.querySelectorAll(".datatable").forEach((element) => {
     const instance = DataTable.getOrCreateInstance(element);
     disposers.push(() => instance.dispose());
   });

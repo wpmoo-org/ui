@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Data Table certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 48rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Data Table certification fixture</h1>
+<div class="datatable" id="certification-datatable" data-datatable-page-size="2">
+    <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-3" data-datatable-toolbar>
+      <input class="form-control form-control-sm datatable-search" type="search" placeholder="Filter by subject or ID..." aria-label="Filter by subject or ID..." data-datatable-search>
+          <div class="dropdown datatable-facet" data-datatable-facet="status">
+    <button class="btn btn-sm datatable-facet-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+      <svg
+  data-icon="inline-start"
+  data-lucide="circle-plus"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8m-4-4v8"/></g>
+</svg>
+      <span>Status</span>
+      <span class="datatable-facet-summary" data-datatable-facet-summary hidden></span>
+    </button>
+  <ul class="dropdown-menu datatable-facet-menu">
+    <li>
+    <button class="dropdown-item datatable-facet-item" type="button" data-datatable-facet-option="open" aria-pressed="false">
+      <span class="datatable-facet-item__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+      <span data-datatable-facet-option-label>Open</span>
+<span class="ms-auto small text-body-secondary">2</span>    </button>
+  </li>
+          <li>
+    <button class="dropdown-item datatable-facet-item" type="button" data-datatable-facet-option="resolved" aria-pressed="false">
+      <span class="datatable-facet-item__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+      <span data-datatable-facet-option-label>Resolved</span>
+<span class="ms-auto small text-body-secondary">1</span>    </button>
+  </li>
+      <li><hr class="dropdown-divider"></li>
+          <li>
+      <button class="dropdown-item" type="button" data-datatable-facet-clear>
+        
+        <span>Clear filters</span>
+      </button>
+    </li>
+  </ul>  </div>
+      <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
+        Reset
+        <svg
+  data-icon="inline-end"
+  data-lucide="x"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>
+</svg>
+      </button>
+      <div class="dropdown datatable-view ms-auto">
+        <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+          <svg
+  data-icon="inline-start"
+  data-lucide="sliders-horizontal"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5H3m9 14H3M14 3v4m2 10v4m5-9h-9m9 7h-5m5-14h-7m-6 5v4m0-2H3"/>
+</svg>
+          <span>View</span>
+        </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><h6 class="dropdown-header">Toggle columns</h6></li>
+                <li>
+    <button class="dropdown-item dropdown-item-check active" type="button" data-bs-toggle="button" aria-pressed="true" data-datatable-column-toggle="ticket">
+      <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+      <span>Ticket</span>
+    </button>
+  </li>
+                <li>
+    <button class="dropdown-item dropdown-item-check active" type="button" data-bs-toggle="button" aria-pressed="true" data-datatable-column-toggle="subject">
+      <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+      <span>Subject</span>
+    </button>
+  </li>
+                <li>
+    <button class="dropdown-item dropdown-item-check active" type="button" data-bs-toggle="button" aria-pressed="true" data-datatable-column-toggle="status">
+      <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+      <span>Status</span>
+    </button>
+  </li>
+  </ul>      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table datatable-table" id="certification-datatable-table">
+        <thead>
+          <tr>
+              <th scope="col" class="datatable-col-select">
+                <input class="form-check-input" type="checkbox" aria-label="Select all rows" data-datatable-select-all>
+              </th>
+                  <th scope="col" class="datatable-col" data-datatable-column="ticket" style="width: 7rem;">
+      <div class="dropdown datatable-sort">
+        <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-datatable-sort-key="ticket">
+          <span>Ticket</span>
+          <span class="datatable-sort-icon" aria-hidden="true" data-datatable-sort-icon><svg
+  data-icon="inline-end"
+  data-lucide="chevrons-up-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 15l5 5l5-5M7 9l5-5l5 5"/>
+</svg></span>
+        </button>
+  <ul class="dropdown-menu">
+    <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="asc">
+        <svg
+  data-icon="inline-start"
+  data-lucide="arrow-up"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/>
+</svg>
+        <span>Asc</span>
+      </button>
+    </li>
+
+              <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="desc">
+        <svg
+  data-icon="inline-start"
+  data-lucide="arrow-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7l-7 7l-7-7"/>
+</svg>
+        <span>Desc</span>
+      </button>
+    </li>
+
+          <li><hr class="dropdown-divider"></li>
+              <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="hide">
+        <svg
+  data-icon="inline-start"
+  data-lucide="eye-off"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.8 10.8 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></g>
+</svg>
+        <span>Hide</span>
+      </button>
+    </li>
+  </ul>      </div>
+    </th>
+
+                  <th scope="col" class="datatable-col" data-datatable-column="subject">
+      <div class="dropdown datatable-sort">
+        <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-datatable-sort-key="subject">
+          <span>Subject</span>
+          <span class="datatable-sort-icon" aria-hidden="true" data-datatable-sort-icon><svg
+  data-icon="inline-end"
+  data-lucide="chevrons-up-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 15l5 5l5-5M7 9l5-5l5 5"/>
+</svg></span>
+        </button>
+  <ul class="dropdown-menu">
+    <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="asc">
+        <svg
+  data-icon="inline-start"
+  data-lucide="arrow-up"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/>
+</svg>
+        <span>Asc</span>
+      </button>
+    </li>
+
+              <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="desc">
+        <svg
+  data-icon="inline-start"
+  data-lucide="arrow-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7l-7 7l-7-7"/>
+</svg>
+        <span>Desc</span>
+      </button>
+    </li>
+
+          <li><hr class="dropdown-divider"></li>
+              <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="hide">
+        <svg
+  data-icon="inline-start"
+  data-lucide="eye-off"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.8 10.8 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></g>
+</svg>
+        <span>Hide</span>
+      </button>
+    </li>
+  </ul>      </div>
+    </th>
+
+                  <th scope="col" class="datatable-col" data-datatable-column="status" style="width: 9rem;">
+      <div class="dropdown datatable-sort">
+        <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-datatable-sort-key="status">
+          <span>Status</span>
+          <span class="datatable-sort-icon" aria-hidden="true" data-datatable-sort-icon><svg
+  data-icon="inline-end"
+  data-lucide="chevrons-up-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 15l5 5l5-5M7 9l5-5l5 5"/>
+</svg></span>
+        </button>
+  <ul class="dropdown-menu">
+    <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="asc">
+        <svg
+  data-icon="inline-start"
+  data-lucide="arrow-up"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/>
+</svg>
+        <span>Asc</span>
+      </button>
+    </li>
+
+              <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="desc">
+        <svg
+  data-icon="inline-start"
+  data-lucide="arrow-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7l-7 7l-7-7"/>
+</svg>
+        <span>Desc</span>
+      </button>
+    </li>
+
+          <li><hr class="dropdown-divider"></li>
+              <li>
+      <button class="dropdown-item" type="button" data-datatable-sort-action="hide">
+        <svg
+  data-icon="inline-start"
+  data-lucide="eye-off"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.8 10.8 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></g>
+</svg>
+        <span>Hide</span>
+      </button>
+    </li>
+  </ul>      </div>
+    </th>
+
+                  <th scope="col" class="datatable-col text-end" data-datatable-column="actions" style="width: 4rem;">Actions</th>
+
+          </tr>
+        </thead>
+        <tbody>
+            <tr id="cert-row-1" data-datatable-row data-datatable-search="TCK-1 Login redirect" data-datatable-facet-status="open">
+                <td class="datatable-col-select">
+                  <input class="form-check-input" type="checkbox" aria-label="Select cert-row-1" data-datatable-select-row>
+                </td>
+                <td class="datatable-col" data-datatable-column="ticket" data-datatable-sort-value="TCK-1"><span>TCK-1</span></td>
+                <td class="datatable-col" data-datatable-column="subject" data-datatable-sort-value="login redirect"><span>Login redirect loops</span></td>
+                <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="0"><span>Open</span></td>
+                <td class="datatable-col text-end" data-datatable-column="actions"><span>-</span></td>
+            </tr>
+            <tr id="cert-row-2" data-datatable-row data-datatable-search="TCK-2 Export drops column" data-datatable-facet-status="resolved">
+                <td class="datatable-col-select">
+                  <input class="form-check-input" type="checkbox" aria-label="Select cert-row-2" data-datatable-select-row>
+                </td>
+                <td class="datatable-col" data-datatable-column="ticket" data-datatable-sort-value="TCK-2"><span>TCK-2</span></td>
+                <td class="datatable-col" data-datatable-column="subject" data-datatable-sort-value="export drops column"><span>Export drops a column</span></td>
+                <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="1"><span>Resolved</span></td>
+                <td class="datatable-col text-end" data-datatable-column="actions"><span>-</span></td>
+            </tr>
+            <tr id="cert-row-3" data-datatable-row data-datatable-search="TCK-3 Dashboard misaligned" data-datatable-facet-status="open">
+                <td class="datatable-col-select">
+                  <input class="form-check-input" type="checkbox" aria-label="Select cert-row-3" data-datatable-select-row>
+                </td>
+                <td class="datatable-col" data-datatable-column="ticket" data-datatable-sort-value="TCK-3"><span>TCK-3</span></td>
+                <td class="datatable-col" data-datatable-column="subject" data-datatable-sort-value="dashboard misaligned"><span>Dashboard misaligned</span></td>
+                <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="0"><span>Open</span></td>
+                <td class="datatable-col text-end" data-datatable-column="actions"><span>-</span></td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="datatable-pagination d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3" data-datatable-pagination>
+      <div class="datatable-selection-count small text-body-secondary" data-datatable-selection-count></div>
+      <div class="datatable-pagination-controls d-flex flex-wrap align-items-center gap-4 ms-auto">
+        <div class="datatable-page-size d-flex align-items-center gap-2">
+          <select class="form-select form-select-sm" id="certification-datatable-page-size" data-datatable-page-size-select>
+              <option value="2" selected>2</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+          </select>
+          <label class="small text-body-secondary text-nowrap" for="certification-datatable-page-size">Rows per page</label>
+        </div>
+        <div class="datatable-page-status small text-nowrap" data-datatable-page-status></div>
+        <nav aria-label="Table pagination" class="datatable-page-nav">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first><svg
+  data-icon="inline-start"
+  data-lucide="chevrons-left"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m11 17l-5-5l5-5m7 10l-5-5l5-5"/>
+</svg></button>
+            </li>
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev><svg
+  data-icon="inline-start"
+  data-lucide="chevron-left"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6"/>
+</svg></button>
+            </li>
+            <template data-datatable-page-numbers></template>
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next><svg
+  data-icon="inline-start"
+  data-lucide="chevron-right"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/>
+</svg></button>
+            </li>
+            <li class="page-item">
+              <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last><svg
+  data-icon="inline-start"
+  data-lucide="chevrons-right"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 17l5-5l-5-5m7 10l5-5l-5-5"/>
+</svg></button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+      <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden>
+    <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection (Escape)">
+      <svg
+  data-icon="inline-start"
+  data-lucide="x"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>
+</svg>
+    </button>
+        <div class="vr" aria-hidden="true"></div>
+
+    <span class="datatable-bulk-summary small">
+      <span class="badge text-bg-dark rounded-pill" data-datatable-bulk-count>0</span>
+      <span>tickets selected</span>
+    </span>
+          <div class="vr" aria-hidden="true"></div>
+
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-icon-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Update status" data-bs-placement="top" data-bs-title="Update status">
+              <svg
+  data-icon="inline-start"
+  data-lucide="circle-check-big"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11l3 3L22 4"/></g>
+</svg>
+            </button>
+  <ul class="dropdown-menu">
+    <li>
+      <button class="dropdown-item" type="button" data-datatable-bulk-update="status" data-datatable-bulk-update-value="open">
+        
+        <span>Open</span>
+      </button>
+    </li>
+
+                    <li>
+      <button class="dropdown-item" type="button" data-datatable-bulk-update="status" data-datatable-bulk-update-value="resolved">
+        
+        <span>Resolved</span>
+      </button>
+    </li>
+  </ul>          </div>
+          <button type="button" class="btn btn-icon-sm btn-danger" data-datatable-bulk-action="delete" aria-label="Delete selected tickets" data-bs-placement="top" data-bs-title="Delete selected tickets">
+            <svg
+  data-icon="inline-start"
+  data-lucide="trash-2"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+</svg>
+          </button>
+  </div>
+  </div>
+    </main>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+      import DataTable from "/dist/js/datatable.js";
+
+      const root = document.querySelector("#certification-datatable");
+      window.CertificationDataTable = DataTable;
+      window.certificationDataTable = DataTable.getOrCreateInstance(root);
+      document.body.dataset.datatableReady = "true";
+    </script>
+  </body>
+</html>
