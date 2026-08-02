@@ -84,28 +84,51 @@
     <div class="input-group input-group-sm datatable-searchbar">
       <span class="datatable-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
       <input class="form-control datatable-search{% if filter_mode == "picker" and facets %} datatable-search-with-filter{% endif %}" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
-      {% if filter_mode == "picker" and facets %}
-        <button class="btn btn-ghost datatable-filter-picker-trigger border-0" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-offset="0,8" aria-expanded="false" aria-label="Open filters" data-datatable-filter-menu-trigger>
+    </div>
+    {% if filter_mode == "picker" and facets %}
+      <div class="dropdown datatable-filter-picker">
+        <button class="btn btn-ghost btn-icon-sm datatable-filter-picker-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-offset="0,8" aria-expanded="false" aria-label="Open filters" data-datatable-filter-menu-trigger>
           {{ render_icon("list-filter", "inline-start") }}
         </button>
         {% call dropdown_menu(extra_class="datatable-search-filter-menu", align="end") %}
+          <li class="datatable-filter-panel" data-datatable-filter-panel="facets">
+            <h6 class="dropdown-header">Filter by</h6>
+          </li>
           {% for facet in facets %}
-            {{ dropdown_header(facet.label) }}
+            <li class="datatable-filter-panel" data-datatable-filter-panel="facets">
+              <button class="dropdown-item datatable-filter-group" type="button" data-datatable-filter-group="{{ facet.key }}">
+                <span>{{ facet.label }}</span>
+                <span class="datatable-filter-group-summary small text-body-secondary" data-datatable-filter-group-summary="{{ facet.key }}" hidden></span>
+                {{ render_icon("chevron-right", "inline-end") }}
+              </button>
+            </li>
+          {% endfor %}
+          {% for facet in facets %}
+            <li class="datatable-filter-panel" data-datatable-filter-panel="options" data-datatable-filter-panel-key="{{ facet.key }}" hidden>
+              <button class="dropdown-item datatable-filter-panel-back" type="button" data-datatable-filter-back>
+                {{ render_icon("chevron-left", "inline-start") }}
+                <span>{{ facet.label }}</span>
+              </button>
+            </li>
+            {% if facet.options | length > 7 %}
+              <li class="datatable-filter-panel datatable-filter-option-search-wrap" data-datatable-filter-panel="options" data-datatable-filter-panel-key="{{ facet.key }}" hidden>
+                <input class="form-control form-control-sm datatable-filter-option-search" type="search" placeholder="Search {{ facet.label | lower }}..." aria-label="Search {{ facet.label | lower }}" data-datatable-filter-option-search="{{ facet.key }}">
+              </li>
+            {% endif %}
             {% for option in facet.options %}
-              <li>
+              <li class="datatable-filter-panel" data-datatable-filter-panel="options" data-datatable-filter-panel-key="{{ facet.key }}" hidden>
                 <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-option="{{ option.value }}" data-datatable-filter-option-key="{{ facet.key }}" aria-pressed="false">
                   <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
                   {% if option.icon is defined and option.icon %}{{ render_icon(option.icon, "inline-start") }}{% endif %}
-                  <span>{{ option.label }}</span>
+                  <span data-datatable-filter-option-label>{{ option.label }}</span>
                   {% if option.count is defined %}<span class="ms-auto small text-body-secondary">{{ option.count }}</span>{% endif %}
                 </button>
               </li>
             {% endfor %}
-            {% if not loop.last %}{{ dropdown_divider() }}{% endif %}
           {% endfor %}
         {% endcall %}
-      {% endif %}
-    </div>
+      </div>
+    {% endif %}
   </div>
 {%- endmacro %}
 

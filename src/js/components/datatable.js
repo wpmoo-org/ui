@@ -327,6 +327,12 @@ export default class DataTable {
       option.classList.toggle("active", active);
       option.setAttribute("aria-pressed", active ? "true" : "false");
     });
+
+    this._element.querySelectorAll("[data-datatable-filter-group-summary]").forEach((summary) => {
+      const selected = this._facetSelections.get(summary.dataset.datatableFilterGroupSummary) || new Set();
+      summary.hidden = selected.size === 0;
+      summary.textContent = selected.size > 0 ? `${selected.size} selected` : "";
+    });
   }
 
   _createFacetBadge(text) {
@@ -614,6 +620,42 @@ export default class DataTable {
     this._trigger("filter");
   }
 
+  _showFilterPickerPanel(key = null) {
+    this._element.querySelectorAll("[data-datatable-filter-panel]").forEach((panel) => {
+      const isFacetList = panel.dataset.datatableFilterPanel === "facets";
+      const isRequestedOptions = panel.dataset.datatableFilterPanelKey === key;
+      panel.hidden = key ? !isRequestedOptions : !isFacetList;
+    });
+  }
+
+  _handleFilterPickerClick(event) {
+    const group = event.target.closest("[data-datatable-filter-group]");
+    if (group) {
+      const key = group.dataset.datatableFilterGroup;
+      this._showFilterPickerPanel(key);
+      const search = this._element.querySelector(`[data-datatable-filter-option-search="${key}"]`);
+      const option = this._element.querySelector(`[data-datatable-filter-option-key="${key}"]`);
+      (search || option)?.focus({ preventScroll: true });
+      return;
+    }
+    if (event.target.closest("[data-datatable-filter-back]")) {
+      this._showFilterPickerPanel();
+    }
+  }
+
+  _handleFilterOptionSearch(event) {
+    const search = event.target.closest("[data-datatable-filter-option-search]");
+    if (!search) {
+      return;
+    }
+    const key = search.dataset.datatableFilterOptionSearch;
+    const query = normalize(search.value);
+    this._element.querySelectorAll(`[data-datatable-filter-option-key="${key}"]`).forEach((option) => {
+      const label = normalize(option.querySelector("[data-datatable-filter-option-label]")?.textContent || option.textContent);
+      option.closest("li")?.classList.toggle("datatable-filter-option-search-hidden", query.length > 0 && !label.includes(query));
+    });
+  }
+
   _handleFilterToggleClick(event) {
     const toggle = event.target.closest("[data-datatable-filter-toggle]");
     if (!toggle) {
@@ -670,6 +712,7 @@ export default class DataTable {
       this._window.clearTimeout(this._filterMenuTimer);
     }
     this._filterMenuTimer = this._window.setTimeout(() => {
+      this._showFilterPickerPanel();
       Dropdown.getOrCreateInstance(trigger).show();
       search?.focus({ preventScroll: true });
       this._filterMenuTimer = null;
@@ -833,14 +876,31 @@ export default class DataTable {
     this._listen(search, "input", (event) => {
       this._searchTerm = normalize(event.target.value);
       this._currentPage = 1;
+      this._showSearchFilterMenu(event.currentTarget);
       this._render();
       this._trigger("filter");
     });
     this._listen(search, "focus", (event) => this._showSearchFilterMenu(event.currentTarget));
     this._listen(search, "click", (event) => this._showSearchFilterMenu(event.currentTarget));
+    this._listen(search, "keydown", (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      if (this._filterMenuTimer) {
+        this._window.clearTimeout(this._filterMenuTimer);
+        this._filterMenuTimer = null;
+      }
+      const trigger = this._element.querySelector("[data-datatable-filter-menu-trigger]");
+      const Dropdown = this._bootstrap("Dropdown");
+      if (trigger && Dropdown) {
+        Dropdown.getOrCreateInstance(trigger).hide();
+      }
+    });
 
     this._listen(this._element, "click", (event) => {
       this._handleSortAction(event);
+      this._handleFilterPickerClick(event);
       this._handleFilterOptionClick(event);
       this._handleFilterToggleClick(event);
       this._handleFacetClick(event);
@@ -882,6 +942,13 @@ export default class DataTable {
     });
     this._listen(this._element, "hidden.bs.dropdown", (event) => {
       this._bootstrap("Tooltip")?.getInstance(event.target)?.enable();
+      if (event.target.matches("[data-datatable-filter-menu-trigger]")) {
+        this._showFilterPickerPanel();
+      }
+    });
+
+    this._element.querySelectorAll("[data-datatable-filter-option-search]").forEach((searchInput) => {
+      this._listen(searchInput, "input", (event) => this._handleFilterOptionSearch(event));
     });
 
     const resetButton = this._element.querySelector("[data-datatable-reset]");

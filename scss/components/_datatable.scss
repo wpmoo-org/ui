@@ -94,6 +94,7 @@
 
 .datatable-searchbar {
   position: relative;
+  flex: 1 1 auto;
   flex-wrap: nowrap;
   width: 100%;
 }
@@ -107,8 +108,7 @@
 }
 
 .datatable-searchbar .datatable-search-with-filter {
-  border-start-end-radius: 0;
-  border-end-end-radius: 0;
+  padding-inline-end: 2.5rem;
 }
 
 .datatable-search-icon {
@@ -129,17 +129,30 @@
   height: 0.875rem;
 }
 
+.datatable-filter-picker {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: $spacer * 0.25;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+}
+
 .datatable-filter-picker-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  inline-size: 2rem;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
   padding: 0;
+  border-radius: var(--bs-border-radius-sm);
+  gap: 0;
 }
 
 .datatable-filter-picker-trigger > [data-icon] {
   width: 0.875rem;
   height: 0.875rem;
+  margin: 0;
 }
 
 .datatable-search-filter-menu {
@@ -148,6 +161,33 @@
   max-height: calc(100vh - 8rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.datatable-filter-panel {
+  min-width: 0;
+}
+
+.datatable-filter-group,
+.datatable-filter-panel-back {
+  gap: 0.5rem;
+}
+
+.datatable-filter-group > [data-icon],
+.datatable-filter-panel-back > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.datatable-filter-group-summary {
+  margin-inline-start: auto;
+}
+
+.datatable-filter-option-search-wrap {
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+.datatable-filter-option-search-hidden {
+  display: none;
 }
 
 .datatable-toolbar-filters {
