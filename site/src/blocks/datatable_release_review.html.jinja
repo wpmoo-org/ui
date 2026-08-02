@@ -97,7 +97,7 @@
     {% set _ = review_rows.append({
       "id": "review-" ~ review.id | lower,
       "label": review.id,
-      "card": {"title": review.item, "code": review.id, "actions": review_row_actions(icon="ellipsis-vertical")},
+      "card": {"title": review.item, "actions": review_row_actions(icon="ellipsis-vertical")},
       "search": review.id ~ " " ~ review.item ~ " " ~ review.type ~ " " ~ status.label ~ " " ~ priority.label ~ " " ~ area.label ~ " " ~ review.owner,
       "facets": {"status": review.status, "priority": review.priority},
       "sort": {
@@ -121,7 +121,7 @@
   {{ datatable(
     id,
     columns=[
-      {"key": "id", "label": "Review", "width": "7rem", "card_role": "code"},
+      {"key": "id", "label": "Review", "width": "7rem"},
       {"key": "item", "label": "Item", "initial_sort": "asc", "card_role": "title"},
       {"key": "status", "label": "Status", "width": "10rem"},
       {"key": "priority", "label": "Priority", "width": "9rem"},

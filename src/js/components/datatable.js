@@ -114,12 +114,25 @@ export default class DataTable {
   // developer-chosen breakpoint), so the choice belongs to the reader across
   // visits, not just the current render.
   _initViewToggle() {
-    const toggle = this._element.querySelector(".datatable-view-toggle");
-    if (!toggle) {
+    const toggles = Array.from(this._element.querySelectorAll(".datatable-view-toggle"));
+    if (!toggles.length) {
       return;
     }
-    const inputs = Array.from(toggle.querySelectorAll("input"));
+    const inputs = toggles.flatMap((toggle) => Array.from(toggle.querySelectorAll("input")));
     const storageKey = `moo-datatable-view:${this._element.id}`;
+    const setView = (value, { persist = false } = {}) => {
+      this._element.dataset.datatableView = value;
+      inputs.forEach((input) => {
+        input.checked = input.value === value;
+      });
+      if (persist) {
+        try {
+          this._window.localStorage.setItem(storageKey, value);
+        } catch {
+          // Storage may be unavailable (private browsing); the toggle still works for this session.
+        }
+      }
+    };
     let stored = null;
     try {
       stored = this._window.localStorage.getItem(storageKey);
@@ -127,22 +140,16 @@ export default class DataTable {
       stored = null;
     }
     if (stored === "table" || stored === "cards") {
-      this._element.dataset.datatableView = stored;
-      inputs.forEach((input) => {
-        input.checked = input.value === stored;
-      });
+      setView(stored);
     }
-    this._listen(toggle, "change", (event) => {
-      const value = event.target.value;
-      if (value !== "table" && value !== "cards") {
-        return;
-      }
-      this._element.dataset.datatableView = value;
-      try {
-        this._window.localStorage.setItem(storageKey, value);
-      } catch {
-        // Storage may be unavailable (private browsing); the toggle still works for this session.
-      }
+    toggles.forEach((toggle) => {
+      this._listen(toggle, "change", (event) => {
+        const value = event.target.value;
+        if (value !== "table" && value !== "cards") {
+          return;
+        }
+        setView(value, { persist: true });
+      });
     });
   }
 
@@ -462,11 +469,10 @@ export default class DataTable {
       cell.classList.toggle("datatable-col-hidden", !visible);
     });
     if (syncViewToggle) {
-      const toggle = this._element.querySelector(`[data-datatable-column-toggle="${key}"]`);
-      if (toggle) {
+      this._element.querySelectorAll(`[data-datatable-column-toggle="${key}"]`).forEach((toggle) => {
         toggle.classList.toggle("active", visible);
         toggle.setAttribute("aria-pressed", String(visible));
-      }
+      });
     }
   }
 
