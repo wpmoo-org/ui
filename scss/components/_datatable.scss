@@ -81,13 +81,50 @@
   max-width: 16rem;
 }
 
+.datatable-toolbar-query {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 18rem;
+  max-width: 100%;
+}
+
 .datatable-toolbar-search {
-  flex: 1 1 16rem;
+  position: relative;
+  flex: 0 1 16rem;
   min-width: 16rem;
+}
+
+.datatable-toolbar-query .datatable-toolbar-search {
+  min-width: 0;
 }
 
 .datatable-toolbar-search .datatable-search {
   width: 100%;
+  padding-inline-start: 2rem;
+}
+
+.datatable-search-icon {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.625rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.datatable-search-icon > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.datatable-filter-picker {
+  flex: 0 0 auto;
 }
 
 .datatable-toolbar-filters {
@@ -547,6 +584,15 @@
   .datatable-toolbar-search {
     grid-column: 1 / -1;
     min-width: 0;
+  }
+
+  .datatable-toolbar-query {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .datatable-toolbar-query .datatable-toolbar-search {
+    flex: 1 1 auto;
   }
 
   .datatable-toolbar-search .datatable-search {

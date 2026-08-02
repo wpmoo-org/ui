@@ -59,11 +59,11 @@
   </li>
 {%- endmacro %}
 
-{% macro datatable_facet(key, label, options) -%}
+{% macro datatable_facet(key, label, options, hidden=false) -%}
   {% if not key | trim %}{{ fail("Data Table facet key is required") }}{% endif %}
   {% if not label | trim %}{{ fail("Data Table facet label is required") }}{% endif %}
   {% if not options %}{{ fail("Data Table facet options are required") }}{% endif %}
-  <div class="dropdown datatable-facet" data-datatable-facet="{{ key }}">
+  <div class="dropdown datatable-facet" data-datatable-facet="{{ key }}"{% if hidden %} hidden{% endif %}>
     <button class="btn btn-sm datatable-facet-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
       {{ render_icon("circle-plus", "inline-start") }}
       <span>{{ label }}</span>
@@ -75,6 +75,25 @@
       {% endfor %}
       {{ dropdown_divider() }}
       {{ dropdown_item("Clear filters", attrs="data-datatable-facet-clear") }}
+    {% endcall %}
+  </div>
+{%- endmacro %}
+
+{% macro datatable_filter_picker(facets) -%}
+  <div class="dropdown datatable-filter-picker">
+    <button class="btn btn-sm datatable-facet-trigger datatable-filter-picker-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+      {{ render_icon("list-filter", "inline-start") }}
+      <span>Filter</span>
+    </button>
+    {% call dropdown_menu(extra_class="datatable-filter-picker-menu") %}
+      {% for facet in facets %}
+        <li>
+          <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-toggle="{{ facet.key }}" aria-pressed="false">
+            <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+            <span>{{ facet.label }}</span>
+          </button>
+        </li>
+      {% endfor %}
     {% endcall %}
   </div>
 {%- endmacro %}
@@ -169,6 +188,7 @@
   selectable=true,
   selection_noun="row(s)",
   bulk_actions=[],
+  filter_mode="inline",
   responsive_mode="scroll",
   responsive_breakpoint="lg",
   extra_class=""
@@ -177,6 +197,7 @@
   {% if not columns %}{{ fail("Data Table columns are required") }}{% endif %}
   {% if not rows %}{{ fail("Data Table rows are required") }}{% endif %}
   {% if default_page_size not in page_sizes %}{{ fail("Data Table default_page_size must be one of page_sizes") }}{% endif %}
+  {% if filter_mode not in ["inline", "picker"] %}{{ fail("Data Table filter_mode must be 'inline' or 'picker'") }}{% endif %}
   {% if responsive_mode not in ["scroll", "cards", "toggle"] %}{{ fail("Data Table responsive_mode must be 'scroll', 'cards', or 'toggle'") }}{% endif %}
   {% if responsive_breakpoint not in ["sm", "md", "lg", "xl", "xxl"] %}{{ fail("Data Table responsive_breakpoint must be a Bootstrap breakpoint") }}{% endif %}
   {% set table_id = id ~ "-table" %}
@@ -198,12 +219,18 @@
   {% endfor %}
   <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
     <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-2" data-datatable-toolbar>
-      <div class="datatable-toolbar-search">
-        <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
+      <div class="datatable-toolbar-query">
+        <div class="datatable-toolbar-search">
+          <span class="datatable-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
+          <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
+        </div>
+        {% if filter_mode == "picker" and facets %}
+          {{ datatable_filter_picker(facets) }}
+        {% endif %}
       </div>
       <div class="datatable-toolbar-filters" role="group" aria-label="Table filters">
         {% for facet in facets %}
-          {{ datatable_facet(facet.key, facet.label, facet.options) }}
+          {{ datatable_facet(facet.key, facet.label, facet.options, hidden=(filter_mode == "picker")) }}
         {% endfor %}
         <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
           Reset

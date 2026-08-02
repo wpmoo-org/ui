@@ -43,6 +43,7 @@ export default class DataTable {
     this._sortDirection = null;
     this._selectedIds = new Set();
     this._facetSelections = new Map();
+    this._visibleFacets = new Map();
     this._searchTerm = "";
     this._tooltips = [];
 
@@ -53,6 +54,7 @@ export default class DataTable {
       search: normalize(tr.dataset.datatableSearch),
       facets: this._readFacets(tr),
     }));
+    this._readInitialFacetVisibility();
     this._readInitialSort();
 
     instances.set(element, this);
@@ -164,6 +166,15 @@ export default class DataTable {
     return facets;
   }
 
+  _readInitialFacetVisibility() {
+    this._element.querySelectorAll("[data-datatable-facet]").forEach((facetRoot) => {
+      const key = facetRoot.dataset.datatableFacet;
+      if (key) {
+        this._visibleFacets.set(key, !facetRoot.hidden);
+      }
+    });
+  }
+
   _readInitialSort() {
     const th = this._element.querySelector("th[data-datatable-initial-sort][data-datatable-column]");
     const direction = th?.dataset.datatableInitialSort;
@@ -270,6 +281,9 @@ export default class DataTable {
     this._element.querySelectorAll("[data-datatable-facet]").forEach((facetRoot) => {
       const key = facetRoot.dataset.datatableFacet;
       const selected = this._facetSelections.get(key) || new Set();
+      if (this._visibleFacets.has(key)) {
+        facetRoot.hidden = !this._visibleFacets.get(key);
+      }
       const trigger = facetRoot.querySelector(".datatable-facet-trigger");
       trigger?.classList.toggle("datatable-facet-trigger-active", selected.size > 0);
       const summary = facetRoot.querySelector("[data-datatable-facet-summary]");
@@ -291,6 +305,13 @@ export default class DataTable {
         option.classList.toggle("active", isSelected);
         option.setAttribute("aria-pressed", String(isSelected));
       });
+    });
+
+    this._element.querySelectorAll("[data-datatable-filter-toggle]").forEach((toggle) => {
+      const key = toggle.dataset.datatableFilterToggle;
+      const visible = this._visibleFacets.get(key) ?? true;
+      toggle.classList.toggle("active", visible);
+      toggle.setAttribute("aria-pressed", visible ? "true" : "false");
     });
   }
 
@@ -550,6 +571,25 @@ export default class DataTable {
     this._trigger("filter");
   }
 
+  _handleFilterToggleClick(event) {
+    const toggle = event.target.closest("[data-datatable-filter-toggle]");
+    if (!toggle) {
+      return;
+    }
+    const key = toggle.dataset.datatableFilterToggle;
+    if (!key || !this._visibleFacets.has(key)) {
+      return;
+    }
+    const nextVisible = !this._visibleFacets.get(key);
+    this._visibleFacets.set(key, nextVisible);
+    if (!nextVisible) {
+      this._facetSelections.get(key)?.clear();
+      this._currentPage = 1;
+      this._trigger("filter");
+    }
+    this._render();
+  }
+
   _handleColumnToggleClick(event) {
     const toggle = event.target.closest("[data-datatable-column-toggle]");
     if (!toggle) {
@@ -735,6 +775,7 @@ export default class DataTable {
 
     this._listen(this._element, "click", (event) => {
       this._handleSortAction(event);
+      this._handleFilterToggleClick(event);
       this._handleFacetClick(event);
       this._handleColumnToggleClick(event);
       this._handlePageClick(event);
