@@ -8,6 +8,8 @@
    at load; the runtime only reorders, hides, or paginates existing rows. No
    remote data engine, per the Phase 3B non-goals. #}
 
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/checkbox.html.jinja" import checkbox %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_menu, dropdown_item, dropdown_toggle_item, dropdown_header, dropdown_divider %}
 {% from "components/separator.html.jinja" import separator %}
 
@@ -18,7 +20,7 @@
     </button>
     {{ separator(orientation="vertical") }}
     <span class="datatable-bulk-summary small" data-datatable-bulk-summary>
-      <span class="badge text-bg-dark rounded-pill" data-datatable-bulk-count>0</span>
+      {{ badge("0", variant="dark", pill=true, attrs="data-datatable-bulk-count") }}
       <span>{{ selection_noun }} selected</span>
     </span>
     {% if bulk_actions %}
@@ -104,7 +106,7 @@
             <li class="datatable-filter-panel" data-datatable-filter-panel="facets">
               <button class="dropdown-item datatable-filter-group" type="button" data-datatable-filter-group="{{ facet.key }}">
                 <span>{{ facet.label }}</span>
-                <span class="datatable-filter-group-summary small text-body-secondary" data-datatable-filter-group-summary="{{ facet.key }}" hidden></span>
+                <span class="datatable-filter-group-summary ms-auto small text-body-secondary" data-datatable-filter-group-summary="{{ facet.key }}" hidden></span>
                 {{ render_icon("chevron-right", "inline-end") }}
               </button>
             </li>
@@ -176,16 +178,11 @@
 {% macro datatable_frame_header(id, header_id, table_id, columns, selectable, selection_noun, responsive_mode) -%}
   <div class="datatable-frame-header">
     {% if selectable %}
-      <label class="datatable-select-all">
-        <span class="datatable-checkbox-target">
-          <input class="form-check-input" type="checkbox" aria-label="Select visible {{ selection_noun }}" aria-controls="{{ table_id }}" data-datatable-select-all>
-        </span>
-        <span>Select visible {{ selection_noun }}</span>
-      </label>
+      {{ checkbox(id ~ "-" ~ header_id ~ "-select-visible", label="Select visible " ~ selection_noun, extra_class="datatable-select-all", input_attrs='aria-controls="' ~ table_id ~ '" data-datatable-select-all') }}
     {% else %}
       <span></span>
     {% endif %}
-    <div class="datatable-toolbar-actions d-flex align-items-center gap-2">
+    <div class="datatable-toolbar-actions d-flex align-items-center gap-2 ms-auto">
       {% if responsive_mode == "toggle" %}
         <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
           <input type="radio" class="btn-check" name="{{ id }}-{{ header_id }}-view" id="{{ id }}-{{ header_id }}-view-table" value="table" autocomplete="off" checked>
@@ -276,7 +273,7 @@
     <div class="{{ frame_class }}">
       {{ datatable_frame_header(id, "table", table_id, columns, selectable, selection_noun, responsive_mode) }}
       <div class="{{ table_responsive_class }}">
-        <table class="table datatable-table" id="{{ table_id }}">
+        <table class="table align-middle datatable-table" id="{{ table_id }}">
           <thead>
             <tr>
               {% if selectable %}
@@ -291,12 +288,11 @@
           </thead>
           <tbody>
             {% for row in rows %}
+              {% set row_label = row.label | default(row.id) %}
               <tr id="{{ row.id }}" data-datatable-row{% if row.search is defined %} data-datatable-search="{{ row.search }}"{% endif %}{% for facet_key, facet_value in (row.facets | default({})).items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}>
                 {% if selectable %}
                   <td class="datatable-col-select">
-                    <label class="datatable-checkbox-target">
-                      <input class="form-check-input" type="checkbox" aria-label="Select {{ row.label | default(row.id) }}" data-datatable-select-row>
-                    </label>
+                    {{ checkbox(id ~ "-" ~ row.id ~ "-table-select", aria_label="Select " ~ row_label, extra_class="datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
                   </td>
                 {% endif %}
                 {% for column in columns %}
@@ -316,12 +312,11 @@
         {{ datatable_frame_header(id, "cards", table_id, columns, selectable, selection_noun, responsive_mode) }}
         <div class="{{ cards_class }}" data-datatable-cards aria-label="Responsive {{ table_id }} cards">
           {% for row in rows %}
+            {% set row_label = row.label | default(row.id) %}
             <article class="datatable-card" data-datatable-card data-datatable-card-for="{{ row.id }}"{% if loop.index > default_page_size %} hidden{% endif %}>
               <div class="datatable-card-header">
                 {% if selectable %}
-                  <label class="datatable-card-select datatable-checkbox-target">
-                      <input class="form-check-input" type="checkbox" aria-label="Select {{ row.label | default(row.id) }}" data-datatable-select-row>
-                  </label>
+                  {{ checkbox(id ~ "-" ~ row.id ~ "-card-select", aria_label="Select " ~ row_label, extra_class="datatable-card-select datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
                 {% endif %}
                 <div class="datatable-card-heading">
                   {% if row.card is defined and row.card.title is defined %}

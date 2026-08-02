@@ -1,4 +1,5 @@
 {% from "components/datatable.html.jinja" import datatable %}
+{% from "components/badge.html.jinja" import badge %}
 {% from "components/table.html.jinja" import table_row_actions %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
 
@@ -9,7 +10,7 @@
 {% macro review_item_cell(title, type) -%}
   <div class="datatable-item-cell">
     <span class="text-truncate">{{ title }}</span>
-    <span class="badge text-bg-secondary rounded-pill">{{ type }}</span>
+    {{ badge(type, variant="secondary", pill=true) }}
   </div>
 {%- endmacro %}
 

@@ -36,6 +36,16 @@ class CheckboxTests(CatalogTestCase):
         self.assertIn('aria-label="Accept"', output)
         self.assertNotIn("form-check-label", output)
 
+    def test_checkbox_supports_input_attrs_and_label_wrapper(self) -> None:
+        output = self.render_checkbox(
+            'checkbox("c6", aria_label="Select row", '
+            'input_attrs="data-select-row", label_wrapper=true)'
+        )
+
+        self.assertTrue(output.startswith('<label class="form-check">'))
+        self.assertIn('data-select-row', output)
+        self.assertIn('aria-label="Select row"', output)
+
     def test_checkbox_requires_exactly_one_of_label_or_aria_label(self) -> None:
         with self.assertRaisesRegex(
             ValueError, "Checkbox requires exactly one of label or aria_label"
@@ -49,6 +59,12 @@ class CheckboxTests(CatalogTestCase):
     def test_checkbox_requires_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Checkbox id is required"):
             self.render_checkbox('checkbox("   ", label="Accept")')
+
+    def test_checkbox_label_wrapper_rejects_visible_label(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError, "Checkbox label_wrapper requires aria_label"
+        ):
+            self.render_checkbox('checkbox("c7", label="Accept", label_wrapper=true)')
 
     def test_checkbox_invalid_adds_is_invalid_class(self) -> None:
         output = self.render_checkbox('checkbox("c4", label="Accept", invalid=true)')
