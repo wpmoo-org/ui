@@ -5,3 +5,9 @@
 .form-switch .form-check-input {
   height: $moo-switch-height;
 }
+
+.form-switch .form-check-input:not(.is-invalid):focus,
+.form-switch .form-check-input:not(.is-invalid):focus-visible {
+  border-color: var(--moo-border);
+  box-shadow: none;
+}

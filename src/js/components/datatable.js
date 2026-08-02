@@ -337,7 +337,7 @@ export default class DataTable {
 
   _createFacetBadge(text) {
     const badge = this._document.createElement("span");
-    badge.className = "badge text-bg-secondary datatable-facet-badge";
+    badge.className = "datatable-facet-badge";
     badge.textContent = text;
     return badge;
   }
@@ -592,6 +592,19 @@ export default class DataTable {
     this._currentPage = 1;
     this._render();
     this._trigger("filter");
+  }
+
+  _handleFacetSearch(event) {
+    const search = event.target.closest("[data-datatable-facet-search]");
+    if (!search) {
+      return;
+    }
+    const facetRoot = search.closest("[data-datatable-facet]");
+    const query = normalize(search.value);
+    facetRoot?.querySelectorAll("[data-datatable-facet-option]").forEach((option) => {
+      const label = normalize(option.querySelector("[data-datatable-facet-option-label]")?.textContent || option.textContent);
+      option.closest("li")?.classList.toggle("datatable-facet-search-hidden", query.length > 0 && !label.includes(query));
+    });
   }
 
   _handleFilterOptionClick(event) {
@@ -949,6 +962,10 @@ export default class DataTable {
 
     this._element.querySelectorAll("[data-datatable-filter-option-search]").forEach((searchInput) => {
       this._listen(searchInput, "input", (event) => this._handleFilterOptionSearch(event));
+    });
+
+    this._element.querySelectorAll("[data-datatable-facet-search]").forEach((searchInput) => {
+      this._listen(searchInput, "input", (event) => this._handleFacetSearch(event));
     });
 
     const resetButton = this._element.querySelector("[data-datatable-reset]");

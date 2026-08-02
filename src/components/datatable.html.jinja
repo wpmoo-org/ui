@@ -70,6 +70,12 @@
       <span class="datatable-facet-summary" data-datatable-facet-summary hidden></span>
     </button>
     {% call dropdown_menu(extra_class="datatable-facet-menu") %}
+      {% if options | length > 7 %}
+        <li class="datatable-facet-search-wrap">
+          <span class="datatable-dropdown-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
+          <input class="form-control form-control-sm datatable-facet-search" type="search" placeholder="Search {{ label | lower }}..." aria-label="Search {{ label | lower }}" data-datatable-facet-search="{{ key }}">
+        </li>
+      {% endif %}
       {% for option in options %}
         {{ datatable_facet_item(option.label, icon=option.icon | default(""), count=option.count if option.count is defined else none, attrs='data-datatable-facet-option="' ~ option.value ~ '"') }}
       {% endfor %}
@@ -112,6 +118,7 @@
             </li>
             {% if facet.options | length > 7 %}
               <li class="datatable-filter-panel datatable-filter-option-search-wrap" data-datatable-filter-panel="options" data-datatable-filter-panel-key="{{ facet.key }}" hidden>
+                <span class="datatable-dropdown-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
                 <input class="form-control form-control-sm datatable-filter-option-search" type="search" placeholder="Search {{ facet.label | lower }}..." aria-label="Search {{ facet.label | lower }}" data-datatable-filter-option-search="{{ facet.key }}">
               </li>
             {% endif %}

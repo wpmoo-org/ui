@@ -14,7 +14,7 @@
 {%- endmacro %}
 
 {% macro review_icon_label_cell(label, icon, extra_class="") -%}
-  <span class="datatable-icon-label d-inline-flex align-items-center gap-1 text-nowrap{% if extra_class %} {{ extra_class }}{% endif %}">
+  <span class="datatable-icon-label text-nowrap{% if extra_class %} {{ extra_class }}{% endif %}">
     {{ render_icon(icon, "inline-start") }}
     <span data-datatable-cell-label>{{ label }}</span>
   </span>
@@ -85,12 +85,23 @@
     {"id": "REV-977", "item": "Popover clipping proof", "type": "Runtime", "status": "approved", "priority": "medium", "area": "overlay", "owner": "Lynn Conway"},
     {"id": "REV-974", "item": "Tabs passive contrast", "type": "Accessibility", "status": "approved", "priority": "high", "area": "navigation", "owner": "Erna Schneider Hoover"}
   ] %}
+  {% set owner_options = [] %}
+  {% for review in reviews %}
+    {% set owner_value = review.owner | lower | replace(" ", "-") %}
+    {% set _ = owner_options.append({
+      "value": owner_value,
+      "label": review.owner,
+      "icon": "user",
+      "count": reviews | selectattr("owner", "equalto", review.owner) | list | length
+    }) %}
+  {% endfor %}
 
   {% set review_rows = [] %}
   {% for review in reviews %}
     {% set status = status_by_value[review.status] %}
     {% set priority = priority_by_value[review.priority] %}
     {% set area = area_by_value[review.area] %}
+    {% set owner_value = review.owner | lower | replace(" ", "-") %}
     {% set status_cell %}{{ review_icon_label_cell(status.label, status.icon, "text-body-secondary") }}{% endset %}
     {% set priority_cell %}{{ review_icon_label_cell(priority.label, priority.icon, "text-body-secondary") }}{% endset %}
     {% set area_cell %}{{ review_icon_label_cell(area.label, area.icon, "text-body-secondary") }}{% endset %}
@@ -99,7 +110,7 @@
       "label": review.id,
       "card": {"title": review.item, "actions": review_row_actions(icon="ellipsis-vertical")},
       "search": review.id ~ " " ~ review.item ~ " " ~ review.type ~ " " ~ status.label ~ " " ~ priority.label ~ " " ~ area.label ~ " " ~ review.owner,
-      "facets": {"status": review.status, "priority": review.priority},
+      "facets": {"status": review.status, "priority": review.priority, "owner": owner_value},
       "sort": {
         "id": review.id,
         "item": review.item | lower,
@@ -148,6 +159,11 @@
           {"value": "medium", "label": "Medium", "icon": "minus", "count": reviews | selectattr("priority", "equalto", "medium") | list | length},
           {"value": "low", "label": "Low", "icon": "arrow-down", "count": reviews | selectattr("priority", "equalto", "low") | list | length}
         ]
+      },
+      {
+        "key": "owner",
+        "label": "Owner",
+        "options": owner_options
       }
     ],
     search_placeholder="Filter reviews...",
