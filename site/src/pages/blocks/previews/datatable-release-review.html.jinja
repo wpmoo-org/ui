@@ -9,14 +9,14 @@
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
           <h1 class="h3 mb-1">Release review queue</h1>
-          <p class="text-body-secondary mb-0">Search, prioritize, and close certification review work.</p>
+          <p class="text-body-secondary mb-0">Search, prioritize, and close certification review work with list and card views in one surface.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
           <button class="btn btn-outline-secondary btn-sm" type="button">Import</button>
           <button class="btn btn-primary btn-sm" type="button">Create review</button>
         </div>
       </div>
-      {{ render_release_review_table(id="standalone-datatable-release-reviews", standalone=true) }}
+      {{ render_release_review_table(id="standalone-datatable-release-reviews", standalone=true, responsive_mode="toggle") }}
     </div>
   </section>
 {% endblock %}

@@ -24,36 +24,21 @@
     </p>
 
     {% set release_review_table %}
-      {{ render_release_review_table(id="datatable-release-reviews") }}
+      {{ render_release_review_table(id="datatable-release-reviews", responsive_mode="toggle") }}
     {% endset %}
     {{ render_block_example(
       "release-review-queue",
       "Release review queue",
-      "A shadcn-admin-inspired work queue with original release-review content. Switch the preview between the full table, a responsive card mode, and a reader-controlled toggle without changing the desktop layout.",
+      "A shadcn-admin-inspired work queue with original release-review content. Search, filter, sort, select, and switch between list and card views from one surface.",
       release_review_table,
       preview_class="moo-example__preview--shell",
       frame_src=site_href("blocks/previews/datatable-release-review.html", root_path),
-      frame_width=1440,
+      frame_width=1280,
       frame_height=900,
-      frame_variants=[
-        {
-          "label": "Full width",
-          "src": site_href("blocks/previews/datatable-release-review.html", root_path),
-          "active": true
-        },
-        {
-          "label": "Responsive",
-          "src": site_href("blocks/previews/datatable-release-review-responsive.html", root_path)
-        },
-        {
-          "label": "User toggle",
-          "src": site_href("blocks/previews/datatable-release-review-toggle.html", root_path)
-        }
-      ],
       frame_viewports=[
         {"label": "Mobile", "icon": "smartphone", "width": 390, "height": 900},
         {"label": "Tablet", "icon": "tablet", "width": 768, "height": 900},
-        {"label": "Desktop", "icon": "monitor", "width": 1440, "height": 900, "active": true}
+        {"label": "Desktop", "icon": "monitor", "width": 1280, "height": 900, "active": true}
       ]
     ) }}
 
@@ -120,9 +105,12 @@
       ["<code>responsive_mode=\"cards\"</code>", "Hides the table below the configured breakpoint and shows each row as a card. Columns can opt into <code>card_role=\"title\"</code>, <code>code</code>, or <code>actions</code> for the card header."],
       ["<code>responsive_mode=\"toggle\"</code>", "Renders the table and the cards together and adds a <code>.datatable-view-toggle</code> Table/Cards control so the reader, not the breakpoint, picks the layout."],
       ["<code>[data-datatable-cards]</code>", "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."],
+      ["<code>[data-datatable-empty]</code>", "Accessible empty-state surface shown when filtering leaves no matching rows, with a clear-filters action."],
+      ["<code>[data-datatable-results-summary]</code>", "Live page-range summary such as <code>Showing 1-10 of 24</code>, or <code>No results</code> when nothing matches."],
       ["<code>th[data-datatable-column]</code>", "Column ownership hook used by sorting, hiding, and cell updates."],
       ["<code>tr[data-datatable-row]</code>", "Server-rendered row with search text, facet values, and stable id."],
       ["<code>[data-datatable-select-row]</code>", "Native checkbox for row selection."],
+      ["<code>[data-datatable-select-all]</code>", "Selects or clears the current page rows from the shared toolbar, keeping the control in the same place in table and card views."],
       ["<code>td[data-datatable-sort-value]</code>", "Optional sort value that avoids parsing rich cell content."],
       ["<code>[data-datatable-bulk-actions]</code>", "Fixed selection toolbar shown after at least one row is selected."],
       ["<code>[data-datatable-pagination]</code>", "Pagination region that owns page size and page navigation controls."]
@@ -130,7 +118,7 @@
     {{ table(
       ["Selector", "Purpose"],
       anatomy_rows,
-      row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "responsive-toggle", "cards", "column", "row", "select-row", "sort-value", "bulk-actions", "pagination"],
+      row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "responsive-toggle", "cards", "empty", "results-summary", "column", "row", "select-row", "select-all", "sort-value", "bulk-actions", "pagination"],
       row_header=true,
       extra_class="align-middle mb-5"
     ) }}
@@ -209,14 +197,15 @@
       ["Column visibility", "Keep hideable columns in the View dropdown. Columns with <code>hideable=false</code>, such as row actions, stay fixed."],
       ["Responsive cards", "Set <code>responsive_mode=\"cards\"</code> to keep the desktop table unchanged and render mobile/tablet rows as cards with title/code/actions in the header and secondary fields below."],
       ["Reader-controlled layout", "Set <code>responsive_mode=\"toggle\"</code> to render the table and cards together with a Table/Cards toggle; the reader's choice persists per table id in <code>localStorage</code>, independent of viewport."],
-      ["Row selection", "Render native row checkboxes with stable row ids. The bulk bar appears when one or more row ids are selected."],
+      ["Row selection", "Render native row checkboxes with stable row ids. Table rows and responsive cards receive selected-state feedback, while the bulk bar announces the current selection."],
       ["Bulk actions", "Use button or dropdown actions with <code>data-datatable-bulk-action</code> or <code>data-datatable-bulk-update</code>."],
+      ["Empty and result feedback", "The runtime announces the current range and shows a clear empty state when search or facets produce no matching rows."],
       ["Pagination", "Set the default page size on the root and let the footer controls move through the filtered row set."]
     ] %}
     {{ table(
       ["Feature", "How to activate it"],
       feature_rows,
-      row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-toggle", "feature-selection", "feature-bulk", "feature-pagination"],
+      row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-toggle", "feature-selection", "feature-bulk", "feature-feedback", "feature-pagination"],
       row_header=true,
       extra_class="align-middle mb-0"
     ) }}

@@ -246,6 +246,7 @@ export default class DataTable {
     this._renderToolbarState();
     this._renderSortHeaders();
     this._renderSelection(pageRows);
+    this._renderEmptyState(filtered.length);
     this._renderPagination(filtered.length, pageCount);
     this._renderBulkActions();
   }
@@ -300,6 +301,7 @@ export default class DataTable {
         if (checkbox) {
           checkbox.checked = this._selectedIds.has(row.element.id);
         }
+        container?.classList.toggle("datatable-row-selected", this._selectedIds.has(row.element.id));
       });
     });
     const total = pageRows.length;
@@ -319,6 +321,26 @@ export default class DataTable {
     const count = bar.querySelector("[data-datatable-bulk-count]");
     if (count) {
       count.textContent = String(this._selectedIds.size);
+    }
+  }
+
+  _renderEmptyState(totalRows) {
+    const empty = this._element.querySelector("[data-datatable-empty]");
+    if (!empty) {
+      return;
+    }
+    const hasRows = this._rows.length > 0;
+    empty.hidden = totalRows !== 0;
+    empty.querySelector(".datatable-empty-title")?.replaceChildren(
+      this._document.createTextNode(hasRows ? "No matching results" : "No rows to display")
+    );
+    const copy = empty.querySelector(".datatable-empty-copy");
+    if (copy) {
+      copy.hidden = !hasRows;
+    }
+    const reset = empty.querySelector("[data-datatable-empty-reset]");
+    if (reset) {
+      reset.hidden = !hasRows;
     }
   }
 
@@ -362,6 +384,17 @@ export default class DataTable {
     const atEnd = this._currentPage >= pageCount;
     [first, prev].forEach((button) => this._setPageItemDisabled(button, atStart));
     [next, last].forEach((button) => this._setPageItemDisabled(button, atEnd));
+
+    const summary = this._element.querySelector("[data-datatable-results-summary]");
+    if (summary) {
+      if (totalRows === 0) {
+        summary.textContent = "No results";
+      } else {
+        const start = (this._currentPage - 1) * this._pageSize + 1;
+        const end = Math.min(this._currentPage * this._pageSize, totalRows);
+        summary.textContent = `Showing ${start}-${end} of ${totalRows}`;
+      }
+    }
 
     const template = this._element.querySelector("template[data-datatable-page-numbers]");
     if (!template) {
@@ -671,6 +704,9 @@ export default class DataTable {
       this._handleColumnToggleClick(event);
       this._handlePageClick(event);
       this._handleBulkClick(event);
+      if (event.target.closest("[data-datatable-empty-reset]")) {
+        this._handleReset();
+      }
       if (event.target.closest("[data-datatable-select-row]")) {
         this._handleSelectRow(event);
       }

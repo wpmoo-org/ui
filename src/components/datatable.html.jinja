@@ -12,12 +12,12 @@
 {% from "components/separator.html.jinja" import separator %}
 
 {% macro datatable_bulk_actions(selection_noun, bulk_actions) -%}
-  <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden>
+  <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden role="status" aria-live="polite" aria-atomic="true">
     <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection (Escape)">
       {{ render_icon("x", "inline-start") }}
     </button>
     {{ separator(orientation="vertical") }}
-    <span class="datatable-bulk-summary small">
+    <span class="datatable-bulk-summary small" data-datatable-bulk-summary>
       <span class="badge text-bg-dark rounded-pill" data-datatable-bulk-count>0</span>
       <span>{{ selection_noun }} selected</span>
     </span>
@@ -152,42 +152,52 @@
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
   <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
-    <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-3" data-datatable-toolbar>
-      <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
-      {% for facet in facets %}
-        {{ datatable_facet(facet.key, facet.label, facet.options) }}
-      {% endfor %}
-      <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
-        Reset
-        {{ render_icon("x", "inline-end") }}
-      </button>
-      <div class="d-flex align-items-center gap-2 ms-auto">
-      {% if responsive_mode == "toggle" %}
-        <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
-          <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-table" value="table" autocomplete="off" checked>
-          <label class="btn btn-outline-secondary btn-icon-sm" for="{{ id }}-view-table" aria-label="Table view">
-            {{ render_icon("table", "inline-start") }}
-          </label>
-          <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-cards" value="cards" autocomplete="off">
-          <label class="btn btn-outline-secondary btn-icon-sm" for="{{ id }}-view-cards" aria-label="Card view">
-            {{ render_icon("layout-grid", "inline-start") }}
-          </label>
-        </div>
-      {% endif %}
-      <div class="dropdown datatable-view">
-        <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-          {{ render_icon("sliders-horizontal", "inline-start") }}
-          <span>View</span>
-        </button>
-        {% call dropdown_menu(align="end") %}
-          {{ dropdown_header("Toggle columns") }}
-          {% for column in columns %}
-            {% if column.hideable | default(true) %}
-              {{ dropdown_toggle_item(column.label, pressed=true, attrs='data-datatable-column-toggle="' ~ column.key ~ '"') }}
-            {% endif %}
-          {% endfor %}
-        {% endcall %}
+    <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-2" data-datatable-toolbar>
+      <div class="datatable-toolbar-search">
+        <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
       </div>
+      <div class="datatable-toolbar-filters" role="group" aria-label="Table filters">
+        {% for facet in facets %}
+          {{ datatable_facet(facet.key, facet.label, facet.options) }}
+        {% endfor %}
+        <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
+          Reset
+          {{ render_icon("x", "inline-end") }}
+        </button>
+      </div>
+      {% if selectable %}
+        <label class="datatable-select-all">
+          <input class="form-check-input" type="checkbox" aria-label="Select visible {{ selection_noun }}" aria-controls="{{ table_id }}" data-datatable-select-all>
+          <span>Select visible {{ selection_noun }}</span>
+        </label>
+      {% endif %}
+      <div class="datatable-toolbar-actions d-flex align-items-center gap-2">
+        {% if responsive_mode == "toggle" %}
+          <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
+            <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-table" value="table" autocomplete="off" checked>
+            <label class="btn btn-outline-secondary btn-icon-sm" for="{{ id }}-view-table" aria-label="Table view">
+              {{ render_icon("table", "inline-start") }}
+            </label>
+            <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-cards" value="cards" autocomplete="off">
+            <label class="btn btn-outline-secondary btn-icon-sm" for="{{ id }}-view-cards" aria-label="Card view">
+              {{ render_icon("layout-grid", "inline-start") }}
+            </label>
+          </div>
+        {% endif %}
+        <div class="dropdown datatable-view">
+          <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            {{ render_icon("sliders-horizontal", "inline-start") }}
+            <span>View</span>
+          </button>
+          {% call dropdown_menu(align="end") %}
+            {{ dropdown_header("Toggle columns") }}
+            {% for column in columns %}
+              {% if column.hideable | default(true) %}
+                {{ dropdown_toggle_item(column.label, pressed=true, attrs='data-datatable-column-toggle="' ~ column.key ~ '"') }}
+              {% endif %}
+            {% endfor %}
+          {% endcall %}
+        </div>
       </div>
     </div>
     <div class="{{ frame_class }}">
@@ -197,7 +207,7 @@
           <tr>
             {% if selectable %}
               <th scope="col" class="datatable-col-select">
-                <input class="form-check-input" type="checkbox" aria-label="Select all rows" data-datatable-select-all>
+                <span class="visually-hidden">Selection</span>
               </th>
             {% endif %}
             {% for column in columns %}
@@ -227,12 +237,6 @@
     </div>
     {% if responsive_cards_enabled %}
       <div class="{{ cards_class }}" data-datatable-cards aria-label="Responsive {{ table_id }} cards">
-        {% if selectable %}
-          <label class="datatable-card-select-all">
-            <input class="form-check-input" type="checkbox" aria-label="Select visible {{ selection_noun }}" data-datatable-select-all>
-            <span>Select visible {{ selection_noun }}</span>
-          </label>
-        {% endif %}
         {% for row in rows %}
           <article class="datatable-card" data-datatable-card data-datatable-card-for="{{ row.id }}"{% if loop.index > default_page_size %} hidden{% endif %}>
             <div class="datatable-card-header">
@@ -282,8 +286,17 @@
         {% endfor %}
       </div>
     {% endif %}
+    <div class="datatable-empty" data-datatable-empty hidden role="status" aria-live="polite">
+      <p class="datatable-empty-title mb-1">No matching results</p>
+      <p class="datatable-empty-copy text-body-secondary mb-3">Try a different search or clear the active filters.</p>
+      <button type="button" class="btn btn-outline-secondary btn-sm" data-datatable-empty-reset>
+        Clear filters
+        {{ render_icon("x", "inline-end") }}
+      </button>
+    </div>
     <div class="datatable-pagination d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3" data-datatable-pagination>
       <div class="datatable-pagination-controls d-flex flex-fill flex-wrap align-items-center justify-content-between gap-3">
+        <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite"></span>
         <div class="datatable-page-size d-flex align-items-center gap-2">
           <select class="form-select form-select-sm" id="{{ id }}-page-size" data-datatable-page-size-select>
             {% for size in page_sizes %}
