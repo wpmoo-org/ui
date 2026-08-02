@@ -79,22 +79,33 @@
   </div>
 {%- endmacro %}
 
-{% macro datatable_filter_picker(facets) -%}
-  <div class="dropdown datatable-filter-picker">
-    <button class="btn btn-sm datatable-facet-trigger datatable-filter-picker-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-      {{ render_icon("list-filter", "inline-start") }}
-      <span>Filter</span>
-    </button>
-    {% call dropdown_menu(extra_class="datatable-filter-picker-menu") %}
-      {% for facet in facets %}
-        <li>
-          <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-toggle="{{ facet.key }}" aria-pressed="false">
-            <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
-            <span>{{ facet.label }}</span>
-          </button>
-        </li>
-      {% endfor %}
-    {% endcall %}
+{% macro datatable_search_filter(search_placeholder, facets, filter_mode) -%}
+  <div class="datatable-search-filter">
+    <div class="input-group input-group-sm datatable-searchbar">
+      <span class="datatable-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
+      <input class="form-control datatable-search{% if filter_mode == "picker" and facets %} datatable-search-with-filter{% endif %}" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
+      {% if filter_mode == "picker" and facets %}
+        <button class="btn btn-ghost datatable-filter-picker-trigger border-0" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-offset="0,8" aria-expanded="false" aria-label="Open filters" data-datatable-filter-menu-trigger>
+          {{ render_icon("list-filter", "inline-start") }}
+        </button>
+        {% call dropdown_menu(extra_class="datatable-search-filter-menu", align="end") %}
+          {% for facet in facets %}
+            {{ dropdown_header(facet.label) }}
+            {% for option in facet.options %}
+              <li>
+                <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-option="{{ option.value }}" data-datatable-filter-option-key="{{ facet.key }}" aria-pressed="false">
+                  <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+                  {% if option.icon is defined and option.icon %}{{ render_icon(option.icon, "inline-start") }}{% endif %}
+                  <span>{{ option.label }}</span>
+                  {% if option.count is defined %}<span class="ms-auto small text-body-secondary">{{ option.count }}</span>{% endif %}
+                </button>
+              </li>
+            {% endfor %}
+            {% if not loop.last %}{{ dropdown_divider() }}{% endif %}
+          {% endfor %}
+        {% endcall %}
+      {% endif %}
+    </div>
   </div>
 {%- endmacro %}
 
@@ -217,16 +228,10 @@
     {% if column.card_role | default("") == "title" %}{% set card_columns.title = column %}{% endif %}
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
-  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
+  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}" data-datatable-filter-mode="{{ filter_mode }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
     <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-2" data-datatable-toolbar>
       <div class="datatable-toolbar-query">
-        <div class="datatable-toolbar-search">
-          <span class="datatable-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
-          <input class="form-control form-control-sm datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
-        </div>
-        {% if filter_mode == "picker" and facets %}
-          {{ datatable_filter_picker(facets) }}
-        {% endif %}
+        {{ datatable_search_filter(search_placeholder, facets, filter_mode) }}
       </div>
       <div class="datatable-toolbar-filters" role="group" aria-label="Table filters">
         {% for facet in facets %}

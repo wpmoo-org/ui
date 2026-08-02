@@ -77,32 +77,38 @@
 // and pushes the Status/Priority facet triggers onto a wrapped second
 // line even when there is room beside it. A max-width (not a fixed width)
 // caps it on wide toolbars while still letting it shrink on narrow ones.
-.datatable-search {
-  max-width: 16rem;
-}
-
 .datatable-toolbar-query {
   display: flex;
-  flex: 0 1 auto;
+  flex: 0 1 22rem;
   gap: 0.5rem;
   align-items: center;
-  min-width: 18rem;
+  min-width: 20rem;
   max-width: 100%;
 }
 
-.datatable-toolbar-search {
+.datatable-search-filter {
   position: relative;
-  flex: 0 1 16rem;
-  min-width: 16rem;
-}
-
-.datatable-toolbar-query .datatable-toolbar-search {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
-.datatable-toolbar-search .datatable-search {
+.datatable-searchbar {
+  position: relative;
+  flex-wrap: nowrap;
   width: 100%;
+}
+
+.datatable-searchbar .datatable-search {
+  flex: 1 1 auto;
+  max-width: none;
+  min-width: 0;
+  width: 1%;
   padding-inline-start: 2rem;
+}
+
+.datatable-searchbar .datatable-search-with-filter {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .datatable-search-icon {
@@ -123,8 +129,25 @@
   height: 0.875rem;
 }
 
-.datatable-filter-picker {
-  flex: 0 0 auto;
+.datatable-filter-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  padding: 0;
+}
+
+.datatable-filter-picker-trigger > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.datatable-search-filter-menu {
+  width: 22rem;
+  max-width: calc(100vw - 1.5rem);
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .datatable-toolbar-filters {
@@ -581,7 +604,7 @@
     align-items: center;
   }
 
-  .datatable-toolbar-search {
+  .datatable-search-filter {
     grid-column: 1 / -1;
     min-width: 0;
   }
@@ -591,11 +614,11 @@
     min-width: 0;
   }
 
-  .datatable-toolbar-query .datatable-toolbar-search {
+  .datatable-toolbar-query .datatable-search-filter {
     flex: 1 1 auto;
   }
 
-  .datatable-toolbar-search .datatable-search {
+  .datatable-searchbar .datatable-search {
     max-width: none;
   }
 

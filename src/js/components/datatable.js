@@ -46,6 +46,8 @@ export default class DataTable {
     this._visibleFacets = new Map();
     this._searchTerm = "";
     this._tooltips = [];
+    this._filterMode = element.dataset.datatableFilterMode || "inline";
+    this._filterMenuTimer = null;
 
     this._rows = Array.from(this._tbody.querySelectorAll(":scope > tr[data-datatable-row]")).map((tr, index) => ({
       element: tr,
@@ -69,6 +71,10 @@ export default class DataTable {
       target.removeEventListener(type, handler, options);
     });
     this._listeners = [];
+    if (this._filterMenuTimer) {
+      this._window.clearTimeout(this._filterMenuTimer);
+      this._filterMenuTimer = null;
+    }
     this._tooltips.forEach((tooltip) => tooltip.dispose());
     this._tooltips = [];
     instances.delete(this._element);
@@ -312,6 +318,14 @@ export default class DataTable {
       const visible = this._visibleFacets.get(key) ?? true;
       toggle.classList.toggle("active", visible);
       toggle.setAttribute("aria-pressed", visible ? "true" : "false");
+    });
+
+    this._element.querySelectorAll("[data-datatable-filter-option]").forEach((option) => {
+      const key = option.dataset.datatableFilterOptionKey;
+      const selected = this._facetSelections.get(key) || new Set();
+      const active = selected.has(option.dataset.datatableFilterOption);
+      option.classList.toggle("active", active);
+      option.setAttribute("aria-pressed", active ? "true" : "false");
     });
   }
 
@@ -566,6 +580,35 @@ export default class DataTable {
       }
     }
     this._facetSelections.set(key, selected);
+    if (this._filterMode === "picker" && selected.size === 0) {
+      this._visibleFacets.set(key, false);
+    }
+    this._currentPage = 1;
+    this._render();
+    this._trigger("filter");
+  }
+
+  _handleFilterOptionClick(event) {
+    const option = event.target.closest("[data-datatable-filter-option]");
+    if (!option) {
+      return;
+    }
+    const key = option.dataset.datatableFilterOptionKey;
+    const value = option.dataset.datatableFilterOption;
+    if (!key || !this._visibleFacets.has(key)) {
+      return;
+    }
+    this._visibleFacets.set(key, true);
+    const selected = this._facetSelections.get(key) || new Set();
+    if (selected.has(value)) {
+      selected.delete(value);
+    } else {
+      selected.add(value);
+    }
+    this._facetSelections.set(key, selected);
+    if (selected.size === 0) {
+      this._visibleFacets.set(key, false);
+    }
     this._currentPage = 1;
     this._render();
     this._trigger("filter");
@@ -607,9 +650,30 @@ export default class DataTable {
     }
     this._searchTerm = "";
     this._facetSelections.forEach((selected) => selected.clear());
+    if (this._filterMode === "picker") {
+      this._visibleFacets.forEach((value, key) => {
+        this._visibleFacets.set(key, false);
+      });
+    }
     this._currentPage = 1;
     this._render();
     this._trigger("filter");
+  }
+
+  _showSearchFilterMenu(search) {
+    const trigger = this._element.querySelector("[data-datatable-filter-menu-trigger]");
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!trigger || !Dropdown) {
+      return;
+    }
+    if (this._filterMenuTimer) {
+      this._window.clearTimeout(this._filterMenuTimer);
+    }
+    this._filterMenuTimer = this._window.setTimeout(() => {
+      Dropdown.getOrCreateInstance(trigger).show();
+      search?.focus({ preventScroll: true });
+      this._filterMenuTimer = null;
+    });
   }
 
   _handleSelectAll(event) {
@@ -772,9 +836,12 @@ export default class DataTable {
       this._render();
       this._trigger("filter");
     });
+    this._listen(search, "focus", (event) => this._showSearchFilterMenu(event.currentTarget));
+    this._listen(search, "click", (event) => this._showSearchFilterMenu(event.currentTarget));
 
     this._listen(this._element, "click", (event) => {
       this._handleSortAction(event);
+      this._handleFilterOptionClick(event);
       this._handleFilterToggleClick(event);
       this._handleFacetClick(event);
       this._handleColumnToggleClick(event);
