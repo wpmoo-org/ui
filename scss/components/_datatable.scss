@@ -528,12 +528,12 @@
 
   .datatable-page-nav {
     grid-column: 1 / -1;
-    justify-self: center;
+    justify-self: start;
     margin-block-start: 0.25rem;
   }
 
   .datatable-page-nav .pagination {
-    justify-content: center;
+    justify-content: flex-start;
   }
 }
 
