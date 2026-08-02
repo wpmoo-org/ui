@@ -26,8 +26,8 @@
 
 .moo-page-description {
   max-width: 42rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  font-size: var(--moo-doc-lead-font-size);
+  line-height: var(--moo-doc-lead-line-height);
 }
 
 .moo-component-header__actions {
@@ -101,7 +101,18 @@
 }
 
 .moo-example__header>p {
-  line-height: 1.5;
+  font-size: var(--moo-doc-body-font-size);
+  line-height: var(--moo-doc-body-line-height);
+}
+
+.moo-component-examples > p {
+  max-width: 44rem;
+  font-size: var(--moo-doc-body-font-size);
+  line-height: var(--moo-doc-body-line-height);
+}
+
+.moo-component-examples > .table-responsive .table {
+  line-height: var(--moo-doc-table-line-height);
 }
 
 .moo-example__surface {

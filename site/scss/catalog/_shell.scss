@@ -1,6 +1,10 @@
 body {
   min-height: 100vh;
   background: var(--bs-tertiary-bg);
+  font-family: $moo-catalog-font-family, var(--bs-body-font-family);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 // Catalog-chrome-only display typeface. The Moo UI product itself
@@ -135,7 +139,11 @@ body {
   --moo-catalog-header-height: 4rem;
   --moo-catalog-header-bg-opacity: 0.94;
   --moo-catalog-header-backdrop-filter: blur(0.75rem);
+  --moo-doc-lead-font-size: 1rem;
+  --moo-doc-lead-line-height: 1.5;
   --moo-doc-body-font-size: 0.9375rem;
+  --moo-doc-body-line-height: 1.75;
+  --moo-doc-table-line-height: 1.4285714286;
   --moo-doc-toc-offset: calc(2rem + 5px);
 
   min-height: 100vh;
