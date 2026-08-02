@@ -131,19 +131,19 @@
           <input type="radio" class="btn-check" name="{{ id }}-{{ header_id }}-view" id="{{ id }}-{{ header_id }}-view-table" value="table" autocomplete="off" checked>
           <label class="btn btn-outline-secondary datatable-view-option" for="{{ id }}-{{ header_id }}-view-table">
             {{ render_icon("table", "inline-start") }}
-            <span>Table</span>
+            <span class="visually-hidden">Table</span>
           </label>
           <input type="radio" class="btn-check" name="{{ id }}-{{ header_id }}-view" id="{{ id }}-{{ header_id }}-view-cards" value="cards" autocomplete="off">
           <label class="btn btn-outline-secondary datatable-view-option" for="{{ id }}-{{ header_id }}-view-cards">
             {{ render_icon("layout-grid", "inline-start") }}
-            <span>Cards</span>
+            <span class="visually-hidden">Cards</span>
           </label>
         </div>
       {% endif %}
       <div class="dropdown datatable-view">
-        <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="View columns">
           {{ render_icon("sliders-horizontal", "inline-start") }}
-          <span>View</span>
+          <span class="datatable-view-trigger-label">View</span>
         </button>
         {% call dropdown_menu(align="end") %}
           {{ dropdown_header("Toggle columns") }}
@@ -306,35 +306,33 @@
         {{ render_icon("x", "inline-end") }}
       </button>
     </div>
-    <div class="datatable-pagination d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3" data-datatable-pagination>
-      <div class="datatable-pagination-controls d-flex flex-fill flex-wrap align-items-center justify-content-between gap-3">
-        <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite"></span>
-        <div class="datatable-page-size d-flex align-items-center gap-2">
-          <select class="form-select form-select-sm" id="{{ id }}-page-size" data-datatable-page-size-select>
-            {% for size in page_sizes %}
-              <option value="{{ size }}"{% if size == default_page_size %} selected{% endif %}>{{ size }}</option>
-            {% endfor %}
-          </select>
-          <label class="small text-body-secondary text-nowrap" for="{{ id }}-page-size">Rows per page</label>
-        </div>
-        <nav aria-label="Table pagination" class="datatable-page-nav">
-          <ul class="pagination pagination-sm mb-0">
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first>{{ render_icon("chevrons-left", "inline-start") }}</button>
-            </li>
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev>{{ render_icon("chevron-left", "inline-start") }}</button>
-            </li>
-            <template data-datatable-page-numbers></template>
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next>{{ render_icon("chevron-right", "inline-start") }}</button>
-            </li>
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last>{{ render_icon("chevrons-right", "inline-start") }}</button>
-            </li>
-          </ul>
-        </nav>
+    <div class="datatable-pagination mt-3" data-datatable-pagination>
+      <div class="datatable-page-size d-flex align-items-center gap-2">
+        <select class="form-select form-select-sm" id="{{ id }}-page-size" data-datatable-page-size-select>
+          {% for size in page_sizes %}
+            <option value="{{ size }}"{% if size == default_page_size %} selected{% endif %}>{{ size }}</option>
+          {% endfor %}
+        </select>
+        <label class="small text-body-secondary text-nowrap" for="{{ id }}-page-size">Rows per page</label>
       </div>
+      <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite"></span>
+      <nav aria-label="Table pagination" class="datatable-page-nav">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first>{{ render_icon("chevrons-left", "inline-start") }}</button>
+          </li>
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev>{{ render_icon("chevron-left", "inline-start") }}</button>
+          </li>
+          <template data-datatable-page-numbers></template>
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next>{{ render_icon("chevron-right", "inline-start") }}</button>
+          </li>
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last>{{ render_icon("chevrons-right", "inline-start") }}</button>
+          </li>
+        </ul>
+      </nav>
     </div>
     {% if selectable %}
       {{ datatable_bulk_actions(selection_noun, bulk_actions) }}
