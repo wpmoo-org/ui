@@ -308,12 +308,23 @@
     </div>
     <div class="datatable-pagination mt-3" data-datatable-pagination>
       <div class="datatable-page-size d-flex align-items-center gap-2">
-        <select class="form-select form-select-sm" id="{{ id }}-page-size" data-datatable-page-size-select>
-          {% for size in page_sizes %}
-            <option value="{{ size }}"{% if size == default_page_size %} selected{% endif %}>{{ size }}</option>
-          {% endfor %}
-        </select>
-        <label class="small text-body-secondary text-nowrap" for="{{ id }}-page-size">Rows per page</label>
+        <div class="dropdown datatable-page-size-control">
+          <button class="btn btn-outline-secondary btn-sm datatable-page-size-trigger" type="button" id="{{ id }}-page-size" data-bs-toggle="dropdown" aria-expanded="false" aria-labelledby="{{ id }}-page-size-label {{ id }}-page-size-value">
+            <span id="{{ id }}-page-size-value" data-datatable-page-size-value>{{ default_page_size }}</span>
+            {{ render_icon("chevron-down", "inline-end") }}
+          </button>
+          {% call dropdown_menu(extra_class="datatable-page-size-menu") %}
+            {% for size in page_sizes %}
+              <li>
+                <button class="dropdown-item dropdown-item-check{% if size == default_page_size %} active{% endif %}" type="button" data-datatable-page-size-option="{{ size }}" aria-pressed="{% if size == default_page_size %}true{% else %}false{% endif %}">
+                  <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+                  <span>{{ size }}</span>
+                </button>
+              </li>
+            {% endfor %}
+          {% endcall %}
+        </div>
+        <span class="small text-body-secondary text-nowrap" id="{{ id }}-page-size-label">Rows per page</span>
       </div>
       <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite"></span>
       <nav aria-label="Table pagination" class="datatable-page-nav">

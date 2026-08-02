@@ -255,6 +255,7 @@ export default class DataTable {
     this._renderSelection(pageRows);
     this._renderEmptyState(filtered.length);
     this._renderPagination(filtered.length, pageCount);
+    this._renderPageSize();
     this._renderBulkActions();
   }
 
@@ -436,6 +437,23 @@ export default class DataTable {
       fragment.appendChild(li);
     });
     template.parentNode.insertBefore(fragment, template);
+  }
+
+  _renderPageSize() {
+    const currentSize = String(this._pageSize);
+    const value = this._element.querySelector("[data-datatable-page-size-value]");
+    if (value) {
+      value.textContent = currentSize;
+    }
+    const select = this._element.querySelector("[data-datatable-page-size-select]");
+    if (select) {
+      select.value = currentSize;
+    }
+    this._element.querySelectorAll("[data-datatable-page-size-option]").forEach((option) => {
+      const active = option.dataset.datatablePageSizeOption === currentSize;
+      option.classList.toggle("active", active);
+      option.setAttribute("aria-pressed", active ? "true" : "false");
+    });
   }
 
   _setPageItemDisabled(button, disabled) {
@@ -695,6 +713,17 @@ export default class DataTable {
     }
   }
 
+  _setPageSize(value) {
+    const nextPageSize = Number(value);
+    if (!Number.isFinite(nextPageSize) || nextPageSize <= 0) {
+      return;
+    }
+    this._pageSize = nextPageSize;
+    this._element.dataset.datatablePageSize = String(nextPageSize);
+    this._currentPage = 1;
+    this._render();
+  }
+
   _bindEvents() {
     const search = this._element.querySelector("[data-datatable-search]");
     this._listen(search, "input", (event) => {
@@ -755,10 +784,12 @@ export default class DataTable {
     });
 
     const pageSizeSelect = this._element.querySelector("[data-datatable-page-size-select]");
-    this._listen(pageSizeSelect, "change", (event) => {
-      this._pageSize = Number(event.target.value) || this._pageSize;
-      this._currentPage = 1;
-      this._render();
+    this._listen(pageSizeSelect, "change", (event) => this._setPageSize(event.target.value));
+
+    this._element.querySelectorAll("[data-datatable-page-size-option]").forEach((option) => {
+      this._listen(option, "click", () => {
+        this._setPageSize(option.dataset.datatablePageSizeOption);
+      });
     });
   }
 }

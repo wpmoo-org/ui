@@ -382,6 +382,15 @@
   justify-self: start;
 }
 
+.datatable-page-size-trigger {
+  min-width: 3.25rem;
+  justify-content: space-between;
+}
+
+.datatable-page-size-menu {
+  min-width: 4rem;
+}
+
 .datatable-results-summary {
   justify-self: center;
   text-align: center;
