@@ -239,6 +239,8 @@ $moo-datatable-frame-header-min-height: 2.78125rem !default;
 $moo-datatable-table-select-all-offset-y: 0.046875rem !default;
 $moo-datatable-toolbar-control-height: calc(#{$input-height} + var(--bs-border-width) * 2) !default;
 $moo-datatable-icon-label-gap: 0.5rem !default;
+// Bootstrap dropdowns have no scoped Data Table filter-picker width token; the
+// compact root list and longer option drill-down each need their own knob.
 $moo-datatable-search-filter-menu-width: 12.5rem !default;
 $moo-datatable-search-filter-options-menu-width: 17rem !default;
 $moo-datatable-facet-menu-min-width: 12.5rem !default;
