@@ -243,7 +243,7 @@
   {% set root_class = "datatable datatable--responsive-" ~ responsive_mode %}
   {% if responsive_cards_enabled %}{% set root_class = root_class ~ " datatable--responsive-cards-active" %}{% endif %}
   {% if extra_class %}{% set root_class = root_class ~ " " ~ extra_class %}{% endif %}
-  {% set table_responsive_class = "table-responsive" %}
+  {% set table_responsive_class = "table-responsive scrollbar-thin" %}
   {% if responsive_mode in ["scroll", "toggle"] %}{% set table_responsive_class = table_responsive_class ~ " scroll-fade-x" %}{% endif %}
   {% set frame_class = "datatable-frame" %}
   {% if responsive_mode == "cards" %}{% set frame_class = frame_class ~ " d-none d-" ~ responsive_breakpoint ~ "-block" %}{% endif %}

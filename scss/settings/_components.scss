@@ -246,6 +246,9 @@ $moo-datatable-search-filter-options-menu-width: 17rem !default;
 $moo-datatable-facet-menu-min-width: 12.5rem !default;
 $moo-datatable-facet-trigger-font-size: $btn-font-size-sm !default;
 $moo-datatable-facet-trigger-min-height: 2rem !default;
-$moo-datatable-scrollbar-size: 0.375rem !default;
+// Bootstrap has no thin scrollbar utility. Keep the primitive shared and let
+// Data Table inherit it unless a consumer needs a component-specific override.
+$moo-scrollbar-thin-size: 0.375rem !default;
+$moo-datatable-scrollbar-size: $moo-scrollbar-thin-size !default;
 $moo-datatable-page-size-trigger-min-width: 3.25rem !default;
 $moo-datatable-page-size-menu-min-width: 4rem !default;
