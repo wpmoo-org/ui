@@ -137,10 +137,10 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  inline-size: 1.5rem;
+  inline-size: 2rem;
   block-size: 1.5rem;
   padding: 0;
-  margin-inline-end: 0.25rem;
+  margin-inline-end: 0;
   border-radius: var(--bs-border-radius-sm);
   gap: 0;
 }
@@ -343,6 +343,10 @@
   padding-inline: 0.5rem;
 }
 
+.datatable .datatable-layout-switch .btn-group-sm > .btn.datatable-view-option:has(> [data-icon="inline-start"]) {
+  padding-inline: 0.5rem;
+}
+
 .datatable-view-option > [data-icon] {
   width: 1rem;
   height: 1rem;
@@ -356,6 +360,10 @@
 
 .datatable-view-trigger {
   min-block-size: var(--moo-datatable-toolbar-control-height);
+}
+
+.datatable .datatable-toolbar-actions .btn.btn-sm.datatable-view-trigger:has(> [data-icon="inline-start"]) {
+  padding-inline: $btn-padding-x-sm;
 }
 
 .datatable-select-all {
