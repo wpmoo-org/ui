@@ -758,7 +758,7 @@
   color: var(--bs-body-color);
 }
 
-.btn.datatable-facet-trigger:focus {
+.btn.datatable-facet-trigger:focus:not(:focus-visible) {
   outline: 0;
   box-shadow: none;
 }
@@ -766,7 +766,6 @@
 .btn.datatable-facet-trigger:focus-visible,
 .btn.datatable-facet-trigger.show:focus-visible,
 .btn.datatable-facet-trigger-active:focus-visible {
-  outline: 0;
   box-shadow: none;
 }
 
