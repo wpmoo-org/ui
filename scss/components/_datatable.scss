@@ -226,12 +226,28 @@
   color: var(--bs-secondary-color);
   font-size: $font-size-sm;
   font-weight: var(--bs-body-font-weight);
+  font-variant-numeric: tabular-nums;
 }
 
 .datatable-filter-group > [data-icon],
 .datatable-filter-panel-back > [data-icon] {
   width: 0.875rem;
   height: 0.875rem;
+  color: var(--bs-secondary-color);
+}
+
+.datatable-filter-panel-back {
+  color: var(--bs-secondary-color);
+  font-weight: var(--bs-body-font-weight);
+}
+
+.datatable-filter-panel-back span {
+  color: var(--bs-body-color);
+}
+
+.datatable-filter-picker-item .text-body-secondary,
+.datatable-facet-option .text-body-secondary {
+  font-variant-numeric: tabular-nums;
 }
 
 .datatable-filter-option-search-wrap,
