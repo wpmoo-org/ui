@@ -931,17 +931,10 @@
     justify-content: center;
     gap: 0;
     flex: 0 0 auto;
-    min-width: 0;
-    min-height: 0;
-    inline-size: calc(
-      var(--bs-btn-line-height) +
-      var(--bs-btn-padding-y) +
-      var(--bs-btn-padding-y) +
-      var(--bs-btn-border-width) +
-      var(--bs-btn-border-width)
-    );
-    block-size: auto;
-    aspect-ratio: 1;
+    min-width: var(--moo-datatable-toolbar-control-height);
+    min-height: var(--moo-datatable-toolbar-control-height);
+    inline-size: var(--moo-datatable-toolbar-control-height);
+    block-size: var(--moo-datatable-toolbar-control-height);
     padding: 0;
   }
 
