@@ -55,7 +55,7 @@
       },
       "automatedEvidence": [
         "tests/test_datatable.py",
-        "tests/test_certification_browser.py",
+        "tests/test_datatable_browser.py",
         "dist/js/datatable.js"
       ],
       "browserCases": [
@@ -78,7 +78,7 @@
       ],
       "limitations": [
         "Phase 3B browser automation currently covers the canonical Bootstrap 5.3.3 lane in Chromium; a later gate will rerun the supported Bootstrap and browser matrices.",
-        "The fixture proves explicit public ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, text search, faceted Status/Priority filtering, single-column Asc/Desc/Hide sorting, column visibility toggling kept in sync between the column header and the View menu, row selection with an indeterminate select-all state, pagination composed with the active filter/sort state, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
+        "The release-review preview and browser automation prove explicit public ESM initialization, getInstance/getOrCreateInstance/dispose lifecycle, text search, faceted Status/Priority filtering, single-column Asc/Desc/Hide sorting, column visibility toggling kept in sync between the column header and the View menu, row selection with an indeterminate select-all state, pagination composed with the active filter/sort state, responsive/RTL/theme rendering, accessibility, and clean console/page-error evidence.",
         "No remote data engine: the component operates on a fixed, fully server-rendered dataset, matching the Phase 3B non-goal.",
         "The normalized screenshot is a render smoke and has no accepted regression baseline yet.",
         "Real-device and generic host-conformance evidence remain pending."

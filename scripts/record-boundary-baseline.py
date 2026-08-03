@@ -19,6 +19,7 @@ CORE_OUTPUTS = {
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/context-menu.js",
+    "dist/js/datatable.js",
     "dist/js/sidebar.js",
 }
 

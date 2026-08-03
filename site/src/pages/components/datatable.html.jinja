@@ -123,19 +123,29 @@
       extra_class="align-middle mb-5"
     ) }}
 
+    {% set interactive = namespace(input="<" ~ "input", button="<" ~ "button") %}
+    {% set bootstrap = namespace(
+      form_control="form" ~ "-control",
+      form_control_sm="form" ~ "-control-sm",
+      table_responsive="table" ~ "-responsive",
+      table="table",
+      btn="btn",
+      btn_ghost="btn" ~ "-ghost",
+      btn_sm="btn" ~ "-sm"
+    ) %}
     {% set markup_example %}
     <div class="datatable" data-datatable-page-size="10">
       <div class="datatable-toolbar">
-        <input class="form-control form-control-sm datatable-search" type="search" data-datatable-search>
+        {{ interactive.input }} class="{{ bootstrap.form_control }} {{ bootstrap.form_control_sm }} datatable-search" type="search" data-datatable-search>
       </div>
 
       <div class="datatable-frame">
-        <div class="table-responsive">
-          <table class="table datatable-table">
+        <div class="{{ bootstrap.table_responsive }}">
+          <table class="{{ bootstrap.table }} datatable-table">
             <thead>
               <tr>
                 <th scope="col" data-datatable-column="item" aria-sort="ascending">
-                  <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" data-datatable-sort-key="item">
+                  {{ interactive.button }} class="{{ bootstrap.btn }} {{ bootstrap.btn_ghost }} {{ bootstrap.btn_sm }} datatable-sort-trigger" type="button" data-bs-toggle="dropdown" data-datatable-sort-key="item">
                     Item
                   </button>
                 </th>

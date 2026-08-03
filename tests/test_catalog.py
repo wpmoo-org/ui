@@ -238,6 +238,29 @@ class CatalogContractTests(CatalogTestCase):
             # namespace is a composition of Bootstrap form-control,
             # validation, and Dropdown pieces.
             "combobox": ("combobox", "is-invalid"),
+            # Bootstrap Table owns the static table markup only. DataTable is
+            # Moo's documented interactive composition around Bootstrap table,
+            # dropdown, button, checkbox, badge, and pagination primitives.
+            "datatable": (
+                "datatable",
+                "active",
+                "badge",
+                "btn",
+                "btn-check",
+                "btn-group",
+                "dropdown",
+                "dropdown-header",
+                "dropdown-item",
+                "dropdown-item-check",
+                "form-check",
+                "ms-auto",
+                "pagination",
+                "show",
+                "table",
+                "table-responsive",
+                "text-body-secondary",
+                "text-truncate",
+            ),
             # Input group owns the compound surface around Bootstrap's native
             # children, so its partial may retune the edge behavior of form,
             # button, validation, and dropdown children while scoped under

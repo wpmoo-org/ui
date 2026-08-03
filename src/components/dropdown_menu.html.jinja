@@ -33,21 +33,14 @@
       {{ render_icon(icon, "inline-start") }}
     {%- endif -%}
   {% endset %}
+  {% set rendered_icon = icon_markup | trim %}
   {% if href %}
     <li>
-      <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>
-        {{ icon_markup | trim | safe }}
-        <span>{{ label }}</span>
-        {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
-      </a>
+      <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>{% if rendered_icon %}{{ rendered_icon | safe }}{% endif %}<span>{{ label }}</span>{% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}</a>
     </li>
   {% else %}
     <li>
-      <button class="{{ classes }}" type="button"{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} disabled{% endif %}>
-        {{ icon_markup | trim | safe }}
-        <span>{{ label }}</span>
-        {% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}
-      </button>
+      <button class="{{ classes }}" type="button"{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} disabled{% endif %}>{% if rendered_icon %}{{ rendered_icon | safe }}{% endif %}<span>{{ label }}</span>{% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}</button>
     </li>
   {% endif %}
 {%- endmacro %}
