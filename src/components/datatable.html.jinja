@@ -139,14 +139,14 @@
   </div>
 {%- endmacro %}
 
-{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none") -%}
+{% macro datatable_column_header(key, label, sr_label="", align="", sortable=true, width="", sort_state="none", hideable=true) -%}
   {% set th_class = "datatable-col" %}
   {% if align %}{% set th_class = th_class ~ " text-" ~ align %}{% endif %}
   {% set width_attr = ' style="width: ' ~ width ~ ';"' if width else "" %}
   {% if sortable %}
     {% set current_sort = sort_state if sort_state in ["asc", "desc"] else "none" %}
     {% set aria_sort = "ascending" if current_sort == "asc" else "descending" if current_sort == "desc" else "none" %}
-    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}" data-datatable-sort-state="{{ current_sort }}"{% if current_sort != "none" %} data-datatable-initial-sort="{{ current_sort }}" data-datatable-sort-direction="{{ current_sort }}"{% endif %} aria-sort="{{ aria_sort }}"{{ width_attr | safe }}>
+    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{% if not hideable %} data-datatable-column-fixed="true"{% endif %} data-datatable-sort-state="{{ current_sort }}"{% if current_sort != "none" %} data-datatable-initial-sort="{{ current_sort }}" data-datatable-sort-direction="{{ current_sort }}"{% endif %} aria-sort="{{ aria_sort }}"{{ width_attr | safe }}>
       <div class="dropdown datatable-sort">
         <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Sort by {{ label }}" data-datatable-sort-key="{{ key }}">
           <span>{{ label }}</span>
@@ -157,13 +157,15 @@
         {% call dropdown_menu() %}
           {{ dropdown_item("Asc", icon="arrow-up", attrs='data-datatable-sort-action="asc"') }}
           {{ dropdown_item("Desc", icon="arrow-down", attrs='data-datatable-sort-action="desc"') }}
-          {{ dropdown_divider() }}
-          {{ dropdown_item("Hide", icon="eye-off", attrs='data-datatable-sort-action="hide"') }}
+          {% if hideable %}
+            {{ dropdown_divider() }}
+            {{ dropdown_item("Hide", icon="eye-off", attrs='data-datatable-sort-action="hide"') }}
+          {% endif %}
         {% endcall %}
       </div>
     </th>
   {% else %}
-    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{{ width_attr | safe }}>
+    <th scope="col" class="{{ th_class }}" data-datatable-column="{{ key }}"{% if not hideable %} data-datatable-column-fixed="true"{% endif %}{{ width_attr | safe }}>
       {% if label | trim %}
         {{ label }}
       {% elif sr_label | trim %}
@@ -287,7 +289,7 @@
                 </th>
               {% endif %}
               {% for column in columns %}
-                {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none")) }}
+                {{ datatable_column_header(column.key, column.label, sr_label=column.sr_label | default(""), align=column.align | default(""), sortable=column.sortable | default(true), width=column.width | default(""), sort_state=column.initial_sort | default("none"), hideable=column.hideable | default(true)) }}
               {% endfor %}
             </tr>
           </thead>

@@ -265,6 +265,7 @@ export default class DataTable {
     this._renderToolbarState();
     this._renderSortHeaders();
     this._renderSelection(pageRows);
+    this._renderFrameState(filtered.length);
     this._renderEmptyState(filtered.length);
     this._renderPagination(filtered.length, pageCount);
     this._renderPageSize();
@@ -366,6 +367,13 @@ export default class DataTable {
     if (count) {
       count.textContent = String(this._selectedIds.size);
     }
+  }
+
+  _renderFrameState(totalRows) {
+    const isEmpty = totalRows === 0;
+    this._element.querySelectorAll(".datatable-frame, .datatable-card-frame").forEach((frame) => {
+      frame.hidden = isEmpty;
+    });
   }
 
   _renderEmptyState(totalRows) {
@@ -518,7 +526,16 @@ export default class DataTable {
     return withEllipsis;
   }
 
+  _isColumnFixed(key) {
+    return this._element
+      .querySelector(`th[data-datatable-column="${key}"]`)
+      ?.hasAttribute("data-datatable-column-fixed") || false;
+  }
+
   _setColumnVisible(key, visible, { syncViewToggle = true } = {}) {
+    if (!visible && this._isColumnFixed(key)) {
+      return;
+    }
     this._element.querySelectorAll(`[data-datatable-column="${key}"], [data-datatable-detail-column="${key}"]`).forEach((cell) => {
       cell.classList.toggle("datatable-col-hidden", !visible);
     });
