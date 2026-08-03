@@ -15,6 +15,8 @@
   --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
   --moo-datatable-table-select-all-offset-y: #{$moo-datatable-table-select-all-offset-y};
   --moo-datatable-toolbar-control-height: #{$moo-datatable-toolbar-control-height};
+  --moo-datatable-search-filter-menu-width: #{$moo-datatable-search-filter-menu-width};
+  --moo-datatable-search-filter-options-menu-width: #{$moo-datatable-search-filter-options-menu-width};
 }
 
 .datatable-table {
@@ -154,11 +156,15 @@
 .datatable-search-filter-menu {
   --bs-dropdown-border-radius: var(--bs-border-radius);
 
-  width: $moo-datatable-search-filter-menu-width;
+  width: var(--moo-datatable-search-filter-menu-width);
   max-width: calc(100vw - 1.5rem);
   max-height: calc(100vh - 8rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.datatable-search-filter-menu[data-datatable-filter-menu-panel="options"] {
+  width: var(--moo-datatable-search-filter-options-menu-width);
 }
 
 .datatable-facet-menu {
@@ -248,8 +254,17 @@
 }
 
 .datatable-filter-picker-item .text-body-secondary,
-.datatable-facet-option .text-body-secondary {
+.datatable-facet-item .text-body-secondary {
+  flex: 0 0 auto;
   font-variant-numeric: tabular-nums;
+}
+
+.datatable-filter-picker-item > [data-datatable-filter-option-label],
+.datatable-facet-item > [data-datatable-facet-option-label] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .datatable-filter-option-search-wrap,

@@ -651,6 +651,9 @@ export default class DataTable {
       const isRequestedOptions = panel.dataset.datatableFilterPanelKey === key;
       panel.hidden = key ? !isRequestedOptions : !isFacetList;
     });
+    this._element
+      .querySelector(".datatable-search-filter-menu")
+      ?.setAttribute("data-datatable-filter-menu-panel", key ? "options" : "facets");
   }
 
   _handleFilterPickerClick(event) {
