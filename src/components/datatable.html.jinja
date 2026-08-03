@@ -173,7 +173,22 @@
   {% endif %}
 {%- endmacro %}
 
-{% macro datatable_frame_header(id, header_id, table_id, columns, selectable, selection_noun, responsive_mode) -%}
+{% macro datatable_view_toggle(id) -%}
+  <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
+    <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-table" value="table" autocomplete="off" checked>
+    <label class="btn btn-outline-secondary datatable-view-option" for="{{ id }}-view-table">
+      {{ render_icon("table", "inline-start") }}
+      <span class="visually-hidden">Table</span>
+    </label>
+    <input type="radio" class="btn-check" name="{{ id }}-view" id="{{ id }}-view-cards" value="cards" autocomplete="off">
+    <label class="btn btn-outline-secondary datatable-view-option" for="{{ id }}-view-cards">
+      {{ render_icon("layout-grid", "inline-start") }}
+      <span class="visually-hidden">Cards</span>
+    </label>
+  </div>
+{%- endmacro %}
+
+{% macro datatable_frame_header(id, header_id, table_id, columns, selectable, selection_noun) -%}
   <div class="datatable-frame-header">
     {% if selectable %}
       {{ checkbox(id ~ "-" ~ header_id ~ "-select-visible", label="Select visible " ~ selection_noun, extra_class="datatable-select-all", input_attrs='aria-controls="' ~ table_id ~ '" data-datatable-select-all') }}
@@ -181,20 +196,6 @@
       <span></span>
     {% endif %}
     <div class="datatable-toolbar-actions d-flex align-items-center gap-2 ms-auto">
-      {% if responsive_mode == "toggle" %}
-        <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
-          <input type="radio" class="btn-check" name="{{ id }}-{{ header_id }}-view" id="{{ id }}-{{ header_id }}-view-table" value="table" autocomplete="off" checked>
-          <label class="btn btn-outline-secondary datatable-view-option" for="{{ id }}-{{ header_id }}-view-table">
-            {{ render_icon("table", "inline-start") }}
-            <span class="visually-hidden">Table</span>
-          </label>
-          <input type="radio" class="btn-check" name="{{ id }}-{{ header_id }}-view" id="{{ id }}-{{ header_id }}-view-cards" value="cards" autocomplete="off">
-          <label class="btn btn-outline-secondary datatable-view-option" for="{{ id }}-{{ header_id }}-view-cards">
-            {{ render_icon("layout-grid", "inline-start") }}
-            <span class="visually-hidden">Cards</span>
-          </label>
-        </div>
-      {% endif %}
       <div class="dropdown datatable-view">
         <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="View columns">
           {{ render_icon("sliders-horizontal", "inline-start") }}
@@ -267,9 +268,14 @@
           {{ render_icon("x", "inline-end") }}
         </button>
       </div>
+      {% if responsive_mode == "toggle" %}
+        <div class="datatable-layout-switch ms-auto">
+          {{ datatable_view_toggle(id) }}
+        </div>
+      {% endif %}
     </div>
     <div class="{{ frame_class }}">
-      {{ datatable_frame_header(id, "table", table_id, columns, selectable, selection_noun, responsive_mode) }}
+      {{ datatable_frame_header(id, "table", table_id, columns, selectable, selection_noun) }}
       <div class="{{ table_responsive_class }}">
         <table class="table align-middle datatable-table" id="{{ table_id }}">
           <thead>
@@ -307,7 +313,7 @@
     </div>
     {% if responsive_cards_enabled %}
       <div class="{{ card_frame_class }}">
-        {{ datatable_frame_header(id, "cards", table_id, columns, selectable, selection_noun, responsive_mode) }}
+        {{ datatable_frame_header(id, "cards", table_id, columns, selectable, selection_noun) }}
         <div class="{{ cards_class }}" data-datatable-cards aria-label="Responsive {{ table_id }} cards">
           {% for row in rows %}
             {% set row_label = row.label | default(row.id) %}

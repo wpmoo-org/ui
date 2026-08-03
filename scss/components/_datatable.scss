@@ -286,6 +286,13 @@
   align-items: center;
 }
 
+.datatable-layout-switch {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .datatable-view-option {
   display: inline-flex;
   align-items: center;
@@ -809,6 +816,11 @@
 
   .datatable-toolbar-filters {
     min-width: 0;
+  }
+
+  .datatable-layout-switch {
+    grid-column: 2;
+    justify-self: end;
   }
 
   .datatable-select-all {
