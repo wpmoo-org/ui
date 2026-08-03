@@ -929,17 +929,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0;
+    gap: 0.375rem;
     flex: 0 0 auto;
-    min-width: var(--moo-datatable-toolbar-control-height);
+    min-width: 0;
     min-height: var(--moo-datatable-toolbar-control-height);
-    inline-size: var(--moo-datatable-toolbar-control-height);
+    inline-size: auto;
     block-size: var(--moo-datatable-toolbar-control-height);
-    padding: 0;
+    padding-inline: $btn-padding-x-sm;
   }
 
   .datatable-toolbar-actions .btn.btn-sm.datatable-view-trigger:has(> [data-icon="inline-start"]) {
-    padding-inline: 0;
+    padding-inline: $btn-padding-x-sm;
   }
 
   .datatable-toolbar-actions .datatable-view-trigger > [data-icon] {
@@ -948,7 +948,7 @@
   }
 
   .datatable-view-trigger-label {
-    display: none;
+    display: inline;
   }
 
   .datatable-pagination {
