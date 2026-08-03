@@ -233,6 +233,9 @@ $moo-datatable-card-label-width: 7rem !default;
 // Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
 // these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
 $moo-datatable-frame-header-min-height: 2.78125rem !default;
+// The table header's native checkbox sits inside a Bootstrap table cell while
+// the card header's checkbox is flex-aligned; this 0.75px nudge keeps their
+// visual boxes on the same y-axis when switching between list and card view.
 $moo-datatable-table-select-all-offset-y: 0.046875rem !default;
 $moo-datatable-toolbar-control-height: calc(#{$input-height} + var(--bs-border-width) * 2) !default;
 $moo-datatable-icon-label-gap: 0.5rem !default;
