@@ -857,6 +857,21 @@
     max-width: none;
   }
 
+  .datatable-search-filter-menu {
+    max-width: calc(100vw - 2rem);
+  }
+
+  .datatable-search-filter-menu .dropdown-header {
+    padding-block-end: 0.25rem;
+    font-size: $font-size-sm;
+  }
+
+  .datatable-search-filter-menu .dropdown-item {
+    min-height: 1.875rem;
+    padding-block: 0.3125rem;
+    font-size: $font-size-sm;
+  }
+
   .datatable-toolbar-filters {
     display: flex;
     grid-column: 1 / -1;
