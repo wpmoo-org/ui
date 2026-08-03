@@ -188,30 +188,29 @@
   </div>
 {%- endmacro %}
 
-{% macro datatable_frame_header(id, header_id, table_id, columns, selectable, selection_noun) -%}
-  <div class="datatable-frame-header">
-    {% if selectable %}
-      {{ checkbox(id ~ "-" ~ header_id ~ "-select-visible", label="Select visible " ~ selection_noun, extra_class="datatable-select-all", input_attrs='aria-controls="' ~ table_id ~ '" data-datatable-select-all') }}
-    {% else %}
-      <span></span>
-    {% endif %}
-    <div class="datatable-toolbar-actions d-flex align-items-center gap-2 ms-auto">
-      <div class="dropdown datatable-view">
-        <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="View columns">
-          {{ render_icon("sliders-horizontal", "inline-start") }}
-          <span class="datatable-view-trigger-label">View</span>
-        </button>
-        {% call dropdown_menu(align="end") %}
-          {{ dropdown_header("Toggle columns") }}
-          {% for column in columns %}
-            {% if column.hideable | default(true) %}
-              {{ dropdown_toggle_item(column.label, pressed=true, attrs='data-datatable-column-toggle="' ~ column.key ~ '"') }}
-            {% endif %}
-          {% endfor %}
-        {% endcall %}
-      </div>
-    </div>
+{% macro datatable_column_visibility_menu(columns) -%}
+  <div class="dropdown datatable-view">
+    <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="View columns">
+      {{ render_icon("sliders-horizontal", "inline-start") }}
+      <span class="datatable-view-trigger-label">View</span>
+    </button>
+    {% call dropdown_menu(align="end") %}
+      {{ dropdown_header("Toggle columns") }}
+      {% for column in columns %}
+        {% if column.hideable | default(true) %}
+          {{ dropdown_toggle_item(column.label, pressed=true, attrs='data-datatable-column-toggle="' ~ column.key ~ '"') }}
+        {% endif %}
+      {% endfor %}
+    {% endcall %}
   </div>
+{%- endmacro %}
+
+{% macro datatable_frame_header(id, header_id, table_id, selectable, selection_noun) -%}
+  {% if selectable %}
+    <div class="datatable-frame-header">
+      {{ checkbox(id ~ "-" ~ header_id ~ "-select-visible", label="Select visible " ~ selection_noun, extra_class="datatable-select-all", input_attrs='aria-controls="' ~ table_id ~ '" data-datatable-select-all') }}
+    </div>
+  {% endif %}
 {%- endmacro %}
 
 {% macro datatable(
@@ -268,21 +267,23 @@
           {{ render_icon("x", "inline-end") }}
         </button>
       </div>
-      {% if responsive_mode == "toggle" %}
-        <div class="datatable-layout-switch ms-auto">
+      <div class="datatable-toolbar-actions d-flex align-items-center gap-2 ms-auto">
+        {% if responsive_mode == "toggle" %}
+        <div class="datatable-layout-switch">
           {{ datatable_view_toggle(id) }}
         </div>
-      {% endif %}
+        {% endif %}
+        {{ datatable_column_visibility_menu(columns) }}
+      </div>
     </div>
     <div class="{{ frame_class }}">
-      {{ datatable_frame_header(id, "table", table_id, columns, selectable, selection_noun) }}
       <div class="{{ table_responsive_class }}">
         <table class="table align-middle datatable-table" id="{{ table_id }}">
           <thead>
             <tr>
               {% if selectable %}
                 <th scope="col" class="datatable-col-select">
-                  <span class="visually-hidden">Selection</span>
+                  {{ checkbox(id ~ "-table-select-visible", aria_label="Select visible " ~ selection_noun, extra_class="datatable-select-all datatable-select-all-table", input_attrs='aria-controls="' ~ table_id ~ '" data-datatable-select-all', label_wrapper=true) }}
                 </th>
               {% endif %}
               {% for column in columns %}
@@ -313,7 +314,7 @@
     </div>
     {% if responsive_cards_enabled %}
       <div class="{{ card_frame_class }}">
-        {{ datatable_frame_header(id, "cards", table_id, columns, selectable, selection_noun) }}
+        {{ datatable_frame_header(id, "cards", table_id, selectable, selection_noun) }}
         <div class="{{ cards_class }}" data-datatable-cards aria-label="Responsive {{ table_id }} cards">
           {% for row in rows %}
             {% set row_label = row.label | default(row.id) %}

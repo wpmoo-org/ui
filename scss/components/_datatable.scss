@@ -12,6 +12,8 @@
 .datatable {
   --moo-datatable-min-width: #{$moo-datatable-min-width};
   --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
+  --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
+  --moo-datatable-table-select-all-offset-y: #{$moo-datatable-table-select-all-offset-y};
 }
 
 .datatable-table {
@@ -59,7 +61,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.625rem;
-  padding: 0.375rem 0.625rem;
+  min-block-size: var(--moo-datatable-frame-header-min-height);
+  padding: 0.375rem 0.5rem;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
   background-color: var(--bs-body-bg);
 }
@@ -328,6 +331,10 @@
   margin: 0;
 }
 
+.datatable-select-all-table {
+  transform: translateY(var(--moo-datatable-table-select-all-offset-y));
+}
+
 .datatable-checkbox-target {
   position: relative;
   display: grid;
@@ -362,6 +369,7 @@
 
 .datatable-col-select {
   width: 2.75rem;
+  vertical-align: middle;
   white-space: nowrap;
 }
 

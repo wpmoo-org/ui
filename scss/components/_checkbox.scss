@@ -10,3 +10,19 @@
 [data-bs-theme="dark"] .form-check-input:checked {
   filter: invert(1);
 }
+
+.form-check-input[type="checkbox"]:focus:active,
+.form-check-input[type="checkbox"]:focus:not(:focus-visible) {
+  border-color: var(--bs-border-color);
+  box-shadow: none;
+}
+
+.form-check-input[type="checkbox"]:checked:focus:active,
+.form-check-input[type="checkbox"]:checked:focus:not(:focus-visible) {
+  border-color: $form-check-input-checked-border-color;
+}
+
+.form-check-input[type="checkbox"]:indeterminate:focus:active,
+.form-check-input[type="checkbox"]:indeterminate:focus:not(:focus-visible) {
+  border-color: $form-check-input-indeterminate-border-color;
+}
