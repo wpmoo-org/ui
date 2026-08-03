@@ -47,7 +47,6 @@ export default class DataTable {
     this._searchTerm = "";
     this._tooltips = [];
     this._filterMode = element.dataset.datatableFilterMode || "inline";
-    this._filterMenuTimer = null;
 
     this._rows = Array.from(this._tbody.querySelectorAll(":scope > tr[data-datatable-row]")).map((tr, index) => ({
       element: tr,
@@ -71,10 +70,6 @@ export default class DataTable {
       target.removeEventListener(type, handler, options);
     });
     this._listeners = [];
-    if (this._filterMenuTimer) {
-      this._window.clearTimeout(this._filterMenuTimer);
-      this._filterMenuTimer = null;
-    }
     this._tooltips.forEach((tooltip) => tooltip.dispose());
     this._tooltips = [];
     instances.delete(this._element);
@@ -715,23 +710,6 @@ export default class DataTable {
     this._trigger("filter");
   }
 
-  _showSearchFilterMenu(search) {
-    const trigger = this._element.querySelector("[data-datatable-filter-menu-trigger]");
-    const Dropdown = this._bootstrap("Dropdown");
-    if (!trigger || !Dropdown) {
-      return;
-    }
-    if (this._filterMenuTimer) {
-      this._window.clearTimeout(this._filterMenuTimer);
-    }
-    this._filterMenuTimer = this._window.setTimeout(() => {
-      this._showFilterPickerPanel();
-      Dropdown.getOrCreateInstance(trigger).show();
-      search?.focus({ preventScroll: true });
-      this._filterMenuTimer = null;
-    });
-  }
-
   _handleSelectAll(event) {
     const checked = event.target.checked;
     const filtered = this._visibleRows();
@@ -889,21 +867,14 @@ export default class DataTable {
     this._listen(search, "input", (event) => {
       this._searchTerm = normalize(event.target.value);
       this._currentPage = 1;
-      this._showSearchFilterMenu(event.currentTarget);
       this._render();
       this._trigger("filter");
     });
-    this._listen(search, "focus", (event) => this._showSearchFilterMenu(event.currentTarget));
-    this._listen(search, "click", (event) => this._showSearchFilterMenu(event.currentTarget));
     this._listen(search, "keydown", (event) => {
       if (event.key !== "Enter") {
         return;
       }
       event.preventDefault();
-      if (this._filterMenuTimer) {
-        this._window.clearTimeout(this._filterMenuTimer);
-        this._filterMenuTimer = null;
-      }
       const trigger = this._element.querySelector("[data-datatable-filter-menu-trigger]");
       const Dropdown = this._bootstrap("Dropdown");
       if (trigger && Dropdown) {

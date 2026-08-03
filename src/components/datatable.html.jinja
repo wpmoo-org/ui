@@ -91,10 +91,8 @@
   <div class="datatable-search-filter">
     <div class="input-group input-group-sm datatable-searchbar">
       <span class="datatable-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
-      <input class="form-control datatable-search{% if filter_mode == "picker" and facets %} datatable-search-with-filter{% endif %}" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
-    </div>
-    {% if filter_mode == "picker" and facets %}
-      <div class="dropdown datatable-filter-picker">
+      <input class="form-control datatable-search" type="search" placeholder="{{ search_placeholder }}" aria-label="{{ search_placeholder }}" data-datatable-search>
+      {% if filter_mode == "picker" and facets %}
         <button class="btn btn-ghost btn-icon-sm datatable-filter-picker-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-offset="0,8" aria-expanded="false" aria-label="Open filters" data-datatable-filter-menu-trigger>
           {{ render_icon("list-filter", "inline-start") }}
         </button>
@@ -136,8 +134,8 @@
             {% endfor %}
           {% endfor %}
         {% endcall %}
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 {%- endmacro %}
 

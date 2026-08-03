@@ -94,8 +94,10 @@
 
 .datatable-searchbar {
   position: relative;
+  display: flex;
   flex: 1 1 auto;
   flex-wrap: nowrap;
+  align-items: center;
   width: 100%;
 }
 
@@ -105,10 +107,6 @@
   min-width: 0;
   width: 1%;
   padding-inline-start: 2rem;
-}
-
-.datatable-searchbar .datatable-search-with-filter {
-  padding-inline-end: 2.5rem;
 }
 
 .datatable-search-icon {
@@ -129,22 +127,15 @@
   height: 0.875rem;
 }
 
-.datatable-filter-picker {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: $spacer * 0.25;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-}
-
 .datatable-filter-picker-trigger {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   inline-size: 1.5rem;
   block-size: 1.5rem;
   padding: 0;
+  margin-inline-end: 0.25rem;
   border-radius: var(--bs-border-radius-sm);
   gap: 0;
 }
