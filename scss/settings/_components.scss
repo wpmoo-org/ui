@@ -224,12 +224,17 @@ $moo-field-separator-opacity: 0.1 !default;
 // scoped, consumer-overridable knob: set to 1 to turn the effect off, or
 // raise it for a more pronounced zoom.
 $moo-datatable-bulk-actions-hover-scale: 1.02 !default;
+// Bootstrap has no Data Table layout/card primitive, so these scoped knobs
+// describe the generated table/card frames without becoming global widths.
 $moo-datatable-min-width: 48rem !default;
 $moo-datatable-release-review-min-width: 64rem !default;
 $moo-datatable-card-min-width: 20rem !default;
 $moo-datatable-card-label-width: 7rem !default;
+// Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
+// these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
 $moo-datatable-frame-header-min-height: 2.78125rem !default;
 $moo-datatable-table-select-all-offset-y: 0.046875rem !default;
+$moo-datatable-toolbar-control-height: calc(#{$input-height} + var(--bs-border-width) * 2) !default;
 $moo-datatable-icon-label-gap: 0.5rem !default;
 $moo-datatable-search-filter-menu-width: 14rem !default;
 $moo-datatable-facet-menu-min-width: 12.5rem !default;
