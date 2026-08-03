@@ -169,6 +169,15 @@
   min-width: 0;
 }
 
+.datatable-search-filter-menu .dropdown-header {
+  padding-block: 0.125rem 0.375rem;
+  padding-inline: 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
 .datatable-search-filter-menu .dropdown-item,
 .datatable-facet-menu .dropdown-item {
   min-height: 2rem;
@@ -207,6 +216,16 @@
 .datatable-filter-group,
 .datatable-filter-panel-back {
   gap: 0.5rem;
+}
+
+.datatable-filter-group {
+  justify-content: flex-start;
+}
+
+.datatable-filter-group-summary {
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  font-weight: var(--bs-body-font-weight);
 }
 
 .datatable-filter-group > [data-icon],
