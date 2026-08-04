@@ -179,15 +179,11 @@
     ) }}
   </div>
 
-  <p class="text-body-secondary">
-    Need sorting, filtering, or pagination on top of this? That calls for a dedicated Data Table
-    component built on top of this Table; it isn't part of this catalog yet.
-  </p>
-
   {{ render_reference(
     "For Bootstrap's source behavior and contextual row/cell variants, see the",
     "https://getbootstrap.com/docs/5.3/content/tables/",
-    "Bootstrap Tables documentation"
+    "Bootstrap Tables documentation",
+    limitation="This Table intentionally has no sorting, filtering, or pagination. Need those on top of a table? The Data Table component composes this same Bootstrap table markup with that interactive behavior."
   ) }}
 
 {% endblock %}

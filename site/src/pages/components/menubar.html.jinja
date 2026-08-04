@@ -3,7 +3,6 @@
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item, dropdown_toggle_item, dropdown_header, dropdown_divider %}
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/tabs.html.jinja" import tabs %}
-{% from "components/alert.html.jinja" import alert %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -202,16 +201,11 @@
     ) }}
   </div>
 
-  {{ alert(
-    "Submenu is not yet supported",
-    "The reference nests a hover-opened flyout menu inside a menu item (for example Edit > Find, or File > Share). Bootstrap's dropdown plugin has no native nested-menu behavior, and faking one with plain markup would claim a keyboard/hover model this catalog cannot back yet. Items like Find above render as plain commands instead of a submenu trigger. Tracked as a gap rather than approximated with misleading markup.",
-    icon="triangle-alert"
-  ) }}
-
   {{ render_reference(
     "For Bootstrap's Dropdown plugin options, positioning, and keyboard behavior, see the",
     "https://getbootstrap.com/docs/5.3/components/dropdowns/",
-    "Bootstrap Dropdowns documentation"
+    "Bootstrap Dropdowns documentation",
+    limitation="Submenu is not yet supported: the reference nests a hover-opened flyout menu inside a menu item (for example Edit > Find, or File > Share). Bootstrap's dropdown plugin has no native nested-menu behavior, and faking one with plain markup would claim a keyboard/hover model this catalog cannot back yet. Items like Find above render as plain commands instead of a submenu trigger. Tracked as a gap rather than approximated with misleading markup."
   ) }}
 
 {% endblock %}
