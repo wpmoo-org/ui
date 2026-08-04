@@ -173,7 +173,14 @@
   box-shadow: $input-focus-box-shadow;
 }
 
-.input-group:not(:has(> .form-control[type="file"])) > :focus {
+// Scoped to the native form control itself, not "any focused child": the
+// input-group already carries its own compound glow from the rule above, so
+// only the .form-control/.form-select that would otherwise draw a second,
+// competing glow needs its own default suppressed. A bare > :focus also
+// matched dropdown-toggle buttons living in the same input-group (e.g. Data
+// Table's filter-picker trigger), and its (0,4,0) specificity beat those
+// buttons' own :focus-visible keyboard ring outright.
+.input-group:not(:has(> .form-control[type="file"])) > :is(.form-control, .form-select):focus {
   outline: 0;
   box-shadow: none;
 }
