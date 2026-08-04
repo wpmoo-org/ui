@@ -126,6 +126,15 @@ body {
   color: currentColor;
 }
 
+// Below lg the repository label collapses and the link becomes icon-only;
+// restore symmetric padding so the mark sits optically centered (the core
+// inline-start rule assumes a visible label next to the icon).
+@media (max-width: 991.98px) {
+  .btn.moo-catalog__github-link:has(> [data-icon="inline-start"]) {
+    padding-inline: 0.5rem;
+  }
+}
+
 .moo-catalog__theme-toggle {
   border-radius: 50%;
 }
