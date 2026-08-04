@@ -262,7 +262,7 @@
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
   <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}" data-datatable-filter-mode="{{ filter_mode }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
-    <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-2" data-datatable-toolbar>
+    <div class="datatable-toolbar" data-datatable-toolbar>
       <div class="datatable-toolbar-query">
         {{ datatable_search_filter(search_placeholder, facets, filter_mode) }}
       </div>
@@ -275,7 +275,7 @@
           {{ render_icon("x", "inline-end") }}
         </button>
       </div>
-      <div class="datatable-toolbar-actions d-flex align-items-center gap-2 ms-auto">
+      <div class="datatable-toolbar-actions">
         {% if responsive_mode == "toggle" %}
         <div class="datatable-layout-switch">
           {{ datatable_view_toggle(id) }}

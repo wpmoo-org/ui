@@ -93,6 +93,26 @@
   vertical-align: middle;
 }
 
+// The toolbar's flex layout belongs to the component itself, not to
+// Bootstrap layout utilities on the macro markup: the narrow-screen grid
+// override below can replace it without an !important fight against
+// .d-flex, and the trailing actions group owns its own
+// margin-inline-start: auto alignment instead of .ms-auto.
+.datatable-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.datatable-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
 // Bootstrap's .form-control defaults to width: 100%, so inside the
 // toolbar's flex row the search input claims the entire line on its own
 // and pushes the Status/Priority facet triggers onto a wrapped second
@@ -867,6 +887,7 @@
 // backdrop blur have no existing Bootstrap utility to consume.
 .datatable-bulk-actions {
   --moo-datatable-bulk-actions-hover-scale: #{$moo-datatable-bulk-actions-hover-scale};
+  --moo-datatable-bulk-actions-backdrop-blur: #{$moo-datatable-bulk-actions-backdrop-blur};
 
   position: fixed;
   inset-inline-start: 50%;
@@ -882,7 +903,7 @@
   border-radius: var(--bs-border-radius-xl);
   background-color: var(--bs-body-bg);
   background-color: color-mix(in srgb, var(--bs-body-bg) 95%, transparent);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(var(--moo-datatable-bulk-actions-backdrop-blur));
   box-shadow: var(--bs-box-shadow-lg);
 }
 
@@ -898,8 +919,11 @@
   white-space: nowrap;
 }
 
+// Catalog preview chrome: caps the full-bleed release-review preview pages.
+// A Sass knob keeps the geometry on the ordered settings aggregate instead
+// of a component-local literal.
 .datatable-preview-shell {
-  max-width: 82rem;
+  max-width: $moo-datatable-preview-shell-max-width;
 }
 
 @media (max-width: 991.98px) {
@@ -925,7 +949,7 @@
 
 @media (max-width: 575.98px) {
   .datatable-toolbar {
-    display: grid !important;
+    display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
@@ -980,9 +1004,9 @@
     grid-column: 1;
   }
 
-  .datatable-toolbar-actions.ms-auto {
+  .datatable-toolbar-actions {
     grid-column: 1 / -1;
-    margin-inline-start: 0 !important;
+    margin-inline-start: 0;
     justify-self: end;
   }
 

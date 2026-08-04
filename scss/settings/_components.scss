@@ -233,6 +233,9 @@ $moo-field-separator-opacity: 0.1 !default;
 // scoped, consumer-overridable knob: set to 1 to turn the effect off, or
 // raise it for a more pronounced zoom.
 $moo-datatable-bulk-actions-hover-scale: 1.02 !default;
+// The selection bulk-actions bar is a fixed-position overlay surface; its
+// backdrop blur strength has no Bootstrap equivalent to consume.
+$moo-datatable-bulk-actions-backdrop-blur: 8px !default;
 // Bootstrap has no Data Table layout/card primitive, so these scoped knobs
 // describe the generated table/card frames without becoming global widths.
 $moo-datatable-min-width: 48rem !default;
@@ -287,3 +290,6 @@ $moo-scrollbar-thin-size: 0.375rem !default;
 $moo-datatable-scrollbar-size: $moo-scrollbar-thin-size !default;
 $moo-datatable-page-size-trigger-min-width: 3.25rem !default;
 $moo-datatable-page-size-menu-min-width: 4rem !default;
+// Catalog preview chrome: maximum width of the full-bleed release-review
+// preview pages that host the Data Table block.
+$moo-datatable-preview-shell-max-width: 82rem !default;
