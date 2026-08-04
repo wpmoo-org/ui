@@ -302,7 +302,7 @@
           <tbody>
             {% for row in rows %}
               {% set row_label = row.label | default(row.id) %}
-              <tr id="{{ row.id }}" data-datatable-row{% if row.search is defined %} data-datatable-search="{{ row.search }}"{% endif %}{% for facet_key, facet_value in (row.facets | default({})).items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}>
+              <tr id="{{ row.id }}" data-datatable-row{% if row.search is defined %} data-datatable-search="{{ row.search }}"{% endif %}{% for facet_key, facet_value in (row.facets | default({})).items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}{% if loop.index > default_page_size %} hidden{% endif %}>
                 {% if selectable %}
                   <td class="datatable-col-select">
                     {{ checkbox(id ~ "-" ~ row.id ~ "-table-select", aria_label="Select " ~ row_label, extra_class="datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
