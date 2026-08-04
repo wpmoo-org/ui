@@ -1,5 +1,12 @@
 {% extends "layouts/base.html.jinja" %}
 
+{# This layout has no catalog chrome (nav, headers) -- the only surface
+   that renders in the Geist display face -- and .moo-block-standalone
+   (scss/catalog/_blocks.scss) resets its own content back to the product's
+   system-ui default, so nothing on this layout ever needs Geist. Preloading
+   it here just wastes bandwidth on a font-face the page never uses. #}
+{% block font_preload %}{% endblock %}
+
 {% block body %}
   <main class="moo-block-standalone moo-ui" id="main-content" tabindex="-1">
     {% block content %}{% endblock %}

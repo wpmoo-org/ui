@@ -62,9 +62,15 @@
   transform-origin: top right;
 }
 
+// Standalone preview pages extend the catalog's own <body>, which sets the
+// catalog-chrome-only Geist display face (scss/catalog/_shell.scss). This is
+// product content, not chrome -- same reasoning, and the same
+// var(--bs-body-font-family) reset, .moo-example__preview already applies
+// for the catalog-embedded version of the same preview.
 .moo-block-standalone {
   min-height: 100vh;
   background: var(--bs-body-bg);
+  font-family: var(--bs-body-font-family);
 }
 
 .moo-block-standalone>.sidebar-wrapper {
