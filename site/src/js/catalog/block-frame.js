@@ -1,5 +1,17 @@
 const states = new WeakMap();
 
+// Safari has a long-documented bug where a transform: scale()'d <iframe>
+// can mis-composite after the iframe's own internal content repaints (e.g.
+// opening a dropdown inside it): the outer paint snaps toward the actual
+// browser viewport origin instead of staying anchored to the scaled box,
+// making the whole preview appear to jump toward the window edge. zoom
+// rescales the layout box itself rather than painting a transformed layer,
+// so there is no separate composited layer for Safari to mis-position.
+// Firefox only gained zoom support in 126 (2024), so feature-detect and
+// keep the transform path as a fallback for older engines.
+const supportsZoom =
+  typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("zoom", "1");
+
 export function initBlockFrames(root = document) {
   if (states.has(root)) {
     return states.get(root);
@@ -36,7 +48,12 @@ export function initBlockFrames(root = document) {
     const scale = Math.min(1, viewport.clientWidth / width);
     frame.style.width = `${width}px`;
     frame.style.height = `${height}px`;
-    frame.style.transform = `scale(${scale})`;
+    if (supportsZoom) {
+      frame.style.zoom = String(scale);
+      frame.style.transform = "";
+    } else {
+      frame.style.transform = `scale(${scale})`;
+    }
     viewport.style.height = `${Math.ceil(height * scale)}px`;
     updateSizeLabel(shell, width, height);
   };
