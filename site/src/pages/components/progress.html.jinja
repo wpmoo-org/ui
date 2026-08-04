@@ -14,7 +14,9 @@
 
   <div class="moo-component-examples">
     {% set default %}
-      {{ progress(66, aria_label="Upload progress") }}
+      <div class="w-100">
+        {{ progress(66, aria_label="Upload progress") }}
+      </div>
     {% endset %}
     {{ render_example(
       "default",
@@ -40,7 +42,9 @@
     ) }}
 
     {% set with_label %}
-      {{ progress(40, aria_label="Download progress", show_label=true) }}
+      <div class="w-100">
+        {{ progress(40, aria_label="Download progress", show_label=true) }}
+      </div>
     {% endset %}
     {{ render_example(
       "with-label",
@@ -51,17 +55,17 @@
     ) }}
 
     {% set arabic_progress %}
-      <div dir="rtl">
+      <div dir="rtl" class="w-100">
         {{ progress(40, aria_label="تقدم التنزيل", show_label=true) }}
       </div>
     {% endset %}
     {% set hebrew_progress %}
-      <div dir="rtl">
+      <div dir="rtl" class="w-100">
         {{ progress(40, aria_label="התקדמות ההורדה", show_label=true) }}
       </div>
     {% endset %}
     {% set english_progress %}
-      <div dir="rtl">
+      <div dir="rtl" class="w-100">
         {{ progress(40, aria_label="Download progress", show_label=true) }}
       </div>
     {% endset %}
