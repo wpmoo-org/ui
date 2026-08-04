@@ -29,6 +29,7 @@ body {
   height: 2rem;
   flex: 1 1 10rem;
   min-width: 0;
+  justify-content: flex-start;
   padding: 0.5rem 0.75rem;
   color: var(--bs-secondary-color);
   border: var(--bs-border-width) solid var(--bs-border-color);
@@ -61,15 +62,9 @@ body {
   gap: 0.25rem;
 }
 
-// Below sm the trigger is icon-only, so it keeps the base .btn centering.
-// From sm up the visible "Search" label reads like input text, not a
-// centered button caption.
-@include media-breakpoint-up(sm) {
-  .moo-catalog__search-trigger {
-    justify-content: flex-start;
-  }
-}
-
+// The visible "Search" label reads like input text at every width, so the
+// trigger stays start-aligned; from md up the shortcut hint takes the far
+// edge.
 @include media-breakpoint-up(md) {
   .moo-catalog__search-trigger {
     flex: 0 0 auto;
