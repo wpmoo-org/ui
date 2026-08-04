@@ -16,6 +16,21 @@ export function initBootstrapPreview(root = document) {
     }
   };
 
+  // Preview pages are designed to fit their frame width, so a horizontal
+  // scroll offset is engine fallout — WebKit can keep a stale inner viewport
+  // when the outer frame shrinks without a reload, and a later focus or
+  // scroll-into-view parks the document at a bogus offset. Clamp it back
+  // whenever the content actually fits; genuine overflow pages are untouched.
+  const clampHorizontalScroll = () => {
+    const doc = root.documentElement || root.ownerDocument?.documentElement;
+    if (doc && doc.scrollLeft !== 0 && doc.scrollWidth <= doc.clientWidth + 1) {
+      doc.scrollLeft = 0;
+    }
+  };
+  listen(view, "scroll", clampHorizontalScroll, { passive: true });
+  listen(view, "resize", clampHorizontalScroll, { passive: true });
+  clampHorizontalScroll();
+
   const onModalShow = (event) => {
     const modal = event.target;
     if (
