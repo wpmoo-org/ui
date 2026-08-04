@@ -19,9 +19,44 @@
         <article class="moo-changelog__release" aria-labelledby="release-{{ product.version | replace('.', '-') }}">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v{{ product.version }}</span>
+            <span class="text-body-secondary">Complete the 42-component Core roadmap</span>
+          </div>
+          <h2 id="release-{{ product.version | replace('.', '-') }}">Context Menu and Data Table</h2>
+          <p>
+            Context Menu and Data Table join the Core as certified Tier 3
+            components, completing the open-source 42-component roadmap.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Context Menu with pointer positioning, viewport collision handling, keyboard invocation, focus ownership, dismissal, and a touch fallback.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Data Table composing Table, Checkbox, Input, Select, Dropdown Menu, Pagination, and Badge contracts with sorting, filtering, bulk actions, empty/loading/error states, and responsive overflow behavior.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Hand-drawn catalog preview art for Context Menu and Data Table; Combobox and Form previews re-keyed to transparent monochrome.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Data Table toolbar layout moved into component SCSS with new <code>$moo-datatable-*</code> Sass knobs; catalog home and header refinements.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v{{ product.version }}">GitHub Release v{{ product.version }}</a></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-0-7-1">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v0.7.1</span>
             <span class="text-body-secondary">npm README links</span>
           </div>
-          <h2 id="release-{{ product.version | replace('.', '-') }}">NPM README Links</h2>
+          <h2 id="release-0-7-1">NPM README Links</h2>
           <p>
             Published the public documentation updates with npm-safe README
             image URLs.
@@ -31,10 +66,6 @@
             <div class="moo-changelog__change-row">
               <span class="moo-changelog__change-label">Updated</span>
               <span>README preview images now use absolute public catalog URLs so they render on npm.</span>
-            </div>
-            <div class="moo-changelog__change-row">
-              <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v{{ product.version }}">GitHub Release v{{ product.version }}</a></span>
             </div>
           </div>
         </article>
@@ -289,6 +320,7 @@
 
     {{ render_doc_toc([
       {"id": "release-" ~ (product.version | replace('.', '-')), "label": "v" ~ product.version},
+      {"id": "release-0-7-1", "label": "v0.7.1"},
       {"id": "post-release-docs-boundary", "label": "Post-release"},
       {"id": "release-0-7-0", "label": "v0.7.0"},
       {"id": "release-0-6-0", "label": "v0.6.0"},
