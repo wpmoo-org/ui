@@ -78,9 +78,13 @@
           <input class="form-control form-control-sm datatable-facet-search" type="search" placeholder="Search {{ label | lower }}..." aria-label="Search {{ label | lower }}" data-datatable-facet-search="{{ key }}">
         </li>
       {% endif %}
-      {% for option in options %}
-        {{ datatable_facet_item(option.label, icon=option.icon | default(""), count=option.count if option.count is defined else none, attrs='data-datatable-facet-option="' ~ option.value ~ '"') }}
-      {% endfor %}
+      <li class="datatable-facet-options-wrap">
+        <ul class="datatable-facet-options no-scrollbar scroll-fade-y">
+          {% for option in options %}
+            {{ datatable_facet_item(option.label, icon=option.icon | default(""), count=option.count if option.count is defined else none, attrs='data-datatable-facet-option="' ~ option.value ~ '"') }}
+          {% endfor %}
+        </ul>
+      </li>
       {{ dropdown_divider() }}
       {{ dropdown_item("Clear filters", attrs="data-datatable-facet-clear") }}
     {% endcall %}
@@ -115,23 +119,25 @@
                 {{ render_icon("chevron-left", "inline-start") }}
                 <span>{{ facet.label }}</span>
               </button>
+              {% if facet.options | length > 7 %}
+                <div class="datatable-filter-option-search-wrap">
+                  <span class="datatable-dropdown-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
+                  <input class="form-control form-control-sm datatable-filter-option-search" type="search" placeholder="Search {{ facet.label | lower }}..." aria-label="Search {{ facet.label | lower }}" data-datatable-filter-option-search="{{ facet.key }}">
+                </div>
+              {% endif %}
+              <ul class="datatable-filter-options no-scrollbar scroll-fade-y">
+                {% for option in facet.options %}
+                  <li>
+                    <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-option="{{ option.value }}" data-datatable-filter-option-key="{{ facet.key }}" aria-pressed="false">
+                      <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+                      {% if option.icon is defined and option.icon %}{{ render_icon(option.icon, "inline-start") }}{% endif %}
+                      <span data-datatable-filter-option-label>{{ option.label }}</span>
+                      {% if option.count is defined %}<span class="ms-auto small text-body-secondary">{{ option.count }}</span>{% endif %}
+                    </button>
+                  </li>
+                {% endfor %}
+              </ul>
             </li>
-            {% if facet.options | length > 7 %}
-              <li class="datatable-filter-panel datatable-filter-option-search-wrap" data-datatable-filter-panel="options" data-datatable-filter-panel-key="{{ facet.key }}" hidden>
-                <span class="datatable-dropdown-search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
-                <input class="form-control form-control-sm datatable-filter-option-search" type="search" placeholder="Search {{ facet.label | lower }}..." aria-label="Search {{ facet.label | lower }}" data-datatable-filter-option-search="{{ facet.key }}">
-              </li>
-            {% endif %}
-            {% for option in facet.options %}
-              <li class="datatable-filter-panel" data-datatable-filter-panel="options" data-datatable-filter-panel-key="{{ facet.key }}" hidden>
-                <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-option="{{ option.value }}" data-datatable-filter-option-key="{{ facet.key }}" aria-pressed="false">
-                  <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
-                  {% if option.icon is defined and option.icon %}{{ render_icon(option.icon, "inline-start") }}{% endif %}
-                  <span data-datatable-filter-option-label>{{ option.label }}</span>
-                  {% if option.count is defined %}<span class="ms-auto small text-body-secondary">{{ option.count }}</span>{% endif %}
-                </button>
-              </li>
-            {% endfor %}
           {% endfor %}
         {% endcall %}
       {% endif %}

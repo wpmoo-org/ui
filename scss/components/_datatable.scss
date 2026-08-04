@@ -207,6 +207,21 @@
   min-width: 0;
 }
 
+// Only the option rows scroll; the facet/back-button header and the search
+// box above them stay in normal flow outside this nested list, so they
+// never move. list-style/margin/padding reset because this <ul> nests
+// inside a .dropdown-menu <li>, which does not get Bootstrap's own
+// dropdown-menu list reset applied to it a second time.
+.datatable-facet-options,
+.datatable-filter-options {
+  max-height: $moo-datatable-facet-options-max-height;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
 .datatable-search-filter-menu .dropdown-header {
   padding-block: 0.125rem 0.375rem;
   padding-inline: 0.5rem;
@@ -218,7 +233,7 @@
 
 .datatable-search-filter-menu .dropdown-item,
 .datatable-facet-menu .dropdown-item {
-  min-height: 2rem;
+  min-height: $moo-datatable-facet-item-height;
   padding-block: 0.375rem;
   padding-inline: 0.5rem;
   border-radius: var(--bs-border-radius-sm);
@@ -745,6 +760,14 @@
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius-sm);
   color: transparent;
+  // The shared .dropdown-item-check__indicator (scss/components/_dropdown.scss)
+  // is opacity-toggled: invisible until its item is active, showing no box at
+  // all for unselected rows. Data Table's picker wants the persistent
+  // checkbox-outline look documented at the top of this file, so it has to
+  // reset opacity back to 1 -- the rule above already restates every other
+  // property, but opacity was never one of them, so the shared default was
+  // still winning.
+  opacity: 1;
 }
 
 .datatable-search-filter-menu .dropdown-item-check[aria-pressed="true"] .dropdown-item-check__indicator,
