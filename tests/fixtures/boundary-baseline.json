@@ -68,7 +68,7 @@
     "sideEffects": [
       "dist/assets/css/*.css"
     ],
-    "version": "0.7.1"
+    "version": "0.8.0"
   },
   "siteDistFiles": [
     "site-dist/apple-touch-icon.png",
@@ -341,7 +341,7 @@
     "site-dist/blocks/previews/sidebar-inset/index.html": "719ee5563554cc9666d51142c56320ac0b996fab332808422744e33a04cb962b",
     "site-dist/blocks/sidebar-floating/index.html": "0294b754ad2c460dee4f7e6ebb2f5653c620c2b271c21549965d8e50a4ba4076",
     "site-dist/blocks/sidebar-inset/index.html": "a5261cb647f876f03c4102748e5e9ad867fc5f53eb9c3d7132cc15183dcf6e20",
-    "site-dist/changelog/index.html": "99f69236f4db896eb301b1b76ff5b621724242968381fcef5384f454fcc2adf1",
+    "site-dist/changelog/index.html": "616f242b6efde40feb4ed7bb211f5c64486796be7de41550ca79fc5e232a8f67",
     "site-dist/components/accordion/index.html": "3db546f7ea485a76e3c0f2a37f0193e4fd10a6289d00e9cc25710fa851869625",
     "site-dist/components/alert-dialog/index.html": "06f08af870c4eb00f8ebe988d4d3923fcd7f2d5684701ec091a35144a7d24ae4",
     "site-dist/components/alert/index.html": "6538b2b90c43fd07143e74e03bd7fd40d1babd3a244c6985616eb9405efe54f5",
@@ -390,20 +390,20 @@
     "site-dist/favicon.svg": "faf1d513e3c7cdd2c17ee5fc2db6667fb7f99313562c6218cb8e2395aec0dc39",
     "site-dist/icon-192.png": "681080a5b14510b267344f67c6c0384a87480e6e919ad5d4003190d56c10050b",
     "site-dist/icon-512.png": "0f9e72886c967ba2a2e83bc68be51ce14a0967d641ec1f176ff850a1d9b91dec",
-    "site-dist/index.html": "0ba66357c6905056b63f876fc078b53bc1944f048417fafdd4691156599bcc9a",
-    "site-dist/installation/index.html": "34d3a620e73516d5db5921381232520abf7e88896d5742eb70204997da4b6c1b",
+    "site-dist/index.html": "012d8f4b46f90a7f68a3ff6082a226927a3282e777bdfb9e56b323b24dd5416f",
+    "site-dist/installation/index.html": "93efb15c7fcca21247f534409e8b0450bd06a1625b21963d652f2db50842cc9d",
     "site-dist/introduction/index.html": "89d1e4a3270b1eb74b1edb8ca9b92511761d14cdaebe2ef3ee0467e85f985939",
     "site-dist/js/combobox.js": "3b3ee1c7ec72c21cbfcf4442d084f86504955e3147b7c16f6ebbd74ef4eed98b",
     "site-dist/js/context-menu.js": "831ce547e51c91539f85279c9596528da18403f095f36e4913b2f1526d426076",
     "site-dist/js/datatable.js": "0c4a5db2028845aaec1bc3dc4946b3e3d26b4613e3cb6d7f813fd2e44dfcab93",
     "site-dist/js/sidebar.js": "96dec88d1e265baca1cb72684cacf01ce40dd5fa98ca7c8627f8c002e93d6cf1",
     "site-dist/license/index.html": "8265db021f5ffb6de33d4611f7495a7eefe150d276906fbaa91ad37b64e6cb99",
-    "site-dist/llms.txt": "794fa386e9f7b245a2ad226b5f1457dd1ef202f0f3ea5e357b8bb594ba958f82",
+    "site-dist/llms.txt": "d64ce73a397a6f9584197d0885c83b34b3721e304243baf64afe464a389ad87b",
     "site-dist/robots.txt": "bf13521a8ca29a68a5ba125d21c65b84b1679a0aae915a9fd08794d1dc6d9fbf",
     "site-dist/site.webmanifest": "af971266a10396df62c991d9e1f4b86be68d7d2bb248b83386a7ba7f1820fbde",
     "site-dist/sitemap.xml": "a6c08c4c55a6f2a6263c64c88efe91a8af04e61f3eb7cc0abcb90f374a77ef43",
-    "site-dist/skills/index.html": "1814188e4a32ed33ed48479b788a5cd3335e10c6a858afc1371b993b77353163",
-    "site-dist/support/index.html": "2972d2c0715f8888a7458b17c0cee39ac401dda891806724589330b19ca4e9b6",
+    "site-dist/skills/index.html": "e6d372bdc54ef07d698df8b266f0ae9513cc8ae53bc6ab33d1d298a29df794d3",
+    "site-dist/support/index.html": "6b8c88224916c3903fa2a46c90e166b9d3adebe35d1dfdef0edcb1be0f82e201",
     "site-dist/utils/scroll-fade/index.html": "47a1084ef205d7f18250eed9e68af8bdfd811bcf5df478652c9a3739b3c77ced"
   }
 }
