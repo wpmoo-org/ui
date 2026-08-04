@@ -32,12 +32,14 @@
         </p>
       </section>
 
-      <section class="moo-doc-section" aria-labelledby="third-party-notices">
-        {{ typography("Third-Party Notices", variant="section-title", id="third-party-notices") }}
+      <section class="moo-doc-section" aria-labelledby="credits">
+        {{ typography("Credits", variant="section-title", id="credits") }}
         <p>
-          Moo UI keeps third-party material under its original license and
-          attribution. These notices describe what is vendored, referenced, or
-          used as visual context.
+          Moo UI is built with and informed by the open-source projects below.
+          Each stays under its own license and copyright, separate from Moo
+          UI's own MIT license above; see
+          <a href="https://github.com/wpmoo-org/ui/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer"><code>THIRD_PARTY_NOTICES.md</code></a>
+          for the complete notices.
         </p>
 
         <div class="d-grid gap-4 mt-4">
@@ -45,41 +47,41 @@
             <h3 class="h5 mb-2">Bootstrap</h3>
             <p class="mb-0">
               Moo UI vendors the official <code>twbs/bootstrap</code> v5.3.3 SCSS
-              source and bundled JavaScript. Bootstrap is licensed under the MIT
-              License; the bundled license is stored at
-              <code>vendor/bootstrap/LICENSE</code>. Bootstrap documentation is used
-              as the behavior, semantics, and accessibility reference for this
+              source and bundled JavaScript, and uses its documentation as the
+              behavior, semantics, and accessibility reference for this
               product.
+              <a href="https://github.com/wpmoo-org/ui/blob/main/vendor/bootstrap/LICENSE" target="_blank" rel="noopener noreferrer">License</a>.
             </p>
           </div>
 
           <div>
             <h3 class="h5 mb-2">shadcn/ui</h3>
             <p class="mb-0">
-              shadcn/ui documentation is used as visual-intent and catalog coverage
-              reference. No shadcn/ui implementation source, React code, Tailwind
-              code, Radix code, or example prose is bundled or copied. Moo UI
-              documentation, example copy, component templates, styles, and inline
-              SVG icons are original product work.
+              shadcn/ui documentation is used as visual-intent and catalog
+              coverage reference only. No shadcn/ui implementation source,
+              React code, Tailwind code, Radix code, or example prose is
+              bundled or copied; Moo UI's documentation, example copy,
+              component templates, styles, and inline SVG icons are original
+              product work.
             </p>
           </div>
 
           <div>
             <h3 class="h5 mb-2">Lucide</h3>
             <p class="mb-0">
-              Moo UI vendors a build-time icon metadata subset from Iconify's Lucide
-              icon set at <code>src/icons/lucide-icons.json</code> and renders
-              selected icons into the generated catalog. Lucide is licensed under
-              the ISC License.
+              Moo UI vendors a build-time icon metadata subset from Iconify's
+              Lucide icon set at <code>src/icons/lucide-icons.json</code> and
+              renders selected icons into the generated catalog.
+              <a href="https://github.com/lucide-icons/lucide/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License</a>.
             </p>
           </div>
 
           <div>
             <h3 class="h5 mb-2">Geist</h3>
             <p class="mb-0">
-              Moo UI vendors <code>Geist-Variable.woff2</code> for catalog chrome
-              typography only. Geist is licensed under the SIL Open Font License
-              1.1; the bundled license is stored at <code>vendor/geist/LICENSE</code>.
+              Moo UI vendors <code>Geist-Variable.woff2</code> for catalog
+              chrome typography only.
+              <a href="https://github.com/wpmoo-org/ui/blob/main/vendor/geist/LICENSE" target="_blank" rel="noopener noreferrer">License</a>.
             </p>
           </div>
         </div>
@@ -100,7 +102,7 @@
 
     {{ render_doc_toc([
       {"id": "mit-license", "label": "MIT License"},
-      {"id": "third-party-notices", "label": "Third-Party Notices"},
+      {"id": "credits", "label": "Credits"},
       {"id": "visual-assets", "label": "Visual Assets"}
     ]) }}
   </div>
