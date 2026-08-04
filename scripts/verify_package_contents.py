@@ -10,7 +10,6 @@ APPROVED_TARBALL_FILES = {
     "ASSET_LICENSE.md",
     "LICENSE",
     "README.md",
-    "THIRD_PARTY_NOTICES.md",
     "certification.json",
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",

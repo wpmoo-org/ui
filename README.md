@@ -142,10 +142,10 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
 
-The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
-`THIRD_PARTY_NOTICES.md`. It does not publish catalog templates, preview
-artwork, catalog JavaScript, SCSS source, or a Sass facade. Internal Sass
-partials and Jinja macros are repository build tools, not npm APIs.
+The tarball also contains `README.md`, `LICENSE`, and `ASSET_LICENSE.md`. It
+does not publish catalog templates, preview artwork, catalog JavaScript, SCSS
+source, or a Sass facade. Internal Sass partials and
+Jinja macros are repository build tools, not npm APIs.
 
 ## Why Bootstrap Teams Try It
 
