@@ -23,21 +23,21 @@ Scope: DataTable release-review queue showcase, standalone preview, and certific
 
 ### DataTable
 
-- [ ] Catalog visual check
+- [X] Catalog visual check
   - Notes:
-- [ ] Standalone preview desktop
+- [X] Standalone preview desktop
   - Notes:
 - [ ] Certification fixture desktop smoke
   - Notes:
-- [ ] Table view: search, faceted filters, sort menus, column visibility, row actions, row selection, and pagination
+- [X] Table view: search, faceted filters, sort menus, column visibility, row actions, row selection, and pagination
   - Notes:
-- [ ] Card view: table/card toggle, card layout, fixed review identity, select-all header, row actions, column visibility, and pagination
+- [X] Card view: table/card toggle, card layout, fixed review identity, select-all header, row actions, column visibility, and pagination
   - Notes:
-- [ ] Empty state: no matching results hides table/card frame and shows only the empty-state panel
+- [X] Empty state: no matching results hides table/card frame and shows only the empty-state panel
   - Notes:
 - [ ] Keyboard / Escape / focus return
-  - Notes:
-- [ ] macOS Safari
+  - Notes: Tab
+- [X] macOS Safari
   - Notes:
 - [ ] iPhone Safari
   - Notes:

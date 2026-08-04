@@ -20,12 +20,127 @@
   <body>
     <main aria-labelledby="fixture-title">
       <h1 id="fixture-title">Data Table certification fixture</h1>
-<div class="datatable" id="certification-datatable" data-datatable-page-size="2">
+<div class="datatable datatable--responsive-toggle" id="certification-datatable" data-datatable-page-size="2" data-datatable-view="table">
     <div class="datatable-toolbar d-flex flex-wrap align-items-center gap-2 mb-3" data-datatable-toolbar>
-      <input class="form-control form-control-sm datatable-search" type="search" placeholder="Filter by subject or ID..." aria-label="Filter by subject or ID..." data-datatable-search>
-          <div class="dropdown datatable-facet" data-datatable-facet="status">
-    <button class="btn btn-sm datatable-facet-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-      <svg
+      <div class="datatable-toolbar-query">
+        <div class="datatable-search-filter">
+          <div class="input-group input-group-sm datatable-searchbar">
+            <span class="datatable-search-icon" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="search"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m21 21l-4.34-4.34"/><circle cx="11" cy="11" r="8"/></g>
+</svg></span>
+            <input class="form-control datatable-search" type="search" placeholder="Filter by subject or ID..." aria-label="Filter by subject or ID..." data-datatable-search>
+            <button class="btn btn-ghost btn-icon-sm datatable-filter-picker-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-offset="0,8" aria-expanded="false" aria-label="Open filters" data-datatable-filter-menu-trigger>
+              <svg
+  data-icon="inline-start"
+  data-lucide="list-filter"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 5h20M6 12h12m-9 7h6"/>
+</svg>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end datatable-search-filter-menu">
+              <li class="datatable-filter-panel" data-datatable-filter-panel="facets">
+                <h6 class="dropdown-header">Filter by</h6>
+              </li>
+              <li class="datatable-filter-panel" data-datatable-filter-panel="facets">
+                <button class="dropdown-item datatable-filter-group" type="button" data-datatable-filter-group="status">
+                  <span>Status</span>
+                  <span class="datatable-filter-group-summary ms-auto small text-body-secondary" data-datatable-filter-group-summary="status" hidden></span>
+                  <svg
+  data-icon="inline-end"
+  data-lucide="chevron-right"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/>
+</svg>
+                </button>
+              </li>
+              <li class="datatable-filter-panel" data-datatable-filter-panel="options" data-datatable-filter-panel-key="status" hidden>
+                <button class="dropdown-item datatable-filter-panel-back" type="button" data-datatable-filter-back>
+                  <svg
+  data-icon="inline-start"
+  data-lucide="chevron-left"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6"/>
+</svg>
+                  <span>Status</span>
+                </button>
+              </li>
+              <li class="datatable-filter-panel" data-datatable-filter-panel="options" data-datatable-filter-panel-key="status" hidden>
+                <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-option="open" data-datatable-filter-option-key="status" aria-pressed="false">
+                  <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+                  <span data-datatable-filter-option-label>Open</span>
+                  <span class="ms-auto small text-body-secondary">2</span>
+                </button>
+              </li>
+              <li class="datatable-filter-panel" data-datatable-filter-panel="options" data-datatable-filter-panel-key="status" hidden>
+                <button class="dropdown-item dropdown-item-check datatable-filter-picker-item" type="button" data-datatable-filter-option="resolved" data-datatable-filter-option-key="status" aria-pressed="false">
+                  <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+                  <span data-datatable-filter-option-label>Resolved</span>
+                  <span class="ms-auto small text-body-secondary">1</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="datatable-toolbar-filters" role="group" aria-label="Table filters">
+        <div class="dropdown datatable-facet" data-datatable-facet="status" hidden>
+          <button class="btn btn-sm datatable-facet-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            <svg
   data-icon="inline-start"
   data-lucide="circle-plus"
   viewBox="0 0 24 24"
@@ -38,13 +153,13 @@
 >
   <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8m-4-4v8"/></g>
 </svg>
-      <span>Status</span>
-      <span class="datatable-facet-summary" data-datatable-facet-summary hidden></span>
-    </button>
-  <ul class="dropdown-menu datatable-facet-menu">
-    <li>
-    <button class="dropdown-item datatable-facet-item" type="button" data-datatable-facet-option="open" aria-pressed="false">
-      <span class="datatable-facet-item__indicator" aria-hidden="true"><svg
+            <span>Status</span>
+            <span class="datatable-facet-summary" data-datatable-facet-summary hidden></span>
+          </button>
+          <ul class="dropdown-menu datatable-facet-menu">
+            <li>
+              <button class="dropdown-item datatable-facet-item" type="button" data-datatable-facet-option="open" aria-pressed="false">
+                <span class="datatable-facet-item__indicator" aria-hidden="true"><svg
   data-icon="inline-start"
   data-lucide="check"
   viewBox="0 0 24 24"
@@ -57,12 +172,13 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
 </svg></span>
-      <span data-datatable-facet-option-label>Open</span>
-<span class="ms-auto small text-body-secondary">2</span>    </button>
-  </li>
-          <li>
-    <button class="dropdown-item datatable-facet-item" type="button" data-datatable-facet-option="resolved" aria-pressed="false">
-      <span class="datatable-facet-item__indicator" aria-hidden="true"><svg
+                <span data-datatable-facet-option-label>Open</span>
+                <span class="ms-auto small text-body-secondary">2</span>
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item datatable-facet-item" type="button" data-datatable-facet-option="resolved" aria-pressed="false">
+                <span class="datatable-facet-item__indicator" aria-hidden="true"><svg
   data-icon="inline-start"
   data-lucide="check"
   viewBox="0 0 24 24"
@@ -75,20 +191,21 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
 </svg></span>
-      <span data-datatable-facet-option-label>Resolved</span>
-<span class="ms-auto small text-body-secondary">1</span>    </button>
-  </li>
-      <li><hr class="dropdown-divider"></li>
-          <li>
-      <button class="dropdown-item" type="button" data-datatable-facet-clear>
-
-        <span>Clear filters</span>
-      </button>
-    </li>
-  </ul>  </div>
-      <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
-        Reset
-        <svg
+                <span data-datatable-facet-option-label>Resolved</span>
+                <span class="ms-auto small text-body-secondary">1</span>
+              </button>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <button class="dropdown-item" type="button" data-datatable-facet-clear>
+                <span>Clear filters</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm datatable-reset" hidden data-datatable-reset>
+          Reset
+          <svg
   data-icon="inline-end"
   data-lucide="x"
   viewBox="0 0 24 24"
@@ -101,8 +218,48 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>
 </svg>
-      </button>
-      <div class="dropdown datatable-view ms-auto">
+        </button>
+      </div>
+      <div class="datatable-toolbar-actions d-flex align-items-center gap-2 ms-auto">
+        <div class="datatable-layout-switch">
+          <div class="btn-group btn-group-sm datatable-view-toggle" role="group" aria-label="Table or card view">
+            <input type="radio" class="btn-check" name="certification-datatable-view" id="certification-datatable-view-table" value="table" autocomplete="off" checked>
+            <label class="btn btn-outline-secondary datatable-view-option" for="certification-datatable-view-table">
+              <svg
+  data-icon="inline-start"
+  data-lucide="table"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18"/></g>
+</svg>
+              <span class="visually-hidden">Table</span>
+            </label>
+            <input type="radio" class="btn-check" name="certification-datatable-view" id="certification-datatable-view-cards" value="cards" autocomplete="off">
+            <label class="btn btn-outline-secondary datatable-view-option" for="certification-datatable-view-cards">
+              <svg
+  data-icon="inline-start"
+  data-lucide="layout-grid"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g>
+</svg>
+              <span class="visually-hidden">Cards</span>
+            </label>
+          </div>
+        </div>
+      <div class="dropdown datatable-view">
         <button class="btn btn-outline-secondary btn-sm datatable-view-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
           <svg
   data-icon="inline-start"
@@ -122,42 +279,6 @@
   <ul class="dropdown-menu dropdown-menu-end">
     <li><h6 class="dropdown-header">Toggle columns</h6></li>
                 <li>
-    <button class="dropdown-item dropdown-item-check active" type="button" data-bs-toggle="button" aria-pressed="true" data-datatable-column-toggle="ticket">
-      <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
-  data-icon="inline-start"
-  data-lucide="check"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  aria-hidden="true"
->
-  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
-</svg></span>
-      <span>Ticket</span>
-    </button>
-  </li>
-                <li>
-    <button class="dropdown-item dropdown-item-check active" type="button" data-bs-toggle="button" aria-pressed="true" data-datatable-column-toggle="subject">
-      <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
-  data-icon="inline-start"
-  data-lucide="check"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  aria-hidden="true"
->
-  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
-</svg></span>
-      <span>Subject</span>
-    </button>
-  </li>
-                <li>
     <button class="dropdown-item dropdown-item-check active" type="button" data-bs-toggle="button" aria-pressed="true" data-datatable-column-toggle="status">
       <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
   data-icon="inline-start"
@@ -176,15 +297,17 @@
     </button>
   </li>
   </ul>      </div>
+      </div>
     </div>
-    <div class="table-responsive">
-      <table class="table datatable-table" id="certification-datatable-table">
+    <div class="datatable-frame">
+      <div class="table-responsive scrollbar-thin scroll-fade-x">
+        <table class="table align-middle datatable-table" id="certification-datatable-table">
         <thead>
           <tr>
               <th scope="col" class="datatable-col-select">
                 <input class="form-check-input" type="checkbox" aria-label="Select all rows" data-datatable-select-all>
               </th>
-                  <th scope="col" class="datatable-col" data-datatable-column="ticket" style="width: 7rem;">
+                  <th scope="col" class="datatable-col" data-datatable-column="ticket" data-datatable-column-fixed="true" style="width: 7rem;">
       <div class="dropdown datatable-sort">
         <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-datatable-sort-key="ticket">
           <span>Ticket</span>
@@ -241,29 +364,10 @@
       </button>
     </li>
 
-          <li><hr class="dropdown-divider"></li>
-              <li>
-      <button class="dropdown-item" type="button" data-datatable-sort-action="hide">
-        <svg
-  data-icon="inline-start"
-  data-lucide="eye-off"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  aria-hidden="true"
->
-  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.8 10.8 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></g>
-</svg>
-        <span>Hide</span>
-      </button>
-    </li>
   </ul>      </div>
     </th>
 
-                  <th scope="col" class="datatable-col" data-datatable-column="subject">
+                  <th scope="col" class="datatable-col" data-datatable-column="subject" data-datatable-column-fixed="true">
       <div class="dropdown datatable-sort">
         <button class="btn btn-ghost btn-sm datatable-sort-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-datatable-sort-key="subject">
           <span>Subject</span>
@@ -320,25 +424,6 @@
       </button>
     </li>
 
-          <li><hr class="dropdown-divider"></li>
-              <li>
-      <button class="dropdown-item" type="button" data-datatable-sort-action="hide">
-        <svg
-  data-icon="inline-start"
-  data-lucide="eye-off"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
-  aria-hidden="true"
->
-  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.8 10.8 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></g>
-</svg>
-        <span>Hide</span>
-      </button>
-    </li>
   </ul>      </div>
     </th>
 
@@ -421,7 +506,7 @@
   </ul>      </div>
     </th>
 
-                  <th scope="col" class="datatable-col text-end" data-datatable-column="actions" style="width: 4rem;">Actions</th>
+                  <th scope="col" class="datatable-col text-end" data-datatable-column="actions" style="width: 4rem;"><span class="visually-hidden">Row actions</span></th>
 
           </tr>
         </thead>
@@ -433,7 +518,25 @@
                 <td class="datatable-col" data-datatable-column="ticket" data-datatable-sort-value="TCK-1"><span>TCK-1</span></td>
                 <td class="datatable-col" data-datatable-column="subject" data-datatable-sort-value="login redirect"><span>Login redirect loops</span></td>
                 <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="0"><span>Open</span></td>
-                <td class="datatable-col text-end" data-datatable-column="actions"><span>-</span></td>
+                <td class="datatable-col text-end" data-datatable-column="actions">
+                  <div class="table-row-actions dropdown">
+                    <button
+                      class="btn btn-ghost btn-icon-sm"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      aria-label="Open ticket actions"
+                      id="cert-row-1-actions"
+                    >
+                      <svg data-icon="inline-start" data-lucide="ellipsis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li><button class="dropdown-item" type="button">Open ticket</button></li>
+                      <li><button class="dropdown-item" type="button">Assign owner</button></li>
+                      <li><button class="dropdown-item" type="button">Copy link</button></li>
+                    </ul>
+                  </div>
+                </td>
             </tr>
             <tr id="cert-row-2" data-datatable-row data-datatable-search="TCK-2 Export drops column" data-datatable-facet-status="resolved">
                 <td class="datatable-col-select">
@@ -442,7 +545,25 @@
                 <td class="datatable-col" data-datatable-column="ticket" data-datatable-sort-value="TCK-2"><span>TCK-2</span></td>
                 <td class="datatable-col" data-datatable-column="subject" data-datatable-sort-value="export drops column"><span>Export drops a column</span></td>
                 <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="1"><span>Resolved</span></td>
-                <td class="datatable-col text-end" data-datatable-column="actions"><span>-</span></td>
+                <td class="datatable-col text-end" data-datatable-column="actions">
+                  <div class="table-row-actions dropdown">
+                    <button
+                      class="btn btn-ghost btn-icon-sm"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      aria-label="Open ticket actions"
+                      id="cert-row-2-actions"
+                    >
+                      <svg data-icon="inline-start" data-lucide="ellipsis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li><button class="dropdown-item" type="button">Open ticket</button></li>
+                      <li><button class="dropdown-item" type="button">Assign owner</button></li>
+                      <li><button class="dropdown-item" type="button">Copy link</button></li>
+                    </ul>
+                  </div>
+                </td>
             </tr>
             <tr id="cert-row-3" data-datatable-row data-datatable-search="TCK-3 Dashboard misaligned" data-datatable-facet-status="open">
                 <td class="datatable-col-select">
@@ -451,10 +572,155 @@
                 <td class="datatable-col" data-datatable-column="ticket" data-datatable-sort-value="TCK-3"><span>TCK-3</span></td>
                 <td class="datatable-col" data-datatable-column="subject" data-datatable-sort-value="dashboard misaligned"><span>Dashboard misaligned</span></td>
                 <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="0"><span>Open</span></td>
-                <td class="datatable-col text-end" data-datatable-column="actions"><span>-</span></td>
+                <td class="datatable-col text-end" data-datatable-column="actions">
+                  <div class="table-row-actions dropdown">
+                    <button
+                      class="btn btn-ghost btn-icon-sm"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      aria-label="Open ticket actions"
+                      id="cert-row-3-actions"
+                    >
+                      <svg data-icon="inline-start" data-lucide="ellipsis" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g></svg>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li><button class="dropdown-item" type="button">Open ticket</button></li>
+                      <li><button class="dropdown-item" type="button">Assign owner</button></li>
+                      <li><button class="dropdown-item" type="button">Copy link</button></li>
+                    </ul>
+                  </div>
+                </td>
             </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
+    </div>
+    <div class="datatable-card-frame">
+      <div class="datatable-frame-header">
+        <div class="form-check datatable-select-all">
+          <input class="form-check-input" type="checkbox" id="certification-datatable-cards-select-visible" aria-controls="certification-datatable-table" data-datatable-select-all>
+          <label class="form-check-label" for="certification-datatable-cards-select-visible">Select visible tickets</label>
+        </div>
+      </div>
+      <div class="datatable-cards" data-datatable-cards aria-label="Responsive certification-datatable-table cards">
+        <article class="datatable-card" data-datatable-card data-datatable-card-for="cert-row-1">
+          <div class="datatable-card-header">
+            <label class="form-check datatable-card-select datatable-checkbox-target">
+              <input class="form-check-input" type="checkbox" aria-label="Select TCK-1" data-datatable-select-row>
+            </label>
+            <div class="datatable-card-heading">
+              <div class="datatable-card-title">Login redirect loops</div>
+            </div>
+            <div class="datatable-card-actions">
+              <div class="table-row-actions dropdown">
+                <button class="btn btn-ghost btn-icon-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open ticket actions" id="cert-card-row-1-actions">
+                  <svg data-icon="inline-start" data-lucide="ellipsis-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></g></svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><button class="dropdown-item" type="button">Open ticket</button></li>
+                  <li><button class="dropdown-item" type="button">Assign owner</button></li>
+                  <li><button class="dropdown-item" type="button">Copy link</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <dl class="datatable-card-list">
+            <div class="datatable-card-row" data-datatable-detail-column="ticket">
+              <dt>Ticket</dt>
+              <dd class="datatable-card-value">TCK-1</dd>
+            </div>
+            <div class="datatable-card-row" data-datatable-detail-column="status">
+              <dt>Status</dt>
+              <dd class="datatable-card-value">Open</dd>
+            </div>
+          </dl>
+        </article>
+        <article class="datatable-card" data-datatable-card data-datatable-card-for="cert-row-2">
+          <div class="datatable-card-header">
+            <label class="form-check datatable-card-select datatable-checkbox-target">
+              <input class="form-check-input" type="checkbox" aria-label="Select TCK-2" data-datatable-select-row>
+            </label>
+            <div class="datatable-card-heading">
+              <div class="datatable-card-title">Export drops a column</div>
+            </div>
+            <div class="datatable-card-actions">
+              <div class="table-row-actions dropdown">
+                <button class="btn btn-ghost btn-icon-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open ticket actions" id="cert-card-row-2-actions">
+                  <svg data-icon="inline-start" data-lucide="ellipsis-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></g></svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><button class="dropdown-item" type="button">Open ticket</button></li>
+                  <li><button class="dropdown-item" type="button">Assign owner</button></li>
+                  <li><button class="dropdown-item" type="button">Copy link</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <dl class="datatable-card-list">
+            <div class="datatable-card-row" data-datatable-detail-column="ticket">
+              <dt>Ticket</dt>
+              <dd class="datatable-card-value">TCK-2</dd>
+            </div>
+            <div class="datatable-card-row" data-datatable-detail-column="status">
+              <dt>Status</dt>
+              <dd class="datatable-card-value">Resolved</dd>
+            </div>
+          </dl>
+        </article>
+        <article class="datatable-card" data-datatable-card data-datatable-card-for="cert-row-3">
+          <div class="datatable-card-header">
+            <label class="form-check datatable-card-select datatable-checkbox-target">
+              <input class="form-check-input" type="checkbox" aria-label="Select TCK-3" data-datatable-select-row>
+            </label>
+            <div class="datatable-card-heading">
+              <div class="datatable-card-title">Dashboard misaligned</div>
+            </div>
+            <div class="datatable-card-actions">
+              <div class="table-row-actions dropdown">
+                <button class="btn btn-ghost btn-icon-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open ticket actions" id="cert-card-row-3-actions">
+                  <svg data-icon="inline-start" data-lucide="ellipsis-vertical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></g></svg>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><button class="dropdown-item" type="button">Open ticket</button></li>
+                  <li><button class="dropdown-item" type="button">Assign owner</button></li>
+                  <li><button class="dropdown-item" type="button">Copy link</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <dl class="datatable-card-list">
+            <div class="datatable-card-row" data-datatable-detail-column="ticket">
+              <dt>Ticket</dt>
+              <dd class="datatable-card-value">TCK-3</dd>
+            </div>
+            <div class="datatable-card-row" data-datatable-detail-column="status">
+              <dt>Status</dt>
+              <dd class="datatable-card-value">Open</dd>
+            </div>
+          </dl>
+        </article>
+      </div>
+    </div>
+    <div class="datatable-empty" data-datatable-empty hidden role="status" aria-live="polite">
+      <p class="datatable-empty-title mb-1">No matching results</p>
+      <p class="datatable-empty-copy text-body-secondary mb-3">Try a different search or clear the active filters.</p>
+      <button type="button" class="btn btn-outline-secondary btn-sm" data-datatable-empty-reset>
+        Clear filters
+        <svg
+  data-icon="inline-end"
+  data-lucide="x"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/>
+</svg>
+      </button>
     </div>
     <div class="datatable-pagination d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3" data-datatable-pagination>
       <div class="datatable-selection-count small text-body-secondary" data-datatable-selection-count></div>
@@ -536,7 +802,7 @@
       </div>
     </div>
       <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden>
-    <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection (Escape)">
+    <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection <code class='tooltip-kbd'>Escape</code>" data-bs-html="true">
       <svg
   data-icon="inline-start"
   data-lucide="x"

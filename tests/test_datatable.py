@@ -214,6 +214,186 @@ class DataTableTests(CatalogTestCase):
         self.assertIsNotNone(root.find_one(class_name="datatable-frame"))
         self.assertIsNotNone(root.find_one(class_name="datatable-card-frame"))
 
+    def test_bulk_clear_tooltip_uses_sanitizer_safe_kbd_markup(self) -> None:
+        tree = _parse_html(self.render_release_review())
+        clear_button = tree.find_one(
+            tag="button", attrs={"data-datatable-bulk-clear"}
+        )
+        self.assertIsNotNone(clear_button)
+        assert clear_button is not None
+
+        self.assertIn(
+            "Clear selection <code class='tooltip-kbd'>Escape</code>",
+            clear_button.attrs.get("data-bs-title"),
+        )
+        self.assertEqual(clear_button.attrs.get("data-bs-html"), "true")
+        self.assertEqual(clear_button.attrs.get("aria-label"), "Clear selection")
+
+    def test_certification_fixture_exposes_empty_state_hook(self) -> None:
+        tree = _parse_html(CERTIFICATION_FIXTURE.read_text(encoding="utf-8"))
+        root = tree.find_one(class_name="datatable")
+        self.assertIsNotNone(root)
+        assert root is not None
+
+        empty = root.find_one(class_name="datatable-empty")
+        self.assertIsNotNone(empty)
+        assert empty is not None
+        self.assertIn("data-datatable-empty", empty.attrs)
+        self.assertIn("hidden", empty.attrs)
+        self.assertIsNotNone(
+            empty.find_one(tag="button", attrs={"data-datatable-empty-reset"})
+        )
+        self.assertIsNotNone(root.find_one(class_name="datatable-frame"))
+        self.assertIsNotNone(root.find_one(class_name="datatable-card-frame"))
+
+    def test_certification_fixture_exposes_search_filter_picker(self) -> None:
+        tree = _parse_html(CERTIFICATION_FIXTURE.read_text(encoding="utf-8"))
+        root = tree.find_one(class_name="datatable")
+        self.assertIsNotNone(root)
+        assert root is not None
+
+        search_filter = root.find_one(class_name="datatable-search-filter")
+        self.assertIsNotNone(search_filter)
+        assert search_filter is not None
+        self.assertIsNotNone(search_filter.find_one(class_name="datatable-searchbar"))
+        self.assertIsNotNone(
+            search_filter.find_one(tag="input", attrs={"data-datatable-search"})
+        )
+        self.assertIsNotNone(
+            search_filter.find_one(
+                tag="button", attrs={"data-datatable-filter-menu-trigger"}
+            )
+        )
+
+        picker = search_filter.find_one(class_name="datatable-search-filter-menu")
+        self.assertIsNotNone(picker)
+        assert picker is not None
+        self.assertIn("Filter by", picker.text_content())
+        status_group = picker.find_one(
+            tag="button", attrs={"data-datatable-filter-group"}
+        )
+        self.assertIsNotNone(status_group)
+        assert status_group is not None
+        self.assertEqual(status_group.attrs.get("data-datatable-filter-group"), "status")
+        self.assertIsNotNone(
+            picker.find_one(
+                tag="span", attrs={"data-datatable-filter-group-summary"}
+            )
+        )
+
+        status_options = [
+            option
+            for option in picker.find_all(
+                tag="button", attrs={"data-datatable-filter-option"}
+            )
+            if option.attrs.get("data-datatable-filter-option-key") == "status"
+        ]
+        self.assertEqual(
+            [option.attrs.get("data-datatable-filter-option") for option in status_options],
+            ["open", "resolved"],
+        )
+        self.assertEqual(
+            picker.find_all(tag="button", attrs={"data-datatable-filter-clear"}),
+            [],
+        )
+        toolbar_filters = root.find_one(class_name="datatable-toolbar-filters")
+        self.assertIsNotNone(toolbar_filters)
+        assert toolbar_filters is not None
+        status_facet = next(
+            (
+                facet
+                for facet in toolbar_filters.find_all(class_name="datatable-facet")
+                if facet.attrs.get("data-datatable-facet") == "status"
+            ),
+            None,
+        )
+        self.assertIsNotNone(status_facet)
+        assert status_facet is not None
+        self.assertIn("hidden", status_facet.attrs)
+        self.assertIsNotNone(
+            status_facet.find_one(attrs={"data-datatable-facet-summary"})
+        )
+        self.assertEqual(
+            [
+                option.attrs.get("data-datatable-facet-option")
+                for option in status_facet.find_all(
+                    tag="button", attrs={"data-datatable-facet-option"}
+                )
+            ],
+            ["open", "resolved"],
+        )
+        self.assertIsNotNone(
+            toolbar_filters.find_one(tag="button", attrs={"data-datatable-reset"})
+        )
+
+    def test_certification_fixture_exposes_table_and_card_views(self) -> None:
+        tree = _parse_html(CERTIFICATION_FIXTURE.read_text(encoding="utf-8"))
+        root = tree.find_one(class_name="datatable")
+        self.assertIsNotNone(root)
+        assert root is not None
+
+        toolbar = root.find_one(class_name="datatable-toolbar")
+        self.assertIsNotNone(toolbar)
+        assert toolbar is not None
+        self.assertEqual(len(toolbar.find_all(class_name="datatable-view-toggle")), 1)
+        self.assertEqual(len(root.find_all(class_name="datatable-view-toggle")), 1)
+
+        card_frame = root.find_one(class_name="datatable-card-frame")
+        self.assertIsNotNone(card_frame)
+        assert card_frame is not None
+        self.assertEqual(card_frame.find_all(tag="th"), [])
+        self.assertEqual(card_frame.find_all(tag="thead"), [])
+        self.assertIsNotNone(card_frame.find_one(class_name="datatable-frame-header"))
+        self.assertEqual(
+            len(card_frame.find_all(tag="input", attrs={"data-datatable-select-all"})),
+            1,
+        )
+
+        cards = card_frame.find_all(attrs={"data-datatable-card"})
+        self.assertEqual(len(cards), 3)
+        self.assertEqual(
+            [card.attrs.get("data-datatable-card-for") for card in cards],
+            ["cert-row-1", "cert-row-2", "cert-row-3"],
+        )
+        self.assertIn("Login redirect loops", cards[0].text_content())
+        self.assertIn("TCK-1", cards[0].text_content())
+        self.assertIsNotNone(cards[0].find_one(class_name="table-row-actions"))
+
+    def test_certification_fixture_exposes_row_action_menu(self) -> None:
+        tree = _parse_html(CERTIFICATION_FIXTURE.read_text(encoding="utf-8"))
+        root = tree.find_one(class_name="datatable")
+        self.assertIsNotNone(root)
+        assert root is not None
+
+        action_headers = [
+            header
+            for header in root.find_all(tag="th", attrs={"data-datatable-column"})
+            if header.attrs.get("data-datatable-column") == "actions"
+        ]
+        self.assertEqual(len(action_headers), 1)
+        action_header = action_headers[0]
+        self.assertNotIn("Actions", action_header.text)
+        action_header_labels = action_header.find_all(
+            tag="span", class_name="visually-hidden"
+        )
+        self.assertEqual(
+            [label.text_content().strip() for label in action_header_labels],
+            ["Row actions"],
+        )
+
+        actions = root.find_all(class_name="table-row-actions")
+        self.assertGreaterEqual(len(actions), 1)
+        first_action = actions[0]
+        trigger = first_action.find_one(tag="button", attrs={"data-bs-toggle"})
+        self.assertIsNotNone(trigger)
+        assert trigger is not None
+        self.assertEqual(trigger.attrs.get("data-bs-toggle"), "dropdown")
+        self.assertEqual(trigger.attrs.get("aria-label"), "Open ticket actions")
+        self.assertIsNotNone(first_action.find_one(class_name="dropdown-menu"))
+        self.assertIn("Open ticket", first_action.text_content())
+        self.assertIn("Assign owner", first_action.text_content())
+        self.assertIn("Copy link", first_action.text_content())
+
     def test_documentation_page_contains_the_rendered_release_review_showcase(
         self,
     ) -> None:

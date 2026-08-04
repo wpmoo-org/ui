@@ -13,6 +13,7 @@
   --moo-datatable-min-width: #{$moo-datatable-min-width};
   --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
   --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
+  --moo-datatable-select-cell-inset: #{$moo-datatable-select-cell-inset};
   --moo-datatable-table-select-all-offset-y: #{$moo-datatable-table-select-all-offset-y};
   --moo-datatable-toolbar-control-height: #{$moo-datatable-toolbar-control-height};
   --moo-datatable-search-filter-menu-width: #{$moo-datatable-search-filter-menu-width};
@@ -60,13 +61,20 @@
   overflow: hidden;
 }
 
+.datatable-frame:has(.table-row-actions .dropdown-menu.show),
+.datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show) {
+  overflow: visible;
+}
+
 .datatable-frame-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.625rem;
   min-block-size: var(--moo-datatable-frame-header-min-height);
-  padding: 0.375rem 0.5rem;
+  padding-block: 0.375rem;
+  padding-inline-start: var(--moo-datatable-select-cell-inset);
+  padding-inline-end: 0.5rem;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
   background-color: var(--bs-body-bg);
 }
@@ -78,6 +86,10 @@
 
 .datatable-frame .datatable-table {
   margin-bottom: 0;
+}
+
+.datatable-table > :not(caption) > * > * {
+  vertical-align: middle;
 }
 
 // Bootstrap's .form-control defaults to width: 100%, so inside the
@@ -147,6 +159,22 @@
   margin-inline-end: 0;
   border-radius: var(--bs-border-radius-sm);
   gap: 0;
+}
+
+.btn.datatable-filter-picker-trigger:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+.btn.datatable-filter-picker-trigger:focus-visible {
+  z-index: 3;
+  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+.input-group > .btn-ghost.datatable-filter-picker-trigger:focus-visible::before {
+  opacity: 1;
 }
 
 .datatable-filter-picker-trigger > [data-icon] {
@@ -434,9 +462,10 @@
   }
 }
 
-.datatable-col-select {
+.datatable-table > :not(caption) > * > .datatable-col-select {
   width: 2.75rem;
-  vertical-align: middle;
+  padding-inline-start: var(--moo-datatable-select-cell-inset);
+  padding-inline-end: $table-cell-padding-x;
   white-space: nowrap;
 }
 
@@ -517,10 +546,20 @@
 }
 
 .datatable-card {
+  position: relative;
   overflow: hidden;
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-body-bg);
+}
+
+.datatable-card-frame:has(.datatable-card .dropdown-menu.show),
+.datatable-card:has(.dropdown-menu.show) {
+  overflow: visible;
+}
+
+.datatable-card:has(.dropdown-menu.show) {
+  z-index: 2;
 }
 
 .datatable-card-header {

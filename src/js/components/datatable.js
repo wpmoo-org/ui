@@ -112,6 +112,21 @@ export default class DataTable {
     });
   }
 
+  _hideBulkTooltips({ blur = false } = {}) {
+    this._tooltips.forEach((tooltip) => {
+      tooltip.hide();
+    });
+
+    if (!blur) {
+      return;
+    }
+
+    const active = this._document.activeElement;
+    if (active?.closest?.("[data-datatable-bulk-actions]")) {
+      active.blur();
+    }
+  }
+
   // responsive_mode="toggle" renders both the table and the card list and
   // lets the reader pick between them (Odoo's List/Kanban switcher, not a
   // developer-chosen breakpoint), so the choice belongs to the reader across
@@ -172,6 +187,18 @@ export default class DataTable {
       const key = facetRoot.dataset.datatableFacet;
       if (key) {
         this._visibleFacets.set(key, !facetRoot.hidden);
+      }
+    });
+    this._element.querySelectorAll("[data-datatable-filter-group]").forEach((group) => {
+      const key = group.dataset.datatableFilterGroup;
+      if (key && !this._visibleFacets.has(key)) {
+        this._visibleFacets.set(key, false);
+      }
+    });
+    this._element.querySelectorAll("[data-datatable-filter-option-key]").forEach((option) => {
+      const key = option.dataset.datatableFilterOptionKey;
+      if (key && !this._visibleFacets.has(key)) {
+        this._visibleFacets.set(key, false);
       }
     });
   }
@@ -805,6 +832,7 @@ export default class DataTable {
   }
 
   _clearSelection() {
+    this._hideBulkTooltips({ blur: true });
     this._selectedIds.clear();
     this._render();
     this._trigger("select");

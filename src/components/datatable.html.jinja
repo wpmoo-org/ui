@@ -15,7 +15,7 @@
 
 {% macro datatable_bulk_actions(selection_noun, bulk_actions) -%}
   <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden role="status" aria-live="polite" aria-atomic="true">
-    <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection (Escape)">
+    <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection <code class='tooltip-kbd'>Escape</code>" data-bs-html="true">
       {{ render_icon("x", "inline-start") }}
     </button>
     {{ separator(orientation="vertical") }}
