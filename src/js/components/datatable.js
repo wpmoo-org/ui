@@ -255,12 +255,27 @@ export default class DataTable {
         row.cardElement.hidden = !isVisible;
       }
     });
-    pageRows.forEach((row) => {
-      this._tbody.appendChild(row.element);
-      if (this._cards && row.cardElement) {
-        this._cards.appendChild(row.cardElement);
-      }
-    });
+
+    // appendChild() always detaches-and-reinserts, which blurs a focused
+    // descendant (e.g. a row checkbox) even when the node is only moved to
+    // the position it already occupies. Selecting/deselecting a row never
+    // changes row order, so skip the reorder entirely unless the DOM order
+    // actually disagrees with the desired page order.
+    const currentOrder = Array.from(this._tbody.children)
+      .filter((element) => pageRowIds.has(element.id))
+      .map((element) => element.id);
+    const desiredOrder = pageRows.map((row) => row.element.id);
+    const orderChanged =
+      currentOrder.length !== desiredOrder.length ||
+      currentOrder.some((id, index) => id !== desiredOrder[index]);
+    if (orderChanged) {
+      pageRows.forEach((row) => {
+        this._tbody.appendChild(row.element);
+        if (this._cards && row.cardElement) {
+          this._cards.appendChild(row.cardElement);
+        }
+      });
+    }
 
     this._renderToolbarState();
     this._renderSortHeaders();
