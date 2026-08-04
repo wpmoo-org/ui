@@ -1,0 +1,16 @@
+// Bootstrap's own hr/.vr fake a light divider with a 25%-opacity trick
+// over an inherited/currentColor value (vendor/bootstrap/scss/_reboot.scss,
+// helpers/_vr.scss) instead of a flat border-color fill. That renders
+// visibly darker than --moo-border, this reference's own flat divider
+// color already used at full opacity everywhere else a hairline border
+// appears, and the closest match to shadcn's own flat border-token
+// separator fill.
+hr {
+  opacity: 1;
+  border-top: var(--bs-border-width) solid var(--moo-border);
+}
+
+.vr {
+  opacity: 1;
+  background-color: var(--moo-border);
+}

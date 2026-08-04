@@ -188,6 +188,10 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap's pagination markup uses .page-item/.page-link, not a
             # "pagination-" prefixed family.
             "pagination": ("pagination", "page", "disabled"),
+            # Bootstrap's own horizontal/vertical divider markup is the bare
+            # <hr> tag and the .vr helper class, not a "separator-" prefixed
+            # family.
+            "separator": ("hr", "vr"),
             # Bootstrap's checkbox markup uses the shared .form-check family,
             # not a "checkbox-" prefixed one.
             "checkbox": ("form-check",),
