@@ -26,6 +26,20 @@
   gap: $spacer * 0.5;
 }
 
+// Bootstrap's own .dropdown-item bundles :hover and :focus into the same
+// highlight (vendor/bootstrap/scss/_dropdown.scss), so an item that still
+// holds DOM focus from a prior mouse click (clicking a button leaves it
+// focused) keeps its highlight after the mouse moves to hover a different
+// item -- two rows lit up at once. Resetting the stale, non-keyboard focus
+// back to resting style (only when the item isn't also genuinely hovered,
+// so real hover still wins) leaves exactly one item highlighted at a time;
+// real keyboard :focus-visible navigation is untouched, since it's a subset
+// of :focus and this selector explicitly excludes it.
+.dropdown-item:focus:not(:focus-visible):not(:hover) {
+  color: var(--bs-dropdown-link-color);
+  background-color: transparent;
+}
+
 .dropdown-item > [data-icon] {
   width: 1rem;
   height: 1rem;
