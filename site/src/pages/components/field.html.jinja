@@ -228,6 +228,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   ) }}
 
   {% set checkbox_group %}
+  <div class="vstack gap-3">
   {% call fieldset("Visible dashboard widgets", description="Choose what shows on your team's overview.") %}
   {% call field_group() %}
   {% call field() %}
@@ -248,6 +249,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ checkbox(id="field-sync", label="Sync settings across devices", checked=true, description="Preferences carry over
   to any device you sign into.") }}
   {% endcall %}
+  </div>
   {% endset %}
   {{ render_example(
   "checkbox",
@@ -281,14 +283,6 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   ) }}
 
   {% set separated_group %}
-  {% call fieldset("Build alerts", description="Notified the moment a deploy fails its build step.") %}
-  {% call field_group() %}
-  {% call field() %}
-  {{ checkbox(id="field-build-alerts", label="Notify on failure", checked=true) }}
-  {% endcall %}
-  {% endcall %}
-  {% endcall %}
-  {{ separator() }}
   {% call fieldset("Usage alerts", description="Notified as this project approaches its monthly usage limit.") %}
   {% call field_group() %}
   {% call field() %}
