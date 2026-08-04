@@ -386,7 +386,7 @@
           {% call dropdown_menu(extra_class="datatable-page-size-menu") %}
             {% for size in page_sizes %}
               <li>
-                <button class="dropdown-item dropdown-item-check{% if size == default_page_size %} active{% endif %}" type="button" data-datatable-page-size-option="{{ size }}" aria-pressed="{% if size == default_page_size %}true{% else %}false{% endif %}">
+                <button class="dropdown-item dropdown-item-check dropdown-item-check--radio{% if size == default_page_size %} active{% endif %}" type="button" data-datatable-page-size-option="{{ size }}" aria-pressed="{% if size == default_page_size %}true{% else %}false{% endif %}">
                   <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
                   <span>{{ size }}</span>
                 </button>

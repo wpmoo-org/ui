@@ -98,6 +98,23 @@
   height: 0.75rem;
 }
 
+// Single-choice ("radio") menu items reuse the same indicator markup as the
+// checkbox variant above but read as a plain checkmark-on-select instead: no
+// boxed square, since a box implies each item has its own independent on/off
+// state, which is wrong when only one item in the group can ever be active
+// (e.g. Data Table's page-size menu). The icon stays hidden until the item
+// is active, matching how shadcn and native menus mark single-choice items.
+.dropdown-item-check--radio .dropdown-item-check__indicator {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.dropdown-item-check--radio.active .dropdown-item-check__indicator {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--bs-dropdown-link-color);
+}
+
 .dropdown-item__icon-box {
   --moo-dropdown-item-icon-size: #{$moo-dropdown-item-icon-size};
 
