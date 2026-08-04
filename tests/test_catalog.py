@@ -179,10 +179,6 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap renders both single-line inputs and textareas through
             # the shared `.form-control` family.
             "textarea": ("form-control",),
-            # Bootstrap's own forms/_input-group.scss styles `.input-group >
-            # .form-control` / `> .form-select`, so the group legitimately owns
-            # those controls within its scope.
-            "input_group": ("input-group", "form-control", "form-select"),
             # Bootstrap documents vertical navs as `.nav.flex-column`, so the
             # Navigation partial may scope width fixes to that native utility.
             "navigation": ("active", "disabled", "flex-column", "nav"),
@@ -241,6 +237,10 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap Table owns the static table markup only. DataTable is
             # Moo's documented interactive composition around Bootstrap table,
             # dropdown, button, checkbox, badge, and pagination primitives.
+            # The filter-picker trigger's focus-ring rule is scoped with an
+            # .input-group ancestor combinator (it targets DataTable's own
+            # .datatable-filter-picker-trigger, not .input-group itself), so
+            # datatable legitimately references that ancestor context.
             "datatable": (
                 "datatable",
                 "active",
@@ -253,6 +253,7 @@ class CatalogContractTests(CatalogTestCase):
                 "dropdown-item",
                 "dropdown-item-check",
                 "form-check",
+                "input-group",
                 "ms-auto",
                 "pagination",
                 "show",
@@ -264,10 +265,13 @@ class CatalogContractTests(CatalogTestCase):
             # Input group owns the compound surface around Bootstrap's native
             # children, so its partial may retune the edge behavior of form,
             # button, validation, and dropdown children while scoped under
-            # .input-group.
+            # .input-group. Bootstrap's own forms/_input-group.scss styles
+            # both `.input-group > .form-control` and `> .form-select`, so
+            # the group legitimately owns .form-select within its scope too.
             "input_group": (
                 "input-group",
                 "form-control",
+                "form-select",
                 "btn",
                 "dropdown-menu",
                 "valid-tooltip",
