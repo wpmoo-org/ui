@@ -661,6 +661,30 @@ export default class DataTable {
     });
   }
 
+  // Bootstrap's own dropdown keyboard navigation moves focus between
+  // .dropdown-item siblings, but it deliberately leaves focus alone while an
+  // <input> has it (arrow keys inside a text field move the caret, not a
+  // list). A facet's own search box needs an explicit bridge so ArrowDown
+  // hands off to the first result instead of doing nothing.
+  _handleFacetSearchKeydown(event) {
+    if (event.key !== "ArrowDown") {
+      return;
+    }
+    const search = event.target.closest("[data-datatable-facet-search]");
+    if (!search) {
+      return;
+    }
+    const facetRoot = search.closest("[data-datatable-facet]");
+    const options = Array.from(facetRoot?.querySelectorAll("[data-datatable-facet-option]") || []);
+    const firstVisible = options.find(
+      (option) => !option.closest("li")?.classList.contains("datatable-facet-search-hidden")
+    );
+    if (firstVisible) {
+      event.preventDefault();
+      firstVisible.focus();
+    }
+  }
+
   _handleFilterOptionClick(event) {
     const option = event.target.closest("[data-datatable-filter-option]");
     if (!option) {
@@ -724,6 +748,29 @@ export default class DataTable {
       const label = normalize(option.querySelector("[data-datatable-filter-option-label]")?.textContent || option.textContent);
       option.closest("li")?.classList.toggle("datatable-filter-option-search-hidden", query.length > 0 && !label.includes(query));
     });
+  }
+
+  // Same bridge as _handleFacetSearchKeydown, for the filter-picker's
+  // drill-down option search box.
+  _handleFilterOptionSearchKeydown(event) {
+    if (event.key !== "ArrowDown") {
+      return;
+    }
+    const search = event.target.closest("[data-datatable-filter-option-search]");
+    if (!search) {
+      return;
+    }
+    const key = search.dataset.datatableFilterOptionSearch;
+    const options = Array.from(
+      this._element.querySelectorAll(`[data-datatable-filter-option-key="${key}"]`)
+    );
+    const firstVisible = options.find(
+      (option) => !option.closest("li")?.classList.contains("datatable-filter-option-search-hidden")
+    );
+    if (firstVisible) {
+      event.preventDefault();
+      firstVisible.focus();
+    }
   }
 
   _handleFilterToggleClick(event) {
@@ -996,10 +1043,12 @@ export default class DataTable {
 
     this._element.querySelectorAll("[data-datatable-filter-option-search]").forEach((searchInput) => {
       this._listen(searchInput, "input", (event) => this._handleFilterOptionSearch(event));
+      this._listen(searchInput, "keydown", (event) => this._handleFilterOptionSearchKeydown(event));
     });
 
     this._element.querySelectorAll("[data-datatable-facet-search]").forEach((searchInput) => {
       this._listen(searchInput, "input", (event) => this._handleFacetSearch(event));
+      this._listen(searchInput, "keydown", (event) => this._handleFacetSearchKeydown(event));
     });
 
     const resetButton = this._element.querySelector("[data-datatable-reset]");
