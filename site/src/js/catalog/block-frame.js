@@ -21,6 +21,24 @@ export function initBlockFrames(root = document) {
       label.textContent = `${width} x ${height}`;
     }
   };
+  // The viewport wrapper is overflow: hidden and never meant to scroll --
+  // the iframe inside it is sized to fit via transform: scale(), not via
+  // scrolling. Safari's "scroll the focused element's ancestors into view"
+  // behavior can still reach out across the iframe boundary and give this
+  // wrapper a real (if scrollbar-less) horizontal scroll offset when focus
+  // lands inside the iframe (e.g. opening the release-review preview's
+  // "View" dropdown), which shifts the scaled iframe's whole static
+  // position -- not just its paint -- off to the side. Reset it back
+  // unconditionally on scroll; a container that should never scroll has no
+  // legitimate offset to preserve.
+  const clampViewportScroll = (viewport) => {
+    if (viewport.scrollLeft !== 0) {
+      viewport.scrollLeft = 0;
+    }
+    if (viewport.scrollTop !== 0) {
+      viewport.scrollTop = 0;
+    }
+  };
   const resize = (shell) => {
     const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
     const frame = shell.querySelector("[data-moo-block-frame]");
@@ -38,6 +56,7 @@ export function initBlockFrames(root = document) {
     frame.style.height = `${height}px`;
     frame.style.transform = `scale(${scale})`;
     viewport.style.height = `${Math.ceil(height * scale)}px`;
+    clampViewportScroll(viewport);
     updateSizeLabel(shell, width, height);
   };
   const resizeAll = () => shells.forEach(resize);
@@ -102,6 +121,10 @@ export function initBlockFrames(root = document) {
     }
     shells.forEach((shell) => {
       listen(shell.querySelector("[data-moo-block-frame]"), "load", () => resize(shell));
+      const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
+      if (viewport) {
+        listen(viewport, "scroll", () => clampViewportScroll(viewport));
+      }
       shell.querySelectorAll("[data-moo-frame-variant]").forEach((button) => {
         listen(button, "click", () => setVariant(shell, button));
       });
