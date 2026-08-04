@@ -15,7 +15,7 @@
         <dd class="col-sm-9 mb-0">{{ details.markupOwner }}</dd>
         {% if limitation %}
         <dt class="col-sm-3 text-body">Known limitation</dt>
-        <dd class="col-sm-9 mb-0">{{ limitation }}</dd>
+        <dd class="col-sm-9 mb-0">{{ limitation | safe }}</dd>
         {% endif %}
       </dl>
       <p class="text-body-secondary mb-0">
@@ -26,7 +26,7 @@
   {% else %}
     <aside class="mt-5" aria-label="Bootstrap reference">
       {% if limitation %}
-      <p><strong>Known limitation:</strong> {{ limitation }}</p>
+      <p><strong>Known limitation:</strong> {{ limitation | safe }}</p>
       {% endif %}
       <p class="text-body-secondary mb-0">
         {{ lead }}
