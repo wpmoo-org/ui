@@ -725,7 +725,10 @@ class SidebarTests(CatalogTestCase):
         sidebar_js = self.read_output("assets/js/components/sidebar.js")
         self.assertIn("dataset.mooSidebarState", sidebar_js)
         catalog_js = self.read_output("assets/js/catalog/index.js")
-        self.assertIn('import Sidebar from "../components/sidebar.js";', catalog_js)
+        self.assertRegex(
+            catalog_js,
+            r'import Sidebar from "\.\./components/sidebar\.js(?:\?v=[0-9a-f]+)?";',
+        )
         self.assertIn("Sidebar.getOrCreateInstance(element);", catalog_js)
         self.assertNotIn("dataset.mooSidebarState", catalog_js)
 

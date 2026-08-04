@@ -197,7 +197,8 @@
   max-width: 44rem;
   margin-bottom: 0;
   color: var(--bs-secondary-color);
-  line-height: 1.65;
+  font-size: var(--moo-doc-body-font-size);
+  line-height: var(--moo-doc-body-line-height);
 }
 
 .moo-doc-principles {

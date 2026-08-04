@@ -1,0 +1,184 @@
+{% from "components/datatable.html.jinja" import datatable %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/table.html.jinja" import table_row_actions %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
+
+{% macro review_id_cell(id) -%}
+  <span class="font-monospace small">{{ id }}</span>
+{%- endmacro %}
+
+{% macro review_item_cell(title, type) -%}
+  <div class="datatable-item-cell">
+    <span class="text-truncate">{{ title }}</span>
+    {{ badge(type, variant="secondary", pill=true) }}
+  </div>
+{%- endmacro %}
+
+{% macro review_icon_label_cell(label, icon, extra_class="") -%}
+  <span class="datatable-icon-label text-nowrap{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ render_icon(icon, "inline-start") }}
+    <span data-datatable-cell-label>{{ label }}</span>
+  </span>
+{%- endmacro %}
+
+{% macro review_row_actions(icon="ellipsis") -%}
+  {% call table_row_actions(aria_label="Open review actions", icon=icon) %}
+    {{ dropdown_item("Open review", icon="external-link") }}
+    {{ dropdown_item("Assign owner", icon="user-plus") }}
+    {{ dropdown_item("Copy link", icon="copy") }}
+    {{ dropdown_divider() }}
+    {{ dropdown_item("Remove from queue", icon="trash-2", destructive=true) }}
+  {% endcall %}
+{%- endmacro %}
+
+{% macro render_release_review_table(id="datatable-release-reviews", standalone=false, responsive_mode="scroll") -%}
+  {% set table_class = "datatable--release-review" %}
+  {% if standalone %}{% set table_class = table_class ~ " datatable--standalone" %}{% endif %}
+  {% set statuses = [
+    {"value": "ready", "label": "Ready", "icon": "circle-dot", "rank": 0},
+    {"value": "in-review", "label": "In review", "icon": "refresh-cw", "rank": 1},
+    {"value": "blocked", "label": "Blocked", "icon": "circle-alert", "rank": 2},
+    {"value": "approved", "label": "Approved", "icon": "circle-check", "rank": 3}
+  ] %}
+  {% set priorities = [
+    {"value": "high", "label": "High", "icon": "arrow-up", "rank": 0},
+    {"value": "medium", "label": "Medium", "icon": "minus", "rank": 1},
+    {"value": "low", "label": "Low", "icon": "arrow-down", "rank": 2}
+  ] %}
+  {% set areas = [
+    {"value": "forms", "label": "Forms", "icon": "badge-check", "rank": 0},
+    {"value": "overlay", "label": "Overlay", "icon": "layers", "rank": 1},
+    {"value": "navigation", "label": "Navigation", "icon": "route", "rank": 2},
+    {"value": "data", "label": "Data", "icon": "database", "rank": 3},
+    {"value": "docs", "label": "Docs", "icon": "file-text", "rank": 4},
+    {"value": "runtime", "label": "Runtime", "icon": "activity", "rank": 5}
+  ] %}
+  {% set status_by_value = {} %}
+  {% for status in statuses %}{% set _ = status_by_value.update({status.value: status}) %}{% endfor %}
+  {% set priority_by_value = {} %}
+  {% for priority in priorities %}{% set _ = priority_by_value.update({priority.value: priority}) %}{% endfor %}
+  {% set area_by_value = {} %}
+  {% for area in areas %}{% set _ = area_by_value.update({area.value: area}) %}{% endfor %}
+
+  {% set reviews = [
+    {"id": "REV-1042", "item": "Combobox keyboard pass", "type": "Accessibility", "status": "ready", "priority": "high", "area": "forms", "owner": "Ada Lovelace"},
+    {"id": "REV-1039", "item": "Context menu pointer fallback", "type": "Runtime", "status": "in-review", "priority": "high", "area": "overlay", "owner": "Grace Hopper"},
+    {"id": "REV-1037", "item": "Sidebar reduced motion note", "type": "Device", "status": "approved", "priority": "medium", "area": "navigation", "owner": "Katherine Johnson"},
+    {"id": "REV-1034", "item": "Data table bulk action polish", "type": "Visual", "status": "blocked", "priority": "high", "area": "data", "owner": "Radia Perlman"},
+    {"id": "REV-1031", "item": "Toast viewport ownership", "type": "Runtime", "status": "approved", "priority": "medium", "area": "overlay", "owner": "Margaret Hamilton"},
+    {"id": "REV-1028", "item": "Form fieldset spacing", "type": "Markup", "status": "ready", "priority": "medium", "area": "forms", "owner": "Mary Jackson"},
+    {"id": "REV-1025", "item": "Component reference copy", "type": "Docs", "status": "in-review", "priority": "low", "area": "docs", "owner": "Joan Clarke"},
+    {"id": "REV-1022", "item": "Menubar Safari traversal", "type": "Accessibility", "status": "approved", "priority": "high", "area": "navigation", "owner": "Dorothy Vaughan"},
+    {"id": "REV-1019", "item": "Public ESM disposal contract", "type": "Runtime", "status": "ready", "priority": "high", "area": "runtime", "owner": "Hedy Lamarr"},
+    {"id": "REV-1016", "item": "Dropdown disabled tone", "type": "Visual", "status": "blocked", "priority": "medium", "area": "overlay", "owner": "Annie Easley"},
+    {"id": "REV-1013", "item": "Pagination boundary contrast", "type": "Accessibility", "status": "approved", "priority": "medium", "area": "data", "owner": "Evelyn Boyd Granville"},
+    {"id": "REV-1010", "item": "Support policy link audit", "type": "Docs", "status": "ready", "priority": "low", "area": "docs", "owner": "Frances Allen"},
+    {"id": "REV-1007", "item": "Sheet focus smoke result", "type": "Device", "status": "approved", "priority": "medium", "area": "overlay", "owner": "Jean Sammet"},
+    {"id": "REV-1004", "item": "Bootstrap range evidence", "type": "Compatibility", "status": "in-review", "priority": "high", "area": "runtime", "owner": "Barbara Liskov"},
+    {"id": "REV-1001", "item": "Table fixture text rhythm", "type": "Visual", "status": "ready", "priority": "low", "area": "data", "owner": "Adele Goldberg"},
+    {"id": "REV-998", "item": "Alert dialog escape return", "type": "Accessibility", "status": "approved", "priority": "high", "area": "overlay", "owner": "Ida Rhodes"},
+    {"id": "REV-995", "item": "Select disabled color audit", "type": "Visual", "status": "blocked", "priority": "medium", "area": "forms", "owner": "Betty Holberton"},
+    {"id": "REV-992", "item": "Navigation item density", "type": "Visual", "status": "in-review", "priority": "low", "area": "navigation", "owner": "Carol Shaw"},
+    {"id": "REV-989", "item": "Certification manifest wording", "type": "Docs", "status": "approved", "priority": "medium", "area": "docs", "owner": "Marsha Rhea Williams"},
+    {"id": "REV-986", "item": "Runtime package export check", "type": "Runtime", "status": "ready", "priority": "high", "area": "runtime", "owner": "Elizabeth Feinler"},
+    {"id": "REV-983", "item": "Badge status inventory", "type": "Docs", "status": "approved", "priority": "low", "area": "docs", "owner": "Sister Mary Kenneth Keller"},
+    {"id": "REV-980", "item": "Input group icon alignment", "type": "Visual", "status": "ready", "priority": "medium", "area": "forms", "owner": "Karen Sparck Jones"},
+    {"id": "REV-977", "item": "Popover clipping proof", "type": "Runtime", "status": "approved", "priority": "medium", "area": "overlay", "owner": "Lynn Conway"},
+    {"id": "REV-974", "item": "Tabs passive contrast", "type": "Accessibility", "status": "approved", "priority": "high", "area": "navigation", "owner": "Erna Schneider Hoover"}
+  ] %}
+  {% set owner_options = [] %}
+  {% for review in reviews %}
+    {% set owner_value = review.owner | lower | replace(" ", "-") %}
+    {% set _ = owner_options.append({
+      "value": owner_value,
+      "label": review.owner,
+      "icon": "user",
+      "count": reviews | selectattr("owner", "equalto", review.owner) | list | length
+    }) %}
+  {% endfor %}
+
+  {% set review_rows = [] %}
+  {% for review in reviews %}
+    {% set status = status_by_value[review.status] %}
+    {% set priority = priority_by_value[review.priority] %}
+    {% set area = area_by_value[review.area] %}
+    {% set owner_value = review.owner | lower | replace(" ", "-") %}
+    {% set status_cell %}{{ review_icon_label_cell(status.label, status.icon, "text-body-secondary") }}{% endset %}
+    {% set priority_cell %}{{ review_icon_label_cell(priority.label, priority.icon, "text-body-secondary") }}{% endset %}
+    {% set area_cell %}{{ review_icon_label_cell(area.label, area.icon, "text-body-secondary") }}{% endset %}
+    {% set _ = review_rows.append({
+      "id": "review-" ~ review.id | lower,
+      "label": review.id,
+      "card": {"title": review.item, "actions": review_row_actions(icon="ellipsis-vertical")},
+      "search": review.id ~ " " ~ review.item ~ " " ~ review.type ~ " " ~ status.label ~ " " ~ priority.label ~ " " ~ area.label ~ " " ~ review.owner,
+      "facets": {"status": review.status, "priority": review.priority, "owner": owner_value},
+      "sort": {
+        "id": review.id,
+        "item": review.item | lower,
+        "status": status.rank,
+        "priority": priority.rank,
+        "area": area.rank
+      },
+      "cells": {
+        "id": review_id_cell(review.id),
+        "item": review_item_cell(review.item, review.type),
+        "status": status_cell,
+        "priority": priority_cell,
+        "area": area_cell,
+        "actions": review_row_actions()
+      }
+    }) %}
+  {% endfor %}
+
+  {{ datatable(
+    id,
+    columns=[
+      {"key": "id", "label": "Review", "width": "7rem", "hideable": false},
+      {"key": "item", "label": "Item", "initial_sort": "asc", "card_role": "title", "hideable": false},
+      {"key": "status", "label": "Status", "width": "10rem"},
+      {"key": "priority", "label": "Priority", "width": "9rem"},
+      {"key": "area", "label": "Area", "width": "9rem"},
+      {"key": "actions", "label": "", "sr_label": "Row actions", "sortable": false, "hideable": false, "align": "end", "width": "4rem", "card_role": "actions"}
+    ],
+    rows=review_rows,
+    facets=[
+      {
+        "key": "status",
+        "label": "Status",
+        "options": [
+          {"value": "ready", "label": "Ready", "icon": "circle-dot", "count": reviews | selectattr("status", "equalto", "ready") | list | length},
+          {"value": "in-review", "label": "In review", "icon": "refresh-cw", "count": reviews | selectattr("status", "equalto", "in-review") | list | length},
+          {"value": "blocked", "label": "Blocked", "icon": "circle-alert", "count": reviews | selectattr("status", "equalto", "blocked") | list | length},
+          {"value": "approved", "label": "Approved", "icon": "circle-check", "count": reviews | selectattr("status", "equalto", "approved") | list | length}
+        ]
+      },
+      {
+        "key": "priority",
+        "label": "Priority",
+        "options": [
+          {"value": "high", "label": "High", "icon": "arrow-up", "count": reviews | selectattr("priority", "equalto", "high") | list | length},
+          {"value": "medium", "label": "Medium", "icon": "minus", "count": reviews | selectattr("priority", "equalto", "medium") | list | length},
+          {"value": "low", "label": "Low", "icon": "arrow-down", "count": reviews | selectattr("priority", "equalto", "low") | list | length}
+        ]
+      },
+      {
+        "key": "owner",
+        "label": "Owner",
+        "options": owner_options
+      }
+    ],
+    search_placeholder="Search reviews...",
+    default_page_size=10,
+    selection_noun="reviews",
+    filter_mode="picker",
+    responsive_mode=responsive_mode,
+    responsive_breakpoint="lg",
+    bulk_actions=[
+      {"key": "status", "label": "Update status", "icon": "circle-check-big", "options": statuses},
+      {"key": "priority", "label": "Set priority", "icon": "flag", "options": priorities},
+      {"key": "export", "label": "Export reviews", "icon": "download"},
+      {"key": "delete", "label": "Remove reviews", "icon": "trash-2", "destructive": true}
+    ],
+    extra_class=table_class
+  ) }}
+{%- endmacro %}

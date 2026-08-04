@@ -4,12 +4,32 @@
 
 .moo-block-preview__toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
   background: var(--bs-tertiary-bg);
+}
+
+.moo-block-preview__toolbar-start,
+.moo-block-preview__toolbar-end,
+.moo-block-preview__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.moo-block-preview__toolbar-end {
+  margin-inline-start: auto;
+  justify-content: flex-end;
+}
+
+.moo-block-preview__variant-trigger {
+  min-width: 9rem;
+  justify-content: space-between;
 }
 
 .moo-block-preview__viewport {

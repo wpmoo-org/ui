@@ -34,6 +34,12 @@ $input-disabled-bg: color-mix(in srgb, var(--moo-border) 40%, transparent) !defa
 // both light and dark theme blocks (vendor/bootstrap/scss/forms/_form-control.scss).
 $form-file-button-hover-bg: var(--moo-border) !default;
 $form-text-margin-top: 0.5rem !default;
+$form-check-input-focus-border: var(--moo-border) !default;
+// Native checkbox/radio/switch controls have a very small focus target. Keep
+// Bootstrap's form-check glow contract, but make the visible keyboard ring
+// strong enough to clear the 3:1 focus-indicator contrast target on white and
+// dark surfaces.
+$form-check-input-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--moo-ring) 50%, transparent) !default;
 // Moo promotes Bootstrap input groups from separate child borders to one
 // compound border. Bootstrap has no parent input-group radius knob, so the
 // default parent radius lives here while .rounded-pill can still opt into

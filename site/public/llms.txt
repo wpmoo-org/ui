@@ -33,6 +33,7 @@ not independent or accredited certification.
 - `@wpmoo/ui/moo.min.css`: scoped minified component layer
 - `@wpmoo/ui/combobox.js`: optional Combobox ESM lifecycle
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
+- `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
@@ -66,8 +67,8 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 ```
 
 Optional Moo ESM is imported only for documented gaps and must be initialized
-explicitly. Importing `combobox.js`, `context-menu.js`, or `sidebar.js` does not
-scan the document.
+explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
+`sidebar.js` does not scan the document.
 
 ## Runtime Ownership
 
@@ -76,6 +77,8 @@ scan the document.
 - Combobox: optional Moo ESM
 - Context Menu pointer and keyboard invocation: optional Moo ESM composed with
   Bootstrap Dropdown
+- DataTable sorting, filtering, selection, pagination, and responsive card sync:
+  optional Moo ESM composed with Bootstrap Table and controls
 - Sidebar state and responsive coordination: optional Moo ESM composed with
   Bootstrap behavior
 
@@ -108,6 +111,7 @@ scan the document.
 - [Collapsible](https://ui.wpmoo.org/components/collapsible/)
 - [Combobox](https://ui.wpmoo.org/components/combobox/)
 - [Context Menu](https://ui.wpmoo.org/components/context-menu/)
+- [Data Table](https://ui.wpmoo.org/components/datatable/)
 - [Dialog](https://ui.wpmoo.org/components/dialog/)
 - [Dropdown Menu](https://ui.wpmoo.org/components/dropdown-menu/)
 - [Field](https://ui.wpmoo.org/components/field/)
@@ -144,7 +148,7 @@ scan the document.
 ## Agent Guidance
 
 - Preserve Bootstrap behavior before adding custom behavior.
-- Use Moo ESM only for Combobox, Context Menu, and Sidebar unless future
+- Use Moo ESM only for Combobox, Context Menu, DataTable, and Sidebar unless future
   documentation adds another public entrypoint.
 - Do not invent public Sass APIs, aggregate JavaScript entrypoints, or
   certification claims.

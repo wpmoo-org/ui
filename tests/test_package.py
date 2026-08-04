@@ -18,11 +18,11 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
+    "dist/js/datatable.js",
     "certification.json",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
@@ -32,6 +32,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
+    "./datatable.js": "./dist/js/datatable.js",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
@@ -108,9 +109,11 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["exports"]["./combobox.js"], "./dist/js/combobox.js")
         self.assertEqual(package["exports"]["./sidebar.js"], "./dist/js/sidebar.js")
         self.assertEqual(package["exports"]["./context-menu.js"], "./dist/js/context-menu.js")
+        self.assertEqual(package["exports"]["./datatable.js"], "./dist/js/datatable.js")
         self.assertIn("dist/js/combobox.js", files)
         self.assertIn("dist/js/sidebar.js", files)
         self.assertIn("dist/js/context-menu.js", files)
+        self.assertIn("dist/js/datatable.js", files)
         self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
         self.assertEqual(
             package["exports"]["./certification.json"],
@@ -173,7 +176,10 @@ class PackageMetadataTests(unittest.TestCase):
             path.relative_to(directory).as_posix()
             for path in directory.rglob("*.js")
         }
-        self.assertEqual(modules, {"combobox.js", "sidebar.js", "context-menu.js"})
+        self.assertEqual(
+            modules,
+            {"combobox.js", "sidebar.js", "context-menu.js", "datatable.js"},
+        )
 
     def test_npm_pack_contains_only_the_approved_files(self) -> None:
         result = subprocess.run(
@@ -316,8 +322,14 @@ class PackageMetadataTests(unittest.TestCase):
 import Combobox from "@wpmoo/ui/combobox.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
+import DataTable from "@wpmoo/ui/datatable.js";
 
-if (Combobox.name !== "Combobox" || Sidebar.name !== "Sidebar" || ContextMenu.name !== "ContextMenu") {
+if (
+  Combobox.name !== "Combobox" ||
+  Sidebar.name !== "Sidebar" ||
+  ContextMenu.name !== "ContextMenu" ||
+  DataTable.name !== "DataTable"
+) {
   throw new Error("Unexpected public ESM default export");
 }
 
@@ -346,7 +358,12 @@ for (const specifier of [
             self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
-        for module_name in ("combobox.js", "sidebar.js", "context-menu.js"):
+        for module_name in (
+            "combobox.js",
+            "sidebar.js",
+            "context-menu.js",
+            "datatable.js",
+        ):
             with self.subTest(module_name=module_name):
                 result = subprocess.run(
                     [

@@ -194,6 +194,15 @@ $moo-dropdown-item-icon-size: 1.5rem !default;
 // product; this is a sidebar-scoped floor, not a global change.
 $moo-dropdown-sidebar-min-width: 14rem !default;
 
+// Bootstrap has no --bs-form-check-input-border-radius custom property to
+// consume at runtime (only the compile-time $form-check-input-border-radius
+// Sass default, which this settings layer loads before Bootstrap defines),
+// so the checkbox-style menu-item indicator shared by Dropdown, Menubar,
+// Context Menu, and Data Table needs its own scoped knob to reuse
+// Checkbox's exact corner radius. Restated as .25em to match Bootstrap's
+// own $form-check-input-border-radius default.
+$moo-dropdown-item-check-border-radius: .25em !default;
+
 // Field has no matching Bootstrap component of its own, so its spacing
 // scale and legend sizing live on dedicated Sass knobs instead of
 // per-instance utility classes. Changing spacing/type for every Field
@@ -217,3 +226,70 @@ $moo-field-fieldset-sibling-gap: $moo-field-group-gap !default;
 $moo-field-legend-font-size: 1rem !default;
 $moo-field-legend-margin-bottom: 0.375rem !default;
 $moo-field-separator-opacity: 0.1 !default;
+
+// Bootstrap has no floating/overlay toolbar primitive, so the Data Table
+// bulk-actions bar's hover affordance (the whole bar scaling up slightly,
+// not a per-button state) has no Bootstrap knob to consume. Exposed as a
+// scoped, consumer-overridable knob: set to 1 to turn the effect off, or
+// raise it for a more pronounced zoom.
+$moo-datatable-bulk-actions-hover-scale: 1.02 !default;
+// The selection bulk-actions bar is a fixed-position overlay surface; its
+// backdrop blur strength has no Bootstrap equivalent to consume.
+$moo-datatable-bulk-actions-backdrop-blur: 8px !default;
+// Bootstrap has no Data Table layout/card primitive, so these scoped knobs
+// describe the generated table/card frames without becoming global widths.
+$moo-datatable-min-width: 48rem !default;
+$moo-datatable-release-review-min-width: 64rem !default;
+$moo-datatable-card-min-width: 20rem !default;
+$moo-datatable-card-label-width: 7rem !default;
+// Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
+// these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
+$moo-datatable-frame-header-min-height: 2.78125rem !default;
+// Bootstrap's checkbox width variable is not available while primary settings
+// are aggregated, so keep Data Table's select inset derived from Moo's compact
+// checkbox box and Bootstrap's default 1px frame border.
+$moo-datatable-select-checkbox-size: 0.875rem !default;
+// Bootstrap has no --bs-form-check-input-border-radius custom property to
+// consume here either, same gap as the checkbox size above, this time for
+// the facet dropdown's own checkbox-style indicator (datatable_facet_item(),
+// which can't reuse the shared .dropdown-item-check__indicator markup).
+// Scoped to Data Table since it can't reference Dropdown's private knob
+// across files; restated as .25em to match Bootstrap's own
+// $form-check-input-border-radius default so the facet dropdown reads as
+// the same control as the shared indicator and the real Checkbox.
+$moo-datatable-facet-item-border-radius: .25em !default;
+// Keep the select-all checkbox inset visually even with the table/card header's
+// vertical breathing while accounting for the framed wrapper border.
+$moo-datatable-select-cell-inset: ($moo-datatable-frame-header-min-height - $moo-datatable-select-checkbox-size) * 0.5 - 0.0625rem !default;
+// Bootstrap has no knob for reconciling a native table-cell checkbox baseline
+// with a flex-aligned card header checkbox, so this scoped 0.75px nudge keeps
+// their visual boxes on the same y-axis when switching between list/card view.
+$moo-datatable-table-select-all-offset-y: 0.046875rem !default;
+$moo-datatable-toolbar-control-height: calc(#{$input-height} + var(--bs-border-width) * 2) !default;
+$moo-datatable-icon-label-gap: 0.5rem !default;
+// Bootstrap dropdowns have no scoped Data Table filter-picker width token; the
+// compact root list and longer option drill-down each need their own knob.
+$moo-datatable-search-filter-menu-width: 12.5rem !default;
+$moo-datatable-search-filter-options-menu-width: 17rem !default;
+$moo-datatable-facet-menu-min-width: 12.5rem !default;
+$moo-datatable-facet-trigger-font-size: $btn-font-size-sm !default;
+$moo-datatable-facet-trigger-min-height: 2rem !default;
+// A viewport-relative cap (100vh - offset) assumes the menu opens near the
+// top of the screen; Popper can anchor it much lower, letting it overflow
+// the viewport anyway. A fixed cap sized to a row count -- the same
+// rows-per-screen convention Combobox's own long menu already uses -- stays
+// correct regardless of where the trigger sits on the page, and keeps a
+// long option list (e.g. every row owner) from crowding the whole screen.
+// Shared by both the inline facet dropdown and the filter-picker's
+// drill-down option list, so the two present the same row count.
+$moo-datatable-facet-item-height: 2rem !default;
+$moo-datatable-facet-options-max-height: $moo-datatable-facet-item-height * 10 !default;
+// Bootstrap has no thin scrollbar utility. Keep the primitive shared and let
+// Data Table inherit it unless a consumer needs a component-specific override.
+$moo-scrollbar-thin-size: 0.375rem !default;
+$moo-datatable-scrollbar-size: $moo-scrollbar-thin-size !default;
+$moo-datatable-page-size-trigger-min-width: 3.25rem !default;
+$moo-datatable-page-size-menu-min-width: 4rem !default;
+// Catalog preview chrome: maximum width of the full-bleed release-review
+// preview pages that host the Data Table block.
+$moo-datatable-preview-shell-max-width: 82rem !default;

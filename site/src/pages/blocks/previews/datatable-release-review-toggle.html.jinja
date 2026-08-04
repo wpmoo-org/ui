@@ -1,0 +1,22 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "blocks/datatable_release_review.html.jinja" import render_release_review_table %}
+
+{% block title %}Data Table User Toggle Preview — Moo UI{% endblock %}
+
+{% block content %}
+  <section class="container-fluid py-4">
+    <div class="mx-auto datatable-preview-shell">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+          <h1 class="h3 mb-1">Release review queue</h1>
+          <p class="text-body-secondary mb-0">Table and card layouts are both always available; the reader picks with the toggle, and the choice is remembered.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-outline-secondary btn-sm" type="button">Import</button>
+          <button class="btn btn-primary btn-sm" type="button">Create review</button>
+        </div>
+      </div>
+      {{ render_release_review_table(id="standalone-datatable-toggle-release-reviews", standalone=true, responsive_mode="toggle") }}
+    </div>
+  </section>
+{% endblock %}

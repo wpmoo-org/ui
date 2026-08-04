@@ -146,51 +146,6 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set dense %}
-      <div class="d-flex justify-content-center">
-        {{ select(
-          aria_label="Priority",
-          id="select-priority",
-          options=quick_options,
-          selected="medium",
-          size="lg",
-          rows="6"
-        ) }}
-      </div>
-    {% endset %}
-    {{ render_example(
-      "dense",
-      "Dense list",
-      "Use the native `size` attribute for a denser, scroll-free queue picker.",
-      dense,
-      preview_class="moo-example__preview--narrow"
-    ) }}
-
-    {% set multiple %}
-      <div class="d-flex justify-content-center">
-        {{ select(
-          aria_label="Assigned teams",
-          options=[
-            {"value": "platform", "label": "Platform"},
-            {"value": "support", "label": "Support"},
-            {"value": "customer", "label": "Customer Success"},
-            {"value": "qa", "label": "Quality"},
-            {"value": "finance", "label": "Finance"},
-            {"value": "security", "label": "Security"}
-          ],
-          multiple=true,
-          rows="5"
-        ) }}
-      </div>
-    {% endset %}
-    {{ render_example(
-      "multiple",
-      "Multiple",
-      "Use the native `multiple` selection mode when a task targets several teams.",
-      multiple,
-      preview_class="moo-example__preview--narrow"
-    ) }}
-
     {% set with_fieldset %}
       <div class="vstack gap-2">
         {% call fieldset("Delivery controls", "Select the target queue for each environment.") %}

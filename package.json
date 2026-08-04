@@ -30,6 +30,7 @@
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
+    "./datatable.js": "./dist/js/datatable.js",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -41,11 +42,11 @@
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
+    "dist/js/datatable.js",
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md"
+    "ASSET_LICENSE.md"
   ],
   "peerDependencies": {
     "bootstrap": ">=5.3.0 <5.4"

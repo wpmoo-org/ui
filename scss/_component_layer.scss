@@ -16,6 +16,7 @@
 @import "components/breadcrumb";
 @import "components/pagination";
 @import "components/progress";
+@import "components/separator";
 @import "components/checkbox";
 @import "components/radio_group";
 @import "components/switch";
@@ -31,6 +32,7 @@
 @import "components/field";
 @import "components/combobox";
 @import "components/context-menu";
+@import "components/datatable";
 
 // Bootstrap's own .form-label/.form-check-label leave native text selection
 // on; the design reference treats every control label as part of the

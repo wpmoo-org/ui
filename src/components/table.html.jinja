@@ -76,7 +76,7 @@
    text). Pass the caller's dropdown_item()/dropdown_divider() calls as
    the row's cell value, same as any other rich, caller-controlled
    table cell. #}
-{% macro table_row_actions(aria_label="Open menu", align="end", extra_class="") -%}
+{% macro table_row_actions(aria_label="Open menu", align="end", extra_class="", icon="ellipsis") -%}
   {% if not aria_label | trim %}{{ fail("Table row actions aria_label is required") }}{% endif %}
   {% set items %}{{ caller() | trim | safe }}{% endset %}
   <div class="table-row-actions dropdown{% if extra_class %} {{ extra_class }}{% endif %}">
@@ -87,7 +87,7 @@
       aria-expanded="false"
       aria-label="{{ aria_label }}"
     >
-      {{ render_icon("ellipsis", "inline-start") }}
+      {{ render_icon(icon, "inline-start") }}
     </button>
     {% call dropdown_menu(align=align) %}{{ items | safe }}{% endcall %}
   </div>

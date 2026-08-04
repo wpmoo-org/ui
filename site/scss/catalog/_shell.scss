@@ -1,6 +1,10 @@
 body {
   min-height: 100vh;
   background: var(--bs-tertiary-bg);
+  font-family: $moo-catalog-font-family, var(--bs-body-font-family);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 // Catalog-chrome-only display typeface. The Moo UI product itself
@@ -25,6 +29,7 @@ body {
   height: 2rem;
   flex: 1 1 10rem;
   min-width: 0;
+  justify-content: flex-start;
   padding: 0.5rem 0.75rem;
   color: var(--bs-secondary-color);
   border: var(--bs-border-width) solid var(--bs-border-color);
@@ -57,15 +62,9 @@ body {
   gap: 0.25rem;
 }
 
-// Below sm the trigger is icon-only, so it keeps the base .btn centering.
-// From sm up the visible "Search" label reads like input text, not a
-// centered button caption.
-@include media-breakpoint-up(sm) {
-  .moo-catalog__search-trigger {
-    justify-content: flex-start;
-  }
-}
-
+// The visible "Search" label reads like input text at every width, so the
+// trigger stays start-aligned; from md up the shortcut hint takes the far
+// edge.
 @include media-breakpoint-up(md) {
   .moo-catalog__search-trigger {
     flex: 0 0 auto;
@@ -122,6 +121,15 @@ body {
   color: currentColor;
 }
 
+// Below lg the repository label collapses and the link becomes icon-only;
+// restore symmetric padding so the mark sits optically centered (the core
+// inline-start rule assumes a visible label next to the icon).
+@media (max-width: 991.98px) {
+  .btn.moo-catalog__github-link:has(> [data-icon="inline-start"]) {
+    padding-inline: 0.5rem;
+  }
+}
+
 .moo-catalog__theme-toggle {
   border-radius: 50%;
 }
@@ -135,7 +143,11 @@ body {
   --moo-catalog-header-height: 4rem;
   --moo-catalog-header-bg-opacity: 0.94;
   --moo-catalog-header-backdrop-filter: blur(0.75rem);
+  --moo-doc-lead-font-size: 1rem;
+  --moo-doc-lead-line-height: 1.5;
   --moo-doc-body-font-size: 0.9375rem;
+  --moo-doc-body-line-height: 1.75;
+  --moo-doc-table-line-height: 1.4285714286;
   --moo-doc-toc-offset: calc(2rem + 5px);
 
   min-height: 100vh;

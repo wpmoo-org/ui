@@ -55,7 +55,7 @@ LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
-CORE_JS_MODULES = ("combobox.js", "sidebar.js", "context-menu.js")
+CORE_JS_MODULES = ("combobox.js", "sidebar.js", "context-menu.js", "datatable.js")
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
@@ -80,6 +80,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "collapsible": "src/components/collapsible.html.jinja",
     "combobox": "src/components/combobox.html.jinja",
     "context-menu": "src/components/context_menu.html.jinja",
+    "datatable": "src/components/datatable.html.jinja",
     "field": "src/components/field.html.jinja",
     "form": "src/components/field.html.jinja",
     "menubar": "src/components/menubar.html.jinja",
@@ -1132,6 +1133,43 @@ def copy_site_assets() -> None:
         shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
 
 
+def version_site_module_imports() -> None:
+    catalog_js_dir = SITE_DIST / "assets/js/catalog"
+    if not catalog_js_dir.exists():
+        return
+
+    import_pattern = re.compile(
+        r'(?P<prefix>\bfrom\s+)(?P<quote>["\'])(?P<path>\.{1,2}/[^"\']+?\.js)(?P=quote)'
+    )
+
+    def import_version(script: Path, import_path: str) -> str | None:
+        target = (script.parent / import_path).resolve()
+        try:
+            target.relative_to(SITE_DIST.resolve())
+        except ValueError:
+            return None
+        if not target.is_file():
+            return None
+        return hashlib.sha256(target.read_bytes()).hexdigest()[:12]
+
+    for script in sorted(catalog_js_dir.rglob("*.js")):
+        source = script.read_text(encoding="utf-8")
+
+        def replace_import(match: re.Match[str]) -> str:
+            path = match.group("path")
+            if "?" in path:
+                return match.group(0)
+            version = import_version(script, path)
+            if not version:
+                return match.group(0)
+            quote = match.group("quote")
+            return f"{match.group('prefix')}{quote}{path}?v={version}{quote}"
+
+        updated = import_pattern.sub(replace_import, source)
+        if updated != source:
+            script.write_text(updated, encoding="utf-8")
+
+
 def copy_site_metadata() -> None:
     if LLMS_TXT.exists():
         shutil.copy2(LLMS_TXT, SITE_DIST / "llms.txt")
@@ -1192,7 +1230,7 @@ def write_sitemap() -> None:
     )
 
 
-def render_pages() -> None:
+def render_pages(version: str | None = None) -> None:
     environment = create_environment()
     catalog = load_catalog()
     sections = load_entries(SITE_REGISTRY, "sections.json")
@@ -1211,7 +1249,7 @@ def render_pages() -> None:
         for component in catalog
     ]
     site_pages = build_site_pages(sections, catalog, utilities, blocks)
-    version = asset_version()
+    version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
         logical_relative = relative.with_suffix("")
@@ -1290,7 +1328,9 @@ def build_site() -> None:
     compile_catalog_styles()
     copy_site_assets()
     copy_site_metadata()
-    render_pages()
+    version_site_module_imports()
+    version = asset_version()
+    render_pages(version)
     write_sitemap()
 
 

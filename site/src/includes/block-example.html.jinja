@@ -1,9 +1,28 @@
 {% from "components/typography.html.jinja" import typography %}
 
-{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720) %}
+{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720, frame_variants=[], frame_viewports=[]) %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
   {% set title_slug = title | slugify %}
+  {% set frame_state = namespace(src=frame_src, width=frame_width, height=frame_height, variant_label="") %}
+  {% if frame_variants %}
+    {% for variant in frame_variants %}
+      {% if loop.first or variant.active | default(false) %}
+        {% set frame_state.src = variant.src %}
+        {% set frame_state.width = variant.width | default(frame_width) %}
+        {% set frame_state.height = variant.height | default(frame_height) %}
+        {% set frame_state.variant_label = variant.label %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  {% if frame_viewports %}
+    {% for viewport in frame_viewports %}
+      {% if viewport.active | default(false) %}
+        {% set frame_state.width = viewport.width | default(frame_state.width) %}
+        {% set frame_state.height = viewport.height | default(frame_state.height) %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
   <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ title_slug }}">
     <div class="moo-example__header">
       {{ typography(title, variant="example-title", id=title_slug) }}
@@ -11,28 +30,82 @@
     </div>
     <div class="moo-example__surface">
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
-        {% if frame_src %}
+        {% if frame_state.src %}
           <div
             class="moo-block-preview"
             data-moo-block-frame-shell
-            data-moo-frame-width="{{ frame_width }}"
-            data-moo-frame-height="{{ frame_height }}"
+            data-moo-frame-width="{{ frame_state.width }}"
+            data-moo-frame-height="{{ frame_state.height }}"
           >
             <div class="moo-block-preview__toolbar">
-              <span class="small text-body-secondary">{{ frame_width }} x {{ frame_height }}</span>
-              <a class="btn btn-sm btn-outline-secondary" href="{{ frame_src }}" target="_blank" rel="noopener noreferrer">
-                {{ render_icon("external-link", "inline-start") }}
-                Open standalone
-              </a>
+              <div class="moo-block-preview__toolbar-start">
+                {% if frame_variants %}
+                  <div class="moo-block-preview__control">
+                    <span class="small text-body-secondary">Variant</span>
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-outline-secondary moo-block-preview__variant-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span data-moo-frame-variant-label>{{ frame_state.variant_label }}</span>
+                        {{ render_icon("chevron-down", "inline-end") }}
+                      </button>
+                      <ul class="dropdown-menu">
+                        {% for variant in frame_variants %}
+                          {% set is_active = (variant.label == frame_state.variant_label) %}
+                          <li>
+                            <button
+                              class="dropdown-item{% if is_active %} active{% endif %}"
+                              type="button"
+                              data-moo-frame-variant
+                              data-moo-frame-src="{{ variant.src }}"
+                              data-moo-frame-variant-label="{{ variant.label }}"
+                              {% if is_active %}
+                                aria-current="true"
+                              {% endif %}
+                            >
+                              {{ variant.label }}
+                            </button>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </div>
+                {% endif %}
+                <span class="small text-body-secondary" data-moo-frame-size-label>{{ frame_state.width }} x {{ frame_state.height }}</span>
+              </div>
+              <div class="moo-block-preview__toolbar-end">
+                {% if frame_viewports %}
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Preview viewport">
+                    {% for viewport in frame_viewports %}
+                      {% set is_active = viewport.active | default(false) %}
+                      <button
+                        class="btn btn-outline-secondary btn-icon-sm{% if is_active %} active{% endif %}"
+                        type="button"
+                        data-moo-frame-preset
+                        data-moo-frame-width="{{ viewport.width }}"
+                        data-moo-frame-height="{{ viewport.height }}"
+                        data-moo-frame-preset-label="{{ viewport.label }}"
+                        aria-label="{{ viewport.label }} preview"
+                        aria-pressed="{{ 'true' if is_active else 'false' }}"
+                        title="{{ viewport.label }}"
+                      >
+                        {{ render_icon(viewport.icon, "inline-start") }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-secondary" href="{{ frame_state.src }}" target="_blank" rel="noopener noreferrer" data-moo-frame-standalone-link>
+                  {{ render_icon("external-link", "inline-start") }}
+                  Open standalone
+                </a>
+              </div>
             </div>
             <div class="moo-block-preview__viewport" data-moo-block-frame-viewport>
               <iframe
                 class="moo-block-preview__frame"
                 data-moo-block-frame
-                src="{{ frame_src }}"
+                src="{{ frame_state.src }}"
                 title="{{ title }} preview"
-                width="{{ frame_width }}"
-                height="{{ frame_height }}"
+                width="{{ frame_state.width }}"
+                height="{{ frame_state.height }}"
                 loading="lazy"
               ></iframe>
             </div>

@@ -10,7 +10,6 @@ APPROVED_TARBALL_FILES = {
     "ASSET_LICENSE.md",
     "LICENSE",
     "README.md",
-    "THIRD_PARTY_NOTICES.md",
     "certification.json",
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -19,6 +18,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
+    "dist/js/datatable.js",
     "package.json",
 }
 

@@ -24,6 +24,16 @@
   background-color: var(--moo-muted-surface);
 }
 
+// The active pill's own background (--bs-nav-pills-link-active-bg above)
+// is a persistent class-based state, so it stays lit even while a
+// different pill is hovered -- two pills highlighted at once, competing
+// for attention. Suppress it only while another pill in the same group is
+// hovered, so exactly one pill is ever highlighted: whichever the cursor
+// is over, or the active one when nothing is hovered.
+.nav-pills:has(.nav-link:hover) .nav-link.active:not(:hover) {
+  background-color: transparent;
+}
+
 .nav-link [data-icon] {
   width: 1rem;
   height: 1rem;

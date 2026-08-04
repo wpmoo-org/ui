@@ -1,6 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
-{% from "components/alert.html.jinja" import alert %}
 {% from "components/checkbox.html.jinja" import checkbox %}
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
@@ -173,16 +172,11 @@
     ) }}
   </div>
 
-  {{ alert(
-    "Submenu gap",
-    "Bootstrap has no native submenu in dropdowns, so this catalog keeps nested workflows as separate top-level commands to preserve keyboard behavior and predictable focus.",
-    icon="triangle-alert"
-  ) }}
-
   {{ render_reference(
     "For plugin behavior, alignment, and placement options, see the",
     "https://getbootstrap.com/docs/5.3/components/dropdowns/",
-    "Bootstrap Dropdown documentation"
+    "Bootstrap Dropdown documentation",
+    limitation="Bootstrap has no native submenu in dropdowns, so this catalog keeps nested workflows as separate top-level commands to preserve keyboard behavior and predictable focus."
   ) }}
 
 {% endblock %}

@@ -24,11 +24,11 @@ class CertificationContractTests(unittest.TestCase):
         inventory_slugs = {component["slug"] for component in inventory["components"]}
         registry_slugs = {component["slug"] for component in registry}
 
-        self.assertEqual(len(inventory["components"]), 41)
+        self.assertEqual(len(inventory["components"]), 42)
         self.assertEqual(inventory_slugs, registry_slugs)
         self.assertEqual(
             {component["slug"] for component in inventory["plannedComponents"]},
-            {"data-table"},
+            set(),
         )
 
     def test_every_evidence_profile_partitions_all_categories_once(self) -> None:
@@ -53,7 +53,7 @@ class CertificationContractTests(unittest.TestCase):
             for evidence_path in component["evidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
 
-        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 6})
+        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 7})
 
     def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
         pilot = self._read_json("src/certification/pilot-evidence.json")
@@ -233,7 +233,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
 
-    def test_phase_three_evidence_tracks_t3_context_menu(self) -> None:
+    def test_phase_three_evidence_tracks_t3_components(self) -> None:
         phase_three = self._read_json("src/certification/phase-3-evidence.json")
         manifest = self._read_json("certification.json")
         components = {
@@ -241,6 +241,11 @@ class CertificationContractTests(unittest.TestCase):
         }
         expected_components = {
             "context-menu": {"phase": "3A", "tier": 3},
+            "datatable": {
+                "phase": "3B",
+                "tier": 3,
+                "manual_form": "src/certification/manual-acceptance/2026-08-03-datatable-phase-3b.md",
+            },
         }
 
         self.assertEqual(phase_three["status"], "backfill")
@@ -258,6 +263,8 @@ class CertificationContractTests(unittest.TestCase):
                 self.assertIn("host-conformance", component["evidence"]["missing"])
                 for evidence_path in component["automatedEvidence"]:
                     self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
+                if expected.get("manual_form"):
+                    self.assertTrue((ROOT / expected["manual_form"]).is_file())
                 for evidence_url in component["bootstrapEvidence"]:
                     parsed_url = urlparse(evidence_url)
                     self.assertEqual(parsed_url.scheme, "https", evidence_url)

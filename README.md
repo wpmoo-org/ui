@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/wpmoo-org/ui/actions/workflows/ui-ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/wpmoo-org/ui/ui-ci.yml?branch=main&label=CI"></a>
+  <a href="https://github.com/wpmoo-org/ui"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white"></a>
   <a href="https://www.npmjs.com/package/@wpmoo/ui"><img alt="npm" src="https://img.shields.io/npm/v/@wpmoo/ui?label=npm&logo=npm&color=cb3837"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
 </p>
@@ -26,7 +27,7 @@
 Moo UI preserves Bootstrap markup, variables, and JavaScript plugins wherever
 Bootstrap already provides the contract. For patterns Bootstrap does not
 provide, Moo UI adds small documented extensions, including optional ESM for
-Combobox, Context Menu, and Sidebar.
+Combobox, Context Menu, DataTable, and Sidebar.
 
 - **CSS-first.** Most components need only the stylesheet and ordinary HTML.
 - **Bootstrap owns native behavior.** Keep using Bootstrap's bundle for its
@@ -58,6 +59,7 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other Bootstrap plugins | Bootstrap | Bootstrap's JavaScript bundle and documented initialization |
 | Combobox | Optional Moo ESM | `@wpmoo/ui/combobox.js`, then explicit initialization |
 | Context Menu pointer and keyboard invocation | Optional Moo ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
+| DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
 | Sidebar state and responsive coordination | Optional Moo ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
 
 Moo UI does not replace Bootstrap plugins and does not publish a mandatory
@@ -102,10 +104,12 @@ Initialize only the documented behavior gaps you use:
 ```js
 import Combobox from "@wpmoo/ui/combobox.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
+import DataTable from "@wpmoo/ui/datatable.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
 
 Combobox.getOrCreateInstance(document.querySelector(".combobox"));
 ContextMenu.getOrCreateInstance(document.querySelector(".context-menu"));
+DataTable.getOrCreateInstance(document.querySelector(".datatable"));
 Sidebar.getOrCreateInstance(document.querySelector('[data-slot="sidebar-wrapper"]'));
 ```
 
@@ -120,7 +124,7 @@ recipes, load order, and troubleshooting.
 | Existing Bootstrap application | Load `moo.css` after Bootstrap CSS and add `.moo-ui` around migrated regions. |
 | Static page with no interactive plugins | Load CSS only. |
 | Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
-| Page using Combobox, Context Menu, or Sidebar | Add only the corresponding optional Moo ESM module. |
+| Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo ESM module. |
 
 ## Public Package Surface
 
@@ -134,14 +138,15 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/moo.min.css` | Scoped minified component layer |
 | `@wpmoo/ui/combobox.js` | Optional Combobox ESM lifecycle |
 | `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
+| `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
 
-The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
-`THIRD_PARTY_NOTICES.md`. It does not publish catalog templates, preview
-artwork, catalog JavaScript, SCSS source, or a Sass facade. Internal Sass
-partials and Jinja macros are repository build tools, not npm APIs.
+The tarball also contains `README.md`, `LICENSE`, and `ASSET_LICENSE.md`. It
+does not publish catalog templates, preview artwork, catalog JavaScript, SCSS
+source, or a Sass facade. Internal Sass partials and
+Jinja macros are repository build tools, not npm APIs.
 
 ## Why Bootstrap Teams Try It
 
@@ -151,8 +156,8 @@ partials and Jinja macros are repository build tools, not npm APIs.
 - Inspect static rendered examples and copy the resulting HTML contracts.
 - Start with one scoped region or replace the full stylesheet after review.
 
-Representative components include Button, Field, Table, Dialog, Toast, Sheet,
-Combobox, Context Menu, and Sidebar. Browse the [component catalog](https://ui.wpmoo.org/components/)
+Representative components include Button, Field, Table, DataTable, Dialog,
+Toast, Sheet, Combobox, Context Menu, and Sidebar. Browse the [component catalog](https://ui.wpmoo.org/components/)
 and composed [blocks](https://ui.wpmoo.org/blocks/).
 
 ## Designed, Not Just Restyled

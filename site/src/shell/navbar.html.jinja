@@ -41,13 +41,14 @@
       </div>
 
       <div class="moo-catalog__header-actions">
-        {#- Always visible (icon-only below sm) rather than d-none, so
-           search/the command palette stays reachable at every width even
-           once the primary nav and its label text are hidden. #}
+        {#- Always visible (label included, icon-only nowhere) rather than
+           d-none, so search/the command palette stays reachable at every
+           width even once the primary nav is hidden; the shortcut hint
+           still collapses below md. #}
         {% set search_trigger_label %}
           <span class="moo-catalog__search-trigger-lead">
             {{ render_icon("search", "inline-start") }}
-            <span class="d-none d-sm-inline">Search</span>
+            <span>Search</span>
           </span>
           {#- Real shortcut, not decoration: Cmd/Ctrl+K opens this same
              command palette through the catalog command module. #}

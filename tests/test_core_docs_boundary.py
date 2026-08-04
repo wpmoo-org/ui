@@ -22,6 +22,7 @@ CORE_OUTPUTS = {
     "dist/assets/css/moo.min.css",
     "dist/js/combobox.js",
     "dist/js/context-menu.js",
+    "dist/js/datatable.js",
     "dist/js/sidebar.js",
 }
 FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
@@ -123,6 +124,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "assets/css/moo.min.css",
             "js/combobox.js",
             "js/context-menu.js",
+            "js/datatable.js",
             "js/sidebar.js",
         }
         expected_site_files = {
@@ -140,6 +142,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "assets/js/bootstrap.bundle.min.js",
             "js/combobox.js",
             "js/context-menu.js",
+            "js/datatable.js",
             "js/sidebar.js",
             "components/button/index.html",
             "blocks/sidebar-floating/index.html",

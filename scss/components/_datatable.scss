@@ -1,0 +1,1055 @@
+// Bootstrap ships .table markup only, with no sort/filter/pagination
+// behavior and no faceted-filter or column-visibility concept, so this
+// partial covers only the pieces that have no Bootstrap token to consume:
+// the facet dropdown's own checkbox indicator (mirroring the shared
+// dropdown_toggle_item() indicator in scss/components/_dropdown.scss), the
+// sort-direction icon swap, and the hidden-column state the runtime drives.
+
+// A fixed layout keeps the table's overall width stable as sorting,
+// filtering, pagination, and column visibility change which rows and
+// columns are on screen; Bootstrap's own .table stays auto-layout (sized
+// to the current content), which is what let the table jump width as
+// visible content changed.
+.datatable {
+  --moo-datatable-min-width: #{$moo-datatable-min-width};
+  --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
+  --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
+  --moo-datatable-select-cell-inset: #{$moo-datatable-select-cell-inset};
+  --moo-datatable-table-select-all-offset-y: #{$moo-datatable-table-select-all-offset-y};
+  --moo-datatable-toolbar-control-height: #{$moo-datatable-toolbar-control-height};
+  --moo-datatable-search-filter-menu-width: #{$moo-datatable-search-filter-menu-width};
+  --moo-datatable-search-filter-options-menu-width: #{$moo-datatable-search-filter-options-menu-width};
+  --moo-datatable-scrollbar-size: #{$moo-datatable-scrollbar-size};
+}
+
+.datatable-table {
+  table-layout: fixed;
+}
+
+.datatable--responsive-scroll .datatable-table,
+.datatable--responsive-toggle .datatable-table {
+  min-width: var(--moo-datatable-min-width);
+}
+
+// Toggle mode renders both the table and the card list at once (unlike
+// cards mode, which swaps them by breakpoint) so a person, not a viewport,
+// can choose the layout the way Odoo's List/Kanban switcher works. Visibility
+// follows the root's own data-datatable-view state instead of a d-*-none
+// utility.
+.datatable--responsive-toggle[data-datatable-view="table"] .datatable-card-frame {
+  display: none;
+}
+
+.datatable--responsive-toggle[data-datatable-view="cards"] .datatable-frame {
+  display: none;
+}
+
+// Bootstrap's .table has no bordered/rounded container variant of its own
+// (.table-bordered adds vertical column rules too, which the reference
+// doesn't have -- only an outer frame plus its own default row dividers).
+// The radius has to live on this wrapper, not the <table> itself: Bootstrap
+// resets every table to border-collapse: collapse, and a border-radius on a
+// collapsed-border table does not clip its own cell backgrounds.
+.datatable-frame {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  overflow: hidden;
+}
+
+.datatable-card-frame {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  overflow: hidden;
+}
+
+.datatable-frame:has(.table-row-actions .dropdown-menu.show),
+.datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show) {
+  overflow: visible;
+}
+
+.datatable-frame-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625rem;
+  min-block-size: var(--moo-datatable-frame-header-min-height);
+  padding-block: 0.375rem;
+  padding-inline-start: var(--moo-datatable-select-cell-inset);
+  padding-inline-end: 0.5rem;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+}
+
+.datatable-frame .table-responsive {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.datatable-frame .datatable-table {
+  margin-bottom: 0;
+}
+
+.datatable-table > :not(caption) > * > * {
+  vertical-align: middle;
+}
+
+// The toolbar's flex layout belongs to the component itself, not to
+// Bootstrap layout utilities on the macro markup: the narrow-screen grid
+// override below can replace it without an !important fight against
+// .d-flex, and the trailing actions group owns its own
+// margin-inline-start: auto alignment instead of .ms-auto.
+.datatable-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.datatable-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+// Bootstrap's .form-control defaults to width: 100%, so inside the
+// toolbar's flex row the search input claims the entire line on its own
+// and pushes the Status/Priority facet triggers onto a wrapped second
+// line even when there is room beside it. A max-width (not a fixed width)
+// caps it on wide toolbars while still letting it shrink on narrow ones.
+.datatable-toolbar-query {
+  display: flex;
+  flex: 0 1 22rem;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 20rem;
+  max-width: 100%;
+}
+
+.datatable-search-filter {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.datatable-searchbar {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-block-size: var(--moo-datatable-toolbar-control-height);
+  width: 100%;
+}
+
+.datatable-searchbar .datatable-search {
+  flex: 1 1 auto;
+  max-width: none;
+  min-width: 0;
+  width: 1%;
+  padding-inline-start: 2rem;
+}
+
+.datatable-search-icon {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.625rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.datatable-search-icon > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.datatable-filter-picker-trigger {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  margin-inline-end: 0;
+  border-radius: var(--bs-border-radius-sm);
+  gap: 0;
+}
+
+.btn.datatable-filter-picker-trigger:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+.btn.datatable-filter-picker-trigger:focus-visible {
+  z-index: 3;
+  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+.input-group > .btn-ghost.datatable-filter-picker-trigger:focus-visible::before {
+  opacity: 1;
+}
+
+.datatable-filter-picker-trigger > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+}
+
+.datatable-search-filter-menu {
+  --bs-dropdown-border-radius: var(--bs-border-radius);
+
+  width: var(--moo-datatable-search-filter-menu-width);
+  max-width: calc(100vw - 1.5rem);
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.datatable-search-filter-menu[data-datatable-filter-menu-panel="options"] {
+  width: var(--moo-datatable-search-filter-options-menu-width);
+}
+
+.datatable-facet-menu {
+  --bs-dropdown-border-radius: var(--bs-border-radius);
+
+  min-width: $moo-datatable-facet-menu-min-width;
+}
+
+.datatable-filter-panel {
+  min-width: 0;
+}
+
+// Only the option rows scroll; the facet/back-button header and the search
+// box above them stay in normal flow outside this nested list, so they
+// never move. list-style/margin/padding reset because this <ul> nests
+// inside a .dropdown-menu <li>, which does not get Bootstrap's own
+// dropdown-menu list reset applied to it a second time.
+.datatable-facet-options,
+.datatable-filter-options {
+  max-height: $moo-datatable-facet-options-max-height;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.datatable-search-filter-menu .dropdown-header {
+  padding-block: 0.125rem 0.375rem;
+  padding-inline: 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.datatable-search-filter-menu .dropdown-item,
+.datatable-facet-menu .dropdown-item {
+  min-height: $moo-datatable-facet-item-height;
+  padding-block: 0.375rem;
+  padding-inline: 0.5rem;
+  border-radius: var(--bs-border-radius-sm);
+  gap: 0.5rem;
+  cursor: default;
+  line-height: 1.25rem;
+}
+
+.datatable-search-filter-menu .dropdown-item.active,
+.datatable-facet-menu .dropdown-item.active {
+  color: var(--bs-dropdown-link-color);
+  background-color: transparent;
+}
+
+.datatable-search-filter-menu .dropdown-item:hover,
+.datatable-search-filter-menu .dropdown-item:focus-visible,
+.datatable-facet-menu .dropdown-item:hover,
+.datatable-facet-menu .dropdown-item:focus-visible {
+  color: var(--bs-dropdown-link-hover-color);
+  background-color: var(--bs-dropdown-link-hover-bg);
+  outline: 0;
+  box-shadow: none;
+}
+
+.datatable-search-filter-menu .dropdown-item:focus:not(:focus-visible, :hover),
+.datatable-facet-menu .dropdown-item:focus:not(:focus-visible, :hover) {
+  color: var(--bs-dropdown-link-color);
+  background-color: transparent;
+  outline: 0;
+  box-shadow: none;
+}
+
+.datatable-filter-group,
+.datatable-filter-panel-back {
+  gap: 0.5rem;
+}
+
+.datatable-filter-group {
+  justify-content: flex-start;
+}
+
+.datatable-filter-group-summary {
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  font-weight: var(--bs-body-font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.datatable-filter-group > [data-icon],
+.datatable-filter-panel-back > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--bs-secondary-color);
+}
+
+.datatable-filter-panel-back {
+  color: var(--bs-secondary-color);
+  font-weight: var(--bs-body-font-weight);
+}
+
+.datatable-filter-panel-back span {
+  color: var(--bs-body-color);
+}
+
+.datatable-filter-picker-item .text-body-secondary,
+.datatable-facet-item .text-body-secondary {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.datatable-filter-picker-item > [data-datatable-filter-option-label],
+.datatable-facet-item > [data-datatable-facet-option-label] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datatable-filter-option-search-wrap,
+.datatable-facet-search-wrap {
+  position: relative;
+  display: flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.datatable-filter-option-search-wrap::after,
+.datatable-facet-search-wrap::after {
+  position: absolute;
+  inset-inline: calc(-1 * var(--bs-dropdown-padding-x, 0));
+  inset-block-end: 0;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  content: "";
+}
+
+.datatable-dropdown-search-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-secondary-color);
+}
+
+.datatable-dropdown-search-icon > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.datatable-filter-option-search,
+.datatable-facet-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--bs-body-color);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.datatable-filter-option-search::placeholder,
+.datatable-facet-search::placeholder {
+  color: var(--bs-secondary-color);
+}
+
+.datatable-filter-option-search:focus,
+.datatable-facet-search:focus {
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  outline: 0;
+}
+
+.datatable-filter-option-search-hidden,
+.datatable-facet-search-hidden {
+  display: none;
+}
+
+.datatable-toolbar-filters {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.datatable-layout-switch {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.datatable-view-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-block-size: var(--moo-datatable-toolbar-control-height);
+  min-width: 2rem;
+  padding-inline: 0.5rem;
+}
+
+.datatable .datatable-layout-switch .btn-group-sm > .btn.datatable-view-option:has(> [data-icon="inline-start"]) {
+  padding-inline: 0.5rem;
+}
+
+.datatable-view-option > [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.datatable-view-toggle .btn-check:checked + .datatable-view-option {
+  border-color: var(--moo-border);
+  color: var(--bs-body-color);
+  background-color: var(--moo-muted-surface);
+}
+
+.datatable-view-trigger {
+  min-block-size: var(--moo-datatable-toolbar-control-height);
+}
+
+.datatable .datatable-toolbar-actions .btn.btn-sm.datatable-view-trigger:has(> [data-icon="inline-start"]) {
+  padding-inline: $btn-padding-x-sm;
+}
+
+.datatable-select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  padding-inline-start: 0;
+  color: var(--bs-secondary-color);
+  white-space: nowrap;
+}
+
+.datatable-select-all .form-check-input {
+  float: none;
+  margin: 0;
+}
+
+.datatable-select-all-table {
+  transform: translateY(var(--moo-datatable-table-select-all-offset-y));
+}
+
+.datatable-checkbox-target {
+  position: relative;
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  padding-inline-start: 0;
+  margin: 0;
+  place-items: center;
+  cursor: pointer;
+}
+
+.datatable-checkbox-target::before {
+  position: absolute;
+  inset: -0.5625rem;
+  border-radius: var(--bs-border-radius);
+  content: "";
+}
+
+.datatable-checkbox-target .form-check-input {
+  position: relative;
+  z-index: 1;
+  float: none;
+  margin: 0;
+}
+
+@media (pointer: coarse) {
+  .datatable-checkbox-target::before {
+    inset: -0.8125rem;
+  }
+}
+
+.datatable-table > :not(caption) > * > .datatable-col-select {
+  width: 2.75rem;
+  padding-inline-start: var(--moo-datatable-select-cell-inset);
+  padding-inline-end: $table-cell-padding-x;
+  white-space: nowrap;
+}
+
+.datatable-col-hidden {
+  display: none;
+}
+
+.datatable-item-cell {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.datatable-item-cell > .text-truncate {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.datatable-item-cell > .badge {
+  flex: 0 0 auto;
+}
+
+.datatable-icon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: $moo-datatable-icon-label-gap;
+}
+
+.datatable-sort-trigger {
+  margin-inline-start: calc(-1 * var(--bs-btn-padding-x, 0.5rem));
+  gap: 0.5rem;
+}
+
+.datatable-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.datatable-sort-icon-asc,
+.datatable-sort-icon-desc {
+  display: none;
+}
+
+.datatable-sort-icon > [data-icon],
+.datatable-icon-label > [data-icon] {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+[data-datatable-sort-direction="asc"] .datatable-sort-icon-none,
+[data-datatable-sort-direction="desc"] .datatable-sort-icon-none {
+  display: none;
+}
+
+[data-datatable-sort-direction="asc"] .datatable-sort-icon-asc {
+  display: inline-flex;
+}
+
+[data-datatable-sort-direction="desc"] .datatable-sort-icon-desc {
+  display: inline-flex;
+}
+
+// A card view is a grid, not a stack: on md/lg/tablet-and-wider screens a
+// single edge-to-edge card reads as an oversized table row, not a card.
+// auto-fill + a minimum card width wraps into as many columns as the
+// viewport allows and falls back to one column once it can't.
+.datatable-cards {
+  --moo-datatable-card-min-width: #{$moo-datatable-card-min-width};
+
+  display: grid;
+  gap: 0.625rem;
+  grid-template-columns: repeat(auto-fill, minmax(var(--moo-datatable-card-min-width), 1fr));
+  padding: 0.625rem;
+}
+
+.datatable-card {
+  position: relative;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+}
+
+.datatable-card-frame:has(.datatable-card .dropdown-menu.show),
+.datatable-card:has(.dropdown-menu.show) {
+  overflow: visible;
+}
+
+.datatable-card:has(.dropdown-menu.show) {
+  z-index: 2;
+}
+
+.datatable-card-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+  background-color: var(--bs-tertiary-bg);
+}
+
+.datatable-card-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.datatable-card-select .form-check-input {
+  margin: 0;
+}
+
+.datatable-card-heading {
+  min-width: 0;
+}
+
+.datatable-card-title {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datatable-card-code {
+  overflow: hidden;
+  color: var(--bs-secondary-color);
+  font-family: var(--bs-font-monospace);
+  font-size: var(--bs-body-font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datatable-card-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.datatable-card-actions .btn {
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.25rem;
+}
+
+.datatable-card-list {
+  margin: 0;
+}
+
+.datatable-card-row {
+  display: grid;
+  grid-template-columns: minmax(var(--moo-datatable-card-label-width), 30%) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+}
+
+// .datatable-col-hidden is a single class (display: none) declared above
+// .datatable-card-row's own display: grid; a tied, later-wins cascade let
+// the row's grid display beat the hide, so the View dropdown's column
+// toggles never reached the card list. Two classes outrank one regardless
+// of source order.
+.datatable-card-row.datatable-col-hidden {
+  display: none;
+}
+
+.datatable-card-row:first-child {
+  padding-top: 0.875rem;
+}
+
+.datatable-card-row:last-child {
+  padding-bottom: 0.875rem;
+}
+
+.datatable-card-row dt,
+.datatable-card-row dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.datatable-card-row dt {
+  font-weight: var(--bs-body-font-weight);
+  color: var(--bs-secondary-color);
+}
+
+.datatable-card-value {
+  display: flex;
+  min-width: 0;
+  justify-content: flex-start;
+  text-align: start;
+}
+
+.datatable-card-value .datatable-item-cell {
+  justify-content: flex-start;
+}
+
+.datatable-card-value .datatable-item-cell > .text-truncate {
+  flex: 0 1 auto;
+}
+
+.datatable-row-selected > td {
+  background-color: var(--moo-muted-surface);
+}
+
+.datatable-card.datatable-row-selected {
+  border-color: var(--moo-border);
+  background-color: var(--moo-muted-surface);
+}
+
+.datatable-empty {
+  padding: 2rem 1rem;
+  border-width: var(--bs-border-width);
+  border-style: dashed;
+  border-color: var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  text-align: center;
+}
+
+.datatable-empty-title {
+  font-weight: var(--bs-font-weight-semibold, 600);
+}
+
+.datatable-pagination {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.datatable-page-size {
+  justify-self: start;
+}
+
+.datatable-page-size-trigger {
+  min-width: $moo-datatable-page-size-trigger-min-width;
+  justify-content: space-between;
+}
+
+.datatable-page-size-menu {
+  min-width: $moo-datatable-page-size-menu-min-width;
+}
+
+.datatable-results-summary {
+  justify-self: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.datatable-page-nav {
+  max-width: 100%;
+  justify-self: end;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.datatable-page-nav .pagination {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  min-width: max-content;
+}
+
+.datatable-card-row--selection .form-check-input {
+  margin: 0;
+}
+
+// .datatable-facet-item__indicator is Data Table's own facet-dropdown item
+// (datatable_facet_item(), not the shared dropdown_toggle_item() macro), so
+// it can't inherit .dropdown-item-check__indicator's shared rule (scss/
+// components/_dropdown.scss) directly -- it restates the same
+// $form-check-input-* tokens and checked treatment so the facet dropdown and
+// the filter-picker (which does use the shared indicator) read identically.
+.datatable-facet-item__indicator {
+  --moo-datatable-facet-item-border-radius: #{$moo-datatable-facet-item-border-radius};
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: $form-check-input-width;
+  height: $form-check-input-width;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--moo-datatable-facet-item-border-radius);
+  color: transparent;
+}
+
+.datatable-facet-item.active .datatable-facet-item__indicator {
+  background-color: var(--moo-foreground);
+  border-color: var(--moo-foreground);
+  color: var(--moo-surface);
+}
+
+.datatable-facet-item__indicator > [data-icon] {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+// Bootstrap has no "inactive filter" button variant, so the faceted-filter
+// trigger is unstyled `.btn.btn-sm` by default and gets its own dashed,
+// muted-token treatment here. Selected filters keep the same calm outline
+// while the inline summary carries the active value.
+.datatable-facet-trigger {
+  --bs-btn-active-bg: var(--bs-body-bg);
+  --bs-btn-active-border-color: var(--bs-border-color);
+  --bs-btn-active-color: var(--bs-body-color);
+  --bs-btn-border-color: var(--bs-border-color);
+  --bs-btn-border-radius: var(--bs-border-radius);
+  --bs-btn-border-width: var(--bs-border-width);
+  --bs-btn-font-size: #{$moo-datatable-facet-trigger-font-size};
+  --bs-btn-hover-bg: var(--moo-muted-surface);
+  --bs-btn-hover-border-color: var(--bs-border-color);
+  --bs-btn-hover-color: var(--bs-body-color);
+  --bs-btn-line-height: 1.25rem;
+  --bs-btn-padding-x: #{$spacer * 0.625};
+  --bs-btn-padding-y: 0;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: $moo-datatable-facet-trigger-min-height;
+  border-style: dashed;
+  color: var(--bs-secondary-color);
+}
+
+.datatable-facet-trigger:hover,
+.datatable-facet-trigger:focus,
+.datatable-facet-trigger:focus-visible,
+.datatable-facet-trigger:active,
+.datatable-facet-trigger.show {
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+.btn.datatable-facet-trigger:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+.btn.datatable-facet-trigger:focus-visible,
+.btn.datatable-facet-trigger.show:focus-visible,
+.btn.datatable-facet-trigger-active:focus-visible {
+  box-shadow: none;
+}
+
+.datatable-facet-trigger-active {
+  border-style: dashed;
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+.datatable-facet-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-inline-start: 0.5rem;
+  margin-inline-start: 0.5rem;
+  border-inline-start: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.datatable-facet-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: $spacer * 1.5;
+  padding-block: 0;
+  padding-inline: 0.5rem;
+  border: 0;
+  border-radius: var(--bs-border-radius-sm);
+  background-color: var(--moo-muted-surface);
+  color: var(--bs-body-color);
+  font-size: $font-size-base * 0.857;
+  font-weight: var(--bs-body-font-weight);
+  line-height: $spacer;
+  white-space: nowrap;
+}
+
+// Bootstrap has no floating/overlay toolbar primitive, so the selection
+// bulk-actions bar (shown only once at least one row is selected) is a
+// Moo-owned fixed-position surface. It reuses Bootstrap's own shadow,
+// border, and radius tokens; only the fixed positioning, translucency, and
+// backdrop blur have no existing Bootstrap utility to consume.
+.datatable-bulk-actions {
+  --moo-datatable-bulk-actions-hover-scale: #{$moo-datatable-bulk-actions-hover-scale};
+  --moo-datatable-bulk-actions-backdrop-blur: #{$moo-datatable-bulk-actions-backdrop-blur};
+
+  position: fixed;
+  inset-inline-start: 50%;
+  inset-block-end: 1rem;
+  transform: translateX(-50%) scale(1);
+  @include transition(transform 0.15s ease-out);
+  z-index: var(--bs-zindex-fixed, 1030);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-xl);
+  background-color: var(--bs-body-bg);
+  background-color: color-mix(in srgb, var(--bs-body-bg) 95%, transparent);
+  backdrop-filter: blur(var(--moo-datatable-bulk-actions-backdrop-blur));
+  box-shadow: var(--bs-box-shadow-lg);
+}
+
+.datatable-bulk-actions:hover,
+.datatable-bulk-actions:focus-within {
+  transform: translateX(-50%) scale(var(--moo-datatable-bulk-actions-hover-scale));
+}
+
+.datatable-bulk-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+// Catalog preview chrome: caps the full-bleed release-review preview pages.
+// A Sass knob keeps the geometry on the ordered settings aggregate instead
+// of a component-local literal.
+.datatable-preview-shell {
+  max-width: $moo-datatable-preview-shell-max-width;
+}
+
+@media (max-width: 991.98px) {
+  .datatable-pagination {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .datatable-results-summary {
+    justify-self: end;
+    text-align: end;
+  }
+
+  .datatable-page-nav {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-block-start: 0.25rem;
+  }
+
+  .datatable-page-nav .pagination {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .datatable-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .datatable-search-filter {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .datatable-toolbar-query {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .datatable-toolbar-query .datatable-search-filter {
+    flex: 1 1 auto;
+  }
+
+  .datatable-searchbar .datatable-search {
+    max-width: none;
+  }
+
+  .datatable-search-filter-menu {
+    max-width: calc(100vw - 2rem);
+  }
+
+  .datatable-search-filter-menu .dropdown-header {
+    padding-block-end: 0.25rem;
+    font-size: $font-size-sm;
+  }
+
+  .datatable-search-filter-menu .dropdown-item {
+    min-height: 1.875rem;
+    padding-block: 0.3125rem;
+    font-size: $font-size-sm;
+  }
+
+  .datatable-toolbar-filters {
+    display: flex;
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .datatable-layout-switch {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .datatable-select-all {
+    grid-column: 1;
+  }
+
+  .datatable-toolbar-actions {
+    grid-column: 1 / -1;
+    margin-inline-start: 0;
+    justify-self: end;
+  }
+
+  .datatable-toolbar-actions .datatable-view-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    flex: 0 0 auto;
+    min-width: 0;
+    min-height: var(--moo-datatable-toolbar-control-height);
+    inline-size: auto;
+    block-size: var(--moo-datatable-toolbar-control-height);
+    padding-inline: $btn-padding-x-sm;
+  }
+
+  .datatable-toolbar-actions .btn.btn-sm.datatable-view-trigger:has(> [data-icon="inline-start"]) {
+    padding-inline: $btn-padding-x-sm;
+  }
+
+  .datatable-toolbar-actions .datatable-view-trigger > [data-icon] {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .datatable-view-trigger-label {
+    display: inline;
+  }
+
+  .datatable-pagination {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .datatable-page-nav {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .datatable-page-nav .pagination {
+    justify-content: flex-start;
+  }
+}
+
+.datatable--release-review {
+  --moo-datatable-min-width: #{$moo-datatable-release-review-min-width};
+}

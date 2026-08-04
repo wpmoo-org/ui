@@ -52,6 +52,11 @@ class BadgeTests(CatalogTestCase):
             output,
         )
 
+    def test_badge_supports_attrs(self) -> None:
+        output = self.render_badge('badge("3", attrs="data-count")')
+
+        self.assertIn('data-count', output)
+
     def test_badge_uses_medium_bootstrap_font_weight_token(self) -> None:
         result = self.run_build()
 

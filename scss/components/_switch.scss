@@ -5,3 +5,8 @@
 .form-switch .form-check-input {
   height: $moo-switch-height;
 }
+
+.form-switch .form-check-input:focus:active:not(:checked),
+.form-switch .form-check-input:focus:not(:focus-visible):not(:checked) {
+  --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image)};
+}

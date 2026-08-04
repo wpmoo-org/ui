@@ -10,11 +10,11 @@
   "dark": "text-bg-dark"
 } %}
 
-{% macro badge(label, variant="default", pill=false, extra_class="", visually_hidden="") -%}
+{% macro badge(label, variant="default", pill=false, extra_class="", visually_hidden="", attrs="") -%}
   {% if variant not in badge_variants %}{{ fail("Unknown badge variant: " ~ variant) }}{% endif %}
   {% if not label | trim %}{{ fail("Badge label is required") }}{% endif %}
   {% set classes = "badge " ~ badge_variants[variant] %}
   {% if pill %}{% set classes = classes ~ " rounded-pill" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  <span class="{{ classes }}">{{ label }}{% if visually_hidden %}<span class="visually-hidden">{{ visually_hidden }}</span>{% endif %}</span>
+  <span class="{{ classes }}"{% if attrs %} {{ attrs | safe }}{% endif %}>{{ label }}{% if visually_hidden %}<span class="visually-hidden">{{ visually_hidden }}</span>{% endif %}</span>
 {%- endmacro %}
