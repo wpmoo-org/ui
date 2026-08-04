@@ -194,6 +194,15 @@ $moo-dropdown-item-icon-size: 1.5rem !default;
 // product; this is a sidebar-scoped floor, not a global change.
 $moo-dropdown-sidebar-min-width: 14rem !default;
 
+// Bootstrap has no --bs-form-check-input-border-radius custom property to
+// consume at runtime (only the compile-time $form-check-input-border-radius
+// Sass default, which this settings layer loads before Bootstrap defines),
+// so the checkbox-style menu-item indicator shared by Dropdown, Menubar,
+// Context Menu, and Data Table needs its own scoped knob to reuse
+// Checkbox's exact corner radius. Restated as .25em to match Bootstrap's
+// own $form-check-input-border-radius default.
+$moo-dropdown-item-check-border-radius: .25em !default;
+
 // Field has no matching Bootstrap component of its own, so its spacing
 // scale and legend sizing live on dedicated Sass knobs instead of
 // per-instance utility classes. Changing spacing/type for every Field
@@ -237,6 +246,15 @@ $moo-datatable-frame-header-min-height: 2.78125rem !default;
 // are aggregated, so keep Data Table's select inset derived from Moo's compact
 // checkbox box and Bootstrap's default 1px frame border.
 $moo-datatable-select-checkbox-size: 0.875rem !default;
+// Bootstrap has no --bs-form-check-input-border-radius custom property to
+// consume here either, same gap as the checkbox size above, this time for
+// the facet dropdown's own checkbox-style indicator (datatable_facet_item(),
+// which can't reuse the shared .dropdown-item-check__indicator markup).
+// Scoped to Data Table since it can't reference Dropdown's private knob
+// across files; restated as .25em to match Bootstrap's own
+// $form-check-input-border-radius default so the facet dropdown reads as
+// the same control as the shared indicator and the real Checkbox.
+$moo-datatable-facet-item-border-radius: .25em !default;
 // Keep the select-all checkbox inset visually even with the table/card header's
 // vertical breathing while accounting for the framed wrapper border.
 $moo-datatable-select-cell-inset: ($moo-datatable-frame-header-min-height - $moo-datatable-select-checkbox-size) * 0.5 - 0.0625rem !default;

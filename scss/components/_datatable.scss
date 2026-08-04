@@ -1,7 +1,8 @@
 // Bootstrap ships .table markup only, with no sort/filter/pagination
 // behavior and no faceted-filter or column-visibility concept, so this
 // partial covers only the pieces that have no Bootstrap token to consume:
-// a persistent (not opacity-toggled) facet checkbox indicator, the
+// the facet dropdown's own checkbox indicator (mirroring the shared
+// dropdown_toggle_item() indicator in scss/components/_dropdown.scss), the
 // sort-direction icon swap, and the hidden-column state the runtime drives.
 
 // A fixed layout keeps the table's overall width stable as sorting,
@@ -749,38 +750,35 @@
   margin: 0;
 }
 
-.datatable-search-filter-menu .dropdown-item-check__indicator,
+// .datatable-facet-item__indicator is Data Table's own facet-dropdown item
+// (datatable_facet_item(), not the shared dropdown_toggle_item() macro), so
+// it can't inherit .dropdown-item-check__indicator's shared rule (scss/
+// components/_dropdown.scss) directly -- it restates the same
+// $form-check-input-* tokens and checked treatment so the facet dropdown and
+// the filter-picker (which does use the shared indicator) read identically.
 .datatable-facet-item__indicator {
+  --moo-datatable-facet-item-border-radius: #{$moo-datatable-facet-item-border-radius};
+
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: 1rem;
-  height: 1rem;
+  width: $form-check-input-width;
+  height: $form-check-input-width;
   border: var(--bs-border-width) solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius-sm);
+  border-radius: var(--moo-datatable-facet-item-border-radius);
   color: transparent;
-  // The shared .dropdown-item-check__indicator (scss/components/_dropdown.scss)
-  // is opacity-toggled: invisible until its item is active, showing no box at
-  // all for unselected rows. Data Table's picker wants the persistent
-  // checkbox-outline look documented at the top of this file, so it has to
-  // reset opacity back to 1 -- the rule above already restates every other
-  // property, but opacity was never one of them, so the shared default was
-  // still winning.
-  opacity: 1;
 }
 
-.datatable-search-filter-menu .dropdown-item-check[aria-pressed="true"] .dropdown-item-check__indicator,
 .datatable-facet-item.active .datatable-facet-item__indicator {
   background-color: var(--moo-foreground);
   border-color: var(--moo-foreground);
   color: var(--moo-surface);
 }
 
-.datatable-search-filter-menu .dropdown-item-check__indicator > [data-icon],
 .datatable-facet-item__indicator > [data-icon] {
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 // Bootstrap has no "inactive filter" button variant, so the faceted-filter
