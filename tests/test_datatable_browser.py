@@ -618,6 +618,242 @@ class DataTableBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_certification_fixture_sort_updates_aria_sort_and_row_order(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator(".datatable-page-size-trigger").click()
+            root.locator('[data-datatable-page-size-option="10"]').click()
+            ticket_header = root.locator('th[data-datatable-column="ticket"]')
+            ticket_trigger = ticket_header.locator("[data-datatable-sort-key]")
+            rows = root.locator("tbody > tr[data-datatable-row]:not([hidden])")
+
+            expect(ticket_header).to_have_attribute("aria-sort", "none")
+
+            ticket_trigger.click()
+            ticket_header.locator('[data-datatable-sort-action="desc"]').click()
+
+            expect(ticket_header).to_have_attribute("aria-sort", "descending")
+            expect(rows).to_have_count(3)
+            expect(rows.nth(0)).to_contain_text("TCK-3")
+            expect(rows.nth(2)).to_contain_text("TCK-1")
+
+            ticket_trigger.click()
+            ticket_header.locator('[data-datatable-sort-action="asc"]').click()
+
+            expect(ticket_header).to_have_attribute("aria-sort", "ascending")
+            expect(rows.nth(0)).to_contain_text("TCK-1")
+            expect(rows.nth(2)).to_contain_text("TCK-3")
+
+            subject_header = root.locator('th[data-datatable-column="subject"]')
+            expect(subject_header).to_have_attribute("aria-sort", "none")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_pagination_controls_navigate_pages(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            rows = root.locator("tbody > tr[data-datatable-row]:not([hidden])")
+            summary = root.locator("[data-datatable-results-summary]")
+            first_button = root.locator("[data-datatable-page-first]")
+            prev_button = root.locator("[data-datatable-page-prev]")
+            next_button = root.locator("[data-datatable-page-next]")
+            last_button = root.locator("[data-datatable-page-last]")
+
+            expect(rows).to_have_count(2)
+            expect(rows.nth(0)).to_contain_text("TCK-1")
+            expect(rows.nth(1)).to_contain_text("TCK-2")
+            expect(summary).to_have_text("Showing 1-2 of 3")
+            expect(first_button).to_be_disabled()
+            expect(prev_button).to_be_disabled()
+            expect(next_button).to_be_enabled()
+            expect(last_button).to_be_enabled()
+
+            next_button.click()
+            expect(rows).to_have_count(1)
+            expect(rows.nth(0)).to_contain_text("TCK-3")
+            expect(summary).to_have_text("Showing 3-3 of 3")
+            expect(next_button).to_be_disabled()
+            expect(last_button).to_be_disabled()
+            expect(prev_button).to_be_enabled()
+
+            first_button.click()
+            expect(rows).to_have_count(2)
+            expect(rows.nth(0)).to_contain_text("TCK-1")
+            expect(summary).to_have_text("Showing 1-2 of 3")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_page_size_select_updates_rows_per_page(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            rows = root.locator("tbody > tr[data-datatable-row]:not([hidden])")
+            summary = root.locator("[data-datatable-results-summary]")
+            trigger = root.locator(".datatable-page-size-trigger")
+
+            expect(rows).to_have_count(2)
+
+            trigger.click()
+            root.locator('[data-datatable-page-size-option="10"]').click()
+
+            expect(rows).to_have_count(3)
+            expect(summary).to_have_text("Showing 1-3 of 3")
+            expect(root.locator('[data-datatable-page-size-value]')).to_have_text("10")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_bulk_update_changes_status_across_selection(
+        self,
+    ) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator(".datatable-page-size-trigger").click()
+            root.locator('[data-datatable-page-size-option="10"]').click()
+            root.locator("#cert-row-1 [data-datatable-select-row]").check()
+            root.locator("#cert-row-3 [data-datatable-select-row]").check()
+
+            bulk_actions = root.locator("[data-datatable-bulk-actions]")
+            expect(bulk_actions).to_be_visible()
+            expect(root.locator("[data-datatable-bulk-count]")).to_have_text("2")
+
+            root.locator('[data-bs-toggle="dropdown"][aria-label="Update status"]').click()
+            root.locator(
+                '[data-datatable-bulk-update="status"][data-datatable-bulk-update-value="resolved"]'
+            ).click()
+
+            expect(root.locator("#cert-row-1 [data-datatable-column=\"status\"]")).to_contain_text(
+                "Resolved"
+            )
+            expect(root.locator("#cert-row-3 [data-datatable-column=\"status\"]")).to_contain_text(
+                "Resolved"
+            )
+            expect(root.locator("#cert-row-2 [data-datatable-column=\"status\"]")).to_contain_text(
+                "Resolved"
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_bulk_delete_removes_selected_rows(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            root.locator(".datatable-page-size-trigger").click()
+            root.locator('[data-datatable-page-size-option="10"]').click()
+            root.locator("#cert-row-2 [data-datatable-select-row]").check()
+
+            bulk_actions = root.locator("[data-datatable-bulk-actions]")
+            expect(bulk_actions).to_be_visible()
+
+            root.locator('[data-datatable-bulk-action="delete"]').click()
+
+            rows = root.locator("tbody > tr[data-datatable-row]:not([hidden])")
+            expect(rows).to_have_count(2)
+            self.assertEqual(root.locator("#cert-row-2").count(), 0)
+            expect(bulk_actions).to_be_hidden()
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_select_all_scopes_to_current_page_and_indeterminate(
+        self,
+    ) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            select_all = root.locator(
+                '.datatable-frame [data-datatable-select-all]'
+            )
+
+            select_all.check()
+            expect(root.locator("#cert-row-1 [data-datatable-select-row]")).to_be_checked()
+            expect(root.locator("#cert-row-2 [data-datatable-select-row]")).to_be_checked()
+            expect(root.locator("[data-datatable-bulk-count]")).to_have_text("2")
+
+            root.locator("#cert-row-1 [data-datatable-select-row]").uncheck()
+            self.assertTrue(
+                select_all.evaluate("element => element.indeterminate")
+            )
+
+            root.locator("#cert-row-1 [data-datatable-select-row]").check()
+            root.locator("[data-datatable-page-next]").click()
+            self.assertFalse(
+                select_all.evaluate("element => element.checked")
+            )
+            self.assertFalse(
+                select_all.evaluate("element => element.indeterminate")
+            )
+            expect(root.locator("#cert-row-3 [data-datatable-select-row]")).not_to_be_checked()
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_dark_mobile_case_renders_clean(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[1])
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}{CERTIFICATION_FIXTURE_PATH}", wait_until="networkidle"
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[1])
+
+            root = page.locator("#certification-datatable")
+            expect(root).to_be_visible()
+            expect(root.locator("tbody > tr[data-datatable-row]:not([hidden])")).to_have_count(2)
+
+            filter_button = root.locator("[data-datatable-filter-menu-trigger]")
+            filter_button.click()
+            expect(root.locator(".datatable-search-filter-menu")).to_be_visible()
+
+            body_background = page.evaluate(
+                "getComputedStyle(document.body).backgroundColor"
+            )
+            self.assertNotEqual(body_background, "rgba(0, 0, 0, 0)")
+
+            overflow = page.evaluate(
+                """
+                () => ({
+                  scrollWidth: document.documentElement.scrollWidth,
+                  clientWidth: document.documentElement.clientWidth,
+                })
+                """
+            )
+            self.assertLessEqual(overflow["scrollWidth"], overflow["clientWidth"] + 1)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_preview_page_never_exposes_page_level_horizontal_overflow(self) -> None:
+        context, page, evidence = self.open_preview()
+        try:
+            for width in (390, 768, 1040):
+                page.set_viewport_size({"width": width, "height": 844})
+                overflow = page.evaluate(
+                    """
+                    () => ({
+                      scrollWidth: document.documentElement.scrollWidth,
+                      clientWidth: document.documentElement.clientWidth,
+                    })
+                    """
+                )
+                self.assertLessEqual(
+                    overflow["scrollWidth"],
+                    overflow["clientWidth"] + 1,
+                    f"page-level horizontal overflow at width={width}: {overflow}",
+                )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_required_columns_stay_fixed_while_optional_columns_toggle(self) -> None:
         context, page, evidence = self.open_preview()
         try:

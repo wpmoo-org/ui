@@ -722,22 +722,89 @@
 </svg>
       </button>
     </div>
-    <div class="datatable-pagination d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3" data-datatable-pagination>
-      <div class="datatable-selection-count small text-body-secondary" data-datatable-selection-count></div>
-      <div class="datatable-pagination-controls d-flex flex-wrap align-items-center gap-4 ms-auto">
-        <div class="datatable-page-size d-flex align-items-center gap-2">
-          <select class="form-select form-select-sm" id="certification-datatable-page-size" data-datatable-page-size-select>
-              <option value="2" selected>2</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-          </select>
-          <label class="small text-body-secondary text-nowrap" for="certification-datatable-page-size">Rows per page</label>
+    <div class="datatable-pagination mt-3" data-datatable-pagination>
+      <div class="datatable-page-size d-flex align-items-center gap-2">
+        <div class="dropdown datatable-page-size-control">
+          <button class="btn btn-outline-secondary btn-sm datatable-page-size-trigger" type="button" id="certification-datatable-page-size" data-bs-toggle="dropdown" aria-expanded="false" aria-labelledby="certification-datatable-page-size-label certification-datatable-page-size-value">
+            <span id="certification-datatable-page-size-value" data-datatable-page-size-value>2</span>
+            <svg
+  data-icon="inline-end"
+  data-lucide="chevron-down"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/>
+</svg>
+          </button>
+          <ul class="dropdown-menu datatable-page-size-menu">
+            <li>
+              <button class="dropdown-item dropdown-item-check active" type="button" data-datatable-page-size-option="2" aria-pressed="true">
+                <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+                <span>2</span>
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item dropdown-item-check" type="button" data-datatable-page-size-option="5" aria-pressed="false">
+                <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+                <span>5</span>
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item dropdown-item-check" type="button" data-datatable-page-size-option="10" aria-pressed="false">
+                <span class="dropdown-item-check__indicator" aria-hidden="true"><svg
+  data-icon="inline-start"
+  data-lucide="check"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 6L9 17l-5-5"/>
+</svg></span>
+                <span>10</span>
+              </button>
+            </li>
+          </ul>
         </div>
-        <div class="datatable-page-status small text-nowrap" data-datatable-page-status></div>
-        <nav aria-label="Table pagination" class="datatable-page-nav">
-          <ul class="pagination pagination-sm mb-0">
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first><svg
+        <span class="small text-body-secondary text-nowrap" id="certification-datatable-page-size-label">Rows per page</span>
+      </div>
+      <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite"></span>
+      <nav aria-label="Table pagination" class="datatable-page-nav">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first><svg
   data-icon="inline-start"
   data-lucide="chevrons-left"
   viewBox="0 0 24 24"
@@ -750,9 +817,9 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m11 17l-5-5l5-5m7 10l-5-5l5-5"/>
 </svg></button>
-            </li>
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev><svg
+          </li>
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev><svg
   data-icon="inline-start"
   data-lucide="chevron-left"
   viewBox="0 0 24 24"
@@ -765,10 +832,10 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6"/>
 </svg></button>
-            </li>
-            <template data-datatable-page-numbers></template>
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next><svg
+          </li>
+          <template data-datatable-page-numbers></template>
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next><svg
   data-icon="inline-start"
   data-lucide="chevron-right"
   viewBox="0 0 24 24"
@@ -781,9 +848,9 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/>
 </svg></button>
-            </li>
-            <li class="page-item">
-              <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last><svg
+          </li>
+          <li class="page-item">
+            <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last><svg
   data-icon="inline-start"
   data-lucide="chevrons-right"
   viewBox="0 0 24 24"
@@ -796,12 +863,11 @@
 >
   <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 17l5-5l-5-5m7 10l5-5l-5-5"/>
 </svg></button>
-            </li>
-          </ul>
-        </nav>
-      </div>
+          </li>
+        </ul>
+      </nav>
     </div>
-      <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden>
+      <div class="datatable-bulk-actions" data-datatable-bulk-actions hidden role="status" aria-live="polite" aria-atomic="true">
     <button type="button" class="btn btn-outline-secondary btn-icon-xs rounded-circle" data-datatable-bulk-clear aria-label="Clear selection" data-bs-placement="top" data-bs-title="Clear selection <code class='tooltip-kbd'>Escape</code>" data-bs-html="true">
       <svg
   data-icon="inline-start"
@@ -819,7 +885,7 @@
     </button>
         <div class="vr" aria-hidden="true"></div>
 
-    <span class="datatable-bulk-summary small">
+    <span class="datatable-bulk-summary small" data-datatable-bulk-summary>
       <span class="badge text-bg-dark rounded-pill" data-datatable-bulk-count>0</span>
       <span>tickets selected</span>
     </span>

@@ -107,9 +107,19 @@ export default class DataTable {
     if (!Tooltip) {
       return;
     }
-    this._element.querySelectorAll("[data-datatable-bulk-actions] [data-bs-title]").forEach((trigger) => {
-      this._tooltips.push(Tooltip.getOrCreateInstance(trigger, { animation: false }));
-    });
+    // Bootstrap's Data store allows only one bound component instance per
+    // element (dom/data.js logs "doesn't allow more than one instance per
+    // element" and silently drops the second). The bulk-action option
+    // trigger (e.g. "Update status") carries both data-bs-title and
+    // data-bs-toggle="dropdown" on the same button, so it must keep its
+    // Dropdown instance and skip the JS-managed Tooltip here; its
+    // aria-label already gives it an accessible name without the hover
+    // affordance.
+    this._element
+      .querySelectorAll("[data-datatable-bulk-actions] [data-bs-title]:not([data-bs-toggle=\"dropdown\"])")
+      .forEach((trigger) => {
+        this._tooltips.push(Tooltip.getOrCreateInstance(trigger, { animation: false }));
+      });
   }
 
   _hideBulkTooltips({ blur = false } = {}) {
