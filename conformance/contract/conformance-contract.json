@@ -321,6 +321,7 @@
           ],
           "description": "While the Dialog overlay is open, document.activeElement is inside the overlay element.",
           "params": {
+            "trigger": "[data-conformance-overlay-trigger]",
             "overlay": "[data-conformance-overlay]"
           }
         },

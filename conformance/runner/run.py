@@ -106,6 +106,12 @@ MARKER_VISIBLE_JS = """
 THEME_TOGGLE_JS = """
 (args) => {
   const root = document.documentElement;
+  const hadAttribute = root.hasAttribute(args.attribute);
+  const original = root.getAttribute(args.attribute);
+  const restore = () => {
+    if (hadAttribute) root.setAttribute(args.attribute, original);
+    else root.removeAttribute(args.attribute);
+  };
   const read = () => {
     const element = document.querySelector(args.selector);
     return element ? getComputedStyle(element).getPropertyValue(args.property) : null;
@@ -114,7 +120,7 @@ THEME_TOGGLE_JS = """
   const light = read();
   root.setAttribute(args.attribute, "dark");
   const dark = read();
-  root.removeAttribute(args.attribute);
+  restore();
   const restored = read();
   return {
     present: document.querySelector(args.selector) !== null,
@@ -128,6 +134,12 @@ THEME_TOGGLE_JS = """
 DIRECTION_MIRROR_JS = """
 (args) => {
   const root = document.documentElement;
+  const hadDirection = root.hasAttribute("dir");
+  const original = root.getAttribute("dir");
+  const restore = () => {
+    if (hadDirection) root.setAttribute("dir", original);
+    else root.removeAttribute("dir");
+  };
   const read = () => {
     const element = document.querySelector(args.selector);
     if (!element) return null;
@@ -142,7 +154,7 @@ DIRECTION_MIRROR_JS = """
   const ltr = read();
   root.setAttribute("dir", "rtl");
   const rtl = read();
-  root.removeAttribute("dir");
+  restore();
   return { ltr, rtl };
 }
 """
@@ -264,6 +276,8 @@ class FixtureState:
             if entry["name"] == fixture_meta["cssRecipe"]
         )
         self.recipe_stylesheets = list(recipe["stylesheets"])
+        # The layer the scoping two-pass blocks: the recipe's Moo stylesheet.
+        self.moo_layer = self.recipe_stylesheets[-1]
         self.console = []
         self.page_errors = []
         self.bad_responses = []
@@ -397,10 +411,12 @@ class FixtureState:
             self.bootstrap_version = self.page.evaluate(BOOTSTRAP_VERSION_JS)
 
     def blocked_page(self) -> Page:
-        """A second load of the same fixture with moo.css route-blocked."""
+        """A second load of the same fixture with the Moo layer route-blocked."""
         if self._blocked_page is None:
             self._blocked_context = self._new_context()
-            self._blocked_context.route("**/moo.css", lambda route: route.abort())
+            self._blocked_context.route(
+                f"**/{self.moo_layer}", lambda route: route.abort()
+            )
             self._blocked_page = self._blocked_context.new_page()
             self._blocked_page.goto(
                 self.url, wait_until="networkidle", timeout=NAVIGATION_TIMEOUT_MS
@@ -552,11 +568,13 @@ def check_request_order(state, params):
 
 
 def check_scoped_style_diff(state, params):
-    if not state.discrete_recipe:
+    # Isolation only needs the Moo layer itself to be a discrete request;
+    # how the host delivers Bootstrap does not affect the block.
+    if state.moo_layer not in state.stylesheet_basenames:
         return Outcome(
             "skipped",
-            reason="moo.css is not served as a discrete stylesheet, so the "
-            "two-pass block cannot isolate it",
+            reason=f"{state.moo_layer} is not served as a discrete "
+            "stylesheet, so the two-pass block cannot isolate it",
         )
     blocked = state.blocked_page()
     if params["expect"] == "identical":
@@ -747,8 +765,8 @@ def check_overlay_open(state, params):
 
 
 def check_overlay_focus_moved(state, params):
-    overlay = params["overlay"]
-    state.ensure_overlay_open(params.get("trigger", "[data-conformance-overlay-trigger]"), overlay)
+    trigger, overlay = params["trigger"], params["overlay"]
+    state.ensure_overlay_open(trigger, overlay)
     try:
         state.page.wait_for_function(
             FOCUS_INSIDE_OVERLAY_JS, arg=overlay, timeout=SCENARIO_TIMEOUT_MS

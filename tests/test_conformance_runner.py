@@ -40,10 +40,14 @@ class ConformanceRunnerTests(unittest.TestCase):
         cls.contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
         cls.server = serve_directory(FIXTURES_DIR)
         cls.base_url = cls.server.__enter__()
-        cls.report_dir = tempfile.TemporaryDirectory(prefix="moo-conformance-")
-        cls.report_path = Path(cls.report_dir.name) / "pass-report.json"
-        cls.process = invoke_runner(cls.base_url, cls.report_path)
-        cls.report = json.loads(cls.report_path.read_text(encoding="utf-8"))
+        try:
+            cls.report_dir = tempfile.TemporaryDirectory(prefix="moo-conformance-")
+            cls.report_path = Path(cls.report_dir.name) / "pass-report.json"
+            cls.process = invoke_runner(cls.base_url, cls.report_path)
+            cls.report = json.loads(cls.report_path.read_text(encoding="utf-8"))
+        except Exception:
+            cls.server.__exit__(None, None, None)
+            raise
 
     @classmethod
     def tearDownClass(cls):
