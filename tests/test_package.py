@@ -360,6 +360,92 @@ for (const specifier of [
             )
             self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
 
+    def test_sass_facade_compiles_from_a_clean_consumer(self) -> None:
+        """Phase 0C discipline: test the facade from a clean consumer
+        fixture without source-tree shortcuts. Mirrors the tarball-install
+        pattern from test_real_tarball_resolves_from_a_clean_consumer."""
+        import sass
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            pack_result = subprocess.run(
+                ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+            pack_payload = json.loads(pack_result.stdout)
+            tarball = temporary_root / pack_payload[0]["filename"]
+            self.assertTrue(tarball.is_file())
+
+            # Unpack into a consumer node_modules layout
+            unpack_root = temporary_root / "unpacked"
+            with tarfile.open(tarball, mode="r:gz") as archive:
+                archive.extractall(unpack_root)
+            consumer_root = temporary_root / "consumer"
+            installed_package = consumer_root / "node_modules/@wpmoo/ui"
+            installed_package.parent.mkdir(parents=True)
+            shutil.move(unpack_root / "package", installed_package)
+
+            # Install bootstrap@5.3.3 alongside
+            bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
+            bootstrap_pkg.mkdir(parents=True)
+            vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
+            for item in vendor_bootstrap_scss.iterdir():
+                dest = bootstrap_pkg / item.name
+                if item.is_file():
+                    shutil.copy2(item, dest)
+                elif item.is_dir():
+                    shutil.copytree(item, dest)
+
+            # --- Assertion 1: zero overrides compiles ---
+            scss_dir = consumer_root / "scss"
+            scss_dir.mkdir(exist_ok=True)
+            (scss_dir / "defaults.scss").write_text(
+                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                "@import \"bootstrap/scss/functions\";\n"
+                "@import \"bootstrap/scss/variables\";\n"
+                "@import \"bootstrap/scss/variables-dark\";\n"
+                "@import \"bootstrap/scss/maps\";\n"
+                "@import \"bootstrap/scss/mixins\";\n"
+                "@import \"bootstrap/scss/root\";\n",
+                encoding="utf-8",
+            )
+            css_defaults = sass.compile(
+                filename=str(scss_dir / "defaults.scss"),
+                include_paths=[str(consumer_root / "node_modules")],
+                output_style="expanded",
+            )
+            self.assertIn("--bs-body-color:", css_defaults)
+
+            # --- Assertion 2: overriding $primary changes the output ---
+            (scss_dir / "override.scss").write_text(
+                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                "$primary: #3b82f6;\n"
+                '@import "bootstrap/scss/functions";\n'
+                '@import "bootstrap/scss/variables";\n'
+                '@import "bootstrap/scss/maps";\n'
+                '@import "bootstrap/scss/mixins";\n'
+                '@import "bootstrap/scss/root";\n',
+                encoding="utf-8",
+            )
+            css_override = sass.compile(
+                filename=str(scss_dir / "override.scss"),
+                include_paths=[str(consumer_root / "node_modules")],
+                output_style="expanded",
+            )
+            self.assertIn("#3b82f6", css_override)
+            self.assertNotIn(css_defaults, css_override)
+
+            # --- Assertion 3: no internal partial paths leaked ---
+            for output in (css_defaults, css_override):
+                self.assertNotIn("settings/", output)
+                self.assertNotIn("_palette", output)
+                self.assertNotIn("_components", output)
+                self.assertNotIn("_forms", output)
+
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
         for module_name in (
             "combobox.js",
