@@ -26,7 +26,7 @@
       "./context-menu.js",
       "./datatable.js"
     ],
-    "sass": []
+    "sass": ["./scss/facade-settings"]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
 }

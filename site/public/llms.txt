@@ -35,11 +35,13 @@ not independent or accredited certification.
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
+- `@wpmoo/ui/scss/facade-settings`: public Sass variable allow-list (LibSass `@import`)
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
 
 The npm package does not publish catalog templates, preview artwork, catalog
-JavaScript, SCSS source, or a Sass facade.
+JavaScript, or internal SCSS partials beyond the facade's required settings
+import.
 
 ## Installation Facts
 

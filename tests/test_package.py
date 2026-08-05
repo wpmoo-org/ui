@@ -19,6 +19,8 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
+    "scss/_facade-settings.scss",
+    "scss/settings/_palette.scss",
     "certification.json",
     "README.md",
     "LICENSE",
@@ -33,6 +35,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
+    "./scss/facade-settings": "./scss/_facade-settings.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }

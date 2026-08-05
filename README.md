@@ -140,13 +140,14 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
 | `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
+| `@wpmoo/ui/scss/facade-settings` | Public Sass variable allow-list (LibSass `@import`) |
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
 
 The tarball also contains `README.md`, `LICENSE`, and `ASSET_LICENSE.md`. It
-does not publish catalog templates, preview artwork, catalog JavaScript, SCSS
-source, or a Sass facade. Internal Sass partials and
-Jinja macros are repository build tools, not npm APIs.
+does not publish catalog templates, preview artwork, catalog JavaScript, or
+internal SCSS partials beyond the facade's required settings import. Internal
+Sass partials and Jinja macros are repository build tools, not npm APIs.
 
 ## Why Bootstrap Teams Try It
 

@@ -334,6 +334,7 @@ class DesignGateTests(CatalogTestCase):
             {
                 "_bootstrap_component_layer.scss",
                 "_component_layer.scss",
+                "_facade-settings.scss",
                 "_primary_variables.scss",
                 "moo-core.scss",
                 "moo-ui.scss",
