@@ -1,0 +1,460 @@
+{
+  "schemaVersion": "1.0",
+  "kit": {
+    "name": "moo-ui-generic-host-conformance-kit",
+    "bootstrapRange": ">=5.3.0 <5.4",
+    "scopeClass": "moo-ui",
+    "themeAttribute": "data-bs-theme",
+    "fixtures": [
+      {
+        "name": "static-primitives",
+        "path": "static-primitives.html",
+        "cssRecipe": "scoped",
+        "bootstrapJs": false,
+        "notes": "Non-interactive primitives (Button, Badge, Card, Avatar, Typography). Must include host content outside the .moo-ui wrapper for scoping probes."
+      },
+      {
+        "name": "forms",
+        "path": "forms.html",
+        "cssRecipe": "scoped",
+        "bootstrapJs": false,
+        "notes": "Field/Input/Textarea/Select/Checkbox/Radio Group/Switch proving native form-control theming. Must include host content outside the .moo-ui wrapper for scoping probes."
+      },
+      {
+        "name": "bootstrap-data-api",
+        "path": "bootstrap-data-api.html",
+        "cssRecipe": "scoped",
+        "bootstrapJs": true,
+        "notes": "Dropdown Menu, Collapsible, Tabs driven entirely by Bootstrap's Data API; no Moo ESM. Must include host content outside the .moo-ui wrapper for scoping probes."
+      },
+      {
+        "name": "overlays",
+        "path": "overlays.html",
+        "cssRecipe": "scoped",
+        "bootstrapJs": true,
+        "notes": "Dialog, Tooltip, Popover: focus, backdrop, layering, and close behavior for Bootstrap-plugin-owned overlays. Must include host content outside the .moo-ui wrapper for scoping probes."
+      },
+      {
+        "name": "moo-esm",
+        "path": "moo-esm.html",
+        "cssRecipe": "scoped",
+        "bootstrapJs": true,
+        "mooEsm": [
+          "combobox.js",
+          "sidebar.js"
+        ],
+        "notes": "Combobox and Sidebar with explicit getOrCreateInstance initialization; initialization lives in a standalone external script file so it is independently blockable for the lifecycle two-pass check and the fixture stays strict-CSP clean. Must include host content outside the .moo-ui wrapper for scoping probes."
+      }
+    ]
+  },
+  "cssRecipes": [
+    {
+      "name": "scoped",
+      "description": "Documented scoped gradual-adoption recipe: the host's Bootstrap stylesheet first, then Moo UI's scoped component layer, components wrapped in .moo-ui. Chosen as the kit's canonical recipe because host conformance is about embedding Moo UI into an existing host, and this recipe exercises the @scope (.moo-ui) boundary the scoping category checks.",
+      "stylesheets": [
+        "bootstrap.min.css",
+        "moo.css"
+      ]
+    },
+    {
+      "name": "full",
+      "description": "Documented full-replacement recipe: moo-ui.css replaces the host's Bootstrap stylesheet entirely. Recorded for contract completeness; the kit's fixtures use the scoped recipe.",
+      "stylesheets": [
+        "moo-ui.css"
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": "css-reset",
+      "title": "CSS reset",
+      "description": "Bootstrap's reboot arrives intact through the host's stylesheet pipeline, so Moo components render on the documented reset baseline.",
+      "mechanism": "Computed-style assertions on in-scope elements: box-sizing must be border-box on every element inside the .moo-ui wrapper (reboot universal rule), and headings inside the scope must show reboot's zeroed top margin. Pure getComputedStyle checks; no human judgment.",
+      "assertions": [
+        {
+          "id": "reboot-box-sizing",
+          "check": "computed-equals",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "Every element inside the .moo-ui wrapper computes box-sizing to border-box, except elements Bootstrap's own CSS explicitly opts out of the reboot for (btn-close, which Bootstrap sets to content-box by design).",
+          "params": {
+            "selectorAll": ".moo-ui *",
+            "excludeSelector": ".btn-close",
+            "property": "box-sizing",
+            "expected": "border-box"
+          }
+        },
+        {
+          "id": "reboot-heading-margin",
+          "check": "computed-equals",
+          "fixtures": [
+            "static-primitives"
+          ],
+          "description": "A heading inside the .moo-ui wrapper computes margin-top to 0px, proving reboot heading normalization survived the host pipeline.",
+          "params": {
+            "selector": ".moo-ui h2",
+            "property": "margin-top",
+            "expected": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "id": "asset-order",
+      "title": "Asset order",
+      "description": "The documented stylesheet cascade holds on the host: Moo UI's documented overrides win over Bootstrap defaults inside the scope, and the recipe's stylesheets are actually loaded.",
+      "mechanism": "Cascade-correctness outcomes are the contract, not literal request order: a host may concatenate or inline assets, so request order is only checked (and recorded as evidence) when the host serves the recipe as discrete stylesheets; an inlined or concatenated host is judged on the cascade outcome alone.",
+      "assertions": [
+        {
+          "id": "moo-override-wins",
+          "check": "computed-equals",
+          "fixtures": [
+            "static-primitives",
+            "forms"
+          ],
+          "description": "An in-scope .btn btn-primary computes background-color to Moo UI's foreground token (#18181b, --moo-foreground), not Bootstrap's default blue, proving Moo's layer wins the documented cascade regardless of how the host delivered it. The computed value reflects the later theme-aware button rule in moo.css, which overrides the earlier $primary-derived rule at equal specificity.",
+          "params": {
+            "selector": ".moo-ui .btn.btn-primary",
+            "property": "background-color",
+            "expected": "rgb(24, 24, 27)"
+          }
+        },
+        {
+          "id": "recipe-stylesheets-loaded",
+          "check": "stylesheets-loaded",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "Every stylesheet named in the fixture's cssRecipe is present in the loaded document's stylesheets (matched by basename). Skipped with a recorded reason when the host concatenates or inlines styles and no discrete recipe stylesheets are observable; on such hosts moo-override-wins is the sole cascade judge, as the category mechanism states.",
+          "params": {
+            "matchBy": "basename",
+            "skipWhenConcatenated": true
+          }
+        },
+        {
+          "id": "discrete-recipe-order",
+          "check": "request-order",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "When the host serves the recipe as discrete stylesheet files, they are requested in the cssRecipe's documented order (bootstrap.min.css before moo.css). Skipped with a recorded reason when the host concatenates or inlines styles, since no request order exists to check there.",
+          "params": {
+            "skipWhenConcatenated": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "scoping",
+      "title": "Scoping",
+      "description": "Moo UI's scoped layer changes nothing in host content outside the .moo-ui boundary (as sampled by the documented probes) and demonstrably changes things inside it. Overlay backdrops are styled globally by design because Bootstrap teleports modals and offcanvas to the body; that is expected, not a scoping violation.",
+      "mechanism": "Two-pass comparison by the runner: load the fixture normally and record computed styles of out-of-scope probe elements, then reload with the moo.css stylesheet request blocked via route interception and record the same values; the two recordings must be identical for out-of-scope probes while at least one in-scope control element must differ. Hosts that concatenate Moo CSS with host styles cannot isolate the stylesheet, in which case the assertion is skipped with a recorded reason rather than forced.",
+      "assertions": [
+        {
+          "id": "out-of-scope-untouched",
+          "check": "scoped-style-diff",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "Computed styles of host content outside the .moo-ui wrapper (heading, paragraph, link, list, plain button probes) are byte-identical across the moo.css-loaded and moo.css-blocked passes.",
+          "params": {
+            "selectorAll": "[data-conformance-probe]",
+            "properties": [
+              "color",
+              "background-color",
+              "font-family",
+              "font-size",
+              "margin-top",
+              "padding-left",
+              "border-top-width"
+            ],
+            "expect": "identical"
+          }
+        },
+        {
+          "id": "in-scope-changed",
+          "check": "scoped-style-diff",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "At least one in-scope control element's computed styles differ between the two passes, proving the block was effective and Moo's scoped layer actually applies inside .moo-ui.",
+          "params": {
+            "selector": ".moo-ui [data-conformance-control]",
+            "properties": [
+              "background-color",
+              "border-radius"
+            ],
+            "expect": "different"
+          }
+        }
+      ]
+    },
+    {
+      "id": "theme",
+      "title": "Theme",
+      "description": "The documented Bootstrap theme attribute switches Moo components between light and dark values inside the scope.",
+      "mechanism": "The runner sets data-bs-theme on the document element and re-reads computed styles of an in-scope themed surface; light and dark readings must differ and the dark reading must match Moo UI's documented dark surface token.",
+      "assertions": [
+        {
+          "id": "dark-theme-surface",
+          "check": "theme-toggle",
+          "fixtures": [
+            "static-primitives",
+            "overlays"
+          ],
+          "description": "Setting data-bs-theme=\"dark\" changes the computed background-color of the in-scope themed surface from the documented light value to the documented dark value, and removing it restores the light value.",
+          "params": {
+            "selector": ".moo-ui [data-conformance-themed]",
+            "property": "background-color",
+            "attribute": "data-bs-theme",
+            "lightValue": "rgb(255, 255, 255)",
+            "darkValue": "rgb(24, 24, 27)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "direction",
+      "title": "Direction",
+      "description": "Components follow the document direction: logical spacing and alignment mirror under dir=\"rtl\".",
+      "mechanism": "The runner measures an asymmetric in-scope probe under dir=\"ltr\", sets dir=\"rtl\" on the document element, and re-measures; the probe's physical left/right spacing must swap, proving styles are written in logical properties rather than pinned physical sides.",
+      "assertions": [
+        {
+          "id": "rtl-mirrors-spacing",
+          "check": "direction-mirror",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "moo-esm"
+          ],
+          "description": "An in-scope probe element with asymmetric horizontal spacing computes padding-left and padding-right swapped between dir=\"ltr\" and dir=\"rtl\" readings.",
+          "params": {
+            "selector": ".moo-ui [data-conformance-asymmetric]",
+            "properties": [
+              "padding-left",
+              "padding-right"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "focus",
+      "title": "Focus",
+      "description": "Interactive components are keyboard-reachable and show a visible focus treatment.",
+      "mechanism": "Playwright keyboard navigation (Tab from body) plus computed outline/box-shadow of the focused element; no human judgment of appearance, only presence of a non-none focus treatment on the focused in-scope element.",
+      "assertions": [
+        {
+          "id": "keyboard-focus-reachable",
+          "check": "tab-reaches-scope",
+          "fixtures": [
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "Pressing Tab from the document body moves focus to an interactive element inside the .moo-ui wrapper within a bounded number of Tab presses.",
+          "params": {
+            "maxTabs": 20
+          }
+        },
+        {
+          "id": "focus-visible-treatment",
+          "check": "focus-treatment",
+          "fixtures": [
+            "static-primitives",
+            "forms"
+          ],
+          "description": "A keyboard-focused in-scope element computes a non-none outline-style or a non-none box-shadow, proving a visible focus treatment exists.",
+          "params": {
+            "selector": ".moo-ui [data-conformance-focusable]"
+          }
+        }
+      ]
+    },
+    {
+      "id": "overlays",
+      "title": "Overlays",
+      "description": "Bootstrap-plugin-owned overlays open, layer above content, move focus where documented, and close with focus restoration.",
+      "mechanism": "Playwright drives the documented trigger (click or keyboard), then checks computed z-index/visibility of the overlay element, activeElement location while open, and close-and-restore behavior via Escape; all mechanical DOM and computed-style reads.",
+      "assertions": [
+        {
+          "id": "overlay-opens-and-layers",
+          "check": "overlay-open",
+          "fixtures": [
+            "overlays",
+            "bootstrap-data-api"
+          ],
+          "description": "Activating the documented trigger makes the overlay element visible with a computed z-index at or above Bootstrap's overlay floor (1000).",
+          "params": {
+            "trigger": "[data-conformance-overlay-trigger]",
+            "overlay": "[data-conformance-overlay]",
+            "minZIndex": 1000
+          }
+        },
+        {
+          "id": "dialog-focus-moves",
+          "check": "overlay-focus-moved",
+          "fixtures": [
+            "overlays"
+          ],
+          "description": "While the Dialog overlay is open, document.activeElement is inside the overlay element.",
+          "params": {
+            "trigger": "[data-conformance-overlay-trigger]",
+            "overlay": "[data-conformance-overlay]"
+          }
+        },
+        {
+          "id": "overlay-closes-and-restores",
+          "check": "overlay-close-restore",
+          "fixtures": [
+            "overlays"
+          ],
+          "description": "Pressing Escape while the overlay is open hides it and returns focus to the original trigger element.",
+          "params": {
+            "overlay": "[data-conformance-overlay]",
+            "trigger": "[data-conformance-overlay-trigger]"
+          }
+        }
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "title": "Lifecycle",
+      "description": "Runtime ownership holds: Moo ESM components are inert until explicit initialization, initialization is idempotent and validates its root; Bootstrap Data API components work without any Moo JavaScript.",
+      "mechanism": "For Moo ESM fixtures the runner evaluates behavior before and after the documented getOrCreateInstance call and checks instance identity across double initialization; for the Data API fixture it verifies documented toggle behavior with only Bootstrap's bundle loaded. The pre-init state is observed with a two-pass load: the runner first loads the fixture with the external init script blocked via route interception and interacts, then reloads with it allowed; the moo-esm fixture's init script must therefore be a standalone blockable resource. All checks are scripted DOM probes; Combobox and Sidebar were confirmed to use explicit initialization with no document auto-scanning.",
+      "assertions": [
+        {
+          "id": "inert-before-init",
+          "check": "esm-inert-before-init",
+          "fixtures": [
+            "moo-esm"
+          ],
+          "description": "Before explicit initialization, interacting with the Combobox trigger produces no listbox (no [role=listbox] appears and aria-expanded is not true); after the fixture's initialization script runs, the same interaction opens it.",
+          "params": {
+            "trigger": ".moo-ui [data-conformance-combobox-trigger]",
+            "openedMarker": "[role=listbox]"
+          }
+        },
+        {
+          "id": "idempotent-init",
+          "check": "esm-idempotent-init",
+          "fixtures": [
+            "moo-esm"
+          ],
+          "description": "Calling getOrCreateInstance twice on the same root returns the identical instance and produces no console errors.",
+          "params": {
+            "module": "sidebar.js",
+            "rootSelector": ".moo-ui [data-slot=sidebar-wrapper]"
+          }
+        },
+        {
+          "id": "invalid-root-rejected",
+          "check": "esm-invalid-root-throws",
+          "fixtures": [
+            "moo-esm"
+          ],
+          "description": "Constructing Sidebar against an element without the documented [data-slot=sidebar-wrapper] root throws a TypeError, proving the documented root contract is enforced.",
+          "params": {
+            "module": "sidebar.js",
+            "errorName": "TypeError"
+          }
+        },
+        {
+          "id": "data-api-without-moo-js",
+          "check": "bootstrap-data-api-works",
+          "fixtures": [
+            "bootstrap-data-api"
+          ],
+          "description": "Clicking a data-bs-toggle trigger opens its panel with only Bootstrap's JavaScript bundle loaded and no Moo ESM module on the page.",
+          "params": {
+            "trigger": "[data-conformance-overlay-trigger]",
+            "panel": "[data-conformance-overlay]"
+          }
+        }
+      ]
+    },
+    {
+      "id": "csp",
+      "title": "Content Security Policy",
+      "description": "The kit's fixtures and Moo UI's documented runtime work under a strict CSP: no inline scripts, no inline style blocks, no eval.",
+      "mechanism": "Runner-side enforcement by construction: the runner intercepts responses and injects a strict Content-Security-Policy header (default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self') before collecting console messages, and the contract requires zero CSP violation reports during load and the fixture scenario. The check assumes same-origin kit assets: fixtures must reference stylesheets, scripts, and init code by relative paths, so a host deliberately serving the kit from a CDN is out of scope for this assertion by construction. Fixture initialization code must live in external script files so fixtures remain CSP-clean by construction; a static scan at fixture authoring time keeps inline handlers, style blocks, and javascript: URLs out of the fixtures.",
+      "assertions": [
+        {
+          "id": "strict-csp-no-violations",
+          "check": "csp-injection-clean",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "With the runner-injected strict CSP header in force, the fixture produces zero CSP violation console messages and zero blocked inline executions during load and its scenario.",
+          "params": {
+            "policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "console-health",
+      "title": "Console health",
+      "description": "Fixtures load and run clean: no console errors, no uncaught exceptions, no failed resource loads.",
+      "mechanism": "The runner collects console messages and page errors while loading each fixture and driving its scenario, plus the network log; any error-level message, uncaught exception, or failed/blocked resource request fails the category.",
+      "assertions": [
+        {
+          "id": "zero-console-errors",
+          "check": "console-errors",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "No console.error messages and no uncaught page exceptions occur during fixture load and scenario.",
+          "params": {
+            "allow": []
+          }
+        },
+        {
+          "id": "zero-failed-resources",
+          "check": "failed-requests",
+          "fixtures": [
+            "static-primitives",
+            "forms",
+            "bootstrap-data-api",
+            "overlays",
+            "moo-esm"
+          ],
+          "description": "Every resource the fixture requests loads successfully (no HTTP >= 400 responses, no request failures).",
+          "params": {
+            "ignoreBlockedByCsp": false
+          }
+        }
+      ]
+    }
+  ]
+}
