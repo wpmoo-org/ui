@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -31,6 +31,7 @@
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
+    "./scss/facade-settings": "./scss/_facade-settings.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -43,6 +44,8 @@
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
+    "scss/_facade-settings.scss",
+    "scss/settings/_facade_public.scss",
     "certification.json",
     "README.md",
     "LICENSE",

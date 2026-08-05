@@ -112,17 +112,26 @@
       <section class="moo-doc-section" aria-labelledby="optional-esm">
         {{ typography("Optional Moo ESM", variant="section-title", id="optional-esm") }}
         <p>
-          Combobox and Sidebar cover behavior gaps Bootstrap does not provide.
-          Their modules are side-effect-free: importing them does not scan the
-          document. Create instances explicitly and dispose them when your host
-          removes the corresponding UI.
+          Combobox, Context Menu, DataTable, and Sidebar cover behavior gaps
+          Bootstrap does not provide. Their modules are side-effect-free:
+          importing them does not scan the document. Create instances
+          explicitly and dispose them when your host removes the corresponding
+          UI.
         </p>
         {% set esm_example %}
         import Combobox from "@wpmoo/ui/combobox.js";
+        import ContextMenu from "@wpmoo/ui/context-menu.js";
+        import DataTable from "@wpmoo/ui/datatable.js";
         import Sidebar from "@wpmoo/ui/sidebar.js";
 
         const combobox = Combobox.getOrCreateInstance(
           document.querySelector(".combobox")
+        );
+        const contextMenu = ContextMenu.getOrCreateInstance(
+          document.querySelector(".context-menu")
+        );
+        const datatable = DataTable.getOrCreateInstance(
+          document.querySelector(".datatable")
         );
         const sidebar = Sidebar.getOrCreateInstance(
           document.querySelector('[data-slot="sidebar-wrapper"]')
@@ -130,17 +139,31 @@
 
         // Later, when the host removes the UI:
         combobox.dispose();
+        contextMenu.dispose();
+        datatable.dispose();
         sidebar.dispose();
         {% endset %}
         {{ render_code_snippet("installation-esm", esm_example, "js") }}
         {% set esm_cdn_example %}
         <script type="module">
           import Combobox from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./combobox.js"] | replace("./", "") }}";
+          import ContextMenu from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./context-menu.js"] | replace("./", "") }}";
+          import DataTable from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./datatable.js"] | replace("./", "") }}";
           import Sidebar from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./sidebar.js"] | replace("./", "") }}";
 
           const comboboxRoot = document.querySelector(".combobox");
           if (comboboxRoot) {
             Combobox.getOrCreateInstance(comboboxRoot);
+          }
+
+          const contextMenuRoot = document.querySelector(".context-menu");
+          if (contextMenuRoot) {
+            ContextMenu.getOrCreateInstance(contextMenuRoot);
+          }
+
+          const datatableRoot = document.querySelector(".datatable");
+          if (datatableRoot) {
+            DataTable.getOrCreateInstance(datatableRoot);
           }
 
           const sidebarRoot = document.querySelector('[data-slot="sidebar-wrapper"]');
@@ -151,7 +174,9 @@
         {% endset %}
         {{ render_code_snippet("installation-esm-cdn", esm_cdn_example, "html") }}
         <p>
-          Review the <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>
+          Review the <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>,
+          <a href="{{ site_href('components/context-menu.html', root_path) }}">Context Menu</a>,
+          <a href="{{ site_href('components/datatable.html', root_path) }}">Data Table</a>,
           and <a href="{{ site_href('components/sidebar.html', root_path) }}">Sidebar</a>
           pages for their HTML, selectors, lifecycle, and Bootstrap ownership.
         </p>
@@ -166,8 +191,8 @@
           <dd>Confirm <code>moo.css</code> loads after Bootstrap CSS and the migrated markup has a <code>.moo-ui</code> ancestor.</dd>
           <dt>A Bootstrap control does not open</dt>
           <dd>Load Bootstrap's bundle and follow that plugin's documented initialization requirements.</dd>
-          <dt>Combobox or Sidebar does not respond</dt>
-          <dd>Import the matching Moo ESM module and initialize the rendered root explicitly; imports never auto-scan.</dd>
+          <dt>A Moo ESM module does not respond</dt>
+          <dd>Import the matching Moo ESM module (Combobox, Context Menu, DataTable, or Sidebar) and initialize the rendered root explicitly; imports never auto-scan.</dd>
         </dl>
         {{ button("Browse Components", variant="outline", size="sm", element="a", href=site_href("components/index.html", root_path)) }}
       </section>

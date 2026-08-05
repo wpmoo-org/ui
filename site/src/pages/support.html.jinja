@@ -96,6 +96,44 @@
         </div>
       </section>
 
+      <section class="moo-doc-section" aria-labelledby="bootstrap-compatibility">
+        {{ typography("Bootstrap Compatibility", variant="section-title", id="bootstrap-compatibility") }}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <tbody>
+              <tr>
+                <th scope="row">Canonical build version</th>
+                <td><code>{{ product.certification.bootstrap.canonicalVersion }}</code></td>
+              </tr>
+              <tr>
+                <th scope="row">Peer dependency range</th>
+                <td><code>{{ product.certification.bootstrap.targetRange }}</code></td>
+              </tr>
+              <tr>
+                <th scope="row">Verified range</th>
+                <td><code>{{ product.certification.bootstrap.verifiedRange }}</code></td>
+              </tr>
+              <tr>
+                <th scope="row">Tested versions</th>
+                <td>
+                  {% for version in product.certification.bootstrap.testedVersions %}
+                    <code>{{ version }}</code>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-body-secondary">
+          Moo UI is built reproducibly against Bootstrap
+          {{ product.certification.bootstrap.canonicalVersion }}. The
+          production-certification program verifies each release against the
+          minimum, canonical, and latest Bootstrap 5.3.x versions. See
+          <a href="{{ product.support.url }}#bootstrap-compatibility">SUPPORT.md</a>
+          for the full compatibility narrative.
+        </p>
+      </section>
+
       <section class="moo-doc-section" aria-labelledby="maturity">
         {{ typography("Maturity", variant="section-title", id="maturity") }}
         <div class="table-responsive">
@@ -141,7 +179,7 @@
           <li>The certification manifest is currently <code>{{ product.certification.status }}</code>.</li>
           <li>Generic host-conformance evidence remains pending in the source evidence inventory.</li>
           <li>Bootstrap 6 is outside the current compatibility contract.</li>
-          <li>Sass source and a Sass facade are not public package entrypoints yet.</li>
+          <li>Sass source is not a public package entrypoint. Only the documented facade (<code>scss/facade-settings</code>) is published.</li>
         </ul>
       </section>
 
@@ -153,6 +191,11 @@
           <a href="https://github.com/wpmoo-org/ui/blob/main/certification.json">certification manifest</a>,
           or review complete release notes on
           <a href="https://github.com/wpmoo-org/ui/releases">GitHub Releases</a>.
+        </p>
+        <p>
+          SemVer and compatibility policy:
+          <a href="{{ product.support.url }}#versioning-before-10">Versioning Before 1.0</a> ·
+          <a href="{{ product.support.url }}#what-counts-as-breaking">What Counts as Breaking</a>
         </p>
         <div class="d-flex flex-wrap gap-2">
           {{ button("Report an issue", variant="outline", size="sm", element="a", href="https://github.com/wpmoo-org/ui/issues") }}
@@ -166,6 +209,7 @@
     {{ render_doc_toc([
       {"id": "current-status", "label": "Current Status"},
       {"id": "public-entrypoints", "label": "Public Entrypoints"},
+      {"id": "bootstrap-compatibility", "label": "Bootstrap Compatibility"},
       {"id": "maturity", "label": "Maturity"},
       {"id": "browser-policy", "label": "Browser Policy"},
       {"id": "limitations", "label": "Limitations"},

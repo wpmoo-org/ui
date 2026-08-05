@@ -19,6 +19,8 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
+    "scss/_facade-settings.scss",
+    "scss/settings/_facade_public.scss",
     "certification.json",
     "README.md",
     "LICENSE",
@@ -33,6 +35,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
+    "./scss/facade-settings": "./scss/_facade-settings.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
@@ -356,6 +359,116 @@ for (const specifier of [
                 text=True,
             )
             self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
+
+    def test_sass_facade_compiles_from_a_clean_consumer(self) -> None:
+        """Phase 0C discipline: test the facade from a clean consumer
+        fixture without source-tree shortcuts. Mirrors the tarball-install
+        pattern from test_real_tarball_resolves_from_a_clean_consumer."""
+        import sass
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            pack_result = subprocess.run(
+                ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+            pack_payload = json.loads(pack_result.stdout)
+            tarball = temporary_root / pack_payload[0]["filename"]
+            self.assertTrue(tarball.is_file())
+
+            # Unpack into a consumer node_modules layout
+            unpack_root = temporary_root / "unpacked"
+            with tarfile.open(tarball, mode="r:gz") as archive:
+                archive.extractall(unpack_root)
+            consumer_root = temporary_root / "consumer"
+            installed_package = consumer_root / "node_modules/@wpmoo/ui"
+            installed_package.parent.mkdir(parents=True)
+            shutil.move(unpack_root / "package", installed_package)
+
+            # Install bootstrap@5.3.3 alongside
+            bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
+            bootstrap_pkg.mkdir(parents=True)
+            vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
+            for item in vendor_bootstrap_scss.iterdir():
+                dest = bootstrap_pkg / item.name
+                if item.is_file():
+                    shutil.copy2(item, dest)
+                elif item.is_dir():
+                    shutil.copytree(item, dest)
+
+            # --- Assertion 1: zero overrides compiles ---
+            scss_dir = consumer_root / "scss"
+            scss_dir.mkdir(exist_ok=True)
+            (scss_dir / "defaults.scss").write_text(
+                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                "@import \"bootstrap/scss/functions\";\n"
+                "@import \"bootstrap/scss/variables\";\n"
+                "@import \"bootstrap/scss/variables-dark\";\n"
+                "@import \"bootstrap/scss/maps\";\n"
+                "@import \"bootstrap/scss/mixins\";\n"
+                "@import \"bootstrap/scss/root\";\n",
+                encoding="utf-8",
+            )
+            css_defaults = sass.compile(
+                filename=str(scss_dir / "defaults.scss"),
+                include_paths=[str(consumer_root / "node_modules")],
+                output_style="expanded",
+            )
+            self.assertIn("--bs-body-color:", css_defaults)
+
+            # --- Assertion 2: overriding $primary changes the output ---
+            (scss_dir / "override.scss").write_text(
+                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                "$primary: #3b82f6;\n"
+                '@import "bootstrap/scss/functions";\n'
+                '@import "bootstrap/scss/variables";\n'
+                '@import "bootstrap/scss/maps";\n'
+                '@import "bootstrap/scss/mixins";\n'
+                '@import "bootstrap/scss/root";\n',
+                encoding="utf-8",
+            )
+            css_override = sass.compile(
+                filename=str(scss_dir / "override.scss"),
+                include_paths=[str(consumer_root / "node_modules")],
+                output_style="expanded",
+            )
+            self.assertIn("#3b82f6", css_override)
+            self.assertNotIn(css_defaults, css_override)
+
+            # --- Assertion 3: no internal partial paths leaked ---
+            for output in (css_defaults, css_override):
+                self.assertNotIn("settings/", output)
+                self.assertNotIn("_palette", output)
+                self.assertNotIn("_components", output)
+                self.assertNotIn("_forms", output)
+
+            # --- Assertion 4: non-allow-listed variables must not leak ---
+            # The facade may only expose the frozen 15-variable allow-list.
+            # Referencing an internal declaration ($white from the palette,
+            # $moo-destructive derived token) after the facade import must
+            # fail with Sass's own undefined-variable error. If the facade
+            # ever re-imports the full internal settings partial, these
+            # compilations succeed and this assertion fails for real.
+            for leaked_variable in ("$white", "$moo-destructive"):
+                with self.subTest(leaked_variable=leaked_variable):
+                    (scss_dir / "leak.scss").write_text(
+                        '@import "@wpmoo/ui/scss/facade-settings";\n'
+                        f".leak-test {{ color: {leaked_variable}; }}\n",
+                        encoding="utf-8",
+                    )
+                    with self.assertRaises(sass.CompileError) as leak_context:
+                        sass.compile(
+                            filename=str(scss_dir / "leak.scss"),
+                            include_paths=[str(consumer_root / "node_modules")],
+                            output_style="expanded",
+                        )
+                    self.assertIn(
+                        "Undefined variable", str(leak_context.exception)
+                    )
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
         for module_name in (

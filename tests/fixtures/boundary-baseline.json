@@ -32,7 +32,9 @@
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
-    "package.json"
+    "package.json",
+    "scss/_facade-settings.scss",
+    "scss/settings/_facade_public.scss"
   ],
   "package": {
     "exports": {
@@ -45,6 +47,7 @@
       "./moo.css": "./dist/assets/css/moo.css",
       "./moo.min.css": "./dist/assets/css/moo.min.css",
       "./package.json": "./package.json",
+      "./scss/facade-settings": "./scss/_facade-settings.scss",
       "./sidebar.js": "./dist/js/sidebar.js"
     },
     "files": [
@@ -59,7 +62,9 @@
       "dist/js/combobox.js",
       "dist/js/context-menu.js",
       "dist/js/datatable.js",
-      "dist/js/sidebar.js"
+      "dist/js/sidebar.js",
+      "scss/_facade-settings.scss",
+      "scss/settings/_facade_public.scss"
     ],
     "name": "@wpmoo/ui",
     "peerDependencies": {
@@ -68,7 +73,7 @@
     "sideEffects": [
       "dist/assets/css/*.css"
     ],
-    "version": "0.8.1"
+    "version": "0.9.0"
   },
   "siteDistFiles": [
     "site-dist/apple-touch-icon.png",
@@ -341,7 +346,7 @@
     "site-dist/blocks/previews/sidebar-inset/index.html": "a38d4513ea564841dcfb722ab6544707117bf8069decec2d71c230483f9862de",
     "site-dist/blocks/sidebar-floating/index.html": "d997a3a3919904862256bee8a8d50f0242275cbbf660d5bb242a9de2e4deb378",
     "site-dist/blocks/sidebar-inset/index.html": "c224d3a70e7b854c7b72a1c34b173d70a3e7563d77474a02ef00f0c1466194c9",
-    "site-dist/changelog/index.html": "d9d1f63f3419212da8c5db332bb25de7fa719236864d91d6a5f9c9e40824d344",
+    "site-dist/changelog/index.html": "466587c1f4be6a10cc130948d784897e763de66050d430d7599c90d2cb7562b9",
     "site-dist/components/accordion/index.html": "91eb91f0757ddaceca8946362e0f8b2a1f643a2b1d8b6040ead9363b84e07f3e",
     "site-dist/components/alert-dialog/index.html": "f812286b8c8e011611d4e6d36ac97dccb56b45306e0880fff57e5c0db14ea722",
     "site-dist/components/alert/index.html": "addf323c8ab1a29f8bb65e7e45d879aabaa7086992dee013e4043d31b52b813a",
@@ -390,20 +395,20 @@
     "site-dist/favicon.svg": "faf1d513e3c7cdd2c17ee5fc2db6667fb7f99313562c6218cb8e2395aec0dc39",
     "site-dist/icon-192.png": "681080a5b14510b267344f67c6c0384a87480e6e919ad5d4003190d56c10050b",
     "site-dist/icon-512.png": "0f9e72886c967ba2a2e83bc68be51ce14a0967d641ec1f176ff850a1d9b91dec",
-    "site-dist/index.html": "4b356ccc9ba1931396446742e7c4c5ce91508be2dfac82254c6ed946e16c5018",
-    "site-dist/installation/index.html": "ddebf25f8ecbf68eea710b828b019963b533c21f9eebe12510bcfb6b4e03632e",
+    "site-dist/index.html": "6560ee772fd833da7c29fdcf94629ad86dff319887a93ef818bb837e155dbc92",
+    "site-dist/installation/index.html": "031ea2042eeb47d112dfa41efe58ccb87d10b756fe0720353926e22d62b9a704",
     "site-dist/introduction/index.html": "8b830bcc274fd8b7c3c636aa6aaebb399176f2ad1442cbbe1dee743dd5ae4764",
     "site-dist/js/combobox.js": "3b3ee1c7ec72c21cbfcf4442d084f86504955e3147b7c16f6ebbd74ef4eed98b",
     "site-dist/js/context-menu.js": "831ce547e51c91539f85279c9596528da18403f095f36e4913b2f1526d426076",
     "site-dist/js/datatable.js": "0c4a5db2028845aaec1bc3dc4946b3e3d26b4613e3cb6d7f813fd2e44dfcab93",
     "site-dist/js/sidebar.js": "96dec88d1e265baca1cb72684cacf01ce40dd5fa98ca7c8627f8c002e93d6cf1",
     "site-dist/license/index.html": "df4b491c1875307e63c1bcb63903744e330b1b864fbc9c6de109cd7e871a25e4",
-    "site-dist/llms.txt": "d64ce73a397a6f9584197d0885c83b34b3721e304243baf64afe464a389ad87b",
+    "site-dist/llms.txt": "a58dee5095545a40041476b7ce236ec29f8ff7fdd0d12c49417ceb453a8c37c0",
     "site-dist/robots.txt": "bf13521a8ca29a68a5ba125d21c65b84b1679a0aae915a9fd08794d1dc6d9fbf",
     "site-dist/site.webmanifest": "af971266a10396df62c991d9e1f4b86be68d7d2bb248b83386a7ba7f1820fbde",
     "site-dist/sitemap.xml": "a6c08c4c55a6f2a6263c64c88efe91a8af04e61f3eb7cc0abcb90f374a77ef43",
-    "site-dist/skills/index.html": "67393c5a39a6ed09868c1a8f698de8279cc0f1a45e54c510c4b60261c145d733",
-    "site-dist/support/index.html": "f5f2a8c3da302e0f90534b33c688868a7e25c205bdf27b8325324785477ab4e5",
+    "site-dist/skills/index.html": "80f122964b38174387e396c009a9a55dcc1d00c4158edcfa39cb78cdfffcc65e",
+    "site-dist/support/index.html": "477d7ab9aa7be841c5909ea5ad273ddddf6d7ec4855f2dada5244850dc6763d4",
     "site-dist/utils/scroll-fade/index.html": "ac587d52c32878fcfec1e1123c0e60b5fcc8a7b9ecd26bfc1ef4a6ba21951541"
   }
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "0.8.1",
+  "coreVersion": "0.9.0",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -26,7 +26,7 @@
       "./context-menu.js",
       "./datatable.js"
     ],
-    "sass": []
+    "sass": ["./scss/facade-settings"]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
 }

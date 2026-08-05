@@ -2,7 +2,7 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 0.8.1 is a Bootstrap 5.3-native component system with a restrained,
+Moo UI 0.9.0 is a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
@@ -14,7 +14,7 @@ implementation.
 
 ## Version And Support
 
-- npm package: `@wpmoo/ui@0.8.1`
+- npm package: `@wpmoo/ui@0.9.0`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -35,15 +35,17 @@ not independent or accredited certification.
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
+- `@wpmoo/ui/scss/facade-settings`: public Sass variable allow-list (LibSass `@import`)
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
 
 The npm package does not publish catalog templates, preview artwork, catalog
-JavaScript, SCSS source, or a Sass facade.
+JavaScript, or internal SCSS partials beyond the facade's required settings
+import.
 
 ## Installation Facts
 
-- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@0.8.1/dist/assets/css/moo-ui.css`
+- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@0.9.0/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
