@@ -19,7 +19,11 @@ Moo UI treats the following documented surfaces as public contracts:
   scoped versus unscoped stylesheet behavior;
 - documented exports, options, lifecycle methods, and events of public ESM
   modules;
-- variables explicitly listed by the future public Sass facade;
+- variables explicitly listed by the public Sass facade
+  (`scss/_facade-settings.scss`): `$primary`, `$secondary`, `$success`,
+  `$info`, `$warning`, `$danger`, `$light`, `$dark`, `$body-color`,
+  `$body-bg`, `$border-color`, `$border-radius`, `$border-radius-sm`,
+  `$border-radius-lg`, `$font-size-base`;
 - the certification manifest and support-policy formats once published.
 
 The Jinja macros used to build the catalog are internal build tools and are not
