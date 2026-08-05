@@ -46,7 +46,9 @@
         }
       })();
     </script>
+    {% block font_preload %}
     <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+    {% endblock %}
     <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css?v={{ asset_version }}">
   </head>

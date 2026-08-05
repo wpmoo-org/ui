@@ -194,6 +194,32 @@
       <span class="visually-hidden">Cards</span>
     </label>
   </div>
+  {#- The root always renders data-datatable-view="table" server-side (there's
+     no per-request access to localStorage at build time). DataTable.js's
+     module script restores a saved table/cards choice too, but module
+     scripts run after the parser finishes, by which point the browser has
+     already painted the server default -- a visible view swap on every load
+     for anyone who last chose "cards". This inline, synchronous script runs
+     immediately as the parser reaches it, before that paint happens, so the
+     later module-script restore is a no-op in the common case. #}
+  <script>
+    (function () {
+      var root = document.currentScript.closest("[data-datatable-view]");
+      if (!root) return;
+      var stored;
+      try {
+        stored = window.localStorage.getItem("moo-datatable-view:" + root.id);
+      } catch (_) {
+        return;
+      }
+      if (stored !== "table" && stored !== "cards") return;
+      root.dataset.datatableView = stored;
+      var inputs = root.querySelectorAll(".datatable-view-toggle input");
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].checked = inputs[i].value === stored;
+      }
+    })();
+  </script>
 {%- endmacro %}
 
 {% macro datatable_column_visibility_menu(columns) -%}
@@ -244,6 +270,37 @@
   {% if filter_mode not in ["inline", "picker"] %}{{ fail("Data Table filter_mode must be 'inline' or 'picker'") }}{% endif %}
   {% if responsive_mode not in ["scroll", "cards", "toggle"] %}{{ fail("Data Table responsive_mode must be 'scroll', 'cards', or 'toggle'") }}{% endif %}
   {% if responsive_breakpoint not in ["sm", "md", "lg", "xl", "xxl"] %}{{ fail("Data Table responsive_breakpoint must be a Bootstrap breakpoint") }}{% endif %}
+  {% set total_rows = rows | length %}
+  {% set page_count = (total_rows + default_page_size - 1) // default_page_size %}
+  {#- Server pre-applies the deterministic initial state that datatable.js
+     would otherwise only reach after its module script runs, by which point
+     the browser may already have painted the raw state -- a visible flash of
+     unsorted rows plus a bare pagination footer. Row order mirrors the
+     runtime comparator (_sortValue + normalize: the explicit row.sort value
+     when present, else the cell text, trimmed and lowercased; Python's sort
+     is stable, matching the original-index tie-break, including under desc).
+     The first-page summary and page-number window mirror _renderPagination
+     for the always-deterministic initial state (page 1, default page size). #}
+  {% set initial_sort = namespace(key="", direction="") %}
+  {% for column in columns %}
+    {% if column.initial_sort | default("none") in ["asc", "desc"] %}
+      {% set initial_sort.key = column.key %}
+      {% set initial_sort.direction = column.initial_sort %}
+    {% endif %}
+  {% endfor %}
+  {% set ordered_rows = rows %}
+  {% if initial_sort.key %}
+    {% set decorated_rows = [] %}
+    {% for row in rows %}
+      {% if row.sort is defined and initial_sort.key in row.sort %}
+        {% set sort_value = row.sort[initial_sort.key] %}
+      {% else %}
+        {% set sort_value = row.cells[initial_sort.key] | striptags %}
+      {% endif %}
+      {% set _ = decorated_rows.append({"value": sort_value | string | trim | lower, "row": row}) %}
+    {% endfor %}
+    {% set ordered_rows = decorated_rows | sort(attribute="value", reverse=(initial_sort.direction == "desc")) | map(attribute="row") | list %}
+  {% endif %}
   {% set table_id = id ~ "-table" %}
   {% set responsive_cards_enabled = responsive_mode in ["cards", "toggle"] %}
   {% set root_class = "datatable datatable--responsive-" ~ responsive_mode %}
@@ -300,9 +357,9 @@
             </tr>
           </thead>
           <tbody>
-            {% for row in rows %}
+            {% for row in ordered_rows %}
               {% set row_label = row.label | default(row.id) %}
-              <tr id="{{ row.id }}" data-datatable-row{% if row.search is defined %} data-datatable-search="{{ row.search }}"{% endif %}{% for facet_key, facet_value in (row.facets | default({})).items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}>
+              <tr id="{{ row.id }}" data-datatable-row{% if row.search is defined %} data-datatable-search="{{ row.search }}"{% endif %}{% for facet_key, facet_value in (row.facets | default({})).items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}{% if loop.index > default_page_size %} hidden{% endif %}>
                 {% if selectable %}
                   <td class="datatable-col-select">
                     {{ checkbox(id ~ "-" ~ row.id ~ "-table-select", aria_label="Select " ~ row_label, extra_class="datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
@@ -324,7 +381,7 @@
       <div class="{{ card_frame_class }}">
         {{ datatable_frame_header(id, "cards", table_id, selectable, selection_noun) }}
         <div class="{{ cards_class }}" data-datatable-cards aria-label="Responsive {{ table_id }} cards">
-          {% for row in rows %}
+          {% for row in ordered_rows %}
             {% set row_label = row.label | default(row.id) %}
             <article class="datatable-card" data-datatable-card data-datatable-card-for="{{ row.id }}"{% if loop.index > default_page_size %} hidden{% endif %}>
               <div class="datatable-card-header">
@@ -386,7 +443,7 @@
           {% call dropdown_menu(extra_class="datatable-page-size-menu") %}
             {% for size in page_sizes %}
               <li>
-                <button class="dropdown-item dropdown-item-check{% if size == default_page_size %} active{% endif %}" type="button" data-datatable-page-size-option="{{ size }}" aria-pressed="{% if size == default_page_size %}true{% else %}false{% endif %}">
+                <button class="dropdown-item dropdown-item-check dropdown-item-check--radio{% if size == default_page_size %} active{% endif %}" type="button" data-datatable-page-size-option="{{ size }}" aria-pressed="{% if size == default_page_size %}true{% else %}false{% endif %}">
                   <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
                   <span>{{ size }}</span>
                 </button>
@@ -396,21 +453,36 @@
         </div>
         <span class="small text-body-secondary text-nowrap" id="{{ id }}-page-size-label">Rows per page</span>
       </div>
-      <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite"></span>
+      <span class="datatable-results-summary small text-body-secondary" data-datatable-results-summary role="status" aria-live="polite">{% if total_rows == 0 %}No results{% else %}Showing 1-{{ [default_page_size, total_rows] | min }} of {{ total_rows }}{% endif %}</span>
       <nav aria-label="Table pagination" class="datatable-page-nav">
         <ul class="pagination pagination-sm mb-0">
-          <li class="page-item">
-            <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first>{{ render_icon("chevrons-left", "inline-start") }}</button>
+          {#- First paint is always page 1, so first/prev start disabled and
+             the page-number window for page 1 is pre-rendered; the runtime's
+             first _renderPagination then rebuilds identical markup in place. #}
+          <li class="page-item disabled">
+            <button type="button" class="page-link" aria-label="Go to first page" data-datatable-page-first disabled>{{ render_icon("chevrons-left", "inline-start") }}</button>
           </li>
-          <li class="page-item">
-            <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev>{{ render_icon("chevron-left", "inline-start") }}</button>
+          <li class="page-item disabled">
+            <button type="button" class="page-link" aria-label="Go to previous page" data-datatable-page-prev disabled>{{ render_icon("chevron-left", "inline-start") }}</button>
           </li>
+          {% if page_count <= 7 %}
+            {% set page_window = range(1, page_count + 1) | list %}
+          {% else %}
+            {% set page_window = [1, 2, "\u2026", page_count] %}
+          {% endif %}
+          {% for page in page_window %}
+            {% if page == "\u2026" %}
+              <li class="page-item" data-datatable-page-ellipsis><span class="page-link">\u2026</span></li>
+            {% else %}
+              <li class="page-item{% if page == 1 %} active{% endif %}"{% if page == 1 %} aria-current="page"{% endif %} data-datatable-page-number="{{ page }}"><button type="button" class="page-link" aria-label="Go to page {{ page }}" data-datatable-page-go="{{ page }}">{{ page }}</button></li>
+            {% endif %}
+          {% endfor %}
           <template data-datatable-page-numbers></template>
-          <li class="page-item">
-            <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next>{{ render_icon("chevron-right", "inline-start") }}</button>
+          <li class="page-item{% if page_count <= 1 %} disabled{% endif %}">
+            <button type="button" class="page-link" aria-label="Go to next page" data-datatable-page-next{% if page_count <= 1 %} disabled{% endif %}>{{ render_icon("chevron-right", "inline-start") }}</button>
           </li>
-          <li class="page-item">
-            <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last>{{ render_icon("chevrons-right", "inline-start") }}</button>
+          <li class="page-item{% if page_count <= 1 %} disabled{% endif %}">
+            <button type="button" class="page-link" aria-label="Go to last page" data-datatable-page-last{% if page_count <= 1 %} disabled{% endif %}>{{ render_icon("chevrons-right", "inline-start") }}</button>
           </li>
         </ul>
       </nav>
