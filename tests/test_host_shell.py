@@ -11,11 +11,13 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 import urllib.request
 from pathlib import Path
@@ -26,6 +28,7 @@ SERVE = ROOT / "conformance" / "host-shell" / "serve.py"
 RUNNER = ROOT / "conformance" / "runner" / "run.py"
 CONTRACT = ROOT / "conformance" / "contract" / "conformance-contract.json"
 RUN_TIMEOUT_SECONDS = 240
+BANNER_TIMEOUT_SECONDS = 30
 ALLOWED_IMPORT_MODULES = {
     "__future__",
     "argparse",
@@ -62,6 +65,36 @@ def imported_modules(source: str) -> set:
     }
 
 
+def read_banner_line(server: subprocess.Popen) -> str:
+    """Read the host shell's listening-URL line with a bounded wait.
+
+    ``readline`` alone blocks until the job timeout if the host hangs
+    before printing its URL, and a readiness poll can fire on a partial
+    line.  A daemon thread performs the blocking read and hands the
+    result through a queue, so the wait stays bounded either way.
+    """
+    result = queue.Queue()
+
+    def reader() -> None:
+        try:
+            result.put(server.stdout.readline())
+        except Exception as error:
+            result.put(error)
+
+    thread = threading.Thread(target=reader, daemon=True)
+    thread.start()
+    try:
+        value = result.get(timeout=BANNER_TIMEOUT_SECONDS)
+    except queue.Empty:
+        raise AssertionError(
+            "host shell did not print its listening URL within "
+            f"{BANNER_TIMEOUT_SECONDS}s"
+        )
+    if isinstance(value, BaseException):
+        raise value
+    return value
+
+
 class HostShellTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -77,7 +110,7 @@ class HostShellTests(unittest.TestCase):
             env={"PATH": "/usr/bin:/bin"},
         )
         try:
-            banner = cls.server.stdout.readline()
+            banner = read_banner_line(cls.server)
         except Exception:
             cls.server.kill()
             raise

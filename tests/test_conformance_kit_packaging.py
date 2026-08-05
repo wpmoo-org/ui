@@ -4,7 +4,8 @@ Task 8 acceptance: two independent packaging runs produce byte-identical
 archives and identical hashes.  These tests lock that in CI, verify the
 archive carries exactly the distributable kit (no evidence snapshots, no
 test-only files), and prove an extracted artifact is self-sufficient:
-its own host shell serves it and the reference runner passes against it.
+its own host shell serves it and its own reference runner passes
+against it.
 """
 
 from __future__ import annotations
@@ -22,11 +23,11 @@ import unittest
 from pathlib import Path
 
 from tests.helpers import ROOT
-from tests.test_host_shell import non_venv_interpreter
+from tests.test_host_shell import non_venv_interpreter, read_banner_line
 
 SCRIPT = ROOT / "scripts" / "package-conformance-kit.py"
-RUNNER = ROOT / "conformance" / "runner" / "run.py"
 RUN_TIMEOUT_SECONDS = 240
+PACKAGING_TIMEOUT_SECONDS = 120
 VERSION = "1.0"
 PREFIX = f"moo-ui-conformance-kit-{VERSION}"
 
@@ -46,14 +47,48 @@ class PackagingTests(unittest.TestCase):
         cls.packaging = load_packaging()
         cls.archive = cls.packaging.build_archive(VERSION)
 
-    def test_two_builds_are_byte_identical(self) -> None:
-        first = self.packaging.build_archive(VERSION)
-        second = self.packaging.build_archive(VERSION)
-        self.assertEqual(first, second)
-        self.assertEqual(
-            hashlib.sha256(first).hexdigest(),
-            hashlib.sha256(second).hexdigest(),
-        )
+    def test_two_cli_runs_are_byte_identical(self) -> None:
+        with tempfile.TemporaryDirectory() as scratch:
+            out_dirs = []
+            for name in ("first", "second"):
+                out_dir = Path(scratch) / name
+                completed = subprocess.run(
+                    [
+                        sys.executable,
+                        str(SCRIPT),
+                        "--version",
+                        VERSION,
+                        "--out-dir",
+                        str(out_dir),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=PACKAGING_TIMEOUT_SECONDS,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                out_dirs.append(out_dir)
+
+            archive_name = f"moo-ui-conformance-kit-{VERSION}.tar.gz"
+            first = (out_dirs[0] / archive_name).read_bytes()
+            second = (out_dirs[1] / archive_name).read_bytes()
+            self.assertEqual(first, second)
+            first_sidecar = (out_dirs[0] / f"{archive_name}.sha256").read_text(
+                encoding="utf-8"
+            )
+            second_sidecar = (out_dirs[1] / f"{archive_name}.sha256").read_text(
+                encoding="utf-8"
+            )
+            self.assertEqual(first_sidecar, second_sidecar)
+            digest = hashlib.sha256(first).hexdigest()
+            self.assertEqual(first_sidecar, f"{digest}  {archive_name}\n")
+
+    def test_symlinked_kit_content_is_rejected(self) -> None:
+        probe = self.packaging.KIT_DIR / "fixtures" / "_symlink_probe.html"
+        probe.unlink(missing_ok=True)
+        probe.symlink_to(SCRIPT)
+        self.addCleanup(probe.unlink, missing_ok=True)
+        with self.assertRaises(ValueError):
+            self.packaging.build_archive(VERSION)
 
     def test_archive_contains_exactly_the_distributable_kit(self) -> None:
         expected = {
@@ -89,6 +124,9 @@ class PackagingTests(unittest.TestCase):
             serve = (
                 Path(scratch) / PREFIX / "conformance" / "host-shell" / "serve.py"
             )
+            artifact_runner = (
+                Path(scratch) / PREFIX / "conformance" / "runner" / "run.py"
+            )
             server = subprocess.Popen(
                 [interpreter, str(serve), "--port", "0"],
                 stdout=subprocess.PIPE,
@@ -97,7 +135,7 @@ class PackagingTests(unittest.TestCase):
                 env={"PATH": "/usr/bin:/bin"},
             )
             try:
-                banner = server.stdout.readline()
+                banner = read_banner_line(server)
                 match = re.search(r"http://127\.0\.0\.1:(\d+)", banner)
                 self.assertIsNotNone(match, banner)
                 base_url = f"http://127.0.0.1:{match.group(1)}/fixtures"
@@ -106,7 +144,7 @@ class PackagingTests(unittest.TestCase):
                 completed = subprocess.run(
                     [
                         sys.executable,
-                        str(RUNNER),
+                        str(artifact_runner),
                         "--base-url",
                         base_url,
                         "--report-out",

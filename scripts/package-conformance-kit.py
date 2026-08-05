@@ -10,7 +10,8 @@ prefix that preserves the repository-relative ``conformance/`` paths, so
 an extracted copy is directly runnable (``conformance/host-shell/serve.py``
 plus ``conformance/runner/run.py``).  Evidence snapshots under
 ``conformance/reports/`` are repository evidence, not kit content, and
-are excluded.
+are excluded.  Symbolic links are rejected so the archive can never
+carry content from outside the repository.
 
 Usage:
     python scripts/package-conformance-kit.py [--version 1.0] [--out-dir dist/conformance-kit]
@@ -38,6 +39,10 @@ def kit_files() -> list:
     for dir_name in INCLUDED_DIRS:
         base = KIT_DIR / dir_name
         for path in base.rglob("*"):
+            if path.is_symlink():
+                raise ValueError(
+                    f"conformance kit must not contain symlinks: {path}"
+                )
             if not path.is_file():
                 continue
             if any(part in EXCLUDED_PARTS for part in path.relative_to(ROOT).parts):
