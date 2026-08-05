@@ -128,3 +128,16 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Attach conformance kit artifact
+        if: startsWith(steps.package.outputs.tag, 'v')
+        run: |
+          tag="${{ steps.package.outputs.tag }}"
+          kit_version="$(python -c "import json; print(json.load(open('conformance/contract/conformance-contract.json'))['schemaVersion'])")"
+          python scripts/package-conformance-kit.py --version "${kit_version}"
+          gh release upload "${tag}" \
+            "dist/conformance-kit/moo-ui-conformance-kit-${kit_version}.tar.gz" \
+            "dist/conformance-kit/moo-ui-conformance-kit-${kit_version}.tar.gz.sha256" \
+            --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
