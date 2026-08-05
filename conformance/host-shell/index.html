@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo UI Conformance Kit — Example Host Shell</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 42rem; padding: 0 1rem; line-height: 1.5; }
+      code, pre { background: #f2f2f2; }
+      code { padding: 0 .3em; }
+      pre { padding: .75rem 1rem; overflow-x: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>Example Host Shell</h1>
+    <p>
+      This page is host-owned content. It is served by <code>serve.py</code>,
+      a standard-library-only static server with no dependency on Moo UI
+      Core's Jinja/Python build. The kit's canonical fixtures are mounted
+      unchanged at <code>/fixtures/</code>.
+    </p>
+    <ul>
+      <li><a href="/fixtures/static-primitives.html">static-primitives</a></li>
+      <li><a href="/fixtures/forms.html">forms</a></li>
+      <li><a href="/fixtures/bootstrap-data-api.html">bootstrap-data-api</a></li>
+      <li><a href="/fixtures/overlays.html">overlays</a></li>
+      <li><a href="/fixtures/moo-esm.html">moo-esm</a></li>
+    </ul>
+    <p>Run the reference runner against this host:</p>
+    <pre><code>python conformance/runner/run.py --base-url http://127.0.0.1:8124/fixtures</code></pre>
+  </body>
+</html>
