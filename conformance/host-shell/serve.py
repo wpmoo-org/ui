@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import socket
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -88,10 +89,24 @@ def main(argv: list = None) -> int:
     if not FIXTURES_DIR.is_dir():
         parser.exit(2, f"fixtures directory not found: {FIXTURES_DIR}\n")
 
-    server = ThreadingHTTPServer((args.host, args.port), HostShellHandler)
-    host, port = server.server_address
+    try:
+        family = socket.getaddrinfo(
+            args.host, args.port, type=socket.SOCK_STREAM
+        )[0][0]
+    except OSError as error:
+        parser.exit(2, f"cannot resolve --host {args.host!r}: {error}\n")
+
+    class HostShellServer(ThreadingHTTPServer):
+        address_family = family
+
+    try:
+        server = HostShellServer((args.host, args.port), HostShellHandler)
+    except OSError as error:
+        parser.exit(2, f"cannot bind {args.host}:{args.port}: {error}\n")
+    host, port = server.server_address[:2]
+    display = f"[{host}]:{port}" if ":" in str(host) else f"{host}:{port}"
     print(
-        f"moo-ui host shell serving on http://{host}:{port} "
+        f"moo-ui host shell serving on http://{display} "
         f"(fixtures mounted at {MOUNT_PREFIX})",
         flush=True,
     )

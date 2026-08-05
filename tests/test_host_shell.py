@@ -32,6 +32,7 @@ ALLOWED_IMPORT_MODULES = {
     "http.server",
     "os",
     "pathlib",
+    "socket",
     "sys",
 }
 
