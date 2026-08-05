@@ -34,6 +34,19 @@ FIXED_MTIME = 0
 FIXED_MODE = 0o644
 
 
+def validate_version(version: str) -> str:
+    """Reject versions that could escape the archive prefix or out-dir.
+
+    The version is embedded in member names and the output filename, so
+    separators or traversal components would be a path-injection vector.
+    """
+    if not version:
+        raise ValueError("version must not be empty")
+    if "/" in version or "\\" in version or ".." in version:
+        raise ValueError(f"version must not contain path separators: {version!r}")
+    return version
+
+
 def kit_files() -> list:
     files = []
     for dir_name in INCLUDED_DIRS:
@@ -52,6 +65,7 @@ def kit_files() -> list:
 
 
 def build_archive(version: str) -> bytes:
+    version = validate_version(version)
     prefix = f"moo-ui-conformance-kit-{version}"
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w") as tar:

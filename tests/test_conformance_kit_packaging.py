@@ -84,11 +84,20 @@ class PackagingTests(unittest.TestCase):
 
     def test_symlinked_kit_content_is_rejected(self) -> None:
         probe = self.packaging.KIT_DIR / "fixtures" / "_symlink_probe.html"
-        probe.unlink(missing_ok=True)
+        self.assertFalse(
+            probe.exists() or probe.is_symlink(),
+            f"reserved test probe already exists: {probe}",
+        )
         probe.symlink_to(SCRIPT)
         self.addCleanup(probe.unlink, missing_ok=True)
         with self.assertRaises(ValueError):
             self.packaging.build_archive(VERSION)
+
+    def test_unsafe_version_values_are_rejected(self) -> None:
+        for bad in ("", "../outside", "1.0/../../x", "a\\b", "1.0..1"):
+            with self.subTest(version=bad):
+                with self.assertRaises(ValueError):
+                    self.packaging.build_archive(bad)
 
     def test_archive_contains_exactly_the_distributable_kit(self) -> None:
         expected = {
