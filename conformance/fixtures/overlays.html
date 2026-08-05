@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo UI conformance fixture: overlays</title>
+    <!--
+      Generic Host Conformance Kit fixture 4/5 (contract 1.0, cssRecipe "scoped").
+      Hand-authored against the documented component pages:
+      dialog, tooltip, popover.
+      Tooltips and popovers are opt-in under Bootstrap 5, so the host's
+      documented initialization lives in the external assets/init-overlays.js
+      script (no inline scripts, CSP-clean). Modal backdrops are styled
+      globally by design because Bootstrap teleports overlays to the body.
+      Host content outside .moo-ui carries data-conformance-probe for the
+      scoping two-pass comparison.
+    -->
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/moo.css">
+  </head>
+  <body>
+    <section class="p-3" data-conformance-host>
+      <h2 data-conformance-probe>Host console</h2>
+      <p data-conformance-probe>Plain host paragraph rendered outside the Moo UI scope.</p>
+      <p><a data-conformance-probe href="#host">Host navigation link</a></p>
+      <ul data-conformance-probe>
+        <li>Host list item one</li>
+        <li>Host list item two</li>
+      </ul>
+      <button data-conformance-probe type="button">Host action</button>
+    </section>
+
+    <div class="moo-ui p-4">
+      <h2>Overlays</h2>
+      <p class="text-body-secondary">Dialog, Tooltip, and Popover owned by Bootstrap's plugins.</p>
+
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#fixture-dialog" data-conformance-overlay-trigger>Open dialog</button>
+        <button class="btn btn-primary" type="button" data-conformance-control>Primary action</button>
+        <a href="#!" class="tooltip-trigger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Workspace status is visible from the project settings panel.">Check sync status</a>
+        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="popover" data-bs-title="Routing review" data-bs-content="Approve this request, reassign it, or return it for clarification." data-bs-placement="bottom">Review update</button>
+      </div>
+
+      <div class="card" data-conformance-themed>
+        <div class="card-body">Themed surface: this card tracks the active data-bs-theme value.</div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="fixture-dialog"
+        tabindex="-1"
+        aria-labelledby="fixture-dialog-title"
+        aria-describedby="fixture-dialog-description"
+        aria-hidden="true"
+        data-conformance-overlay
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title" id="fixture-dialog-title">Edit project details</h1>
+              <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-body-secondary mb-3" id="fixture-dialog-description">Update the public project label and a short note shown to team members.</p>
+              <div class="vstack gap-3">
+                <label class="form-label" for="fixture-dialog-name">Project name</label>
+                <input class="form-control" id="fixture-dialog-name" type="text" value="Spring launch">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+              <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Save project</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/bootstrap.bundle.min.js"></script>
+    <script src="assets/init-overlays.js"></script>
+  </body>
+</html>
