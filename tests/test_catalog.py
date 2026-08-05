@@ -948,9 +948,13 @@ class CatalogContractTests(CatalogTestCase):
         version = package["version"]
         bootstrap_version = certification["bootstrap"]["canonicalVersion"]
         combobox_export = package["exports"]["./combobox.js"].removeprefix("./")
+        context_menu_export = package["exports"]["./context-menu.js"].removeprefix("./")
+        datatable_export = package["exports"]["./datatable.js"].removeprefix("./")
         sidebar_export = package["exports"]["./sidebar.js"].removeprefix("./")
 
         self.assertIn(combobox_export, package["files"])
+        self.assertIn(context_menu_export, package["files"])
+        self.assertIn(datatable_export, package["files"])
         self.assertIn(sidebar_export, package["files"])
 
         self.assertIn(
@@ -973,9 +977,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Bootstrap JavaScript", installation)
         self.assertIn("Optional Moo ESM", installation)
         self.assertIn('href="../components/combobox/">Combobox</a>', installation)
+        self.assertIn('href="../components/context-menu/">Context Menu</a>', installation)
+        self.assertIn('href="../components/datatable/">Data Table</a>', installation)
         self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
         self.assertIn(
             'import Combobox from &quot;@wpmoo/ui/combobox.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import ContextMenu from &quot;@wpmoo/ui/context-menu.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import DataTable from &quot;@wpmoo/ui/datatable.js&quot;',
             installation,
         )
         self.assertIn(
@@ -987,10 +1001,20 @@ class CatalogContractTests(CatalogTestCase):
             installation,
         )
         self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{context_menu_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{datatable_export}",
+            installation,
+        )
+        self.assertIn(
             f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{sidebar_export}",
             installation,
         )
         self.assertIn("Combobox.getOrCreateInstance", installation)
+        self.assertIn("ContextMenu.getOrCreateInstance", installation)
+        self.assertIn("DataTable.getOrCreateInstance", installation)
         self.assertIn("Sidebar.getOrCreateInstance", installation)
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
