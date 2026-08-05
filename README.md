@@ -175,7 +175,7 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is in the `0.x` series. Current package: `@wpmoo/ui@0.8.1`. The
+Moo UI is in the `0.x` series. Current package: `@wpmoo/ui@0.9.0`. The
 package's certification manifest currently has `preview` status; catalog
 availability is WPMoo-maintained preview evidence, not independent or
 accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
