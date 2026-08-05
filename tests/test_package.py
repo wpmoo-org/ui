@@ -20,7 +20,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "scss/_facade-settings.scss",
-    "scss/settings/_palette.scss",
+    "scss/settings/_facade_public.scss",
     "certification.json",
     "README.md",
     "LICENSE",
@@ -445,6 +445,30 @@ for (const specifier of [
                 self.assertNotIn("_palette", output)
                 self.assertNotIn("_components", output)
                 self.assertNotIn("_forms", output)
+
+            # --- Assertion 4: non-allow-listed variables must not leak ---
+            # The facade may only expose the frozen 15-variable allow-list.
+            # Referencing an internal declaration ($white from the palette,
+            # $moo-destructive derived token) after the facade import must
+            # fail with Sass's own undefined-variable error. If the facade
+            # ever re-imports the full internal settings partial, these
+            # compilations succeed and this assertion fails for real.
+            for leaked_variable in ("$white", "$moo-destructive"):
+                with self.subTest(leaked_variable=leaked_variable):
+                    (scss_dir / "leak.scss").write_text(
+                        '@import "@wpmoo/ui/scss/facade-settings";\n'
+                        f".leak-test {{ color: {leaked_variable}; }}\n",
+                        encoding="utf-8",
+                    )
+                    with self.assertRaises(sass.CompileError) as leak_context:
+                        sass.compile(
+                            filename=str(scss_dir / "leak.scss"),
+                            include_paths=[str(consumer_root / "node_modules")],
+                            output_style="expanded",
+                        )
+                    self.assertIn(
+                        "Undefined variable", str(leak_context.exception)
+                    )
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
         for module_name in (

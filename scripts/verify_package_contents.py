@@ -20,7 +20,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "scss/_facade-settings.scss",
-    "scss/settings/_palette.scss",
+    "scss/settings/_facade_public.scss",
     "package.json",
 }
 

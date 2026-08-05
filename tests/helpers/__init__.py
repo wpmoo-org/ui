@@ -42,6 +42,7 @@ def read_scss_aggregate(
     if source_root is None:
         source_root = ROOT / "scss"
     paths = [entrypoint]
+    queue: list[Path] = []
     for target in active_scss_imports(source):
         if not target.startswith(f"{prefix}/"):
             continue
@@ -50,6 +51,23 @@ def read_scss_aggregate(
         if not partial.is_file():
             raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
         paths.append(partial)
+        queue.append(partial)
+    seen = set(paths)
+    # Follow imports nested inside the included partials (e.g.
+    # settings/_palette.scss importing facade_public) so their
+    # declarations still contribute to the aggregate.
+    while queue:
+        current = queue.pop(0)
+        for target in active_scss_imports(current.read_text(encoding="utf-8")):
+            relative = Path(target)
+            partial = current.parent / f"_{relative.name}.scss"
+            if not partial.is_file():
+                raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
+            if partial in seen:
+                continue
+            seen.add(partial)
+            paths.append(partial)
+            queue.append(partial)
     return "\n".join(path.read_text(encoding="utf-8") for path in paths)
 
 

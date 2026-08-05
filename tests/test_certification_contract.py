@@ -423,16 +423,31 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(live_files, frozen_files,
             "package.json files diverged from the 0.9.0 freeze document")
 
-        # Sass facade allow-list must match the facade source
-        facade_source = (ROOT / "scss/_facade-settings.scss").read_text(encoding="utf-8")
-        frozen_sass_vars = set(freeze["sassFacadeAllowList"])
-        # Extract variable names documented in the facade header
+        # Sass facade allow-list must match the real public declarations.
+        # Extract variable names from the actual !default declarations in
+        # the narrow public partial -- not from facade comments -- so any
+        # widening of the public surface (e.g. re-importing the full
+        # internal palette into _facade_public.scss) grows the extracted
+        # set past the freeze document and fails for real.
         import re
-        documented_vars = set(re.findall(r'\$[\w-]+(?=\s)', facade_source))
-        # Filter to only the allow-listed ones (exclude $moo-* derived tokens)
-        public_vars = {v for v in documented_vars if not v.startswith("$moo-")}
-        self.assertEqual(frozen_sass_vars, public_vars,
+        facade_public_source = (ROOT / "scss/settings/_facade_public.scss").read_text(encoding="utf-8")
+        frozen_sass_vars = set(freeze["sassFacadeAllowList"])
+        declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', facade_public_source, re.MULTILINE))
+        self.assertEqual(frozen_sass_vars, declared_vars,
             "Sass facade allow-list diverged from the freeze document")
+
+        # The facade itself may only import the narrow public partial;
+        # importing the full internal palette would re-leak ~35 variables.
+        facade_source = (ROOT / "scss/_facade-settings.scss").read_text(encoding="utf-8")
+        # Strip comments first so the documented usage recipes in the
+        # header are not mistaken for real imports.
+        stripped_facade = re.sub(r"/\*.*?\*/", "", facade_source, flags=re.DOTALL)
+        stripped_facade = "\n".join(
+            line.split("//", 1)[0] for line in stripped_facade.splitlines()
+        )
+        facade_imports = set(re.findall(r'@import\s+"([^"]+)"\s*;', stripped_facade))
+        self.assertEqual(facade_imports, {"settings/facade_public"},
+            "facade-settings must import only the narrow public partial")
 
         # Certification manifest schema required fields must match
         live_required = set(schema["required"])

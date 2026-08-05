@@ -383,7 +383,17 @@ class DesignGateTests(CatalogTestCase):
         ]
 
         self.assertEqual(imports, expected)
-        self.assertEqual(owned_partial_targets(SCSS / "settings"), set(expected))
+        # _facade_public.scss is the narrow public allow-list: it is owned
+        # by _palette.scss's leading import (and by the public facade), not
+        # a direct _primary_variables.scss import.
+        self.assertEqual(
+            owned_partial_targets(SCSS / "settings"),
+            set(expected) | {"settings/facade_public"},
+        )
+        palette_imports = active_scss_import_list(
+            (SCSS / "settings/_palette.scss").read_text(encoding="utf-8")
+        )
+        self.assertEqual(palette_imports[:1], ["facade_public"])
 
     def test_entrypoints_import_theme_and_foundation_layers_in_order(self) -> None:
         entrypoint_imports = {
