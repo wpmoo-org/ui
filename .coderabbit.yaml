@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en
+
+reviews:
+  profile: chill
+  path_filters:
+    - "!dist/**"
+    - "!site-dist/**"
+    - "!vendor/**"
+    - "!node_modules/**"
+  path_instructions:
+    - path: "scss/**"
+      instructions: |
+        Follow this project's Bootstrap-native value-precedence ladder: reuse
+        Bootstrap's own Sass/CSS tokens first, then Bootstrap --bs-* consumption
+        variables, and introduce a --moo-* token only for a source-verified gap
+        Bootstrap's own API cannot express. Flag hardcoded colors, radii,
+        shadows, or borders in component partials -- these must resolve through
+        a Sass !default knob, not a literal. Sass imports must stay
+        @import-only; flag any @use or @forward.
+    - path: "src/js/components/**"
+      instructions: |
+        Public ESM modules must stay side-effect-free on import: no
+        auto-scanning the document. Initialization must be explicit
+        (getInstance/getOrCreateInstance), idempotent, and paired with an
+        explicit dispose() lifecycle.
+    - path: "tests/**"
+      instructions: |
+        Python unittest conventions; certification/browser tests use
+        Playwright. Flag brittle pixel-perfect assertions or incidental
+        DOM-shape pins in favor of semantic/contract assertions.
+    - path: ".github/workflows/**"
+      instructions: |
+        Flag any change that could tag, publish, or release without an
+        existing human-approval gate. This repo's release automation
+        (release-tag.yml, npm-publish.yml) requires explicit approval before
+        any behavior change ships.
+  auto_review:
+    enabled: true
+    base_branches:
+      - main
+      - dev
