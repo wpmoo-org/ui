@@ -18,6 +18,58 @@ PREVIEW_PATH = "/site-dist/blocks/previews/datatable-release-review/index.html"
 CERTIFICATION_FIXTURE_PATH = "/tests/fixtures/certification/datatable.html"
 TABLE_ID = "standalone-datatable-release-reviews"
 
+_CAPTURE_DATATABLE_STATE_JS = """
+(tableId) => {
+    const root = document.getElementById(tableId);
+    const rows = Array.from(
+        root.querySelectorAll(
+            "tbody > tr[data-datatable-row]"
+        )
+    ).map((tr) => tr.id);
+    const summary = root.querySelector(
+        "[data-datatable-results-summary]"
+    );
+    const pageNumbers = Array.from(
+        root.querySelectorAll(
+            "li[data-datatable-page-number]"
+        )
+    ).map((li) => li.getAttribute("data-datatable-page-number"));
+    const first = root.querySelector(
+        "[data-datatable-page-first]"
+    );
+    const prev = root.querySelector(
+        "[data-datatable-page-prev]"
+    );
+    const sortStates = {};
+    root.querySelectorAll("th[data-datatable-column]").forEach(
+        (th) => {
+            sortStates[
+                th.getAttribute("data-datatable-column")
+            ] = th.getAttribute("aria-sort") || "none";
+        }
+    );
+    return {
+        rowIds: rows,
+        summaryText: summary ? summary.textContent : "",
+        pageNumbers: pageNumbers,
+        firstDisabled: first ? first.disabled : null,
+        prevDisabled: prev ? prev.disabled : null,
+        sortStates: sortStates,
+    };
+}
+"""
+
+
+def _capture_datatable_state(page, table_id: str) -> dict:
+    """Read the row order, results summary, pagination, and sort state a
+    visitor would currently see for the given Data Table root.
+
+    Shared by the pre-JS and post-JS captures in
+    ``test_initial_server_render_matches_post_js_render`` so both sides read
+    the exact same DOM shape — a selector change only needs to happen once.
+    """
+    return page.evaluate(_CAPTURE_DATATABLE_STATE_JS, table_id)
+
 
 class DataTableBrowserTests(unittest.TestCase):
     @classmethod
@@ -896,3 +948,73 @@ class DataTableBrowserTests(unittest.TestCase):
             evidence.assert_clean()
         finally:
             context.close()
+
+    def test_initial_server_render_matches_post_js_render(self) -> None:
+        """Lock the 'no-op re-render' claim from commit 5f1b87e.
+
+        Loads the Jinja-rendered preview page twice: once with JS disabled
+        (pure server HTML) and once with JS enabled. The two states must be
+        identical for row order, results summary, pagination, and sort —
+        proving datatable.js's initial render is a no-op.
+        """
+        case = CERTIFICATION_CASES[0]
+
+        # --- Pre-JS state: server-rendered HTML with no JS execution ---
+        pre_context = self.browser.new_context(
+            viewport=case.viewport,
+            color_scheme=case.color_scheme,
+            java_script_enabled=False,
+            reduced_motion="reduce",
+            locale="en-US",
+        )
+        pre_page = pre_context.new_page()
+        try:
+            response = pre_page.goto(
+                f"{self.base_url}{PREVIEW_PATH}", wait_until="networkidle"
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            pre_state = _capture_datatable_state(pre_page, TABLE_ID)
+        finally:
+            pre_context.close()
+
+        # --- Post-JS state: normal rendering with datatable.js active ---
+        context, page, evidence = self.open_preview()
+        try:
+            post_state = _capture_datatable_state(page, TABLE_ID)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+        # --- Parity assertions ---
+        self.assertEqual(
+            pre_state["rowIds"],
+            post_state["rowIds"],
+            "Row order differs between server render and JS render",
+        )
+        self.assertEqual(
+            pre_state["summaryText"],
+            post_state["summaryText"],
+            "Results summary differs between server render and JS render",
+        )
+        self.assertEqual(
+            pre_state["pageNumbers"],
+            post_state["pageNumbers"],
+            "Pagination page numbers differ between server render and JS render",
+        )
+        self.assertEqual(
+            pre_state["firstDisabled"],
+            post_state["firstDisabled"],
+            "First-page button disabled state differs",
+        )
+        self.assertEqual(
+            pre_state["prevDisabled"],
+            post_state["prevDisabled"],
+            "Previous-page button disabled state differs",
+        )
+        self.assertEqual(
+            pre_state["sortStates"],
+            post_state["sortStates"],
+            "Column aria-sort states differ between server render and JS render",
+        )
