@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.0",
   "kit": {
     "name": "moo-ui-generic-host-conformance-kit",
     "bootstrapRange": ">=5.3.0 <5.4",
@@ -43,7 +43,7 @@
           "combobox.js",
           "sidebar.js"
         ],
-        "notes": "Combobox and Sidebar with explicit getOrCreateInstance initialization; initialization lives in an external script file so the fixture stays strict-CSP clean. Must include host content outside the .moo-ui wrapper for scoping probes."
+        "notes": "Combobox and Sidebar with explicit getOrCreateInstance initialization; initialization lives in a standalone external script file so it is independently blockable for the lifecycle two-pass check and the fixture stays strict-CSP clean. Must include host content outside the .moo-ui wrapper for scoping probes."
       }
     ]
   },
@@ -116,11 +116,11 @@
             "static-primitives",
             "forms"
           ],
-          "description": "An in-scope .btn btn-primary computes background-color to Moo UI's documented $primary (#171717), not Bootstrap's default, proving Moo's layer wins the documented cascade regardless of how the host delivered it.",
+          "description": "An in-scope .btn btn-primary computes background-color to Moo UI's foreground token (#18181b, --moo-foreground), not Bootstrap's default blue, proving Moo's layer wins the documented cascade regardless of how the host delivered it. The computed value reflects the later theme-aware button rule in moo.css, which overrides the earlier $primary-derived rule at equal specificity.",
           "params": {
             "selector": ".moo-ui .btn.btn-primary",
             "property": "background-color",
-            "expected": "rgb(23, 23, 23)"
+            "expected": "rgb(24, 24, 27)"
           }
         },
         {
@@ -133,9 +133,10 @@
             "overlays",
             "moo-esm"
           ],
-          "description": "Every stylesheet named in the fixture's cssRecipe is present in the loaded document's stylesheets (matched by basename), whether delivered as discrete files or observed as discrete requests.",
+          "description": "Every stylesheet named in the fixture's cssRecipe is present in the loaded document's stylesheets (matched by basename). Skipped with a recorded reason when the host concatenates or inlines styles and no discrete recipe stylesheets are observable; on such hosts moo-override-wins is the sole cascade judge, as the category mechanism states.",
           "params": {
-            "matchBy": "basename"
+            "matchBy": "basename",
+            "skipWhenConcatenated": true
           }
         },
         {
@@ -158,7 +159,7 @@
     {
       "id": "scoping",
       "title": "Scoping",
-      "description": "Moo UI's scoped layer changes nothing outside the .moo-ui boundary and demonstrably changes things inside it.",
+      "description": "Moo UI's scoped layer changes nothing in host content outside the .moo-ui boundary (as sampled by the documented probes) and demonstrably changes things inside it. Overlay backdrops are styled globally by design because Bootstrap teleports modals and offcanvas to the body; that is expected, not a scoping violation.",
       "mechanism": "Two-pass comparison by the runner: load the fixture normally and record computed styles of out-of-scope probe elements, then reload with the moo.css stylesheet request blocked via route interception and record the same values; the two recordings must be identical for out-of-scope probes while at least one in-scope control element must differ. Hosts that concatenate Moo CSS with host styles cannot isolate the stylesheet, in which case the assertion is skipped with a recorded reason rather than forced.",
       "assertions": [
         {
@@ -340,7 +341,7 @@
       "id": "lifecycle",
       "title": "Lifecycle",
       "description": "Runtime ownership holds: Moo ESM components are inert until explicit initialization, initialization is idempotent and validates its root; Bootstrap Data API components work without any Moo JavaScript.",
-      "mechanism": "For Moo ESM fixtures the runner evaluates behavior before and after the documented getOrCreateInstance call and checks instance identity across double initialization; for the Data API fixture it verifies documented toggle behavior with only Bootstrap's bundle loaded. All checks are scripted DOM probes; Combobox and Sidebar were confirmed to use explicit initialization with no document auto-scanning.",
+      "mechanism": "For Moo ESM fixtures the runner evaluates behavior before and after the documented getOrCreateInstance call and checks instance identity across double initialization; for the Data API fixture it verifies documented toggle behavior with only Bootstrap's bundle loaded. The pre-init state is observed with a two-pass load: the runner first loads the fixture with the external init script blocked via route interception and interacts, then reloads with it allowed; the moo-esm fixture's init script must therefore be a standalone blockable resource. All checks are scripted DOM probes; Combobox and Sidebar were confirmed to use explicit initialization with no document auto-scanning.",
       "assertions": [
         {
           "id": "inert-before-init",
@@ -396,7 +397,7 @@
       "id": "csp",
       "title": "Content Security Policy",
       "description": "The kit's fixtures and Moo UI's documented runtime work under a strict CSP: no inline scripts, no inline style blocks, no eval.",
-      "mechanism": "Runner-side enforcement by construction: the runner intercepts responses and injects a strict Content-Security-Policy header (default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self') before collecting console messages, and the contract requires zero CSP violation reports during load and the fixture scenario. Fixture initialization code must live in external script files so fixtures remain CSP-clean by construction; a static scan at fixture authoring time keeps inline handlers, style blocks, and javascript: URLs out of the fixtures.",
+      "mechanism": "Runner-side enforcement by construction: the runner intercepts responses and injects a strict Content-Security-Policy header (default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self') before collecting console messages, and the contract requires zero CSP violation reports during load and the fixture scenario. The check assumes same-origin kit assets: fixtures must reference stylesheets, scripts, and init code by relative paths, so a host deliberately serving the kit from a CDN is out of scope for this assertion by construction. Fixture initialization code must live in external script files so fixtures remain CSP-clean by construction; a static scan at fixture authoring time keeps inline handlers, style blocks, and javascript: URLs out of the fixtures.",
       "assertions": [
         {
           "id": "strict-csp-no-violations",
