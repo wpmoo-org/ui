@@ -173,8 +173,8 @@ def run_axe(page: Page) -> list[dict[str, object]]:
 
 
 @contextmanager
-def serve_repository() -> Iterator[str]:
-    handler = partial(_QuietHandler, directory=str(ROOT))
+def serve_directory(directory: Path) -> Iterator[str]:
+    handler = partial(_QuietHandler, directory=str(directory))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -185,3 +185,9 @@ def serve_repository() -> Iterator[str]:
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+@contextmanager
+def serve_repository() -> Iterator[str]:
+    with serve_directory(ROOT) as base_url:
+        yield base_url

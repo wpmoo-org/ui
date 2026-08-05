@@ -81,9 +81,10 @@
             "overlays",
             "moo-esm"
           ],
-          "description": "Every element inside the .moo-ui wrapper computes box-sizing to border-box.",
+          "description": "Every element inside the .moo-ui wrapper computes box-sizing to border-box, except elements Bootstrap's own CSS explicitly opts out of the reboot for (btn-close, which Bootstrap sets to content-box by design).",
           "params": {
             "selectorAll": ".moo-ui *",
+            "excludeSelector": ".btn-close",
             "property": "box-sizing",
             "expected": "border-box"
           }

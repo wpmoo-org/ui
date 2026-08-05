@@ -1,0 +1,183 @@
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+from jsonschema import Draft202012Validator
+
+from tests.helpers.browser_harness import serve_directory
+
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURES_DIR = ROOT / "conformance" / "fixtures"
+RUNNER = ROOT / "conformance" / "runner" / "run.py"
+CONTRACT_PATH = ROOT / "conformance" / "contract" / "conformance-contract.json"
+REPORT_SCHEMA_PATH = ROOT / "conformance" / "contract" / "report.schema.json"
+RUN_TIMEOUT_SECONDS = 600
+
+
+def invoke_runner(base_url, report_out):
+    return subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--base-url",
+            base_url,
+            "--report-out",
+            str(report_out),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=RUN_TIMEOUT_SECONDS,
+    )
+
+
+class ConformanceRunnerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+        cls.server = serve_directory(FIXTURES_DIR)
+        cls.base_url = cls.server.__enter__()
+        cls.report_dir = tempfile.TemporaryDirectory(prefix="moo-conformance-")
+        cls.report_path = Path(cls.report_dir.name) / "pass-report.json"
+        cls.process = invoke_runner(cls.base_url, cls.report_path)
+        cls.report = json.loads(cls.report_path.read_text(encoding="utf-8"))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.report_dir.cleanup()
+        cls.server.__exit__(None, None, None)
+
+    def test_runner_requires_base_url(self):
+        process = subprocess.run(
+            [sys.executable, str(RUNNER)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        self.assertEqual(process.returncode, 2)
+
+    def test_canonical_fixtures_pass_with_exit_code_zero(self):
+        self.assertEqual(
+            self.process.returncode,
+            0,
+            f"runner stderr:\n{self.process.stderr}",
+        )
+        summary = self.report["summary"]
+        self.assertEqual(summary["result"], "pass")
+        self.assertEqual(summary["assertionsFailed"], 0)
+        self.assertGreater(summary["assertionsPassed"], 0)
+        self.assertEqual(summary["assertionsSkipped"], 0)
+
+    def test_report_conforms_to_report_schema(self):
+        schema = json.loads(REPORT_SCHEMA_PATH.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        errors = sorted(
+            Draft202012Validator(schema).iter_errors(self.report),
+            key=lambda error: list(error.absolute_path),
+        )
+        self.assertEqual(
+            [error.message for error in errors],
+            [],
+            "runner output does not conform to report.schema.json",
+        )
+
+    def test_host_metadata_is_detected(self):
+        host = self.report["host"]
+        self.assertEqual(host["baseUrl"], self.base_url)
+        self.assertEqual(host["servedBootstrapVersion"], "5.3.3")
+        self.assertEqual(host["cssRecipeDetected"], "scoped")
+        self.assertEqual(self.report["contractVersion"], self.contract["schemaVersion"])
+
+    def test_every_contract_assertion_is_reported_for_its_fixtures(self):
+        reported = {
+            (fixture["name"], assertion["id"]): assertion
+            for fixture in self.report["fixtures"]
+            for category in fixture["categories"]
+            for assertion in category["assertions"]
+        }
+        for category in self.contract["categories"]:
+            for assertion in category["assertions"]:
+                for fixture_name in assertion["fixtures"]:
+                    key = (fixture_name, assertion["id"])
+                    self.assertIn(key, reported, f"missing {key} in the report")
+                    self.assertIn(
+                        reported[key]["status"], {"pass", "fail", "skipped"}
+                    )
+
+    def test_inert_check_uses_visibility_not_dom_presence(self):
+        """Claude's Task 4 note: the listbox is always in the DOM and hidden
+        by CSS, so the openedMarker check must be a visibility check."""
+        moo_esm = next(
+            fixture
+            for fixture in self.report["fixtures"]
+            if fixture["name"] == "moo-esm"
+        )
+        assertion = next(
+            assertion
+            for category in moo_esm["categories"]
+            for assertion in category["assertions"]
+            if assertion["id"] == "inert-before-init"
+        )
+        self.assertEqual(assertion["status"], "pass")
+        pre_init = assertion["evidence"]["preInit"]
+        self.assertGreaterEqual(pre_init["markerCount"], 1)
+        self.assertFalse(pre_init["markerVisible"])
+        self.assertNotEqual(pre_init["ariaExpanded"], "true")
+        self.assertTrue(assertion["evidence"]["opensAfterInit"])
+
+    def test_fault_injection_breaks_the_scoping_category(self):
+        with tempfile.TemporaryDirectory(prefix="moo-fault-") as broken_dir:
+            broken_fixtures = Path(broken_dir) / "fixtures"
+            shutil.copytree(FIXTURES_DIR, broken_fixtures)
+            target = broken_fixtures / "static-primitives.html"
+            original = target.read_text(encoding="utf-8")
+            broken = original.replace('class="moo-ui p-4"', 'class="moo-ui-off p-4"')
+            self.assertNotEqual(broken, original)
+            target.write_text(broken, encoding="utf-8")
+
+            with serve_directory(broken_fixtures) as broken_url:
+                report_path = Path(broken_dir) / "fault-report.json"
+                process = invoke_runner(broken_url, report_path)
+                report = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            process.returncode,
+            1,
+            f"runner stderr:\n{process.stderr}",
+        )
+        self.assertEqual(report["summary"]["result"], "fail")
+        self.assertGreater(report["summary"]["assertionsFailed"], 0)
+
+        static = next(
+            fixture
+            for fixture in report["fixtures"]
+            if fixture["name"] == "static-primitives"
+        )
+        by_category = {category["id"]: category for category in static["categories"]}
+        self.assertEqual(by_category["scoping"]["status"], "fail")
+        self.assertEqual(by_category["css-reset"]["status"], "fail")
+        self.assertEqual(by_category["asset-order"]["status"], "fail")
+        # Out-of-scope host content is still untouched by the broken scope.
+        untouched = next(
+            assertion
+            for assertion in by_category["scoping"]["assertions"]
+            if assertion["id"] == "out-of-scope-untouched"
+        )
+        self.assertEqual(untouched["status"], "pass")
+        # Untouched fixtures must still pass fully.
+        forms = next(
+            fixture for fixture in report["fixtures"] if fixture["name"] == "forms"
+        )
+        for category in forms["categories"]:
+            self.assertEqual(
+                category["status"],
+                "pass",
+                f"forms category {category['id']} regressed under fault injection",
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()
