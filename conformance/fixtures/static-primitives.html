@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo UI conformance fixture: static primitives</title>
+    <!--
+      Generic Host Conformance Kit fixture 1/5 (contract 1.0, cssRecipe "scoped").
+      Hand-authored against the documented component pages:
+      button, badge, card, avatar, typography.
+      Host content outside .moo-ui carries data-conformance-probe for the
+      scoping two-pass comparison; no inline styles or scripts (CSP-clean).
+    -->
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/moo.css">
+  </head>
+  <body>
+    <section class="p-3" data-conformance-host>
+      <h2 data-conformance-probe>Host console</h2>
+      <p data-conformance-probe>Plain host paragraph rendered outside the Moo UI scope.</p>
+      <p><a data-conformance-probe href="#host">Host navigation link</a></p>
+      <ul data-conformance-probe>
+        <li>Host list item one</li>
+        <li>Host list item two</li>
+      </ul>
+      <button data-conformance-probe type="button">Host action</button>
+    </section>
+
+    <div class="moo-ui p-4">
+      <h2>Static primitives</h2>
+      <p class="text-body-secondary">Button, Badge, Card, Avatar, and Typography under the scoped recipe.</p>
+
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <button class="btn btn-primary" type="button" data-conformance-control data-conformance-focusable>Publish</button>
+        <button class="btn btn-secondary" type="button">Reschedule</button>
+        <button class="btn btn-outline-secondary" type="button">Open workspace</button>
+        <button class="btn btn-outline-secondary" type="button" data-conformance-asymmetric>
+          <svg data-icon="inline-start" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          Export report
+        </button>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <span class="badge text-bg-primary">Default</span>
+        <span class="badge text-bg-secondary">Secondary</span>
+        <span class="badge text-bg-danger">Destructive</span>
+        <span class="badge border text-body-secondary">Outline</span>
+      </div>
+
+      <div class="card mb-4" data-conformance-themed>
+        <div class="card-header">
+          <h3 class="card-title">Incident recap</h3>
+          <p class="card-subtitle">Recent checks and owner notes for the active release.</p>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <div class="d-flex justify-content-between">
+              <span class="text-body-secondary">Service</span>
+              <span class="fw-medium">Payments</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-body-secondary">Status</span>
+              <span>In review</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <span class="avatar" role="img" aria-label="Moo Admin">
+          <span class="avatar-fallback">MO</span>
+          <span class="avatar-badge avatar-badge--dot bg-success" role="status" aria-label="Available"></span>
+        </span>
+        <div class="min-w-0">
+          <div class="fw-medium">Moo Admin</div>
+          <div class="text-body-secondary small">admin@example.com</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo UI conformance fixture: Bootstrap Data API</title>
+    <!--
+      Generic Host Conformance Kit fixture 3/5 (contract 1.0, cssRecipe "scoped").
+      Hand-authored against the documented component pages:
+      dropdown-menu, collapsible, tabs.
+      Interactivity is entirely Bootstrap's Data API: only the Bootstrap
+      bundle is loaded, no Moo ESM module appears on this page.
+      Host content outside .moo-ui carries data-conformance-probe for the
+      scoping two-pass comparison; no inline styles or scripts (CSP-clean).
+    -->
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/moo.css">
+  </head>
+  <body>
+    <section class="p-3" data-conformance-host>
+      <h2 data-conformance-probe>Host console</h2>
+      <p data-conformance-probe>Plain host paragraph rendered outside the Moo UI scope.</p>
+      <p><a data-conformance-probe href="#host">Host navigation link</a></p>
+      <ul data-conformance-probe>
+        <li>Host list item one</li>
+        <li>Host list item two</li>
+      </ul>
+      <button data-conformance-probe type="button">Host action</button>
+    </section>
+
+    <div class="moo-ui p-4">
+      <h2>Bootstrap Data API</h2>
+      <p class="text-body-secondary">Dropdown Menu, Collapsible, and Tabs with no Moo JavaScript on the page.</p>
+
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,6" data-conformance-overlay-trigger>Project actions</button>
+          <ul class="dropdown-menu dropdown-menu-start" data-conformance-overlay>
+            <li><h6 class="dropdown-header">Project</h6></li>
+            <li><button class="dropdown-item" type="button"><span>Open project</span></button></li>
+            <li><button class="dropdown-item" type="button"><span>Rename project</span></button></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item text-danger" type="button"><span>Delete</span></button></li>
+          </ul>
+        </div>
+        <button class="btn btn-primary" type="button" data-conformance-control>Primary action</button>
+      </div>
+
+      <div class="collapsible mb-4">
+        <div class="collapsible-header">
+          <h4 class="collapsible-title">Can we use this flow in operations?</h4>
+          <button class="btn btn-ghost btn-icon-sm" type="button" aria-label="Toggle task details" data-bs-toggle="collapse" data-bs-target="#fixture-collapsible" aria-expanded="false" aria-controls="fixture-collapsible">
+            <svg data-icon="inline-start" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m7 15 5 5 5-5"/>
+              <path d="m7 9 5-5 5 5"/>
+            </svg>
+          </button>
+        </div>
+        <div id="fixture-collapsible" class="collapse">
+          <div class="collapsible-content">Yes. This pattern is safe for internal and client workflows, and no external attribution is needed.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="tabs-list nav nav-pills" id="fixture-tabs-list" role="tablist">
+          <button class="nav-link active" id="fixture-overview-tab" data-bs-toggle="tab" data-bs-target="#fixture-overview-pane" type="button" role="tab" aria-controls="fixture-overview-pane" aria-selected="true">Overview</button>
+          <button class="nav-link" id="fixture-workflows-tab" data-bs-toggle="tab" data-bs-target="#fixture-workflows-pane" type="button" role="tab" aria-controls="fixture-workflows-pane" aria-selected="false">Workflows</button>
+          <button class="nav-link" id="fixture-settings-tab" data-bs-toggle="tab" data-bs-target="#fixture-settings-pane" type="button" role="tab" aria-controls="fixture-settings-pane" aria-selected="false">Settings</button>
+        </div>
+        <div class="tab-content" id="fixture-tabs-content">
+          <div class="tab-pane fade show active" id="fixture-overview-pane" role="tabpanel" aria-labelledby="fixture-overview-tab" tabindex="0">Track open requests, risk flags, and handoff status.</div>
+          <div class="tab-pane fade" id="fixture-workflows-pane" role="tabpanel" aria-labelledby="fixture-workflows-tab" tabindex="0">Move items through review lanes with minimal context switching.</div>
+          <div class="tab-pane fade" id="fixture-settings-pane" role="tabpanel" aria-labelledby="fixture-settings-tab" tabindex="0">Set locale, notifications, and digest frequency from one place.</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

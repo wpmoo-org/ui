@@ -1,0 +1,874 @@
+{
+  "schemaVersion": "1.0",
+  "contractVersion": "1.0",
+  "generatedAt": "2026-08-05T20:00:56Z",
+  "runner": {
+    "name": "moo-ui-conformance-reference-runner",
+    "version": "1.0"
+  },
+  "host": {
+    "baseUrl": "http://127.0.0.1:8216/fixtures",
+    "servedBootstrapVersion": "5.3.3",
+    "cssRecipeDetected": "scoped"
+  },
+  "fixtures": [
+    {
+      "name": "static-primitives",
+      "url": "http://127.0.0.1:8216/fixtures/static-primitives.html",
+      "categories": [
+        {
+          "id": "css-reset",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "reboot-box-sizing",
+              "status": "pass",
+              "evidence": {
+                "matched": 33,
+                "mismatchCount": 0,
+                "mismatches": []
+              }
+            },
+            {
+              "id": "reboot-heading-margin",
+              "status": "pass",
+              "evidence": {
+                "actual": "0px",
+                "expected": "0px"
+              }
+            }
+          ]
+        },
+        {
+          "id": "asset-order",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "moo-override-wins",
+              "status": "pass",
+              "evidence": {
+                "actual": "rgb(24, 24, 27)",
+                "expected": "rgb(24, 24, 27)"
+              }
+            },
+            {
+              "id": "recipe-stylesheets-loaded",
+              "status": "pass",
+              "evidence": {
+                "loaded": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            },
+            {
+              "id": "discrete-recipe-order",
+              "status": "pass",
+              "evidence": {
+                "requestOrder": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "scoping",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "out-of-scope-untouched",
+              "status": "pass",
+              "evidence": {
+                "probeCount": 5,
+                "differences": []
+              }
+            },
+            {
+              "id": "in-scope-changed",
+              "status": "pass",
+              "evidence": {
+                "loaded": {
+                  "background-color": "rgb(24, 24, 27)",
+                  "border-radius": "8px"
+                },
+                "blocked": {
+                  "background-color": "rgb(13, 110, 253)",
+                  "border-radius": "6px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "theme",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "dark-theme-surface",
+              "status": "pass",
+              "evidence": {
+                "present": true,
+                "light": "rgb(255, 255, 255)",
+                "dark": "rgb(24, 24, 27)",
+                "restored": "rgb(255, 255, 255)"
+              }
+            }
+          ]
+        },
+        {
+          "id": "direction",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "rtl-mirrors-spacing",
+              "status": "pass",
+              "evidence": {
+                "ltr": {
+                  "padding-left": "8px",
+                  "padding-right": "10px"
+                },
+                "rtl": {
+                  "padding-left": "10px",
+                  "padding-right": "8px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "focus",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "focus-visible-treatment",
+              "status": "pass",
+              "evidence": {
+                "tabs": 3,
+                "treatment": {
+                  "outlineStyle": "solid",
+                  "boxShadow": "none"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "csp",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "strict-csp-no-violations",
+              "status": "pass",
+              "evidence": {
+                "policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'",
+                "violations": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "console-health",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "zero-console-errors",
+              "status": "pass",
+              "evidence": {
+                "consoleErrors": [],
+                "pageErrors": []
+              }
+            },
+            {
+              "id": "zero-failed-resources",
+              "status": "pass",
+              "evidence": {
+                "badResponses": [],
+                "failedRequests": [],
+                "note": "browser-internal favicon requests are excluded"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "forms",
+      "url": "http://127.0.0.1:8216/fixtures/forms.html",
+      "categories": [
+        {
+          "id": "css-reset",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "reboot-box-sizing",
+              "status": "pass",
+              "evidence": {
+                "matched": 46,
+                "mismatchCount": 0,
+                "mismatches": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "asset-order",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "moo-override-wins",
+              "status": "pass",
+              "evidence": {
+                "actual": "rgb(24, 24, 27)",
+                "expected": "rgb(24, 24, 27)"
+              }
+            },
+            {
+              "id": "recipe-stylesheets-loaded",
+              "status": "pass",
+              "evidence": {
+                "loaded": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            },
+            {
+              "id": "discrete-recipe-order",
+              "status": "pass",
+              "evidence": {
+                "requestOrder": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "scoping",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "out-of-scope-untouched",
+              "status": "pass",
+              "evidence": {
+                "probeCount": 5,
+                "differences": []
+              }
+            },
+            {
+              "id": "in-scope-changed",
+              "status": "pass",
+              "evidence": {
+                "loaded": {
+                  "background-color": "rgb(24, 24, 27)",
+                  "border-radius": "8px"
+                },
+                "blocked": {
+                  "background-color": "rgb(13, 110, 253)",
+                  "border-radius": "6px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "direction",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "rtl-mirrors-spacing",
+              "status": "pass",
+              "evidence": {
+                "ltr": {
+                  "padding-left": "8px",
+                  "padding-right": "10px"
+                },
+                "rtl": {
+                  "padding-left": "10px",
+                  "padding-right": "8px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "focus",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "keyboard-focus-reachable",
+              "status": "pass",
+              "evidence": {
+                "tabs": 3,
+                "maxTabs": 20
+              }
+            },
+            {
+              "id": "focus-visible-treatment",
+              "status": "pass",
+              "evidence": {
+                "tabs": 12,
+                "treatment": {
+                  "outlineStyle": "none",
+                  "boxShadow": "rgba(23, 23, 23, 0.25) 0px 0px 0px 2px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "csp",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "strict-csp-no-violations",
+              "status": "pass",
+              "evidence": {
+                "policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'",
+                "violations": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "console-health",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "zero-console-errors",
+              "status": "pass",
+              "evidence": {
+                "consoleErrors": [],
+                "pageErrors": []
+              }
+            },
+            {
+              "id": "zero-failed-resources",
+              "status": "pass",
+              "evidence": {
+                "badResponses": [],
+                "failedRequests": [],
+                "note": "browser-internal favicon requests are excluded"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bootstrap-data-api",
+      "url": "http://127.0.0.1:8216/fixtures/bootstrap-data-api.html",
+      "categories": [
+        {
+          "id": "css-reset",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "reboot-box-sizing",
+              "status": "pass",
+              "evidence": {
+                "matched": 38,
+                "mismatchCount": 0,
+                "mismatches": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "asset-order",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "recipe-stylesheets-loaded",
+              "status": "pass",
+              "evidence": {
+                "loaded": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            },
+            {
+              "id": "discrete-recipe-order",
+              "status": "pass",
+              "evidence": {
+                "requestOrder": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "scoping",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "out-of-scope-untouched",
+              "status": "pass",
+              "evidence": {
+                "probeCount": 5,
+                "differences": []
+              }
+            },
+            {
+              "id": "in-scope-changed",
+              "status": "pass",
+              "evidence": {
+                "loaded": {
+                  "background-color": "rgb(24, 24, 27)",
+                  "border-radius": "8px"
+                },
+                "blocked": {
+                  "background-color": "rgb(13, 110, 253)",
+                  "border-radius": "6px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "focus",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "keyboard-focus-reachable",
+              "status": "pass",
+              "evidence": {
+                "tabs": 3,
+                "maxTabs": 20
+              }
+            }
+          ]
+        },
+        {
+          "id": "overlays",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "overlay-opens-and-layers",
+              "status": "pass",
+              "evidence": {
+                "zIndex": 1000,
+                "minZIndex": 1000
+              }
+            }
+          ]
+        },
+        {
+          "id": "lifecycle",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "data-api-without-moo-js",
+              "status": "pass",
+              "evidence": {
+                "opened": true,
+                "mooScripts": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "csp",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "strict-csp-no-violations",
+              "status": "pass",
+              "evidence": {
+                "policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'",
+                "violations": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "console-health",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "zero-console-errors",
+              "status": "pass",
+              "evidence": {
+                "consoleErrors": [],
+                "pageErrors": []
+              }
+            },
+            {
+              "id": "zero-failed-resources",
+              "status": "pass",
+              "evidence": {
+                "badResponses": [],
+                "failedRequests": [],
+                "note": "browser-internal favicon requests are excluded"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "overlays",
+      "url": "http://127.0.0.1:8216/fixtures/overlays.html",
+      "categories": [
+        {
+          "id": "css-reset",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "reboot-box-sizing",
+              "status": "pass",
+              "evidence": {
+                "matched": 22,
+                "mismatchCount": 0,
+                "mismatches": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "asset-order",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "recipe-stylesheets-loaded",
+              "status": "pass",
+              "evidence": {
+                "loaded": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            },
+            {
+              "id": "discrete-recipe-order",
+              "status": "pass",
+              "evidence": {
+                "requestOrder": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "scoping",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "out-of-scope-untouched",
+              "status": "pass",
+              "evidence": {
+                "probeCount": 5,
+                "differences": []
+              }
+            },
+            {
+              "id": "in-scope-changed",
+              "status": "pass",
+              "evidence": {
+                "loaded": {
+                  "background-color": "rgb(24, 24, 27)",
+                  "border-radius": "8px"
+                },
+                "blocked": {
+                  "background-color": "rgb(13, 110, 253)",
+                  "border-radius": "6px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "theme",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "dark-theme-surface",
+              "status": "pass",
+              "evidence": {
+                "present": true,
+                "light": "rgb(255, 255, 255)",
+                "dark": "rgb(24, 24, 27)",
+                "restored": "rgb(255, 255, 255)"
+              }
+            }
+          ]
+        },
+        {
+          "id": "focus",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "keyboard-focus-reachable",
+              "status": "pass",
+              "evidence": {
+                "tabs": 3,
+                "maxTabs": 20
+              }
+            }
+          ]
+        },
+        {
+          "id": "overlays",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "overlay-opens-and-layers",
+              "status": "pass",
+              "evidence": {
+                "zIndex": 1055,
+                "minZIndex": 1000
+              }
+            },
+            {
+              "id": "dialog-focus-moves",
+              "status": "pass",
+              "evidence": {
+                "activeElement": "#fixture-dialog"
+              }
+            },
+            {
+              "id": "overlay-closes-and-restores",
+              "status": "pass",
+              "evidence": {
+                "focusRestoredToTrigger": true
+              }
+            }
+          ]
+        },
+        {
+          "id": "csp",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "strict-csp-no-violations",
+              "status": "pass",
+              "evidence": {
+                "policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'",
+                "violations": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "console-health",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "zero-console-errors",
+              "status": "pass",
+              "evidence": {
+                "consoleErrors": [],
+                "pageErrors": []
+              }
+            },
+            {
+              "id": "zero-failed-resources",
+              "status": "pass",
+              "evidence": {
+                "badResponses": [],
+                "failedRequests": [],
+                "note": "browser-internal favicon requests are excluded"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "moo-esm",
+      "url": "http://127.0.0.1:8216/fixtures/moo-esm.html",
+      "categories": [
+        {
+          "id": "css-reset",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "reboot-box-sizing",
+              "status": "pass",
+              "evidence": {
+                "matched": 56,
+                "mismatchCount": 0,
+                "mismatches": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "asset-order",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "recipe-stylesheets-loaded",
+              "status": "pass",
+              "evidence": {
+                "loaded": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            },
+            {
+              "id": "discrete-recipe-order",
+              "status": "pass",
+              "evidence": {
+                "requestOrder": [
+                  "bootstrap.min.css",
+                  "moo.css"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "scoping",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "out-of-scope-untouched",
+              "status": "pass",
+              "evidence": {
+                "probeCount": 5,
+                "differences": []
+              }
+            },
+            {
+              "id": "in-scope-changed",
+              "status": "pass",
+              "evidence": {
+                "loaded": {
+                  "background-color": "rgb(24, 24, 27)",
+                  "border-radius": "8px"
+                },
+                "blocked": {
+                  "background-color": "rgb(13, 110, 253)",
+                  "border-radius": "6px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "direction",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "rtl-mirrors-spacing",
+              "status": "pass",
+              "evidence": {
+                "ltr": {
+                  "padding-left": "8px",
+                  "padding-right": "10px"
+                },
+                "rtl": {
+                  "padding-left": "10px",
+                  "padding-right": "8px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "focus",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "keyboard-focus-reachable",
+              "status": "pass",
+              "evidence": {
+                "tabs": 3,
+                "maxTabs": 20
+              }
+            }
+          ]
+        },
+        {
+          "id": "lifecycle",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "inert-before-init",
+              "status": "pass",
+              "evidence": {
+                "preInit": {
+                  "opened": false,
+                  "markerCount": 1,
+                  "markerVisible": false,
+                  "ariaExpanded": "false"
+                },
+                "opensAfterInit": true
+              }
+            },
+            {
+              "id": "idempotent-init",
+              "status": "pass",
+              "evidence": {
+                "ready": true,
+                "identical": true
+              }
+            },
+            {
+              "id": "invalid-root-rejected",
+              "status": "pass",
+              "evidence": {
+                "ready": true,
+                "threw": true,
+                "errorName": "TypeError"
+              }
+            }
+          ]
+        },
+        {
+          "id": "csp",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "strict-csp-no-violations",
+              "status": "pass",
+              "evidence": {
+                "policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'",
+                "violations": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "console-health",
+          "status": "pass",
+          "assertions": [
+            {
+              "id": "zero-console-errors",
+              "status": "pass",
+              "evidence": {
+                "consoleErrors": [],
+                "pageErrors": []
+              }
+            },
+            {
+              "id": "zero-failed-resources",
+              "status": "pass",
+              "evidence": {
+                "badResponses": [],
+                "failedRequests": [],
+                "note": "browser-internal favicon requests are excluded"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "assertionsPassed": 62,
+    "assertionsFailed": 0,
+    "assertionsSkipped": 0,
+    "result": "pass"
+  }
+}

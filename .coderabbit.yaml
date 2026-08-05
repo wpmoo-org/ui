@@ -1,0 +1,142 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en
+early_access: true
+
+# Review voice: direct, evidence-based, anchored in this repo's conventions.
+tone_instructions: >-
+  Be direct and evidence-based. Anchor feedback in this repo's conventions:
+  Bootstrap-native token ladder, explicit-init ESM lifecycle, Core/Docs
+  boundary, evidence-first certification. Never suggest changes that weaken
+  a public contract.
+
+reviews:
+  # Assertive = wide net. Humans and Claude filter the output; CodeRabbit
+  # is the layer that must not stay quiet.
+  profile: assertive
+  # Formally request changes on findings; auto-approve once all CodeRabbit
+  # comments are resolved and checks pass. Merging still requires a human.
+  request_changes_workflow: true
+  high_level_summary: true
+  review_status: true
+
+  # Review only owned sources. Build output, vendored trees, and
+  # byte-identical conformance copies are noise; their origins (scss/,
+  # src/js/, dist/ build inputs) are reviewed instead.
+  path_filters:
+    - "!dist/**"
+    - "!site-dist/**"
+    - "!vendor/**"
+    - "!node_modules/**"
+    - "!.venv/**"
+    - "!package-lock.json"
+    - "!conformance/fixtures/assets/bootstrap.min.css"
+    - "!conformance/fixtures/assets/bootstrap.bundle.min.js"
+    - "!conformance/fixtures/assets/moo.css"
+    - "!conformance/fixtures/assets/combobox.js"
+    - "!conformance/fixtures/assets/sidebar.js"
+
+  path_instructions:
+    - path: "scss/**"
+      instructions: |
+        Follow this project's Bootstrap-native value-precedence ladder: reuse
+        Bootstrap's own Sass/CSS tokens first, then Bootstrap --bs-* consumption
+        variables, and introduce a --moo-* token only for a source-verified gap
+        Bootstrap's own API cannot express. Flag hardcoded colors, radii,
+        shadows, or borders in component partials -- these must resolve through
+        a Sass !default knob, not a literal. Sass imports must stay
+        @import-only; flag any @use or @forward.
+    - path: "src/js/components/**"
+      instructions: |
+        Public ESM modules must stay side-effect-free on import: no
+        auto-scanning the document. Initialization must be explicit
+        (getInstance/getOrCreateInstance), idempotent, and paired with an
+        explicit dispose() lifecycle.
+    - path: "tests/**"
+      instructions: |
+        Python unittest conventions; pytest is not installed in this repo.
+        Certification/browser tests use Playwright via the shared browser
+        harness. Flag brittle pixel-perfect assertions or incidental
+        DOM-shape pins in favor of semantic/contract assertions.
+    - path: ".github/workflows/**"
+      instructions: |
+        Flag any change that could tag, publish, or release without an
+        existing human-approval gate. This repo's release automation
+        (release-tag.yml, npm-publish.yml) requires explicit approval before
+        any behavior change ships.
+    - path: "conformance/contract/**"
+      instructions: |
+        The conformance contract is versioned truth. Flag silent removal or
+        renaming of assertions or named checks. JSON Schema files must follow
+        the src/certification conventions: draft 2020-12, $id under
+        https://ui.wpmoo.org/schemas/, additionalProperties false, two-part
+        versions (MAJOR.MINOR). Every new check needs matching hooks in the
+        fixtures, a runner implementation, and report-schema coverage.
+    - path: "conformance/fixtures/**"
+      instructions: |
+        Fixtures must stay CSP-clean: no inline scripts, inline styles, event
+        handler attributes, or javascript: URLs. Keep the scoped recipe:
+        bootstrap.min.css before moo.css, components inside .moo-ui, host
+        probes outside it. Hook attributes must match the params in
+        conformance/contract/conformance-contract.json. Each fixture must
+        keep the doc-page citations it was authored against.
+    - path: "src/certification/**"
+      instructions: |
+        Evidence inventory: flag any status flip that lacks matching evidence
+        and commit trail. The profile set and schema conventions are fixed
+        contracts; changing them requires a recorded decision in docs/.
+    - path: "site/src/**"
+      instructions: |
+        Doc pages are public HTML contracts. Code samples in <pre> blocks
+        must stay in sync with the component they document; changes ripple
+        into site-dist and the certification fixtures. Respect the Core/Docs
+        boundary described in CONTRIBUTING.md.
+    - path: "docs/**"
+      instructions: |
+        Plans record confirmed decisions and verification evidence. Flag
+        speculative claims presented as facts, acceptance boxes checked
+        without recorded verification, and drift between plan steps and the
+        committed code.
+
+  auto_review:
+    enabled: true
+    drafts: false
+    # Re-review on every push to the PR so nothing lands unreviewed.
+    auto_incremental_review: true
+    base_branches:
+      - main
+      - dev
+
+  tools:
+    github-checks:
+      enabled: true
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    actionlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    gitleaks:
+      enabled: true
+    # Deliberately off: no eslint/biome config exists in this repo, and ruff
+    # already covers Python without pylint's unconfigured noise.
+    eslint:
+      enabled: false
+    biome:
+      enabled: false
+    pylint:
+      enabled: false
+
+chat:
+  auto_reply: true
+
+# The repo has no AGENTS.md, so point the guidelines learner at the
+# rule documents that do exist.
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "CONTRIBUTING.md"
