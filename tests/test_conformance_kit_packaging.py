@@ -23,7 +23,7 @@ import unittest
 from pathlib import Path
 
 from tests.helpers import ROOT
-from tests.test_host_shell import non_venv_interpreter, read_banner_line
+from tests.helpers.host_process import non_venv_interpreter, read_banner_line
 
 SCRIPT = ROOT / "scripts" / "package-conformance-kit.py"
 RUN_TIMEOUT_SECONDS = 240
@@ -94,10 +94,29 @@ class PackagingTests(unittest.TestCase):
             self.packaging.build_archive(VERSION)
 
     def test_unsafe_version_values_are_rejected(self) -> None:
-        for bad in ("", "../outside", "1.0/../../x", "a\\b", "1.0..1"):
+        for bad in ("", "../outside", "1.0/../../x", "a\\b", "1.0..1", "/tmp/escape"):
             with self.subTest(version=bad):
                 with self.assertRaises(ValueError):
                     self.packaging.build_archive(bad)
+
+    def test_archive_metadata_is_normalized(self) -> None:
+        # Byte identity between two runs could agree with itself after a
+        # normalization regression; assert the contract's normalization
+        # directly instead: sorted members, fixed metadata, and a gzip
+        # header with neither an embedded mtime nor a filename.
+        names = []
+        with tarfile.open(fileobj=io.BytesIO(self.archive)) as tar:
+            for member in tar.getmembers():
+                names.append(member.name)
+                self.assertEqual(member.mtime, 0, member.name)
+                self.assertEqual(member.uid, 0, member.name)
+                self.assertEqual(member.gid, 0, member.name)
+                self.assertEqual(member.uname, "", member.name)
+                self.assertEqual(member.gname, "", member.name)
+                self.assertEqual(member.mode, 0o644, member.name)
+        self.assertEqual(names, sorted(names))
+        self.assertEqual(self.archive[4:8], b"\x00\x00\x00\x00")
+        self.assertFalse(self.archive[3] & 0x08, "gzip FNAME flag must be unset")
 
     def test_archive_contains_exactly_the_distributable_kit(self) -> None:
         expected = {

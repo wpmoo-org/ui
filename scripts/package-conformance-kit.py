@@ -39,6 +39,8 @@ def validate_version(version: str) -> str:
 
     The version is embedded in member names and the output filename, so
     separators or traversal components would be a path-injection vector.
+    This also covers absolute versions, which ``out_dir / archive_name``
+    would otherwise resolve outside the output directory.
     """
     if not version:
         raise ValueError("version must not be empty")
@@ -88,7 +90,7 @@ def build_archive(version: str) -> bytes:
     return gz_buffer.getvalue()
 
 
-def main(argv: list = None) -> int:
+def main(argv: list | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Deterministic packaging of the conformance kit."
     )

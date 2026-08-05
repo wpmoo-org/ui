@@ -10,25 +10,21 @@ the same proof a bridge or another project would repeat.
 from __future__ import annotations
 
 import json
-import os
-import queue
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
-import threading
 import unittest
 import urllib.request
 from pathlib import Path
 
 from tests.helpers import ROOT
+from tests.helpers.host_process import non_venv_interpreter, read_banner_line
 
 SERVE = ROOT / "conformance" / "host-shell" / "serve.py"
 RUNNER = ROOT / "conformance" / "runner" / "run.py"
 CONTRACT = ROOT / "conformance" / "contract" / "conformance-contract.json"
 RUN_TIMEOUT_SECONDS = 240
-BANNER_TIMEOUT_SECONDS = 30
 ALLOWED_IMPORT_MODULES = {
     "__future__",
     "argparse",
@@ -40,21 +36,6 @@ ALLOWED_IMPORT_MODULES = {
 }
 
 
-def non_venv_interpreter() -> str:
-    """Return an interpreter outside the repository .venv, if one exists."""
-    venv_dir = os.path.realpath(str(ROOT / ".venv"))
-    for candidate in ("/usr/bin/python3", shutil.which("python3")):
-        if not candidate:
-            continue
-        resolved = os.path.realpath(candidate)
-        if not os.path.isfile(resolved):
-            continue
-        if resolved.startswith(venv_dir + os.sep):
-            continue
-        return resolved
-    return ""
-
-
 def imported_modules(source: str) -> set:
     return {
         match.group(1)
@@ -63,36 +44,6 @@ def imported_modules(source: str) -> set:
             source,
         )
     }
-
-
-def read_banner_line(server: subprocess.Popen) -> str:
-    """Read the host shell's listening-URL line with a bounded wait.
-
-    ``readline`` alone blocks until the job timeout if the host hangs
-    before printing its URL, and a readiness poll can fire on a partial
-    line.  A daemon thread performs the blocking read and hands the
-    result through a queue, so the wait stays bounded either way.
-    """
-    result = queue.Queue()
-
-    def reader() -> None:
-        try:
-            result.put(server.stdout.readline())
-        except Exception as error:
-            result.put(error)
-
-    thread = threading.Thread(target=reader, daemon=True)
-    thread.start()
-    try:
-        value = result.get(timeout=BANNER_TIMEOUT_SECONDS)
-    except queue.Empty:
-        raise AssertionError(
-            "host shell did not print its listening URL within "
-            f"{BANNER_TIMEOUT_SECONDS}s"
-        )
-    if isinstance(value, BaseException):
-        raise value
-    return value
 
 
 class HostShellTests(unittest.TestCase):
