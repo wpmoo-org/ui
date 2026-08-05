@@ -27,12 +27,6 @@ TESTS_DIR = ROOT / "tests"
 # a conscious review of which modules are included/excluded.
 BROWSER_TEST_GLOB = "test_*_browser.py"
 
-# This guard module's own source contains "from playwright" / "import
-# playwright" as string literals (in the check logic below).  Without the
-# exclusion, it would match itself as a Playwright test module and then
-# fail the glob check.
-_GUARD_MODULE = "test_bootstrap_compatibility_runner.py"
-
 
 def _imports_playwright(path: Path) -> bool:
     """Return True when *path* has a real ``from playwright`` or
