@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.wpmoo.org/schemas/conformance-contract.schema.json",
+  "title": "Moo UI Generic Host Conformance Contract",
+  "description": "Versioned host-neutral conformance contract. Defines the ten semantic categories from the Moo UI Core production-certification design document's Evidence Model (generic host conformance bullet) as mechanically checkable assertion sets. A reference runner implements each named check; other languages may implement the same contract against this schema and the report schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kit",
+    "cssRecipes",
+    "categories"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Contract version, independent of the @wpmoo/ui package version.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "kit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "bootstrapRange",
+        "scopeClass",
+        "themeAttribute",
+        "fixtures"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "bootstrapRange": {
+          "description": "Bootstrap major range this contract is scoped to.",
+          "type": "string"
+        },
+        "scopeClass": {
+          "description": "CSS class delimiting the scoped Moo component layer.",
+          "type": "string"
+        },
+        "themeAttribute": {
+          "description": "Attribute carrying the Bootstrap theme state (light/dark).",
+          "type": "string"
+        },
+        "fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fixture"
+          }
+        }
+      }
+    },
+    "cssRecipes": {
+      "description": "The documented Moo UI CSS recipes a conforming host may serve. Asset-order evidence is only recorded when the host serves a recipe as discrete stylesheets.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/cssRecipe"
+      }
+    },
+    "categories": {
+      "description": "The ten contract categories, in contract order.",
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/category"
+      }
+    }
+  },
+  "$defs": {
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "path"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "description": "Fixture document path relative to the kit fixtures directory.",
+          "type": "string"
+        },
+        "cssRecipe": {
+          "description": "Name of the cssRecipes entry this fixture must be served with.",
+          "type": "string"
+        },
+        "bootstrapJs": {
+          "description": "Whether the fixture requires Bootstrap's JavaScript bundle.",
+          "type": "boolean"
+        },
+        "mooEsm": {
+          "description": "Moo ESM modules the fixture initializes explicitly.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "cssRecipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "stylesheets"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "stylesheets": {
+          "description": "Stylesheet basenames in required load order. A host serving this recipe as discrete files must load them in this order; concatenated or inlined hosts carry the same cascade outcome without a checkable request order.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "description",
+        "mechanism",
+        "assertions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "css-reset",
+            "asset-order",
+            "scoping",
+            "theme",
+            "direction",
+            "focus",
+            "overlays",
+            "lifecycle",
+            "csp",
+            "console-health"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "mechanism": {
+          "description": "How a runner mechanically checks this category, including the chosen mechanism where alternatives existed.",
+          "type": "string",
+          "minLength": 20
+        },
+        "assertions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/assertion"
+          }
+        }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "check",
+        "fixtures",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "check": {
+          "description": "Named check implemented by a reference runner. The name is contract surface; runners must implement exactly these names.",
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "fixtures": {
+          "description": "Fixture names this assertion applies to.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "description": "The concrete expected outcome, phrased as a falsifiable statement.",
+          "type": "string",
+          "minLength": 20
+        },
+        "params": {
+          "description": "Check-specific parameters (selectors, property lists, expected values).",
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

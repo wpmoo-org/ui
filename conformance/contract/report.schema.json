@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.wpmoo.org/schemas/conformance-report.schema.json",
+  "title": "Moo UI Generic Host Conformance Report",
+  "description": "Report a conformance runner emits after driving the kit's fixtures against a host. Language-neutral contract surface: any runner implementation in any language can produce this report. Consumable by a human reading raw JSON and by a future CI step parsing it; carries no embedded HTML and no host-identifying secrets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contractVersion",
+    "generatedAt",
+    "runner",
+    "host",
+    "fixtures",
+    "summary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Report schema version this document conforms to.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "contractVersion": {
+      "description": "Kit conformance-contract schemaVersion the run executed.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "generatedAt": {
+      "description": "UTC timestamp of the run, RFC 3339.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseUrl",
+        "servedBootstrapVersion"
+      ],
+      "properties": {
+        "baseUrl": {
+          "description": "Base URL the runner was pointed at.",
+          "type": "string",
+          "format": "uri"
+        },
+        "servedBootstrapVersion": {
+          "description": "Bootstrap version the host actually served, as detected by the runner (e.g. from the served stylesheet's banner comment or Tooltip.VERSION). A conformance report is weaker evidence without the dependency version.",
+          "type": "string"
+        },
+        "cssRecipeDetected": {
+          "description": "Name of the contract cssRecipe the served stylesheets matched, if any.",
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "fixtures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/fixtureResult"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assertionsPassed",
+        "assertionsFailed",
+        "assertionsSkipped",
+        "result"
+      ],
+      "properties": {
+        "assertionsPassed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "assertionsFailed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "assertionsSkipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "result": {
+          "description": "Overall verdict: pass only when zero assertions failed.",
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "fixtureResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "url",
+        "categories"
+      ],
+      "properties": {
+        "name": {
+          "description": "Contract fixture name.",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL actually loaded for this fixture.",
+          "type": "string"
+        },
+        "categories": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/categoryResult"
+          }
+        }
+      }
+    },
+    "categoryResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "assertions"
+      ],
+      "properties": {
+        "id": {
+          "description": "Contract category id.",
+          "type": "string",
+          "enum": [
+            "css-reset",
+            "asset-order",
+            "scoping",
+            "theme",
+            "direction",
+            "focus",
+            "overlays",
+            "lifecycle",
+            "csp",
+            "console-health"
+          ]
+        },
+        "status": {
+          "description": "Category verdict: pass when every applied assertion passed, fail when any failed, skipped only when every applied assertion was skipped with a recorded reason.",
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "skipped"
+          ]
+        },
+        "reason": {
+          "description": "Required context when status is skipped.",
+          "type": "string"
+        },
+        "assertions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/assertionResult"
+          }
+        }
+      }
+    },
+    "assertionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "description": "Contract assertion id.",
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "skipped"
+          ]
+        },
+        "evidence": {
+          "description": "Machine-readable evidence for the outcome: the actual computed value, console message, request list, or diff that decided the assertion.",
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "object",
+            "array"
+          ]
+        },
+        "reason": {
+          "description": "Why the assertion failed or was skipped, in one sentence.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
