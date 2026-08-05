@@ -128,3 +128,21 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Attach conformance kit artifact
+        if: startsWith(steps.package.outputs.tag, 'v')
+        run: |
+          tag="${{ steps.package.outputs.tag }}"
+          # Build the kit from the tagged commit, not the workflow ref:
+          # with inputs.release_ref the checkout may be a later commit
+          # carrying the same package version, and the release asset
+          # must match the commit the release tag points to.
+          git checkout --detach "${tag}"
+          kit_version="$(python -c "import json; print(json.load(open('conformance/contract/conformance-contract.json'))['schemaVersion'])")"
+          python scripts/package-conformance-kit.py --version "${kit_version}"
+          gh release upload "${tag}" \
+            "dist/conformance-kit/moo-ui-conformance-kit-${kit_version}.tar.gz" \
+            "dist/conformance-kit/moo-ui-conformance-kit-${kit_version}.tar.gz.sha256" \
+            --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

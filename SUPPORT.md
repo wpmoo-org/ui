@@ -158,10 +158,32 @@ the package version they apply to.
 
 ## Generic Host Conformance
 
-Moo UI will publish a host-neutral conformance contract and fixture bundle as a
-language-neutral, hash-locked GitHub Release artifact. It will test concerns
-such as CSS resets, asset order, scoping, direction, themes, focus, overlays,
-plugin lifecycle, Content Security Policy, and console health.
+Moo UI publishes the Generic Host Conformance Kit: a host-neutral contract,
+a bundle of canonical fixture pages, a reference runner, and an example host
+shell. It is distributed as a deterministic, hash-locked GitHub Release
+artifact (`moo-ui-conformance-kit-<version>.tar.gz` plus a `.sha256`
+sidecar) attached to Moo UI releases; the first published archive ships
+with the next release. The contract checks concerns such as CSS resets,
+asset order, scoping, direction, themes, focus, overlays, plugin lifecycle,
+Content Security Policy, and console health.
+
+A host runs the kit in three steps: extract the archive, serve the fixture
+pages from the environment under test (any static file server works; the
+kit ships an example host shell at `conformance/host-shell/serve.py`), and
+point the reference runner (`conformance/runner/run.py`) at the served
+fixtures. The runner drives the fixtures in a browser and writes a JSON
+report conforming to the kit's report schema
+(`conformance/contract/report.schema.json`); exit code 0 records a
+conformance pass for that host. The runner needs Python 3 and Playwright
+only; no Moo UI build tooling is involved.
+
+The archive is reproducible byte-for-byte from the repository source at any
+time. The current kit carries contract version 1.0, and its archive hashes
+to SHA-256
+`f29b3e7e22273671facb4391a1da005362ea6fb9a05ccf5bdf6c827a48416c3c`.
+Published artifacts are listed on the GitHub Releases page:
+
+https://github.com/wpmoo-org/ui/releases
 
 Passing the generic contract does not automatically grant an “official
 integration” designation. Platform-specific implementation, support, and

@@ -10,9 +10,7 @@ the same proof a bridge or another project would repeat.
 from __future__ import annotations
 
 import json
-import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -21,6 +19,7 @@ import urllib.request
 from pathlib import Path
 
 from tests.helpers import ROOT
+from tests.helpers.host_process import non_venv_interpreter, read_banner_line
 
 SERVE = ROOT / "conformance" / "host-shell" / "serve.py"
 RUNNER = ROOT / "conformance" / "runner" / "run.py"
@@ -35,21 +34,6 @@ ALLOWED_IMPORT_MODULES = {
     "socket",
     "sys",
 }
-
-
-def non_venv_interpreter() -> str:
-    """Return an interpreter outside the repository .venv, if one exists."""
-    venv_dir = os.path.realpath(str(ROOT / ".venv"))
-    for candidate in ("/usr/bin/python3", shutil.which("python3")):
-        if not candidate:
-            continue
-        resolved = os.path.realpath(candidate)
-        if not os.path.isfile(resolved):
-            continue
-        if resolved.startswith(venv_dir + os.sep):
-            continue
-        return resolved
-    return ""
 
 
 def imported_modules(source: str) -> set:
@@ -77,7 +61,7 @@ class HostShellTests(unittest.TestCase):
             env={"PATH": "/usr/bin:/bin"},
         )
         try:
-            banner = cls.server.stdout.readline()
+            banner = read_banner_line(cls.server)
         except Exception:
             cls.server.kill()
             raise
