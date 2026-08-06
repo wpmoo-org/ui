@@ -9,6 +9,7 @@ under-reporting manifest would be worse than no manifest.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -243,7 +244,12 @@ class CertificationManifestTests(unittest.TestCase):
         self.assertNotEqual(completed.returncode, 0)
         self.assertIn("package hash mismatch", completed.stderr)
 
-    def test_certified_status_accepts_a_real_matching_attestation(self) -> None:
+    def test_certified_status_rejects_a_real_preview_attestation(self) -> None:
+        # scripts/build-certification-attestation.py only ever emits
+        # status="preview" by design (it explicitly rejects non-preview
+        # manifest input) - a real, correctly-generated, passing attestation
+        # must still be refused as certified backing, because it never
+        # claimed to be one.
         head_commit = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=ROOT,
@@ -281,6 +287,87 @@ class CertificationManifestTests(unittest.TestCase):
             )
             self.assertEqual(
                 attestation_completed.returncode, 0, attestation_completed.stderr
+            )
+            attestation = json.loads(attestation_path.read_text(encoding="utf-8"))
+            self.assertEqual(attestation["status"], "preview")
+
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                head_commit,
+                "--attestation",
+                "https://github.com/wpmoo-org/ui/releases/download/v1.0.0/attestation.json",
+                "--attestation-file",
+                str(attestation_path),
+                package=str(self.tarball),
+                output=str(scratch_path / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("not 'certified'", completed.stderr)
+
+    def test_certified_status_accepts_a_matching_certified_attestation(self) -> None:
+        # No tool in this repo produces status="certified" yet - that
+        # requires the human/manual-acceptance evidence Phase 6 doesn't
+        # generate. This constructs a schema-valid certified attestation
+        # by hand to test the manifest generator's own validation in
+        # isolation from that still-missing upstream generator.
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        package_sha256 = hashlib.sha256(self.tarball.read_bytes()).hexdigest()
+        core_version = json.loads(
+            (ROOT / "package.json").read_text(encoding="utf-8")
+        )["version"]
+        certified_attestation_document = {
+            "schemaVersion": "0.1",
+            "status": "certified",
+            "scope": "core",
+            "coreVersion": core_version,
+            "sourceCommit": head_commit,
+            "createdAt": "2026-08-06T00:00:00Z",
+            "result": "passed",
+            "package": {
+                "name": "@wpmoo/ui",
+                "version": core_version,
+                "filename": self.tarball.name,
+                "sha256": package_sha256,
+                "manifestSha256": "0" * 64,
+            },
+            "bootstrap": [
+                {"lane": "canonical", "version": "5.3.3", "result": "passed"}
+            ],
+            "browsers": [
+                {
+                    "name": "Chromium",
+                    "version": "test",
+                    "operatingSystem": "test",
+                    "mode": "automated",
+                    "result": "passed",
+                }
+            ],
+            "components": [],
+            "automatedRuns": [
+                {
+                    "name": "test-harness",
+                    "result": "passed",
+                    "evidence": "urn:test:manifest-certified-status",
+                }
+            ],
+            "manualReviews": [],
+            "realDevices": [],
+            "waivers": [],
+            "limitations": [],
+        }
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            attestation_path = scratch_path / "attestation.json"
+            attestation_path.write_text(
+                json.dumps(certified_attestation_document), encoding="utf-8"
             )
 
             output_path = scratch_path / "out.json"

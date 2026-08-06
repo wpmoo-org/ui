@@ -13,7 +13,11 @@ import os
 import unittest
 from unittest import mock
 
-from tests.helpers.browser_harness import launch_certification_browser
+from tests.helpers.browser_harness import (
+    BrowserCase,
+    launch_certification_browser,
+    new_case_context,
+)
 
 
 class BrowserHarnessEngineSelectionTests(unittest.TestCase):
@@ -47,6 +51,43 @@ class BrowserHarnessEngineSelectionTests(unittest.TestCase):
                 getattr(playwright, engine).launch.assert_called_once_with()
                 for other_engine in {"chromium", "firefox", "webkit"} - {engine}:
                     getattr(playwright, other_engine).launch.assert_not_called()
+
+
+class NewCaseContextEngineOptionsTests(unittest.TestCase):
+    """Lock the is_mobile/has_touch guard added for Firefox: it rejects
+    those context options ("options.isMobile is not supported in Firefox"),
+    so new_case_context must omit them only on that engine."""
+
+    MOBILE_CASE = BrowserCase(
+        name="mobile-dark-rtl",
+        viewport={"width": 390, "height": 844},
+        color_scheme="dark",
+        direction="rtl",
+        is_mobile=True,
+        has_touch=True,
+    )
+
+    def _browser_named(self, engine: str) -> mock.Mock:
+        browser = mock.Mock()
+        browser.browser_type.name = engine
+        return browser
+
+    def test_firefox_omits_mobile_and_touch_options(self) -> None:
+        browser = self._browser_named("firefox")
+        new_case_context(browser, self.MOBILE_CASE)
+        _, kwargs = browser.new_context.call_args
+        self.assertNotIn("is_mobile", kwargs)
+        self.assertNotIn("has_touch", kwargs)
+        self.assertEqual(kwargs["viewport"], self.MOBILE_CASE.viewport)
+
+    def test_chromium_and_webkit_include_mobile_and_touch_options(self) -> None:
+        for engine in ("chromium", "webkit"):
+            with self.subTest(engine=engine):
+                browser = self._browser_named(engine)
+                new_case_context(browser, self.MOBILE_CASE)
+                _, kwargs = browser.new_context.call_args
+                self.assertEqual(kwargs["is_mobile"], True)
+                self.assertEqual(kwargs["has_touch"], True)
 
 
 if __name__ == "__main__":

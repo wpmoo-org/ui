@@ -106,9 +106,11 @@ def certified_attestation(
 
     A certified manifest's --attestation is only a public URI pointer; on
     its own that proves nothing. This loads the actual attestation document,
-    validates it against its schema, and refuses certified status unless
-    its sourceCommit, coreVersion, package hash, and result all agree with
-    what this manifest run has independently established.
+    validates it against its schema, and refuses certified status unless its
+    own status is "certified" (a preview attestation cannot back a certified
+    manifest, even a passing one) and its sourceCommit, coreVersion, package
+    hash, and result all agree with what this manifest run has independently
+    established.
     """
     if not attestation_file.is_file():
         raise ValueError(
@@ -124,6 +126,12 @@ def certified_attestation(
             + "; ".join(error.message for error in errors)
         )
 
+    if attestation.get("status") != "certified":
+        raise ValueError(
+            "attestation status is "
+            f"{attestation.get('status')!r}, not 'certified'; a preview "
+            "attestation cannot back a certified manifest"
+        )
     if attestation.get("result") != "passed":
         raise ValueError(
             "attestation does not record a passing result; refusing to "
