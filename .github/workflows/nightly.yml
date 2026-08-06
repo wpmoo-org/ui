@@ -20,7 +20,9 @@ jobs:
   browser-engine-matrix:
     name: browser-${{ matrix.browser }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # WebKit's GTK build is slow on hosted runners: the first real run
+    # needed over 30 minutes before completion, so give the matrix room.
+    timeout-minutes: 60
     # matrix.browser is only defined at job scope; a workflow-level group
     # would lump all engines together and cancel them against each other.
     concurrency:
