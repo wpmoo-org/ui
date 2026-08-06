@@ -39,6 +39,17 @@ class RehearseRcTests(unittest.TestCase):
         self.assertIn("package version:", completed.stdout)
         self.assertIn("source commit:", completed.stdout)
 
+        # Stage B, Task 1 half: the manifest generator exists as of Phase 6
+        # Task 1, so the rehearsal must actually produce a manifest, not
+        # just report it pending.
+        self.assertIn("manifest:        " + str(ROOT), completed.stdout)
+        self.assertNotIn("manifest:        pending", completed.stdout)
+
+        # Stage B, Task 2 half: the attestation generator still reads
+        # pilot-evidence.json until Task 2 re-scopes it, so the rehearsal
+        # must keep reporting it pending rather than wiring in stale data.
+        self.assertIn("attestation:     pending", completed.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

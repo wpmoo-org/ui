@@ -141,19 +141,40 @@ def step_conformance_kit() -> Path:
     return archive
 
 
-def step_manifest_and_attestation() -> list:
-    print("== certification manifest + attestation (Phase 6 Tasks 1/2) ==")
-    collected = []
-    for label, script in (
-        ("manifest", MANIFEST_SCRIPT),
-        ("attestation", ATTESTATION_SCRIPT),
-    ):
-        if not script.is_file():
-            print(f"{label}: pending — {script.name} does not exist yet")
-            continue
-        print(f"{label}: {script.name} exists, but Stage B wiring is not implemented yet")
-        collected.append(script)
-    return collected
+def step_manifest(tarball: Path) -> Path | None:
+    print("== certification manifest (Phase 6 Task 1) ==")
+    if not MANIFEST_SCRIPT.is_file():
+        print(f"pending — {MANIFEST_SCRIPT.name} does not exist yet")
+        return None
+    manifest_path = OUT_DIR / "certification-manifest.json"
+    run(
+        [
+            sys.executable,
+            str(MANIFEST_SCRIPT),
+            "--package",
+            str(tarball),
+            "--output",
+            str(manifest_path),
+            "--status",
+            "preview",
+        ]
+    )
+    print(f"{manifest_path} ({sha256_of(manifest_path)})")
+    return manifest_path
+
+
+def step_attestation() -> Path | None:
+    print("== release attestation (Phase 6 Task 2) ==")
+    # Task 2 re-scopes this generator from pilot-evidence.json to the
+    # current Core-only evidence inventory; wiring it in before that
+    # lands would produce a preview manifest built from stale pilot-era
+    # claims, which is worse than reporting it as not ready yet.
+    print(
+        f"pending — {ATTESTATION_SCRIPT.name} exists but still reads "
+        "pilot-evidence.json (Task 2 not landed yet); not wired in until "
+        "it's re-scoped to Core-only evidence"
+    )
+    return None
 
 
 def main() -> int:
@@ -163,7 +184,8 @@ def main() -> int:
         step_install_and_smoke()
         tarball = step_collect_tarball()
         kit_archive = step_conformance_kit()
-        pending = step_manifest_and_attestation()
+        manifest = step_manifest(tarball)
+        attestation = step_attestation()
     except RehearsalError as error:
         print(f"\nREHEARSAL FAILED: {error}", file=sys.stderr)
         return 1
@@ -173,16 +195,14 @@ def main() -> int:
     print(f"source commit:   {source_commit()}")
     print(f"tarball:         {tarball} ({sha256_of(tarball)})")
     print(f"conformance kit: {kit_archive} ({sha256_of(kit_archive)})")
-    if pending:
-        print(
-            "Stage B (manifest/attestation) not wired in yet — "
-            f"{len(pending)} generator script(s) present but not integrated."
-        )
+    if manifest:
+        print(f"manifest:        {manifest} ({sha256_of(manifest)})")
     else:
-        print(
-            "Stage B (manifest/attestation) generators not found — "
-            "waiting on Phase 6 Tasks 1/2."
-        )
+        print("manifest:        pending (Phase 6 Task 1)")
+    if attestation:
+        print(f"attestation:     {attestation} ({sha256_of(attestation)})")
+    else:
+        print("attestation:     pending (Phase 6 Task 2)")
     print("\nREHEARSAL OK (no publish, no tag)")
     return 0
 
