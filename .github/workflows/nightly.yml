@@ -6,6 +6,12 @@ on:
     # branch; use workflow_dispatch to exercise this matrix from any branch.
     - cron: "30 3 * * *"
   workflow_dispatch:
+  # TEMPORARY until the Phase 6 PR merges: workflows are only registered
+  # from the default branch, so this trigger lets the matrix run for real
+  # as a check on the PR itself. Remove this block before merging.
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
