@@ -119,6 +119,11 @@ class BrowserEvidence:
 
 
 def launch_certification_browser(playwright: Playwright) -> Browser:
+    engine = os.environ.get("MOO_UI_BROWSER_ENGINE", "chromium").lower()
+    if engine not in {"chromium", "firefox", "webkit"}:
+        raise AssertionError(f"Unsupported browser engine: {engine!r}")
+    if engine != "chromium":
+        return getattr(playwright, engine).launch()
     configured_channel = os.environ.get("MOO_UI_BROWSER_CHANNEL")
     if configured_channel:
         return playwright.chromium.launch(channel=configured_channel)
@@ -128,14 +133,20 @@ def launch_certification_browser(playwright: Playwright) -> Browser:
 
 
 def new_case_context(browser: Browser, case: BrowserCase) -> BrowserContext:
-    return browser.new_context(
-        viewport=case.viewport,
-        color_scheme=case.color_scheme,
-        is_mobile=case.is_mobile,
-        has_touch=case.has_touch,
-        reduced_motion="reduce",
-        locale="en-US",
-    )
+    options: dict[str, object] = {
+        "viewport": case.viewport,
+        "color_scheme": case.color_scheme,
+        "reduced_motion": "reduce",
+        "locale": "en-US",
+    }
+    # Firefox rejects the mobile/touch emulation options ("options.isMobile
+    # is not supported in Firefox"); Chromium and WebKit accept them. On
+    # Firefox the mobile case still runs with its viewport, theme, and
+    # direction, just without isMobile/hasTouch emulation.
+    if browser.browser_type.name != "firefox":
+        options["is_mobile"] = case.is_mobile
+        options["has_touch"] = case.has_touch
+    return browser.new_context(**options)
 
 
 def prepare_page(
