@@ -6,19 +6,37 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PILOT_EVIDENCE = ROOT / "src/certification/pilot-evidence.json"
+EVIDENCE_INVENTORY = ROOT / "src/certification/evidence-inventory.json"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+# The attestation schema's components[].checks enum. Every category the
+# evidence inventory reports as existing must map into this set; one that
+# does not is a contract drift we fail on loudly rather than silently drop.
+ALLOWED_CHECKS = {
+    "contract",
+    "markup",
+    "theme",
+    "rtl",
+    "responsive",
+    "keyboard",
+    "focus",
+    "lifecycle",
+    "accessibility",
+    "visual",
+    "real-device",
+    "host-conformance",
+}
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build a Moo UI Core preview certification attestation."
+        description="Build the Core-only Moo UI release certification attestation."
     )
     parser.add_argument("--package", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
@@ -66,11 +84,88 @@ def normalize_created_at(value: str | None) -> str:
     return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def resolve_head_commit() -> str:
+    completed = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise ValueError(
+            "cannot resolve the checkout HEAD; refusing to attest without "
+            f"provenance ({completed.stderr.strip()})"
+        )
+    return completed.stdout.strip()
+
+
+def certified_components() -> list[dict]:
+    """Every inventory component, with its evidence proven on disk.
+
+    Derives each component's attested checks from its evidence profile's
+    ``existing`` categories. A component whose profile is undefined, whose
+    checks fall outside the attestation contract, or whose evidence files
+    are missing raises here rather than emitting an under-reported claim.
+    """
+    inventory = json.loads(EVIDENCE_INVENTORY.read_text(encoding="utf-8"))
+    profiles = inventory.get("profiles") or {}
+    components = []
+    for component in inventory.get("components", []):
+        slug = component.get("slug")
+        profile = profiles.get(component.get("profile"))
+        if profile is None:
+            raise ValueError(
+                f"component {slug!r} references undefined profile "
+                f"{component.get('profile')!r}"
+            )
+        checks = list(profile.get("existing") or [])
+        if not checks:
+            raise ValueError(
+                f"component {slug!r} has no existing evidence checks"
+            )
+        for check in checks:
+            if check not in ALLOWED_CHECKS:
+                raise ValueError(
+                    f"component {slug!r} carries a check outside the "
+                    f"attestation contract: {check!r}"
+                )
+        for evidence_path in component.get("evidence", []):
+            if not (ROOT / evidence_path).is_file():
+                raise ValueError(
+                    f"component {slug!r} is missing evidence: {evidence_path}"
+                )
+        components.append(
+            {
+                "slug": slug,
+                "tier": profile["tier"],
+                "result": "passed",
+                "checks": checks,
+            }
+        )
+    if not components:
+        raise ValueError("evidence inventory lists no components")
+    return components
+
+
 def build_attestation(args: argparse.Namespace) -> dict:
     if not args.package.is_file():
         raise ValueError(f"Package tarball does not exist: {args.package}")
     if not COMMIT_PATTERN.fullmatch(args.source_commit):
         raise ValueError("--source-commit must be a 40-character lowercase Git commit")
+
+    # The evidence inventory (and the evidence files it references) is read
+    # from the working checkout, not from the tarball — it is not shipped in
+    # the package. Pin that evidence to the claimed commit: the checkout must
+    # actually be at --source-commit, otherwise a caller could attest one
+    # tarball with evidence drawn from a different checkout.
+    head_commit = resolve_head_commit()
+    if head_commit != args.source_commit:
+        raise ValueError(
+            "the evidence inventory is read from the working checkout, so "
+            "--source-commit must match the checkout HEAD: got "
+            f"{args.source_commit}, checkout is at {head_commit}"
+        )
 
     with tarfile.open(args.package, mode="r:gz") as archive:
         package, _ = read_tarball_json(archive, "package/package.json")
@@ -84,40 +179,35 @@ def build_attestation(args: argparse.Namespace) -> dict:
     if package["version"] != manifest["coreVersion"]:
         raise ValueError("Package and certification Core versions do not match")
     if manifest["status"] != "preview":
-        raise ValueError("Phase 0 generator accepts preview manifests only")
+        raise ValueError(
+            "This rehearsal generator accepts preview manifests only"
+        )
 
-    pilot = json.loads(PILOT_EVIDENCE.read_text(encoding="utf-8"))
-    preview_components = [
-        component
-        for component in pilot["components"]
-        if component["status"] == "preview-passed"
-    ]
-    if len(preview_components) != 5:
-        raise ValueError("Phase 0 preview requires all five pilot components")
+    components = certified_components()
 
     limitations = [
         {
-            "surface": component["slug"],
-            "description": limitation,
-        }
-        for component in preview_components
-        for limitation in component["limitations"]
-    ]
-    limitations.insert(
-        0,
-        {
             "surface": "release",
             "description": (
-                "This is Phase 0 preview evidence, not a complete release "
-                "certification claim."
+                "Automated Core-only evidence for a release candidate; "
+                "real-device and manual accessibility acceptance are "
+                "recorded separately before final certification."
             ),
         },
-    )
+        {
+            "surface": "browsers",
+            "description": (
+                "This attestation records the single automated browser run "
+                "supplied by the caller; the full cross-browser matrix is "
+                "tracked by the nightly certification workflow."
+            ),
+        },
+    ]
 
     return {
         "schemaVersion": "0.1",
         "status": "preview",
-        "scope": "phase-0-pilot",
+        "scope": "core",
         "coreVersion": package["version"],
         "sourceCommit": args.source_commit,
         "createdAt": normalize_created_at(args.created_at),
@@ -147,19 +237,10 @@ def build_attestation(args: argparse.Namespace) -> dict:
                 "evidence": args.automated_evidence,
             }
         ],
-        "components": [
-            {
-                "slug": component["slug"],
-                "tier": component["tier"],
-                "result": "passed",
-                "checks": component["evidence"]["existing"],
-                "evidence": [args.automated_evidence],
-            }
-            for component in preview_components
-        ],
+        "components": components,
         "automatedRuns": [
             {
-                "name": "phase-0-pilot",
+                "name": "core-certification",
                 "result": "passed",
                 "evidence": args.automated_evidence,
             }
