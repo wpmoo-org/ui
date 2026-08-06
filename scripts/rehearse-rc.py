@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -163,18 +165,46 @@ def step_manifest(tarball: Path) -> Path | None:
     return manifest_path
 
 
-def step_attestation() -> Path | None:
+def evidence_uri() -> str:
+    """A real CI run URL when running in GitHub Actions, otherwise an
+    honest local marker — never a fabricated evidence link."""
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        server = os.environ["GITHUB_SERVER_URL"]
+        repo = os.environ["GITHUB_REPOSITORY"]
+        run_id = os.environ["GITHUB_RUN_ID"]
+        return f"{server}/{repo}/actions/runs/{run_id}"
+    return "urn:rehearsal:local-run"
+
+
+def step_attestation(tarball: Path, commit: str) -> Path | None:
     print("== release attestation (Phase 6 Task 2) ==")
-    # Task 2 re-scopes this generator from pilot-evidence.json to the
-    # current Core-only evidence inventory; wiring it in before that
-    # lands would produce a preview manifest built from stale pilot-era
-    # claims, which is worse than reporting it as not ready yet.
-    print(
-        f"pending — {ATTESTATION_SCRIPT.name} exists but still reads "
-        "pilot-evidence.json (Task 2 not landed yet); not wired in until "
-        "it's re-scoped to Core-only evidence"
+    attestation_path = OUT_DIR / "certification-attestation.json"
+    # Rehearsal-honest values: no browser was actually driven by this
+    # script, so the attestation says so rather than claiming a real
+    # cross-browser run. The real automated evidence is ui-ci.yml's own
+    # Chromium contract-test run, tracked separately.
+    run(
+        [
+            sys.executable,
+            str(ATTESTATION_SCRIPT),
+            "--package",
+            str(tarball),
+            "--output",
+            str(attestation_path),
+            "--source-commit",
+            commit,
+            "--browser-name",
+            "rehearsal",
+            "--browser-version",
+            "n/a",
+            "--operating-system",
+            platform.platform(),
+            "--automated-evidence",
+            evidence_uri(),
+        ]
     )
-    return None
+    print(f"{attestation_path} ({sha256_of(attestation_path)})")
+    return attestation_path
 
 
 def main() -> int:
@@ -185,14 +215,15 @@ def main() -> int:
         tarball = step_collect_tarball()
         kit_archive = step_conformance_kit()
         manifest = step_manifest(tarball)
-        attestation = step_attestation()
+        commit = source_commit()
+        attestation = step_attestation(tarball, commit)
     except RehearsalError as error:
         print(f"\nREHEARSAL FAILED: {error}", file=sys.stderr)
         return 1
 
     print("\n== summary ==")
     print(f"package version: {package_version()}")
-    print(f"source commit:   {source_commit()}")
+    print(f"source commit:   {commit}")
     print(f"tarball:         {tarball} ({sha256_of(tarball)})")
     print(f"conformance kit: {kit_archive} ({sha256_of(kit_archive)})")
     if manifest:

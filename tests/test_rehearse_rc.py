@@ -1,54 +1,82 @@
 """Lock the RC rehearsal script: it must run clean against the current
-tree and never touch npm publish, npm version, or git tags.
+tree, never touch npm publish/version/tag/push, and produce a tarball,
+conformance kit, manifest, and attestation that all agree on version and
+source commit — Task 4's actual acceptance criterion, checked directly
+rather than trusted from the script's own summary line.
 """
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
+import tarfile
 import unittest
 from pathlib import Path
 
 from tests.helpers import ROOT
 
 SCRIPT = ROOT / "scripts" / "rehearse-rc.py"
+OUT_DIR = ROOT / "dist" / "rc-rehearsal"
 RUN_TIMEOUT_SECONDS = 300
 
 
 class RehearseRcTests(unittest.TestCase):
-    def test_rehearsal_runs_clean_and_never_publishes(self) -> None:
-        # Only the executable body is checked — the module docstring
-        # legitimately explains what the script avoids doing.
+    @classmethod
+    def setUpClass(cls) -> None:
         source = SCRIPT.read_text(encoding="utf-8")
-        _, _, body = source.partition('"""\n\nfrom __future__')
-        self.assertTrue(body, "could not isolate the script body from its docstring")
-        # Matches the quoted argv token regardless of list-literal spacing,
-        # e.g. both ["npm", "publish"] and ["npm","publish"].
-        for forbidden in ('"publish"', '"push"', '"tag"'):
-            self.assertNotIn(forbidden, body, forbidden)
-
-        completed = subprocess.run(
+        _, _, cls.body = source.partition('"""\n\nfrom __future__')
+        cls.completed = subprocess.run(
             [sys.executable, str(SCRIPT)],
             cwd=ROOT,
             capture_output=True,
             text=True,
             timeout=RUN_TIMEOUT_SECONDS,
         )
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("REHEARSAL OK", completed.stdout)
-        self.assertIn("package version:", completed.stdout)
-        self.assertIn("source commit:", completed.stdout)
 
-        # Stage B, Task 1 half: the manifest generator exists as of Phase 6
-        # Task 1, so the rehearsal must actually produce a manifest, not
-        # just report it pending.
-        self.assertIn("manifest:        " + str(ROOT), completed.stdout)
-        self.assertNotIn("manifest:        pending", completed.stdout)
+    def test_rehearsal_runs_clean_and_never_publishes(self) -> None:
+        # Only the executable body is checked — the module docstring
+        # legitimately explains what the script avoids doing.
+        self.assertTrue(self.body, "could not isolate the script body from its docstring")
+        # Matches the quoted argv token regardless of list-literal spacing,
+        # e.g. both ["npm", "publish"] and ["npm","publish"].
+        for forbidden in ('"publish"', '"push"', '"tag"'):
+            self.assertNotIn(forbidden, self.body, forbidden)
 
-        # Stage B, Task 2 half: the attestation generator still reads
-        # pilot-evidence.json until Task 2 re-scopes it, so the rehearsal
-        # must keep reporting it pending rather than wiring in stale data.
-        self.assertIn("attestation:     pending", completed.stdout)
+        self.assertEqual(self.completed.returncode, 0, self.completed.stderr)
+        self.assertIn("REHEARSAL OK", self.completed.stdout)
+
+        # Stage B is fully wired now that Phase 6 Tasks 1 and 2 have both
+        # landed - neither generator should be reported pending anymore.
+        self.assertNotIn("pending", self.completed.stdout)
+
+    def test_artifacts_agree_on_version_and_source_commit(self) -> None:
+        self.assertEqual(self.completed.returncode, 0, self.completed.stderr)
+
+        with tarfile.open(next(OUT_DIR.glob("*.tgz"))) as archive:
+            package = json.loads(
+                archive.extractfile("package/package.json").read()
+            )
+        manifest = json.loads(
+            (OUT_DIR / "certification-manifest.json").read_text(encoding="utf-8")
+        )
+        attestation = json.loads(
+            (OUT_DIR / "certification-attestation.json").read_text(encoding="utf-8")
+        )
+
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+
+        self.assertEqual(package["version"], manifest["coreVersion"])
+        self.assertEqual(package["version"], attestation["coreVersion"])
+        self.assertEqual(attestation["sourceCommit"], head_commit)
+        self.assertEqual(len(manifest["certifiedComponents"]), 42)
+        self.assertEqual(len(attestation["components"]), 42)
 
 
 if __name__ == "__main__":
