@@ -68,8 +68,10 @@ jobs:
       - name: Run browser certification matrix on ${{ matrix.browser }}
         env:
           MOO_UI_BROWSER_ENGINE: ${{ matrix.browser }}
+        # tests.test_conformance_runner is deliberately excluded: the
+        # conformance kit's runner launches Chromium by design (it certifies
+        # a reference host) and ui-ci already exercises it on every push.
         run: >
           .venv/bin/python -m unittest -v
           tests.test_certification_browser
           tests.test_datatable_browser
-          tests.test_conformance_runner
