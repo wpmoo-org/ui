@@ -43,6 +43,7 @@ $kbd-bg: var(--bs-secondary-bg-subtle) !default;
 $moo-code-padding-y: 0.125rem !default;
 $moo-code-padding-x: 0.375rem !default;
 $moo-code-color: var(--bs-secondary-color) !default;
+
 // Matches the shadcn reference inline-code background (#f5f5f5) far more
 // closely than any --bs-*-bg step; --moo-muted-surface (#f4f4f5) is
 // effectively the same value.
