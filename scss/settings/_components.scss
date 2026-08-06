@@ -43,7 +43,10 @@ $kbd-bg: var(--bs-secondary-bg-subtle) !default;
 $moo-code-padding-y: 0.125rem !default;
 $moo-code-padding-x: 0.375rem !default;
 $moo-code-color: var(--bs-secondary-color) !default;
-$moo-code-bg: var(--bs-secondary-bg) !default;
+// Matches the shadcn reference inline-code background (#f5f5f5, measured
+// directly from ui.shadcn.com) far more closely than any --bs-*-bg step;
+// --moo-muted-surface (#f4f4f5) is effectively the same value.
+$moo-code-bg: var(--moo-muted-surface) !default;
 // The reference breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
 $breadcrumb-divider-flipped: quote("<") !default;

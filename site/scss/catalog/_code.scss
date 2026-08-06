@@ -89,10 +89,14 @@
 
 // references/bootstrap/5.3.3/scss/_variables.scss:1739-1740 gives <code>
 // only $code-color/$code-font-size, no background/padding/radius token
-// (see $moo-code-* in _primary_variables.scss for the gap citation and
+// (see $moo-code-* in settings/_components.scss for the gap citation and
 // why this doesn't just reuse <kbd>'s own knobs). Scoped to prose so it
 // never touches the syntax-highlighted code panel's own <code> rule above.
-.moo-doc-main :where(p, li) code {
+// Uses .moo-catalog__content (present on every catalog page) rather than
+// .moo-doc-main (only rendered for component/utility/block pages) so
+// Sections-type pages get the same treatment instead of falling back to
+// Bootstrap's unstyled reboot <code>.
+.moo-catalog__content :where(p, li) code {
   padding: $moo-code-padding-y $moo-code-padding-x;
   color: $moo-code-color;
   background: $moo-code-bg;
