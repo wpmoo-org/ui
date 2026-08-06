@@ -28,6 +28,8 @@ import re
 import tarfile
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_SCHEMA_VERSION = "1.0"
@@ -67,13 +69,83 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source-commit")
     parser.add_argument(
         "--attestation",
-        help="Public URI of the release attestation (certified only).",
+        help="Public URI of the release attestation (certified only). This "
+        "is embedded as metadata; --attestation-file is what gets validated.",
+    )
+    parser.add_argument(
+        "--attestation-file",
+        type=Path,
+        help="Local path to the release attestation JSON (certified only). "
+        "Validated against attestation.schema.json and cross-checked "
+        "against this manifest's own coreVersion, sourceCommit, and "
+        "package hash before certified status is emitted.",
     )
     parser.add_argument(
         "--expected-package-sha256",
         help="When given, the tarball's hash must match exactly.",
     )
     return parser.parse_args()
+
+
+def load_attestation_schema() -> dict:
+    return json.loads(
+        (ROOT / "src/certification/attestation.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+
+def certified_attestation(
+    attestation_file: Path,
+    *,
+    source_commit: str,
+    core_version: str,
+    package_sha256: str,
+) -> dict:
+    """Load and validate the attestation backing a certified manifest.
+
+    A certified manifest's --attestation is only a public URI pointer; on
+    its own that proves nothing. This loads the actual attestation document,
+    validates it against its schema, and refuses certified status unless
+    its sourceCommit, coreVersion, package hash, and result all agree with
+    what this manifest run has independently established.
+    """
+    if not attestation_file.is_file():
+        raise ValueError(
+            f"--attestation-file does not exist: {attestation_file}"
+        )
+    attestation = json.loads(attestation_file.read_text(encoding="utf-8"))
+
+    validator = Draft202012Validator(load_attestation_schema())
+    errors = sorted(validator.iter_errors(attestation), key=str)
+    if errors:
+        raise ValueError(
+            "attestation file does not conform to attestation.schema.json: "
+            + "; ".join(error.message for error in errors)
+        )
+
+    if attestation.get("result") != "passed":
+        raise ValueError(
+            "attestation does not record a passing result; refusing to "
+            "claim certified status"
+        )
+    if attestation.get("sourceCommit") != source_commit:
+        raise ValueError(
+            "attestation sourceCommit does not match --source-commit: "
+            f"{attestation.get('sourceCommit')!r} vs {source_commit!r}"
+        )
+    if attestation.get("coreVersion") != core_version:
+        raise ValueError(
+            "attestation coreVersion does not match the package tarball: "
+            f"{attestation.get('coreVersion')!r} vs {core_version!r}"
+        )
+    attested_package_sha256 = (attestation.get("package") or {}).get("sha256")
+    if attested_package_sha256 != package_sha256:
+        raise ValueError(
+            "attestation package hash does not match the package tarball: "
+            f"{attested_package_sha256!r} vs {package_sha256!r}"
+        )
+    return attestation
 
 
 def sha256_file(path: Path) -> str:
@@ -203,6 +275,17 @@ def build_manifest(args: argparse.Namespace) -> dict:
             )
         if not args.attestation:
             raise ValueError("--attestation URI is required for a certified manifest")
+        if not args.attestation_file:
+            raise ValueError(
+                "--attestation-file is required for a certified manifest; "
+                "--attestation alone is an unvalidated pointer"
+            )
+        certified_attestation(
+            args.attestation_file,
+            source_commit=args.source_commit,
+            core_version=package["version"],
+            package_sha256=package_sha256,
+        )
         if not bootstrap.get("verifiedRange"):
             raise ValueError(
                 "shipped certification carries no verified Bootstrap range; "

@@ -173,6 +173,65 @@ class CertificationManifestTests(unittest.TestCase):
         self.assertNotEqual(completed.returncode, 0)
         self.assertIn("--source-commit", completed.stderr)
 
+    def test_certified_status_requires_an_attestation_file_not_just_a_uri(self) -> None:
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        with tempfile.TemporaryDirectory() as scratch:
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                head_commit,
+                "--attestation",
+                "https://github.com/wpmoo-org/ui/releases/download/v1.0.0/attestation.json",
+                package=str(self.tarball),
+                output=str(Path(scratch) / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("--attestation-file", completed.stderr)
+
+    def test_certified_status_rejects_a_mismatched_attestation(self) -> None:
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            forged = scratch_path / "attestation.json"
+            forged.write_text(
+                json.dumps(
+                    {
+                        "sourceCommit": "a" * 40,  # does not match head_commit
+                        "coreVersion": "0.0.0",
+                        "result": "passed",
+                        "package": {"sha256": "b" * 64},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                head_commit,
+                "--attestation",
+                "https://example.invalid/attestation.json",
+                "--attestation-file",
+                str(forged),
+                package=str(self.tarball),
+                output=str(scratch_path / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("does not conform to attestation.schema.json", completed.stderr)
+
     def test_package_hash_mismatch_fails_loudly(self) -> None:
         with tempfile.TemporaryDirectory() as scratch:
             completed = run_generator(
@@ -183,6 +242,71 @@ class CertificationManifestTests(unittest.TestCase):
             )
         self.assertNotEqual(completed.returncode, 0)
         self.assertIn("package hash mismatch", completed.stderr)
+
+    def test_certified_status_accepts_a_real_matching_attestation(self) -> None:
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            attestation_path = scratch_path / "attestation.json"
+            attestation_completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "build-certification-attestation.py"),
+                    "--package",
+                    str(self.tarball),
+                    "--output",
+                    str(attestation_path),
+                    "--source-commit",
+                    head_commit,
+                    "--browser-name",
+                    "test-harness",
+                    "--browser-version",
+                    "n/a",
+                    "--operating-system",
+                    "test",
+                    "--automated-evidence",
+                    "urn:test:manifest-certified-status",
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=GENERATOR_TIMEOUT_SECONDS,
+            )
+            self.assertEqual(
+                attestation_completed.returncode, 0, attestation_completed.stderr
+            )
+
+            output_path = scratch_path / "out.json"
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                head_commit,
+                "--attestation",
+                "https://github.com/wpmoo-org/ui/releases/download/v1.0.0/attestation.json",
+                "--attestation-file",
+                str(attestation_path),
+                package=str(self.tarball),
+                output=str(output_path),
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            manifest = json.loads(output_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(manifest["status"], "certified")
+        self.assertEqual(manifest["sourceCommit"], head_commit)
+        errors = list(
+            Draft202012Validator(
+                json.loads(SCHEMA.read_text(encoding="utf-8"))
+            ).iter_errors(manifest)
+        )
+        self.assertEqual(errors, [], [error.message for error in errors])
 
 
 if __name__ == "__main__":
