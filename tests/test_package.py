@@ -563,9 +563,10 @@ for (const specifier of [
                     )
                     self.assertEqual(completed.returncode, 0, completed.stderr)
                     outputs = output_path.read_text(encoding="utf-8")
-                    self.assertIn(f"npm_tag={expected_npm_tag}\n", outputs)
-                    self.assertIn(
-                        f"prerelease={expected_prerelease}\n", outputs
+                    self.assertEqual(
+                        outputs,
+                        f"npm_tag={expected_npm_tag}\n"
+                        f"prerelease={expected_prerelease}\n",
                     )
 
         self.assertIn(
