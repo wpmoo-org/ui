@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -529,25 +530,43 @@ for (const specifier of [
         # A version like "1.0.0-rc.1" must publish under a dist-tag other
         # than npm's default "latest" - otherwise a plain `npm install
         # @wpmoo/ui` would resolve to a release candidate instead of the
-        # last stable release the moment an RC tag is pushed. Split on the
-        # if/else/fi markers so each output pair is checked inside its own
-        # branch, not just present somewhere in the file - a swapped
-        # npm_tag/prerelease pair between branches would otherwise still
-        # pass a plain assertIn check.
+        # last stable release the moment an RC tag is pushed. Extract the
+        # exact routing snippet and actually execute it for a stable and a
+        # prerelease version, asserting on its real GITHUB_OUTPUT writes -
+        # a text/position check could still pass a logic bug (e.g. an
+        # inverted comparison) that happens to keep the right literal
+        # strings in the right branches.
         marker = 'if [[ "${version}" == *-* ]]; then'
         self.assertIn(marker, workflow)
-        _, _, after_if = workflow.partition(marker)
-        prerelease_branch, has_else, after_else = after_if.partition("\n          else\n")
-        self.assertTrue(has_else, "expected an else branch immediately after the if")
-        stable_branch, has_fi, _ = after_else.partition("\n          fi\n")
-        self.assertTrue(has_fi, "expected a closing fi for the version-check if")
+        start = workflow.index(marker)
+        end = workflow.index("\n          fi\n", start) + len("\n          fi\n")
+        routing_snippet = workflow[start:end]
 
-        self.assertIn('echo "npm_tag=rc" >> "$GITHUB_OUTPUT"', prerelease_branch)
-        self.assertIn('echo "prerelease=true" >> "$GITHUB_OUTPUT"', prerelease_branch)
-        self.assertIn('echo "npm_tag=latest" >> "$GITHUB_OUTPUT"', stable_branch)
-        self.assertIn('echo "prerelease=false" >> "$GITHUB_OUTPUT"', stable_branch)
-        self.assertNotIn("npm_tag=latest", prerelease_branch)
-        self.assertNotIn("npm_tag=rc", stable_branch)
+        for version, expected_npm_tag, expected_prerelease in (
+            ("1.0.0-rc.1", "rc", "true"),
+            ("1.0.0", "latest", "false"),
+        ):
+            with self.subTest(version=version):
+                with tempfile.TemporaryDirectory() as scratch:
+                    output_path = Path(scratch) / "github_output"
+                    output_path.write_text("", encoding="utf-8")
+                    completed = subprocess.run(
+                        ["bash", "-c", routing_snippet],
+                        env={
+                            **os.environ,
+                            "version": version,
+                            "GITHUB_OUTPUT": str(output_path),
+                        },
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
+                    )
+                    self.assertEqual(completed.returncode, 0, completed.stderr)
+                    outputs = output_path.read_text(encoding="utf-8")
+                    self.assertIn(f"npm_tag={expected_npm_tag}\n", outputs)
+                    self.assertIn(
+                        f"prerelease={expected_prerelease}\n", outputs
+                    )
 
         self.assertIn(
             'npm publish --access public --provenance --tag '
