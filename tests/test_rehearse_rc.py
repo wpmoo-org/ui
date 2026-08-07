@@ -61,13 +61,16 @@ class RehearseRcTests(unittest.TestCase):
 
         # Stage B is fully wired now that Phase 6 Tasks 1 and 2 have both
         # landed - assert the summary names each generator's real output
-        # path, rather than merely that it doesn't say "pending"; a script
-        # that renamed the placeholder text would slip past a negative
-        # check but not this one.
+        # path and that the file actually exists, rather than merely that
+        # it doesn't say "pending"; a script that renamed the placeholder
+        # text, or reported a path it never wrote, would slip past a
+        # padded-text-only check but not this one.
         manifest_path = OUT_DIR / "certification-manifest.json"
         attestation_path = OUT_DIR / "certification-attestation.json"
-        self.assertIn(f"manifest:        {manifest_path}", self.completed.stdout)
-        self.assertIn(f"attestation:     {attestation_path}", self.completed.stdout)
+        self.assertIn(str(manifest_path), self.completed.stdout)
+        self.assertTrue(manifest_path.is_file(), manifest_path)
+        self.assertIn(str(attestation_path), self.completed.stdout)
+        self.assertTrue(attestation_path.is_file(), attestation_path)
 
     def test_artifacts_agree_on_version_and_source_commit(self) -> None:
         self.assertEqual(self.completed.returncode, 0, self.completed.stderr)
