@@ -7,6 +7,7 @@ rather than trusted from the script's own summary line.
 
 from __future__ import annotations
 
+import ast
 import json
 import subprocess
 import sys
@@ -38,17 +39,38 @@ class RehearseRcTests(unittest.TestCase):
         # Only the executable body is checked — the module docstring
         # legitimately explains what the script avoids doing.
         self.assertTrue(self.body, "could not isolate the script body from its docstring")
-        # Matches the quoted argv token regardless of list-literal spacing,
-        # e.g. both ["npm", "publish"] and ["npm","publish"].
-        for forbidden in ('"publish"', '"push"', '"tag"'):
-            self.assertNotIn(forbidden, self.body, forbidden)
+        # AST-based rather than textual: a plain substring/token search on
+        # "version" also matches package.json's ["version"] key lookup,
+        # which has nothing to do with `npm version`. Instead, walk every
+        # list literal in the script and flag any that pairs "npm" with a
+        # mutating subcommand - the actual argv shape a subprocess call
+        # would use. Parsed from the full source (not self.body) since a
+        # module docstring is a single string node, not a list literal, so
+        # stripping it isn't necessary for this check.
+        forbidden = {"publish", "push", "tag", "version"}
+        tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.List):
+                continue
+            elements = [
+                element.value
+                for element in node.elts
+                if isinstance(element, ast.Constant) and isinstance(element.value, str)
+            ]
+            if "npm" not in elements:
+                continue
+            hit = forbidden.intersection(elements)
+            self.assertFalse(hit, f"npm argv list contains forbidden token(s): {hit}")
 
         self.assertEqual(self.completed.returncode, 0, self.completed.stderr)
         self.assertIn("REHEARSAL OK", self.completed.stdout)
 
         # Stage B is fully wired now that Phase 6 Tasks 1 and 2 have both
         # landed - neither generator should be reported pending anymore.
-        self.assertNotIn("pending", self.completed.stdout)
+        # Matched against the script's own literal status lines rather than
+        # the bare word "pending", so unrelated output can't collide.
+        self.assertNotIn("manifest:        pending", self.completed.stdout)
+        self.assertNotIn("attestation:     pending", self.completed.stdout)
 
     def test_artifacts_agree_on_version_and_source_commit(self) -> None:
         self.assertEqual(self.completed.returncode, 0, self.completed.stderr)

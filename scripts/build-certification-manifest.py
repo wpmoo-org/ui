@@ -10,9 +10,11 @@ instead of producing a manifest that silently under-reports.
 
 The generator never upgrades claims on its own: ``--status preview`` (the
 default) emits the rehearsal manifest; ``--status certified`` additionally
-requires ``--source-commit`` and ``--attestation`` and refuses to run
-unless the shipped certification data already carries a verified Bootstrap
-range.
+requires ``--source-commit``, ``--attestation``, ``--attestation-file``,
+and ``--attestation-sha256`` (binding the embedded URI to the validated
+file's own hash), and refuses to run unless the referenced attestation is
+itself certified and passing, and the shipped certification data already
+carries a verified Bootstrap range.
 
 Usage:
     python scripts/build-certification-manifest.py \
@@ -70,7 +72,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--attestation",
         help="Public URI of the release attestation (certified only). This "
-        "is embedded as metadata; --attestation-file is what gets validated.",
+        "is embedded as metadata; --attestation-file is what gets validated, "
+        "and --attestation-sha256 binds the two together.",
     )
     parser.add_argument(
         "--attestation-file",
@@ -79,6 +82,13 @@ def parse_args() -> argparse.Namespace:
         "Validated against attestation.schema.json and cross-checked "
         "against this manifest's own coreVersion, sourceCommit, and "
         "package hash before certified status is emitted.",
+    )
+    parser.add_argument(
+        "--attestation-sha256",
+        help="SHA-256 of the exact bytes served at --attestation (certified "
+        "only). Required so the embedded URI cannot silently diverge from "
+        "the validated --attestation-file: this generator checks the file's "
+        "own hash against it, not just its content.",
     )
     parser.add_argument(
         "--expected-package-sha256",
@@ -101,22 +111,38 @@ def certified_attestation(
     source_commit: str,
     core_version: str,
     package_sha256: str,
+    expected_attestation_sha256: str,
 ) -> dict:
     """Load and validate the attestation backing a certified manifest.
 
     A certified manifest's --attestation is only a public URI pointer; on
-    its own that proves nothing. This loads the actual attestation document,
-    validates it against its schema, and refuses certified status unless its
-    own status is "certified" (a preview attestation cannot back a certified
-    manifest, even a passing one) and its sourceCommit, coreVersion, package
-    hash, and result all agree with what this manifest run has independently
-    established.
+    its own that proves nothing, and validating --attestation-file alone
+    does not bind that validated content to the URI actually embedded in
+    the manifest - a caller could validate one document and publish a URI
+    for different evidence. --attestation-sha256 closes that gap: it is
+    the hash the caller claims --attestation serves, checked here against
+    the actual bytes of --attestation-file.
+
+    This also validates the document against its schema, and refuses
+    certified status unless its own status is "certified" (a preview
+    attestation cannot back a certified manifest, even a passing one) and
+    its sourceCommit, coreVersion, package hash, and result all agree with
+    what this manifest run has independently established.
     """
     if not attestation_file.is_file():
         raise ValueError(
             f"--attestation-file does not exist: {attestation_file}"
         )
-    attestation = json.loads(attestation_file.read_text(encoding="utf-8"))
+    attestation_bytes = attestation_file.read_bytes()
+    actual_attestation_sha256 = hashlib.sha256(attestation_bytes).hexdigest()
+    if actual_attestation_sha256 != expected_attestation_sha256.lower():
+        raise ValueError(
+            "--attestation-sha256 does not match --attestation-file: "
+            f"expected {expected_attestation_sha256}, got "
+            f"{actual_attestation_sha256}. The embedded --attestation URI "
+            "must point at exactly this file's bytes."
+        )
+    attestation = json.loads(attestation_bytes.decode("utf-8"))
 
     validator = Draft202012Validator(load_attestation_schema())
     errors = sorted(validator.iter_errors(attestation), key=str)
@@ -288,11 +314,18 @@ def build_manifest(args: argparse.Namespace) -> dict:
                 "--attestation-file is required for a certified manifest; "
                 "--attestation alone is an unvalidated pointer"
             )
+        if not args.attestation_sha256:
+            raise ValueError(
+                "--attestation-sha256 is required for a certified manifest; "
+                "without it, --attestation could name different evidence "
+                "than --attestation-file validated"
+            )
         certified_attestation(
             args.attestation_file,
             source_commit=args.source_commit,
             core_version=package["version"],
             package_sha256=package_sha256,
+            expected_attestation_sha256=args.attestation_sha256,
         )
         if not bootstrap.get("verifiedRange"):
             raise ValueError(

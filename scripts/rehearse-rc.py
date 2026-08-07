@@ -101,6 +101,7 @@ def step_install_and_smoke() -> None:
 
 def step_collect_tarball() -> Path:
     print("== collect a persistent tarball for inspection ==")
+    shutil.rmtree(OUT_DIR, ignore_errors=True)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     pack = run(
         [
@@ -201,6 +202,15 @@ def step_attestation(tarball: Path, commit: str) -> Path | None:
             platform.platform(),
             "--automated-evidence",
             evidence_uri(),
+            "--limitation",
+            "browsers",
+            (
+                "The 'rehearsal' browser entry above did not drive any real "
+                "browser; it exists only to satisfy the attestation "
+                "schema's browsers[] minItems requirement for this local "
+                "rehearsal run. Real cross-browser evidence comes from the "
+                "nightly certification matrix, not this script."
+            ),
         ]
     )
     print(f"{attestation_path} ({sha256_of(attestation_path)})")

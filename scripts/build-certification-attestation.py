@@ -49,6 +49,19 @@ def parse_args() -> argparse.Namespace:
         "--created-at",
         help="ISO-8601 timestamp; defaults to the current UTC time.",
     )
+    parser.add_argument(
+        "--limitation",
+        nargs=2,
+        metavar=("SURFACE", "DESCRIPTION"),
+        action="append",
+        default=[],
+        help=(
+            "Append an extra limitations[] entry (may be repeated). Use this "
+            "to disclose, e.g., that --browser-name did not drive a real "
+            "browser, rather than letting the browsers[] entry's required "
+            "'passed' result imply an evidence claim it cannot back."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -100,13 +113,35 @@ def resolve_head_commit() -> str:
     return completed.stdout.strip()
 
 
+def assert_worktree_is_clean() -> None:
+    completed = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise ValueError(
+            "cannot inspect the checkout status; refusing to attest without "
+            f"provenance ({completed.stderr.strip()})"
+        )
+    if completed.stdout.strip():
+        raise ValueError(
+            "the checkout has uncommitted changes; refusing to attest, "
+            "since the evidence inventory is read from the working tree "
+            "and could diverge from --source-commit's committed state"
+        )
+
+
 def certified_components() -> list[dict]:
     """Every inventory component, with its evidence proven on disk.
 
     Derives each component's attested checks from its evidence profile's
     ``existing`` categories. A component whose profile is undefined, whose
-    checks fall outside the attestation contract, or whose evidence files
-    are missing raises here rather than emitting an under-reported claim.
+    tier is out of range, whose checks fall outside the attestation
+    contract, or whose evidence files are missing or escape the repository
+    raises here rather than emitting an under-reported claim.
     """
     inventory = json.loads(EVIDENCE_INVENTORY.read_text(encoding="utf-8"))
     profiles = inventory.get("profiles") or {}
@@ -119,6 +154,9 @@ def certified_components() -> list[dict]:
                 f"component {slug!r} references undefined profile "
                 f"{component.get('profile')!r}"
             )
+        tier = profile.get("tier")
+        if not isinstance(tier, int) or not 0 <= tier <= 3:
+            raise ValueError(f"component {slug!r} has an invalid tier: {tier!r}")
         checks = list(profile.get("existing") or [])
         if not checks:
             raise ValueError(
@@ -130,15 +168,29 @@ def certified_components() -> list[dict]:
                     f"component {slug!r} carries a check outside the "
                     f"attestation contract: {check!r}"
                 )
-        for evidence_path in component.get("evidence", []):
-            if not (ROOT / evidence_path).is_file():
+        evidence_paths = component.get("evidence")
+        if not isinstance(evidence_paths, list) or not evidence_paths:
+            raise ValueError(f"component {slug!r} has no evidence")
+        for evidence_path in evidence_paths:
+            if not isinstance(evidence_path, str) or not evidence_path:
+                raise ValueError(
+                    f"component {slug!r} has an invalid evidence path: "
+                    f"{evidence_path!r}"
+                )
+            resolved = (ROOT / evidence_path).resolve()
+            if ROOT.resolve() not in resolved.parents:
+                raise ValueError(
+                    f"component {slug!r} evidence escapes the repository: "
+                    f"{evidence_path}"
+                )
+            if not resolved.is_file():
                 raise ValueError(
                     f"component {slug!r} is missing evidence: {evidence_path}"
                 )
         components.append(
             {
                 "slug": slug,
-                "tier": profile["tier"],
+                "tier": tier,
                 "result": "passed",
                 "checks": checks,
             }
@@ -166,6 +218,7 @@ def build_attestation(args: argparse.Namespace) -> dict:
             "--source-commit must match the checkout HEAD: got "
             f"{args.source_commit}, checkout is at {head_commit}"
         )
+    assert_worktree_is_clean()
 
     with tarfile.open(args.package, mode="r:gz") as archive:
         package, _ = read_tarball_json(archive, "package/package.json")
@@ -203,6 +256,10 @@ def build_attestation(args: argparse.Namespace) -> dict:
             ),
         },
     ]
+    limitations.extend(
+        {"surface": surface, "description": description}
+        for surface, description in args.limitation
+    )
 
     return {
         "schemaVersion": "0.1",

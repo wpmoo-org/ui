@@ -1,7 +1,7 @@
 # Moo UI 1.0.0-rc.1 Clean Install Rehearsal
 
 Generated: 2026-08-06
-Status: Pass (rehearsal against the packed 0.9.0 tarball; repeat verbatim against the final RC tarball before tagging)
+Status: Pass with documented limitations (rehearsal against the packed 0.9.0 tarball; repeat verbatim against the final RC tarball before tagging)
 Scope: Clean-room installation of `@wpmoo/ui` in an empty consumer project following the documented install path (catalog Installation page), plus the documented scoped gradual-adoption path.
 
 ## Environment
@@ -10,6 +10,10 @@ Scope: Clean-room installation of `@wpmoo/ui` in an empty consumer project follo
 - Node: v26.5.0, npm 11.17.0
 - Tarball: `wpmoo-ui-0.9.0.tgz` packed from the dev checkout (`npm pack`)
   - sha256: `d61172626484771e195d85d610ebaca92a65a66b5ec00c6e0f61d3b9a27db091`
+  - Source commit: not recorded — this rehearsal predates the
+    `--source-commit` provenance binding added to the certification
+    generators later in Phase 6. The final RC re-run must capture the
+    checkout's exact commit alongside the tarball sha256.
 - Registry substitution: `@wpmoo/ui` is not published yet, so the consumer
   installed the local tarball in place of the registry package
   (`npm install ../wpmoo-ui-0.9.0.tgz bootstrap` instead of
@@ -61,9 +65,12 @@ cannot be verified until the package is published — re-check at the real RC.
 
 ## Result
 
-- [X] Pass
-- [ ] Pass with documented limitations
+- [ ] Pass
+- [X] Pass with documented limitations
 - [ ] Fail
 
 Final notes: Re-run against the actual 1.0.0-rc.1 tarball (same steps) and
-record its sha256 in the release attestation evidence.
+record its sha256 and source commit in the release attestation evidence. The
+sole limitation on this rehearsal is the missing source commit above; every
+functional check (install, exports, styling boundary, migration path) passed
+cleanly.
