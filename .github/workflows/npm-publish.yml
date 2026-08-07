@@ -78,6 +78,17 @@ jobs:
           echo "name=${name}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          # A prerelease identifier (e.g. "1.0.0-rc.1") must never publish
+          # under npm's default "latest" dist-tag, or every plain
+          # `npm install @wpmoo/ui` would suddenly resolve to a
+          # release candidate instead of the last stable version.
+          if [[ "${version}" == *-* ]]; then
+            echo "npm_tag=rc" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
           if [ -n "${RELEASE_REF}" ]; then
             if ! git show-ref --verify --quiet "refs/tags/${tag}"; then
               echo "Release ref ${tag} must be an existing tag."
@@ -115,7 +126,7 @@ jobs:
 
       - name: Publish to npm
         if: steps.package.outputs.published == 'false'
-        run: npm publish --access public --provenance
+        run: npm publish --access public --provenance --tag "${{ steps.package.outputs.npm_tag }}"
 
       - name: Create GitHub release notes
         if: startsWith(steps.package.outputs.tag, 'v')
@@ -124,7 +135,11 @@ jobs:
           if gh release view "${tag}" >/dev/null 2>&1; then
             echo "Release ${tag} already exists; skipping."
           else
-            gh release create "${tag}" --title "${tag}" --generate-notes
+            release_args=("${tag}" --title "${tag}" --generate-notes)
+            if [ "${{ steps.package.outputs.prerelease }}" = "true" ]; then
+              release_args+=(--prerelease)
+            fi
+            gh release create "${release_args[@]}"
           fi
         env:
           GH_TOKEN: ${{ github.token }}

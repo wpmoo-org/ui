@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -520,6 +521,67 @@ for (const specifier of [
             'Workflow source commit ${source_commit} is not in origin/main history.',
             workflow,
         )
+
+    def test_publish_workflow_never_tags_a_prerelease_as_npm_latest(self) -> None:
+        workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text(
+            encoding="utf-8"
+        )
+
+        # A version like "1.0.0-rc.1" must publish under a dist-tag other
+        # than npm's default "latest" - otherwise a plain `npm install
+        # @wpmoo/ui` would resolve to a release candidate instead of the
+        # last stable release the moment an RC tag is pushed. Extract the
+        # exact routing snippet and actually execute it for a stable and a
+        # prerelease version, asserting on its real GITHUB_OUTPUT writes -
+        # a text/position check could still pass a logic bug (e.g. an
+        # inverted comparison) that happens to keep the right literal
+        # strings in the right branches.
+        marker = 'if [[ "${version}" == *-* ]]; then'
+        self.assertIn(marker, workflow)
+        start = workflow.index(marker)
+        end = workflow.index("\n          fi\n", start) + len("\n          fi\n")
+        routing_snippet = workflow[start:end]
+
+        for version, expected_npm_tag, expected_prerelease in (
+            ("1.0.0-rc.1", "rc", "true"),
+            ("1.0.0", "latest", "false"),
+        ):
+            with self.subTest(version=version):
+                with tempfile.TemporaryDirectory() as scratch:
+                    output_path = Path(scratch) / "github_output"
+                    output_path.write_text("", encoding="utf-8")
+                    completed = subprocess.run(
+                        ["bash", "-c", routing_snippet],
+                        env={
+                            **os.environ,
+                            "version": version,
+                            "GITHUB_OUTPUT": str(output_path),
+                        },
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
+                    )
+                    self.assertEqual(completed.returncode, 0, completed.stderr)
+                    outputs = output_path.read_text(encoding="utf-8")
+                    self.assertEqual(
+                        outputs,
+                        f"npm_tag={expected_npm_tag}\n"
+                        f"prerelease={expected_prerelease}\n",
+                    )
+
+        self.assertIn(
+            'npm publish --access public --provenance --tag '
+            '"${{ steps.package.outputs.npm_tag }}"',
+            workflow,
+        )
+        self.assertNotIn("npm publish --access public --provenance\n", workflow)
+        # The GitHub release itself must also be marked prerelease, not
+        # presented as a normal stable release.
+        self.assertIn(
+            'if [ "${{ steps.package.outputs.prerelease }}" = "true" ]; then',
+            workflow,
+        )
+        self.assertIn("release_args+=(--prerelease)", workflow)
 
     def test_release_tag_workflow_creates_lightweight_tags(self) -> None:
         workflow = (ROOT / ".github/workflows/release-tag.yml").read_text(
