@@ -521,6 +521,33 @@ for (const specifier of [
             workflow,
         )
 
+    def test_publish_workflow_never_tags_a_prerelease_as_npm_latest(self) -> None:
+        workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text(
+            encoding="utf-8"
+        )
+
+        # A version like "1.0.0-rc.1" must publish under a dist-tag other
+        # than npm's default "latest" - otherwise a plain `npm install
+        # @wpmoo/ui` would resolve to a release candidate instead of the
+        # last stable release the moment an RC tag is pushed.
+        self.assertIn('if [[ "${version}" == *-* ]]; then', workflow)
+        self.assertIn('echo "npm_tag=rc" >> "$GITHUB_OUTPUT"', workflow)
+        self.assertIn('echo "npm_tag=latest" >> "$GITHUB_OUTPUT"', workflow)
+        self.assertIn(
+            'npm publish --access public --provenance --tag '
+            '"${{ steps.package.outputs.npm_tag }}"',
+            workflow,
+        )
+        self.assertNotIn("npm publish --access public --provenance\n", workflow)
+        # The GitHub release itself must also be marked prerelease, not
+        # presented as a normal stable release.
+        self.assertIn('echo "prerelease=true" >> "$GITHUB_OUTPUT"', workflow)
+        self.assertIn(
+            'if [ "${{ steps.package.outputs.prerelease }}" = "true" ]; then',
+            workflow,
+        )
+        self.assertIn("release_args+=(--prerelease)", workflow)
+
     def test_release_tag_workflow_creates_lightweight_tags(self) -> None:
         workflow = (ROOT / ".github/workflows/release-tag.yml").read_text(
             encoding="utf-8"
