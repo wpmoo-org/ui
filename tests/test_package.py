@@ -529,10 +529,26 @@ for (const specifier of [
         # A version like "1.0.0-rc.1" must publish under a dist-tag other
         # than npm's default "latest" - otherwise a plain `npm install
         # @wpmoo/ui` would resolve to a release candidate instead of the
-        # last stable release the moment an RC tag is pushed.
-        self.assertIn('if [[ "${version}" == *-* ]]; then', workflow)
-        self.assertIn('echo "npm_tag=rc" >> "$GITHUB_OUTPUT"', workflow)
-        self.assertIn('echo "npm_tag=latest" >> "$GITHUB_OUTPUT"', workflow)
+        # last stable release the moment an RC tag is pushed. Split on the
+        # if/else/fi markers so each output pair is checked inside its own
+        # branch, not just present somewhere in the file - a swapped
+        # npm_tag/prerelease pair between branches would otherwise still
+        # pass a plain assertIn check.
+        marker = 'if [[ "${version}" == *-* ]]; then'
+        self.assertIn(marker, workflow)
+        _, _, after_if = workflow.partition(marker)
+        prerelease_branch, has_else, after_else = after_if.partition("\n          else\n")
+        self.assertTrue(has_else, "expected an else branch immediately after the if")
+        stable_branch, has_fi, _ = after_else.partition("\n          fi\n")
+        self.assertTrue(has_fi, "expected a closing fi for the version-check if")
+
+        self.assertIn('echo "npm_tag=rc" >> "$GITHUB_OUTPUT"', prerelease_branch)
+        self.assertIn('echo "prerelease=true" >> "$GITHUB_OUTPUT"', prerelease_branch)
+        self.assertIn('echo "npm_tag=latest" >> "$GITHUB_OUTPUT"', stable_branch)
+        self.assertIn('echo "prerelease=false" >> "$GITHUB_OUTPUT"', stable_branch)
+        self.assertNotIn("npm_tag=latest", prerelease_branch)
+        self.assertNotIn("npm_tag=rc", stable_branch)
+
         self.assertIn(
             'npm publish --access public --provenance --tag '
             '"${{ steps.package.outputs.npm_tag }}"',
@@ -541,7 +557,6 @@ for (const specifier of [
         self.assertNotIn("npm publish --access public --provenance\n", workflow)
         # The GitHub release itself must also be marked prerelease, not
         # presented as a normal stable release.
-        self.assertIn('echo "prerelease=true" >> "$GITHUB_OUTPUT"', workflow)
         self.assertIn(
             'if [ "${{ steps.package.outputs.prerelease }}" = "true" ]; then',
             workflow,
