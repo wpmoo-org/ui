@@ -343,14 +343,18 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 context.close()
 
     def test_sidebar_mobile_offcanvas_keeps_bootstrap_transform_transition(self) -> None:
-        context = self.browser.new_context(
-            viewport={"width": 390, "height": 844},
-            color_scheme="light",
-            is_mobile=True,
-            has_touch=True,
-            reduced_motion="no-preference",
-            locale="en-US",
-        )
+        context_options: dict[str, object] = {
+            "viewport": {"width": 390, "height": 844},
+            "color_scheme": "light",
+            "reduced_motion": "no-preference",
+            "locale": "en-US",
+        }
+        # Firefox rejects the mobile/touch emulation options; the offcanvas
+        # transition under audit does not depend on them.
+        if self.browser.browser_type.name != "firefox":
+            context_options["is_mobile"] = True
+            context_options["has_touch"] = True
+        context = self.browser.new_context(**context_options)
         page = context.new_page()
         evidence = BrowserEvidence(page)
         response = page.goto(

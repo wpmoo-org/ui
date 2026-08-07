@@ -42,8 +42,21 @@ $kbd-bg: var(--bs-secondary-bg-subtle) !default;
 // <kbd>'s own knobs.
 $moo-code-padding-y: 0.125rem !default;
 $moo-code-padding-x: 0.375rem !default;
-$moo-code-color: var(--bs-secondary-color) !default;
-$moo-code-bg: var(--bs-secondary-bg) !default;
+// var(--bs-secondary-color) on this chip's own var(--moo-muted-surface)
+// background measures 4.40:1 in light mode, under the 4.5:1 WCAG AA
+// minimum for normal text — the same defect the Tabs trigger and Kbd
+// contrast fixes hit against this exact background/alias combination
+// (Moo UI's theme sets --bs-secondary-color: var(--moo-muted-foreground),
+// so it resolves to the same failing color; see scss/components/_tabs.scss).
+// var(--bs-secondary-text-emphasis) is the untouched Bootstrap token built
+// for accessible text on a tinted surface, and measures 5.55:1 light /
+// 14.03:1 dark against this same background.
+$moo-code-color: var(--bs-secondary-text-emphasis) !default;
+
+// Matches the shadcn reference inline-code background (#f5f5f5) far more
+// closely than any --bs-*-bg step; --moo-muted-surface (#f4f4f5) is
+// effectively the same value.
+$moo-code-bg: var(--moo-muted-surface) !default;
 // The reference breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
 $breadcrumb-divider-flipped: quote("<") !default;

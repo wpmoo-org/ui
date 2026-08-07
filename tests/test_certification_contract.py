@@ -9,6 +9,8 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import urlparse
 
+from jsonschema import Draft202012Validator
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATION_ROOT = ROOT / "src/certification"
@@ -316,7 +318,14 @@ class CertificationContractTests(unittest.TestCase):
                 self.assertEqual(lane["build"], "passed")
                 self.assertEqual(lane["browserCertification"], "passed")
 
-    def test_preview_attestation_is_built_from_the_real_tarball(self) -> None:
+    def test_core_attestation_is_built_from_the_real_tarball(self) -> None:
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
         with tempfile.TemporaryDirectory() as temporary_directory:
             temporary_root = Path(temporary_directory)
             pack_result = subprocess.run(
@@ -345,7 +354,7 @@ class CertificationContractTests(unittest.TestCase):
                     "--output",
                     str(output),
                     "--source-commit",
-                    "a" * 40,
+                    head_commit,
                     "--browser-name",
                     "Chromium",
                     "--browser-version",
@@ -365,10 +374,15 @@ class CertificationContractTests(unittest.TestCase):
             self.assertEqual(build_result.returncode, 0, build_result.stderr)
             attestation = json.loads(output.read_text(encoding="utf-8"))
 
+            schema = self._read_json("src/certification/attestation.schema.json")
+            validator = Draft202012Validator(schema)
+            errors = list(validator.iter_errors(attestation))
+            self.assertEqual(errors, [], [error.message for error in errors])
+
             self.assertEqual(attestation["status"], "preview")
-            self.assertEqual(attestation["scope"], "phase-0-pilot")
+            self.assertEqual(attestation["scope"], "core")
             self.assertEqual(attestation["result"], "passed")
-            self.assertEqual(attestation["sourceCommit"], "a" * 40)
+            self.assertEqual(attestation["sourceCommit"], head_commit)
             self.assertEqual(attestation["createdAt"], "2026-07-27T00:00:00Z")
             self.assertEqual(
                 attestation["package"]["version"],
@@ -379,14 +393,117 @@ class CertificationContractTests(unittest.TestCase):
                 attestation["package"]["manifestSha256"],
                 r"^[0-9a-f]{64}$",
             )
+            inventory = self._read_json(
+                "src/certification/evidence-inventory.json"
+            )
             self.assertEqual(
                 [component["slug"] for component in attestation["components"]],
-                ["badge", "accordion", "dialog", "combobox", "sidebar"],
+                [component["slug"] for component in inventory["components"]],
             )
+            self.assertEqual(len(attestation["components"]), 42)
+            for component in attestation["components"]:
+                self.assertGreaterEqual(len(component["checks"]), 1)
             self.assertEqual(attestation["manualReviews"], [])
             self.assertEqual(attestation["realDevices"], [])
             self.assertEqual(attestation["waivers"], [])
-            self.assertIn("not a complete release certification", attestation["limitations"][0]["description"])
+            surfaces = {
+                limitation["surface"] for limitation in attestation["limitations"]
+            }
+            self.assertIn("release", surfaces)
+            self.assertIn("browsers", surfaces)
+
+    def test_attestation_rejects_a_source_commit_not_at_the_checkout(self) -> None:
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        foreign_commit = "a" * 40 if head_commit != "a" * 40 else "b" * 40
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            # build-certification-attestation.py rejects a commit mismatch
+            # before it ever opens --package as a tarball (it only checks
+            # that the path exists), so a real npm pack here would just be
+            # slower and less reliable for the same coverage.
+            tarball = temporary_root / "placeholder.tgz"
+            tarball.write_bytes(b"")
+            build_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/build-certification-attestation.py"),
+                    "--package",
+                    str(tarball),
+                    "--output",
+                    str(temporary_root / "attestation.json"),
+                    "--source-commit",
+                    foreign_commit,
+                    "--browser-name",
+                    "Chromium",
+                    "--browser-version",
+                    "test",
+                    "--operating-system",
+                    "test",
+                    "--automated-evidence",
+                    "https://github.com/wpmoo-org/ui/actions/runs/example",
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        self.assertNotEqual(build_result.returncode, 0)
+        self.assertIn("must match the checkout HEAD", build_result.stderr)
+
+    def test_attestation_rejects_a_dirty_worktree(self) -> None:
+        # The commit-mismatch test above locks half of the provenance
+        # binding; this locks the other half. An untracked scratch file
+        # outside the gitignored dist/ is enough to dirty
+        # `git status --porcelain` without touching any tracked content
+        # that would need restoring.
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        scratch_marker = ROOT / "_test_dirty_worktree_marker.tmp"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            tarball = temporary_root / "placeholder.tgz"
+            tarball.write_bytes(b"")
+            try:
+                scratch_marker.write_text("dirtying the worktree for a test\n")
+                build_result = subprocess.run(
+                    [
+                        sys.executable,
+                        str(ROOT / "scripts/build-certification-attestation.py"),
+                        "--package",
+                        str(tarball),
+                        "--output",
+                        str(temporary_root / "attestation.json"),
+                        "--source-commit",
+                        head_commit,
+                        "--browser-name",
+                        "Chromium",
+                        "--browser-version",
+                        "test",
+                        "--operating-system",
+                        "test",
+                        "--automated-evidence",
+                        "https://github.com/wpmoo-org/ui/actions/runs/example",
+                    ],
+                    cwd=ROOT,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+            finally:
+                scratch_marker.unlink(missing_ok=True)
+        self.assertNotEqual(build_result.returncode, 0)
+        self.assertIn("uncommitted changes", build_result.stderr)
 
     def test_core_certification_sources_do_not_name_commercial_bridges(self) -> None:
         public_sources = [
