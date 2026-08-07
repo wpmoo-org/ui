@@ -10,6 +10,7 @@ under-reporting manifest would be worse than no manifest.
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
@@ -22,10 +23,20 @@ from jsonschema import Draft202012Validator
 from tests.helpers import ROOT
 
 SCRIPT = ROOT / "scripts" / "build-certification-manifest.py"
+ATTESTATION_SCRIPT = ROOT / "scripts" / "build-certification-attestation.py"
 SCHEMA = ROOT / "src" / "certification" / "manifest.schema.json"
 INVENTORY = ROOT / "src" / "certification" / "evidence-inventory.json"
 PACK_TIMEOUT_SECONDS = 180
 GENERATOR_TIMEOUT_SECONDS = 120
+
+
+def load_attestation_generator():
+    spec = importlib.util.spec_from_file_location(
+        "build_certification_attestation", ATTESTATION_SCRIPT
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def pack_tarball(destination: Path) -> Path:
@@ -86,6 +97,11 @@ class CertificationManifestTests(unittest.TestCase):
         cls.core_version = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )["version"]
+        # The same records a real attestation would carry for every
+        # evidence-inventory component - reused so the certified-status
+        # fixtures below are internally consistent by construction rather
+        # than hand-typed and liable to drift from the real generator.
+        cls.attested_components = load_attestation_generator().certified_components()
 
     @staticmethod
     def _head_commit() -> str:
@@ -132,7 +148,7 @@ class CertificationManifestTests(unittest.TestCase):
                     "result": "passed",
                 }
             ],
-            "components": [],
+            "components": self.attested_components,
             "automatedRuns": [
                 {
                     "name": "test-harness",
@@ -339,6 +355,130 @@ class CertificationManifestTests(unittest.TestCase):
             )
         self.assertNotEqual(completed.returncode, 0)
         self.assertIn("sourceCommit does not match", completed.stderr)
+
+    def test_certified_status_rejects_a_valid_attestation_for_another_core_version(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            attestation_path, attestation_sha256 = self._write_certified_attestation(
+                scratch_path, coreVersion="0.0.0-not-this-release"
+            )
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                self.head_commit,
+                "--attestation",
+                "https://example.invalid/attestation.json",
+                "--attestation-file",
+                str(attestation_path),
+                "--attestation-sha256",
+                attestation_sha256,
+                package=str(self.tarball),
+                output=str(scratch_path / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("coreVersion does not match", completed.stderr)
+
+    def test_certified_status_rejects_a_valid_attestation_for_another_package(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            attestation_path, attestation_sha256 = self._write_certified_attestation(
+                scratch_path,
+                package={
+                    "name": "@wpmoo/ui",
+                    "version": self.core_version,
+                    "filename": self.tarball.name,
+                    "sha256": "0" * 64,
+                    "manifestSha256": "0" * 64,
+                },
+            )
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                self.head_commit,
+                "--attestation",
+                "https://example.invalid/attestation.json",
+                "--attestation-file",
+                str(attestation_path),
+                "--attestation-sha256",
+                attestation_sha256,
+                package=str(self.tarball),
+                output=str(scratch_path / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("package hash does not match", completed.stderr)
+
+    def test_certified_status_rejects_an_attestation_missing_a_certified_component(
+        self,
+    ) -> None:
+        # Every component the manifest certifies must actually appear in
+        # the attestation it cites - otherwise a manifest could claim a
+        # component is certified while its own attestation never mentions
+        # it at all.
+        missing_slug = self.attested_components[0]["slug"]
+        components_missing_one = [
+            component
+            for component in self.attested_components
+            if component["slug"] != missing_slug
+        ]
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            attestation_path, attestation_sha256 = self._write_certified_attestation(
+                scratch_path, components=components_missing_one
+            )
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                self.head_commit,
+                "--attestation",
+                "https://example.invalid/attestation.json",
+                "--attestation-file",
+                str(attestation_path),
+                "--attestation-sha256",
+                attestation_sha256,
+                package=str(self.tarball),
+                output=str(scratch_path / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn(missing_slug, completed.stderr)
+        self.assertIn("no matching entry", completed.stderr)
+
+    def test_certified_status_rejects_an_attestation_with_a_failed_component(
+        self,
+    ) -> None:
+        # A component present in the attestation but not passed must also
+        # block certified status, not just an absent one.
+        components_with_a_failure = [
+            dict(component, result="failed") if index == 0 else component
+            for index, component in enumerate(self.attested_components)
+        ]
+        with tempfile.TemporaryDirectory() as scratch:
+            scratch_path = Path(scratch)
+            attestation_path, attestation_sha256 = self._write_certified_attestation(
+                scratch_path, components=components_with_a_failure
+            )
+            completed = run_generator(
+                "--status",
+                "certified",
+                "--source-commit",
+                self.head_commit,
+                "--attestation",
+                "https://example.invalid/attestation.json",
+                "--attestation-file",
+                str(attestation_path),
+                "--attestation-sha256",
+                attestation_sha256,
+                package=str(self.tarball),
+                output=str(scratch_path / "out.json"),
+            )
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("not 'passed'", completed.stderr)
 
     def test_package_hash_mismatch_fails_loudly(self) -> None:
         with tempfile.TemporaryDirectory() as scratch:

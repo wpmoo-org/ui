@@ -69,8 +69,12 @@ cannot be verified until the package is published — re-check at the real RC.
 - [X] Pass with documented limitations
 - [ ] Fail
 
-Final notes: Re-run against the actual 1.0.0-rc.1 tarball (same steps) and
-record its sha256 and source commit in the release attestation evidence. The
-sole limitation on this rehearsal is the missing source commit above; every
-functional check (install, exports, styling boundary, migration path) passed
-cleanly.
+Final notes: every functional check (install, exports, styling boundary,
+migration path) passed cleanly. Documented limitations, all closed by
+re-running against the actual, published 1.0.0-rc.1 tarball: (1) this
+rehearsal used the packed 0.9.0 tarball, not the final RC tarball; (2) its
+source commit was not recorded (see Environment); (3) the registry
+substitution means the real `npm install @wpmoo/ui bootstrap` path was not
+exercised; (4) CDN URL shapes could not be verified against a published
+package. Re-run against the actual 1.0.0-rc.1 tarball (same steps) and
+record its sha256 and source commit in the release attestation evidence.

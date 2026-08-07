@@ -320,13 +320,31 @@ def build_manifest(args: argparse.Namespace) -> dict:
                 "without it, --attestation could name different evidence "
                 "than --attestation-file validated"
             )
-        certified_attestation(
+        attestation = certified_attestation(
             args.attestation_file,
             source_commit=args.source_commit,
             core_version=package["version"],
             package_sha256=package_sha256,
             expected_attestation_sha256=args.attestation_sha256,
         )
+        attested_components = {
+            component.get("slug"): component
+            for component in attestation.get("components", [])
+        }
+        for component in components:
+            slug = component["slug"]
+            attested = attested_components.get(slug)
+            if attested is None:
+                raise ValueError(
+                    f"component {slug!r} is in certifiedComponents but has "
+                    "no matching entry in the attestation's components[]"
+                )
+            if attested.get("result") != "passed":
+                raise ValueError(
+                    f"component {slug!r} is in certifiedComponents but the "
+                    f"attestation records its result as "
+                    f"{attested.get('result')!r}, not 'passed'"
+                )
         if not bootstrap.get("verifiedRange"):
             raise ValueError(
                 "shipped certification carries no verified Bootstrap range; "

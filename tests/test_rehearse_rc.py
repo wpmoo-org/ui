@@ -13,7 +13,6 @@ import subprocess
 import sys
 import tarfile
 import unittest
-from pathlib import Path
 
 from tests.helpers import ROOT
 
@@ -25,8 +24,6 @@ RUN_TIMEOUT_SECONDS = 300
 class RehearseRcTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        source = SCRIPT.read_text(encoding="utf-8")
-        _, _, cls.body = source.partition('"""\n\nfrom __future__')
         cls.completed = subprocess.run(
             [sys.executable, str(SCRIPT)],
             cwd=ROOT,
@@ -36,17 +33,14 @@ class RehearseRcTests(unittest.TestCase):
         )
 
     def test_rehearsal_runs_clean_and_never_publishes(self) -> None:
-        # Only the executable body is checked — the module docstring
-        # legitimately explains what the script avoids doing.
-        self.assertTrue(self.body, "could not isolate the script body from its docstring")
         # AST-based rather than textual: a plain substring/token search on
         # "version" also matches package.json's ["version"] key lookup,
         # which has nothing to do with `npm version`. Instead, walk every
         # list literal in the script and flag any that pairs "npm" with a
         # mutating subcommand - the actual argv shape a subprocess call
-        # would use. Parsed from the full source (not self.body) since a
-        # module docstring is a single string node, not a list literal, so
-        # stripping it isn't necessary for this check.
+        # would use. A module docstring is a single string node, not a
+        # list literal, so it can't trip this even though it legitimately
+        # names the same words while explaining what the script avoids.
         forbidden = {"publish", "push", "tag", "version"}
         tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
         for node in ast.walk(tree):

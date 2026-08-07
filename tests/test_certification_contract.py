@@ -421,15 +421,12 @@ class CertificationContractTests(unittest.TestCase):
         foreign_commit = "a" * 40 if head_commit != "a" * 40 else "b" * 40
         with tempfile.TemporaryDirectory() as temporary_directory:
             temporary_root = Path(temporary_directory)
-            pack_result = subprocess.run(
-                ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
-                cwd=ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
-            tarball = temporary_root / json.loads(pack_result.stdout)[0]["filename"]
+            # build-certification-attestation.py rejects a commit mismatch
+            # before it ever opens --package as a tarball (it only checks
+            # that the path exists), so a real npm pack here would just be
+            # slower and less reliable for the same coverage.
+            tarball = temporary_root / "placeholder.tgz"
+            tarball.write_bytes(b"")
             build_result = subprocess.run(
                 [
                     sys.executable,
