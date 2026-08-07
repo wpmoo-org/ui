@@ -8,6 +8,7 @@ rather than trusted from the script's own summary line.
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import subprocess
 import sys
@@ -18,7 +19,12 @@ from tests.helpers import ROOT
 
 SCRIPT = ROOT / "scripts" / "rehearse-rc.py"
 OUT_DIR = ROOT / "dist" / "rc-rehearsal"
-RUN_TIMEOUT_SECONDS = 300
+# Generous relative to rehearse-rc.py's own internal DEFAULT_TIMEOUT_SECONDS
+# (600s per command): the script runs several such commands in sequence on
+# a cold cache (build.py, two npm packs, two npm installs, the conformance
+# kit, and both certification generators), so the outer budget must cover
+# more than one worst-case internal timeout.
+RUN_TIMEOUT_SECONDS = 900
 
 
 class RehearseRcTests(unittest.TestCase):
@@ -75,7 +81,8 @@ class RehearseRcTests(unittest.TestCase):
     def test_artifacts_agree_on_version_and_source_commit(self) -> None:
         self.assertEqual(self.completed.returncode, 0, self.completed.stderr)
 
-        with tarfile.open(next(OUT_DIR.glob("*.tgz"))) as archive:
+        tarball = next(OUT_DIR.glob("*.tgz"))
+        with tarfile.open(tarball) as archive:
             package = json.loads(
                 archive.extractfile("package/package.json").read()
             )
@@ -97,6 +104,10 @@ class RehearseRcTests(unittest.TestCase):
         self.assertEqual(package["version"], manifest["coreVersion"])
         self.assertEqual(package["version"], attestation["coreVersion"])
         self.assertEqual(attestation["sourceCommit"], head_commit)
+        self.assertEqual(
+            attestation["package"]["sha256"],
+            hashlib.sha256(tarball.read_bytes()).hexdigest(),
+        )
         self.assertEqual(len(manifest["certifiedComponents"]), 42)
         self.assertEqual(len(attestation["components"]), 42)
 

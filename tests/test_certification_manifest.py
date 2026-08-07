@@ -581,6 +581,11 @@ class CertificationManifestTests(unittest.TestCase):
 
         self.assertEqual(manifest["status"], "certified")
         self.assertEqual(manifest["sourceCommit"], self.head_commit)
+        self.assertEqual(
+            manifest["attestation"],
+            "https://github.com/wpmoo-org/ui/releases/download/v1.0.0/attestation.json",
+        )
+        self.assertTrue(manifest["browserPolicy"]["exactEvidenceInAttestation"])
         errors = list(
             Draft202012Validator(
                 json.loads(SCHEMA.read_text(encoding="utf-8"))

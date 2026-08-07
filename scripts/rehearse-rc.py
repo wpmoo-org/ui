@@ -3,12 +3,11 @@
 
 Mirrors `npm-publish.yml`'s real build/pack steps (catalog build, package
 boundary check, the tested install-and-smoke sequence) and collects every
-RC-required artifact — the npm tarball, the conformance-kit archive, and
-(once Phase 6 Tasks 1/2 land) the certification manifest and release
-attestation — into `dist/rc-rehearsal/`, printing their versions, source
-commit, and hashes so a human can confirm they agree before cutting a real
-RC. Exits non-zero on any failure; never runs `npm publish`, `npm version`,
-or creates a tag.
+RC-required artifact — the npm tarball, the conformance-kit archive, the
+certification manifest, and the release attestation — into
+`dist/rc-rehearsal/`, printing their versions, source commit, and hashes so
+a human can confirm they agree before cutting a real RC. Exits non-zero on
+any failure; never runs `npm publish`, `npm version`, or creates a tag.
 
 Usage:
     python scripts/rehearse-rc.py
@@ -27,9 +26,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "dist" / "rc-rehearsal"
+DEFAULT_TIMEOUT_SECONDS = 600
 
-# Stage B (Phase 6 Tasks 1/2) drop their generators here once they land;
-# Stage A runs standalone and reports them as pending until then.
 MANIFEST_SCRIPT = ROOT / "scripts" / "build-certification-manifest.py"
 ATTESTATION_SCRIPT = ROOT / "scripts" / "build-certification-attestation.py"
 
@@ -39,8 +37,9 @@ class RehearsalError(RuntimeError):
 
 
 def run(cmd: list, **kwargs) -> subprocess.CompletedProcess:
+    kwargs.setdefault("timeout", DEFAULT_TIMEOUT_SECONDS)
     result = subprocess.run(
-        cmd, cwd=ROOT, capture_output=True, text=True, **kwargs
+        cmd, cwd=ROOT, check=False, capture_output=True, text=True, **kwargs
     )
     if result.returncode != 0:
         raise RehearsalError(
@@ -55,6 +54,20 @@ def sha256_of(path: Path) -> str:
 
 def source_commit() -> str:
     return run(["git", "rev-parse", "HEAD"]).stdout.strip()
+
+
+def assert_worktree_is_clean() -> None:
+    # step_attestation's own generator refuses a dirty worktree too (the
+    # evidence inventory it reads is not pinned to the commit it claims
+    # otherwise); checking here as well means a dirty tree fails before the
+    # full build/pack/install cycle runs, not after it.
+    status = run(["git", "status", "--porcelain"]).stdout
+    if status.strip():
+        raise RehearsalError(
+            "the checkout has uncommitted changes; the attestation step "
+            "will refuse to run against a dirty worktree, so failing here "
+            "instead of after the full rehearsal"
+        )
 
 
 def package_version() -> str:
@@ -89,10 +102,14 @@ def step_install_and_smoke() -> None:
             sys.executable,
             "-m",
             "unittest",
-            "tests.test_package.PackageMetadataTests."
-            "test_real_tarball_resolves_from_a_clean_consumer",
-            "tests.test_package.PackageMetadataTests."
-            "test_sass_facade_compiles_from_a_clean_consumer",
+            (
+                "tests.test_package.PackageMetadataTests."
+                "test_real_tarball_resolves_from_a_clean_consumer"
+            ),
+            (
+                "tests.test_package.PackageMetadataTests."
+                "test_sass_facade_compiles_from_a_clean_consumer"
+            ),
             "-v",
         ]
     )
@@ -144,11 +161,8 @@ def step_conformance_kit() -> Path:
     return archive
 
 
-def step_manifest(tarball: Path) -> Path | None:
-    print("== certification manifest (Phase 6 Task 1) ==")
-    if not MANIFEST_SCRIPT.is_file():
-        print(f"pending — {MANIFEST_SCRIPT.name} does not exist yet")
-        return None
+def step_manifest(tarball: Path) -> Path:
+    print("== certification manifest ==")
     manifest_path = OUT_DIR / "certification-manifest.json"
     run(
         [
@@ -177,8 +191,8 @@ def evidence_uri() -> str:
     return "urn:rehearsal:local-run"
 
 
-def step_attestation(tarball: Path, commit: str) -> Path | None:
-    print("== release attestation (Phase 6 Task 2) ==")
+def step_attestation(tarball: Path, commit: str) -> Path:
+    print("== release attestation ==")
     attestation_path = OUT_DIR / "certification-attestation.json"
     # Rehearsal-honest values: no browser was actually driven by this
     # script, so the attestation says so rather than claiming a real
@@ -219,13 +233,14 @@ def step_attestation(tarball: Path, commit: str) -> Path | None:
 
 def main() -> int:
     try:
+        commit = source_commit()
+        assert_worktree_is_clean()
         step_build_catalog()
         step_verify_package_boundary()
         step_install_and_smoke()
         tarball = step_collect_tarball()
         kit_archive = step_conformance_kit()
         manifest = step_manifest(tarball)
-        commit = source_commit()
         attestation = step_attestation(tarball, commit)
     except RehearsalError as error:
         print(f"\nREHEARSAL FAILED: {error}", file=sys.stderr)
@@ -236,14 +251,8 @@ def main() -> int:
     print(f"source commit:   {commit}")
     print(f"tarball:         {tarball} ({sha256_of(tarball)})")
     print(f"conformance kit: {kit_archive} ({sha256_of(kit_archive)})")
-    if manifest:
-        print(f"manifest:        {manifest} ({sha256_of(manifest)})")
-    else:
-        print("manifest:        pending (Phase 6 Task 1)")
-    if attestation:
-        print(f"attestation:     {attestation} ({sha256_of(attestation)})")
-    else:
-        print("attestation:     pending (Phase 6 Task 2)")
+    print(f"manifest:        {manifest} ({sha256_of(manifest)})")
+    print(f"attestation:     {attestation} ({sha256_of(attestation)})")
     print("\nREHEARSAL OK (no publish, no tag)")
     return 0
 

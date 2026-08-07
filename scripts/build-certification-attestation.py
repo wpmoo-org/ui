@@ -14,24 +14,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_INVENTORY = ROOT / "src/certification/evidence-inventory.json"
+ATTESTATION_SCHEMA = ROOT / "src/certification/attestation.schema.json"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
-# The attestation schema's components[].checks enum. Every category the
-# evidence inventory reports as existing must map into this set; one that
-# does not is a contract drift we fail on loudly rather than silently drop.
-ALLOWED_CHECKS = {
-    "contract",
-    "markup",
-    "theme",
-    "rtl",
-    "responsive",
-    "keyboard",
-    "focus",
-    "lifecycle",
-    "accessibility",
-    "visual",
-    "real-device",
-    "host-conformance",
-}
+GIT_TIMEOUT_SECONDS = 60
+
+
+def allowed_checks() -> set[str]:
+    """The attestation schema's components[].checks enum, read from the
+    schema itself so this generator cannot drift from the contract it
+    validates against. Every category the evidence inventory reports as
+    existing must map into this set; one that does not is a contract drift
+    we fail on loudly rather than silently drop."""
+    schema = json.loads(ATTESTATION_SCHEMA.read_text(encoding="utf-8"))
+    return set(
+        schema["properties"]["components"]["items"]["properties"]["checks"][
+            "items"
+        ]["enum"]
+    )
+
+
+ALLOWED_CHECKS = allowed_checks()
 
 
 def parse_args() -> argparse.Namespace:
@@ -104,6 +106,7 @@ def resolve_head_commit() -> str:
         check=False,
         capture_output=True,
         text=True,
+        timeout=GIT_TIMEOUT_SECONDS,
     )
     if completed.returncode != 0:
         raise ValueError(
@@ -120,6 +123,7 @@ def assert_worktree_is_clean() -> None:
         check=False,
         capture_output=True,
         text=True,
+        timeout=GIT_TIMEOUT_SECONDS,
     )
     if completed.returncode != 0:
         raise ValueError(

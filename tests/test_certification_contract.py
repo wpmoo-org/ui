@@ -406,9 +406,11 @@ class CertificationContractTests(unittest.TestCase):
             self.assertEqual(attestation["manualReviews"], [])
             self.assertEqual(attestation["realDevices"], [])
             self.assertEqual(attestation["waivers"], [])
-            self.assertIn(
-                "Core-only", attestation["limitations"][0]["description"]
-            )
+            surfaces = {
+                limitation["surface"] for limitation in attestation["limitations"]
+            }
+            self.assertIn("release", surfaces)
+            self.assertIn("browsers", surfaces)
 
     def test_attestation_rejects_a_source_commit_not_at_the_checkout(self) -> None:
         head_commit = subprocess.run(
@@ -453,6 +455,55 @@ class CertificationContractTests(unittest.TestCase):
             )
         self.assertNotEqual(build_result.returncode, 0)
         self.assertIn("must match the checkout HEAD", build_result.stderr)
+
+    def test_attestation_rejects_a_dirty_worktree(self) -> None:
+        # The commit-mismatch test above locks half of the provenance
+        # binding; this locks the other half. An untracked scratch file
+        # outside the gitignored dist/ is enough to dirty
+        # `git status --porcelain` without touching any tracked content
+        # that would need restoring.
+        head_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        scratch_marker = ROOT / "_test_dirty_worktree_marker.tmp"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            tarball = temporary_root / "placeholder.tgz"
+            tarball.write_bytes(b"")
+            try:
+                scratch_marker.write_text("dirtying the worktree for a test\n")
+                build_result = subprocess.run(
+                    [
+                        sys.executable,
+                        str(ROOT / "scripts/build-certification-attestation.py"),
+                        "--package",
+                        str(tarball),
+                        "--output",
+                        str(temporary_root / "attestation.json"),
+                        "--source-commit",
+                        head_commit,
+                        "--browser-name",
+                        "Chromium",
+                        "--browser-version",
+                        "test",
+                        "--operating-system",
+                        "test",
+                        "--automated-evidence",
+                        "https://github.com/wpmoo-org/ui/actions/runs/example",
+                    ],
+                    cwd=ROOT,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+            finally:
+                scratch_marker.unlink(missing_ok=True)
+        self.assertNotEqual(build_result.returncode, 0)
+        self.assertIn("uncommitted changes", build_result.stderr)
 
     def test_core_certification_sources_do_not_name_commercial_bridges(self) -> None:
         public_sources = [
