@@ -135,6 +135,41 @@ class ButtonTests(CatalogTestCase):
         self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
         self.assertNotIn("opacity: var(--bs-btn-disabled-opacity);", scss)
 
+    def test_primary_button_uses_reference_primary_theme_tokens(self) -> None:
+        scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
+        primary = scss.split(".btn-primary {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("--bs-btn-color: var(--moo-primary-foreground);", primary)
+        self.assertIn("--bs-btn-bg: var(--moo-primary);", primary)
+        self.assertIn(
+            "--bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 88%, var(--moo-surface));",
+            primary,
+        )
+        self.assertIn(
+            "--bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));",
+            primary,
+        )
+
+    def test_danger_button_uses_reference_destructive_surface_tokens(self) -> None:
+        scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
+        danger = scss.split(".btn-danger {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("--bs-btn-color: var(--moo-destructive);", danger)
+        self.assertIn("--bs-btn-bg: var(--moo-destructive-surface);", danger)
+        self.assertIn("--bs-btn-border-color: transparent;", danger)
+        self.assertIn("--bs-btn-hover-color: var(--moo-destructive);", danger)
+        self.assertIn(
+            "--bs-btn-hover-bg: var(--moo-destructive-surface-hover);",
+            danger,
+        )
+        self.assertIn("--bs-btn-hover-border-color: transparent;", danger)
+        self.assertIn("--bs-btn-active-color: var(--moo-destructive);", danger)
+        self.assertIn(
+            "--bs-btn-active-bg: var(--moo-destructive-surface-hover);",
+            danger,
+        )
+        self.assertIn("--bs-btn-active-border-color: transparent;", danger)
+
     def test_button_loading_and_icon_start_are_mutually_exclusive(self) -> None:
         with self.assertRaisesRegex(
             ValueError, "Button loading replaces icon_start; do not set both"

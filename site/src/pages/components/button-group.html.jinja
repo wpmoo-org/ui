@@ -4,6 +4,7 @@
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group %}
+{% from "components/separator.html.jinja" import separator %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
@@ -179,6 +180,39 @@
       "Nested groups",
       "Use Bootstrap input grouping when buttons and fields need one connected surface.",
       nested_groups
+    ) }}
+
+    {% set separator_group %}
+      {% call button_group("Clipboard actions") %}
+        {{ button("Copy", variant="secondary") }}
+        {{ separator(orientation="vertical", extra_class="mx-1") }}
+        {{ button("Paste", variant="secondary") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "separator-group",
+      "Separator",
+      "Place a vertical <code>separator</code> inside a group to visually divide buttons that share the same variant.",
+      separator_group
+    ) }}
+
+    {% set split_button %}
+      {% call button_group("Deploy action") %}
+        {{ button("Deploy", variant="secondary") }}
+        {{ button("", variant="secondary", size="icon", aria_label="Deploy options", icon_start="chevron-down", extra_class="rounded-end", dropdown=true) }}
+        {% call dropdown_menu(align="end") %}
+          {{ dropdown_item("Deploy to production", icon="rocket") }}
+          {{ dropdown_item("Deploy to staging", icon="flask-conical") }}
+          {{ dropdown_divider() }}
+          {{ dropdown_item("Cancel deployment", icon="circle-x") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "split-button",
+      "Split button",
+      "Pair a primary action with a Dropdown Menu trigger for related variants. The chevron trigger carries an accessible name without Bootstrap's caret.",
+      split_button
     ) }}
 
     {% set rtl_arabic %}

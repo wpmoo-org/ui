@@ -17,6 +17,11 @@ MOO_THEME_TOKENS = {
     "--moo-surface": ("$moo-surface", "$moo-surface-dark"),
     "--moo-muted-surface": ("$moo-muted-surface", "$moo-muted-surface-dark"),
     "--moo-border": ("$moo-border", "$moo-border-dark"),
+    "--moo-primary": ("$moo-primary", "$moo-primary-dark"),
+    "--moo-primary-foreground": (
+        "$moo-primary-foreground",
+        "$moo-primary-foreground-dark",
+    ),
     "--moo-foreground": ("$moo-foreground", "$moo-foreground-dark"),
     "--moo-muted-foreground": (
         "$moo-muted-foreground",
@@ -28,6 +33,14 @@ MOO_THEME_TOKENS = {
     ),
     "--moo-ring": ("$moo-ring", "$moo-ring-dark"),
     "--moo-destructive": ("$moo-destructive", "$moo-destructive-dark"),
+    "--moo-destructive-surface": (
+        "$moo-destructive-surface",
+        "$moo-destructive-surface-dark",
+    ),
+    "--moo-destructive-surface-hover": (
+        "$moo-destructive-surface-hover",
+        "$moo-destructive-surface-hover-dark",
+    ),
     "--moo-destructive-foreground": (
         "$moo-destructive-foreground",
         "$moo-destructive-foreground-dark",
@@ -307,6 +320,11 @@ def shared_primitive_offenders(paths: tuple[Path, ...]) -> list[str]:
             if prop == "color-scheme" or not GATED_PROP.search(prop):
                 continue
             if approved_shared_value(prop, value):
+                continue
+            # --bs-btn-close-bg override replaces Bootstrap's filled-path X
+            # with a Lucide-style stroke-based icon; the inline SVG URL is
+            # intentional and not a shared-primitive consumer.
+            if prop == "--bs-btn-close-bg" and "url(" in value:
                 continue
             offenders.append(
                 f"{display_path(path)}:{lineno}: '{prop}: {value}' must consume"

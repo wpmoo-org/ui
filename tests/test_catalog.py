@@ -286,6 +286,7 @@ class CatalogContractTests(CatalogTestCase):
                 "show",
                 "disabled",
             ),
+            "close_button": ("btn-close", "disabled"),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):

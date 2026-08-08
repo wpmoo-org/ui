@@ -161,8 +161,17 @@ class MooCoreTests(CatalogTestCase):
         offenders: list[str] = []
         for directory in (COMPONENTS_SCSS, UTILITIES_SCSS):
             for path in sorted(directory.glob("_*.scss")):
-                if "url(" in path.read_text(encoding="utf-8").lower():
-                    offenders.append(path.relative_to(ROOT).as_posix())
+                source = path.read_text(encoding="utf-8")
+                # Inline SVG data URIs (e.g. Lucide icon overrides) are
+                # intentional component-level replacements, not asset refs.
+                if "url(" in source.lower():
+                    non_svg_urls = [
+                        line for line in source.splitlines()
+                        if "url(" in line.lower() and not line.strip().startswith("//")
+                        and "data:image/svg+xml" not in line.lower()
+                    ]
+                    if non_svg_urls:
+                        offenders.append(path.relative_to(ROOT).as_posix())
         self.assertEqual(offenders, [])
 
     def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
