@@ -25,6 +25,25 @@
   --bs-body-color-rgb: #{to-rgb($moo-foreground)};
   --bs-heading-color: var(--moo-foreground);
   --bs-secondary-color: var(--moo-muted-foreground);
+  // Bootstrap computes its own dark-mode --bs-body-bg/-secondary-bg/
+  // -tertiary-bg independently of this file (see vendor/bootstrap/scss/
+  // _root.scss's [data-bs-theme="dark"] block), the same way it did for the
+  // --bs-body-color trio above before this bridge existed. The scoped Odoo
+  // core build already ties every one of these to the shared --moo-*
+  // palette (scss/themes/_scoped_core.scss's moo-core-light/dark mixins);
+  // mirror that here so both entrypoints render the same background, not
+  // two independently-computed gray scales that happen to agree in light
+  // mode and diverge in dark (this is what caused the catalog shell's body
+  // background to sit only ~7 units of contrast from its own Kbd chips
+  // instead of the ~15 they're tuned for).
+  --bs-body-bg: var(--moo-surface);
+  --bs-body-bg-rgb: #{to-rgb($moo-surface)};
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-secondary-bg-rgb: #{to-rgb($moo-muted-surface)};
+  --bs-tertiary-bg: #{$body-tertiary-bg};
+  --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
+  --bs-tertiary-color: #{$body-tertiary-color};
+  --bs-tertiary-color-rgb: #{to-rgb($body-tertiary-color)};
 }
 
 [data-bs-theme="dark"] {
@@ -42,4 +61,13 @@
   --bs-body-color-rgb: #{to-rgb($moo-foreground-dark)};
   --bs-heading-color: var(--moo-foreground);
   --bs-secondary-color: var(--moo-muted-foreground);
+  // See the light block's matching comment above.
+  --bs-body-bg: var(--moo-surface);
+  --bs-body-bg-rgb: #{to-rgb($moo-surface-dark)};
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-secondary-bg-rgb: #{to-rgb($moo-muted-surface-dark)};
+  --bs-tertiary-bg: #{$body-tertiary-bg-dark};
+  --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg-dark)};
+  --bs-tertiary-color: #{$body-tertiary-color-dark};
+  --bs-tertiary-color-rgb: #{to-rgb($body-tertiary-color-dark)};
 }

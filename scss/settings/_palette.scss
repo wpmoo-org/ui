@@ -40,7 +40,10 @@ $moo-ring: color-mix(in srgb, $white 60%, $primary) !default;
 $moo-destructive: $danger !default;
 $moo-destructive-foreground: $white !default;
 $moo-sidebar: $light !default;
-$moo-surface-dark: $dark !default;
+// $black (#0a0a0a), not $dark (#18181b, zinc-900) -- the reference's own
+// dark-mode --background is #0a0a0a exactly, and $black already carried
+// that value without being wired to this token.
+$moo-surface-dark: $black !default;
 $moo-muted-surface-dark: #27272a !default;
 $moo-border-dark: #3f3f46 !default;
 $moo-foreground-dark: $light !default;

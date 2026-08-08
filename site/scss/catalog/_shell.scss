@@ -44,8 +44,15 @@ body {
   box-shadow: none;
 }
 
+// A full-strength --moo-muted-surface fill exactly matches Kbd's own
+// background (both draw from the same token), so the "⌘K" shortcut hint
+// this trigger renders disappeared into its own hover state. Blending
+// toward the resting background instead of using the token at full
+// strength keeps the hover tint visibly lighter than Kbd's solid fill,
+// without inventing a translucent-overlay token Moo's surface system
+// doesn't otherwise have.
 .moo-catalog__search-trigger:hover {
-  background: var(--moo-muted-surface);
+  background: color-mix(in srgb, var(--moo-muted-surface) 50%, var(--bs-body-bg));
 }
 
 .moo-catalog__search-trigger:focus-visible {
