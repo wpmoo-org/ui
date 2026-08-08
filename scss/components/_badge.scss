@@ -1,0 +1,33 @@
+.badge {
+  display: inline-flex;
+  height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-color: transparent;
+  gap: 0.25rem;
+  line-height: 1rem;
+}
+
+.badge[class~="border"] {
+  border-color: var(--moo-border) !important;
+}
+
+.badge[class~="text-bg-primary"] {
+  color: var(--moo-primary-foreground) !important;
+  background-color: var(--moo-primary) !important;
+}
+
+.badge[class~="text-bg-secondary"] {
+  color: var(--moo-foreground) !important;
+  background-color: var(--moo-muted-surface) !important;
+}
+
+.badge[class~="text-bg-danger"] {
+  color: var(--moo-destructive) !important;
+  background-color: var(--moo-destructive-surface) !important;
+}
+
+.badge[class~="text-body-secondary"] {
+  color: var(--moo-foreground) !important;
+}

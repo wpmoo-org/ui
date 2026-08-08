@@ -17,9 +17,15 @@ $moo-combobox-multiple-width: $moo-combobox-width * 1.6 !default;
 $moo-combobox-menu-max-height: $input-height * 8 !default;
 $moo-combobox-option-line-height: 1.25rem !default;
 $moo-combobox-description-font-size: 0.75rem !default;
-// Bootstrap defaults badges to $font-weight-bold. The reference badge reads as
-// a compact medium label, so keep the native $badge-font-weight knob at 500.
+// Bootstrap defaults badges to relative em sizing so they scale inside
+// headings/buttons. Moo badges are standalone status chips, and the reference
+// uses a fixed 20px chip with 12px/16px label metrics; keep that geometry on
+// Bootstrap's own badge Sass knobs before the component selector centers it.
+$badge-font-size: 0.75rem !default;
 $badge-font-weight: 500 !default;
+$badge-padding-y: 0.125rem !default;
+$badge-padding-x: 0.5rem !default;
+$badge-border-radius: var(--bs-border-radius-pill) !default;
 // The reference sizes its kbd chip via a fixed 20px height + flex centering
 // (Tailwind h-5/min-w-5), not padding math, so $kbd-padding-y drops to 0 --
 // components/_kbd.scss sets that fixed height directly. $kbd-padding-x
@@ -175,6 +181,18 @@ $btn-padding-y-sm: 0.3125rem !default;
 $btn-padding-x-sm: 0.625rem !default;
 $btn-padding-y-lg: 0.4375rem !default;
 $btn-padding-x-lg: 0.625rem !default;
+
+// Bootstrap's close button already exposes Sass knobs for its content-box icon
+// and padding. Keep the native glyph slightly lighter than Bootstrap's default
+// while the padding preserves the 24px reference hit target.
+$btn-close-width: 0.75rem !default;
+$btn-close-height: $btn-close-width !default;
+$btn-close-padding-x: 0.34375rem !default;
+$btn-close-padding-y: $btn-close-padding-x !default;
+$btn-close-opacity: 1 !default;
+$btn-close-hover-opacity: $btn-close-opacity !default;
+$btn-close-focus-opacity: $btn-close-opacity !default;
+$btn-close-disabled-opacity: $moo-disabled-control-opacity !default;
 
 // Shared focus primitive: a thin 2px ring. Components consume
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
