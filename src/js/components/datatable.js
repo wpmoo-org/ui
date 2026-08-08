@@ -63,6 +63,7 @@ export default class DataTable {
     this._render();
     this._initBulkTooltips();
     this._initViewToggle();
+    this._initRowActionDropdowns();
   }
 
   dispose() {
@@ -85,6 +86,23 @@ export default class DataTable {
     }
     target.addEventListener(type, handler, options);
     this._listeners.push({ target, type, handler, options });
+  }
+
+  // Row menus live inside the horizontally scrollable wrapper. Flipping the
+  // wrapper's overflow to let the menu escape would reset its scroll offset
+  // and shuffle the visible slice of the table, so the menu escapes instead:
+  // Popper's fixed strategy positions it against the viewport, clear of the
+  // wrapper's clipping (no ancestor establishes a containing block).
+  _initRowActionDropdowns() {
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!Dropdown) {
+      return;
+    }
+    this._element.querySelectorAll(".table-responsive .table-row-actions [data-bs-toggle=\"dropdown\"]").forEach((trigger) => {
+      Dropdown.getOrCreateInstance(trigger, {
+        popperConfig: (defaultConfig) => ({ ...defaultConfig, strategy: "fixed" }),
+      });
+    });
   }
 
   _bootstrap(name) {

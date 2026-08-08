@@ -660,7 +660,11 @@ class DataTableBrowserTests(unittest.TestCase):
                 root.locator(".datatable-frame").evaluate(
                     "element => getComputedStyle(element).overflowY"
                 ),
-                "visible",
+                "hidden",
+            )
+            self.assertEqual(
+                menu.evaluate("element => getComputedStyle(element).position"),
+                "fixed",
             )
 
             trigger.press("Escape")

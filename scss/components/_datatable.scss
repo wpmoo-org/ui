@@ -62,9 +62,29 @@
   overflow: hidden;
 }
 
-.datatable-frame:has(.table-row-actions .dropdown-menu.show),
+// Pin the actions column to the inline-end edge so the menu trigger stays
+// in view at every scroll position; the opaque background hides the cells
+// sliding underneath. Row menus escape the scroll container via Popper's
+// fixed strategy (see datatable.js), so the wrapper keeps its overflow and
+// the scroll offset -- and the visible slice of the table -- never moves.
+.datatable-frame [data-datatable-column="actions"] {
+  position: sticky;
+  inset-inline-end: 0;
+  z-index: 2;
+  background-color: var(--bs-body-bg);
+}
+
+// The scroll-fade mask clips painting to the wrapper's box and would fade
+// a row menu sitting in the fade zone; dropping the fade for as long as a
+// menu is open lets the menu paint cleanly over the frame edge.
 .datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show) {
-  overflow: visible;
+  mask-image: none;
+}
+
+// Pinned cells share one z-index, so a later row's cell would paint over
+// an earlier row's open menu; lift the cell that owns the open menu.
+.datatable-frame [data-datatable-column="actions"]:has(.dropdown-menu.show) {
+  z-index: 3;
 }
 
 .datatable-frame-header {
