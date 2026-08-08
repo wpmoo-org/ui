@@ -59,11 +59,6 @@
   background-color: var(--moo-destructive-surface) !important;
 }
 
-[data-bs-theme="dark"] .dropdown-item[data-variant="destructive"]:hover,
-[data-bs-theme="dark"] .dropdown-item[data-variant="destructive"]:focus {
-  background-color: var(--moo-destructive-surface-dark) !important;
-}
-
 .dropdown-item[data-variant="destructive"] > [data-icon] {
   color: var(--moo-destructive) !important;
 }

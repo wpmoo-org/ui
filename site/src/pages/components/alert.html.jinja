@@ -58,19 +58,49 @@
       action
     ) }}
 
-    {% set custom_colors %}
+    {% set warning %}
       {{ alert(
         "Subscription renews in 3 days",
         description="Confirm your payment method so the workspace doesn't lose access when the trial ends.",
-        icon="triangle-alert",
-        extra_class="border-warning-subtle bg-warning-subtle text-warning-emphasis"
+        variant="warning",
+        icon="triangle-alert"
       ) }}
     {% endset %}
     {{ render_example(
-      "custom-colors",
-      "Custom colors",
-      "Layer Bootstrap's own subtle contextual utilities on <code>extra_class</code> instead of a filled, saturated alert color.",
-      custom_colors
+      "warning",
+      "Warning",
+      "Use <code>variant=\"warning\"</code> for time-sensitive notices that need attention but aren't blocking.",
+      warning
+    ) }}
+
+    {% set success %}
+      {{ alert(
+        "Access request approved",
+        description="The reviewer granted workspace access. The requester can join within minutes.",
+        variant="success",
+        icon="circle-check"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "success",
+      "Success",
+      "Use <code>variant=\"success\"</code> to confirm a completed action or a positive state change.",
+      success
+    ) }}
+
+    {% set info %}
+      {{ alert(
+        "New version available",
+        description="Moo UI 1.1 ships a refreshed token palette. Review the changelog before upgrading.",
+        variant="info",
+        icon="sparkles"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "info",
+      "Info",
+      "Use <code>variant=\"info\"</code> for neutral, informational notices that don't require action.",
+      info
     ) }}
 
     {% set dismissible %}

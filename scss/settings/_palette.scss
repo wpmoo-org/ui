@@ -39,15 +39,27 @@ $moo-muted-foreground: #71717a !default;
 // own default Neutral theme's ring (#a1a1a1 light / #737373 dark) -- while
 // staying derived rather than a hardcoded copy of those numbers.
 $moo-ring: color-mix(in srgb, $white 60%, $primary) !default;
-// shadcn's --destructive: vibrant red text on a faint alpha surface.
-// Light: #e40014 at 10% alpha bg. Dark: #ff6568 at 20% alpha bg.
-// The text color IS the destructive hue (not a darkened foreground) —
-// matching shadcn exactly. Contrast on the alpha surface is ~3.5:1 light /
-// ~4.7:1 dark; shadcn ships these same values.
-$moo-destructive: #e40014 !default;
+// shadcn's --destructive token drives destructive text and alpha surfaces.
+// The public $danger default matches shadcn's light token; dark mode uses the
+// matching shadcn dark token below.
+$moo-destructive: $danger !default;
 $moo-destructive-surface: color-mix(in srgb, $moo-destructive 10%, transparent) !default;
 $moo-destructive-surface-hover: color-mix(in srgb, $moo-destructive 20%, transparent) !default;
 $moo-destructive-foreground: $moo-destructive !default;
+// Warning and success derive from Bootstrap's $warning/$success palette
+// variables, following the same alpha-surface pattern as destructive.
+$moo-warning: $warning !default;
+$moo-warning-surface: color-mix(in srgb, $moo-warning 10%, transparent) !default;
+$moo-warning-surface-hover: color-mix(in srgb, $moo-warning 20%, transparent) !default;
+$moo-warning-foreground: $moo-warning !default;
+$moo-success: $success !default;
+$moo-success-surface: color-mix(in srgb, $moo-success 10%, transparent) !default;
+$moo-success-surface-hover: color-mix(in srgb, $moo-success 20%, transparent) !default;
+$moo-success-foreground: $moo-success !default;
+$moo-info: $info !default;
+$moo-info-surface: color-mix(in srgb, $moo-info 10%, transparent) !default;
+$moo-info-surface-hover: color-mix(in srgb, $moo-info 20%, transparent) !default;
+$moo-info-foreground: $moo-info !default;
 $moo-sidebar: $light !default;
 // $black (#0a0a0a), not $dark (#18181b, zinc-900) -- the reference's own
 // dark-mode --background is #0a0a0a exactly, and $black already carried
@@ -63,12 +75,26 @@ $moo-muted-foreground-dark: #a1a1aa !default;
 // surfaces need a darker-than-light-mode ring to read as mid-tone against a
 // dark background instead of a near-white glow.
 $moo-ring-dark: color-mix(in srgb, $white 40%, $primary) !default;
-// Dark-mode destructive: shadcn's #ff6568 coral on 20% alpha surface.
-// Text color is the destructive hue itself, matching shadcn exactly.
-$moo-destructive-dark: #ff6568 !default;
+// shadcn's dark --destructive token.
+$moo-destructive-dark: #ff6467 !default;
 $moo-destructive-surface-dark: color-mix(in srgb, $moo-destructive-dark 20%, transparent) !default;
 $moo-destructive-surface-hover-dark: color-mix(in srgb, $moo-destructive-dark 30%, transparent) !default;
 $moo-destructive-foreground-dark: $moo-destructive-dark !default;
+// Dark-mode warning/success: lighter tints of the facade_public base hues,
+// mixed toward $light so they stay readable on dark surfaces. Everything
+// derives from facade_public variables only.
+$moo-warning-dark: color-mix(in srgb, $light 60%, $warning) !default;
+$moo-warning-surface-dark: color-mix(in srgb, $moo-warning-dark 20%, transparent) !default;
+$moo-warning-surface-hover-dark: color-mix(in srgb, $moo-warning-dark 30%, transparent) !default;
+$moo-warning-foreground-dark: $moo-warning-dark !default;
+$moo-success-dark: color-mix(in srgb, $light 60%, $success) !default;
+$moo-success-surface-dark: color-mix(in srgb, $moo-success-dark 20%, transparent) !default;
+$moo-success-surface-hover-dark: color-mix(in srgb, $moo-success-dark 30%, transparent) !default;
+$moo-success-foreground-dark: $moo-success-dark !default;
+$moo-info-dark: color-mix(in srgb, $light 60%, $info) !default;
+$moo-info-surface-dark: color-mix(in srgb, $moo-info-dark 20%, transparent) !default;
+$moo-info-surface-hover-dark: color-mix(in srgb, $moo-info-dark 30%, transparent) !default;
+$moo-info-foreground-dark: $moo-info-dark !default;
 $moo-sidebar-dark: #1c1c1f !default;
 
 // Bootstrap root variables consumed by the scoped core build. Define them

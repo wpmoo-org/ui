@@ -15,6 +15,19 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set default_example %}
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        {{ button("Button", variant="outline") }}
+        {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "default",
+      "Default",
+      "The reference's default button is a quiet outlined style, paired with an icon-only companion.",
+      default_example
+    ) }}
+
     {% set size_example %}
       <div class="d-flex flex-column gap-3 flex-sm-row">
         <div class="d-flex align-items-start gap-2">
@@ -40,16 +53,6 @@
       "Size",
       "Use the <code>size</code> prop to change the size of the button.",
       size_example
-    ) }}
-
-    {% set default_example %}
-      {{ button("Button") }}
-    {% endset %}
-    {{ render_example(
-      "default",
-      "Default",
-      "The default button style for primary actions.",
-      default_example
     ) }}
 
     {% set outline_example %}
@@ -220,23 +223,32 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-inline-flex gap-2" dir="rtl">
-        {{ button("حفظ", variant="outline", icon_start="save") }}
-        {{ button("نشر", variant="success", icon_start="send") }}
+      <div class="d-flex flex-wrap align-items-center gap-2" dir="rtl">
+        {{ button("زر", variant="outline") }}
+        {{ button("حذف", variant="destructive") }}
+        {{ button("إرسال", variant="outline", icon_end="arrow-right") }}
+        {{ button("", variant="outline", size="icon", aria_label="إضافة", icon_start="plus") }}
+        {{ button("جاري التحميل", variant="secondary", loading=true, disabled=true) }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-flex gap-2" dir="rtl">
-        {{ button("שמור", variant="outline", icon_start="save") }}
-        {{ button("פרסם", variant="success", icon_start="send") }}
+      <div class="d-flex flex-wrap align-items-center gap-2" dir="rtl">
+        {{ button("כפתור", variant="outline") }}
+        {{ button("מחק", variant="destructive") }}
+        {{ button("שלח", variant="outline", icon_end="arrow-right") }}
+        {{ button("", variant="outline", size="icon", aria_label="הוסף", icon_start="plus") }}
+        {{ button("טוען", variant="secondary", loading=true, disabled=true) }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex gap-2" dir="rtl">
-        {{ button("Save", variant="outline", icon_start="save") }}
-        {{ button("Publish", variant="success", icon_start="send") }}
+      <div class="d-flex flex-wrap align-items-center gap-2" dir="rtl">
+        {{ button("Button", variant="outline") }}
+        {{ button("Delete", variant="destructive") }}
+        {{ button("Send", variant="outline", icon_end="arrow-right") }}
+        {{ button("", variant="outline", size="icon", aria_label="Add", icon_start="plus") }}
+        {{ button("Loading", variant="secondary", loading=true, disabled=true) }}
       </div>
     {% endset %}
 

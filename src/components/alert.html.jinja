@@ -1,6 +1,6 @@
 {% from "components/close_button.html.jinja" import close_button %}
 
-{% set alert_variants = ["default", "destructive"] %}
+{% set alert_variants = ["default", "destructive", "warning", "success", "info"] %}
 
 {% macro alert(
   title,
@@ -16,6 +16,9 @@
   {% if variant not in alert_variants %}{{ fail("Unknown alert variant: " ~ variant) }}{% endif %}
   {% set classes = "alert" %}
   {% if variant == "destructive" %}{% set classes = classes ~ " alert-danger" %}{% endif %}
+  {% if variant == "warning" %}{% set classes = classes ~ " alert-warning" %}{% endif %}
+  {% if variant == "success" %}{% set classes = classes ~ " alert-success" %}{% endif %}
+  {% if variant == "info" %}{% set classes = classes ~ " alert-info" %}{% endif %}
   {% if dismissible %}{% set classes = classes ~ " alert-dismissible fade show" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <div class="{{ classes }}" role="alert">

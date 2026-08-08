@@ -22,6 +22,27 @@
   --bs-alert-color: var(--moo-destructive);
 }
 
+// Warning and success alerts follow the same quiet pattern as destructive:
+// neutral border, tinted alpha surface, hue-colored text. Matches shadcn's
+// alert variants (amber for warning, green for success).
+.alert-warning {
+  --bs-alert-bg: var(--moo-warning-surface);
+  --bs-alert-border-color: var(--moo-border);
+  --bs-alert-color: var(--moo-warning);
+}
+
+.alert-success {
+  --bs-alert-bg: var(--moo-success-surface);
+  --bs-alert-border-color: var(--moo-border);
+  --bs-alert-color: var(--moo-success);
+}
+
+.alert-info {
+  --bs-alert-bg: var(--moo-info-surface);
+  --bs-alert-border-color: var(--moo-border);
+  --bs-alert-color: var(--moo-info);
+}
+
 .alert-icon {
   display: flex;
   flex: 0 0 auto;
