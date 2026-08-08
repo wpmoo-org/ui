@@ -171,14 +171,13 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn(label, home)
 
     def test_catalog_sidebar_has_no_blocks_group(self) -> None:
-        # The left catalog sidebar no longer lists Blocks at all; only shared
-        # header/palette navigation does. Reading a page unrelated to either
-        # block's own content (the Components index) isolates the shell: each
-        # block name should come from the command-palette loop only, and
-        # "../blocks/" should appear exactly four times: the Sections
-        # sidebar link, the compact dropdown, the desktop header nav link, the
-        # palette's hardcoded Blocks entry. Page navigation now follows the
-        # global docs order, so Components advances to the first component page.
+        # Blocks is a link inside the sidebar's "Catalog" group, not its own
+        # labelled group -- the navbar carries no page links at all now (it's
+        # header chrome only: sidebar toggle, search, theme, GitHub), so
+        # "../blocks/" should appear exactly twice: the sidebar link and the
+        # command palette's hardcoded Blocks entry. Reading a page unrelated
+        # to either block's own content (the Components index) isolates the
+        # shell from that assertion.
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -186,7 +185,7 @@ class BlocksTests(CatalogTestCase):
 
         self.assertEqual(page.count("Sidebar (Floating)"), 1)
         self.assertEqual(page.count("Sidebar (Inset)"), 1)
-        self.assertEqual(page.count('href="../blocks/"'), 4)
+        self.assertEqual(page.count('href="../blocks/"'), 2)
         self.assertNotIn('class="sidebar-group-label" data-slot="sidebar-group-label">Blocks<', page)
 
     def test_block_preview_iframes_are_scaled_programmatically(self) -> None:

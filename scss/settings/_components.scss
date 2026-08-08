@@ -173,6 +173,16 @@ $btn-padding-x-lg: 0.625rem !default;
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
 $focus-ring-width: 2px !default;
 
+// shadcn's own form-control focus ring is 3px, one size up from the 2px
+// ring the rest of the system uses on buttons/links/custom surfaces. Input,
+// Textarea, Select, Checkbox, Radio, and Switch all share this wider ring
+// so the reference's exact focus recipe carries over unmodified.
+$moo-form-focus-ring-width: 3px !default;
+// Same --moo-ring value the width above pairs with, aliased under a name
+// the shared-primitive design gate recognizes as a color reference (see
+// approved_shared_value's shadow-token check in tests/test_design_gates.py).
+$moo-form-focus-ring-color: var(--moo-ring) !default;
+
 // Shared overlay primitive for Bootstrap's native Modal and Offcanvas
 // backdrops. Bootstrap exposes separate .modal-backdrop and
 // .offcanvas-backdrop selectors; Moo keeps their visual treatment aligned via

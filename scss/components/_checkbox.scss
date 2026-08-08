@@ -11,14 +11,18 @@
   filter: invert(1);
 }
 
-.form-check-input[type="checkbox"]:focus:active,
-.form-check-input[type="checkbox"]:focus:not(:focus-visible) {
+// Covers checkbox, switch (also type="checkbox"), and radio alike so
+// mouse-triggered focus never shows a ring on any form-check control,
+// matching Input/Textarea/Select's own :focus:not(:focus-visible) rule
+// in foundations/_focus.scss.
+.form-check-input:is([type="checkbox"], [type="radio"]):focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]):focus:not(:focus-visible) {
   border-color: var(--bs-border-color);
   box-shadow: none;
 }
 
-.form-check-input[type="checkbox"]:checked:focus:active,
-.form-check-input[type="checkbox"]:checked:focus:not(:focus-visible) {
+.form-check-input:is([type="checkbox"], [type="radio"]):checked:focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]):checked:focus:not(:focus-visible) {
   border-color: $form-check-input-checked-border-color;
 }
 
