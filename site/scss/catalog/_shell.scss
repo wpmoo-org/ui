@@ -31,9 +31,11 @@ body {
 // field, not decoration on a button.
 .moo-catalog__search-trigger {
   height: 2rem;
-  flex: 1 1 10rem;
+  width: 10rem;
+  max-width: 100%;
+  flex: 0 1 10rem;
   min-width: 0;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding: 0.5rem 0.75rem;
   color: var(--bs-secondary-color);
   border: var(--bs-border-width) solid var(--bs-border-color);
@@ -73,31 +75,17 @@ body {
   gap: 0.25rem;
 }
 
-// The visible "Search" label reads like input text at every width, so the
-// trigger stays start-aligned; from md up the shortcut hint takes the far
-// edge.
-@include media-breakpoint-up(md) {
-  .moo-catalog__search-trigger {
-    flex: 0 0 auto;
-    justify-content: space-between;
-  }
-}
-
-@include media-breakpoint-up(sm) {
-  .moo-catalog__search-trigger {
-    width: 10rem;
-  }
-}
-
 @include media-breakpoint-up(lg) {
   .moo-catalog__search-trigger {
     width: 13rem;
+    flex-basis: 13rem;
   }
 }
 
 @include media-breakpoint-up(xxl) {
   .moo-catalog__search-trigger {
     width: 16rem;
+    flex-basis: 16rem;
   }
 }
 
@@ -265,7 +253,7 @@ body {
   align-items: center;
   gap: 1rem;
   min-width: 0;
-  flex: 0 0 auto;
+  flex: 1 1 0;
 }
 
 .moo-catalog__sidebar-toggle,
@@ -275,14 +263,6 @@ body {
   --bs-btn-hover-border-color: var(--moo-border);
   --bs-btn-active-border-color: var(--moo-border);
   box-shadow: var(--bs-box-shadow-sm);
-}
-
-@include media-breakpoint-down(md) {
-  .moo-catalog__sidebar-toggle,
-  .moo-catalog__nav-menu-trigger {
-    inline-size: 2.25rem;
-    min-height: 2.25rem;
-  }
 }
 
 .moo-catalog__nav-dropdown .dropdown-menu {
@@ -337,19 +317,9 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
-}
-
-@include media-breakpoint-up(md) {
-  .moo-catalog__header-start {
-    flex: 1 1 auto;
-  }
-
-  .moo-catalog__header-actions {
-    flex: 0 0 auto;
-    margin-left: auto;
-  }
+  margin-left: auto;
 }
 
 .moo-catalog__main {

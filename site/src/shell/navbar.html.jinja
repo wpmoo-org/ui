@@ -27,7 +27,8 @@
         {{ sidebar_trigger(sidebar_id="catalog-sidebar", extra_class="moo-catalog__sidebar-toggle") }}
         {#- Always visible (label included, icon-only nowhere) rather than
            d-none, so search/the command palette stays reachable at every
-           width; the shortcut hint still collapses below md. #}
+           width; the shortcut hint remains part of the same control instead
+           of introducing a breakpoint jump. #}
         {% set search_trigger_label %}
           <span class="moo-catalog__search-trigger-lead">
             {{ render_icon("search", "inline-start") }}
@@ -35,7 +36,7 @@
           </span>
           {#- Real shortcut, not decoration: Cmd/Ctrl+K opens this same
              command palette through the catalog command module. #}
-          <span class="moo-catalog__search-trigger-shortcut d-none d-md-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
+          <span class="moo-catalog__search-trigger-shortcut d-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
         {% endset %}
         {{ button(
           search_trigger_label | safe,
