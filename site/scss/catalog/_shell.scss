@@ -1,6 +1,10 @@
 body {
   min-height: 100vh;
-  background: var(--bs-tertiary-bg);
+  // Matches the package's own surface token instead of Bootstrap's
+  // unrelated tertiary-bg: elevated "muted surface" chips (e.g. Kbd) are
+  // tuned for contrast against --moo-surface, and read as barely distinct
+  // in dark mode against tertiary-bg's lighter default.
+  background: var(--moo-surface);
   font-family: $moo-catalog-font-family, var(--bs-body-font-family);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
