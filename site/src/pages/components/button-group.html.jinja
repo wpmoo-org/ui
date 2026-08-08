@@ -4,7 +4,7 @@
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group %}
-{% from "components/separator.html.jinja" import separator %}
+{% from "components/select.html.jinja" import select %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
@@ -19,14 +19,24 @@
 
   <div class="moo-component-examples">
     {% set basic_actions %}
-      {% call button_group("Ticket actions", toolbar=true, extra_class="gap-2") %}
-        {% call button_group("Ticket navigation") %}
+      {% call button_group("Message actions", toolbar=true, extra_class="gap-2") %}
+        {% call button_group("Message navigation") %}
           {{ button("", variant="outline", size="icon", aria_label="Go back", icon_start="arrow-left") }}
         {% endcall %}
-        {% call button_group("Ticket review") %}
+        {% call button_group("Message review") %}
           {{ button("Archive", variant="outline") }}
           {{ button("Report", variant="outline") }}
+        {% endcall %}
+        {% call button_group("More actions") %}
           {{ button("Snooze", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="More message actions", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
+          {% call dropdown_menu(align="end") %}
+            {{ dropdown_item("Mark as handled", icon="mail-check") }}
+            {{ dropdown_item("Move to archive", icon="archive") }}
+            {{ dropdown_item("Delay reminder", icon="clock") }}
+            {{ dropdown_divider() }}
+            {{ dropdown_item("Delete message", icon="trash-2", destructive=true) }}
+          {% endcall %}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -35,28 +45,6 @@
       "Composition",
       "Use <code>btn-group</code> for joined controls. Wrap separate groups in <code>btn-toolbar</code> when the toolbar needs its own spacing.",
       basic_actions
-    ) }}
-
-    {% set dropdown_actions %}
-      {% call button_group("Message actions") %}
-        {{ button("Archive", variant="outline") }}
-        {{ button("Report", variant="outline") }}
-        {{ button("Snooze", variant="outline") }}
-        {{ button("", variant="outline", size="icon", aria_label="More message actions", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
-        {% call dropdown_menu(align="end") %}
-          {{ dropdown_item("Mark as handled", icon="mail-check") }}
-          {{ dropdown_item("Move to archive", icon="archive") }}
-          {{ dropdown_item("Delay reminder", icon="clock") }}
-          {{ dropdown_divider() }}
-          {{ dropdown_item("Delete message", icon="trash-2", destructive=true) }}
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "dropdown-actions",
-      "Dropdown menu",
-      "Keep frequent actions visible and place the remaining actions in a ready Dropdown Menu. The icon-only trigger keeps an accessible name without adding Bootstrap's caret.",
-      dropdown_actions
     ) }}
 
     {% set mixed_styles %}
@@ -132,8 +120,8 @@
 
     {% set vertical_group %}
       {% call button_group("Quantity controls", vertical=true) %}
-        {{ button("", variant="outline", aria_label="Increase value", icon_start="plus") }}
-        {{ button("", variant="outline", aria_label="Decrease value", icon_start="minus") }}
+        {{ button("", variant="outline", size="icon", aria_label="Increase value", icon_start="plus") }}
+        {{ button("", variant="outline", size="icon", aria_label="Decrease value", icon_start="minus") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -167,7 +155,7 @@
     ) }}
 
     {% set nested_groups %}
-      <div class="d-flex align-items-center gap-2 w-100">
+      <div class="d-flex align-items-center gap-2">
         {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus", extra_class="rounded-3") }}
         {% call input_group(extra_class="flex-grow-1 rounded-3") %}
           {{ input(aria_label="Message body", placeholder="Send a message...") }}
@@ -182,21 +170,20 @@
       nested_groups
     ) }}
 
-    {% set separator_group %}
-      {% call button_group("Clipboard actions") %}
-        {{ button("Copy", variant="secondary") }}
-        {{ separator(orientation="vertical", extra_class="mx-1") }}
-        {{ button("Paste", variant="secondary") }}
+    {% set split_button %}
+      {% call button_group("Follow action") %}
+        {{ button("Follow", variant="outline") }}
+        {{ button("", variant="outline", size="icon", aria_label="Follow options", icon_start="plus") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "separator-group",
-      "Separator",
-      "Place a vertical <code>separator</code> inside a group to visually divide buttons that share the same variant.",
-      separator_group
+      "split-button",
+      "Split",
+      "Join a primary action button with an icon-only trigger. The two buttons share joined edges while each keeps its own hit target.",
+      split_button
     ) }}
 
-    {% set split_button %}
+    {% set dropdown_button %}
       {% call button_group("Deploy action") %}
         {{ button("Deploy", variant="secondary") }}
         {{ button("", variant="secondary", size="icon", aria_label="Deploy options", icon_start="chevron-down", extra_class="rounded-end", dropdown=true) }}
@@ -204,43 +191,104 @@
           {{ dropdown_item("Deploy to production", icon="rocket") }}
           {{ dropdown_item("Deploy to staging", icon="flask-conical") }}
           {{ dropdown_divider() }}
-          {{ dropdown_item("Cancel deployment", icon="circle-x") }}
+          {{ dropdown_item("Cancel deployment", icon="circle-x", destructive=true) }}
         {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "split-button",
-      "Split button",
+      "dropdown-button",
+      "Dropdown menu",
       "Pair a primary action with a Dropdown Menu trigger for related variants. The chevron trigger carries an accessible name without Bootstrap's caret.",
-      split_button
+      dropdown_button
+    ) }}
+
+    {% set select_group %}
+      <div class="d-inline-flex align-items-stretch gap-2">
+        <div class="btn-group" role="group" aria-label="Currency and amount">
+          {{ select(aria_label="Currency", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}], extra_class="rounded-end-0 border-end-0 btn-group-select") }}
+          <input class="form-control rounded-start-0 border-start-0" type="text" aria-label="Amount" placeholder="10.00" style="min-width: 8rem;">
+        </div>
+        {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="arrow-right") }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "select-group",
+      "Select",
+      "Pair with a <code>Select</code> component.",
+      select_group
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-inline-flex" dir="rtl">
-        {% call button_group("إجراءات قائمة انتظار مساحة العمل") %}
-          {{ button("أرشفة", variant="outline") }}
-          {{ button("تصعيد", variant="outline") }}
-          {{ button("تأجيل", variant="outline") }}
+      <div dir="rtl">
+        {% call button_group("إجراءات الرسالة", toolbar=true, extra_class="gap-2") %}
+          {% call button_group("التنقل في الرسالة") %}
+            {{ button("", variant="outline", size="icon", aria_label="الرجوع", icon_start="arrow-left") }}
+          {% endcall %}
+          {% call button_group("مراجعة الرسالة") %}
+            {{ button("أرشفة", variant="outline") }}
+            {{ button("إبلاغ", variant="outline") }}
+          {% endcall %}
+          {% call button_group("إجراءات أخرى") %}
+            {{ button("تأجيل", variant="outline") }}
+            {{ button("", variant="outline", size="icon", aria_label="المزيد", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
+            {% call dropdown_menu(align="end") %}
+              {{ dropdown_item("وضع علامة كمُعالَج", icon="mail-check") }}
+              {{ dropdown_item("نقل إلى الأرشيف", icon="archive") }}
+              {{ dropdown_item("تأجيل التذكير", icon="clock") }}
+              {{ dropdown_divider() }}
+              {{ dropdown_item("حذف الرسالة", icon="trash-2", destructive=true) }}
+            {% endcall %}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-flex" dir="rtl">
-        {% call button_group("פעולות תור סביבת העבודה") %}
-          {{ button("ארכוב", variant="outline") }}
-          {{ button("הסלמה", variant="outline") }}
-          {{ button("השהיה", variant="outline") }}
+      <div dir="rtl">
+        {% call button_group("פעולות הודעה", toolbar=true, extra_class="gap-2") %}
+          {% call button_group("ניווט בהודעה") %}
+            {{ button("", variant="outline", size="icon", aria_label="חזרה", icon_start="arrow-left") }}
+          {% endcall %}
+          {% call button_group("סקירת הודעה") %}
+            {{ button("ארכוב", variant="outline") }}
+            {{ button("דיווח", variant="outline") }}
+          {% endcall %}
+          {% call button_group("פעולות נוספות") %}
+            {{ button("השהיה", variant="outline") }}
+            {{ button("", variant="outline", size="icon", aria_label="עוד", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
+            {% call dropdown_menu(align="end") %}
+              {{ dropdown_item("סמן כטופל", icon="mail-check") }}
+              {{ dropdown_item("העבר לארכיון", icon="archive") }}
+              {{ dropdown_item("דחה תזכורת", icon="clock") }}
+              {{ dropdown_divider() }}
+              {{ dropdown_item("מחק הודעה", icon="trash-2", destructive=true) }}
+            {% endcall %}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
-        {% call button_group("Workspace queue actions") %}
-          {{ button("Archive", variant="outline") }}
-          {{ button("Escalate", variant="outline") }}
-          {{ button("Snooze", variant="outline") }}
+      <div dir="rtl">
+        {% call button_group("Message actions", toolbar=true, extra_class="gap-2") %}
+          {% call button_group("Message navigation") %}
+            {{ button("", variant="outline", size="icon", aria_label="Go back", icon_start="arrow-left") }}
+          {% endcall %}
+          {% call button_group("Message review") %}
+            {{ button("Archive", variant="outline") }}
+            {{ button("Report", variant="outline") }}
+          {% endcall %}
+          {% call button_group("More actions") %}
+            {{ button("Snooze", variant="outline") }}
+            {{ button("", variant="outline", size="icon", aria_label="More", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
+            {% call dropdown_menu(align="end") %}
+              {{ dropdown_item("Mark as handled", icon="mail-check") }}
+              {{ dropdown_item("Move to archive", icon="archive") }}
+              {{ dropdown_item("Delay reminder", icon="clock") }}
+              {{ dropdown_divider() }}
+              {{ dropdown_item("Delete message", icon="trash-2", destructive=true) }}
+            {% endcall %}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}

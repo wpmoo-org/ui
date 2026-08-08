@@ -11,3 +11,37 @@
 [dir="rtl"] .btn-toolbar > .btn {
   unicode-bidi: plaintext;
 }
+
+// Icon buttons in button groups should stay square, not stretch to fill
+// the group width (Bootstrap's flex: 1 1 auto makes them rectangular).
+.btn-group > .btn-icon,
+.btn-group > .btn-icon-xs,
+.btn-group > .btn-icon-sm,
+.btn-group > .btn-icon-lg,
+.btn-group-vertical > .btn-icon,
+.btn-group-vertical > .btn-icon-xs,
+.btn-group-vertical > .btn-icon-sm,
+.btn-group-vertical > .btn-icon-lg {
+  flex: 0 0 auto;
+}
+
+// Bootstrap's .btn-group-vertical > .btn { width: 100% } would stretch icon
+// buttons; re-assert the token-derived square so vertical rails stay square.
+.btn-group-vertical > .btn-icon,
+.btn-group-vertical > .btn-icon-xs,
+.btn-group-vertical > .btn-icon-sm,
+.btn-group-vertical > .btn-icon-lg {
+  width: var(--moo-btn-icon-size);
+}
+
+// Select inside a button group: compact and content-sized, matching shadcn's
+// compact currency selector pattern. Bootstrap's flex defaults would shrink
+// it below its longest option; flex: 0 0 auto keeps the intrinsic (content)
+// width. The min-width floor derives from Bootstrap's form-select caret-space
+// token, not magic numbers. Focus keeps Bootstrap's default visible treatment.
+.btn-group-select {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: calc(#{$form-select-indicator-padding} + #{$spacer});
+  padding-inline-end: $form-select-indicator-padding;
+}

@@ -66,19 +66,22 @@ label.btn {
   padding-inline-end: $icon-link-gap;
 }
 
+// Icon-only buttons become squares whose side equals the token-driven
+// button height (line-height + 2*padding-y + 2*border), so they always match
+// the height of sibling text buttons. --bs-btn-line-height is a length in
+// Moo, making this calc valid. No hard-coded dimensions.
 .btn-icon,
 .btn-icon-xs,
 .btn-icon-sm,
 .btn-icon-lg {
-  padding: 0;
-  inline-size: calc(
+  --moo-btn-icon-size: calc(
     var(--bs-btn-line-height) +
-    var(--bs-btn-padding-y) +
-    var(--bs-btn-padding-y) +
-    var(--bs-btn-border-width) +
-    var(--bs-btn-border-width)
+    var(--bs-btn-padding-y) * 2 +
+    var(--bs-btn-border-width) * 2
   );
-  aspect-ratio: 1;
+  padding-inline: 0;
+  inline-size: var(--moo-btn-icon-size);
+  block-size: var(--moo-btn-icon-size);
 }
 
 :is(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg)::after {
