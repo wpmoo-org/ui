@@ -36,6 +36,7 @@
 .modal--alert {
   --bs-modal-width: 24rem;
   --bs-modal-padding: 1rem;
+  --bs-modal-footer-bg: rgba(var(--bs-secondary-bg-rgb), 0.5);
 }
 
 .modal-header--alert {
