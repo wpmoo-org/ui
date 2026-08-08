@@ -10,6 +10,14 @@
   gap: $spacer * 0.75;
 }
 
+.alert-dismissible .btn-close {
+  top: auto;
+  right: auto;
+  inset-block-start: var(--bs-alert-padding-y);
+  inset-inline-end: var(--bs-alert-padding-x);
+  padding: $btn-close-padding-y $btn-close-padding-x;
+}
+
 // The reference's destructive alert keeps the same neutral surface and
 // border as the default alert and tints only the text/icon color —
 // verified against the live reference page's Destructive example (bg-card,
