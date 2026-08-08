@@ -103,8 +103,8 @@ class AvatarTests(CatalogTestCase):
     def test_avatar_page_examples_stay_product_shaped(self) -> None:
         page = PAGE.read_text()
 
-        self.assertIn("Moo Admin", page)
-        self.assertIn("admin@example.com", page)
+        self.assertIn("Cangir", page)
+        self.assertIn("Core maintainer", page)
         self.assertIn("render_rtl_example", page)
         self.assertNotIn('title="Direction aware"', page)
         self.assertNotIn("badge_dot for", page)
@@ -116,5 +116,5 @@ class AvatarTests(CatalogTestCase):
         self.assertRegex(style, r"\.avatar::after\s*\{[^}]*z-index:\s*1;")
         self.assertRegex(style, r"\.avatar-badge\s*\{[^}]*z-index:\s*2;")
         self.assertRegex(style, r"\.avatar-badge--icon\s*\{[^}]*padding-inline:\s*0;")
-        self.assertRegex(style, r"\.avatar-badge--icon \[data-icon\]\s*\{[^}]*width:\s*0\.375rem;")
+        self.assertRegex(style, r"\.avatar-badge--icon \[data-icon\]\s*\{[^}]*width:\s*\$avatar-badge-icon-glyph-size;")
         self.assertRegex(style, r"\.avatar-group > \.avatar\s*\{[^}]*z-index:\s*0;")
