@@ -24,8 +24,8 @@
   {% if target and not rel %}{{ fail("Dropdown item target requires rel") }}{% endif %}
   {% set classes = "dropdown-item" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
-  {% if destructive %}{% set classes = classes ~ " text-danger" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  {% set destructive_attr = 'data-variant="destructive"' if destructive else "" %}
   {% set icon_markup %}
     {%- if icon and icon_box -%}
       <span class="dropdown-item__icon-box">{{ render_icon(icon, "inline-start") }}</span>
@@ -36,11 +36,11 @@
   {% set rendered_icon = icon_markup | trim %}
   {% if href %}
     <li>
-      <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>{% if rendered_icon %}{{ rendered_icon | safe }}{% endif %}<span>{{ label }}</span>{% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}</a>
+      <a class="{{ classes }}{% if disabled %} disabled{% endif %}" href="{{ href }}"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if destructive_attr %} {{ destructive_attr | safe }}{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="true"{% endif %}>{% if rendered_icon %}{{ rendered_icon | safe }}{% endif %}<span>{{ label }}</span>{% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}</a>
     </li>
   {% else %}
     <li>
-      <button class="{{ classes }}" type="button"{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} disabled{% endif %}>{% if rendered_icon %}{{ rendered_icon | safe }}{% endif %}<span>{{ label }}</span>{% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}</button>
+      <button class="{{ classes }}" type="button"{% if destructive_attr %} {{ destructive_attr | safe }}{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}{% if disabled %} disabled{% endif %}>{% if rendered_icon %}{{ rendered_icon | safe }}{% endif %}<span>{{ label }}</span>{% if shortcut %}<span class="ms-auto small text-body-secondary">{{ shortcut }}</span>{% endif %}</button>
     </li>
   {% endif %}
 {%- endmacro %}

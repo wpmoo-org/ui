@@ -151,20 +151,20 @@ label.btn {
 }
 
 .btn-primary {
-  --bs-btn-color: var(--moo-surface);
-  --bs-btn-bg: var(--moo-foreground);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface));
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface));
+  --bs-btn-color: var(--moo-primary-foreground);
+  --bs-btn-bg: var(--moo-primary);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface));
 }
 
 .btn-secondary {
   --bs-btn-color: var(--moo-foreground);
   --bs-btn-bg: var(--moo-muted-surface);
   --bs-btn-border-color: var(--moo-border);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 86%, var(--moo-foreground));
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 80%, var(--moo-foreground));
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-muted-surface) 78%, var(--moo-foreground));
-  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-border) 72%, var(--moo-foreground));
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 95%, var(--moo-foreground));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 90%, var(--moo-foreground));
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-muted-surface) 88%, var(--moo-foreground));
+  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-border) 82%, var(--moo-foreground));
 }
 
 .btn-outline-secondary {
@@ -195,9 +195,23 @@ label.btn {
 
 .btn-danger {
   --bs-btn-color: var(--moo-destructive-foreground);
-  --bs-btn-bg: var(--moo-destructive);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground));
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground));
+  --bs-btn-bg: var(--moo-destructive-surface);
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--moo-destructive-foreground);
+  --bs-btn-hover-bg: var(--moo-destructive-surface-hover);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: var(--moo-destructive-foreground);
+  --bs-btn-active-bg: var(--moo-destructive-surface-hover);
+  --bs-btn-active-border-color: transparent;
+}
+
+.btn-danger:focus-visible {
+  border-color: color-mix(in srgb, var(--moo-destructive) 40%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--moo-destructive) 20%, transparent);
+}
+
+[data-bs-theme="dark"] .btn-danger:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--moo-destructive) 40%, transparent);
 }
 
 .btn-link {

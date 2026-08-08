@@ -46,6 +46,28 @@
   flex: 0 0 auto;
 }
 
+// Destructive dropdown items use the shared --moo-destructive token so the
+// red stays in sync with every other destructive control. Matches shadcn's
+// pattern: red text on transparent bg at rest, destructive-tinted bg on hover.
+.dropdown-item[data-variant="destructive"] {
+  color: var(--moo-destructive) !important;
+}
+
+.dropdown-item[data-variant="destructive"]:hover,
+.dropdown-item[data-variant="destructive"]:focus {
+  color: var(--moo-destructive) !important;
+  background-color: var(--moo-destructive-surface) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item[data-variant="destructive"]:hover,
+[data-bs-theme="dark"] .dropdown-item[data-variant="destructive"]:focus {
+  background-color: var(--moo-destructive-surface-dark) !important;
+}
+
+.dropdown-item[data-variant="destructive"] > [data-icon] {
+  color: var(--moo-destructive) !important;
+}
+
 .dropdown-menu .dropdown-divider {
   margin-inline: calc(-1 * var(--bs-dropdown-padding-x));
   border-block-start: var(--bs-border-width) solid var(--bs-dropdown-divider-bg);
