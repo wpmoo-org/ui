@@ -598,9 +598,7 @@ class CatalogContractTests(CatalogTestCase):
             catalog_scss,
         )
 
-    def test_header_navigation_links_docs_between_home_and_components(
-        self,
-    ) -> None:
+    def test_header_carries_no_primary_navigation_links(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -609,15 +607,45 @@ class CatalogContractTests(CatalogTestCase):
         header_end = index.index("</header>", header_start)
         header = index[header_start:header_end]
 
-        home_index = header.index('href="./"')
-        docs_index = header.index('href="introduction/"')
-        components_index = header.index('href="components/"')
-        blocks_index = header.index('href="blocks/"')
+        for href in (
+            'href="introduction/"',
+            'href="components/"',
+            'href="blocks/"',
+            'href="examples/"',
+        ):
+            self.assertNotIn(
+                href,
+                header,
+                "header should be minimal chrome; primary navigation lives in the sidebar",
+            )
+
+    def test_sidebar_navigation_orders_getting_started_before_catalog(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        sidebar_start = index.index('id="catalog-sidebar"')
+        sidebar_end = index.index("</aside>", sidebar_start)
+        sidebar = index[sidebar_start:sidebar_end]
+
+        home_index = sidebar.index('href="./"')
+        docs_index = sidebar.index('href="introduction/"')
+        installation_index = sidebar.index('href="installation/"')
+        examples_index = sidebar.index('data-bs-target="#shell-examples-menu"')
+        components_index = sidebar.index('data-bs-target="#shell-components-menu"')
+        blocks_index = sidebar.index('href="blocks/"')
 
         self.assertLess(home_index, docs_index)
-        self.assertLess(docs_index, components_index)
+        self.assertLess(docs_index, installation_index)
+        self.assertLess(installation_index, examples_index)
+        self.assertLess(examples_index, components_index)
         self.assertLess(components_index, blocks_index)
-        self.assertIn(">Docs</", header)
+        self.assertIn(">Introduction<", sidebar)
+        self.assertIn(">Getting Started<", sidebar)
+        self.assertIn(">Catalog<", sidebar)
+        self.assertIn(">Resources<", sidebar)
 
     def test_home_page_introduces_the_product_and_links_to_components(
         self,

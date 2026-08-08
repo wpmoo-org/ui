@@ -1,22 +1,115 @@
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_separator %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_group, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item %}
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% set utility_icons = {
   "scroll-fade": "scroll"
 } %}
 
-{#- One ordered menu instead of labelled groups: Introduction, Installation,
-    Components (disclosure), Blocks, Utilities, Examples (disclosure), then
-    the remaining doc pages. The disclosure entries reuse the certified
-    Sidebar submenu contract (sidebar_menu_sub_button + sidebar_menu_sub),
-    so the icon-rail flyout and tooltip behavior come from the component
-    for free; only the nested indentation is site-owned SCSS. #}
+{#- The sidebar now owns every top-level navigation entry the navbar used
+    to carry (Home/Docs/Components/Blocks/Examples) -- the navbar itself
+    is header chrome only (toggle, search, theme, GitHub). nav_groups is
+    plain data (label/href/icon/active, or a submenu with children), built
+    once here and then rendered as sidebar_group/sidebar_menu. Keeping the
+    group/item shape data-first -- not sidebar-markup calls inline -- means
+    a future "no sidebar" layout variant can render this exact structure
+    as a top nav instead, without duplicating which pages belong where. #}
 {% set introduction = (sections | selectattr("slug", "equalto", "introduction") | list)[0] %}
 {% set installation = (sections | selectattr("slug", "equalto", "installation") | list)[0] %}
 {% set blocks_page = (sections | selectattr("slug", "equalto", "blocks") | list)[0] %}
-{% set other_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "components", "blocks"]) | list %}
+{% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "components", "blocks"]) | list %}
 {% set components_open = current_section == "components" %}
 {% set examples_open = current_section == "examples" %}
+{% set home_active = current_section == "sections" and current_slug == "index" %}
+
+{% set component_children = [{
+  "label": "All Components",
+  "href": "components/index.html",
+  "icon": "layout-grid",
+  "active": components_open and current_slug == "index"
+}] %}
+{% for component in catalog | sort(attribute="label") %}
+  {% set _ = component_children.append({
+    "label": component.label,
+    "href": "components/" ~ component.slug ~ ".html",
+    "icon": component_icons.get(component.slug, "component"),
+    "active": components_open and current_slug == component.slug
+  }) %}
+{% endfor %}
+
+{% set example_children = [{
+  "label": "Overview",
+  "href": "examples/index.html",
+  "icon": "layout-grid",
+  "active": examples_open and current_slug == "index"
+}] %}
+{% for example in examples %}
+  {% set _ = example_children.append({
+    "label": example.label,
+    "href": "examples/" ~ example.slug ~ ".html",
+    "icon": "list-checks",
+    "active": examples_open and current_slug == example.slug
+  }) %}
+{% endfor %}
+
+{% set catalog_items = [
+  {"kind": "submenu", "id": "shell-components-menu", "label": "Components", "icon": "component", "open": components_open, "active": components_open, "children": component_children},
+  {"kind": "link", "label": blocks_page.label, "href": blocks_page.href, "icon": blocks_page.icon, "active": current_section == "blocks"}
+] %}
+{#- One utility ships today; the entry links straight to it and keeps the
+    Catalog group's Utilities slot for later growth. #}
+{% for utility in utilities %}
+  {% set _ = catalog_items.append({
+    "kind": "link",
+    "label": "Utilities",
+    "href": "utils/" ~ utility.slug ~ ".html",
+    "icon": utility_icons.get(utility.slug, "sparkles"),
+    "active": current_section == "utils"
+  }) %}
+{% endfor %}
+
+{% set resource_items = [] %}
+{% for page in resource_pages %}
+  {% set _ = resource_items.append({
+    "kind": "link",
+    "label": page.label,
+    "href": page.href,
+    "icon": page.icon,
+    "active": (current_section == "sections" and current_slug == page.slug) or (current_section == page.slug)
+  }) %}
+{% endfor %}
+
+{% set examples_entry = {"kind": "submenu", "id": "shell-examples-menu", "label": "Examples", "icon": "list-todo", "open": examples_open, "active": examples_open, "children": example_children} %}
+
+{% set nav_groups = [
+  {
+    "label": "Getting Started",
+    "entries": [
+      {"kind": "link", "label": "Home", "href": "index.html", "icon": "house", "active": home_active},
+      {"kind": "link", "label": introduction.label, "href": introduction.href, "icon": introduction.icon, "active": current_section == "sections" and current_slug == introduction.slug},
+      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug},
+      examples_entry
+    ]
+  },
+  {"label": "Catalog", "entries": catalog_items},
+  {"label": "Resources", "entries": resource_items}
+] %}
+
+{% macro _render_nav_item(item) -%}
+  {% call sidebar_menu_item() %}
+    {% if item.kind == "submenu" %}
+      {{ sidebar_menu_sub_button(item.label, item.id, icon=item.icon, active=item.active, open=item.open) }}
+      {% call sidebar_menu_sub(item.id, open=item.open) %}
+        {% for child in item.children %}
+          {% call sidebar_menu_sub_item() %}
+            {{ sidebar_menu_button(child.label, href=site_href(child.href, root_path), active=child.active, icon=child.icon) }}
+          {% endcall %}
+        {% endfor %}
+      {% endcall %}
+    {% else %}
+      {{ sidebar_menu_button(item.label, href=site_href(item.href, root_path), active=item.active, icon=item.icon) }}
+    {% endif %}
+  {% endcall %}
+{%- endmacro %}
 
 {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
   {% call sidebar_header() %}
@@ -34,116 +127,15 @@
   {% endcall %}
 
   {% call sidebar_content() %}
-    {% call sidebar_menu() %}
-      {% call sidebar_menu_item() %}
-        {{ sidebar_menu_button(
-          introduction.label,
-          href=site_href(introduction.href, root_path),
-          active=current_section == "sections" and current_slug == introduction.slug,
-          icon=introduction.icon
-        ) }}
-      {% endcall %}
-      {% call sidebar_menu_item() %}
-        {{ sidebar_menu_button(
-          installation.label,
-          href=site_href(installation.href, root_path),
-          active=current_section == "sections" and current_slug == installation.slug,
-          icon=installation.icon
-        ) }}
-      {% endcall %}
-      {% call sidebar_menu_item() %}
-        {{ sidebar_menu_sub_button(
-          "Components",
-          "shell-components-menu",
-          icon="component",
-          active=components_open,
-          open=components_open
-        ) }}
-        {% call sidebar_menu_sub("shell-components-menu", open=components_open) %}
-          {% call sidebar_menu_sub_item() %}
-            {{ sidebar_menu_button(
-              "All Components",
-              href=site_href("components/index.html", root_path),
-              active=components_open and current_slug == "index",
-              icon="layout-grid"
-            ) }}
-          {% endcall %}
-          {% for component in catalog | sort(attribute="label") %}
-            {% call sidebar_menu_sub_item() %}
-              {{ sidebar_menu_button(
-                component.label,
-                href=site_href("components/" ~ component.slug ~ ".html", root_path),
-                active=components_open and current_slug == component.slug,
-                icon=component_icons.get(component.slug, "component")
-              ) }}
-            {% endcall %}
+    {% for group in nav_groups %}
+      {% call sidebar_group() %}
+        {{ sidebar_group_label(group.label) }}
+        {% call sidebar_menu() %}
+          {% for item in group.entries %}
+            {{ _render_nav_item(item) }}
           {% endfor %}
         {% endcall %}
       {% endcall %}
-      {% call sidebar_menu_item() %}
-        {{ sidebar_menu_button(
-          blocks_page.label,
-          href=site_href(blocks_page.href, root_path),
-          active=current_section == "blocks",
-          icon=blocks_page.icon
-        ) }}
-      {% endcall %}
-      {#- One utility ships today; the entry links straight to it and keeps
-          the Utilities slot in the ordered menu for later growth. #}
-      {% for utility in utilities %}
-        {% call sidebar_menu_item() %}
-          {{ sidebar_menu_button(
-            "Utilities",
-            href=site_href("utils/" ~ utility.slug ~ ".html", root_path),
-            active=current_section == "utils",
-            icon=utility_icons.get(utility.slug, "sparkles")
-          ) }}
-        {% endcall %}
-      {% endfor %}
-      {% call sidebar_menu_item() %}
-        {{ sidebar_menu_sub_button(
-          "Examples",
-          "shell-examples-menu",
-          icon="list-todo",
-          active=examples_open,
-          open=examples_open
-        ) }}
-        {% call sidebar_menu_sub("shell-examples-menu", open=examples_open) %}
-          {% call sidebar_menu_sub_item() %}
-            {{ sidebar_menu_button(
-              "Overview",
-              href=site_href("examples/index.html", root_path),
-              active=examples_open and current_slug == "index",
-              icon="layout-grid"
-            ) }}
-          {% endcall %}
-          {% for example in examples %}
-            {% call sidebar_menu_sub_item() %}
-              {{ sidebar_menu_button(
-                example.label,
-                href=site_href("examples/" ~ example.slug ~ ".html", root_path),
-                active=examples_open and current_slug == example.slug,
-                icon="list-checks"
-              ) }}
-            {% endcall %}
-          {% endfor %}
-        {% endcall %}
-      {% endcall %}
-    {% endcall %}
-
-    {{ sidebar_separator() }}
-
-    {% call sidebar_menu() %}
-      {% for section in other_pages %}
-        {% call sidebar_menu_item() %}
-          {{ sidebar_menu_button(
-            section.label,
-            href=site_href(section.href, root_path),
-            active=(current_section == "sections" and current_slug == section.slug) or (current_section == section.slug),
-            icon=section.icon
-          ) }}
-        {% endcall %}
-      {% endfor %}
-    {% endcall %}
+    {% endfor %}
   {% endcall %}
 {% endcall %}
