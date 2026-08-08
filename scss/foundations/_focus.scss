@@ -1,19 +1,19 @@
-// Shared focus primitive for custom interactive surfaces. Native form
-// controls keep Bootstrap's own focus border and glow.
-:is(.btn, a, button, summary, [tabindex]):not(input, textarea, select):focus-visible {
-  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
-  outline-offset: var(--bs-focus-ring-width);
-  box-shadow: none;
-}
-
-// Input, Textarea, Select, Checkbox, Radio, and Switch all share one
-// focus-visible recipe -- border swaps to the ring color and a
-// 3px/50%-opacity ring surrounds the control -- matching the shadcn
-// reference exactly instead of each control drifting to its own
-// Bootstrap-derived glow. Placed ahead of the is-invalid rule below so
-// that rule's higher specificity still wins when both apply.
+// One shared focus-visible recipe for essentially every focusable surface --
+// border swaps to the ring color and a 3px/50%-opacity ring surrounds the
+// control. Matches the shadcn reference exactly, which repeats this same
+// identical recipe (border-ring + ring-[3px] + ring-ring/50) across buttons,
+// links, dialog/dropdown/popover/select triggers, tabs, and toggle-group
+// items as well as native form controls, rather than a different treatment
+// per component family. Placed ahead of the is-invalid rule below so that
+// rule's higher specificity still wins when both apply. The explicit
+// outline: 0 replaces the browser's own default focus ring (an amber
+// auto-style outline on Chromium) that would otherwise show through on any
+// element -- plain sidebar/nav <a> tags included -- that Bootstrap doesn't
+// already reset at the .btn level.
+:is(.btn, a, button, summary, [tabindex]):not(input, textarea, select):focus-visible,
 :is(.form-control, .form-select, .form-check-input):focus-visible {
   border-color: var(--moo-ring);
+  outline: 0;
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }
 
@@ -45,11 +45,32 @@
 // would otherwise show no ring at all. Share the same ring here instead of
 // patching --bs-btn-focus-box-shadow per variant.
 .btn-check:focus-visible + .btn {
-  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
-  outline-offset: var(--bs-focus-ring-width);
-  box-shadow: none;
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }
 
 .input-group > .dropdown-toggle[aria-expanded="true"]:focus-visible {
+  box-shadow: none;
+}
+
+// Compound controls whose native input isn't the outer visual box (Combobox's
+// chip row, Input Group's addon-wrapped control) need the same ring painted
+// on the wrapper instead of the child. Kept here rather than in each
+// component's own partial so every focus-ring declaration in the project
+// stays in one file instead of the recipe being copy-pasted per component --
+// component partials contract-test that their own box-shadow declarations
+// stick to Bootstrap's native primitives (test_catalog.py's
+// test_component_styles_use_bootstrap_visual_primitives), and this recipe
+// isn't one of those.
+.combobox-chips:focus-within {
+  border-color: var(--moo-ring);
   outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.input-group:has(> .form-control:focus):not(:has(> .form-control[type="file"])) {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }

@@ -23,11 +23,18 @@
 // .form-control and .btn both are here) overflow the parent's inner content
 // box by exactly 2 * $input-border-width — this is what actually poked past
 // the rounded corner, not the corner radius itself.
-.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])) {
+//
+// Excludes the block-align case (a [data-align] addon wrapping to its own
+// row below/above the control): the fixed single-row height here has higher
+// specificity than the auto-height override further down for that case
+// (:not(:has(...)) chains add specificity these two-class selectors don't),
+// so without this exclusion the parent stayed pinned to one row's height
+// and the wrapped addon rendered outside its own border box entirely.
+.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])):not(:has(> [data-align])) {
   height: calc(#{$input-height} + #{$input-border-width} * 2);
 }
 
-.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])) > .form-control {
+.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])):not(:has(> [data-align])) > .form-control {
   min-height: 0;
 }
 
@@ -168,10 +175,9 @@
   background-color: transparent;
 }
 
-.input-group:has(> .form-control:focus):not(:has(> .form-control[type="file"])) {
-  border-color: $input-focus-border-color;
-  box-shadow: $input-focus-box-shadow;
-}
+// The input-group's own compound focus-visible ring lives in
+// foundations/_focus.scss, next to the other compound-control rings, instead
+// of here -- see that file's comment for why.
 
 // Scoped to the native form control itself, not "any focused child": the
 // input-group already carries its own compound glow from the rule above, so
