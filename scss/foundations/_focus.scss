@@ -1,6 +1,6 @@
 // One shared focus-visible recipe for essentially every focusable surface --
 // border swaps to the ring color and a 3px/50%-opacity ring surrounds the
-// control. Matches the shadcn reference exactly, which repeats this same
+// control. Matches the reference exactly, which repeats this same
 // identical recipe (border-ring + ring-[3px] + ring-ring/50) across buttons,
 // links, dialog/dropdown/popover/select triggers, tabs, and toggle-group
 // items as well as native form controls, rather than a different treatment

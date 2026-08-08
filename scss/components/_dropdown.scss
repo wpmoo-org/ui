@@ -103,7 +103,7 @@
 // boxed square, since a box implies each item has its own independent on/off
 // state, which is wrong when only one item in the group can ever be active
 // (e.g. Data Table's page-size menu). The icon stays hidden until the item
-// is active, matching how shadcn and native menus mark single-choice items.
+// is active, matching how the reference and native menus mark single-choice items.
 .dropdown-item-check--radio .dropdown-item-check__indicator {
   border-color: transparent;
   background-color: transparent;

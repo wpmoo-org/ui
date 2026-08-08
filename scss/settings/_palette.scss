@@ -29,7 +29,14 @@ $moo-muted-surface: $secondary !default;
 $moo-border: $border-color !default;
 $moo-foreground: $body-color !default;
 $moo-muted-foreground: #71717a !default;
-$moo-ring: $body-color !default;
+// The reference derives --ring as a lighter tint of --primary (same hue,
+// lightened toward the surface) instead of a fixed literal, so a
+// brand-color change updates the ring automatically instead of needing a
+// matching manual edit. $primary here is itself a near-neutral dark tone,
+// so this naturally lands close to a neutral mid-gray -- the reference's
+// own default Neutral theme's ring (#a1a1a1 light / #737373 dark) -- while
+// staying derived rather than a hardcoded copy of those numbers.
+$moo-ring: color-mix(in srgb, $white 60%, $primary) !default;
 $moo-destructive: $danger !default;
 $moo-destructive-foreground: $white !default;
 $moo-sidebar: $light !default;
@@ -38,7 +45,10 @@ $moo-muted-surface-dark: #27272a !default;
 $moo-border-dark: #3f3f46 !default;
 $moo-foreground-dark: $light !default;
 $moo-muted-foreground-dark: #a1a1aa !default;
-$moo-ring-dark: $light !default;
+// Same derivation as $moo-ring above, at a lower white weight -- dark
+// surfaces need a darker-than-light-mode ring to read as mid-tone against a
+// dark background instead of a near-white glow.
+$moo-ring-dark: color-mix(in srgb, $white 40%, $primary) !default;
 $moo-destructive-dark: #f87171 !default;
 $moo-destructive-foreground-dark: $dark !default;
 $moo-sidebar-dark: #1c1c1f !default;

@@ -82,7 +82,7 @@
   border-radius: var(--moo-input-group-border-radius) !important;
 }
 
-// Match the shadcn input-group affordance: the compound input stays clear,
+// Match the reference input-group affordance: the compound input stays clear,
 // while the hovered control gets a small inset surface. The surface reuses
 // the existing Moo muted token and Bootstrap radius instead of adding a
 // component-specific color or geometry value.
