@@ -304,6 +304,24 @@ body {
   background: transparent;
 }
 
+// The Components dropdown trigger reads like the plain nav links around
+// it: same type and color, zeroed button padding. is-current marks the
+// dropdown while any Components/Utilities page is open.
+.moo-catalog__header-nav .moo-catalog__header-nav-trigger {
+  min-height: 1.25rem;
+  padding: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.moo-catalog__header-nav .moo-catalog__header-nav-trigger:hover,
+.moo-catalog__header-nav .moo-catalog__header-nav-trigger.show,
+.moo-catalog__header-nav-dropdown.is-current .moo-catalog__header-nav-trigger {
+  color: var(--bs-body-color);
+  background: transparent;
+}
+
 .moo-catalog__header-actions {
   display: flex;
   align-items: center;

@@ -1,5 +1,5 @@
 {% from "components/button.html.jinja" import button %}
-{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
@@ -18,6 +18,12 @@
   </a>
 {%- endmacro %}
 
+{#- Active-section flags shared by the desktop nav and the mobile menu.
+   Components owns both the component catalog and the utilities section. #}
+{% set components_active = current_section in ["components", "utils"] %}
+{% set examples_active = current_section == "examples" %}
+{% set docs_active = current_section == "sections" and current_slug != "index" %}
+
 <header class="moo-catalog__header">
   <nav class="navbar moo-catalog__navbar" aria-label="Catalog controls">
     <div class="container-fluid moo-catalog__navbar-inner">
@@ -30,13 +36,56 @@
             {{ dropdown_item("Docs", href=site_href("introduction.html", root_path)) }}
             {{ dropdown_item("Components", href=site_href("components/index.html", root_path)) }}
             {{ dropdown_item("Blocks", href=site_href("blocks/index.html", root_path)) }}
+            {{ dropdown_item("Examples", href=site_href("examples/index.html", root_path)) }}
           {% endcall %}
         </div>
         {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav d-none d-md-flex") %}
-          {{ nav_item("Home", href=site_href("index.html", root_path)) }}
-          {{ nav_item("Docs", href=site_href("introduction.html", root_path)) }}
-          {{ nav_item("Components", href=site_href("components/index.html", root_path)) }}
-          {{ nav_item("Blocks", href=site_href("blocks/index.html", root_path)) }}
+          {{ nav_item("Home", href=site_href("index.html", root_path), active=(current_section == "sections" and current_slug == "index")) }}
+          {{ nav_item("Docs", href=site_href("introduction.html", root_path), active=docs_active) }}
+          {#- Components is the only nav dropdown; it stays shallow (a few
+             representative entries plus the full index) instead of listing
+             all 42 components. #}
+          <li class="nav-item dropdown moo-catalog__header-nav-dropdown{% if components_active %} is-current{% endif %}">
+            {{ button(
+              "Components",
+              variant="ghost",
+              element="button",
+              dropdown=true,
+              dropdown_caret=true,
+              aria_label="Browse components",
+              extra_class="moo-catalog__header-nav-trigger"
+            ) }}
+            {% call dropdown_menu() %}
+              {{ dropdown_item("All Components", href=site_href("components/index.html", root_path)) }}
+              {{ dropdown_divider() }}
+              {{ dropdown_item("Button", href=site_href("components/button.html", root_path)) }}
+              {{ dropdown_item("Input", href=site_href("components/input.html", root_path)) }}
+              {{ dropdown_item("Select", href=site_href("components/select.html", root_path)) }}
+              {{ dropdown_item("Data Table", href=site_href("components/datatable.html", root_path)) }}
+              {{ dropdown_item("Dialog", href=site_href("components/dialog.html", root_path)) }}
+              {{ dropdown_item("Sidebar", href=site_href("components/sidebar.html", root_path)) }}
+            {% endcall %}
+          </li>
+          {{ nav_item("Blocks", href=site_href("blocks/index.html", root_path), active=(current_section == "blocks")) }}
+          {#- Examples mirrors the Components dropdown: shallow list of the
+             shipped example pages plus the index, growing with later
+             phases. #}
+          <li class="nav-item dropdown moo-catalog__header-nav-dropdown{% if examples_active %} is-current{% endif %}">
+            {{ button(
+              "Examples",
+              variant="ghost",
+              element="button",
+              dropdown=true,
+              dropdown_caret=true,
+              aria_label="Browse examples",
+              extra_class="moo-catalog__header-nav-trigger"
+            ) }}
+            {% call dropdown_menu() %}
+              {{ dropdown_item("All Examples", href=site_href("examples/index.html", root_path)) }}
+              {{ dropdown_divider() }}
+              {{ dropdown_item("Tasks", href=site_href("examples/tasks.html", root_path)) }}
+            {% endcall %}
+          </li>
         {% endcall %}
       </div>
 

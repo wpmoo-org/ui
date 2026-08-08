@@ -1,0 +1,351 @@
+{% from "components/datatable.html.jinja" import datatable %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/alert_dialog.html.jinja" import alert_dialog, alert_dialog_header %}
+{% from "components/dialog.html.jinja" import dialog_footer %}
+{% from "components/field.html.jinja" import field, field_group, form %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/select.html.jinja" import select %}
+{% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
+{% from "components/table.html.jinja" import table_row_actions %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
+
+{#- Status, priority, and tag sets drive the table cells, the facet
+    filters, the bulk-action menus, the New Task sheet's selects, and the
+    row skeleton that examples-tasks.js fills on submit; keeping them
+    module-level lets every surface stay in one order. #}
+{% set task_statuses = [
+  {"value": "open", "label": "Open", "icon": "circle", "rank": 0},
+  {"value": "in-progress", "label": "In progress", "icon": "loader", "rank": 1},
+  {"value": "blocked", "label": "Blocked", "icon": "circle-alert", "rank": 2},
+  {"value": "done", "label": "Done", "icon": "circle-check", "rank": 3}
+] %}
+{% set task_priorities = [
+  {"value": "high", "label": "High", "icon": "arrow-up", "rank": 0},
+  {"value": "medium", "label": "Medium", "icon": "minus", "rank": 1},
+  {"value": "low", "label": "Low", "icon": "arrow-down", "rank": 2}
+] %}
+{% set task_tags = ["Docs", "A11y", "Visual", "Site", "Core"] %}
+{% set task_tag_options = [] %}
+{% for tag in task_tags %}{% set _ = task_tag_options.append({"value": tag | lower, "label": tag}) %}{% endfor %}
+{% set task_status_options = [] %}
+{% for status in task_statuses %}{% set _ = task_status_options.append({"value": status.value, "label": status.label}) %}{% endfor %}
+{% set task_priority_options = [] %}
+{% for priority in task_priorities %}{% set _ = task_priority_options.append({"value": priority.value, "label": priority.label}) %}{% endfor %}
+
+{% macro task_item_cell(title, tag) -%}
+  <div class="datatable-item-cell">
+    <span class="text-truncate">{{ title }}</span>
+    {{ badge(tag, variant="outline", pill=true) }}
+  </div>
+{%- endmacro %}
+
+{#- Icon + label cells (the certified Data Table contract for columns a
+    bulk update can rewrite): datatable.js swaps the label text and the
+    svg on bulk update, so status and priority cells both use this shape. #}
+{% macro task_icon_label_cell(label, icon, extra_class="") -%}
+  <span class="datatable-icon-label text-nowrap{% if extra_class %} {{ extra_class }}{% endif %}">
+    {{ render_icon(icon, "inline-start") }}
+    <span data-datatable-cell-label>{{ label }}</span>
+  </span>
+{%- endmacro %}
+
+{% macro task_row_actions(title="", icon="ellipsis-vertical") -%}
+  {% call table_row_actions(aria_label="Task actions" if not title else "Task actions for " ~ title, icon=icon) %}
+    {{ dropdown_item("Edit", icon="pencil", attrs="data-moo-task-edit") }}
+    {{ dropdown_item("Copy link", icon="copy", attrs="data-moo-task-copy") }}
+    {{ dropdown_divider() }}
+    {{ dropdown_item("Delete task", icon="trash-2", destructive=true, attrs="data-moo-task-delete") }}
+  {% endcall %}
+{%- endmacro %}
+
+{% macro task_tr(row) -%}
+  <tr id="{{ row.id }}" data-datatable-row data-datatable-search="{{ row.search }}"{% for facet_key, facet_value in row.facets.items() %} data-datatable-facet-{{ facet_key }}="{{ facet_value }}"{% endfor %}>
+    <td class="datatable-col" data-datatable-column="task" data-datatable-sort-value="{{ row.sort.task }}">{{ row.cells.task | safe }}</td>
+    <td class="datatable-col" data-datatable-column="status" data-datatable-sort-value="{{ row.sort.status }}">{{ row.cells.status | safe }}</td>
+    <td class="datatable-col" data-datatable-column="priority" data-datatable-sort-value="{{ row.sort.priority }}">{{ row.cells.priority | safe }}</td>
+    <td class="datatable-col" data-datatable-column="assignee" data-datatable-sort-value="{{ row.sort.assignee }}">{{ row.cells.assignee | safe }}</td>
+    <td class="datatable-col" data-datatable-column="due" data-datatable-sort-value="{{ row.sort.due }}">{{ row.cells.due | safe }}</td>
+    <td class="datatable-col text-end" data-datatable-column="actions">{{ row.cells.actions | safe }}</td>
+  </tr>
+{%- endmacro %}
+
+{% macro task_card(row) -%}
+  <article class="datatable-card" data-datatable-card data-datatable-card-for="{{ row.id }}">
+    <div class="datatable-card-header">
+      <div class="datatable-card-heading">
+        <div class="datatable-card-title">{{ row.card.title | safe }}</div>
+      </div>
+      <div class="datatable-card-actions">{{ row.card.actions | safe }}</div>
+    </div>
+    <dl class="datatable-card-list">
+      <div class="datatable-card-row" data-datatable-detail-column="status">
+        <dt>Status</dt>
+        <dd class="datatable-card-value">{{ row.cells.status | safe }}</dd>
+      </div>
+      <div class="datatable-card-row" data-datatable-detail-column="priority">
+        <dt>Priority</dt>
+        <dd class="datatable-card-value">{{ row.cells.priority | safe }}</dd>
+      </div>
+      <div class="datatable-card-row" data-datatable-detail-column="assignee">
+        <dt>Assignee</dt>
+        <dd class="datatable-card-value">{{ row.cells.assignee | safe }}</dd>
+      </div>
+      <div class="datatable-card-row" data-datatable-detail-column="due">
+        <dt>Due</dt>
+        <dd class="datatable-card-value">{{ row.cells.due | safe }}</dd>
+      </div>
+    </dl>
+  </article>
+{%- endmacro %}
+
+{#- Row skeleton for the New Task sheet. examples-tasks.js clones it on
+    submit and fills the data-moo-fill text slots, the status/priority
+    icon + label pairs, and the sort/search/facet attributes from the
+    form. Server-rendering the row keeps every icon and cell shape on the
+    certified contract; JS never fabricates component markup. #}
+{% macro task_skeleton(id) -%}
+  <template data-moo-task-skeleton>
+    <div data-moo-task-skeleton-item>
+      {#- A <tr> outside a table context is dropped by the HTML parser,
+          even inside <template>; the skeleton row rides in a throwaway
+          table so it survives parsing. #}
+      <table><tbody>
+        <tr data-datatable-row>
+          {#- The selection cell mirrors the server-rendered rows; its id
+              is rewritten by examples-tasks.js once the row gets one. #}
+          <td class="datatable-col-select">
+            {{ checkbox(id ~ "-skeleton-table-select", aria_label="Select row", extra_class="datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
+          </td>
+          <td class="datatable-col" data-datatable-column="task">
+            <div class="datatable-item-cell">
+              <span class="text-truncate" data-moo-fill="title"></span>
+              <span data-moo-badge="tag">{{ badge("Tag", variant="outline", pill=true) }}</span>
+            </div>
+          </td>
+          <td class="datatable-col" data-datatable-column="status">
+            <span class="datatable-icon-label text-nowrap text-body-secondary" data-moo-choice="status">
+              {{ render_icon("circle", "inline-start") }}
+              <span data-datatable-cell-label>Open</span>
+            </span>
+          </td>
+          <td class="datatable-col" data-datatable-column="priority">
+            <span class="datatable-icon-label text-nowrap text-body-secondary" data-moo-choice="priority">
+              {{ render_icon("minus", "inline-start") }}
+              <span data-datatable-cell-label>Medium</span>
+            </span>
+          </td>
+          <td class="datatable-col" data-datatable-column="assignee"><span data-moo-fill="assignee"></span></td>
+          <td class="datatable-col" data-datatable-column="due"><span class="text-nowrap text-body-secondary" data-moo-fill="due"></span></td>
+          <td class="datatable-col text-end" data-datatable-column="actions">{{ task_row_actions() }}</td>
+        </tr>
+      </tbody></table>
+      <article class="datatable-card" data-datatable-card>
+        <div class="datatable-card-header">
+          {{ checkbox(id ~ "-skeleton-card-select", aria_label="Select row", extra_class="datatable-card-select datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
+          <div class="datatable-card-heading">
+            <div class="datatable-card-title" data-moo-fill="title"></div>
+          </div>
+          <div class="datatable-card-actions">{{ task_row_actions() }}</div>
+        </div>
+        <dl class="datatable-card-list">
+          <div class="datatable-card-row" data-datatable-detail-column="status">
+            <dt>Status</dt>
+            <dd class="datatable-card-value">
+              <span class="datatable-icon-label text-nowrap text-body-secondary" data-moo-choice="status">
+                {{ render_icon("circle", "inline-start") }}
+                <span data-datatable-cell-label>Open</span>
+              </span>
+            </dd>
+          </div>
+          <div class="datatable-card-row" data-datatable-detail-column="priority">
+            <dt>Priority</dt>
+            <dd class="datatable-card-value">
+              <span class="datatable-icon-label text-nowrap text-body-secondary" data-moo-choice="priority">
+                {{ render_icon("minus", "inline-start") }}
+                <span data-datatable-cell-label>Medium</span>
+              </span>
+            </dd>
+          </div>
+          <div class="datatable-card-row" data-datatable-detail-column="assignee">
+            <dt>Assignee</dt>
+            <dd class="datatable-card-value"><span data-moo-fill="assignee"></span></dd>
+          </div>
+          <div class="datatable-card-row" data-datatable-detail-column="due">
+            <dt>Due</dt>
+            <dd class="datatable-card-value"><span class="text-nowrap text-body-secondary" data-moo-fill="due"></span></dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+  </template>
+{%- endmacro %}
+
+{#- New Task sheet. One form serves both create and edit: examples-tasks.js
+    prefills it for Edit and remembers the row being edited. Submitting
+    applies the change to the table on the page; nothing is persisted. #}
+{% macro render_task_sheet() -%}
+  {% call sheet("tasks-new-sheet", aria_label="Task details") %}
+    {{ sheet_header("tasks-new-sheet", "New task") }}
+    {% call sheet_body() %}
+      {% call form(extra_class="vstack gap-3") %}
+        <p class="text-body-secondary mb-0" data-moo-task-sheet-copy>
+          Fill in the details and add the task — it appears in the table
+          right away. This is a live demo, so nothing is stored.
+        </p>
+        {% call field() %}
+          {{ input(label="Title", id="tasks-new-title", required=true, placeholder="e.g. Draft release notes") }}
+        {% endcall %}
+        {% call field_group() %}
+          {% call field() %}
+            {{ select(label="Tag", id="tasks-new-tag", options=task_tag_options, selected="docs") }}
+          {% endcall %}
+          {% call field() %}
+            {{ select(label="Status", id="tasks-new-status", options=task_status_options, selected="open") }}
+          {% endcall %}
+        {% endcall %}
+        {% call field_group() %}
+          {% call field() %}
+            {{ select(label="Priority", id="tasks-new-priority", options=task_priority_options, selected="medium") }}
+          {% endcall %}
+          {% call field() %}
+            {{ input(label="Due", id="tasks-new-due", placeholder="e.g. Aug 21") }}
+          {% endcall %}
+        {% endcall %}
+        {% call field() %}
+          {{ input(label="Assignee", id="tasks-new-assignee", placeholder="e.g. Ada Lovelace") }}
+        {% endcall %}
+        <div class="d-flex justify-content-end gap-2 mt-auto pt-3">
+          {{ button("Cancel", variant="outline", dismiss="offcanvas") }}
+          {{ button("Add task", type="submit", extra_class="moo-task-sheet-submit") }}
+        </div>
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}
+
+{#- Destructive confirmation behind the Delete task row action.
+    examples-tasks.js rewrites the title and description for the targeted
+    row before showing the dialog; the Delete button carries the removal
+    through. #}
+{% macro render_task_delete_dialog() -%}
+  {% call alert_dialog("tasks-delete-dialog", describedby="tasks-delete-dialog-description") %}
+    {{ alert_dialog_header("tasks-delete-dialog", "Delete this task?", "This action cannot be undone.", icon="trash-2") }}
+    {% call dialog_footer() %}
+      {{ button("Cancel", variant="outline", dismiss="modal") }}
+      {{ button("Delete", variant="destructive", dismiss="modal", extra_class="moo-task-delete-confirm") }}
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}
+
+{% macro render_tasks_table(id="datatable-tasks") -%}
+  {% set status_by_value = {} %}
+  {% for status in task_statuses %}{% set _ = status_by_value.update({status.value: status}) %}{% endfor %}
+  {% set priority_by_value = {} %}
+  {% for priority in task_priorities %}{% set _ = priority_by_value.update({priority.value: priority}) %}{% endfor %}
+
+  {% set tasks = [
+    {"id": "tsk-126", "ref": "TSK-126", "title": "Dark mode token contrast audit", "tag": "A11y", "status": "open", "priority": "high", "assignee": "Alan Turing", "due": "Aug 09"},
+    {"id": "tsk-125", "ref": "TSK-125", "title": "Installation guide screenshot refresh", "tag": "Docs", "status": "in-progress", "priority": "medium", "assignee": "Betty Holberton", "due": "Aug 16"},
+    {"id": "tsk-123", "ref": "TSK-123", "title": "Card view bulk bar overlap", "tag": "Visual", "status": "blocked", "priority": "high", "assignee": "Jean Sammet", "due": "Aug 10"},
+    {"id": "tsk-122", "ref": "TSK-122", "title": "Examples index meta descriptions", "tag": "Docs", "status": "open", "priority": "low", "assignee": "Frances Allen", "due": "Aug 25"},
+    {"id": "tsk-121", "ref": "TSK-121", "title": "Search funnel icon alignment", "tag": "Visual", "status": "in-progress", "priority": "medium", "assignee": "Karen Spärck Jones", "due": "Aug 17"},
+    {"id": "tsk-120", "ref": "TSK-120", "title": "Offcanvas scroll lock on iOS", "tag": "Core", "status": "blocked", "priority": "high", "assignee": "Barbara Liskov", "due": "Aug 09"},
+    {"id": "tsk-119", "ref": "TSK-119", "title": "RTL sidebar flyout placement", "tag": "A11y", "status": "done", "priority": "medium", "assignee": "Adele Goldberg", "due": "Aug 04"},
+    {"id": "tsk-118", "ref": "TSK-118", "title": "Draft Examples section copy", "tag": "Docs", "status": "in-progress", "priority": "high", "assignee": "Ada Lovelace", "due": "Aug 12"},
+    {"id": "tsk-117", "ref": "TSK-117", "title": "Sidebar icon-rail contrast pass", "tag": "A11y", "status": "open", "priority": "high", "assignee": "Grace Hopper", "due": "Aug 08"},
+    {"id": "tsk-116", "ref": "TSK-116", "title": "Utilities page anchor offsets", "tag": "Site", "status": "open", "priority": "medium", "assignee": "Dana Ulery", "due": "Aug 20"},
+    {"id": "tsk-115", "ref": "TSK-115", "title": "Data table card view spacing", "tag": "Visual", "status": "in-progress", "priority": "medium", "assignee": "Katherine Johnson", "due": "Aug 14"},
+    {"id": "tsk-114", "ref": "TSK-114", "title": "Command palette RTL traversal", "tag": "A11y", "status": "blocked", "priority": "high", "assignee": "Radia Perlman", "due": "Aug 11"},
+    {"id": "tsk-113", "ref": "TSK-113", "title": "Icon sprite tree-shaking check", "tag": "Core", "status": "in-progress", "priority": "low", "assignee": "Susan Kare", "due": "Aug 21"},
+    {"id": "tsk-112", "ref": "TSK-112", "title": "Theme toggle persistence audit", "tag": "Site", "status": "done", "priority": "medium", "assignee": "Margaret Hamilton", "due": "Aug 05"},
+    {"id": "tsk-111", "ref": "TSK-111", "title": "Changelog entry template", "tag": "Docs", "status": "done", "priority": "low", "assignee": "Erna Schneider Hoover", "due": "Aug 03"},
+    {"id": "tsk-110", "ref": "TSK-110", "title": "Focus-visible ring on dark", "tag": "A11y", "status": "open", "priority": "high", "assignee": "Evelyn Berezin", "due": "Aug 11"},
+    {"id": "tsk-109", "ref": "TSK-109", "title": "Badge tone inventory on dark", "tag": "Visual", "status": "open", "priority": "low", "assignee": "Mary Jackson", "due": "Aug 19"},
+    {"id": "tsk-108", "ref": "TSK-108", "title": "Sticky table header shadow", "tag": "Visual", "status": "in-progress", "priority": "medium", "assignee": "Klara von Neumann", "due": "Aug 18"},
+    {"id": "tsk-107", "ref": "TSK-107", "title": "Sheet focus return smoke test", "tag": "Core", "status": "done", "priority": "high", "assignee": "Joan Clarke", "due": "Aug 06"},
+    {"id": "tsk-106", "ref": "TSK-106", "title": "Contributing guide code fences", "tag": "Docs", "status": "open", "priority": "low", "assignee": "Tim Berners-Lee", "due": "Aug 26"},
+    {"id": "tsk-105", "ref": "TSK-105", "title": "Navbar dropdown keyboard pass", "tag": "A11y", "status": "in-progress", "priority": "medium", "assignee": "Dorothy Vaughan", "due": "Aug 15"},
+    {"id": "tsk-104", "ref": "TSK-104", "title": "Badge pill radius tokens", "tag": "Site", "status": "done", "priority": "medium", "assignee": "Dennis Ritchie", "due": "Aug 02"},
+    {"id": "tsk-103", "ref": "TSK-103", "title": "Blocks preview frame reload", "tag": "Site", "status": "open", "priority": "low", "assignee": "Hedy Lamarr", "due": "Aug 22"},
+    {"id": "tsk-101", "ref": "TSK-101", "title": "Pagination boundary contrast", "tag": "Visual", "status": "blocked", "priority": "medium", "assignee": "Annie Easley", "due": "Aug 13"}
+  ] %}
+
+  {% set task_rows = [] %}
+  {% for task in tasks %}
+    {% set status = status_by_value[task.status] %}
+    {% set priority = priority_by_value[task.priority] %}
+    {% set _ = task_rows.append({
+      "id": task.id,
+      "label": task.ref,
+      "card": {"title": task.title, "actions": task_row_actions(task.title)},
+      "search": task.ref ~ " " ~ task.title ~ " " ~ task.tag ~ " " ~ status.label ~ " " ~ priority.label ~ " " ~ task.assignee ~ " " ~ task.due,
+      "facets": {"status": task.status, "priority": task.priority, "tag": task.tag | lower},
+      "sort": {
+        "task": task.title | lower,
+        "status": status.rank,
+        "priority": priority.rank,
+        "assignee": task.assignee | lower,
+        "due": task.due | replace("Aug", "") | trim | int
+      },
+      "cells": {
+        "task": task_item_cell(task.title, task.tag),
+        "status": task_icon_label_cell(status.label, status.icon, "text-body-secondary"),
+        "priority": task_icon_label_cell(priority.label, priority.icon, "text-body-secondary"),
+        "assignee": task.assignee,
+        "due": "<span class=\"text-nowrap text-body-secondary\">" ~ task.due ~ "</span>",
+        "actions": task_row_actions(task.title)
+      }
+    }) %}
+  {% endfor %}
+
+  {% set status_facet_options = [] %}
+  {% for status in task_statuses %}
+    {% set _ = status_facet_options.append({"value": status.value, "label": status.label, "icon": status.icon, "count": tasks | selectattr("status", "equalto", status.value) | list | length}) %}
+  {% endfor %}
+  {% set priority_facet_options = [] %}
+  {% for priority in task_priorities %}
+    {% set _ = priority_facet_options.append({"value": priority.value, "label": priority.label, "icon": priority.icon, "count": tasks | selectattr("priority", "equalto", priority.value) | list | length}) %}
+  {% endfor %}
+  {% set tag_facet_options = [] %}
+  {% for tag in task_tags %}
+    {% set _ = tag_facet_options.append({"value": tag | lower, "label": tag, "count": tasks | selectattr("tag", "equalto", tag) | list | length}) %}
+  {% endfor %}
+
+  {#- Tasks showcases the picker variant: the filter funnel docked in the
+      search bar is the signature Filter UX, and it keeps the toolbar to
+      one row on narrow viewports. The inline facet chips remain
+      documented on the Data Table component page. #}
+  {{ datatable(
+    id,
+    columns=[
+      {"key": "task", "label": "Task", "card_role": "title", "hideable": false, "width": "22rem"},
+      {"key": "status", "label": "Status", "width": "9rem"},
+      {"key": "priority", "label": "Priority", "width": "9rem"},
+      {"key": "assignee", "label": "Assignee", "width": "11rem"},
+      {"key": "due", "label": "Due", "width": "7rem"},
+      {"key": "actions", "label": "", "sr_label": "Row actions", "sortable": false, "hideable": false, "align": "end", "width": "4rem", "card_role": "actions"}
+    ],
+    rows=task_rows,
+    facets=[
+      {"key": "status", "label": "Status", "options": status_facet_options},
+      {"key": "priority", "label": "Priority", "options": priority_facet_options},
+      {"key": "tag", "label": "Tag", "options": tag_facet_options}
+    ],
+    search_placeholder="Search tasks...",
+    default_page_size=10,
+    selection_noun="tasks",
+    filter_mode="picker",
+    responsive_mode="toggle",
+    responsive_breakpoint="md",
+    bulk_actions=[
+      {"key": "status", "label": "Update status", "icon": "circle-check-big", "options": task_statuses},
+      {"key": "priority", "label": "Set priority", "icon": "flag", "options": task_priorities},
+      {"key": "delete", "label": "Delete tasks", "icon": "trash-2", "destructive": true}
+    ],
+    extra_class="datatable--tasks"
+  ) }}
+
+  {{ task_skeleton(id) }}
+{%- endmacro %}

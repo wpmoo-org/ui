@@ -1,9 +1,22 @@
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_group, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_header, sidebar_menu, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_separator %}
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% set utility_icons = {
   "scroll-fade": "scroll"
 } %}
+
+{#- One ordered menu instead of labelled groups: Introduction, Installation,
+    Components (disclosure), Blocks, Utilities, Examples (disclosure), then
+    the remaining doc pages. The disclosure entries reuse the certified
+    Sidebar submenu contract (sidebar_menu_sub_button + sidebar_menu_sub),
+    so the icon-rail flyout and tooltip behavior come from the component
+    for free; only the nested indentation is site-owned SCSS. #}
+{% set introduction = (sections | selectattr("slug", "equalto", "introduction") | list)[0] %}
+{% set installation = (sections | selectattr("slug", "equalto", "installation") | list)[0] %}
+{% set blocks_page = (sections | selectattr("slug", "equalto", "blocks") | list)[0] %}
+{% set other_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "components", "blocks"]) | list %}
+{% set components_open = current_section == "components" %}
+{% set examples_open = current_section == "examples" %}
 
 {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
   {% call sidebar_header() %}
@@ -21,52 +34,116 @@
   {% endcall %}
 
   {% call sidebar_content() %}
-    {% call sidebar_group() %}
-      {{ sidebar_group_label("Sections") }}
-      {% call sidebar_menu() %}
-        {% for section in sections %}
-          {% call sidebar_menu_item() %}
+    {% call sidebar_menu() %}
+      {% call sidebar_menu_item() %}
+        {{ sidebar_menu_button(
+          introduction.label,
+          href=site_href(introduction.href, root_path),
+          active=current_section == "sections" and current_slug == introduction.slug,
+          icon=introduction.icon
+        ) }}
+      {% endcall %}
+      {% call sidebar_menu_item() %}
+        {{ sidebar_menu_button(
+          installation.label,
+          href=site_href(installation.href, root_path),
+          active=current_section == "sections" and current_slug == installation.slug,
+          icon=installation.icon
+        ) }}
+      {% endcall %}
+      {% call sidebar_menu_item() %}
+        {{ sidebar_menu_sub_button(
+          "Components",
+          "shell-components-menu",
+          icon="component",
+          active=components_open,
+          open=components_open
+        ) }}
+        {% call sidebar_menu_sub("shell-components-menu", open=components_open) %}
+          {% call sidebar_menu_sub_item() %}
             {{ sidebar_menu_button(
-              section.label,
-              href=site_href(section.href, root_path),
-              active=(current_section == "sections" and current_slug == section.slug) or (current_section == section.slug),
-              icon=section.icon
+              "All Components",
+              href=site_href("components/index.html", root_path),
+              active=components_open and current_slug == "index",
+              icon="layout-grid"
             ) }}
           {% endcall %}
-        {% endfor %}
+          {% for component in catalog | sort(attribute="label") %}
+            {% call sidebar_menu_sub_item() %}
+              {{ sidebar_menu_button(
+                component.label,
+                href=site_href("components/" ~ component.slug ~ ".html", root_path),
+                active=components_open and current_slug == component.slug,
+                icon=component_icons.get(component.slug, "component")
+              ) }}
+            {% endcall %}
+          {% endfor %}
+        {% endcall %}
+      {% endcall %}
+      {% call sidebar_menu_item() %}
+        {{ sidebar_menu_button(
+          blocks_page.label,
+          href=site_href(blocks_page.href, root_path),
+          active=current_section == "blocks",
+          icon=blocks_page.icon
+        ) }}
+      {% endcall %}
+      {#- One utility ships today; the entry links straight to it and keeps
+          the Utilities slot in the ordered menu for later growth. #}
+      {% for utility in utilities %}
+        {% call sidebar_menu_item() %}
+          {{ sidebar_menu_button(
+            "Utilities",
+            href=site_href("utils/" ~ utility.slug ~ ".html", root_path),
+            active=current_section == "utils",
+            icon=utility_icons.get(utility.slug, "sparkles")
+          ) }}
+        {% endcall %}
+      {% endfor %}
+      {% call sidebar_menu_item() %}
+        {{ sidebar_menu_sub_button(
+          "Examples",
+          "shell-examples-menu",
+          icon="list-todo",
+          active=examples_open,
+          open=examples_open
+        ) }}
+        {% call sidebar_menu_sub("shell-examples-menu", open=examples_open) %}
+          {% call sidebar_menu_sub_item() %}
+            {{ sidebar_menu_button(
+              "Overview",
+              href=site_href("examples/index.html", root_path),
+              active=examples_open and current_slug == "index",
+              icon="layout-grid"
+            ) }}
+          {% endcall %}
+          {% for example in examples %}
+            {% call sidebar_menu_sub_item() %}
+              {{ sidebar_menu_button(
+                example.label,
+                href=site_href("examples/" ~ example.slug ~ ".html", root_path),
+                active=examples_open and current_slug == example.slug,
+                icon="list-checks"
+              ) }}
+            {% endcall %}
+          {% endfor %}
+        {% endcall %}
       {% endcall %}
     {% endcall %}
 
-    {% call sidebar_group() %}
-      {{ sidebar_group_label("Components") }}
-      {% call sidebar_menu() %}
-        {% for component in catalog | sort(attribute="label") %}
-          {% call sidebar_menu_item() %}
-            {{ sidebar_menu_button(
-              component.label,
-              href=site_href("components/" ~ component.slug ~ ".html", root_path),
-              active=current_section == "components" and current_slug == component.slug,
-              icon=component_icons.get(component.slug, "component")
-            ) }}
-          {% endcall %}
-        {% endfor %}
-      {% endcall %}
-    {% endcall %}
+    {{ sidebar_separator() }}
 
-    {% call sidebar_group() %}
-      {{ sidebar_group_label("Utilities") }}
-      {% call sidebar_menu() %}
-        {% for utility in utilities %}
-          {% call sidebar_menu_item() %}
-            {{ sidebar_menu_button(
-              utility.label,
-              href=site_href("utils/" ~ utility.slug ~ ".html", root_path),
-              active=current_section == "utils" and current_slug == utility.slug,
-              icon=utility_icons.get(utility.slug, "sparkles")
-            ) }}
-          {% endcall %}
-        {% endfor %}
-      {% endcall %}
+    {% call sidebar_menu() %}
+      {% for section in other_pages %}
+        {% call sidebar_menu_item() %}
+          {{ sidebar_menu_button(
+            section.label,
+            href=site_href(section.href, root_path),
+            active=(current_section == "sections" and current_slug == section.slug) or (current_section == section.slug),
+            icon=section.icon
+          ) }}
+        {% endcall %}
+      {% endfor %}
     {% endcall %}
   {% endcall %}
 {% endcall %}

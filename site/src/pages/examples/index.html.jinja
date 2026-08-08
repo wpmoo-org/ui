@@ -1,0 +1,38 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/card.html.jinja" import card %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% set example_descriptions = {
+  "tasks": "A work queue with search, sorting, list/card views, and a New Task action on a certified Data Table."
+} %}
+
+{% block title %}Examples — Moo UI{% endblock %}
+
+{% block content %}
+  {#- Examples pages are full-width app screens: no doc reading measure,
+     no TOC column. #}
+  <div class="moo-examples-page">
+      {{ render_page_header(
+        "Examples",
+        "Real, multi-page screens built only from certified Moo UI components. Click through them like an app, not a gallery.",
+        id="examples"
+      ) }}
+
+      <section class="moo-catalog__dashboard" aria-label="Examples">
+        <div class="moo-catalog__grid" id="examples-grid">
+          {% for example in examples %}
+            {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
+              <div>
+                <h2 class="h5 mb-2">
+                  <a class="stretched-link text-body text-decoration-none" href="{{ site_href("examples/" ~ example.slug ~ ".html", root_path) }}">{{ example.label }}</a>
+                </h2>
+                <p class="text-body-secondary mb-0">
+                  {{ example_descriptions.get(example.slug, example.description) }}
+                </p>
+              </div>
+            {% endcall %}
+          {% endfor %}
+        </div>
+      </section>
+  </div>
+{% endblock %}

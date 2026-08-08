@@ -221,3 +221,53 @@
 .moo-example__preview--shell>* {
   width: 100%;
 }
+
+// Examples section pages are full-width app screens, not doc articles:
+// no 52rem reading measure and no reserved TOC column. Vertical rhythm
+// matches the doc pages' 3rem section gap. Children must be allowed to
+// shrink below their intrinsic width (grid items default to
+// min-width: auto), so the Data Table's own horizontal scroll-fade
+// engages instead of the table stretching the whole page.
+.moo-examples-page {
+  display: grid;
+  gap: 3rem;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+// App-toolbar header: title and copy on the left, primary action on the
+// right, wrapping as a unit on narrow viewports. The copy shrinks (and
+// its paragraph wraps) so the action stays on the title row while there
+// is room.
+.moo-examples-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.moo-examples-header > :first-child {
+  // A shrinkable basis (not auto): the wrap decision runs on the flex
+  // base size, so an auto basis would keep the copy's full one-line
+  // width and push the action onto its own row even when there is
+  // room to share.
+  flex: 1 1 24rem;
+  min-width: 0;
+}
+
+// The package's modal--alert contract is a compact 24rem confirmation;
+// the Tasks delete dialog carries a full sentence plus the task title,
+// so it reads better at the regular Dialog width.
+#tasks-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+// The per-row copy joins two sentences with a line break; the default
+// description collapses whitespace, so opt this dialog into pre-line.
+#tasks-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+

@@ -48,6 +48,48 @@
     </div>
   </section>
 
+  {#- Entry row under the hero: the three top-level destinations of the
+     catalog. Each card is one stretched link, so the whole surface is
+     clickable. #}
+  <section class="moo-home-entries" aria-label="Browse Moo UI">
+    {% call card(extra_class="h-100 moo-home-entry-card", body_class="d-grid gap-3") %}
+      <span class="moo-catalog__philosophy-icon">{{ render_icon("component", "inline-start") }}</span>
+      <div>
+        <h2 class="h6 mb-2">
+          <a class="stretched-link" href="{{ site_href("components/index.html", root_path) }}">Components</a>
+        </h2>
+        <p class="text-body-secondary mb-0">
+          {{ catalog | length }} certified components with live examples,
+          from Button to Data Table.
+        </p>
+      </div>
+    {% endcall %}
+    {% call card(extra_class="h-100 moo-home-entry-card", body_class="d-grid gap-3") %}
+      <span class="moo-catalog__philosophy-icon">{{ render_icon("blocks", "inline-start") }}</span>
+      <div>
+        <h2 class="h6 mb-2">
+          <a class="stretched-link" href="{{ site_href("blocks/index.html", root_path) }}">Blocks</a>
+        </h2>
+        <p class="text-body-secondary mb-0">
+          Composed, copy-paste regions such as sidebar shells and release
+          review queues.
+        </p>
+      </div>
+    {% endcall %}
+    {% call card(extra_class="h-100 moo-home-entry-card", body_class="d-grid gap-3") %}
+      <span class="moo-catalog__philosophy-icon">{{ render_icon("app-window", "inline-start") }}</span>
+      <div>
+        <h2 class="h6 mb-2">
+          <a class="stretched-link" href="{{ site_href("examples/index.html", root_path) }}">Examples</a>
+        </h2>
+        <p class="text-body-secondary mb-0">
+          Real, click-through pages — starting with Tasks — built only
+          from certified components.
+        </p>
+      </div>
+    {% endcall %}
+  </section>
+
   <section class="moo-home-intro" aria-labelledby="home-intro">
     <div class="moo-home-intro__copy">
       <h2 class="h3 mb-0" id="home-intro">A product interface layer for teams that already trust Bootstrap.</h2>

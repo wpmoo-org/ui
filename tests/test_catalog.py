@@ -668,12 +668,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         components = self.read_output("components/index.html")
 
-        sections_index = components.index(
-            'class="sidebar-group-label" data-slot="sidebar-group-label">Sections<'
-        )
-        components_index = components.index(
-            'class="sidebar-group-label" data-slot="sidebar-group-label">Components<'
-        )
+        # The catalog sidebar is one ordered menu (no labelled groups):
+        # the doc-section entries, starting with Introduction, precede
+        # the Components disclosure.
+        sidebar = components[components.index('id="catalog-sidebar"'):]
+        sections_index = sidebar.index(">Introduction<")
+        components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         self.assertLess(sections_index, components_index)
 
         for label, href in (

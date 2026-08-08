@@ -489,6 +489,7 @@ def build_site_pages(
     catalog: list[dict[str, str]],
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
+    examples: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     def section_page(slug: str) -> dict[str, str] | None:
         section = _find_entry(sections, slug)
@@ -527,6 +528,19 @@ def build_site_pages(
             pages.extend(child_pages(blocks, "blocks", "block"))
         else:
             pages.append({**section, "kind": "doc"})
+
+    # Examples pages keep kind "doc" on purpose: the command palette's
+    # "Pages" group picks them up without any template-side change.
+    if examples:
+        pages.append(
+            {
+                "slug": "examples",
+                "label": "Examples",
+                "href": "examples/index.html",
+                "kind": "doc",
+            }
+        )
+        pages.extend(child_pages(examples, "examples", "doc"))
 
     return pages
 
@@ -987,6 +1001,16 @@ def load_blocks() -> list[dict[str, str]]:
     )
 
 
+def load_examples() -> list[dict[str, str]]:
+    # No registry file yet: labels/descriptions come from each template's
+    # own metadata, and the index page is excluded by the registry loader.
+    return _load_page_registry(
+        PAGES / "examples",
+        SITE_REGISTRY,
+        "examples.json",
+    )
+
+
 def style_include_paths(entrypoint: Path) -> list[str]:
     include_paths = [str(SCSS)]
     if entrypoint.is_relative_to(SITE_SCSS):
@@ -1115,14 +1139,17 @@ def copy_site_assets() -> None:
     )
     if JS_CATALOG.exists():
         shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
-        catalog_index = js_dir / "catalog/index.js"
-        catalog_index.write_text(
-            catalog_index.read_text(encoding="utf-8").replace(
-                "../../../../src/js/components/",
-                "../components/",
-            ),
-            encoding="utf-8",
-        )
+        # Source catalog modules import package ESM via repo-relative
+        # paths; the dist layout nests them one level down, so every
+        # catalog module gets its imports remapped, not just index.js.
+        for catalog_script in sorted((js_dir / "catalog").rglob("*.js")):
+            catalog_script.write_text(
+                catalog_script.read_text(encoding="utf-8").replace(
+                    "../../../../src/js/components/",
+                    "../components/",
+                ),
+                encoding="utf-8",
+            )
     fonts_dir = SITE_DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
@@ -1236,6 +1263,7 @@ def render_pages(version: str | None = None) -> None:
     sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
+    examples = load_examples()
     product = load_product_facts()
     component_ownership = derive_component_ownership(
         catalog,
@@ -1248,7 +1276,7 @@ def render_pages(version: str | None = None) -> None:
         }
         for component in catalog
     ]
-    site_pages = build_site_pages(sections, catalog, utilities, blocks)
+    site_pages = build_site_pages(sections, catalog, utilities, blocks, examples)
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -1260,7 +1288,7 @@ def render_pages(version: str | None = None) -> None:
         root_path = "../" * depth
         current_section = logical_relative.parent.name
         current_slug = logical_relative.stem
-        if current_section not in {"components", "utils", "blocks"}:
+        if current_section not in {"components", "utils", "blocks", "examples"}:
             current_section = "sections"
         template_name = page.relative_to(SITE_SRC).as_posix()
         metadata = page_metadata(
@@ -1276,6 +1304,7 @@ def render_pages(version: str | None = None) -> None:
             sections=sections,
             utilities=utilities,
             blocks=blocks,
+            examples=examples,
             product=product,
             component_ownership=component_ownership,
             site_pages=site_pages,

@@ -7,6 +7,7 @@ import { initBootstrapPreview } from "./bootstrap-preview.js";
 import { initCatalogFilter } from "./catalog-filter.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
+import { initExamplesTasks } from "./examples-tasks.js";
 import { initHomeMotion } from "./home-motion.js";
 import { initTheme } from "./theme.js";
 import { initToc } from "./toc.js";
@@ -22,6 +23,7 @@ export function initCatalog(root = document) {
     initTheme(root),
     initCatalogFilter(root),
     initCommand(root),
+    initExamplesTasks(root),
     initToc(root),
   ];
 

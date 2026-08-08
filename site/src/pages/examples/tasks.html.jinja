@@ -1,0 +1,44 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/datatable_tasks.html.jinja" import render_task_sheet, render_task_delete_dialog, render_tasks_table %}
+{% from "components/button.html.jinja" import button %}
+
+{% block title %}Tasks — Moo UI{% endblock %}
+
+{% block content %}
+  {#- Examples pages are full-width app screens: no doc reading measure,
+     no TOC column, and no component-docs header chrome. The header is a
+     plain app toolbar: title and copy on the left, primary action right.
+     The table is a live, in-browser workspace: New Task opens a sheet
+     form, rows can be opened, edited, copied, and deleted, and bulk
+     selection works — all client-side, nothing is stored. #}
+  <div class="moo-examples-page" data-moo-example-tasks>
+    <header class="moo-examples-header">
+      <div>
+        <h1 class="h4 mb-1" id="tasks">Tasks</h1>
+        <p class="text-body-secondary mb-0">
+          A live work queue — changes stay in your browser.
+        </p>
+      </div>
+      <div data-moo-new-task-slot>
+        {{ button("New Task", icon_start="plus", element="button", sheet_target="tasks-new-sheet") }}
+      </div>
+    </header>
+
+    {{ render_tasks_table(id="examples-tasks-datatable") }}
+
+    <p class="moo-examples-built-with text-body-secondary small">
+      Built with the
+      <a href="{{ site_href("components/sidebar.html", root_path) }}">Sidebar</a>,
+      <a href="{{ site_href("components/datatable.html", root_path) }}">Data Table</a>,
+      <a href="{{ site_href("components/sheet.html", root_path) }}">Sheet</a>,
+      <a href="{{ site_href("components/alert-dialog.html", root_path) }}">Alert Dialog</a>,
+      <a href="{{ site_href("components/dropdown-menu.html", root_path) }}">Dropdown Menu</a>,
+      <a href="{{ site_href("components/badge.html", root_path) }}">Badge</a>, and
+      <a href="{{ site_href("components/button.html", root_path) }}">Button</a>
+      components.
+    </p>
+
+    {{ render_task_sheet() }}
+    {{ render_task_delete_dialog() }}
+  </div>
+{% endblock %}
