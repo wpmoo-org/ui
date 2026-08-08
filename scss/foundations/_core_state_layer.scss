@@ -12,8 +12,3 @@
 .moo-ui[data-bs-theme="dark"] .form-check-input:checked {
   filter: invert(1);
 }
-
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .btn-close,
-.moo-ui[data-bs-theme="dark"] .btn-close {
-  filter: var(--#{$prefix}btn-close-white-filter);
-}
