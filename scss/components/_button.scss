@@ -74,14 +74,17 @@ label.btn {
 .btn-icon-xs,
 .btn-icon-sm,
 .btn-icon-lg {
-  --moo-btn-icon-size: calc(
+  padding-inline: 0;
+  inline-size: calc(
     var(--bs-btn-line-height) +
     var(--bs-btn-padding-y) * 2 +
     var(--bs-btn-border-width) * 2
   );
-  padding-inline: 0;
-  inline-size: var(--moo-btn-icon-size);
-  block-size: var(--moo-btn-icon-size);
+  block-size: calc(
+    var(--bs-btn-line-height) +
+    var(--bs-btn-padding-y) * 2 +
+    var(--bs-btn-border-width) * 2
+  );
 }
 
 :is(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg)::after {
@@ -206,15 +209,6 @@ label.btn {
   --bs-btn-active-color: var(--moo-destructive-foreground);
   --bs-btn-active-bg: var(--moo-destructive-surface-hover);
   --bs-btn-active-border-color: transparent;
-}
-
-.btn-danger:focus-visible {
-  border-color: color-mix(in srgb, var(--moo-destructive) 40%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--moo-destructive) 20%, transparent);
-}
-
-[data-bs-theme="dark"] .btn-danger:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--moo-destructive) 40%, transparent);
 }
 
 .btn-link {

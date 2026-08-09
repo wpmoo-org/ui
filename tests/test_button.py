@@ -142,11 +142,11 @@ class ButtonTests(CatalogTestCase):
         self.assertIn("--bs-btn-color: var(--moo-primary-foreground);", primary)
         self.assertIn("--bs-btn-bg: var(--moo-primary);", primary)
         self.assertIn(
-            "--bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 88%, var(--moo-surface));",
+            "--bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));",
             primary,
         )
         self.assertIn(
-            "--bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));",
+            "--bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface));",
             primary,
         )
 
@@ -154,16 +154,16 @@ class ButtonTests(CatalogTestCase):
         scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
         danger = scss.split(".btn-danger {", 1)[1].split("}", 1)[0]
 
-        self.assertIn("--bs-btn-color: var(--moo-destructive);", danger)
+        self.assertIn("--bs-btn-color: var(--moo-destructive-foreground);", danger)
         self.assertIn("--bs-btn-bg: var(--moo-destructive-surface);", danger)
         self.assertIn("--bs-btn-border-color: transparent;", danger)
-        self.assertIn("--bs-btn-hover-color: var(--moo-destructive);", danger)
+        self.assertIn("--bs-btn-hover-color: var(--moo-destructive-foreground);", danger)
         self.assertIn(
             "--bs-btn-hover-bg: var(--moo-destructive-surface-hover);",
             danger,
         )
         self.assertIn("--bs-btn-hover-border-color: transparent;", danger)
-        self.assertIn("--bs-btn-active-color: var(--moo-destructive);", danger)
+        self.assertIn("--bs-btn-active-color: var(--moo-destructive-foreground);", danger)
         self.assertIn(
             "--bs-btn-active-bg: var(--moo-destructive-surface-hover);",
             danger,
@@ -602,10 +602,10 @@ class ButtonTests(CatalogTestCase):
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
-        self.assertIn('{{ button("حفظ", variant="outline", icon_start="save") }}', source)
-        self.assertIn('{{ button("שמור", variant="outline", icon_start="save") }}', source)
-        self.assertIn('{{ button("Save", variant="outline", icon_start="save") }}', source)
-        self.assertIn('variant="outline", icon_start="save"', source)
+        self.assertIn('{{ button("زر", variant="outline") }}', source)
+        self.assertIn('{{ button("כפתור", variant="outline") }}', source)
+        self.assertIn('{{ button("Button", variant="outline") }}', source)
+        self.assertIn('variant="outline", size="icon", aria_label="إضافة"', source)
         self.assertIn('dir="rtl"', source)
         self.assertIn("Use tabs to compare Arabic, Hebrew, and English button actions in RTL layout.", source)
         self.assertNotIn("Right-to-left layout", source)

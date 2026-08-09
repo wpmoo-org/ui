@@ -11,6 +11,7 @@ from tests.helpers.browser_harness import (
     new_case_context,
     prepare_page,
     serve_repository,
+    skip_if_browser_launch_is_sandboxed,
 )
 
 
@@ -74,6 +75,7 @@ def _capture_datatable_state(page, table_id: str) -> dict:
 class DataTableBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
         cls.playwright_manager = sync_playwright()

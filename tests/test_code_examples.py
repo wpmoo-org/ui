@@ -196,7 +196,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('data-expanded="false"', page)
         self.assertIn('data-moo-code-copy hidden', page)
         self.assertIn('data-moo-copy-status role="status"', page)
-        self.assertIn('aria-controls="core-variants-code"', page)
+        self.assertIn('aria-controls="default-code"', page)
 
         script = self.read_output("assets/js/catalog/code-preview.js")
         self.assertIn('panel.dataset.expanded = "true";', script)

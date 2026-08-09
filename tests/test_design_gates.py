@@ -183,7 +183,13 @@ def approved_shared_value(prop: str, value: str) -> bool:
             "0 0 0" in clean
             and all(APPROVED_CSS_TOKEN.match(token) for token in css_tokens)
             and any("ring-width" in name for name in names)
-            and any("color" in name or "border" in name for name in names)
+            and any(
+                "color" in name
+                or "border" in name
+                or "-bg" in name
+                or "surface" in name
+                for name in names
+            )
         )
     if "border" in prop:
         if prop.endswith("border-color") or prop == "border-color":

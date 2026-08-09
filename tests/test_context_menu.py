@@ -51,7 +51,12 @@ class ContextMenuTests(CatalogTestCase):
             output,
         )
         self.assertIn('class="dropdown-item"', output)
-        self.assertIn('class="dropdown-item text-danger"', output)
+        self.assertRegex(
+            output,
+            r'<button(?=[^>]*\sclass="dropdown-item"(?:\s|>))'
+            r'(?=[^>]*\stype="button"(?:\s|>))'
+            r'(?=[^>]*\sdata-variant="destructive"(?:\s|>))[^>]*>',
+        )
 
     def test_context_menu_fallback_uses_ghost_icon_button(self) -> None:
         output = self.render_context_menu(

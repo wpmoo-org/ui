@@ -9,6 +9,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from tests.helpers.browser_harness import serve_directory
+from tests.helpers.browser_harness import skip_if_browser_launch_is_sandboxed
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES_DIR = ROOT / "conformance" / "fixtures"
@@ -34,9 +35,21 @@ def invoke_runner(base_url, report_out):
     )
 
 
+class ConformanceRunnerCliTests(unittest.TestCase):
+    def test_runner_requires_base_url(self):
+        process = subprocess.run(
+            [sys.executable, str(RUNNER)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        self.assertEqual(process.returncode, 2)
+
+
 class ConformanceRunnerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        skip_if_browser_launch_is_sandboxed()
         cls.contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
         cls.server = serve_directory(FIXTURES_DIR)
         cls.base_url = cls.server.__enter__()
@@ -53,15 +66,6 @@ class ConformanceRunnerTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.report_dir.cleanup()
         cls.server.__exit__(None, None, None)
-
-    def test_runner_requires_base_url(self):
-        process = subprocess.run(
-            [sys.executable, str(RUNNER)],
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-        self.assertEqual(process.returncode, 2)
 
     def test_canonical_fixtures_pass_with_exit_code_zero(self):
         self.assertEqual(

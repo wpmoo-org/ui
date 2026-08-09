@@ -14,12 +14,14 @@ from tests.helpers.browser_harness import (
     prepare_page,
     run_axe,
     serve_repository,
+    skip_if_browser_launch_is_sandboxed,
 )
 
 
 class CertificationBrowserHarnessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
         cls.playwright_manager = sync_playwright()

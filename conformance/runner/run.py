@@ -49,7 +49,6 @@ SCENARIO_TIMEOUT_MS = 4_000
 INERT_POLL_TIMEOUT_MS = 1_000
 MAX_TAB_FALLBACK = 40
 VIEWPORT = {"width": 1280, "height": 900}
-LOCAL_CHROME = Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 FAVICON_PATH = "/favicon.ico"
 MOO_ESM_READY_JS = "() => document.body.dataset.mooEsmReady === 'true'"
 
@@ -1177,9 +1176,9 @@ def find_csp_policy(contract):
 def launch_browser(playwright: Playwright) -> Browser:
     channel = os.environ.get("MOO_UI_BROWSER_CHANNEL")
     if channel:
+        if channel in {"bundled", "playwright"}:
+            return playwright.chromium.launch()
         return playwright.chromium.launch(channel=channel)
-    if LOCAL_CHROME.is_file():
-        return playwright.chromium.launch(channel="chrome")
     return playwright.chromium.launch()
 
 

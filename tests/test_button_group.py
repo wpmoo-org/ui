@@ -50,7 +50,7 @@ class ButtonGroupTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn("Workspace queue actions", source)
+        self.assertIn("Message actions", source)
         self.assertIn("Compare Arabic, Hebrew, and English command rails", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
 
@@ -60,5 +60,5 @@ class ButtonGroupTests(CatalogTestCase):
         for copied_reference_label in ("Button 1", "Button 2", "Copilot"):
             self.assertNotIn(copied_reference_label, source)
 
-        for local_workflow in ("Ticket actions", "Message actions", "Editor toolbar"):
+        for local_workflow in ("Message actions", "Mixed semantic styles", "Editor toolbar"):
             self.assertIn(local_workflow, source)

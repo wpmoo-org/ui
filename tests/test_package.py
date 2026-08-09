@@ -8,6 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.helpers import npm_env
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIST = ROOT / "dist"
@@ -56,6 +58,7 @@ class PackageMetadataTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=npm_env(),
         )
         if result.returncode:
             raise AssertionError(result.stderr)
@@ -192,6 +195,7 @@ class PackageMetadataTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=npm_env(),
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -282,6 +286,7 @@ class PackageMetadataTests(unittest.TestCase):
                 check=False,
                 capture_output=True,
                 text=True,
+                env=npm_env(),
             )
 
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
@@ -375,6 +380,7 @@ for (const specifier of [
                 check=False,
                 capture_output=True,
                 text=True,
+                env=npm_env(),
             )
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
             pack_payload = json.loads(pack_result.stdout)

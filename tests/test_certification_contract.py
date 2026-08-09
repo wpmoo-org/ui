@@ -11,6 +11,8 @@ from urllib.parse import urlparse
 
 from jsonschema import Draft202012Validator
 
+from tests.helpers import npm_env
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATION_ROOT = ROOT / "src/certification"
@@ -340,6 +342,7 @@ class CertificationContractTests(unittest.TestCase):
                 check=False,
                 capture_output=True,
                 text=True,
+                env=npm_env(),
             )
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
             pack_payload = json.loads(pack_result.stdout)

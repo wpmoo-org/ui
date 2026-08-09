@@ -33,9 +33,21 @@ class AlertTests(CatalogTestCase):
     def test_alert_destructive_variant_maps_to_bootstrap_danger(self) -> None:
         self.assertIn('class="alert alert-danger"', self.render_alert('alert("Payment failed", variant="destructive")'))
 
+    def test_alert_semantic_variants_map_to_bootstrap_contexts(self) -> None:
+        for variant, expected_class in (
+            ("warning", "alert-warning"),
+            ("success", "alert-success"),
+            ("info", "alert-info"),
+        ):
+            with self.subTest(variant=variant):
+                self.assertIn(
+                    f'class="alert {expected_class}"',
+                    self.render_alert(f'alert("Heads up!", variant="{variant}")'),
+                )
+
     def test_alert_rejects_unknown_variant(self) -> None:
-        with self.assertRaisesRegex(ValueError, "Unknown alert variant: warning"):
-            self.render_alert('alert("Heads up!", variant="warning")')
+        with self.assertRaisesRegex(ValueError, "Unknown alert variant: urgent"):
+            self.render_alert('alert("Heads up!", variant="urgent")')
 
     def test_alert_requires_visible_title(self) -> None:
         with self.assertRaisesRegex(ValueError, "Alert title is required"):

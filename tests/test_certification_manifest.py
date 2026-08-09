@@ -20,7 +20,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from tests.helpers import ROOT
+from tests.helpers import ROOT, npm_env
 
 SCRIPT = ROOT / "scripts" / "build-certification-manifest.py"
 ATTESTATION_SCRIPT = ROOT / "scripts" / "build-certification-attestation.py"
@@ -47,6 +47,7 @@ def pack_tarball(destination: Path) -> Path:
         capture_output=True,
         text=True,
         timeout=PACK_TIMEOUT_SECONDS,
+        env=npm_env(),
     )
     if completed.returncode != 0:
         raise AssertionError(f"npm pack failed: {completed.stderr}")

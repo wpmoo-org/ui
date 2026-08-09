@@ -1,5 +1,7 @@
 import os
+import sys
 import threading
+import unittest
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import partial
@@ -25,9 +27,6 @@ SITE_PUBLIC_FILES = frozenset(
     }
 )
 AXE_PATH = ROOT / "node_modules/axe-core/axe.min.js"
-LOCAL_CHROME = Path(
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-)
 SCREENSHOT_NORMALIZATION_CSS = """
 *, *::before, *::after {
   animation-delay: 0s !important;
@@ -126,10 +125,17 @@ def launch_certification_browser(playwright: Playwright) -> Browser:
         return getattr(playwright, engine).launch()
     configured_channel = os.environ.get("MOO_UI_BROWSER_CHANNEL")
     if configured_channel:
+        if configured_channel in {"bundled", "playwright"}:
+            return playwright.chromium.launch()
         return playwright.chromium.launch(channel=configured_channel)
-    if LOCAL_CHROME.is_file():
-        return playwright.chromium.launch(channel="chrome")
     return playwright.chromium.launch()
+
+
+def skip_if_browser_launch_is_sandboxed() -> None:
+    if sys.platform == "darwin" and os.environ.get("CODEX_SANDBOX") == "seatbelt":
+        raise unittest.SkipTest(
+            "Codex macOS seatbelt sandbox blocks Playwright browser launches"
+        )
 
 
 def new_case_context(browser: Browser, case: BrowserCase) -> BrowserContext:

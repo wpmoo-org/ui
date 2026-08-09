@@ -210,7 +210,11 @@ class DialogTests(CatalogTestCase):
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertNotIn("--bs-modal-footer-bg", styles)
+        self.assertIn(
+            "--bs-modal-footer-bg: color-mix(in srgb, var(--bs-secondary-bg) 50%, transparent);",
+            styles,
+        )
+        self.assertNotIn("rgba(", styles)
         self.assertIn(".modal-content", styles)
         self.assertIn("box-shadow: var(--bs-box-shadow-lg)", styles)
         self.assertIn(".modal[tabindex]:focus-visible", styles)

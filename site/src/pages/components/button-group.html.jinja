@@ -204,10 +204,10 @@
 
     {% set select_group %}
       <div class="d-inline-flex align-items-stretch gap-2">
-        <div class="btn-group" role="group" aria-label="Currency and amount">
-          {{ select(aria_label="Currency", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}], extra_class="rounded-end-0 border-end-0 btn-group-select") }}
-          <input class="form-control rounded-start-0 border-start-0" type="text" aria-label="Amount" placeholder="10.00" style="min-width: 8rem;">
-        </div>
+        {% call input_group(extra_class="w-auto") %}
+          {{ select(aria_label="Currency", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}]) }}
+          {{ input(aria_label="Amount", placeholder="10.00") }}
+        {% endcall %}
         {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="arrow-right") }}
       </div>
     {% endset %}

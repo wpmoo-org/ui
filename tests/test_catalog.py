@@ -287,6 +287,11 @@ class CatalogContractTests(CatalogTestCase):
                 "disabled",
             ),
             "close_button": ("btn-close", "disabled"),
+            # Bootstrap's own alert component positions its native close
+            # button under `.alert-dismissible .btn-close`; this keeps that
+            # ownership scoped to Alert instead of moving an Alert layout
+            # rule into the standalone Close Button partial.
+            "alert": ("alert",),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -302,6 +307,13 @@ class CatalogContractTests(CatalogTestCase):
 
             for class_name in set(re.findall(r"\.([a-z][a-z0-9_-]*)", source)):
                 with self.subTest(component=component, selector=class_name):
+                    if component == "alert" and class_name == "btn-close":
+                        self.assertIn(".alert-dismissible .btn-close", source)
+                        self.assertNotIn(
+                            ".btn-close",
+                            source.replace(".alert-dismissible .btn-close", ""),
+                        )
+                        continue
                     self.assertTrue(
                         any(
                             class_name == prefix
@@ -1556,7 +1568,9 @@ class CatalogContractTests(CatalogTestCase):
                     if declaration.startswith("box-shadow:"):
                         self.assertRegex(
                             declaration,
-                            r"^box-shadow: (?:none|\$input-focus-box-shadow|var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\));$",
+                            r"^box-shadow: (?:none|\$input-focus-box-shadow|"
+                            r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
+                            r"0 0 0 \$[a-z0-9-]*ring-width var\(--bs-body-bg\));$",
                         )
                     elif declaration.startswith("border-radius:"):
                         self.assertRegex(

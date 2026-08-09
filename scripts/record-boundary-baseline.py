@@ -4,8 +4,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -24,6 +26,28 @@ CORE_OUTPUTS = {
 }
 
 
+def npm_env() -> dict[str, str]:
+    env = os.environ.copy()
+    cache = env.get("npm_config_cache")
+    if not cache or not npm_cache_is_writable(Path(cache)):
+        env["npm_config_cache"] = os.path.join(
+            tempfile.gettempdir(),
+            "wpmoo-npm-cache",
+        )
+    return env
+
+
+def npm_cache_is_writable(cache: Path) -> bool:
+    try:
+        probe_dir = cache / "_cacache" / "tmp"
+        probe_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=probe_dir):
+            pass
+    except OSError:
+        return False
+    return True
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     digest.update(path.read_bytes())
@@ -37,6 +61,7 @@ def run(command: list[str], root: Path) -> subprocess.CompletedProcess[str]:
         check=True,
         capture_output=True,
         text=True,
+        env=npm_env(),
     )
 
 
