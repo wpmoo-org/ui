@@ -141,15 +141,15 @@
     ) }}
 
     {% set invalid %}
-      {% call field() %}
+      {% call field(invalid=true) %}
       {{ input(
-        label="Coupon Code",
+        label="Invalid Input",
         id="input-invalid",
-        placeholder="Enter code",
+        placeholder="Error",
         aria_invalid=true,
         describedby="input-invalid-help"
       ) }}
-      {{ field_description("input-invalid-help", "That coupon code has expired.") }}
+      {{ field_description("input-invalid-help", "This field contains validation errors.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(

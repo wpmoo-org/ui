@@ -5,7 +5,8 @@
 // links, dialog/dropdown/popover/select triggers, tabs, and toggle-group
 // items as well as native form controls, rather than a different treatment
 // per component family. Placed ahead of the is-invalid rule below so that
-// rule's higher specificity still wins when both apply. The explicit
+// invalid controls can keep the same ring width while swapping only the
+// color. The explicit
 // outline: 0 replaces the browser's own default focus ring (an amber
 // auto-style outline on Chromium) that would otherwise show through on any
 // element -- plain sidebar/nav <a> tags included -- that Bootstrap doesn't
@@ -35,7 +36,7 @@
 .form-control.is-invalid:focus,
 .form-select.is-invalid,
 .form-select.is-invalid:focus {
-  box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--bs-form-invalid-border-color) 20%, transparent);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }
 
 // .btn-check toggle buttons (Toggle Group) put focus on the hidden input,

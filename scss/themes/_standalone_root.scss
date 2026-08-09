@@ -24,6 +24,7 @@
   --moo-destructive-surface: #{$moo-destructive-surface};
   --moo-destructive-surface-hover: #{$moo-destructive-surface-hover};
   --moo-destructive-foreground: #{$moo-destructive-foreground};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};
   --moo-warning: #{$moo-warning};
   --moo-warning-surface: #{$moo-warning-surface};
   --moo-warning-surface-hover: #{$moo-warning-surface-hover};
@@ -60,6 +61,8 @@
   --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
   --bs-tertiary-color: #{$body-tertiary-color};
   --bs-tertiary-color-rgb: #{to-rgb($body-tertiary-color)};
+  --bs-form-invalid-color: var(--moo-destructive);
+  --bs-form-invalid-border-color: #{$moo-form-invalid-border-color};
 }
 
 [data-bs-theme="dark"] {
@@ -76,6 +79,7 @@
   --moo-destructive-surface: #{$moo-destructive-surface-dark};
   --moo-destructive-surface-hover: #{$moo-destructive-surface-hover-dark};
   --moo-destructive-foreground: #{$moo-destructive-foreground-dark};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};
   --moo-warning: #{$moo-warning-dark};
   --moo-warning-surface: #{$moo-warning-surface-dark};
   --moo-warning-surface-hover: #{$moo-warning-surface-hover-dark};
@@ -102,4 +106,6 @@
   --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg-dark)};
   --bs-tertiary-color: #{$body-tertiary-color-dark};
   --bs-tertiary-color-rgb: #{to-rgb($body-tertiary-color-dark)};
+  --bs-form-invalid-color: var(--moo-destructive);
+  --bs-form-invalid-border-color: #{$moo-form-invalid-border-color-dark};
 }

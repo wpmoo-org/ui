@@ -1370,6 +1370,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 expect(search).to_have_attribute("type", "search")
                 expect(required).to_have_class("form-control is-invalid")
+                expect(required.locator("xpath=ancestor::div[1]")).to_have_attribute(
+                    "data-invalid",
+                    "true",
+                )
                 expect(required).to_have_attribute("aria-invalid", "true")
                 expect(required).to_have_attribute(
                     "aria-describedby",
@@ -2104,6 +2108,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(project).to_have_value("Moo UI")
 
                 expect(slug).to_have_class("form-control is-invalid")
+                expect(slug.locator("xpath=ancestor::div[1]")).to_have_attribute(
+                    "data-invalid",
+                    "true",
+                )
                 expect(slug).to_have_attribute("required", "")
                 expect(slug).to_have_attribute("aria-invalid", "true")
                 expect(slug).to_have_attribute(

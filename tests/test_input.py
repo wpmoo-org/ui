@@ -142,15 +142,98 @@ class InputTests(CatalogTestCase):
         self.assertIn("$input-line-height: 1.4285714286 !default;", variables)
 
     def test_invalid_form_controls_share_destructive_ring(self) -> None:
+        variables = read_primary_variables()
         focus = (ROOT / "scss/foundations/_focus.scss").read_text(
             encoding="utf-8"
         )
+        bootstrap_overrides = (
+            ROOT / "scss/settings/_bootstrap_overrides.scss"
+        ).read_text(encoding="utf-8")
+        tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
+            encoding="utf-8"
+        )
+        core_theme = (ROOT / "scss/themes/_scoped_core.scss").read_text(
+            encoding="utf-8"
+        )
 
+        self.assertIn(
+            "$moo-form-invalid-border-color: $moo-destructive !default;",
+            variables,
+        )
+        self.assertIn(
+            "$moo-form-invalid-ring-color: color-mix(in srgb, $moo-destructive 20%, transparent) !default;",
+            variables,
+        )
+        self.assertIn(
+            "$moo-form-invalid-border-color-dark: color-mix(in srgb, $moo-destructive-dark 50%, transparent) !default;",
+            variables,
+        )
+        self.assertIn(
+            "$moo-form-invalid-ring-color-dark: color-mix(in srgb, $moo-destructive-dark 40%, transparent) !default;",
+            variables,
+        )
+        self.assertIn(
+            "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};",
+            tokens_root,
+        )
+        self.assertIn(
+            "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};",
+            tokens_root,
+        )
+        self.assertIn(
+            "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};",
+            core_theme,
+        )
+        self.assertIn(
+            "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};",
+            core_theme,
+        )
+        self.assertIn("--bs-form-invalid-color: var(--moo-destructive);", tokens_root)
+        self.assertIn(
+            "--#{$prefix}form-invalid-color: var(--moo-destructive);",
+            core_theme,
+        )
+        self.assertIn(
+            "--bs-form-invalid-border-color: #{$moo-form-invalid-border-color};",
+            tokens_root,
+        )
+        self.assertIn(
+            "--bs-form-invalid-border-color: #{$moo-form-invalid-border-color-dark};",
+            tokens_root,
+        )
+        self.assertIn(
+            "--#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color};",
+            core_theme,
+        )
+        self.assertIn(
+            "--#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color-dark};",
+            core_theme,
+        )
+        self.assertIn("$enable-validation-icons: false !default;", bootstrap_overrides)
         self.assertIn(".form-control.is-invalid,", focus)
         self.assertIn(".form-control.is-invalid:focus,", focus)
         self.assertIn(".form-select.is-invalid,", focus)
         self.assertIn(".form-select.is-invalid:focus", focus)
-        self.assertIn("box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--bs-form-invalid-border-color) 20%, transparent);", focus)
+        self.assertIn(
+            "box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);",
+            focus,
+        )
+
+    def test_invalid_input_example_uses_field_invalid_contract(self) -> None:
+        page_source = PAGE.read_text(encoding="utf-8")
+        invalid_block = page_source[
+            page_source.index("{% set invalid %}"):
+            page_source.index("{% set file_input %}")
+        ]
+
+        self.assertIn("{% call field(invalid=true) %}", invalid_block)
+        self.assertIn('label="Invalid Input"', invalid_block)
+        self.assertIn('placeholder="Error"', invalid_block)
+        self.assertIn("This field contains validation errors.", invalid_block)
+        self.assertIn(
+            'describedby="input-invalid-help"',
+            invalid_block,
+        )
 
     def test_input_emits_validation_and_required_states(self) -> None:
         output = self.render_input(

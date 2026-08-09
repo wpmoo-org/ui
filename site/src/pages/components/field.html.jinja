@@ -100,11 +100,12 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "basic",
   "Basic field",
   "Place helper text next to its control and connect their IDs with <code>aria-describedby</code> for assistive relationships.",
-  basic
+  basic,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set invalid %}
-  {% call field() %}
+  {% call field(invalid=true) %}
   {{ input(label="Workspace slug", id="field-invalid-slug", value="my workspace", aria_invalid=true,
   describedby="field-invalid-slug-error") }}
   {{ field_error("field-invalid-slug-error", "Slugs can only contain lowercase letters, numbers, and hyphens.") }}
@@ -113,9 +114,10 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ render_example(
   "invalid",
   "Input with validation error",
-  "Set <code>aria-invalid=&quot;true&quot;</code> on the control and render linked feedback directly below it; Bootstrap's
-  <code>.is-invalid</code> and <code>.invalid-feedback</code> rules need no extra CSS.",
-  invalid
+  "Set <code>data-invalid=&quot;true&quot;</code> on the field, <code>aria-invalid=&quot;true&quot;</code> on the control,
+  and render linked feedback directly below it.",
+  invalid,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set disabled %}
@@ -130,7 +132,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "Disabled field",
   "Keep the label and helper text visible when a field is temporarily unavailable by using the control's native
   <code>disabled</code> state.",
-  disabled
+  disabled,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set group %}
@@ -147,7 +150,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "group",
   "Field group",
   "Group related labeled controls with a consistent gap while preserving each control's accessible relationships.",
-  group
+  group,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set textarea_field %}
@@ -161,7 +165,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "textarea",
   "Textarea",
   "Multiline controls retain the same label, spacing, and linked helper-text contract as single-line inputs.",
-  textarea_field
+  textarea_field,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set select_field %}
@@ -178,7 +183,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "select",
   "Select",
   "Use native select markup with the same visible-label and helper-text flow as other fields.",
-  select_field
+  select_field,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set fieldset_example %}
@@ -200,7 +206,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "fieldset",
   "Fieldset",
   "A native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and optional description groups related controls semantically.",
-  fieldset_example
+  fieldset_example,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set fieldset_group %}
@@ -224,7 +231,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "fieldset-group",
   "Fieldset with a nested row",
   "Side-by-side labeled controls can sit inside the same semantic group without changing their individual field contracts.",
-  fieldset_group
+  fieldset_group,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set checkbox_group %}
@@ -255,7 +263,8 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "checkbox",
   "Checkbox group",
   "Each checkbox carries its own visible label, so related choices can be grouped directly when no additional helper text is needed.",
-  checkbox_group
+  checkbox_group,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set radio_field %}
@@ -298,11 +307,12 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   "separator",
   "Field group with a separator",
   "Use a documented Separator between grouped sections to create a clear transition in long option sets.",
-  separated_group
+  separated_group,
+  preview_class="moo-example__preview--narrow"
   ) }}
 
   {% set arabic_rtl %}
-  <div dir="rtl">
+  <div class="w-100" dir="rtl">
     {% call field() %}
     {{ input(label="اسم المشروع", id="field-rtl-arabic-project", placeholder="marketing-site",
     describedby="field-rtl-arabic-project-description") }}
@@ -316,7 +326,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   </div>
   {% endset %}
   {% set hebrew_rtl %}
-  <div dir="rtl">
+  <div class="w-100" dir="rtl">
     {% call field() %}
     {{ input(label="שם הפרויקט", id="field-rtl-hebrew-project", placeholder="marketing-site",
     describedby="field-rtl-hebrew-project-description") }}
@@ -330,7 +340,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   </div>
   {% endset %}
   {% set english_rtl %}
-  <div dir="rtl">
+  <div class="w-100" dir="rtl">
     {% call field() %}
     {{ input(label="Project name", id="field-rtl-english-project", placeholder="marketing-site",
     describedby="field-rtl-english-project-description") }}

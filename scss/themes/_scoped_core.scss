@@ -104,6 +104,7 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-destructive-surface: #{$moo-destructive-surface};
   --moo-destructive-surface-hover: #{$moo-destructive-surface-hover};
   --moo-destructive-foreground: #{$moo-destructive-foreground};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};
   --moo-warning: #{$moo-warning};
   --moo-warning-surface: #{$moo-warning-surface};
   --moo-warning-surface-hover: #{$moo-warning-surface-hover};
@@ -143,8 +144,8 @@ $moo-theme-colors-border-subtle-dark: (
   --#{$prefix}border-color-translucent: #{$border-color-translucent};
   --#{$prefix}form-valid-color: #{$form-valid-color};
   --#{$prefix}form-valid-border-color: #{$form-valid-border-color};
-  --#{$prefix}form-invalid-color: #{$form-invalid-color};
-  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color};
+  --#{$prefix}form-invalid-color: var(--moo-destructive);
+  --#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color};
 
   @each $color, $value in $theme-colors-text {
     --#{$prefix}#{$color}-text-emphasis: #{$value};
@@ -176,6 +177,7 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-destructive-surface: #{$moo-destructive-surface-dark};
   --moo-destructive-surface-hover: #{$moo-destructive-surface-hover-dark};
   --moo-destructive-foreground: #{$moo-destructive-foreground-dark};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};
   --moo-warning: #{$moo-warning-dark};
   --moo-warning-surface: #{$moo-warning-surface-dark};
   --moo-warning-surface-hover: #{$moo-warning-surface-hover-dark};
@@ -215,8 +217,8 @@ $moo-theme-colors-border-subtle-dark: (
   --#{$prefix}border-color-translucent: #{$border-color-translucent-dark};
   --#{$prefix}form-valid-color: #{$form-valid-color-dark};
   --#{$prefix}form-valid-border-color: #{$form-valid-border-color-dark};
-  --#{$prefix}form-invalid-color: #{$form-invalid-color-dark};
-  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color-dark};
+  --#{$prefix}form-invalid-color: var(--moo-destructive);
+  --#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color-dark};
 
   @each $color, $value in $moo-theme-colors-text-dark {
     --#{$prefix}#{$color}-text-emphasis: #{$value};

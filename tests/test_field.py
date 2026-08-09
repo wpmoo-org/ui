@@ -51,6 +51,20 @@ class FieldTests(CatalogTestCase):
 
         self.assertIn('class="field mb-3"', output)
 
+    def test_field_accepts_invalid_state(self) -> None:
+        output = self.render(
+            '{% call field(invalid=true) %}x{% endcall %}'
+        )
+
+        self.assertIn('<div class="field" data-invalid="true">', output)
+
+    def test_field_styles_invalid_state_from_wrapper(self) -> None:
+        source = FIELD_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn('&[data-invalid="true"] {', source)
+        self.assertIn("color: var(--bs-form-invalid-color);", source)
+        self.assertNotIn(":has(> .is-invalid) > .form-label", source)
+
     def test_field_description_renders_form_text(self) -> None:
         output = self.render(
             '{{ field_description("field-1-description", "Helper text.") }}'
@@ -179,6 +193,38 @@ class FieldTests(CatalogTestCase):
         self.assertIn("field_description(", source)
         self.assertIn("fieldset(", source)
         self.assertIn('type="submit"', source)
+
+    def test_page_form_like_examples_use_standard_preview_measure(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/field.html")
+
+        for example in (
+            "basic",
+            "invalid",
+            "disabled",
+            "group",
+            "textarea",
+            "select",
+            "fieldset",
+            "fieldset-group",
+            "checkbox",
+            "separator",
+        ):
+            with self.subTest(example=example):
+                section = page.split(f'data-example="{example}"', 1)[1].split(
+                    '<div class="moo-example__source"',
+                    1,
+                )[0]
+                self.assertIn(
+                    'class="moo-example__preview moo-example__preview--narrow"',
+                    section,
+                )
+
+        self.assertGreaterEqual(
+            page.count('<div class="w-100" dir="rtl">'),
+            3,
+        )
 
     def test_catalog_bootstrap_module_wires_needs_validation_forms(self) -> None:
         self.assertTrue(BOOTSTRAP_PREVIEW_JS.is_file())
