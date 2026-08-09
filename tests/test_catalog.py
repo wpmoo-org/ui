@@ -287,6 +287,19 @@ class CatalogContractTests(CatalogTestCase):
                 "disabled",
             ),
             "close_button": ("btn-close", "disabled"),
+            # Tooltip is Bootstrap's overlay component; placement/state
+            # classes are emitted by Bootstrap/Popper and retuned only while
+            # still scoped to the tooltip surface.
+            "tooltip": (
+                "tooltip",
+                "bs-tooltip-auto",
+                "bs-tooltip-bottom",
+                "bs-tooltip-end",
+                "bs-tooltip-start",
+                "bs-tooltip-top",
+                "fade",
+                "show",
+            ),
             # Bootstrap's own alert component positions its native close
             # button under `.alert-dismissible .btn-close`; this keeps that
             # ownership scoped to Alert instead of moving an Alert layout
@@ -570,6 +583,29 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+
+    def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
+        catalog_scss = read_catalog_styles()
+        slot = catalog_scss.split(
+            ".moo-catalog__theme-toggle [data-moo-theme-icon] {",
+            1,
+        )[1].split("}", 1)[0]
+        svg = catalog_scss.split(".moo-catalog__theme-toggle svg {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+
+        for contract in (
+            "display: inline-flex;",
+            "width: 1rem;",
+            "height: 1rem;",
+            "align-items: center;",
+            "justify-content: center;",
+            "line-height: 1;",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, slot)
+        self.assertIn("display: block;", svg)
 
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")

@@ -8,6 +8,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/tooltip.html.jinja"
 PAGE = ROOT / "site/src/pages/components/tooltip.html.jinja"
+STYLES = ROOT / "scss/components/_tooltip.scss"
 
 # Bootstrap's Tooltip runs data-bs-html content through its own default
 # sanitizer allowlist before it ever reaches the page (see
@@ -143,6 +144,24 @@ class TooltipTests(CatalogTestCase):
         self.assertRegex(
             source,
             r'<span[^>]*data-bs-toggle="tooltip"[^>]*>\s*{{\s*button\("Archive", variant="outline", disabled=true\)\s*}}',
+        )
+
+    def test_tooltip_motion_animates_inner_surface_not_popper_wrapper(self) -> None:
+        # Popper writes an inline transform on the tooltip wrapper for
+        # placement. Motion belongs on .tooltip-inner so the opening animation
+        # cannot shift the computed anchor position.
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn("--moo-tooltip-motion-duration", styles)
+        self.assertIn(".tooltip.fade .tooltip-inner", styles)
+        self.assertIn(
+            "transition: transform var(--moo-tooltip-motion-duration) var(--moo-tooltip-motion-easing);",
+            styles,
+        )
+        self.assertIn(".tooltip.show .tooltip-inner", styles)
+        self.assertNotRegex(
+            styles,
+            r"\.tooltip(?:\.fade)?\s*\{[^}]*\btransform\s*:",
         )
 
     def test_html_tooltip_examples_only_use_bootstraps_default_allowlisted_tags(
