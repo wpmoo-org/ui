@@ -104,6 +104,10 @@ $form-switch-width: 2rem !default;
 // keep the same proportional gap Bootstrap's own default uses.
 $form-switch-padding-start: 2.5rem !default;
 $moo-switch-height: 1.15rem !default;
+// Bootstrap's dark unchecked switch thumb is separate from its checked
+// thumb. The checked dark state needs the opposite pair (light track,
+// dark thumb), so the component owns that SVG as its own compile-time knob.
+$moo-switch-checked-bg-image-dark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$moo-primary-foreground-dark}'/></svg>") !default;
 // The reference accordion trigger stays fully neutral when expanded (only an
 // underline on hover); Bootstrap's default tints the expanded trigger with
 // $primary-bg-subtle / $primary-text-emphasis. Referencing the resting

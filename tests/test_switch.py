@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -65,3 +67,22 @@ class SwitchTests(CatalogTestCase):
             output,
         )
         self.assertIn('aria-describedby="s5-description"', output)
+
+    def test_dark_unchecked_mouse_focus_keeps_thumb_visible(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        selector = (
+            r":where\(\[data-bs-theme=\"dark\"\]\) "
+            r"\.form-switch \.form-check-input:focus:not"
+            r"\(:focus-visible\):not\(:checked\)"
+        )
+        rule = re.search(rf"{selector}[^{{]*\{{(?P<body>[^}}]*)\}}", css)
+
+        self.assertIsNotNone(rule)
+        assert rule is not None
+        self.assertIn(
+            "fill='rgba%28255, 255, 255, 0.25%29'",
+            rule.group("body"),
+        )

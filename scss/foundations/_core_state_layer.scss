@@ -8,7 +8,7 @@
   --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-dark)};
 }
 
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-check-input:checked,
-.moo-ui[data-bs-theme="dark"] .form-check-input:checked {
+:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-check-input:checked:not([role="switch"]),
+.moo-ui[data-bs-theme="dark"] .form-check-input:checked:not([role="switch"]) {
   filter: invert(1);
 }
