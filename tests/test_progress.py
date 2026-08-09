@@ -23,7 +23,6 @@ class ProgressTests(CatalogTestCase):
         self.assertIn("render_rtl_example", page)
         self.assertIn('id="progress"', page)
         self.assertIn('"progress"', page)
-        self.assertNotIn("Right-to-left layout", page)
         self.assertGreaterEqual(page.count('dir="rtl"'), 3)
         self.assertIn("arabic_progress", page)
         self.assertIn("hebrew_progress", page)

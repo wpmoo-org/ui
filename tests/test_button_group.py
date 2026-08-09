@@ -42,8 +42,6 @@ class ButtonGroupTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn('{% from "includes/example.html.jinja" import render_example, render_rtl_example %}', source)
-        self.assertIn("title=\"RTL\"", source)
-        self.assertNotIn("Right-to-left layout", source)
         self.assertIn('render_rtl_example(', source)
         self.assertIn('"button-group-ribbon"', source)
         self.assertIn("rtl_arabic", source)

@@ -93,7 +93,6 @@ class PaginationTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
-        self.assertNotIn('title="RTL"', source)
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)

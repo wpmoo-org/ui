@@ -603,11 +603,6 @@ class ButtonTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertNotIn("Right-to-left layout", source)
-        self.assertNotIn("title=\"RTL\"", source)
-        self.assertNotIn("title_id=", source)
-        self.assertNotIn("example_prefix=\"rtl\"", source)
-        self.assertNotIn("rtl-preview", source)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

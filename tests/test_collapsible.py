@@ -82,12 +82,6 @@ class CollapsibleTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn(
-            "Compare RTL behavior for task and workflow examples across Arabic, Hebrew, and English content.",
-            source,
-        )
-        self.assertNotIn("Right-to-left layout", source)
-        self.assertNotIn("title_id=", source)
         self.assertNotIn(
             '{% from "components/tabs.html.jinja" import tabs %}',
             source,

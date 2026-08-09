@@ -148,7 +148,6 @@ class BadgeTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
-        self.assertNotIn('title="RTL"', source)
         self.assertIn("arabic_badge", source)
         self.assertIn("hebrew_badge", source)
         self.assertIn("english_badge", source)

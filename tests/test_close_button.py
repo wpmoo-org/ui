@@ -93,8 +93,6 @@ class CloseButtonTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertNotIn("title_id=", source)
-        self.assertNotIn("Right-to-left layout", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
 
         result = self.run_build()

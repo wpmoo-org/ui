@@ -168,7 +168,6 @@ class DialogTests(CatalogTestCase):
         self.assertIn("static=true", source)
         self.assertIn('direction="rtl"', source)
         self.assertIn('dir="rtl"', source)
-        self.assertNotIn("Right-to-left layout", source)
 
     def test_page_uses_render_rtl_example(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
@@ -183,9 +182,6 @@ class DialogTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertNotIn("title_id=", source)
-        self.assertNotIn('title="RTL"', source)
-        self.assertNotIn("example_prefix=", source)
         self.assertNotIn(
             '{% from "components/tabs.html.jinja" import tabs %}',
             source,

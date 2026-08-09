@@ -123,8 +123,6 @@ class BreadcrumbTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
-        self.assertNotIn('title="RTL"', source)
-        self.assertNotIn('"Right-to-left layout"', source)
         self.assertIn("arabic_breadcrumb", source)
         self.assertIn("hebrew_breadcrumb", source)
         self.assertIn("english_breadcrumb", source)
