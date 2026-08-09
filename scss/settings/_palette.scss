@@ -43,8 +43,8 @@ $moo-ring: color-mix(in srgb, $white 60%, $primary) !default;
 // The public $danger default matches shadcn's light token; dark mode uses the
 // matching shadcn dark token below.
 $moo-destructive: $danger !default;
-$moo-destructive-surface: color-mix(in srgb, $moo-destructive 10%, transparent) !default;
-$moo-destructive-surface-hover: color-mix(in srgb, $moo-destructive 20%, transparent) !default;
+$moo-destructive-surface: color-mix(in srgb, $moo-destructive 3%, transparent) !default;
+$moo-destructive-surface-hover: color-mix(in srgb, $moo-destructive 6%, transparent) !default;
 $moo-destructive-foreground: $moo-destructive !default;
 // Warning and success derive from Bootstrap's $warning/$success palette
 // variables, following the same alpha-surface pattern as destructive.

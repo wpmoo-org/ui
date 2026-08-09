@@ -103,7 +103,7 @@ class BadgeTests(CatalogTestCase):
         )
 
         self.assertIn(
-            "$moo-destructive-surface: color-mix(in srgb, $moo-destructive 10%, transparent) !default;",
+            "$moo-destructive-surface: color-mix(in srgb, $moo-destructive 3%, transparent) !default;",
             source,
         )
         self.assertIn(
