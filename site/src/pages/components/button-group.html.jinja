@@ -47,20 +47,6 @@
       basic_actions
     ) }}
 
-    {% set mixed_styles %}
-      {% call button_group("Mixed semantic styles") %}
-        {{ button("Danger", variant="destructive") }}
-        {{ button("Warning", variant="warning") }}
-        {{ button("Success", variant="success") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "mixed-styles",
-      "Mixed styles",
-      "Combine semantic <code>btn-*</code> variants when each action carries a different consequence.",
-      mixed_styles
-    ) }}
-
     {% set outlined_styles %}
       {% call button_group("Outlined actions") %}
         {{ button("Previous", variant="outline-primary") }}

@@ -60,5 +60,5 @@ class ButtonGroupTests(CatalogTestCase):
         for copied_reference_label in ("Button 1", "Button 2", "Copilot"):
             self.assertNotIn(copied_reference_label, source)
 
-        for local_workflow in ("Message actions", "Mixed semantic styles", "Editor toolbar"):
+        for local_workflow in ("Message actions", "Editor toolbar"):
             self.assertIn(local_workflow, source)
