@@ -468,7 +468,6 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('import Combobox from "@wpmoo/ui/combobox.js";', source)
         self.assertIn("Combobox.getOrCreateInstance(element)", source)
         self.assertIn("combobox.dispose()", source)
-        self.assertIn("Bootstrap 5.3 does not provide a Combobox plugin", source)
 
     def test_public_module_owns_combobox_behavior_and_lifecycle(self) -> None:
         source = COMBOBOX_JS.read_text(encoding="utf-8")

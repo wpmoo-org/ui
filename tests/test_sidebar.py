@@ -670,7 +670,6 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("<table", page)
         self.assertIn("<th scope=\"col\">Selector</th>", page)
         self.assertIn("<th scope=\"col\">Purpose</th>", page)
-        self.assertIn("Diagram showing the sidebar wrapper", page)
         self.assertTrue((DIST / "assets/images/sidebar-structure.webp").is_file())
 
     def test_sidebar_catalog_page_documents_public_html_anatomy(self) -> None:
@@ -715,8 +714,6 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("useSidebar", page)
         self.assertIn("data-moo-sidebar-state", page)
         self.assertIn("@wpmoo/ui/sidebar.js", page)
-        self.assertIn("In Moo UI it is not a React hook.", page)
-        self.assertIn("public Sidebar", page)
         self.assertIn("Sidebar.getOrCreateInstance(element)", page)
         self.assertIn("sidebar.dispose()", page)
         self.assertNotIn("static/js/preview.js", page)

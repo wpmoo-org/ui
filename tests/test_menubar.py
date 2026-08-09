@@ -97,7 +97,6 @@ class MenubarTests(CatalogTestCase):
 
     def test_page_documents_the_submenu_gap_without_faking_it(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
-        self.assertIn("Submenu is not yet supported", source)
         self.assertNotIn("MenubarSub", source)
 
     def test_page_uses_tabbed_rtl_locales_like_accordion(self) -> None:

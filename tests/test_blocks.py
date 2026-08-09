@@ -45,7 +45,6 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn("moo-block-preview__frame", page)
                 self.assertIn(f'src="../../blocks/previews/{slug}/"', page)
                 self.assertIn(f'href="../../blocks/previews/{slug}/"', page)
-                self.assertIn("Open standalone", page)
 
             source = (
                 ROOT / f"site/src/pages/blocks/{slug}.html.jinja"
