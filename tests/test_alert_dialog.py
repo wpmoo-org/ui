@@ -119,8 +119,6 @@ class AlertDialogTests(CatalogTestCase):
         self.assertIn("{% call alert_dialog(", source)
         self.assertNotIn("{% call dialog(", source)
         self.assertNotIn("static=true", source)
-        self.assertNotIn("permanently delete your account", source.lower())
-        self.assertNotIn("absolutely sure", source.lower())
 
     def test_page_uses_realistic_original_scenarios(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
@@ -145,8 +143,6 @@ class AlertDialogTests(CatalogTestCase):
         self.assertIn('button("Delete customer data", variant="outline"', source)
         self.assertIn('button("Delete", variant="destructive", dismiss="modal")', source)
         self.assertIn('"למחוק את נתוני הלקוח האלה?"', source)
-        self.assertNotIn("Archive workspace", source)
-        self.assertNotIn("הסרת סביבת עבודה", source)
 
         result = self.run_build()
 

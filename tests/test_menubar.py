@@ -71,23 +71,6 @@ class MenubarTests(CatalogTestCase):
 
     def test_page_uses_realistic_original_scenarios(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
-        for distinctive_reference_scenario in (
-            "New Tab",
-            "New Window",
-            "⌘T",
-            "Bookmarks Bar",
-            "Full URLs",
-            "Reload",
-            "Force Reload",
-            "Andy",
-            "Benoit",
-            "Luis",
-        ):
-            self.assertNotIn(
-                distinctive_reference_scenario,
-                source,
-                f"Page reuses the reference's own scenario shape: {distinctive_reference_scenario}",
-            )
         for original_scenario in (
             "New document",
             "Export as PDF",

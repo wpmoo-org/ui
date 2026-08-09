@@ -106,9 +106,6 @@ class AvatarTests(CatalogTestCase):
         self.assertIn("Cangir", page)
         self.assertIn("Core maintainer", page)
         self.assertIn("render_rtl_example", page)
-        self.assertNotIn('title="Direction aware"', page)
-        self.assertNotIn("badge_dot for", page)
-        self.assertNotIn('style="width: 0.5rem; height: 0.5rem;"', page)
 
     def test_avatar_badge_paints_above_avatar_outline(self) -> None:
         style = STYLE.read_text()

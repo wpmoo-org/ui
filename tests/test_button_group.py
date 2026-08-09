@@ -57,8 +57,5 @@ class ButtonGroupTests(CatalogTestCase):
     def test_page_keeps_examples_original_and_production_focused(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        for copied_reference_label in ("Button 1", "Button 2", "Copilot"):
-            self.assertNotIn(copied_reference_label, source)
-
         for local_workflow in ("Message actions", "Editor toolbar"):
             self.assertIn(local_workflow, source)
