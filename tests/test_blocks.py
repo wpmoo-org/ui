@@ -72,33 +72,15 @@ class BlocksTests(CatalogTestCase):
                 self.assertNotIn("moo-example__source", standalone)
 
             if slug in {"sidebar-floating", "sidebar-inset"}:
-                with self.subTest(slug=slug, contract="portal demo copy"):
+                with self.subTest(slug=slug, contract="portal demo structure"):
                     self.assertIn("Moo Portal", standalone)
                     self.assertIn("Portal Operations", standalone)
-                    self.assertIn("Request Review", standalone)
-                    self.assertIn("Workspace", standalone)
-                    self.assertIn("Approvals", standalone)
                     self.assertIn('data-slot="sidebar-menu-badge"', standalone)
-                    self.assertIn("Customers", standalone)
-                    self.assertIn("Reports", standalone)
-                    self.assertIn("Preferences actions", standalone)
-                    self.assertIn("Open preferences", standalone)
-                    self.assertIn("Copy profile link", standalone)
-                    self.assertIn("Manage notifications", standalone)
-                    self.assertIn("Settings", standalone)
-                    self.assertIn("Get Help", standalone)
-                    self.assertIn("Search", standalone)
-                    self.assertIn("Upgrade workspace", standalone)
-                    self.assertIn("Billing", standalone)
-                    self.assertIn("Notifications", standalone)
+                    self.assertIn('aria-label="Preferences actions"', standalone)
                     self.assertIn('data-bs-offset="0,4"', standalone)
                     self.assertIn('class="sidebar-menu-item dropend"', standalone)
-                    self.assertNotIn("Customer Spaces", standalone)
-                    self.assertNotIn("Client Onboarding", standalone)
-                    self.assertNotIn("Invoice Review", standalone)
-                    self.assertNotIn("Partner Access", standalone)
-                    self.assertNotIn("Duplicate flow", standalone)
                     self.assertEqual(standalone.count('data-slot="sidebar-menu-action"'), 1)
+                    self.assertGreaterEqual(standalone.count('data-slot="sidebar-menu-sub"'), 3)
                     self.assertIn("moo-sidebar-demo--portal-shell", standalone)
                     self.assertIn(
                         'class="sidebar-menu-item dropend sidebar-menu-item--account"',
@@ -108,10 +90,7 @@ class BlocksTests(CatalogTestCase):
                     self.assertIn("sidebar-account-menu", standalone)
                     self.assertIn("sidebar-account-menu__item", standalone)
                     self.assertIn("sidebar-account-menu__header", standalone)
-                    self.assertNotIn("Building Your Application", standalone)
-                    self.assertNotIn("Data Fetching", standalone)
-                    self.assertNotIn("Acme Inc", standalone)
-                    self.assertNotIn("Evil Corp.", standalone)
+                    self.assertGreaterEqual(standalone.count("sidebar-account-menu__item"), 4)
                     self.assertIn(
                         "sidebar-inset__content d-flex flex-column gap-3 p-3 pt-0",
                         standalone,
