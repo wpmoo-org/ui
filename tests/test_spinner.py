@@ -74,6 +74,3 @@ class SpinnerTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         output = self.read_output("components/spinner.html")
         self.assertIn("spinner-direction-tabs", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)

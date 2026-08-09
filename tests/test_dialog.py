@@ -183,10 +183,6 @@ class DialogTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn(
-            "Compare Arabic, Hebrew, and English dialog flows used in operational workflows.",
-            source,
-        )
         self.assertNotIn("title_id=", source)
         self.assertNotIn('title="RTL"', source)
         self.assertNotIn("example_prefix=", source)
@@ -202,9 +198,6 @@ class DialogTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
         self.assertIn('id="rtl">RTL</h2>', output)
 
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:

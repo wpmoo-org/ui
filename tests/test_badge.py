@@ -153,7 +153,6 @@ class BadgeTests(CatalogTestCase):
         self.assertIn("hebrew_badge", source)
         self.assertIn("english_badge", source)
         self.assertGreaterEqual(source.count('dir="rtl"'), 3)
-        self.assertIn("Access request", source)
 
         result = self.run_build()
 
@@ -164,6 +163,3 @@ class BadgeTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)

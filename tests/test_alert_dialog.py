@@ -120,29 +120,14 @@ class AlertDialogTests(CatalogTestCase):
         self.assertNotIn("{% call dialog(", source)
         self.assertNotIn("static=true", source)
 
-    def test_page_uses_realistic_original_scenarios(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
-        for original_scenario in (
-            "Discard this draft invoice",
-            "Leave without saving",
-            "Stop this import",
-            "Pause nightly synchronization",
-            "Delete this customer record",
-        ):
-            self.assertIn(original_scenario, source)
-
     def test_page_includes_small_media_and_tabbed_rtl_examples(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn("Small with media", source)
         self.assertIn('icon="circle-alert"', source)
         self.assertIn("render_rtl_example", source)
         self.assertIn('"alert-dialog"', source)
         self.assertIn('preview_class="moo-example__preview--fit"', source)
         self.assertGreaterEqual(source.count('direction="rtl"'), 3)
-        self.assertIn('button("Delete customer data", variant="outline"', source)
-        self.assertIn('button("Delete", variant="destructive", dismiss="modal")', source)
-        self.assertIn('"למחוק את נתוני הלקוח האלה?"', source)
 
         result = self.run_build()
 

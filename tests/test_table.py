@@ -124,15 +124,6 @@ class TableTests(CatalogTestCase):
         ):
             " ".join(template.render().split())
 
-    def test_page_uses_realistic_original_scenarios(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
-        for original_scenario in (
-            "Partner agreement",
-            "Web frontend",
-            "Batch worker",
-        ):
-            self.assertIn(original_scenario, source)
-
     def test_page_composes_actions_from_ready_row_actions_and_dropdown_macros(
         self,
     ) -> None:

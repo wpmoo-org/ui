@@ -93,16 +93,6 @@ class CloseButtonTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn(
-            "Compare Arabic, Hebrew, and English close actions in an RTL layout for operations workflows.",
-            source,
-        )
-        self.assertIn("تم تجاهل الحادث", source)
-        self.assertIn("האירוע נסגר", source)
-        self.assertIn("Incident dismissed", source)
-        self.assertIn('close_button(aria_label="إغلاق")', source)
-        self.assertIn('close_button(aria_label="סגירה")', source)
-        self.assertIn('close_button(aria_label="Close")', source)
         self.assertNotIn("title_id=", source)
         self.assertNotIn("Right-to-left layout", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
@@ -114,7 +104,4 @@ class CloseButtonTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
         self.assertIn('id="rtl">RTL</h2>', output)

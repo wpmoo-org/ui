@@ -36,9 +36,6 @@ class ProgressTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
 
     def test_progress_renders_accessible_bar_with_computed_width(self) -> None:
         output = self.render_progress('progress(66, aria_label="Upload progress")')

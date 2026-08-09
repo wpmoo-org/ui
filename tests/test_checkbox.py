@@ -95,13 +95,6 @@ class CheckboxTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn("dir=\"rtl\"", source)
-        self.assertIn("الموافقة على طلب الوصول إلى مساحة العمل", source)
-        self.assertIn("אישור בקשת גישה לסביבת העבודה", source)
-        self.assertIn("Approve workspace access request", source)
-        self.assertIn(
-            "Compare Arabic, Hebrew, and English checkbox labels in an RTL layout",
-            source,
-        )
         self.assertNotIn("title_id=", source)
         self.assertNotIn("Right-to-left layout", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)

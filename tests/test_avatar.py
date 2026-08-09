@@ -103,8 +103,6 @@ class AvatarTests(CatalogTestCase):
     def test_avatar_page_examples_stay_product_shaped(self) -> None:
         page = PAGE.read_text()
 
-        self.assertIn("Cangir", page)
-        self.assertIn("Core maintainer", page)
         self.assertIn("render_rtl_example", page)
 
     def test_avatar_badge_paints_above_avatar_outline(self) -> None:

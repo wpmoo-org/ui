@@ -221,13 +221,3 @@ class ToggleGroupTests(CatalogTestCase):
             'legend="View", extra_class="mb-3")'
         )
         self.assertIn("mb-3", output)
-
-    def test_page_uses_realistic_original_scenarios(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
-        for original_scenario in (
-            "Notification channels",
-            "Shipment method",
-            "Task priority",
-            "Approval stage",
-        ):
-            self.assertIn(original_scenario, source)

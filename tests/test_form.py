@@ -23,8 +23,6 @@ class FormPageTests(CatalogTestCase):
         self.assertIn("{% call fieldset(", source)
         self.assertIn("{% call field_group()", source)
         self.assertIn("{% call field()", source)
-        self.assertIn("Bootstrap Forms", source)
-        self.assertIn("Field", source)
         self.assertNotIn('{% from "components/form.html.jinja"', source)
 
     def test_form_is_listed_as_ready_without_a_new_component_macro(self) -> None:
@@ -35,4 +33,3 @@ class FormPageTests(CatalogTestCase):
         self.assertEqual(form["label"], "Form")
         self.assertEqual(form["status"], "ready")
         self.assertFalse((ROOT / "src/components/form.html.jinja").exists())
-

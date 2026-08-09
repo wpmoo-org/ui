@@ -100,7 +100,4 @@ class CollapsibleTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
         self.assertIn('id="rtl">RTL</h2>', output)

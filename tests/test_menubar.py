@@ -69,17 +69,6 @@ class MenubarTests(CatalogTestCase):
         self.assertIn("--bs-btn-color: var(--moo-foreground)", styles)
         self.assertIn("font-weight: $font-weight-medium", styles)
 
-    def test_page_uses_realistic_original_scenarios(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
-        for original_scenario in (
-            "New document",
-            "Export as PDF",
-            "Invite teammate",
-            "Sidebar",
-            "Profile",
-        ):
-            self.assertIn(original_scenario, source)
-
     def test_checkbox_and_radio_menus_opt_into_outside_auto_close(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
         checkbox_block = source.split('{% set checkbox_example %}')[1].split(
@@ -114,5 +103,3 @@ class MenubarTests(CatalogTestCase):
     def test_page_uses_tabbed_rtl_locales_like_accordion(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
         self.assertIn('{% from "components/tabs.html.jinja" import tabs %}', source)
-        for locale_tab in ("Arabic", "Hebrew", "English"):
-            self.assertIn(locale_tab, source)

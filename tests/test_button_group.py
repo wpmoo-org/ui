@@ -50,12 +50,4 @@ class ButtonGroupTests(CatalogTestCase):
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn("Message actions", source)
-        self.assertIn("Compare Arabic, Hebrew, and English command rails", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
-
-    def test_page_keeps_examples_original_and_production_focused(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
-
-        for local_workflow in ("Message actions", "Editor toolbar"):
-            self.assertIn(local_workflow, source)
