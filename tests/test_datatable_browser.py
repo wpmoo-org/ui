@@ -719,6 +719,30 @@ class DataTableBrowserTests(unittest.TestCase):
             prev_button = root.locator("[data-datatable-page-prev]")
             next_button = root.locator("[data-datatable-page-next]")
             last_button = root.locator("[data-datatable-page-last]")
+            page_nav = root.locator(".datatable-page-nav")
+
+            def read_page_nav_metrics() -> dict:
+                return page_nav.evaluate(
+                    """
+                    element => {
+                      const links = Array.from(element.querySelectorAll(".page-link"));
+                      return {
+                        overflowX: getComputedStyle(element).overflowX,
+                        overflowY: getComputedStyle(element).overflowY,
+                        clientHeight: element.clientHeight,
+                        scrollHeight: element.scrollHeight,
+                        linkBoxes: links.map(link => {
+                          const rect = link.getBoundingClientRect();
+                          return {
+                            text: link.textContent.trim(),
+                            width: rect.width,
+                            height: rect.height,
+                          };
+                        }),
+                      };
+                    }
+                    """
+                )
 
             expect(rows).to_have_count(2)
             expect(rows.nth(0)).to_contain_text("TCK-1")
@@ -728,6 +752,13 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(prev_button).to_be_disabled()
             expect(next_button).to_be_enabled()
             expect(last_button).to_be_enabled()
+            metrics = read_page_nav_metrics()
+            self.assertIn(metrics["overflowX"], {"auto", "scroll"})
+            self.assertEqual(metrics["overflowY"], "hidden")
+            self.assertLessEqual(metrics["scrollHeight"], metrics["clientHeight"] + 1)
+            for box in metrics["linkBoxes"]:
+                self.assertAlmostEqual(box["width"], 32, delta=1)
+                self.assertAlmostEqual(box["height"], 32, delta=1)
 
             next_button.click()
             expect(rows).to_have_count(1)
@@ -736,6 +767,9 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(next_button).to_be_disabled()
             expect(last_button).to_be_disabled()
             expect(prev_button).to_be_enabled()
+            metrics = read_page_nav_metrics()
+            self.assertEqual(metrics["overflowY"], "hidden")
+            self.assertLessEqual(metrics["scrollHeight"], metrics["clientHeight"] + 1)
 
             first_button.click()
             expect(rows).to_have_count(2)

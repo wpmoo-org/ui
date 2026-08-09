@@ -13,21 +13,56 @@
 // couple pixels shorter than the numbered page-links next to them.
 .page-link {
   $page-link-square-size: calc(
-    1em * var(--bs-body-line-height, #{$line-height-base}) + var(--bs-pagination-padding-y) * 2 +
-      var(--bs-pagination-border-width) * 2
+    1.25rem + 0.625rem + var(--bs-pagination-border-width) * 2
   );
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $spacer * 0.25;
+  flex-shrink: 0;
+  gap: $spacer * 0.375;
   min-width: $page-link-square-size;
   min-height: $page-link-square-size;
+  line-height: 1.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.page-link[aria-label]:has(> span:not(.visually-hidden):not(.d-none)):has([data-icon="inline-start"]) {
+  padding-inline-start: $spacer * 0.375;
+  padding-inline-end: $spacer * 0.625;
+}
+
+.page-link[aria-label]:has(> span:not(.visually-hidden):not(.d-none)):has([data-icon="inline-end"]) {
+  padding-inline-start: $spacer * 0.625;
+  padding-inline-end: $spacer * 0.375;
+}
+
+@include media-breakpoint-up(sm) {
+  .page-link[aria-label]:has(> .d-sm-inline):has([data-icon="inline-start"]) {
+    padding-inline-start: $spacer * 0.375;
+    padding-inline-end: $spacer * 0.625;
+  }
+
+  .page-link[aria-label]:has(> .d-sm-inline):has([data-icon="inline-end"]) {
+    padding-inline-start: $spacer * 0.625;
+    padding-inline-end: $spacer * 0.375;
+  }
+}
+
+.page-link:has([data-icon]):not(:has(> span:not(.visually-hidden))) {
+  padding-inline: 0;
 }
 
 .page-link [data-icon] {
   width: $spacer;
   height: $spacer;
+  flex: 0 0 auto;
+}
+
+.page-item:not(.disabled) .page-link:active {
+  transform: translateY($moo-control-active-translate-y);
 }
 
 .page-item.disabled {

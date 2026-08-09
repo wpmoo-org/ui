@@ -2948,6 +2948,47 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 page_2 = page.locator("#certification-pagination-page-2")
                 expect(page_2.locator("xpath=..")).to_have_class("page-item active")
                 expect(page_2.locator("xpath=..")).to_have_attribute("aria-current", "page")
+                metrics = page_2.evaluate(
+                    """
+                    element => {
+                      const read = target => {
+                        const style = getComputedStyle(target);
+                        const rect = target.getBoundingClientRect();
+                        return {
+                          width: rect.width,
+                          height: rect.height,
+                          borderRadius: style.borderRadius,
+                          fontWeight: style.fontWeight,
+                          lineHeight: style.lineHeight,
+                          backgroundColor: style.backgroundColor,
+                          borderColor: style.borderColor,
+                        };
+                      };
+                      return {
+                        active: read(element),
+                        adjacent: read(document.querySelector("#certification-pagination-page-3")),
+                        ellipsis: read(
+                          document.querySelector(
+                            "#certification-pagination-default .page-item.disabled .page-link"
+                          )
+                        ),
+                        prev: read(document.querySelector("#certification-pagination-prev")),
+                      };
+                    }
+                    """
+                )
+                for key in ("active", "adjacent", "ellipsis"):
+                    with self.subTest(case=case.name, item=key):
+                        self.assertAlmostEqual(metrics[key]["width"], 32, delta=1)
+                        self.assertAlmostEqual(metrics[key]["height"], 32, delta=1)
+                        self.assertEqual(metrics[key]["borderRadius"], "10px")
+                        self.assertEqual(metrics[key]["fontWeight"], "500")
+                        self.assertEqual(metrics[key]["lineHeight"], "20px")
+                self.assertNotEqual(metrics["active"]["backgroundColor"], "rgba(0, 0, 0, 0)")
+                self.assertNotEqual(metrics["active"]["borderColor"], "rgba(0, 0, 0, 0)")
+                self.assertEqual(metrics["ellipsis"]["backgroundColor"], "rgba(0, 0, 0, 0)")
+                if case.is_mobile:
+                    self.assertAlmostEqual(metrics["prev"]["width"], 32, delta=1)
 
                 prev = page.locator("#certification-pagination-prev")
                 page_1 = page.locator("#certification-pagination-page-1")

@@ -15,7 +15,7 @@
   <div class="moo-component-examples">
     {% set default %}
       {% call pagination() %}
-        {{ pagination_prev(label="Previous page") }}
+        {{ pagination_prev() }}
         {{ pagination_item("1") }}
         {{ pagination_item("2", active=true) }}
         {{ pagination_item("3") }}
