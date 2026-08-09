@@ -50,7 +50,7 @@
       "Footer",
       "Pass <code>footer</code> for a summary row that closes out a usage ledger.",
       footer,
-      preview_class="moo-example__preview--narrow"
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set actions %}
@@ -125,7 +125,7 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ table(
           ["التكرار", "المالك", "الحالة", "الوقت المقدر"],
           [
@@ -140,7 +140,7 @@
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ table(
           ["בקשה", "אחראי", "סטטוס", "זמן משוער"],
           [
@@ -155,7 +155,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ table(
           ["Request", "Owner", "Status", "SLA"],
           [
@@ -175,7 +175,7 @@
       rtl_arabic,
       rtl_hebrew,
       rtl_english,
-      preview_class="moo-example__preview--narrow"
+      preview_class="moo-example__preview--medium"
     ) }}
   </div>
 

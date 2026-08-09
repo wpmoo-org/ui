@@ -6,6 +6,8 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/table.html.jinja"
 PAGE = ROOT / "site/src/pages/components/table.html.jinja"
+STYLES = ROOT / "scss/components/_table.scss"
+COMPONENT_LAYER = ROOT / "scss/_component_layer.scss"
 
 
 class TableTests(CatalogTestCase):
@@ -136,3 +138,27 @@ class TableTests(CatalogTestCase):
             '{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}',
             source,
         )
+
+    def test_table_row_actions_escape_responsive_wrapper_clipping_when_open(
+        self,
+    ) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn('@import "components/table";', COMPONENT_LAYER.read_text(encoding="utf-8"))
+        self.assertIn(
+            '.table-responsive:has(.table-row-actions > [aria-expanded="true"])',
+            styles,
+        )
+        self.assertIn("overflow: visible;", styles)
+        self.assertIn(
+            '.table-row-actions:has(> [aria-expanded="true"])',
+            styles,
+        )
+        self.assertIn("z-index: $zindex-dropdown;", styles)
+
+    def test_page_uses_one_standard_table_preview_width(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertNotIn('preview_class="moo-example__preview--narrow"', source)
+        self.assertEqual(source.count('preview_class="moo-example__preview--medium"'), 5)
+        self.assertEqual(source.count('class="w-100" dir="rtl"'), 3)
