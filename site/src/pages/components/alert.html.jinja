@@ -130,7 +130,8 @@
         {{ alert(
           "تمت الموافقة على الطلب",
           description="تمت مراجعة طلب الوصول وسيصل صاحبه إلى مساحة العمل خلال دقائق.",
-          icon="info"
+          icon="info",
+          dismissible=true
         ) }}
       </div>
     {% endset %}
@@ -140,7 +141,8 @@
         {{ alert(
           "הבקשה אושרה",
           description="בקשת הגישה נבדקה והמשתמש יקבל גישה לסביבת העבודה בתוך דקות.",
-          icon="info"
+          icon="info",
+          dismissible=true
         ) }}
       </div>
     {% endset %}
@@ -150,7 +152,8 @@
         {{ alert(
           "Access request approved",
           description="The request was reviewed and the requester will reach the workspace within minutes.",
-          icon="info"
+          icon="info",
+          dismissible=true
         ) }}
       </div>
     {% endset %}
@@ -161,7 +164,7 @@
       arabic_alert,
       hebrew_alert,
       english_rtl_alert,
-      preview_class="moo-example__preview--fit"
+      preview_class="moo-example__preview--medium"
     ) }}
   </div>
 

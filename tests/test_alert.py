@@ -71,14 +71,15 @@ class AlertTests(CatalogTestCase):
         output = self.render_alert('alert("Heads up!", action="<button>Go</button>")')
         self.assertIn('<div class="alert-action"><button>Go</button></div>', output)
 
-    def test_rtl_tabbed_examples_do_not_mix_fit_and_medium_preview_widths(self) -> None:
+    def test_rtl_tabbed_examples_use_medium_preview_width(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
         self.assertIn('"alert"', source)
-        self.assertIn('preview_class="moo-example__preview--fit"', source)
+        # RTL examples use --medium to match other examples
+        self.assertIn('preview_class="moo-example__preview--medium"', source)
         self.assertNotIn(
-            'preview_class="moo-example__preview--medium moo-example__preview--fit"',
+            'preview_class="moo-example__preview--fit"',
             source,
         )
 
