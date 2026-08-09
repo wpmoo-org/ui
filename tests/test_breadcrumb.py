@@ -66,7 +66,7 @@ class BreadcrumbTests(CatalogTestCase):
             'breadcrumb([{"label": "Home"}, {"label": "Library"}], divider="•")'
         )
         self.assertIn(
-            'class="breadcrumb" style="--bs-breadcrumb-divider: \'•\';"',
+            'class="breadcrumb breadcrumb--custom-divider" style="--bs-breadcrumb-divider: \'•\';"',
             output,
         )
 
@@ -83,10 +83,11 @@ class BreadcrumbTests(CatalogTestCase):
             styles,
         )
         self.assertIn(":dir(rtl) .breadcrumb-item + .breadcrumb-item {", styles)
-        self.assertIn("padding-right: var(--bs-breadcrumb-item-padding-x);", styles)
+        self.assertIn("column-gap: var(--bs-breadcrumb-item-padding-x);", styles)
         self.assertIn(":dir(rtl) .breadcrumb-item + .breadcrumb-item::before {", styles)
-        self.assertIn("float: right;", styles)
-        self.assertIn("padding-left: var(--bs-breadcrumb-item-padding-x);", styles)
+        self.assertIn("padding-right: 0;", styles)
+        self.assertIn("padding-left: 0;", styles)
+        self.assertIn("transform: scaleX(-1);", styles)
 
     def test_breadcrumb_ellipsis_item_renders_a_static_marker(self) -> None:
         output = self.render_breadcrumb(
@@ -98,7 +99,7 @@ class BreadcrumbTests(CatalogTestCase):
         self.assertNotIn("<button", output)
         self.assertNotIn("<a ", output.split("visually-hidden")[1])
 
-    def test_breadcrumb_dropdown_item_renders_via_ready_dropdown_macros(self) -> None:
+    def test_breadcrumb_dropdown_item_uses_inline_trigger_with_ready_menu(self) -> None:
         output = self.render_breadcrumb(
             'breadcrumb(['
             '{"label": "Home", "href": "#"}, '
@@ -110,6 +111,9 @@ class BreadcrumbTests(CatalogTestCase):
             '])'
         )
         self.assertIn('<span class="breadcrumb-dropdown-item">', output)
+        self.assertIn('<button class="breadcrumb-dropdown-trigger"', output)
+        self.assertIn('data-bs-toggle="dropdown"', output)
+        self.assertIn('data-icon="inline-end"', output)
         self.assertIn('class="dropdown-item" href="/projects"', output)
         self.assertIn('class="dropdown-item" href="/reports"', output)
 

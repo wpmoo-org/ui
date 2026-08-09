@@ -53,14 +53,14 @@
 
     {% set dropdown_example %}
       {{ breadcrumb([
-        {"label": "Workspace", "href": "#"},
-        {"label": "Projects", "dropdown_items": [
-          {"label": "Projects", "href": "#"},
-          {"label": "Reports", "href": "#"},
-          {"label": "Automations", "href": "#"}
+        {"label": "Home", "href": "#"},
+        {"label": "Components", "dropdown_items": [
+          {"label": "Documentation", "href": "#"},
+          {"label": "Themes", "href": "#"},
+          {"label": "GitHub", "href": "#"}
         ]},
-        {"label": "Growth dashboard"}
-      ]) }}
+        {"label": "Breadcrumb"}
+      ], divider="•") }}
     {% endset %}
     {{ render_example(
       "dropdown",
@@ -87,36 +87,48 @@
     {% set arabic_breadcrumb %}
       <div dir="rtl">
         {{ breadcrumb([
-          {"label": "مساحة العمل", "href": "#"},
-          {"label": "المراجعات", "href": "#"},
-          {"label": "طلبات اليوم"}
-        ]) }}
+          {"label": "الرئيسية", "href": "#"},
+          {"label": "المكونات", "dropdown_items": [
+            {"label": "التوثيق", "href": "#"},
+            {"label": "السمات", "href": "#"},
+            {"label": "GitHub", "href": "#"}
+          ]},
+          {"label": "مسار التنقل"}
+        ], divider="•") }}
       </div>
     {% endset %}
 
     {% set hebrew_breadcrumb %}
       <div dir="rtl">
         {{ breadcrumb([
-          {"label": "סביבת עבודה", "href": "#"},
-          {"label": "חיוב", "href": "#"},
-          {"label": "חשבוניות פתוחות"}
-        ]) }}
+          {"label": "בית", "href": "#"},
+          {"label": "רכיבים", "dropdown_items": [
+            {"label": "תיעוד", "href": "#"},
+            {"label": "ערכות נושא", "href": "#"},
+            {"label": "GitHub", "href": "#"}
+          ]},
+          {"label": "פירורי לחם"}
+        ], divider="•") }}
       </div>
     {% endset %}
 
     {% set english_breadcrumb %}
       <div dir="rtl">
         {{ breadcrumb([
-          {"label": "Workspace", "href": "#"},
-          {"label": "Support queue", "href": "#"},
-          {"label": "Escalations"}
-        ]) }}
+          {"label": "Home", "href": "#"},
+          {"label": "Components", "dropdown_items": [
+            {"label": "Documentation", "href": "#"},
+            {"label": "Themes", "href": "#"},
+            {"label": "GitHub", "href": "#"}
+          ]},
+          {"label": "Breadcrumb"}
+        ], divider="•") }}
       </div>
     {% endset %}
 
     {{ render_rtl_example(
       "breadcrumb",
-      "Use tabs to compare practical breadcrumb trails inside Arabic, Hebrew, and English right-to-left layouts.",
+      "Use tabs to compare Arabic, Hebrew, and English breadcrumb trails with a dropdown segment and custom separator.",
       arabic_breadcrumb,
       hebrew_breadcrumb,
       english_breadcrumb,
