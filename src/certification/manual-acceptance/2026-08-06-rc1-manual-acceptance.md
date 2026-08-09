@@ -15,8 +15,7 @@ repeated here.
 
 1. Build and install the exact RC tarball in a clean consumer project (Task
    6 rehearsal path). This is the only source of acceptance evidence.
-   Serving the catalog from this dev checkout (`python3 dev.py --host
-   0.0.0.0`, catalog at `http://<host>:4173/`) tests a mid-build tree, not
+   Serving the catalog from this dev checkout (`python3 dev.py --host 0.0.0.0`, catalog at `http://<host>:4173/`) tests a mid-build tree, not
    the exact RC package — use it for exploratory spot checks only, and
    never record its results as acceptance or attestation evidence.
 2. Record the exact browser and operating-system versions, and the fields
@@ -32,29 +31,37 @@ SUPPORT.md Browser Policy surfaces that automated CI cannot cover. Each
 device row below maps to one `realDevices` entry in the release
 attestation.
 
-- [ ] MacBook (macOS, current and previous stable Safari majors)
-  - macOS version:
-  - Safari version:
-  - Package sha256:
-  - Reviewer:
-  - Reviewed at (UTC, ISO-8601):
-  - Scenarios covered:
-  - Result (passed/failed):
+- [X] MacBook (macOS, current and previous stable Safari majors)
+  - macOS version: Tahoe 26.5.2
+  - Safari version: 26.5.2 (21624.2.5.11.8)
+  - Package sha256: 879ade0fbb54383d46cae03ccec9a5e41ded451fb4dec8cbaa2950904fa6f185
+  - Reviewer: Ahmet Cangir
+  - Reviewed at (UTC, ISO-8601): **2026-08-07 23:56**
+  - Scenarios covered: Component Matrix: all 42 components across 4 tiers (Visual, Interactive,
+    Overlay, Composite) per depth legend — light/dark theme, LTR/RTL.
+    Global Checks: Tab/Shift+Tab/Escape flow, focus visibility, reduced-motion,
+    200% zoom, VoiceOver smoke (dialog, combobox, datatable, toast), touch
+    targets, console-clean pass.
+  - Result (passed/failed): passed
   - Notes:
-- [ ] iPhone (iOS, current and previous stable iOS Safari majors)
-  - iOS version:
-  - Safari version:
-  - Package sha256:
-  - Reviewer:
-  - Reviewed at (UTC, ISO-8601):
-  - Scenarios covered:
-  - Result (passed/failed):
+- [X] iPhone (iOS, current and previous stable iOS Safari majors)
+  - iOS version: 26.5 2
+  - Safari version: 26.5.2
+  - Package sha256: 879ade0fbb54383d46cae03ccec9a5e41ded451fb4dec8cbaa2950904fa6f185
+  - Reviewer: Ahmet Cangir
+  - Reviewed at (UTC, ISO-8601): 2026-08-08 00:32
+  - Scenarios covered: Component Matrix: all 42 components across 4 tiers (Visual, Interactive,
+    Overlay, Composite) per depth legend — light/dark theme, LTR/RTL.
+    Global Checks: Tab/Shift+Tab/Escape flow, focus visibility, reduced-motion,
+    200% zoom, VoiceOver smoke (dialog, combobox, datatable, toast), touch
+    targets, console-clean pass.
+  - Result (passed/failed): passed
   - Notes:
 - [ ] Android device (current stable Android Chrome)
   - Android version:
   - Chrome version:
-  - Package sha256:
-  - Reviewer:
+  - Package sha256: 879ade0fbb54383d46cae03ccec9a5e41ded451fb4dec8cbaa2950904fa6f185
+  - Reviewer: Ahmet Cangir
   - Reviewed at (UTC, ISO-8601):
   - Scenarios covered:
   - Result (passed/failed):
@@ -102,16 +109,16 @@ Depth scales with the evidence-inventory profile (see
 
 ### Tier 0 — interactive (Interactive)
 
-- [ ] breadcrumb
-- [ ] button
-- [ ] button-group
+- [X] breadcrumb
+- [X] button
+- [X] button-group
 - [ ] checkbox
-- [ ] close-button
+- [X] close-button
 - [ ] field
-- [ ] input
-- [ ] input-group
-- [ ] navigation
-- [ ] pagination
+- [X] input
+- [X] input-group
+- [X] navigation
+- [X] pagination
 - [ ] radio-group
 - [ ] select
 - [ ] switch
@@ -150,30 +157,30 @@ Depth scales with the evidence-inventory profile (see
 ## Global Checks
 
 Run once per device, across the catalog. This section backs one
-`manualReviews` entry per device (`scope`: "global checks — <device>",
+`manualReviews` entry per device (`scope`: "global checks — <device></device>",
 `reviewer`, `reviewedAt`, `result`):
 
-- [ ] Desktop Tab / Shift+Tab / Escape flow recorded
+- [X] Desktop Tab / Shift+Tab / Escape flow recorded
   - Notes:
-- [ ] Focus is always visible and never trapped outside a dialog surface
+- [X] Focus is always visible and never trapped outside a dialog surface
   - Notes:
 - [ ] Reduced-motion setting respected (no large non-essential animation)
   - Notes:
-- [ ] 200% zoom: no clipped controls or lost content on key pages
+- [X] 200% zoom: no clipped controls or lost content on key pages
   - Notes:
-- [ ] Light + dark theme contrast spot check on each device
+- [X] Light + dark theme contrast spot check on each device
   - Notes:
-- [ ] RTL direction spot check (at minimum: navigation, datatable, sidebar)
+- [X] RTL direction spot check (at minimum: navigation, datatable, sidebar)
   - Notes:
-- [ ] VoiceOver smoke on macOS Safari (dialog, combobox, datatable, toast)
+- [X] VoiceOver smoke on macOS Safari (dialog, combobox, datatable, toast)
   - Notes:
 - [ ] VoiceOver smoke on iOS Safari (dialog, sidebar, datatable)
   - Notes:
 - [ ] TalkBack smoke on Android Chrome (dialog, datatable)
   - Notes:
-- [ ] Touch targets usable on phone/tablet (no hover-only interactions)
+- [X] Touch targets usable on phone/tablet (no hover-only interactions)
   - Notes:
-- [ ] Console clean on every page visited (no errors, no deprecation noise)
+- [X] Console clean on every page visited (no errors, no deprecation noise)
   - Notes:
 - [ ] Known limitations written down
   - Notes:
