@@ -17,7 +17,7 @@
   ) }}
 
   <div class="moo-component-examples">
-    {% set composition %}
+    {% set overview %}
       <div class="d-flex align-items-center gap-3">
         {{ avatar(
           name="Cangir",
@@ -28,17 +28,28 @@
           badge_class="bg-success",
           badge_aria_label="Available"
         ) }}
-        <div class="min-w-0">
-          <div class="fw-medium">Cangir</div>
-          <div class="text-body-secondary small">Design systems</div>
+        {{ avatar(
+          name="Bull mascot",
+          src=avatar_bull,
+          alt="Black and white bull mascot avatar",
+          fallback="BM",
+          badge_icon="plus",
+          badge_class="bg-primary text-white",
+          badge_aria_label="Add mascot"
+        ) }}
+        <div class="avatar-group">
+          {{ avatar(name="Cangir", src=avatar_cangir, alt="Illustrated profile photo of Cangir", fallback="CA") }}
+          {{ avatar(name="Cangir at the marina", src=avatar_marina, alt="Profile photo of Cangir at a marina", fallback="CA") }}
+          {{ avatar(name="Bull mascot", src=avatar_bull, alt="Black and white bull mascot avatar", fallback="BM") }}
+          <span class="avatar avatar-count">3</span>
         </div>
       </div>
     {% endset %}
     {{ render_example(
-      "composition",
-      "Composition",
-      "Use a fallback avatar with a small presence mark for account rows, profile menus, and compact workspace headers.",
-      composition
+      "overview",
+      "Overview",
+      "The avatar family in three common forms: a status badge, an icon badge, and a counted group.",
+      overview
     ) }}
 
     {% set fallback %}

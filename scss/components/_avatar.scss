@@ -119,7 +119,12 @@
   align-items: center;
 }
 
+// Matches the reference's ring-2 ring-background: each avatar in a group
+// carries a page-background ring (light = white, dark = black) so stacked
+// avatars stay visibly separated. --bs-body-bg is theme-aware in both the
+// standalone and scoped builds, mirroring the badge ring treatment.
 .avatar-group > .avatar {
+  box-shadow: 0 0 0 $avatar-group-ring-width var(--bs-body-bg);
   z-index: 0;
 }
 
