@@ -11,33 +11,65 @@
   filter: invert(1);
 }
 
+// Bootstrap's margin-top (0.25rem = 4px) was computed for the old 1em
+// checkbox (14px at the catalog's 0.875rem body font). The override to
+// 1rem (16px) shifted the geometric center by 1px; tightening the top
+// margin to 0.125rem (2px) re-centres the 16px control within the
+// .form-check min-height so it aligns with the label text.
+.form-check-input {
+  margin-top: 0.125rem;
+}
+
 // Covers checkbox, switch (also type="checkbox"), and radio alike so
 // mouse-triggered focus never shows a ring on any form-check control,
 // matching Input/Textarea/Select's own :focus:not(:focus-visible) rule
-// in foundations/_focus.scss.
-.form-check-input:is([type="checkbox"], [type="radio"]):focus:active,
-.form-check-input:is([type="checkbox"], [type="radio"]):focus:not(:focus-visible) {
+// in foundations/_focus.scss. Invalid checkboxes are excluded — their
+// persistent validation ring is restored by the rules at the bottom.
+.form-check-input:is([type="checkbox"], [type="radio"]):not(.is-invalid):focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]):not(.is-invalid):focus:not(:focus-visible) {
   border-color: var(--bs-border-color);
   box-shadow: none;
 }
 
-.form-check-input:is([type="checkbox"], [type="radio"]):checked:focus:active,
-.form-check-input:is([type="checkbox"], [type="radio"]):checked:focus:not(:focus-visible) {
+.form-check-input:is([type="checkbox"], [type="radio"]):checked:not(.is-invalid):focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]):checked:not(.is-invalid):focus:not(:focus-visible) {
   border-color: $form-check-input-checked-border-color;
 }
 
-.form-check-input[type="checkbox"]:indeterminate:focus:active,
-.form-check-input[type="checkbox"]:indeterminate:focus:not(:focus-visible) {
+.form-check-input[type="checkbox"]:not(.is-invalid):indeterminate:focus:active,
+.form-check-input[type="checkbox"]:not(.is-invalid):indeterminate:focus:not(:focus-visible) {
   border-color: $form-check-input-indeterminate-border-color;
 }
 
 // Invalid ("destructive") checkboxes are an exception to the mouse-click
-// focus-ring suppression above. The validation ring stays visible on every
-// focus trigger — including mouse click — so the error state is never
-// silently dismissed by a tap. Mirrors the destructive ring that
-// foundations/_focus.scss already paints on .form-control.is-invalid and
-// .form-select.is-invalid.
-.form-check-input.is-invalid:focus {
+// focus-ring suppression above. The validation ring stays visible at all
+// times — not just on :focus — so the error state is never silently
+// dismissed. This matches the reference's aria-invalid ring pattern and
+// mirrors the destructive ring that foundations/_focus.scss already
+// paints on .form-control.is-invalid and .form-select.is-invalid.
+.form-check-input.is-invalid {
   border-color: var(--moo-form-invalid-ring-color);
-  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-invalid-ring-color} 50%, transparent);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
+}
+
+// The focus-suppression rules above have specificity (0,4,0) which
+// beats .is-invalid's (0,2,0). These :focus variants sit after the
+// suppression block and carry (0,5,0), so the destructive ring stays
+// visible during mouse click and programmatic focus alike.
+.form-check-input.is-invalid:focus:active,
+.form-check-input.is-invalid:focus:not(:focus-visible) {
+  border-color: var(--moo-form-invalid-ring-color);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
+}
+
+.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:not(:focus-visible) {
+  border-color: var(--moo-form-invalid-ring-color);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
+}
+
+.form-check-input[type="checkbox"].is-invalid:indeterminate:focus:active,
+.form-check-input[type="checkbox"].is-invalid:indeterminate:focus:not(:focus-visible) {
+  border-color: var(--moo-form-invalid-ring-color);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }

@@ -1638,7 +1638,7 @@ class CatalogContractTests(CatalogTestCase):
                             declaration,
                             r"^box-shadow: (?:none|\$input-focus-box-shadow|"
                             r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
-                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--bs-body-bg\)|"
+                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
                             r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? color-mix\(in srgb, (?:\$|\#\{\$)[a-z0-9-]*ring-color(?:\})? 50%, transparent\));$",
                         )
                     elif declaration.startswith("border-radius:"):

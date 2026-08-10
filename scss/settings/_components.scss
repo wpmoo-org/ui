@@ -101,6 +101,13 @@ $pagination-disabled-bg: transparent !default;
 $pagination-disabled-border-color: transparent !default;
 // The reference progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;
+// Bootstrap's checkbox/radio default is 1em which follows the parent
+// font-size (14px here). The reference uses a fixed 16px (size-4), so
+// pin the width to 1rem to match 1:1 regardless of context font-size.
+$form-check-input-width: 1rem !default;
+// Bootstrap derives this as $form-check-input-width + .5em, but mixing
+// rem and em in Sass arithmetic fails to compile; restate it in rem.
+$form-check-padding-start: 1.5rem !default;
 // The reference switch track is chubbier than Bootstrap's default: 32x18.4px
 // versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
 // Bootstrap's own customization point, but there is no matching height
@@ -338,8 +345,9 @@ $moo-datatable-card-label-width: 7rem !default;
 $moo-datatable-frame-header-min-height: 2.78125rem !default;
 // Bootstrap's checkbox width variable is not available while primary settings
 // are aggregated, so keep Data Table's select inset derived from Moo's compact
-// checkbox box and Bootstrap's default 1px frame border.
-$moo-datatable-select-checkbox-size: 0.875rem !default;
+// checkbox box and Bootstrap's default 1px frame border. Now matches the
+// global $form-check-input-width (1rem / 16px) set above.
+$moo-datatable-select-checkbox-size: 1rem !default;
 // Bootstrap has no --bs-form-check-input-border-radius custom property to
 // consume here either, same gap as the checkbox size above, this time for
 // the facet dropdown's own checkbox-style indicator (datatable_facet_item(),
