@@ -382,6 +382,10 @@ class CatalogContractTests(CatalogTestCase):
             "table-responsive",
             "table",
             "table-sm",
+            # Bootstrap's RTL flip for form-check: passed via extra_class to
+            # the checkbox macro in RTL examples so the input appears on the
+            # right side of the label (matching Bootstrap's RTL CSS behavior).
+            "form-check-reverse",
         }
 
         pages = [

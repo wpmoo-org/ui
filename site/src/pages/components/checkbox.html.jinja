@@ -12,24 +12,24 @@
     "Toggle a single option using Bootstrap's native checkbox contract."
   ) }}
 
-  {# Hero preview: a comprehensive composition shown above the TOC sections,
-     matching the reference's pattern of a live multi-variant preview at the top. #}
-  <div class="moo-example__surface mb-4">
-    <div class="moo-example__preview moo-example__preview--narrow">
-      <div class="d-grid gap-3">
-        {{ checkbox("checkbox-hero-terms", label="Accept terms and conditions") }}
-        {{ checkbox(
-          "checkbox-hero-terms-checked",
-          label="Accept terms and conditions",
-          description="By clicking this checkbox, you agree to the terms.",
-          checked=true
-        ) }}
-        {{ checkbox("checkbox-hero-notify", label="Enable notifications", disabled=true) }}
+  <div class="moo-component-examples">
+    {# Hero preview: a comprehensive composition shown above the TOC sections,
+       matching the reference's pattern of a live multi-variant preview at the top. #}
+    <div class="moo-example__surface mb-4">
+      <div class="moo-example__preview moo-example__preview--narrow">
+        <div class="d-grid gap-3">
+          {{ checkbox("checkbox-hero-terms", label="Accept terms and conditions") }}
+          {{ checkbox(
+            "checkbox-hero-terms-checked",
+            label="Accept terms and conditions",
+            description="By clicking this checkbox, you agree to the terms.",
+            checked=true
+          ) }}
+          {{ checkbox("checkbox-hero-notify", label="Enable notifications", disabled=true) }}
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="moo-component-examples">
     {% set usage %}
       {{ checkbox("checkbox-usage", label="Accept terms and conditions") }}
     {% endset %}
@@ -176,22 +176,22 @@
 
     {% set rtl_arabic %}
       <div class="d-grid gap-2" dir="rtl">
-        {{ checkbox("checkbox-rtl-ar-terms", label="قبول الشروط والأحكام") }}
-        {{ checkbox("checkbox-rtl-ar-notify", label="تفعيل الإشعارات", description="يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.", checked=true) }}
+        {{ checkbox("checkbox-rtl-ar-terms", label="قبول الشروط والأحكام", extra_class="form-check-reverse") }}
+        {{ checkbox("checkbox-rtl-ar-notify", label="تفعيل الإشعارات", description="يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.", checked=true, extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
       <div class="d-grid gap-2" dir="rtl">
-        {{ checkbox("checkbox-rtl-he-terms", label="קבלת תנאי השירות") }}
-        {{ checkbox("checkbox-rtl-he-notify", label="הפעלת התראות", description="ניתן להפעיל או לבטל התראות בכל עת.", checked=true) }}
+        {{ checkbox("checkbox-rtl-he-terms", label="קבלת תנאי השירות", extra_class="form-check-reverse") }}
+        {{ checkbox("checkbox-rtl-he-notify", label="הפעלת התראות", description="ניתן להפעיל או לבטל התראות בכל עת.", checked=true, extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
       <div class="d-grid gap-2" dir="rtl">
-        {{ checkbox("checkbox-rtl-en-terms", label="Accept terms and conditions") }}
-        {{ checkbox("checkbox-rtl-en-notify", label="Enable notifications", description="You can enable or disable notifications at any time.", checked=true) }}
+        {{ checkbox("checkbox-rtl-en-terms", label="Accept terms and conditions", extra_class="form-check-reverse") }}
+        {{ checkbox("checkbox-rtl-en-notify", label="Enable notifications", description="You can enable or disable notifications at any time.", checked=true, extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
