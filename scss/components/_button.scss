@@ -74,17 +74,20 @@ label.btn {
 .btn-icon-xs,
 .btn-icon-sm,
 .btn-icon-lg {
+  // Icon-only buttons become squares whose side equals the token-driven
+  // button height (line-height + 2*padding-y + 2*border), so they always
+  // match the height of sibling text buttons. The default button exposes no
+  // --bs-btn-line-height / --bs-btn-padding-y custom properties (Bootstrap
+  // compiles those from Sass), so the default size declares them here;
+  // xs/sm/lg override them in their own blocks. The side is computed once
+  // into --moo-btn-icon-size and consumed on both axes (and by
+  // .btn-group-vertical) so the two cannot diverge.
+  --bs-btn-line-height: #{$btn-line-height};
+  --bs-btn-padding-y: #{$btn-padding-y};
+  --moo-btn-icon-size: #{$moo-btn-icon-size};
   padding-inline: 0;
-  inline-size: calc(
-    var(--bs-btn-line-height) +
-    var(--bs-btn-padding-y) * 2 +
-    var(--bs-btn-border-width) * 2
-  );
-  block-size: calc(
-    var(--bs-btn-line-height) +
-    var(--bs-btn-padding-y) * 2 +
-    var(--bs-btn-border-width) * 2
-  );
+  inline-size: var(--moo-btn-icon-size);
+  block-size: var(--moo-btn-icon-size);
 }
 
 :is(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg)::after {

@@ -214,6 +214,16 @@ $btn-padding-y-sm: 0.3125rem !default;
 $btn-padding-x-sm: 0.625rem !default;
 $btn-padding-y-lg: 0.4375rem !default;
 $btn-padding-x-lg: 0.625rem !default;
+// Icon-only buttons are squares whose side equals the token-driven button
+// height (line-height + 2*padding-y + 2*border), matching sibling text
+// buttons. Bootstrap exposes no single icon-button size knob; the side is a
+// runtime calc over the --bs-btn-* consumption variables so size variants
+// (xs/sm/lg) resolve their own box, backed here by a private Sass knob.
+$moo-btn-icon-size: calc(
+  var(--bs-btn-line-height) +
+  var(--bs-btn-padding-y) * 2 +
+  var(--bs-btn-border-width) * 2
+) !default;
 
 // Bootstrap's close button already exposes Sass knobs for its content-box icon
 // and padding. Keep the native glyph slightly lighter than Bootstrap's default

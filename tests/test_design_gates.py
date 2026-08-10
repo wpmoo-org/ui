@@ -686,16 +686,25 @@ class DesignGateTests(CatalogTestCase):
         primary_variables = read_primary_variables()
         primary_lines = primary_variables.splitlines()
 
+        # Bootstrap's native class family is .btn (not .button), so
+        # Button's private tokens use --moo-btn-* to stay aligned with
+        # the --bs-btn-* consumption variables they extend.
+        token_prefix_aliases = {
+            "button": ("--moo-button", "--moo-btn"),
+        }
+
         for path in sorted(component_partials()):
             component = component_owner(path)
             prefix = f"--moo-{component.replace('_', '-')}"
+            accepted = token_prefix_aliases.get(component, (prefix,))
             source = path.read_text(encoding="utf-8")
             tokens = set(re.findall(r"--moo-[\w-]+(?=\s*:)", source))
 
             for token in sorted(tokens):
                 self.assertTrue(
-                    token.startswith(prefix),
-                    f"{path.name}: {token} is outside the {prefix}-* namespace",
+                    any(token.startswith(p) for p in accepted),
+                    f"{path.name}: {token} is outside the"
+                    f" {'/'.join(accepted)}-* namespace",
                 )
 
             for token in sorted(tokens):

@@ -170,7 +170,10 @@ class CatalogContractTests(CatalogTestCase):
     def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
         allowed_prefixes = {
             "button": ("btn", "disabled"),
-            "button_group": ("btn",),
+            # Button Group's compact select override matches Bootstrap's
+            # `.input-group > .form-select` specificity, so the partial
+            # legitimately references .input-group as an ancestor context.
+            "button_group": ("btn", "input-group"),
             "card": ("card",),
             # Breadcrumb's collapsed-segment composition wraps Bootstrap's
             # native .dropdown inside its own .breadcrumb-dropdown-item, so
@@ -368,6 +371,9 @@ class CatalogContractTests(CatalogTestCase):
             # strip are documented examples, not product components.
             "card-spacing-demo",
             "card-scroll",
+            # Button Group's compact select modifier: a layout hint passed
+            # to the select macro's extra_class, not raw component markup.
+            "btn-group-select",
         }
 
         pages = [

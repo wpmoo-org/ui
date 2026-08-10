@@ -34,12 +34,16 @@
   width: var(--moo-btn-icon-size);
 }
 
-// Select inside a button group: compact and content-sized, matching shadcn's
+// Select inside a button group: compact and content-sized, matching the
 // compact currency selector pattern. Bootstrap's flex defaults would shrink
 // it below its longest option; flex: 0 0 auto keeps the intrinsic (content)
 // width. The min-width floor derives from Bootstrap's form-select caret-space
 // token, not magic numbers. Focus keeps Bootstrap's default visible treatment.
-.btn-group-select {
+//
+// The input-group override matches Bootstrap's own `.input-group > .form-select`
+// specificity (0,2,0) which would otherwise stretch the select with flex: 1 1 auto.
+.btn-group-select,
+.input-group > .btn-group-select {
   flex: 0 0 auto;
   width: auto;
   min-width: calc(#{$form-select-indicator-padding} + #{$spacer});

@@ -189,12 +189,12 @@
     ) }}
 
     {% set select_group %}
-      <div class="d-inline-flex align-items-stretch gap-2">
-        {% call input_group(extra_class="w-auto") %}
-          {{ select(aria_label="Currency", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}]) }}
+      <div class="d-inline-flex align-items-stretch">
+        {% call input_group(extra_class="flex-grow-1 rounded-3") %}
+          {{ select(aria_label="Currency", extra_class="btn-group-select", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}]) }}
           {{ input(aria_label="Amount", placeholder="10.00") }}
+          {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="arrow-right") }}
         {% endcall %}
-        {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="arrow-right") }}
       </div>
     {% endset %}
     {{ render_example(
