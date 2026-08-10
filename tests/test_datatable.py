@@ -223,7 +223,7 @@ class DataTableTests(CatalogTestCase):
         assert clear_button is not None
 
         self.assertIn(
-            "Clear selection <code class='tooltip-kbd'>Escape</code>",
+            "Clear selection <kbd>Escape</kbd>",
             clear_button.attrs.get("data-bs-title"),
         )
         self.assertEqual(clear_button.attrs.get("data-bs-html"), "true")

@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
+{% from "components/kbd.html.jinja" import kbd %}
 {% from "components/tooltip.html.jinja" import tooltip_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
@@ -46,7 +47,7 @@
         "Save draft",
         variant="outline",
         icon_start="save",
-        tooltip="Save draft <code class='tooltip-kbd'>⌘S</code>",
+        tooltip="Save draft " ~ kbd("⌘S"),
         tooltip_html=true
       ) }}
     {% endset %}
