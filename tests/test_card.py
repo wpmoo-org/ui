@@ -46,18 +46,32 @@ class CardTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/card.html")
-        self.assertIn('data-example="rtl"', page)
+        # The three-language render_rtl_example macro generates
+        # data-example="rtl-arabic", "rtl-hebrew", "rtl-english".
+        self.assertIn('data-example="rtl-arabic"', page)
+        self.assertIn('data-example="rtl-hebrew"', page)
+        self.assertIn('data-example="rtl-english"', page)
         self.assertIn('dir="rtl"', page)
         self.assertIn("تسجيل الدخول", page)
 
     def test_card_rtl_example_is_a_single_translated_login_scenario(self) -> None:
-        # The RTL example mirrors the reference: one Arabic login card with
-        # the same structure as the spacing example, flipped to RTL.
+        # The RTL example uses render_rtl_example with three language
+        # variants (Arabic, Hebrew, English), each wrapping the same
+        # login card structure in dir="rtl".
         source = PAGE.read_text(encoding="utf-8")
 
-        block = source.split("arabic_card %}", 1)[1].split("{% endset %}", 1)[0]
-        self.assertIn('dir="rtl"', block)
-        self.assertIn("تسجيل الدخول إلى حسابك", block)
-        self.assertIn('action=button("إنشاء حساب"', block)
-        self.assertIn("card-rtl-email", block)
-        self.assertIn("card-rtl-password", block)
+        arabic_block = source.split("rtl_arabic %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="rtl"', arabic_block)
+        self.assertIn("تسجيل الدخول إلى حسابك", arabic_block)
+        self.assertIn('action=button("إنشاء حساب"', arabic_block)
+        self.assertIn("card-rtl-ar-email", arabic_block)
+        self.assertIn("card-rtl-ar-password", arabic_block)
+
+        hebrew_block = source.split("rtl_hebrew %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="rtl"', hebrew_block)
+        self.assertIn("card-rtl-he-email", hebrew_block)
+
+        english_block = source.split("rtl_english %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="rtl"', english_block)
+        self.assertIn("Login to your account", english_block)
+        self.assertIn("card-rtl-en-email", english_block)

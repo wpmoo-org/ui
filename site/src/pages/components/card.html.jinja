@@ -126,31 +126,79 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set arabic_card %}
-      {% call card(
-        "تسجيل الدخول إلى حسابك",
-        "أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك.",
-        action=button("إنشاء حساب", variant="ghost"),
-        footer=button("تسجيل الدخول", extra_class="w-100") ~ button("تسجيل الدخول باستخدام Google", variant="secondary", extra_class="w-100"),
-        footer_class="flex-column gap-2",
-        dir="rtl"
-      ) %}
-          {% call field_group() %}
-            {% call field() %}
-              {{ input(label="البريد الإلكتروني", id="card-rtl-email", type="email", placeholder="you@example.com") }}
+    {% set rtl_arabic %}
+      <div dir="rtl">
+        {% call card(
+          "تسجيل الدخول إلى حسابك",
+          "أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك.",
+          action=button("إنشاء حساب", variant="ghost"),
+          footer=button("تسجيل الدخول", extra_class="w-100") ~ button("تسجيل الدخول باستخدام Google", variant="secondary", extra_class="w-100"),
+          footer_class="flex-column gap-2"
+        ) %}
+            {% call field_group() %}
+              {% call field() %}
+                {{ input(label="البريد الإلكتروني", id="card-rtl-ar-email", type="email", placeholder="you@example.com") }}
+              {% endcall %}
+              {% call field() %}
+                {{ input(label="كلمة المرور", id="card-rtl-ar-password", type="password", label_extra='<a href="#" class="text-decoration-none">نسيت كلمة المرور؟</a>') }}
+              {% endcall %}
             {% endcall %}
-            {% call field() %}
-              {{ input(label="كلمة المرور", id="card-rtl-password", type="password", label_extra='<a href="#" class="text-decoration-none">نسيت كلمة المرور؟</a>') }}
-            {% endcall %}
-          {% endcall %}
-      {% endcall %}
+        {% endcall %}
+      </div>
     {% endset %}
-    {{ render_example(
-      "rtl",
-      "RTL",
-      "The same login card reads naturally right-to-left with <code>dir=\"rtl\"</code>.",
-      arabic_card,
-      preview_class="moo-example__preview--narrow"
+
+    {% set rtl_hebrew %}
+      <div dir="rtl">
+        {% call card(
+          "התחברות לחשבון שלך",
+          "הזן את כתובת הדוא\"ל שלך להתחברות לחשבון שלך.",
+          action=button("יצירת חשבון", variant="ghost"),
+          footer=button("התחברות", extra_class="w-100") ~ button("התחברות עם Google", variant="secondary", extra_class="w-100"),
+          footer_class="flex-column gap-2"
+        ) %}
+            {% call field_group() %}
+              {% call field() %}
+                {{ input(label="דוא\"ל", id="card-rtl-he-email", type="email", placeholder="you@example.com") }}
+              {% endcall %}
+              {% call field() %}
+                {{ input(label="סיסמה", id="card-rtl-he-password", type="password", label_extra='<a href="#" class="text-decoration-none">שכחת את הסיסמה?</a>') }}
+              {% endcall %}
+            {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {% set rtl_english %}
+      <div dir="rtl">
+        {% call card(
+          "Login to your account",
+          "Enter your email below to login to your account.",
+          action=button("Sign up", variant="ghost"),
+          footer=button("Login", extra_class="w-100") ~ button("Login with Google", variant="secondary", extra_class="w-100"),
+          footer_class="flex-column gap-2"
+        ) %}
+            {% call field_group() %}
+              {% call field() %}
+                {{ input(label="Email", id="card-rtl-en-email", type="email", placeholder="you@example.com") }}
+              {% endcall %}
+              {% call field() %}
+                {{ input(label="Password", id="card-rtl-en-password", type="password", label_extra='<a href="#" class="text-decoration-none">Forgot your password?</a>') }}
+              {% endcall %}
+            {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+
+    {{ render_rtl_example(
+      "card-login",
+      "Compare Arabic, Hebrew, and English login cards in an RTL shell.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow",
+      title="RTL",
+      title_id="card-rtl",
+      example_prefix="rtl"
     ) }}
   </div>
 
