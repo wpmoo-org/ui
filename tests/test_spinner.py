@@ -58,7 +58,8 @@ class SpinnerTests(CatalogTestCase):
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         # RTL rule: exact translations of the same example, same structure.
         for block_start in ("rtl_arabic %}", "rtl_hebrew %}", "rtl_english %}"):

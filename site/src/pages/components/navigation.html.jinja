@@ -91,7 +91,7 @@
     {% endset %}
 
     {% set nav_rtl_english %}
-      {% call nav_menu("App sections", vertical=true, dir="rtl") %}
+      {% call nav_menu("App sections", vertical=true, dir="ltr") %}
         {{ nav_item("Dashboard", href="#", icon="layout-dashboard", active=true) }}
         {{ nav_item("Tasks", href="#", icon="list-check") }}
         {{ nav_item("Apps", href="#", icon="package", badge_label="3", badge_variant="default") }}

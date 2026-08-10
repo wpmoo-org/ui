@@ -72,6 +72,6 @@ class CardTests(CatalogTestCase):
         self.assertIn("card-rtl-he-email", hebrew_block)
 
         english_block = source.split("rtl_english %}", 1)[1].split("{% endset %}", 1)[0]
-        self.assertIn('dir="rtl"', english_block)
+        self.assertIn('dir="ltr"', english_block)
         self.assertIn("Login to your account", english_block)
         self.assertIn("card-rtl-en-email", english_block)

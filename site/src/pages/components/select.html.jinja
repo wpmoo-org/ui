@@ -230,7 +230,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl" class="d-grid gap-2 w-auto">
+      <div dir="ltr" class="d-grid gap-2 w-auto">
         {{ select(
           label="Workspace",
           id="select-rtl-english",
@@ -240,7 +240,7 @@
             {"value": "design", "label": "Design"},
             {"value": "analytics", "label": "Analytics"}
           ],
-          dir="rtl",
+          dir="ltr",
           required=true,
           describedby="select-rtl-english-help"
         ) }}

@@ -15,7 +15,7 @@
   <div class="moo-component-examples">
     {# Hero preview: a comprehensive composition shown above the TOC sections,
        matching the reference's pattern of a live multi-variant preview at the top. #}
-    <div class="moo-example__surface mb-4">
+    <div class="moo-example__surface mb-5">
       <div class="moo-example__preview moo-example__preview--narrow">
         <div class="d-grid gap-3">
           {{ checkbox("checkbox-hero-terms", label="Accept terms and conditions") }}
@@ -189,9 +189,9 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-grid gap-2" dir="rtl">
-        {{ checkbox("checkbox-rtl-en-terms", label="Accept terms and conditions", extra_class="form-check-reverse") }}
-        {{ checkbox("checkbox-rtl-en-notify", label="Enable notifications", description="You can enable or disable notifications at any time.", checked=true, extra_class="form-check-reverse") }}
+      <div class="d-grid gap-2" dir="ltr">
+        {{ checkbox("checkbox-rtl-en-terms", label="Accept terms and conditions") }}
+        {{ checkbox("checkbox-rtl-en-notify", label="Enable notifications", description="You can enable or disable notifications at any time.", checked=true) }}
       </div>
     {% endset %}
 

@@ -86,6 +86,13 @@
   margin-top: 3rem;
 }
 
+// Portal content (toast containers, etc.) rendered between sections breaks
+// the .moo-example+.moo-example adjacency. Restore spacing when a single
+// portal element sits between two examples.
+.moo-example + * + .moo-example {
+  margin-top: 3rem;
+}
+
 .tab-content .moo-example {
   max-width: 100%;
   min-width: 0;

@@ -187,7 +187,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex align-items-center gap-2" dir="rtl">
+      <div class="d-inline-flex align-items-center gap-2" dir="ltr">
         {{ button("Open dialog", variant="outline", dialog_target="dialog-rtl-english") }}
         {% call dialog("dialog-rtl-english", centered=true, direction="rtl") %}
           {{ dialog_header("dialog-rtl-english", "Escalation review") }}

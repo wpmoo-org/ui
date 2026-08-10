@@ -223,8 +223,9 @@ class FieldTests(CatalogTestCase):
 
         self.assertGreaterEqual(
             page.count('<div class="w-100" dir="rtl">'),
-            3,
+            2,
         )
+        self.assertIn('<div class="w-100" dir="ltr">', page)
 
     def test_catalog_bootstrap_module_wires_needs_validation_forms(self) -> None:
         self.assertTrue(BOOTSTRAP_PREVIEW_JS.is_file())

@@ -177,7 +177,7 @@
     {% endset %}
 
     {% set menubar_rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
+      <div class="d-inline-flex" dir="ltr">
         {% call menubar("Document actions") %}
           {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
             {{ dropdown_item("New document", shortcut="⌘N") }}

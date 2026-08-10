@@ -13,21 +13,30 @@
   ) }}
 
   <div class="moo-component-examples">
-    {% set default %}
-      <div class="d-grid gap-2">
-        {{ switch("switch-default", label="Enable workflow backup window") }}
-        {{ switch("switch-checked", label="Enable workflow backup window", checked=true) }}
+    {# Hero preview: a comprehensive composition shown above the TOC sections,
+       matching the reference's pattern of a live multi-variant preview at the top. #}
+    <div class="moo-example__surface mb-5">
+      <div class="moo-example__preview moo-example__preview--narrow">
+        <div class="d-grid gap-3">
+          {{ switch("switch-hero-sync", label="Background sync", description="Keep team data synchronized across all devices.", checked=true) }}
+          {{ switch("switch-hero-notify", label="Enable notifications", description="Receive alerts when workflow status changes.") }}
+          {{ switch("switch-hero-disabled", label="Force MFA at login", disabled=true) }}
+        </div>
       </div>
+    </div>
+
+    {% set usage %}
+      {{ switch("switch-usage", label="Enable workflow backup window") }}
     {% endset %}
     {{ render_example(
-      "default",
-      "Default",
-      "Show the same label with both off and on states when rollout toggles are introduced.",
-      default,
+      "usage",
+      "Usage",
+      "A single switch toggles one option. Pair with a label so the hit target covers the text.",
+      usage,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set with_description %}
+    {% set description %}
       {{ switch(
         "switch-description",
         label="Background sync",
@@ -36,10 +45,10 @@
       ) }}
     {% endset %}
     {{ render_example(
-      "with-description",
-      "With description",
+      "description",
+      "Description",
       "Add supporting copy below the label with <code>description</code>.",
-      with_description,
+      description,
       preview_class="moo-example__preview--narrow"
     ) }}
 
@@ -69,20 +78,23 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-grid gap-2" dir="rtl">
-        {{ switch("switch-rtl-arabic", label="تفعيل المزامنة الخلفية", checked=true, extra_class="form-check-reverse") }}
+      <div class="d-grid gap-3" dir="rtl">
+        {{ switch("switch-rtl-arabic-sync", label="المزامنة في الخلفية", description="حافظ على مزامنة بيانات الفريق عبر جميع الأجهزة بعد إعادة الاتصال بالشبكة.", checked=true, extra_class="form-check-reverse") }}
+        {{ switch("switch-rtl-arabic-notify", label="تفعيل الإشعارات", description="يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.", extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-grid gap-2" dir="rtl">
-        {{ switch("switch-rtl-hebrew", label="הפעלת סנכרון רקע", checked=true, extra_class="form-check-reverse") }}
+      <div class="d-grid gap-3" dir="rtl">
+        {{ switch("switch-rtl-hebrew-sync", label="סנכרון רקע", description="שמור על נתוני הצוות מסונכרנים בכל המכשירים לאחר חיבור מחדש לרשת.", checked=true, extra_class="form-check-reverse") }}
+        {{ switch("switch-rtl-hebrew-notify", label="הפעלת התראות", description="ניתן להפעיל או לבטל התראות בכל עת.", extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-grid gap-2" dir="rtl">
-        {{ switch("switch-rtl-english", label="Enable background sync", checked=true, extra_class="form-check-reverse") }}
+      <div class="d-grid gap-3" dir="ltr">
+        {{ switch("switch-rtl-english-sync", label="Background sync", description="Keep team data synchronized across all devices after a network reconnect.", checked=true) }}
+        {{ switch("switch-rtl-english-notify", label="Enable notifications", description="You can enable or disable notifications at any time.") }}
       </div>
     {% endset %}
 

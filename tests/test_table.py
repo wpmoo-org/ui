@@ -161,4 +161,5 @@ class TableTests(CatalogTestCase):
 
         self.assertNotIn('preview_class="moo-example__preview--narrow"', source)
         self.assertEqual(source.count('preview_class="moo-example__preview--medium"'), 5)
-        self.assertEqual(source.count('class="w-100" dir="rtl"'), 3)
+        self.assertEqual(source.count('class="w-100" dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)

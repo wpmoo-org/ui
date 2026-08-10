@@ -1,11 +1,13 @@
-{% macro switch(id, label="", aria_label="", checked=false, disabled=false, invalid=false, description="", extra_class="") -%}
+{% macro switch(id, label="", aria_label="", checked=false, disabled=false, invalid=false, description="", extra_class="", label_wrapper=false) -%}
   {% if not id | trim %}{{ fail("Switch id is required") }}{% endif %}
   {% set has_label = label | trim %}
   {% set has_aria_label = aria_label | trim %}
   {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Switch requires exactly one of label or aria_label") }}{% endif %}
-  <div class="form-check form-switch{% if extra_class %} {{ extra_class }}{% endif %}">
+  {% if label_wrapper and has_label %}{{ fail("Switch label_wrapper requires aria_label") }}{% endif %}
+  {% set wrapper_tag = "label" if label_wrapper else "div" %}
+  <{{ wrapper_tag }} class="form-check form-switch{% if extra_class %} {{ extra_class }}{% endif %}">
     <input class="form-check-input{% if invalid %} is-invalid{% endif %}" type="checkbox" role="switch" id="{{ id }}"{% if checked %} checked{% endif %}{% if disabled %} disabled{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if description %} aria-describedby="{{ id }}-description"{% endif %}>
     {% if has_label %}<label class="form-check-label" for="{{ id }}">{{ label }}</label>{% endif %}
     {% if description %}<div class="form-text" id="{{ id }}-description">{{ description }}</div>{% endif %}
-  </div>
+  </{{ wrapper_tag }}>
 {%- endmacro %}

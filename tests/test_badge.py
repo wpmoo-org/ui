@@ -151,7 +151,8 @@ class BadgeTests(CatalogTestCase):
         self.assertIn("arabic_badge", source)
         self.assertIn("hebrew_badge", source)
         self.assertIn("english_badge", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         result = self.run_build()
 

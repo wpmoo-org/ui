@@ -130,7 +130,8 @@ class BreadcrumbTests(CatalogTestCase):
         self.assertIn("arabic_breadcrumb", source)
         self.assertIn("hebrew_breadcrumb", source)
         self.assertIn("english_breadcrumb", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         result = self.run_build()
 

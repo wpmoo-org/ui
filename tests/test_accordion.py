@@ -55,8 +55,10 @@ class AccordionTests(CatalogTestCase):
         self.assertIn('"accordion-rtl-arabic"', page)
         self.assertIn('"accordion-rtl-hebrew"', page)
         self.assertIn('"accordion-rtl-english"', page)
-        self.assertGreaterEqual(page.count('<div class="w-100" dir="rtl">'), 3)
-        self.assertGreaterEqual(page.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(page.count('<div class="w-100" dir="rtl">'), 2)
+        self.assertIn('dir="ltr"', page)
+        self.assertGreaterEqual(page.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', page)
 
         result = self.run_build()
 

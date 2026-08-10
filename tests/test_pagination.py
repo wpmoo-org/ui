@@ -96,7 +96,8 @@ class PaginationTests(CatalogTestCase):
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         # The RTL rule requires exact translations of the same example:
         # same page range (1/2/3, page 2 active) and ellipsis in all three.
