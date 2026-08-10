@@ -10,10 +10,10 @@
   --bs-tooltip-padding-y: 0.375rem;
   --bs-tooltip-font-size: 0.75rem;
   --bs-tooltip-opacity: 1;
-  --moo-tooltip-motion-duration: 150ms;
-  --moo-tooltip-motion-easing: cubic-bezier(0.16, 1, 0.3, 1);
-  --moo-tooltip-motion-scale: 0.95;
-  --moo-tooltip-motion-translate: 0.25rem;
+  --moo-tooltip-motion-duration: #{$moo-tooltip-motion-duration};
+  --moo-tooltip-motion-easing: #{$moo-tooltip-motion-easing};
+  --moo-tooltip-motion-scale: #{$moo-tooltip-motion-scale};
+  --moo-tooltip-motion-translate: #{$moo-tooltip-motion-translate};
   line-height: 1.333;
 }
 

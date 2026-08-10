@@ -172,6 +172,10 @@ class CatalogContractTests(CatalogTestCase):
             "button": ("btn", "disabled"),
             "button_group": ("btn",),
             "card": ("card",),
+            # Breadcrumb's collapsed-segment composition wraps Bootstrap's
+            # native .dropdown inside its own .breadcrumb-dropdown-item, so
+            # the partial scopes a layout rule to that Bootstrap wrapper.
+            "breadcrumb": ("breadcrumb", "dropdown"),
             # Dropdown toggle rows use Bootstrap Button's .active data-api
             # state while scoped under .dropdown-item-check.
             "dropdown": ("dropdown", "active"),
@@ -179,6 +183,9 @@ class CatalogContractTests(CatalogTestCase):
             # Bootstrap renders both single-line inputs and textareas through
             # the shared `.form-control` family.
             "textarea": ("form-control",),
+            # Bootstrap's native select markup is the `.form-select` family,
+            # not a "select-" prefixed one; Select retunes it in place.
+            "select": ("form-select",),
             # Bootstrap documents vertical navs as `.nav.flex-column`, so the
             # Navigation partial may scope width fixes to that native utility.
             "navigation": ("active", "disabled", "flex-column", "nav"),
@@ -187,7 +194,11 @@ class CatalogContractTests(CatalogTestCase):
             "sidebar": ("sidebar",),
             # Bootstrap's pagination markup uses .page-item/.page-link, not a
             # "pagination-" prefixed family.
-            "pagination": ("pagination", "page", "disabled"),
+            # The icon-only prev/next detection reads Bootstrap's own
+            # utility-class state (.d-none/.d-sm-inline/.visually-hidden)
+            # inside :has(), the same way Data Table reads Bootstrap
+            # utilities, rather than owning those classes.
+            "pagination": ("pagination", "page", "disabled", "d-none", "d-sm-inline", "visually-hidden"),
             # Bootstrap's own horizontal/vertical divider markup is the bare
             # <hr> tag and the .vr helper class, not a "separator-" prefixed
             # family.

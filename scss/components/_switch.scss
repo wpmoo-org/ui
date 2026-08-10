@@ -6,9 +6,7 @@
   height: $moo-switch-height;
 }
 
-:where([data-bs-theme="dark"]) .form-switch .form-check-input:checked,
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-switch .form-check-input:checked,
-.moo-ui[data-bs-theme="dark"] .form-switch .form-check-input:checked {
+:where([data-bs-theme="dark"]) .form-switch .form-check-input:checked {
   --#{$prefix}form-switch-bg: #{escape-svg($moo-switch-checked-bg-image-dark)};
 
   background-color: var(--moo-foreground);
@@ -22,10 +20,6 @@
 }
 
 :where([data-bs-theme="dark"]) .form-switch .form-check-input:focus:active:not(:checked),
-:where([data-bs-theme="dark"]) .form-switch .form-check-input:focus:not(:focus-visible):not(:checked),
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-switch .form-check-input:focus:active:not(:checked),
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) .form-switch .form-check-input:focus:not(:focus-visible):not(:checked),
-.moo-ui[data-bs-theme="dark"] .form-switch .form-check-input:focus:active:not(:checked),
-.moo-ui[data-bs-theme="dark"] .form-switch .form-check-input:focus:not(:focus-visible):not(:checked) {
+:where([data-bs-theme="dark"]) .form-switch .form-check-input:focus:not(:focus-visible):not(:checked) {
   --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-dark)};
 }

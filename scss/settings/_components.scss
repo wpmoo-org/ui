@@ -176,6 +176,14 @@ $avatar-badge-icon-size: $avatar-badge-dot-size !default;
 $avatar-badge-icon-glyph-size: 0.5rem !default;
 $avatar-badge-ring-width: 2px !default;
 $avatar-group-ring-width: 2px !default;
+// Bootstrap's tooltip plugin has no motion-timing tokens (its own source
+// hardcodes the transition in tooltip.scss); the reference's subtle
+// zoom/slide open is scoped to Moo's tooltip surface, so the four motion
+// steps are private component knobs rather than global Bootstrap values.
+$moo-tooltip-motion-duration: 150ms !default;
+$moo-tooltip-motion-easing: cubic-bezier(0.16, 1, 0.3, 1) !default;
+$moo-tooltip-motion-scale: 0.95 !default;
+$moo-tooltip-motion-translate: 0.25rem !default;
 
 $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
