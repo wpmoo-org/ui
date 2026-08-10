@@ -69,20 +69,20 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ switch("switch-rtl-arabic", label="تفعيل المزامنة الخلفية", checked=true) }}
+      <div class="d-grid gap-2" dir="rtl">
+        {{ switch("switch-rtl-arabic", label="تفعيل المزامنة الخلفية", checked=true, extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ switch("switch-rtl-hebrew", label="הפעלת סנכרון רקע", checked=true) }}
+      <div class="d-grid gap-2" dir="rtl">
+        {{ switch("switch-rtl-hebrew", label="הפעלת סנכרון רקע", checked=true, extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ switch("switch-rtl-english", label="Enable background sync", checked=true) }}
+      <div class="d-grid gap-2" dir="rtl">
+        {{ switch("switch-rtl-english", label="Enable background sync", checked=true, extra_class="form-check-reverse") }}
       </div>
     {% endset %}
 
