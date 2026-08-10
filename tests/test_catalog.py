@@ -207,8 +207,11 @@ class CatalogContractTests(CatalogTestCase):
             # family.
             "separator": ("hr", "vr"),
             # Bootstrap's checkbox markup uses the shared .form-check family,
-            # not a "checkbox-" prefixed one.
-            "checkbox": ("form-check",),
+            # not a "checkbox-" prefixed one. The invalid-state focus ring
+            # rule also references .is-invalid to keep the destructive ring
+            # visible on mouse click (matching _focus.scss's pattern for
+            # .form-control.is-invalid and .form-select.is-invalid).
+            "checkbox": ("form-check", "is-invalid"),
             # The legend reuses Bootstrap's shared .form-label class to
             # match sibling form labels.
             "radio_group": ("radio-group", "form-label"),
@@ -374,6 +377,11 @@ class CatalogContractTests(CatalogTestCase):
             # Button Group's compact select modifier: a layout hint passed
             # to the select macro's extra_class, not raw component markup.
             "btn-group-select",
+            # Checkbox's Table example uses Bootstrap's native table classes
+            # directly (not a Moo table macro) to embed checkboxes in rows.
+            "table-responsive",
+            "table",
+            "table-sm",
         }
 
         pages = [
@@ -1630,7 +1638,8 @@ class CatalogContractTests(CatalogTestCase):
                             declaration,
                             r"^box-shadow: (?:none|\$input-focus-box-shadow|"
                             r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
-                            r"0 0 0 \$[a-z0-9-]*ring-width var\(--bs-body-bg\));$",
+                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--bs-body-bg\)|"
+                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? color-mix\(in srgb, (?:\$|\#\{\$)[a-z0-9-]*ring-color(?:\})? 50%, transparent\));$",
                         )
                     elif declaration.startswith("border-radius:"):
                         self.assertRegex(

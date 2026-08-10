@@ -30,3 +30,14 @@
 .form-check-input[type="checkbox"]:indeterminate:focus:not(:focus-visible) {
   border-color: $form-check-input-indeterminate-border-color;
 }
+
+// Invalid ("destructive") checkboxes are an exception to the mouse-click
+// focus-ring suppression above. The validation ring stays visible on every
+// focus trigger — including mouse click — so the error state is never
+// silently dismissed by a tap. Mirrors the destructive ring that
+// foundations/_focus.scss already paints on .form-control.is-invalid and
+// .form-select.is-invalid.
+.form-check-input.is-invalid:focus {
+  border-color: var(--moo-form-invalid-ring-color);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-invalid-ring-color} 50%, transparent);
+}

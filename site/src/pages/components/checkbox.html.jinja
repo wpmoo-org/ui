@@ -12,41 +12,91 @@
     "Toggle a single option using Bootstrap's native checkbox contract."
   ) }}
 
+  {# Hero preview: a comprehensive composition shown above the TOC sections,
+     matching the reference's pattern of a live multi-variant preview at the top. #}
+  <div class="moo-example__surface mb-4">
+    <div class="moo-example__preview moo-example__preview--narrow">
+      <div class="d-grid gap-3">
+        {{ checkbox("checkbox-hero-terms", label="Accept terms and conditions") }}
+        {{ checkbox(
+          "checkbox-hero-terms-checked",
+          label="Accept terms and conditions",
+          description="By clicking this checkbox, you agree to the terms.",
+          checked=true
+        ) }}
+        {{ checkbox("checkbox-hero-notify", label="Enable notifications", disabled=true) }}
+      </div>
+    </div>
+  </div>
+
   <div class="moo-component-examples">
-    {% set default %}
+    {% set usage %}
+      {{ checkbox("checkbox-usage", label="Accept terms and conditions") }}
+    {% endset %}
+    {{ render_example(
+      "usage",
+      "Usage",
+      "A single checkbox toggles one option. Pair with a label so the hit target covers the text.",
+      usage,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set checked_state %}
       <div class="d-inline-grid gap-2">
-        {{ checkbox("checkbox-default", label="Subscribe to the newsletter") }}
-        {{ checkbox("checkbox-checked", label="Subscribe to the newsletter", checked=true) }}
+        {{ checkbox("checkbox-unchecked", label="Accept terms and conditions") }}
+        {{ checkbox("checkbox-checked", label="Accept terms and conditions", checked=true) }}
       </div>
     {% endset %}
     {{ render_example(
-      "default",
-      "Default",
-      "Unchecked and checked states share the same label contract.",
-      default,
+      "checked-state",
+      "Checked State",
+      "Unchecked and checked states share the same label contract; the input's <code>checked</code> attribute sets the initial state.",
+      checked_state,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set invalid_state %}
+      {{ checkbox("checkbox-invalid", label="Accept terms and conditions", invalid=true) }}
+    {% endset %}
+    {{ render_example(
+      "invalid-state",
+      "Invalid State",
+      "Set <code>invalid=true</code> to pair with a form's validation state. Unlike other form controls, invalid checkboxes keep the focus ring visible on mouse click so the error stays prominent.",
+      invalid_state,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set basic %}
+      {{ checkbox("checkbox-basic", label="Accept terms and conditions") }}
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Pair the checkbox with a label for proper layout and labeling. The <code>form-check</code> wrapper aligns the input and text on a shared baseline.",
+      basic,
       preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set with_description %}
       {{ checkbox(
-        "checkbox-description",
-        label="Subscribe to the newsletter",
-        description="You can unsubscribe at any time from your account settings.",
+        "checkbox-desc",
+        label="Accept terms and conditions",
+        description="By clicking this checkbox, you agree to the terms and conditions.",
         checked=true
       ) }}
     {% endset %}
     {{ render_example(
       "with-description",
-      "With description",
-      "Add supporting copy below the label with <code>description</code>.",
+      "Description",
+      "Add supporting copy below the label with <code>description</code>. The helper text is linked via <code>aria-describedby</code> for screen readers.",
       with_description,
       preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set disabled %}
       <div class="d-inline-grid gap-2">
-        {{ checkbox("checkbox-disabled", label="Sync files automatically", disabled=true) }}
-        {{ checkbox("checkbox-disabled-checked", label="Sync files automatically", checked=true, disabled=true) }}
+        {{ checkbox("checkbox-disabled", label="Enable notifications", disabled=true) }}
+        {{ checkbox("checkbox-disabled-checked", label="Enable notifications", checked=true, disabled=true) }}
       </div>
     {% endset %}
     {{ render_example(
@@ -57,38 +107,97 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set invalid %}
-      {{ checkbox("checkbox-invalid", label="Subscribe to the newsletter", invalid=true) }}
+    {% set group %}
+      <div>
+        <p class="form-label mb-1">Show these items on the desktop:</p>
+        <p class="form-text mb-2">Select the items you want to show on the desktop.</p>
+        <div class="d-grid gap-2">
+          {{ checkbox("checkbox-group-hard-disks", label="Hard disks", checked=true) }}
+          {{ checkbox("checkbox-group-external", label="External disks", checked=true) }}
+          {{ checkbox("checkbox-group-cd-dvd", label="CDs, DVDs, and iPods") }}
+          {{ checkbox("checkbox-group-servers", label="Connected servers") }}
+        </div>
+      </div>
     {% endset %}
     {{ render_example(
-      "invalid",
-      "Invalid",
-      "Set <code>invalid=true</code> to pair with a form's validation state.",
-      invalid,
+      "group",
+      "Group",
+      "Stack multiple checkboxes with a shared label and description to create a checkbox list.",
+      group,
       preview_class="moo-example__preview--narrow"
     ) }}
 
+    {% set table_example %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="ps-1" style="width: 2.5rem"></th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ps-1">{{ checkbox("checkbox-row-1", aria_label="Select Ayla Norberg", label_wrapper=true) }}</td>
+              <td>Ayla Norberg</td>
+              <td>ayla.norberg@example.com</td>
+              <td>Admin</td>
+            </tr>
+            <tr>
+              <td class="ps-1">{{ checkbox("checkbox-row-2", aria_label="Select Marcus Voss", label_wrapper=true) }}</td>
+              <td>Marcus Voss</td>
+              <td>marcus.voss@example.com</td>
+              <td>User</td>
+            </tr>
+            <tr>
+              <td class="ps-1">{{ checkbox("checkbox-row-3", aria_label="Select Priya Kapoor", label_wrapper=true, checked=true) }}</td>
+              <td>Priya Kapoor</td>
+              <td>priya.kapoor@example.com</td>
+              <td>Editor</td>
+            </tr>
+            <tr>
+              <td class="ps-1">{{ checkbox("checkbox-row-4", aria_label="Select Jonas Eriksen", label_wrapper=true) }}</td>
+              <td>Jonas Eriksen</td>
+              <td>jonas.eriksen@example.com</td>
+              <td>User</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "table",
+      "Table",
+      "Embed checkboxes inside table rows for batch selection. Use <code>label_wrapper</code> with <code>aria_label</code> so the entire cell is the hit target.",
+      table_example
+    ) }}
+
     {% set rtl_arabic %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ checkbox("checkbox-rtl-arabic", label="الموافقة على طلب الوصول إلى مساحة العمل") }}
+      <div class="d-inline-grid gap-2" dir="rtl">
+        {{ checkbox("checkbox-rtl-ar-terms", label="قبول الشروط والأحكام") }}
+        {{ checkbox("checkbox-rtl-ar-notify", label="تفعيل الإشعارات", description="يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.", checked=true) }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ checkbox("checkbox-rtl-hebrew", label="אישור בקשת גישה לסביבת העבודה") }}
+      <div class="d-inline-grid gap-2" dir="rtl">
+        {{ checkbox("checkbox-rtl-he-terms", label="קבלת תנאי השירות") }}
+        {{ checkbox("checkbox-rtl-he-notify", label="הפעלת התראות", description="ניתן להפעיל או לבטל התראות בכל עת.", checked=true) }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ checkbox("checkbox-rtl-english", label="Approve workspace access request") }}
+      <div class="d-inline-grid gap-2" dir="rtl">
+        {{ checkbox("checkbox-rtl-en-terms", label="Accept terms and conditions") }}
+        {{ checkbox("checkbox-rtl-en-notify", label="Enable notifications", description="You can enable or disable notifications at any time.", checked=true) }}
       </div>
     {% endset %}
 
     {{ render_rtl_example(
       "checkbox",
-      "Compare Arabic, Hebrew, and English checkbox labels in an RTL layout for support and access-control workflows.",
+      "Compare Arabic, Hebrew, and English checkbox labels in an RTL layout for terms and notification workflows.",
       rtl_arabic,
       rtl_hebrew,
       rtl_english,
