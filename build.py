@@ -958,7 +958,11 @@ def _load_page_registry(
         slug = page.with_suffix("").stem
         metadata = extract_template_metadata(page)
         override = overrides.get(slug, {})
-        label = metadata.get("page_title") or override.get("label") or _fallback_label(slug)
+        # The registry label is canonical: it is the reviewed public name for
+        # the component (e.g. "Button"). The page header is a display title
+        # that should match it; fall back to it only when the registry has no
+        # label, so a page header cannot silently override a reviewed name.
+        label = override.get("label") or metadata.get("page_title") or _fallback_label(slug)
         description = (
             metadata.get("page_description")
             or override.get("description")
