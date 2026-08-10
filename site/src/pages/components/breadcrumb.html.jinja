@@ -13,16 +13,6 @@
   ) }}
 
   <div class="moo-component-examples">
-    {% set current_only %}
-      {{ breadcrumb([{"label": "Workspace"}]) }}
-    {% endset %}
-    {{ render_example(
-      "current-only",
-      "Current page only",
-      "A single item renders as the current, non-linked page.",
-      current_only
-    ) }}
-
     {% set trail %}
       {{ breadcrumb([
         {"label": "Workspace", "href": "#"},
