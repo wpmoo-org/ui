@@ -1,6 +1,10 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
+{% from "components/field.html.jinja" import field, field_group %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
@@ -10,142 +14,142 @@
 {% block content %}
   {{ render_page_header(
     "Card",
-    "Group related content into a compact, structured surface with predictable spacing."
+    "Display a structured surface with a header, body, and optional footer."
   ) }}
 
   <div class="moo-component-examples">
-    {% set content_card %}
-      {% call card() %}
-        A short note can stay compact by using a single card body without a separate header or footer.
+    {% set size_sm %}
+      {% call card(
+        "Scheduled reports",
+        "Weekly snapshots. No more manual exports.",
+        size="sm",
+        footer=button("Set up scheduled reports", icon_end="arrow-right", extra_class="w-100") ~ button("See what's new", variant="secondary", icon_end="arrow-right", extra_class="w-100"),
+        footer_class="flex-column gap-2"
+      ) %}
+        <ul class="moo-card-list">
+          <li><span class="moo-card-list__icon">{{ render_icon("chevron-right", "") }}</span>Choose a schedule (daily, or weekly).</li>
+          <li><span class="moo-card-list__icon">{{ render_icon("chevron-right", "") }}</span>Send to channels or specific teammates.</li>
+          <li><span class="moo-card-list__icon">{{ render_icon("chevron-right", "") }}</span>Include charts, tables, and key metrics.</li>
+        </ul>
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "card-content",
-      "Content only",
-      "Use a bare <code>card</code> for short notes, hints, and status messages where one section is enough.",
-      content_card,
+      "size",
+      "Size",
+      "Use <code>size=\"sm\"</code> to tighten the card rhythm for compact surfaces. Sections and the inline inset share one spacing token.",
+      size_sm,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set summary_card %}
+    {% set spacing_login %}
+      <div data-card-spacing>
+        {{ toggle_group(
+          name="card-spacing",
+          legend="Card spacing",
+          items=[
+            {"id": "card-spacing-16", "label": "16px", "value": "16px", "pressed": true},
+            {"id": "card-spacing-20", "label": "20px", "value": "20px"},
+            {"id": "card-spacing-24", "label": "24px", "value": "24px"},
+            {"id": "card-spacing-32", "label": "32px", "value": "32px"}
+          ],
+          extra_class="mb-3"
+        ) }}
+        {% call card(
+          "Login to your account",
+          "Enter your email below to login to your account.",
+          action=button("Sign up", variant="ghost"),
+          footer=button("Login", extra_class="w-100") ~ button("Login with Google", variant="secondary", icon_start="chrome", extra_class="w-100"),
+          footer_class="flex-column gap-2",
+          extra_class="card-spacing-demo"
+        ) %}
+            {% call field_group() %}
+              {% call field() %}
+                {{ input(label="Email", id="card-email", type="email", placeholder="you@example.com") }}
+              {% endcall %}
+              {% call field() %}
+                {{ input(label="Password", id="card-password", type="password", label_extra='<a href="#" class="text-decoration-none">Forgot your password?</a>') }}
+              {% endcall %}
+            {% endcall %}
+        {% endcall %}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "spacing",
+      "Spacing",
+      "The card exposes <code>--card-spacing</code> so a consumer can retune the section gap and part inset in one place.",
+      spacing_login,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set spacing_tos %}
       {% call card(
-        "Incident recap",
-        "Recent checks and owner notes for the active release."
+        "Terms of Service",
+        "Review the terms before accepting the agreement.",
+        footer=button("Decline", variant="secondary") ~ button("Accept"),
+        footer_class="justify-content-end gap-2"
       ) %}
-        <div class="d-grid gap-2">
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">Service</span>
-            <span class="fw-medium">Payments</span>
-          </div>
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">Status</span>
-            <span>In review</span>
-          </div>
+        <div class="card-scroll">
+          <p class="mb-0">These terms govern your use of the workspace, including access to shared documents, project files, and collaboration tools.</p>
+          <p class="mb-0">You are responsible for the content you upload and for ensuring that your team has the appropriate permissions to view or edit it.</p>
+          <p class="mb-0">We may update features or limits as the service evolves. When those changes materially affect your workflow, we will notify your workspace administrators.</p>
+          <p class="mb-0">By continuing, you agree to keep your account credentials secure and to follow your organization's acceptable use policies.</p>
         </div>
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "card-summary",
-      "Header and content",
-      "Use <code>card-title</code> and <code>card-subtitle</code> to pair concise copy with focused body rows.",
-      summary_card,
+      "spacing-edge-to-edge",
+      "Scrollable",
+      "Scroll long body content inside a <code>card-scroll</code> strip that bleeds to the card edges. Above a footer, the strip sits flush against the divider.",
+      spacing_tos,
       preview_class="moo-example__preview--narrow"
     ) }}
 
-    {% set actions_card %}
-      {% set actions_footer %}
-        {{ button("Keep for next pass", variant="outline") }}
-        {{ button("Mark complete") }}
-      {% endset %}
+    {% set image_card %}
       {% call card(
-        "Operational checkpoint",
-        "Publish the summary only when all verification steps are confirmed.",
-        footer=actions_footer,
-        footer_class="justify-content-end"
+        "Design systems meetup",
+        "A practical talk on component APIs, accessibility, and shipping faster.",
+        action=badge("Featured", variant="secondary"),
+        image={
+          "src": root_path ~ "assets/images/placeholder.webp",
+          "alt": "Design systems meetup illustration"
+        },
+        footer=button("View event", icon_end="arrow-right")
       ) %}
-        <div class="small d-grid gap-2">
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">Checks</span>
-            <span>4 / 5</span>
-          </div>
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">Approver</span>
-            <span>Ops lead</span>
-          </div>
-        </div>
+        <p class="mb-0">A practical talk on component APIs, accessibility, and shipping faster.</p>
       {% endcall %}
     {% endset %}
     {{ render_example(
-      "card-actions",
-      "Action footer",
-      "Keep actions in <code>card-footer</code> so copy and controls remain within one clear command surface.",
-      actions_card,
+      "image",
+      "Image",
+      "Add an image before the card header to create a featured card. The image clips to the card's top corners.",
+      image_card,
       preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set arabic_card %}
       {% call card(
-        "الموافقة على الإصدار مطلوبة",
-        "تأكيد القائمة قبل فتح نافذة النشر.",
+        "تسجيل الدخول إلى حسابك",
+        "أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك.",
+        action=button("إنشاء حساب", variant="ghost"),
+        footer=button("تسجيل الدخول", extra_class="w-100") ~ button("تسجيل الدخول باستخدام Google", variant="secondary", extra_class="w-100"),
+        footer_class="flex-column gap-2",
         dir="rtl"
       ) %}
-        <div class="d-grid gap-2">
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">المسؤول</span>
-            <span class="fw-medium">مدير الإصدار</span>
-          </div>
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">الحالة</span>
-            <span>بانتظار الاعتماد</span>
-          </div>
-        </div>
+          {% call field_group() %}
+            {% call field() %}
+              {{ input(label="البريد الإلكتروني", id="card-rtl-email", type="email", placeholder="you@example.com") }}
+            {% endcall %}
+            {% call field() %}
+              {{ input(label="كلمة المرور", id="card-rtl-password", type="password", label_extra='<a href="#" class="text-decoration-none">نسيت كلمة المرور؟</a>') }}
+            {% endcall %}
+          {% endcall %}
       {% endcall %}
     {% endset %}
-
-    {% set hebrew_card %}
-      {% call card(
-        "נדרש אישור לגרסה",
-        "יש לאשר את הרשימה לפני פתיחת חלון הפריסה.",
-        dir="rtl"
-      ) %}
-        <div class="d-grid gap-2">
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">אחראי</span>
-            <span class="fw-medium">מנהל הגרסה</span>
-          </div>
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">סטטוס</span>
-            <span>ממתין לאישור</span>
-          </div>
-        </div>
-      {% endcall %}
-    {% endset %}
-
-    {% set english_card %}
-      {% call card(
-        "Release approval needed",
-        "Confirm the checklist before the deploy window opens.",
-        dir="rtl"
-      ) %}
-        <div class="d-grid gap-2">
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">Owner</span>
-            <span class="fw-medium">Release manager</span>
-          </div>
-          <div class="d-flex justify-content-between">
-            <span class="text-body-secondary">Status</span>
-            <span>Awaiting sign-off</span>
-          </div>
-        </div>
-      {% endcall %}
-    {% endset %}
-
-    {{ render_rtl_example(
-      "card",
-      "Use tabs to compare the same release-approval card translated exactly into Arabic, Hebrew, and English.",
+    {{ render_example(
+      "rtl",
+      "RTL",
+      "The same login card reads naturally right-to-left with <code>dir=\"rtl\"</code>.",
       arabic_card,
-      hebrew_card,
-      english_card,
       preview_class="moo-example__preview--narrow"
     ) }}
   </div>

@@ -361,7 +361,14 @@ class CatalogContractTests(CatalogTestCase):
             r"modal|nav|navbar|offcanvas|page|pagination|placeholder|"
             r"popover|progress|spinner|table|toast)(?:-|$)"
         )
-        page_level_classes = {"form-label"}
+        page_level_classes = {
+            "form-label",
+            # Catalog demo surfaces that are not ready component macros: the
+            # Card spacing demo's live toggle hook and its scrollable body
+            # strip are documented examples, not product components.
+            "card-spacing-demo",
+            "card-scroll",
+        }
 
         pages = [
             *sorted((ROOT / "site/src/pages/components").glob("*.jinja")),

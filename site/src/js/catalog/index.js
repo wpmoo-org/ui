@@ -4,6 +4,7 @@ import DataTable from "../../../../src/js/components/datatable.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
+import { initCardSpacing } from "./card-spacing.js";
 import { initCatalogFilter } from "./catalog-filter.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
@@ -52,6 +53,7 @@ export function initCatalog(root = document) {
 
   disposers.push(initHomeMotion(root));
   disposers.push(initBlockFrames(root));
+  disposers.push(initCardSpacing(root));
 
   const dispose = () => {
     [...disposers].reverse().forEach((release) => release?.());

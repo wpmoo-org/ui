@@ -76,7 +76,7 @@ class InputTests(CatalogTestCase):
             self.render_input('input(label="Search")')
 
     def test_input_supports_only_approved_native_types(self) -> None:
-        for input_type in ("text", "search", "file"):
+        for input_type in ("text", "search", "file", "email", "password"):
             with self.subTest(input_type=input_type):
                 output = self.render_input(
                     f'input(aria_label="Query", type="{input_type}")'
@@ -85,9 +85,9 @@ class InputTests(CatalogTestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            "Unknown input type: email",
+            "Unknown input type: tel",
         ):
-            self.render_input('input(aria_label="Email", type="email")')
+            self.render_input('input(aria_label="Phone", type="tel")')
 
     def test_input_does_not_expose_bootstrap_size_variants(self) -> None:
         with self.assertRaisesRegex(

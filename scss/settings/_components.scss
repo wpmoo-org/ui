@@ -149,6 +149,15 @@ $card-cap-padding-y: $card-spacer-y !default;
 $card-cap-padding-x: $card-spacer-x !default;
 $card-title-font-size: 1rem !default;
 $card-title-letter-spacing: -0.01em !default;
+// The reference card exposes one --card-spacing rhythm for section gaps and
+// the inline inset of header/body/footer, defaulting to the 16px step of
+// Bootstrap's own spacer scale; the size="sm" variant drops to 12px. This is
+// a private consumption token because Bootstrap's card has no single
+// variable that covers both the vertical section gap and the horizontal
+// inset of every part. Literal values, not $spacer math: this file compiles
+// before Bootstrap's own variables (including $spacer) are defined.
+$card-spacing: 1rem !default;
+$card-spacing-sm: 0.75rem !default;
 
 // Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
 // at the browser's bold UA default; the reference renders both header

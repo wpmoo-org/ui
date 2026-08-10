@@ -1,10 +1,15 @@
 // Card: bridge Bootstrap's consumption variables to shared primitives
 // (UI-wide shadow and radius) and runtime theme tokens, then add the minimal
 // structure that gives Bootstrap's native card the reference silhouette.
+// The reference card is a rounded surface with a hairline ring (not a hard
+// border) and a muted footer strip; its geometry is the source of the
+// values chosen here (verified against the live reference page).
 .card {
   --bs-card-bg: var(--moo-surface);
   --bs-card-color: var(--moo-foreground);
   --bs-card-border-color: var(--moo-border);
+  // The reference uses a 14px corner; Bootstrap's shared radius-xl is the
+  // closest token and wins the delta (12px here) per the token-first rule.
   --bs-card-border-radius: var(--bs-border-radius-xl);
   --bs-card-inner-border-radius: calc(var(--bs-card-border-radius) - var(--bs-card-border-width));
   --bs-card-box-shadow: var(--bs-box-shadow-sm);
@@ -12,22 +17,62 @@
   --bs-card-cap-color: var(--moo-foreground);
   --bs-card-title-color: var(--moo-foreground);
   --bs-card-subtitle-color: var(--moo-muted-foreground);
+  // The reference card lets consumers retune section rhythm and inset in one
+  // place; the default matches the 16px step Bootstrap's own spacer scale
+  // already carries. Declared on the selector that consumes it, like
+  // Bootstrap's own component custom properties.
+  --card-spacing: #{$card-spacing};
 
   // One vertical rhythm owned by the card; sections add only inline padding.
-  gap: var(--bs-card-spacer-x);
-  padding-block: var(--bs-card-spacer-x);
+  gap: var(--card-spacing);
+  padding-block: var(--card-spacing);
 
-  // Bootstrap gates its box-shadow mixin behind $enable-shadows (off), so apply
-  // the shared elevation token directly.
+  // A footer strip owns its own bottom padding; with one present the card
+  // drops its trailing rhythm so the muted strip touches the card edge
+  // (mirrors the reference's has-data-[slot=card-footer]:pb-0).
+  &:has(.card-footer) {
+    padding-block-end: 0;
+  }
+
+  // A leading image frame owns the top edge; with one present the card drops
+  // its leading rhythm so the image touches the card corner (mirrors the
+  // reference's has-[>img:first-child]:pt-0).
+  &:has(> .card-image) {
+    padding-block-start: 0;
+  }
+
+  // The reference renders the hairline as a foreground ring, not a hard
+  // border. Bootstrap has no ring primitive, so a border in the theme's
+  // translucent border token reads as the same hairline on both surfaces.
+  border: var(--bs-card-border-width) solid var(--bs-card-border-color);
   box-shadow: var(--bs-card-box-shadow);
 }
 
-// The reference header stacks title and description; no cap background or divider.
+.card--sm {
+  --card-spacing: #{$card-spacing-sm};
+}
+
+// The reference header lays title/description in a grid; an optional action
+// occupies the trailing auto column on the same row as the title.
 .card-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: var(--card-spacing);
+  align-items: flex-start;
+  border-bottom: 0;
+}
+
+.card-header__text {
   display: flex;
   flex-direction: column;
-  gap: $spacer * 0.375;
-  border-bottom: 0;
+  gap: $spacer * 0.25;
+  min-width: 0;
+  grid-column: 1;
+}
+
+.card-action {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .card-header,
@@ -36,12 +81,43 @@
   padding-block: 0;
 }
 
-// The reference footer lays actions in a row; no divider.
+.card-header,
+.card-body {
+  padding-inline: var(--card-spacing);
+}
+
+// The reference footer is a muted strip above a hairline divider.
 .card-footer {
   display: flex;
   align-items: center;
   gap: $spacer * 0.5;
-  border-top: 0;
+  padding: var(--card-spacing);
+  border-top: var(--bs-card-border-width) solid var(--bs-card-border-color);
+  background-color: var(--moo-muted-surface);
+}
+
+.card-img-top {
+  // The reference clips a leading image to the card's top corners; the shared
+  // radius keeps it aligned with the rounded surface.
+  border-top-left-radius: var(--bs-card-border-radius);
+  border-top-right-radius: var(--bs-card-border-radius);
+}
+
+// A leading image sits in a 16:9 frame; the frame owns a theme-adaptive
+// surface so a non-cover image never leaves an unstyled gap.
+.card-image {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-top-left-radius: var(--bs-card-border-radius);
+  border-top-right-radius: var(--bs-card-border-radius);
+  background-color: var(--moo-muted-surface);
+}
+
+.card-image .card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
 }
 
 .card-title {
@@ -55,4 +131,5 @@
 .card-subtitle {
   margin-top: 0;
   font-size: $font-size-base;
+  color: var(--moo-muted-foreground);
 }

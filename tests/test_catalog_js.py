@@ -17,6 +17,7 @@ MODULES = {
     "bootstrap-preview.js": "initBootstrapPreview",
     "home-motion.js": "initHomeMotion",
     "block-frame.js": "initBlockFrames",
+    "card-spacing.js": "initCardSpacing",
 }
 
 

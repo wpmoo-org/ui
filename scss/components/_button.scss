@@ -165,7 +165,10 @@ label.btn {
 
 .btn-secondary {
   --bs-btn-color: var(--moo-foreground);
-  --bs-btn-bg: var(--moo-muted-surface);
+  // The reference's secondary button is the surface color (white in light)
+  // with a hairline border (bg-background + border-border), not a tinted
+  // fill; the shared muted surface stays the hover/active step.
+  --bs-btn-bg: var(--moo-surface);
   --bs-btn-border-color: var(--moo-border);
   --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 95%, var(--moo-foreground));
   --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 90%, var(--moo-foreground));
