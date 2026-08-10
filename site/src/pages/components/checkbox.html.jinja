@@ -175,21 +175,21 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-inline-grid gap-2" dir="rtl">
+      <div class="d-grid gap-2" dir="rtl">
         {{ checkbox("checkbox-rtl-ar-terms", label="قبول الشروط والأحكام") }}
         {{ checkbox("checkbox-rtl-ar-notify", label="تفعيل الإشعارات", description="يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.", checked=true) }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-grid gap-2" dir="rtl">
+      <div class="d-grid gap-2" dir="rtl">
         {{ checkbox("checkbox-rtl-he-terms", label="קבלת תנאי השירות") }}
         {{ checkbox("checkbox-rtl-he-notify", label="הפעלת התראות", description="ניתן להפעיל או לבטל התראות בכל עת.", checked=true) }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-grid gap-2" dir="rtl">
+      <div class="d-grid gap-2" dir="rtl">
         {{ checkbox("checkbox-rtl-en-terms", label="Accept terms and conditions") }}
         {{ checkbox("checkbox-rtl-en-notify", label="Enable notifications", description="You can enable or disable notifications at any time.", checked=true) }}
       </div>
