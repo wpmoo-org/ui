@@ -18,6 +18,14 @@
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }
 
+// Buttons keep their hover/open treatment after pointer clicks; the ring is
+// reserved for keyboard focus on the resting control.
+.btn:focus-visible:hover,
+.btn.show:focus-visible {
+  border-color: var(--bs-btn-hover-border-color);
+  box-shadow: none;
+}
+
 // Mouse-triggered focus keeps the resting border and shows no ring, same
 // as every other interactive surface on the site (.form-check-input's own
 // equivalent lives in components/_checkbox.scss, next to its checked/
