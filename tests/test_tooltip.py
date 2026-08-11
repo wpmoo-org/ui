@@ -165,6 +165,16 @@ class TooltipTests(CatalogTestCase):
         self.assertIn("disabled=true", source)
         self.assertIn('dir="rtl"', source)
 
+    def test_intro_trigger_names_the_hover_interaction(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        intro_block = source[
+            source.index("{% set intro %}"):
+            source.index("{% endset %}", source.index("{% set intro %}"))
+        ]
+
+        self.assertIn('"Hover"', intro_block)
+        self.assertNotIn('"Sync status"', intro_block)
+
     def test_page_mirrors_bootstraps_disabled_element_wrapper_guidance(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
