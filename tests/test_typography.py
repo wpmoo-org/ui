@@ -57,14 +57,15 @@ class TypographyTests(CatalogTestCase):
         ):
             self.render_typography('typography("Text", variant="typo")')
 
-    def test_intro_uses_typographic_sample_copy(self) -> None:
+    def test_intro_uses_component_intro_with_typographic_roles(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
         intro_block = source[
             source.index("{% set intro %}"):
             source.index("{% endset %}", source.index("{% set intro %}"))
         ]
 
-        self.assertIn("Build with character", intro_block)
-        self.assertIn("Readable portals feel calm", intro_block)
-        self.assertIn("Whitespace has a job", intro_block)
-        self.assertNotIn("Product Console", intro_block)
+        self.assertIn("render_component_intro(", source)
+        self.assertIn('variant="page-title"', intro_block)
+        self.assertIn("<h5", intro_block)
+        self.assertIn("text-center", intro_block)
+        self.assertIn("fst-italic", intro_block)

@@ -145,6 +145,22 @@ class DataTableTests(CatalogTestCase):
                 with self.subTest(path=path, token=token):
                     self.assertNotIn(token, source)
 
+    def test_public_docs_do_not_expose_template_parameters(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/datatable/index.html")
+        for forbidden in (
+            "responsive_mode=",
+            "card_role=",
+            "hideable=false",
+        ):
+            with self.subTest(forbidden=forbidden):
+                if forbidden in page:
+                    raise AssertionError(
+                        f"Data Table public docs expose template parameter: {forbidden}"
+                    )
+
     def test_release_review_visibility_menu_keeps_identity_columns_fixed(self) -> None:
         output = self.render_release_review()
 

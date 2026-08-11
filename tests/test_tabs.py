@@ -155,6 +155,11 @@ class TabsTests(CatalogTestCase):
         self.assertIn('aria-orientation="vertical"', html)
         self.assertIn('data-bs-toggle="pill"', html)
 
+    def test_catalog_tabs_examples_use_shared_preview_width_classes(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertNotIn('style="width: min(', source)
+
     def test_tabs_content_is_not_escaped(self) -> None:
         output = self.render_tabs(
             'tabs("t", [{"id": "a", "title": "A", "content": "See <code>docs</code>."}])'
