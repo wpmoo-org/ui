@@ -17,7 +17,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("data-moo-code-toggle", template)
         self.assertIn('aria-expanded="false"', template)
         self.assertIn("data-moo-code-copy", template)
-        self.assertIn('data-bs-theme="dark"', template)
+        self.assertNotIn('data-bs-theme="dark"', template)
         self.assertEqual(template.count("{{ rendered | safe }}"), 1)
         self.assertIn("portal_content=\"\"", template)
         self.assertIn("{% set rendered_portal = portal_content | dedent_html %}", template)
@@ -126,6 +126,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("padding: 0.875rem 0;", source_code)
         self.assertIn("font-size: 0.875rem;", source_code)
         self.assertIn("line-height: 1.75;", source_code)
+        reveal = css.split(".moo-code__reveal {", 1)[1].split("}", 1)[0]
+        self.assertNotIn("padding-bottom:", reveal)
+        reveal_button = css.split(".moo-code__reveal .btn {", 1)[1].split(
+            "}", 1
+        )[0]
+        self.assertIn("background: var(--bs-body-bg);", reveal_button)
         nested_tab_example = css.split(".tab-content .moo-example {", 1)[1].split("}", 1)[0]
         self.assertIn("max-width: 100%;", nested_tab_example)
         self.assertIn("min-width: 0;", nested_tab_example)
@@ -232,6 +238,7 @@ class CodeExampleTests(CatalogTestCase):
 
         self.assertIn("moo-doc-code-panel", page)
         self.assertIn('data-moo-code-panel data-expanded="true"', page)
+        self.assertNotIn('data-bs-theme="dark"', page)
         self.assertIn('data-moo-code-copy aria-label="Copy code"', page)
         self.assertIn('data-moo-copy-status role="status"', page)
         self.assertNotIn("data-moo-code-copy hidden", page)

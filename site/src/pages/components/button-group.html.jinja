@@ -156,24 +156,6 @@
       nested_groups
     ) }}
 
-    {% set split_button %}
-      {% call button_group("Follow action") %}
-        {{ button("Follow", variant="outline") }}
-        {{ button("", variant="outline", size="icon", aria_label="Follow options", icon_start="plus", dropdown=true) }}
-        {% call dropdown_menu(align="end") %}
-          {{ dropdown_item("Follow quietly", icon="bell-off") }}
-          {{ dropdown_item("Follow with email", icon="mail") }}
-          {{ dropdown_item("Mute updates", icon="volume-x") }}
-        {% endcall %}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "split-button",
-      "Split",
-      "Join a primary action button with an icon-only trigger. The two buttons share joined edges while each keeps its own hit target.",
-      split_button
-    ) }}
-
     {% set dropdown_button %}
       {% call button_group("Deploy action") %}
         {{ button("Deploy", variant="secondary") }}

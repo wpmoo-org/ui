@@ -50,16 +50,19 @@ class ButtonGroupTests(CatalogTestCase):
         self.assertIn('dir="rtl"', source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
 
-    def test_split_button_example_options_trigger_owns_a_menu(self) -> None:
+    def test_page_omits_redundant_split_example_and_keeps_dropdown_menu(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = self.read_output("components/button-group.html")
-        section = output.split('data-example="split-button"', 1)[1].split(
+        self.assertNotIn('data-example="split-button"', output)
+        self.assertNotIn('aria-label="Follow options"', output)
+
+        section = output.split('data-example="dropdown-button"', 1)[1].split(
             '<div class="moo-example__source"',
             1,
         )[0]
 
-        self.assertIn('aria-label="Follow options"', section)
+        self.assertIn('aria-label="Deploy options"', section)
         self.assertIn('data-bs-toggle="dropdown"', section)
         self.assertIn('class="dropdown-menu dropdown-menu-end"', section)

@@ -13,7 +13,6 @@
   inset: 0;
   display: grid;
   place-items: center;
-  padding-bottom: 1rem;
   pointer-events: none;
   background: linear-gradient(to top,
       var(--bs-tertiary-bg),
@@ -23,6 +22,11 @@
 
 .moo-code__reveal .btn {
   pointer-events: auto;
+  background: var(--bs-body-bg);
+}
+
+.moo-code__reveal .btn:hover {
+  background: var(--bs-secondary-bg);
 }
 
 [data-expanded="true"] .moo-code__reveal {
