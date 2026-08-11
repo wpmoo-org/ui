@@ -1,6 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/card.html.jinja" import card %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
 {% set example_descriptions = {
   "tasks": "A work queue with search, sorting, list/card views, and a New Task action on Data Table."
@@ -34,5 +35,7 @@
           {% endfor %}
         </div>
       </section>
+
+      {{ render_section_page_pagination("examples", site_pages, root_path) }}
   </div>
 {% endblock %}

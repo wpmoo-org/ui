@@ -26,7 +26,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("portal_content=hebrew_portal", template)
         self.assertIn("portal_content=english_portal", template)
         self.assertEqual(template.count("{{ source | highlight_html }}"), 1)
-        self.assertEqual(template.count("{{ source | line_numbers }}"), 1)
+        self.assertNotIn("line_numbers", template)
 
     def test_source_formatter_indents_nested_macro_markup(self) -> None:
         source = """
@@ -183,7 +183,11 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
         self.assertIn('<code class="language-html">', page)
-        self.assertIn('class="moo-code__lines" aria-hidden="true"', page)
+        self.assertIn(
+            '<span class="moo-code__lines" aria-hidden="true"></span>',
+            page,
+        )
+        self.assertNotRegex(page, r'class="moo-code__lines"[^>]*>\s*1\s*<')
         self.assertIn('<span class="token tag">', page)
         self.assertIn('<span class="token attr-name">class</span>', page)
         self.assertIn('<span class="token attr-value">', page)
@@ -215,7 +219,8 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('let message = "Code copied";', script)
         self.assertIn('message = "Copy failed";', script)
         self.assertIn("copyStatus.textContent = message;", script)
-        self.assertNotIn("moo-code__lines", script)
+        self.assertIn("renderCodeLineNumbers", script)
+        self.assertIn('panel.querySelector(".moo-code__lines")', script)
 
         catalog_css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-code__lines {", catalog_css)

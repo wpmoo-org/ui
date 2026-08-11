@@ -99,12 +99,26 @@ export function initCodePreview(root = document) {
     }
   }, true);
 
+  const renderCodeLineNumbers = (panel) => {
+    const lines = panel.querySelector(".moo-code__lines");
+    const code = panel.querySelector("code");
+    if (!lines || !code) {
+      return;
+    }
+    const count = Math.max(1, code.textContent.split("\n").length);
+    lines.textContent = Array.from(
+      { length: count },
+      (_, index) => String(index + 1)
+    ).join("\n");
+  };
+
   root.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");
     const copyStatus = panel.querySelector("[data-moo-copy-status]");
     const scroller = panel.querySelector(".moo-code");
     const code = panel.querySelector("code");
+    renderCodeLineNumbers(panel);
     listen(toggle, "click", () => {
       panel.dataset.expanded = "true";
       scroller.classList.toggle(

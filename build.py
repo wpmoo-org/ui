@@ -351,11 +351,6 @@ def highlight_html(value: object) -> Markup:
     return Markup("".join(highlighted))
 
 
-def line_numbers(value: object) -> Markup:
-    count = max(1, len(str(value).splitlines()))
-    return Markup("\n".join(str(number) for number in range(1, count + 1)))
-
-
 def slugify(value: object) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", str(value).lower()).strip("-")
     return slug or "section"
@@ -513,21 +508,11 @@ def build_site_pages(
     pages: list[dict[str, str]] = [
         {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
     ]
-    for section in sections:
-        slug = section.get("slug", "")
-        if slug == "components":
-            components = section_page("components")
-            if components:
-                pages.append(components)
-            pages.extend(child_pages(catalog, "components", "component"))
-            pages.extend(child_pages(utilities, "utils", "utility"))
-        elif slug == "blocks":
-            blocks_page = section_page("blocks")
-            if blocks_page:
-                pages.append(blocks_page)
-            pages.extend(child_pages(blocks, "blocks", "block"))
-        else:
-            pages.append({**section, "kind": "doc"})
+
+    for slug in ("introduction", "installation"):
+        page = section_page(slug)
+        if page:
+            pages.append(page)
 
     # Examples pages keep kind "doc" on purpose: the command palette's
     # "Pages" group picks them up without any template-side change.
@@ -541,6 +526,22 @@ def build_site_pages(
             }
         )
         pages.extend(child_pages(examples, "examples", "doc"))
+
+    components = section_page("components")
+    if components:
+        pages.append(components)
+    pages.extend(child_pages(catalog, "components", "component"))
+
+    blocks_page = section_page("blocks")
+    if blocks_page:
+        pages.append(blocks_page)
+    pages.extend(child_pages(blocks, "blocks", "block"))
+    pages.extend(child_pages(utilities, "utils", "utility"))
+
+    for section in sections:
+        slug = section.get("slug", "")
+        if slug not in {"introduction", "installation", "components", "blocks"}:
+            pages.append({**section, "kind": "doc"})
 
     return pages
 
@@ -653,7 +654,6 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["dedent_html"] = dedent_html
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
-    environment.filters["line_numbers"] = line_numbers
     environment.filters["slugify"] = slugify
     environment.globals["pretty_url"] = pretty_url
     environment.globals["site_href"] = site_href

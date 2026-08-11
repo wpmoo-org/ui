@@ -896,26 +896,36 @@ class CatalogContractTests(CatalogTestCase):
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
-        self.assertIn('aria-label="Next page: Support &amp; Evidence"', installation)
-        self.assertIn('href="../support/"', installation)
+        self.assertIn('aria-label="Next page: Examples"', installation)
+        self.assertIn('href="../examples/"', installation)
 
-        support = self.read_output("support.html")
-        self.assertIn('aria-label="Previous page: Installation"', support)
-        self.assertIn('aria-label="Next page: Contributing"', support)
-        self.assertIn('href="../contributing/"', support)
+        examples = self.read_output("examples/index.html")
+        examples_pagination = examples.rsplit(
+            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
+            1,
+        )[1]
+        self.assertIn('href="../installation/"', examples_pagination)
+        self.assertIn("Installation", examples_pagination)
+        self.assertIn('href="../examples/tasks/"', examples_pagination)
+        self.assertIn("Tasks", examples_pagination)
 
-        contributing = self.read_output("contributing.html")
-        self.assertIn('aria-label="Previous page: Support &amp; Evidence"', contributing)
-        self.assertIn('aria-label="Next page: Components"', contributing)
-        self.assertIn('href="../components/"', contributing)
+        tasks = self.read_output("examples/tasks.html")
+        tasks_pagination = tasks.rsplit(
+            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
+            1,
+        )[1]
+        self.assertIn('href="../../examples/"', tasks_pagination)
+        self.assertIn("Examples", tasks_pagination)
+        self.assertIn('href="../../components/"', tasks_pagination)
+        self.assertIn("Components", tasks_pagination)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Contributing"', components)
+        self.assertIn('aria-label="Previous page: Tasks"', components)
         self.assertIn('aria-label="Next page: Accordion"', components)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
         blocks = self.read_output("blocks/index.html")
-        self.assertIn('aria-label="Previous page: Scroll Fade"', blocks)
+        self.assertIn('aria-label="Previous page: Typography"', blocks)
         self.assertIn('aria-label="Next page: Sidebar (Floating)"', blocks)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', blocks)
 
@@ -937,8 +947,8 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
-        self.assertIn('aria-label="Previous page: Typography"', utility)
-        self.assertIn('aria-label="Next page: Blocks"', utility)
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', utility)
+        self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
         block_header_start = block.index('<header class="moo-component-header')
@@ -951,10 +961,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
-        self.assertIn('aria-label="Next page: AI Usage"', last_block)
+        self.assertIn('aria-label="Next page: Scroll Fade"', last_block)
+
+        support = self.read_output("support.html")
+        self.assertIn('aria-label="Previous page: Scroll Fade"', support)
+        self.assertIn('aria-label="Next page: Contributing"', support)
+        self.assertIn('href="../contributing/"', support)
+
+        contributing = self.read_output("contributing.html")
+        self.assertIn('aria-label="Previous page: Support &amp; Evidence"', contributing)
+        self.assertIn('aria-label="Next page: AI Usage"', contributing)
 
         skills = self.read_output("skills.html")
-        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
+        self.assertIn('aria-label="Previous page: Contributing"', skills)
         self.assertIn('aria-label="Next page: Changelog"', skills)
 
         code_preview = self.read_output("assets/js/catalog/code-preview.js")

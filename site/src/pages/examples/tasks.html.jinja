@@ -1,6 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "blocks/datatable_tasks.html.jinja" import render_task_sheet, render_task_delete_dialog, render_tasks_table %}
 {% from "components/button.html.jinja" import button %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
 {% block title %}Tasks — Moo UI{% endblock %}
 
@@ -37,6 +38,8 @@
       <a href="{{ site_href("components/button.html", root_path) }}">Button</a>
       components.
     </p>
+
+    {{ render_section_page_pagination("tasks", site_pages, root_path) }}
 
     {{ render_task_sheet() }}
     {{ render_task_delete_dialog() }}
