@@ -70,7 +70,7 @@
   // 10px/12px/15px box while the page-background ring paints outside it.
   // box-shadow (not border) keeps the ring out of the layout box, matching
   // the .avatar-group ring below and Tailwind's own ring-* technique.
-  box-shadow: 0 0 0 $avatar-badge-ring-width var(--bs-body-bg);
+  box-shadow: $avatar-badge-ring-shadow;
   background-color: var(--moo-muted-surface);
   color: var(--moo-foreground);
   font-size: 0.625rem;
@@ -126,7 +126,7 @@
 // avatars stay visibly separated. --bs-body-bg is theme-aware in both the
 // standalone and scoped builds, mirroring the badge ring treatment.
 .avatar-group > .avatar {
-  box-shadow: 0 0 0 $avatar-group-ring-width var(--bs-body-bg);
+  box-shadow: $avatar-group-ring-shadow;
   z-index: 0;
 }
 

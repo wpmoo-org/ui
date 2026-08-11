@@ -31,6 +31,7 @@ $badge-font-weight: 500 !default;
 $badge-padding-y: 0.125rem !default;
 $badge-padding-x: 0.5rem !default;
 $badge-border-radius: var(--bs-border-radius-pill) !default;
+$badge-border-color: transparent !default;
 // The reference sizes its kbd chip via a fixed 20px height + flex centering
 // (Tailwind h-5/min-w-5), not padding math, so $kbd-padding-y drops to 0 --
 // components/_kbd.scss sets that fixed height directly. $kbd-padding-x
@@ -169,15 +170,15 @@ $card-cap-padding-y: $card-spacer-y !default;
 $card-cap-padding-x: $card-spacer-x !default;
 $card-title-font-size: 1rem !default;
 $card-title-letter-spacing: -0.01em !default;
-// The reference card exposes one --card-spacing rhythm for section gaps and
-// the inline inset of header/body/footer, defaulting to the 16px step of
+// The reference card exposes one --moo-card-spacing rhythm for section gaps
+// and the inline inset of header/body/footer, defaulting to the 16px step of
 // Bootstrap's own spacer scale; the size="sm" variant drops to 12px. This is
 // a private consumption token because Bootstrap's card has no single
 // variable that covers both the vertical section gap and the horizontal
 // inset of every part. Literal values, not $spacer math: this file compiles
 // before Bootstrap's own variables (including $spacer) are defined.
-$card-spacing: 1rem !default;
-$card-spacing-sm: 0.75rem !default;
+$moo-card-spacing: 1rem !default;
+$moo-card-spacing-sm: 0.75rem !default;
 
 // Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
 // at the browser's bold UA default; the reference renders both header
@@ -205,6 +206,8 @@ $avatar-badge-icon-size: $avatar-badge-dot-size !default;
 $avatar-badge-icon-glyph-size: 0.5rem !default;
 $avatar-badge-ring-width: 2px !default;
 $avatar-group-ring-width: 2px !default;
+$avatar-badge-ring-shadow: 0 0 0 $avatar-badge-ring-width var(--bs-body-bg) !default;
+$avatar-group-ring-shadow: 0 0 0 $avatar-group-ring-width var(--bs-body-bg) !default;
 // Bootstrap's tooltip plugin has no motion-timing tokens (its own source
 // hardcodes the transition in tooltip.scss); the reference's subtle
 // zoom/slide open is scoped to Moo's tooltip surface, so the four motion
@@ -256,6 +259,7 @@ $btn-close-opacity: 1 !default;
 $btn-close-hover-opacity: $btn-close-opacity !default;
 $btn-close-focus-opacity: $btn-close-opacity !default;
 $btn-close-disabled-opacity: $moo-disabled-control-opacity !default;
+$moo-close-button-border-color: transparent !default;
 // Bootstrap's close button ships a filled-path X glyph; the reference uses a
 // thinner Lucide-style stroke icon instead. .btn-close::before consumes this
 // through mask + currentColor (scss/components/_close_button.scss), so only
@@ -339,6 +343,7 @@ $moo-dropdown-item-check-border-radius: .25em !default;
 // - field-fieldset-sibling-gap: between consecutive fieldsets in one form
 $moo-field-gap: 0.5rem !default;
 $moo-field-group-gap: 1.25rem !default;
+$moo-field-switch-gap: $moo-field-group-gap !default;
 $moo-field-form-gap: $moo-field-group-gap !default;
 $moo-field-fieldset-gap: 1rem !default;
 $moo-field-fieldset-sibling-gap: $moo-field-group-gap !default;

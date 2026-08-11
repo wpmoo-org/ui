@@ -22,6 +22,32 @@
   }
 }
 
+.field--switch {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $moo-field-switch-gap;
+
+  > :first-child {
+    min-width: 0;
+  }
+
+  > label {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .form-label {
+    margin-bottom: $moo-field-gap * 0.5;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.field--disabled {
+  opacity: $moo-disabled-control-opacity;
+  pointer-events: none;
+}
+
 // field_description()/field_error() keep Bootstrap's own .form-text /
 // .invalid-feedback class alongside these (the latter is load-bearing:
 // Bootstrap's own validity sibling-selector CSS targets that exact class

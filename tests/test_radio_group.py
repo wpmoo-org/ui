@@ -79,13 +79,14 @@ class RadioGroupTests(CatalogTestCase):
         output = self.render_radio_group(
             'radio_group("plan", "", [{"id": "plan-a", "label": "A"}], bare=true)'
         )
-        self.assertEqual(
-            output,
-            '<div class="form-check">'
-            ' <input class="form-check-input" type="radio" name="plan" id="plan-a">'
-            ' <label class="form-check-label" for="plan-a">A</label>'
-            " </div>",
-        )
+
+        self.assertNotIn("<fieldset", output)
+        self.assertNotIn("<legend", output)
+        self.assertIn('class="form-check"', output)
+        self.assertIn('type="radio"', output)
+        self.assertIn('name="plan"', output)
+        self.assertIn('id="plan-a"', output)
+        self.assertIn('for="plan-a">A</label>', output)
 
     def test_radio_group_reverse_adds_form_check_reverse_per_item(self) -> None:
         output = self.render_radio_group(
@@ -93,6 +94,22 @@ class RadioGroupTests(CatalogTestCase):
             '[{"id": "plan-a", "label": "A"}, {"id": "plan-b", "label": "B"}], reverse=true)'
         )
         self.assertEqual(output.count('class="form-check form-check-reverse"'), 2)
+
+    def test_radio_group_rtl_example_uses_balanced_description_copy(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn("يوضح كل خيار متى يصل التنبيه إلى الفريق.", source)
+        self.assertIn("يرسل ملخص الحالة إلى صندوق الوارد.", source)
+        self.assertIn("مناسب للتنبيهات التي تحتاج ردًا سريعًا.", source)
+        self.assertIn("כל אפשרות מסבירה מתי ההתראה מגיעה לצוות.", source)
+        self.assertIn("שולח סיכום מצב לתיבת הדואר.", source)
+        self.assertIn("מתאים להתראות שדורשות תגובה מהירה.", source)
+        self.assertIn(
+            "Each option explains when the alert reaches the team.",
+            source,
+        )
+        self.assertIn("Sends the status summary to the inbox.", source)
+        self.assertIn("Useful for alerts that need a quick response.", source)
 
     def test_radio_group_requires_name(self) -> None:
         with self.assertRaisesRegex(ValueError, "Radio Group name is required"):

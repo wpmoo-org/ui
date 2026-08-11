@@ -15,7 +15,7 @@
         {% elif item.dropdown_items is defined %}
           {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}
           <li class="breadcrumb-item">
-            <span class="breadcrumb-dropdown-item">
+            <div class="breadcrumb-dropdown-item">
               <div class="dropdown">
                 <button class="breadcrumb-dropdown-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>{{ item.label }}</span>
@@ -27,7 +27,7 @@
                 {% endfor %}
                 {% endcall %}
               </div>
-            </span>
+            </div>
           </li>
         {% else %}
           {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}

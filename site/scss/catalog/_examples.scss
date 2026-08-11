@@ -281,14 +281,14 @@
 // The Card "Edge-to-edge content" example mirrors the reference: the body
 // scrolls inside a strip that bleeds to the card edges. The negative margins
 // pull the strip to the card edges (and flush against a following footer) by
-// the card's own --card-spacing inset; this rule owns that arithmetic plus
+// the card's own --moo-card-spacing inset; this rule owns that arithmetic plus
 // the scroll surface and hairline that make the strip read as a distinct
 // section, lighter than the footer's muted strip.
 .card-scroll {
-  margin-inline: calc(-1 * var(--card-spacing));
-  margin-block-end: calc(-1 * var(--card-spacing));
+  margin-inline: calc(-1 * var(--moo-card-spacing));
+  margin-block-end: calc(-1 * var(--moo-card-spacing));
   max-height: 12rem;
-  padding: var(--card-spacing);
+  padding: var(--moo-card-spacing);
   overflow-y: auto;
   display: flex;
   flex-direction: column;

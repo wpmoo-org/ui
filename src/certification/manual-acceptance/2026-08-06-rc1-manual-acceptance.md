@@ -1,7 +1,9 @@
 # Moo UI 1.0.0-rc.1 Manual Acceptance
 
 Generated: 2026-08-06
-Status: Draft — pending human execution against the final 1.0.0-rc.1 tarball
+Status: Draft — visual acceptance recorded for the listed MacBook and iPhone
+devices; final checklist reconciliation, Android coverage, and release
+attestation evidence remain pending.
 Scope: Release-candidate manual acceptance for all 42 Core components, at
 each component's own tiered depth (see Component Matrix below — manual
 keyboard/focus checks and screen-reader smoke apply where a component's
@@ -36,27 +38,31 @@ attestation.
   - Safari version: 26.5.2 (21624.2.5.11.8)
   - Package sha256: 879ade0fbb54383d46cae03ccec9a5e41ded451fb4dec8cbaa2950904fa6f185
   - Reviewer: Ahmet Cangir
-  - Reviewed at (UTC, ISO-8601): **2026-08-07 23:56**
+  - Reviewed at (UTC, ISO-8601): 2026-08-07T23:56:00Z
   - Scenarios covered: Component Matrix: all 42 components across 4 tiers (Visual, Interactive,
     Overlay, Composite) per depth legend — light/dark theme, LTR/RTL.
     Global Checks: Tab/Shift+Tab/Escape flow, focus visibility, reduced-motion,
     200% zoom, VoiceOver smoke (dialog, combobox, datatable, toast), touch
     targets, console-clean pass.
-  - Result (passed/failed): passed
-  - Notes:
+  - Result (passed/failed): pending final checklist reconciliation
+  - Notes: Visual acceptance recorded; component-matrix and global-check
+    evidence still need to be reconciled before this can back a release
+    attestation.
 - [X] iPhone (iOS, current and previous stable iOS Safari majors)
-  - iOS version: 26.5 2
+  - iOS version: 26.5.2
   - Safari version: 26.5.2
   - Package sha256: 879ade0fbb54383d46cae03ccec9a5e41ded451fb4dec8cbaa2950904fa6f185
   - Reviewer: Ahmet Cangir
-  - Reviewed at (UTC, ISO-8601): 2026-08-08 00:32
+  - Reviewed at (UTC, ISO-8601): 2026-08-08T00:32:00Z
   - Scenarios covered: Component Matrix: all 42 components across 4 tiers (Visual, Interactive,
     Overlay, Composite) per depth legend — light/dark theme, LTR/RTL.
     Global Checks: Tab/Shift+Tab/Escape flow, focus visibility, reduced-motion,
     200% zoom, VoiceOver smoke (dialog, combobox, datatable, toast), touch
     targets, console-clean pass.
-  - Result (passed/failed): passed
-  - Notes:
+  - Result (passed/failed): pending final checklist reconciliation
+  - Notes: Visual acceptance recorded; component-matrix and global-check
+    evidence still need to be reconciled before this can back a release
+    attestation.
 - [ ] Android device (current stable Android Chrome)
   - Android version:
   - Chrome version:

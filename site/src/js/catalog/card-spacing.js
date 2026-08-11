@@ -16,7 +16,7 @@ export function initCardSpacing(root = document) {
 
     const apply = (input) => {
       if (input && input.checked && input.value) {
-        card.style.setProperty("--card-spacing", input.value);
+        card.style.setProperty("--moo-card-spacing", input.value);
       }
     };
 

@@ -145,7 +145,7 @@
 
     {% set radio_rtl_arabic %}
       <div dir="rtl">
-        {% call fieldset("قناة التنبيه", description="اختر كيفية تلقي التنبيهات.") %}
+        {% call fieldset("قناة التنبيه", description="يوضح كل خيار متى يصل التنبيه إلى الفريق.") %}
           {% call field() %}
             {{ radio_group(
               "radio-rtl-channel-arabic",
@@ -153,14 +153,14 @@
               [
                 {
                   "id": "radio-rtl-email-arabic",
-                  "label": "البريد الإلكتروني",
-                  "description": "يصل إلى بريدك الوارد.",
+                  "label": "بريد الفريق",
+                  "description": "يرسل ملخص الحالة إلى صندوق الوارد.",
                   "checked": true
                 },
                 {
                   "id": "radio-rtl-sms-arabic",
-                  "label": "رسالة نصية قصيرة",
-                  "description": "يصل فورًا إلى هاتفك."
+                  "label": "تنبيه SMS",
+                  "description": "مناسب للتنبيهات التي تحتاج ردًا سريعًا."
                 }
               ],
               reverse=true,
@@ -173,7 +173,7 @@
 
     {% set radio_rtl_hebrew %}
       <div dir="rtl">
-        {% call fieldset("ערוץ התראות", description="בחר כיצד לקבל התראות.") %}
+        {% call fieldset("ערוץ התראות", description="כל אפשרות מסבירה מתי ההתראה מגיעה לצוות.") %}
           {% call field() %}
             {{ radio_group(
               "radio-rtl-channel-hebrew",
@@ -181,14 +181,14 @@
               [
                 {
                   "id": "radio-rtl-email-hebrew",
-                  "label": "דוא״ל",
-                  "description": "מגיע לתיבת הדואר הנכנס שלך.",
+                  "label": "דוא״ל צוות",
+                  "description": "שולח סיכום מצב לתיבת הדואר.",
                   "checked": true
                 },
                 {
                   "id": "radio-rtl-sms-hebrew",
-                  "label": "מסרון",
-                  "description": "מגיע מיידית לטלפון שלך."
+                  "label": "הודעת SMS",
+                  "description": "מתאים להתראות שדורשות תגובה מהירה."
                 }
               ],
               reverse=true,
@@ -201,7 +201,7 @@
 
     {% set radio_rtl_english %}
       <div dir="ltr">
-        {% call fieldset("Notification channel", description="Choose how you want to receive notifications.") %}
+        {% call fieldset("Alert channel", description="Each option explains when the alert reaches the team.") %}
           {% call field() %}
             {{ radio_group(
               "radio-rtl-channel-english",
@@ -209,14 +209,14 @@
               [
                 {
                   "id": "radio-rtl-email-english",
-                  "label": "Email",
-                  "description": "Delivered to your inbox.",
+                  "label": "Team email",
+                  "description": "Sends the status summary to the inbox.",
                   "checked": true
                 },
                 {
                   "id": "radio-rtl-sms-english",
-                  "label": "SMS",
-                  "description": "Delivered instantly to your phone."
+                  "label": "SMS alert",
+                  "description": "Useful for alerts that need a quick response."
                 }
               ],
               bare=true
@@ -228,7 +228,7 @@
 
     {{ render_rtl_example(
       "radio-group",
-      "Choose the same notification channel in Arabic, Hebrew, and English, with RTL layout on each tab.",
+      "Choose the same notification channel across Arabic and Hebrew RTL examples, with English as the LTR comparison.",
       radio_rtl_arabic,
       radio_rtl_hebrew,
       radio_rtl_english

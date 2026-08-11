@@ -89,6 +89,21 @@ class CatalogContractTests(CatalogTestCase):
                     f"{path.relative_to(ROOT)} must sort components by label",
                 )
 
+    def test_public_site_does_not_claim_certified_components_before_certification(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        surfaces = {
+            "home": self.read_output("index.html"),
+            "examples": self.read_output("examples/index.html"),
+            "tasks": self.read_output("examples/tasks.html"),
+        }
+
+        for name, output in surfaces.items():
+            with self.subTest(surface=name):
+                self.assertNotIn("certified components", output)
+                self.assertNotIn("certified Data Table", output)
+
     def test_llms_txt_lists_ready_components_alphabetically(self) -> None:
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
@@ -1641,6 +1656,7 @@ class CatalogContractTests(CatalogTestCase):
                         self.assertRegex(
                             declaration,
                             r"^box-shadow: (?:none|\$input-focus-box-shadow|"
+                            r"\$[a-z0-9-]*ring-shadow|"
                             r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
                             r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
                             r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? color-mix\(in srgb, (?:\$|\#\{\$)[a-z0-9-]*ring-color(?:\})? 50%, transparent\));$",

@@ -1,8 +1,30 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/field.html.jinja" import field, field_description, field_group, fieldset %}
 {% from "components/switch.html.jinja" import switch %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% macro switch_field(id, label, description="", checked=false, disabled=false, invalid=false) -%}
+  {% set description_id = id ~ "-description" if description else "" %}
+  {% set label_id = id ~ "-label" %}
+  {% set field_extra_class = "field--switch" ~ (" field--disabled" if disabled else "") %}
+  {% call field(extra_class=field_extra_class, invalid=invalid) %}
+    <div>
+      <label class="form-label" id="{{ label_id }}" for="{{ id }}">{{ label }}</label>
+      {% if description %}{{ field_description(description_id, description) }}{% endif %}
+    </div>
+    {{ switch(
+      id,
+      labelledby=label_id,
+      describedby=description_id,
+      checked=checked,
+      disabled=disabled,
+      invalid=invalid,
+      label_wrapper=true
+    ) }}
+  {% endcall %}
+{%- endmacro %}
 
 {% block title %}Switch — Moo UI{% endblock %}
 
@@ -17,32 +39,25 @@
        matching the reference's pattern of a live multi-variant preview at the top. #}
     <div class="moo-example__surface mb-5">
       <div class="moo-example__preview moo-example__preview--narrow">
-        <div class="d-grid gap-3">
-          {{ switch("switch-hero-sync", label="Background sync", description="Keep team data synchronized across all devices.", checked=true) }}
-          {{ switch("switch-hero-notify", label="Enable notifications", description="Receive alerts when workflow status changes.") }}
-          {{ switch("switch-hero-disabled", label="Force MFA at login", disabled=true) }}
-        </div>
+        {{ switch("switch-hero-notifications", label="Enable notifications") }}
       </div>
     </div>
 
-    {% set usage %}
-      {{ switch("switch-usage", label="Enable workflow backup window") }}
-    {% endset %}
-    {{ render_example(
-      "usage",
-      "Usage",
-      "A single switch toggles one option. Pair with a label so the hit target covers the text.",
-      usage,
-      preview_class="moo-example__preview--narrow"
-    ) }}
+    <section class="moo-example" aria-labelledby="usage">
+      <h2 class="h4" id="usage">Usage</h2>
+      <p>Use a switch for one boolean setting. Provide a visible <code>label</code> for the basic inline pattern, or compose it with Field when the setting needs supporting copy, grouping, disabled state, or validation.</p>
+    </section>
 
     {% set description %}
-      {{ switch(
-        "switch-description",
-        label="Background sync",
-        description="Keep team data synchronized across all devices after a network reconnect.",
-        checked=true
-      ) }}
+      {% call fieldset("Focus sharing", description="Configure how focus mode follows you across devices.") %}
+        {% call field_group() %}
+          {{ switch_field(
+            "switch-description",
+            "Share across devices",
+            "Focus is shared across devices, and turns off when you leave the app."
+          ) }}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "description",
@@ -53,10 +68,12 @@
     ) }}
 
     {% set disabled %}
-      <div class="d-grid gap-2">
-        {{ switch("switch-disabled", label="Force MFA at login", disabled=true) }}
-        {{ switch("switch-disabled-checked", label="Force MFA at login", checked=true, disabled=true) }}
-      </div>
+      {% call fieldset("Authentication policy", description="Disabled switches show unavailable settings without changing layout.") %}
+        {% call field_group() %}
+          {{ switch_field("switch-disabled", "Force MFA at login", disabled=true) }}
+          {{ switch_field("switch-disabled-checked", "Force MFA at login", checked=true, disabled=true) }}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "disabled",
@@ -67,7 +84,16 @@
     ) }}
 
     {% set invalid %}
-      {{ switch("switch-invalid", label="Collect usage analytics", invalid=true) }}
+      {% call fieldset("Terms acceptance", description="Use the same description layout when a switch needs validation feedback.") %}
+        {% call field_group() %}
+          {{ switch_field(
+            "switch-invalid",
+            "Accept terms and conditions",
+            "You must accept the terms and conditions to continue.",
+            invalid=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "invalid",
@@ -78,23 +104,35 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-grid gap-3" dir="rtl">
-        {{ switch("switch-rtl-arabic-sync", label="المزامنة في الخلفية", description="حافظ على مزامنة بيانات الفريق عبر جميع الأجهزة بعد إعادة الاتصال بالشبكة.", checked=true, extra_class="form-check-reverse") }}
-        {{ switch("switch-rtl-arabic-notify", label="تفعيل الإشعارات", description="يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.", extra_class="form-check-reverse") }}
+      <div dir="rtl">
+        {% call fieldset("تفضيلات الإشعارات", description="اختر كيفية عمل الإشعارات والمزامنة.") %}
+          {% call field_group() %}
+            {{ switch_field("switch-rtl-arabic-sync", "المزامنة في الخلفية", "حافظ على مزامنة بيانات الفريق عبر جميع الأجهزة بعد إعادة الاتصال بالشبكة.", checked=true) }}
+            {{ switch_field("switch-rtl-arabic-notify", "تفعيل الإشعارات", "يمكنك تفعيل أو إلغاء تفعيل الإشعارات في أي وقت.") }}
+          {% endcall %}
+        {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-grid gap-3" dir="rtl">
-        {{ switch("switch-rtl-hebrew-sync", label="סנכרון רקע", description="שמור על נתוני הצוות מסונכרנים בכל המכשירים לאחר חיבור מחדש לרשת.", checked=true, extra_class="form-check-reverse") }}
-        {{ switch("switch-rtl-hebrew-notify", label="הפעלת התראות", description="ניתן להפעיל או לבטל התראות בכל עת.", extra_class="form-check-reverse") }}
+      <div dir="rtl">
+        {% call fieldset("העדפות התראות", description="בחר כיצד התראות וסנכרון יפעלו.") %}
+          {% call field_group() %}
+            {{ switch_field("switch-rtl-hebrew-sync", "סנכרון רקע", "שמור על נתוני הצוות מסונכרנים בכל המכשירים לאחר חיבור מחדש לרשת.", checked=true) }}
+            {{ switch_field("switch-rtl-hebrew-notify", "הפעלת התראות", "ניתן להפעיל או לבטל התראות בכל עת.") }}
+          {% endcall %}
+        {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-grid gap-3" dir="ltr">
-        {{ switch("switch-rtl-english-sync", label="Background sync", description="Keep team data synchronized across all devices after a network reconnect.", checked=true) }}
-        {{ switch("switch-rtl-english-notify", label="Enable notifications", description="You can enable or disable notifications at any time.") }}
+      <div dir="ltr">
+        {% call fieldset("Notification preferences", description="Choose how notifications and sync should behave.") %}
+          {% call field_group() %}
+            {{ switch_field("switch-rtl-english-sync", "Background sync", "Keep team data synchronized across all devices after a network reconnect.", checked=true) }}
+            {{ switch_field("switch-rtl-english-notify", "Enable notifications", "You can enable or disable notifications at any time.") }}
+          {% endcall %}
+        {% endcall %}
       </div>
     {% endset %}
 

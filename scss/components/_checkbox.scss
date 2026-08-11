@@ -7,7 +7,7 @@
 // dark-mode fill. A theme-scoped filter invert flips the black fill and
 // white glyph together for checkbox/radio controls; Switch owns its
 // checked track and thumb separately.
-[data-bs-theme="dark"] .form-check-input:checked:not([role="switch"]) {
+[data-bs-theme="dark"] .form-check-input:is(:checked, :indeterminate):not([role="switch"]) {
   filter: invert(1);
 }
 
@@ -85,9 +85,9 @@
 // control's fill destructive-red by default). Repeats the :focus variants
 // verbatim so this wins the same specificity tie by source order, focused
 // or not.
-.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked,
-.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:active,
-.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:not(:focus-visible) {
+.form-check-input:is([type="checkbox"], [type="radio"]):not([role="switch"]).is-invalid:checked,
+.form-check-input:is([type="checkbox"], [type="radio"]):not([role="switch"]).is-invalid:checked:focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]):not([role="switch"]).is-invalid:checked:focus:not(:focus-visible) {
   border-color: var(--bs-primary);
   background-color: var(--bs-primary);
 }

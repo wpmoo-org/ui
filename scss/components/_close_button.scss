@@ -2,7 +2,7 @@
   --bs-btn-close-color: var(--moo-foreground);
   --bs-btn-hover-color: var(--bs-btn-close-color);
   --bs-btn-hover-bg: var(--moo-muted-surface);
-  --bs-btn-hover-border-color: transparent;
+  --bs-btn-hover-border-color: #{$moo-close-button-border-color};
   // Replace Bootstrap's filled-path X with a Lucide-style stroke-based icon
   // (thinner, more delicate — matches the reference's feel).
   --bs-btn-close-bg: #{escape-svg($moo-close-button-bg-image)};
@@ -13,7 +13,7 @@
   justify-content: center;
   border-width: var(--bs-border-width);
   border-style: var(--bs-border-style);
-  border-color: transparent;
+  border-color: $moo-close-button-border-color;
   border-radius: var(--bs-border-radius-xl);
   color: var(--bs-btn-close-color);
   background-image: none;

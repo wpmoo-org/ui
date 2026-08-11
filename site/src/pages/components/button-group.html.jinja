@@ -159,7 +159,12 @@
     {% set split_button %}
       {% call button_group("Follow action") %}
         {{ button("Follow", variant="outline") }}
-        {{ button("", variant="outline", size="icon", aria_label="Follow options", icon_start="plus") }}
+        {{ button("", variant="outline", size="icon", aria_label="Follow options", icon_start="plus", dropdown=true) }}
+        {% call dropdown_menu(align="end") %}
+          {{ dropdown_item("Follow quietly", icon="bell-off") }}
+          {{ dropdown_item("Follow with email", icon="mail") }}
+          {{ dropdown_item("Mute updates", icon="volume-x") }}
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_example(

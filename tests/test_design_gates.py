@@ -80,6 +80,7 @@ NONZERO_DIMENSION = re.compile(
 )
 NONZERO_PERCENT = re.compile(r"(?<![\w.-])(?:\d*\.\d+|[1-9]\d*)%\b")
 CSS_VAR = re.compile(r"var\((--(?:[\w-]|#\{\$[\w-]+\})+)")
+CUSTOM_PROPERTY_DECLARATION = re.compile(r"^[ \t]*(--[\w-]+)[ \t]*:", re.MULTILINE)
 SASS_VAR = re.compile(r"\$[\w-]+")
 SINGLE_SASS_INTERPOLATION = re.compile(r"^#\{\s*(\$[\w-]+)\s*\}$")
 TO_RGB_INTERPOLATION = re.compile(r"^#\{\s*to-rgb\((\$[\w-]+)\)\s*\}$")
@@ -175,6 +176,8 @@ def approved_shared_value(prop: str, value: str) -> bool:
     if "radius" in prop:
         return semantic_tokens_only(clean, "radius")
     if "shadow" in prop:
+        if SASS_VAR.fullmatch(clean) and "shadow" in clean:
+            return True
         if semantic_tokens_only(clean, "shadow"):
             return True
         css_tokens, sass_tokens = token_names(clean)
@@ -731,6 +734,51 @@ class DesignGateTests(CatalogTestCase):
                     ),
                     f"{knob} must explain why a private component knob is needed",
                 )
+
+    def test_component_custom_properties_use_bootstrap_or_moo_namespace(self) -> None:
+        for path in sorted(component_partials()):
+            source = strip_scss_comments(path.read_text(encoding="utf-8"))
+            for token in sorted(set(CUSTOM_PROPERTY_DECLARATION.findall(source))):
+                with self.subTest(path=path.name, token=token):
+                    self.assertTrue(
+                        token.startswith(("--bs-", "--moo-")),
+                        f"{path.name}: {token} must use the --bs-* or --moo-* namespace",
+                    )
+
+    def test_visual_exception_values_are_configured_by_sass_knobs(self) -> None:
+        primary_variables = read_primary_variables()
+        component_sources = {
+            path.name: path.read_text(encoding="utf-8")
+            for path in component_partials()
+        }
+
+        expected_knobs = (
+            "$badge-border-color: transparent !default;",
+            "$moo-close-button-border-color: transparent !default;",
+            "$avatar-badge-ring-shadow: 0 0 0 $avatar-badge-ring-width var(--bs-body-bg) !default;",
+            "$avatar-group-ring-shadow: 0 0 0 $avatar-group-ring-width var(--bs-body-bg) !default;",
+        )
+        for knob in expected_knobs:
+            with self.subTest(knob=knob):
+                self.assertIn(knob, primary_variables)
+
+        self.assertIn("border-color: $badge-border-color;", component_sources["_badge.scss"])
+        self.assertIn(
+            "--bs-btn-hover-border-color: #{$moo-close-button-border-color};",
+            component_sources["_close_button.scss"],
+        )
+        self.assertIn(
+            "border-color: $moo-close-button-border-color;",
+            component_sources["_close_button.scss"],
+        )
+        self.assertIn(
+            "box-shadow: $avatar-badge-ring-shadow;",
+            component_sources["_avatar.scss"],
+        )
+        self.assertIn(
+            "box-shadow: $avatar-group-ring-shadow;",
+            component_sources["_avatar.scss"],
+        )
 
     def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
         primary_variables = read_primary_variables()

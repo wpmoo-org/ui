@@ -21,11 +21,11 @@
   // place; the default matches the 16px step Bootstrap's own spacer scale
   // already carries. Declared on the selector that consumes it, like
   // Bootstrap's own component custom properties.
-  --card-spacing: #{$card-spacing};
+  --moo-card-spacing: #{$moo-card-spacing};
 
   // One vertical rhythm owned by the card; sections add only inline padding.
-  gap: var(--card-spacing);
-  padding-block: var(--card-spacing);
+  gap: var(--moo-card-spacing);
+  padding-block: var(--moo-card-spacing);
 
   // A footer strip owns its own bottom padding; with one present the card
   // drops its trailing rhythm so the muted strip touches the card edge
@@ -49,7 +49,7 @@
 }
 
 .card--sm {
-  --card-spacing: #{$card-spacing-sm};
+  --moo-card-spacing: #{$moo-card-spacing-sm};
 }
 
 // The reference header lays title/description in a grid; an optional action
@@ -57,7 +57,7 @@
 .card-header {
   display: grid;
   grid-template-columns: 1fr auto;
-  column-gap: var(--card-spacing);
+  column-gap: var(--moo-card-spacing);
   align-items: flex-start;
   border-bottom: 0;
 }
@@ -83,7 +83,7 @@
 
 .card-header,
 .card-body {
-  padding-inline: var(--card-spacing);
+  padding-inline: var(--moo-card-spacing);
 }
 
 // The reference footer is a muted strip above a hairline divider.
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   gap: $spacer * 0.5;
-  padding: var(--card-spacing);
+  padding: var(--moo-card-spacing);
   border-top: var(--bs-card-border-width) solid var(--bs-card-border-color);
   background-color: var(--moo-muted-surface);
 }

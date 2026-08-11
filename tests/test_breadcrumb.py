@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 
@@ -61,6 +63,20 @@ class BreadcrumbTests(CatalogTestCase):
             styles,
         )
 
+    def test_breadcrumb_dropdown_trigger_keeps_visible_focus(self) -> None:
+        styles = (ROOT / "scss/components/_breadcrumb.scss").read_text(encoding="utf-8")
+        rule = re.search(
+            r"\.breadcrumb \.breadcrumb-dropdown-trigger:focus-visible\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+
+        self.assertIsNotNone(rule)
+        assert rule is not None
+        body = rule.group("body")
+        self.assertNotIn("box-shadow: none;", body)
+        self.assertIn("box-shadow: 0 0 0 #{$moo-form-focus-ring-width}", styles)
+        self.assertIn("#{$moo-form-focus-ring-color}", styles)
+
     def test_breadcrumb_supports_custom_divider(self) -> None:
         output = self.render_breadcrumb(
             'breadcrumb([{"label": "Home"}, {"label": "Library"}], divider="•")'
@@ -110,7 +126,8 @@ class BreadcrumbTests(CatalogTestCase):
             '{"label": "Library"}'
             '])'
         )
-        self.assertIn('<span class="breadcrumb-dropdown-item">', output)
+        self.assertIn('<div class="breadcrumb-dropdown-item">', output)
+        self.assertNotIn('<span class="breadcrumb-dropdown-item">', output)
         self.assertIn('<button class="breadcrumb-dropdown-trigger"', output)
         self.assertIn('data-bs-toggle="dropdown"', output)
         self.assertIn('data-icon="inline-end"', output)
