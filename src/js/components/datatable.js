@@ -522,35 +522,62 @@ export default class DataTable {
     if (!template) {
       return;
     }
-    template.parentNode
-      .querySelectorAll("[data-datatable-page-number], [data-datatable-page-ellipsis]")
-      .forEach((node) => node.remove());
 
     const pages = this._pageWindow(this._currentPage, pageCount);
-    const fragment = this._document.createDocumentFragment();
-    pages.forEach((page) => {
-      const li = this._document.createElement("li");
-      li.className = "page-item";
-      if (page === "…") {
-        li.dataset.datatablePageEllipsis = "";
-        li.innerHTML = '<span class="page-link">…</span>';
-      } else {
-        li.dataset.datatablePageNumber = String(page);
-        if (page === this._currentPage) {
-          li.classList.add("active");
-          li.setAttribute("aria-current", "page");
+    const existing = Array.from(
+      template.parentNode.querySelectorAll(
+        "[data-datatable-page-number], [data-datatable-page-ellipsis]"
+      )
+    );
+    const existingWindow = existing.map((node) =>
+      node.dataset.datatablePageEllipsis === undefined
+        ? Number(node.dataset.datatablePageNumber)
+        : "…"
+    );
+    // Same node-reuse rationale as the row-reorder skip above: rebuilding
+    // every page-number button on each click destroys and recreates the one
+    // the user just clicked, which blurs it (losing the focus ring and any
+    // keyboard position). The page window is unchanged on most clicks (any
+    // dataset small enough to show every page, or a prev/next inside an
+    // already-visible window), so only rebuild when the window itself
+    // differs; otherwise just resync which node is active below.
+    const windowChanged =
+      existingWindow.length !== pages.length ||
+      existingWindow.some((page, index) => page !== pages[index]);
+
+    if (windowChanged) {
+      existing.forEach((node) => node.remove());
+      const fragment = this._document.createDocumentFragment();
+      pages.forEach((page) => {
+        const li = this._document.createElement("li");
+        li.className = "page-item";
+        if (page === "…") {
+          li.dataset.datatablePageEllipsis = "";
+          li.innerHTML = '<span class="page-link">…</span>';
+        } else {
+          li.dataset.datatablePageNumber = String(page);
+          const button = this._document.createElement("button");
+          button.type = "button";
+          button.className = "page-link";
+          button.textContent = String(page);
+          button.setAttribute("aria-label", `Go to page ${page}`);
+          button.dataset.datatablePageGo = String(page);
+          li.appendChild(button);
         }
-        const button = this._document.createElement("button");
-        button.type = "button";
-        button.className = "page-link";
-        button.textContent = String(page);
-        button.setAttribute("aria-label", `Go to page ${page}`);
-        button.dataset.datatablePageGo = String(page);
-        li.appendChild(button);
+        fragment.appendChild(li);
+      });
+      template.parentNode.insertBefore(fragment, template);
+    }
+
+    template.parentNode.querySelectorAll("[data-datatable-page-number]").forEach((li) => {
+      const isActive = Number(li.dataset.datatablePageNumber) === this._currentPage;
+      li.classList.toggle("active", isActive);
+      if (isActive) {
+        li.setAttribute("aria-current", "page");
+      } else {
+        li.removeAttribute("aria-current");
       }
-      fragment.appendChild(li);
     });
-    template.parentNode.insertBefore(fragment, template);
   }
 
   _renderPageSize() {

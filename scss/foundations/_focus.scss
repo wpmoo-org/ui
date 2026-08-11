@@ -28,6 +28,29 @@
   box-shadow: none;
 }
 
+// Bootstrap's own .page-link:focus (vendor/bootstrap/scss/_pagination.scss)
+// applies its background/color/outline/box-shadow on any focus, including
+// mouse clicks -- unlike every other control here, it was never gated
+// behind :focus-visible, so clicking a page number (which also makes it the
+// active page) showed a ring the reference only shows for keyboard focus.
+// The ring/outline never carries active-state meaning (Bootstrap's own
+// ".active > &" rule never sets box-shadow), so it's always safe to drop on
+// non-keyboard focus, active page included. color/bg/border only revert to
+// resting when the page isn't the current one, so the active page keeps its
+// own look while it holds mouse focus. Real keyboard focus still gets the
+// shared ring above, since .page-link is a <button> and already matches
+// that selector.
+.page-link:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+.page-item:not(.active) > .page-link:focus:not(:focus-visible) {
+  color: var(--bs-pagination-color);
+  background-color: var(--bs-pagination-bg);
+  border-color: var(--bs-pagination-border-color);
+}
+
 // Bootstrap shows validation glow only on :focus, while the reference keeps a
 // subtle destructive ring visible for invalid controls. Keep it on native
 // form-control/form-select classes so Input, Select, Field, and Combobox share

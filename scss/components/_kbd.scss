@@ -1,7 +1,7 @@
 kbd {
   display: inline-flex;
-  height: 1.25rem;
-  min-width: 1.25rem;
+  height: $moo-chip-height;
+  min-width: $moo-chip-height;
   align-items: center;
   justify-content: center;
   font-family: $font-family-sans-serif;

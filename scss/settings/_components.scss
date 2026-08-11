@@ -17,6 +17,11 @@ $moo-combobox-multiple-width: $moo-combobox-width * 1.6 !default;
 $moo-combobox-menu-max-height: $input-height * 8 !default;
 $moo-combobox-option-line-height: 1.25rem !default;
 $moo-combobox-description-font-size: 0.75rem !default;
+// Badge, Kbd, and the Pagination icon-square baseline all share the
+// reference's 20px chip primitive (Tailwind h-5); one knob keeps them in
+// sync instead of repeating the literal across three unrelated component
+// files.
+$moo-chip-height: 1.25rem !default;
 // Bootstrap defaults badges to relative em sizing so they scale inside
 // headings/buttons. Moo badges are standalone status chips, and the reference
 // uses a fixed 20px chip with 12px/16px label metrics; keep that geometry on
@@ -84,6 +89,14 @@ $moo-control-active-translate-y: 0.5px !default;
 $pagination-margin-start: 0.25rem !default;
 $pagination-padding-y: 0 !default;
 $pagination-padding-x: 0 !default;
+// The icon-square baseline in components/_pagination.scss used to add
+// var(--bs-pagination-padding-y) * 2 to reach the reference's hit target,
+// but $pagination-padding-y is zeroed above so real content padding could
+// move onto explicit content-aware rules instead (see components/
+// _pagination.scss's [aria-label]:has(...) selectors). Bootstrap's own
+// padding-y token no longer carries that space, so this knob preserves the
+// square's total inset independently instead of falling back to a literal.
+$moo-pagination-square-inset: 0.625rem !default;
 $pagination-font-size: 0.875rem !default;
 $pagination-border-radius: var(--bs-border-radius-lg) !default;
 $pagination-color: var(--moo-muted-foreground) !default;
@@ -243,6 +256,14 @@ $btn-close-opacity: 1 !default;
 $btn-close-hover-opacity: $btn-close-opacity !default;
 $btn-close-focus-opacity: $btn-close-opacity !default;
 $btn-close-disabled-opacity: $moo-disabled-control-opacity !default;
+// Bootstrap's close button ships a filled-path X glyph; the reference uses a
+// thinner Lucide-style stroke icon instead. .btn-close::before consumes this
+// through mask + currentColor (scss/components/_close_button.scss), so only
+// the SVG's alpha shape ever paints -- the stroke color itself never
+// renders -- but the design gate still requires every component custom
+// property to trace to a token source, so bind it through $black the same
+// way the switch's dark bg-image binds through $moo-primary-foreground-dark.
+$moo-close-button-bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#{$black}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 6 6 18'/><path d='m6 6 12 12'/></svg>") !default;
 
 // Shared focus primitive: a thin 2px ring. Components consume
 // --bs-focus-ring-width; only the ring color is a runtime theme token.

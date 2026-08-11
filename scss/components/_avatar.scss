@@ -68,6 +68,8 @@
   border-radius: var(--bs-border-radius-pill);
   // Mirrors the reference's ring-2 treatment: the badge keeps its own
   // 10px/12px/15px box while the page-background ring paints outside it.
+  // box-shadow (not border) keeps the ring out of the layout box, matching
+  // the .avatar-group ring below and Tailwind's own ring-* technique.
   box-shadow: 0 0 0 $avatar-badge-ring-width var(--bs-body-bg);
   background-color: var(--moo-muted-surface);
   color: var(--moo-foreground);

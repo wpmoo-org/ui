@@ -13,7 +13,7 @@
 // couple pixels shorter than the numbered page-links next to them.
 .page-link {
   $page-link-square-size: calc(
-    1.25rem + 0.625rem + var(--bs-pagination-border-width) * 2
+    #{$moo-chip-height} + #{$moo-pagination-square-inset} + var(--bs-pagination-border-width) * 2
   );
 
   display: inline-flex;

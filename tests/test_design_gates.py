@@ -327,11 +327,6 @@ def shared_primitive_offenders(paths: tuple[Path, ...]) -> list[str]:
                 continue
             if approved_shared_value(prop, value):
                 continue
-            # --bs-btn-close-bg override replaces Bootstrap's filled-path X
-            # with a Lucide-style stroke-based icon; the inline SVG URL is
-            # intentional and not a shared-primitive consumer.
-            if prop == "--bs-btn-close-bg" and "url(" in value:
-                continue
             offenders.append(
                 f"{display_path(path)}:{lineno}: '{prop}: {value}' must consume"
                 " a shared Bootstrap Sass/CSS scale or --moo-* token"
