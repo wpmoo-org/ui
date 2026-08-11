@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/field.html.jinja" import field, fieldset, field_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -108,16 +109,22 @@
     ) }}
 
     {% set group %}
-      <div>
-        <p class="form-label mb-1">Show these items on the desktop:</p>
-        <p class="form-text mb-2">Select the items you want to show on the desktop.</p>
-        <div class="d-grid gap-2">
-          {{ checkbox("checkbox-group-hard-disks", label="Hard disks", checked=true) }}
-          {{ checkbox("checkbox-group-external", label="External disks", checked=true) }}
-          {{ checkbox("checkbox-group-cd-dvd", label="CDs, DVDs, and iPods") }}
-          {{ checkbox("checkbox-group-servers", label="Connected servers") }}
-        </div>
-      </div>
+      {% call fieldset("Show these items on the desktop", description="Select the items you want to show on the desktop.") %}
+        {% call field_group() %}
+          {% call field() %}
+            {{ checkbox("checkbox-group-hard-disks", label="Hard disks", checked=true) }}
+          {% endcall %}
+          {% call field() %}
+            {{ checkbox("checkbox-group-external", label="External disks", checked=true) }}
+          {% endcall %}
+          {% call field() %}
+            {{ checkbox("checkbox-group-cd-dvd", label="CDs, DVDs, and iPods") }}
+          {% endcall %}
+          {% call field() %}
+            {{ checkbox("checkbox-group-servers", label="Connected servers") }}
+          {% endcall %}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "group",

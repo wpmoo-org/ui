@@ -46,9 +46,12 @@
 // times — not just on :focus — so the error state is never silently
 // dismissed. This matches the reference's aria-invalid ring pattern and
 // mirrors the destructive ring that foundations/_focus.scss already
-// paints on .form-control.is-invalid and .form-select.is-invalid.
+// paints on .form-control.is-invalid and .form-select.is-invalid. Border
+// color is left to Bootstrap's own native .is-invalid rule (compiled from
+// vendor/bootstrap/scss/mixins/_forms.scss's form-validation-state(),
+// already themed to --bs-form-invalid-border-color); only the ring is
+// added on top of it here.
 .form-check-input.is-invalid {
-  border-color: var(--moo-form-invalid-ring-color);
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }
 
@@ -58,18 +61,33 @@
 // visible during mouse click and programmatic focus alike.
 .form-check-input.is-invalid:focus:active,
 .form-check-input.is-invalid:focus:not(:focus-visible) {
-  border-color: var(--moo-form-invalid-ring-color);
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }
 
 .form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:active,
 .form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:not(:focus-visible) {
-  border-color: var(--moo-form-invalid-ring-color);
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }
 
 .form-check-input[type="checkbox"].is-invalid:indeterminate:focus:active,
 .form-check-input[type="checkbox"].is-invalid:indeterminate:focus:not(:focus-visible) {
-  border-color: var(--moo-form-invalid-ring-color);
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
+}
+
+// The reference keeps a checked control's own border and fill at the
+// normal checked color even inside an invalid group -- only unchecked
+// siblings' solid border and the ring (kept above) flag the error, so the
+// user's actual selection never reads as "wrong" by itself. Overrides two
+// separate Bootstrap native rules: the base .is-invalid border-color
+// above (which does not itself distinguish :checked) and .is-invalid:
+// checked's own background-color: var(--bs-form-invalid-color) (also
+// compiled from form-validation-state(), which paints a checked+invalid
+// control's fill destructive-red by default). Repeats the :focus variants
+// verbatim so this wins the same specificity tie by source order, focused
+// or not.
+.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked,
+.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:active,
+.form-check-input:is([type="checkbox"], [type="radio"]).is-invalid:checked:focus:not(:focus-visible) {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
 }

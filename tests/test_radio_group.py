@@ -75,6 +75,25 @@ class RadioGroupTests(CatalogTestCase):
         )
         self.assertIn('class="radio-group mb-3"', output)
 
+    def test_radio_group_bare_omits_fieldset_and_legend(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("plan", "", [{"id": "plan-a", "label": "A"}], bare=true)'
+        )
+        self.assertEqual(
+            output,
+            '<div class="form-check">'
+            ' <input class="form-check-input" type="radio" name="plan" id="plan-a">'
+            ' <label class="form-check-label" for="plan-a">A</label>'
+            " </div>",
+        )
+
+    def test_radio_group_reverse_adds_form_check_reverse_per_item(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("plan", "Plan", '
+            '[{"id": "plan-a", "label": "A"}, {"id": "plan-b", "label": "B"}], reverse=true)'
+        )
+        self.assertEqual(output.count('class="form-check form-check-reverse"'), 2)
+
     def test_radio_group_requires_name(self) -> None:
         with self.assertRaisesRegex(ValueError, "Radio Group name is required"):
             self.render_radio_group(

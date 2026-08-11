@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/radio_group.html.jinja" import radio_group %}
+{% from "components/field.html.jinja" import field, fieldset %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -14,15 +15,20 @@
 
   <div class="moo-component-examples">
     {% set default %}
-      {{ radio_group(
-        "radio-default",
-        "Incident alert channel",
-        [
-          {"id": "radio-default-email", "label": "Email", "checked": true},
-          {"id": "radio-default-sms", "label": "SMS"},
-          {"id": "radio-default-webhook", "label": "Webhook"}
-        ]
-      ) }}
+      {% call fieldset("Incident alert channel", description="Choose how you want to be notified when an incident occurs.") %}
+        {% call field() %}
+          {{ radio_group(
+            "radio-default",
+            "",
+            [
+              {"id": "radio-default-email", "label": "Email", "checked": true},
+              {"id": "radio-default-sms", "label": "SMS"},
+              {"id": "radio-default-webhook", "label": "Webhook"}
+            ],
+            bare=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "default",
@@ -32,44 +38,77 @@
     ) }}
 
     {% set with_description %}
-      {{ radio_group(
-        "radio-format",
-        "Export destination",
-        [
-          {
-            "id": "radio-format-drive",
-            "label": "Shared drive",
-            "description": "Saves to the operations drive folder.",
-            "checked": true
-          },
-          {
-            "id": "radio-format-sftp",
-            "label": "SFTP",
-            "description": "Available for scheduled sync jobs only."
-          }
-        ]
-      ) }}
+      {% call fieldset("Export destination", description="Each option explains its own operational impact below.") %}
+        {% call field() %}
+          {{ radio_group(
+            "radio-format",
+            "",
+            [
+              {
+                "id": "radio-format-drive",
+                "label": "Shared drive",
+                "description": "Saves to the operations drive folder.",
+                "checked": true
+              },
+              {
+                "id": "radio-format-sftp",
+                "label": "SFTP",
+                "description": "Available for scheduled sync jobs only."
+              }
+            ],
+            bare=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
-      "with-description",
-      "With description",
+      "description",
+      "Description",
       "Show option-level helper text when each choice has a different operational impact.",
       with_description
     ) }}
 
+    {% set fieldset_example %}
+      {% call fieldset("Backup retention plan", description="Longer retention windows use more storage and cost more per month.") %}
+        {% call field() %}
+          {{ radio_group(
+            "radio-retention",
+            "",
+            [
+              {"id": "radio-retention-standard", "label": "Standard (30 days)", "checked": true},
+              {"id": "radio-retention-extended", "label": "Extended (180 days)"},
+              {"id": "radio-retention-archive", "label": "Archive (7 years)"}
+            ],
+            bare=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "fieldset",
+      "Fieldset",
+      "Add a fieldset-level description and standard field spacing when the whole group needs shared context.",
+      fieldset_example
+    ) }}
+
     {% set disabled %}
-      {{ radio_group(
-        "radio-disabled",
-        "Task completion notification",
-        [
-          {"id": "radio-disabled-portal", "label": "Team portal", "checked": true},
-          {
-            "id": "radio-disabled-mobile",
-            "label": "Mobile push (temporarily paused)",
-            "disabled": true
-          }
-        ]
-      ) }}
+      {% call fieldset("Task completion notification", description="Some delivery methods may be temporarily unavailable.") %}
+        {% call field() %}
+          {{ radio_group(
+            "radio-disabled",
+            "",
+            [
+              {"id": "radio-disabled-portal", "label": "Team portal", "checked": true},
+              {
+                "id": "radio-disabled-mobile",
+                "label": "Mobile push (temporarily paused)",
+                "disabled": true
+              }
+            ],
+            bare=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_example(
       "disabled",
@@ -78,42 +117,112 @@
       disabled
     ) }}
 
+    {% set invalid %}
+      {% call fieldset("Primary contact method", description="Choose how we should reach you if there's an issue.") %}
+        {% call field() %}
+          {{ radio_group(
+            "radio-invalid",
+            "",
+            [
+              {"id": "radio-invalid-email", "label": "Email"},
+              {"id": "radio-invalid-sms", "label": "SMS"},
+              {"id": "radio-invalid-phone", "label": "Phone call"}
+            ],
+            invalid=true,
+            required=true,
+            feedback="Select a contact method before saving.",
+            bare=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "invalid",
+      "Invalid",
+      "Use the invalid and feedback parameters to show a validation error across the whole group.",
+      invalid
+    ) }}
+
     {% set radio_rtl_arabic %}
       <div dir="rtl">
-        {{ radio_group(
-          "radio-rtl-channel-arabic",
-          "قناة التنبيه",
-          [
-            {"id": "radio-rtl-email-arabic", "label": "البريد الإلكتروني", "checked": true},
-            {"id": "radio-rtl-sms-arabic", "label": "رسالة نصية قصيرة"}
-          ]
-        ) }}
+        {% call fieldset("قناة التنبيه", description="اختر كيفية تلقي التنبيهات.") %}
+          {% call field() %}
+            {{ radio_group(
+              "radio-rtl-channel-arabic",
+              "",
+              [
+                {
+                  "id": "radio-rtl-email-arabic",
+                  "label": "البريد الإلكتروني",
+                  "description": "يصل إلى بريدك الوارد.",
+                  "checked": true
+                },
+                {
+                  "id": "radio-rtl-sms-arabic",
+                  "label": "رسالة نصية قصيرة",
+                  "description": "يصل فورًا إلى هاتفك."
+                }
+              ],
+              reverse=true,
+              bare=true
+            ) }}
+          {% endcall %}
+        {% endcall %}
       </div>
     {% endset %}
 
     {% set radio_rtl_hebrew %}
       <div dir="rtl">
-        {{ radio_group(
-          "radio-rtl-channel-hebrew",
-          "ערוץ התראות",
-          [
-            {"id": "radio-rtl-email-hebrew", "label": "דוא״ל", "checked": true},
-            {"id": "radio-rtl-sms-hebrew", "label": "מסרון"}
-          ]
-        ) }}
+        {% call fieldset("ערוץ התראות", description="בחר כיצד לקבל התראות.") %}
+          {% call field() %}
+            {{ radio_group(
+              "radio-rtl-channel-hebrew",
+              "",
+              [
+                {
+                  "id": "radio-rtl-email-hebrew",
+                  "label": "דוא״ל",
+                  "description": "מגיע לתיבת הדואר הנכנס שלך.",
+                  "checked": true
+                },
+                {
+                  "id": "radio-rtl-sms-hebrew",
+                  "label": "מסרון",
+                  "description": "מגיע מיידית לטלפון שלך."
+                }
+              ],
+              reverse=true,
+              bare=true
+            ) }}
+          {% endcall %}
+        {% endcall %}
       </div>
     {% endset %}
 
     {% set radio_rtl_english %}
       <div dir="ltr">
-        {{ radio_group(
-          "radio-rtl-channel-english",
-          "Notification channel",
-          [
-            {"id": "radio-rtl-email-english", "label": "Email", "checked": true},
-            {"id": "radio-rtl-sms-english", "label": "SMS"}
-          ]
-        ) }}
+        {% call fieldset("Notification channel", description="Choose how you want to receive notifications.") %}
+          {% call field() %}
+            {{ radio_group(
+              "radio-rtl-channel-english",
+              "",
+              [
+                {
+                  "id": "radio-rtl-email-english",
+                  "label": "Email",
+                  "description": "Delivered to your inbox.",
+                  "checked": true
+                },
+                {
+                  "id": "radio-rtl-sms-english",
+                  "label": "SMS",
+                  "description": "Delivered instantly to your phone."
+                }
+              ],
+              bare=true
+            ) }}
+          {% endcall %}
+        {% endcall %}
       </div>
     {% endset %}
 
