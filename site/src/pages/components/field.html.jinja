@@ -9,7 +9,7 @@
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Field — Moo UI{% endblock %}
@@ -22,6 +22,19 @@ label-first fields using Bootstrap-native validation and semantic grouping."
 ) }}
 
 <div class="moo-component-examples">
+  {% set intro %}
+  {% call field() %}
+  {{ input(label="Form Field", id="field-intro-name", placeholder="Placeholder Text",
+  describedby="field-intro-name-description") }}
+  {{ field_description("field-intro-name-description", "Pair a visible label with helper text below the control.") }}
+  {% endcall %}
+  {% endset %}
+  {{ render_component_intro(
+  intro,
+  "Wrap each form control in one field, keep the label visible, and place helper or error text directly below the control it explains. Connect helper text with <code>aria-describedby</code>, mark invalid state on both field and control when needed, and use field groups and fieldsets when multiple controls answer one larger question.",
+  preview_class="moo-example__preview--narrow"
+  ) }}
+
   {% set full %}
   {% call form(extra_class="needs-validation", novalidate=true) %}
   {% call fieldset("Deployment", description="Configure where and how this build ships.") %}

@@ -3,7 +3,7 @@
 {% from "components/table.html.jinja" import table, table_row_actions %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Table — Moo UI{% endblock %}
@@ -15,6 +15,24 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ table(
+        ["Request", "Owner", "Status"],
+        [
+          ["First row", "Column value", "Plain text"],
+          ["Second row", "Column value", "Plain text"],
+          ["Third row", "Column value", "Plain text"]
+        ],
+        caption="A native table groups related rows under visible column headers.",
+        row_header=true
+      ) }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render column headers in <code>thead</code>, data rows in <code>tbody</code>, and a caption when the table needs context. Use row headers for named records, align numeric columns consistently, and wrap wide tables in the responsive container so columns stay inspectable.",
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set basic %}
       {{ table(
         ["Request", "Owner", "Status", "SLA"],

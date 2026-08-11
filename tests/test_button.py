@@ -593,10 +593,6 @@ class ButtonTests(CatalogTestCase):
     def test_page_uses_render_rtl_example_for_button_direction_examples(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn(
-            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
-            source,
-        )
         self.assertIn("render_rtl_example(", source)
         self.assertIn('render_rtl_example(\n      "button"', source)
         self.assertIn("rtl_arabic", source)

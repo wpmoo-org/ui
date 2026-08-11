@@ -4,7 +4,7 @@
 {% from "components/card.html.jinja" import card %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Context Menu — Moo UI{% endblock %}
@@ -16,6 +16,28 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro_items %}
+      {{ dropdown_item("Rename", icon="pencil", shortcut="⌘R") }}
+      {{ dropdown_item("Duplicate", icon="copy") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Delete", icon="trash-2", destructive=true) }}
+    {% endset %}
+    {% set intro %}
+      {% call context_menu(
+        "context-menu-intro",
+        "File actions",
+        intro_items,
+        trigger_class="d-flex align-items-center justify-content-center w-100 h-100 rounded-3 border p-5",
+        attrs='style="--bs-border-style: dashed; width: min(100%, 22rem); height: 12rem;"'
+      ) %}
+        <span>Right click here</span>
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Attach the context menu to the surface that owns the actions, keep the menu items in a flat Bootstrap dropdown menu, and provide the visible fallback trigger for touch and keyboard users. Support right-click, <code>Shift+F10</code>, and the fallback button without making the context menu the only path to required work."
+    ) }}
+
     {% set basic_items %}
       {{ dropdown_item("Rename", icon="pencil", shortcut="⌘R") }}
       {{ dropdown_item("Duplicate", icon="copy") }}

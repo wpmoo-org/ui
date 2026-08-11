@@ -2,7 +2,7 @@
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Alert — Moo UI{% endblock %}
@@ -14,6 +14,19 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ alert(
+        "Alert",
+        description="Use for a short contextual message that belongs near the related content.",
+        icon="info"
+      ) }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Place the alert message in a Bootstrap alert container, keep the title visible, and add description text only when the state needs explanation. Match the variant to the message severity, add a dismiss button only when the notice may be removed, and keep any action button inside the alert body so it remains tied to the message.",
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set basic %}
       {{ alert(
         "Scheduled maintenance",

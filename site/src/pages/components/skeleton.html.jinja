@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Skeleton — Moo UI{% endblock %}
@@ -13,6 +13,20 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-flex align-items-center gap-3">
+        {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="10rem", height=".875rem") }}
+          {{ skeleton(width="6.5rem", height=".875rem") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render skeleton shapes in the same positions and approximate sizes as the final content. Hide placeholders from assistive technology, keep the rhythm close to the loaded layout, and replace the skeletons as soon as real content is available."
+    ) }}
+
     {% set basic %}
       {{ skeleton(width="9.5rem", height="1rem") }}
     {% endset %}

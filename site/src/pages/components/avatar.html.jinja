@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Avatar — Moo UI{% endblock %}
@@ -45,27 +45,9 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
-      "overview",
-      "Overview",
-      "The avatar family in three common forms: a status badge, an icon badge, and a counted group.",
-      overview
-    ) }}
-
-    {% set fallback %}
-      <div class="d-flex align-items-center gap-3">
-        {{ avatar(name="Moo UI", initials="MU") }}
-        <div>
-          <div class="fw-medium">Moo UI</div>
-          <div class="text-body-secondary small">Design system</div>
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "fallback",
-      "Fallback initials",
-      "Use initials when no image is available. The fallback still needs an accessible name through <code>aria-label</code>.",
-      fallback
+    {{ render_component_intro(
+      overview,
+      "Render the image and initials fallback together so the fallback is ready when the image is missing. Write alternative text for real profile images, keep initials short, attach status badges to the avatar edge, and add a count chip when a grouped stack hides additional people."
     ) }}
 
     {% set basic %}
@@ -84,19 +66,35 @@
       basic
     ) }}
 
+    {% set fallback %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(name="Moo UI", initials="MU") }}
+        <div>
+          <div class="fw-medium">Moo UI</div>
+          <div class="text-body-secondary small">Design system</div>
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "fallback",
+      "Fallback initials",
+      "Use initials when no image is available. The fallback still needs an accessible name through <code>aria-label</code>.",
+      fallback
+    ) }}
+
     {% set badge %}
       <div class="d-flex align-items-center gap-3">
         {{ avatar(
-          name="Cangir",
+          name="CNGR",
           src=avatar_cangir,
-          alt="Illustrated profile photo of Cangir",
+          alt="Illustrated profile photo of CNGR",
           fallback="CA",
           badge_dot=true,
           badge_class="bg-success",
           badge_aria_label="Available"
         ) }}
         <div>
-          <div class="fw-medium">Cangir</div>
+          <div class="fw-medium">CNGR</div>
           <div class="text-body-secondary small">Available for review</div>
         </div>
       </div>

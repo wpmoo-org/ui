@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import field, field_group, field_description, field_error %}
 {% from "components/textarea.html.jinja" import textarea %}
@@ -15,6 +15,24 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field() %}
+        {{ textarea(
+          label="Message",
+          id="textarea-intro-message",
+          rows=3,
+          placeholder="Describe the request in one short paragraph.",
+          describedby="textarea-intro-message-help"
+        ) }}
+        {{ field_description("textarea-intro-message-help", "Give reviewers enough context to act without opening another view.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render multiline values with a visible label and a starting row count that matches the expected amount of writing. Keep helper or error text directly under the textarea, connect it with <code>aria-describedby</code>, and leave long-form editing to a larger editor surface.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {% call field_group() %}
       {% call field() %}

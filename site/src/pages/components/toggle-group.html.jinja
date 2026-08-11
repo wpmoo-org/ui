@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Toggle Group — Moo UI{% endblock %}
@@ -13,6 +13,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ toggle_group(
+        "toggle-group-intro-density",
+        [
+          {"id": "toggle-intro-list", "icon": "list", "aria_label": "List view", "pressed": true},
+          {"id": "toggle-intro-grid", "icon": "layout-grid", "aria_label": "Grid view"},
+          {"id": "toggle-intro-table", "icon": "table-2", "aria_label": "Table view"}
+        ],
+        legend="View mode",
+        type="single",
+        variant="outline"
+      ) }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Group related toggle inputs under one accessible label. Use radio inputs when exactly one item should stay active, checkbox inputs when multiple items may be pressed, and give every icon-only toggle its own accessible label.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       {{ toggle_group(
         "notification-channels",

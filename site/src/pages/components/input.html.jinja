@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import form, field, field_description, field_group, fieldset %}
@@ -18,6 +18,22 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field() %}
+        {{ input(
+          label="Input",
+          id="input-intro-email",
+          type="email",
+          placeholder="you@example.com"
+        ) }}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render one-line values with the native input type that matches the data. Pair every standalone control with a visible label or accessible name, connect helper or error text with <code>aria-describedby</code>, and keep required, readonly, disabled, and invalid state on the native input.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set api_key %}
       {% call field() %}
       {{ input(

@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/spinner.html.jinja" import spinner %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Spinner — Moo UI{% endblock %}
@@ -14,6 +14,18 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-flex align-items-center gap-2">
+        {{ spinner(aria_label="Loading updates") }}
+        <span>Loading updates</span>
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render the spinner with an accessible loading name and pair it with visible text when the wait affects surrounding content. Keep it for indeterminate work only; switch to a progress bar when completion can be measured.",
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       {{ spinner() }}
     {% endset %}

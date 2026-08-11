@@ -52,6 +52,20 @@ class CloseButtonTests(CatalogTestCase):
         with self.assertRaisesRegex(ValueError, "Close button aria_label is required"):
             self.render_close_button('close_button(aria_label="   ")')
 
+    def test_page_intro_uses_dismissible_alert_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/close-button.html")
+        intro = output.split('<div class="moo-example__surface mb-5">', 1)[1].split(
+            '<h2 class="h4" id="usage">',
+            1,
+        )[0]
+
+        self.assertIn("alert-dismissible", intro)
+        self.assertIn('role="alert"', intro)
+        self.assertIn('data-bs-dismiss="alert"', intro)
+
     def test_close_button_uses_reference_icon_button_geometry(self) -> None:
         result = self.run_build()
 
@@ -83,10 +97,6 @@ class CloseButtonTests(CatalogTestCase):
     def test_page_uses_render_rtl_example(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn(
-            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
-            source,
-        )
         self.assertIn("render_rtl_example(", source)
         self.assertIn("close-button-ribbon", source)
         self.assertIn("rtl_arabic", source)

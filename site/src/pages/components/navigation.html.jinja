@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/navigation.html.jinja" import nav_item, nav_menu %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Navigation — Moo UI{% endblock %}
@@ -13,6 +13,18 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call nav_menu("Workspace sections") %}
+        {{ nav_item("Overview", href="#", active=true) }}
+        {{ nav_item("Requests", href="#") }}
+        {{ nav_item("Settings", href="#") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Wrap route links in a labelled navigation region, mark the current item with the active state, and keep disabled items out of required paths. Use one style for the whole set, keep labels short, and add badges or icons only when they clarify the destination."
+    ) }}
+
     {% set horizontal %}
       {% call nav_menu("Workspace sections") %}
         {{ nav_item("Dashboard", href="#", active=true) }}
@@ -35,7 +47,7 @@
         {{ nav_item("Apps", href="#", icon="package") }}
         {{ nav_item("Chats", href="#", icon="messages-square", badge_label="3", badge_variant="default") }}
         {{ nav_item("Users", href="#", icon="users") }}
-        {{ nav_item("Settings", href="#", icon="settings", end_icon="chevron-right") }}
+        {{ nav_item("Settings", href="#", icon="settings") }}
       {% endcall %}
     {% endset %}
     {{ render_example(

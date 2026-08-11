@@ -7,7 +7,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 
 {% block title %}Button Group — Moo UI{% endblock %}
 
@@ -40,11 +40,9 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
-      "basic-actions",
-      "Composition",
-      "Use <code>btn-group</code> for joined controls. Wrap separate groups in <code>btn-toolbar</code> when the toolbar needs its own spacing.",
-      basic_actions
+    {{ render_component_intro(
+      basic_actions,
+      "Wrap joined controls in one labelled button group, keep every button on the same size and variant, and place only related actions inside the joined edge. When several groups share a row, wrap them in a toolbar and let each inner group keep its own accessible label."
     ) }}
 
     {% set outlined_styles %}

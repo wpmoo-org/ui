@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/kbd.html.jinja" import kbd %}
 
 {% block title %}Kbd — Moo UI{% endblock %}
@@ -13,6 +13,14 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <p class="mb-0">Press {{ kbd("⌘") }} {{ kbd("K") }} to open search.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Wrap each physical key in its own <code>&lt;kbd&gt;</code> element, then place the keys in the order a user should press them. Pair the shortcut with visible action text and keep punctuation or plus signs outside the key elements unless they are real keys."
+    ) }}
+
     {% set single_key %}
       <div class="d-inline-flex align-items-center gap-2">
         <span>Dismiss the panel with</span>

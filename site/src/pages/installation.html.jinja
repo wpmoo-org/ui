@@ -1,6 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/alert.html.jinja" import alert %}
-{% from "components/button.html.jinja" import button %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
@@ -194,7 +193,6 @@
           <dt>A Moo ESM module does not respond</dt>
           <dd>Import the matching Moo ESM module (Combobox, Context Menu, DataTable, or Sidebar) and initialize the rendered root explicitly; imports never auto-scan.</dd>
         </dl>
-        {{ button("Browse Components", variant="outline", size="sm", element="a", href=site_href("components/index.html", root_path)) }}
       </section>
 
       {{ render_section_page_pagination(current_slug, site_pages, root_path) }}

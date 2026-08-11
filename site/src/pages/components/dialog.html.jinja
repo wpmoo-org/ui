@@ -4,7 +4,7 @@
 {% from "components/input.html.jinja" import input %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Dialog — Moo UI{% endblock %}
@@ -16,6 +16,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ button("Open dialog", variant="outline", dialog_target="dialog-intro") }}
+      {% call dialog("dialog-intro", centered=true, describedby="dialog-intro-description") %}
+        {{ dialog_header("dialog-intro", "Edit project details") }}
+        {% call dialog_body() %}
+          <p class="text-body-secondary mb-0" id="dialog-intro-description">Update the public project label before the next review starts.</p>
+        {% endcall %}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Save changes", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Open the modal from a clear trigger, point that trigger at the dialog id, and label the modal with its title. Connect supporting copy with <code>aria-describedby</code>, keep the body focused on the task, place actions in the footer, and use a static backdrop only when dismissal must be explicit.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {{ button("Open dialog", variant="outline", dialog_target="dialog-basic") }}
       {% call dialog("dialog-basic", centered=true, describedby="dialog-basic-description") %}

@@ -3,7 +3,7 @@
 {% from "components/dialog.html.jinja" import dialog_footer %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Alert Dialog — Moo UI{% endblock %}
@@ -15,6 +15,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ button("Show dialog", variant="outline", dialog_target="alert-dialog-preview") }}
+      {% call alert_dialog("alert-dialog-preview", describedby="alert-dialog-preview-description") %}
+        {{ alert_dialog_header(
+          "alert-dialog-preview",
+          "Are you absolutely sure?",
+          "This action cannot be undone."
+        ) }}
+        {% call dialog_footer() %}
+          {{ button("Cancel", variant="outline", dismiss="modal") }}
+          {{ button("Continue", dismiss="modal") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Connect the trigger to the modal with Bootstrap's <code>data-bs-target</code>, label the dialog from its title, and connect supporting copy with <code>aria-describedby</code>. Put cancel and confirm actions in the footer, keep the backdrop static for irreversible choices, and make every exit path a visible button."
+    ) }}
+
     {% set basic %}
       {{ button("Discard draft", variant="outline", dialog_target="alert-dialog-basic") }}
       {% call alert_dialog("alert-dialog-basic", describedby="alert-dialog-basic-description") %}

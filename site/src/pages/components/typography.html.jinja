@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Typography — Moo UI{% endblock %}
@@ -13,6 +13,19 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-grid gap-3">
+        {{ typography("Product Console", variant="page-title") }}
+        {{ typography("Operations playbook", variant="section-title") }}
+        <p class="text-body-secondary mb-0">Use type roles to make hierarchy scan quickly.</p>
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Choose the semantic HTML element first, then apply the typography role or Bootstrap text utility that matches the visual hierarchy. Keep heading levels meaningful, use muted text for supporting copy, and reserve display sizes for content that needs extra presence.",
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set headings %}
       <div class="d-grid gap-3">
         {{ typography("Product Console", variant="page-title") }}

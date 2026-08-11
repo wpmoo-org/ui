@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Separator — Moo UI{% endblock %}
@@ -13,6 +13,19 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="vstack justify-content-center gap-2 w-100" style="min-height: 8rem;">
+        <span class="fw-medium">Separator</span>
+        {{ separator() }}
+        <span class="text-body-secondary">Use between related content sections.</span>
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Place a horizontal separator between stacked sections or a vertical separator between compact inline groups. Keep purely visual dividers decorative for assistive technology, and avoid using a separator where a real heading or landmark is needed.",
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set horizontal %}
       <div class="vstack gap-2">
         <div>

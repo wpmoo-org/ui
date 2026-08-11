@@ -2,7 +2,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "components/field.html.jinja" import field, field_description, field_error, field_group, fieldset %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Select — Moo UI{% endblock %}
@@ -64,6 +64,28 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field() %}
+        {{ select(
+          label="Select",
+          id="select-intro",
+          options=[
+            {"value": "", "label": "Choose an option", "selected": true, "disabled": true},
+            {"value": "one", "label": "Option one"},
+            {"value": "two", "label": "Option two"},
+            {"value": "three", "label": "Option three"}
+          ],
+          describedby="select-intro-help"
+        ) }}
+        {{ field_description("select-intro-help", "Use a native option menu when one value should be submitted.") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render a native select with a visible label, provide a disabled placeholder when no value has been chosen, and keep option values stable for form submission. Use option groups only when they make a long list easier to scan.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set simple_options = [
       {"value": "", "label": "Choose queue", "selected": true, "disabled": true},
       {"value": "ops", "label": "Operations"},

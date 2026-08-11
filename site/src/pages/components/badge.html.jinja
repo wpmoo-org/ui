@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Badge — Moo UI{% endblock %}
@@ -13,6 +13,18 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ badge("Badge") }}
+        {{ badge("New", variant="secondary") }}
+        {{ badge("Blocked", variant="destructive") }}
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Place the badge next to the label, heading, or item it describes instead of floating it as a separate control. Keep the visible text short, choose the variant from the status meaning, and add visually hidden context when the badge shows only a number or symbol."
+    ) }}
+
     {% set variants %}
       <div class="d-flex flex-wrap gap-2">
         {{ badge("Badge") }}

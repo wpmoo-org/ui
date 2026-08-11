@@ -1,7 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/card.html.jinja" import card %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Tabs — Moo UI{% endblock %}
@@ -13,6 +14,39 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro_overview %}
+      {% call card("Connected panels", "Each trigger points at one tab panel and the active panel stays visible.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Keep labels short so the tab list remains quick to scan.</p>
+      {% endcall %}
+    {% endset %}
+    {% set intro_activation %}
+      {% call card("Click activation", "A tab changes state only after it is selected by click or keyboard.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Hover can hint at interactivity without looking like the active tab.</p>
+      {% endcall %}
+    {% endset %}
+    {% set intro_panels %}
+      {% call card("Panel content", "Use panels for peer views that can be shown one at a time.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Keep required sequential steps outside inactive tabs.</p>
+      {% endcall %}
+    {% endset %}
+    {% set intro %}
+      <div style="width: min(100%, 28rem);">
+        {{ tabs(
+          "tabs-intro",
+          [
+            {"id": "overview", "title": "Overview", "content": intro_overview},
+            {"id": "activation", "title": "Activation", "content": intro_activation},
+            {"id": "panels", "title": "Panels", "content": intro_panels}
+          ]
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Connect each tab trigger to one panel, keep tab labels short, and mark the active trigger and panel consistently. Put immediately useful content in the active panel and avoid hiding required sequential steps behind inactive tabs.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set operational_views %}
       {{ tabs(
         "tabs-operational",
@@ -40,6 +74,42 @@
       "Operational views",
       "Use tab sets when users need to move between related operational surfaces quickly.",
       operational_views,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set vertical_structure %}
+      {% call card("Stacked triggers", "Use a vertical tab list when labels scan better as a short side rail.", size="sm") %}
+        <p class="mb-0 text-body-secondary">The tablist keeps the same tab roles while adding vertical orientation.</p>
+      {% endcall %}
+    {% endset %}
+    {% set vertical_keyboard %}
+      {% call card("Keyboard state", "Bootstrap keeps one active tab in the roving focus order.", size="sm") %}
+        <p class="mb-0 text-body-secondary">The selected trigger and visible panel update together after activation.</p>
+      {% endcall %}
+    {% endset %}
+    {% set vertical_panels %}
+      {% call card("Panel width", "Let the active panel use the remaining inline space.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Keep each panel self-contained so switching tabs does not require extra context.</p>
+      {% endcall %}
+    {% endset %}
+    {% set vertical %}
+      <div style="width: min(100%, 34rem);">
+        {{ tabs(
+          "tabs-vertical",
+          [
+            {"id": "structure", "title": "Structure", "content": vertical_structure},
+            {"id": "keyboard", "title": "Keyboard", "content": vertical_keyboard},
+            {"id": "panels", "title": "Panels", "content": vertical_panels}
+          ],
+          orientation="vertical"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "vertical",
+      "Vertical",
+      "Set <code>orientation=\"vertical\"</code> when the tab triggers should stack beside the active panel.",
+      vertical,
       preview_class="moo-example__preview--narrow"
     ) }}
 
@@ -74,78 +144,93 @@
       preview_class="moo-example__preview--narrow"
     ) }}
 
+    {% set rtl_arabic_overview %}
+      {% call card("لوحات مرتبطة", "يشير كل تبويب إلى لوحة محتوى واحدة وتبقى اللوحة النشطة ظاهرة.", size="sm") %}
+        <p class="mb-0 text-body-secondary">اجعل عناوين التبويبات قصيرة حتى تبقى سهلة المسح.</p>
+      {% endcall %}
+    {% endset %}
+    {% set rtl_arabic_activation %}
+      {% call card("تفعيل بالنقر", "يتغير التبويب النشط فقط بعد اختياره بالنقر أو لوحة المفاتيح.", size="sm") %}
+        <p class="mb-0 text-body-secondary">يبقى التحويم خفيفا ولا يبدو كأنه الحالة النشطة.</p>
+      {% endcall %}
+    {% endset %}
+    {% set rtl_arabic_panels %}
+      {% call card("محتوى اللوحة", "استخدم اللوحات لواجهات متوازية تظهر واحدة في كل مرة.", size="sm") %}
+        <p class="mb-0 text-body-secondary">اترك الخطوات المطلوبة خارج التبويبات غير النشطة.</p>
+      {% endcall %}
+    {% endset %}
     {% set tabs_rtl_arabic %}
       <div dir="rtl">
-        {{ tabs(
-          "tabs-rtl-overview-arabic",
-          [
-            {
-              "id": "overview",
-              "title": "نظرة عامة",
-              "content": "تتبّع الطلبات المفتوحة وعلامات المخاطر وحالة التسليم."
-            },
-            {
-              "id": "workflows",
-              "title": "تدفقات",
-              "content": "انقل العناصر عبر مسارات المراجعة دون تغييرات إضافية في السياق."
-            },
-            {
-              "id": "settings",
-              "title": "الإعدادات",
-              "content": "اضبط اللغة والإشعارات وتكرار الملخصات من مكان واحد."
-            }
-          ]
-        ) }}
+        <div style="width: min(100%, 28rem);">
+          {{ tabs(
+            "tabs-rtl-overview-arabic",
+            [
+              {"id": "overview", "title": "نظرة عامة", "content": rtl_arabic_overview},
+              {"id": "activation", "title": "التفعيل", "content": rtl_arabic_activation},
+              {"id": "panels", "title": "اللوحات", "content": rtl_arabic_panels}
+            ]
+          ) }}
+        </div>
       </div>
     {% endset %}
 
+    {% set rtl_hebrew_overview %}
+      {% call card("פאנלים מחוברים", "כל טריגר מצביע אל פאנל תוכן אחד והפאנל הפעיל נשאר גלוי.", size="sm") %}
+        <p class="mb-0 text-body-secondary">שמור על תוויות קצרות כדי שרשימת הטאבים תיסרק במהירות.</p>
+      {% endcall %}
+    {% endset %}
+    {% set rtl_hebrew_activation %}
+      {% call card("הפעלה בלחיצה", "טאב משנה מצב רק אחרי בחירה בלחיצה או במקלדת.", size="sm") %}
+        <p class="mb-0 text-body-secondary">ריחוף נשאר עדין ולא נראה כמו הטאב הפעיל.</p>
+      {% endcall %}
+    {% endset %}
+    {% set rtl_hebrew_panels %}
+      {% call card("תוכן הפאנל", "השתמש בפאנלים עבור תצוגות מקבילות שמופיעות אחת בכל פעם.", size="sm") %}
+        <p class="mb-0 text-body-secondary">השאר שלבים הכרחיים מחוץ לטאבים לא פעילים.</p>
+      {% endcall %}
+    {% endset %}
     {% set tabs_rtl_hebrew %}
       <div dir="rtl">
-        {{ tabs(
-          "tabs-rtl-overview-hebrew",
-          [
-            {
-              "id": "overview",
-              "title": "סקירה כללית",
-              "content": "עקוב אחר הבקשות הפתוחות, דגלי הסיכון ומצב ההעברה."
-            },
-            {
-              "id": "workflows",
-              "title": "תהליכים",
-              "content": "העבר פריטים לאורך מסלולי הבדיקה ללא מעבר הקשר נוסף."
-            },
-            {
-              "id": "settings",
-              "title": "הגדרות",
-              "content": "הגדר שפה, התראות ותדירות סיכום במקום אחד."
-            }
-          ]
-        ) }}
+        <div style="width: min(100%, 28rem);">
+          {{ tabs(
+            "tabs-rtl-overview-hebrew",
+            [
+              {"id": "overview", "title": "סקירה כללית", "content": rtl_hebrew_overview},
+              {"id": "activation", "title": "הפעלה", "content": rtl_hebrew_activation},
+              {"id": "panels", "title": "פאנלים", "content": rtl_hebrew_panels}
+            ]
+          ) }}
+        </div>
       </div>
     {% endset %}
 
+    {% set rtl_english_overview %}
+      {% call card("Connected panels", "Each trigger points at one tab panel and the active panel stays visible.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Keep labels short so the tab list remains quick to scan.</p>
+      {% endcall %}
+    {% endset %}
+    {% set rtl_english_activation %}
+      {% call card("Click activation", "A tab changes state only after it is selected by click or keyboard.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Hover can hint at interactivity without looking like the active tab.</p>
+      {% endcall %}
+    {% endset %}
+    {% set rtl_english_panels %}
+      {% call card("Panel content", "Use panels for peer views that can be shown one at a time.", size="sm") %}
+        <p class="mb-0 text-body-secondary">Keep required sequential steps outside inactive tabs.</p>
+      {% endcall %}
+    {% endset %}
     {% set tabs_rtl_english %}
       <div dir="ltr">
-        {{ tabs(
-          "tabs-rtl-overview-english",
-          [
-            {
-              "id": "overview",
-              "title": "Overview",
-              "content": "Track open requests, risk flags, and handoff status."
-            },
-            {
-              "id": "workflows",
-              "title": "Workflows",
-              "content": "Move items through review lanes without extra context switches."
-            },
-            {
-              "id": "settings",
-              "title": "Settings",
-              "content": "Set locale, notifications, and digest frequency from one place."
-            }
-          ]
-        ) }}
+        <div style="width: min(100%, 28rem);">
+          {{ tabs(
+            "tabs-rtl-overview-english",
+            [
+              {"id": "overview", "title": "Overview", "content": rtl_english_overview},
+              {"id": "activation", "title": "Activation", "content": rtl_english_activation},
+              {"id": "panels", "title": "Panels", "content": rtl_english_panels}
+            ]
+          ) }}
+        </div>
       </div>
     {% endset %}
 

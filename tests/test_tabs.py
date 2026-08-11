@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -57,6 +59,28 @@ class TabsTests(CatalogTestCase):
 
         self.assertIn("disabled>", output)
 
+    def test_tabs_vertical_orientation_outputs_bootstrap_vertical_pills(self) -> None:
+        output = self.render_tabs(
+            'tabs("t", [{"id": "a", "title": "A", "content": "Content A"}, '
+            '{"id": "b", "title": "B", "content": "Content B"}], orientation="vertical")'
+        )
+
+        self.assertIn('<div class="tabs tabs--vertical">', output)
+        self.assertIn(
+            '<div class="tabs-list nav nav-pills flex-column" id="t-list"'
+            ' role="tablist" aria-orientation="vertical">',
+            output,
+        )
+        self.assertIn('id="t-a-tab" data-bs-toggle="pill"', output)
+        self.assertIn('id="t-b-tab" data-bs-toggle="pill"', output)
+
+    def test_tabs_rejects_unknown_orientation(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown tabs orientation: diagonal"):
+            self.render_tabs(
+                'tabs("t", [{"id": "a", "title": "A", "content": "Content A"}], '
+                'orientation="diagonal")'
+            )
+
     def test_disabled_tab_triggers_use_shared_disabled_opacity(self) -> None:
         scss = (ROOT / "scss/components/_tabs.scss").read_text(encoding="utf-8")
 
@@ -65,6 +89,72 @@ class TabsTests(CatalogTestCase):
         self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
         self.assertIn("pointer-events: none;", scss)
 
+    def test_tab_hover_does_not_present_inactive_tabs_as_active(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        trigger = css.split(".tabs-list .nav-link {", 1)[1].split("}", 1)[0]
+        self.assertIn("cursor: default;", trigger)
+        hover = css.rsplit(".tabs-list .nav-link:not(.active, .disabled):hover {", 1)[1].split("}", 1)[0]
+        self.assertIn("background-color: transparent;", hover)
+        self.assertIn("box-shadow: none;", hover)
+        active_while_sibling_hovered = css.rsplit(
+            ".tabs-list:has(.nav-link:hover) .nav-link.active:not(:hover) {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("background-color: var(--moo-surface);", active_while_sibling_hovered)
+        self.assertIn("box-shadow: var(--bs-box-shadow-sm);", active_while_sibling_hovered)
+
+    def test_vertical_tabs_layout_has_stacked_list_and_panel_gap(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        vertical = css.split(".tabs--vertical {", 1)[1].split("}", 1)[0]
+        self.assertIn("display: flex;", vertical)
+        self.assertIn("align-items: flex-start;", vertical)
+        self.assertIn("gap: 1rem;", vertical)
+        content = css.rsplit(".tabs--vertical .tab-content {", 1)[1].split("}", 1)[0]
+        self.assertIn("margin-top: 0;", content)
+        self.assertIn("flex: 1 1 auto;", content)
+
+    def test_catalog_intro_and_rtl_panels_render_card_content(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        html = self.read_output("components/tabs/index.html")
+        for pane_id in (
+            "tabs-intro-overview-pane",
+            "tabs-intro-activation-pane",
+            "tabs-intro-panels-pane",
+            "tabs-rtl-overview-arabic-overview-pane",
+            "tabs-rtl-overview-arabic-activation-pane",
+            "tabs-rtl-overview-arabic-panels-pane",
+            "tabs-rtl-overview-hebrew-overview-pane",
+            "tabs-rtl-overview-hebrew-activation-pane",
+            "tabs-rtl-overview-hebrew-panels-pane",
+            "tabs-rtl-overview-english-overview-pane",
+            "tabs-rtl-overview-english-activation-pane",
+            "tabs-rtl-overview-english-panels-pane",
+        ):
+            pane_start = re.search(rf'<div class="tab-pane[^"]*" id="{pane_id}"[^>]*>', html)
+            self.assertIsNotNone(pane_start, f"{pane_id} pane is missing")
+            next_pane = html.find('<div class="tab-pane', pane_start.end())
+            pane = html[pane_start.end() : next_pane if next_pane != -1 else len(html)]
+            self.assertIn('class="card card--sm', pane)
+            self.assertIn('class="card-title"', pane)
+            self.assertIn('class="card-body', pane)
+
+    def test_catalog_includes_vertical_tabs_example(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        html = self.read_output("components/tabs/index.html")
+        self.assertIn('data-example="vertical"', html)
+        self.assertIn('class="tabs tabs--vertical"', html)
+        self.assertIn('aria-orientation="vertical"', html)
+        self.assertIn('data-bs-toggle="pill"', html)
+
     def test_tabs_content_is_not_escaped(self) -> None:
         output = self.render_tabs(
             'tabs("t", [{"id": "a", "title": "A", "content": "See <code>docs</code>."}])'
@@ -72,7 +162,7 @@ class TabsTests(CatalogTestCase):
 
         self.assertIn("See <code>docs</code>.", output)
 
-    def test_tabs_css_keeps_panes_stable_and_animates_switches(self) -> None:
+    def test_tabs_css_keeps_panes_stable_and_fades_switches(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -87,12 +177,12 @@ class TabsTests(CatalogTestCase):
         self.assertIn("max-width: 100%;", tab_pane)
         self.assertIn("min-width: 0;", tab_pane)
         self.assertIn("opacity: 0;", tab_pane)
-        self.assertIn("transform: translateY(0.25rem);", tab_pane)
+        self.assertNotIn("transform:", tab_pane)
         self.assertIn("pointer-events: none;", tab_pane)
-        self.assertIn("transition: opacity 0.16s ease", tab_pane)
+        self.assertIn("transition: opacity 0.16s ease, visibility 0s linear 0.16s;", tab_pane)
         active_tab_pane = css.rsplit(".tab-content > .active {", 1)[1].split("}", 1)[0]
         self.assertIn("opacity: 1;", active_tab_pane)
-        self.assertIn("transform: none;", active_tab_pane)
+        self.assertNotIn("transform:", active_tab_pane)
         self.assertIn("pointer-events: auto;", active_tab_pane)
 
     def test_catalog_tabs_freeze_smooth_scroll_during_handoff(self) -> None:

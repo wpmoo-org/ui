@@ -2,7 +2,7 @@
 {% from "components/field.html.jinja" import field, field_description, field_group, fieldset %}
 {% from "components/switch.html.jinja" import switch %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% macro switch_field(id, label, description="", checked=false, disabled=false, invalid=false) -%}
@@ -35,18 +35,14 @@
   ) }}
 
   <div class="moo-component-examples">
-    {# Hero preview: a comprehensive composition shown above the TOC sections,
-       matching the reference's pattern of a live multi-variant preview at the top. #}
-    <div class="moo-example__surface mb-5">
-      <div class="moo-example__preview moo-example__preview--narrow">
-        {{ switch("switch-hero-notifications", label="Enable notifications") }}
-      </div>
-    </div>
-
-    <section class="moo-example" aria-labelledby="usage">
-      <h2 class="h4" id="usage">Usage</h2>
-      <p>Use a switch for one boolean setting. Provide a visible <code>label</code> for the basic inline pattern, or compose it with Field when the setting needs supporting copy, grouping, disabled state, or validation.</p>
-    </section>
+    {% set intro %}
+      {{ switch("switch-hero-notifications", label="Enable notifications") }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Render the switch as a checkbox with <code>role=\"switch\"</code> and a visible label. Pair it with Field when the setting needs supporting copy, grouping, disabled state, or validation, and keep the checked state on the native input.",
+      preview_class="moo-example__preview--narrow"
+    ) }}
 
     {% set description %}
       {% call fieldset("Focus sharing", description="Configure how focus mode follows you across devices.") %}

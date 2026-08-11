@@ -4,7 +4,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Combobox — Moo UI{% endblock %}
@@ -66,6 +66,21 @@
 ) }}
 
 <div class="moo-component-examples">
+  {% set intro %}
+    {{ combobox(
+      id="combobox-intro-reviewer",
+      aria_label="Select reviewer",
+      name="intro_reviewer",
+      placeholder="Select a reviewer",
+      items=reviewer_items
+    ) }}
+  {% endset %}
+  {{ render_component_intro(
+    intro,
+    "Render the text input with <code>role=\"combobox\"</code>, connect it to the listbox with <code>aria-controls</code>, and keep selected values synchronized with hidden form inputs. Keep the label or accessible name clear, keep option values unique, and load the optional Moo combobox module only on pages that need the enhanced list behavior.",
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
   {% set basic %}
     {{ combobox(
       id="combobox-reviewer",

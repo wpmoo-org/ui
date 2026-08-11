@@ -1,7 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/alert.html.jinja" import alert %}
 {% from "components/close_button.html.jinja" import close_button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Close Button — Moo UI{% endblock %}
@@ -13,6 +14,21 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div style="width: 20rem;">
+        {{ alert(
+          "Close Button",
+          description="Use inside alerts, dialogs, toasts, and other dismissible surfaces.",
+          dismissible=true,
+          extra_class="mb-0"
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Place the close button at the edge of the content it dismisses and give it a meaningful accessible label. Keep Bootstrap's <code>.btn-close</code> class and the matching dismissal attribute for alerts, toasts, dialogs, or offcanvas panels instead of replacing it with a custom icon button."
+    ) }}
+
     {% set default %}
       <div class="d-inline-flex">
         {{ close_button() }}

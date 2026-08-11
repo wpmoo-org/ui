@@ -2,7 +2,7 @@
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/field.html.jinja" import field, fieldset %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Radio Group — Moo UI{% endblock %}
@@ -14,6 +14,27 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call fieldset("Radio Group", description="Use for one required choice from a related set.") %}
+        {% call field() %}
+          {{ radio_group(
+            "radio-intro-options",
+            "",
+            [
+              {"id": "radio-intro-first", "label": "First option", "description": "Selected by default when it is the safest common choice.", "checked": true},
+              {"id": "radio-intro-second", "label": "Second option", "description": "Available when the user needs a different value."}
+            ],
+            bare=true
+          ) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Group the radio inputs with a fieldset and legend, give every option a distinct label, and share one name so only one value can be selected. Add option descriptions only when they explain the consequence of choosing that value.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       {% call fieldset("Incident alert channel", description="Choose how you want to be notified when an incident occurs.") %}
         {% call field() %}

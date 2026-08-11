@@ -8,7 +8,7 @@
 {% from "components/spinner.html.jinja" import spinner %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Input Group — Moo UI{% endblock %}
@@ -20,6 +20,26 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field(extra_class="w-100") %}
+        <label class="form-label" for="input-group-intro-search">Input Group</label>
+        {% call input_group() %}
+          {{ input_group_text(button_icon("search", "inline-start")) }}
+          {{ input(
+            id="input-group-intro-search",
+            type="search",
+            placeholder="Search requests...",
+            aria_label="Search requests"
+          ) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Wrap the input and each attached prefix, suffix, icon, or button inside one Bootstrap input group. Keep the editable input as the primary control, keep addon content short, and avoid nesting unrelated controls that would make the group hard to scan or tab through.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set icon_start %}
       {% call field(extra_class="w-100") %}
         <label class="form-label" for="icon-start-search">Input</label>

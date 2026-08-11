@@ -2,7 +2,7 @@
 {% from "components/accordion.html.jinja" import accordion %}
 {% from "components/card.html.jinja" import card %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Accordion — Moo UI{% endblock %}
@@ -14,6 +14,34 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ accordion(
+        "accordion-preview",
+        [
+          {
+            "id": "overview",
+            "title": "Review request details",
+            "content": "Use the open panel for the information people need first. Keep the content brief enough to scan before moving to the next section."
+          },
+          {
+            "id": "history",
+            "title": "Audit history",
+            "content": "Collapse supporting history until someone needs to inspect the decision trail."
+          },
+          {
+            "id": "handoff",
+            "title": "Reviewer handoff",
+            "content": "Keep the next owner and follow-up notes close to the same request."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Start with one accordion root and give every trigger a stable target panel. Keep the button text as the section title, put the revealed content in the paired collapse body, leave every item closed by default unless the page needs an initial answer, and use the always-open pattern only when multiple panels may stay expanded together.",
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set basic %}
       {{ accordion(
         "accordion-basic",

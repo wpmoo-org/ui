@@ -8,7 +8,7 @@
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Form — Moo UI{% endblock %}
@@ -20,6 +20,35 @@
 ) }}
 
 <div class="moo-component-examples">
+  {% set intro %}
+  {% call form(extra_class="needs-validation", novalidate=true) %}
+    {% call fieldset("Account profile", description="Update the details teammates see in shared project tools.") %}
+      {% call field_group() %}
+        {% call field() %}
+          {{ input(label="Display name", id="form-intro-name", placeholder="Ada Lovelace", required=true) }}
+        {% endcall %}
+        {% call field() %}
+          {{ select(label="Default queue", id="form-intro-queue", options=[
+            {"value": "", "label": "Choose queue", "disabled": true},
+            {"value": "ops", "label": "Operations"},
+            {"value": "support", "label": "Support"},
+            {"value": "finance", "label": "Finance"}
+          ], selected="ops") }}
+        {% endcall %}
+      {% endcall %}
+    {% endcall %}
+    <div class="d-flex flex-wrap gap-2">
+      {{ button("Save changes", type="submit") }}
+      {{ button("Reset", variant="outline", type="reset") }}
+    </div>
+  {% endcall %}
+  {% endset %}
+  {{ render_component_intro(
+    intro,
+    "Start with a native <code>&lt;form&gt;</code>, group related controls in fieldsets, and compose every row from documented field markup. Keep labels and descriptions visible, connect validation feedback to the affected control, and let Bootstrap's validation classes reflect the submitted state.",
+    preview_class="moo-example__preview--narrow"
+  ) }}
+
   {% set account_settings %}
   {% call form(extra_class="needs-validation", novalidate=true) %}
     {% call fieldset("Account profile", description="Update the details teammates see in shared project tools.") %}

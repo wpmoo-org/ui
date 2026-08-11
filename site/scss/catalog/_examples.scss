@@ -52,7 +52,7 @@
   background: var(--bs-secondary-bg);
 }
 
-.moo-doc-page-actions .btn.btn-sm[data-moo-copy-page]:has(> [data-icon="inline-start"]) {
+.moo-doc-page-actions .btn:is(.btn-xs, .btn-sm)[data-moo-copy-page]:has(> [data-icon="inline-start"]) {
   padding-inline-start: var(--bs-btn-padding-x);
 }
 

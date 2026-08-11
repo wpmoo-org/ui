@@ -85,10 +85,6 @@ class CheckboxTests(CatalogTestCase):
     def test_page_uses_render_rtl_example(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn(
-            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
-            source,
-        )
         self.assertIn('render_rtl_example(', source)
         self.assertIn('"checkbox"', source)
         self.assertIn("rtl_arabic", source)

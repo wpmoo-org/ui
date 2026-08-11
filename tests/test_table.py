@@ -160,6 +160,6 @@ class TableTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertNotIn('preview_class="moo-example__preview--narrow"', source)
-        self.assertEqual(source.count('preview_class="moo-example__preview--medium"'), 5)
+        self.assertEqual(source.count('preview_class="moo-example__preview--medium"'), 6)
         self.assertEqual(source.count('class="w-100" dir="rtl"'), 2)
         self.assertIn('dir="ltr"', source)

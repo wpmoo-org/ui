@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/progress.html.jinja" import progress %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Progress — Moo UI{% endblock %}
@@ -13,6 +13,17 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="w-100">
+        {{ progress(64, aria_label="Upload progress", show_label=true) }}
+      </div>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Set the current value and maximum on the progress bar, provide an accessible label, and show nearby text when users need the percentage or task name outside the bar. Use an indeterminate spinner instead when completion cannot be measured.",
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       <div class="w-100">
         {{ progress(66, aria_label="Upload progress") }}

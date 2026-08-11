@@ -15,14 +15,6 @@
   ) }}
 
   <div class="moo-component-examples">
-    <h2 id="usage" class="h4 mb-3">Usage</h2>
-    <p class="mb-4">
-      Data Table composes Bootstrap table markup with Moo's ready Checkbox,
-      Dropdown Menu, Button, Badge, Tooltip, and Pagination contracts. Every row
-      is rendered by the server first; the optional Moo runtime only reorders,
-      filters, paginates, or hides existing markup in the browser.
-    </p>
-
     {% set release_review_table %}
       {{ render_release_review_table(id="datatable-release-reviews", responsive_mode="toggle") }}
     {% endset %}
@@ -39,8 +31,17 @@
         {"label": "Mobile", "icon": "smartphone", "width": 390, "height": 900},
         {"label": "Tablet", "icon": "tablet", "width": 768, "height": 900},
         {"label": "Desktop", "icon": "monitor", "width": 1280, "height": 900, "active": true}
-      ]
+      ],
+      show_header=false
     ) }}
+
+    <h2 id="usage" class="h4 mt-5 mb-3">Usage</h2>
+    <p class="mb-4">
+      Data Table composes Bootstrap table markup with Moo's ready Checkbox,
+      Dropdown Menu, Button, Badge, Tooltip, and Pagination contracts. Every row
+      is rendered by the server first; the optional Moo runtime only reorders,
+      filters, paginates, or hides existing markup in the browser.
+    </p>
 
     <h2 id="responsive-modes" class="h4 mt-5 mb-3">Responsive modes</h2>
     <p class="mb-4">

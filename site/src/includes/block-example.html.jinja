@@ -1,6 +1,6 @@
 {% from "components/typography.html.jinja" import typography %}
 
-{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720, frame_variants=[], frame_viewports=[]) %}
+{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720, frame_variants=[], frame_viewports=[], show_header=true) %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
   {% set title_slug = title | slugify %}
@@ -23,11 +23,13 @@
       {% endif %}
     {% endfor %}
   {% endif %}
-  <section class="moo-example" data-example="{{ id }}" aria-labelledby="{{ title_slug }}">
-    <div class="moo-example__header">
-      {{ typography(title, variant="example-title", id=title_slug) }}
-      <p class="text-body-secondary mb-0">{{ description | safe }}</p>
-    </div>
+  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
+    {% if show_header %}
+      <div class="moo-example__header">
+        {{ typography(title, variant="example-title", id=title_slug) }}
+        <p class="text-body-secondary mb-0">{{ description | safe }}</p>
+      </div>
+    {% endif %}
     <div class="moo-example__surface">
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {% if frame_state.src %}
@@ -122,9 +124,10 @@
           </button>
         </div>
         <button class="btn btn-outline-secondary btn-icon-sm moo-code__copy" type="button" data-moo-code-copy hidden aria-label="Copy code" title="Copy code">
-          {{ render_icon("copy", "inline-start") }}
+          <span data-moo-copy-icon="copy">{{ render_icon("copy", "inline-start") }}</span>
+          <span data-moo-copy-icon="check" hidden>{{ render_icon("check", "inline-start") }}</span>
         </button>
-        <span class="position-absolute top-0 end-0 mt-3 me-5 small text-body-secondary" data-moo-copy-status role="status"></span>
+        <span class="visually-hidden" data-moo-copy-status role="status"></span>
       </div>
     </div>
   </section>

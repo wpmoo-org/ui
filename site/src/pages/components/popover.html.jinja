@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/popover.html.jinja" import popover_dismiss_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Popover — Moo UI{% endblock %}
@@ -14,6 +14,20 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ button(
+        "Review update",
+        variant="outline",
+        popover_title="Routing review",
+        popover_content="Approve this request, reassign it, or return it for clarification."
+      ) }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Attach the popover attributes to a clear, focusable trigger and provide concise title or body content. Choose placement from the surrounding layout, keep HTML content inside Bootstrap's sanitizer limits, and keep primary form steps or critical confirmations outside the popover.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {{ button(
         "Review update",

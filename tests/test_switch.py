@@ -142,31 +142,34 @@ class SwitchTests(CatalogTestCase):
 
     def test_hero_preview_uses_single_enable_notifications_field(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
-        hero_block = source[
-            source.index("<div class=\"moo-example__surface mb-5\">"):
-            source.index('<section class="moo-example" aria-labelledby="usage">')
-        ]
-
-        self.assertIn('switch("switch-hero-notifications"', hero_block)
-        self.assertIn('label="Enable notifications"', hero_block)
-        self.assertNotIn("switch-hero-sync", hero_block)
-        self.assertNotIn("switch-hero-disabled", hero_block)
-        self.assertNotIn("switch_field(", hero_block)
-
-    def test_usage_section_is_guidance_text_not_a_live_example(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
-        usage_block = source[
-            source.index('<section class="moo-example" aria-labelledby="usage">'):
+        intro_block = source[
+            source.index("{% set intro %}"):
             source.index("{% set description %}")
         ]
 
-        self.assertIn('<section class="moo-example" aria-labelledby="usage">', usage_block)
-        self.assertIn('<h2 class="h4" id="usage">Usage</h2>', usage_block)
-        self.assertIn("<p>", usage_block)
-        self.assertIn("<code>label</code>", usage_block)
-        self.assertNotIn("render_example(", usage_block)
-        self.assertNotIn("moo-example__surface", usage_block)
-        self.assertNotIn("switch_field(", usage_block)
+        self.assertIn("render_component_intro(", intro_block)
+        self.assertIn('switch("switch-hero-notifications"', intro_block)
+        self.assertIn('label="Enable notifications"', intro_block)
+        self.assertIn('preview_class="moo-example__preview--narrow"', intro_block)
+        self.assertNotIn("switch-hero-sync", intro_block)
+        self.assertNotIn("switch-hero-disabled", intro_block)
+        self.assertNotIn("switch_field(", intro_block)
+
+    def test_usage_section_is_guidance_text_not_a_live_example(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        intro_block = source[
+            source.index("render_component_intro("):
+            source.index("{% set description %}")
+        ]
+
+        self.assertIn("render_component_intro(", intro_block)
+        self.assertNotIn("render_example(", intro_block)
+        self.assertNotIn('<div class="moo-example__surface mb-5">', source)
+        self.assertNotIn(
+            '<section class="moo-example" aria-labelledby="usage">',
+            source,
+        )
+        self.assertNotIn("switch_field(", intro_block)
 
     def test_switch_examples_use_field_contract_without_utility_layout(self) -> None:
         source = PAGE.read_text(encoding="utf-8")

@@ -4,7 +4,7 @@
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 
 {% block title %}Button — Moo UI{% endblock %}
 
@@ -15,44 +15,25 @@
   ) }}
 
   <div class="moo-component-examples">
-    {% set default_example %}
+    {% set intro %}
       <div class="d-flex flex-wrap align-items-center gap-2">
         {{ button("Button", variant="outline") }}
         {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up") }}
       </div>
     {% endset %}
-    {{ render_example(
-      "default",
-      "Default",
-      "The reference's default button is a quiet outlined style, paired with an icon-only companion.",
-      default_example
+    {{ render_component_intro(
+      intro,
+      "Render actions as native <code>button</code>, <code>a</code>, or <code>input</code> controls according to what they do. Keep a visible label when space allows, add <code>aria-label</code> to icon-only buttons, choose one variant for emphasis, and set disabled or busy state while the action cannot run."
     ) }}
 
-    {% set size_example %}
-      <div class="d-flex flex-column gap-3 flex-sm-row">
-        <div class="d-flex align-items-start gap-2">
-          {{ button("Extra Small", variant="outline", size="xs") }}
-          {{ button("", variant="outline", size="icon-xs", aria_label="Submit", icon_start="arrow-up-right") }}
-        </div>
-        <div class="d-flex align-items-start gap-2">
-          {{ button("Small", variant="outline", size="sm") }}
-          {{ button("", variant="outline", size="icon-sm", aria_label="Submit", icon_start="arrow-up-right") }}
-        </div>
-        <div class="d-flex align-items-start gap-2">
-          {{ button("Default", variant="outline") }}
-          {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up-right") }}
-        </div>
-        <div class="d-flex align-items-start gap-2">
-          {{ button("Large", variant="outline", size="lg") }}
-          {{ button("", variant="outline", size="icon-lg", aria_label="Submit", icon_start="arrow-up-right") }}
-        </div>
-      </div>
+    {% set primary_example %}
+      {{ button("Primary") }}
     {% endset %}
     {{ render_example(
-      "size",
-      "Size",
-      "Use the <code>size</code> prop to change the size of the button.",
-      size_example
+      "primary",
+      "Primary",
+      "Use the primary button for the main action in a small decision area.",
+      primary_example
     ) }}
 
     {% set outline_example %}
@@ -103,6 +84,33 @@
       "Link",
       "A button styled as a hyperlink.",
       link_example
+    ) }}
+
+    {% set size_example %}
+      <div class="d-flex flex-column gap-3 flex-sm-row">
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Extra Small", variant="outline", size="xs") }}
+          {{ button("", variant="outline", size="icon-xs", aria_label="Submit", icon_start="arrow-up-right") }}
+        </div>
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Small", variant="outline", size="sm") }}
+          {{ button("", variant="outline", size="icon-sm", aria_label="Submit", icon_start="arrow-up-right") }}
+        </div>
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Default", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up-right") }}
+        </div>
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Large", variant="outline", size="lg") }}
+          {{ button("", variant="outline", size="icon-lg", aria_label="Submit", icon_start="arrow-up-right") }}
+        </div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "size",
+      "Size",
+      "Use the <code>size</code> prop after choosing the button variant.",
+      size_example
     ) }}
 
     {% set icon_example %}

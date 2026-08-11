@@ -4,7 +4,7 @@
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Menubar — Moo UI{% endblock %}
@@ -17,6 +17,24 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call menubar("Document actions") %}
+        {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("New document", shortcut="⌘N") }}
+          {{ dropdown_item("Open recent") }}
+        {% endcall %}
+        {% call dropdown("Edit", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("Undo", shortcut="⌘Z") }}
+          {{ dropdown_item("Redo", shortcut="⇧⌘Z") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Place several related Bootstrap dropdown triggers inside one labelled group. Keep top-level labels short, let each trigger open its own dropdown menu, and avoid adding desktop menubar ARIA behavior unless the keyboard model is implemented to match it.",
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {% call menubar("Document actions") %}
         {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}

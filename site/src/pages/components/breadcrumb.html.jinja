@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/breadcrumb.html.jinja" import breadcrumb %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Breadcrumb — Moo UI{% endblock %}
@@ -13,6 +13,18 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ breadcrumb([
+        {"label": "Home", "href": "#"},
+        {"label": "Components", "href": "#"},
+        {"label": "Breadcrumb"}
+      ]) }}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Wrap the breadcrumb list in a labelled <code>nav</code>, render each parent as a link, and render the current page as the final item with <code>aria-current=\"page\"</code>. Keep labels short and avoid adding unrelated actions inside the breadcrumb trail."
+    ) }}
+
     {% set trail %}
       {{ breadcrumb([
         {"label": "Workspace", "href": "#"},

@@ -7,7 +7,7 @@
 {% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 
 {% block title %}Card — Moo UI{% endblock %}
 
@@ -18,6 +18,24 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call card(
+        "Login to your account",
+        "Enter your email below to login to your account.",
+        footer=button("Login", extra_class="w-100")
+      ) %}
+        <div class="d-grid gap-2">
+          {{ input(label="Email", id="card-intro-email", type="email", placeholder="you@example.com") }}
+          {{ input(label="Password", id="card-intro-password", type="password") }}
+        </div>
+      {% endcall %}
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      "Build the card from a header, body, and optional footer in that order. Put the object title in the header, keep primary content in the body, and reserve the footer for actions or summary metadata that belongs to the same object.",
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set size_sm %}
       {% call card(
         "Scheduled reports",
