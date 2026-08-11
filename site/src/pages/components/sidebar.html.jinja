@@ -148,12 +148,13 @@
   {{ render_reference(
     "The mobile drawer and collapse behavior build on Bootstrap's own Offcanvas and Collapse plugins; see the",
     "https://getbootstrap.com/docs/5.3/components/offcanvas/",
-    "Bootstrap Offcanvas documentation"
-  ) }}
-  {{ render_reference(
-    "For the nested collapse behavior, see the",
-    "https://getbootstrap.com/docs/5.3/components/collapse/",
-    "Bootstrap Collapse documentation",
-    show_details=false
+    "Bootstrap Offcanvas documentation",
+    extra_references=[
+      {
+        "lead": "For the nested collapse behavior, see the",
+        "href": "https://getbootstrap.com/docs/5.3/components/collapse/",
+        "label": "Bootstrap Collapse documentation"
+      }
+    ]
   ) }}
 {% endblock %}

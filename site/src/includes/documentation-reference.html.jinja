@@ -1,4 +1,4 @@
-{% macro render_reference(lead, href, label, show_details=true, limitation="") %}
+{% macro render_reference(lead, href, label, show_details=true, limitation="", extra_references=[]) %}
   {% set details = none %}
   {% if show_details and component_ownership is defined and current_slug is defined and current_slug in component_ownership %}
     {% set details = component_ownership[current_slug] %}
@@ -13,15 +13,24 @@
         <dd class="col-sm-9 mb-0">{{ details.runtimeOwner }}</dd>
         <dt class="col-sm-3 text-body">Markup</dt>
         <dd class="col-sm-9 mb-0">{{ details.markupOwner }}</dd>
+        <dt class="col-sm-3 text-body">Reference</dt>
+        <dd class="col-sm-9 mb-0">
+          <p class="{% if extra_references %}mb-1{% else %}mb-0{% endif %}">
+            {{ lead }}
+            <a href="{{ href }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>.
+          </p>
+          {% for reference in extra_references %}
+          <p class="{% if not loop.last %}mb-1{% else %}mb-0{% endif %}">
+            {{ reference.lead }}
+            <a href="{{ reference.href }}" target="_blank" rel="noopener noreferrer">{{ reference.label }}</a>.
+          </p>
+          {% endfor %}
+        </dd>
         {% if limitation %}
         <dt class="col-sm-3 text-body">Known limitation</dt>
         <dd class="col-sm-9 mb-0">{{ limitation | safe }}</dd>
         {% endif %}
       </dl>
-      <p class="text-body-secondary mb-0">
-        {{ lead }}
-        <a href="{{ href }}" target="_blank" rel="noopener noreferrer">{{ label }}</a>.
-      </p>
     </section>
   {% else %}
     <aside class="mt-5" aria-label="Bootstrap reference">

@@ -1444,7 +1444,9 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(details["maturity"].capitalize(), reference_body)
                 self.assertIn(details["runtimeOwner"], reference_body)
                 self.assertIn(details["markupOwner"], reference_body)
+                self.assertIn('<dt class="col-sm-3 text-body">Reference</dt>', reference_body)
                 self.assertIn('target="_blank" rel="noopener noreferrer"', reference_body)
+                self.assertNotIn('<p class="text-body-secondary mb-0">', reference_body)
                 self.assertNotIn("border rounded", reference_body)
                 self.assertNotIn("p-3", reference_body)
 
@@ -1470,6 +1472,41 @@ class CatalogContractTests(CatalogTestCase):
                         ownership[slug]["markupOwner"],
                     ),
                     expected,
+                )
+
+    def test_components_with_secondary_bootstrap_sources_keep_them_in_reference_row(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        expected_labels = {
+            "datatable": (
+                "Bootstrap Tables documentation",
+                "Bootstrap Dropdown documentation",
+            ),
+            "sidebar": (
+                "Bootstrap Offcanvas documentation",
+                "Bootstrap Collapse documentation",
+            ),
+        }
+
+        for slug, labels in expected_labels.items():
+            with self.subTest(slug=slug):
+                page = self.read_output(f"components/{slug}/index.html")
+                reference = re.search(
+                    r'<section\b[^>]*data-moo-component-reference[^>]*>'
+                    r"(?P<body>.*?)</section>",
+                    page,
+                    re.DOTALL,
+                )
+                self.assertIsNotNone(reference)
+                reference_body = reference.group("body")
+                for label in labels:
+                    self.assertIn(label, reference_body)
+                self.assertNotIn(
+                    '<aside class="mt-5" aria-label="Bootstrap reference">',
+                    page,
                 )
 
     def test_ownership_evidence_index_rejects_malformed_records(self) -> None:

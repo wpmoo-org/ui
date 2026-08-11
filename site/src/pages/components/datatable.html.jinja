@@ -225,12 +225,13 @@
   {{ render_reference(
     "Data Table composes Bootstrap's table, dropdown, form, and pagination markup; for the base table structure see the",
     "https://getbootstrap.com/docs/5.3/content/tables/",
-    "Bootstrap Tables documentation"
-  ) }}
-  {{ render_reference(
-    "For faceted filters, row actions, and bulk-action menus, see the",
-    "https://getbootstrap.com/docs/5.3/components/dropdowns/",
-    "Bootstrap Dropdown documentation",
-    show_details=false
+    "Bootstrap Tables documentation",
+    extra_references=[
+      {
+        "lead": "For faceted filters, row actions, and bulk-action menus, see the",
+        "href": "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "label": "Bootstrap Dropdown documentation"
+      }
+    ]
   ) }}
 {% endblock %}
