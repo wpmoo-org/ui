@@ -130,14 +130,15 @@ class SwitchTests(CatalogTestCase):
             "field_description, field_group, fieldset %}",
             source,
         )
-        self.assertIn('{% call fieldset("Focus sharing"', description_block)
-        self.assertIn("Configure how focus mode follows you across devices.", description_block)
+        self.assertIn("{% call fieldset(", description_block)
+        self.assertIn("description=", description_block)
         self.assertIn("{% call field_group()", description_block)
         self.assertIn("switch_field(", description_block)
         self.assertIn('"switch-description"', description_block)
         self.assertNotIn("visually-hidden", description_block)
         self.assertIn('label class="form-label"', source)
         self.assertIn("field_description(", source)
+        self.assertIn("describedby=description_id", source)
 
     def test_hero_preview_uses_single_enable_notifications_field(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
@@ -161,7 +162,8 @@ class SwitchTests(CatalogTestCase):
 
         self.assertIn('<section class="moo-example" aria-labelledby="usage">', usage_block)
         self.assertIn('<h2 class="h4" id="usage">Usage</h2>', usage_block)
-        self.assertIn("Use a switch for one boolean setting.", usage_block)
+        self.assertIn("<p>", usage_block)
+        self.assertIn("<code>label</code>", usage_block)
         self.assertNotIn("render_example(", usage_block)
         self.assertNotIn("moo-example__surface", usage_block)
         self.assertNotIn("switch_field(", usage_block)
@@ -204,11 +206,8 @@ class SwitchTests(CatalogTestCase):
             source.index("{% endset %}", source.index("{% set invalid %}"))
         ]
 
-        self.assertIn("Accept terms and conditions", invalid_block)
-        self.assertIn(
-            "You must accept the terms and conditions to continue.",
-            invalid_block,
-        )
+        self.assertIn('"switch-invalid"', invalid_block)
+        self.assertIn("description=", invalid_block)
         self.assertIn("invalid=true", invalid_block)
         self.assertIn("switch_field(", invalid_block)
 

@@ -95,21 +95,25 @@ class RadioGroupTests(CatalogTestCase):
         )
         self.assertEqual(output.count('class="form-check form-check-reverse"'), 2)
 
-    def test_radio_group_rtl_example_uses_balanced_description_copy(self) -> None:
+    def test_radio_group_rtl_example_uses_described_options_in_each_direction(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
+        rtl_block = source[
+            source.index("{% set radio_rtl_arabic %}"):
+            source.index(
+                "{{ render_rtl_example(",
+                source.index("{% set radio_rtl_arabic %}"),
+            )
+        ]
 
-        self.assertIn("يوضح كل خيار متى يصل التنبيه إلى الفريق.", source)
-        self.assertIn("يرسل ملخص الحالة إلى صندوق الوارد.", source)
-        self.assertIn("مناسب للتنبيهات التي تحتاج ردًا سريعًا.", source)
-        self.assertIn("כל אפשרות מסבירה מתי ההתראה מגיעה לצוות.", source)
-        self.assertIn("שולח סיכום מצב לתיבת הדואר.", source)
-        self.assertIn("מתאים להתראות שדורשות תגובה מהירה.", source)
-        self.assertIn(
-            "Each option explains when the alert reaches the team.",
-            source,
-        )
-        self.assertIn("Sends the status summary to the inbox.", source)
-        self.assertIn("Useful for alerts that need a quick response.", source)
+        self.assertIn('<div dir="rtl">', rtl_block)
+        self.assertIn('<div dir="ltr">', rtl_block)
+        self.assertEqual(rtl_block.count("radio_group("), 3)
+        self.assertEqual(rtl_block.count("bare=true"), 3)
+        self.assertEqual(rtl_block.count("reverse=true"), 2)
+        self.assertEqual(rtl_block.count('"description":'), 6)
+        self.assertIn("radio-rtl-channel-arabic", rtl_block)
+        self.assertIn("radio-rtl-channel-hebrew", rtl_block)
+        self.assertIn("radio-rtl-channel-english", rtl_block)
 
     def test_radio_group_requires_name(self) -> None:
         with self.assertRaisesRegex(ValueError, "Radio Group name is required"):

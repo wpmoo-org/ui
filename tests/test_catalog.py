@@ -104,6 +104,26 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("certified components", output)
                 self.assertNotIn("certified Data Table", output)
 
+    def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+        source = (ROOT / "site/src/pages/changelog.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        normalized_source = " ".join(source.split())
+
+        forbidden_claims = (
+            "certified Tier 3 components",
+            "certified components",
+            "certified Data Table",
+        )
+        for claim in forbidden_claims:
+            with self.subTest(claim=claim):
+                self.assertNotIn(claim, normalized_source)
+
     def test_llms_txt_lists_ready_components_alphabetically(self) -> None:
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
