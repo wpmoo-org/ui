@@ -29,9 +29,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set radio_group_usage %}
+      <p>Use <code>.form-check</code> radio inputs when one and only one option can be selected from a related set. Group the native radio inputs with a fieldset and legend, give every option a distinct visible label, and share the same <code>name</code> so the browser enforces a single selected value.</p>
+      <p>Use <code>.form-check</code>, <code>.form-check-input</code>, and <code>.form-check-label</code> for each option so label clicks and Bootstrap state styling work predictably. Add option descriptions only when they explain the consequence of choosing that value, and keep the selected default to the safest or most common choice.</p>
+      <p>Use disabled state for unavailable options without removing them when their presence helps explain the rule. Mark invalid state on the group when the user must choose before submitting, then make the validation message describe the required decision.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Group the radio inputs with a fieldset and legend, give every option a distinct label, and share one name so only one value can be selected. Add option descriptions only when they explain the consequence of choosing that value.",
+      radio_group_usage,
       "moo-example__preview--narrow"
     ) }}
 

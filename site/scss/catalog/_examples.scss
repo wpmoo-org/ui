@@ -126,6 +126,19 @@
   line-height: var(--moo-doc-table-line-height);
 }
 
+.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) {
+  min-width: 64rem;
+}
+
+.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) :is(th, td):first-child {
+  width: 22rem;
+  min-width: 22rem;
+}
+
+.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) :is(th, td):last-child {
+  min-width: 34rem;
+}
+
 .moo-example__surface {
   min-width: 0;
   overflow: hidden;

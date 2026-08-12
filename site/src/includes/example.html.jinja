@@ -45,7 +45,11 @@
 
   <section class="moo-example" aria-labelledby="usage">
     <h2 class="h4" id="usage">Usage</h2>
-    <p>{{ usage | safe }}</p>
+    {% if "<p" in usage %}
+      <div class="moo-component-usage">{{ usage | safe }}</div>
+    {% else %}
+      <p>{{ usage | safe }}</p>
+    {% endif %}
   </section>
 {% endmacro %}
 

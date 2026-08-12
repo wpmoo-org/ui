@@ -36,9 +36,14 @@
         ]
       ) }}
     {% endset %}
+    {% set accordion_usage %}
+      <p>Use <code>.accordion</code> for a vertical set of disclosure sections where each header toggles its own panel. The structure follows Bootstrap's Collapse behavior: an <code>.accordion-button</code> controls an <code>.accordion-collapse</code> region with <code>data-bs-toggle="collapse"</code>, <code>data-bs-target</code>, <code>aria-expanded</code>, and <code>aria-controls</code>, while the revealed content sits inside <code>.accordion-body</code>.</p>
+      <p>Keep the default one-open-at-a-time behavior by grouping items with <code>data-bs-parent</code>; omit <code>data-bs-parent</code> when multiple panels should stay open together. To render a panel open on first paint, add <code>.show</code> to the <code>.accordion-collapse</code>, remove <code>.collapsed</code> from the matching <code>.accordion-button</code>, and set <code>aria-expanded="true"</code>.</p>
+      <p>Use <code>.accordion-flush</code> when the accordion should sit edge-to-edge inside its parent without the standard outer borders and radius. Because Accordion is powered by Bootstrap's Collapse plugin, keep button and panel ids stable, keep heading order meaningful, and let Bootstrap honor reduced-motion preferences for the expand/collapse animation.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Start with one accordion root and give every trigger a stable target panel. Keep the button text as the section title, put the revealed content in the paired collapse body, leave every item closed by default unless the page needs an initial answer, and use the always-open pattern only when multiple panels may stay expanded together.",
+      accordion_usage,
       preview_class="moo-example__preview--medium"
     ) }}
 

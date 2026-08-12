@@ -75,9 +75,14 @@
       items=reviewer_items
     ) }}
   {% endset %}
+  {% set combobox_usage %}
+    <p>Use <code>.combobox</code> when the user needs to search or filter a known list before choosing a value. Keep the text input focusable, give it <code>role="combobox"</code>, connect it to the popup with <code>aria-controls</code>, and expose the suggestion list as a listbox so keyboard and screen reader users can follow the active option.</p>
+    <p>Use a visible label or clear accessible name, keep option values unique, and submit the selected value through normal form fields. For long lists, group options only when the grouping helps scanning; for multiple selection, keep selected chips short and make removal controls reachable from the keyboard.</p>
+    <p>Combobox uses Bootstrap form-control and dropdown-menu surfaces, while the optional Moo UI runtime owns filtering, active-option movement, and selected-value synchronization. Load that runtime only on pages that need enhanced list behavior, and provide a native select or server-side fallback when JavaScript is unavailable.</p>
+  {% endset %}
   {{ render_component_intro(
     intro,
-    "Render the text input with <code>role=\"combobox\"</code>, connect it to the listbox with <code>aria-controls</code>, and keep selected values synchronized with hidden form inputs. Keep the label or accessible name clear, keep option values unique, and load the optional Moo combobox module only on pages that need the enhanced list behavior.",
+    combobox_usage,
     preview_class="moo-example__preview--narrow"
   ) }}
 

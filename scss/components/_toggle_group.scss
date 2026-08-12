@@ -1,0 +1,6 @@
+// Toggle Group uses Bootstrap's native .btn-check + label.btn contract, but
+// selected state should change in place instead of using the generic button
+// press nudge.
+.toggle-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
+  transform: none;
+}

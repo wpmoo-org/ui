@@ -81,6 +81,15 @@
   mask-image: none;
 }
 
+// Row menus are trapped inside the sticky actions cell's stacking context.
+// Lift the owning frame while a menu is open so footer pagination never
+// paints over the dropdown.
+.datatable-frame:has(.table-row-actions .dropdown-menu.show),
+.datatable-card-frame:has(.datatable-card .dropdown-menu.show) {
+  position: relative;
+  z-index: $zindex-dropdown;
+}
+
 // Pinned cells share one z-index, so a later row's cell would paint over
 // an earlier row's open menu; lift the cell that owns the open menu.
 .datatable-frame [data-datatable-column="actions"]:has(.dropdown-menu.show) {

@@ -38,9 +38,14 @@
     {% set intro %}
       {{ switch("switch-hero-notifications", label="Enable notifications") }}
     {% endset %}
+    {% set switch_usage %}
+      <p>Use <code>.form-switch</code> for a single setting that can be on or off and takes effect like a mode, preference, or feature flag. Render it as a native checkbox with <code>role="switch"</code>, keep the visible label tied to the input, and store the checked state on the native control.</p>
+      <p>Use <code>.field</code> when the switch needs supporting copy, grouping, disabled state, or validation. The label should name the setting, while the description explains the consequence of turning it on or off; avoid writing a switch label as a question that becomes confusing in both states.</p>
+      <p>Switches inherit the Bootstrap checks/radios contract through <code>.form-check</code> and <code>.form-switch</code>. Use disabled and invalid states on the input itself, and group related switches in a fieldset when they answer one larger settings question.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render the switch as a checkbox with <code>role=\"switch\"</code> and a visible label. Pair it with Field when the setting needs supporting copy, grouping, disabled state, or validation, and keep the checked state on the native input.",
+      switch_usage,
       preview_class="moo-example__preview--narrow"
     ) }}
 

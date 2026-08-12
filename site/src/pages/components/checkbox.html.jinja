@@ -21,9 +21,14 @@
         description="Use for one optional setting that can be selected or cleared."
       ) }}
     {% endset %}
+    {% set checkbox_usage %}
+      <p>Use <code>.form-check</code> when a single checkbox option can be independently on or off, or when several options in a set may be selected together. Keep the native <code>input</code> and <code>label</code> as siblings, give the input <code>.form-check-input</code>, give the label <code>.form-check-label</code>, and connect them with matching <code>id</code> and <code>for</code>.</p>
+      <p>Let the label carry the hit target and write it as the choice the user is making. Add a short description below the label only when the consequence is not obvious, and group related checkboxes with a fieldset and legend when they answer one larger question.</p>
+      <p>Use the native <code>checked</code> and <code>disabled</code> attributes for state, and set indeterminate state from JavaScript because HTML has no <code>indeterminate</code> attribute. Mark invalid state on the input when validation fails so Bootstrap's sibling-state styling can reach the label and feedback.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Pair the checkbox input with a visible label and let the label text extend the hit target. Add a short description below the label when the choice has consequences, mark invalid state on the input when validation fails, and group related checkboxes in a fieldset.",
+      checkbox_usage,
       "moo-example__preview--narrow"
     ) }}
 

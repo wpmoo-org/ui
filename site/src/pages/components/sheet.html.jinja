@@ -25,9 +25,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set sheet_usage %}
+      <p>Use <code>.offcanvas</code> for secondary controls or details that should slide in from a viewport edge without navigating away from the current page. Connect a clear trigger to the offcanvas id, choose the placement edge, and label the panel from its visible header.</p>
+      <p>Keep the sheet body focused on one supporting task, such as filters, settings, or contextual details. Configure backdrop and body scrolling intentionally: a backdrop keeps attention inside the sheet, while body scrolling can preserve page context for lighter side panels.</p>
+      <p>Sheet uses Bootstrap Offcanvas behavior, so Bootstrap owns focus management, Escape dismissal, backdrop clicks, and reduced-motion-aware transitions. Keep essential page actions outside the sheet unless the sheet is already open, and avoid placing another overlay workflow inside it.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Connect the trigger to the offcanvas id, choose the placement edge, and label the panel from its header. Keep secondary controls in the sheet body, configure backdrop and body scrolling intentionally, and let Bootstrap Offcanvas own focus management and dismissal behavior.",
+      sheet_usage,
       "moo-example__preview--narrow"
     ) }}
 

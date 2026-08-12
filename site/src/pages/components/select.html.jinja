@@ -80,9 +80,14 @@
         {{ field_description("select-intro-help", "Use a native option menu when one value should be submitted.") }}
       {% endcall %}
     {% endset %}
+    {% set select_usage %}
+      <p>Use <code>.form-select</code> when the user must choose one value from a finite list and native browser behavior is enough. Pair the control with a visible label, keep option values stable for form submission, and use a disabled placeholder option when no value has been chosen yet.</p>
+      <p>Use option groups only when they make a long list easier to scan. Keep labels short, avoid using select for huge searchable datasets, and prefer Combobox when filtering, async loading, or multi-selection is central to the workflow.</p>
+      <p>Set native state directly on the control: <code>disabled</code> when it is unavailable, <code>multiple</code> only when several values can be submitted, and invalid state when validation fails. Size variants such as <code>.form-select-sm</code> and <code>.form-select-lg</code> should match the density of the surrounding form.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render a native select with a visible label, provide a disabled placeholder when no value has been chosen, and keep option values stable for form submission. Use option groups only when they make a long list easier to scan.",
+      select_usage,
       "moo-example__preview--narrow"
     ) }}
 

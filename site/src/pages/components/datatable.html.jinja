@@ -37,10 +37,24 @@
 
     <h2 id="usage" class="h4 mt-5 mb-3">Usage</h2>
     <p class="mb-4">
-      Data Table composes Bootstrap table markup with Moo's ready Checkbox,
-      Dropdown Menu, Button, Badge, Tooltip, and Pagination contracts. Every row
-      is rendered by the server first; the optional Moo runtime only reorders,
-      filters, paginates, or hides existing markup in the browser.
+      Use <code>.datatable</code> when users need to scan, compare, filter, sort, select,
+      and page through server-rendered records without losing ordinary table
+      semantics. Keep the base structure as Bootstrap table markup with
+      meaningful column headers, row ids, and visible labels for every toolbar
+      control.
+    </p>
+    <p class="mb-4">
+      Compose the surface from the same component contracts used elsewhere:
+      search uses a Bootstrap form control, facets and row actions use Dropdown
+      Menu, selection uses Checkbox, status uses Badge, overflow help can use
+      Tooltip, and the footer uses Bootstrap pagination markup. That keeps each
+      interactive part inspectable and replaceable instead of hiding the table
+      inside a single opaque widget.
+    </p>
+    <p class="mb-4">
+      Render every row on the server first. The optional Moo UI runtime should
+      only reorder, filter, paginate, select, or hide existing markup in the
+      browser; it should not become the source of truth for the row data.
     </p>
 
     <h2 id="responsive-modes" class="h4 mt-5 mb-3">Responsive modes</h2>
@@ -121,7 +135,8 @@
       anatomy_rows,
       row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "responsive-toggle", "cards", "empty", "results-summary", "column", "row", "select-row", "select-all", "sort-value", "bulk-actions", "pagination"],
       row_header=true,
-      extra_class="align-middle mb-5"
+      extra_class="align-middle mb-5 datatable-anatomy-table",
+      responsive_class="scroll-fade-x no-scrollbar"
     ) }}
 
     {% set interactive = namespace(input="<" ~ "input", button="<" ~ "button") %}
@@ -218,7 +233,8 @@
       feature_rows,
       row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-toggle", "feature-selection", "feature-bulk", "feature-feedback", "feature-pagination"],
       row_header=true,
-      extra_class="align-middle mb-0"
+      extra_class="align-middle mb-0 datatable-feature-table",
+      responsive_class="scroll-fade-x no-scrollbar"
     ) }}
   </div>
 

@@ -28,9 +28,14 @@
         ) }}
       {% endcall %}
     {% endset %}
+    {% set input_usage %}
+      <p>Use <code>.form-control</code> inputs for one-line values such as names, emails, search terms, urls, tokens, and numbers. Choose the native <code>type</code> that matches the data so mobile keyboards, browser validation, and autofill behavior work with the field instead of against it.</p>
+      <p>Pair every standalone input with a visible label or an accessible name, and connect helper or error text with <code>aria-describedby</code>. Keep placeholder text as an example value only; it should not replace the label or carry required instructions.</p>
+      <p>Set state on the native input: <code>required</code> for required fields, <code>readonly</code> when the value can be copied but not changed, <code>disabled</code> when it is unavailable, and invalid state when validation fails. Use Bootstrap sizing and form-control variants only after the field's semantics are already clear.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render one-line values with the native input type that matches the data. Pair every standalone control with a visible label or accessible name, connect helper or error text with <code>aria-describedby</code>, and keep required, readonly, disabled, and invalid state on the native input.",
+      input_usage,
       "moo-example__preview--narrow"
     ) }}
 

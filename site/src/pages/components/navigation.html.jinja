@@ -20,9 +20,14 @@
         {{ nav_item("Settings", href="#") }}
       {% endcall %}
     {% endset %}
+    {% set navigation_usage %}
+      <p>Use <code>.nav</code> and <code>.nav-link</code> for links that move between pages, sections, or persistent app routes. Wrap the links in a labelled <code>nav</code> region, use one Bootstrap nav style for the whole set, and keep labels short enough to scan in sidebars, tabs, or compact header rows.</p>
+      <p>Mark the current destination with the active state and the appropriate current-page signal, and keep disabled items out of required paths. Icons, badges, and counters should clarify the destination or status; they should not replace the visible link label.</p>
+      <p>Choose the pattern from the information architecture: horizontal pills for peer routes, vertical lists for sidebars, and underline nav for lightweight filters. If clicking a control changes a panel without navigating to a route, use Tabs rather than Navigation.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Wrap route links in a labelled navigation region, mark the current item with the active state, and keep disabled items out of required paths. Use one style for the whole set, keep labels short, and add badges or icons only when they clarify the destination."
+      navigation_usage
     ) }}
 
     {% set horizontal %}

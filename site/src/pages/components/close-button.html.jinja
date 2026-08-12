@@ -24,9 +24,14 @@
         ) }}
       </div>
     {% endset %}
+    {% set close_button_usage %}
+      <p>Use <code>.btn-close</code> for dismissing nearby transient content such as alerts, dialogs, toasts, and offcanvas panels. Render the button at the edge of the surface it dismisses, and always provide an accessible name with <code>aria-label</code> because the icon has no visible text.</p>
+      <p>Pair the close button with the matching Bootstrap dismissal behavior for the owning component, such as <code>data-bs-dismiss="alert"</code> or <code>data-bs-dismiss="modal"</code>. Use <code>disabled</code> only when dismissal is temporarily unavailable; Bootstrap suppresses pointer and selection behavior for the disabled state.</p>
+      <p>For dark surfaces, prefer <code>data-bs-theme="dark"</code> on the button or parent instead of deprecated color inversion classes. After dismissal, make sure focus lands somewhere sensible when the closed surface contained the active control.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Place the close button at the edge of the content it dismisses and give it a meaningful accessible label. Keep Bootstrap's <code>.btn-close</code> class and the matching dismissal attribute for alerts, toasts, dialogs, or offcanvas panels instead of replacing it with a custom icon button."
+      close_button_usage
     ) }}
 
     {% set default %}

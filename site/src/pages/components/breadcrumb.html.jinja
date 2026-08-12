@@ -20,9 +20,14 @@
         {"label": "Breadcrumb"}
       ]) }}
     {% endset %}
+    {% set breadcrumb_usage %}
+      <p>Use <code>.breadcrumb</code> to show the current page's position inside a navigational hierarchy. Wrap the ordered trail in a <code>nav</code> with <code>aria-label="breadcrumb"</code>, render parent levels as links inside <code>.breadcrumb-item</code>, and mark the final page with <code>aria-current="page"</code>.</p>
+      <p>Keep labels short and structural: breadcrumbs answer where the user is, not what actions they can take. Bootstrap adds separators with CSS, so avoid hardcoding divider characters in the list content itself.</p>
+      <p>When a product needs a different divider, set <code>--bs-breadcrumb-divider</code> on the breadcrumb wrapper or use the documented Sass variable. Keep RTL in mind when customizing divider artwork, and avoid placing unrelated menus or controls inside the trail unless they still represent hierarchy.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Wrap the breadcrumb list in a labelled <code>nav</code>, render each parent as a link, and render the current page as the final item with <code>aria-current=\"page\"</code>. Keep labels short and avoid adding unrelated actions inside the breadcrumb trail."
+      breadcrumb_usage
     ) }}
 
     {% set trail %}

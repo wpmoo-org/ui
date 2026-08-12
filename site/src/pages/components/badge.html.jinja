@@ -20,9 +20,14 @@
         {{ badge("Blocked", variant="destructive") }}
       </div>
     {% endset %}
+    {% set badge_usage %}
+      <p>Use <code>.badge</code> for compact labels, counts, and status hints that belong to nearby text or controls. Place it next to the heading, item label, button, or row it describes; Bootstrap sizes badges with relative font sizing and <code>em</code> units, so the badge naturally follows the scale of its immediate parent.</p>
+      <p>Use <code>.text-bg-*</code> variants when the badge needs a semantic color with matching foreground contrast, and use <code>.rounded-pill</code> when the label should read as a softer pill. Keep badge text short, reserve strong variants for meaningful states, and avoid using color alone to explain the status.</p>
+      <p>For counters on buttons or positioned corner indicators, make the surrounding label carry most of the meaning. If the badge only contains a number, symbol, or dot, add extra context with <code>.visually-hidden</code> so assistive technologies hear the full meaning instead of an isolated value.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Place the badge next to the label, heading, or item it describes instead of floating it as a separate control. Keep the visible text short, choose the variant from the status meaning, and add visually hidden context when the badge shows only a number or symbol."
+      badge_usage
     ) }}
 
     {% set variants %}

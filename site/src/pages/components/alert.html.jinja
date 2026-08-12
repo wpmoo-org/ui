@@ -21,9 +21,14 @@
         icon="info"
       ) }}
     {% endset %}
+    {% set alert_usage %}
+      <p>Use <code>.alert</code> for contextual feedback that should stay visible near the work it affects. Render the message in the alert region with a visible title, add supporting text only when the state needs explanation, and keep links or actions inside the alert body so they remain tied to the message.</p>
+      <p>Choose a contextual variant such as <code>.alert-success</code>, <code>.alert-warning</code>, <code>.alert-danger</code>, or <code>.alert-info</code> when the message has a clear severity. Do not rely on color alone to communicate meaning; make the status clear in the visible copy, and use <code>.alert-link</code> when a link needs to inherit the alert's matching color treatment.</p>
+      <p>For dismissible alerts, add <code>.alert-dismissible</code> and a close button with <code>data-bs-dismiss="alert"</code>; use <code>.fade</code> and <code>.show</code> only when the removal should animate. Bootstrap removes a dismissed alert from the page, so move focus to a sensible next target after <code>closed.bs.alert</code> when the close button was keyboard-operated.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Place the alert message in a Bootstrap alert container, keep the title visible, and add description text only when the state needs explanation. Match the variant to the message severity, add a dismiss button only when the notice may be removed, and keep any action button inside the alert body so it remains tied to the message.",
+      alert_usage,
       preview_class="moo-example__preview--medium"
     ) }}
 

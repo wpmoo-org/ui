@@ -29,9 +29,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set menubar_usage %}
+      <p>Use <code>.menubar</code> as a compact row of related Bootstrap dropdown triggers, such as document, editor, or workspace command groups. Keep top-level labels short, group related commands under each trigger, and keep each popup menu built from the same Dropdown Menu item, header, and divider structure used elsewhere.</p>
+      <p>Label the row as one toolbar-like surface, but do not claim desktop application menubar behavior unless the full keyboard model is implemented. Bootstrap dropdowns already support click opening, item movement, and Escape dismissal; Moo UI should add only the composition and visual frame around those dropdowns.</p>
+      <p>Use <code>.menubar</code> when the commands are siblings at the same level. If one trigger contains the main action and another only contains overflow, use Button Group or Dropdown Menu instead; if the items are route links, use Navigation so current-page state and link semantics stay clear.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Place several related Bootstrap dropdown triggers inside one labelled group. Keep top-level labels short, let each trigger open its own dropdown menu, and avoid adding desktop menubar ARIA behavior unless the keyboard model is implemented to match it.",
+      menubar_usage,
       "moo-example__preview--narrow"
     ) }}
 

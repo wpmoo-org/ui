@@ -28,6 +28,50 @@ commits.
 - Reviewer:
 - Reviewed at (UTC, ISO-8601):
 
+## Acceptance Portal
+
+- Portal: `/acceptance/rc2/`
+- Scope: all component catalog pages and matching certification fixtures.
+- Default behavior: select a checklist item on the left to open its catalog
+  page or certification fixture in the right-side frame.
+- The path shown above the frame is a normal link; right-click it if the page
+  needs to be opened in a separate browser tab.
+- Checkbox state is stored in the local browser only. Transfer the final
+  results back into this Markdown record before using it as release evidence.
+
+## Certification Fixtures
+
+Use the portal when available, or open fixture URLs directly:
+`/tests/fixtures/certification/<slug>.html`.
+
+- [ ] Fixture URLs needed by this rc2 pass open without 404.
+  - Notes:
+- [ ] Each fixture matching a checked component opens cleanly.
+  - Notes:
+- [ ] Fixture behavior matches the catalog docs for keyboard, focus, state,
+      dismissal, overlay behavior, and responsive behavior at the component's
+      tier depth.
+  - Notes:
+- [ ] Dark, RTL, and responsive fixture cases render where provided.
+  - Notes:
+- [ ] No fixture uses stale markup from earlier component versions.
+  - Notes:
+
+## Interaction Checks
+
+Use the portal's device tabs to record interaction checks per device.
+
+- [ ] Safari keyboard checks are complete for every component.
+  - Notes:
+- [ ] iPhone voice-control checks are complete for every component where the
+      interaction is applicable.
+  - Notes:
+- [ ] Android voice-access checks are complete for every component where the
+      interaction is applicable.
+  - Notes:
+- [ ] Any component marked not applicable has a note explaining why.
+  - Notes:
+
 ## Devices
 
 - [ ] macOS Safari

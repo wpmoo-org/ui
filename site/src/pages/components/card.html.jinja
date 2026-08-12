@@ -30,9 +30,14 @@
         </div>
       {% endcall %}
     {% endset %}
+    {% set card_usage %}
+      <p>Use <code>.card</code> as a flexible content container for one object, setting, summary, or workflow step. Bootstrap cards are built with minimal markup, use flexbox, have no default margin, and fill the width of their parent unless you constrain them with grid, width utilities, or local layout rules.</p>
+      <p>Place padded primary content in <code>.card-body</code>, use <code>.card-title</code> and <code>.card-subtitle</code> for the object heading and secondary label, and keep longer copy in <code>.card-text</code>. Use <code>.card-header</code> and <code>.card-footer</code> only when those regions add clear structure rather than decorative framing.</p>
+      <p>Cards can contain images, list groups, links, and actions, but the card should still describe one thing. Use <code>.card-img-top</code> or <code>.card-img-bottom</code> for media attached to the card edge, keep action buttons close to the content they affect, and use external spacing utilities between cards instead of adding unrelated margin inside the card.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Build the card from a header, body, and optional footer in that order. Put the object title in the header, keep primary content in the body, and reserve the footer for actions or summary metadata that belongs to the same object.",
+      card_usage,
       preview_class="moo-example__preview--narrow"
     ) }}
 

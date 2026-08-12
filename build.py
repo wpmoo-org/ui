@@ -32,6 +32,7 @@ SITE_SRC = SITE / "src"
 CORE_REGISTRY = SRC / "registry"
 SITE_REGISTRY = SITE_SRC / "registry"
 CERTIFICATION = SRC / "certification"
+CERTIFICATION_FIXTURES = ROOT / "tests/fixtures/certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
 PACKAGE_DIST = ROOT / "dist"
@@ -100,6 +101,7 @@ SOURCE_SNAPSHOT_DIRS = (
     JS_COMPONENTS,
     SRC / "icons",
     CORE_REGISTRY,
+    CERTIFICATION_FIXTURES,
     SCSS,
 )
 BUILD_LOCK = (
@@ -1164,6 +1166,31 @@ def copy_site_assets() -> None:
         shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
 
 
+def copy_certification_fixtures_to_site() -> None:
+    if not CERTIFICATION_FIXTURES.exists():
+        return
+
+    fixture_dir = SITE_DIST / "tests/fixtures/certification"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    for fixture in sorted(CERTIFICATION_FIXTURES.glob("*.html")):
+        shutil.copy2(fixture, fixture_dir / fixture.name)
+
+    public_dist = SITE_DIST / "dist"
+    shutil.copytree(PACKAGE_DIST / "assets", public_dist / "assets", dirs_exist_ok=True)
+    shutil.copytree(PACKAGE_DIST / "js", public_dist / "js", dirs_exist_ok=True)
+
+    public_bootstrap_js = SITE_DIST / "vendor/bootstrap/dist/js"
+    public_bootstrap_js.mkdir(parents=True, exist_ok=True)
+    for bootstrap_file in (
+        "bootstrap.bundle.min.js",
+        "bootstrap.bundle.min.js.map",
+    ):
+        shutil.copy2(
+            BOOTSTRAP / "dist/js" / bootstrap_file,
+            public_bootstrap_js / bootstrap_file,
+        )
+
+
 def version_site_module_imports() -> None:
     catalog_js_dir = SITE_DIST / "assets/js/catalog"
     if not catalog_js_dir.exists():
@@ -1360,6 +1387,7 @@ def build_site() -> None:
     copy_core_outputs_to_site()
     compile_catalog_styles()
     copy_site_assets()
+    copy_certification_fixtures_to_site()
     copy_site_metadata()
     version_site_module_imports()
     version = asset_version()

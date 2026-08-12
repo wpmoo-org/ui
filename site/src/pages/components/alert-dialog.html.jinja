@@ -29,9 +29,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set alert_dialog_usage %}
+      <p>Use a Bootstrap <code>.modal</code> as an alert dialog when the user must acknowledge or confirm a consequential choice before continuing. Open it from a clear trigger with <code>data-bs-toggle="modal"</code> and <code>data-bs-target</code>, label the dialog from its title with <code>aria-labelledby</code>, and connect the supporting explanation with <code>aria-describedby</code>.</p>
+      <p>Keep the content short and decision-focused: one title, one explanation, and explicit cancel and confirm actions in the footer. For irreversible choices, use a static backdrop with <code>data-bs-backdrop="static"</code> and <code>data-bs-keyboard="false"</code> so the user cannot dismiss the dialog accidentally with backdrop click or Escape.</p>
+      <p>Because Alert Dialog is built on Bootstrap's Modal plugin, it appears above the page, traps interaction while open, and should not be nested inside another modal. Keep dismissal buttons visible, use <code>data-bs-dismiss="modal"</code> on safe exits, and return the user to a sensible place in the workflow after the dialog closes.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Connect the trigger to the modal with Bootstrap's <code>data-bs-target</code>, label the dialog from its title, and connect supporting copy with <code>aria-describedby</code>. Put cancel and confirm actions in the footer, keep the backdrop static for irreversible choices, and make every exit path a visible button."
+      alert_dialog_usage
     ) }}
 
     {% set basic %}

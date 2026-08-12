@@ -21,9 +21,14 @@
         {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up") }}
       </div>
     {% endset %}
+    {% set button_usage %}
+      <p>Use <code>.btn</code> for actions that submit, open, confirm, dismiss, or move work forward. Choose the native element from the action: use <code>button</code> for in-page behavior, <code>a</code> for real navigation, and <code>input</code> only when a form API requires it.</p>
+      <p>Choose one variant for emphasis and make the purpose visible in the label. Use <code>.btn-primary</code> for the main action in a small decision area, <code>.btn-outline-*</code> for quieter actions, and <code>.btn-sm</code> or <code>.btn-lg</code> only when the surrounding density changes.</p>
+      <p>Give icon-only buttons an <code>aria-label</code>, do not rely on color alone for destructive or success meaning, and set <code>disabled</code> while an action cannot run. If an <code>a</code> element triggers in-page behavior instead of navigating, add <code>role="button"</code> so assistive technology hears the right control type.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render actions as native <code>button</code>, <code>a</code>, or <code>input</code> controls according to what they do. Keep a visible label when space allows, add <code>aria-label</code> to icon-only buttons, choose one variant for emphasis, and set disabled or busy state while the action cannot run."
+      button_usage
     ) }}
 
     {% set primary_example %}

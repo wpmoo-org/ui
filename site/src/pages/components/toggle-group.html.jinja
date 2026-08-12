@@ -26,9 +26,14 @@
         variant="outline"
       ) }}
     {% endset %}
+    {% set toggle_group_usage %}
+      <p>Use grouped <code>.btn-check</code> inputs with matching <code>.btn</code> labels when related button-like choices need a persistent pressed state. Use radio inputs when exactly one item should stay active, and checkbox inputs when multiple items may be pressed at the same time.</p>
+      <p>Group the controls under one accessible label, keep every item the same size and variant, and make the selected state visible without relying on color alone. Give every icon-only toggle its own accessible label because the icon is not a name.</p>
+      <p>Toggle Group uses Bootstrap's button-check contract: native inputs hold the state while labels render the button surface. Keep values stable for form submission, and choose a normal Button Group when the controls are actions rather than selectable modes.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Group related toggle inputs under one accessible label. Use radio inputs when exactly one item should stay active, checkbox inputs when multiple items may be pressed, and give every icon-only toggle its own accessible label.",
+      toggle_group_usage,
       "moo-example__preview--narrow"
     ) }}
 

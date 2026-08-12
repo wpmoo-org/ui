@@ -34,9 +34,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set input_group_usage %}
+      <p>Use <code>.input-group</code> when a text input needs a tightly attached prefix, suffix, icon, button, or short addon. Put the editable control and its attached addons inside one group, and keep any visible <code>label</code> outside the group as Bootstrap recommends.</p>
+      <p>Keep the input as the primary control. Addons should clarify the value, such as a currency symbol, unit, search icon, domain suffix, or action button; avoid nesting unrelated controls that make the group hard to scan or tab through.</p>
+      <p>Input groups wrap by default to make validation possible. Apply size classes such as <code>.input-group-sm</code> or <code>.input-group-lg</code> to the group itself, not to each child, and be careful with hidden first or last children because they can affect Bootstrap's joined border radius.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Wrap the input and each attached prefix, suffix, icon, or button inside one Bootstrap input group. Keep the editable input as the primary control, keep addon content short, and avoid nesting unrelated controls that would make the group hard to scan or tab through.",
+      input_group_usage,
       "moo-example__preview--narrow"
     ) }}
 

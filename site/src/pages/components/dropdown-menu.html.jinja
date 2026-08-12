@@ -23,9 +23,14 @@
         {{ dropdown_item("Delete", icon="trash-2", destructive=true) }}
       {% endcall %}
     {% endset %}
+    {% set dropdown_menu_usage %}
+      <p>Use <code>.dropdown-menu</code> for contextual actions, filters, or compact choices that should open from a visible trigger. Wrap the trigger and menu in a Bootstrap <code>.dropdown</code> container, prefer a <code>button</code> trigger for in-page actions, and use <code>data-bs-toggle="dropdown"</code> so Bootstrap owns opening, placement, and keyboard behavior.</p>
+      <p>Render actions as <code>.dropdown-item</code> rows, split groups with <code>.dropdown-header</code> or <code>.dropdown-divider</code>, and place destructive actions after a separator. Keep labels concise, mark disabled items clearly, and use shortcut text only when the same command is actually available from the keyboard.</p>
+      <p>Dropdowns open on click rather than hover by design and use Popper for dynamic positioning outside navbars. Choose alignment, direction, and <code>data-bs-auto-close</code> based on the surrounding workflow, especially when the menu contains checkboxes, radios, or other form controls.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Attach the menu to a Bootstrap dropdown trigger and keep the trigger label visible. Render actions as <code>.dropdown-item</code> rows, split groups with headers or dividers, place destructive actions after a separator, and let Bootstrap own opening, placement, and keyboard behavior.",
+      dropdown_menu_usage,
       "moo-example__preview--narrow"
     ) }}
 

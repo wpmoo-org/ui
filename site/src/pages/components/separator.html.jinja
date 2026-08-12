@@ -20,9 +20,14 @@
         <span class="text-body-secondary">Use between related content sections.</span>
       </div>
     {% endset %}
+    {% set separator_usage %}
+      <p>Use <code>&lt;hr&gt;</code> or Bootstrap's <code>.vr</code> helper to divide related content sections when spacing alone is not enough. A horizontal separator can split stacked blocks, while a vertical separator can divide compact inline groups in a flex row.</p>
+      <p>Keep purely visual separators decorative for assistive technology. If the split introduces a new topic, form section, route group, or landmark, use a real heading, fieldset legend, or navigation label instead of relying on a line.</p>
+      <p>Bootstrap's horizontal rule inherits border color and opacity from the design system, while the <code>.vr</code> helper creates a vertical rule that stretches in the layout. Keep separator spacing local to the surrounding composition so the line supports rhythm without becoming a card-like frame.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Place a horizontal separator between stacked sections or a vertical separator between compact inline groups. Keep purely visual dividers decorative for assistive technology, and avoid using a separator where a real heading or landmark is needed.",
+      separator_usage,
       preview_class="moo-example__preview--narrow"
     ) }}
 

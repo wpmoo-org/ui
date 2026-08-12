@@ -27,9 +27,14 @@
         {{ field_description("textarea-intro-message-help", "Give reviewers enough context to act without opening another view.") }}
       {% endcall %}
     {% endset %}
+    {% set textarea_usage %}
+      <p>Use <code>.form-control</code> on <code>&lt;textarea&gt;</code> for multiline values such as notes, messages, summaries, and review context. Pair it with a visible label, choose a starting <code>rows</code> count that matches the expected amount of writing, and keep placeholder text as an example rather than a replacement for the label.</p>
+      <p>Place helper or error text directly below the textarea and connect it with <code>aria-describedby</code>. Use validation state on the native control, and keep constraints such as required, disabled, readonly, maxlength, or minimum guidance close to the field.</p>
+      <p>Keep Textarea for short to medium plain text. If users need rich formatting, attachments, comments, or long-form editing, move them to a larger editor surface rather than stretching a form textarea into a document editor.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render multiline values with a visible label and a starting row count that matches the expected amount of writing. Keep helper or error text directly under the textarea, connect it with <code>aria-describedby</code>, and leave long-form editing to a larger editor surface.",
+      textarea_usage,
       "moo-example__preview--narrow"
     ) }}
 

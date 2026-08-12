@@ -18,9 +18,14 @@
         {{ progress(64, aria_label="Upload progress", show_label=true) }}
       </div>
     {% endset %}
+    {% set progress_usage %}
+      <p>Use <code>.progress</code> and <code>.progress-bar</code> when completion can be measured as a value between a minimum and maximum. Render the bar with an accessible label, set the current value and maximum, and show nearby text when users need the task name, percentage, or status outside the visual track.</p>
+      <p>Keep the progress bar itself simple: Bootstrap drives the fill from width, supports labels when the bar is tall enough, and can stack multiple bars when the same track represents related segments. Moo UI uses a slim track, so readable labels belong beside or above the bar rather than inside it.</p>
+      <p>Use contextual color only when it communicates real state, and never rely on color alone. If the amount of work cannot be measured, use Spinner or a loading state instead of showing a fake percentage.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Set the current value and maximum on the progress bar, provide an accessible label, and show nearby text when users need the percentage or task name outside the bar. Use an indeterminate spinner instead when completion cannot be measured.",
+      progress_usage,
       preview_class="moo-example__preview--narrow"
     ) }}
 

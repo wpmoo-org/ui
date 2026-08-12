@@ -20,9 +20,14 @@
         <span>Loading updates</span>
       </div>
     {% endset %}
+    {% set spinner_usage %}
+      <p>Use <code>.spinner-border</code> or <code>.spinner-grow</code> for indeterminate loading: work is happening, but completion cannot be measured as a percentage. Render it with <code>role="status"</code> or an accessible loading label, and pair it with visible text when the wait affects surrounding content.</p>
+      <p>Bootstrap spinners are built with HTML and CSS, use <code>currentColor</code>, and do not need JavaScript to animate. Use utilities to align, recolor, or size them, and use the small variant inside buttons or dense inline controls.</p>
+      <p>Use <code>.progress</code> instead when completion can be measured. When a spinner replaces a button label, disable the action while it is running and keep the label clear enough that users know what is still in progress.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render the spinner with an accessible loading name and pair it with visible text when the wait affects surrounding content. Keep it for indeterminate work only; switch to a progress bar when completion can be measured.",
+      spinner_usage,
       preview_class="moo-example__preview--narrow"
     ) }}
 

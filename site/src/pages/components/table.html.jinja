@@ -27,9 +27,14 @@
         row_header=true
       ) }}
     {% endset %}
+    {% set table_usage %}
+      <p>Use <code>.table</code> for data that needs row and column relationships to stay visible. Render column headers in <code>thead</code>, data rows in <code>tbody</code>, and a caption when the table needs context beyond the surrounding heading.</p>
+      <p>Use row headers for named records, align numeric columns consistently, and keep status or action cells short enough that the row remains scannable. Bootstrap table variants are opt-in, so choose striped, hover, bordered, or compact styles only when they improve comparison.</p>
+      <p>Wrap wide tables in a responsive container so columns remain inspectable on smaller screens. If the user needs filtering, sorting, pagination, row selection, or responsive cards, move up to Data Table instead of adding those behaviors directly to a basic table.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Render column headers in <code>thead</code>, data rows in <code>tbody</code>, and a caption when the table needs context. Use row headers for named records, align numeric columns consistently, and wrap wide tables in the responsive container so columns stay inspectable.",
+      table_usage,
       preview_class="moo-example__preview--medium"
     ) }}
 
@@ -119,7 +124,7 @@
       {{ table(
         ["Workspace ID", "Workspace", "Plan", "Requests"],
         [
-          ["m00-portal", "Moo Portal", "Growth", "18"],
+          ["m00-portal", "Moo UI Portal", "Growth", "18"],
           ["m01-partners", "Partner Desk", "Business", "9"],
           ["m02-billing", "Billing Hub", "Starter", "4"],
           ["m03-support", "Support Lab", "Trial", "2"]

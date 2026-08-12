@@ -29,9 +29,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set dialog_usage %}
+      <p>Use <code>.modal</code> for focused work that must temporarily sit above the page, such as editing details, confirming a choice, or collecting a short form. Open it from a clear trigger with Bootstrap modal data attributes, point that trigger at the dialog id, and label the modal from its visible title.</p>
+      <p>Keep the body focused on one task. Connect supporting copy with <code>aria-describedby</code>, place primary and secondary actions in the footer, and keep a visible dismiss path unless the workflow intentionally requires an explicit decision.</p>
+      <p>Bootstrap modals are positioned over the document and only support one modal window at a time. Use a static backdrop only when accidental dismissal would be harmful, avoid nesting dialogs, and make sure the user returns to a sensible place after the dialog closes.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Open the modal from a clear trigger, point that trigger at the dialog id, and label the modal with its title. Connect supporting copy with <code>aria-describedby</code>, keep the body focused on the task, place actions in the footer, and use a static backdrop only when dismissal must be explicit.",
+      dialog_usage,
       "moo-example__preview--narrow"
     ) }}
 

@@ -18,9 +18,14 @@
     {% set intro %}
       {{ button("Hover", variant="outline", tooltip="Last synced 2 minutes ago") }}
     {% endset %}
+    {% set tooltip_usage %}
+      <p>Use <code>data-bs-toggle="tooltip"</code> for brief, optional hints attached to a control that already has a visible purpose. Attach the tooltip to a focusable trigger, keep the content short, and choose placement from the surrounding layout so the hint does not cover the thing it explains.</p>
+      <p>Initialize tooltips only on pages that use them; Bootstrap keeps them opt-in for performance and positions them with Popper. Use <code>container="body"</code> or another explicit container when the trigger sits inside complex layouts such as input groups, button groups, tables, or clipped containers.</p>
+      <p>Keep essential instructions visible outside the tooltip for touch and assistive technology users. Tooltips with empty titles do not show, disabled elements need a wrapper trigger, HTML content is sanitized, and tooltips should be hidden before their trigger is removed from the DOM.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Attach tooltip attributes to a focusable trigger that already has a visible purpose. Keep the content brief, choose placement from the surrounding layout, and keep essential instructions visible outside the tooltip for touch and assistive technology users.",
+      tooltip_usage,
       "moo-example__preview--narrow"
     ) }}
 

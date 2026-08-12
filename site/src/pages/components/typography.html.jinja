@@ -20,9 +20,14 @@
         <p class="fst-italic text-body-secondary mb-0">"Whitespace has a job"</p>
       </div>
     {% endset %}
+    {% set typography_usage %}
+      <p>Use semantic headings, paragraphs, lists, and Bootstrap text utilities to keep document structure and visual hierarchy working together. Choose the HTML element first, then apply the typography role or utility that matches the visual level the interface needs.</p>
+      <p>Keep heading levels meaningful for screen readers, search indexing, and in-page navigation. Use muted text for supporting copy, section labels for small categorical context, and display sizes only when a heading needs more presence than the surrounding content hierarchy.</p>
+      <p>Use utility classes when the visual size must differ from the HTML element, such as a paragraph styled as a heading inside a compact card. Keep body copy readable, avoid decorative over-scaling in dense app screens, and let whitespace separate ideas instead of adding extra frames.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Choose the semantic HTML element first, then apply the typography role or Bootstrap text utility that matches the visual hierarchy. Keep heading levels meaningful, use muted text for supporting copy, and reserve display sizes for content that needs extra presence.",
+      typography_usage,
       preview_class="moo-example__preview--medium"
     ) }}
 

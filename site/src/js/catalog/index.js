@@ -2,6 +2,7 @@ import Combobox from "../../../../src/js/components/combobox.js";
 import ContextMenu from "../../../../src/js/components/context-menu.js";
 import DataTable from "../../../../src/js/components/datatable.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
+import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
 import { initCardSpacing } from "./card-spacing.js";
@@ -26,6 +27,7 @@ export function initCatalog(root = document) {
     initCommand(root),
     initExamplesTasks(root),
     initToc(root),
+    initAcceptancePortal(root),
   ];
 
   root.querySelectorAll(".combobox").forEach((element) => {

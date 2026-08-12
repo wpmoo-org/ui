@@ -12,7 +12,7 @@
 {% block content %}
   {{ render_page_header(
     "Context Menu",
-    "A right-click menu built on Bootstrap's documented dropdown-menu surface, with Moo owning only the pointer/keyboard invocation Bootstrap does not provide."
+    "A right-click menu built on Bootstrap's documented dropdown-menu surface, with Moo UI owning only the pointer/keyboard invocation Bootstrap does not provide."
   ) }}
 
   <div class="moo-component-examples">
@@ -33,9 +33,14 @@
         <span>Right click here</span>
       {% endcall %}
     {% endset %}
+    {% set context_menu_usage %}
+      <p>Use <code>.context-menu</code> for secondary actions that belong to a specific surface, file, row, or card. Attach the trigger area to the object that owns the actions, render the popup as a flat Bootstrap <code>.dropdown-menu</code>, and keep item labels action-oriented so the menu can be scanned quickly.</p>
+      <p>Support pointer and keyboard access together: right-click should open the menu for mouse users, <code>Shift+F10</code> should open it for keyboard users, and a visible fallback trigger should remain available for touch and assistive technology users. Do not make context menu access the only path to required work.</p>
+      <p>Use <code>.dropdown-item</code> rows, headers, and dividers for the menu content, and keep destructive actions after a separator. Because Bootstrap dropdowns support generic menu content, add any more specific ARIA semantics only when the menu is truly acting like an application menu.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Attach the context menu to the surface that owns the actions, keep the menu items in a flat Bootstrap dropdown menu, and provide the visible fallback trigger for touch and keyboard users. Support right-click, <code>Shift+F10</code>, and the fallback button without making the context menu the only path to required work."
+      context_menu_usage
     ) }}
 
     {% set basic_items %}
@@ -184,7 +189,7 @@
     {{ render_example(
       "radio",
       "Radio",
-      "Single-select options reuse the checkbox item's dropdown-item button so keyboard roving focus and Bootstrap's button-toggle Data API keep working; Moo adds only the mutual-exclusivity between grouped options.",
+      "Single-select options reuse the checkbox item's dropdown-item button so keyboard roving focus and Bootstrap's button-toggle Data API keep working; Moo UI adds only the mutual-exclusivity between grouped options.",
       radio
     ) }}
 

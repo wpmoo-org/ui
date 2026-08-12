@@ -11,7 +11,8 @@
   hover=false,
   small=false,
   borderless=false,
-  extra_class=""
+  extra_class="",
+  responsive_class=""
 ) -%}
   {% if not headers %}{{ fail("Table headers are required") }}{% endif %}
   {% set classes = "table" %}
@@ -21,7 +22,7 @@
   {% if caption_top %}{% set classes = classes ~ " caption-top" %}{% endif %}
   {% if borderless %}{% set classes = classes ~ " table-borderless" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  <div class="table-responsive">
+  <div class="table-responsive{% if responsive_class %} {{ responsive_class }}{% endif %}">
     <table class="{{ classes }}">
       {% if caption %}<caption>{{ caption }}</caption>{% endif %}
       <thead>

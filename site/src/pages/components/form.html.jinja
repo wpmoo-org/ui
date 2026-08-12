@@ -43,9 +43,14 @@
     </div>
   {% endcall %}
   {% endset %}
+  {% set form_usage %}
+    <p>Use a real <code>&lt;form&gt;</code> to submit a complete set of related fields through native HTML semantics. Group related controls with fieldsets and legends, and keep every editable control paired with a visible label or accessible name.</p>
+    <p>Use Bootstrap <code>.form-control</code>, <code>.form-select</code>, and <code>.form-check</code> contracts for the inputs themselves, and keep descriptions, constraints, and validation feedback close to the field they affect. For validation, add submitted-state classes to the form, connect messages with <code>aria-describedby</code>, and let native attributes such as <code>required</code>, <code>disabled</code>, and <code>readonly</code> describe the browser behavior.</p>
+    <p>Keep submit and reset actions outside individual fields so they read as form-level commands. Preserve predictable tab order, avoid nested forms, and only split a long form into sections when the grouping helps users understand what will be saved together.</p>
+  {% endset %}
   {{ render_component_intro(
     intro,
-    "Start with a native <code>&lt;form&gt;</code>, group related controls in fieldsets, and compose every row from documented field markup. Keep labels and descriptions visible, connect validation feedback to the affected control, and let Bootstrap's validation classes reflect the submitted state.",
+    form_usage,
     preview_class="moo-example__preview--narrow"
   ) }}
 
@@ -128,7 +133,7 @@
   {{ render_example(
     "deploy-request",
     "Deploy request",
-    "A complete form remains plain Bootstrap form markup underneath; Moo only standardizes the Field composition.",
+    "A complete form remains plain Bootstrap form markup underneath; Moo UI only standardizes the Field composition.",
     deploy_request,
     preview_class="moo-example__preview--narrow"
   ) }}

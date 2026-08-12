@@ -41,9 +41,14 @@
         ) }}
       </div>
     {% endset %}
+    {% set tabs_usage %}
+      <p>Use <code>.nav-tabs</code> or <code>.nav-pills</code> for peer panels where one view should be visible at a time. Connect each tab trigger to exactly one <code>.tab-pane</code>, keep labels short, and keep the selected trigger and visible panel in sync with Bootstrap's tab behavior.</p>
+      <p>Tabs should activate when selected by click or keyboard, not merely on hover. Hover can show a subtle affordance, but the active visual state belongs only to the selected tab and its panel.</p>
+      <p>Use horizontal tabs for compact peer views and vertical tabs when labels scan better as a side rail. Keep required sequential steps outside inactive panels, because hidden tab content should not block users from completing the current task.</p>
+    {% endset %}
     {{ render_component_intro(
       intro,
-      "Connect each tab trigger to one panel, keep tab labels short, and mark the active trigger and panel consistently. Put immediately useful content in the active panel and avoid hiding required sequential steps behind inactive tabs.",
+      tabs_usage,
       "moo-example__preview--narrow"
     ) }}
 

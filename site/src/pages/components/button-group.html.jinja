@@ -40,9 +40,14 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
+    {% set button_group_usage %}
+      <p>Use <code>.btn-group</code> when several closely related buttons should read as one compact control surface. Keep the buttons visually compatible, and include only actions that share the same context or operate on the same object.</p>
+      <p>Give every group an explicit accessible label with <code>role="group"</code> plus <code>aria-label</code> or <code>aria-labelledby</code>. When multiple groups share a row, wrap them in a <code>.btn-toolbar</code> with <code>role="toolbar"</code> and let each inner group keep its own label.</p>
+      <p>Use grouped checkbox or radio toggles only when the options act like buttons and the selected state needs to stay visible. Preserve normal focus order, keep icon-only buttons labelled, and move unrelated overflow actions into a dropdown rather than stretching the joined edge.</p>
+    {% endset %}
     {{ render_component_intro(
       basic_actions,
-      "Wrap joined controls in one labelled button group, keep every button on the same size and variant, and place only related actions inside the joined edge. When several groups share a row, wrap them in a toolbar and let each inner group keep its own accessible label."
+      button_group_usage
     ) }}
 
     {% set outlined_styles %}
