@@ -105,6 +105,40 @@ class TabsTests(CatalogTestCase):
         self.assertIn("background-color: var(--moo-surface);", active_while_sibling_hovered)
         self.assertIn("box-shadow: var(--bs-box-shadow-sm);", active_while_sibling_hovered)
 
+    def test_tab_focus_ring_is_keyboard_only(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        pointer_focus = css.rsplit(
+            ".tabs-list .nav-link:focus:not(:focus-visible) {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("outline: 0;", pointer_focus)
+        self.assertIn("box-shadow: none;", pointer_focus)
+        keyboard_focus = css.rsplit(
+            ":is(.btn, a, button, summary, [tabindex]):not(input, textarea, select):focus-visible",
+            1,
+        )[1].split("}", 1)[0]
+        self.assertIn("box-shadow:", keyboard_focus)
+
+    def test_active_tab_keeps_keyboard_focus_ring_over_active_shadow(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/moo-ui.css")
+        active_tab = css.rsplit(".tabs-list .nav-link.active {", 1)[1].split("}", 1)[0]
+        active_focus = css.rsplit(
+            ".tabs-list .nav-link.active:focus-visible {", 1
+        )[1].split("}", 1)[0]
+
+        self.assertIn("box-shadow: var(--bs-box-shadow-sm);", active_tab)
+        self.assertIn("border-color: var(--moo-ring);", active_focus)
+        self.assertIn("box-shadow: 0 0 0 3px color-mix", active_focus)
+        self.assertLess(
+            css.index(".tabs-list .nav-link.active {"),
+            css.index(".tabs-list .nav-link.active:focus-visible {"),
+        )
+
     def test_vertical_tabs_layout_has_stacked_list_and_panel_gap(self) -> None:
         result = self.run_build()
 

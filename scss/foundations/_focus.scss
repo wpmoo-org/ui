@@ -80,6 +80,11 @@
 // colors) get a working native focus glow, so btn-ghost/outline consumers
 // would otherwise show no ring at all. Share the same ring here instead of
 // patching --bs-btn-focus-box-shadow per variant.
+.btn-check:focus:not(:focus-visible) + .btn {
+  outline: 0;
+  box-shadow: none;
+}
+
 .btn-check:focus-visible + .btn {
   border-color: var(--moo-ring);
   outline: 0;

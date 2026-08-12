@@ -42,10 +42,21 @@
   box-shadow: none;
 }
 
+.tabs-list .nav-link:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
 .tabs-list .nav-link.active {
   color: var(--moo-foreground);
   background-color: var(--moo-surface);
   box-shadow: var(--bs-box-shadow-sm);
+}
+
+.tabs-list .nav-link.active:focus-visible {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }
 
 .tabs-list:has(.nav-link:hover) .nav-link.active:not(:hover) {

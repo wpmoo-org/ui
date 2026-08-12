@@ -100,6 +100,47 @@ class ToggleGroupTests(CatalogTestCase):
         self.assertIn("pointer-events: none;", button_scss)
         self.assertIn("opacity: var(--moo-disabled-control-opacity);", button_scss)
 
+    def test_btn_check_focus_ring_is_keyboard_only(self) -> None:
+        focus_scss = (ROOT / "scss/foundations/_focus.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(".btn-check:focus:not(:focus-visible) + .btn {", focus_scss)
+        self.assertIn(".btn-check:focus-visible + .btn {", focus_scss)
+
+    def test_toggle_group_hover_does_not_suppress_keyboard_focus_ring(self) -> None:
+        toggle_group_scss = (ROOT / "scss/components/_toggle_group.scss").read_text(
+            encoding="utf-8"
+        )
+        focus_scss = (ROOT / "scss/foundations/_focus.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(".btn-check:focus:not(:focus-visible) + .btn {", focus_scss)
+        self.assertIn(".btn-check:focus-visible + .btn {", focus_scss)
+        self.assertNotIn(".btn-check:focus-visible + .btn:hover", toggle_group_scss)
+        self.assertNotIn(".btn-check:checked:focus-visible + .btn:hover", toggle_group_scss)
+
+    def test_toggle_group_focus_ring_wins_over_checked_button_state(self) -> None:
+        self.run_build()
+        css = self.read_output("assets/css/moo-ui.css")
+
+        self.assertIn(".toggle-group > .btn-check:focus-visible + .btn", css)
+        self.assertIn(".toggle-group > .btn-check:checked:focus-visible + .btn", css)
+        checked_state_index = css.rindex(".btn-check:checked + .btn")
+        focus_state_index = css.rindex(".toggle-group > .btn-check:focus-visible + .btn")
+        checked_focus_state_index = css.rindex(
+            ".toggle-group > .btn-check:checked:focus-visible + .btn"
+        )
+        focus_state_body = css[
+            focus_state_index : css.index("}", checked_focus_state_index) + 1
+        ]
+
+        self.assertLess(checked_state_index, focus_state_index)
+        self.assertLess(checked_state_index, checked_focus_state_index)
+        self.assertIn("border-color: var(--moo-ring);", focus_state_body)
+        self.assertIn("box-shadow: 0 0 0 3px color-mix", focus_state_body)
+
     def test_spacing_defaults_to_gap_2_horizontal_and_gap_1_vertical(self) -> None:
         horizontal = self.render_toggle_group(
             'toggle_group("view", [{"id": "view-list", "label": "List"}], legend="View")'
