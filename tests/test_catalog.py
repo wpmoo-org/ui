@@ -156,6 +156,35 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(claim=claim):
                 self.assertNotIn(claim, normalized_source)
 
+    def test_public_docs_use_moo_ui_brand_name_in_prose(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        surfaces = {
+            "home": self.read_output("index.html"),
+            "installation": self.read_output("installation.html"),
+            "skills": self.read_output("skills.html"),
+            "changelog": self.read_output("changelog.html"),
+            "components": self.read_output("components/index.html"),
+            "readme": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "llms": (ROOT / "site/public/llms.txt").read_text(encoding="utf-8"),
+        }
+        forbidden_brand_fragments = (
+            "Moo-owned",
+            "Moo owned",
+            "Moo's",
+            "Moo ESM",
+            "Moo stylesheet",
+            "Moo stylesheets",
+            "Moo component layer",
+            "Moo documented extension",
+        )
+
+        for name, surface in surfaces.items():
+            with self.subTest(surface=name):
+                for fragment in forbidden_brand_fragments:
+                    self.assertNotIn(fragment, surface)
+
     def test_acceptance_portal_marks_mobile_keyboard_checks_not_applicable(self) -> None:
         result = self.run_build()
 
@@ -1110,7 +1139,7 @@ class CatalogContractTests(CatalogTestCase):
                 ("full-build", "Full Build"),
                 ("scoped-build", "Scoped Adoption"),
                 ("bootstrap-javascript", "Bootstrap JavaScript"),
-                ("optional-esm", "Optional Moo ESM"),
+                ("optional-esm", "Optional Moo UI ESM"),
             ),
             "skills.html": (
                 ("selection-criteria", "Selection Criteria"),
@@ -1233,7 +1262,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn("Create workspace", installation)
         self.assertIn("Bootstrap JavaScript", installation)
-        self.assertIn("Optional Moo ESM", installation)
+        self.assertIn("Optional Moo UI ESM", installation)
         self.assertIn('href="../components/combobox/">Combobox</a>', installation)
         self.assertIn('href="../components/context-menu/">Context Menu</a>', installation)
         self.assertIn('href="../components/datatable/">Data Table</a>', installation)
@@ -1490,11 +1519,11 @@ class CatalogContractTests(CatalogTestCase):
         allowed_runtime = {
             "native HTML/CSS",
             "Bootstrap plugin",
-            "optional Moo ESM",
+            "optional Moo UI ESM",
         }
         allowed_markup = {
             "Bootstrap/native HTML",
-            "Moo documented extension",
+            "Moo UI documented extension",
             "not applicable",
         }
         allowed_maturity = {"ready", "accepted", "certified"}
@@ -1546,14 +1575,14 @@ class CatalogContractTests(CatalogTestCase):
             # source-derived while avoiding a second public registry.
             "card": ("native HTML/CSS", "Bootstrap/native HTML"),
             "dropdown-menu": ("Bootstrap plugin", "Bootstrap/native HTML"),
-            "combobox": ("optional Moo ESM", "Moo documented extension"),
-            "sidebar": ("optional Moo ESM", "Moo documented extension"),
-            "avatar": ("native HTML/CSS", "Moo documented extension"),
-            "field": ("native HTML/CSS", "Moo documented extension"),
-            "collapsible": ("Bootstrap plugin", "Moo documented extension"),
-            "radio-group": ("native HTML/CSS", "Moo documented extension"),
-            "skeleton": ("native HTML/CSS", "Moo documented extension"),
-            "toggle-group": ("native HTML/CSS", "Moo documented extension"),
+            "combobox": ("optional Moo UI ESM", "Moo UI documented extension"),
+            "sidebar": ("optional Moo UI ESM", "Moo UI documented extension"),
+            "avatar": ("native HTML/CSS", "Moo UI documented extension"),
+            "field": ("native HTML/CSS", "Moo UI documented extension"),
+            "collapsible": ("Bootstrap plugin", "Moo UI documented extension"),
+            "radio-group": ("native HTML/CSS", "Moo UI documented extension"),
+            "skeleton": ("native HTML/CSS", "Moo UI documented extension"),
+            "toggle-group": ("native HTML/CSS", "Moo UI documented extension"),
         }
         for slug, expected in expected_classifications.items():
             with self.subTest(representative_slug=slug):
@@ -1696,7 +1725,7 @@ class CatalogContractTests(CatalogTestCase):
 
         with self.assertRaisesRegex(
             RuntimeError,
-            "Optional Moo ESM exports do not match src/js/components sources",
+            "Optional Moo UI ESM exports do not match src/js/components sources",
         ):
             site_build.derive_component_ownership(catalog, certification)
 

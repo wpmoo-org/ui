@@ -54,7 +54,7 @@
           <li>Full CSS: <code>@wpmoo/ui/moo-ui.css</code>.</li>
           <li>Scoped CSS: <code>@wpmoo/ui/moo.css</code>, loaded after Bootstrap CSS and used inside <code>.moo-ui</code>.</li>
           <li>Bootstrap JavaScript remains separate and should be loaded only when Bootstrap plugins are used.</li>
-          <li>Optional Moo ESM entrypoints initialize explicitly and do not auto-scan on import.</li>
+          <li>Optional Moo UI ESM entrypoints initialize explicitly and do not auto-scan on import.</li>
         </ul>
       </section>
 
@@ -99,7 +99,7 @@
         {{ typography("Editing Guidance", variant="section-title", id="editing-guidance") }}
         <ul>
           <li>Preserve Bootstrap markup, classes, and plugin behavior wherever Bootstrap already owns the contract.</li>
-          <li>Use Moo-owned extensions only where the component page documents them.</li>
+          <li>Use Moo UI-owned extensions only where the component page documents them.</li>
           <li>Internal Jinja macros, Sass partials, and catalog scripts are not npm APIs.</li>
           <li>Use original examples and copy; shadcn/ui is a visual reference, not a source dependency.</li>
           <li>Verify rendered HTML, keyboard behavior, and public exports before claiming a change is complete.</li>

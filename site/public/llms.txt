@@ -68,7 +68,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 </div>
 ```
 
-Optional Moo ESM is imported only for documented gaps and must be initialized
+Optional Moo UI ESM is imported only for documented gaps and must be initialized
 explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 `sidebar.js` does not scan the document.
 
@@ -76,12 +76,12 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 
 - Static HTML and CSS components: browser + Bootstrap-compatible markup
 - Bootstrap plugins: Bootstrap JavaScript and documented `data-bs-*` behavior
-- Combobox: optional Moo ESM
-- Context Menu pointer and keyboard invocation: optional Moo ESM composed with
+- Combobox: optional Moo UI ESM
+- Context Menu pointer and keyboard invocation: optional Moo UI ESM composed with
   Bootstrap Dropdown
 - DataTable sorting, filtering, selection, pagination, and responsive card sync:
-  optional Moo ESM composed with Bootstrap Table and controls
-- Sidebar state and responsive coordination: optional Moo ESM composed with
+  optional Moo UI ESM composed with Bootstrap Table and controls
+- Sidebar state and responsive coordination: optional Moo UI ESM composed with
   Bootstrap behavior
 
 ## Documentation
@@ -150,7 +150,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 ## Agent Guidance
 
 - Preserve Bootstrap behavior before adding custom behavior.
-- Use Moo ESM only for Combobox, Context Menu, DataTable, and Sidebar unless future
+- Use Moo UI ESM only for Combobox, Context Menu, DataTable, and Sidebar unless future
   documentation adds another public entrypoint.
 - Do not invent public Sass APIs, aggregate JavaScript entrypoints, or
   certification claims.

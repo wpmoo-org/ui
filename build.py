@@ -849,7 +849,7 @@ def _markup_owner_for_component(slug: str, source_file: Path) -> str:
         )
     if not source_file.exists():
         raise RuntimeError(f"Moo markup ownership source missing for {slug}")
-    return "Moo documented extension"
+    return "Moo UI documented extension"
 
 
 def derive_component_ownership(
@@ -864,7 +864,7 @@ def derive_component_ownership(
     source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
     if exported_moo_modules != source_moo_modules:
         raise RuntimeError(
-            "Optional Moo ESM exports do not match src/js/components sources"
+            "Optional Moo UI ESM exports do not match src/js/components sources"
         )
 
     certified = set(certification.get("certifiedComponents", []))
@@ -904,7 +904,7 @@ def derive_component_ownership(
         has_bootstrap_js = _has_bootstrap_js_evidence(bootstrap_sources)
         runtime_owner = "native HTML/CSS"
         if slug in exported_moo_modules:
-            runtime_owner = "optional Moo ESM"
+            runtime_owner = "optional Moo UI ESM"
         elif has_bootstrap_js:
             runtime_owner = "Bootstrap plugin"
 
