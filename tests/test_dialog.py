@@ -192,6 +192,14 @@ class DialogTests(CatalogTestCase):
         self.assertIn("rtl-english-code", output)
         self.assertIn('id="rtl">RTL</h2>', output)
 
+    def test_dialog_english_rtl_comparison_uses_ltr_modal_direction(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        english_example = source.split("{% set rtl_english %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="ltr"', english_example)
+        self.assertIn('direction="ltr"', english_example)
+        self.assertNotIn('direction="rtl"', english_example)
+
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 

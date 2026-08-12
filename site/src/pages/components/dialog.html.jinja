@@ -213,7 +213,7 @@
     {% set rtl_english %}
       <div class="d-inline-flex align-items-center gap-2" dir="ltr">
         {{ button("Open dialog", variant="outline", dialog_target="dialog-rtl-english") }}
-        {% call dialog("dialog-rtl-english", centered=true, direction="rtl") %}
+        {% call dialog("dialog-rtl-english", centered=true, direction="ltr") %}
           {{ dialog_header("dialog-rtl-english", "Escalation review") }}
           {% call dialog_body() %}
             <p>Approve ticket escalation only after support sign-off.</p>

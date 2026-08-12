@@ -8,7 +8,7 @@
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Form — Moo UI{% endblock %}
@@ -44,8 +44,8 @@
   {% endcall %}
   {% endset %}
   {% set form_usage %}
-    <p>Use a real <code>&lt;form&gt;</code> to submit a complete set of related fields through native HTML semantics. Group related controls with fieldsets and legends, and keep every editable control paired with a visible label or accessible name.</p>
-    <p>Use Bootstrap <code>.form-control</code>, <code>.form-select</code>, and <code>.form-check</code> contracts for the inputs themselves, and keep descriptions, constraints, and validation feedback close to the field they affect. For validation, add submitted-state classes to the form, connect messages with <code>aria-describedby</code>, and let native attributes such as <code>required</code>, <code>disabled</code>, and <code>readonly</code> describe the browser behavior.</p>
+    <p>Use a real <code>&lt;form&gt;</code> to submit a complete set of related fields through native HTML semantics. Compose each row with the <a href="/components/field/">Field</a> pattern, group related controls with <a href="/components/field/#fieldset">fieldsets and legends</a>, and keep every editable control paired with a visible label or accessible name.</p>
+    <p>Use Bootstrap <code>.form-control</code>, <code>.form-select</code>, and <code>.form-check</code> contracts for the inputs themselves; see <a href="/components/input/">Input</a>, <a href="/components/select/">Select</a>, and <a href="/components/checkbox/">Checkbox</a> for the control-level markup. Keep descriptions, constraints, and validation feedback close to the field they affect. For validation, add submitted-state classes to the form, connect messages with <code>aria-describedby</code>, and let native attributes such as <code>required</code>, <code>disabled</code>, and <code>readonly</code> describe the browser behavior.</p>
     <p>Keep submit and reset actions outside individual fields so they read as form-level commands. Preserve predictable tab order, avoid nested forms, and only split a long form into sections when the grouping helps users understand what will be saved together.</p>
   {% endset %}
   {{ render_component_intro(
@@ -91,8 +91,8 @@
   {% endset %}
   {{ render_example(
     "account-settings",
-    "Account settings",
-    "Use a native <code>&lt;form&gt;</code> element and compose each visible row from documented Field and form-control contracts.",
+    "Field composition",
+    "Compose a native <code>&lt;form&gt;</code> from Field, Fieldset, and Bootstrap form-control contracts.",
     account_settings,
     preview_class="moo-example__preview--narrow"
   ) }}
@@ -132,8 +132,8 @@
   {% endset %}
   {{ render_example(
     "deploy-request",
-    "Deploy request",
-    "A complete form remains plain Bootstrap form markup underneath; Moo UI only standardizes the Field composition.",
+    "Validation feedback",
+    "Keep required inputs, helper text, and invalid feedback close to the field they describe.",
     deploy_request,
     preview_class="moo-example__preview--narrow"
   ) }}
@@ -159,10 +159,97 @@
   {% endset %}
   {{ render_example(
     "access-policy",
-    "Access policy",
-    "Use Fieldset for semantic grouping even when the child controls already own their labels.",
+    "Grouped controls",
+    "Use Fieldset for related choices even when the child controls already own their labels.",
     access_policy,
     preview_class="moo-example__preview--narrow"
+  ) }}
+
+  {% set rtl_arabic %}
+    <div dir="rtl">
+      {% call form(extra_class="needs-validation", novalidate=true) %}
+        {% call fieldset("ملف الحساب", description="حدّث التفاصيل التي يراها الفريق في أدوات المشروع المشتركة.") %}
+          {% call field_group() %}
+            {% call field() %}
+              {{ input(label="اسم العرض", id="form-rtl-arabic-name", placeholder="سارة علي", required=true) }}
+            {% endcall %}
+            {% call field() %}
+              {{ select(label="قائمة العمل الافتراضية", id="form-rtl-arabic-queue", options=[
+                {"value": "", "label": "اختر القائمة", "disabled": true},
+                {"value": "ops", "label": "العمليات"},
+                {"value": "support", "label": "الدعم"},
+                {"value": "finance", "label": "المالية"}
+              ], selected="ops", dir="rtl") }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("حفظ التغييرات", type="submit") }}
+          {{ button("إعادة ضبط", variant="outline", type="reset") }}
+        </div>
+      {% endcall %}
+    </div>
+  {% endset %}
+
+  {% set rtl_hebrew %}
+    <div dir="rtl">
+      {% call form(extra_class="needs-validation", novalidate=true) %}
+        {% call fieldset("פרופיל חשבון", description="עדכן את הפרטים שהצוות רואה בכלי הפרויקט המשותפים.") %}
+          {% call field_group() %}
+            {% call field() %}
+              {{ input(label="שם תצוגה", id="form-rtl-hebrew-name", placeholder="נועה לוי", required=true) }}
+            {% endcall %}
+            {% call field() %}
+              {{ select(label="תור ברירת מחדל", id="form-rtl-hebrew-queue", options=[
+                {"value": "", "label": "בחר תור", "disabled": true},
+                {"value": "ops", "label": "תפעול"},
+                {"value": "support", "label": "תמיכה"},
+                {"value": "finance", "label": "כספים"}
+              ], selected="ops", dir="rtl") }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("שמור שינויים", type="submit") }}
+          {{ button("איפוס", variant="outline", type="reset") }}
+        </div>
+      {% endcall %}
+    </div>
+  {% endset %}
+
+  {% set rtl_english %}
+    <div dir="ltr">
+      {% call form(extra_class="needs-validation", novalidate=true) %}
+        {% call fieldset("Account profile", description="Update the details teammates see in shared project tools.") %}
+          {% call field_group() %}
+            {% call field() %}
+              {{ input(label="Display name", id="form-rtl-english-name", placeholder="Ada Lovelace", required=true) }}
+            {% endcall %}
+            {% call field() %}
+              {{ select(label="Default queue", id="form-rtl-english-queue", options=[
+                {"value": "", "label": "Choose queue", "disabled": true},
+                {"value": "ops", "label": "Operations"},
+                {"value": "support", "label": "Support"},
+                {"value": "finance", "label": "Finance"}
+              ], selected="ops", dir="ltr") }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+        <div class="d-flex flex-wrap gap-2">
+          {{ button("Save changes", type="submit") }}
+          {{ button("Reset", variant="outline", type="reset") }}
+        </div>
+      {% endcall %}
+    </div>
+  {% endset %}
+  {{ render_rtl_example(
+    "form-profile",
+    "Compare the same account profile form across Arabic and Hebrew RTL examples, with English as the LTR comparison.",
+    rtl_arabic,
+    rtl_hebrew,
+    rtl_english,
+    preview_class="moo-example__preview--narrow",
+    example_prefix="form-rtl"
   ) }}
 </div>
 

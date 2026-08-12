@@ -65,8 +65,12 @@
 // the same validation affordance.
 .form-control.is-invalid,
 .form-control.is-invalid:focus,
+.was-validated .form-control:invalid,
+.was-validated .form-control:invalid:focus,
 .form-select.is-invalid,
-.form-select.is-invalid:focus {
+.form-select.is-invalid:focus,
+.was-validated .form-select:invalid,
+.was-validated .form-select:invalid:focus {
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }
 
@@ -105,4 +109,18 @@
   border-color: var(--moo-ring);
   outline: 0;
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+// Validation input groups are also one visual control. Keep feedback outside the
+// grouped control, then paint the destructive ring on the wrapper and suppress
+// the child ring.
+.input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))):has(> :is(.form-control, .form-select).is-invalid),
+.was-validated .input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))):has(> :is(.form-control, .form-select):invalid) {
+  border-color: var(--bs-form-invalid-border-color);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
+}
+
+.input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))) > :is(.form-control, .form-select).is-invalid,
+.was-validated .input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))) > :is(.form-control, .form-select):invalid {
+  box-shadow: none;
 }

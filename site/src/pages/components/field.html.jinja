@@ -30,7 +30,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endcall %}
   {% endset %}
   {% set field_usage %}
-    <p>Use <code>.field</code> as the smallest repeatable form unit: one visible label, one control or control group, and the helper or error text that explains it. Keep the label before the control, connect helper or validation text with <code>aria-describedby</code>, and place feedback directly under the control it describes.</p>
+    <p>Use <code>.field</code> as the smallest repeatable form unit inside a <a href="/components/form/">Form</a>: one visible label, one control or control group, and the helper or error text that explains it. Keep the label before the control, connect helper or validation text with <code>aria-describedby</code>, and place feedback directly under the control it describes.</p>
     <p>Mark required, readonly, disabled, and invalid states on the native control so Bootstrap form styles and browser behavior stay aligned. When validation fails, show the invalid state on both the field context and the affected control, then keep the message specific enough to tell the user how to recover.</p>
     <p>Use field groups for stacked fields that belong to the same form section, and use a fieldset with a legend when multiple controls answer one larger question. Keep descriptions visible when they change the user's decision; avoid hiding important form instructions behind tooltips.</p>
   {% endset %}

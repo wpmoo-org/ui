@@ -12,6 +12,7 @@
 // visible content changed.
 .datatable {
   --moo-datatable-min-width: #{$moo-datatable-min-width};
+  --moo-datatable-actions-cell-fade-width: #{$moo-datatable-actions-cell-fade-width};
   --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
   --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
   --moo-datatable-select-cell-inset: #{$moo-datatable-select-cell-inset};
@@ -64,38 +65,34 @@
 
 // Pin the actions column to the inline-end edge so the menu trigger stays
 // in view at every scroll position; the opaque background hides the cells
-// sliding underneath. Row menus escape the scroll container via Popper's
-// fixed strategy (see datatable.js), so the wrapper keeps its overflow and
-// the scroll offset -- and the visible slice of the table -- never moves.
+// sliding underneath. Row menus are temporarily moved under body while open
+// (see datatable.js), so the wrapper keeps its overflow and scroll offset.
 .datatable-frame [data-datatable-column="actions"] {
   position: sticky;
   inset-inline-end: 0;
   z-index: 2;
-  background-color: var(--bs-body-bg);
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)
+  );
 }
 
-// The scroll-fade mask clips painting to the wrapper's box and would fade
-// a row menu sitting in the fade zone; dropping the fade for as long as a
-// menu is open lets the menu paint cleanly over the frame edge.
-.datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show) {
-  mask-image: none;
+[dir="rtl"] .datatable-frame [data-datatable-column="actions"],
+.datatable-frame [dir="rtl"] [data-datatable-column="actions"] {
+  background: linear-gradient(
+    270deg,
+    transparent 0,
+    var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)
+  );
 }
 
-// Row menus are trapped inside the sticky actions cell's stacking context
-// and Safari clips fixed-position descendants at the rounded frame edge.
-// Let the owning frame overflow only while a menu is open, then lift it so
-// footer pagination never paints over the dropdown.
-.datatable-frame:has(.table-row-actions .dropdown-menu.show),
+// Card menus still live inside the card frame, so lift that frame while a
+// card menu is open.
 .datatable-card-frame:has(.datatable-card .dropdown-menu.show) {
   position: relative;
   z-index: $zindex-dropdown;
   overflow: visible;
-}
-
-// Pinned cells share one z-index, so a later row's cell would paint over
-// an earlier row's open menu; lift the cell that owns the open menu.
-.datatable-frame [data-datatable-column="actions"]:has(.dropdown-menu.show) {
-  z-index: 3;
 }
 
 .datatable-frame-header {
@@ -468,6 +465,12 @@
   border-color: var(--moo-border);
   color: var(--bs-body-color);
   background-color: var(--moo-muted-surface);
+}
+
+.datatable-view-toggle .btn-check:focus-visible + .datatable-view-option {
+  z-index: 3;
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }
 
 .datatable-view-trigger {

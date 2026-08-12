@@ -146,7 +146,7 @@ class TableTests(CatalogTestCase):
 
         self.assertIn('@import "components/table";', COMPONENT_LAYER.read_text(encoding="utf-8"))
         self.assertIn(
-            '.table-responsive:has(.table-row-actions > [aria-expanded="true"])',
+            '.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"])',
             styles,
         )
         self.assertIn("overflow: visible;", styles)

@@ -12,6 +12,7 @@
   {"slug": "iphone", "label": "iPhone"},
   {"slug": "android", "label": "Android"}
 ] %}
+{% set acceptance_total = catalog | length * ((acceptance_devices | length * 3) + 1) %}
 
 {% block body %}
   <main class="moo-acceptance" id="main-content" tabindex="-1" data-moo-acceptance-portal data-moo-acceptance-key="rc2-component-matrix">
@@ -24,7 +25,7 @@
         </div>
         <div class="moo-acceptance__header-actions">
           <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-acceptance-export>Export Summary</button>
-          <div class="moo-acceptance__count" aria-live="polite" data-moo-acceptance-count>0/{{ catalog | length * acceptance_devices | length * 4 }}</div>
+          <div class="moo-acceptance__count" aria-live="polite" data-moo-acceptance-count>0/{{ acceptance_total }}</div>
         </div>
       </header>
 
@@ -82,8 +83,12 @@
                 <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Voice">
                   <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-voice" data-moo-acceptance-check>
                 </div>
-                <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Keyboard">
-                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-keyboard" data-moo-acceptance-check>
+                <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Keyboard"{% if device.slug != "safari" %} data-moo-acceptance-state="N/A"{% endif %}>
+                  {% if device.slug == "safari" %}
+                    <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-keyboard" data-moo-acceptance-check>
+                  {% else %}
+                    <span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on {{ device.label }}">&ndash;</span>
+                  {% endif %}
                 </div>
               {% endfor %}
             </div>

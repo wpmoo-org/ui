@@ -127,7 +127,7 @@ class AlertDialogTests(CatalogTestCase):
         self.assertIn("render_rtl_example", source)
         self.assertIn('"alert-dialog"', source)
         self.assertIn('preview_class="moo-example__preview--fit"', source)
-        self.assertGreaterEqual(source.count('direction="rtl"'), 3)
+        self.assertGreaterEqual(source.count('direction="rtl"'), 2)
 
         result = self.run_build()
 
@@ -136,6 +136,14 @@ class AlertDialogTests(CatalogTestCase):
         self.assertIn('id="rtl"', page)
         self.assertIn("alert-dialog-direction-tabs", page)
         self.assertIn("rtl-arabic-code", page)
+
+    def test_english_rtl_tab_keeps_modal_text_ltr(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        english_block = source.split("{% set rtl_english %}", 1)[1].split("{% endset %}", 1)[0]
+
+        self.assertIn('<div dir="ltr">', english_block)
+        self.assertIn('direction="ltr"', english_block)
+        self.assertNotIn('direction="rtl"', english_block)
 
     def test_requires_dialog_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Alert Dialog id is required"):

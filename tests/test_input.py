@@ -212,8 +212,12 @@ class InputTests(CatalogTestCase):
         self.assertIn("$enable-validation-icons: false !default;", bootstrap_overrides)
         self.assertIn(".form-control.is-invalid,", focus)
         self.assertIn(".form-control.is-invalid:focus,", focus)
+        self.assertIn(".was-validated .form-control:invalid,", focus)
+        self.assertIn(".was-validated .form-control:invalid:focus,", focus)
         self.assertIn(".form-select.is-invalid,", focus)
-        self.assertIn(".form-select.is-invalid:focus", focus)
+        self.assertIn(".form-select.is-invalid:focus,", focus)
+        self.assertIn(".was-validated .form-select:invalid,", focus)
+        self.assertIn(".was-validated .form-select:invalid:focus", focus)
         self.assertIn(
             "box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);",
             focus,
@@ -243,6 +247,15 @@ class InputTests(CatalogTestCase):
         self.assertIn(" is-invalid", output)
         self.assertIn(' aria-invalid="true"', output)
         self.assertIn(" required", output)
+
+    def test_full_form_example_uses_preview_validation_handler(self) -> None:
+        page_source = PAGE.read_text(encoding="utf-8")
+        form_block = page_source[
+            page_source.index("{% set full_form %}"):
+            page_source.index("{% set rtl_arabic %}")
+        ]
+
+        self.assertIn('form(extra_class="needs-validation mx-auto", novalidate=true)', form_block)
 
     def test_input_describedby_links_helper_text(self) -> None:
         output = self.render_input(

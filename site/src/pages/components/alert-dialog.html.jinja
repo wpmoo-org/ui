@@ -183,7 +183,7 @@
     {% set rtl_english %}
       <div dir="ltr">
         {{ button("Delete customer data", variant="outline", dialog_target="alert-dialog-rtl-english") }}
-        {% call alert_dialog("alert-dialog-rtl-english", direction="rtl", describedby="alert-dialog-rtl-english-description") %}
+        {% call alert_dialog("alert-dialog-rtl-english", direction="ltr", describedby="alert-dialog-rtl-english-description") %}
           {{ alert_dialog_header(
             "alert-dialog-rtl-english",
             "Delete this customer data?",

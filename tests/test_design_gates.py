@@ -490,6 +490,7 @@ class DesignGateTests(CatalogTestCase):
             "catalog/blocks",
             "catalog/code",
             "catalog/command",
+            "catalog/acceptance",
         ]
         imports = [
             target

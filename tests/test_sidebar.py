@@ -505,6 +505,13 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("outline: 0", collapsed_account_focus)
         self.assertIn("box-shadow: none", collapsed_account_focus)
 
+    def test_sidebar_avatar_uses_default_avatar_shape(self) -> None:
+        styles = read_sidebar_styles()
+
+        self.assertNotIn(".sidebar-avatar {", styles)
+        self.assertNotIn(".sidebar-avatar > img", styles)
+        self.assertNotIn(".sidebar-avatar > .avatar-fallback", styles)
+
     def test_sidebar_workspace_dropdown_uses_identity_trigger_contract(self) -> None:
         styles = read_sidebar_styles()
         dropdown_styles = ROOT.joinpath("scss/components/_dropdown.scss").read_text()
@@ -551,6 +558,33 @@ class SidebarTests(CatalogTestCase):
             collapsed_header_dropdown,
         )
         self.assertIn("transform: none !important", collapsed_header_dropdown)
+
+    def test_sidebar_identity_dropdowns_stack_inside_small_mobile_drawer(self) -> None:
+        dropdown_styles = ROOT.joinpath("scss/components/_dropdown.scss").read_text()
+
+        self.assertIn("@include media-breakpoint-down(sm)", dropdown_styles)
+        shared_dropdown = _css_block(
+            dropdown_styles,
+            '[data-slot="sidebar-header"] .dropend > .dropdown-menu,\n  [data-slot="sidebar-footer"] .dropend > .dropdown-menu',
+        )
+
+        self.assertIn("left: 0 !important", shared_dropdown)
+        self.assertIn("right: 0 !important", shared_dropdown)
+        self.assertIn("min-width: 100%", shared_dropdown)
+        self.assertIn("transform: none !important", shared_dropdown)
+
+        self.assertIn(
+            '[data-slot="sidebar-header"] .dropend > .dropdown-menu {\n'
+            "    top: calc(100% + #{$spacer * 0.25}) !important;\n"
+            "    bottom: auto !important;",
+            dropdown_styles,
+        )
+        self.assertIn(
+            '[data-slot="sidebar-footer"] .dropend > .dropdown-menu {\n'
+            "    top: auto !important;\n"
+            "    bottom: calc(100% + #{$spacer * 0.25}) !important;",
+            dropdown_styles,
+        )
 
     def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
         # Regression coverage: sidebar(variant="floating") accepted the enum

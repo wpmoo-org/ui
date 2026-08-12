@@ -112,6 +112,33 @@ export function initAcceptancePortal(root = document) {
           ? "Done"
           : "Missing";
       });
+      portal.querySelectorAll('[data-moo-acceptance-state="N/A"]').forEach((item) => {
+        const component = item.dataset.mooAcceptanceComponent || "Unknown";
+        const device = item.dataset.mooAcceptanceDevice || "Unknown";
+        const kind = item.dataset.mooAcceptanceKind || "Unknown";
+        if (!componentMap.has(component)) {
+          const entry = {
+            label: component,
+            devices: [],
+            deviceMap: new Map(),
+          };
+          componentMap.set(component, entry);
+          components.push(entry);
+        }
+        const componentEntry = componentMap.get(component);
+        if (!componentEntry.deviceMap.has(device)) {
+          const deviceEntry = {
+            label: device,
+            Visual: "Missing",
+            Fixture: "Missing",
+            Voice: "Missing",
+            Keyboard: "Missing",
+          };
+          componentEntry.deviceMap.set(device, deviceEntry);
+          componentEntry.devices.push(deviceEntry);
+        }
+        componentEntry.deviceMap.get(device)[kind] = "N/A";
+      });
 
       const checkedCount = checks.filter((check) => stored[check.id] === true).length;
       const lines = [

@@ -13,6 +13,7 @@ DOCUMENTATION_PAGE = ROOT / "site/src/pages/components/datatable.html.jinja"
 CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/datatable.html"
 DATATABLE_JS = ROOT / "src/js/components/datatable.js"
 DATATABLE_SCSS = ROOT / "scss/components/_datatable.scss"
+TABLE_SCSS = ROOT / "scss/components/_table.scss"
 MACHINE_PATH_ROOTS = (
     ROOT / "src",
     ROOT / "site/src",
@@ -420,20 +421,45 @@ class DataTableTests(CatalogTestCase):
         self.assertIn('boundary: "viewport"', source)
         self.assertIn("padding: 8", source)
 
-    def test_datatable_frame_releases_row_menu_clipping_when_open(self) -> None:
-        source = DATATABLE_SCSS.read_text(encoding="utf-8")
-        frame_rule = source.split(
-            ".datatable-frame:has(.table-row-actions .dropdown-menu.show),",
-            1,
-        )[1].split("}", 1)[0]
+    def test_row_action_dropdowns_escape_scroll_frame_without_changing_frame_overflow(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
 
-        self.assertIn(
-            ".datatable-card-frame:has(.datatable-card .dropdown-menu.show)",
-            frame_rule,
-        )
-        self.assertIn("position: relative;", frame_rule)
-        self.assertIn("z-index: $zindex-dropdown;", frame_rule)
-        self.assertIn("overflow: visible;", frame_rule)
+        self.assertIn("this._reparentedRowMenus = new Map();", source)
+        self.assertIn('trigger?.closest?.(".table-row-actions")', source)
+        self.assertIn("this._document.body.appendChild(menu);", source)
+        self.assertIn("this._restoreRowActionMenuForTrigger(event.target);", source)
+        self.assertIn("this._restoreRowActionMenus();", source)
+
+    def test_datatable_frame_keeps_row_menu_out_of_overflow_rules(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+        table_source = TABLE_SCSS.read_text(encoding="utf-8")
+        card_frame_rule = source.split(".datatable-card-frame:has(.datatable-card .dropdown-menu.show)", 1)[1].split("}", 1)[0]
+
+        self.assertNotIn(".datatable-frame:has(.table-row-actions .dropdown-menu.show)", source)
+        self.assertNotIn(".datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show)", source)
+        self.assertIn('.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"])', table_source)
+        self.assertNotIn('.table-responsive:has(.table-row-actions > [aria-expanded="true"])', table_source)
+        self.assertIn("position: relative;", card_frame_rule)
+        self.assertIn("z-index: $zindex-dropdown;", card_frame_rule)
+        self.assertIn("overflow: visible;", card_frame_rule)
+
+    def test_datatable_sticky_action_cell_uses_soft_fade_background(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn("--moo-datatable-actions-cell-fade-width", source)
+        self.assertIn(".datatable-frame [data-datatable-column=\"actions\"]", source)
+        self.assertIn("linear-gradient(", source)
+        self.assertIn("transparent 0", source)
+        self.assertIn("var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)", source)
+        self.assertIn('[dir="rtl"] .datatable-frame [data-datatable-column="actions"]', source)
+
+    def test_datatable_view_toggle_paints_focus_ring_on_visible_label(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn(".datatable-view-toggle .btn-check:focus-visible + .datatable-view-option", source)
+        self.assertIn("border-color: var(--moo-ring);", source)
+        self.assertIn("box-shadow: 0 0 0 #{$moo-form-focus-ring-width}", source)
+        self.assertIn("z-index: 3;", source)
 
     def test_documentation_page_contains_the_rendered_release_review_showcase(
         self,

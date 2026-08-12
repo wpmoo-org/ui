@@ -1,4 +1,4 @@
-.table-responsive:has(.table-row-actions > [aria-expanded="true"]) {
+.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"]) {
   overflow: visible;
 }
 

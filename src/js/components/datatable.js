@@ -47,6 +47,7 @@ export default class DataTable {
     this._searchTerm = "";
     this._tooltips = [];
     this._filterMode = element.dataset.datatableFilterMode || "inline";
+    this._reparentedRowMenus = new Map();
 
     this._rows = Array.from(this._tbody.querySelectorAll(":scope > tr[data-datatable-row]")).map((tr, index) => ({
       element: tr,
@@ -67,6 +68,7 @@ export default class DataTable {
   }
 
   dispose() {
+    this._restoreRowActionMenus();
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
@@ -88,13 +90,11 @@ export default class DataTable {
     this._listeners.push({ target, type, handler, options });
   }
 
-  // Row menus live inside the horizontally scrollable wrapper. Flipping the
-  // wrapper's overflow to let the menu escape would reset its scroll offset
-  // and shuffle the visible slice of the table, so the menu escapes instead:
-  // Popper's fixed strategy positions it against the viewport, clear of the
-  // wrapper's clipping (no ancestor establishes a containing block). The
-  // viewport boundary and top fallbacks keep the menu inside scaled preview
-  // iframes and Safari's stricter clipping behavior.
+  // Row menus are authored next to their trigger so the public HTML stays
+  // inspectable, but when opened they are temporarily moved under body.
+  // That keeps the menu out of the scroll wrapper's layout math, so Safari
+  // cannot clip it at the rounded frame edge or shift the visible table
+  // slice while Popper positions it against the viewport.
   _initRowActionDropdowns() {
     const Dropdown = this._bootstrap("Dropdown");
     if (!Dropdown) {
@@ -123,6 +123,54 @@ export default class DataTable {
           ],
         }),
       });
+    });
+  }
+
+  _rowActionMenuForTrigger(trigger) {
+    if (!trigger?.closest?.(".table-row-actions")) {
+      return null;
+    }
+    return trigger.closest(".dropdown")?.querySelector(":scope > .dropdown-menu") || null;
+  }
+
+  _reparentRowActionMenu(trigger) {
+    const menu = this._rowActionMenuForTrigger(trigger);
+    if (!menu || this._reparentedRowMenus.has(menu)) {
+      return;
+    }
+    this._reparentedRowMenus.set(menu, {
+      parent: menu.parentNode,
+      nextSibling: menu.nextSibling,
+    });
+    this._document.body.appendChild(menu);
+  }
+
+  _restoreRowActionMenuForTrigger(trigger) {
+    const menu = this._rowActionMenuForTrigger(trigger);
+    if (menu) {
+      this._restoreRowActionMenu(menu);
+    }
+  }
+
+  _restoreRowActionMenu(menu) {
+    const original = this._reparentedRowMenus.get(menu);
+    if (!original) {
+      return;
+    }
+    const { parent, nextSibling } = original;
+    if (parent?.isConnected) {
+      if (nextSibling?.parentNode === parent) {
+        parent.insertBefore(menu, nextSibling);
+      } else {
+        parent.appendChild(menu);
+      }
+    }
+    this._reparentedRowMenus.delete(menu);
+  }
+
+  _restoreRowActionMenus() {
+    Array.from(this._reparentedRowMenus.keys()).forEach((menu) => {
+      this._restoreRowActionMenu(menu);
     });
   }
 
@@ -1106,11 +1154,13 @@ export default class DataTable {
     // no-op for as long as the dropdown stays open, however it gets
     // re-triggered.
     this._listen(this._element, "show.bs.dropdown", (event) => {
+      this._reparentRowActionMenu(event.target);
       const tooltip = this._bootstrap("Tooltip")?.getInstance(event.target);
       tooltip?.hide();
       tooltip?.disable();
     });
     this._listen(this._element, "hidden.bs.dropdown", (event) => {
+      this._restoreRowActionMenuForTrigger(event.target);
       this._bootstrap("Tooltip")?.getInstance(event.target)?.enable();
       if (event.target.matches("[data-datatable-filter-menu-trigger]")) {
         this._showFilterPickerPanel();

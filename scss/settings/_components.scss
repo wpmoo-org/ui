@@ -366,6 +366,9 @@ $moo-datatable-min-width: 48rem !default;
 $moo-datatable-release-review-min-width: 64rem !default;
 $moo-datatable-card-min-width: 20rem !default;
 $moo-datatable-card-label-width: 7rem !default;
+// Sticky row-action cells need just enough opaque surface for the trigger;
+// this fade prevents the pinned cell from reading as a dominant blank column.
+$moo-datatable-actions-cell-fade-width: 1.25rem !default;
 // Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
 // these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
 $moo-datatable-frame-header-min-height: 2.78125rem !default;

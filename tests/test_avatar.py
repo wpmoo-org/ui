@@ -11,6 +11,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/avatar.html.jinja"
 PAGE = ROOT / "site/src/pages/components/avatar.html.jinja"
 STYLE = ROOT / "scss/components/_avatar.scss"
+CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/avatar.html"
 
 
 class AvatarTests(CatalogTestCase):
@@ -104,6 +105,15 @@ class AvatarTests(CatalogTestCase):
         page = PAGE.read_text()
 
         self.assertIn("render_rtl_example", page)
+        self.assertIn('aria_label="Open profile menu"', page)
+
+    def test_avatar_certification_image_fixture_uses_visible_media(self) -> None:
+        fixture = CERTIFICATION_FIXTURE.read_text()
+
+        self.assertIn('id="certification-avatar-image"', fixture)
+        self.assertIn("avatar--has-image", fixture)
+        self.assertIn('<span class="avatar-fallback">GH</span>', fixture)
+        self.assertNotIn("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7", fixture)
 
     def test_avatar_badge_paints_above_avatar_outline(self) -> None:
         style = STYLE.read_text()

@@ -221,6 +221,18 @@ class FieldTests(CatalogTestCase):
                     section,
                 )
 
+    def test_usage_links_back_to_form_page(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/field.html")
+
+        usage = page.split('id="usage">Usage</h2>', 1)[1].split(
+            'id="full-example">Full example</h2>',
+            1,
+        )[0]
+
+        self.assertIn('href="/components/form/"', usage)
+
         self.assertGreaterEqual(
             page.count('<div class="w-100" dir="rtl">'),
             2,

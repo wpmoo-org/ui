@@ -1170,10 +1170,24 @@ def copy_certification_fixtures_to_site() -> None:
     if not CERTIFICATION_FIXTURES.exists():
         return
 
+    catalog_entries = [
+        entry
+        for entry in load_catalog()
+        if (CERTIFICATION_FIXTURES / f"{entry['slug']}.html").is_file()
+    ]
     fixture_dir = SITE_DIST / "tests/fixtures/certification"
     fixture_dir.mkdir(parents=True, exist_ok=True)
-    for fixture in sorted(CERTIFICATION_FIXTURES.glob("*.html")):
-        shutil.copy2(fixture, fixture_dir / fixture.name)
+    for index, entry in enumerate(catalog_entries):
+        fixture = CERTIFICATION_FIXTURES / f"{entry['slug']}.html"
+        output = fixture_dir / fixture.name
+        output.write_text(
+            add_certification_fixture_pagination(
+                fixture.read_text(encoding="utf-8"),
+                catalog_entries,
+                index,
+            ),
+            encoding="utf-8",
+        )
 
     public_dist = SITE_DIST / "dist"
     shutil.copytree(PACKAGE_DIST / "assets", public_dist / "assets", dirs_exist_ok=True)
@@ -1189,6 +1203,66 @@ def copy_certification_fixtures_to_site() -> None:
             BOOTSTRAP / "dist/js" / bootstrap_file,
             public_bootstrap_js / bootstrap_file,
         )
+
+
+def add_certification_fixture_pagination(
+    source: str,
+    entries: list[dict[str, str]],
+    index: int,
+) -> str:
+    if "</body>" not in source:
+        return source
+
+    previous_entry = entries[index - 1] if index > 0 else None
+    next_entry = entries[index + 1] if index + 1 < len(entries) else None
+    links: list[str] = []
+    if previous_entry:
+        previous_label = escape(previous_entry["label"])
+        links.append(
+            '<a class="btn btn-outline-secondary" '
+            f'href="{escape(previous_entry["slug"])}.html" '
+            f'aria-label="Previous fixture: {previous_label}">'
+            f"Previous</a>"
+        )
+    else:
+        links.append(
+            '<span class="btn btn-outline-secondary disabled" aria-disabled="true">'
+            "Previous</span>"
+        )
+
+    if next_entry:
+        next_label = escape(next_entry["label"])
+        links.append(
+            '<a class="btn btn-outline-secondary" '
+            f'href="{escape(next_entry["slug"])}.html" '
+            f'aria-label="Next fixture: {next_label}">'
+            f"Next</a>"
+        )
+    else:
+        links.append(
+            '<span class="btn btn-outline-secondary disabled" aria-disabled="true">'
+            "Next</span>"
+        )
+
+    pagination = (
+        '<nav class="moo-fixture-pagination" aria-label="Certification fixture pagination">'
+        '<div class="btn-group" role="group">'
+        f"{''.join(links)}"
+        "</div>"
+        "</nav>"
+    )
+    style = (
+        "<style>"
+        ".moo-fixture-pagination{display:flex;justify-content:center;margin-top:2rem}"
+        ".moo-fixture-pagination .btn{min-width:6rem}"
+        "</style>"
+    )
+
+    if "</head>" in source:
+        source = source.replace("</head>", f"{style}</head>", 1)
+    else:
+        pagination = f"{style}{pagination}"
+    return source.replace("</body>", f"{pagination}</body>", 1)
 
 
 def version_site_module_imports() -> None:

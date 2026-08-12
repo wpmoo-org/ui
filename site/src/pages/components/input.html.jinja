@@ -314,7 +314,7 @@
     ) }}
 
     {% set full_form %}
-      {% call form(extra_class="mx-auto", novalidate=true) %}
+      {% call form(extra_class="needs-validation mx-auto", novalidate=true) %}
       {% call fieldset("Shipping details", description="Used to calculate delivery time and customs fees.") %}
       {% call field_group() %}
       {% call field() %}

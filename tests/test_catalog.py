@@ -89,6 +89,38 @@ class CatalogContractTests(CatalogTestCase):
                     f"{path.relative_to(ROOT)} must sort components by label",
                 )
 
+    def test_ready_component_sidebar_icons_do_not_fall_back_for_new_components(self) -> None:
+        source = (ROOT / "site/src/includes/component-icons.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        for slug in (
+            "alert-dialog",
+            "combobox",
+            "context-menu",
+            "datatable",
+            "form",
+            "menubar",
+            "skeleton",
+            "toggle-group",
+        ):
+            with self.subTest(slug=slug):
+                self.assertRegex(source, rf'"{re.escape(slug)}":\s*"(?!component")')
+
+    def test_form_adjacent_sidebar_icons_use_distinct_semantic_glyphs(self) -> None:
+        source = (ROOT / "site/src/includes/component-icons.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        for slug, icon in (
+            ("form", "form"),
+            ("field", "rectangle-ellipsis"),
+            ("input-group", "brackets"),
+            ("skeleton", "square-dashed"),
+        ):
+            with self.subTest(slug=slug):
+                self.assertRegex(source, rf'"{re.escape(slug)}":\s*"{icon}"')
+
     def test_public_site_does_not_claim_certified_components_before_certification(self) -> None:
         result = self.run_build()
 
@@ -123,6 +155,55 @@ class CatalogContractTests(CatalogTestCase):
         for claim in forbidden_claims:
             with self.subTest(claim=claim):
                 self.assertNotIn(claim, normalized_source)
+
+    def test_acceptance_portal_marks_mobile_keyboard_checks_not_applicable(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("acceptance/rc2.html")
+        self.assertNotIn("acceptance-accordion-iphone-keyboard", page)
+        self.assertNotIn("acceptance-accordion-android-keyboard", page)
+        self.assertIn(
+            'data-moo-acceptance-kind="Keyboard" data-moo-acceptance-state="N/A"',
+            page,
+        )
+        self.assertNotIn(
+            'type="checkbox" disabled aria-label="Keyboard not applicable on iPhone"',
+            page,
+        )
+        self.assertNotIn(
+            'type="checkbox" disabled aria-label="Keyboard not applicable on Android"',
+            page,
+        )
+        self.assertIn(
+            '<span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on iPhone">&ndash;</span>',
+            page,
+        )
+        self.assertIn(
+            '<span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on Android">&ndash;</span>',
+            page,
+        )
+
+    def test_certification_fixtures_get_build_time_pagination(self) -> None:
+        source = (
+            ROOT / "tests/fixtures/certification/accordion.html"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("moo-fixture-pagination", source)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        accordion = (
+            DIST / "tests/fixtures/certification/accordion.html"
+        ).read_text(encoding="utf-8")
+        alert = (
+            DIST / "tests/fixtures/certification/alert.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('class="moo-fixture-pagination"', accordion)
+        self.assertIn('href="alert.html"', accordion)
+        self.assertIn('aria-label="Next fixture: Alert"', accordion)
+        self.assertIn('href="accordion.html"', alert)
+        self.assertIn('aria-label="Previous fixture: Accordion"', alert)
 
     def test_llms_txt_lists_ready_components_alphabetically(self) -> None:
         catalog = json.loads(
@@ -215,9 +296,15 @@ class CatalogContractTests(CatalogTestCase):
             # the partial scopes a layout rule to that Bootstrap wrapper.
             "breadcrumb": ("breadcrumb", "dropdown"),
             # Dropdown toggle rows use Bootstrap Button's .active data-api
-            # state while scoped under .dropdown-item-check.
-            "dropdown": ("dropdown", "active"),
+            # state while scoped under .dropdown-item-check. Bootstrap
+            # Dropdown also exposes directional wrappers such as .dropend;
+            # the mobile sidebar placement rule retunes the native dropdown
+            # surface while staying in the dropdown partial.
+            "dropdown": ("dropdown", "dropend", "active"),
             "input": ("form-control", "form-select"),
+            # Table owns Bootstrap's static table family and the horizontal
+            # scroll-fade helper used beside responsive table wrappers.
+            "table": ("table", "table-responsive", "scroll-fade-x"),
             # Bootstrap renders both single-line inputs and textareas through
             # the shared `.form-control` family.
             "textarea": ("form-control",),
@@ -271,6 +358,10 @@ class CatalogContractTests(CatalogTestCase):
             # and also fixes the grid stacking on Bootstrap's own tab-content
             # and tab-pane classes.
             "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
+            # Toggle Group composes Bootstrap's .btn-check + label.btn
+            # contract and suppresses the generic pressed transform only
+            # inside the .toggle-group scope.
+            "toggle_group": ("toggle-group", "btn", "disabled"),
             # Dialog is the Moo catalog name for Bootstrap's Modal component;
             # its native selector family is "modal-", not "dialog-".
             "dialog": ("modal", "show"),

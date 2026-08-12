@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -127,6 +128,29 @@
       "Badge with icon",
       "Use an icon badge when the avatar needs one compact action cue.",
       badge_with_icon
+    ) }}
+
+    {% set dropdown_example %}
+      {% call dropdown(
+        avatar(name="Cangir", src=avatar_cangir, alt="Illustrated profile photo of Cangir", fallback="CA"),
+        variant="ghost",
+        align="end",
+        size="icon",
+        aria_label="Open profile menu"
+      ) %}
+        {{ dropdown_header("Ahmet Cangir") }}
+        {{ dropdown_item("Profile", icon="user") }}
+        {{ dropdown_item("Settings", icon="settings") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Sign out", icon="log-out") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "dropdown",
+      "Dropdown",
+      "Use an avatar as the trigger for a compact profile menu when account actions belong to the current user.",
+      dropdown_example,
+      preview_class="moo-example__preview--narrow"
     ) }}
 
     {% set group %}

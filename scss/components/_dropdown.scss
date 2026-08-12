@@ -47,8 +47,8 @@
 }
 
 // Destructive dropdown items use the shared --moo-destructive token so the
-// red stays in sync with every other destructive control. Matches shadcn's
-// pattern: red text on transparent bg at rest, destructive-tinted bg on hover.
+// red stays in sync with every other destructive control. Matches the
+// reference pattern: red text at rest, destructive-tinted bg on hover.
 .dropdown-item[data-variant="destructive"] {
   color: var(--moo-destructive) !important;
 }
@@ -165,6 +165,27 @@
   // var() as a non-numeric argument, so escape it through to plain CSS
   // (same technique already used for clamp() in the catalog stylesheet).
   min-width: #{unquote("max(100%, var(--moo-dropdown-sidebar-min-width))")};
+}
+
+@include media-breakpoint-down(sm) {
+  [data-slot="sidebar-header"] .dropend > .dropdown-menu,
+  [data-slot="sidebar-footer"] .dropend > .dropdown-menu {
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 100%;
+    margin: 0;
+    transform: none !important;
+  }
+
+  [data-slot="sidebar-header"] .dropend > .dropdown-menu {
+    top: calc(100% + #{$spacer * 0.25}) !important;
+    bottom: auto !important;
+  }
+
+  [data-slot="sidebar-footer"] .dropend > .dropdown-menu {
+    top: auto !important;
+    bottom: calc(100% + #{$spacer * 0.25}) !important;
+  }
 }
 
 @include media-breakpoint-up(lg) {

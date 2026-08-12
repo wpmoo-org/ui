@@ -8,6 +8,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 CATALOG_JS = ROOT / "site/src/js/catalog"
 MODULES = {
+    "acceptance.js": "initAcceptancePortal",
     "theme.js": "initTheme",
     "catalog-filter.js": "initCatalogFilter",
     "command.js": "initCommand",

@@ -24,17 +24,18 @@
 // box by exactly 2 * $input-border-width — this is what actually poked past
 // the rounded corner, not the corner radius itself.
 //
-// Excludes the block-align case (a [data-align] addon wrapping to its own
-// row below/above the control): the fixed single-row height here has higher
+// Excludes groups with validation feedback (feedback wraps below the control)
+// and the block-align case (a [data-align] addon wrapping to its own row
+// below/above the control): the fixed single-row height here has higher
 // specificity than the auto-height override further down for that case
 // (:not(:has(...)) chains add specificity these two-class selectors don't),
 // so without this exclusion the parent stayed pinned to one row's height
 // and the wrapped addon rendered outside its own border box entirely.
-.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])):not(:has(> [data-align])) {
+.input-group:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))):not(:has(textarea)):not(:has(> .form-control[type="file"])):not(:has(> [data-align])) {
   height: calc(#{$input-height} + #{$input-border-width} * 2);
 }
 
-.input-group:not(:has(textarea)):not(:has(> .form-control[type="file"])):not(:has(> [data-align])) > .form-control {
+.input-group:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))):not(:has(textarea)):not(:has(> .form-control[type="file"])):not(:has(> [data-align])) > .form-control {
   min-height: 0;
 }
 
