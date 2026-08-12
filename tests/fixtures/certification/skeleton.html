@@ -9,13 +9,35 @@
       body {
         margin: 0;
         min-height: 100vh;
-        padding: 2rem;
+        padding: clamp(1.5rem, 4vw, 3rem);
       }
 
       main {
         display: grid;
-        gap: 1rem;
-        max-width: 24rem;
+        gap: 2rem;
+        width: min(100%, 42rem);
+      }
+
+      .fixture-skeletons {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .fixture-profile-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .fixture-profile-copy {
+        display: grid;
+        gap: 0.5rem;
+        min-width: 0;
+      }
+
+      #certification-skeleton-avatar {
+        border-radius: 50%;
+        flex: 0 0 auto;
       }
     </style>
   </head>
@@ -23,27 +45,31 @@
     <main aria-labelledby="fixture-title">
       <h1 id="fixture-title">Skeleton certification fixture</h1>
 
-      <section aria-label="Loading placeholders">
-        <div
-          class="skeleton placeholder-glow"
-          aria-hidden="true"
-          style="width: 8rem;"
-          id="certification-skeleton-text"
-        >
-          <span class="placeholder" style="width: 100%"></span>
+      <section class="fixture-skeletons" aria-label="Loading placeholders">
+        <div class="fixture-profile-row">
+          <div
+            class="skeleton placeholder-glow"
+            aria-hidden="true"
+            style="width: 2.5rem; height: 2.5rem;"
+            id="certification-skeleton-avatar"
+          >
+            <span class="placeholder" style="width: 100%; height: 100%"></span>
+          </div>
+          <div class="fixture-profile-copy">
+            <div
+              class="skeleton placeholder-glow"
+              aria-hidden="true"
+              style="width: 10rem; height: .875rem;"
+              id="certification-skeleton-text"
+            >
+              <span class="placeholder" style="width: 100%; height: 100%"></span>
+            </div>
+          </div>
         </div>
         <div
           class="skeleton placeholder-glow"
           aria-hidden="true"
-          style="width: 2.5rem; height: 2.5rem;"
-          id="certification-skeleton-avatar"
-        >
-          <span class="placeholder" style="width: 100%; height: 100%"></span>
-        </div>
-        <div
-          class="skeleton placeholder-glow"
-          aria-hidden="true"
-          style="width: 100%; height: 6rem;"
+          style="width: min(100%, 18rem); height: 8rem;"
           id="certification-skeleton-block"
         >
           <span class="placeholder" style="width: 100%; height: 100%"></span>
