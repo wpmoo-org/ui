@@ -92,7 +92,9 @@ export default class DataTable {
   // wrapper's overflow to let the menu escape would reset its scroll offset
   // and shuffle the visible slice of the table, so the menu escapes instead:
   // Popper's fixed strategy positions it against the viewport, clear of the
-  // wrapper's clipping (no ancestor establishes a containing block).
+  // wrapper's clipping (no ancestor establishes a containing block). The
+  // viewport boundary and top fallbacks keep the menu inside scaled preview
+  // iframes and Safari's stricter clipping behavior.
   _initRowActionDropdowns() {
     const Dropdown = this._bootstrap("Dropdown");
     if (!Dropdown) {
@@ -100,7 +102,26 @@ export default class DataTable {
     }
     this._element.querySelectorAll(".table-responsive .table-row-actions [data-bs-toggle=\"dropdown\"]").forEach((trigger) => {
       Dropdown.getOrCreateInstance(trigger, {
-        popperConfig: (defaultConfig) => ({ ...defaultConfig, strategy: "fixed" }),
+        popperConfig: (defaultConfig) => ({
+          ...defaultConfig,
+          strategy: "fixed",
+          modifiers: [
+            ...(defaultConfig.modifiers || []),
+            {
+              name: "flip",
+              options: {
+                fallbackPlacements: ["top-end", "top-start", "bottom-end", "bottom-start"],
+              },
+            },
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "viewport",
+                padding: 8,
+              },
+            },
+          ],
+        }),
       });
     });
   }

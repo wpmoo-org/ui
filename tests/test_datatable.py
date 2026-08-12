@@ -11,6 +11,8 @@ COMPONENT = ROOT / "src/components/datatable.html.jinja"
 RELEASE_REVIEW_BLOCK = ROOT / "site/src/blocks/datatable_release_review.html.jinja"
 DOCUMENTATION_PAGE = ROOT / "site/src/pages/components/datatable.html.jinja"
 CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/datatable.html"
+DATATABLE_JS = ROOT / "src/js/components/datatable.js"
+DATATABLE_SCSS = ROOT / "scss/components/_datatable.scss"
 MACHINE_PATH_ROOTS = (
     ROOT / "src",
     ROOT / "site/src",
@@ -409,6 +411,29 @@ class DataTableTests(CatalogTestCase):
         self.assertIn("Open ticket", first_action.text_content())
         self.assertIn("Assign owner", first_action.text_content())
         self.assertIn("Copy link", first_action.text_content())
+
+    def test_row_action_dropdowns_flip_inside_preview_viewports(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn('strategy: "fixed"', source)
+        self.assertIn('fallbackPlacements: ["top-end", "top-start", "bottom-end", "bottom-start"]', source)
+        self.assertIn('boundary: "viewport"', source)
+        self.assertIn("padding: 8", source)
+
+    def test_datatable_frame_releases_row_menu_clipping_when_open(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+        frame_rule = source.split(
+            ".datatable-frame:has(.table-row-actions .dropdown-menu.show),",
+            1,
+        )[1].split("}", 1)[0]
+
+        self.assertIn(
+            ".datatable-card-frame:has(.datatable-card .dropdown-menu.show)",
+            frame_rule,
+        )
+        self.assertIn("position: relative;", frame_rule)
+        self.assertIn("z-index: $zindex-dropdown;", frame_rule)
+        self.assertIn("overflow: visible;", frame_rule)
 
     def test_documentation_page_contains_the_rendered_release_review_showcase(
         self,

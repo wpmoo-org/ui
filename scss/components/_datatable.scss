@@ -81,13 +81,15 @@
   mask-image: none;
 }
 
-// Row menus are trapped inside the sticky actions cell's stacking context.
-// Lift the owning frame while a menu is open so footer pagination never
-// paints over the dropdown.
+// Row menus are trapped inside the sticky actions cell's stacking context
+// and Safari clips fixed-position descendants at the rounded frame edge.
+// Let the owning frame overflow only while a menu is open, then lift it so
+// footer pagination never paints over the dropdown.
 .datatable-frame:has(.table-row-actions .dropdown-menu.show),
 .datatable-card-frame:has(.datatable-card .dropdown-menu.show) {
   position: relative;
   z-index: $zindex-dropdown;
+  overflow: visible;
 }
 
 // Pinned cells share one z-index, so a later row's cell would paint over
