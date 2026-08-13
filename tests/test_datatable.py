@@ -423,6 +423,9 @@ class DataTableTests(CatalogTestCase):
 
     def test_row_action_dropdowns_escape_scroll_frame_without_changing_frame_overflow(self) -> None:
         source = DATATABLE_JS.read_text(encoding="utf-8")
+        browser_source = (ROOT / "tests" / "test_datatable_browser.py").read_text(
+            encoding="utf-8"
+        )
 
         self.assertIn("this._reparentedRowMenus = new Map();", source)
         self.assertIn("this._reparentedRowMenuByTrigger = new WeakMap();", source)
@@ -433,6 +436,11 @@ class DataTableTests(CatalogTestCase):
         self.assertIn("this._document.body.appendChild(menu);", source)
         self.assertIn("this._restoreRowActionMenuForTrigger(event.target);", source)
         self.assertIn("this._restoreRowActionMenus();", source)
+        self.assertIn('page.locator("body > .dropdown-menu.show")', browser_source)
+        self.assertNotIn(
+            'root.locator(".datatable-card .dropdown-menu.show")',
+            browser_source,
+        )
 
     def test_datatable_frame_keeps_row_menu_out_of_overflow_rules(self) -> None:
         source = DATATABLE_SCSS.read_text(encoding="utf-8")

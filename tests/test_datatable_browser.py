@@ -284,16 +284,19 @@ class DataTableBrowserTests(unittest.TestCase):
                 ".datatable-card:visible .table-row-actions > button"
             ).first
             action.click()
-            menu = root.locator(".datatable-card .dropdown-menu.show")
+            menu = page.locator("body > .dropdown-menu.show")
+            expect(menu).to_have_count(1)
             expect(menu).to_be_visible()
 
             result = page.evaluate(
                 """
                 () => {
-                  const menu = document.querySelector(
-                    "#standalone-datatable-release-reviews .datatable-card .dropdown-menu.show"
+                  const menu = document.querySelector("body > .dropdown-menu.show");
+                  const trigger = document.querySelector(
+                    "#standalone-datatable-release-reviews .datatable-card "
+                      + ".table-row-actions > [aria-expanded='true']"
                   );
-                  const card = menu?.closest(".datatable-card");
+                  const card = trigger?.closest(".datatable-card");
                   const rect = (element) => {
                     const box = element.getBoundingClientRect();
                     return {
@@ -317,6 +320,7 @@ class DataTableBrowserTests(unittest.TestCase):
                   });
                   return {
                     cardOverflow: getComputedStyle(card).overflow,
+                    menuParentIsBody: menu?.parentElement === document.body,
                     menuExtendsPastCard: rect(menu).bottom > rect(card).bottom,
                     allItemsHit,
                   };
@@ -325,8 +329,17 @@ class DataTableBrowserTests(unittest.TestCase):
             )
 
             self.assertEqual(result["cardOverflow"], "visible")
+            self.assertTrue(result["menuParentIsBody"])
             self.assertTrue(result["menuExtendsPastCard"])
             self.assertTrue(result["allItemsHit"])
+            action.press("Escape")
+            expect(action).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            self.assertTrue(
+                action.evaluate(
+                    "element => element.parentElement.querySelector(':scope > .dropdown-menu') !== null"
+                )
+            )
             evidence.assert_clean()
         finally:
             context.close()
@@ -595,12 +608,19 @@ class DataTableBrowserTests(unittest.TestCase):
             )
 
             trigger = first_card.locator(".table-row-actions > button")
+            menu = page.locator("body > .dropdown-menu.show")
             trigger.click()
             expect(trigger).to_have_attribute("aria-expanded", "true")
-            expect(first_card.locator(".table-row-actions .dropdown-menu")).to_be_visible()
-            expect(first_card.locator(".table-row-actions .dropdown-menu")).to_contain_text(
-                "Open ticket"
-            )
+            expect(menu).to_have_count(1)
+            expect(menu).to_be_visible()
+            expect(menu).to_contain_text("Open ticket")
+            self.assertTrue(menu.evaluate("element => element.parentElement === document.body"))
+
+            trigger.press("Escape")
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(first_card.locator(".table-row-actions .dropdown-menu")).to_have_count(1)
+            expect(trigger).to_be_focused()
             evidence.assert_clean()
         finally:
             context.close()
