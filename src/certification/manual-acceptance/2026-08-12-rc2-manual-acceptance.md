@@ -8,23 +8,23 @@ commits.
 
 ## Build Under Review
 
-- HTML repository commit: `5b5ca9e2207b829ffc9bff9bad49a3f6d434c722`
-- Root workspace commit at evidence transfer: `7bfb263fba3ff579625a4bd4bffaef5c5f771c0c`
+- HTML repository commit: `089eb2f1dbb7e5fcbb76f65b1bbfc7ab25f27d6b`
+- Root workspace commit at evidence capture: `03b0b9e5e5aa6512813d78819e06af040c740a61`
 - Package version: `1.0.0-rc.2`
-- Package tarball sha256: `af4807d4cdc0f7f7e94fd371b30afee85e784f03151c18f9046def43201b77a4`
+- Package tarball sha256: `c9894606966d8a9f000b61bfacf329d03f4a6d68610360e704b2a9a51178d505`
 - Conformance kit sha256: `969550911564fe24797ba67bce26f003adb9c6245dea7c311d205b9705c33328`
 - Certification manifest sha256: `1ed562c90906bf791b674970e4b9222259b597039b08b627f5f31c636b3f4f88`
-- Certification attestation sha256: `2d4e400c74d17e82dd04ff6ec2a6f233bd42226023e4a87aea5c4cd283102ec1`
+- Certification attestation sha256: `6910b06dfa20ad8e90807b8fa15222e1015097f25cc232c4b03ffaea93e8e904`
 - Catalog URL: `http://localhost:4174/`
 - Acceptance portal: `http://localhost:4174/acceptance/rc2/`
 - Reviewer: Ahmet Cangir
 - Acceptance export generated at (UTC, ISO-8601): `2026-08-12T22:34:20.510Z`
-- Build metadata captured at (UTC, ISO-8601): `2026-08-13T07:59:26Z`
+- Build metadata captured at (UTC, ISO-8601): `2026-08-13T22:11:41Z`
 
 ## Rehearsal Artifacts
 
 These hashes were produced by `python3 scripts/rehearse-rc.py` from the clean
-`5b5ca9e2207b829ffc9bff9bad49a3f6d434c722` build-under-review commit.
+`089eb2f1dbb7e5fcbb76f65b1bbfc7ab25f27d6b` build-under-review commit.
 
 - Package: `/Users/cng/WPMoo/workspace/projects/ui/html/dist/rc-rehearsal/wpmoo-ui-1.0.0-rc.2.tgz`
 - Conformance kit: `/Users/cng/WPMoo/workspace/projects/ui/html/dist/rc-rehearsal/conformance-kit/moo-ui-conformance-kit-1.0.tar.gz`
@@ -46,6 +46,15 @@ The export reports:
   required checks.
 - Unchecked rows: none
 
+## Post-Acceptance Delta
+
+The 420/420 manual device matrix remains accepted for rc2. After the device
+pass, the candidate received narrow follow-up commits for Data Table row-action
+menu lifecycle/reparenting, package notice URL pinning, changelog wording,
+generated baseline refreshes, and release evidence refresh. These deltas are
+covered by rehearsal and targeted automated regression checks; they did not
+reopen the visual acceptance matrix.
+
 ## Accessibility Smoke Scope
 
 The manual acceptance pass records interaction smoke coverage, not standalone
@@ -64,7 +73,7 @@ rc2 acceptance export.
   - Device/model: MacBook
   - macOS version: Tahoe 26.5.2
   - Safari version: 26.5.2 (21624.2.5.11.8)
-  - Package sha256: `af4807d4cdc0f7f7e94fd371b30afee85e784f03151c18f9046def43201b77a4`
+  - Package sha256: `c9894606966d8a9f000b61bfacf329d03f4a6d68610360e704b2a9a51178d505`
   - Reviewer: Ahmet Cangir
   - Reviewed at (UTC, ISO-8601): `2026-08-12T22:34:20.510Z`
   - Result: passed
@@ -73,7 +82,7 @@ rc2 acceptance export.
   - Device/model: iPhone
   - iOS version: 26.5.2
   - Safari version: 26.5.2
-  - Package sha256: `af4807d4cdc0f7f7e94fd371b30afee85e784f03151c18f9046def43201b77a4`
+  - Package sha256: `c9894606966d8a9f000b61bfacf329d03f4a6d68610360e704b2a9a51178d505`
   - Reviewer: Ahmet Cangir
   - Reviewed at (UTC, ISO-8601): `2026-08-12T22:34:20.510Z`
   - Result: passed
@@ -82,7 +91,7 @@ rc2 acceptance export.
   - Device/model: Samsung Tab S6 Lite
   - Android version: 14
   - Chrome version: 150.0.7871.186
-  - Package sha256: `af4807d4cdc0f7f7e94fd371b30afee85e784f03151c18f9046def43201b77a4`
+  - Package sha256: `c9894606966d8a9f000b61bfacf329d03f4a6d68610360e704b2a9a51178d505`
   - Reviewer: Ahmet Cangir
   - Reviewed at (UTC, ISO-8601): `2026-08-12T22:34:20.510Z`
   - Result: passed
