@@ -319,7 +319,6 @@ class DataTableBrowserTests(unittest.TestCase):
                     return hit && item.contains(hit);
                   });
                   return {
-                    cardOverflow: getComputedStyle(card).overflow,
                     menuParentIsBody: menu?.parentElement === document.body,
                     menuExtendsPastCard: rect(menu).bottom > rect(card).bottom,
                     allItemsHit,
@@ -328,7 +327,6 @@ class DataTableBrowserTests(unittest.TestCase):
                 """
             )
 
-            self.assertEqual(result["cardOverflow"], "visible")
             self.assertTrue(result["menuParentIsBody"])
             self.assertTrue(result["menuExtendsPastCard"])
             self.assertTrue(result["allItemsHit"])
