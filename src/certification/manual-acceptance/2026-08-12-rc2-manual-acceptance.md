@@ -46,6 +46,18 @@ The export reports:
   required checks.
 - Unchecked rows: none
 
+## Accessibility Smoke Scope
+
+The manual acceptance pass records interaction smoke coverage, not standalone
+screen-reader certification. Mac Safari covered keyboard tab order, visible
+focus, Enter/Space activation, Escape dismissal where applicable, overlay focus
+return, and component state changes. iPhone Safari and Android Chrome covered
+touch and voice-control flows; hardware keyboard traversal on mobile remains
+outside the 420 required checks by review design.
+
+Treat future screen-reader certification as a separate evidence lane from this
+rc2 acceptance export.
+
 ## Devices
 
 - [x] macOS Safari
@@ -464,7 +476,9 @@ The export reports:
 
 ## Known Limitations
 
-- None for rc2 manual acceptance.
+- No release-blocking limitations were recorded for rc2 manual acceptance.
+- Standalone screen-reader certification was not part of this rc2 acceptance
+  pass; it remains a separate future evidence lane.
 - Mobile keyboard cells are `N/A` by review design; touch and voice-control
   checks cover iPhone and Android interaction acceptance.
 
