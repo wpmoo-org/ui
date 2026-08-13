@@ -442,6 +442,33 @@ class DataTableTests(CatalogTestCase):
             browser_source,
         )
 
+    def test_row_action_dropdowns_export_owner_metadata_when_reparented(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn("_rowActionOwnerIdForTrigger(trigger)", source)
+        self.assertIn('trigger?.closest?.("tr[data-datatable-row]")?.id', source)
+        self.assertIn(
+            'trigger?.closest?.("[data-datatable-card]")'
+            '?.getAttribute("data-datatable-card-for")',
+            source,
+        )
+        self.assertIn(
+            'menu.setAttribute("data-datatable-row-action-owner", ownerId)',
+            source,
+        )
+        self.assertIn(
+            'menu.setAttribute("data-datatable-row-action-trigger", trigger.id)',
+            source,
+        )
+        self.assertIn(
+            'menu.removeAttribute("data-datatable-row-action-owner")',
+            source,
+        )
+        self.assertIn(
+            'menu.removeAttribute("data-datatable-row-action-trigger")',
+            source,
+        )
+
     def test_datatable_frame_keeps_row_menu_out_of_overflow_rules(self) -> None:
         source = DATATABLE_SCSS.read_text(encoding="utf-8")
         table_source = TABLE_SCSS.read_text(encoding="utf-8")

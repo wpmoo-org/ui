@@ -134,10 +134,25 @@ export default class DataTable {
     return trigger.closest(".dropdown")?.querySelector(":scope > .dropdown-menu") || null;
   }
 
+  _rowActionOwnerIdForTrigger(trigger) {
+    const rowId = trigger?.closest?.("tr[data-datatable-row]")?.id;
+    if (rowId) {
+      return rowId;
+    }
+    return trigger?.closest?.("[data-datatable-card]")?.getAttribute("data-datatable-card-for") || "";
+  }
+
   _reparentRowActionMenu(trigger) {
     const menu = this._rowActionMenuForTrigger(trigger);
     if (!menu || this._reparentedRowMenus.has(menu)) {
       return;
+    }
+    const ownerId = this._rowActionOwnerIdForTrigger(trigger);
+    if (ownerId) {
+      menu.setAttribute("data-datatable-row-action-owner", ownerId);
+    }
+    if (trigger.id) {
+      menu.setAttribute("data-datatable-row-action-trigger", trigger.id);
     }
     this._reparentedRowMenus.set(menu, {
       parent: menu.parentNode,
@@ -171,6 +186,8 @@ export default class DataTable {
     if (trigger) {
       this._reparentedRowMenuByTrigger.delete(trigger);
     }
+    menu.removeAttribute("data-datatable-row-action-owner");
+    menu.removeAttribute("data-datatable-row-action-trigger");
     this._reparentedRowMenus.delete(menu);
   }
 

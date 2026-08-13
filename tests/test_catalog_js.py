@@ -95,6 +95,28 @@ class CatalogJavaScriptTests(CatalogTestCase):
         self.assertNotIn("mooSidebarState", source)
         self.assertFalse((ROOT / "site/static/js/preview.js").exists())
 
+    def test_examples_tasks_row_actions_survive_reparented_menus(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "examples-tasks.js").read_text(encoding="utf-8")
+        )
+
+        self.assertIn("const documentRoot = root.ownerDocument || root;", source)
+        self.assertIn(
+            'target.closest(".dropdown-menu[data-datatable-row-action-owner]")',
+            source,
+        )
+        self.assertIn("rowById(ownerId)", source)
+        self.assertIn(
+            'getAttribute("data-datatable-row-action-trigger")',
+            source,
+        )
+        self.assertIn("documentRoot.getElementById(triggerId)", source)
+        self.assertIn('documentRoot.addEventListener("click", onPageClick);', source)
+        self.assertIn(
+            'documentRoot.removeEventListener("click", onPageClick);',
+            source,
+        )
+
     def test_build_copies_catalog_tree_recursively(self) -> None:
         result = self.run_build()
 

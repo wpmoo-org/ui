@@ -89,7 +89,9 @@ export function initExamplesTasks(root = document) {
   let editRow = null;
   let deleteRow = null;
 
-  const bootstrap = root.defaultView?.bootstrap;
+  const documentRoot = root.ownerDocument || root;
+  const windowRoot = documentRoot.defaultView;
+  const bootstrap = windowRoot?.bootstrap;
   const reinitTable = () => {
     DataTable.getOrCreateInstance(tableRoot).dispose();
     DataTable.getOrCreateInstance(tableRoot);
@@ -261,11 +263,22 @@ export function initExamplesTasks(root = document) {
       return row;
     }
     const card = target.closest("[data-datatable-card]");
-    return card ? rowById(card.getAttribute("data-datatable-card-for")) : null;
+    if (card) {
+      return rowById(card.getAttribute("data-datatable-card-for"));
+    }
+    const menu = target.closest(".dropdown-menu[data-datatable-row-action-owner]");
+    const ownerId = menu?.getAttribute("data-datatable-row-action-owner");
+    return ownerId ? rowById(ownerId) : null;
   };
 
   const closeRowMenu = (target) => {
-    const toggle = target.closest(".dropdown")?.querySelector("[data-bs-toggle=\"dropdown\"]");
+    const menu = target.closest(".dropdown-menu[data-datatable-row-action-owner]");
+    const triggerId = menu?.getAttribute("data-datatable-row-action-trigger");
+    const triggerFromMenu = triggerId ? documentRoot.getElementById(triggerId) : null;
+    const toggle =
+      target.closest(".dropdown")?.querySelector("[data-bs-toggle=\"dropdown\"]") ||
+      triggerFromMenu ||
+      page.querySelector(".table-row-actions [data-bs-toggle=\"dropdown\"][aria-expanded=\"true\"]");
     bootstrap?.Dropdown.getInstance(toggle)?.hide();
   };
 
@@ -291,7 +304,7 @@ export function initExamplesTasks(root = document) {
 
   const onPageClick = (event) => {
     const target = event.target;
-    if (!(target instanceof root.defaultView.Element)) {
+    if (!windowRoot || !(target instanceof windowRoot.Element)) {
       return;
     }
     if (target.closest("[data-moo-task-delete]")) {
@@ -328,8 +341,8 @@ export function initExamplesTasks(root = document) {
       if (!row) {
         return;
       }
-      const link = `${root.defaultView.location.href.split("#")[0]}#${row.id}`;
-      root.defaultView.navigator.clipboard?.writeText(link).catch(() => {});
+      const link = `${windowRoot.location.href.split("#")[0]}#${row.id}`;
+      windowRoot.navigator.clipboard?.writeText(link).catch(() => {});
       closeRowMenu(target);
     }
   };
@@ -361,7 +374,7 @@ export function initExamplesTasks(root = document) {
   };
 
   form.addEventListener("submit", onSubmit);
-  page.addEventListener("click", onPageClick);
+  documentRoot.addEventListener("click", onPageClick);
   sheet.addEventListener("show.bs.offcanvas", onSheetShow);
   sheet.addEventListener("hidden.bs.offcanvas", onSheetHidden);
   deleteConfirm.addEventListener("click", onDeleteConfirm);
@@ -369,7 +382,7 @@ export function initExamplesTasks(root = document) {
 
   const dispose = () => {
     form.removeEventListener("submit", onSubmit);
-    page.removeEventListener("click", onPageClick);
+    documentRoot.removeEventListener("click", onPageClick);
     sheet.removeEventListener("show.bs.offcanvas", onSheetShow);
     sheet.removeEventListener("hidden.bs.offcanvas", onSheetHidden);
     deleteConfirm.removeEventListener("click", onDeleteConfirm);
