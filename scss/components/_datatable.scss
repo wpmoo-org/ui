@@ -623,15 +623,6 @@
   background-color: var(--bs-body-bg);
 }
 
-.datatable-card-frame:has(.datatable-card .dropdown-menu.show),
-.datatable-card:has(.dropdown-menu.show) {
-  overflow: visible;
-}
-
-.datatable-card:has(.dropdown-menu.show) {
-  z-index: 2;
-}
-
 .datatable-card-header {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
