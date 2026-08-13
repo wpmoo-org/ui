@@ -175,7 +175,7 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is at the `1.0.0-rc.1` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.1`. The
+Moo UI is at the `1.0.0-rc.2` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.2`. The
 package's certification manifest currently has `preview` status; catalog
 availability is WPMoo-maintained preview evidence, not independent or
 accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)

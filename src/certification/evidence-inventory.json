@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "baseline",
-  "description": "Pre-certification evidence inventory for the 42 components ready in Moo UI Core 0.4.0. Profile status is conservative: static source assertions count as existing contract evidence, while browser, accessibility-engine, visual, lifecycle, and host-conformance evidence remains missing until the certification harness proves it.",
+  "description": "Preview evidence inventory for the 42-component Moo UI Core release-candidate surface. Profile status remains conservative: automated and manual release evidence may exist for specific contracts, while whole-profile certification categories stay missing until the certification harness produces final attestation.",
   "genericHostConformanceKit": {
     "status": "built-and-self-proven",
     "contractVersion": "1.0",
