@@ -89,6 +89,21 @@ class InputTests(CatalogTestCase):
         ):
             self.render_input('input(aria_label="Phone", type="tel")')
 
+    def test_password_input_rejects_a_rendered_value(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            'Input does not render a value for type="password"',
+        ):
+            self.render_input(
+                'input(aria_label="Password", type="password", value="hunter2")'
+            )
+
+        output = self.render_input(
+            'input(aria_label="Password", type="password")'
+        )
+        self.assertIn('type="password"', output)
+        self.assertNotIn(" value=", output)
+
     def test_input_does_not_expose_bootstrap_size_variants(self) -> None:
         with self.assertRaisesRegex(
             TypeError,
