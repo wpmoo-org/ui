@@ -279,7 +279,21 @@ export default class Combobox {
     this._input.value = "";
   }
 
-  _setActiveOption(option, { focus = false } = {}) {
+  _activeOption() {
+    const activeId = this._input.getAttribute("aria-activedescendant");
+    if (!activeId) {
+      return null;
+    }
+    return this._visibleOptions().find((option) => option.id === activeId) || null;
+  }
+
+  _activateFirstOptionIfNeeded() {
+    if (!this._activeOption()) {
+      this._setActiveOption(this._visibleOptions()[0] || null);
+    }
+  }
+
+  _setActiveOption(option) {
     this._options.forEach((candidate) => {
       const active = candidate === option;
       candidate.toggleAttribute("aria-current", active);
@@ -296,9 +310,6 @@ export default class Combobox {
       this._menu.scrollTop -= menuRect.top - optionRect.top;
     } else if (optionRect.bottom > menuRect.bottom) {
       this._menu.scrollTop += optionRect.bottom - menuRect.bottom;
-    }
-    if (focus) {
-      option.focus({ preventScroll: true });
     }
   }
 
@@ -345,7 +356,7 @@ export default class Combobox {
     this._empty.hidden = count !== 0;
     this._liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
     if (activate) {
-      this._setActiveOption(this._visibleOptions()[0] || null);
+      this._activateFirstOptionIfNeeded();
     }
   }
 
@@ -355,7 +366,7 @@ export default class Combobox {
       if (!this._isMultiple && this._input.dataset.mooComboboxSelected === "true") {
         this._input.select();
       }
-      this._setActiveOption(this._visibleOptions()[0] || null);
+      this._activateFirstOptionIfNeeded();
     });
     this._listen(this._input, "input", () => {
       if (!this._isMultiple) {
@@ -438,7 +449,10 @@ export default class Combobox {
       this._openMenu();
       const offset = isNextKey ? 1 : -1;
       const next = current === -1 ? 0 : (current + offset + available.length) % available.length;
-      this._setActiveOption(available[next], { focus: true });
+      this._setActiveOption(available[next]);
+      if (event.target !== this._input) {
+        this._input.focus({ preventScroll: true });
+      }
     } else if (event.key === "Enter") {
       const option = available[current];
       if (option) {

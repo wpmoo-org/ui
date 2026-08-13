@@ -161,6 +161,9 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     "aria-activedescendant",
                     "certification-combobox-option-2",
                 )
+                self.assertTrue(
+                    combobox_input.evaluate("element => document.activeElement === element")
+                )
                 self.assertEqual(run_axe(page), [])
 
                 combobox_input.press("Enter")
