@@ -211,4 +211,5 @@ Browse the local catalog at `http://localhost:4173/` while `dev.py` runs.
 Moo UI source code is MIT licensed. WPMoo-generated visual assets under
 `site/static/images/` remain separately protected as described in
 `ASSET_LICENSE.md`. Vendored dependencies retain their original licenses; see
-`LICENSE`, `ASSET_LICENSE.md`, and `THIRD_PARTY_NOTICES.md`.
+`LICENSE`, `ASSET_LICENSE.md`, and the
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.2/THIRD_PARTY_NOTICES.md).

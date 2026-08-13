@@ -13,5 +13,5 @@ You may not copy, redistribute, modify, sell, sublicense, or use them in another
 product, site, template, library, training dataset, or marketing asset without
 prior written permission from WPMoo.
 
-Third-party assets remain under their own licenses. See
-`THIRD_PARTY_NOTICES.md`.
+Third-party assets remain under their own licenses. See the
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.2/THIRD_PARTY_NOTICES.md).
