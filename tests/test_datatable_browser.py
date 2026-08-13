@@ -649,15 +649,17 @@ class DataTableBrowserTests(unittest.TestCase):
             root = page.locator("#certification-datatable")
             first_row = root.locator("#cert-row-1")
             trigger = first_row.locator(".table-row-actions > button")
-            menu = first_row.locator(".table-row-actions .dropdown-menu")
+            menu = page.locator("body > .dropdown-menu.show")
 
             expect(trigger).to_have_attribute("aria-expanded", "false")
             trigger.click()
             expect(trigger).to_have_attribute("aria-expanded", "true")
+            expect(menu).to_have_count(1)
             expect(menu).to_be_visible()
             expect(menu).to_contain_text("Open ticket")
             expect(menu).to_contain_text("Assign owner")
             expect(menu).to_contain_text("Copy link")
+            self.assertTrue(menu.evaluate("element => element.parentElement === document.body"))
             self.assertEqual(
                 root.locator(".datatable-frame").evaluate(
                     "element => getComputedStyle(element).overflowY"
@@ -671,6 +673,8 @@ class DataTableBrowserTests(unittest.TestCase):
 
             trigger.press("Escape")
             expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(first_row.locator(".table-row-actions .dropdown-menu")).to_have_count(1)
             expect(trigger).to_be_focused()
             evidence.assert_clean()
         finally:

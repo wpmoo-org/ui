@@ -425,7 +425,11 @@ class DataTableTests(CatalogTestCase):
         source = DATATABLE_JS.read_text(encoding="utf-8")
 
         self.assertIn("this._reparentedRowMenus = new Map();", source)
+        self.assertIn("this._reparentedRowMenuByTrigger = new WeakMap();", source)
         self.assertIn('trigger?.closest?.(".table-row-actions")', source)
+        self.assertIn("this._reparentedRowMenuByTrigger.set(trigger, menu);", source)
+        self.assertIn("this._reparentedRowMenuByTrigger.get(trigger)", source)
+        self.assertIn("this._reparentedRowMenuByTrigger.delete(trigger);", source)
         self.assertIn("this._document.body.appendChild(menu);", source)
         self.assertIn("this._restoreRowActionMenuForTrigger(event.target);", source)
         self.assertIn("this._restoreRowActionMenus();", source)

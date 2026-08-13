@@ -48,6 +48,7 @@ export default class DataTable {
     this._tooltips = [];
     this._filterMode = element.dataset.datatableFilterMode || "inline";
     this._reparentedRowMenus = new Map();
+    this._reparentedRowMenuByTrigger = new WeakMap();
 
     this._rows = Array.from(this._tbody.querySelectorAll(":scope > tr[data-datatable-row]")).map((tr, index) => ({
       element: tr,
@@ -141,12 +142,14 @@ export default class DataTable {
     this._reparentedRowMenus.set(menu, {
       parent: menu.parentNode,
       nextSibling: menu.nextSibling,
+      trigger,
     });
+    this._reparentedRowMenuByTrigger.set(trigger, menu);
     this._document.body.appendChild(menu);
   }
 
   _restoreRowActionMenuForTrigger(trigger) {
-    const menu = this._rowActionMenuForTrigger(trigger);
+    const menu = this._reparentedRowMenuByTrigger.get(trigger) || this._rowActionMenuForTrigger(trigger);
     if (menu) {
       this._restoreRowActionMenu(menu);
     }
@@ -157,13 +160,16 @@ export default class DataTable {
     if (!original) {
       return;
     }
-    const { parent, nextSibling } = original;
+    const { parent, nextSibling, trigger } = original;
     if (parent?.isConnected) {
       if (nextSibling?.parentNode === parent) {
         parent.insertBefore(menu, nextSibling);
       } else {
         parent.appendChild(menu);
       }
+    }
+    if (trigger) {
+      this._reparentedRowMenuByTrigger.delete(trigger);
     }
     this._reparentedRowMenus.delete(menu);
   }
