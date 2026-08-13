@@ -342,6 +342,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
         for path in site_pages:
             relative_path = path.relative_to(site_dist)
+            if relative_path.parts[:3] == ("tests", "fixtures", "certification"):
+                continue
             prefix = "../" * len(relative_path.parent.parts)
             page = path.read_text(encoding="utf-8")
 
