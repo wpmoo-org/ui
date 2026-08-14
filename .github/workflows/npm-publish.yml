@@ -23,7 +23,12 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Same root cause as ui-ci.yml's ui-tests job: this workflow runs the same
+    # full suite ("Run contract tests") on a cold ubuntu-latest runner, and the
+    # old 10-minute budget was cancelling it mid-suite before publish ever ran
+    # (observed on the v1.0.0-rc.2 tag run: cancelled at "Run contract tests",
+    # every step after it skipped, including "Publish to npm").
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
