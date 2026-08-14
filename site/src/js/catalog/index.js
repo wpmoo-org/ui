@@ -9,6 +9,7 @@ import { initCardSpacing } from "./card-spacing.js";
 import { initCatalogFilter } from "./catalog-filter.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
+import { initExamplesForms } from "./examples-forms.js";
 import { initExamplesTasks } from "./examples-tasks.js";
 import { initHomeMotion } from "./home-motion.js";
 import { initTheme } from "./theme.js";
@@ -25,6 +26,7 @@ export function initCatalog(root = document) {
     initTheme(root),
     initCatalogFilter(root),
     initCommand(root),
+    initExamplesForms(root),
     initExamplesTasks(root),
     initToc(root),
     initAcceptancePortal(root),
