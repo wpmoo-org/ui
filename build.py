@@ -410,7 +410,7 @@ def block_preview_src(slug: str, root_path: str) -> str:
 
 
 PAGE_META_SET = re.compile(
-    r"\{%\s*set\s+(?P<name>page_(?:title|description|image|image_alt))\s*=\s*"
+    r"\{%\s*set\s+(?P<name>page_(?:title|description|image|image_alt|category))\s*=\s*"
     r"(?P<quote>['\"])(?P<value>.*?)(?P=quote)\s*%\}",
     re.DOTALL,
 )
@@ -453,19 +453,24 @@ def extract_template_metadata(page: Path) -> dict[str, str]:
         for match in PAGE_META_SET.finditer(source)
     }
 
+    # {% block title %} is the page's authoritative identity (it's also the
+    # literal <title> tag), so it must win over render_page_header()'s title
+    # argument -- that argument is just what's shown as the on-page H1, which
+    # can legitimately differ (e.g. three Settings sub-pages all show
+    # "Settings" as their heading but are titled Profile/Account/Appearance).
+    title_block = TITLE_BLOCK.search(source)
+    if title_block:
+        metadata.setdefault(
+            "page_title",
+            _strip_site_suffix(_clean_meta_text(title_block.group("title"))),
+        )
+
     header = PAGE_HEADER_CALL.search(source)
     if header:
         metadata.setdefault("page_title", _clean_meta_text(header.group("title")))
         metadata.setdefault(
             "page_description",
             _clean_meta_text(header.group("description")),
-        )
-
-    title_block = TITLE_BLOCK.search(source)
-    if title_block:
-        metadata.setdefault(
-            "page_title",
-            _strip_site_suffix(_clean_meta_text(title_block.group("title"))),
         )
 
     return metadata
@@ -577,6 +582,12 @@ def page_metadata(
         kind = "block"
         entry = _find_entry(blocks, slug)
         image = seo_image_src("blocks", slug)
+    elif path.startswith("examples/") and path != "examples/index.html":
+        # Examples pages can nest a category folder (examples/auth/sign-in);
+        # keep that folder in the slug so it matches the registry's slug
+        # (see _load_page_registry) instead of colliding with siblings that
+        # share a filename across category folders.
+        slug = logical_relative.relative_to("examples").with_suffix("").as_posix()
     else:
         normalized_path = pretty_url(path)
         entry = next(
@@ -954,10 +965,16 @@ def _load_page_registry(
 ) -> list[dict[str, str]]:
     overrides = _registry_overrides(registry_root, registry_filename)
     entries: list[dict[str, str]] = []
-    for page in sorted(pages_dir.glob("*.html.jinja")):
+    for page in sorted(pages_dir.rglob("*.html.jinja")):
         if page.name == "index.html.jinja":
             continue
-        slug = page.with_suffix("").stem
+        relative = page.relative_to(pages_dir)
+        if "previews" in relative.parts:
+            continue
+        # Nested pages (e.g. examples/auth/sign-in.html.jinja) keep their
+        # folder in the slug so hrefs built as f"{section}/{slug}/" still
+        # resolve, and so it stays unique against sibling folders.
+        slug = relative.with_suffix("").with_suffix("").as_posix()
         metadata = extract_template_metadata(page)
         override = overrides.get(slug, {})
         # The registry label is canonical: it is the reviewed public name for
@@ -971,6 +988,7 @@ def _load_page_registry(
             or override.get("summary")
             or DEFAULT_META_DESCRIPTION
         )
+        category = metadata.get("page_category") or override.get("category") or ""
         entries.append(
             {
                 **override,
@@ -978,6 +996,7 @@ def _load_page_registry(
                 "label": label,
                 "description": description,
                 "status": override.get("status", fallback_status),
+                "category": category,
             }
         )
     return sorted(entries, key=lambda entry: entry["label"].lower())
@@ -1391,7 +1410,12 @@ def render_pages(version: str | None = None) -> None:
         output_file.parent.mkdir(parents=True, exist_ok=True)
         depth = len(output_relative.parents) - 1
         root_path = "../" * depth
-        current_section = logical_relative.parent.name
+        # logical_relative.parent.name only identifies the top-level section
+        # for pages exactly one level below PAGES; a page nested a level
+        # deeper (examples/auth/sign-in.html.jinja) needs the first path
+        # component instead, or it reads its subfolder ("auth") as the
+        # section.
+        current_section = logical_relative.parts[0] if len(logical_relative.parts) > 1 else ""
         current_slug = logical_relative.stem
         if current_section not in {"components", "utils", "blocks", "examples"}:
             current_section = "sections"
