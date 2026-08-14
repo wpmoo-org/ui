@@ -1,0 +1,9 @@
+{% from "components/navigation.html.jinja" import nav_item, nav_menu %}
+
+{% macro render_settings_nav(active, root_path) -%}
+  {% call nav_menu("Settings sections", style="pills", vertical=true, extra_class="moo-settings-nav") %}
+    {{ nav_item("Profile", href=site_href("examples/settings/profile.html", root_path), active=(active == "profile")) }}
+    {{ nav_item("Account", href=site_href("examples/settings/account.html", root_path), active=(active == "account")) }}
+    {{ nav_item("Appearance", href=site_href("examples/settings/appearance.html", root_path), active=(active == "appearance")) }}
+  {% endcall %}
+{%- endmacro %}

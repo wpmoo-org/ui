@@ -1,0 +1,69 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/field.html.jinja" import field, field_group, fieldset, form %}
+{% from "components/select.html.jinja" import select %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+{% from "includes/settings-nav.html.jinja" import render_settings_nav %}
+
+{% set page_category = "Settings" %}
+
+{% block title %}Account — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-examples-page" data-moo-example-settings>
+    {{ render_page_header(
+      "Settings",
+      "Manage your account settings and preferences — nothing here saves.",
+      id="settings"
+    ) }}
+
+    <div class="moo-settings-layout">
+      {{ render_settings_nav("account", root_path) }}
+
+      <div class="moo-settings-layout__content">
+        {% call form(extra_class="d-grid gap-4") %}
+          {% call fieldset("Preferences", description="Choose your language and timezone.") %}
+            {% call field_group() %}
+              {% call field() %}
+                {{ select(
+                  label="Language",
+                  id="settings-language",
+                  options=[
+                    {"value": "en", "label": "English"},
+                    {"value": "tr", "label": "Türkçe"},
+                    {"value": "de", "label": "Deutsch"}
+                  ],
+                  selected="en"
+                ) }}
+              {% endcall %}
+              {% call field() %}
+                {{ select(
+                  label="Timezone",
+                  id="settings-timezone",
+                  options=[
+                    {"value": "utc", "label": "UTC"},
+                    {"value": "europe-istanbul", "label": "Europe/Istanbul"},
+                    {"value": "america-new_york", "label": "America/New_York"}
+                  ],
+                  selected="europe-istanbul"
+                ) }}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+          {{ button("Save changes") }}
+        {% endcall %}
+      </div>
+    </div>
+
+    <p class="moo-examples-built-with text-body-secondary small">
+      Composed from the
+      <a href="{{ site_href("components/form.html", root_path) }}">Form</a>,
+      <a href="{{ site_href("components/field.html", root_path) }}">Field</a>, and
+      <a href="{{ site_href("components/select.html", root_path) }}">Select</a>
+      components.
+    </p>
+
+    {{ render_section_page_pagination("settings/account", site_pages, root_path) }}
+  </div>
+{% endblock %}

@@ -410,3 +410,36 @@
   background: var(--bs-body-bg);
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
+
+// Settings pages are real navigation (a distinct URL per section), not a
+// Tabs instance -- each section renders its own page and links to the
+// other two through the Navigation component's own vertical nav_menu,
+// so only the two-column page arrangement is custom here.
+.moo-settings-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.moo-settings-layout__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 28rem;
+}
+
+.moo-settings-nav {
+  flex: 0 0 auto;
+  width: 12rem;
+}
+
+@include media-breakpoint-down(sm) {
+  .moo-settings-layout {
+    flex-direction: column;
+  }
+
+  .moo-settings-nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}

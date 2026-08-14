@@ -1,0 +1,64 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/field.html.jinja" import field, field_description, field_group, fieldset, form %}
+{% from "components/switch.html.jinja" import switch %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+{% from "includes/settings-nav.html.jinja" import render_settings_nav %}
+
+{% set page_category = "Settings" %}
+
+{#- Mirrors the switch_field() helper on the Switch component's own catalog
+   page: a field--switch layout with the visible label/description on the
+   left and a plain, unlabeled switch (labelledby/describedby only) on the
+   right, instead of the switch's own built-in label+description block. #}
+{% macro settings_switch(id, label, description, checked=false) -%}
+  {% set description_id = id ~ "-description" %}
+  {% set label_id = id ~ "-label" %}
+  {% call field(extra_class="field--switch") %}
+    <div>
+      <label class="form-label" id="{{ label_id }}" for="{{ id }}">{{ label }}</label>
+      {{ field_description(description_id, description) }}
+    </div>
+    {{ switch(id, labelledby=label_id, describedby=description_id, checked=checked, label_wrapper=true) }}
+  {% endcall %}
+{%- endmacro %}
+
+{% block title %}Appearance — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-examples-page" data-moo-example-settings>
+    {{ render_page_header(
+      "Settings",
+      "Manage your account settings and preferences — nothing here saves.",
+      id="settings"
+    ) }}
+
+    <div class="moo-settings-layout">
+      {{ render_settings_nav("appearance", root_path) }}
+
+      <div class="moo-settings-layout__content">
+        {% call form(extra_class="d-grid gap-4") %}
+          {% call fieldset("Preferences", description="Choose how this app looks and behaves for you.") %}
+            {% call field_group() %}
+              {{ settings_switch("settings-compact", "Compact mode", "Reduce spacing in tables and lists.", checked=true) }}
+              {{ settings_switch("settings-avatars", "Show avatars", "Display profile pictures across the app.", checked=true) }}
+              {{ settings_switch("settings-digest", "Weekly email digest", "Get a summary of activity every Monday.") }}
+            {% endcall %}
+          {% endcall %}
+          {{ button("Save preferences") }}
+        {% endcall %}
+      </div>
+    </div>
+
+    <p class="moo-examples-built-with text-body-secondary small">
+      Composed from the
+      <a href="{{ site_href("components/form.html", root_path) }}">Form</a>,
+      <a href="{{ site_href("components/field.html", root_path) }}">Field</a>, and
+      <a href="{{ site_href("components/switch.html", root_path) }}">Switch</a>
+      components.
+    </p>
+
+    {{ render_section_page_pagination("settings/appearance", site_pages, root_path) }}
+  </div>
+{% endblock %}
