@@ -182,6 +182,8 @@ export default class DataTable {
       } else {
         parent.appendChild(menu);
       }
+    } else {
+      menu.remove();
     }
     if (trigger) {
       this._reparentedRowMenuByTrigger.delete(trigger);

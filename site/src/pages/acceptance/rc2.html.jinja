@@ -75,17 +75,17 @@
               {% for device in acceptance_devices %}
                 <div class="moo-acceptance__matrix-label">{{ device.label }}</div>
                 <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Visual">
-                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-visual" data-moo-acceptance-check>
+                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-visual" aria-label="{{ component.label }} {{ device.label }} Visual" data-moo-acceptance-check>
                 </div>
                 <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Fixture">
-                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-fixture" data-moo-acceptance-check>
+                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-fixture" aria-label="{{ component.label }} {{ device.label }} Fixture" data-moo-acceptance-check>
                 </div>
                 <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Voice">
-                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-voice" data-moo-acceptance-check>
+                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-voice" aria-label="{{ component.label }} {{ device.label }} Voice" data-moo-acceptance-check>
                 </div>
                 <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Keyboard"{% if device.slug != "safari" %} data-moo-acceptance-state="N/A"{% endif %}>
                   {% if device.slug == "safari" %}
-                    <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-keyboard" data-moo-acceptance-check>
+                    <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-keyboard" aria-label="{{ component.label }} {{ device.label }} Keyboard" data-moo-acceptance-check>
                   {% else %}
                     <span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on {{ device.label }}">&ndash;</span>
                   {% endif %}

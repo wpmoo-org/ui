@@ -67,7 +67,7 @@
 .tabs--vertical {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  gap: $spacer;
   width: 100%;
   max-width: 100%;
 }

@@ -6,8 +6,8 @@
   {% if orientation not in tabs_orientations %}{{ fail("Unknown tabs orientation: " ~ orientation) }}{% endif %}
   {% set has_explicit_active = items | selectattr("active", "defined") | selectattr("active") | list | length > 0 %}
   {% set is_vertical = orientation == "vertical" %}
-  {% set wrapper_classes = "" %}
-  {% if is_vertical %}{% set wrapper_classes = "tabs tabs--vertical" %}{% endif %}
+  {% set wrapper_classes = "tabs" %}
+  {% if is_vertical %}{% set wrapper_classes = wrapper_classes ~ " tabs--vertical" %}{% endif %}
   {% if extra_class %}{% set wrapper_classes = (wrapper_classes ~ " " ~ extra_class) | trim %}{% endif %}
   {% set list_classes = "tabs-list nav nav-pills" %}
   {% if is_vertical %}{% set list_classes = list_classes ~ " flex-column" %}{% endif %}
