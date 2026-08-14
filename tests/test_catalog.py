@@ -1128,11 +1128,18 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         profile = self.read_output("examples/settings/profile.html")
-        self.assertIn(
-            'id="settings-email" type="email" value="jane@example.com" '
+        # Match the input tag by id, then check each attribute independently
+        # rather than one literal substring -- the assertion shouldn't break
+        # if input()'s own attribute-rendering order ever changes.
+        input_match = re.search(r'<input\b[^>]*\bid="settings-email"[^>]*>', profile)
+        self.assertIsNotNone(input_match, "settings-email input not found in output")
+        email_input = input_match.group(0)
+        for attribute in (
+            'type="email"',
+            'value="jane@example.com"',
             'aria-describedby="settings-email-description"',
-            profile,
-        )
+        ):
+            self.assertIn(attribute, email_input)
         self.assertIn(
             'id="settings-email-description">Used for sign-in and notifications.',
             profile,
