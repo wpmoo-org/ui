@@ -469,6 +469,33 @@ class DataTableTests(CatalogTestCase):
             source,
         )
 
+    def test_card_row_action_dropdowns_share_the_fixed_popper_config(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '[data-datatable-card] .table-row-actions [data-bs-toggle=\\"dropdown\\"]"',
+            source,
+        )
+        self.assertIn("_rowActionTriggers()", source)
+        # Both init and dispose must select triggers through the same shared
+        # method, so table and card views can never drift out of sync again.
+        self.assertEqual(
+            source.count("this._rowActionTriggers()"),
+            2,
+        )
+
+    def test_dispose_cleans_up_open_row_action_dropdowns(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+        dispose_body = source.split("dispose() {", 1)[1].split("\n  }\n", 1)[0]
+
+        self.assertIn("this._disposeRowActionDropdowns();", dispose_body)
+        method_body = source.split("_disposeRowActionDropdowns() {", 1)[1].split(
+            "\n  }\n", 1
+        )[0]
+        self.assertIn("Dropdown.getInstance(trigger)", method_body)
+        self.assertIn("instance.hide();", method_body)
+        self.assertIn("instance.dispose();", method_body)
+
     def test_datatable_frame_keeps_row_menu_out_of_overflow_rules(self) -> None:
         source = DATATABLE_SCSS.read_text(encoding="utf-8")
         table_source = TABLE_SCSS.read_text(encoding="utf-8")

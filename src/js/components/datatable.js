@@ -69,6 +69,7 @@ export default class DataTable {
   }
 
   dispose() {
+    this._disposeRowActionDropdowns();
     this._restoreRowActionMenus();
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
@@ -96,12 +97,21 @@ export default class DataTable {
   // That keeps the menu out of the scroll wrapper's layout math, so Safari
   // cannot clip it at the rounded frame edge or shift the visible table
   // slice while Popper positions it against the viewport.
+  // Table and card views both wrap row actions in .table-row-actions, but
+  // .table-responsive only contains the table view; card triggers must be
+  // selected separately so both views get the same fixed Popper config.
+  _rowActionTriggers() {
+    return this._element.querySelectorAll(
+      ".table-responsive .table-row-actions [data-bs-toggle=\"dropdown\"], [data-datatable-card] .table-row-actions [data-bs-toggle=\"dropdown\"]"
+    );
+  }
+
   _initRowActionDropdowns() {
     const Dropdown = this._bootstrap("Dropdown");
     if (!Dropdown) {
       return;
     }
-    this._element.querySelectorAll(".table-responsive .table-row-actions [data-bs-toggle=\"dropdown\"]").forEach((trigger) => {
+    this._rowActionTriggers().forEach((trigger) => {
       Dropdown.getOrCreateInstance(trigger, {
         popperConfig: (defaultConfig) => ({
           ...defaultConfig,
@@ -124,6 +134,24 @@ export default class DataTable {
           ],
         }),
       });
+    });
+  }
+
+  // dispose() alone leaves any open row-action Dropdown's show/aria-expanded/
+  // data-bs-popper state and Bootstrap instance behind; hide and dispose each
+  // one first so a subsequent re-init starts from a clean state.
+  _disposeRowActionDropdowns() {
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!Dropdown) {
+      return;
+    }
+    this._rowActionTriggers().forEach((trigger) => {
+      const instance = Dropdown.getInstance(trigger);
+      if (!instance) {
+        return;
+      }
+      instance.hide();
+      instance.dispose();
     });
   }
 
