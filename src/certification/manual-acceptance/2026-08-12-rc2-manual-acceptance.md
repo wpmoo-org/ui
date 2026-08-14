@@ -8,23 +8,33 @@ commits.
 
 ## Build Under Review
 
-- HTML repository commit: `089eb2f1dbb7e5fcbb76f65b1bbfc7ab25f27d6b`
+- HTML repository commit: `e662f40ba3d9bc90bd799db6527e91aeb049209e`
 - Root workspace commit at evidence capture: `03b0b9e5e5aa6512813d78819e06af040c740a61`
 - Package version: `1.0.0-rc.2`
-- Package tarball sha256: `c9894606966d8a9f000b61bfacf329d03f4a6d68610360e704b2a9a51178d505`
+- Package tarball sha256: `e5b7192e572704fc92beb78b4eb784d89ebaf570beadcdfbdf5a59e8604a9d70`
 - Conformance kit sha256: `969550911564fe24797ba67bce26f003adb9c6245dea7c311d205b9705c33328`
 - Certification manifest sha256: `1ed562c90906bf791b674970e4b9222259b597039b08b627f5f31c636b3f4f88`
-- Certification attestation sha256: `6910b06dfa20ad8e90807b8fa15222e1015097f25cc232c4b03ffaea93e8e904`
+- Certification attestation sha256: `099c7e7eae1f1713ec734e65a29a75e8aa5f3d22607a690c0992c8cceb1ea91f`
 - Catalog URL: `http://localhost:4174/`
 - Acceptance portal: `http://localhost:4174/acceptance/rc2/`
 - Reviewer: Ahmet Cangir
 - Acceptance export generated at (UTC, ISO-8601): `2026-08-12T22:34:20.510Z`
-- Build metadata captured at (UTC, ISO-8601): `2026-08-13T22:11:41Z`
+- Build metadata captured at (UTC, ISO-8601): `2026-08-14T00:24:35Z`
+
+Note: the 420/420 acceptance export above was captured against the earlier
+`089eb2f` build. The code changes between `089eb2f` and `e662f40` (this
+record's build-under-review) are: two documentation/path-only commits, a
+password-value validation guard on `input()` that no accepted example
+triggers, and the PR-review fixes in `fde8eb5` (icon-button sizing, tabs
+wrapper class, tabs gap token, input-group aria-label, and a datatable
+orphaned-menu cleanup) — all bug fixes restoring previously-accepted
+behavior or fixing non-visible defects, not new visual/interaction changes.
+No re-acceptance pass was performed against `e662f40` specifically.
 
 ## Rehearsal Artifacts
 
 These hashes were produced by `python3 scripts/rehearse-rc.py` from the clean
-`089eb2f1dbb7e5fcbb76f65b1bbfc7ab25f27d6b` build-under-review commit.
+`e662f40ba3d9bc90bd799db6527e91aeb049209e` build-under-review commit.
 
 - Package: `dist/rc-rehearsal/wpmoo-ui-1.0.0-rc.2.tgz`
 - Conformance kit: `dist/rc-rehearsal/conformance-kit/moo-ui-conformance-kit-1.0.tar.gz`
