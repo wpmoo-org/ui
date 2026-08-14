@@ -12,6 +12,7 @@ MODULES = {
     "theme.js": "initTheme",
     "catalog-filter.js": "initCatalogFilter",
     "command.js": "initCommand",
+    "examples-forms.js": "initExamplesForms",
     "examples-tasks.js": "initExamplesTasks",
     "toc.js": "initToc",
     "code-preview.js": "initCodePreview",

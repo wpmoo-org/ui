@@ -128,7 +128,7 @@ class CatalogContractTests(CatalogTestCase):
         surfaces = {
             "home": self.read_output("index.html"),
             "examples": self.read_output("examples/index.html"),
-            "tasks": self.read_output("examples/tasks.html"),
+            "tasks": self.read_output("examples/dashboard/tasks.html"),
         }
 
         for name, output in surfaces.items():
@@ -873,7 +873,7 @@ class CatalogContractTests(CatalogTestCase):
         home_index = sidebar.index('href="./"')
         docs_index = sidebar.index('href="introduction/"')
         installation_index = sidebar.index('href="installation/"')
-        examples_index = sidebar.index('data-bs-target="#shell-examples-menu"')
+        examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         blocks_index = sidebar.index('href="blocks/"')
 
@@ -1046,17 +1046,17 @@ class CatalogContractTests(CatalogTestCase):
         )[1]
         self.assertIn('href="../installation/"', examples_pagination)
         self.assertIn("Installation", examples_pagination)
-        self.assertIn('href="../examples/tasks/"', examples_pagination)
-        self.assertIn("Tasks", examples_pagination)
+        self.assertIn('href="../examples/settings/account/"', examples_pagination)
+        self.assertIn("Account", examples_pagination)
 
-        tasks = self.read_output("examples/tasks.html")
+        tasks = self.read_output("examples/dashboard/tasks.html")
         tasks_pagination = tasks.rsplit(
             '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
             1,
         )[1]
-        self.assertIn('href="../../examples/"', tasks_pagination)
-        self.assertIn("Examples", tasks_pagination)
-        self.assertIn('href="../../components/"', tasks_pagination)
+        self.assertIn('href="../../../examples/auth/sign-up/"', tasks_pagination)
+        self.assertIn("Sign Up", tasks_pagination)
+        self.assertIn('href="../../../components/"', tasks_pagination)
         self.assertIn("Components", tasks_pagination)
 
         components = self.read_output("components/index.html")
