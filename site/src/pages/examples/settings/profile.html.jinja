@@ -30,7 +30,7 @@
                 {{ input(label="Name", id="settings-name", type="text", value="Jane Doe") }}
               {% endcall %}
               {% call field() %}
-                {{ input(label="Email", id="settings-email", type="email", value="jane@example.com") }}
+                {{ input(label="Email", id="settings-email", type="email", value="jane@example.com", describedby="settings-email-description") }}
                 {{ field_description("settings-email-description", "Used for sign-in and notifications.") }}
               {% endcall %}
               {% call field() %}

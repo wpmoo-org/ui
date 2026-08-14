@@ -1123,6 +1123,21 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("[data-moo-catalog-section-filter]", catalog_filter)
         self.assertIn("selectedSection", catalog_filter)
 
+    def test_settings_profile_email_description_is_wired_to_the_input(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        profile = self.read_output("examples/settings/profile.html")
+        self.assertIn(
+            'id="settings-email" type="email" value="jane@example.com" '
+            'aria-describedby="settings-email-description"',
+            profile,
+        )
+        self.assertIn(
+            'id="settings-email-description">Used for sign-in and notifications.',
+            profile,
+        )
+
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()
 
