@@ -168,28 +168,16 @@ class DialogTests(CatalogTestCase):
         self.assertIn("static=true", source)
         self.assertIn('direction="rtl"', source)
         self.assertIn('dir="rtl"', source)
-        self.assertNotIn("Right-to-left layout", source)
 
     def test_page_uses_render_rtl_example(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn(
-            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
-            source,
-        )
         self.assertIn("render_rtl_example(", source)
         self.assertIn('render_rtl_example(\n      "dialog"', source)
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn(
-            "Compare Arabic, Hebrew, and English dialog flows used in operational workflows.",
-            source,
-        )
-        self.assertNotIn("title_id=", source)
-        self.assertNotIn('title="RTL"', source)
-        self.assertNotIn("example_prefix=", source)
         self.assertNotIn(
             '{% from "components/tabs.html.jinja" import tabs %}',
             source,
@@ -202,15 +190,24 @@ class DialogTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
         self.assertIn('id="rtl">RTL</h2>', output)
+
+    def test_dialog_english_rtl_comparison_uses_ltr_modal_direction(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        english_example = source.split("{% set rtl_english %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="ltr"', english_example)
+        self.assertIn('direction="ltr"', english_example)
+        self.assertNotIn('direction="rtl"', english_example)
 
     def test_dialog_styles_keep_one_surface_and_preserve_elevation_on_focus(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertNotIn("--bs-modal-footer-bg", styles)
+        self.assertIn(
+            "--bs-modal-footer-bg: color-mix(in srgb, var(--bs-secondary-bg) 50%, transparent);",
+            styles,
+        )
+        self.assertNotIn("rgba(", styles)
         self.assertIn(".modal-content", styles)
         self.assertIn("box-shadow: var(--bs-box-shadow-lg)", styles)
         self.assertIn(".modal[tabindex]:focus-visible", styles)

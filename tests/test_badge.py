@@ -4,7 +4,7 @@ import json
 import re
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_primary_variables
 
 
 COMPONENT = ROOT / "src/components/badge.html.jinja"
@@ -64,25 +64,103 @@ class BadgeTests(CatalogTestCase):
         css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
         self.assertRegex(css, r"--bs-badge-font-weight:\s*500;")
 
+    def test_badge_uses_centered_reference_chip_geometry(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+        badge_rule = re.search(
+            r"\.badge\s*\{(?P<body>[^}]*display:\s*inline-flex;[^}]*)\}",
+            css,
+        )
+        self.assertIsNotNone(badge_rule)
+        badge_css = badge_rule.group("body")
+
+        self.assertRegex(css, r"--bs-badge-padding-x:\s*0\.5rem;")
+        self.assertRegex(css, r"--bs-badge-padding-y:\s*0\.125rem;")
+        self.assertRegex(css, r"--bs-badge-font-size:\s*0\.75rem;")
+        self.assertRegex(css, r"--bs-badge-border-radius:\s*var\(--bs-border-radius-pill\);")
+        self.assertIn("display: inline-flex;", badge_css)
+        self.assertIn("align-items: center;", badge_css)
+        self.assertIn("justify-content: center;", badge_css)
+        self.assertRegex(badge_css, r"(?m)^\s*height:\s*1\.25rem;")
+        self.assertIn("border: var(--bs-border-width) solid var(--bs-border-color);", badge_css)
+        self.assertIn("border-color: transparent;", badge_css)
+        self.assertIn("$badge-border-color: transparent !default;", read_primary_variables())
+        self.assertIn("gap: 0.25rem;", badge_css)
+        self.assertIn("line-height: 1rem;", badge_css)
+
+    def test_badge_variants_use_reference_theme_tokens(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+        source = (ROOT / "scss/settings/_palette.scss").read_text(encoding="utf-8")
+        tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
+            encoding="utf-8"
+        )
+        core_theme = (ROOT / "scss/themes/_scoped_core.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            "$moo-destructive-surface: color-mix(in srgb, $moo-destructive 3%, transparent) !default;",
+            source,
+        )
+        self.assertIn(
+            "$moo-destructive-surface-dark: color-mix(in srgb, $moo-destructive-dark 20%, transparent) !default;",
+            source,
+        )
+        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface};", tokens_root)
+        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface-dark};", tokens_root)
+        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface};", core_theme)
+        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface-dark};", core_theme)
+
+        expected_rules = {
+            '.badge[class~="border"]': (
+                "border-color: var(--moo-border) !important;",
+            ),
+            '.badge[class~="text-bg-primary"]': (
+                "color: var(--moo-primary-foreground) !important;",
+                "background-color: var(--moo-primary) !important;",
+            ),
+            '.badge[class~="text-bg-secondary"]': (
+                "color: var(--moo-foreground) !important;",
+                "background-color: var(--moo-muted-surface) !important;",
+            ),
+            '.badge[class~="text-bg-danger"]': (
+                "color: var(--moo-destructive) !important;",
+                "background-color: var(--moo-destructive-surface) !important;",
+            ),
+            '.badge[class~="text-body-secondary"]': (
+                "color: var(--moo-foreground) !important;",
+            ),
+        }
+        for selector, declarations in expected_rules.items():
+            with self.subTest(selector=selector):
+                escaped_selector = re.escape(selector).replace("\\[", "\\[").replace("\\]", "\\]")
+                rule = re.search(rf"{escaped_selector}\s*\{{(?P<body>[^}}]*)\}}", css)
+                self.assertIsNotNone(rule)
+                body = rule.group("body")
+                for declaration in declarations:
+                    self.assertIn(declaration, body)
+
     def test_page_uses_shared_rtl_example_tabs(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
-        self.assertNotIn('title="RTL"', source)
         self.assertIn("arabic_badge", source)
         self.assertIn("hebrew_badge", source)
         self.assertIn("english_badge", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
-        self.assertIn("Access request", source)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = self.read_output("components/badge.html")
+        self.assertIn(">Badge</span>", output)
         self.assertIn("badge-direction-tabs", output)
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)

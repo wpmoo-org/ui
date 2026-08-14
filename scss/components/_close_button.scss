@@ -1,0 +1,59 @@
+.btn-close {
+  --bs-btn-close-color: var(--moo-foreground);
+  --bs-btn-hover-color: var(--bs-btn-close-color);
+  --bs-btn-hover-bg: var(--moo-muted-surface);
+  --bs-btn-hover-border-color: #{$moo-close-button-border-color};
+  // Replace Bootstrap's filled-path X with a Lucide-style stroke-based icon
+  // (thinner, more delicate — matches the reference's feel).
+  --bs-btn-close-bg: #{escape-svg($moo-close-button-bg-image)};
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-width: var(--bs-border-width);
+  border-style: var(--bs-border-style);
+  border-color: $moo-close-button-border-color;
+  border-radius: var(--bs-border-radius-xl);
+  color: var(--bs-btn-close-color);
+  background-image: none;
+  transition: $btn-transition;
+}
+
+.btn-close::before {
+  width: $btn-close-width;
+  height: $btn-close-height;
+  content: "";
+  background-color: currentColor;
+  -webkit-mask: var(--bs-btn-close-bg) center / contain no-repeat;
+  mask: var(--bs-btn-close-bg) center / contain no-repeat;
+}
+
+// Bootstrap's dark rule filters the whole element to recolor its background
+// image. The glyph above uses currentColor through a mask, so filtering would
+// incorrectly invert the token-driven hover surface as well.
+[data-bs-theme="dark"] .btn-close {
+  filter: none;
+}
+
+.btn-close:hover {
+  border-color: var(--bs-btn-hover-border-color);
+  color: var(--bs-btn-hover-color);
+  background-color: var(--bs-btn-hover-bg);
+}
+
+.btn-close:focus-visible {
+  border-color: var(--moo-ring);
+  color: var(--bs-btn-hover-color);
+  background-color: var(--bs-btn-hover-bg);
+}
+
+.btn-close:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.btn-close:disabled,
+.btn-close.disabled {
+  pointer-events: none;
+  opacity: var(--moo-disabled-control-opacity);
+}

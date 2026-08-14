@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/popover.html.jinja" import popover_dismiss_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Popover — Moo UI{% endblock %}
@@ -14,6 +14,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ button(
+        "Click to popover",
+        variant="outline",
+        popover_title="Routing review",
+        popover_content="Approve this request, reassign it, or return it for clarification."
+      ) }}
+    {% endset %}
+    {% set popover_usage %}
+      <p>Use <code>data-bs-toggle="popover"</code> for compact contextual details attached to a clear, focusable trigger. Provide a concise title, body content, or both with Bootstrap popover attributes, and choose a placement that keeps the popover close to the action without covering the work the user is reviewing.</p>
+      <p>Initialize popovers only on pages that use them; Bootstrap keeps them opt-in for performance. Use <code>container="body"</code> or another explicit container when the trigger sits inside complex layouts such as input groups, button groups, tables, or dialogs where clipping and focus containment can matter.</p>
+      <p>Keep critical confirmations, long forms, and required instructions outside popovers. Bootstrap sanitizes HTML content, disabled elements need a wrapper trigger, and the popover should be hidden before its trigger is removed from the DOM.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      popover_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {{ button(
         "Review update",
@@ -114,7 +133,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {{ button(
           "Open review note",
           variant="outline",

@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Toggle Group — Moo UI{% endblock %}
@@ -13,6 +13,30 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ toggle_group(
+        "toggle-group-intro-density",
+        [
+          {"id": "toggle-intro-list", "icon": "list", "aria_label": "List view", "pressed": true},
+          {"id": "toggle-intro-grid", "icon": "layout-grid", "aria_label": "Grid view"},
+          {"id": "toggle-intro-table", "icon": "table-2", "aria_label": "Table view"}
+        ],
+        legend="View mode",
+        type="single",
+        variant="outline"
+      ) }}
+    {% endset %}
+    {% set toggle_group_usage %}
+      <p>Use grouped <code>.btn-check</code> inputs with matching <code>.btn</code> labels when related button-like choices need a persistent pressed state. Use radio inputs when exactly one item should stay active, and checkbox inputs when multiple items may be pressed at the same time.</p>
+      <p>Group the controls under one accessible label, keep every item the same size and variant, and make the selected state visible without relying on color alone. Give every icon-only toggle its own accessible label because the icon is not a name.</p>
+      <p>Toggle Group uses Bootstrap's button-check contract: native inputs hold the state while labels render the button surface. Keep values stable for form submission, and choose a normal Button Group when the controls are actions rather than selectable modes.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      toggle_group_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       {{ toggle_group(
         "notification-channels",
@@ -162,7 +186,7 @@
     {% endset %}
 
     {% set toggle_group_rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {{ toggle_group(
           "shipment-method-rtl-english",
           [
@@ -179,7 +203,7 @@
 
     {{ render_rtl_example(
       "toggle-group",
-      "Use the same shipment method options across Arabic, Hebrew, and English RTL previews.",
+      "Use the same shipment method options across Arabic and Hebrew RTL examples, with English as the LTR comparison.",
       toggle_group_rtl_arabic,
       toggle_group_rtl_hebrew,
       toggle_group_rtl_english,

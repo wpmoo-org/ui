@@ -8,7 +8,7 @@
 {% from "components/spinner.html.jinja" import spinner %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Input Group — Moo UI{% endblock %}
@@ -20,6 +20,31 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field(extra_class="w-100") %}
+        <label class="form-label" for="input-group-intro-search">Input Group</label>
+        {% call input_group() %}
+          {{ input_group_text(button_icon("search", "inline-start")) }}
+          {{ input(
+            id="input-group-intro-search",
+            type="search",
+            placeholder="Search requests...",
+            aria_label="Input Group"
+          ) }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {% set input_group_usage %}
+      <p>Use <code>.input-group</code> when a text input needs a tightly attached prefix, suffix, icon, button, or short addon. Put the editable control and its attached addons inside one group, and keep any visible <code>label</code> outside the group as Bootstrap recommends.</p>
+      <p>Keep the input as the primary control. Addons should clarify the value, such as a currency symbol, unit, search icon, domain suffix, or action button; avoid nesting unrelated controls that make the group hard to scan or tab through.</p>
+      <p>Input groups wrap by default to make validation possible. Apply size classes such as <code>.input-group-sm</code> or <code>.input-group-lg</code> to the group itself, not to each child, and be careful with hidden first or last children because they can affect Bootstrap's joined border radius.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      input_group_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set icon_start %}
       {% call field(extra_class="w-100") %}
         <label class="form-label" for="icon-start-search">Input</label>
@@ -432,7 +457,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {% call input_group() %}
           {{ input(
             aria_label="Search",
@@ -447,7 +472,7 @@
 
     {{ render_rtl_example(
       "rtl",
-      "Use one compact search control in Arabic, Hebrew, and English to verify mirrored composition inside RTL containers.",
+      "Use one compact search control across Arabic and Hebrew RTL examples, with English as the LTR comparison.",
       rtl_arabic,
       rtl_hebrew,
       rtl_english,

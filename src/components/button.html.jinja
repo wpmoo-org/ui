@@ -87,7 +87,7 @@
   {% if loading and icon_start %}{{ fail("Button loading replaces icon_start; do not set both") }}{% endif %}
   {% if collapse_target and (toggle or dropdown) %}{{ fail("Button collapse_target cannot combine with toggle or dropdown") }}{% endif %}
   {% if collapse_open and not collapse_target %}{{ fail("Button collapse_open requires collapse_target") }}{% endif %}
-  {% if not label | trim and not aria_label | trim %}{{ fail("Buttons without a visible label require aria_label") }}{% endif %}
+  {% if not label | trim and not aria_label | trim %}{{ fail("Button without a visible label requires aria_label") }}{% endif %}
   {% if tooltip_placement not in button_tooltip_placements %}{{ fail("Unknown button tooltip placement: " ~ tooltip_placement) }}{% endif %}
   {% if tooltip and element not in ("button", "a") %}{{ fail("Button tooltip requires element=button or element=a") }}{% endif %}
   {% if tooltip and (toggle or dropdown or collapse_target) %}{{ fail("Button tooltip cannot combine with toggle, dropdown, or collapse_target; a Bootstrap element holds only one plugin instance") }}{% endif %}

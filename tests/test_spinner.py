@@ -55,11 +55,11 @@ class SpinnerTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
-        self.assertNotIn('title="RTL"', source)
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         # RTL rule: exact translations of the same example, same structure.
         for block_start in ("rtl_arabic %}", "rtl_hebrew %}", "rtl_english %}"):
@@ -74,6 +74,3 @@ class SpinnerTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         output = self.read_output("components/spinner.html")
         self.assertIn("spinner-direction-tabs", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)

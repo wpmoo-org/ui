@@ -25,8 +25,8 @@
   </form>
 {%- endmacro %}
 
-{% macro field(extra_class="") -%}
-  <div class="field{% if extra_class %} {{ extra_class }}{% endif %}">
+{% macro field(extra_class="", invalid=false) -%}
+  <div class="field{% if extra_class %} {{ extra_class }}{% endif %}"{% if invalid %} data-invalid="true"{% endif %}>
     {{ caller() | trim | safe }}
   </div>
 {%- endmacro %}

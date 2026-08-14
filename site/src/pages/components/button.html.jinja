@@ -1,81 +1,144 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 
 {% block title %}Button — Moo UI{% endblock %}
 
 {% block content %}
   {{ render_page_header(
-    "Buttons",
+    "Button",
     "Use Bootstrap button styles for reliable production actions: publish, review, and move work forward."
   ) }}
 
   <div class="moo-component-examples">
-    {% set core_variants %}
-      <div class="d-flex flex-column align-items-center gap-2">
-        <div class="d-flex flex-wrap justify-content-center gap-2">
-          {{ button("Publish") }}
-          {{ button("Reschedule", variant="secondary") }}
-          {{ button("Mark approved", variant="success") }}
-          {{ button("Needs review", variant="warning") }}
+    {% set intro %}
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        {{ button("Button", variant="outline") }}
+        {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up") }}
+      </div>
+    {% endset %}
+    {% set button_usage %}
+      <p>Use <code>.btn</code> for actions that submit, open, confirm, dismiss, or move work forward. Choose the native element from the action: use <code>button</code> for in-page behavior, <code>a</code> for real navigation, and <code>input</code> only when a form API requires it.</p>
+      <p>Choose one variant for emphasis and make the purpose visible in the label. Use <code>.btn-primary</code> for the main action in a small decision area, <code>.btn-outline-*</code> for quieter actions, and <code>.btn-sm</code> or <code>.btn-lg</code> only when the surrounding density changes.</p>
+      <p>Give icon-only buttons an <code>aria-label</code>, do not rely on color alone for destructive or success meaning, and set <code>disabled</code> while an action cannot run. If an <code>a</code> element triggers in-page behavior instead of navigating, add <code>role="button"</code> so assistive technology hears the right control type.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      button_usage
+    ) }}
+
+    {% set primary_example %}
+      {{ button("Primary") }}
+    {% endset %}
+    {{ render_example(
+      "primary",
+      "Primary",
+      "Use the primary button for the main action in a small decision area.",
+      primary_example
+    ) }}
+
+    {% set outline_example %}
+      {{ button("Outline", variant="outline") }}
+    {% endset %}
+    {{ render_example(
+      "outline",
+      "Outline",
+      "An outlined button with no fill.",
+      outline_example
+    ) }}
+
+    {% set secondary_example %}
+      {{ button("Secondary", variant="secondary") }}
+    {% endset %}
+    {{ render_example(
+      "secondary",
+      "Secondary",
+      "A muted button for secondary actions.",
+      secondary_example
+    ) }}
+
+    {% set ghost_example %}
+      {{ button("Ghost", variant="ghost") }}
+    {% endset %}
+    {{ render_example(
+      "ghost",
+      "Ghost",
+      "A transparent button with no background or border.",
+      ghost_example
+    ) }}
+
+    {% set destructive_example %}
+      {{ button("Destructive", variant="destructive") }}
+    {% endset %}
+    {{ render_example(
+      "destructive",
+      "Destructive",
+      "A destructive button for dangerous actions.",
+      destructive_example
+    ) }}
+
+    {% set link_example %}
+      {{ button("Link", variant="link") }}
+    {% endset %}
+    {{ render_example(
+      "link",
+      "Link",
+      "A button styled as a hyperlink.",
+      link_example
+    ) }}
+
+    {% set size_example %}
+      <div class="d-flex flex-column gap-3 flex-sm-row">
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Extra Small", variant="outline", size="xs") }}
+          {{ button("", variant="outline", size="icon-xs", aria_label="Submit", icon_start="arrow-up-right") }}
         </div>
-        <div class="d-flex flex-wrap justify-content-center gap-2">
-          {{ button("Reject", variant="destructive") }}
-          {{ button("Open workspace", variant="outline") }}
-          {{ button("More options", variant="ghost") }}
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Small", variant="outline", size="sm") }}
+          {{ button("", variant="outline", size="icon-sm", aria_label="Submit", icon_start="arrow-up-right") }}
+        </div>
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Default", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="Submit", icon_start="arrow-up-right") }}
+        </div>
+        <div class="d-flex align-items-start gap-2">
+          {{ button("Large", variant="outline", size="lg") }}
+          {{ button("", variant="outline", size="icon-lg", aria_label="Submit", icon_start="arrow-up-right") }}
         </div>
       </div>
     {% endset %}
     {{ render_example(
-      "core-variants",
-      "Variants",
-      "Choose a variant for the action's consequence: default for normal operations, success for confirmation, and destructive for irreversible steps.",
-      core_variants
+      "size",
+      "Size",
+      "Use the <code>size</code> prop after choosing the button variant.",
+      size_example
     ) }}
 
-    {% set semantic_elements %}
+    {% set icon_example %}
+      {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="send") }}
+    {% endset %}
+    {{ render_example(
+      "icon",
+      "Icon",
+      "An icon-only button. Always provide an <code>aria-label</code>; the icon alone is not an accessible name.",
+      icon_example
+    ) }}
+
+    {% set with_icon_example %}
       <div class="d-flex flex-wrap gap-2">
-        {{ button("Open runbook", variant="outline", element="a", href="#button-tags") }}
-        {{ button("Submit approval", type="submit") }}
-        {{ button("Clear queue", element="input", type="reset") }}
+        {{ button("New Branch", variant="outline", icon_start="git-branch") }}
+        {{ button("Fork", variant="outline", icon_end="git-fork") }}
       </div>
     {% endset %}
     {{ render_example(
-      "semantic-elements",
-      "Button tags",
-      "Use the right element for the context: links for navigation, buttons for actions, and input buttons for form workflows.",
-      semantic_elements
-    ) }}
-
-    {% set outline_variants %}
-      <div class="d-flex flex-wrap gap-2">
-        {{ button("Keep draft", variant="outline") }}
-        {{ button("Archive queue", variant="outline-primary") }}
-        {{ button("Mark blocked", variant="outline-danger") }}
-      </div>
-    {% endset %}
-    {{ render_example(
-      "outline-variants",
-      "Outlined actions",
-      "Outlined styles stay visible without taking visual priority from primary actions.",
-      outline_variants
-    ) }}
-
-    {% set icon_actions %}
-      <div class="d-flex flex-wrap gap-2">
-        {{ button("Create task", icon_start="user-plus") }}
-        {{ button("Continue process", variant="outline", icon_end="arrow-right") }}
-        {{ button("", variant="secondary", size="icon", aria_label="Pin workspace", icon_start="pin") }}
-      </div>
-    {% endset %}
-    {{ render_example(
-      "icon-actions",
-      "Icons",
-      "Keep icon placement explicit: leading icons clarify operation type, trailing icons indicate direction.",
-      icon_actions
+      "with-icon",
+      "With Icon",
+      "Remember to add the <code>icon_start</code> or <code>icon_end</code> parameter to the button for the correct spacing.",
+      with_icon_example
     ) }}
 
     {% set button_states %}
@@ -92,31 +155,30 @@
       button_states
     ) }}
 
-    {% set button_size_examples %}
-      <div class="d-flex flex-column gap-2">
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          {{ button("XS", variant="outline", size="xs") }}
-          {{ button("", variant="outline", size="icon-xs", aria_label="Create micro task", icon_start="plus") }}
-        </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          {{ button("Small", variant="outline", size="sm") }}
-          {{ button("", variant="outline", size="icon-sm", aria_label="Create small task", icon_start="plus") }}
-        </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          {{ button("Default", variant="outline") }}
-          {{ button("", variant="outline", size="icon", aria_label="Create task", icon_start="plus") }}
-        </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          {{ button("Large", variant="outline", size="lg") }}
-          {{ button("", variant="outline", size="icon-lg", aria_label="Create large task", icon_start="plus") }}
-        </div>
+    {% set rounded_example %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Get Started", extra_class="rounded-pill") }}
+        {{ button("", variant="outline", size="icon", aria_label="Arrow up", icon_start="arrow-up", extra_class="rounded-pill") }}
       </div>
     {% endset %}
     {{ render_example(
-      "button-sizes",
-      "Sizes",
-      "Size options should reflect component density. Matching text and icon buttons keeps alignment steady when a toolbar grows or shrinks.",
-      button_size_examples
+      "rounded",
+      "Rounded",
+      "Use the <code>rounded-pill</code> class to make the button rounded.",
+      rounded_example
+    ) }}
+
+    {% set spinner_example %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Generating", loading=true, disabled=true) }}
+        {{ button("Downloading", loading=true, disabled=true) }}
+      </div>
+    {% endset %}
+    {{ render_example(
+      "spinner",
+      "Spinner",
+      "Render a spinner inside the button to show a loading state. The <code>loading</code> parameter replaces the leading icon with a spinning loader and sets <code>aria-busy</code>.",
+      spinner_example
     ) }}
 
     {% set full_width_actions %}
@@ -143,41 +205,63 @@
     ) }}
 
     {% set related_button_group %}
-      <div class="d-flex flex-column align-items-start gap-3">
-        {% call button_group("Queue actions") %}
-          {{ button("Previous", variant="outline") }}
-          {{ button("Next", variant="outline") }}
+      {% call button_group("Message actions", toolbar=true, extra_class="gap-2") %}
+        {% call button_group("Navigation", extra_class="d-none d-sm-flex") %}
+          {{ button("", variant="outline", size="icon", aria_label="Go back", icon_start="arrow-left") }}
         {% endcall %}
-      </div>
+        {% call button_group("Message review") %}
+          {{ button("Archive", variant="outline") }}
+          {{ button("Report", variant="outline") }}
+        {% endcall %}
+        {% call button_group("More actions") %}
+          {{ button("Snooze", variant="outline") }}
+          {{ button("", variant="outline", size="icon", aria_label="More options", icon_start="ellipsis", extra_class="rounded-end", dropdown=true) }}
+          {% call dropdown_menu(align="end") %}
+            {{ dropdown_item("Mark as handled", icon="mail-check") }}
+            {{ dropdown_item("Move to archive", icon="archive") }}
+            {{ dropdown_divider() }}
+            {{ dropdown_item("Delete message", icon="trash-2", destructive=true) }}
+          {% endcall %}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {% set related_button_group_description %}
       Group adjacent actions that belong together. See the <a href="{{ site_href("components/button-group.html", root_path) }}">Button Group</a> component for broader toolbar behavior.
     {% endset %}
     {{ render_example(
       "related-button-group",
-      "Button group",
+      "Button Group",
       related_button_group_description,
       related_button_group
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-inline-flex gap-2" dir="rtl">
-        {{ button("حفظ", variant="outline", icon_start="save") }}
-        {{ button("نشر", variant="success", icon_start="send") }}
+      <div class="d-flex flex-wrap align-items-center gap-2" dir="rtl">
+        {{ button("زر", variant="outline") }}
+        {{ button("حذف", variant="destructive") }}
+        {{ button("إرسال", variant="outline", icon_end="arrow-right") }}
+        {{ button("", variant="outline", size="icon", aria_label="إضافة", icon_start="plus") }}
+        {{ button("جاري التحميل", variant="secondary", loading=true, disabled=true) }}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-flex gap-2" dir="rtl">
-        {{ button("שמור", variant="outline", icon_start="save") }}
-        {{ button("פרסם", variant="success", icon_start="send") }}
+      <div class="d-flex flex-wrap align-items-center gap-2" dir="rtl">
+        {{ button("כפתור", variant="outline") }}
+        {{ button("מחק", variant="destructive") }}
+        {{ button("שלח", variant="outline", icon_end="arrow-right") }}
+        {{ button("", variant="outline", size="icon", aria_label="הוסף", icon_start="plus") }}
+        {{ button("טוען", variant="secondary", loading=true, disabled=true) }}
       </div>
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex gap-2" dir="rtl">
-        {{ button("Save", variant="outline", icon_start="save") }}
-        {{ button("Publish", variant="success", icon_start="send") }}
+      <div class="d-flex flex-wrap align-items-center gap-2" dir="ltr">
+        {{ button("Button", variant="outline") }}
+        {{ button("Delete", variant="destructive") }}
+        {{ button("Send", variant="outline", icon_end="arrow-right") }}
+        {{ button("", variant="outline", size="icon", aria_label="Add", icon_start="plus") }}
+        {{ button("Loading", variant="secondary", loading=true, disabled=true) }}
       </div>
     {% endset %}
 
@@ -193,7 +277,7 @@
   {{ render_reference(
     "For more detailed information, see the",
     "https://getbootstrap.com/docs/5.3/components/buttons/",
-    "Bootstrap Buttons documentation"
+    "Bootstrap Button documentation"
   ) }}
 
 {% endblock %}

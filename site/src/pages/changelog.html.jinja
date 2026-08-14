@@ -16,14 +16,50 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
-        <article class="moo-changelog__release" aria-labelledby="release-{{ product.version | replace('.', '-') }}">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-2">
           <div class="moo-changelog__release-heading">
-            <span class="badge text-bg-dark">v{{ product.version }}</span>
+            <span class="badge text-bg-dark">v1.0.0-rc.2</span>
+            <span class="text-body-secondary">Release-candidate polish and acceptance evidence</span>
+          </div>
+          <h2 id="release-1-0-0-rc-2">Rc2 Readiness Closeout</h2>
+          <p>
+            Moo UI 1.0.0-rc.2 keeps certification in preview while folding
+            post-rc1 visual acceptance, fixture, keyboard, and release-metadata
+            fixes into the release candidate.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Component usage guidance, intro examples, RTL examples, reference rows, and catalog code presentation were polished for the rc2 acceptance pass.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Rc2 manual acceptance portal and 420-check export covering Safari, iPhone Safari, and Samsung tablet Chrome; mobile keyboard rows are intentionally not applicable.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>Combobox input-owned Arrow navigation, Data Table row-action menu lifecycle, dropdown overlays and scroll affordances, Skeleton certification fixture layout, and Tabs and Toggle Group keyboard-only focus rings.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Package metadata and generated public metadata for <code>@wpmoo/ui@1.0.0-rc.2</code>; the certification manifest remains <code>preview</code> and its component list remains empty.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v1.0.0-rc.2">GitHub Release v1.0.0-rc.2</a></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-1">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.1</span>
             <span class="text-body-secondary">Complete the 42-component Core roadmap</span>
           </div>
-          <h2 id="release-{{ product.version | replace('.', '-') }}">Context Menu and Data Table</h2>
+          <h2 id="release-1-0-0-rc-1">Context Menu and Data Table</h2>
           <p>
-            Context Menu and Data Table join the Core as certified Tier 3
+            Context Menu and Data Table join the Core as Tier 3 ready
             components, completing the open-source 42-component roadmap.
           </p>
 
@@ -45,8 +81,12 @@
               <span>Data Table toolbar layout moved into component SCSS with new <code>$moo-datatable-*</code> Sass knobs; catalog home and header refinements.</span>
             </div>
             <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Card spacing runtime variable renamed from <code>--card-spacing</code> to <code>--moo-card-spacing</code> to keep Moo UI-owned custom properties in the documented namespace.</span>
+            </div>
+            <div class="moo-changelog__change-row">
               <span class="moo-changelog__change-label">Release</span>
-              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v{{ product.version }}">GitHub Release v{{ product.version }}</a></span>
+              <span><a href="https://github.com/wpmoo-org/ui/releases/tag/v1.0.0-rc.1">GitHub Release v1.0.0-rc.1</a></span>
             </div>
           </div>
         </article>
@@ -319,7 +359,8 @@
     </article>
 
     {{ render_doc_toc([
-      {"id": "release-" ~ (product.version | replace('.', '-')), "label": "v" ~ product.version},
+      {"id": "release-1-0-0-rc-2", "label": "v1.0.0-rc.2"},
+      {"id": "release-1-0-0-rc-1", "label": "v1.0.0-rc.1"},
       {"id": "release-0-7-1", "label": "v0.7.1"},
       {"id": "post-release-docs-boundary", "label": "Post-release"},
       {"id": "release-0-7-0", "label": "v0.7.0"},

@@ -1,4 +1,5 @@
 {% from "components/button.html.jinja" import button %}
+{% from "components/button_group.html.jinja" import button_group %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
 
 {% macro render_section_page_actions(current_slug, sections, root_path="", ai_links=true) -%}
@@ -23,44 +24,25 @@ I'm looking at this Moo UI documentation:
 Help me understand how to use it. Be ready to explain concepts, give examples, or help debug based on it.
     {%- endset -%}
     <div class="moo-doc-page-actions" aria-label="Page actions">
-      <div class="btn-group btn-group-sm" role="group" aria-label="Page sharing">
-        <button class="btn btn-ghost" type="button" data-moo-copy-page data-moo-copy-value="{{ page_url }}">
-          {{ render_icon("copy", "inline-start") }}
-          <span data-moo-copy-page-label>Copy Link</span>
-        </button>
-        {% if ai_links %}
-          {{ button(
-            "",
-            variant="ghost",
-            size="icon-sm",
-            aria_label="Open page with AI",
-            icon_start="chevron-down",
-            extra_class="rounded-end",
-            dropdown=true
-          ) }}
-          {% call dropdown_menu(align="end") %}
-            {{ dropdown_item("Open in ChatGPT", href="https://chatgpt.com/?q=" ~ (prompt | urlencode), icon="bot", target="_blank", rel="noopener noreferrer") }}
-            {{ dropdown_item("Open in Claude", href="https://claude.ai/new?q=" ~ (prompt | urlencode), icon="sparkles", target="_blank", rel="noopener noreferrer") }}
-            {{ dropdown_item("Open in v0", href="https://v0.app/?q=" ~ (prompt | urlencode), icon="box", target="_blank", rel="noopener noreferrer") }}
-          {% endcall %}
-        {% endif %}
-      </div>
+      {% call button_group("Page sharing") %}
+        <button class="btn btn-outline-secondary btn-xs" type="button" data-moo-copy-page data-moo-copy-value="{{ page_url }}">{{ render_icon("copy", "inline-start") }}<span data-moo-copy-page-label>Copy Link</span></button>{% if ai_links %}{{ button("", variant="outline", size="icon-xs", aria_label="Open page with AI", icon_start="chevron-down", extra_class="rounded-end", dropdown=true) }}{% call dropdown_menu(align="end") %}{{ dropdown_item("Open in ChatGPT", href="https://chatgpt.com/?q=" ~ (prompt | urlencode), icon="bot", target="_blank", rel="noopener noreferrer") }}{{ dropdown_item("Open in Claude", href="https://claude.ai/new?q=" ~ (prompt | urlencode), icon="sparkles", target="_blank", rel="noopener noreferrer") }}{{ dropdown_item("Open in v0", href="https://v0.app/?q=" ~ (prompt | urlencode), icon="box", target="_blank", rel="noopener noreferrer") }}{% endcall %}{% endif %}
+      {% endcall %}
       <div class="moo-doc-page-actions__nav" role="group" aria-label="Page navigation">
         {% if ns.previous %}
-          <a class="btn btn-ghost btn-icon-sm" href="{{ site_href(ns.previous.href, root_path) }}" aria-label="Previous page: {{ ns.previous.label }}">
+          <a class="btn btn-ghost btn-icon-xs" href="{{ site_href(ns.previous.href, root_path) }}" aria-label="Previous page: {{ ns.previous.label }}">
             {{ render_icon("arrow-left", "inline-start") }}
           </a>
         {% else %}
-          <button class="btn btn-ghost btn-icon-sm disabled" type="button" disabled aria-disabled="true" aria-label="Previous page unavailable">
+          <button class="btn btn-ghost btn-icon-xs disabled" type="button" disabled aria-disabled="true" aria-label="Previous page unavailable">
             {{ render_icon("arrow-left", "inline-start") }}
           </button>
         {% endif %}
         {% if ns.next %}
-          <a class="btn btn-ghost btn-icon-sm" href="{{ site_href(ns.next.href, root_path) }}" aria-label="Next page: {{ ns.next.label }}">
+          <a class="btn btn-ghost btn-icon-xs" href="{{ site_href(ns.next.href, root_path) }}" aria-label="Next page: {{ ns.next.label }}">
             {{ render_icon("arrow-right", "inline-start") }}
           </a>
         {% else %}
-          <button class="btn btn-ghost btn-icon-sm disabled" type="button" disabled aria-disabled="true" aria-label="Next page unavailable">
+          <button class="btn btn-ghost btn-icon-xs disabled" type="button" disabled aria-disabled="true" aria-label="Next page unavailable">
             {{ render_icon("arrow-right", "inline-start") }}
           </button>
         {% endif %}

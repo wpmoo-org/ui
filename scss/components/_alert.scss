@@ -4,10 +4,27 @@
 .alert {
   --bs-alert-border-color: var(--moo-border);
   --bs-alert-color: var(--moo-foreground);
+  --bs-alert-padding-x: 0.625rem;
+  --bs-alert-padding-y: 0.5rem;
 
   display: flex;
   align-items: flex-start;
-  gap: $spacer * 0.75;
+  gap: 0.375rem;
+}
+
+.alert-dismissible {
+  padding-right: 0;
+  padding-left: 0;
+  padding-inline-start: var(--bs-alert-padding-x);
+  padding-inline-end: calc(var(--bs-alert-padding-x) + 1.5rem);
+}
+
+.alert-dismissible .btn-close {
+  top: auto;
+  right: auto;
+  inset-block-start: var(--bs-alert-padding-y);
+  inset-inline-end: var(--bs-alert-padding-x);
+  padding: $btn-close-padding-y $btn-close-padding-x;
 }
 
 // The reference's destructive alert keeps the same neutral surface and
@@ -20,6 +37,27 @@
   --bs-alert-bg: transparent;
   --bs-alert-border-color: var(--moo-border);
   --bs-alert-color: var(--moo-destructive);
+}
+
+// Warning and success alerts follow the same quiet pattern as destructive:
+// neutral border, tinted alpha surface, hue-colored text. Matches the
+// reference's alert variants (amber for warning, green for success).
+.alert-warning {
+  --bs-alert-bg: var(--moo-warning-surface);
+  --bs-alert-border-color: var(--moo-border);
+  --bs-alert-color: var(--moo-warning);
+}
+
+.alert-success {
+  --bs-alert-bg: var(--moo-success-surface);
+  --bs-alert-border-color: var(--moo-border);
+  --bs-alert-color: var(--moo-success);
+}
+
+.alert-info {
+  --bs-alert-bg: var(--moo-info-surface);
+  --bs-alert-border-color: var(--moo-border);
+  --bs-alert-color: var(--moo-info);
 }
 
 .alert-icon {
@@ -36,6 +74,10 @@
 .alert-body {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.alert-body p {
+  color: color-mix(in srgb, var(--bs-alert-color) 60%, var(--bs-secondary-color));
 }
 
 .alert-heading {

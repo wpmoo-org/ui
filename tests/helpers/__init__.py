@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import struct
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -24,6 +26,28 @@ SCSS_IMPORT = re.compile(
     r'^[ \t]*@import[ \t]+["\']([^"\']+)["\'][ \t]*;',
     re.MULTILINE,
 )
+
+
+def npm_env() -> dict[str, str]:
+    env = os.environ.copy()
+    cache = env.get("npm_config_cache")
+    if not cache or not _npm_cache_is_writable(Path(cache)):
+        env["npm_config_cache"] = os.path.join(
+            tempfile.gettempdir(),
+            "wpmoo-npm-cache",
+        )
+    return env
+
+
+def _npm_cache_is_writable(cache: Path) -> bool:
+    try:
+        probe_dir = cache / "_cacache" / "tmp"
+        probe_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=probe_dir):
+            pass
+    except OSError:
+        return False
+    return True
 
 
 def active_scss_imports(source: str) -> list[str]:

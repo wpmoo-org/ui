@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/collapsible.html.jinja" import collapsible %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Collapsible — Moo UI{% endblock %}
@@ -13,6 +13,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ collapsible(
+        "collapsible-intro",
+        "Can I change this after saving?",
+        "Yes. You can reopen the request and update the details until the review starts.",
+        trigger_aria_label="Toggle save policy details"
+      ) }}
+    {% endset %}
+    {% set collapsible_usage %}
+      <p>Use <code>.collapse</code> for one section of content that should be hidden until the user asks for it. Connect the trigger to the content with <code>data-bs-toggle="collapse"</code> and <code>data-bs-target</code> or <code>href</code>, and keep the target <code>id</code> stable for <code>aria-controls</code>.</p>
+      <p>Use <code>aria-expanded="false"</code> when the panel starts closed and <code>aria-expanded="true"</code> when it starts open with <code>.show</code>. Bootstrap toggles <code>.collapse</code>, <code>.collapsing</code>, and <code>.collapse.show</code> during the transition, so keep padding on an inner wrapper instead of putting it directly on the collapsing element.</p>
+      <p>Use a <code>button</code> trigger for in-page disclosure whenever possible. Multiple triggers can point to the same target, and one trigger can target several panels with a selector, but keep labels specific so the user understands what will appear or disappear.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      collapsible_usage,
+      "moo-example__preview--narrow moo-example__preview--top-aligned"
+    ) }}
+
     {% set basic %}
       {{ collapsible(
         "collapsible-basic",
@@ -63,7 +82,7 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ collapsible(
           "collapsible-rtl",
           "المهمة: مراجعة يومية",
@@ -74,7 +93,7 @@
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div dir="rtl">
+      <div class="w-100" dir="rtl">
         {{ collapsible(
           "collapsible-rtl-hebrew",
           "משימה: ביקורת יומית",
@@ -85,7 +104,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl">
+      <div class="w-100" dir="ltr">
         {{ collapsible(
           "collapsible-rtl-english",
           "Task: Daily audit sync",

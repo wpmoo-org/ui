@@ -20,7 +20,13 @@
 
       [data-certification-surface] {
         display: grid;
-        gap: 0.75rem;
+        gap: 1rem;
+      }
+
+      [data-certification-field] {
+        display: flex;
+        flex-direction: column;
+        gap: var(--moo-field-gap, 0.5rem);
       }
     </style>
   </head>
@@ -30,36 +36,40 @@
 
       <section aria-labelledby="input-group-url-title" data-certification-surface>
         <h2 id="input-group-url-title" class="h5">Text addon</h2>
-        <label class="form-label" for="certification-input-group-url-input">Project URL</label>
-        <div class="input-group" id="certification-input-group-url">
-          <span class="input-group-text" id="certification-input-group-url-addon">https://example.com/</span>
-          <input
-            class="form-control"
-            id="certification-input-group-url-input"
-            type="text"
-            placeholder="project"
-            aria-describedby="certification-input-group-url-addon certification-input-group-url-help"
-          >
-        </div>
-        <div id="certification-input-group-url-help" class="form-text">
-          Example help text stays outside the input group.
+        <div class="field" data-certification-field>
+          <label class="form-label" for="certification-input-group-url-input">Project URL</label>
+          <div class="input-group" id="certification-input-group-url">
+            <span class="input-group-text" id="certification-input-group-url-addon">https://example.com/</span>
+            <input
+              class="form-control"
+              id="certification-input-group-url-input"
+              type="text"
+              placeholder="project"
+              aria-describedby="certification-input-group-url-addon certification-input-group-url-help"
+            >
+          </div>
+          <div id="certification-input-group-url-help" class="field-description form-text">
+            Example help text stays outside the input group.
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="input-group-invalid-title" data-certification-surface>
         <h2 id="input-group-invalid-title" class="h5">Validation</h2>
-        <label class="form-label" for="certification-input-group-token">Access token</label>
-        <div class="input-group has-validation" id="certification-input-group-invalid">
-          <span class="input-group-text" id="certification-input-group-token-addon">token</span>
-          <input
-            class="form-control is-invalid"
-            id="certification-input-group-token"
-            type="text"
-            required
-            aria-invalid="true"
-            aria-describedby="certification-input-group-token-addon certification-input-group-token-feedback"
-          >
-          <div id="certification-input-group-token-feedback" class="invalid-feedback">
+        <div class="field" data-invalid="true" data-certification-field>
+          <label class="form-label" for="certification-input-group-token">Access token</label>
+          <div class="input-group has-validation" id="certification-input-group-invalid">
+            <span class="input-group-text" id="certification-input-group-token-addon">token</span>
+            <input
+              class="form-control is-invalid"
+              id="certification-input-group-token"
+              type="text"
+              required
+              aria-invalid="true"
+              aria-describedby="certification-input-group-token-addon certification-input-group-token-feedback"
+            >
+          </div>
+          <div id="certification-input-group-token-feedback" class="field-error invalid-feedback d-block">
             Enter an access token before continuing.
           </div>
         </div>
@@ -86,13 +96,21 @@
       <section aria-labelledby="input-group-textarea-title" data-certification-surface>
         <h2 id="input-group-textarea-title" class="h5">Textarea addon</h2>
         <div class="input-group" id="certification-input-group-textarea">
-          <span class="input-group-text">With textarea</span>
           <textarea
             class="form-control"
             id="certification-input-group-notes"
             rows="3"
-            aria-label="Review notes"
+            placeholder="Write a comment..."
+            aria-label="Comment"
           ></textarea>
+          <div class="d-flex align-items-center justify-content-between" data-align="block-end">
+            <label class="input-group-text flex-grow-1" for="certification-input-group-notes">0/280</label>
+            <button
+              class="btn btn-primary"
+              id="certification-input-group-post"
+              type="button"
+            >Post</button>
+          </div>
         </div>
       </section>
 

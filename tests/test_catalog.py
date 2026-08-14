@@ -89,6 +89,151 @@ class CatalogContractTests(CatalogTestCase):
                     f"{path.relative_to(ROOT)} must sort components by label",
                 )
 
+    def test_ready_component_sidebar_icons_do_not_fall_back_for_new_components(self) -> None:
+        source = (ROOT / "site/src/includes/component-icons.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        for slug in (
+            "alert-dialog",
+            "combobox",
+            "context-menu",
+            "datatable",
+            "form",
+            "menubar",
+            "skeleton",
+            "toggle-group",
+        ):
+            with self.subTest(slug=slug):
+                self.assertRegex(source, rf'"{re.escape(slug)}":\s*"(?!component")')
+
+    def test_form_adjacent_sidebar_icons_use_distinct_semantic_glyphs(self) -> None:
+        source = (ROOT / "site/src/includes/component-icons.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        for slug, icon in (
+            ("form", "form"),
+            ("field", "rectangle-ellipsis"),
+            ("input-group", "brackets"),
+            ("skeleton", "square-dashed"),
+        ):
+            with self.subTest(slug=slug):
+                self.assertRegex(source, rf'"{re.escape(slug)}":\s*"{icon}"')
+
+    def test_public_site_does_not_claim_certified_components_before_certification(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        surfaces = {
+            "home": self.read_output("index.html"),
+            "examples": self.read_output("examples/index.html"),
+            "tasks": self.read_output("examples/tasks.html"),
+        }
+
+        for name, output in surfaces.items():
+            with self.subTest(surface=name):
+                self.assertNotIn("certified components", output)
+                self.assertNotIn("certified Data Table", output)
+
+    def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+        source = (ROOT / "site/src/pages/changelog.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        normalized_source = " ".join(source.split())
+
+        forbidden_claims = (
+            "certified Tier 3 components",
+            "certified components",
+            "certified Data Table",
+        )
+        for claim in forbidden_claims:
+            with self.subTest(claim=claim):
+                self.assertNotIn(claim, normalized_source)
+
+    def test_public_docs_use_moo_ui_brand_name_in_prose(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        surfaces = {
+            "home": self.read_output("index.html"),
+            "installation": self.read_output("installation.html"),
+            "skills": self.read_output("skills.html"),
+            "changelog": self.read_output("changelog.html"),
+            "components": self.read_output("components/index.html"),
+            "readme": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "llms": (ROOT / "site/public/llms.txt").read_text(encoding="utf-8"),
+        }
+        forbidden_brand_fragments = (
+            "Moo-owned",
+            "Moo owned",
+            "Moo's",
+            "Moo ESM",
+            "Moo stylesheet",
+            "Moo stylesheets",
+            "Moo component layer",
+            "Moo documented extension",
+        )
+
+        for name, surface in surfaces.items():
+            with self.subTest(surface=name):
+                for fragment in forbidden_brand_fragments:
+                    self.assertNotIn(fragment, surface)
+
+    def test_acceptance_portal_marks_mobile_keyboard_checks_not_applicable(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("acceptance/rc2.html")
+        self.assertNotIn("acceptance-accordion-iphone-keyboard", page)
+        self.assertNotIn("acceptance-accordion-android-keyboard", page)
+        self.assertIn(
+            'data-moo-acceptance-kind="Keyboard" data-moo-acceptance-state="N/A"',
+            page,
+        )
+        self.assertNotIn(
+            'type="checkbox" disabled aria-label="Keyboard not applicable on iPhone"',
+            page,
+        )
+        self.assertNotIn(
+            'type="checkbox" disabled aria-label="Keyboard not applicable on Android"',
+            page,
+        )
+        self.assertIn(
+            '<span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on iPhone">&ndash;</span>',
+            page,
+        )
+        self.assertIn(
+            '<span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on Android">&ndash;</span>',
+            page,
+        )
+
+    def test_certification_fixtures_get_build_time_pagination(self) -> None:
+        source = (
+            ROOT / "tests/fixtures/certification/accordion.html"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("moo-fixture-pagination", source)
+
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        accordion = (
+            DIST / "tests/fixtures/certification/accordion.html"
+        ).read_text(encoding="utf-8")
+        alert = (
+            DIST / "tests/fixtures/certification/alert.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('class="moo-fixture-pagination"', accordion)
+        self.assertIn('href="alert.html"', accordion)
+        self.assertIn('aria-label="Next fixture: Alert"', accordion)
+        self.assertIn('href="accordion.html"', alert)
+        self.assertIn('aria-label="Previous fixture: Accordion"', alert)
+
     def test_llms_txt_lists_ready_components_alphabetically(self) -> None:
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
@@ -170,15 +315,31 @@ class CatalogContractTests(CatalogTestCase):
     def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
         allowed_prefixes = {
             "button": ("btn", "disabled"),
-            "button_group": ("btn",),
+            # Button Group's compact select override matches Bootstrap's
+            # `.input-group > .form-select` specificity, so the partial
+            # legitimately references .input-group as an ancestor context.
+            "button_group": ("btn", "input-group"),
             "card": ("card",),
+            # Breadcrumb's collapsed-segment composition wraps Bootstrap's
+            # native .dropdown inside its own .breadcrumb-dropdown-item, so
+            # the partial scopes a layout rule to that Bootstrap wrapper.
+            "breadcrumb": ("breadcrumb", "dropdown"),
             # Dropdown toggle rows use Bootstrap Button's .active data-api
-            # state while scoped under .dropdown-item-check.
-            "dropdown": ("dropdown", "active"),
+            # state while scoped under .dropdown-item-check. Bootstrap
+            # Dropdown also exposes directional wrappers such as .dropend;
+            # the mobile sidebar placement rule retunes the native dropdown
+            # surface while staying in the dropdown partial.
+            "dropdown": ("dropdown", "dropend", "active"),
             "input": ("form-control", "form-select"),
+            # Table owns Bootstrap's static table family and the horizontal
+            # scroll-fade helper used beside responsive table wrappers.
+            "table": ("table", "table-responsive", "scroll-fade-x"),
             # Bootstrap renders both single-line inputs and textareas through
             # the shared `.form-control` family.
             "textarea": ("form-control",),
+            # Bootstrap's native select markup is the `.form-select` family,
+            # not a "select-" prefixed one; Select retunes it in place.
+            "select": ("form-select",),
             # Bootstrap documents vertical navs as `.nav.flex-column`, so the
             # Navigation partial may scope width fixes to that native utility.
             "navigation": ("active", "disabled", "flex-column", "nav"),
@@ -187,14 +348,21 @@ class CatalogContractTests(CatalogTestCase):
             "sidebar": ("sidebar",),
             # Bootstrap's pagination markup uses .page-item/.page-link, not a
             # "pagination-" prefixed family.
-            "pagination": ("pagination", "page", "disabled"),
+            # The icon-only prev/next detection reads Bootstrap's own
+            # utility-class state (.d-none/.d-sm-inline/.visually-hidden)
+            # inside :has(), the same way Data Table reads Bootstrap
+            # utilities, rather than owning those classes.
+            "pagination": ("pagination", "page", "disabled", "d-none", "d-sm-inline", "visually-hidden"),
             # Bootstrap's own horizontal/vertical divider markup is the bare
             # <hr> tag and the .vr helper class, not a "separator-" prefixed
             # family.
             "separator": ("hr", "vr"),
             # Bootstrap's checkbox markup uses the shared .form-check family,
-            # not a "checkbox-" prefixed one.
-            "checkbox": ("form-check",),
+            # not a "checkbox-" prefixed one. The invalid-state focus ring
+            # rule also references .is-invalid to keep the destructive ring
+            # visible on mouse click (matching _focus.scss's pattern for
+            # .form-control.is-invalid and .form-select.is-invalid).
+            "checkbox": ("form-check", "is-invalid"),
             # The legend reuses Bootstrap's shared .form-label class to
             # match sibling form labels.
             "radio_group": ("radio-group", "form-label"),
@@ -219,6 +387,10 @@ class CatalogContractTests(CatalogTestCase):
             # and also fixes the grid stacking on Bootstrap's own tab-content
             # and tab-pane classes.
             "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
+            # Toggle Group composes Bootstrap's .btn-check + label.btn
+            # contract and suppresses the generic pressed transform only
+            # inside the .toggle-group scope.
+            "toggle_group": ("toggle-group", "btn", "disabled"),
             # Dialog is the Moo catalog name for Bootstrap's Modal component;
             # its native selector family is "modal-", not "dialog-".
             "dialog": ("modal", "show"),
@@ -286,6 +458,25 @@ class CatalogContractTests(CatalogTestCase):
                 "show",
                 "disabled",
             ),
+            "close_button": ("btn-close", "disabled"),
+            # Tooltip is Bootstrap's overlay component; placement/state
+            # classes are emitted by Bootstrap/Popper and retuned only while
+            # still scoped to the tooltip surface.
+            "tooltip": (
+                "tooltip",
+                "bs-tooltip-auto",
+                "bs-tooltip-bottom",
+                "bs-tooltip-end",
+                "bs-tooltip-start",
+                "bs-tooltip-top",
+                "fade",
+                "show",
+            ),
+            # Bootstrap's own alert component positions its native close
+            # button under `.alert-dismissible .btn-close`; this keeps that
+            # ownership scoped to Alert instead of moving an Alert layout
+            # rule into the standalone Close Button partial.
+            "alert": ("alert",),
         }
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
@@ -301,6 +492,13 @@ class CatalogContractTests(CatalogTestCase):
 
             for class_name in set(re.findall(r"\.([a-z][a-z0-9_-]*)", source)):
                 with self.subTest(component=component, selector=class_name):
+                    if component == "alert" and class_name == "btn-close":
+                        self.assertIn(".alert-dismissible .btn-close", source)
+                        self.assertNotIn(
+                            ".btn-close",
+                            source.replace(".alert-dismissible .btn-close", ""),
+                        )
+                        continue
                     self.assertTrue(
                         any(
                             class_name == prefix
@@ -324,7 +522,26 @@ class CatalogContractTests(CatalogTestCase):
             r"modal|nav|navbar|offcanvas|page|pagination|placeholder|"
             r"popover|progress|spinner|table|toast)(?:-|$)"
         )
-        page_level_classes = {"form-label"}
+        page_level_classes = {
+            "form-label",
+            # Catalog demo surfaces that are not ready component macros: the
+            # Card spacing demo's live toggle hook and its scrollable body
+            # strip are documented examples, not product components.
+            "card-spacing-demo",
+            "card-scroll",
+            # Button Group's compact select modifier: a layout hint passed
+            # to the select macro's extra_class, not raw component markup.
+            "btn-group-select",
+            # Checkbox's Table example uses Bootstrap's native table classes
+            # directly (not a Moo table macro) to embed checkboxes in rows.
+            "table-responsive",
+            "table",
+            "table-sm",
+            # Bootstrap's RTL flip for form-check: passed via extra_class to
+            # the checkbox macro in RTL examples so the input appears on the
+            # right side of the label (matching Bootstrap's RTL CSS behavior).
+            "form-check-reverse",
+        }
 
         pages = [
             *sorted((ROOT / "site/src/pages/components").glob("*.jinja")),
@@ -558,6 +775,29 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
+    def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
+        catalog_scss = read_catalog_styles()
+        slot = catalog_scss.split(
+            ".moo-catalog__theme-toggle [data-moo-theme-icon] {",
+            1,
+        )[1].split("}", 1)[0]
+        svg = catalog_scss.split(".moo-catalog__theme-toggle svg {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+
+        for contract in (
+            "display: inline-flex;",
+            "width: 1rem;",
+            "height: 1rem;",
+            "align-items: center;",
+            "justify-content: center;",
+            "line-height: 1;",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, slot)
+        self.assertIn("display: block;", svg)
+
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
 
@@ -598,9 +838,7 @@ class CatalogContractTests(CatalogTestCase):
             catalog_scss,
         )
 
-    def test_header_navigation_links_docs_between_home_and_components(
-        self,
-    ) -> None:
+    def test_header_carries_no_primary_navigation_links(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -609,15 +847,45 @@ class CatalogContractTests(CatalogTestCase):
         header_end = index.index("</header>", header_start)
         header = index[header_start:header_end]
 
-        home_index = header.index('href="./"')
-        docs_index = header.index('href="introduction/"')
-        components_index = header.index('href="components/"')
-        blocks_index = header.index('href="blocks/"')
+        for href in (
+            'href="introduction/"',
+            'href="components/"',
+            'href="blocks/"',
+            'href="examples/"',
+        ):
+            self.assertNotIn(
+                href,
+                header,
+                "header should be minimal chrome; primary navigation lives in the sidebar",
+            )
+
+    def test_sidebar_navigation_orders_getting_started_before_catalog(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        sidebar_start = index.index('id="catalog-sidebar"')
+        sidebar_end = index.index("</aside>", sidebar_start)
+        sidebar = index[sidebar_start:sidebar_end]
+
+        home_index = sidebar.index('href="./"')
+        docs_index = sidebar.index('href="introduction/"')
+        installation_index = sidebar.index('href="installation/"')
+        examples_index = sidebar.index('data-bs-target="#shell-examples-menu"')
+        components_index = sidebar.index('data-bs-target="#shell-components-menu"')
+        blocks_index = sidebar.index('href="blocks/"')
 
         self.assertLess(home_index, docs_index)
-        self.assertLess(docs_index, components_index)
+        self.assertLess(docs_index, installation_index)
+        self.assertLess(installation_index, examples_index)
+        self.assertLess(examples_index, components_index)
         self.assertLess(components_index, blocks_index)
-        self.assertIn(">Docs</", header)
+        self.assertIn(">Introduction<", sidebar)
+        self.assertIn(">Getting Started<", sidebar)
+        self.assertIn(">Catalog<", sidebar)
+        self.assertIn(">Resources<", sidebar)
 
     def test_home_page_introduces_the_product_and_links_to_components(
         self,
@@ -668,12 +936,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         components = self.read_output("components/index.html")
 
-        sections_index = components.index(
-            'class="sidebar-group-label" data-slot="sidebar-group-label">Sections<'
-        )
-        components_index = components.index(
-            'class="sidebar-group-label" data-slot="sidebar-group-label">Components<'
-        )
+        # The catalog sidebar is one ordered menu (no labelled groups):
+        # the doc-section entries, starting with Introduction, precede
+        # the Components disclosure.
+        sidebar = components[components.index('id="catalog-sidebar"'):]
+        sections_index = sidebar.index(">Introduction<")
+        components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         self.assertLess(sections_index, components_index)
 
         for label, href in (
@@ -768,26 +1036,36 @@ class CatalogContractTests(CatalogTestCase):
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
-        self.assertIn('aria-label="Next page: Support &amp; Evidence"', installation)
-        self.assertIn('href="../support/"', installation)
+        self.assertIn('aria-label="Next page: Examples"', installation)
+        self.assertIn('href="../examples/"', installation)
 
-        support = self.read_output("support.html")
-        self.assertIn('aria-label="Previous page: Installation"', support)
-        self.assertIn('aria-label="Next page: Contributing"', support)
-        self.assertIn('href="../contributing/"', support)
+        examples = self.read_output("examples/index.html")
+        examples_pagination = examples.rsplit(
+            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
+            1,
+        )[1]
+        self.assertIn('href="../installation/"', examples_pagination)
+        self.assertIn("Installation", examples_pagination)
+        self.assertIn('href="../examples/tasks/"', examples_pagination)
+        self.assertIn("Tasks", examples_pagination)
 
-        contributing = self.read_output("contributing.html")
-        self.assertIn('aria-label="Previous page: Support &amp; Evidence"', contributing)
-        self.assertIn('aria-label="Next page: Components"', contributing)
-        self.assertIn('href="../components/"', contributing)
+        tasks = self.read_output("examples/tasks.html")
+        tasks_pagination = tasks.rsplit(
+            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
+            1,
+        )[1]
+        self.assertIn('href="../../examples/"', tasks_pagination)
+        self.assertIn("Examples", tasks_pagination)
+        self.assertIn('href="../../components/"', tasks_pagination)
+        self.assertIn("Components", tasks_pagination)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Contributing"', components)
+        self.assertIn('aria-label="Previous page: Tasks"', components)
         self.assertIn('aria-label="Next page: Accordion"', components)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
         blocks = self.read_output("blocks/index.html")
-        self.assertIn('aria-label="Previous page: Scroll Fade"', blocks)
+        self.assertIn('aria-label="Previous page: Typography"', blocks)
         self.assertIn('aria-label="Next page: Sidebar (Floating)"', blocks)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', blocks)
 
@@ -809,8 +1087,8 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
-        self.assertIn('aria-label="Previous page: Typography"', utility)
-        self.assertIn('aria-label="Next page: Blocks"', utility)
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', utility)
+        self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
         block_header_start = block.index('<header class="moo-component-header')
@@ -823,10 +1101,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
-        self.assertIn('aria-label="Next page: AI Usage"', last_block)
+        self.assertIn('aria-label="Next page: Scroll Fade"', last_block)
+
+        support = self.read_output("support.html")
+        self.assertIn('aria-label="Previous page: Scroll Fade"', support)
+        self.assertIn('aria-label="Next page: Contributing"', support)
+        self.assertIn('href="../contributing/"', support)
+
+        contributing = self.read_output("contributing.html")
+        self.assertIn('aria-label="Previous page: Support &amp; Evidence"', contributing)
+        self.assertIn('aria-label="Next page: AI Usage"', contributing)
 
         skills = self.read_output("skills.html")
-        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', skills)
+        self.assertIn('aria-label="Previous page: Contributing"', skills)
         self.assertIn('aria-label="Next page: Changelog"', skills)
 
         code_preview = self.read_output("assets/js/catalog/code-preview.js")
@@ -852,7 +1139,7 @@ class CatalogContractTests(CatalogTestCase):
                 ("full-build", "Full Build"),
                 ("scoped-build", "Scoped Adoption"),
                 ("bootstrap-javascript", "Bootstrap JavaScript"),
-                ("optional-esm", "Optional Moo ESM"),
+                ("optional-esm", "Optional Moo UI ESM"),
             ),
             "skills.html": (
                 ("selection-criteria", "Selection Criteria"),
@@ -975,7 +1262,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn("Create workspace", installation)
         self.assertIn("Bootstrap JavaScript", installation)
-        self.assertIn("Optional Moo ESM", installation)
+        self.assertIn("Optional Moo UI ESM", installation)
         self.assertIn('href="../components/combobox/">Combobox</a>', installation)
         self.assertIn('href="../components/context-menu/">Context Menu</a>', installation)
         self.assertIn('href="../components/datatable/">Data Table</a>', installation)
@@ -1232,11 +1519,11 @@ class CatalogContractTests(CatalogTestCase):
         allowed_runtime = {
             "native HTML/CSS",
             "Bootstrap plugin",
-            "optional Moo ESM",
+            "optional Moo UI ESM",
         }
         allowed_markup = {
             "Bootstrap/native HTML",
-            "Moo documented extension",
+            "Moo UI documented extension",
             "not applicable",
         }
         allowed_maturity = {"ready", "accepted", "certified"}
@@ -1277,7 +1564,9 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(details["maturity"].capitalize(), reference_body)
                 self.assertIn(details["runtimeOwner"], reference_body)
                 self.assertIn(details["markupOwner"], reference_body)
+                self.assertIn('<dt class="col-sm-3 text-body">Reference</dt>', reference_body)
                 self.assertIn('target="_blank" rel="noopener noreferrer"', reference_body)
+                self.assertNotIn('<p class="text-body-secondary mb-0">', reference_body)
                 self.assertNotIn("border rounded", reference_body)
                 self.assertNotIn("p-3", reference_body)
 
@@ -1286,14 +1575,14 @@ class CatalogContractTests(CatalogTestCase):
             # source-derived while avoiding a second public registry.
             "card": ("native HTML/CSS", "Bootstrap/native HTML"),
             "dropdown-menu": ("Bootstrap plugin", "Bootstrap/native HTML"),
-            "combobox": ("optional Moo ESM", "Moo documented extension"),
-            "sidebar": ("optional Moo ESM", "Moo documented extension"),
-            "avatar": ("native HTML/CSS", "Moo documented extension"),
-            "field": ("native HTML/CSS", "Moo documented extension"),
-            "collapsible": ("Bootstrap plugin", "Moo documented extension"),
-            "radio-group": ("native HTML/CSS", "Moo documented extension"),
-            "skeleton": ("native HTML/CSS", "Moo documented extension"),
-            "toggle-group": ("native HTML/CSS", "Moo documented extension"),
+            "combobox": ("optional Moo UI ESM", "Moo UI documented extension"),
+            "sidebar": ("optional Moo UI ESM", "Moo UI documented extension"),
+            "avatar": ("native HTML/CSS", "Moo UI documented extension"),
+            "field": ("native HTML/CSS", "Moo UI documented extension"),
+            "collapsible": ("Bootstrap plugin", "Moo UI documented extension"),
+            "radio-group": ("native HTML/CSS", "Moo UI documented extension"),
+            "skeleton": ("native HTML/CSS", "Moo UI documented extension"),
+            "toggle-group": ("native HTML/CSS", "Moo UI documented extension"),
         }
         for slug, expected in expected_classifications.items():
             with self.subTest(representative_slug=slug):
@@ -1303,6 +1592,41 @@ class CatalogContractTests(CatalogTestCase):
                         ownership[slug]["markupOwner"],
                     ),
                     expected,
+                )
+
+    def test_components_with_secondary_bootstrap_sources_keep_them_in_reference_row(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        expected_labels = {
+            "datatable": (
+                "Bootstrap Tables documentation",
+                "Bootstrap Dropdown documentation",
+            ),
+            "sidebar": (
+                "Bootstrap Offcanvas documentation",
+                "Bootstrap Collapse documentation",
+            ),
+        }
+
+        for slug, labels in expected_labels.items():
+            with self.subTest(slug=slug):
+                page = self.read_output(f"components/{slug}/index.html")
+                reference = re.search(
+                    r'<section\b[^>]*data-moo-component-reference[^>]*>'
+                    r"(?P<body>.*?)</section>",
+                    page,
+                    re.DOTALL,
+                )
+                self.assertIsNotNone(reference)
+                reference_body = reference.group("body")
+                for label in labels:
+                    self.assertIn(label, reference_body)
+                self.assertNotIn(
+                    '<aside class="mt-5" aria-label="Bootstrap reference">',
+                    page,
                 )
 
     def test_ownership_evidence_index_rejects_malformed_records(self) -> None:
@@ -1401,7 +1725,7 @@ class CatalogContractTests(CatalogTestCase):
 
         with self.assertRaisesRegex(
             RuntimeError,
-            "Optional Moo ESM exports do not match src/js/components sources",
+            "Optional Moo UI ESM exports do not match src/js/components sources",
         ):
             site_build.derive_component_ownership(catalog, certification)
 
@@ -1527,7 +1851,11 @@ class CatalogContractTests(CatalogTestCase):
                     if declaration.startswith("box-shadow:"):
                         self.assertRegex(
                             declaration,
-                            r"^box-shadow: (?:none|\$input-focus-box-shadow|var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\));$",
+                            r"^box-shadow: (?:none|\$input-focus-box-shadow|"
+                            r"\$[a-z0-9-]*ring-shadow|"
+                            r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
+                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
+                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? color-mix\(in srgb, (?:\$|\#\{\$)[a-z0-9-]*ring-color(?:\})? 50%, transparent\));$",
                         )
                     elif declaration.startswith("border-radius:"):
                         self.assertRegex(

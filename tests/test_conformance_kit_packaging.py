@@ -23,6 +23,7 @@ import unittest
 from pathlib import Path
 
 from tests.helpers import ROOT
+from tests.helpers.browser_harness import skip_if_browser_launch_is_sandboxed
 from tests.helpers.host_process import non_venv_interpreter, read_banner_line
 
 SCRIPT = ROOT / "scripts" / "package-conformance-kit.py"
@@ -140,6 +141,7 @@ class PackagingTests(unittest.TestCase):
             self.assertIn(required, names)
 
     def test_extracted_artifact_is_self_sufficient(self) -> None:
+        skip_if_browser_launch_is_sandboxed()
         interpreter = non_venv_interpreter()
         if not interpreter:
             raise unittest.SkipTest("no interpreter outside the .venv available")

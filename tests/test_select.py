@@ -9,6 +9,8 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/select.html.jinja"
 PAGE = ROOT / "site/src/pages/components/select.html.jinja"
+COMPONENT_LAYER = ROOT / "scss/_component_layer.scss"
+SELECT_SCSS = ROOT / "scss/components/_select.scss"
 
 
 class SelectTests(CatalogTestCase):
@@ -92,3 +94,13 @@ class SelectTests(CatalogTestCase):
                 'select(aria_label="Workspace", '
                 'options=[{"value": "ui", "label": "UI"}], dir="sideways")'
             )
+
+    def test_native_option_menu_uses_theme_tokens(self) -> None:
+        component_layer = COMPONENT_LAYER.read_text(encoding="utf-8")
+        select_scss = SELECT_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn('@import "components/select";', component_layer)
+        self.assertIn("option,", select_scss)
+        self.assertIn("optgroup", select_scss)
+        self.assertIn("color: var(--bs-body-color);", select_scss)
+        self.assertIn("background-color: var(--bs-body-bg);", select_scss)

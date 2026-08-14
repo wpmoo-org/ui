@@ -32,10 +32,10 @@ Combobox, Context Menu, DataTable, and Sidebar.
 - **CSS-first.** Most components need only the stylesheet and ordinary HTML.
 - **Bootstrap owns native behavior.** Keep using Bootstrap's bundle for its
   Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other plugins.
-- **Moo extends verified gaps.** Optional Moo ESM is explicit and
+- **Moo UI extends verified gaps.** Optional Moo UI ESM is explicit and
   side-effect-free; importing it never scans the document automatically.
 - **Adopt all at once or gradually.** Use the full Bootstrap build or scope the
-  Moo component layer to a `.moo-ui` boundary.
+  Moo UI component layer to a `.moo-ui` boundary.
 
 ## Try It in 30 Seconds
 
@@ -57,10 +57,10 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | --- | --- | --- |
 | Static HTML and CSS components | Browser + Bootstrap markup | `moo-ui.css`, or Bootstrap CSS followed by scoped `moo.css` |
 | Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other Bootstrap plugins | Bootstrap | Bootstrap's JavaScript bundle and documented initialization |
-| Combobox | Optional Moo ESM | `@wpmoo/ui/combobox.js`, then explicit initialization |
-| Context Menu pointer and keyboard invocation | Optional Moo ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
-| DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
-| Sidebar state and responsive coordination | Optional Moo ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
+| Combobox | Optional Moo UI ESM | `@wpmoo/ui/combobox.js`, then explicit initialization |
+| Context Menu pointer and keyboard invocation | Optional Moo UI ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
+| DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo UI ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
+| Sidebar state and responsive coordination | Optional Moo UI ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
 
 Moo UI does not replace Bootstrap plugins and does not publish a mandatory
 aggregate JavaScript runtime.
@@ -97,7 +97,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 </div>
 ```
 
-### Optional Moo ESM
+### Optional Moo UI ESM
 
 Initialize only the documented behavior gaps you use:
 
@@ -124,7 +124,7 @@ recipes, load order, and troubleshooting.
 | Existing Bootstrap application | Load `moo.css` after Bootstrap CSS and add `.moo-ui` around migrated regions. |
 | Static page with no interactive plugins | Load CSS only. |
 | Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
-| Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo ESM module. |
+| Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo UI ESM module. |
 
 ## Public Package Surface
 
@@ -175,7 +175,7 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is at the `1.0.0-rc.1` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.1`. The
+Moo UI is at the `1.0.0-rc.2` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.2`. The
 package's certification manifest currently has `preview` status; catalog
 availability is WPMoo-maintained preview evidence, not independent or
 accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
@@ -211,4 +211,5 @@ Browse the local catalog at `http://localhost:4173/` while `dev.py` runs.
 Moo UI source code is MIT licensed. WPMoo-generated visual assets under
 `site/static/images/` remain separately protected as described in
 `ASSET_LICENSE.md`. Vendored dependencies retain their original licenses; see
-`LICENSE`, `ASSET_LICENSE.md`, and `THIRD_PARTY_NOTICES.md`.
+`LICENSE`, `ASSET_LICENSE.md`, and the
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.2/THIRD_PARTY_NOTICES.md).

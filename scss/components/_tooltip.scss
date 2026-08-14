@@ -10,7 +10,53 @@
   --bs-tooltip-padding-y: 0.375rem;
   --bs-tooltip-font-size: 0.75rem;
   --bs-tooltip-opacity: 1;
+  --moo-tooltip-motion-duration: #{$moo-tooltip-motion-duration};
+  --moo-tooltip-motion-easing: #{$moo-tooltip-motion-easing};
+  --moo-tooltip-motion-scale: #{$moo-tooltip-motion-scale};
+  --moo-tooltip-motion-translate: #{$moo-tooltip-motion-translate};
   line-height: 1.333;
+}
+
+// Popper owns the wrapper transform for placement. Animate only the bubble
+// surface so the tooltip opens with the reference's subtle zoom/slide without
+// disturbing Bootstrap positioning.
+.tooltip.fade .tooltip-inner {
+  transition: transform var(--moo-tooltip-motion-duration) var(--moo-tooltip-motion-easing);
+  transform: scale(var(--moo-tooltip-motion-scale));
+  transform-origin: center;
+  will-change: transform;
+}
+
+.tooltip.show .tooltip-inner {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.bs-tooltip-top.fade:not(.show) .tooltip-inner,
+.bs-tooltip-auto[data-popper-placement^="top"].fade:not(.show) .tooltip-inner {
+  transform: translate3d(0, var(--moo-tooltip-motion-translate), 0) scale(var(--moo-tooltip-motion-scale));
+}
+
+.bs-tooltip-bottom.fade:not(.show) .tooltip-inner,
+.bs-tooltip-auto[data-popper-placement^="bottom"].fade:not(.show) .tooltip-inner {
+  transform: translate3d(0, calc(var(--moo-tooltip-motion-translate) * -1), 0) scale(var(--moo-tooltip-motion-scale));
+}
+
+.bs-tooltip-start.fade:not(.show) .tooltip-inner,
+.bs-tooltip-auto[data-popper-placement^="left"].fade:not(.show) .tooltip-inner {
+  transform: translate3d(var(--moo-tooltip-motion-translate), 0, 0) scale(var(--moo-tooltip-motion-scale));
+}
+
+.bs-tooltip-end.fade:not(.show) .tooltip-inner,
+.bs-tooltip-auto[data-popper-placement^="right"].fade:not(.show) .tooltip-inner {
+  transform: translate3d(calc(var(--moo-tooltip-motion-translate) * -1), 0, 0) scale(var(--moo-tooltip-motion-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip.fade .tooltip-inner {
+    transition: none;
+    transform: none;
+    will-change: auto;
+  }
 }
 
 // Bootstrap's tooltip bubble is fully token-driven already (see the vendored
@@ -27,16 +73,11 @@
   text-underline-offset: 0.2em;
 }
 
-// Bootstrap's default sanitizer allowlist for data-bs-html tooltip content
-// has no <kbd>, only <code> among inline code tags, but does allow a
-// class="" attribute on any element. This reproduces Bootstrap's own native
-// <kbd> look (inverted body colors, same $kbd-* padding/font-size scale from
-// reboot) on a sanitizer-safe <code class="tooltip-kbd"> element instead of
-// inventing a new visual.
-.tooltip-kbd {
-  padding: $kbd-padding-y $kbd-padding-x;
-  font-size: $kbd-font-size;
-  color: var(--bs-body-bg);
-  background-color: var(--bs-body-color);
-  border-radius: var(--bs-border-radius-sm);
+// Tooltip shortcut hints render the Kbd component's native <kbd> element.
+// The catalog tooltip initializer extends Bootstrap's sanitizer allowlist
+// with the kbd tag so it survives data-bs-html sanitization; styling comes
+// from the shared Kbd component and Bootstrap's own reboot. A shortcut chip
+// after trailing prose keeps a readable gap from the surrounding text.
+.tooltip-inner kbd {
+  margin-inline-start: $kbd-padding-x;
 }

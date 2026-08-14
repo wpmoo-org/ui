@@ -41,24 +41,27 @@ class ButtonGroupTests(CatalogTestCase):
     def test_page_uses_render_rtl_example_for_direction(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn('{% from "includes/example.html.jinja" import render_example, render_rtl_example %}', source)
-        self.assertIn("title=\"RTL\"", source)
-        self.assertNotIn("Right-to-left layout", source)
         self.assertIn('render_rtl_example(', source)
         self.assertIn('"button-group-ribbon"', source)
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn("Workspace queue actions", source)
-        self.assertIn("Compare Arabic, Hebrew, and English command rails", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
 
-    def test_page_keeps_examples_original_and_production_focused(self) -> None:
-        source = PAGE.read_text(encoding="utf-8")
+    def test_page_omits_redundant_split_example_and_keeps_dropdown_menu(self) -> None:
+        result = self.run_build()
 
-        for copied_reference_label in ("Button 1", "Button 2", "Copilot"):
-            self.assertNotIn(copied_reference_label, source)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = self.read_output("components/button-group.html")
+        self.assertNotIn('data-example="split-button"', output)
+        self.assertNotIn('aria-label="Follow options"', output)
 
-        for local_workflow in ("Ticket actions", "Message actions", "Editor toolbar"):
-            self.assertIn(local_workflow, source)
+        section = output.split('data-example="dropdown-button"', 1)[1].split(
+            '<div class="moo-example__source"',
+            1,
+        )[0]
+
+        self.assertIn('aria-label="Deploy options"', section)
+        self.assertIn('data-bs-toggle="dropdown"', section)
+        self.assertIn('class="dropdown-menu dropdown-menu-end"', section)

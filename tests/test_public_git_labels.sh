@@ -2,7 +2,8 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-checker="$root_dir/scripts/check-public-git-labels.sh"
+workspace_root="$(cd "$root_dir/../../.." && pwd)"
+checker="$workspace_root/scripts/ui/git-label-guard.sh"
 message_file="$(mktemp)"
 trap 'rm -f "$message_file"' EXIT
 
@@ -30,8 +31,16 @@ assert_ref_fail() {
   fi
 }
 
-assert_pass commit-msg "Use canonical reference checkouts"
-assert_pass commit-msg $'Update agent bridge docs\n\n# codex in a comment is ignored'
+assert_pass commit-msg "fix(docs): use canonical reference checkouts"
+assert_pass commit-msg $'docs(agent): update bridge docs\n\n# codex in a comment is ignored'
+assert_pass commit-msg "chore: update generated baselines"
+assert_pass commit-msg "feat(ui): add manual acceptance portal"
+assert_pass commit-msg "fix(docs)!: rename public package path"
+assert_fail commit-msg "Use canonical reference checkouts"
+assert_fail commit-msg "Polish rc2 catalog acceptance pass"
+assert_fail commit-msg "Fix combobox and datatable keyboard overlays"
+assert_fail commit-msg "fix docs: missing conventional separator"
+assert_fail commit-msg "fix(): empty scope"
 assert_fail commit-msg "Codex release followup"
 assert_fail commit-msg $'Update release workflow\n\nReviewed by Claude'
 

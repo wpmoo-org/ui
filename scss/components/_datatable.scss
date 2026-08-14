@@ -12,6 +12,7 @@
 // visible content changed.
 .datatable {
   --moo-datatable-min-width: #{$moo-datatable-min-width};
+  --moo-datatable-actions-cell-fade-width: #{$moo-datatable-actions-cell-fade-width};
   --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
   --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
   --moo-datatable-select-cell-inset: #{$moo-datatable-select-cell-inset};
@@ -62,8 +63,35 @@
   overflow: hidden;
 }
 
-.datatable-frame:has(.table-row-actions .dropdown-menu.show),
-.datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show) {
+// Pin the actions column to the inline-end edge so the menu trigger stays
+// in view at every scroll position; the opaque background hides the cells
+// sliding underneath. Row menus are temporarily moved under body while open
+// (see datatable.js), so the wrapper keeps its overflow and scroll offset.
+.datatable-frame [data-datatable-column="actions"] {
+  position: sticky;
+  inset-inline-end: 0;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)
+  );
+}
+
+[dir="rtl"] .datatable-frame [data-datatable-column="actions"],
+.datatable-frame [dir="rtl"] [data-datatable-column="actions"] {
+  background: linear-gradient(
+    270deg,
+    transparent 0,
+    var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)
+  );
+}
+
+// Card menus still live inside the card frame, so lift that frame while a
+// card menu is open.
+.datatable-card-frame:has(.datatable-card .dropdown-menu.show) {
+  position: relative;
+  z-index: $zindex-dropdown;
   overflow: visible;
 }
 
@@ -439,6 +467,12 @@
   background-color: var(--moo-muted-surface);
 }
 
+.datatable-view-toggle .btn-check:focus-visible + .datatable-view-option {
+  z-index: 3;
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
 .datatable-view-trigger {
   min-block-size: var(--moo-datatable-toolbar-control-height);
 }
@@ -587,15 +621,6 @@
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-body-bg);
-}
-
-.datatable-card-frame:has(.datatable-card .dropdown-menu.show),
-.datatable-card:has(.dropdown-menu.show) {
-  overflow: visible;
-}
-
-.datatable-card:has(.dropdown-menu.show) {
-  z-index: 2;
 }
 
 .datatable-card-header {
@@ -757,6 +782,7 @@
   max-width: 100%;
   justify-self: end;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 }
 

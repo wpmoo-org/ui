@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Badge — Moo UI{% endblock %}
@@ -13,9 +13,26 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ badge("Badge") }}
+        {{ badge("New", variant="secondary") }}
+        {{ badge("Blocked", variant="destructive") }}
+      </div>
+    {% endset %}
+    {% set badge_usage %}
+      <p>Use <code>.badge</code> for compact labels, counts, and status hints that belong to nearby text or controls. Place it next to the heading, item label, button, or row it describes; Bootstrap sizes badges with relative font sizing and <code>em</code> units, so the badge naturally follows the scale of its immediate parent.</p>
+      <p>Use <code>.text-bg-*</code> variants when the badge needs a semantic color with matching foreground contrast, and use <code>.rounded-pill</code> when the label should read as a softer pill. Keep badge text short, reserve strong variants for meaningful states, and avoid using color alone to explain the status.</p>
+      <p>For counters on buttons or positioned corner indicators, make the surrounding label carry most of the meaning. If the badge only contains a number, symbol, or dot, add extra context with <code>.visually-hidden</code> so assistive technologies hear the full meaning instead of an isolated value.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      badge_usage
+    ) }}
+
     {% set variants %}
       <div class="d-flex flex-wrap gap-2">
-        {{ badge("Default") }}
+        {{ badge("Badge") }}
         {{ badge("Secondary", variant="secondary") }}
         {{ badge("Destructive", variant="destructive") }}
         {{ badge("Outline", variant="outline") }}
@@ -81,7 +98,7 @@
     {% endset %}
 
     {% set english_badge %}
-      <div dir="rtl">
+      <div dir="ltr">
         <span class="d-inline-flex align-items-center gap-2">
           Access request
           {{ badge("Pending approval", variant="warning") }}

@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import form, field, field_description, field_group, fieldset %}
@@ -18,6 +18,27 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field() %}
+        {{ input(
+          label="Input",
+          id="input-intro-email",
+          type="email",
+          placeholder="you@example.com"
+        ) }}
+      {% endcall %}
+    {% endset %}
+    {% set input_usage %}
+      <p>Use <code>.form-control</code> inputs for one-line values such as names, emails, search terms, urls, tokens, and numbers. Choose the native <code>type</code> that matches the data so mobile keyboards, browser validation, and autofill behavior work with the field instead of against it.</p>
+      <p>Pair every standalone input with a visible label or an accessible name, and connect helper or error text with <code>aria-describedby</code>. Keep placeholder text as an example value only; it should not replace the label or carry required instructions.</p>
+      <p>Set state on the native input: <code>required</code> for required fields, <code>readonly</code> when the value can be copied but not changed, <code>disabled</code> when it is unavailable, and invalid state when validation fails. Use Bootstrap sizing and form-control variants only after the field's semantics are already clear.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      input_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set api_key %}
       {% call field() %}
       {{ input(
@@ -141,15 +162,15 @@
     ) }}
 
     {% set invalid %}
-      {% call field() %}
+      {% call field(invalid=true) %}
       {{ input(
-        label="Coupon Code",
+        label="Invalid Input",
         id="input-invalid",
-        placeholder="Enter code",
+        placeholder="Error",
         aria_invalid=true,
         describedby="input-invalid-help"
       ) }}
-      {{ field_description("input-invalid-help", "That coupon code has expired.") }}
+      {{ field_description("input-invalid-help", "This field contains validation errors.") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
@@ -293,7 +314,7 @@
     ) }}
 
     {% set full_form %}
-      {% call form(extra_class="mx-auto", novalidate=true) %}
+      {% call form(extra_class="needs-validation mx-auto", novalidate=true) %}
       {% call fieldset("Shipping details", description="Used to calculate delivery time and customs fees.") %}
       {% call field_group() %}
       {% call field() %}
@@ -384,7 +405,7 @@
       </div>
     {% endset %}
     {% set rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {% call field() %}
         {{ input(
           label="API Key",
@@ -399,7 +420,7 @@
 
     {{ render_rtl_example(
       "input",
-      "Use the same labeled helper-text pattern across languages with RTL direction.",
+      "Use the same labeled helper-text pattern across Arabic and Hebrew RTL examples, with English as the LTR comparison.",
       rtl_arabic,
       rtl_hebrew,
       rtl_english,

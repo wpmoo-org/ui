@@ -17,20 +17,39 @@ $moo-combobox-multiple-width: $moo-combobox-width * 1.6 !default;
 $moo-combobox-menu-max-height: $input-height * 8 !default;
 $moo-combobox-option-line-height: 1.25rem !default;
 $moo-combobox-description-font-size: 0.75rem !default;
-// Bootstrap defaults badges to $font-weight-bold. The reference badge reads as
-// a compact medium label, so keep the native $badge-font-weight knob at 500.
+// Badge, Kbd, and the Pagination icon-square baseline all share the
+// reference's 20px chip primitive (Tailwind h-5); one knob keeps them in
+// sync instead of repeating the literal across three unrelated component
+// files.
+$moo-chip-height: 1.25rem !default;
+// Bootstrap defaults badges to relative em sizing so they scale inside
+// headings/buttons. Moo badges are standalone status chips, and the reference
+// uses a fixed 20px chip with 12px/16px label metrics; keep that geometry on
+// Bootstrap's own badge Sass knobs before the component selector centers it.
+$badge-font-size: 0.75rem !default;
 $badge-font-weight: 500 !default;
-$kbd-padding-y: 0.125rem !default;
-$kbd-padding-x: 0.375rem !default;
+$badge-padding-y: 0.125rem !default;
+$badge-padding-x: 0.5rem !default;
+$badge-border-radius: var(--bs-border-radius-pill) !default;
+$badge-border-color: transparent !default;
+// The reference sizes its kbd chip via a fixed 20px height + flex centering
+// (Tailwind h-5/min-w-5), not padding math, so $kbd-padding-y drops to 0 --
+// components/_kbd.scss sets that fixed height directly. $kbd-padding-x
+// matches the reference's px-1 (4px) horizontal inset.
+$kbd-padding-y: 0 !default;
+$kbd-padding-x: 0.25rem !default;
 $kbd-font-size: 0.75rem !default;
 // var(--bs-secondary-color) on var(--bs-secondary-bg) fails WCAG 2 AA
 // contrast at this font-size (axe measured 4.07:1 light / 4.48:1 dark
-// against the 4.5:1 minimum for normal text). Bootstrap's own
-// text-emphasis/bg-subtle pair (already used by Alert and List Group,
-// vendor/bootstrap/scss/_variables.scss "subtle" theme color loop) is
-// built for exactly this accessible-colored-text-on-tinted-surface case.
+// against the 4.5:1 minimum for normal text), so this keeps the darker
+// text-emphasis token from that fix. The background moved to
+// --moo-muted-surface (the same token .btn-ghost's hover fill uses) to
+// match the reference's borderless filled-chip look instead of Bootstrap's
+// near-white "subtle" background + border combination; computed against
+// --bs-secondary-text-emphasis that's still 5.55:1 light / 14.03:1 dark,
+// comfortably above the 4.5:1 minimum.
 $kbd-color: var(--bs-secondary-text-emphasis) !default;
-$kbd-bg: var(--bs-secondary-bg-subtle) !default;
+$kbd-bg: var(--moo-muted-surface) !default;
 // references/bootstrap/5.3.3/scss/_variables.scss:1739-1740 defines only
 // $code-color/$code-font-size for <code> — no background/padding/radius
 // token, unlike <kbd> which gets $kbd-bg/$kbd-padding-*/$kbd-color at
@@ -53,31 +72,56 @@ $moo-code-padding-x: 0.375rem !default;
 // 14.03:1 dark against this same background.
 $moo-code-color: var(--bs-secondary-text-emphasis) !default;
 
-// Matches the shadcn reference inline-code background (#f5f5f5) far more
+// Matches the reference's inline-code background (#f5f5f5) far more
 // closely than any --bs-*-bg step; --moo-muted-surface (#f4f4f5) is
 // effectively the same value.
 $moo-code-bg: var(--moo-muted-surface) !default;
 // The reference breadcrumb uses a chevron divider; Bootstrap's own default is "/".
 $breadcrumb-divider: quote(">") !default;
 $breadcrumb-divider-flipped: quote("<") !default;
+// Shared pressed-state movement for button-like controls. Bootstrap's inset
+// active shadow is disabled in _bootstrap_overrides.scss, so components that
+// present as buttons share this tiny physical press instead.
+$moo-control-active-translate-y: 0.5px !default;
 // The reference pagination items sit separated with no border, ghost-hover, and
 // only the active page gets a bordered box; Bootstrap's default is a fully
 // bordered, edge-to-edge connected strip. A positive margin-start switches
 // Bootstrap's own pagination.scss out of connected-border mode.
 $pagination-margin-start: 0.25rem !default;
+$pagination-padding-y: 0 !default;
+$pagination-padding-x: 0 !default;
+// The icon-square baseline in components/_pagination.scss used to add
+// var(--bs-pagination-padding-y) * 2 to reach the reference's hit target,
+// but $pagination-padding-y is zeroed above so real content padding could
+// move onto explicit content-aware rules instead (see components/
+// _pagination.scss's [aria-label]:has(...) selectors). Bootstrap's own
+// padding-y token no longer carries that space, so this knob preserves the
+// square's total inset independently instead of falling back to a literal.
+$moo-pagination-square-inset: 0.625rem !default;
+$pagination-font-size: 0.875rem !default;
+$pagination-border-radius: var(--bs-border-radius-lg) !default;
 $pagination-color: var(--moo-muted-foreground) !default;
+$pagination-bg: transparent !default;
 $pagination-border-color: transparent !default;
 $pagination-hover-color: var(--bs-body-color) !default;
-$pagination-hover-bg: var(--moo-muted-surface) !default;
+$pagination-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent) !default;
 $pagination-hover-border-color: transparent !default;
-$pagination-focus-bg: var(--moo-muted-surface) !default;
+$pagination-focus-bg: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent) !default;
 $pagination-active-color: var(--bs-body-color) !default;
-$pagination-active-bg: var(--moo-muted-surface) !default;
+$pagination-active-bg: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent) !default;
 $pagination-active-border-color: var(--moo-border) !default;
 $pagination-disabled-color: var(--moo-disabled-foreground) !default;
+$pagination-disabled-bg: transparent !default;
 $pagination-disabled-border-color: transparent !default;
 // The reference progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;
+// Bootstrap's checkbox/radio default is 1em which follows the parent
+// font-size (14px here). The reference uses a fixed 16px (size-4), so
+// pin the width to 1rem to match 1:1 regardless of context font-size.
+$form-check-input-width: 1rem !default;
+// Bootstrap derives this as $form-check-input-width + .5em, but mixing
+// rem and em in Sass arithmetic fails to compile; restate it in rem.
+$form-check-padding-start: 1.5rem !default;
 // The reference switch track is chubbier than Bootstrap's default: 32x18.4px
 // versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
 // Bootstrap's own customization point, but there is no matching height
@@ -91,6 +135,10 @@ $form-switch-width: 2rem !default;
 // keep the same proportional gap Bootstrap's own default uses.
 $form-switch-padding-start: 2.5rem !default;
 $moo-switch-height: 1.15rem !default;
+// Bootstrap's dark unchecked switch thumb is separate from its checked
+// thumb. The checked dark state needs the opposite pair (light track,
+// dark thumb), so the component owns that SVG as its own compile-time knob.
+$moo-switch-checked-bg-image-dark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$moo-primary-foreground-dark}'/></svg>") !default;
 // The reference accordion trigger stays fully neutral when expanded (only an
 // underline on hover); Bootstrap's default tints the expanded trigger with
 // $primary-bg-subtle / $primary-text-emphasis. Referencing the resting
@@ -122,6 +170,15 @@ $card-cap-padding-y: $card-spacer-y !default;
 $card-cap-padding-x: $card-spacer-x !default;
 $card-title-font-size: 1rem !default;
 $card-title-letter-spacing: -0.01em !default;
+// The reference card exposes one --moo-card-spacing rhythm for section gaps
+// and the inline inset of header/body/footer, defaulting to the 16px step of
+// Bootstrap's own spacer scale; the size="sm" variant drops to 12px. This is
+// a private consumption token because Bootstrap's card has no single
+// variable that covers both the vertical section gap and the horizontal
+// inset of every part. Literal values, not $spacer math: this file compiles
+// before Bootstrap's own variables (including $spacer) are defined.
+$moo-card-spacing: 1rem !default;
+$moo-card-spacing-sm: 0.75rem !default;
 
 // Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
 // at the browser's bold UA default; the reference renders both header
@@ -141,12 +198,24 @@ $avatar-font-size-sm: 0.75rem !default;
 $avatar-font-size-lg: 1rem !default;
 $avatar-line-height: 1 !default;
 // Verified against the live reference: a 32px avatar group overlaps by 8px
-// and a plain presence-dot badge (no text/icon) renders 10px square with a
-// 2px page-background ring cut into it.
+// and a plain AvatarBadge renders a 10px mark with a 2px page-background
+// ring painted outside the mark.
 $avatar-group-overlap: -0.5rem !default;
 $avatar-badge-dot-size: 0.625rem !default;
-$avatar-badge-icon-size: 0.75rem !default;
+$avatar-badge-icon-size: $avatar-badge-dot-size !default;
+$avatar-badge-icon-glyph-size: 0.5rem !default;
 $avatar-badge-ring-width: 2px !default;
+$avatar-group-ring-width: 2px !default;
+$avatar-badge-ring-shadow: 0 0 0 $avatar-badge-ring-width var(--bs-body-bg) !default;
+$avatar-group-ring-shadow: 0 0 0 $avatar-group-ring-width var(--bs-body-bg) !default;
+// Bootstrap's tooltip plugin has no motion-timing tokens (its own source
+// hardcodes the transition in tooltip.scss); the reference's subtle
+// zoom/slide open is scoped to Moo's tooltip surface, so the four motion
+// steps are private component knobs rather than global Bootstrap values.
+$moo-tooltip-motion-duration: 150ms !default;
+$moo-tooltip-motion-easing: cubic-bezier(0.16, 1, 0.3, 1) !default;
+$moo-tooltip-motion-scale: 0.95 !default;
+$moo-tooltip-motion-translate: 0.25rem !default;
 
 $btn-font-weight: 500 !default;
 $btn-font-size: 0.875rem !default;
@@ -168,10 +237,51 @@ $btn-padding-y-sm: 0.3125rem !default;
 $btn-padding-x-sm: 0.625rem !default;
 $btn-padding-y-lg: 0.4375rem !default;
 $btn-padding-x-lg: 0.625rem !default;
+// Icon-only buttons are squares whose side equals the token-driven button
+// height (line-height + 2*padding-y + 2*border), matching sibling text
+// buttons. Bootstrap exposes no single icon-button size knob; the side is a
+// runtime calc over the --bs-btn-* consumption variables so size variants
+// (xs/sm/lg) resolve their own box, backed here by a private Sass knob.
+$moo-btn-icon-size: calc(
+  var(--bs-btn-line-height) +
+  var(--bs-btn-padding-y) * 2 +
+  var(--bs-btn-border-width) * 2
+) !default;
+
+// Bootstrap's close button already exposes Sass knobs for its content-box icon
+// and padding. Keep the native glyph slightly lighter than Bootstrap's default
+// while the padding preserves the 24px reference hit target.
+$btn-close-width: 0.75rem !default;
+$btn-close-height: $btn-close-width !default;
+$btn-close-padding-x: 0.34375rem !default;
+$btn-close-padding-y: $btn-close-padding-x !default;
+$btn-close-opacity: 1 !default;
+$btn-close-hover-opacity: $btn-close-opacity !default;
+$btn-close-focus-opacity: $btn-close-opacity !default;
+$btn-close-disabled-opacity: $moo-disabled-control-opacity !default;
+$moo-close-button-border-color: transparent !default;
+// Bootstrap's close button ships a filled-path X glyph; the reference uses a
+// thinner Lucide-style stroke icon instead. .btn-close::before consumes this
+// through mask + currentColor (scss/components/_close_button.scss), so only
+// the SVG's alpha shape ever paints -- the stroke color itself never
+// renders -- but the design gate still requires every component custom
+// property to trace to a token source, so bind it through $black the same
+// way the switch's dark bg-image binds through $moo-primary-foreground-dark.
+$moo-close-button-bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#{$black}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 6 6 18'/><path d='m6 6 12 12'/></svg>") !default;
 
 // Shared focus primitive: a thin 2px ring. Components consume
 // --bs-focus-ring-width; only the ring color is a runtime theme token.
 $focus-ring-width: 2px !default;
+
+// The reference's own form-control focus ring is 3px, one size up from the
+// 2px ring the rest of the system uses on buttons/links/custom surfaces.
+// Input, Textarea, Select, Checkbox, Radio, and Switch all share this wider
+// ring so the reference's exact focus recipe carries over unmodified.
+$moo-form-focus-ring-width: 3px !default;
+// Same --moo-ring value the width above pairs with, aliased under a name
+// the shared-primitive design gate recognizes as a color reference (see
+// approved_shared_value's shadow-token check in tests/test_design_gates.py).
+$moo-form-focus-ring-color: var(--moo-ring) !default;
 
 // Shared overlay primitive for Bootstrap's native Modal and Offcanvas
 // backdrops. Bootstrap exposes separate .modal-backdrop and
@@ -233,6 +343,7 @@ $moo-dropdown-item-check-border-radius: .25em !default;
 // - field-fieldset-sibling-gap: between consecutive fieldsets in one form
 $moo-field-gap: 0.5rem !default;
 $moo-field-group-gap: 1.25rem !default;
+$moo-field-switch-gap: $moo-field-group-gap !default;
 $moo-field-form-gap: $moo-field-group-gap !default;
 $moo-field-fieldset-gap: 1rem !default;
 $moo-field-fieldset-sibling-gap: $moo-field-group-gap !default;
@@ -255,13 +366,17 @@ $moo-datatable-min-width: 48rem !default;
 $moo-datatable-release-review-min-width: 64rem !default;
 $moo-datatable-card-min-width: 20rem !default;
 $moo-datatable-card-label-width: 7rem !default;
+// Sticky row-action cells need just enough opaque surface for the trigger;
+// this fade prevents the pinned cell from reading as a dominant blank column.
+$moo-datatable-actions-cell-fade-width: 1.25rem !default;
 // Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
 // these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
 $moo-datatable-frame-header-min-height: 2.78125rem !default;
 // Bootstrap's checkbox width variable is not available while primary settings
 // are aggregated, so keep Data Table's select inset derived from Moo's compact
-// checkbox box and Bootstrap's default 1px frame border.
-$moo-datatable-select-checkbox-size: 0.875rem !default;
+// checkbox box and Bootstrap's default 1px frame border. Now matches the
+// global $form-check-input-width (1rem / 16px) set above.
+$moo-datatable-select-checkbox-size: 1rem !default;
 // Bootstrap has no --bs-form-check-input-border-radius custom property to
 // consume here either, same gap as the checkbox size above, this time for
 // the facet dropdown's own checkbox-style indicator (datatable_facet_item(),

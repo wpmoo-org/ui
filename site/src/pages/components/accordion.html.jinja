@@ -2,7 +2,7 @@
 {% from "components/accordion.html.jinja" import accordion %}
 {% from "components/card.html.jinja" import card %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Accordion — Moo UI{% endblock %}
@@ -14,6 +14,39 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ accordion(
+        "accordion-preview",
+        [
+          {
+            "id": "overview",
+            "title": "Review request details",
+            "content": "Use the open panel for the information people need first. Keep the content brief enough to scan before moving to the next section."
+          },
+          {
+            "id": "history",
+            "title": "Audit history",
+            "content": "Collapse supporting history until someone needs to inspect the decision trail."
+          },
+          {
+            "id": "handoff",
+            "title": "Reviewer handoff",
+            "content": "Keep the next owner and follow-up notes close to the same request."
+          }
+        ]
+      ) }}
+    {% endset %}
+    {% set accordion_usage %}
+      <p>Use <code>.accordion</code> for a vertical set of disclosure sections where each header toggles its own panel. The structure follows Bootstrap's Collapse behavior: an <code>.accordion-button</code> controls an <code>.accordion-collapse</code> region with <code>data-bs-toggle="collapse"</code>, <code>data-bs-target</code>, <code>aria-expanded</code>, and <code>aria-controls</code>, while the revealed content sits inside <code>.accordion-body</code>.</p>
+      <p>Keep the default one-open-at-a-time behavior by grouping items with <code>data-bs-parent</code>; omit <code>data-bs-parent</code> when multiple panels should stay open together. To render a panel open on first paint, add <code>.show</code> to the <code>.accordion-collapse</code>, remove <code>.collapsed</code> from the matching <code>.accordion-button</code>, and set <code>aria-expanded="true"</code>.</p>
+      <p>Use <code>.accordion-flush</code> when the accordion should sit edge-to-edge inside its parent without the standard outer borders and radius. Because Accordion is powered by Bootstrap's Collapse plugin, keep button and panel ids stable, keep heading order meaningful, and let Bootstrap honor reduced-motion preferences for the expand/collapse animation.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      accordion_usage,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set basic %}
       {{ accordion(
         "accordion-basic",
@@ -229,7 +262,7 @@
     {% endset %}
 
     {% set english_accordion %}
-      <div class="w-100" dir="rtl">
+      <div class="w-100" dir="ltr">
         {{ accordion(
           "accordion-rtl-english",
           [

@@ -15,14 +15,6 @@
   ) }}
 
   <div class="moo-component-examples">
-    <h2 id="usage" class="h4 mb-3">Usage</h2>
-    <p class="mb-4">
-      Data Table composes Bootstrap table markup with Moo's ready Checkbox,
-      Dropdown Menu, Button, Badge, Tooltip, and Pagination contracts. Every row
-      is rendered by the server first; the optional Moo runtime only reorders,
-      filters, paginates, or hides existing markup in the browser.
-    </p>
-
     {% set release_review_table %}
       {{ render_release_review_table(id="datatable-release-reviews", responsive_mode="toggle") }}
     {% endset %}
@@ -39,8 +31,31 @@
         {"label": "Mobile", "icon": "smartphone", "width": 390, "height": 900},
         {"label": "Tablet", "icon": "tablet", "width": 768, "height": 900},
         {"label": "Desktop", "icon": "monitor", "width": 1280, "height": 900, "active": true}
-      ]
+      ],
+      show_header=false
     ) }}
+
+    <h2 id="usage" class="h4 mt-5 mb-3">Usage</h2>
+    <p class="mb-4">
+      Use <code>.datatable</code> when users need to scan, compare, filter, sort, select,
+      and page through server-rendered records without losing ordinary table
+      semantics. Keep the base structure as Bootstrap table markup with
+      meaningful column headers, row ids, and visible labels for every toolbar
+      control.
+    </p>
+    <p class="mb-4">
+      Compose the surface from the same component contracts used elsewhere:
+      search uses a Bootstrap form control, facets and row actions use Dropdown
+      Menu, selection uses Checkbox, status uses Badge, overflow help can use
+      Tooltip, and the footer uses Bootstrap pagination markup. That keeps each
+      interactive part inspectable and replaceable instead of hiding the table
+      inside a single opaque widget.
+    </p>
+    <p class="mb-4">
+      Render every row on the server first. The optional Moo UI runtime should
+      only reorder, filter, paginate, select, or hide existing markup in the
+      browser; it should not become the source of truth for the row data.
+    </p>
 
     <h2 id="responsive-modes" class="h4 mt-5 mb-3">Responsive modes</h2>
     <p class="mb-4">
@@ -101,9 +116,9 @@
       ["<code>[data-datatable-search]</code>", "Search input that filters against each row's server-rendered search string."],
       ["<code>[data-datatable-facet]</code>", "Facet dropdown root that groups multi-select filter options by key."],
       ["<code>.datatable-frame</code>", "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."],
-      ["<code>responsive_mode=\"scroll\"</code>", "Keeps all columns in the table and adds <code>.scroll-fade-x</code> to the horizontal viewport."],
-      ["<code>responsive_mode=\"cards\"</code>", "Hides the table below the configured breakpoint and shows each row as a card. Columns can opt into <code>card_role=\"title\"</code> or <code>actions</code> for the card header; every other column stays in the card body."],
-      ["<code>responsive_mode=\"toggle\"</code>", "Renders the table and the cards together and adds a <code>.datatable-view-toggle</code> Table/Cards control so the reader, not the breakpoint, picks the layout."],
+      ["<code>.table-responsive.scroll-fade-x</code>", "Horizontal viewport for full-width tables when every column should remain inspectable."],
+      ["<code>.datatable-card-frame</code>", "Responsive card list that mirrors table rows with title and action areas in the card header, then secondary fields in the card body."],
+      ["<code>.datatable-view-toggle</code>", "Table/Cards toolbar control so the reader, not only the breakpoint, picks the layout."],
       ["<code>[data-datatable-cards]</code>", "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."],
       ["<code>[data-datatable-empty]</code>", "Accessible empty-state surface shown when filtering leaves no matching rows, with a clear-filters action."],
       ["<code>[data-datatable-results-summary]</code>", "Live page-range summary such as <code>Showing 1-10 of 24</code>, or <code>No results</code> when nothing matches."],
@@ -120,7 +135,8 @@
       anatomy_rows,
       row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "responsive-toggle", "cards", "empty", "results-summary", "column", "row", "select-row", "select-all", "sort-value", "bulk-actions", "pagination"],
       row_header=true,
-      extra_class="align-middle mb-5"
+      extra_class="align-middle mb-5 datatable-anatomy-table",
+      responsive_class="scroll-fade-x no-scrollbar"
     ) }}
 
     {% set interactive = namespace(input="<" ~ "input", button="<" ~ "button") %}
@@ -204,9 +220,9 @@
       ["Search", "Render <code>data-datatable-search</code> and put normalized search text on rows with <code>data-datatable-search</code>."],
       ["Faceted filters", "Pass facet definitions and row facet attributes such as <code>data-datatable-facet-status</code>."],
       ["Sortable columns", "Mark sortable headers with <code>data-datatable-sort-key</code> and give cells stable <code>data-datatable-sort-value</code> values when rich markup is used."],
-      ["Column visibility", "Keep hideable columns in the View dropdown. Columns with <code>hideable=false</code>, such as row identity and row actions, stay fixed."],
-      ["Responsive cards", "Set <code>responsive_mode=\"cards\"</code> to keep the desktop table unchanged and render mobile/tablet rows as cards with title and actions in the header, then secondary fields below."],
-      ["Reader-controlled layout", "Set <code>responsive_mode=\"toggle\"</code> to render the table and cards together with a Table/Cards toggle; the reader's choice persists per table id in <code>localStorage</code>, independent of viewport."],
+      ["Column visibility", "Keep optional columns in the View dropdown. Identity and row-action columns stay fixed and do not appear as visibility toggles."],
+      ["Responsive cards", "Render the card frame alongside the table so mobile and tablet rows can show title and actions in the header, then secondary fields below."],
+      ["Reader-controlled layout", "Render <code>.datatable-view-toggle</code> with table and card frames; the reader's choice persists per table id in <code>localStorage</code>, independent of viewport."],
       ["Row selection", "Render native row checkboxes with stable row ids. Table rows and responsive cards receive selected-state feedback, while the bulk bar announces the current selection."],
       ["Bulk actions", "Use button or dropdown actions with <code>data-datatable-bulk-action</code> or <code>data-datatable-bulk-update</code>."],
       ["Empty and result feedback", "The runtime announces the current range and shows a clear empty state when search or facets produce no matching rows."],
@@ -217,19 +233,21 @@
       feature_rows,
       row_ids=["feature-search", "feature-facets", "feature-sort", "feature-visibility", "feature-cards", "feature-toggle", "feature-selection", "feature-bulk", "feature-feedback", "feature-pagination"],
       row_header=true,
-      extra_class="align-middle mb-0"
+      extra_class="align-middle mb-0 datatable-feature-table",
+      responsive_class="scroll-fade-x no-scrollbar"
     ) }}
   </div>
 
   {{ render_reference(
     "Data Table composes Bootstrap's table, dropdown, form, and pagination markup; for the base table structure see the",
     "https://getbootstrap.com/docs/5.3/content/tables/",
-    "Bootstrap Tables documentation"
-  ) }}
-  {{ render_reference(
-    "For faceted filters, row actions, and bulk-action menus, see the",
-    "https://getbootstrap.com/docs/5.3/components/dropdowns/",
-    "Bootstrap Dropdown documentation",
-    show_details=false
+    "Bootstrap Tables documentation",
+    extra_references=[
+      {
+        "lead": "For faceted filters, row actions, and bulk-action menus, see the",
+        "href": "https://getbootstrap.com/docs/5.3/components/dropdowns/",
+        "label": "Bootstrap Dropdown documentation"
+      }
+    ]
   ) }}
 {% endblock %}

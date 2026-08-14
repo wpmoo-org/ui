@@ -132,6 +132,17 @@ def write_report(report: dict[str, object], output: Path) -> None:
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
+def npm_cache_is_writable(cache: Path) -> bool:
+    try:
+        probe_dir = cache / "_cacache" / "tmp"
+        probe_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=probe_dir):
+            pass
+    except OSError:
+        return False
+    return True
+
+
 def main() -> int:
     args = parse_args()
     repo = args.repo.resolve()
@@ -143,7 +154,12 @@ def main() -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
 
     base_env = os.environ.copy()
-    base_env.setdefault("npm_config_cache", "/private/tmp/wpmoo-npm-cache")
+    cache = base_env.get("npm_config_cache")
+    if not cache or not npm_cache_is_writable(Path(cache)):
+        base_env["npm_config_cache"] = os.path.join(
+            tempfile.gettempdir(),
+            "wpmoo-npm-cache",
+        )
     base_env["MOO_UI_BOOTSTRAP_EXPECTED_VERSION"] = args.version
 
     report: dict[str, object] = {

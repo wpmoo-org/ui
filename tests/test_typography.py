@@ -56,3 +56,16 @@ class TypographyTests(CatalogTestCase):
             "Unknown typography variant: typo",
         ):
             self.render_typography('typography("Text", variant="typo")')
+
+    def test_intro_uses_component_intro_with_typographic_roles(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        intro_block = source[
+            source.index("{% set intro %}"):
+            source.index("{% endset %}", source.index("{% set intro %}"))
+        ]
+
+        self.assertIn("render_component_intro(", source)
+        self.assertIn('variant="page-title"', intro_block)
+        self.assertIn("<h5", intro_block)
+        self.assertIn("text-center", intro_block)
+        self.assertIn("fst-italic", intro_block)

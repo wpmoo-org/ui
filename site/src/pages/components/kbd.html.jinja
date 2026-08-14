@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/kbd.html.jinja" import kbd %}
 
 {% block title %}Kbd — Moo UI{% endblock %}
@@ -13,6 +13,19 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <p class="mb-0">Press {{ kbd("⌘") }} {{ kbd("K") }} to open search.</p>
+    {% endset %}
+    {% set kbd_usage %}
+      <p>Use <code>&lt;kbd&gt;</code> to show the exact physical keys a user should press. Wrap each key in its own element and keep the visible sentence around it, so the shortcut stays understandable when copied, translated, or read aloud.</p>
+      <p>Place keys in the order they are pressed. Use punctuation such as plus signs or commas outside the key elements unless that character is itself a real key, and keep platform-specific variants such as <code>⌘</code>, <code>Ctrl</code>, <code>Alt</code>, and <code>Esc</code> consistent within the same page.</p>
+      <p>Do not use Kbd as the only instruction for required work. Pair the shortcut with the visible action name, keep alternate pointer or menu paths available, and reserve shortcut-heavy copy for workflows where keyboard operation is expected.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      kbd_usage
+    ) }}
+
     {% set single_key %}
       <div class="d-inline-flex align-items-center gap-2">
         <span>Dismiss the panel with</span>
@@ -107,7 +120,7 @@
     {% endset %}
 
     {% set kbd_rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         <div class="d-inline-flex align-items-center gap-2">
           <span>Use</span>
           <span class="d-inline-flex align-items-center gap-1">

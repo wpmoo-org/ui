@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Sheet — Moo UI{% endblock %}
@@ -14,6 +14,28 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-inline-flex">
+        {{ button("Open sheet", variant="outline", sheet_target="sheet-intro") }}
+      </div>
+      {% call sheet("sheet-intro") %}
+        {{ sheet_header("sheet-intro", "Filter results") }}
+        {% call sheet_body() %}
+          <p class="mb-0">Narrow the list by status, owner, and date range before applying a bulk action.</p>
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {% set sheet_usage %}
+      <p>Use <code>.offcanvas</code> for secondary controls or details that should slide in from a viewport edge without navigating away from the current page. Connect a clear trigger to the offcanvas id, choose the placement edge, and label the panel from its visible header.</p>
+      <p>Keep the sheet body focused on one supporting task, such as filters, settings, or contextual details. Configure backdrop and body scrolling intentionally: a backdrop keeps attention inside the sheet, while body scrolling can preserve page context for lighter side panels.</p>
+      <p>Sheet uses Bootstrap Offcanvas behavior, so Bootstrap owns focus management, Escape dismissal, backdrop clicks, and reduced-motion-aware transitions. Keep essential page actions outside the sheet unless the sheet is already open, and avoid placing another overlay workflow inside it.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      sheet_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       <div class="d-inline-flex">
         {{ button("Open sheet", variant="outline", sheet_target="sheet-basic") }}
@@ -170,7 +192,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {{ button("Open filter panel", variant="outline", sheet_target="sheet-rtl-english") }}
       </div>
     {% endset %}

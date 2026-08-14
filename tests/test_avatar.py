@@ -11,6 +11,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/avatar.html.jinja"
 PAGE = ROOT / "site/src/pages/components/avatar.html.jinja"
 STYLE = ROOT / "scss/components/_avatar.scss"
+CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/avatar.html"
 
 
 class AvatarTests(CatalogTestCase):
@@ -103,12 +104,16 @@ class AvatarTests(CatalogTestCase):
     def test_avatar_page_examples_stay_product_shaped(self) -> None:
         page = PAGE.read_text()
 
-        self.assertIn("Moo Admin", page)
-        self.assertIn("admin@example.com", page)
         self.assertIn("render_rtl_example", page)
-        self.assertNotIn('title="Direction aware"', page)
-        self.assertNotIn("badge_dot for", page)
-        self.assertNotIn('style="width: 0.5rem; height: 0.5rem;"', page)
+        self.assertIn('aria_label="Open profile menu"', page)
+
+    def test_avatar_certification_image_fixture_uses_visible_media(self) -> None:
+        fixture = CERTIFICATION_FIXTURE.read_text()
+
+        self.assertIn('id="certification-avatar-image"', fixture)
+        self.assertIn("avatar--has-image", fixture)
+        self.assertIn('<span class="avatar-fallback">GH</span>', fixture)
+        self.assertNotIn("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7", fixture)
 
     def test_avatar_badge_paints_above_avatar_outline(self) -> None:
         style = STYLE.read_text()
@@ -116,5 +121,5 @@ class AvatarTests(CatalogTestCase):
         self.assertRegex(style, r"\.avatar::after\s*\{[^}]*z-index:\s*1;")
         self.assertRegex(style, r"\.avatar-badge\s*\{[^}]*z-index:\s*2;")
         self.assertRegex(style, r"\.avatar-badge--icon\s*\{[^}]*padding-inline:\s*0;")
-        self.assertRegex(style, r"\.avatar-badge--icon \[data-icon\]\s*\{[^}]*width:\s*0\.375rem;")
+        self.assertRegex(style, r"\.avatar-badge--icon \[data-icon\]\s*\{[^}]*width:\s*\$avatar-badge-icon-glyph-size;")
         self.assertRegex(style, r"\.avatar-group > \.avatar\s*\{[^}]*z-index:\s*0;")

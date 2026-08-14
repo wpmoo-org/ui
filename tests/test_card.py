@@ -40,28 +40,38 @@ class CardTests(CatalogTestCase):
 
         self.assertIn('dir="rtl"', output)
 
-    def test_card_page_renders_rtl_tabbed_examples(self) -> None:
+    def test_card_page_renders_rtl_login_example(self) -> None:
         self.assertTrue(PAGE.is_file(), "Card catalog page is not implemented")
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/card.html")
-        self.assertIn('id="card-direction-tabs-list"', page)
-        self.assertIn('id="rtl"', page)
-        self.assertIn('id="card-direction-tabs-arabic-tab"', page)
-        self.assertIn('id="card-direction-tabs-hebrew-tab"', page)
-        self.assertIn('id="card-direction-tabs-english-tab"', page)
+        # The three-language render_rtl_example macro generates
+        # data-example="rtl-arabic", "rtl-hebrew", "rtl-english".
+        self.assertIn('data-example="rtl-arabic"', page)
+        self.assertIn('data-example="rtl-hebrew"', page)
+        self.assertIn('data-example="rtl-english"', page)
+        self.assertIn('dir="rtl"', page)
+        self.assertIn("تسجيل الدخول", page)
 
-    def test_card_rtl_examples_are_exact_translations_of_one_scenario(self) -> None:
-        # The RTL rule requires Arabic/Hebrew/English to be exact
-        # translations of the same example with identical structure, not
-        # three unrelated scenarios -- lock the shared two-row layout here.
+    def test_card_rtl_example_is_a_single_translated_login_scenario(self) -> None:
+        # The RTL example uses render_rtl_example with three language
+        # variants (Arabic, Hebrew, English), each wrapping the same
+        # login card structure in dir="rtl".
         source = PAGE.read_text(encoding="utf-8")
 
-        for block_start in ("arabic_card %}", "hebrew_card %}", "english_card %}"):
-            block = source.split(block_start, 1)[1].split("{% endset %}", 1)[0]
-            with self.subTest(locale=block_start):
-                self.assertEqual(block.count("d-flex justify-content-between"), 2)
-                self.assertIn('class="text-body-secondary"', block)
-                self.assertIn('class="fw-medium"', block)
-                self.assertIn('dir="rtl"', block)
+        arabic_block = source.split("rtl_arabic %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="rtl"', arabic_block)
+        self.assertIn("تسجيل الدخول إلى حسابك", arabic_block)
+        self.assertIn('action=button("إنشاء حساب"', arabic_block)
+        self.assertIn("card-rtl-ar-email", arabic_block)
+        self.assertIn("card-rtl-ar-password", arabic_block)
+
+        hebrew_block = source.split("rtl_hebrew %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="rtl"', hebrew_block)
+        self.assertIn("card-rtl-he-email", hebrew_block)
+
+        english_block = source.split("rtl_english %}", 1)[1].split("{% endset %}", 1)[0]
+        self.assertIn('dir="ltr"', english_block)
+        self.assertIn("Login to your account", english_block)
+        self.assertIn("card-rtl-en-email", english_block)

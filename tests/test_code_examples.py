@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from build import dedent_html, format_html
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -9,24 +11,31 @@ class CodeExampleTests(CatalogTestCase):
         template = (
             ROOT / "site/src/includes/example.html.jinja"
         ).read_text(encoding="utf-8")
+        render_example_block = template[
+            template.index("{% macro render_example("):
+            template.index("{% macro render_component_intro(")
+        ]
 
-        self.assertEqual(template.count('class="moo-example__surface"'), 1)
-        self.assertEqual(template.count('class="moo-example__preview'), 1)
-        self.assertEqual(template.count('class="moo-example__source"'), 1)
-        self.assertIn("data-moo-code-panel", template)
-        self.assertIn("data-moo-code-toggle", template)
-        self.assertIn('aria-expanded="false"', template)
-        self.assertIn("data-moo-code-copy", template)
-        self.assertIn('data-bs-theme="dark"', template)
-        self.assertEqual(template.count("{{ rendered | safe }}"), 1)
-        self.assertIn("portal_content=\"\"", template)
-        self.assertIn("{% set rendered_portal = portal_content | dedent_html %}", template)
-        self.assertIn("{{ rendered_portal | safe }}", template)
+        self.assertEqual(render_example_block.count('class="moo-example__surface"'), 1)
+        self.assertEqual(render_example_block.count('class="moo-example__preview'), 1)
+        self.assertEqual(render_example_block.count('class="moo-example__source"'), 1)
+        self.assertIn("data-moo-code-panel", render_example_block)
+        self.assertIn("data-moo-code-toggle", render_example_block)
+        self.assertIn('aria-expanded="false"', render_example_block)
+        self.assertIn("data-moo-code-copy", render_example_block)
+        self.assertNotIn('data-bs-theme="dark"', render_example_block)
+        self.assertEqual(render_example_block.count("{{ rendered | safe }}"), 1)
+        self.assertIn("portal_content=\"\"", render_example_block)
+        self.assertIn(
+            "{% set rendered_portal = portal_content | dedent_html %}",
+            render_example_block,
+        )
+        self.assertIn("{{ rendered_portal | safe }}", render_example_block)
         self.assertIn("portal_content=arabic_portal", template)
         self.assertIn("portal_content=hebrew_portal", template)
         self.assertIn("portal_content=english_portal", template)
-        self.assertEqual(template.count("{{ source | highlight_html }}"), 1)
-        self.assertEqual(template.count("{{ source | line_numbers }}"), 1)
+        self.assertEqual(render_example_block.count("{{ source | highlight_html }}"), 1)
+        self.assertNotIn("line_numbers", render_example_block)
 
     def test_source_formatter_indents_nested_macro_markup(self) -> None:
         source = """
@@ -86,6 +95,39 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('example_prefix="rtl"', template)
         self.assertEqual(template.count("show_header=false"), 3)
 
+    def test_render_component_intro_centralizes_hero_and_usage_layout(self) -> None:
+        template = (
+            ROOT / "site/src/includes/example.html.jinja"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("{% macro render_component_intro(", template)
+        self.assertIn('class="moo-example__surface mb-5"', template)
+        self.assertIn('aria-labelledby="usage"', template)
+        self.assertIn('<h2 class="h4" id="usage">Usage</h2>', template)
+
+        excluded_component_intro_pages = {"datatable", "sidebar"}
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        intro_slugs = [
+            item["slug"]
+            for item in catalog
+            if item["slug"] not in excluded_component_intro_pages
+        ]
+
+        self.assertGreaterEqual(len(intro_slugs), 40)
+        for slug in intro_slugs:
+            with self.subTest(slug=slug):
+                source = (
+                    ROOT / f"site/src/pages/components/{slug}.html.jinja"
+                ).read_text(encoding="utf-8")
+                self.assertIn("render_component_intro(", source)
+                self.assertNotIn('<div class="moo-example__surface mb-5">', source)
+                self.assertNotIn(
+                    '<section class="moo-example" aria-labelledby="usage">',
+                    source,
+                )
+
     def test_catalog_example_surface_integrates_preview_and_code(self) -> None:
         result = self.run_build()
 
@@ -126,6 +168,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("padding: 0.875rem 0;", source_code)
         self.assertIn("font-size: 0.875rem;", source_code)
         self.assertIn("line-height: 1.75;", source_code)
+        reveal = css.split(".moo-code__reveal {", 1)[1].split("}", 1)[0]
+        self.assertNotIn("padding-bottom:", reveal)
+        reveal_button = css.split(".moo-code__reveal .btn {", 1)[1].split(
+            "}", 1
+        )[0]
+        self.assertIn("background: var(--bs-body-bg);", reveal_button)
         nested_tab_example = css.split(".tab-content .moo-example {", 1)[1].split("}", 1)[0]
         self.assertIn("max-width: 100%;", nested_tab_example)
         self.assertIn("min-width: 0;", nested_tab_example)
@@ -177,7 +225,11 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
         self.assertIn('<code class="language-html">', page)
-        self.assertIn('class="moo-code__lines" aria-hidden="true"', page)
+        self.assertIn(
+            '<span class="moo-code__lines" aria-hidden="true"></span>',
+            page,
+        )
+        self.assertNotRegex(page, r'class="moo-code__lines"[^>]*>\s*1\s*<')
         self.assertIn('<span class="token tag">', page)
         self.assertIn('<span class="token attr-name">class</span>', page)
         self.assertIn('<span class="token attr-value">', page)
@@ -188,6 +240,22 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn(".token.attr-name", catalog_css)
         self.assertIn(".token.attr-value", catalog_css)
 
+    def test_inline_code_chips_apply_across_catalog_prose_contexts(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("installation.html")
+        self.assertIn("<dd>Use either the full <code>moo-ui.css</code>", page)
+        self.assertIn("<td><code>moo-ui.css</code> instead of Bootstrap CSS.</td>", page)
+
+        catalog_css = self.read_output("assets/css/catalog.css")
+        selector = catalog_css.split(
+            ".moo-catalog__content :where(p, li, dd, dt, td, th) code {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("color: var(--bs-secondary-text-emphasis);", selector)
+        self.assertIn("background: var(--moo-muted-surface);", selector)
+        self.assertIn("border-radius:", selector)
+
     def test_code_panel_expands_and_copies_only_code_text(self) -> None:
         result = self.run_build()
 
@@ -196,7 +264,9 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('data-expanded="false"', page)
         self.assertIn('data-moo-code-copy hidden', page)
         self.assertIn('data-moo-copy-status role="status"', page)
-        self.assertIn('aria-controls="core-variants-code"', page)
+        self.assertIn('data-moo-copy-icon="copy"', page)
+        self.assertIn('data-moo-copy-icon="check" hidden', page)
+        self.assertRegex(page, r'aria-controls="[a-z0-9-]+-code"')
 
         script = self.read_output("assets/js/catalog/code-preview.js")
         self.assertIn('panel.dataset.expanded = "true";', script)
@@ -206,15 +276,30 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('toggle.setAttribute("aria-expanded", "true")', script)
         self.assertIn("copyButton.hidden = false;", script)
         self.assertIn("navigator.clipboard.writeText(code.textContent)", script)
-        self.assertIn('let message = "Code copied";', script)
-        self.assertIn('message = "Copy failed";', script)
-        self.assertIn("copyStatus.textContent = message;", script)
-        self.assertNotIn("moo-code__lines", script)
+        self.assertIn('copyStatus.textContent = "Copied";', script)
+        self.assertIn('copyStatus.textContent = "Copy failed";', script)
+        self.assertIn("setCopyState(true);", script)
+        self.assertIn("setCopyState(false);", script)
+        self.assertIn('copyButton.dataset.mooCopied = copied ? "true" : "false";', script)
+        self.assertIn("renderCodeLineNumbers", script)
+        self.assertIn('panel.querySelector(".moo-code__lines")', script)
 
         catalog_css = self.read_output("assets/css/catalog.css")
+        copy_button = catalog_css.split(".moo-code__copy {", 1)[1].split("}", 1)[0]
+        self.assertIn("background: var(--bs-body-bg);", copy_button)
+        copy_icon = catalog_css.split(
+            ".moo-code__copy [data-moo-copy-icon]:not([hidden]) {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("display: inline-flex;", copy_icon)
+        nested_icon = catalog_css.split(
+            ".moo-code__copy [data-icon] {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("width: 0.875rem;", nested_icon)
+        self.assertIn("height: 0.875rem;", nested_icon)
         self.assertIn(".moo-code__lines {", catalog_css)
         self.assertIn("pointer-events: none;", catalog_css)
         self.assertIn("user-select: none;", catalog_css)
+        self.assertNotIn(".moo-code__status {", catalog_css)
         self.assertIn(
             '[data-expanded="true"] .moo-code__copy',
             catalog_css,
@@ -232,8 +317,11 @@ class CodeExampleTests(CatalogTestCase):
 
         self.assertIn("moo-doc-code-panel", page)
         self.assertIn('data-moo-code-panel data-expanded="true"', page)
+        self.assertNotIn('data-bs-theme="dark"', page)
         self.assertIn('data-moo-code-copy aria-label="Copy code"', page)
-        self.assertIn('data-moo-copy-status role="status"', page)
+        self.assertIn('data-moo-copy-icon="copy"', page)
+        self.assertIn('data-moo-copy-icon="check" hidden', page)
+        self.assertIn('class="visually-hidden" data-moo-copy-status role="status"', page)
         self.assertNotIn("data-moo-code-copy hidden", page)
         self.assertIn('class="moo-code scroll-fade-x no-scrollbar"', page)
 

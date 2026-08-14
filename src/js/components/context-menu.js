@@ -174,6 +174,19 @@ export default class ContextMenu {
     this._openMethod = "pointer";
   }
 
+  _handleFallbackKeydown(event) {
+    if (event.key !== " " && event.key !== "Spacebar") {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (this._menu.classList.contains("show")) {
+      this._dropdown.hide();
+      return;
+    }
+    this._open(this._fallback, null, "fallback-keyboard");
+  }
+
   _handleMenuClick(event) {
     const item = menuItemFromEvent(event);
     if (!item) {
@@ -217,6 +230,7 @@ export default class ContextMenu {
     this._listen(this._element, "contextmenu", (event) => this._handleContextMenu(event));
     this._listen(this._element, "keydown", (event) => this._handleKeydown(event));
     this._listen(this._fallback, "click", () => this._handleFallbackClick());
+    this._listen(this._fallback, "keydown", (event) => this._handleFallbackKeydown(event));
     this._listen(this._menu, "click", (event) => this._handleMenuClick(event));
     this._listen(this._fallback, "show.bs.dropdown", (event) => {
       if (!this._trigger("show", true)) {
@@ -231,7 +245,9 @@ export default class ContextMenu {
       // highlight instead of a focus ring competing with it. A keyboard-
       // driven open (Shift+F10/ContextMenu key) still lands on the first
       // item, matching that same native arrow-key-open convention.
-      if (this._openMethod === "keyboard") {
+      if (this._openMethod === "fallback-keyboard") {
+        this._fallback.focus();
+      } else if (this._openMethod === "keyboard") {
         this._menuItems()[0]?.focus();
       } else {
         this._menu.focus();

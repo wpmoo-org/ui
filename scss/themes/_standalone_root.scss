@@ -14,32 +14,98 @@
   --moo-surface: #{$moo-surface};
   --moo-muted-surface: #{$moo-muted-surface};
   --moo-border: #{$moo-border};
+  --moo-primary: #{$moo-primary};
+  --moo-primary-foreground: #{$moo-primary-foreground};
   --moo-foreground: #{$moo-foreground};
   --moo-muted-foreground: #{$moo-muted-foreground};
   --moo-disabled-foreground: #{$moo-disabled-foreground};
   --moo-ring: #{$moo-ring};
   --moo-destructive: #{$moo-destructive};
+  --moo-destructive-surface: #{$moo-destructive-surface};
+  --moo-destructive-surface-hover: #{$moo-destructive-surface-hover};
   --moo-destructive-foreground: #{$moo-destructive-foreground};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};
+  --moo-warning: #{$moo-warning};
+  --moo-warning-surface: #{$moo-warning-surface};
+  --moo-warning-surface-hover: #{$moo-warning-surface-hover};
+  --moo-warning-foreground: #{$moo-warning-foreground};
+  --moo-success: #{$moo-success};
+  --moo-success-surface: #{$moo-success-surface};
+  --moo-success-surface-hover: #{$moo-success-surface-hover};
+  --moo-success-foreground: #{$moo-success-foreground};
+  --moo-info: #{$moo-info};
+  --moo-info-surface: #{$moo-info-surface};
+  --moo-info-surface-hover: #{$moo-info-surface-hover};
+  --moo-info-foreground: #{$moo-info-foreground};
   --moo-sidebar: #{$moo-sidebar};
   --bs-body-color: var(--moo-foreground);
   --bs-body-color-rgb: #{to-rgb($moo-foreground)};
   --bs-heading-color: var(--moo-foreground);
   --bs-secondary-color: var(--moo-muted-foreground);
+  // Bootstrap computes its own dark-mode --bs-body-bg/-secondary-bg/
+  // -tertiary-bg independently of this file (see vendor/bootstrap/scss/
+  // _root.scss's [data-bs-theme="dark"] block), the same way it did for the
+  // --bs-body-color trio above before this bridge existed. The scoped Odoo
+  // core build already ties every one of these to the shared --moo-*
+  // palette (scss/themes/_scoped_core.scss's moo-core-light/dark mixins);
+  // mirror that here so both entrypoints render the same background, not
+  // two independently-computed gray scales that happen to agree in light
+  // mode and diverge in dark (this is what caused the catalog shell's body
+  // background to sit only ~7 units of contrast from its own Kbd chips
+  // instead of the ~15 they're tuned for).
+  --bs-body-bg: var(--moo-surface);
+  --bs-body-bg-rgb: #{to-rgb($moo-surface)};
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-secondary-bg-rgb: #{to-rgb($moo-muted-surface)};
+  --bs-tertiary-bg: #{$body-tertiary-bg};
+  --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
+  --bs-tertiary-color: #{$body-tertiary-color};
+  --bs-tertiary-color-rgb: #{to-rgb($body-tertiary-color)};
+  --bs-form-invalid-color: var(--moo-destructive);
+  --bs-form-invalid-border-color: #{$moo-form-invalid-border-color};
 }
 
 [data-bs-theme="dark"] {
   --moo-surface: #{$moo-surface-dark};
   --moo-muted-surface: #{$moo-muted-surface-dark};
   --moo-border: #{$moo-border-dark};
+  --moo-primary: #{$moo-primary-dark};
+  --moo-primary-foreground: #{$moo-primary-foreground-dark};
   --moo-foreground: #{$moo-foreground-dark};
   --moo-muted-foreground: #{$moo-muted-foreground-dark};
   --moo-disabled-foreground: #{$moo-disabled-foreground-dark};
   --moo-ring: #{$moo-ring-dark};
   --moo-destructive: #{$moo-destructive-dark};
+  --moo-destructive-surface: #{$moo-destructive-surface-dark};
+  --moo-destructive-surface-hover: #{$moo-destructive-surface-hover-dark};
   --moo-destructive-foreground: #{$moo-destructive-foreground-dark};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};
+  --moo-warning: #{$moo-warning-dark};
+  --moo-warning-surface: #{$moo-warning-surface-dark};
+  --moo-warning-surface-hover: #{$moo-warning-surface-hover-dark};
+  --moo-warning-foreground: #{$moo-warning-foreground-dark};
+  --moo-success: #{$moo-success-dark};
+  --moo-success-surface: #{$moo-success-surface-dark};
+  --moo-success-surface-hover: #{$moo-success-surface-hover-dark};
+  --moo-success-foreground: #{$moo-success-foreground-dark};
+  --moo-info: #{$moo-info-dark};
+  --moo-info-surface: #{$moo-info-surface-dark};
+  --moo-info-surface-hover: #{$moo-info-surface-hover-dark};
+  --moo-info-foreground: #{$moo-info-foreground-dark};
   --moo-sidebar: #{$moo-sidebar-dark};
   --bs-body-color: var(--moo-foreground);
   --bs-body-color-rgb: #{to-rgb($moo-foreground-dark)};
   --bs-heading-color: var(--moo-foreground);
   --bs-secondary-color: var(--moo-muted-foreground);
+  // See the light block's matching comment above.
+  --bs-body-bg: var(--moo-surface);
+  --bs-body-bg-rgb: #{to-rgb($moo-surface-dark)};
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-secondary-bg-rgb: #{to-rgb($moo-muted-surface-dark)};
+  --bs-tertiary-bg: #{$body-tertiary-bg-dark};
+  --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg-dark)};
+  --bs-tertiary-color: #{$body-tertiary-color-dark};
+  --bs-tertiary-color-rgb: #{to-rgb($body-tertiary-color-dark)};
+  --bs-form-invalid-color: var(--moo-destructive);
+  --bs-form-invalid-border-color: #{$moo-form-invalid-border-color-dark};
 }

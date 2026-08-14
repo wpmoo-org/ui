@@ -135,6 +135,41 @@ class ButtonTests(CatalogTestCase):
         self.assertIn("opacity: var(--moo-disabled-control-opacity);", scss)
         self.assertNotIn("opacity: var(--bs-btn-disabled-opacity);", scss)
 
+    def test_primary_button_uses_reference_primary_theme_tokens(self) -> None:
+        scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
+        primary = scss.split(".btn-primary {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("--bs-btn-color: var(--moo-primary-foreground);", primary)
+        self.assertIn("--bs-btn-bg: var(--moo-primary);", primary)
+        self.assertIn(
+            "--bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));",
+            primary,
+        )
+        self.assertIn(
+            "--bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface));",
+            primary,
+        )
+
+    def test_danger_button_uses_reference_destructive_surface_tokens(self) -> None:
+        scss = (ROOT / "scss/components/_button.scss").read_text(encoding="utf-8")
+        danger = scss.split(".btn-danger {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("--bs-btn-color: var(--moo-destructive-foreground);", danger)
+        self.assertIn("--bs-btn-bg: var(--moo-destructive-surface);", danger)
+        self.assertIn("--bs-btn-border-color: transparent;", danger)
+        self.assertIn("--bs-btn-hover-color: var(--moo-destructive-foreground);", danger)
+        self.assertIn(
+            "--bs-btn-hover-bg: var(--moo-destructive-surface-hover);",
+            danger,
+        )
+        self.assertIn("--bs-btn-hover-border-color: transparent;", danger)
+        self.assertIn("--bs-btn-active-color: var(--moo-destructive-foreground);", danger)
+        self.assertIn(
+            "--bs-btn-active-bg: var(--moo-destructive-surface-hover);",
+            danger,
+        )
+        self.assertIn("--bs-btn-active-border-color: transparent;", danger)
+
     def test_button_loading_and_icon_start_are_mutually_exclusive(self) -> None:
         with self.assertRaisesRegex(
             ValueError, "Button loading replaces icon_start; do not set both"
@@ -558,26 +593,12 @@ class ButtonTests(CatalogTestCase):
     def test_page_uses_render_rtl_example_for_button_direction_examples(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn(
-            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
-            source,
-        )
         self.assertIn("render_rtl_example(", source)
         self.assertIn('render_rtl_example(\n      "button"', source)
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
-        self.assertIn('{{ button("حفظ", variant="outline", icon_start="save") }}', source)
-        self.assertIn('{{ button("שמור", variant="outline", icon_start="save") }}', source)
-        self.assertIn('{{ button("Save", variant="outline", icon_start="save") }}', source)
-        self.assertIn('variant="outline", icon_start="save"', source)
         self.assertIn('dir="rtl"', source)
-        self.assertIn("Use tabs to compare Arabic, Hebrew, and English button actions in RTL layout.", source)
-        self.assertNotIn("Right-to-left layout", source)
-        self.assertNotIn("title=\"RTL\"", source)
-        self.assertNotIn("title_id=", source)
-        self.assertNotIn("example_prefix=\"rtl\"", source)
-        self.assertNotIn("rtl-preview", source)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

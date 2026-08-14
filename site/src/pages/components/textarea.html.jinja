@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import field, field_group, field_description, field_error %}
 {% from "components/textarea.html.jinja" import textarea %}
@@ -15,6 +15,29 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call field() %}
+        {{ textarea(
+          label="Message",
+          id="textarea-intro-message",
+          rows=3,
+          placeholder="Describe the request in one short paragraph.",
+          describedby="textarea-intro-message-help"
+        ) }}
+        {{ field_description("textarea-intro-message-help", "Give reviewers enough context to act without opening another view.") }}
+      {% endcall %}
+    {% endset %}
+    {% set textarea_usage %}
+      <p>Use <code>.form-control</code> on <code>&lt;textarea&gt;</code> for multiline values such as notes, messages, summaries, and review context. Pair it with a visible label, choose a starting <code>rows</code> count that matches the expected amount of writing, and keep placeholder text as an example rather than a replacement for the label.</p>
+      <p>Place helper or error text directly below the textarea and connect it with <code>aria-describedby</code>. Use validation state on the native control, and keep constraints such as required, disabled, readonly, maxlength, or minimum guidance close to the field.</p>
+      <p>Keep Textarea for short to medium plain text. If users need rich formatting, attachments, comments, or long-form editing, move them to a larger editor surface rather than stretching a form textarea into a document editor.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      textarea_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {% call field_group() %}
       {% call field() %}
@@ -152,7 +175,7 @@
       </div>
     {% endset %}
     {% set rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {% call field_group() %}
         {% call field() %}
         {{ textarea(

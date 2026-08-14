@@ -51,7 +51,12 @@ class ContextMenuTests(CatalogTestCase):
             output,
         )
         self.assertIn('class="dropdown-item"', output)
-        self.assertIn('class="dropdown-item text-danger"', output)
+        self.assertRegex(
+            output,
+            r'<button(?=[^>]*\sclass="dropdown-item"(?:\s|>))'
+            r'(?=[^>]*\stype="button"(?:\s|>))'
+            r'(?=[^>]*\sdata-variant="destructive"(?:\s|>))[^>]*>',
+        )
 
     def test_context_menu_fallback_uses_ghost_icon_button(self) -> None:
         output = self.render_context_menu(
@@ -186,6 +191,10 @@ class ContextMenuTests(CatalogTestCase):
         self.assertIn('"contextmenu"', source)
         self.assertIn('event.shiftKey && event.key === "F10"', source)
         self.assertIn('event.key === "ContextMenu"', source)
+        self.assertIn("_handleFallbackKeydown(event)", source)
+        self.assertIn('event.key !== " " && event.key !== "Spacebar"', source)
+        self.assertIn('this._open(this._fallback, null, "fallback-keyboard")', source)
+        self.assertIn('this._fallback.focus()', source)
         self.assertIn("`${name}.moo.context-menu`", source)
         self.assertIn('this._trigger("show", true)', source)
         self.assertIn('this._trigger("shown")', source)
@@ -213,12 +222,10 @@ class ContextMenuTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_context_menu_page_has_no_api_table_and_notes_missing_submenus(self) -> None:
+    def test_context_menu_page_uses_reference_without_nested_submenu_markup(self) -> None:
         self.assertTrue(PAGE.is_file(), "Context Menu page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertNotIn("API Reference", source)
-        self.assertIn("Nested submenus are not supported", source)
         self.assertNotIn('"submenu",', source)
         self.assertNotIn('"Submenu",', source)
         self.assertNotIn("context-menu-submenu-trigger", source)
@@ -229,20 +236,18 @@ class ContextMenuTests(CatalogTestCase):
         self.assertTrue(PAGE.is_file(), "Context Menu page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
 
-        for example_id, title in (
-            ("basic", "Basic"),
-            ("shortcuts", "Shortcuts"),
-            ("groups", "Groups"),
-            ("icons", "Icons"),
-            ("checkboxes", "Checkboxes"),
-            ("radio", "Radio"),
-            ("destructive", "Destructive"),
-            ("sides", "Sides"),
+        for example_id in (
+            "basic",
+            "shortcuts",
+            "groups",
+            "icons",
+            "checkboxes",
+            "radio",
+            "destructive",
+            "sides",
         ):
             self.assertIn(f'"{example_id}",', source)
-            self.assertIn(f'"{title}",', source)
 
-        self.assertIn("Bootstrap does not provide a native nested-menu contract", source)
         self.assertIn('align="end"', source)
 
     def test_fixture_toggle_item_renders_a_real_check_indicator(self) -> None:

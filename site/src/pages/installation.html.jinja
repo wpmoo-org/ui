@@ -1,6 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/alert.html.jinja" import alert %}
-{% from "components/button.html.jinja" import button %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
@@ -23,7 +22,7 @@
         "CSS-first, not JavaScript-free",
         "Bootstrap owns its native plugins. Moo UI adds optional, explicitly initialized ESM only for Combobox and Sidebar.",
         icon="info",
-        extra_class="text-bg-dark border-dark moo-doc-callout"
+        extra_class="moo-doc-callout"
       ) }}
 
       <section class="moo-doc-section" aria-labelledby="choose-path">
@@ -36,7 +35,7 @@
               <tr><td>Gradual migration in an existing Bootstrap app</td><td>Bootstrap CSS, then <code>moo.css</code>, with a <code>.moo-ui</code> boundary.</td></tr>
               <tr><td>Static page without interactive plugins</td><td>CSS only.</td></tr>
               <tr><td>Bootstrap Dropdown, Modal, Offcanvas, Tooltip, Popover, or Toast</td><td>Keep Bootstrap's JavaScript bundle and documented initialization.</td></tr>
-              <tr><td>Combobox or Sidebar</td><td>Add only the corresponding optional Moo ESM module.</td></tr>
+              <tr><td>Combobox or Sidebar</td><td>Add only the corresponding optional Moo UI ESM module.</td></tr>
             </tbody>
           </table>
         </div>
@@ -70,7 +69,7 @@
         {{ typography("Scoped Gradual Adoption", variant="section-title", id="scoped-build") }}
         <p>
           In an existing Bootstrap app, keep Bootstrap CSS first, load the
-          scoped Moo component layer second, and wrap only migrated regions in
+          scoped Moo UI component layer second, and wrap only migrated regions in
           <code>.moo-ui</code>.
         </p>
         {% set scoped_cdn_example %}
@@ -110,7 +109,7 @@
       </section>
 
       <section class="moo-doc-section" aria-labelledby="optional-esm">
-        {{ typography("Optional Moo ESM", variant="section-title", id="optional-esm") }}
+        {{ typography("Optional Moo UI ESM", variant="section-title", id="optional-esm") }}
         <p>
           Combobox, Context Menu, DataTable, and Sidebar cover behavior gaps
           Bootstrap does not provide. Their modules are side-effect-free:
@@ -186,15 +185,14 @@
         {{ typography("Troubleshooting", variant="section-title", id="troubleshooting") }}
         <dl>
           <dt>Styles look duplicated or inconsistent</dt>
-          <dd>Use either the full <code>moo-ui.css</code> build or Bootstrap CSS followed by scoped <code>moo.css</code>; do not combine both Moo stylesheets.</dd>
+          <dd>Use either the full <code>moo-ui.css</code> build or Bootstrap CSS followed by scoped <code>moo.css</code>; do not combine both Moo UI stylesheets.</dd>
           <dt>Scoped styles do not appear</dt>
           <dd>Confirm <code>moo.css</code> loads after Bootstrap CSS and the migrated markup has a <code>.moo-ui</code> ancestor.</dd>
           <dt>A Bootstrap control does not open</dt>
           <dd>Load Bootstrap's bundle and follow that plugin's documented initialization requirements.</dd>
-          <dt>A Moo ESM module does not respond</dt>
-          <dd>Import the matching Moo ESM module (Combobox, Context Menu, DataTable, or Sidebar) and initialize the rendered root explicitly; imports never auto-scan.</dd>
+          <dt>A Moo UI ESM module does not respond</dt>
+          <dd>Import the matching Moo UI ESM module (Combobox, Context Menu, DataTable, or Sidebar) and initialize the rendered root explicitly; imports never auto-scan.</dd>
         </dl>
-        {{ button("Browse Components", variant="outline", size="sm", element="a", href=site_href("components/index.html", root_path)) }}
       </section>
 
       {{ render_section_page_pagination(current_slug, site_pages, root_path) }}
@@ -205,7 +203,7 @@
       {"id": "full-build", "label": "Full Build"},
       {"id": "scoped-build", "label": "Scoped Adoption"},
       {"id": "bootstrap-javascript", "label": "Bootstrap JavaScript"},
-      {"id": "optional-esm", "label": "Optional Moo ESM"},
+      {"id": "optional-esm", "label": "Optional Moo UI ESM"},
       {"id": "troubleshooting", "label": "Troubleshooting"}
     ]) }}
   </div>

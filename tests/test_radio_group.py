@@ -75,6 +75,46 @@ class RadioGroupTests(CatalogTestCase):
         )
         self.assertIn('class="radio-group mb-3"', output)
 
+    def test_radio_group_bare_omits_fieldset_and_legend(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("plan", "", [{"id": "plan-a", "label": "A"}], bare=true)'
+        )
+
+        self.assertNotIn("<fieldset", output)
+        self.assertNotIn("<legend", output)
+        self.assertIn('class="form-check"', output)
+        self.assertIn('type="radio"', output)
+        self.assertIn('name="plan"', output)
+        self.assertIn('id="plan-a"', output)
+        self.assertIn('for="plan-a">A</label>', output)
+
+    def test_radio_group_reverse_adds_form_check_reverse_per_item(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("plan", "Plan", '
+            '[{"id": "plan-a", "label": "A"}, {"id": "plan-b", "label": "B"}], reverse=true)'
+        )
+        self.assertEqual(output.count('class="form-check form-check-reverse"'), 2)
+
+    def test_radio_group_rtl_example_uses_described_options_in_each_direction(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        rtl_block = source[
+            source.index("{% set radio_rtl_arabic %}"):
+            source.index(
+                "{{ render_rtl_example(",
+                source.index("{% set radio_rtl_arabic %}"),
+            )
+        ]
+
+        self.assertIn('<div dir="rtl">', rtl_block)
+        self.assertIn('<div dir="ltr">', rtl_block)
+        self.assertEqual(rtl_block.count("radio_group("), 3)
+        self.assertEqual(rtl_block.count("bare=true"), 3)
+        self.assertEqual(rtl_block.count("reverse=true"), 2)
+        self.assertEqual(rtl_block.count('"description":'), 6)
+        self.assertIn("radio-rtl-channel-arabic", rtl_block)
+        self.assertIn("radio-rtl-channel-hebrew", rtl_block)
+        self.assertIn("radio-rtl-channel-english", rtl_block)
+
     def test_radio_group_requires_name(self) -> None:
         with self.assertRaisesRegex(ValueError, "Radio Group name is required"):
             self.render_radio_group(

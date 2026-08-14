@@ -66,19 +66,32 @@ label.btn {
   padding-inline-end: $icon-link-gap;
 }
 
+// Icon-only buttons become squares whose side equals the token-driven
+// button height (line-height + 2*padding-y + 2*border), so they always match
+// the height of sibling text buttons. --bs-btn-line-height is a length in
+// Moo, making this calc valid. No hard-coded dimensions.
+.btn-icon {
+  // Icon-only buttons become squares whose side equals the token-driven
+  // button height (line-height + 2*padding-y + 2*border), so they always
+  // match the height of sibling text buttons. The default button exposes no
+  // --bs-btn-line-height / --bs-btn-padding-y custom properties (Bootstrap
+  // compiles those from Sass), so only the default size declares them here;
+  // xs/sm/lg already set their own values in their own blocks above and
+  // must not be overridden back to the default by this shared rule.
+  --bs-btn-line-height: #{$btn-line-height};
+  --bs-btn-padding-y: #{$btn-padding-y};
+}
+
 .btn-icon,
 .btn-icon-xs,
 .btn-icon-sm,
 .btn-icon-lg {
-  padding: 0;
-  inline-size: calc(
-    var(--bs-btn-line-height) +
-    var(--bs-btn-padding-y) +
-    var(--bs-btn-padding-y) +
-    var(--bs-btn-border-width) +
-    var(--bs-btn-border-width)
-  );
-  aspect-ratio: 1;
+  // The side is computed once into --moo-btn-icon-size and consumed on both
+  // axes (and by .btn-group-vertical) so the two cannot diverge.
+  --moo-btn-icon-size: #{$moo-btn-icon-size};
+  padding-inline: 0;
+  inline-size: var(--moo-btn-icon-size);
+  block-size: var(--moo-btn-icon-size);
 }
 
 :is(.btn-icon, .btn-icon-xs, .btn-icon-sm, .btn-icon-lg)::after {
@@ -127,7 +140,7 @@ label.btn {
 // _bootstrap_overrides.scss; 0.5px keeps the press visible without shifting
 // adjacent inline controls.
 .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
-  transform: translateY(0.5px);
+  transform: translateY($moo-control-active-translate-y);
 }
 
 // Bootstrap consumes these properties; owned variants supply only exceptions.
@@ -151,20 +164,23 @@ label.btn {
 }
 
 .btn-primary {
-  --bs-btn-color: var(--moo-surface);
-  --bs-btn-bg: var(--moo-foreground);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-foreground) 88%, var(--moo-surface));
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-foreground) 80%, var(--moo-surface));
+  --bs-btn-color: var(--moo-primary-foreground);
+  --bs-btn-bg: var(--moo-primary);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-primary) 80%, var(--moo-surface));
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-primary) 72%, var(--moo-surface));
 }
 
 .btn-secondary {
   --bs-btn-color: var(--moo-foreground);
-  --bs-btn-bg: var(--moo-muted-surface);
+  // The reference's secondary button is the surface color (white in light)
+  // with a hairline border (bg-background + border-border), not a tinted
+  // fill; the shared muted surface stays the hover/active step.
+  --bs-btn-bg: var(--moo-surface);
   --bs-btn-border-color: var(--moo-border);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 86%, var(--moo-foreground));
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 80%, var(--moo-foreground));
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-muted-surface) 78%, var(--moo-foreground));
-  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-border) 72%, var(--moo-foreground));
+  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-muted-surface) 95%, var(--moo-foreground));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 90%, var(--moo-foreground));
+  --bs-btn-active-bg: color-mix(in srgb, var(--moo-muted-surface) 88%, var(--moo-foreground));
+  --bs-btn-active-border-color: color-mix(in srgb, var(--moo-border) 82%, var(--moo-foreground));
 }
 
 .btn-outline-secondary {
@@ -195,9 +211,14 @@ label.btn {
 
 .btn-danger {
   --bs-btn-color: var(--moo-destructive-foreground);
-  --bs-btn-bg: var(--moo-destructive);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--moo-destructive) 88%, var(--moo-foreground));
-  --bs-btn-active-bg: color-mix(in srgb, var(--moo-destructive) 80%, var(--moo-foreground));
+  --bs-btn-bg: var(--moo-destructive-surface);
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--moo-destructive-foreground);
+  --bs-btn-hover-bg: var(--moo-destructive-surface-hover);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: var(--moo-destructive-foreground);
+  --bs-btn-active-bg: var(--moo-destructive-surface-hover);
+  --bs-btn-active-border-color: transparent;
 }
 
 .btn-link {

@@ -33,9 +33,21 @@ class AlertTests(CatalogTestCase):
     def test_alert_destructive_variant_maps_to_bootstrap_danger(self) -> None:
         self.assertIn('class="alert alert-danger"', self.render_alert('alert("Payment failed", variant="destructive")'))
 
+    def test_alert_semantic_variants_map_to_bootstrap_contexts(self) -> None:
+        for variant, expected_class in (
+            ("warning", "alert-warning"),
+            ("success", "alert-success"),
+            ("info", "alert-info"),
+        ):
+            with self.subTest(variant=variant):
+                self.assertIn(
+                    f'class="alert {expected_class}"',
+                    self.render_alert(f'alert("Heads up!", variant="{variant}")'),
+                )
+
     def test_alert_rejects_unknown_variant(self) -> None:
-        with self.assertRaisesRegex(ValueError, "Unknown alert variant: warning"):
-            self.render_alert('alert("Heads up!", variant="warning")')
+        with self.assertRaisesRegex(ValueError, "Unknown alert variant: urgent"):
+            self.render_alert('alert("Heads up!", variant="urgent")')
 
     def test_alert_requires_visible_title(self) -> None:
         with self.assertRaisesRegex(ValueError, "Alert title is required"):
@@ -59,14 +71,15 @@ class AlertTests(CatalogTestCase):
         output = self.render_alert('alert("Heads up!", action="<button>Go</button>")')
         self.assertIn('<div class="alert-action"><button>Go</button></div>', output)
 
-    def test_rtl_tabbed_examples_do_not_mix_fit_and_medium_preview_widths(self) -> None:
+    def test_rtl_tabbed_examples_use_medium_preview_width(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
         self.assertIn('"alert"', source)
-        self.assertIn('preview_class="moo-example__preview--fit"', source)
+        # RTL examples use --medium to match other examples
+        self.assertIn('preview_class="moo-example__preview--medium"', source)
         self.assertNotIn(
-            'preview_class="moo-example__preview--medium moo-example__preview--fit"',
+            'preview_class="moo-example__preview--fit"',
             source,
         )
 
