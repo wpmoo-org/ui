@@ -24,12 +24,6 @@
   background: var(--moo-sidebar-accent);
 }
 
-// Applied to the footer user avatar via the avatar macro's extra_class so the
-// override stays inside the sidebar's owned selector namespace.
-.sidebar-avatar {
-  border-radius: var(--bs-border-radius);
-}
-
 .sidebar-footer .sidebar-account-menu {
   width: auto;
   min-width: var(--moo-dropdown-sidebar-min-width);

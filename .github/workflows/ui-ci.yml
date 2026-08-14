@@ -21,7 +21,11 @@ jobs:
   ui-tests:
     name: ui-tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # The full suite alone now runs ~6-9 minutes locally; on a cold ubuntu-latest
+    # runner with setup steps included, the old 10-minute budget was getting cut
+    # off mid-suite (observed: cancelled at 10:14 elapsed, mid "Run contract and
+    # certification tests"), not from a real failure.
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository

@@ -59,7 +59,9 @@ class DevRunnerTests(unittest.TestCase):
         handler = dev.create_handler()
 
         self.assertIsInstance(handler, partial)
-        self.assertIs(handler.func, SimpleHTTPRequestHandler)
+        # The dev server wraps SimpleHTTPRequestHandler in a no-store
+        # subclass so rebuilds are never masked by heuristic caching.
+        self.assertTrue(issubclass(handler.func, SimpleHTTPRequestHandler))
         self.assertEqual(handler.keywords, {"directory": str(SITE_DIST)})
 
 

@@ -64,11 +64,13 @@
   height: 0.9375rem;
   min-width: 0.9375rem;
   padding-inline: 0.2rem;
+  border: 0;
   border-radius: var(--bs-border-radius-pill);
-  // The ring that cuts the badge out from whatever sits behind it -- the
-  // avatar circle, or a neighboring avatar in a group -- is a real border
-  // (box-shadow is reserved for the shared elevation scale in this project).
-  border: $avatar-badge-ring-width solid var(--bs-body-bg);
+  // Mirrors the reference's ring-2 treatment: the badge keeps its own
+  // 10px/12px/15px box while the page-background ring paints outside it.
+  // box-shadow (not border) keeps the ring out of the layout box, matching
+  // the .avatar-group ring below and Tailwind's own ring-* technique.
+  box-shadow: $avatar-badge-ring-shadow;
   background-color: var(--moo-muted-surface);
   color: var(--moo-foreground);
   font-size: 0.625rem;
@@ -98,8 +100,8 @@
 }
 
 .avatar-badge--icon [data-icon] {
-  width: 0.375rem;
-  height: 0.375rem;
+  width: $avatar-badge-icon-glyph-size;
+  height: $avatar-badge-icon-glyph-size;
 }
 
 .avatar-sm {
@@ -119,7 +121,12 @@
   align-items: center;
 }
 
+// Matches the reference's ring-2 ring-background: each avatar in a group
+// carries a page-background ring (light = white, dark = black) so stacked
+// avatars stay visibly separated. --bs-body-bg is theme-aware in both the
+// standalone and scoped builds, mirroring the badge ring treatment.
 .avatar-group > .avatar {
+  box-shadow: $avatar-group-ring-shadow;
   z-index: 0;
 }
 

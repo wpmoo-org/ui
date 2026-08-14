@@ -29,6 +29,7 @@
   // light / 14.03:1 dark against this track's own background.
   color: var(--bs-secondary-text-emphasis);
   border-radius: var(--bs-border-radius);
+  cursor: default;
   @include transition($transition-base);
 }
 
@@ -36,10 +37,64 @@
   color: var(--moo-foreground);
 }
 
+.tabs-list .nav-link:not(.active, .disabled):hover {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tabs-list .nav-link:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
 .tabs-list .nav-link.active {
   color: var(--moo-foreground);
   background-color: var(--moo-surface);
   box-shadow: var(--bs-box-shadow-sm);
+}
+
+.tabs-list .nav-link.active:focus-visible {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.tabs-list:has(.nav-link:hover) .nav-link.active:not(:hover) {
+  background-color: var(--moo-surface);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.tabs--vertical {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacer;
+  width: 100%;
+  max-width: 100%;
+}
+
+.tabs--vertical .tabs-list {
+  flex: 0 0 auto;
+}
+
+.tabs--vertical .nav-link {
+  justify-content: flex-start;
+  text-align: start;
+}
+
+.tabs--vertical .tab-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-top: 0;
+}
+
+@include media-breakpoint-down(sm) {
+  .tabs--vertical {
+    flex-direction: column;
+  }
+
+  .tabs--vertical .tabs-list {
+    flex-direction: row !important;
+  }
 }
 
 .tabs-list .nav-link:disabled,
@@ -69,17 +124,15 @@
   max-width: 100%;
   min-width: 0;
   opacity: 0;
-  transform: translateY(0.25rem);
   visibility: hidden;
   pointer-events: none;
-  // Slightly longer than Bootstrap's .15s fade so tab panel motion finishes
-  // after the content handoff without making the tab trigger feel delayed.
-  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
+  // Slightly longer than Bootstrap's .15s fade so the content handoff feels
+  // intentional without adding any positional movement.
+  transition: opacity 0.16s ease, visibility 0s linear 0.16s;
 }
 
 .tab-content > .active {
   opacity: 1;
-  transform: none;
   visibility: visible;
   pointer-events: auto;
   transition-delay: 0s;

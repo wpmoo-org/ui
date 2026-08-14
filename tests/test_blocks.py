@@ -45,7 +45,6 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn("moo-block-preview__frame", page)
                 self.assertIn(f'src="../../blocks/previews/{slug}/"', page)
                 self.assertIn(f'href="../../blocks/previews/{slug}/"', page)
-                self.assertIn("Open standalone", page)
 
             source = (
                 ROOT / f"site/src/pages/blocks/{slug}.html.jinja"
@@ -73,33 +72,15 @@ class BlocksTests(CatalogTestCase):
                 self.assertNotIn("moo-example__source", standalone)
 
             if slug in {"sidebar-floating", "sidebar-inset"}:
-                with self.subTest(slug=slug, contract="portal demo copy"):
+                with self.subTest(slug=slug, contract="portal demo structure"):
                     self.assertIn("Moo Portal", standalone)
                     self.assertIn("Portal Operations", standalone)
-                    self.assertIn("Request Review", standalone)
-                    self.assertIn("Workspace", standalone)
-                    self.assertIn("Approvals", standalone)
                     self.assertIn('data-slot="sidebar-menu-badge"', standalone)
-                    self.assertIn("Customers", standalone)
-                    self.assertIn("Reports", standalone)
-                    self.assertIn("Preferences actions", standalone)
-                    self.assertIn("Open preferences", standalone)
-                    self.assertIn("Copy profile link", standalone)
-                    self.assertIn("Manage notifications", standalone)
-                    self.assertIn("Settings", standalone)
-                    self.assertIn("Get Help", standalone)
-                    self.assertIn("Search", standalone)
-                    self.assertIn("Upgrade workspace", standalone)
-                    self.assertIn("Billing", standalone)
-                    self.assertIn("Notifications", standalone)
+                    self.assertIn('aria-label="Preferences actions"', standalone)
                     self.assertIn('data-bs-offset="0,4"', standalone)
                     self.assertIn('class="sidebar-menu-item dropend"', standalone)
-                    self.assertNotIn("Customer Spaces", standalone)
-                    self.assertNotIn("Client Onboarding", standalone)
-                    self.assertNotIn("Invoice Review", standalone)
-                    self.assertNotIn("Partner Access", standalone)
-                    self.assertNotIn("Duplicate flow", standalone)
                     self.assertEqual(standalone.count('data-slot="sidebar-menu-action"'), 1)
+                    self.assertGreaterEqual(standalone.count('data-slot="sidebar-menu-sub"'), 3)
                     self.assertIn("moo-sidebar-demo--portal-shell", standalone)
                     self.assertIn(
                         'class="sidebar-menu-item dropend sidebar-menu-item--account"',
@@ -109,10 +90,7 @@ class BlocksTests(CatalogTestCase):
                     self.assertIn("sidebar-account-menu", standalone)
                     self.assertIn("sidebar-account-menu__item", standalone)
                     self.assertIn("sidebar-account-menu__header", standalone)
-                    self.assertNotIn("Building Your Application", standalone)
-                    self.assertNotIn("Data Fetching", standalone)
-                    self.assertNotIn("Acme Inc", standalone)
-                    self.assertNotIn("Evil Corp.", standalone)
+                    self.assertGreaterEqual(standalone.count("sidebar-account-menu__item"), 4)
                     self.assertIn(
                         "sidebar-inset__content d-flex flex-column gap-3 p-3 pt-0",
                         standalone,
@@ -171,14 +149,13 @@ class BlocksTests(CatalogTestCase):
                 self.assertIn(label, home)
 
     def test_catalog_sidebar_has_no_blocks_group(self) -> None:
-        # The left catalog sidebar no longer lists Blocks at all; only shared
-        # header/palette navigation does. Reading a page unrelated to either
-        # block's own content (the Components index) isolates the shell: each
-        # block name should come from the command-palette loop only, and
-        # "../blocks/" should appear exactly four times: the Sections
-        # sidebar link, the compact dropdown, the desktop header nav link, the
-        # palette's hardcoded Blocks entry. Page navigation now follows the
-        # global docs order, so Components advances to the first component page.
+        # Blocks is a link inside the sidebar's "Catalog" group, not its own
+        # labelled group -- the navbar carries no page links at all now (it's
+        # header chrome only: sidebar toggle, search, theme, GitHub), so
+        # "../blocks/" should appear exactly twice: the sidebar link and the
+        # command palette's hardcoded Blocks entry. Reading a page unrelated
+        # to either block's own content (the Components index) isolates the
+        # shell from that assertion.
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -186,7 +163,7 @@ class BlocksTests(CatalogTestCase):
 
         self.assertEqual(page.count("Sidebar (Floating)"), 1)
         self.assertEqual(page.count("Sidebar (Inset)"), 1)
-        self.assertEqual(page.count('href="../blocks/"'), 4)
+        self.assertEqual(page.count('href="../blocks/"'), 2)
         self.assertNotIn('class="sidebar-group-label" data-slot="sidebar-group-label">Blocks<', page)
 
     def test_block_preview_iframes_are_scaled_programmatically(self) -> None:

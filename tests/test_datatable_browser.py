@@ -11,6 +11,7 @@ from tests.helpers.browser_harness import (
     new_case_context,
     prepare_page,
     serve_repository,
+    skip_if_browser_launch_is_sandboxed,
 )
 
 
@@ -74,6 +75,7 @@ def _capture_datatable_state(page, table_id: str) -> dict:
 class DataTableBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
         cls.playwright_manager = sync_playwright()
@@ -282,16 +284,19 @@ class DataTableBrowserTests(unittest.TestCase):
                 ".datatable-card:visible .table-row-actions > button"
             ).first
             action.click()
-            menu = root.locator(".datatable-card .dropdown-menu.show")
+            menu = page.locator("body > .dropdown-menu.show")
+            expect(menu).to_have_count(1)
             expect(menu).to_be_visible()
 
             result = page.evaluate(
                 """
                 () => {
-                  const menu = document.querySelector(
-                    "#standalone-datatable-release-reviews .datatable-card .dropdown-menu.show"
+                  const menu = document.querySelector("body > .dropdown-menu.show");
+                  const trigger = document.querySelector(
+                    "#standalone-datatable-release-reviews .datatable-card "
+                      + ".table-row-actions > [aria-expanded='true']"
                   );
-                  const card = menu?.closest(".datatable-card");
+                  const card = trigger?.closest(".datatable-card");
                   const rect = (element) => {
                     const box = element.getBoundingClientRect();
                     return {
@@ -314,7 +319,7 @@ class DataTableBrowserTests(unittest.TestCase):
                     return hit && item.contains(hit);
                   });
                   return {
-                    cardOverflow: getComputedStyle(card).overflow,
+                    menuParentIsBody: menu?.parentElement === document.body,
                     menuExtendsPastCard: rect(menu).bottom > rect(card).bottom,
                     allItemsHit,
                   };
@@ -322,9 +327,17 @@ class DataTableBrowserTests(unittest.TestCase):
                 """
             )
 
-            self.assertEqual(result["cardOverflow"], "visible")
+            self.assertTrue(result["menuParentIsBody"])
             self.assertTrue(result["menuExtendsPastCard"])
             self.assertTrue(result["allItemsHit"])
+            action.press("Escape")
+            expect(action).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            self.assertTrue(
+                action.evaluate(
+                    "element => element.parentElement.querySelector(':scope > .dropdown-menu') !== null"
+                )
+            )
             evidence.assert_clean()
         finally:
             context.close()
@@ -593,12 +606,19 @@ class DataTableBrowserTests(unittest.TestCase):
             )
 
             trigger = first_card.locator(".table-row-actions > button")
+            menu = page.locator("body > .dropdown-menu.show")
             trigger.click()
             expect(trigger).to_have_attribute("aria-expanded", "true")
-            expect(first_card.locator(".table-row-actions .dropdown-menu")).to_be_visible()
-            expect(first_card.locator(".table-row-actions .dropdown-menu")).to_contain_text(
-                "Open ticket"
-            )
+            expect(menu).to_have_count(1)
+            expect(menu).to_be_visible()
+            expect(menu).to_contain_text("Open ticket")
+            self.assertTrue(menu.evaluate("element => element.parentElement === document.body"))
+
+            trigger.press("Escape")
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(first_card.locator(".table-row-actions .dropdown-menu")).to_have_count(1)
+            expect(trigger).to_be_focused()
             evidence.assert_clean()
         finally:
             context.close()
@@ -647,24 +667,32 @@ class DataTableBrowserTests(unittest.TestCase):
             root = page.locator("#certification-datatable")
             first_row = root.locator("#cert-row-1")
             trigger = first_row.locator(".table-row-actions > button")
-            menu = first_row.locator(".table-row-actions .dropdown-menu")
+            menu = page.locator("body > .dropdown-menu.show")
 
             expect(trigger).to_have_attribute("aria-expanded", "false")
             trigger.click()
             expect(trigger).to_have_attribute("aria-expanded", "true")
+            expect(menu).to_have_count(1)
             expect(menu).to_be_visible()
             expect(menu).to_contain_text("Open ticket")
             expect(menu).to_contain_text("Assign owner")
             expect(menu).to_contain_text("Copy link")
+            self.assertTrue(menu.evaluate("element => element.parentElement === document.body"))
             self.assertEqual(
                 root.locator(".datatable-frame").evaluate(
                     "element => getComputedStyle(element).overflowY"
                 ),
-                "visible",
+                "hidden",
+            )
+            self.assertEqual(
+                menu.evaluate("element => getComputedStyle(element).position"),
+                "fixed",
             )
 
             trigger.press("Escape")
             expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(first_row.locator(".table-row-actions .dropdown-menu")).to_have_count(1)
             expect(trigger).to_be_focused()
             evidence.assert_clean()
         finally:
@@ -713,6 +741,30 @@ class DataTableBrowserTests(unittest.TestCase):
             prev_button = root.locator("[data-datatable-page-prev]")
             next_button = root.locator("[data-datatable-page-next]")
             last_button = root.locator("[data-datatable-page-last]")
+            page_nav = root.locator(".datatable-page-nav")
+
+            def read_page_nav_metrics() -> dict:
+                return page_nav.evaluate(
+                    """
+                    element => {
+                      const links = Array.from(element.querySelectorAll(".page-link"));
+                      return {
+                        overflowX: getComputedStyle(element).overflowX,
+                        overflowY: getComputedStyle(element).overflowY,
+                        clientHeight: element.clientHeight,
+                        scrollHeight: element.scrollHeight,
+                        linkBoxes: links.map(link => {
+                          const rect = link.getBoundingClientRect();
+                          return {
+                            text: link.textContent.trim(),
+                            width: rect.width,
+                            height: rect.height,
+                          };
+                        }),
+                      };
+                    }
+                    """
+                )
 
             expect(rows).to_have_count(2)
             expect(rows.nth(0)).to_contain_text("TCK-1")
@@ -722,6 +774,13 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(prev_button).to_be_disabled()
             expect(next_button).to_be_enabled()
             expect(last_button).to_be_enabled()
+            metrics = read_page_nav_metrics()
+            self.assertIn(metrics["overflowX"], {"auto", "scroll"})
+            self.assertEqual(metrics["overflowY"], "hidden")
+            self.assertLessEqual(metrics["scrollHeight"], metrics["clientHeight"] + 1)
+            for box in metrics["linkBoxes"]:
+                self.assertAlmostEqual(box["width"], 32, delta=1)
+                self.assertAlmostEqual(box["height"], 32, delta=1)
 
             next_button.click()
             expect(rows).to_have_count(1)
@@ -730,6 +789,9 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(next_button).to_be_disabled()
             expect(last_button).to_be_disabled()
             expect(prev_button).to_be_enabled()
+            metrics = read_page_nav_metrics()
+            self.assertEqual(metrics["overflowY"], "hidden")
+            self.assertLessEqual(metrics["scrollHeight"], metrics["clientHeight"] + 1)
 
             first_button.click()
             expect(rows).to_have_count(2)

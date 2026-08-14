@@ -1,0 +1,7 @@
+.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"]) {
+  overflow: visible;
+}
+
+.table-row-actions:has(> [aria-expanded="true"]) {
+  z-index: $zindex-dropdown;
+}

@@ -1,21 +1,21 @@
-{% macro radio_group(name, legend, items, extra_class="", required=false, invalid=false, feedback="") -%}
+{% macro radio_group(name, legend, items, extra_class="", required=false, invalid=false, feedback="", reverse=false, bare=false) -%}
   {% if not name | trim %}{{ fail("Radio Group name is required") }}{% endif %}
-  {% if not legend | trim %}{{ fail("Radio Group legend is required") }}{% endif %}
+  {% if not bare and not legend | trim %}{{ fail("Radio Group legend is required") }}{% endif %}
   {% if not items %}{{ fail("Radio Group requires at least one item") }}{% endif %}
   {% set has_feedback = invalid and feedback | trim %}
   {% set feedback_id = name ~ "-feedback" %}
-  <fieldset class="radio-group{% if extra_class %} {{ extra_class }}{% endif %}"{% if has_feedback %} aria-describedby="{{ feedback_id }}"{% endif %}>
-    <legend class="form-label">{{ legend }}</legend>
+  {% if not bare %}<fieldset class="radio-group{% if extra_class %} {{ extra_class }}{% endif %}"{% if has_feedback %} aria-describedby="{{ feedback_id }}"{% endif %}>
+    <legend class="form-label">{{ legend }}</legend>{% endif %}
     {% for item in items %}
       {% if not item.id | default("", true) | trim %}{{ fail("Radio Group item id is required") }}{% endif %}
       {% if not item.label | default("", true) | trim %}{{ fail("Radio Group item label is required") }}{% endif %}
       {% set has_description = item.description is defined and item.description %}
-      <div class="form-check">
+      <div class="form-check{% if reverse %} form-check-reverse{% endif %}">
         <input class="form-check-input{% if invalid %} is-invalid{% endif %}" type="radio" name="{{ name }}" id="{{ item.id }}"{% if item.value is defined %} value="{{ item.value }}"{% endif %}{% if item.checked is defined and item.checked %} checked{% endif %}{% if item.disabled is defined and item.disabled %} disabled{% endif %}{% if required %} required{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if has_description or has_feedback %} aria-describedby="{% if has_description %}{{ item.id }}-description{% endif %}{% if has_description and has_feedback %} {% endif %}{% if has_feedback %}{{ feedback_id }}{% endif %}"{% endif %}>
         <label class="form-check-label" for="{{ item.id }}">{{ item.label }}</label>
         {% if has_description %}<div class="form-text" id="{{ item.id }}-description">{{ item.description }}</div>{% endif %}
       </div>
     {% endfor %}
     {% if has_feedback %}<div class="invalid-feedback d-block" id="{{ feedback_id }}">{{ feedback }}</div>{% endif %}
-  </fieldset>
+  {% if not bare %}</fieldset>{% endif %}
 {%- endmacro %}

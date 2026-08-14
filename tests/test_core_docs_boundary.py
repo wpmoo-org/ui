@@ -12,6 +12,8 @@ from pathlib import Path
 import build
 from jinja2 import Environment, meta
 
+from tests.helpers import npm_env
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/boundary-baseline.json"
@@ -161,6 +163,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=npm_env(),
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -339,6 +342,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
         for path in site_pages:
             relative_path = path.relative_to(site_dist)
+            if relative_path.parts[:3] == ("tests", "fixtures", "certification"):
+                continue
             prefix = "../" * len(relative_path.parent.parts)
             page = path.read_text(encoding="utf-8")
 

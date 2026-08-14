@@ -4,7 +4,7 @@
 {% from "components/card.html.jinja" import card %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Context Menu — Moo UI{% endblock %}
@@ -12,10 +12,37 @@
 {% block content %}
   {{ render_page_header(
     "Context Menu",
-    "A right-click menu built on Bootstrap's documented dropdown-menu surface, with Moo owning only the pointer/keyboard invocation Bootstrap does not provide."
+    "A right-click menu built on Bootstrap's documented dropdown-menu surface, with Moo UI owning only the pointer/keyboard invocation Bootstrap does not provide."
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro_items %}
+      {{ dropdown_item("Rename", icon="pencil", shortcut="⌘R") }}
+      {{ dropdown_item("Duplicate", icon="copy") }}
+      {{ dropdown_divider() }}
+      {{ dropdown_item("Delete", icon="trash-2", destructive=true) }}
+    {% endset %}
+    {% set intro %}
+      {% call context_menu(
+        "context-menu-intro",
+        "File actions",
+        intro_items,
+        trigger_class="d-flex align-items-center justify-content-center w-100 h-100 rounded-3 border p-5",
+        attrs='style="--bs-border-style: dashed; width: min(100%, 22rem); height: 12rem;"'
+      ) %}
+        <span>Right click here</span>
+      {% endcall %}
+    {% endset %}
+    {% set context_menu_usage %}
+      <p>Use <code>.context-menu</code> for secondary actions that belong to a specific surface, file, row, or card. Attach the trigger area to the object that owns the actions, render the popup as a flat Bootstrap <code>.dropdown-menu</code>, and keep item labels action-oriented so the menu can be scanned quickly.</p>
+      <p>Support pointer and keyboard access together: right-click should open the menu for mouse users, <code>Shift+F10</code> should open it for keyboard users, and a visible fallback trigger should remain available for touch and assistive technology users. Do not make context menu access the only path to required work.</p>
+      <p>Use <code>.dropdown-item</code> rows, headers, and dividers for the menu content, and keep destructive actions after a separator. Because Bootstrap dropdowns support generic menu content, add any more specific ARIA semantics only when the menu is truly acting like an application menu.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      context_menu_usage
+    ) }}
+
     {% set basic_items %}
       {{ dropdown_item("Rename", icon="pencil", shortcut="⌘R") }}
       {{ dropdown_item("Duplicate", icon="copy") }}
@@ -162,7 +189,7 @@
     {{ render_example(
       "radio",
       "Radio",
-      "Single-select options reuse the checkbox item's dropdown-item button so keyboard roving focus and Bootstrap's button-toggle Data API keep working; Moo adds only the mutual-exclusivity between grouped options.",
+      "Single-select options reuse the checkbox item's dropdown-item button so keyboard roving focus and Bootstrap's button-toggle Data API keep working; Moo UI adds only the mutual-exclusivity between grouped options.",
       radio
     ) }}
 

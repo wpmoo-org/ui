@@ -4,7 +4,7 @@
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Menubar — Moo UI{% endblock %}
@@ -17,6 +17,29 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call menubar("Document actions") %}
+        {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("New document", shortcut="⌘N") }}
+          {{ dropdown_item("Open recent") }}
+        {% endcall %}
+        {% call dropdown("Edit", variant="ghost", offset=menubar_dropdown_offset) %}
+          {{ dropdown_item("Undo", shortcut="⌘Z") }}
+          {{ dropdown_item("Redo", shortcut="⇧⌘Z") }}
+        {% endcall %}
+      {% endcall %}
+    {% endset %}
+    {% set menubar_usage %}
+      <p>Use <code>.menubar</code> as a compact row of related Bootstrap dropdown triggers, such as document, editor, or workspace command groups. Keep top-level labels short, group related commands under each trigger, and keep each popup menu built from the same Dropdown Menu item, header, and divider structure used elsewhere.</p>
+      <p>Label the row as one toolbar-like surface, but do not claim desktop application menubar behavior unless the full keyboard model is implemented. Bootstrap dropdowns already support click opening, item movement, and Escape dismissal; Moo UI should add only the composition and visual frame around those dropdowns.</p>
+      <p>Use <code>.menubar</code> when the commands are siblings at the same level. If one trigger contains the main action and another only contains overflow, use Button Group or Dropdown Menu instead; if the items are route links, use Navigation so current-page state and link semantics stay clear.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      menubar_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {% call menubar("Document actions") %}
         {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
@@ -177,7 +200,7 @@
     {% endset %}
 
     {% set menubar_rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
+      <div class="d-inline-flex" dir="ltr">
         {% call menubar("Document actions") %}
           {% call dropdown("File", variant="ghost", offset=menubar_dropdown_offset) %}
             {{ dropdown_item("New document", shortcut="⌘N") }}
@@ -193,7 +216,7 @@
 
     {{ render_rtl_example(
       "menubar",
-      "Switch between Arabic, Hebrew, and English labels to validate spacing and trigger alignment in RTL mode.",
+      "Switch between Arabic and Hebrew RTL labels, with English as the LTR comparison for spacing and trigger alignment.",
       menubar_rtl_arabic,
       menubar_rtl_hebrew,
       menubar_rtl_english,

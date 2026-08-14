@@ -1,20 +1,33 @@
+{% set card_sizes = ["default", "sm"] %}
+
 {% macro card(
   title="",
   subtitle="",
+  action="",
+  image="",
   footer="",
+  size="default",
   dir="",
   extra_class="",
   header_class="",
   body_class="",
   footer_class=""
 ) -%}
+  {% if size not in card_sizes %}{{ fail("Unknown card size: " ~ size) }}{% endif %}
   {% set classes = "card" %}
+  {% if size == "sm" %}{% set classes = classes ~ " card--sm" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <div class="{{ classes }}"{% if dir %} dir="{{ dir }}"{% endif %}>
-    {% if title or subtitle %}
+    {% if image %}<div class="card-image"><img class="card-img-top" src="{{ image.src }}" alt="{{ image.alt }}"></div>{% endif %}
+    {% if title or subtitle or action %}
       <div class="card-header{% if header_class %} {{ header_class }}{% endif %}">
-        {% if title %}<h3 class="card-title">{{ title }}</h3>{% endif %}
-        {% if subtitle %}<p class="card-subtitle">{{ subtitle }}</p>{% endif %}
+        {% if title or subtitle %}
+          <div class="card-header__text">
+            {% if title %}<h3 class="card-title">{{ title }}</h3>{% endif %}
+            {% if subtitle %}<p class="card-subtitle">{{ subtitle }}</p>{% endif %}
+          </div>
+        {% endif %}
+        {% if action %}<div class="card-action">{{ action }}</div>{% endif %}
       </div>
     {% endif %}
     <div class="card-body{% if body_class %} {{ body_class }}{% endif %}">

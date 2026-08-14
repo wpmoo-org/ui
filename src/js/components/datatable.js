@@ -47,6 +47,8 @@ export default class DataTable {
     this._searchTerm = "";
     this._tooltips = [];
     this._filterMode = element.dataset.datatableFilterMode || "inline";
+    this._reparentedRowMenus = new Map();
+    this._reparentedRowMenuByTrigger = new WeakMap();
 
     this._rows = Array.from(this._tbody.querySelectorAll(":scope > tr[data-datatable-row]")).map((tr, index) => ({
       element: tr,
@@ -63,9 +65,12 @@ export default class DataTable {
     this._render();
     this._initBulkTooltips();
     this._initViewToggle();
+    this._initRowActionDropdowns();
   }
 
   dispose() {
+    this._disposeRowActionDropdowns();
+    this._restoreRowActionMenus();
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
@@ -85,6 +90,141 @@ export default class DataTable {
     }
     target.addEventListener(type, handler, options);
     this._listeners.push({ target, type, handler, options });
+  }
+
+  // Row menus are authored next to their trigger so the public HTML stays
+  // inspectable, but when opened they are temporarily moved under body.
+  // That keeps the menu out of the scroll wrapper's layout math, so Safari
+  // cannot clip it at the rounded frame edge or shift the visible table
+  // slice while Popper positions it against the viewport.
+  // Table and card views both wrap row actions in .table-row-actions, but
+  // .table-responsive only contains the table view; card triggers must be
+  // selected separately so both views get the same fixed Popper config.
+  _rowActionTriggers() {
+    return this._element.querySelectorAll(
+      ".table-responsive .table-row-actions [data-bs-toggle=\"dropdown\"], [data-datatable-card] .table-row-actions [data-bs-toggle=\"dropdown\"]"
+    );
+  }
+
+  _initRowActionDropdowns() {
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!Dropdown) {
+      return;
+    }
+    this._rowActionTriggers().forEach((trigger) => {
+      Dropdown.getOrCreateInstance(trigger, {
+        popperConfig: (defaultConfig) => ({
+          ...defaultConfig,
+          strategy: "fixed",
+          modifiers: [
+            ...(defaultConfig.modifiers || []),
+            {
+              name: "flip",
+              options: {
+                fallbackPlacements: ["top-end", "top-start", "bottom-end", "bottom-start"],
+              },
+            },
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "viewport",
+                padding: 8,
+              },
+            },
+          ],
+        }),
+      });
+    });
+  }
+
+  // dispose() alone leaves any open row-action Dropdown's show/aria-expanded/
+  // data-bs-popper state and Bootstrap instance behind; hide and dispose each
+  // one first so a subsequent re-init starts from a clean state.
+  _disposeRowActionDropdowns() {
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!Dropdown) {
+      return;
+    }
+    this._rowActionTriggers().forEach((trigger) => {
+      const instance = Dropdown.getInstance(trigger);
+      if (!instance) {
+        return;
+      }
+      instance.hide();
+      instance.dispose();
+    });
+  }
+
+  _rowActionMenuForTrigger(trigger) {
+    if (!trigger?.closest?.(".table-row-actions")) {
+      return null;
+    }
+    return trigger.closest(".dropdown")?.querySelector(":scope > .dropdown-menu") || null;
+  }
+
+  _rowActionOwnerIdForTrigger(trigger) {
+    const rowId = trigger?.closest?.("tr[data-datatable-row]")?.id;
+    if (rowId) {
+      return rowId;
+    }
+    return trigger?.closest?.("[data-datatable-card]")?.getAttribute("data-datatable-card-for") || "";
+  }
+
+  _reparentRowActionMenu(trigger) {
+    const menu = this._rowActionMenuForTrigger(trigger);
+    if (!menu || this._reparentedRowMenus.has(menu)) {
+      return;
+    }
+    const ownerId = this._rowActionOwnerIdForTrigger(trigger);
+    if (ownerId) {
+      menu.setAttribute("data-datatable-row-action-owner", ownerId);
+    }
+    if (trigger.id) {
+      menu.setAttribute("data-datatable-row-action-trigger", trigger.id);
+    }
+    this._reparentedRowMenus.set(menu, {
+      parent: menu.parentNode,
+      nextSibling: menu.nextSibling,
+      trigger,
+    });
+    this._reparentedRowMenuByTrigger.set(trigger, menu);
+    this._document.body.appendChild(menu);
+  }
+
+  _restoreRowActionMenuForTrigger(trigger) {
+    const menu = this._reparentedRowMenuByTrigger.get(trigger) || this._rowActionMenuForTrigger(trigger);
+    if (menu) {
+      this._restoreRowActionMenu(menu);
+    }
+  }
+
+  _restoreRowActionMenu(menu) {
+    const original = this._reparentedRowMenus.get(menu);
+    if (!original) {
+      return;
+    }
+    const { parent, nextSibling, trigger } = original;
+    if (parent?.isConnected) {
+      if (nextSibling?.parentNode === parent) {
+        parent.insertBefore(menu, nextSibling);
+      } else {
+        parent.appendChild(menu);
+      }
+    } else {
+      menu.remove();
+    }
+    if (trigger) {
+      this._reparentedRowMenuByTrigger.delete(trigger);
+    }
+    menu.removeAttribute("data-datatable-row-action-owner");
+    menu.removeAttribute("data-datatable-row-action-trigger");
+    this._reparentedRowMenus.delete(menu);
+  }
+
+  _restoreRowActionMenus() {
+    Array.from(this._reparentedRowMenus.keys()).forEach((menu) => {
+      this._restoreRowActionMenu(menu);
+    });
   }
 
   _bootstrap(name) {
@@ -504,35 +644,62 @@ export default class DataTable {
     if (!template) {
       return;
     }
-    template.parentNode
-      .querySelectorAll("[data-datatable-page-number], [data-datatable-page-ellipsis]")
-      .forEach((node) => node.remove());
 
     const pages = this._pageWindow(this._currentPage, pageCount);
-    const fragment = this._document.createDocumentFragment();
-    pages.forEach((page) => {
-      const li = this._document.createElement("li");
-      li.className = "page-item";
-      if (page === "…") {
-        li.dataset.datatablePageEllipsis = "";
-        li.innerHTML = '<span class="page-link">…</span>';
-      } else {
-        li.dataset.datatablePageNumber = String(page);
-        if (page === this._currentPage) {
-          li.classList.add("active");
-          li.setAttribute("aria-current", "page");
+    const existing = Array.from(
+      template.parentNode.querySelectorAll(
+        "[data-datatable-page-number], [data-datatable-page-ellipsis]"
+      )
+    );
+    const existingWindow = existing.map((node) =>
+      node.dataset.datatablePageEllipsis === undefined
+        ? Number(node.dataset.datatablePageNumber)
+        : "…"
+    );
+    // Same node-reuse rationale as the row-reorder skip above: rebuilding
+    // every page-number button on each click destroys and recreates the one
+    // the user just clicked, which blurs it (losing the focus ring and any
+    // keyboard position). The page window is unchanged on most clicks (any
+    // dataset small enough to show every page, or a prev/next inside an
+    // already-visible window), so only rebuild when the window itself
+    // differs; otherwise just resync which node is active below.
+    const windowChanged =
+      existingWindow.length !== pages.length ||
+      existingWindow.some((page, index) => page !== pages[index]);
+
+    if (windowChanged) {
+      existing.forEach((node) => node.remove());
+      const fragment = this._document.createDocumentFragment();
+      pages.forEach((page) => {
+        const li = this._document.createElement("li");
+        li.className = "page-item";
+        if (page === "…") {
+          li.dataset.datatablePageEllipsis = "";
+          li.innerHTML = '<span class="page-link">…</span>';
+        } else {
+          li.dataset.datatablePageNumber = String(page);
+          const button = this._document.createElement("button");
+          button.type = "button";
+          button.className = "page-link";
+          button.textContent = String(page);
+          button.setAttribute("aria-label", `Go to page ${page}`);
+          button.dataset.datatablePageGo = String(page);
+          li.appendChild(button);
         }
-        const button = this._document.createElement("button");
-        button.type = "button";
-        button.className = "page-link";
-        button.textContent = String(page);
-        button.setAttribute("aria-label", `Go to page ${page}`);
-        button.dataset.datatablePageGo = String(page);
-        li.appendChild(button);
+        fragment.appendChild(li);
+      });
+      template.parentNode.insertBefore(fragment, template);
+    }
+
+    template.parentNode.querySelectorAll("[data-datatable-page-number]").forEach((li) => {
+      const isActive = Number(li.dataset.datatablePageNumber) === this._currentPage;
+      li.classList.toggle("active", isActive);
+      if (isActive) {
+        li.setAttribute("aria-current", "page");
+      } else {
+        li.removeAttribute("aria-current");
       }
-      fragment.appendChild(li);
     });
-    template.parentNode.insertBefore(fragment, template);
   }
 
   _renderPageSize() {
@@ -1040,11 +1207,13 @@ export default class DataTable {
     // no-op for as long as the dropdown stays open, however it gets
     // re-triggered.
     this._listen(this._element, "show.bs.dropdown", (event) => {
+      this._reparentRowActionMenu(event.target);
       const tooltip = this._bootstrap("Tooltip")?.getInstance(event.target);
       tooltip?.hide();
       tooltip?.disable();
     });
     this._listen(this._element, "hidden.bs.dropdown", (event) => {
+      this._restoreRowActionMenuForTrigger(event.target);
       this._bootstrap("Tooltip")?.getInstance(event.target)?.enable();
       if (event.target.matches("[data-datatable-filter-menu-trigger]")) {
         this._showFilterPickerPanel();

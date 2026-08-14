@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/progress.html.jinja" import progress %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Progress — Moo UI{% endblock %}
@@ -13,6 +13,22 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="w-100">
+        {{ progress(64, aria_label="Upload progress", show_label=true) }}
+      </div>
+    {% endset %}
+    {% set progress_usage %}
+      <p>Use <code>.progress</code> and <code>.progress-bar</code> when completion can be measured as a value between a minimum and maximum. Render the bar with an accessible label, set the current value and maximum, and show nearby text when users need the task name, percentage, or status outside the visual track.</p>
+      <p>Keep the progress bar itself simple: Bootstrap drives the fill from width, supports labels when the bar is tall enough, and can stack multiple bars when the same track represents related segments. Moo UI uses a slim track, so readable labels belong beside or above the bar rather than inside it.</p>
+      <p>Use contextual color only when it communicates real state, and never rely on color alone. If the amount of work cannot be measured, use Spinner or a loading state instead of showing a fake percentage.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      progress_usage,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       <div class="w-100">
         {{ progress(66, aria_label="Upload progress") }}
@@ -65,7 +81,7 @@
       </div>
     {% endset %}
     {% set english_progress %}
-      <div dir="rtl" class="w-100">
+      <div dir="ltr" class="w-100">
         {{ progress(40, aria_label="Download progress", show_label=true) }}
       </div>
     {% endset %}

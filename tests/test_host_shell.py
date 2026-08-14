@@ -19,6 +19,7 @@ import urllib.request
 from pathlib import Path
 
 from tests.helpers import ROOT
+from tests.helpers.browser_harness import skip_if_browser_launch_is_sandboxed
 from tests.helpers.host_process import non_venv_interpreter, read_banner_line
 
 SERVE = ROOT / "conformance" / "host-shell" / "serve.py"
@@ -100,6 +101,7 @@ class HostShellTests(unittest.TestCase):
                 self.assertEqual(response.status, 200, fixture["path"])
 
     def test_runner_passes_against_the_host_shell(self) -> None:
+        skip_if_browser_launch_is_sandboxed()
         with tempfile.TemporaryDirectory() as scratch:
             report_path = Path(scratch) / "host-shell-report.json"
             completed = subprocess.run(

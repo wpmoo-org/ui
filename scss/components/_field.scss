@@ -14,15 +14,38 @@
     font-weight: $font-weight-medium;
   }
 
-  // Bootstrap only colors its own .invalid-feedback text red; the label
-  // stays the default body color even on an invalid control. The design
-  // reference tints the whole field (label included) on invalid state, so
-  // this reuses the existing .is-invalid class the input already carries
-  // (vendor/bootstrap/scss/forms/_validation.scss) rather than introducing
-  // a new invalid-state class or attribute.
-  &:has(> .is-invalid) > .form-label {
+  // Bootstrap owns the control and .invalid-feedback state. Field mirrors
+  // the reference's wrapper-level invalid state with data-invalid, so labels
+  // inherit the destructive color only when the field itself opts into that state.
+  &[data-invalid="true"] {
     color: var(--bs-form-invalid-color);
   }
+}
+
+.field--switch {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $moo-field-switch-gap;
+
+  > :first-child {
+    min-width: 0;
+  }
+
+  > label {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .form-label {
+    margin-bottom: $moo-field-gap * 0.5;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.field--disabled {
+  opacity: $moo-disabled-control-opacity;
+  pointer-events: none;
 }
 
 // field_description()/field_error() keep Bootstrap's own .form-text /

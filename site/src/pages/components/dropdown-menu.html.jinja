@@ -3,7 +3,7 @@
 {% from "components/checkbox.html.jinja" import checkbox %}
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Dropdown Menu — Moo UI{% endblock %}
@@ -15,6 +15,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call dropdown("Dropdown Menu", offset="0,6") %}
+        {{ dropdown_item("Edit", icon="pencil") }}
+        {{ dropdown_item("Duplicate", icon="copy") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Delete", icon="trash-2", destructive=true) }}
+      {% endcall %}
+    {% endset %}
+    {% set dropdown_menu_usage %}
+      <p>Use <code>.dropdown-menu</code> for contextual actions, filters, or compact choices that should open from a visible trigger. Wrap the trigger and menu in a Bootstrap <code>.dropdown</code> container, prefer a <code>button</code> trigger for in-page actions, and use <code>data-bs-toggle="dropdown"</code> so Bootstrap owns opening, placement, and keyboard behavior.</p>
+      <p>Render actions as <code>.dropdown-item</code> rows, split groups with <code>.dropdown-header</code> or <code>.dropdown-divider</code>, and place destructive actions after a separator. Keep labels concise, mark disabled items clearly, and use shortcut text only when the same command is actually available from the keyboard.</p>
+      <p>Dropdowns open on click rather than hover by design and use Popper for dynamic positioning outside navbars. Choose alignment, direction, and <code>data-bs-auto-close</code> based on the surrounding workflow, especially when the menu contains checkboxes, radios, or other form controls.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      dropdown_menu_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set grouped %}
       {% call dropdown("Project actions", align="start", offset="0,6") %}
         {{ dropdown_header("Project") }}
@@ -152,7 +171,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
+      <div class="d-inline-flex" dir="ltr">
         {% call dropdown("Actions", offset="0,6") %}
           {{ dropdown_item("Open workspace", icon="folder-open", shortcut="⌘O") }}
           {{ dropdown_divider() }}
@@ -164,7 +183,7 @@
 
     {{ render_rtl_example(
       "dropdown-menu",
-      "Compare Arabic, Hebrew, and English menu flows with the same trigger, icons, shortcuts, divider, and destructive action in RTL layout.",
+      "Compare Arabic and Hebrew RTL menu flows with English as the LTR comparison, using the same trigger, icons, shortcuts, divider, and destructive action.",
       rtl_arabic,
       rtl_hebrew,
       rtl_english,

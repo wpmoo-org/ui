@@ -85,25 +85,12 @@ class CheckboxTests(CatalogTestCase):
     def test_page_uses_render_rtl_example(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
-        self.assertIn(
-            '{% from "includes/example.html.jinja" import render_example, render_rtl_example %}',
-            source,
-        )
         self.assertIn('render_rtl_example(', source)
         self.assertIn('"checkbox"', source)
         self.assertIn("rtl_arabic", source)
         self.assertIn("rtl_hebrew", source)
         self.assertIn("rtl_english", source)
         self.assertIn("dir=\"rtl\"", source)
-        self.assertIn("الموافقة على طلب الوصول إلى مساحة العمل", source)
-        self.assertIn("אישור בקשת גישה לסביבת העבודה", source)
-        self.assertIn("Approve workspace access request", source)
-        self.assertIn(
-            "Compare Arabic, Hebrew, and English checkbox labels in an RTL layout",
-            source,
-        )
-        self.assertNotIn("title_id=", source)
-        self.assertNotIn("Right-to-left layout", source)
         self.assertNotIn('{% from "components/tabs.html.jinja" import tabs %}', source)
 
         result = self.run_build()

@@ -22,6 +22,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,8 +37,31 @@ class RehearsalError(RuntimeError):
     pass
 
 
+def npm_env() -> dict[str, str]:
+    env = os.environ.copy()
+    cache = env.get("npm_config_cache")
+    if not cache or not npm_cache_is_writable(Path(cache)):
+        env["npm_config_cache"] = os.path.join(
+            tempfile.gettempdir(),
+            "wpmoo-npm-cache",
+        )
+    return env
+
+
+def npm_cache_is_writable(cache: Path) -> bool:
+    try:
+        probe_dir = cache / "_cacache" / "tmp"
+        probe_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=probe_dir):
+            pass
+    except OSError:
+        return False
+    return True
+
+
 def run(cmd: list, **kwargs) -> subprocess.CompletedProcess:
     kwargs.setdefault("timeout", DEFAULT_TIMEOUT_SECONDS)
+    kwargs.setdefault("env", npm_env())
     result = subprocess.run(
         cmd, cwd=ROOT, check=False, capture_output=True, text=True, **kwargs
     )

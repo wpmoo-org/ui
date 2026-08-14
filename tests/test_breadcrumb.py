@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 
@@ -61,12 +63,26 @@ class BreadcrumbTests(CatalogTestCase):
             styles,
         )
 
+    def test_breadcrumb_dropdown_trigger_keeps_visible_focus(self) -> None:
+        styles = (ROOT / "scss/components/_breadcrumb.scss").read_text(encoding="utf-8")
+        rule = re.search(
+            r"\.breadcrumb \.breadcrumb-dropdown-trigger:focus-visible\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+
+        self.assertIsNotNone(rule)
+        assert rule is not None
+        body = rule.group("body")
+        self.assertNotIn("box-shadow: none;", body)
+        self.assertIn("box-shadow: 0 0 0 #{$moo-form-focus-ring-width}", styles)
+        self.assertIn("#{$moo-form-focus-ring-color}", styles)
+
     def test_breadcrumb_supports_custom_divider(self) -> None:
         output = self.render_breadcrumb(
             'breadcrumb([{"label": "Home"}, {"label": "Library"}], divider="•")'
         )
         self.assertIn(
-            'class="breadcrumb" style="--bs-breadcrumb-divider: \'•\';"',
+            'class="breadcrumb breadcrumb--custom-divider" style="--bs-breadcrumb-divider: \'•\';"',
             output,
         )
 
@@ -83,10 +99,11 @@ class BreadcrumbTests(CatalogTestCase):
             styles,
         )
         self.assertIn(":dir(rtl) .breadcrumb-item + .breadcrumb-item {", styles)
-        self.assertIn("padding-right: var(--bs-breadcrumb-item-padding-x);", styles)
+        self.assertIn("column-gap: var(--bs-breadcrumb-item-padding-x);", styles)
         self.assertIn(":dir(rtl) .breadcrumb-item + .breadcrumb-item::before {", styles)
-        self.assertIn("float: right;", styles)
-        self.assertIn("padding-left: var(--bs-breadcrumb-item-padding-x);", styles)
+        self.assertIn("padding-right: 0;", styles)
+        self.assertIn("padding-left: 0;", styles)
+        self.assertIn("transform: scaleX(-1);", styles)
 
     def test_breadcrumb_ellipsis_item_renders_a_static_marker(self) -> None:
         output = self.render_breadcrumb(
@@ -98,7 +115,7 @@ class BreadcrumbTests(CatalogTestCase):
         self.assertNotIn("<button", output)
         self.assertNotIn("<a ", output.split("visually-hidden")[1])
 
-    def test_breadcrumb_dropdown_item_renders_via_ready_dropdown_macros(self) -> None:
+    def test_breadcrumb_dropdown_item_uses_inline_trigger_with_ready_menu(self) -> None:
         output = self.render_breadcrumb(
             'breadcrumb(['
             '{"label": "Home", "href": "#"}, '
@@ -109,7 +126,11 @@ class BreadcrumbTests(CatalogTestCase):
             '{"label": "Library"}'
             '])'
         )
-        self.assertIn('<span class="breadcrumb-dropdown-item">', output)
+        self.assertIn('<div class="breadcrumb-dropdown-item">', output)
+        self.assertNotIn('<span class="breadcrumb-dropdown-item">', output)
+        self.assertIn('<button class="breadcrumb-dropdown-trigger"', output)
+        self.assertIn('data-bs-toggle="dropdown"', output)
+        self.assertIn('data-icon="inline-end"', output)
         self.assertIn('class="dropdown-item" href="/projects"', output)
         self.assertIn('class="dropdown-item" href="/reports"', output)
 
@@ -123,13 +144,11 @@ class BreadcrumbTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn("render_rtl_example", source)
-        self.assertNotIn('title="RTL"', source)
-        self.assertNotIn('"Right-to-left layout"', source)
         self.assertIn("arabic_breadcrumb", source)
         self.assertIn("hebrew_breadcrumb", source)
         self.assertIn("english_breadcrumb", source)
-        self.assertGreaterEqual(source.count('dir="rtl"'), 3)
-        self.assertIn("Support queue", source)
+        self.assertGreaterEqual(source.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', source)
 
         result = self.run_build()
 
@@ -139,9 +158,6 @@ class BreadcrumbTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
 
     def test_breadcrumb_requires_items(self) -> None:
         with self.assertRaisesRegex(ValueError, "Breadcrumb items are required"):

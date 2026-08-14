@@ -46,6 +46,23 @@
   flex: 0 0 auto;
 }
 
+// Destructive dropdown items use the shared --moo-destructive token so the
+// red stays in sync with every other destructive control. Matches the
+// reference pattern: red text at rest, destructive-tinted bg on hover.
+.dropdown-item[data-variant="destructive"] {
+  color: var(--moo-destructive) !important;
+}
+
+.dropdown-item[data-variant="destructive"]:hover,
+.dropdown-item[data-variant="destructive"]:focus {
+  color: var(--moo-destructive) !important;
+  background-color: var(--moo-destructive-surface) !important;
+}
+
+.dropdown-item[data-variant="destructive"] > [data-icon] {
+  color: var(--moo-destructive) !important;
+}
+
 .dropdown-menu .dropdown-divider {
   margin-inline: calc(-1 * var(--bs-dropdown-padding-x));
   border-block-start: var(--bs-border-width) solid var(--bs-dropdown-divider-bg);
@@ -103,7 +120,7 @@
 // boxed square, since a box implies each item has its own independent on/off
 // state, which is wrong when only one item in the group can ever be active
 // (e.g. Data Table's page-size menu). The icon stays hidden until the item
-// is active, matching how shadcn and native menus mark single-choice items.
+// is active, matching how the reference and native menus mark single-choice items.
 .dropdown-item-check--radio .dropdown-item-check__indicator {
   border-color: transparent;
   background-color: transparent;
@@ -148,6 +165,27 @@
   // var() as a non-numeric argument, so escape it through to plain CSS
   // (same technique already used for clamp() in the catalog stylesheet).
   min-width: #{unquote("max(100%, var(--moo-dropdown-sidebar-min-width))")};
+}
+
+@include media-breakpoint-down(sm) {
+  [data-slot="sidebar-header"] .dropend > .dropdown-menu,
+  [data-slot="sidebar-footer"] .dropend > .dropdown-menu {
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 100%;
+    margin: 0;
+    transform: none !important;
+  }
+
+  [data-slot="sidebar-header"] .dropend > .dropdown-menu {
+    top: calc(100% + #{$spacer * 0.25}) !important;
+    bottom: auto !important;
+  }
+
+  [data-slot="sidebar-footer"] .dropend > .dropdown-menu {
+    top: auto !important;
+    bottom: calc(100% + #{$spacer * 0.25}) !important;
+  }
 }
 
 @include media-breakpoint-up(lg) {

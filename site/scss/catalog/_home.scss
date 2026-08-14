@@ -141,6 +141,40 @@
   }
 }
 
+// Entry row under the hero: Components / Blocks / Examples. Same grid
+// rhythm as the proof list, but each card is a single stretched link.
+.moo-home-entries {
+  display: grid;
+  gap: 1rem;
+  margin-top: $spacer * 1.5;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.moo-home-entry-card {
+  background: var(--bs-body-bg);
+  transition: border-color 0.15s ease-in-out;
+}
+
+.moo-home-entry-card:hover {
+  border-color: var(--bs-secondary-color);
+}
+
+.moo-home-entry-card .card-body {
+  align-content: start;
+}
+
+.moo-home-entry-card a {
+  color: var(--bs-body-color);
+  text-decoration: none;
+}
+
+.moo-home-entry-card a:hover {
+  text-decoration: underline;
+}
+
 .moo-home-proof-card {
   background: var(--bs-body-bg);
 }

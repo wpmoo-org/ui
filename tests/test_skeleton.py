@@ -98,7 +98,8 @@ class SkeletonTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
         self.assertIn("skeleton(", source)
         self.assertNotIn("class=\"placeholder", source)
-        self.assertNotIn("placeholder-glow", source)
+        self.assertNotIn("class=\"placeholder-glow", source)
+        self.assertNotIn("class=\"placeholder-wave", source)
 
     def test_skeleton_page_covers_the_reference_example_shapes(self) -> None:
         source = PAGE.read_text(encoding="utf-8")

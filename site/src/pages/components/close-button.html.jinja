@@ -1,7 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/alert.html.jinja" import alert %}
 {% from "components/close_button.html.jinja" import close_button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Close Button — Moo UI{% endblock %}
@@ -13,6 +14,26 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div style="width: 20rem;">
+        {{ alert(
+          "Close Button",
+          description="Use inside alerts, dialogs, toasts, and other dismissible surfaces.",
+          dismissible=true,
+          extra_class="mb-0"
+        ) }}
+      </div>
+    {% endset %}
+    {% set close_button_usage %}
+      <p>Use <code>.btn-close</code> for dismissing nearby transient content such as alerts, dialogs, toasts, and offcanvas panels. Render the button at the edge of the surface it dismisses, and always provide an accessible name with <code>aria-label</code> because the icon has no visible text.</p>
+      <p>Pair the close button with the matching Bootstrap dismissal behavior for the owning component, such as <code>data-bs-dismiss="alert"</code> or <code>data-bs-dismiss="modal"</code>. Use <code>disabled</code> only when dismissal is temporarily unavailable; Bootstrap suppresses pointer and selection behavior for the disabled state.</p>
+      <p>For dark surfaces, prefer <code>data-bs-theme="dark"</code> on the button or parent instead of deprecated color inversion classes. After dismissal, make sure focus lands somewhere sensible when the closed surface contained the active control.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      close_button_usage
+    ) }}
+
     {% set default %}
       <div class="d-inline-flex">
         {{ close_button() }}
@@ -40,7 +61,7 @@
     ) }}
 
     {% set in_context %}
-      <div class="d-flex align-items-start justify-content-between gap-3 p-3 rounded-3 bg-body-secondary" style="width: 20rem;">
+      <div class="d-flex align-items-start justify-content-between gap-3 p-3 rounded-3 border bg-body" style="width: 20rem;">
         <div>
           <div class="fw-medium">Update available</div>
           <div class="text-body-secondary small">Version 2.1 is ready to install.</div>
@@ -56,7 +77,7 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div class="d-inline-flex align-items-start justify-content-between gap-3 p-3 rounded-3 bg-body-secondary" dir="rtl">
+      <div class="d-inline-flex align-items-start justify-content-between gap-3 p-3 rounded-3 border bg-body" dir="rtl">
         <div>
           <div class="fw-medium">تم تجاهل الحادث</div>
           <div class="text-body-secondary small">تم مسح تنبيه الحادث.</div>
@@ -66,7 +87,7 @@
     {% endset %}
 
     {% set rtl_hebrew %}
-      <div class="d-inline-flex align-items-start justify-content-between gap-3 p-3 rounded-3 bg-body-secondary" dir="rtl">
+      <div class="d-inline-flex align-items-start justify-content-between gap-3 p-3 rounded-3 border bg-body" dir="rtl">
         <div>
           <div class="fw-medium">האירוע נסגר</div>
           <div class="text-body-secondary small">התראת האירוע נוקתה.</div>
@@ -76,7 +97,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex align-items-start justify-content-between gap-3 p-3 rounded-3 bg-body-secondary" dir="rtl">
+      <div class="d-inline-flex align-items-start justify-content-between gap-3 p-3 rounded-3 border bg-body" dir="ltr">
         <div>
           <div class="fw-medium">Incident dismissed</div>
           <div class="text-body-secondary small">The incident alert was cleared.</div>

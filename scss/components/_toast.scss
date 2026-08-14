@@ -7,8 +7,14 @@
 .toast {
   --bs-toast-border-radius: var(--bs-border-radius-lg);
   --bs-toast-border-color: var(--moo-border);
+  --bs-toast-bg: var(--bs-body-bg);
   --bs-toast-box-shadow: var(--bs-box-shadow-lg);
+  --bs-toast-header-bg: var(--bs-body-bg);
   --bs-toast-padding-x: #{$spacer};
+}
+
+.toast-container {
+  z-index: var(--bs-toast-zindex, #{$zindex-toast});
 }
 
 .toast-header strong {

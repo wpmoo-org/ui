@@ -13,7 +13,6 @@
   inset: 0;
   display: grid;
   place-items: center;
-  padding-bottom: 1rem;
   pointer-events: none;
   background: linear-gradient(to top,
       var(--bs-tertiary-bg),
@@ -23,6 +22,11 @@
 
 .moo-code__reveal .btn {
   pointer-events: auto;
+  background: var(--bs-body-bg);
+}
+
+.moo-code__reveal .btn:hover {
+  background: var(--bs-secondary-bg);
 }
 
 [data-expanded="true"] .moo-code__reveal {
@@ -58,6 +62,24 @@
   z-index: 3;
   top: 0.75rem;
   right: 0.75rem;
+  background: var(--bs-body-bg);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.moo-code__copy:hover {
+  background: var(--bs-secondary-bg);
+}
+
+.moo-code__copy [data-moo-copy-icon]:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moo-code__copy [data-icon] {
+  width: $font-size-base;
+  height: $font-size-base;
+  flex: 0 0 auto;
 }
 
 [data-expanded="true"] .moo-code__copy {
@@ -69,8 +91,8 @@
   left: 0;
   z-index: 1;
   display: block;
-  min-width: 3.5rem;
-  padding: 0 0.75rem 0 1.25rem;
+  min-width: 2.75rem;
+  padding: 0 0.75rem 0 1rem;
   flex: 0 0 auto;
   color: var(--bs-tertiary-color);
   text-align: right;
@@ -95,8 +117,10 @@
 // Uses .moo-catalog__content (present on every catalog page) rather than
 // .moo-doc-main (only rendered for component/utility/block pages) so
 // Sections-type pages get the same treatment instead of falling back to
-// Bootstrap's unstyled reboot <code>.
-.moo-catalog__content :where(p, li) code {
+// Bootstrap's unstyled reboot <code>. The selector includes prose cells and
+// description-list bodies because Installation, Support, and Data Table
+// document contracts in those surfaces too.
+.moo-catalog__content :where(p, li, dd, dt, td, th) code {
   padding: $moo-code-padding-y $moo-code-padding-x;
   color: $moo-code-color;
   background: $moo-code-bg;

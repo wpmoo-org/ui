@@ -2,11 +2,14 @@ import Combobox from "../../../../src/js/components/combobox.js";
 import ContextMenu from "../../../../src/js/components/context-menu.js";
 import DataTable from "../../../../src/js/components/datatable.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
+import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
+import { initCardSpacing } from "./card-spacing.js";
 import { initCatalogFilter } from "./catalog-filter.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
+import { initExamplesTasks } from "./examples-tasks.js";
 import { initHomeMotion } from "./home-motion.js";
 import { initTheme } from "./theme.js";
 import { initToc } from "./toc.js";
@@ -22,7 +25,9 @@ export function initCatalog(root = document) {
     initTheme(root),
     initCatalogFilter(root),
     initCommand(root),
+    initExamplesTasks(root),
     initToc(root),
+    initAcceptancePortal(root),
   ];
 
   root.querySelectorAll(".combobox").forEach((element) => {
@@ -50,6 +55,7 @@ export function initCatalog(root = document) {
 
   disposers.push(initHomeMotion(root));
   disposers.push(initBlockFrames(root));
+  disposers.push(initCardSpacing(root));
 
   const dispose = () => {
     [...disposers].reverse().forEach((release) => release?.());

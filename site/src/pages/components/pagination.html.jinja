@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/pagination.html.jinja" import pagination, pagination_ellipsis, pagination_item, pagination_next, pagination_prev %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Pagination — Moo UI{% endblock %}
@@ -13,9 +13,30 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {% call pagination() %}
+        {{ pagination_prev() }}
+        {{ pagination_item("1") }}
+        {{ pagination_item("2", active=true) }}
+        {{ pagination_item("3") }}
+        {{ pagination_ellipsis() }}
+        {{ pagination_next() }}
+      {% endcall %}
+    {% endset %}
+    {% set pagination_usage %}
+      <p>Use <code>.pagination</code> when a long result set is divided into discrete pages. Wrap the list in a labelled navigation region, keep Previous and Next at the edges, and mark the current page with <code>aria-current="page"</code> so assistive technology can identify the active position.</p>
+      <p>Disable boundary controls when they cannot move, and include accessible labels for icon-only Previous, Next, and ellipsis items. Use an ellipsis only where skipped pages are intentional; do not hide nearby pages that help the user understand where they are in the range.</p>
+      <p>Match the density to the surrounding surface with Bootstrap size variants, and keep pagination close to the collection it controls. For tables or filtered lists, update the visible result range and disabled states whenever filtering changes the page count.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      pagination_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set default %}
       {% call pagination() %}
-        {{ pagination_prev(label="Previous page") }}
+        {{ pagination_prev() }}
         {{ pagination_item("1") }}
         {{ pagination_item("2", active=true) }}
         {{ pagination_item("3") }}
@@ -99,7 +120,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div dir="rtl">
+      <div dir="ltr">
         {% call pagination() %}
           {{ pagination_prev(label="Previous") }}
           {{ pagination_item("1") }}
@@ -113,7 +134,7 @@
 
     {{ render_rtl_example(
       "pagination",
-      "Use the same page range, active state, and skipped-pages marker across Arabic, Hebrew, and English in RTL direction.",
+      "Use the same page range, active state, and skipped-pages marker across Arabic and Hebrew RTL examples, with English as the LTR comparison.",
       rtl_arabic,
       rtl_hebrew,
       rtl_english,

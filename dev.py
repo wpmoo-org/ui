@@ -48,8 +48,16 @@ def display_url(host: str, port: int) -> str:
 
 
 def create_handler():
+    class NoCacheRequestHandler(SimpleHTTPRequestHandler):
+        """Dev server only: skip heuristic caching so every reload picks
+        up the latest rebuild instead of a stale HTML shell."""
+
+        def end_headers(self) -> None:
+            self.send_header("Cache-Control", "no-store")
+            super().end_headers()
+
     return partial(
-        SimpleHTTPRequestHandler,
+        NoCacheRequestHandler,
         directory=str(SITE_DIST),
     )
 

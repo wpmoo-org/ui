@@ -1,43 +1,75 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/avatar.html.jinja" import avatar %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Avatar — Moo UI{% endblock %}
 
-{% set avatar_blue = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%233b82f6'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
-{% set avatar_violet = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%238b5cf6'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
-{% set avatar_emerald = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%2310b981'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
-{% set avatar_error = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='48' fill='%23ef4444'/%3E%3Ccircle cx='48' cy='38' r='16' fill='%23fff'/%3E%3Cpath d='M22 82c5-18 18-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E" %}
-
 {% block content %}
+  {% set avatar_cangir = root_path ~ "assets/images/avatars/cangir.webp" %}
+  {% set avatar_marina = root_path ~ "assets/images/avatars/cangir-marina.webp" %}
+  {% set avatar_bull = root_path ~ "assets/images/avatars/bull.webp" %}
+
   {{ render_page_header(
     "Avatar",
     "Represent people, teams, or accounts with a compact image or initials fallback."
   ) }}
 
   <div class="moo-component-examples">
-    {% set composition %}
+    {% set overview %}
       <div class="d-flex align-items-center gap-3">
         {{ avatar(
-          name="Moo Admin",
-          initials="MO",
+          name="Cangir",
+          src=avatar_cangir,
+          alt="Illustrated profile photo of Cangir",
+          fallback="CA",
           badge_dot=true,
           badge_class="bg-success",
           badge_aria_label="Available"
         ) }}
-        <div class="min-w-0">
-          <div class="fw-medium">Moo Admin</div>
-          <div class="text-body-secondary small">admin@example.com</div>
+        {{ avatar(
+          name="Bull mascot",
+          src=avatar_bull,
+          alt="Black and white bull mascot avatar",
+          fallback="BM",
+          badge_icon="plus",
+          badge_class="bg-primary text-white",
+          badge_aria_label="Add mascot"
+        ) }}
+        <div class="avatar-group">
+          {{ avatar(name="Cangir", src=avatar_cangir, alt="Illustrated profile photo of Cangir", fallback="CA") }}
+          {{ avatar(name="Cangir at the marina", src=avatar_marina, alt="Profile photo of Cangir at a marina", fallback="CA") }}
+          {{ avatar(name="Bull mascot", src=avatar_bull, alt="Black and white bull mascot avatar", fallback="BM") }}
+          <span class="avatar avatar-count">3</span>
+        </div>
+      </div>
+    {% endset %}
+    {% set avatar_usage %}
+      <p>Use <code>.avatar</code> to represent a person, team, account, or automated actor in a compact space. Bootstrap does not provide a native avatar component, so Moo UI keeps the shape as a documented extension while relying on ordinary image behavior: real photos render through an <code>img</code> element, stay constrained by the avatar container, and need meaningful <code>alt</code> text when the image identifies the subject.</p>
+      <p>Render the image and initials fallback together so the fallback is ready when media fails or no image exists. Keep initials short, use an accessible name for fallback-only avatars, and avoid putting job titles or long status text inside the avatar itself; place that supporting copy next to the avatar where it can wrap normally.</p>
+      <p>Attach small status badges to the avatar edge only when they add immediate meaning, and give dot or icon badges an accessible label. For avatar groups, keep the visible stack short, preserve each avatar's name, and add a count chip when the group hides additional people.</p>
+    {% endset %}
+    {{ render_component_intro(
+      overview,
+      avatar_usage
+    ) }}
+
+    {% set basic %}
+      <div class="d-flex align-items-center gap-3">
+        {{ avatar(name="Cangir at the marina", src=avatar_marina, alt="Profile photo of Cangir at a marina", fallback="CA") }}
+        <div>
+          <div class="fw-medium">Cangir</div>
+          <div class="text-body-secondary small">Core maintainer</div>
         </div>
       </div>
     {% endset %}
     {{ render_example(
-      "composition",
-      "Composition",
-      "Use a fallback avatar with a small presence mark for account rows, profile menus, and compact workspace headers.",
-      composition
+      "basic",
+      "Basic",
+      "Image avatars keep people recognizable while initials stay ready for missing media.",
+      basic
     ) }}
 
     {% set fallback %}
@@ -56,36 +88,20 @@
       fallback
     ) }}
 
-    {% set basic %}
-      <div class="d-flex align-items-center gap-3">
-        {{ avatar(name="Ticket review", src=avatar_violet, alt="Workspace mascot avatar", fallback="TR") }}
-        <div>
-          <div class="fw-medium">Ava Ward</div>
-          <div class="text-body-secondary small">Billing queue owner</div>
-        </div>
-      </div>
-    {% endset %}
-    {{ render_example(
-      "basic",
-      "Basic",
-      "Image avatars keep people recognizable while initials stay ready for missing media.",
-      basic
-    ) }}
-
     {% set badge %}
       <div class="d-flex align-items-center gap-3">
         {{ avatar(
-          name="Ops analyst",
-          src=avatar_emerald,
-          alt="Ops analyst portrait",
-          fallback="OA",
+          name="CNGR",
+          src=avatar_cangir,
+          alt="Illustrated profile photo of CNGR",
+          fallback="CA",
           badge_dot=true,
           badge_class="bg-success",
-          badge_aria_label="Available for incident response"
+          badge_aria_label="Available"
         ) }}
         <div>
-          <div class="fw-medium">Rafi Tarek</div>
-          <div class="text-body-secondary small">Incident response</div>
+          <div class="fw-medium">CNGR</div>
+          <div class="text-body-secondary small">Available for review</div>
         </div>
       </div>
     {% endset %}
@@ -98,13 +114,13 @@
 
     {% set badge_with_icon %}
       {{ avatar(
-        name="Add reviewer",
-        src=avatar_error,
-        alt="Reviewer avatar",
-        fallback="AR",
+        name="Bull mascot",
+        src=avatar_bull,
+        alt="Black and white bull mascot avatar",
+        fallback="BM",
         badge_icon="plus",
         badge_class="bg-primary text-white",
-        badge_aria_label="Add reviewer"
+        badge_aria_label="Add mascot"
       ) }}
     {% endset %}
     {{ render_example(
@@ -114,14 +130,37 @@
       badge_with_icon
     ) }}
 
+    {% set dropdown_example %}
+      {% call dropdown(
+        avatar(name="Cangir", src=avatar_cangir, alt="Illustrated profile photo of Cangir", fallback="CA"),
+        variant="ghost",
+        align="end",
+        size="icon",
+        aria_label="Open profile menu"
+      ) %}
+        {{ dropdown_header("Ahmet Cangir") }}
+        {{ dropdown_item("Profile", icon="user") }}
+        {{ dropdown_item("Settings", icon="settings") }}
+        {{ dropdown_divider() }}
+        {{ dropdown_item("Sign out", icon="log-out") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_example(
+      "dropdown",
+      "Dropdown",
+      "Use an avatar as the trigger for a compact profile menu when account actions belong to the current user.",
+      dropdown_example,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
     {% set group %}
       <div class="d-flex flex-column align-items-start gap-3">
         <div class="avatar-group">
-          {{ avatar(name="Aya Nouri", src=avatar_blue, alt="Aya Nouri profile photo", fallback="AN") }}
-          {{ avatar(name="Diego Moss", src=avatar_emerald, alt="Diego Moss profile photo", fallback="DM") }}
-          {{ avatar(name="Lea Rowan", src=avatar_violet, alt="Lea Rowan profile photo", fallback="LR") }}
+          {{ avatar(name="Cangir", src=avatar_cangir, alt="Illustrated profile photo of Cangir", fallback="CA") }}
+          {{ avatar(name="Cangir at the marina", src=avatar_marina, alt="Profile photo of Cangir at a marina", fallback="CA") }}
+          {{ avatar(name="Bull mascot", src=avatar_bull, alt="Black and white bull mascot avatar", fallback="BM") }}
         </div>
-        <div class="text-body-secondary small">Workspace reviewers</div>
+        <div class="text-body-secondary small">Workspace profiles</div>
       </div>
     {% endset %}
     {{ render_example(
@@ -134,12 +173,12 @@
     {% set group_count %}
       <div class="d-flex flex-column align-items-start gap-3">
         <div class="avatar-group">
-          {{ avatar(name="Aya Nouri", src=avatar_blue, alt="Aya Nouri profile photo", fallback="AN") }}
-          {{ avatar(name="Diego Moss", src=avatar_emerald, alt="Diego Moss profile photo", fallback="DM") }}
-          {{ avatar(name="Lea Rowan", src=avatar_violet, alt="Lea Rowan profile photo", fallback="LR") }}
+          {{ avatar(name="Cangir", src=avatar_cangir, alt="Illustrated profile photo of Cangir", fallback="CA") }}
+          {{ avatar(name="Cangir at the marina", src=avatar_marina, alt="Profile photo of Cangir at a marina", fallback="CA") }}
+          {{ avatar(name="Bull mascot", src=avatar_bull, alt="Black and white bull mascot avatar", fallback="BM") }}
           <span class="avatar avatar-count">3</span>
         </div>
-        <div class="text-body-secondary small">Total review team: 3 shown, 6 waiting on handoff</div>
+        <div class="text-body-secondary small">Three shown, more collaborators off-screen</div>
       </div>
     {% endset %}
     {{ render_example(
@@ -196,16 +235,16 @@
     {% endset %}
 
     {% set english_avatar %}
-      <div class="d-inline-flex align-items-center gap-3" dir="rtl">
+      <div class="d-inline-flex align-items-center gap-3" dir="ltr">
         {{ avatar(
-          name="Moo Admin",
+          name="Moo UI Admin",
           initials="MO",
           badge_dot=true,
           badge_class="bg-success",
           badge_aria_label="Available"
         ) }}
         <div>
-          <div class="fw-medium">Moo Admin</div>
+          <div class="fw-medium">Moo UI Admin</div>
           <div class="text-body-secondary small">Workspace owner</div>
         </div>
       </div>

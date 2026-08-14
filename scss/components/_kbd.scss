@@ -1,11 +1,10 @@
 kbd {
+  display: inline-flex;
+  height: $moo-chip-height;
+  min-width: $moo-chip-height;
+  align-items: center;
+  justify-content: center;
   font-family: $font-family-sans-serif;
   line-height: $spacer;
   font-weight: $font-weight-medium;
-  // $kbd-bg is deliberately the "subtle" surface, not the more visible
-  // --bs-secondary-bg (see scss/settings/_components.scss: the bolder pair
-  // fails WCAG AA text contrast at this font-size). A border adds the
-  // key-cap definition a barely-tinted fill lacks without touching that
-  // already axe-verified text/background pair.
-  border: var(--bs-border-width) solid var(--bs-border-color);
 }

@@ -1,9 +1,9 @@
-{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
 
 {% macro breadcrumb(items, aria_label="breadcrumb", extra_class="", divider="") -%}
   {% if not items %}{{ fail("Breadcrumb items are required") }}{% endif %}
   <nav aria-label="{{ aria_label }}">
-    <ol class="breadcrumb{% if extra_class %} {{ extra_class }}{% endif %}"{% if divider %} style="--bs-breadcrumb-divider: '{{ divider }}';"{% endif %}>
+    <ol class="breadcrumb{% if divider %} breadcrumb--custom-divider{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"{% if divider %} style="--bs-breadcrumb-divider: '{{ divider }}';"{% endif %}>
       {% for item in items %}
         {% if item.ellipsis is defined and item.ellipsis %}
           <li class="breadcrumb-item">
@@ -15,13 +15,19 @@
         {% elif item.dropdown_items is defined %}
           {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}
           <li class="breadcrumb-item">
-            <span class="breadcrumb-dropdown-item">
-              {% call dropdown(item.label, variant="link", caret=true) %}
+            <div class="breadcrumb-dropdown-item">
+              <div class="dropdown">
+                <button class="breadcrumb-dropdown-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span>{{ item.label }}</span>
+                  {{ render_icon("chevron-down", "inline-end") }}
+                </button>
+                {% call dropdown_menu() %}
                 {% for entry in item.dropdown_items %}
                   {{ dropdown_item(entry.label, href=entry.href if entry.href is defined else "#") }}
                 {% endfor %}
-              {% endcall %}
-            </span>
+                {% endcall %}
+              </div>
+            </div>
           </li>
         {% else %}
           {% if not item.label | trim %}{{ fail("Breadcrumb item label is required") }}{% endif %}

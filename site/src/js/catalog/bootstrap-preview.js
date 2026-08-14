@@ -95,8 +95,15 @@ export function initBootstrapPreview(root = document) {
 
   const Tooltip = view.bootstrap?.Tooltip;
   if (Tooltip) {
+    // Bootstrap's default sanitizer allowlist has no <kbd>, but tooltip
+    // shortcut hints legitimately render our Kbd component's native <kbd>
+    // element. Extend only that allowlist tag; sanitization stays on for
+    // everything else.
+    const tooltipOptions = Tooltip.Default?.allowList
+      ? { allowList: { ...Tooltip.Default.allowList, kbd: [] } }
+      : {};
     root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((trigger) => {
-      bootstrapInstances.add(Tooltip.getOrCreateInstance(trigger));
+      bootstrapInstances.add(Tooltip.getOrCreateInstance(trigger, tooltipOptions));
     });
   }
   const Popover = view.bootstrap?.Popover;

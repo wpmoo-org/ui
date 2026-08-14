@@ -2,7 +2,7 @@
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Alert — Moo UI{% endblock %}
@@ -14,6 +14,24 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ alert(
+        "Alert",
+        description="Use for a short contextual message that belongs near the related content.",
+        icon="info"
+      ) }}
+    {% endset %}
+    {% set alert_usage %}
+      <p>Use <code>.alert</code> for contextual feedback that should stay visible near the work it affects. Render the message in the alert region with a visible title, add supporting text only when the state needs explanation, and keep links or actions inside the alert body so they remain tied to the message.</p>
+      <p>Choose a contextual variant such as <code>.alert-success</code>, <code>.alert-warning</code>, <code>.alert-danger</code>, or <code>.alert-info</code> when the message has a clear severity. Do not rely on color alone to communicate meaning; make the status clear in the visible copy, and use <code>.alert-link</code> when a link needs to inherit the alert's matching color treatment.</p>
+      <p>For dismissible alerts, add <code>.alert-dismissible</code> and a close button with <code>data-bs-dismiss="alert"</code>; use <code>.fade</code> and <code>.show</code> only when the removal should animate. Bootstrap removes a dismissed alert from the page, so move focus to a sensible next target after <code>closed.bs.alert</code> when the close button was keyboard-operated.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      alert_usage,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set basic %}
       {{ alert(
         "Scheduled maintenance",
@@ -25,7 +43,8 @@
       "basic",
       "Basic",
       "Pair an icon with a title and description inside a quiet bordered region.",
-      basic
+      basic,
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set destructive %}
@@ -40,7 +59,8 @@
       "destructive",
       "Destructive",
       "Use <code>variant=\"destructive\"</code> for errors that need immediate attention.",
-      destructive
+      destructive,
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set action %}
@@ -55,22 +75,56 @@
       "action",
       "Action",
       "Place one documented Button action inline with the alert message when a direct response is useful.",
-      action
+      action,
+      preview_class="moo-example__preview--medium"
     ) }}
 
-    {% set custom_colors %}
+    {% set warning %}
       {{ alert(
         "Subscription renews in 3 days",
         description="Confirm your payment method so the workspace doesn't lose access when the trial ends.",
-        icon="triangle-alert",
-        extra_class="border-warning-subtle bg-warning-subtle text-warning-emphasis"
+        variant="warning",
+        icon="triangle-alert"
       ) }}
     {% endset %}
     {{ render_example(
-      "custom-colors",
-      "Custom colors",
-      "Layer Bootstrap's own subtle contextual utilities on <code>extra_class</code> instead of a filled, saturated alert color.",
-      custom_colors
+      "warning",
+      "Warning",
+      "Use <code>variant=\"warning\"</code> for time-sensitive notices that need attention but aren't blocking.",
+      warning,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set success %}
+      {{ alert(
+        "Access request approved",
+        description="The reviewer granted workspace access. The requester can join within minutes.",
+        variant="success",
+        icon="circle-check"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "success",
+      "Success",
+      "Use <code>variant=\"success\"</code> to confirm a completed action or a positive state change.",
+      success,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set info %}
+      {{ alert(
+        "New version available",
+        description="Moo UI 1.1 ships a refreshed token palette. Review the changelog before upgrading.",
+        variant="info",
+        icon="sparkles"
+      ) }}
+    {% endset %}
+    {{ render_example(
+      "info",
+      "Info",
+      "Use <code>variant=\"info\"</code> for neutral, informational notices that don't require action.",
+      info,
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set dismissible %}
@@ -85,7 +139,8 @@
       "dismissible",
       "Dismissible",
       "Add a Close Button; wire <code>data-bs-dismiss=\"alert\"</code> when the alert should remove itself.",
-      dismissible
+      dismissible,
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set arabic_alert %}
@@ -93,7 +148,8 @@
         {{ alert(
           "تمت الموافقة على الطلب",
           description="تمت مراجعة طلب الوصول وسيصل صاحبه إلى مساحة العمل خلال دقائق.",
-          icon="info"
+          icon="info",
+          dismissible=true
         ) }}
       </div>
     {% endset %}
@@ -103,17 +159,19 @@
         {{ alert(
           "הבקשה אושרה",
           description="בקשת הגישה נבדקה והמשתמש יקבל גישה לסביבת העבודה בתוך דקות.",
-          icon="info"
+          icon="info",
+          dismissible=true
         ) }}
       </div>
     {% endset %}
 
     {% set english_rtl_alert %}
-      <div dir="rtl">
+      <div dir="ltr">
         {{ alert(
           "Access request approved",
           description="The request was reviewed and the requester will reach the workspace within minutes.",
-          icon="info"
+          icon="info",
+          dismissible=true
         ) }}
       </div>
     {% endset %}
@@ -124,7 +182,7 @@
       arabic_alert,
       hebrew_alert,
       english_rtl_alert,
-      preview_class="moo-example__preview--fit"
+      preview_class="moo-example__preview--medium"
     ) }}
   </div>
 

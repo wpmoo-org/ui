@@ -1,9 +1,62 @@
-// Shared focus primitive for custom interactive surfaces. Native form
-// controls keep Bootstrap's own focus border and glow.
-:is(.btn, a, button, summary, [tabindex]):not(input, textarea, select):focus-visible {
-  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
-  outline-offset: var(--bs-focus-ring-width);
+// One shared focus-visible recipe for essentially every focusable surface --
+// border swaps to the ring color and a 3px/50%-opacity ring surrounds the
+// control. Matches the reference exactly, which repeats this same
+// identical recipe (border-ring + ring-[3px] + ring-ring/50) across buttons,
+// links, dialog/dropdown/popover/select triggers, tabs, and toggle-group
+// items as well as native form controls, rather than a different treatment
+// per component family. Placed ahead of the is-invalid rule below so that
+// invalid controls can keep the same ring width while swapping only the
+// color. The explicit
+// outline: 0 replaces the browser's own default focus ring (an amber
+// auto-style outline on Chromium) that would otherwise show through on any
+// element -- plain sidebar/nav <a> tags included -- that Bootstrap doesn't
+// already reset at the .btn level.
+:is(.btn, a, button, summary, [tabindex]):not(input, textarea, select):focus-visible,
+:is(.form-control, .form-select, .form-check-input):focus-visible {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+// Buttons keep their hover/open treatment after pointer clicks; the ring is
+// reserved for keyboard focus on the resting control.
+.btn:focus-visible:hover,
+.btn.show:focus-visible {
+  border-color: var(--bs-btn-hover-border-color);
   box-shadow: none;
+}
+
+// Mouse-triggered focus keeps the resting border and shows no ring, same
+// as every other interactive surface on the site (.form-check-input's own
+// equivalent lives in components/_checkbox.scss, next to its checked/
+// indeterminate border-color variants).
+.form-control:focus:not(:focus-visible),
+.form-select:focus:not(:focus-visible) {
+  border-color: var(--moo-border);
+  box-shadow: none;
+}
+
+// Bootstrap's own .page-link:focus (vendor/bootstrap/scss/_pagination.scss)
+// applies its background/color/outline/box-shadow on any focus, including
+// mouse clicks -- unlike every other control here, it was never gated
+// behind :focus-visible, so clicking a page number (which also makes it the
+// active page) showed a ring the reference only shows for keyboard focus.
+// The ring/outline never carries active-state meaning (Bootstrap's own
+// ".active > &" rule never sets box-shadow), so it's always safe to drop on
+// non-keyboard focus, active page included. color/bg/border only revert to
+// resting when the page isn't the current one, so the active page keeps its
+// own look while it holds mouse focus. Real keyboard focus still gets the
+// shared ring above, since .page-link is a <button> and already matches
+// that selector.
+.page-link:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+.page-item:not(.active) > .page-link:focus:not(:focus-visible) {
+  color: var(--bs-pagination-color);
+  background-color: var(--bs-pagination-bg);
+  border-color: var(--bs-pagination-border-color);
 }
 
 // Bootstrap shows validation glow only on :focus, while the reference keeps a
@@ -12,9 +65,13 @@
 // the same validation affordance.
 .form-control.is-invalid,
 .form-control.is-invalid:focus,
+.was-validated .form-control:invalid,
+.was-validated .form-control:invalid:focus,
 .form-select.is-invalid,
-.form-select.is-invalid:focus {
-  box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--bs-form-invalid-border-color) 20%, transparent);
+.form-select.is-invalid:focus,
+.was-validated .form-select:invalid,
+.was-validated .form-select:invalid:focus {
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
 }
 
 // .btn-check toggle buttons (Toggle Group) put focus on the hidden input,
@@ -23,12 +80,52 @@
 // colors) get a working native focus glow, so btn-ghost/outline consumers
 // would otherwise show no ring at all. Share the same ring here instead of
 // patching --bs-btn-focus-box-shadow per variant.
-.btn-check:focus-visible + .btn {
-  outline: var(--bs-focus-ring-width) solid var(--moo-ring);
-  outline-offset: var(--bs-focus-ring-width);
+.btn-check:focus:not(:focus-visible) + .btn {
+  outline: 0;
   box-shadow: none;
 }
 
-.input-group > .dropdown-toggle[aria-expanded="true"]:focus-visible {
+.btn-check:focus-visible + .btn {
+  border-color: var(--moo-ring);
   outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.input-group > .dropdown-toggle[aria-expanded="true"]:focus-visible {
+  box-shadow: none;
+}
+
+// Compound controls whose native input isn't the outer visual box (Combobox's
+// chip row, Input Group's addon-wrapped control) need the same ring painted
+// on the wrapper instead of the child. Kept here rather than in each
+// component's own partial so every focus-ring declaration in the project
+// stays in one file instead of the recipe being copy-pasted per component --
+// component partials contract-test that their own box-shadow declarations
+// stick to Bootstrap's native primitives (test_catalog.py's
+// test_component_styles_use_bootstrap_visual_primitives), and this recipe
+// isn't one of those.
+.combobox-chips:focus-within {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.input-group:has(> .form-control:focus):not(:has(> .form-control[type="file"])) {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+// Validation input groups are also one visual control. Keep feedback outside the
+// grouped control, then paint the destructive ring on the wrapper and suppress
+// the child ring.
+.input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))):has(> :is(.form-control, .form-select).is-invalid),
+.was-validated .input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))):has(> :is(.form-control, .form-select):invalid) {
+  border-color: var(--bs-form-invalid-border-color);
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} var(--moo-form-invalid-ring-color);
+}
+
+.input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))) > :is(.form-control, .form-select).is-invalid,
+.was-validated .input-group.has-validation:not(:has(> :is(.valid-feedback, .invalid-feedback, .valid-tooltip, .invalid-tooltip))) > :is(.form-control, .form-select):invalid {
+  box-shadow: none;
 }

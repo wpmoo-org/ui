@@ -56,20 +56,22 @@
 
       <section aria-labelledby="input-invalid-title" data-certification-surface>
         <h2 id="input-invalid-title" class="h5">Required invalid input</h2>
-        <label class="form-label" for="certification-input-required">Workspace slug</label>
-        <input
-          class="form-control is-invalid"
-          id="certification-input-required"
-          type="text"
-          required
-          aria-invalid="true"
-          aria-describedby="certification-input-required-help certification-input-required-feedback"
-        >
-        <div id="certification-input-required-help" class="form-text">
-          Use lowercase letters, numbers, and hyphens.
-        </div>
-        <div id="certification-input-required-feedback" class="invalid-feedback">
-          Enter a workspace slug before continuing.
+        <div class="field" data-invalid="true">
+          <label class="form-label" for="certification-input-required">Invalid Input</label>
+          <input
+            class="form-control is-invalid"
+            id="certification-input-required"
+            type="text"
+            required
+            aria-invalid="true"
+            aria-describedby="certification-input-required-help certification-input-required-feedback"
+          >
+          <div id="certification-input-required-help" class="form-text">
+            This field contains validation errors.
+          </div>
+          <div id="certification-input-required-feedback" class="invalid-feedback">
+            Enter a workspace slug before continuing.
+          </div>
         </div>
       </section>
 

@@ -14,12 +14,14 @@ from tests.helpers.browser_harness import (
     prepare_page,
     run_axe,
     serve_repository,
+    skip_if_browser_launch_is_sandboxed,
 )
 
 
 class CertificationBrowserHarnessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
         cls.playwright_manager = sync_playwright()
@@ -158,6 +160,9 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(combobox_input).to_have_attribute(
                     "aria-activedescendant",
                     "certification-combobox-option-2",
+                )
+                self.assertTrue(
+                    combobox_input.evaluate("element => document.activeElement === element")
                 )
                 self.assertEqual(run_axe(page), [])
 
@@ -1368,6 +1373,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 expect(search).to_have_attribute("type", "search")
                 expect(required).to_have_class("form-control is-invalid")
+                expect(required.locator("xpath=ancestor::div[1]")).to_have_attribute(
+                    "data-invalid",
+                    "true",
+                )
                 expect(required).to_have_attribute("aria-invalid", "true")
                 expect(required).to_have_attribute(
                     "aria-describedby",
@@ -1525,6 +1534,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 search_input = page.locator("#certification-input-group-search")
                 search_button = page.locator("#certification-input-group-search-button")
                 textarea = page.locator("#certification-input-group-notes")
+                textarea_post = page.locator("#certification-input-group-post")
                 readonly = page.locator("#certification-input-group-readonly")
                 disabled = page.locator("#certification-input-group-disabled")
 
@@ -1546,7 +1556,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     "input-group-text"
                 )
                 expect(page.locator("#certification-input-group-url-help")).to_have_class(
-                    "form-text"
+                    "field-description form-text"
                 )
 
                 expect(invalid_group).to_have_class("input-group has-validation")
@@ -1560,7 +1570,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 expect(
                     page.locator("#certification-input-group-token-feedback")
-                ).to_have_class("invalid-feedback")
+                ).to_have_class("field-error invalid-feedback d-block")
 
                 url_input.focus()
                 expect(url_input).to_be_focused()
@@ -1577,9 +1587,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(search_button).to_be_focused()
                 expect(search_button).to_have_attribute("type", "button")
 
-                expect(textarea).to_have_attribute("aria-label", "Review notes")
+                expect(textarea).to_have_attribute("aria-label", "Comment")
                 textarea.fill("Grouped text area")
                 expect(textarea).to_have_value("Grouped text area")
+                expect(textarea_post).to_have_attribute("type", "button")
                 expect(readonly).to_have_attribute("readonly", "")
                 readonly.focus()
                 expect(readonly).to_be_focused()
@@ -2102,6 +2113,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(project).to_have_value("Moo UI")
 
                 expect(slug).to_have_class("form-control is-invalid")
+                expect(slug.locator("xpath=ancestor::div[1]")).to_have_attribute(
+                    "data-invalid",
+                    "true",
+                )
                 expect(slug).to_have_attribute("required", "")
                 expect(slug).to_have_attribute("aria-invalid", "true")
                 expect(slug).to_have_attribute(
@@ -2564,7 +2579,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertTrue(response.ok)
                 prepare_page(page, case)
 
-                self.assertEqual(page.locator(".avatar").count(), 7)
+                self.assertEqual(page.locator(".avatar").count(), 6)
 
                 image_avatar = page.locator("#certification-avatar-image")
                 expect(image_avatar).to_have_class("avatar avatar--has-image")
@@ -2592,12 +2607,6 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 expect(badge_dot.locator(".avatar-badge")).to_have_attribute(
                     "aria-label", "Online"
-                )
-
-                badge_count = page.locator("#certification-avatar-badge-count")
-                expect(badge_count.locator(".avatar-badge")).to_have_text("3")
-                expect(badge_count.locator(".avatar-badge")).to_have_attribute(
-                    "aria-label", "3 unread messages"
                 )
 
                 self.assertEqual(
@@ -2938,6 +2947,47 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 page_2 = page.locator("#certification-pagination-page-2")
                 expect(page_2.locator("xpath=..")).to_have_class("page-item active")
                 expect(page_2.locator("xpath=..")).to_have_attribute("aria-current", "page")
+                metrics = page_2.evaluate(
+                    """
+                    element => {
+                      const read = target => {
+                        const style = getComputedStyle(target);
+                        const rect = target.getBoundingClientRect();
+                        return {
+                          width: rect.width,
+                          height: rect.height,
+                          borderRadius: style.borderRadius,
+                          fontWeight: style.fontWeight,
+                          lineHeight: style.lineHeight,
+                          backgroundColor: style.backgroundColor,
+                          borderColor: style.borderColor,
+                        };
+                      };
+                      return {
+                        active: read(element),
+                        adjacent: read(document.querySelector("#certification-pagination-page-3")),
+                        ellipsis: read(
+                          document.querySelector(
+                            "#certification-pagination-default .page-item.disabled .page-link"
+                          )
+                        ),
+                        prev: read(document.querySelector("#certification-pagination-prev")),
+                      };
+                    }
+                    """
+                )
+                for key in ("active", "adjacent", "ellipsis"):
+                    with self.subTest(case=case.name, item=key):
+                        self.assertAlmostEqual(metrics[key]["width"], 32, delta=1)
+                        self.assertAlmostEqual(metrics[key]["height"], 32, delta=1)
+                        self.assertEqual(metrics[key]["borderRadius"], "10px")
+                        self.assertEqual(metrics[key]["fontWeight"], "500")
+                        self.assertEqual(metrics[key]["lineHeight"], "20px")
+                self.assertNotEqual(metrics["active"]["backgroundColor"], "rgba(0, 0, 0, 0)")
+                self.assertNotEqual(metrics["active"]["borderColor"], "rgba(0, 0, 0, 0)")
+                self.assertEqual(metrics["ellipsis"]["backgroundColor"], "rgba(0, 0, 0, 0)")
+                if case.is_mobile:
+                    self.assertAlmostEqual(metrics["prev"]["width"], 32, delta=1)
 
                 prev = page.locator("#certification-pagination-prev")
                 page_1 = page.locator("#certification-pagination-page-1")
@@ -3727,6 +3777,16 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     surface_box["y"] + surface_box["height"],
                 )
                 page.keyboard.press("Escape")
+                expect(fallback).to_be_focused()
+
+                # Space on the focused fallback trigger mirrors Bootstrap's
+                # button-toggle feel: the same key that opens the menu closes
+                # it again instead of moving focus into the next item.
+                fallback.press("Space")
+                expect(menu).to_have_class("dropdown-menu context-menu-menu show")
+                expect(fallback).to_have_attribute("aria-expanded", "true")
+                fallback.press("Space")
+                expect(menu).not_to_have_class("dropdown-menu context-menu-menu show")
                 expect(fallback).to_be_focused()
 
                 # Disabled item is skipped by roving focus and does not

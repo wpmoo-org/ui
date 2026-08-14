@@ -11,6 +11,9 @@ COMPONENT = ROOT / "src/components/datatable.html.jinja"
 RELEASE_REVIEW_BLOCK = ROOT / "site/src/blocks/datatable_release_review.html.jinja"
 DOCUMENTATION_PAGE = ROOT / "site/src/pages/components/datatable.html.jinja"
 CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/datatable.html"
+DATATABLE_JS = ROOT / "src/js/components/datatable.js"
+DATATABLE_SCSS = ROOT / "scss/components/_datatable.scss"
+TABLE_SCSS = ROOT / "scss/components/_table.scss"
 MACHINE_PATH_ROOTS = (
     ROOT / "src",
     ROOT / "site/src",
@@ -145,6 +148,22 @@ class DataTableTests(CatalogTestCase):
                 with self.subTest(path=path, token=token):
                     self.assertNotIn(token, source)
 
+    def test_public_docs_do_not_expose_template_parameters(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/datatable/index.html")
+        for forbidden in (
+            "responsive_mode=",
+            "card_role=",
+            "hideable=false",
+        ):
+            with self.subTest(forbidden=forbidden):
+                if forbidden in page:
+                    raise AssertionError(
+                        f"Data Table public docs expose template parameter: {forbidden}"
+                    )
+
     def test_release_review_visibility_menu_keeps_identity_columns_fixed(self) -> None:
         output = self.render_release_review()
 
@@ -223,7 +242,7 @@ class DataTableTests(CatalogTestCase):
         assert clear_button is not None
 
         self.assertIn(
-            "Clear selection <code class='tooltip-kbd'>Escape</code>",
+            "Clear selection <kbd>Escape</kbd>",
             clear_button.attrs.get("data-bs-title"),
         )
         self.assertEqual(clear_button.attrs.get("data-bs-html"), "true")
@@ -393,6 +412,120 @@ class DataTableTests(CatalogTestCase):
         self.assertIn("Open ticket", first_action.text_content())
         self.assertIn("Assign owner", first_action.text_content())
         self.assertIn("Copy link", first_action.text_content())
+
+    def test_row_action_dropdowns_flip_inside_preview_viewports(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn('strategy: "fixed"', source)
+        self.assertIn('fallbackPlacements: ["top-end", "top-start", "bottom-end", "bottom-start"]', source)
+        self.assertIn('boundary: "viewport"', source)
+        self.assertIn("padding: 8", source)
+
+    def test_row_action_dropdowns_escape_scroll_frame_without_changing_frame_overflow(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+        browser_source = (ROOT / "tests" / "test_datatable_browser.py").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("this._reparentedRowMenus = new Map();", source)
+        self.assertIn("this._reparentedRowMenuByTrigger = new WeakMap();", source)
+        self.assertIn('trigger?.closest?.(".table-row-actions")', source)
+        self.assertIn("this._reparentedRowMenuByTrigger.set(trigger, menu);", source)
+        self.assertIn("this._reparentedRowMenuByTrigger.get(trigger)", source)
+        self.assertIn("this._reparentedRowMenuByTrigger.delete(trigger);", source)
+        self.assertIn("this._document.body.appendChild(menu);", source)
+        self.assertIn("this._restoreRowActionMenuForTrigger(event.target);", source)
+        self.assertIn("this._restoreRowActionMenus();", source)
+        self.assertIn('page.locator("body > .dropdown-menu.show")', browser_source)
+        self.assertNotIn(
+            'root.locator(".datatable-card .dropdown-menu.show")',
+            browser_source,
+        )
+
+    def test_row_action_dropdowns_export_owner_metadata_when_reparented(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn("_rowActionOwnerIdForTrigger(trigger)", source)
+        self.assertIn('trigger?.closest?.("tr[data-datatable-row]")?.id', source)
+        self.assertIn(
+            'trigger?.closest?.("[data-datatable-card]")'
+            '?.getAttribute("data-datatable-card-for")',
+            source,
+        )
+        self.assertIn(
+            'menu.setAttribute("data-datatable-row-action-owner", ownerId)',
+            source,
+        )
+        self.assertIn(
+            'menu.setAttribute("data-datatable-row-action-trigger", trigger.id)',
+            source,
+        )
+        self.assertIn(
+            'menu.removeAttribute("data-datatable-row-action-owner")',
+            source,
+        )
+        self.assertIn(
+            'menu.removeAttribute("data-datatable-row-action-trigger")',
+            source,
+        )
+
+    def test_card_row_action_dropdowns_share_the_fixed_popper_config(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '[data-datatable-card] .table-row-actions [data-bs-toggle=\\"dropdown\\"]"',
+            source,
+        )
+        self.assertIn("_rowActionTriggers()", source)
+        # Both init and dispose must select triggers through the same shared
+        # method, so table and card views can never drift out of sync again.
+        self.assertEqual(
+            source.count("this._rowActionTriggers()"),
+            2,
+        )
+
+    def test_dispose_cleans_up_open_row_action_dropdowns(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+        dispose_body = source.split("dispose() {", 1)[1].split("\n  }\n", 1)[0]
+
+        self.assertIn("this._disposeRowActionDropdowns();", dispose_body)
+        method_body = source.split("_disposeRowActionDropdowns() {", 1)[1].split(
+            "\n  }\n", 1
+        )[0]
+        self.assertIn("Dropdown.getInstance(trigger)", method_body)
+        self.assertIn("instance.hide();", method_body)
+        self.assertIn("instance.dispose();", method_body)
+
+    def test_datatable_frame_keeps_row_menu_out_of_overflow_rules(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+        table_source = TABLE_SCSS.read_text(encoding="utf-8")
+        card_frame_rule = source.split(".datatable-card-frame:has(.datatable-card .dropdown-menu.show)", 1)[1].split("}", 1)[0]
+
+        self.assertNotIn(".datatable-frame:has(.table-row-actions .dropdown-menu.show)", source)
+        self.assertNotIn(".datatable-frame .table-responsive:has(.table-row-actions .dropdown-menu.show)", source)
+        self.assertIn('.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"])', table_source)
+        self.assertNotIn('.table-responsive:has(.table-row-actions > [aria-expanded="true"])', table_source)
+        self.assertIn("position: relative;", card_frame_rule)
+        self.assertIn("z-index: $zindex-dropdown;", card_frame_rule)
+        self.assertIn("overflow: visible;", card_frame_rule)
+
+    def test_datatable_sticky_action_cell_uses_soft_fade_background(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn("--moo-datatable-actions-cell-fade-width", source)
+        self.assertIn(".datatable-frame [data-datatable-column=\"actions\"]", source)
+        self.assertIn("linear-gradient(", source)
+        self.assertIn("transparent 0", source)
+        self.assertIn("var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)", source)
+        self.assertIn('[dir="rtl"] .datatable-frame [data-datatable-column="actions"]', source)
+
+    def test_datatable_view_toggle_paints_focus_ring_on_visible_label(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn(".datatable-view-toggle .btn-check:focus-visible + .datatable-view-option", source)
+        self.assertIn("border-color: var(--moo-ring);", source)
+        self.assertIn("box-shadow: 0 0 0 #{$moo-form-focus-ring-width}", source)
+        self.assertIn("z-index: 3;", source)
 
     def test_documentation_page_contains_the_rendered_release_review_showcase(
         self,

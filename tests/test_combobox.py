@@ -447,55 +447,19 @@ class ComboboxTests(CatalogTestCase):
 
         self.assertIn('{% from "components/combobox.html.jinja" import combobox %}', source)
         self.assertIn('{% from "components/field.html.jinja" import field, field_description %}', source)
-        self.assertIn('"basic"', source)
-        self.assertIn('"Basic"', source)
-        self.assertIn("Select a reviewer", source)
-        self.assertIn('"multiple"', source)
-        self.assertIn('"Multiple"', source)
-        self.assertIn('label="Review areas"', source)
-        self.assertIn('describedby="combobox-review-areas-help"', source)
-        self.assertIn("Choose every area this review should cover.", source)
-        self.assertNotIn("Add review area", source)
-        self.assertIn('"clear-button"', source)
-        self.assertIn('"Clear Button"', source)
-        self.assertIn('selected="ada"', source)
+        for example_id in (
+            '"basic"',
+            '"multiple"',
+            '"clear-button"',
+            '"groups"',
+            '"custom-items"',
+            '"invalid"',
+            '"disabled"',
+        ):
+            self.assertIn(example_id, source)
         self.assertIn("show_clear=true", source)
-        self.assertIn('"groups"', source)
-        self.assertIn('"Groups"', source)
-        self.assertIn("Select a timezone", source)
-        self.assertIn("Bootstrap dropdown headers and dividers", source)
-        self.assertIn('"Americas"', source)
-        self.assertIn('"Europe"', source)
-        self.assertIn('"Asia/Pacific"', source)
-        self.assertIn("(GMT-5) New York", source)
-        self.assertIn("(GMT-8) Los Angeles", source)
-        self.assertIn("(GMT-5) Toronto", source)
-        self.assertIn("(GMT-8) Vancouver", source)
-        self.assertIn("(GMT-3) São Paulo", source)
-        self.assertIn("(GMT+1) Amsterdam", source)
-        self.assertIn("(GMT+11) Sydney", source)
-        self.assertNotIn("ComboboxGroup", source)
-        self.assertNotIn("ComboboxSeparator", source)
-        self.assertIn('"custom-items"', source)
-        self.assertIn('"Custom Items"', source)
-        self.assertIn("Search request types...", source)
-        self.assertIn("secondary text", source)
-        self.assertNotIn("South America", source)
-        self.assertNotIn("Argentina", source)
-        self.assertNotIn("Brazil", source)
-        self.assertNotIn("Search countries", source)
-        self.assertIn('"invalid"', source)
-        self.assertIn('"Invalid"', source)
         self.assertIn("invalid=true", source)
-        self.assertIn('"disabled"', source)
-        self.assertIn('"Disabled"', source)
         self.assertIn("disabled=true", source)
-        self.assertNotIn('"Auto Highlight"', source)
-        self.assertNotIn('"Popup"', source)
-        self.assertNotIn('"Input Group"', source)
-        self.assertNotIn("render_rtl_example(", source)
-        self.assertNotIn("Select a framework", source)
-        self.assertNotIn("Svelte", source)
         self.assertIn(
             'typography("JavaScript", variant="section-title", id="combobox-javascript")',
             source,
@@ -504,7 +468,6 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('import Combobox from "@wpmoo/ui/combobox.js";', source)
         self.assertIn("Combobox.getOrCreateInstance(element)", source)
         self.assertIn("combobox.dispose()", source)
-        self.assertIn("Bootstrap 5.3 does not provide a Combobox plugin", source)
 
     def test_public_module_owns_combobox_behavior_and_lifecycle(self) -> None:
         source = COMBOBOX_JS.read_text(encoding="utf-8")

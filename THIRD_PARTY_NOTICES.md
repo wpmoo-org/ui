@@ -11,17 +11,15 @@ accessibility references for this product.
 
 ## shadcn/ui
 
-The shadcn/ui component and Button documentation are visual-intent and catalog
-coverage references. No shadcn/ui implementation source, React code, Tailwind
-code, Radix code, or example prose is bundled or copied.
-
-Moo UI documentation, example copy, component templates, styles, and inline
-SVG icons are original product work.
+Moo UI is designed for server-rendered interfaces that keep Bootstrap markup as
+the durable contract. shadcn/ui is used as a visual-intent and catalog-coverage
+reference. If you are building React and Tailwind applications, use shadcn/ui
+directly: https://ui.shadcn.com/
 
 ## Lucide
 
 Moo UI vendors a build-time icon metadata subset from Iconify's Lucide icon
-set at `src/icons/lucide-icons.json` and renders selected icons into the
+set at `src/icons/lucide-icons.json` and renders selected Lucide icons into the
 generated catalog. Lucide is licensed under the ISC License. The source
 metadata identifies the Lucide project, its contributors, and the upstream
 license URL. The root favicon set (`favicon.svg`, `favicon.ico`,

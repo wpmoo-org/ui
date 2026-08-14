@@ -32,6 +32,7 @@ SITE_SRC = SITE / "src"
 CORE_REGISTRY = SRC / "registry"
 SITE_REGISTRY = SITE_SRC / "registry"
 CERTIFICATION = SRC / "certification"
+CERTIFICATION_FIXTURES = ROOT / "tests/fixtures/certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
 PACKAGE_DIST = ROOT / "dist"
@@ -100,6 +101,7 @@ SOURCE_SNAPSHOT_DIRS = (
     JS_COMPONENTS,
     SRC / "icons",
     CORE_REGISTRY,
+    CERTIFICATION_FIXTURES,
     SCSS,
 )
 BUILD_LOCK = (
@@ -351,11 +353,6 @@ def highlight_html(value: object) -> Markup:
     return Markup("".join(highlighted))
 
 
-def line_numbers(value: object) -> Markup:
-    count = max(1, len(str(value).splitlines()))
-    return Markup("\n".join(str(number) for number in range(1, count + 1)))
-
-
 def slugify(value: object) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", str(value).lower()).strip("-")
     return slug or "section"
@@ -489,6 +486,7 @@ def build_site_pages(
     catalog: list[dict[str, str]],
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
+    examples: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     def section_page(slug: str) -> dict[str, str] | None:
         section = _find_entry(sections, slug)
@@ -512,20 +510,39 @@ def build_site_pages(
     pages: list[dict[str, str]] = [
         {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
     ]
+
+    for slug in ("introduction", "installation"):
+        page = section_page(slug)
+        if page:
+            pages.append(page)
+
+    # Examples pages keep kind "doc" on purpose: the command palette's
+    # "Pages" group picks them up without any template-side change.
+    if examples:
+        pages.append(
+            {
+                "slug": "examples",
+                "label": "Examples",
+                "href": "examples/index.html",
+                "kind": "doc",
+            }
+        )
+        pages.extend(child_pages(examples, "examples", "doc"))
+
+    components = section_page("components")
+    if components:
+        pages.append(components)
+    pages.extend(child_pages(catalog, "components", "component"))
+
+    blocks_page = section_page("blocks")
+    if blocks_page:
+        pages.append(blocks_page)
+    pages.extend(child_pages(blocks, "blocks", "block"))
+    pages.extend(child_pages(utilities, "utils", "utility"))
+
     for section in sections:
         slug = section.get("slug", "")
-        if slug == "components":
-            components = section_page("components")
-            if components:
-                pages.append(components)
-            pages.extend(child_pages(catalog, "components", "component"))
-            pages.extend(child_pages(utilities, "utils", "utility"))
-        elif slug == "blocks":
-            blocks_page = section_page("blocks")
-            if blocks_page:
-                pages.append(blocks_page)
-            pages.extend(child_pages(blocks, "blocks", "block"))
-        else:
+        if slug not in {"introduction", "installation", "components", "blocks"}:
             pages.append({**section, "kind": "doc"})
 
     return pages
@@ -639,7 +656,6 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["dedent_html"] = dedent_html
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
-    environment.filters["line_numbers"] = line_numbers
     environment.filters["slugify"] = slugify
     environment.globals["pretty_url"] = pretty_url
     environment.globals["site_href"] = site_href
@@ -833,7 +849,7 @@ def _markup_owner_for_component(slug: str, source_file: Path) -> str:
         )
     if not source_file.exists():
         raise RuntimeError(f"Moo markup ownership source missing for {slug}")
-    return "Moo documented extension"
+    return "Moo UI documented extension"
 
 
 def derive_component_ownership(
@@ -848,7 +864,7 @@ def derive_component_ownership(
     source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
     if exported_moo_modules != source_moo_modules:
         raise RuntimeError(
-            "Optional Moo ESM exports do not match src/js/components sources"
+            "Optional Moo UI ESM exports do not match src/js/components sources"
         )
 
     certified = set(certification.get("certifiedComponents", []))
@@ -888,7 +904,7 @@ def derive_component_ownership(
         has_bootstrap_js = _has_bootstrap_js_evidence(bootstrap_sources)
         runtime_owner = "native HTML/CSS"
         if slug in exported_moo_modules:
-            runtime_owner = "optional Moo ESM"
+            runtime_owner = "optional Moo UI ESM"
         elif has_bootstrap_js:
             runtime_owner = "Bootstrap plugin"
 
@@ -944,7 +960,11 @@ def _load_page_registry(
         slug = page.with_suffix("").stem
         metadata = extract_template_metadata(page)
         override = overrides.get(slug, {})
-        label = metadata.get("page_title") or override.get("label") or _fallback_label(slug)
+        # The registry label is canonical: it is the reviewed public name for
+        # the component (e.g. "Button"). The page header is a display title
+        # that should match it; fall back to it only when the registry has no
+        # label, so a page header cannot silently override a reviewed name.
+        label = override.get("label") or metadata.get("page_title") or _fallback_label(slug)
         description = (
             metadata.get("page_description")
             or override.get("description")
@@ -984,6 +1004,16 @@ def load_blocks() -> list[dict[str, str]]:
         PAGES / "blocks",
         SITE_REGISTRY,
         "blocks.json",
+    )
+
+
+def load_examples() -> list[dict[str, str]]:
+    # No registry file yet: labels/descriptions come from each template's
+    # own metadata, and the index page is excluded by the registry loader.
+    return _load_page_registry(
+        PAGES / "examples",
+        SITE_REGISTRY,
+        "examples.json",
     )
 
 
@@ -1115,14 +1145,17 @@ def copy_site_assets() -> None:
     )
     if JS_CATALOG.exists():
         shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
-        catalog_index = js_dir / "catalog/index.js"
-        catalog_index.write_text(
-            catalog_index.read_text(encoding="utf-8").replace(
-                "../../../../src/js/components/",
-                "../components/",
-            ),
-            encoding="utf-8",
-        )
+        # Source catalog modules import package ESM via repo-relative
+        # paths; the dist layout nests them one level down, so every
+        # catalog module gets its imports remapped, not just index.js.
+        for catalog_script in sorted((js_dir / "catalog").rglob("*.js")):
+            catalog_script.write_text(
+                catalog_script.read_text(encoding="utf-8").replace(
+                    "../../../../src/js/components/",
+                    "../components/",
+                ),
+                encoding="utf-8",
+            )
     fonts_dir = SITE_DIST / "assets/fonts/geist"
     fonts_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
@@ -1131,6 +1164,105 @@ def copy_site_assets() -> None:
     )
     if SITE_STATIC.exists():
         shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
+
+
+def copy_certification_fixtures_to_site() -> None:
+    if not CERTIFICATION_FIXTURES.exists():
+        return
+
+    catalog_entries = [
+        entry
+        for entry in load_catalog()
+        if (CERTIFICATION_FIXTURES / f"{entry['slug']}.html").is_file()
+    ]
+    fixture_dir = SITE_DIST / "tests/fixtures/certification"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    for index, entry in enumerate(catalog_entries):
+        fixture = CERTIFICATION_FIXTURES / f"{entry['slug']}.html"
+        output = fixture_dir / fixture.name
+        output.write_text(
+            add_certification_fixture_pagination(
+                fixture.read_text(encoding="utf-8"),
+                catalog_entries,
+                index,
+            ),
+            encoding="utf-8",
+        )
+
+    public_dist = SITE_DIST / "dist"
+    shutil.copytree(PACKAGE_DIST / "assets", public_dist / "assets", dirs_exist_ok=True)
+    shutil.copytree(PACKAGE_DIST / "js", public_dist / "js", dirs_exist_ok=True)
+
+    public_bootstrap_js = SITE_DIST / "vendor/bootstrap/dist/js"
+    public_bootstrap_js.mkdir(parents=True, exist_ok=True)
+    for bootstrap_file in (
+        "bootstrap.bundle.min.js",
+        "bootstrap.bundle.min.js.map",
+    ):
+        shutil.copy2(
+            BOOTSTRAP / "dist/js" / bootstrap_file,
+            public_bootstrap_js / bootstrap_file,
+        )
+
+
+def add_certification_fixture_pagination(
+    source: str,
+    entries: list[dict[str, str]],
+    index: int,
+) -> str:
+    if "</body>" not in source:
+        return source
+
+    previous_entry = entries[index - 1] if index > 0 else None
+    next_entry = entries[index + 1] if index + 1 < len(entries) else None
+    links: list[str] = []
+    if previous_entry:
+        previous_label = escape(previous_entry["label"])
+        links.append(
+            '<a class="btn btn-outline-secondary" '
+            f'href="{escape(previous_entry["slug"])}.html" '
+            f'aria-label="Previous fixture: {previous_label}">'
+            f"Previous</a>"
+        )
+    else:
+        links.append(
+            '<span class="btn btn-outline-secondary disabled" aria-disabled="true">'
+            "Previous</span>"
+        )
+
+    if next_entry:
+        next_label = escape(next_entry["label"])
+        links.append(
+            '<a class="btn btn-outline-secondary" '
+            f'href="{escape(next_entry["slug"])}.html" '
+            f'aria-label="Next fixture: {next_label}">'
+            f"Next</a>"
+        )
+    else:
+        links.append(
+            '<span class="btn btn-outline-secondary disabled" aria-disabled="true">'
+            "Next</span>"
+        )
+
+    pagination = (
+        '<nav class="moo-fixture-pagination" aria-label="Certification fixture pagination">'
+        '<div class="btn-group" role="group">'
+        f"{''.join(links)}"
+        "</div>"
+        "</nav>"
+    )
+    style = (
+        "<style>"
+        ".moo-fixture-pagination{display:flex;justify-content:center;margin-top:2rem}"
+        ".moo-fixture-pagination .btn{min-width:6rem}"
+        "</style>"
+    )
+
+    if "</head>" in source:
+        source = source.replace("</head>", f"{style}</head>", 1)
+    else:
+        pagination = f"{style}{pagination}"
+    return source.replace("</body>", f"{pagination}</body>", 1)
 
 
 def version_site_module_imports() -> None:
@@ -1236,6 +1368,7 @@ def render_pages(version: str | None = None) -> None:
     sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
+    examples = load_examples()
     product = load_product_facts()
     component_ownership = derive_component_ownership(
         catalog,
@@ -1248,7 +1381,7 @@ def render_pages(version: str | None = None) -> None:
         }
         for component in catalog
     ]
-    site_pages = build_site_pages(sections, catalog, utilities, blocks)
+    site_pages = build_site_pages(sections, catalog, utilities, blocks, examples)
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -1260,7 +1393,7 @@ def render_pages(version: str | None = None) -> None:
         root_path = "../" * depth
         current_section = logical_relative.parent.name
         current_slug = logical_relative.stem
-        if current_section not in {"components", "utils", "blocks"}:
+        if current_section not in {"components", "utils", "blocks", "examples"}:
             current_section = "sections"
         template_name = page.relative_to(SITE_SRC).as_posix()
         metadata = page_metadata(
@@ -1276,6 +1409,7 @@ def render_pages(version: str | None = None) -> None:
             sections=sections,
             utilities=utilities,
             blocks=blocks,
+            examples=examples,
             product=product,
             component_ownership=component_ownership,
             site_pages=site_pages,
@@ -1327,6 +1461,7 @@ def build_site() -> None:
     copy_core_outputs_to_site()
     compile_catalog_styles()
     copy_site_assets()
+    copy_certification_fixtures_to_site()
     copy_site_metadata()
     version_site_module_imports()
     version = asset_version()

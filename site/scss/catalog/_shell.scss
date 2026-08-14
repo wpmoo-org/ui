@@ -1,6 +1,10 @@
 body {
   min-height: 100vh;
-  background: var(--bs-tertiary-bg);
+  // Matches the package's own surface token instead of Bootstrap's
+  // unrelated tertiary-bg: elevated "muted surface" chips (e.g. Kbd) are
+  // tuned for contrast against --moo-surface, and read as barely distinct
+  // in dark mode against tertiary-bg's lighter default.
+  background: var(--moo-surface);
   font-family: $moo-catalog-font-family, var(--bs-body-font-family);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -27,9 +31,11 @@ body {
 // field, not decoration on a button.
 .moo-catalog__search-trigger {
   height: 2rem;
-  flex: 1 1 10rem;
+  width: 10rem;
+  max-width: 100%;
+  flex: 0 1 10rem;
   min-width: 0;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding: 0.5rem 0.75rem;
   color: var(--bs-secondary-color);
   border: var(--bs-border-width) solid var(--bs-border-color);
@@ -40,8 +46,15 @@ body {
   box-shadow: none;
 }
 
+// A full-strength --moo-muted-surface fill exactly matches Kbd's own
+// background (both draw from the same token), so the "⌘K" shortcut hint
+// this trigger renders disappeared into its own hover state. Blending
+// toward the resting background instead of using the token at full
+// strength keeps the hover tint visibly lighter than Kbd's solid fill,
+// without inventing a translucent-overlay token Moo's surface system
+// doesn't otherwise have.
 .moo-catalog__search-trigger:hover {
-  background: var(--moo-muted-surface);
+  background: color-mix(in srgb, var(--moo-muted-surface) 50%, var(--bs-body-bg));
 }
 
 .moo-catalog__search-trigger:focus-visible {
@@ -62,31 +75,17 @@ body {
   gap: 0.25rem;
 }
 
-// The visible "Search" label reads like input text at every width, so the
-// trigger stays start-aligned; from md up the shortcut hint takes the far
-// edge.
-@include media-breakpoint-up(md) {
-  .moo-catalog__search-trigger {
-    flex: 0 0 auto;
-    justify-content: space-between;
-  }
-}
-
-@include media-breakpoint-up(sm) {
-  .moo-catalog__search-trigger {
-    width: 10rem;
-  }
-}
-
 @include media-breakpoint-up(lg) {
   .moo-catalog__search-trigger {
     width: 13rem;
+    flex-basis: 13rem;
   }
 }
 
 @include media-breakpoint-up(xxl) {
   .moo-catalog__search-trigger {
     width: 16rem;
+    flex-basis: 16rem;
   }
 }
 
@@ -134,7 +133,17 @@ body {
   border-radius: 50%;
 }
 
+.moo-catalog__theme-toggle [data-moo-theme-icon] {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .moo-catalog__theme-toggle svg {
+  display: block;
   width: 1rem;
   height: 1rem;
 }
@@ -254,7 +263,7 @@ body {
   align-items: center;
   gap: 1rem;
   min-width: 0;
-  flex: 0 0 auto;
+  flex: 1 1 0;
 }
 
 .moo-catalog__sidebar-toggle,
@@ -264,14 +273,6 @@ body {
   --bs-btn-hover-border-color: var(--moo-border);
   --bs-btn-active-border-color: var(--moo-border);
   box-shadow: var(--bs-box-shadow-sm);
-}
-
-@include media-breakpoint-down(md) {
-  .moo-catalog__sidebar-toggle,
-  .moo-catalog__nav-menu-trigger {
-    inline-size: 2.25rem;
-    min-height: 2.25rem;
-  }
 }
 
 .moo-catalog__nav-dropdown .dropdown-menu {
@@ -304,23 +305,31 @@ body {
   background: transparent;
 }
 
+// The Components dropdown trigger reads like the plain nav links around
+// it: same type and color, zeroed button padding. is-current marks the
+// dropdown while any Components/Utilities page is open.
+.moo-catalog__header-nav .moo-catalog__header-nav-trigger {
+  min-height: 1.25rem;
+  padding: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.moo-catalog__header-nav .moo-catalog__header-nav-trigger:hover,
+.moo-catalog__header-nav .moo-catalog__header-nav-trigger.show,
+.moo-catalog__header-nav-dropdown.is-current .moo-catalog__header-nav-trigger {
+  color: var(--bs-body-color);
+  background: transparent;
+}
+
 .moo-catalog__header-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
-}
-
-@include media-breakpoint-up(md) {
-  .moo-catalog__header-start {
-    flex: 1 1 auto;
-  }
-
-  .moo-catalog__header-actions {
-    flex: 0 0 auto;
-    margin-left: auto;
-  }
+  margin-left: auto;
 }
 
 .moo-catalog__main {

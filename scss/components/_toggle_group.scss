@@ -1,0 +1,13 @@
+// Toggle Group uses Bootstrap's native .btn-check + label.btn contract, but
+// selected state should change in place instead of using the generic button
+// press nudge.
+.toggle-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
+  transform: none;
+}
+
+.toggle-group > .btn-check:focus-visible + .btn,
+.toggle-group > .btn-check:checked:focus-visible + .btn {
+  border-color: var(--moo-ring);
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}

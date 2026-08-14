@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Skeleton — Moo UI{% endblock %}
@@ -13,6 +13,25 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-flex align-items-center gap-3">
+        {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
+        <div class="d-grid gap-2">
+          {{ skeleton(width="10rem", height=".875rem") }}
+          {{ skeleton(width="6.5rem", height=".875rem") }}
+        </div>
+      </div>
+    {% endset %}
+    {% set skeleton_usage %}
+      <p>Use <code>.placeholder</code> when a region has not loaded yet but its final structure is already known. Add placeholder shapes where the final avatar, line, field, card media, or table cell will appear, and keep their dimensions close to the loaded content so the page does not jump when data arrives.</p>
+      <p>Control width with grid column classes, width utilities, or an explicit width; control height from the parent text size or with a fixed height when the placeholder stands in for media or controls. Bootstrap placeholders inherit <code>currentColor</code>, can be recolored with background utilities, and can use size modifiers such as <code>.placeholder-lg</code>, <code>.placeholder-sm</code>, and <code>.placeholder-xs</code>.</p>
+      <p>Use <code>.placeholder-glow</code> or <code>.placeholder-wave</code> only when motion helps communicate active loading. Keep skeleton-only markup hidden from assistive technology with <code>aria-hidden</code>, then replace it with the real content and announce the update from the owning view when the change matters to screen reader users.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      skeleton_usage
+    ) }}
+
     {% set basic %}
       {{ skeleton(width="9.5rem", height="1rem") }}
     {% endset %}
@@ -157,7 +176,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-flex align-items-center gap-3" dir="rtl">
+      <div class="d-flex align-items-center gap-3" dir="ltr">
         {{ skeleton(width="2.5rem", height="2.5rem", extra_class="rounded-circle flex-shrink-0") }}
         <div class="d-grid gap-2">
           {{ skeleton(width="10rem", height=".875rem") }}

@@ -34,7 +34,12 @@ class DropdownMenuTests(CatalogTestCase):
         )
         self.assertIn('<ul class="dropdown-menu dropdown-menu-end">', output)
         self.assertIn('class="dropdown-item"', output)
-        self.assertIn('class="dropdown-item text-danger"', output)
+        self.assertRegex(
+            output,
+            r'<button(?=[^>]*\sclass="dropdown-item"(?:\s|>))'
+            r'(?=[^>]*\stype="button"(?:\s|>))'
+            r'(?=[^>]*\sdata-variant="destructive"(?:\s|>))[^>]*>',
+        )
         self.assertIn('data-icon="inline-start"', output)
         self.assertIn('<span class="ms-auto small text-body-secondary">⌘O</span>', output)
 
@@ -130,7 +135,12 @@ class DropdownMenuTests(CatalogTestCase):
             '{{ dropdown_item("Delete", "", "", false, false, true) }}'
         )
 
-        self.assertIn('class="dropdown-item text-danger"', output)
+        self.assertRegex(
+            output,
+            r'<button(?=[^>]*\sclass="dropdown-item"(?:\s|>))'
+            r'(?=[^>]*\stype="button"(?:\s|>))'
+            r'(?=[^>]*\sdata-variant="destructive"(?:\s|>))[^>]*>',
+        )
         self.assertNotIn("ms-auto small", output)
 
     def test_dropdown_fails_fast_for_unknown_contracts(self) -> None:

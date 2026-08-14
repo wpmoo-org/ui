@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from jsonschema import Draft202012Validator
+
+from tests.helpers import npm_env
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,6 +81,29 @@ class CertificationContractTests(unittest.TestCase):
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
         self.assertEqual(manifest["status"], "preview")
         self.assertEqual(manifest["certifiedComponents"], [])
+
+    def test_rc1_manual_acceptance_record_does_not_claim_pass_with_open_checklist(self) -> None:
+        source = (
+            CERTIFICATION_ROOT
+            / "manual-acceptance/2026-08-06-rc1-manual-acceptance.md"
+        ).read_text(encoding="utf-8")
+        devices_section = source.split("## Test Devices", 1)[1].split("## URLs", 1)[0]
+        checked_device_rows = re.findall(
+            r"^- \[X\] (?P<device>[^\n]+)\n(?P<body>(?:  - .+\n)+)",
+            devices_section,
+            flags=re.MULTILINE,
+        )
+
+        self.assertTrue(checked_device_rows)
+        for device, body in checked_device_rows:
+            with self.subTest(device=device):
+                self.assertRegex(
+                    body,
+                    r"Reviewed at \(UTC, ISO-8601\): \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z",
+                )
+                self.assertNotRegex(body, r"iOS version: \d+\.\d+ \d+")
+                if "- Result (passed/failed): passed" in body:
+                    self.assertNotIn("- [ ]", source)
 
     def test_phase_one_evidence_tracks_t0_backfill(self) -> None:
         phase_one = self._read_json("src/certification/phase-1-evidence.json")
@@ -340,6 +366,7 @@ class CertificationContractTests(unittest.TestCase):
                 check=False,
                 capture_output=True,
                 text=True,
+                env=npm_env(),
             )
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
             pack_payload = json.loads(pack_result.stdout)

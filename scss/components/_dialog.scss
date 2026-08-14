@@ -8,6 +8,7 @@
   --bs-modal-border-color: var(--moo-border);
   --bs-modal-header-border-width: 0;
   --bs-modal-footer-border-color: var(--moo-border);
+  --bs-modal-footer-bg: color-mix(in srgb, var(--bs-secondary-bg) 50%, transparent);
   --bs-modal-title-line-height: 1;
 }
 
@@ -36,6 +37,7 @@
 .modal--alert {
   --bs-modal-width: 24rem;
   --bs-modal-padding: 1rem;
+  --bs-modal-footer-bg: color-mix(in srgb, var(--bs-secondary-bg) 50%, transparent);
 }
 
 .modal-header--alert {

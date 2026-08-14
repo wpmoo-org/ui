@@ -93,10 +93,9 @@
   cursor: text;
 }
 
-.combobox-chips:focus-within {
-  border-color: $input-focus-border-color;
-  box-shadow: $input-focus-box-shadow;
-}
+// .combobox-chips's focus-visible ring lives in foundations/_focus.scss,
+// next to the other compound-control rings, instead of here -- see that
+// file's comment for why.
 
 .combobox-value {
   display: flex;

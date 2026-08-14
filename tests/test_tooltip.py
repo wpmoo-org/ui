@@ -8,6 +8,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/tooltip.html.jinja"
 PAGE = ROOT / "site/src/pages/components/tooltip.html.jinja"
+STYLES = ROOT / "scss/components/_tooltip.scss"
 
 # Bootstrap's Tooltip runs data-bs-html content through its own default
 # sanitizer allowlist before it ever reaches the page (see
@@ -15,11 +16,38 @@ PAGE = ROOT / "site/src/pages/components/tooltip.html.jinja"
 # it are removed outright, not merely unwrapped. `sanitize`/`allowList` are
 # also in Bootstrap's DISALLOWED_ATTRIBUTES set, so they cannot be relaxed
 # via data-bs-* attributes — only trusted, allowlisted markup survives.
+#
+# `kbd` is intentionally added to the set the page may use: the catalog
+# tooltip initializer (site/src/js/catalog/bootstrap-preview.js) extends
+# Bootstrap's default allowlist with the kbd tag so the Kbd component's
+# native <kbd> shortcut hints survive data-bs-html sanitization. Every other
+# tag used in an html=true / tooltip_html=true value must stay on this list.
 BOOTSTRAP_DEFAULT_TOOLTIP_ALLOWLIST = {
     "a", "area", "b", "br", "col", "code", "dd", "div", "dl", "dt", "em",
-    "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "img", "li", "ol", "p",
-    "pre", "s", "small", "span", "sub", "sup", "strong", "u", "ul",
+    "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "img", "kbd", "li", "ol",
+    "p", "pre", "s", "small", "span", "sub", "sup", "strong", "u", "ul",
 }
+
+
+def _find_tooltip_html_button_calls(source: str) -> list[str]:
+    # A tooltip value may compose ready macro output (kbd("⌘S")) inside the
+    # call, so a flat button\([^)]*\) regex would stop at the nested paren.
+    # Scan balanced parentheses and return every button(...) call whose
+    # arguments include tooltip_html=true.
+    calls: list[str] = []
+    for match in re.finditer(r"\bbutton\(", source):
+        depth = 1
+        pos = match.end()
+        while depth and pos < len(source):
+            if source[pos] == "(":
+                depth += 1
+            elif source[pos] == ")":
+                depth -= 1
+            pos += 1
+        call = source[match.start():pos]
+        if "tooltip_html=true" in call:
+            calls.append(call)
+    return calls
 
 
 class TooltipTests(CatalogTestCase):
@@ -137,6 +165,18 @@ class TooltipTests(CatalogTestCase):
         self.assertIn("disabled=true", source)
         self.assertIn('dir="rtl"', source)
 
+    def test_intro_uses_component_intro_with_tooltip_trigger(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+        intro_block = source[
+            source.index("{% set intro %}"):
+            source.index("{% endset %}", source.index("{% set intro %}"))
+        ]
+
+        self.assertIn("render_component_intro(", source)
+        self.assertIn("{{ button(", intro_block)
+        self.assertIn("tooltip=", intro_block)
+        self.assertNotIn("tooltip_trigger(", intro_block)
+
     def test_page_mirrors_bootstraps_disabled_element_wrapper_guidance(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
@@ -145,24 +185,37 @@ class TooltipTests(CatalogTestCase):
             r'<span[^>]*data-bs-toggle="tooltip"[^>]*>\s*{{\s*button\("Archive", variant="outline", disabled=true\)\s*}}',
         )
 
-    def test_html_tooltip_examples_only_use_bootstraps_default_allowlisted_tags(
-        self,
-    ) -> None:
+    def test_tooltip_motion_animates_inner_surface_not_popper_wrapper(self) -> None:
+        # Popper writes an inline transform on the tooltip wrapper for
+        # placement. Motion belongs on .tooltip-inner so the opening animation
+        # cannot shift the computed anchor position.
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn("--moo-tooltip-motion-duration", styles)
+        self.assertIn(".tooltip.fade .tooltip-inner", styles)
+        self.assertIn(
+            "transition: transform var(--moo-tooltip-motion-duration) var(--moo-tooltip-motion-easing);",
+            styles,
+        )
+        self.assertIn(".tooltip.show .tooltip-inner", styles)
+        self.assertNotRegex(
+            styles,
+            r"\.tooltip(?:\.fade)?\s*\{[^}]*\btransform\s*:",
+        )
+
+    def test_html_tooltip_examples_only_use_allowlisted_tags(self) -> None:
         # Regression coverage for a real bug caught before shipping: an
         # earlier draft put a <kbd> tag inside a tooltip_html=true tooltip.
-        # Bootstrap's Tooltip sanitizes data-bs-html content through its own
-        # default allowlist (kbd is not on it) and *removes* disallowed
-        # elements entirely, so the shortcut text would have silently
-        # vanished at runtime despite rendering fine in the static page
-        # source. Every tag used inside an html=true / tooltip_html=true
-        # value on this page must stay inside Bootstrap's default allowlist.
+        # Bootstrap's Tooltip sanitizes data-bs-html content through its
+        # default allowlist and *removes* disallowed elements entirely, so
+        # the shortcut text would have silently vanished at runtime despite
+        # rendering fine in the static page source. `kbd` is now explicitly
+        # allowlisted by the catalog tooltip initializer; every other tag
+        # used inside an html=true / tooltip_html=true value on this page
+        # must stay inside the allowlist the page may rely on.
         source = PAGE.read_text(encoding="utf-8")
 
-        html_true_calls = [
-            call
-            for call in re.findall(r"button\([^)]*\)", source)
-            if "tooltip_html=true" in call
-        ]
+        html_true_calls = _find_tooltip_html_button_calls(source)
         self.assertTrue(html_true_calls, "expected at least one tooltip_html=true example")
 
         for call in html_true_calls:
@@ -172,6 +225,6 @@ class TooltipTests(CatalogTestCase):
                 self.assertIn(
                     tag.lower(),
                     BOOTSTRAP_DEFAULT_TOOLTIP_ALLOWLIST,
-                    f"<{tag}> is not in Bootstrap's default Tooltip sanitizer "
-                    "allowlist and would be silently stripped at runtime",
+                    f"<{tag}> is not in the Tooltip sanitizer allowlist "
+                    "and would be silently stripped at runtime",
                 )

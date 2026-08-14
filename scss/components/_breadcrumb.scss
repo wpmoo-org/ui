@@ -4,6 +4,46 @@
 // strength — verified against the live reference page.
 .breadcrumb {
   --bs-breadcrumb-item-active-color: var(--moo-foreground);
+  --bs-breadcrumb-item-padding-x: #{$spacer * 0.375};
+
+  column-gap: var(--bs-breadcrumb-item-padding-x);
+  line-height: 1.25rem;
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  float: none;
+  flex: 0 0 auto;
+}
+
+.breadcrumb-item + .breadcrumb-item {
+  padding-left: 0;
+}
+
+.breadcrumb:not(.breadcrumb--custom-divider) .breadcrumb-item + .breadcrumb-item::before {
+  width: 0.875rem;
+  height: 0.875rem;
+  padding-right: 0;
+  margin-inline-end: var(--bs-breadcrumb-item-padding-x);
+  background-color: var(--moo-muted-foreground);
+  content: "";
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+.breadcrumb--custom-divider .breadcrumb-item + .breadcrumb-item::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  padding-right: 0;
+  margin-inline-end: var(--bs-breadcrumb-item-padding-x);
+  line-height: 1;
 }
 
 // Bootstrap emits these RTL changes through RTLCSS. The catalog serves one
@@ -13,14 +53,18 @@
 }
 
 :dir(rtl) .breadcrumb-item + .breadcrumb-item {
-  padding-right: var(--bs-breadcrumb-item-padding-x);
+  padding-right: 0;
   padding-left: 0;
 }
 
 :dir(rtl) .breadcrumb-item + .breadcrumb-item::before {
-  float: right;
   padding-right: 0;
-  padding-left: var(--bs-breadcrumb-item-padding-x);
+  padding-left: 0;
+}
+
+:dir(rtl) .breadcrumb:not(.breadcrumb--custom-divider) .breadcrumb-item + .breadcrumb-item::before {
+  padding-left: 0;
+  transform: scaleX(-1);
 }
 
 .breadcrumb-item a {
@@ -51,26 +95,36 @@
 // item that sits beside a floated divider, a block box wraps its content
 // onto its own line instead of flowing beside the float. Making this
 // wrapper an atomic inline-flex box keeps it on the breadcrumb's line.
-.breadcrumb-dropdown-item {
+.breadcrumb-dropdown-item,
+.breadcrumb-dropdown-item .dropdown {
   display: inline-flex;
   align-items: center;
 }
 
-// The ready Dropdown macro only exposes an extra_class hook on its own
-// outer wrapper, not on the trigger button it renders internally, so the
-// button is reached here by element rather than by reopening Bootstrap's
-// own button/dropdown selector namespace. Bootstrap's link-styled button
-// variant also keeps full button padding; a breadcrumb segment that opens
-// a dropdown needs to read as inline text like its sibling links.
-.breadcrumb-dropdown-item button {
+.breadcrumb-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacer * 0.25;
   padding: 0;
   border: 0;
   background-color: transparent;
   color: var(--moo-muted-foreground);
+  font: inherit;
+  line-height: 1.25rem;
   text-decoration: none;
 }
 
-.breadcrumb-dropdown-item button:hover,
-.breadcrumb-dropdown-item button:focus {
+.breadcrumb-dropdown-trigger:hover,
+.breadcrumb-dropdown-trigger:focus {
   color: var(--moo-foreground);
+}
+
+.breadcrumb .breadcrumb-dropdown-trigger:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.breadcrumb-dropdown-trigger > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
 }

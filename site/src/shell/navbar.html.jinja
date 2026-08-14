@@ -1,9 +1,7 @@
 {% from "components/button.html.jinja" import button %}
-{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
-{% from "components/navigation.html.jinja" import nav_item, nav_menu %}
 {% from "components/sidebar.html.jinja" import sidebar_trigger %}
 
 {% macro _command_item(href, label) -%}
@@ -18,33 +16,19 @@
   </a>
 {%- endmacro %}
 
+{#- The sidebar (shell/sidebar.html.jinja) owns every top-level page link
+   now -- Home, Docs, Components, Blocks, Examples. The navbar is header
+   chrome only: sidebar toggle, search, theme, GitHub, matching the
+   reference admin shell's minimal top bar. #}
 <header class="moo-catalog__header">
   <nav class="navbar moo-catalog__navbar" aria-label="Catalog controls">
     <div class="container-fluid moo-catalog__navbar-inner">
       <div class="moo-catalog__header-start">
         {{ sidebar_trigger(sidebar_id="catalog-sidebar", extra_class="moo-catalog__sidebar-toggle") }}
-        <div class="dropdown moo-catalog__nav-dropdown d-md-none">
-          {{ button("", variant="ghost", size="icon-sm", element="button", aria_label="Toggle navigation menu", icon_start="menu", dropdown=true, extra_class="moo-catalog__nav-menu-trigger") }}
-          {% call dropdown_menu() %}
-            {{ dropdown_item("Home", href=site_href("index.html", root_path)) }}
-            {{ dropdown_item("Docs", href=site_href("introduction.html", root_path)) }}
-            {{ dropdown_item("Components", href=site_href("components/index.html", root_path)) }}
-            {{ dropdown_item("Blocks", href=site_href("blocks/index.html", root_path)) }}
-          {% endcall %}
-        </div>
-        {% call nav_menu("Catalog navigation", style="base", extra_class="moo-catalog__header-nav d-none d-md-flex") %}
-          {{ nav_item("Home", href=site_href("index.html", root_path)) }}
-          {{ nav_item("Docs", href=site_href("introduction.html", root_path)) }}
-          {{ nav_item("Components", href=site_href("components/index.html", root_path)) }}
-          {{ nav_item("Blocks", href=site_href("blocks/index.html", root_path)) }}
-        {% endcall %}
-      </div>
-
-      <div class="moo-catalog__header-actions">
         {#- Always visible (label included, icon-only nowhere) rather than
            d-none, so search/the command palette stays reachable at every
-           width even once the primary nav is hidden; the shortcut hint
-           still collapses below md. #}
+           width; the shortcut hint remains part of the same control instead
+           of introducing a breakpoint jump. #}
         {% set search_trigger_label %}
           <span class="moo-catalog__search-trigger-lead">
             {{ render_icon("search", "inline-start") }}
@@ -52,7 +36,7 @@
           </span>
           {#- Real shortcut, not decoration: Cmd/Ctrl+K opens this same
              command palette through the catalog command module. #}
-          <span class="moo-catalog__search-trigger-shortcut d-none d-md-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
+          <span class="moo-catalog__search-trigger-shortcut d-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
         {% endset %}
         {{ button(
           search_trigger_label | safe,
@@ -62,6 +46,9 @@
           aria_label="Search documentation",
           extra_class="moo-catalog__search-trigger"
         ) }}
+      </div>
+
+      <div class="moo-catalog__header-actions">
         <button
           class="btn btn-ghost btn-icon moo-catalog__theme-toggle"
           type="button"

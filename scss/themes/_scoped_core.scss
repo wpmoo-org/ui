@@ -94,12 +94,29 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-surface: #{$moo-surface};
   --moo-muted-surface: #{$moo-muted-surface};
   --moo-border: #{$moo-border};
+  --moo-primary: #{$moo-primary};
+  --moo-primary-foreground: #{$moo-primary-foreground};
   --moo-foreground: #{$moo-foreground};
   --moo-muted-foreground: #{$moo-muted-foreground};
   --moo-disabled-foreground: #{$moo-disabled-foreground};
   --moo-ring: #{$moo-ring};
   --moo-destructive: #{$moo-destructive};
+  --moo-destructive-surface: #{$moo-destructive-surface};
+  --moo-destructive-surface-hover: #{$moo-destructive-surface-hover};
   --moo-destructive-foreground: #{$moo-destructive-foreground};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};
+  --moo-warning: #{$moo-warning};
+  --moo-warning-surface: #{$moo-warning-surface};
+  --moo-warning-surface-hover: #{$moo-warning-surface-hover};
+  --moo-warning-foreground: #{$moo-warning-foreground};
+  --moo-success: #{$moo-success};
+  --moo-success-surface: #{$moo-success-surface};
+  --moo-success-surface-hover: #{$moo-success-surface-hover};
+  --moo-success-foreground: #{$moo-success-foreground};
+  --moo-info: #{$moo-info};
+  --moo-info-surface: #{$moo-info-surface};
+  --moo-info-surface-hover: #{$moo-info-surface-hover};
+  --moo-info-foreground: #{$moo-info-foreground};
   --moo-sidebar: #{$moo-sidebar};
   --#{$prefix}body-color: var(--moo-foreground);
   --#{$prefix}body-color-rgb: #{to-rgb($moo-foreground)};
@@ -127,8 +144,8 @@ $moo-theme-colors-border-subtle-dark: (
   --#{$prefix}border-color-translucent: #{$border-color-translucent};
   --#{$prefix}form-valid-color: #{$form-valid-color};
   --#{$prefix}form-valid-border-color: #{$form-valid-border-color};
-  --#{$prefix}form-invalid-color: #{$form-invalid-color};
-  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color};
+  --#{$prefix}form-invalid-color: var(--moo-destructive);
+  --#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color};
 
   @each $color, $value in $theme-colors-text {
     --#{$prefix}#{$color}-text-emphasis: #{$value};
@@ -150,12 +167,29 @@ $moo-theme-colors-border-subtle-dark: (
   --moo-surface: #{$moo-surface-dark};
   --moo-muted-surface: #{$moo-muted-surface-dark};
   --moo-border: #{$moo-border-dark};
+  --moo-primary: #{$moo-primary-dark};
+  --moo-primary-foreground: #{$moo-primary-foreground-dark};
   --moo-foreground: #{$moo-foreground-dark};
   --moo-muted-foreground: #{$moo-muted-foreground-dark};
   --moo-disabled-foreground: #{$moo-disabled-foreground-dark};
   --moo-ring: #{$moo-ring-dark};
   --moo-destructive: #{$moo-destructive-dark};
+  --moo-destructive-surface: #{$moo-destructive-surface-dark};
+  --moo-destructive-surface-hover: #{$moo-destructive-surface-hover-dark};
   --moo-destructive-foreground: #{$moo-destructive-foreground-dark};
+  --moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};
+  --moo-warning: #{$moo-warning-dark};
+  --moo-warning-surface: #{$moo-warning-surface-dark};
+  --moo-warning-surface-hover: #{$moo-warning-surface-hover-dark};
+  --moo-warning-foreground: #{$moo-warning-foreground-dark};
+  --moo-success: #{$moo-success-dark};
+  --moo-success-surface: #{$moo-success-surface-dark};
+  --moo-success-surface-hover: #{$moo-success-surface-hover-dark};
+  --moo-success-foreground: #{$moo-success-foreground-dark};
+  --moo-info: #{$moo-info-dark};
+  --moo-info-surface: #{$moo-info-surface-dark};
+  --moo-info-surface-hover: #{$moo-info-surface-hover-dark};
+  --moo-info-foreground: #{$moo-info-foreground-dark};
   --moo-sidebar: #{$moo-sidebar-dark};
   --#{$prefix}body-color: var(--moo-foreground);
   --#{$prefix}body-color-rgb: #{to-rgb($moo-foreground-dark)};
@@ -183,8 +217,8 @@ $moo-theme-colors-border-subtle-dark: (
   --#{$prefix}border-color-translucent: #{$border-color-translucent-dark};
   --#{$prefix}form-valid-color: #{$form-valid-color-dark};
   --#{$prefix}form-valid-border-color: #{$form-valid-border-color-dark};
-  --#{$prefix}form-invalid-color: #{$form-invalid-color-dark};
-  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color-dark};
+  --#{$prefix}form-invalid-color: var(--moo-destructive);
+  --#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color-dark};
 
   @each $color, $value in $moo-theme-colors-text-dark {
     --#{$prefix}#{$color}-text-emphasis: #{$value};

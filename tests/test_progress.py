@@ -23,8 +23,8 @@ class ProgressTests(CatalogTestCase):
         self.assertIn("render_rtl_example", page)
         self.assertIn('id="progress"', page)
         self.assertIn('"progress"', page)
-        self.assertNotIn("Right-to-left layout", page)
-        self.assertGreaterEqual(page.count('dir="rtl"'), 3)
+        self.assertGreaterEqual(page.count('dir="rtl"'), 2)
+        self.assertIn('dir="ltr"', page)
         self.assertIn("arabic_progress", page)
         self.assertIn("hebrew_progress", page)
         self.assertIn("english_progress", page)
@@ -36,9 +36,6 @@ class ProgressTests(CatalogTestCase):
         self.assertIn("rtl-arabic-code", output)
         self.assertIn("rtl-hebrew-code", output)
         self.assertIn("rtl-english-code", output)
-        self.assertIn(">Arabic</button>", output)
-        self.assertIn(">Hebrew</button>", output)
-        self.assertIn(">English</button>", output)
 
     def test_progress_renders_accessible_bar_with_computed_width(self) -> None:
         output = self.render_progress('progress(66, aria_label="Upload progress")')

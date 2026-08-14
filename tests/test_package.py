@@ -8,6 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.helpers import npm_env
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIST = ROOT / "dist"
@@ -56,6 +58,7 @@ class PackageMetadataTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=npm_env(),
         )
         if result.returncode:
             raise AssertionError(result.stderr)
@@ -192,12 +195,32 @@ class PackageMetadataTests(unittest.TestCase):
             check=False,
             capture_output=True,
             text=True,
+            env=npm_env(),
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         packed_files = {entry["path"] for entry in payload[0]["files"]}
         self.assertEqual(packed_files, EXPECTED_PACKAGE_FILES | {"package.json"})
+
+    def test_published_notices_references_are_version_pinned_urls(self) -> None:
+        package = self._read_package()
+        expected_url = (
+            f"https://github.com/wpmoo-org/ui/blob/v{package['version']}/"
+            "THIRD_PARTY_NOTICES.md"
+        )
+        moving_branch_pattern = (
+            r"https://github\.com/wpmoo-org/ui/blob/"
+            r"(?:main|dev|release/[^/]+)/THIRD_PARTY_NOTICES\.md"
+        )
+
+        for package_file in ("README.md", "ASSET_LICENSE.md"):
+            with self.subTest(package_file=package_file):
+                document = (ROOT / package_file).read_text(encoding="utf-8")
+
+                self.assertIn(expected_url, document)
+                self.assertNotIn("`THIRD_PARTY_NOTICES.md`", document)
+                self.assertNotRegex(document, moving_branch_pattern)
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [
@@ -282,6 +305,7 @@ class PackageMetadataTests(unittest.TestCase):
                 check=False,
                 capture_output=True,
                 text=True,
+                env=npm_env(),
             )
 
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
@@ -375,6 +399,7 @@ for (const specifier of [
                 check=False,
                 capture_output=True,
                 text=True,
+                env=npm_env(),
             )
             self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
             pack_payload = json.loads(pack_result.stdout)

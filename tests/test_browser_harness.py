@@ -31,16 +31,36 @@ class BrowserHarnessEngineSelectionTests(unittest.TestCase):
         environment = {
             key: value
             for key, value in os.environ.items()
-            if key != "MOO_UI_BROWSER_ENGINE"
+            if key not in {"MOO_UI_BROWSER_ENGINE", "MOO_UI_BROWSER_CHANNEL"}
         }
         with mock.patch.dict(os.environ, environment, clear=True):
             # The engine check passes for the default and proceeds toward a
             # Chromium launch; stub the launcher so no browser actually starts.
             playwright = mock.Mock()
             launch_certification_browser(playwright)
-        playwright.chromium.launch.assert_called_once()
+        playwright.chromium.launch.assert_called_once_with()
         playwright.firefox.launch.assert_not_called()
         playwright.webkit.launch.assert_not_called()
+
+    def test_chromium_channel_can_select_branded_or_bundled_browser(self) -> None:
+        for channel, expected_kwargs in (
+            ("chrome", {"channel": "chrome"}),
+            ("bundled", {}),
+            ("playwright", {}),
+        ):
+            with self.subTest(channel=channel):
+                playwright = mock.Mock()
+                with mock.patch.dict(
+                    os.environ,
+                    {
+                        "MOO_UI_BROWSER_ENGINE": "chromium",
+                        "MOO_UI_BROWSER_CHANNEL": channel,
+                    },
+                ):
+                    launch_certification_browser(playwright)
+                playwright.chromium.launch.assert_called_once_with(**expected_kwargs)
+                playwright.firefox.launch.assert_not_called()
+                playwright.webkit.launch.assert_not_called()
 
     def test_supported_non_chromium_engines_use_selected_launcher(self) -> None:
         for engine in ("firefox", "webkit"):

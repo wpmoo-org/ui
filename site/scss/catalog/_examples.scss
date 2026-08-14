@@ -40,16 +40,20 @@
 .moo-doc-page-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.375rem;
   margin-inline-start: auto;
 }
 
-.moo-doc-page-actions .btn {
+.moo-doc-page-actions__nav .btn {
   background: var(--bs-tertiary-bg);
 }
 
-.moo-doc-page-actions .btn:hover {
+.moo-doc-page-actions__nav .btn:hover {
   background: var(--bs-secondary-bg);
+}
+
+.moo-doc-page-actions .btn:is(.btn-xs, .btn-sm)[data-moo-copy-page]:has(> [data-icon="inline-start"]) {
+  padding-inline-start: var(--bs-btn-padding-x);
 }
 
 .moo-doc-page-actions .btn-group > .btn + .btn {
@@ -58,7 +62,7 @@
 
 .moo-doc-page-actions__nav {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .moo-doc-pagination {
@@ -83,6 +87,13 @@
 }
 
 .moo-example+.moo-example {
+  margin-top: 3rem;
+}
+
+// Portal content (toast containers, etc.) rendered between sections breaks
+// the .moo-example+.moo-example adjacency. Restore spacing when a single
+// portal element sits between two examples.
+.moo-example + * + .moo-example {
   margin-top: 3rem;
 }
 
@@ -113,6 +124,19 @@
 
 .moo-component-examples > .table-responsive .table {
   line-height: var(--moo-doc-table-line-height);
+}
+
+.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) {
+  min-width: 64rem;
+}
+
+.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) :is(th, td):first-child {
+  width: 22rem;
+  min-width: 22rem;
+}
+
+.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) :is(th, td):last-child {
+  min-width: 34rem;
 }
 
 .moo-example__surface {
@@ -169,6 +193,15 @@
   max-width: 30rem;
 }
 
+.moo-example__preview-frame {
+  width: 100%;
+  max-width: var(--moo-example-preview-frame-width, 28rem);
+}
+
+.moo-example__preview-frame--wide {
+  --moo-example-preview-frame-width: 34rem;
+}
+
 .moo-example__preview--narrow > :is(
   .accordion,
   .alert,
@@ -220,4 +253,103 @@
 
 .moo-example__preview--shell>* {
   width: 100%;
+}
+
+// Examples section pages are full-width app screens, not doc articles:
+// no 52rem reading measure and no reserved TOC column. Vertical rhythm
+// matches the doc pages' 3rem section gap. Children must be allowed to
+// shrink below their intrinsic width (grid items default to
+// min-width: auto), so the Data Table's own horizontal scroll-fade
+// engages instead of the table stretching the whole page.
+.moo-examples-page {
+  display: grid;
+  gap: 3rem;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+// App-toolbar header: title and copy on the left, primary action on the
+// right, wrapping as a unit on narrow viewports. The copy shrinks (and
+// its paragraph wraps) so the action stays on the title row while there
+// is room.
+.moo-examples-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.moo-examples-header > :first-child {
+  // A shrinkable basis (not auto): the wrap decision runs on the flex
+  // base size, so an auto basis would keep the copy's full one-line
+  // width and push the action onto its own row even when there is
+  // room to share.
+  flex: 1 1 24rem;
+  min-width: 0;
+}
+
+// The package's modal--alert contract is a compact 24rem confirmation;
+// the Tasks delete dialog carries a full sentence plus the task title,
+// so it reads better at the regular Dialog width.
+#tasks-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+// The per-row copy joins two sentences with a line break; the default
+// description collapses whitespace, so opt this dialog into pre-line.
+#tasks-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+
+// The Card "Edge-to-edge content" example mirrors the reference: the body
+// scrolls inside a strip that bleeds to the card edges. The negative margins
+// pull the strip to the card edges (and flush against a following footer) by
+// the card's own --moo-card-spacing inset; this rule owns that arithmetic plus
+// the scroll surface and hairline that make the strip read as a distinct
+// section, lighter than the footer's muted strip.
+.card-scroll {
+  margin-inline: calc(-1 * var(--moo-card-spacing));
+  margin-block-end: calc(-1 * var(--moo-card-spacing));
+  max-height: 12rem;
+  padding: var(--moo-card-spacing);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.625;
+  border-top: var(--bs-border-width) solid var(--bs-card-border-color);
+  background-color: var(--moo-surface);
+}
+
+// The Card "Size" example mirrors the reference's scheduled-reports list:
+// a compact stacked list with a leading chevron glyph per row.
+.moo-card-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.moo-card-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.moo-card-list__icon {
+  display: inline-flex;
+  margin-top: 0.125rem;
+  flex: 0 0 auto;
+  color: var(--moo-muted-foreground);
+}
+
+.moo-card-list__icon [data-icon] {
+  width: 1rem;
+  height: 1rem;
 }

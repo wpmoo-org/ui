@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Typography — Moo UI{% endblock %}
@@ -13,6 +13,24 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      <div class="d-grid gap-2 text-center">
+        {{ typography("Build with character", variant="page-title") }}
+        <h5 class="mb-0">Readable portals feel calm</h5>
+        <p class="fst-italic text-body-secondary mb-0">"Whitespace has a job"</p>
+      </div>
+    {% endset %}
+    {% set typography_usage %}
+      <p>Use semantic headings, paragraphs, lists, and Bootstrap text utilities to keep document structure and visual hierarchy working together. Choose the HTML element first, then apply the typography role or utility that matches the visual level the interface needs.</p>
+      <p>Keep heading levels meaningful for screen readers, search indexing, and in-page navigation. Use muted text for supporting copy, section labels for small categorical context, and display sizes only when a heading needs more presence than the surrounding content hierarchy.</p>
+      <p>Use utility classes when the visual size must differ from the HTML element, such as a paragraph styled as a heading inside a compact card. Keep body copy readable, avoid decorative over-scaling in dense app screens, and let whitespace separate ideas instead of adding extra frames.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      typography_usage,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
     {% set headings %}
       <div class="d-grid gap-3">
         {{ typography("Product Console", variant="page-title") }}
@@ -325,7 +343,7 @@
     {% endset %}
 
     {% set typography_rtl_english %}
-      <div dir="rtl" class="d-grid gap-3">
+      <div dir="ltr" class="d-grid gap-3">
         {{ typography("Daily audit checklist", variant="section-title") }}
         <p class="lead mb-0">Every shift begins with a clear review of key signals and reporting safety.</p>
         <p class="mb-0 text-body-secondary">The summary refreshes at <strong>UTC 07:00</strong>, then open items are reviewed in order.</p>

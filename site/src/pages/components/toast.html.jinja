@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/toast.html.jinja" import toast, toast_container %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% block title %}Toast — Moo UI{% endblock %}
 
@@ -13,6 +13,23 @@
   ) }}
 
   <div class="moo-component-examples">
+    {% set intro %}
+      {{ button("Show toast", variant="outline", toast_target="toast-intro") }}
+      {% call toast_container(placement="bottom-end") %}
+        {{ toast("toast-intro", "Workflow", "Backup completed successfully.", timestamp="just now") }}
+      {% endcall %}
+    {% endset %}
+    {% set toast_usage %}
+      <p>Use <code>.toast</code> for short, temporary updates that should be noticed without interrupting the current page. Place toasts inside a fixed <code>.toast-container</code>, trigger them from the action or event that produced the update, and keep each message concise enough to read before it disappears.</p>
+      <p>Choose live-region priority based on urgency: routine success or sync messages should be polite, while urgent interruptions can be assertive. Keep persistent toasts dismissible when acknowledgement is required, and avoid using toast alone for errors that the user must fix inside a form.</p>
+      <p>Bootstrap Toast owns reveal, autohide, dismissal, stacking, and placement behavior. Keep related toasts in one container, use timestamps only when they add useful context, and make sure the same information is still available elsewhere if it affects a durable workflow state.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      toast_usage,
+      "moo-example__preview--narrow"
+    ) }}
+
     {% set basic %}
       {{ button("Show approval toast", variant="outline", toast_target="toast-basic") }}
     {% endset %}
@@ -24,7 +41,7 @@
     {{ render_example(
       "basic",
       "Basic",
-      "Point a Button's <code>data-moo-toast-target</code> at the rendered toast ID; the catalog adapter initializes Bootstrap Toast for the preview while Bootstrap owns reveal and dismissal behavior.",
+      "Point a trigger at the rendered toast ID; Bootstrap owns reveal and dismissal behavior.",
       basic,
       portal_content=basic_toast
     ) }}
@@ -88,7 +105,7 @@
     {% endset %}
 
     {% set rtl_english %}
-      <div class="d-inline-flex" dir="rtl">
+      <div class="d-inline-flex" dir="ltr">
         {{ button("Show review toast", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-english") }}
       </div>
     {% endset %}
