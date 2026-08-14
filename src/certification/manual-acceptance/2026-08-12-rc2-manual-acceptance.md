@@ -14,33 +14,37 @@ commits.
 
 ## Build Under Review
 
-- HTML repository commit: `e662f40ba3d9bc90bd799db6527e91aeb049209e`
+- HTML repository commit: `50f2f04c5751d0f1c76ce3bde83106b104f0cfa6`
 - Root workspace commit at evidence capture: `03b0b9e5e5aa6512813d78819e06af040c740a61`
 - Package version: `1.0.0-rc.2`
-- Package tarball sha256: `e5b7192e572704fc92beb78b4eb784d89ebaf570beadcdfbdf5a59e8604a9d70`
+- Package tarball sha256: `2683a69f8d3714916ee3e7bf10ac03bab94c25b88dac71aa12335aa98eb3f8c6`
 - Conformance kit sha256: `969550911564fe24797ba67bce26f003adb9c6245dea7c311d205b9705c33328`
 - Certification manifest sha256: `1ed562c90906bf791b674970e4b9222259b597039b08b627f5f31c636b3f4f88`
-- Certification attestation sha256: `099c7e7eae1f1713ec734e65a29a75e8aa5f3d22607a690c0992c8cceb1ea91f`
+- Certification attestation sha256: `bc5d2b013e150b212de6c26571315654aaee1d7552fcc2f1b35c3cafca8d9b6a`
 - Catalog URL: `http://localhost:4174/`
 - Acceptance portal: `http://localhost:4174/acceptance/rc2/`
 - Reviewer: Ahmet Cangir
 - Acceptance export generated at (UTC, ISO-8601): `2026-08-12T22:34:20.510Z`
-- Build metadata captured at (UTC, ISO-8601): `2026-08-14T00:24:35Z`
+- Build metadata captured at (UTC, ISO-8601): `2026-08-14T00:47:51Z`
 
 Note: the 420/420 acceptance export above was captured against the earlier
-`089eb2f` build. The code changes between `089eb2f` and `e662f40` (this
-record's build-under-review) are: two documentation/path-only commits, a
-password-value validation guard on `input()` that no accepted example
-triggers, and the PR-review fixes in `fde8eb5` (icon-button sizing, tabs
-wrapper class, tabs gap token, input-group aria-label, and a datatable
-orphaned-menu cleanup) — all bug fixes restoring previously-accepted
-behavior or fixing non-visible defects, not new visual/interaction changes.
-No re-acceptance pass was performed against `e662f40` specifically.
+`089eb2f` build. The code changes between `089eb2f` and `50f2f04` (this
+record's build-under-review) are all bug fixes restoring previously-accepted
+behavior or fixing non-visible defects, not new visual/interaction changes:
+a password-value validation guard on `input()` that no accepted example
+triggers (`fde8eb5`); PR-review fixes for icon-button sizing, the tabs
+wrapper class, tabs gap token, input-group aria-label, and an initial
+datatable orphaned-menu cleanup (`fde8eb5`); card-view row-action dropdowns
+gaining the same fixed Popper config as table view, and `dispose()` now
+cleaning up any open row-action Dropdown instance (`da51558`); plus
+documentation-only and generated-baseline-refresh commits with no rendered
+or behavioral effect. No re-acceptance pass was performed against `50f2f04`
+specifically.
 
 ## Rehearsal Artifacts
 
 These hashes were produced by `python3 scripts/rehearse-rc.py` from the clean
-`e662f40ba3d9bc90bd799db6527e91aeb049209e` build-under-review commit.
+`50f2f04c5751d0f1c76ce3bde83106b104f0cfa6` build-under-review commit.
 
 - Package: `dist/rc-rehearsal/wpmoo-ui-1.0.0-rc.2.tgz`
 - Conformance kit: `dist/rc-rehearsal/conformance-kit/moo-ui-conformance-kit-1.0.tar.gz`
