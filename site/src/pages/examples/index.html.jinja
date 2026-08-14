@@ -1,10 +1,21 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/card.html.jinja" import card %}
+{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/input_group.html.jinja" import input_group, input_group_text %}
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/typography.html.jinja" import typography %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
 {% set example_descriptions = {
-  "tasks": "A work queue with search, sorting, list/card views, and a New Task action on Data Table."
+  "auth/forgot-password": "Request a password reset link from a full-bleed auth screen.",
+  "auth/sign-in": "Email and password sign-in, with links to Sign Up and Forgot Password.",
+  "auth/sign-up": "Create an account with name, email, and password.",
+  "settings/profile": "Update profile details — name, email, and bio.",
+  "settings/account": "Change language and timezone preferences.",
+  "settings/appearance": "Toggle compact mode, avatars, and email digests.",
+  "dashboard/tasks": "A work queue with search, sorting, list/card views, and a New Task action on Data Table."
 } %}
 
 {% block title %}Examples — Moo UI{% endblock %}
@@ -20,20 +31,45 @@
       ) }}
 
       <section class="moo-catalog__dashboard" aria-label="Examples">
-        <div class="moo-catalog__grid" id="examples-grid">
-          {% for example in examples %}
-            {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
-              <div>
-                <h2 class="h5 mb-2">
-                  <a class="stretched-link text-body text-decoration-none" href="{{ site_href("examples/" ~ example.slug ~ ".html", root_path) }}">{{ example.label }}</a>
-                </h2>
-                <p class="text-body-secondary mb-0">
-                  {{ example_descriptions.get(example.slug, example.description) }}
-                </p>
-              </div>
-            {% endcall %}
-          {% endfor %}
+        <div class="moo-catalog__toolbar">
+          {% call input_group() %}
+            {{ input(
+              aria_label="Filter examples",
+              id="examples-search",
+              type="search",
+              placeholder="Filter examples..."
+            ) }}
+            {{ input_group_text(render_icon("search", "inline-start")) }}
+          {% endcall %}
+          {% call dropdown("All examples", align="end", extra_class="moo-catalog__status-menu", caret=true) %}
+            {{ dropdown_item("All examples", active=true, attrs='data-moo-catalog-section-filter="all"') }}
+            {% for category in examples | map(attribute="category") | unique | sort %}
+              {{ dropdown_item(category, attrs='data-moo-catalog-section-filter="' ~ (category | lower) ~ '"') }}
+            {% endfor %}
+          {% endcall %}
         </div>
+
+        {{ separator(extra_class="my-4") }}
+
+        {% for category, items in examples | groupby("category") %}
+          <section{% if not loop.first %} class="mt-5"{% endif %} aria-labelledby="examples-{{ category | lower }}" data-moo-catalog-section="{{ category | lower }}">
+            {{ typography(category, variant="section-title", id="examples-" ~ (category | lower)) }}
+            <div class="moo-catalog__grid">
+              {% for example in items %}
+                {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
+                  <div>
+                    <h2 class="h5 mb-2">
+                      <a class="stretched-link text-body text-decoration-none" href="{{ site_href("examples/" ~ example.slug ~ ".html", root_path) }}">{{ example.label }}</a>
+                    </h2>
+                    <p class="text-body-secondary mb-0">
+                      {{ example_descriptions.get(example.slug, example.description) }}
+                    </p>
+                  </div>
+                {% endcall %}
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
       </section>
 
       {{ render_section_page_pagination("examples", site_pages, root_path) }}

@@ -36,21 +36,6 @@
   }) %}
 {% endfor %}
 
-{% set example_children = [{
-  "label": "Overview",
-  "href": "examples/index.html",
-  "icon": "layout-grid",
-  "active": examples_open and current_slug == "index"
-}] %}
-{% for example in examples %}
-  {% set _ = example_children.append({
-    "label": example.label,
-    "href": "examples/" ~ example.slug ~ ".html",
-    "icon": "list-checks",
-    "active": examples_open and current_slug == example.slug
-  }) %}
-{% endfor %}
-
 {% set catalog_items = [
   {"kind": "submenu", "id": "shell-components-menu", "label": "Components", "icon": "component", "open": components_open, "active": components_open, "children": component_children},
   {"kind": "link", "label": blocks_page.label, "href": blocks_page.href, "icon": blocks_page.icon, "active": current_section == "blocks"}
@@ -78,7 +63,7 @@
   }) %}
 {% endfor %}
 
-{% set examples_entry = {"kind": "submenu", "id": "shell-examples-menu", "label": "Examples", "icon": "list-todo", "open": examples_open, "active": examples_open, "children": example_children} %}
+{% set examples_entry = {"kind": "link", "label": "Examples", "href": "examples/index.html", "icon": "list-todo", "active": examples_open} %}
 
 {% set nav_groups = [
   {

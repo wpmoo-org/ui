@@ -1,29 +1,25 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "blocks/datatable_tasks.html.jinja" import render_task_sheet, render_task_delete_dialog, render_tasks_table %}
 {% from "components/button.html.jinja" import button %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+
+{% set page_category = "Dashboard" %}
 
 {% block title %}Tasks — Moo UI{% endblock %}
 
 {% block content %}
   {#- Examples pages are full-width app screens: no doc reading measure,
-     no TOC column, and no component-docs header chrome. The header is a
-     plain app toolbar: title and copy on the left, primary action right.
-     The table is a live, in-browser workspace: New Task opens a sheet
-     form, rows can be opened, edited, copied, and deleted, and bulk
-     selection works — all client-side, nothing is stored. #}
+     no TOC column. The table is a live, in-browser workspace: New Task
+     opens a sheet form, rows can be opened, edited, copied, and deleted,
+     and bulk selection works — all client-side, nothing is stored. #}
   <div class="moo-examples-page" data-moo-example-tasks>
-    <header class="moo-examples-header">
-      <div>
-        <h1 class="h4 mb-1" id="tasks">Tasks</h1>
-        <p class="text-body-secondary mb-0">
-          A live work queue — changes stay in your browser.
-        </p>
-      </div>
-      <div data-moo-new-task-slot>
-        {{ button("New Task", icon_start="plus", element="button", sheet_target="tasks-new-sheet") }}
-      </div>
-    </header>
+    {{ render_page_header(
+      "Tasks",
+      "A live work queue — changes stay in your browser.",
+      id="tasks",
+      actions=button("New Task", icon_start="plus", element="button", sheet_target="tasks-new-sheet")
+    ) }}
 
     {{ render_tasks_table(id="examples-tasks-datatable") }}
 
@@ -39,7 +35,7 @@
       components.
     </p>
 
-    {{ render_section_page_pagination("tasks", site_pages, root_path) }}
+    {{ render_section_page_pagination("dashboard/tasks", site_pages, root_path) }}
 
     {{ render_task_sheet() }}
     {{ render_task_delete_dialog() }}
