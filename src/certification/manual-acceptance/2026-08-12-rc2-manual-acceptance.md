@@ -1,7 +1,13 @@
 # Moo UI 1.0.0-rc.2 Manual Acceptance
 
 Generated: 2026-08-12
-Status: Accepted - 420/420
+Status: Accepted - 420/420 for the visual/interaction pass only, captured
+against commit `089eb2f`. Every later "Build Under Review" commit recorded
+below (including the current one) carries rehearsal-verified, source-backed
+bug fixes on top of `089eb2f` — confirmed by tests and a clean rehearsal,
+not by a repeated human visual/interaction pass. Do not read the 420/420
+result as acceptance evidence for any commit after `089eb2f` specifically;
+see the note under Build Under Review for the exact delta.
 Scope: Release-candidate visual and interaction acceptance for Moo UI Core
 `1.0.0-rc.2` after the post-rc1 catalog polish and rc2 review follow-up
 commits.
