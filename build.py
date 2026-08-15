@@ -409,6 +409,10 @@ def block_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("blocks", slug, root_path)
 
 
+def example_preview_src(slug: str, root_path: str) -> str:
+    return _preview_src("examples", slug, root_path)
+
+
 PAGE_META_SET = re.compile(
     r"\{%\s*set\s+(?P<name>page_(?:title|description|image|image_alt|category))\s*=\s*"
     r"(?P<quote>['\"])(?P<value>.*?)(?P=quote)\s*%\}",
@@ -674,6 +678,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
     environment.globals["block_preview_src"] = block_preview_src
+    environment.globals["example_preview_src"] = example_preview_src
     icon_set = load_lucide_icons()
     lucide_renderer = lambda name, position: render_lucide_icon(
         icon_set,

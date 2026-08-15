@@ -5,6 +5,7 @@
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/example-previews.html.jinja" import example_preview %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
@@ -57,6 +58,9 @@
             <div class="moo-catalog__grid">
               {% for example in items %}
                 {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
+                  <div class="moo-catalog__showcase-preview moo-catalog__example-preview">
+                    {{ example_preview(example.slug, root_path) }}
+                  </div>
                   <div>
                     <h2 class="h5 mb-2">
                       <a class="stretched-link text-body text-decoration-none" href="{{ site_href("examples/" ~ example.slug ~ ".html", root_path) }}">{{ example.label }}</a>
