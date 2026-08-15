@@ -1,0 +1,57 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/field.html.jinja" import field, field_description, field_group, fieldset, form %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/textarea.html.jinja" import textarea %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+{% from "includes/settings-nav.html.jinja" import render_settings_nav %}
+
+{% set page_category = "Settings" %}
+
+{% block title %}Profile — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-examples-page" data-moo-example-settings>
+    {{ render_page_header(
+      "Settings",
+      "Manage your account settings and preferences — nothing here saves.",
+      id="settings"
+    ) }}
+
+    <div class="moo-settings-layout">
+      {{ render_settings_nav("profile", root_path) }}
+
+      <div class="moo-settings-layout__content">
+        {% call form(extra_class="d-grid gap-4") %}
+          {% call fieldset("Profile", description="This is how others will see you across the app.") %}
+            {% call field_group() %}
+              {% call field() %}
+                {{ input(label="Name", id="settings-name", type="text", value="Jane Doe") }}
+              {% endcall %}
+              {% call field() %}
+                {{ input(label="Email", id="settings-email", type="email", value="jane@example.com", describedby="settings-email-description") }}
+                {{ field_description("settings-email-description", "Used for sign-in and notifications.") }}
+              {% endcall %}
+              {% call field() %}
+                {{ textarea(label="Bio", id="settings-bio", placeholder="Tell us a little about yourself.", rows=3) }}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+          {{ button("Save changes") }}
+        {% endcall %}
+      </div>
+    </div>
+
+    <p class="moo-examples-built-with text-body-secondary small">
+      Composed from the
+      <a href="{{ site_href("components/form.html", root_path) }}">Form</a>,
+      <a href="{{ site_href("components/field.html", root_path) }}">Field</a>,
+      <a href="{{ site_href("components/input.html", root_path) }}">Input</a>, and
+      <a href="{{ site_href("components/textarea.html", root_path) }}">Textarea</a>
+      components.
+    </p>
+
+    {{ render_section_page_pagination("settings/profile", site_pages, root_path) }}
+  </div>
+{% endblock %}

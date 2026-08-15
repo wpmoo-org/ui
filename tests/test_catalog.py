@@ -128,7 +128,7 @@ class CatalogContractTests(CatalogTestCase):
         surfaces = {
             "home": self.read_output("index.html"),
             "examples": self.read_output("examples/index.html"),
-            "tasks": self.read_output("examples/tasks.html"),
+            "tasks": self.read_output("examples/dashboard/tasks.html"),
         }
 
         for name, output in surfaces.items():
@@ -873,7 +873,7 @@ class CatalogContractTests(CatalogTestCase):
         home_index = sidebar.index('href="./"')
         docs_index = sidebar.index('href="introduction/"')
         installation_index = sidebar.index('href="installation/"')
-        examples_index = sidebar.index('data-bs-target="#shell-examples-menu"')
+        examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         blocks_index = sidebar.index('href="blocks/"')
 
@@ -1046,17 +1046,17 @@ class CatalogContractTests(CatalogTestCase):
         )[1]
         self.assertIn('href="../installation/"', examples_pagination)
         self.assertIn("Installation", examples_pagination)
-        self.assertIn('href="../examples/tasks/"', examples_pagination)
-        self.assertIn("Tasks", examples_pagination)
+        self.assertIn('href="../examples/settings/account/"', examples_pagination)
+        self.assertIn("Account", examples_pagination)
 
-        tasks = self.read_output("examples/tasks.html")
+        tasks = self.read_output("examples/dashboard/tasks.html")
         tasks_pagination = tasks.rsplit(
             '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
             1,
         )[1]
-        self.assertIn('href="../../examples/"', tasks_pagination)
-        self.assertIn("Examples", tasks_pagination)
-        self.assertIn('href="../../components/"', tasks_pagination)
+        self.assertIn('href="../../../examples/auth/sign-up/"', tasks_pagination)
+        self.assertIn("Sign Up", tasks_pagination)
+        self.assertIn('href="../../../components/"', tasks_pagination)
         self.assertIn("Components", tasks_pagination)
 
         components = self.read_output("components/index.html")
@@ -1122,6 +1122,28 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("navigator.clipboard.writeText(value)", code_preview)
         self.assertIn("[data-moo-catalog-section-filter]", catalog_filter)
         self.assertIn("selectedSection", catalog_filter)
+
+    def test_settings_profile_email_description_is_wired_to_the_input(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        profile = self.read_output("examples/settings/profile.html")
+        # Match the input tag by id, then check each attribute independently
+        # rather than one literal substring -- the assertion shouldn't break
+        # if input()'s own attribute-rendering order ever changes.
+        input_match = re.search(r'<input\b[^>]*\bid="settings-email"[^>]*>', profile)
+        self.assertIsNotNone(input_match, "settings-email input not found in output")
+        email_input = input_match.group(0)
+        for attribute in (
+            'type="email"',
+            'value="jane@example.com"',
+            'aria-describedby="settings-email-description"',
+        ):
+            self.assertIn(attribute, email_input)
+        self.assertIn(
+            'id="settings-email-description">Used for sign-in and notifications.',
+            profile,
+        )
 
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()

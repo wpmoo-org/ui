@@ -1,0 +1,62 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/field.html.jinja" import field, field_group, fieldset, form %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/sidebar.html.jinja" import sidebar_brand_mark %}
+
+{% set page_category = "Auth" %}
+
+{% block title %}Sign In — Moo UI{% endblock %}
+
+{% block body %}
+  <main class="moo-auth-page" id="main-content" tabindex="-1">
+    <div class="moo-auth-page__content">
+      <div class="moo-auth-page__inner">
+        <a class="moo-auth-page__brand" href="{{ site_href("index.html", root_path) }}">
+          {{ sidebar_brand_mark("blocks") }}
+          <span>Moo UI</span>
+        </a>
+
+        {% call card(title="Sign in", extra_class="moo-auth-page__card") %}
+          {% call form(extra_class="d-grid gap-4") %}
+            {% call fieldset("Credentials", description="Enter your email and password to continue.") %}
+              {% call field_group() %}
+                {% call field() %}
+                  {{ input(label="Email", id="sign-in-email", type="email", placeholder="name@example.com", required=true) }}
+                {% endcall %}
+                {% call field() %}
+                  {{ input(label="Password", id="sign-in-password", type="password", required=true) }}
+                {% endcall %}
+              {% endcall %}
+            {% endcall %}
+            <div class="d-flex align-items-center justify-content-between">
+              {{ checkbox(id="sign-in-remember", label="Remember me") }}
+              <a class="small" href="{{ site_href("examples/auth/forgot-password.html", root_path) }}">Forgot your password?</a>
+            </div>
+            {{ button("Sign in", extra_class="w-100", icon_start="log-in") }}
+          {% endcall %}
+          <p class="moo-auth-page__footnote text-body-secondary small mt-4 mb-0">
+            Don't have an account?
+            <a href="{{ site_href("examples/auth/sign-up.html", root_path) }}">Sign up</a>
+          </p>
+        {% endcall %}
+
+        {{ button("Back to Examples", variant="ghost", size="sm", element="a", href=site_href("examples/index.html", root_path), icon_start="arrow-left", extra_class="moo-auth-page__back") }}
+      </div>
+    </div>
+
+    <footer class="moo-auth-page__footer text-body-secondary small">
+      Demo only — this form does not submit anywhere or store any data.
+      Built with the
+      <a href="{{ site_href("components/card.html", root_path) }}">Card</a>,
+      <a href="{{ site_href("components/form.html", root_path) }}">Form</a>,
+      <a href="{{ site_href("components/field.html", root_path) }}">Field</a>,
+      <a href="{{ site_href("components/input.html", root_path) }}">Input</a>,
+      <a href="{{ site_href("components/checkbox.html", root_path) }}">Checkbox</a>, and
+      <a href="{{ site_href("components/button.html", root_path) }}">Button</a>
+      components.
+    </footer>
+  </main>
+{% endblock %}

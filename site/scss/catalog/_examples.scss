@@ -270,27 +270,6 @@
   min-width: 0;
 }
 
-// App-toolbar header: title and copy on the left, primary action on the
-// right, wrapping as a unit on narrow viewports. The copy shrinks (and
-// its paragraph wraps) so the action stays on the title row while there
-// is room.
-.moo-examples-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.moo-examples-header > :first-child {
-  // A shrinkable basis (not auto): the wrap decision runs on the flex
-  // base size, so an auto basis would keep the copy's full one-line
-  // width and push the action onto its own row even when there is
-  // room to share.
-  flex: 1 1 24rem;
-  min-width: 0;
-}
-
 // The package's modal--alert contract is a compact 24rem confirmation;
 // the Tasks delete dialog carries a full sentence plus the task title,
 // so it reads better at the regular Dialog width.
@@ -352,4 +331,94 @@
 .moo-card-list__icon [data-icon] {
   width: 1rem;
   height: 1rem;
+}
+
+// Auth pages (Sign in / Sign up / Forgot password) extend base.html.jinja
+// directly -- full-bleed, no sidebar or navbar -- matching the common
+// reference convention for a centered login card.
+.moo-auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.moo-auth-page__content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-auth-page__inner {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.moo-auth-page__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+  text-decoration: none;
+}
+
+.moo-auth-page__footnote {
+  text-align: center;
+}
+
+// Left-aligned like the card and brand's own edge, not centered like the
+// brand mark -- a return link, not a peer of the demo content above it.
+.moo-auth-page__back {
+  justify-self: start;
+}
+
+// A full-width chrome band pinned below the demo area, on the page's own
+// background rather than the demo backdrop -- reads as site meta info
+// (like a real app's footer), not as trailing copy on the sign-in/sign-up/
+// forgot-password example itself.
+.moo-auth-page__footer {
+  flex: 0 0 auto;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  background: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+// Settings pages are real navigation (a distinct URL per section), not a
+// Tabs instance -- each section renders its own page and links to the
+// other two through the Navigation component's own vertical nav_menu,
+// so only the two-column page arrangement is custom here.
+.moo-settings-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.moo-settings-layout__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 28rem;
+}
+
+.moo-settings-nav {
+  flex: 0 0 auto;
+  width: 12rem;
+}
+
+@include media-breakpoint-down(sm) {
+  .moo-settings-layout {
+    flex-direction: column;
+  }
+
+  .moo-settings-nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    width: 100%;
+  }
 }
