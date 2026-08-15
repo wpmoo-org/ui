@@ -4,6 +4,8 @@ import json
 import re
 import tempfile
 import warnings
+from html import unescape
+from html.parser import HTMLParser
 from pathlib import Path
 
 import build as site_build
@@ -20,6 +22,52 @@ from tests.helpers import (
     read_png_ihdr,
     read_primary_variables,
 )
+
+
+class CodePenPayloadParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.in_codepen_form = False
+        self.forms: list[dict[str, str | None]] = []
+        self.buttons: list[dict[str, str | None]] = []
+        self.payloads: list[dict[str, object]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "form" and "data-moo-codepen-form" in attributes:
+            self.in_codepen_form = True
+            self.forms.append(attributes)
+            return
+        if self.in_codepen_form and tag == "button":
+            self.buttons.append(attributes)
+        if (
+            self.in_codepen_form
+            and tag == "input"
+            and attributes.get("name") == "data"
+            and attributes.get("value")
+        ):
+            self.payloads.append(json.loads(attributes["value"]))
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form":
+            self.in_codepen_form = False
+
+
+class LinkParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[dict[str, str | None]] = []
+        self.buttons: list[dict[str, str | None]] = []
+        self.popover_triggers: list[dict[str, str | None]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "a":
+            self.links.append(attributes)
+        if tag == "button":
+            self.buttons.append(attributes)
+        if tag in {"a", "button"} and attributes.get("data-bs-toggle") == "popover":
+            self.popover_triggers.append({"__tag": tag, **attributes})
 
 
 class CatalogContractTests(CatalogTestCase):
@@ -1049,15 +1097,16 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../examples/settings/account/"', examples_pagination)
         self.assertIn("Account", examples_pagination)
 
+        # Individual Examples pages (Tasks, Settings/*, Auth/*) deliberately
+        # carry no Prev/Next pagination -- that's docs-site navigation, and
+        # these pages are meant to read as real, standalone app screens
+        # rather than paginated documentation. Only the Examples index
+        # (asserted above) keeps it, matching every other section index.
         tasks = self.read_output("examples/dashboard/tasks.html")
-        tasks_pagination = tasks.rsplit(
-            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
-            1,
-        )[1]
-        self.assertIn('href="../../../examples/auth/sign-up/"', tasks_pagination)
-        self.assertIn("Sign Up", tasks_pagination)
-        self.assertIn('href="../../../components/"', tasks_pagination)
-        self.assertIn("Components", tasks_pagination)
+        self.assertNotIn("moo-doc-pagination", tasks)
+
+        profile = self.read_output("examples/settings/profile.html")
+        self.assertNotIn("moo-doc-pagination", profile)
 
         components = self.read_output("components/index.html")
         self.assertIn('aria-label="Previous page: Tasks"', components)
@@ -1144,6 +1193,242 @@ class CatalogContractTests(CatalogTestCase):
             'id="settings-email-description">Used for sign-in and notifications.',
             profile,
         )
+
+    def test_examples_catalog_pages_use_shell_footer_for_demo_meta(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        registry = {
+            component["slug"]: component
+            for component in json.loads(
+                (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+            )
+        }
+        expected_footer_components = {
+            "examples/dashboard/tasks.html": [
+                "sidebar",
+                "datatable",
+                "sheet",
+                "alert-dialog",
+                "dropdown-menu",
+                "badge",
+                "button",
+            ],
+            "examples/settings/profile.html": ["form", "field", "input", "textarea"],
+            "examples/settings/account.html": ["form", "field", "select"],
+            "examples/settings/appearance.html": ["form", "field", "switch"],
+        }
+        components_index_source = (
+            ROOT / "site/src/pages/components/index.html.jinja"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("component_descriptions", components_index_source)
+
+        for path, component_slugs in expected_footer_components.items():
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                content_start = page.index('<div class="moo-catalog__content">')
+                main_end = page.index("</main>", content_start)
+                footer_start = page.index('<footer class="moo-examples-footer')
+
+                self.assertGreater(footer_start, main_end)
+                self.assertNotIn(
+                    '<footer class="moo-examples-footer',
+                    page[content_start:main_end],
+                )
+                self.assertEqual(page.count("data-moo-codepen-form"), 1)
+                self.assertIn("Open in CodePen", page[footer_start:])
+
+                parser = CodePenPayloadParser()
+                parser.feed(page)
+                self.assertEqual(len(parser.payloads), 1)
+                self.assertEqual(len(parser.forms), 1)
+                self.assertEqual(parser.forms[0]["action"], "https://codepen.io/pen/define")
+                self.assertEqual(parser.forms[0]["method"], "POST")
+                self.assertEqual(parser.forms[0]["target"], "_blank")
+                self.assertEqual(len(parser.buttons), 1)
+                self.assertEqual(parser.buttons[0]["type"], "submit")
+                payload = parser.payloads[0]
+                self.assertIn("moo-examples-footer", payload["html"])
+                self.assertNotIn("data-moo-codepen-form", payload["html"])
+                self.assertIn(".moo-examples-footer", payload["css"])
+                self.assertIn(".moo-component-header--has-actions", payload["css"])
+                self.assertIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertEqual(
+                    payload["css_external"],
+                    "https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css",
+                )
+                self.assertEqual(
+                    payload["js_external"],
+                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                )
+                self.assertIn("initializeMooCodePenPopovers", payload["js"])
+                self.assertIn("loadMooCodePenBootstrap", payload["js"])
+                self.assertIn(
+                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                    payload["js"],
+                )
+                if path == "examples/dashboard/tasks.html":
+                    self.assertIn(
+                        "@wpmoo/ui@1.0.0-rc.2/dist/js/datatable.js",
+                        payload["js"],
+                    )
+                    self.assertIn("DataTable.getOrCreateInstance", payload["js"])
+                    self.assertIn("gap: 2rem;", payload["css"])
+                    self.assertIn("align-content: start;", payload["css"])
+                    self.assertIn(".datatable--tasks .datatable-card-frame", payload["css"])
+                    self.assertIn("inline-size: 100%;", payload["css"])
+                    self.assertIn(".datatable--tasks .datatable-cards", payload["css"])
+                    self.assertIn("@media (min-width: 48rem)", payload["css"])
+                    self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr));", payload["css"])
+                    self.assertIn("@media (min-width: 70rem)", payload["css"])
+                    self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", payload["css"])
+                    self.assertTrue(payload["js_module"])
+                    self.assertEqual(payload["editors"], "111")
+                elif path.startswith("examples/settings/"):
+                    self.assertIn("gap: 3rem;", payload["css"])
+                    self.assertIn("align-content: start;", payload["css"])
+                else:
+                    self.assertFalse(payload["js_module"])
+
+                expected_labels = {registry[slug]["label"] for slug in component_slugs}
+                for surface in (page[footer_start:], payload["html"]):
+                    link_parser = LinkParser()
+                    link_parser.feed(surface)
+                    component_links = [
+                        link
+                        for link in link_parser.links
+                        if "/components/" in (link.get("href") or "")
+                    ]
+                    component_triggers = [
+                        trigger
+                        for trigger in link_parser.popover_triggers
+                        if trigger.get("data-bs-title") in expected_labels
+                    ]
+                    self.assertEqual(component_links, [])
+                    self.assertEqual(
+                        {trigger.get("data-bs-title") for trigger in component_triggers},
+                        expected_labels,
+                    )
+                    for trigger in component_triggers:
+                        slug = next(
+                            slug
+                            for slug in component_slugs
+                            if registry[slug]["label"] == trigger.get("data-bs-title")
+                        )
+                        self.assertEqual(trigger.get("__tag"), "a")
+                        self.assertNotIn("href", trigger)
+                        self.assertEqual(trigger.get("role"), "button")
+                        self.assertEqual(trigger.get("tabindex"), "0")
+                        self.assertIn("moo-examples-footer__component-trigger", trigger.get("class") or "")
+                        self.assertEqual(trigger.get("data-bs-toggle"), "popover")
+                        self.assertEqual(trigger.get("data-bs-trigger"), "focus")
+                        self.assertEqual(trigger.get("data-bs-container"), "body")
+                        self.assertEqual(trigger.get("data-bs-html"), "true")
+                        popover_content = unescape(trigger.get("data-bs-content") or "")
+                        self.assertIn(registry[slug]["description"], popover_content)
+
+                        popover_content_parser = LinkParser()
+                        popover_content_parser.feed(popover_content)
+                        self.assertEqual(len(popover_content_parser.links), 1)
+                        learn_more = popover_content_parser.links[0]
+                        self.assertEqual(
+                            learn_more.get("href"),
+                            f"https://ui.wpmoo.org/components/{slug}/",
+                        )
+                        self.assertEqual(learn_more.get("target"), "_blank")
+                        self.assertEqual(learn_more.get("rel"), "noopener noreferrer")
+
+    def test_auth_example_component_references_use_popovers(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        registry = {
+            component["slug"]: component
+            for component in json.loads(
+                (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+            )
+        }
+        expected_footer_components = {
+            "examples/auth/sign-in.html": [
+                "card",
+                "form",
+                "field",
+                "input",
+                "checkbox",
+                "button",
+            ],
+            "examples/auth/sign-up.html": ["card", "form", "field", "input", "button"],
+            "examples/auth/forgot-password.html": [
+                "card",
+                "form",
+                "field",
+                "input",
+                "button",
+            ],
+        }
+
+        for path, component_slugs in expected_footer_components.items():
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                footer_start = page.index('<footer class="moo-auth-page__footer')
+                parser = CodePenPayloadParser()
+                parser.feed(page)
+                self.assertEqual(len(parser.payloads), 1)
+                payload = parser.payloads[0]
+                self.assertIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertEqual(
+                    payload["js_external"],
+                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                )
+                self.assertIn("initializeMooCodePenPopovers", payload["js"])
+                self.assertIn("loadMooCodePenBootstrap", payload["js"])
+                self.assertIn(
+                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                    payload["js"],
+                )
+                self.assertFalse(payload["js_module"])
+
+                expected_labels = {registry[slug]["label"] for slug in component_slugs}
+                for surface in (page[footer_start:], payload["html"]):
+                    link_parser = LinkParser()
+                    link_parser.feed(surface)
+                    component_links = [
+                        link
+                        for link in link_parser.links
+                        if "/components/" in (link.get("href") or "")
+                    ]
+                    component_triggers = [
+                        trigger
+                        for trigger in link_parser.popover_triggers
+                        if trigger.get("data-bs-title") in expected_labels
+                    ]
+                    self.assertEqual(component_links, [])
+                    self.assertEqual(
+                        {trigger.get("data-bs-title") for trigger in component_triggers},
+                        expected_labels,
+                    )
+                    for trigger in component_triggers:
+                        slug = next(
+                            slug
+                            for slug in component_slugs
+                            if registry[slug]["label"] == trigger.get("data-bs-title")
+                        )
+                        self.assertEqual(trigger.get("__tag"), "a")
+                        self.assertNotIn("href", trigger)
+                        self.assertEqual(trigger.get("role"), "button")
+                        self.assertEqual(trigger.get("tabindex"), "0")
+                        self.assertEqual(trigger.get("data-bs-toggle"), "popover")
+                        self.assertEqual(trigger.get("data-bs-container"), "body")
+                        self.assertEqual(trigger.get("data-bs-trigger"), "focus")
+                        popover_content = unescape(trigger.get("data-bs-content") or "")
+                        self.assertIn(registry[slug]["description"], popover_content)
+                        popover_content_parser = LinkParser()
+                        popover_content_parser.feed(popover_content)
+                        self.assertEqual(len(popover_content_parser.links), 1)
+                        self.assertEqual(
+                            popover_content_parser.links[0].get("href"),
+                            f"https://ui.wpmoo.org/components/{slug}/",
+                        )
 
     def test_primary_docs_render_a_right_side_table_of_contents(self) -> None:
         result = self.run_build()
@@ -1559,14 +1844,23 @@ class CatalogContractTests(CatalogTestCase):
             slug = component["slug"]
             with self.subTest(slug=slug):
                 self.assertTrue(
+                    component.get("description"),
+                    f"{slug} must define its public summary in components.json",
+                )
+                self.assertNotRegex(component["description"], r"<[^>]+>")
+                self.assertTrue(
                     (ROOT / "site/src/pages/components" / f"{slug}.html.jinja").is_file()
                 )
                 self.assertTrue((DIST / "components" / slug / "index.html").is_file())
                 self.assertIn(f'href="../components/{slug}/"', components_index)
                 self.assertIn(component["label"], components_index)
+                if slug == "datatable":
+                    self.assertIn(component["description"], components_index)
 
                 details = ownership[slug]
                 component_page = self.read_output(f"components/{slug}/index.html")
+                if slug == "datatable":
+                    self.assertIn(component["description"], component_page)
                 self.assertIn(details["runtimeOwner"], allowed_runtime)
                 self.assertIn(details["markupOwner"], allowed_markup)
                 self.assertIn(details["maturity"], allowed_maturity)

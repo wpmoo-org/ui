@@ -381,13 +381,22 @@
 // A full-width chrome band pinned below the demo area, on the page's own
 // background rather than the demo backdrop -- reads as site meta info
 // (like a real app's footer), not as trailing copy on the sign-in/sign-up/
-// forgot-password example itself.
+// forgot-password example itself. A single thin row: credit text on the
+// left, "Open in CodePen" pinned to the right corner -- not stacked, so
+// the band stays a strip instead of growing into its own block.
 .moo-auth-page__footer {
+  display: flex;
   flex: 0 0 auto;
-  padding: 1rem 1.5rem;
-  text-align: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
   background: var(--bs-body-bg);
   border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-auth-page__footer > p {
+  text-align: left;
 }
 
 // Settings pages are real navigation (a distinct URL per section), not a
@@ -420,5 +429,48 @@
     flex-direction: row !important;
     flex-wrap: wrap;
     width: 100%;
+  }
+}
+
+// Settings/Dashboard's meta footer lives in layouts/catalog.html.jinja's
+// footer block, not inside the example page's own content. That matches the
+// Auth examples' page-shell footer: content scrolls above it, while the demo
+// disclaimer and CodePen action stay in the fixed bottom band.
+.moo-examples-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-examples-footer__component-trigger {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+.moo-examples-footer__component-trigger:hover,
+.moo-examples-footer__component-trigger:focus-visible {
+  color: var(--bs-link-hover-color);
+}
+
+@include media-breakpoint-down(sm) {
+  .moo-auth-page__footer,
+  .moo-examples-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .moo-auth-page__footer > p {
+    text-align: center;
   }
 }

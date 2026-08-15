@@ -14,49 +14,6 @@
 
 {% block title %}Components — Moo UI{% endblock %}
 
-{% set component_descriptions = {
-  "button": "Trigger actions with Bootstrap buttons shaped to the Moo UI visual language.",
-  "button-group": "Join related actions into one compact control surface.",
-  "card": "Group content, metadata, and actions inside a flexible surface.",
-  "typography": "Keep headings, support copy, and inline code consistent.",
-  "kbd": "Show keyboard input in clear surrounding instructions.",
-  "input": "Capture single-line text with native form-control behavior.",
-  "textarea": "Capture longer messages with the same field contract.",
-  "input-group": "Attach text, shortcuts, and actions to a field.",
-  "select": "Let users choose from a native option list.",
-  "dropdown-menu": "Collect secondary actions in a Bootstrap dropdown.",
-  "badge": "Mark counts, labels, and compact statuses.",
-  "avatar": "Represent people, teams, or accounts.",
-  "navigation": "Group static destinations for sidebars and sections.",
-  "separator": "Separate content with horizontal and vertical rules.",
-  "skeleton": "Show a loading placeholder while real content arrives.",
-  "sidebar": "Compose a collapsible app shell navigation from ready parts.",
-  "close-button": "Dismiss alerts, dialogs, and other transient content.",
-  "alert": "Surface a contextual message with an icon, title, and action.",
-  "breadcrumb": "Show the current page's location within a hierarchy.",
-  "pagination": "Navigate a series of related content across multiple pages.",
-  "progress": "Show the completion progress of a task as a slim bar.",
-  "table": "Display rows and columns of related data.",
-  "checkbox": "Toggle a single option on or off.",
-  "radio-group": "Choose exactly one option from a set.",
-  "switch": "Toggle a setting on or off.",
-  "spinner": "Show an indeterminate loading state.",
-  "accordion": "Reveal one section of content at a time.",
-  "tabs": "Switch between related views in the same space.",
-  "collapsible": "Toggle the visibility of a section of content.",
-  "tooltip": "Attach short contextual hints to focused controls.",
-  "popover": "Show compact contextual detail in a Bootstrap popover.",
-  "dialog": "Open modal content with Bootstrap's dialog contract.",
-  "toast": "Show transient status updates in a corner stack.",
-  "sheet": "Slide a supporting panel in from the viewport edge.",
-  "field": "Structure form controls with labels, help text, errors, and groups.",
-  "form": "Compose complete Bootstrap forms from Field primitives.",
-  "combobox": "Search and select from a compact Bootstrap dropdown input.",
-  "toggle-group": "Group mutually exclusive or multi-select toggle buttons.",
-  "alert-dialog": "Ask users to confirm disruptive actions in a modal.",
-  "menubar": "Arrange top-level command menus with Bootstrap dropdowns."
-} %}
-
 {% block content %}
   <div class="moo-doc-layout">
     <article class="moo-doc-page">
@@ -107,7 +64,7 @@
                     <a class="stretched-link text-body text-decoration-none" href="{{ site_href("components/" ~ component.slug ~ ".html", root_path) }}">{{ component.label }}</a>
                   </h2>
                   <p class="text-body-secondary mb-0">
-                    {{ component_descriptions.get(component.slug, "Bootstrap-native component primitive.") }}
+                    {{ component.description }}
                   </p>
                 </div>
               {% endcall %}

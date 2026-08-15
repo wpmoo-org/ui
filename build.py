@@ -413,6 +413,23 @@ def example_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("examples", slug, root_path)
 
 
+RELATIVE_LINK = re.compile(r'(href|src)=(["\'])((?:\.\./|\./)[^"\']*)\2')
+
+
+def absolutize_links(value: object) -> str:
+    def repl(match: re.Match[str]) -> str:
+        attr, quote, path = match.group(1), match.group(2), match.group(3)
+        cleaned = re.sub(r"^(\.\./)+", "", path)
+        cleaned = re.sub(r"^\./", "", cleaned)
+        return f"{attr}={quote}{SITE_ORIGIN}/{cleaned}{quote}"
+
+    return RELATIVE_LINK.sub(repl, str(value))
+
+
+def to_json_attr(value: object) -> str:
+    return json.dumps(value)
+
+
 PAGE_META_SET = re.compile(
     r"\{%\s*set\s+(?P<name>page_(?:title|description|image|image_alt|category))\s*=\s*"
     r"(?P<quote>['\"])(?P<value>.*?)(?P=quote)\s*%\}",
@@ -602,8 +619,12 @@ def page_metadata(
             slug = entry.get("slug", slug)
 
     template_meta = extract_template_metadata(page)
-    raw_title = template_meta.get("page_title") or (entry or {}).get("label") or SITE_NAME
-    description = template_meta.get("page_description") or _entry_description(entry)
+    if kind == "component":
+        raw_title = (entry or {}).get("label") or template_meta.get("page_title") or SITE_NAME
+        description = _entry_description(entry) or template_meta.get("page_description")
+    else:
+        raw_title = template_meta.get("page_title") or (entry or {}).get("label") or SITE_NAME
+        description = template_meta.get("page_description") or _entry_description(entry)
     image = template_meta.get("page_image") or image
     image_alt = template_meta.get("page_image_alt") or f"{raw_title} page preview"
     title = raw_title if raw_title == SITE_NAME or raw_title.endswith("Moo UI") else f"{raw_title} — {SITE_NAME}"
@@ -672,6 +693,8 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
+    environment.filters["absolutize_links"] = absolutize_links
+    environment.filters["tojson"] = to_json_attr
     environment.globals["pretty_url"] = pretty_url
     environment.globals["site_href"] = site_href
     environment.globals["canonical_url"] = canonical_url
@@ -988,9 +1011,9 @@ def _load_page_registry(
         # label, so a page header cannot silently override a reviewed name.
         label = override.get("label") or metadata.get("page_title") or _fallback_label(slug)
         description = (
-            metadata.get("page_description")
-            or override.get("description")
+            override.get("description")
             or override.get("summary")
+            or metadata.get("page_description")
             or DEFAULT_META_DESCRIPTION
         )
         category = metadata.get("page_category") or override.get("category") or ""

@@ -5,12 +5,14 @@
 {% from "components/field.html.jinja" import field, field_group, fieldset, form %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/sidebar.html.jinja" import sidebar_brand_mark %}
+{% from "includes/codepen.html.jinja" import auth_codepen_css, codepen_button with context %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
 
 {% set page_category = "Auth" %}
 
 {% block title %}Sign In — Moo UI{% endblock %}
 
-{% block body %}
+{% macro sign_in_body(codepen_action="") %}
   <main class="moo-auth-page" id="main-content" tabindex="-1">
     <div class="moo-auth-page__content">
       <div class="moo-auth-page__inner">
@@ -48,15 +50,29 @@
     </div>
 
     <footer class="moo-auth-page__footer text-body-secondary small">
-      Demo only — this form does not submit anywhere or store any data.
-      Built with the
-      <a href="{{ site_href("components/card.html", root_path) }}">Card</a>,
-      <a href="{{ site_href("components/form.html", root_path) }}">Form</a>,
-      <a href="{{ site_href("components/field.html", root_path) }}">Field</a>,
-      <a href="{{ site_href("components/input.html", root_path) }}">Input</a>,
-      <a href="{{ site_href("components/checkbox.html", root_path) }}">Checkbox</a>, and
-      <a href="{{ site_href("components/button.html", root_path) }}">Button</a>
-      components.
+      <p class="mb-0">
+        Demo only — this form does not submit anywhere or store any data.
+        Built with the
+        {{ example_component_reference("card") }},
+        {{ example_component_reference("form") }},
+        {{ example_component_reference("field") }},
+        {{ example_component_reference("input") }},
+        {{ example_component_reference("checkbox") }}, and
+        {{ example_component_reference("button") }}
+        components.
+      </p>
+      {{ codepen_action }}
     </footer>
   </main>
+{% endmacro %}
+
+{% block body %}
+  {% set page_markup %}{{ sign_in_body() }}{% endset %}
+  {{ sign_in_body(codepen_action=codepen_button(
+    "Moo UI — Sign in",
+    "A full-bleed Sign In screen built entirely from Moo UI's certified Card, Form, Field, Input, Checkbox, and Button components.",
+    page_markup,
+    auth_codepen_css(),
+    ["moo-ui", "bootstrap", "css"]
+  )) }}
 {% endblock %}

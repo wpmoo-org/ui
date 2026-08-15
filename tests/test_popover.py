@@ -72,6 +72,13 @@ class PopoverTests(CatalogTestCase):
 
         self.assertIn('data-bs-placement="left"', output)
 
+    def test_popover_dismiss_trigger_container_is_configurable(self) -> None:
+        output = self.render_popover(
+            'popover_dismiss_trigger("Label", "Content.", container="body")'
+        )
+
+        self.assertIn('data-bs-container="body"', output)
+
     def test_popover_dismiss_trigger_rejects_unknown_placement(self) -> None:
         with self.assertRaisesRegex(ValueError, "Unknown popover placement: huge"):
             self.render_popover(

@@ -1,14 +1,15 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "blocks/datatable_tasks.html.jinja" import render_task_sheet, render_task_delete_dialog, render_tasks_table %}
 {% from "components/button.html.jinja" import button %}
+{% from "includes/codepen.html.jinja" import codepen_button, tasks_codepen_css, tasks_codepen_js with context %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
-{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
 {% set page_category = "Dashboard" %}
 
 {% block title %}Tasks — Moo UI{% endblock %}
 
-{% block content %}
+{% macro tasks_body() %}
   {#- Examples pages are full-width app screens: no doc reading measure,
      no TOC column. The table is a live, in-browser workspace: New Task
      opens a sheet form, rows can be opened, edited, copied, and deleted,
@@ -23,21 +24,44 @@
 
     {{ render_tasks_table(id="examples-tasks-datatable") }}
 
-    <p class="moo-examples-built-with text-body-secondary small">
-      Composed from the
-      <a href="{{ site_href("components/sidebar.html", root_path) }}">Sidebar</a>,
-      <a href="{{ site_href("components/datatable.html", root_path) }}">Data Table</a>,
-      <a href="{{ site_href("components/sheet.html", root_path) }}">Sheet</a>,
-      <a href="{{ site_href("components/alert-dialog.html", root_path) }}">Alert Dialog</a>,
-      <a href="{{ site_href("components/dropdown-menu.html", root_path) }}">Dropdown Menu</a>,
-      <a href="{{ site_href("components/badge.html", root_path) }}">Badge</a>, and
-      <a href="{{ site_href("components/button.html", root_path) }}">Button</a>
-      components.
-    </p>
-
-    {{ render_section_page_pagination("dashboard/tasks", site_pages, root_path) }}
-
     {{ render_task_sheet() }}
     {{ render_task_delete_dialog() }}
   </div>
+{% endmacro %}
+
+{% block content %}
+  {% set page_markup %}{{ tasks_body() }}{% endset %}
+  {{ page_markup }}
+{% endblock %}
+
+{% macro tasks_footer(codepen_action="") %}
+  <footer class="moo-examples-footer text-body-secondary small">
+    <p class="mb-0">
+      Composed from the
+      {{ example_component_reference("sidebar") }},
+      {{ example_component_reference("datatable") }},
+      {{ example_component_reference("sheet") }},
+      {{ example_component_reference("alert-dialog") }},
+      {{ example_component_reference("dropdown-menu") }},
+      {{ example_component_reference("badge") }}, and
+      {{ example_component_reference("button") }}
+      components.
+    </p>
+    {{ codepen_action }}
+  </footer>
+{% endmacro %}
+
+{% block footer %}
+  {% set page_markup %}{{ tasks_body() }}{{ tasks_footer() }}{% endset %}
+  {{ tasks_footer(codepen_action=codepen_button(
+    "Moo UI — Tasks",
+    "A live Tasks dashboard screen built from Moo UI's Data Table, Sheet, Alert Dialog, Dropdown Menu, Badge, and Button components.",
+    page_markup,
+    tasks_codepen_css(),
+    ["moo-ui", "bootstrap", "datatable", "css"],
+    js=tasks_codepen_js(),
+    js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+    js_module=true,
+    editors="111"
+  )) }}
 {% endblock %}

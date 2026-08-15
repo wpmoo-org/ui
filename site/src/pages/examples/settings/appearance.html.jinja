@@ -2,8 +2,9 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import field, field_description, field_group, fieldset, form %}
 {% from "components/switch.html.jinja" import switch %}
+{% from "includes/codepen.html.jinja" import codepen_button, settings_codepen_css with context %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
-{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 {% from "includes/settings-nav.html.jinja" import render_settings_nav %}
 
 {% set page_category = "Settings" %}
@@ -26,7 +27,7 @@
 
 {% block title %}Appearance — Moo UI{% endblock %}
 
-{% block content %}
+{% macro appearance_body() %}
   <div class="moo-examples-page" data-moo-example-settings>
     {{ render_page_header(
       "Settings",
@@ -51,14 +52,34 @@
       </div>
     </div>
 
-    <p class="moo-examples-built-with text-body-secondary small">
+  </div>
+{% endmacro %}
+
+{% block content %}
+  {% set page_markup %}{{ appearance_body() }}{% endset %}
+  {{ page_markup }}
+{% endblock %}
+
+{% macro appearance_footer(codepen_action="") %}
+  <footer class="moo-examples-footer text-body-secondary small">
+    <p class="mb-0">
       Composed from the
-      <a href="{{ site_href("components/form.html", root_path) }}">Form</a>,
-      <a href="{{ site_href("components/field.html", root_path) }}">Field</a>, and
-      <a href="{{ site_href("components/switch.html", root_path) }}">Switch</a>
+      {{ example_component_reference("form") }},
+      {{ example_component_reference("field") }}, and
+      {{ example_component_reference("switch") }}
       components.
     </p>
+    {{ codepen_action }}
+  </footer>
+{% endmacro %}
 
-    {{ render_section_page_pagination("settings/appearance", site_pages, root_path) }}
-  </div>
+{% block footer %}
+  {% set page_markup %}{{ appearance_body() }}{{ appearance_footer() }}{% endset %}
+  {{ appearance_footer(codepen_action=codepen_button(
+      "Moo UI — Settings / Appearance",
+      "A Settings/Appearance screen built entirely from Moo UI's certified Form, Field, and Switch components.",
+      page_markup,
+      settings_codepen_css(),
+      ["moo-ui", "bootstrap", "css"]
+    )) }}
 {% endblock %}

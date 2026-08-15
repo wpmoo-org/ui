@@ -31,6 +31,21 @@
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 }
 
+// auto-fit (the default above) collapses unused tracks, which stretches a
+// lone trailing card to the row's full width once its section has fewer
+// items than fit a row (Dashboard's single Tasks card, for example). Fixed
+// tracks keep every card the same width regardless of how many items are
+// in its section.
+.moo-catalog__grid--examples {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .moo-catalog__grid--examples {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .moo-catalog__component-card {
   display: flex;
   align-items: center;
@@ -124,6 +139,49 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
+}
+
+// List view: one column of rows instead of a card grid. card-body's
+// d-grid utility carries Bootstrap's own !important, so the row layout
+// below needs it too to win; the preview shrinks to a fixed-width
+// thumbnail (bleeding only on its own three outer edges, not against
+// the title column) instead of spanning the card's full width.
+[data-moo-examples-view="list"] .moo-catalog__grid {
+  grid-template-columns: 1fr;
+}
+
+[data-moo-examples-view="list"] .moo-catalog__showcase-card {
+  min-height: 0;
+}
+
+[data-moo-examples-view="list"] .moo-catalog__showcase-card .card-body {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+[data-moo-examples-view="list"] .moo-catalog__example-preview {
+  flex: 0 0 auto;
+  width: 10rem;
+  aspect-ratio: 16 / 9;
+  margin: calc(var(--bs-card-spacer-x) * -1) 0 calc(var(--bs-card-spacer-x) * -1) calc(var(--bs-card-spacer-x) * -1);
+  // showcase-preview's own border-bottom (for the stacked grid layout)
+  // doesn't land anywhere useful in this side-by-side row -- a right
+  // border softens the seam between the screenshot's own light colors
+  // (never inverted, see .moo-catalog__example-image) and a dark card.
+  border-bottom: 0;
+  border-right: var(--bs-border-width) solid var(--moo-border);
+}
+
+// The row has room to spare once the page itself reads at doc width
+// instead of full-bleed -- widen the thumbnail there so it's actually
+// legible, while narrow viewports keep the smaller default above so it
+// doesn't crowd out the title/description text.
+@media (min-width: 768px) {
+  [data-moo-examples-view="list"] .moo-catalog__example-preview {
+    width: 18rem;
+  }
 }
 
 .moo-doc-page {

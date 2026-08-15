@@ -4,7 +4,9 @@
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/separator.html.jinja" import separator %}
+{% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/example-previews.html.jinja" import example_preview %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
@@ -22,16 +24,19 @@
 {% block title %}Examples — Moo UI{% endblock %}
 
 {% block content %}
-  {#- Examples pages are full-width app screens: no doc reading measure,
-     no TOC column. #}
-  <div class="moo-examples-page">
+  {#- The individual example screens (Sign In, Settings/Profile, ...) stay
+     full-bleed app screens -- this is only the index/gallery page, which
+     reads like any other catalog listing: doc reading measure + a TOC of
+     its categories. #}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
       {{ render_page_header(
         "Examples",
         "Real, multi-page screens built from Moo UI components. Click through them like an app, not a gallery.",
         id="examples"
       ) }}
 
-      <section class="moo-catalog__dashboard" aria-label="Examples">
+      <section class="moo-catalog__dashboard" data-moo-examples-view="grid" aria-label="Examples">
         <div class="moo-catalog__toolbar">
           {% call input_group() %}
             {{ input(
@@ -48,6 +53,16 @@
               {{ dropdown_item(category, attrs='data-moo-catalog-section-filter="' ~ (category | lower) ~ '"') }}
             {% endfor %}
           {% endcall %}
+          {{ toggle_group(
+            "examples-view",
+            [
+              {"id": "examples-view-grid", "value": "grid", "icon": "layout-grid", "aria_label": "Grid view", "pressed": true},
+              {"id": "examples-view-list", "value": "list", "icon": "list", "aria_label": "List view"}
+            ],
+            "Examples view",
+            variant="outline",
+            extra_class="moo-catalog__view-toggle"
+          ) }}
         </div>
 
         {{ separator(extra_class="my-4") }}
@@ -55,7 +70,7 @@
         {% for category, items in examples | groupby("category") %}
           <section{% if not loop.first %} class="mt-5"{% endif %} aria-labelledby="examples-{{ category | lower }}" data-moo-catalog-section="{{ category | lower }}">
             {{ typography(category, variant="section-title", id="examples-" ~ (category | lower)) }}
-            <div class="moo-catalog__grid">
+            <div class="moo-catalog__grid moo-catalog__grid--examples">
               {% for example in items %}
                 {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
                   <div class="moo-catalog__showcase-preview moo-catalog__example-preview">
@@ -77,5 +92,12 @@
       </section>
 
       {{ render_section_page_pagination("examples", site_pages, root_path) }}
+    </article>
+
+    {% set toc_categories = namespace(items=[]) %}
+    {% for category in examples | map(attribute="category") | unique | sort %}
+      {% set toc_categories.items = toc_categories.items + [{"id": "examples-" ~ (category | lower), "label": category}] %}
+    {% endfor %}
+    {{ render_doc_toc(toc_categories.items) }}
   </div>
 {% endblock %}

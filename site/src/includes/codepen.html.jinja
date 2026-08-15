@@ -1,0 +1,339 @@
+{% from "components/button.html.jinja" import button %}
+
+{% macro example_component_reference_codepen_css() -%}
+.moo-examples-footer__component-trigger {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+.moo-examples-footer__component-trigger:hover,
+.moo-examples-footer__component-trigger:focus-visible {
+  color: var(--bs-link-hover-color);
+}
+{%- endmacro %}
+
+{#- These two CSS blocks are the small amount of page-layout CSS each
+   example category owns on top of the shipped moo-ui.css (see
+   site/scss/catalog/_examples.scss) -- a CodePen recreation needs it
+   inlined since it isn't part of the published package. Kept here once,
+   shared by every Auth/Settings page's codepen_button() call, instead of
+   duplicated per page. #}
+
+{% macro auth_codepen_css() -%}
+.moo-auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.moo-auth-page__content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-auth-page__inner {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.moo-auth-page__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+  text-decoration: none;
+}
+
+.moo-auth-page__footnote {
+  text-align: center;
+}
+
+.moo-auth-page__back {
+  justify-self: start;
+}
+
+.moo-auth-page__footer {
+  flex: 0 0 auto;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  background: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+{{ example_component_reference_codepen_css() }}
+{%- endmacro %}
+
+{% macro examples_header_codepen_css() -%}
+.moo-component-header {
+  max-width: 44rem;
+}
+
+.moo-component-header--has-actions {
+  max-width: 100%;
+}
+
+.moo-component-header > * + * {
+  margin-top: 1rem;
+}
+
+.moo-component-header__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.moo-component-header h1 {
+  margin-bottom: 0;
+  letter-spacing: -0.025em;
+}
+
+.moo-page-description {
+  max-width: 42rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.moo-component-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+{%- endmacro %}
+
+{% macro examples_footer_codepen_css() -%}
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.moo-examples-page {
+  flex: 1 1 auto;
+}
+
+.moo-examples-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  background: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+{{ example_component_reference_codepen_css() }}
+
+@media (max-width: 576px) {
+  .moo-examples-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+}
+{%- endmacro %}
+
+{% macro settings_codepen_css() -%}
+body {
+  padding: 2rem 1.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.moo-examples-page {
+  display: grid;
+  gap: 3rem;
+  align-content: start;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+
+.moo-settings-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.moo-settings-layout__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 28rem;
+}
+
+.moo-settings-nav {
+  flex: 0 0 auto;
+  width: 12rem;
+}
+
+@media (max-width: 576px) {
+  .moo-settings-layout {
+    flex-direction: column;
+  }
+
+  .moo-settings-nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+{%- endmacro %}
+
+{% macro tasks_codepen_css() -%}
+body {
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+
+.datatable--tasks .datatable-card-frame {
+  inline-size: 100%;
+}
+
+.datatable--tasks .datatable-cards {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 48rem) {
+  .datatable--tasks .datatable-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 70rem) {
+  .datatable--tasks .datatable-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+#tasks-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+#tasks-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+{%- endmacro %}
+
+{% macro tasks_codepen_js() -%}
+import DataTable from "https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/js/datatable.js";
+
+document.querySelectorAll(".datatable").forEach((element) => {
+  DataTable.getOrCreateInstance(element);
+});
+{%- endmacro %}
+
+{#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
+   in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
+   page's own markup (internal links rewritten to absolute ui.wpmoo.org
+   URLs so they still work standalone) plus the shared external
+   moo-ui.css stylesheet, version-locked to the site's own package
+   version so it never drifts from what's actually live. data-moo-codepen-form
+   opts this form out of examples-forms.js's inert-demo-form guard --
+   unlike every other form on an Examples page, this one is meant to
+   really submit.
+
+   Lives in the page's own "demo only / built with X, Y, Z" meta footer,
+   not next to the page/card title -- that title row is the simulated
+   app's own chrome (Tasks' "New Task" button lives there too), and this
+   button is about the demo, not part of it. Callers render their body
+   markup through a local macro twice: once with no action (to capture a
+   clean `html` for the payload below, before this button exists), once
+   with this macro's own output passed back in (for the page actually
+   shown to a visitor) -- see any Examples page for the pattern. #}
+{% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110") -%}
+  {% set uses_popover = 'data-bs-toggle="popover"' in html %}
+  {% set resolved_js_external = js_external %}
+  {% if uses_popover and not resolved_js_external %}
+    {% set resolved_js_external = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js" %}
+  {% endif %}
+  {% set resolved_js = js %}
+  {% if uses_popover and "initializeMooCodePenPopovers" not in resolved_js %}
+    {% set popover_js -%}
+function initializeMooCodePenPopovers() {
+  const Popover = window.bootstrap && window.bootstrap.Popover;
+  if (!Popover) {
+    return;
+  }
+
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach((element) => {
+    Popover.getOrCreateInstance(element);
+  });
+}
+
+function loadMooCodePenBootstrap(callback) {
+  if (window.bootstrap && window.bootstrap.Popover) {
+    callback();
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
+function startMooCodePenPopovers() {
+  loadMooCodePenBootstrap(initializeMooCodePenPopovers);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenPopovers, { once: true });
+} else {
+  startMooCodePenPopovers();
+}
+    {%- endset %}
+    {% set resolved_js = (resolved_js ~ "\n\n" ~ popover_js) | trim %}
+  {% endif %}
+  {% set payload = {
+    "title": title,
+    "description": description,
+    "html": html | absolutize_links,
+    "html_pre_processor": "none",
+    "css": css,
+    "css_pre_processor": "none",
+    "css_starter": "neither",
+    "css_external": "https://unpkg.com/@wpmoo/ui@" ~ product.version ~ "/dist/assets/css/moo-ui.css",
+    "js": resolved_js,
+    "js_pre_processor": "none",
+    "js_external": resolved_js_external,
+    "tags": tags,
+    "editors": editors,
+    "js_module": js_module
+  } %}
+  <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen" data-moo-codepen-form>
+    <input type="hidden" name="data" value="{{ payload | tojson }}">
+    {{ button("Open in CodePen", type="submit", variant="outline", size="sm", icon_start="code") }}
+  </form>
+{%- endmacro %}

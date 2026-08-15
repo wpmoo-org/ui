@@ -28,7 +28,11 @@ from helpers.browser_harness import (  # noqa: E402
 
 SITE_DIST = ROOT / "site-dist"
 OUTPUT_DIR = ROOT / "site/static/images/examples"
-VIEWPORT = {"width": 1280, "height": 720}  # exactly 16:9
+# Auth/Settings pages center a fixed-width card/panel regardless of
+# viewport width, so a narrower (still 16:9) capture makes that content
+# fill more of the frame -- at 1280 wide it reads tiny and busy once
+# scaled down to a 3-per-row card thumbnail; at 960 it's legibly larger.
+VIEWPORT = {"width": 960, "height": 540}  # exactly 16:9
 
 # Auth examples (Sign In/Up, Forgot Password) render full-bleed with no
 # site chrome. Settings/Dashboard examples render inside the normal
@@ -40,7 +44,7 @@ HIDE_CHROME_CSS = """
 #catalog-sidebar,
 header.moo-catalog__header,
 .moo-auth-page__footer,
-.moo-examples-built-with { display: none !important; }
+.moo-examples-footer { display: none !important; }
 """
 
 EXAMPLE_SLUGS = (
@@ -52,6 +56,19 @@ EXAMPLE_SLUGS = (
     "settings/appearance",
     "dashboard/tasks",
 )
+
+# Settings pages' actual content (nav + form) is narrower than the
+# capture viewport, leaving empty space on the right at the full VIEWPORT
+# width above. .moo-settings-layout itself isn't a usable measure of that
+# -- it's a grid item that stretches to fill its row, so its own
+# bounding box is the full viewport width regardless of how little of it
+# its children use. Measuring the nav and content children directly and
+# taking their union gives the actual visual extent instead.
+CONTENT_CLIP_SELECTOR = {
+    "settings/profile": (".moo-settings-nav", ".moo-settings-layout__content"),
+    "settings/account": (".moo-settings-nav", ".moo-settings-layout__content"),
+    "settings/appearance": (".moo-settings-nav", ".moo-settings-layout__content"),
+}
 
 
 def main() -> None:
@@ -80,7 +97,25 @@ def main() -> None:
             page.add_style_tag(content=HIDE_CHROME_CSS)
             out_path = OUTPUT_DIR / f"{slug}.png"
             out_path.parent.mkdir(parents=True, exist_ok=True)
-            page.screenshot(path=str(out_path))
+
+            clip = None
+            selector_pair = CONTENT_CLIP_SELECTOR.get(slug)
+            if selector_pair:
+                nav_selector, content_selector = selector_pair
+                nav_box = page.locator(nav_selector).bounding_box()
+                content_box = page.locator(content_selector).bounding_box()
+                if nav_box and content_box:
+                    left = nav_box["x"]
+                    right = content_box["x"] + content_box["width"]
+                    width = min(VIEWPORT["width"], (right - left) + 2 * left)
+                    clip = {
+                        "x": 0,
+                        "y": 0,
+                        "width": width,
+                        "height": width * 9 / 16,
+                    }
+
+            page.screenshot(path=str(out_path), clip=clip)
             print(f"wrote {out_path.relative_to(ROOT)}")
         context.close()
         browser.close()
