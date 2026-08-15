@@ -155,7 +155,16 @@ body {
   padding: 0.75rem 1.5rem;
   color: var(--bs-secondary-color);
   font-size: 0.875rem;
-  background: var(--bs-body-bg);
+  /* On the real site this band sits inside the docs shell, next to
+     other chrome that already reads as "not page content" -- a hairline
+     border is enough there. Standalone in a CodePen there's nothing else
+     to contrast against (no CodePen action ever renders in its own
+     export, see codepen_button()'s doc comment), so it needs its own
+     visible surface to read as a footer band rather than trailing text.
+     --bs-tertiary-bg (#fafafa in this theme) turned out too close to
+     --bs-body-bg (#fff) to read as a change at all -- secondary-bg
+     (#f4f4f5) is the nearest token with an actually perceptible delta. */
+  background: var(--bs-secondary-bg);
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
 
@@ -171,16 +180,19 @@ body {
 {%- endmacro %}
 
 {% macro settings_codepen_css() -%}
-body {
-  padding: 2rem 1.5rem;
-  max-width: 56rem;
-  margin: 0 auto;
-}
-
+{#- padding/max-width/margin:auto all live on .moo-examples-page, not
+   body -- same split tasks_codepen_css() already uses. The footer is
+   body's other direct child (a sibling of .moo-examples-page, see
+   examples_footer_codepen_css()); any inset on body itself -- padding
+   included, not just max-width -- would apply to the footer too and
+   keep its band off the pen's true edge instead of flush like Auth's. #}
 .moo-examples-page {
   display: grid;
   gap: 3rem;
   align-content: start;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
 }
 
 {{ examples_header_codepen_css() }}
@@ -217,16 +229,17 @@ body {
 {%- endmacro %}
 
 {% macro tasks_codepen_css() -%}
-body {
-  padding: 3rem 1.5rem 0;
-}
-
+{#- Same split as settings_codepen_css(): the inset lives on
+   .moo-examples-page, not body, so the footer (body's other direct
+   child, sibling to .moo-examples-page) stays flush with the pen's true
+   edge instead of inheriting a page-level gutter. #}
 .moo-examples-page {
   display: grid;
   gap: 2rem;
   align-content: start;
   max-width: 72rem;
   margin: 0 auto;
+  padding: 3rem 1.5rem 0;
 }
 
 .moo-examples-page > * {
