@@ -13,8 +13,8 @@
 {% block title %}Sign In — Moo UI{% endblock %}
 
 {% macro sign_in_body(codepen_action="") %}
-  <main class="moo-auth-page" id="main-content" tabindex="-1">
-    <div class="moo-auth-page__content">
+  <div class="moo-auth-page">
+    <main class="moo-auth-page__content" id="main-content" tabindex="-1">
       <div class="moo-auth-page__inner">
         <a class="moo-auth-page__brand" href="{{ site_href("index.html", root_path) }}">
           {{ sidebar_brand_mark("blocks") }}
@@ -47,7 +47,7 @@
 
         {{ button("Back to Examples", variant="ghost", size="sm", element="a", href=site_href("examples/index.html", root_path), icon_start="arrow-left", extra_class="moo-auth-page__back") }}
       </div>
-    </div>
+    </main>
 
     <footer class="moo-auth-page__footer text-body-secondary small">
       <p class="mb-0">
@@ -63,7 +63,7 @@
       </p>
       {{ codepen_action }}
     </footer>
-  </main>
+  </div>
 {% endmacro %}
 
 {% block body %}

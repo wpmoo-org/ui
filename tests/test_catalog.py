@@ -1370,12 +1370,33 @@ class CatalogContractTests(CatalogTestCase):
         for path, component_slugs in expected_footer_components.items():
             with self.subTest(path=path):
                 page = self.read_output(path)
+                main_start = page.index('<main class="moo-auth-page__content"')
+                main_end = page.index("</main>", main_start)
                 footer_start = page.index('<footer class="moo-auth-page__footer')
+                self.assertGreater(footer_start, main_end)
+                self.assertNotIn(
+                    '<footer class="moo-auth-page__footer',
+                    page[main_start:main_end],
+                )
                 parser = CodePenPayloadParser()
                 parser.feed(page)
                 self.assertEqual(len(parser.payloads), 1)
                 payload = parser.payloads[0]
+                payload_main_start = payload["html"].index(
+                    '<main class="moo-auth-page__content"'
+                )
+                payload_main_end = payload["html"].index("</main>", payload_main_start)
+                payload_footer_start = payload["html"].index(
+                    '<footer class="moo-auth-page__footer'
+                )
+                self.assertGreater(payload_footer_start, payload_main_end)
                 self.assertIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertIn(".moo-auth-page__footer", payload["css"])
+                self.assertIn("display: flex;", payload["css"])
+                self.assertIn("justify-content: space-between;", payload["css"])
+                self.assertIn("padding: 0.75rem 1.5rem;", payload["css"])
+                self.assertIn(".moo-auth-page__footer > p", payload["css"])
+                self.assertNotIn("padding: 1rem 1.5rem;", payload["css"])
                 self.assertEqual(
                     payload["js_external"],
                     "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",

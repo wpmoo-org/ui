@@ -66,14 +66,33 @@
 }
 
 .moo-auth-page__footer {
+  display: flex;
   flex: 0 0 auto;
-  padding: 1rem 1.5rem;
-  text-align: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
   background: var(--bs-body-bg);
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
 
+.moo-auth-page__footer > p {
+  text-align: left;
+}
+
 {{ example_component_reference_codepen_css() }}
+
+@media (max-width: 576px) {
+  .moo-auth-page__footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .moo-auth-page__footer > p {
+    text-align: center;
+  }
+}
 {%- endmacro %}
 
 {% macro examples_header_codepen_css() -%}
