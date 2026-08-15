@@ -15,6 +15,27 @@
 .moo-examples-footer__component-trigger:focus-visible {
   color: var(--bs-link-hover-color);
 }
+
+.moo-examples-footer__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: calc(var(--bs-popover-body-padding-y, 0.625rem) * -1) calc(var(--bs-popover-body-padding-x, 0.625rem) * -1) 0.75rem;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-catalog__showcase-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+[data-bs-theme="dark"] .moo-catalog__showcase-image {
+  filter: invert(1) hue-rotate(180deg);
+}
 {%- endmacro %}
 
 {#- These two CSS blocks are the small amount of page-layout CSS each

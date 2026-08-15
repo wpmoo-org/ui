@@ -58,6 +58,7 @@ class LinkParser(HTMLParser):
         super().__init__()
         self.links: list[dict[str, str | None]] = []
         self.buttons: list[dict[str, str | None]] = []
+        self.images: list[dict[str, str | None]] = []
         self.popover_triggers: list[dict[str, str | None]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -66,6 +67,8 @@ class LinkParser(HTMLParser):
             self.links.append(attributes)
         if tag == "button":
             self.buttons.append(attributes)
+        if tag == "img":
+            self.images.append(attributes)
         if tag in {"a", "button"} and attributes.get("data-bs-toggle") == "popover":
             self.popover_triggers.append({"__tag": tag, **attributes})
 
@@ -1302,24 +1305,33 @@ class CatalogContractTests(CatalogTestCase):
                         for link in link_parser.links
                         if "/components/" in (link.get("href") or "")
                     ]
+                    # Popover triggers no longer carry data-bs-title -- the
+                    # label now renders inside the popover body (next to
+                    # the preview image) instead of Bootstrap's separate
+                    # .popover-header. Match each trigger back to its
+                    # component via the description text instead, which is
+                    # unique per component and asserted below anyway.
                     component_triggers = [
                         trigger
                         for trigger in link_parser.popover_triggers
-                        if trigger.get("data-bs-title") in expected_labels
+                        if any(
+                            registry[slug]["description"]
+                            in unescape(trigger.get("data-bs-content") or "")
+                            for slug in component_slugs
+                        )
                     ]
                     self.assertEqual(component_links, [])
-                    self.assertEqual(
-                        {trigger.get("data-bs-title") for trigger in component_triggers},
-                        expected_labels,
-                    )
+                    self.assertEqual(len(component_triggers), len(expected_labels))
                     for trigger in component_triggers:
                         slug = next(
                             slug
                             for slug in component_slugs
-                            if registry[slug]["label"] == trigger.get("data-bs-title")
+                            if registry[slug]["description"]
+                            in unescape(trigger.get("data-bs-content") or "")
                         )
                         self.assertEqual(trigger.get("__tag"), "a")
                         self.assertNotIn("href", trigger)
+                        self.assertNotIn("data-bs-title", trigger)
                         self.assertEqual(trigger.get("role"), "button")
                         self.assertEqual(trigger.get("tabindex"), "0")
                         self.assertIn("moo-examples-footer__component-trigger", trigger.get("class") or "")
@@ -1328,12 +1340,25 @@ class CatalogContractTests(CatalogTestCase):
                         self.assertEqual(trigger.get("data-bs-container"), "body")
                         self.assertEqual(trigger.get("data-bs-html"), "true")
                         popover_content = unescape(trigger.get("data-bs-content") or "")
+                        self.assertIn(registry[slug]["label"], popover_content)
                         self.assertIn(registry[slug]["description"], popover_content)
 
                         popover_content_parser = LinkParser()
                         popover_content_parser.feed(popover_content)
-                        self.assertEqual(len(popover_content_parser.links), 1)
-                        learn_more = popover_content_parser.links[0]
+                        self.assertEqual(len(popover_content_parser.images), 1)
+                        image = popover_content_parser.images[0]
+                        self.assertEqual(
+                            image.get("src"),
+                            f"https://ui.wpmoo.org/assets/images/components/{slug}.webp",
+                        )
+                        self.assertEqual(len(popover_content_parser.links), 2)
+                        preview_link, learn_more = popover_content_parser.links
+                        self.assertEqual(
+                            preview_link.get("href"),
+                            f"https://ui.wpmoo.org/components/{slug}/",
+                        )
+                        self.assertEqual(preview_link.get("target"), "_blank")
+                        self.assertEqual(preview_link.get("rel"), "noopener noreferrer")
                         self.assertEqual(
                             learn_more.get("href"),
                             f"https://ui.wpmoo.org/components/{slug}/",
@@ -1421,36 +1446,52 @@ class CatalogContractTests(CatalogTestCase):
                         for link in link_parser.links
                         if "/components/" in (link.get("href") or "")
                     ]
+                    # See test_examples_catalog_pages_use_shell_footer_for_demo_meta:
+                    # no data-bs-title anymore -- match by description instead.
                     component_triggers = [
                         trigger
                         for trigger in link_parser.popover_triggers
-                        if trigger.get("data-bs-title") in expected_labels
+                        if any(
+                            registry[slug]["description"]
+                            in unescape(trigger.get("data-bs-content") or "")
+                            for slug in component_slugs
+                        )
                     ]
                     self.assertEqual(component_links, [])
-                    self.assertEqual(
-                        {trigger.get("data-bs-title") for trigger in component_triggers},
-                        expected_labels,
-                    )
+                    self.assertEqual(len(component_triggers), len(expected_labels))
                     for trigger in component_triggers:
                         slug = next(
                             slug
                             for slug in component_slugs
-                            if registry[slug]["label"] == trigger.get("data-bs-title")
+                            if registry[slug]["description"]
+                            in unescape(trigger.get("data-bs-content") or "")
                         )
                         self.assertEqual(trigger.get("__tag"), "a")
                         self.assertNotIn("href", trigger)
+                        self.assertNotIn("data-bs-title", trigger)
                         self.assertEqual(trigger.get("role"), "button")
                         self.assertEqual(trigger.get("tabindex"), "0")
                         self.assertEqual(trigger.get("data-bs-toggle"), "popover")
                         self.assertEqual(trigger.get("data-bs-container"), "body")
                         self.assertEqual(trigger.get("data-bs-trigger"), "focus")
                         popover_content = unescape(trigger.get("data-bs-content") or "")
+                        self.assertIn(registry[slug]["label"], popover_content)
                         self.assertIn(registry[slug]["description"], popover_content)
                         popover_content_parser = LinkParser()
                         popover_content_parser.feed(popover_content)
-                        self.assertEqual(len(popover_content_parser.links), 1)
+                        self.assertEqual(len(popover_content_parser.images), 1)
                         self.assertEqual(
-                            popover_content_parser.links[0].get("href"),
+                            popover_content_parser.images[0].get("src"),
+                            f"https://ui.wpmoo.org/assets/images/components/{slug}.webp",
+                        )
+                        self.assertEqual(len(popover_content_parser.links), 2)
+                        preview_link, learn_more = popover_content_parser.links
+                        self.assertEqual(
+                            preview_link.get("href"),
+                            f"https://ui.wpmoo.org/components/{slug}/",
+                        )
+                        self.assertEqual(
+                            learn_more.get("href"),
                             f"https://ui.wpmoo.org/components/{slug}/",
                         )
 

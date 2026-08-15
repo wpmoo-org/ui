@@ -405,6 +405,13 @@ def component_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("components", slug, root_path)
 
 
+def component_preview_absolute_src(slug: str) -> str:
+    for extension in ("webp", "png"):
+        if (SITE_STATIC / "images" / "components" / f"{slug}.{extension}").is_file():
+            return absolute_asset_url(f"assets/images/components/{slug}.{extension}")
+    return absolute_asset_url("assets/images/placeholder.webp")
+
+
 def block_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("blocks", slug, root_path)
 
@@ -700,6 +707,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["canonical_url"] = canonical_url
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
+    environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
     icon_set = load_lucide_icons()
