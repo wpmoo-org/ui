@@ -1198,6 +1198,9 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
+        package_version = json.loads(
+            (ROOT / "package.json").read_text(encoding="utf-8")
+        )["version"]
         registry = {
             component["slug"]: component
             for component in json.loads(
@@ -1255,7 +1258,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn("moo-examples-footer__component-trigger", payload["css"])
                 self.assertEqual(
                     payload["css_external"],
-                    "https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css",
+                    f"https://unpkg.com/@wpmoo/ui@{package_version}/dist/assets/css/moo-ui.css",
                 )
                 self.assertEqual(
                     payload["js_external"],
@@ -1269,7 +1272,7 @@ class CatalogContractTests(CatalogTestCase):
                 )
                 if path == "examples/dashboard/tasks.html":
                     self.assertIn(
-                        "@wpmoo/ui@1.0.0-rc.2/dist/js/datatable.js",
+                        f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
