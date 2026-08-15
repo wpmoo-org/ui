@@ -96,17 +96,23 @@ class ExamplesFormsDoNotSubmitBrowserTests(unittest.TestCase):
 
     def test_settings_profile_save_does_not_submit(self) -> None:
         # Covers the guard's other scope branch ([data-moo-example-settings]
-        # form) -- Sign In only exercises .moo-auth-page form.
+        # form) -- Sign In only exercises .moo-auth-page form. Save changes
+        # is type="button" and Enter doesn't implicitly submit a 3-field
+        # form, so neither actually dispatches a submit event on its own --
+        # asserting on them would pass even without the guard. Call
+        # requestSubmit() directly (not submit(), which skips event
+        # handlers entirely) so this actually exercises the guard's
+        # preventDefault, not just the absence of anything that would
+        # trigger it.
         context, page, navigations = self.open(SETTINGS_PROFILE_PATH)
         try:
             page.locator("#settings-name").fill("Ada Lovelace")
-            page.locator("#settings-name").press("Enter")
-            page.get_by_role("button", name="Save changes").click()
+            page.evaluate("document.querySelector('form').requestSubmit()")
             page.wait_for_timeout(300)
             self.assertEqual(
                 navigations,
                 [],
-                "The Settings/Profile form navigated the page.",
+                "The Settings/Profile form submitted despite the guard.",
             )
         finally:
             context.close()
