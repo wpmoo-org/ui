@@ -344,6 +344,43 @@ body {
 }
 {%- endmacro %}
 
+{% macro users_codepen_css() -%}
+{#- Same split as tasks_codepen_css()/settings_codepen_css(): the inset
+   lives on .moo-examples-page, not body -- the footer stays position:
+   fixed either way (examples_footer_codepen_css()). No responsive-mode
+   overrides needed here (unlike Tasks' .datatable--tasks rules): Users
+   uses the Data Table's default scroll responsive_mode, not cards. #}
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+{%- endmacro %}
+
+{#- Users is a read-only table (no row actions, no sheet, no bulk
+   mutation -- see datatable_users.html.jinja), so unlike Tasks it needs
+   no page-specific module at all: the generic DataTable init is the
+   whole story. codepen_button()'s own uses_popover check still adds the
+   Bootstrap CDN external script + popover-init glue on top of this for
+   the footer's component-reference popovers. #}
+{% macro users_codepen_js() -%}
+import DataTable from "https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/js/datatable.js";
+
+document.querySelectorAll(".datatable").forEach((element) => {
+  DataTable.getOrCreateInstance(element);
+});
+{%- endmacro %}
+
 {#- The bare DataTable init above wasn't enough for a working export --
    Edit/Copy link/Delete task and the New Task sheet are wired by
    examples-tasks.js, a page-specific module the site's own catalog

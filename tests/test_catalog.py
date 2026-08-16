@@ -1108,11 +1108,14 @@ class CatalogContractTests(CatalogTestCase):
         tasks = self.read_output("examples/dashboard/tasks.html")
         self.assertNotIn("moo-doc-pagination", tasks)
 
+        users = self.read_output("examples/dashboard/users.html")
+        self.assertNotIn("moo-doc-pagination", users)
+
         profile = self.read_output("examples/settings/profile.html")
         self.assertNotIn("moo-doc-pagination", profile)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Tasks"', components)
+        self.assertIn('aria-label="Previous page: Users"', components)
         self.assertIn('aria-label="Next page: Accordion"', components)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
@@ -1220,6 +1223,7 @@ class CatalogContractTests(CatalogTestCase):
                 "badge",
                 "button",
             ],
+            "examples/dashboard/users.html": ["datatable", "avatar"],
             "examples/settings/profile.html": ["form", "field", "input", "textarea"],
             "examples/settings/account.html": ["form", "field", "select"],
             "examples/settings/appearance.html": ["form", "field", "switch"],
@@ -1295,6 +1299,20 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", payload["css"])
                     self.assertTrue(payload["js_module"])
                     self.assertEqual(payload["editors"], "111")
+                elif path == "examples/dashboard/users.html":
+                    # Read-only table -- no row actions, no sheet, no bulk
+                    # mutation -- so unlike Tasks it needs no page-specific
+                    # module, just the generic DataTable init.
+                    self.assertIn(
+                        f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
+                        payload["js"],
+                    )
+                    self.assertIn("DataTable.getOrCreateInstance", payload["js"])
+                    self.assertNotIn("data-moo-task-edit", payload["js"])
+                    self.assertIn("gap: 2rem;", payload["css"])
+                    self.assertIn("align-content: start;", payload["css"])
+                    self.assertTrue(payload["js_module"])
+                    self.assertEqual(payload["editors"], "110")
                 elif path.startswith("examples/settings/"):
                     self.assertIn("gap: 3rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])

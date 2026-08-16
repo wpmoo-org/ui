@@ -1,0 +1,122 @@
+{% from "components/datatable.html.jinja" import datatable %}
+{% from "components/avatar.html.jinja" import avatar %}
+{% from "components/badge.html.jinja" import badge %}
+
+{#- Status set drives the table cells and the facet filter; kept
+    module-level so the badge variant and label stay in one place. #}
+{% set user_statuses = [
+  {"value": "active", "label": "Active", "variant": "success", "rank": 0},
+  {"value": "invited", "label": "Invited", "variant": "outline", "rank": 1},
+  {"value": "suspended", "label": "Suspended", "variant": "destructive", "rank": 2}
+] %}
+{% set user_teams = ["Platform", "Infrastructure", "Data", "Growth", "Design"] %}
+
+{#- .datatable-item-cell (scss/components/_datatable.scss) is the
+   certified shape for an avatar/icon + truncating text pair in a Data
+   Table cell -- it sets min-width:0 on itself so the row can actually
+   shrink; the flex-fill text wrapper needs its own min-width:0 too (no
+   Bootstrap utility for that specific property) so each line inside it
+   can truncate independently instead of forcing the column wider. #}
+{% macro user_identity_cell(user) -%}
+  <div class="datatable-item-cell">
+    {{ avatar(
+      name=user.name,
+      initials=user.initials,
+      size="sm",
+      badge_dot=(user.status == "active"),
+      badge_class="bg-success",
+      badge_aria_label="Active"
+    ) }}
+    <div class="flex-fill lh-sm" style="min-width: 0;">
+      <div class="fw-medium text-truncate">{{ user.name }}</div>
+      <div class="text-body-secondary small text-truncate">{{ user.email }}</div>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro render_users_table(id="datatable-users") -%}
+  {% set status_by_value = {} %}
+  {% for status in user_statuses %}{% set _ = status_by_value.update({status.value: status}) %}{% endfor %}
+
+  {% set users = [
+    {"name": "Vint Cerf", "initials": "VC", "email": "vint.cerf@example.com", "role": "Admin", "team": "Platform", "status": "active", "last_active": "Just now", "last_active_rank": 0},
+    {"name": "Guido van Rossum", "initials": "GV", "email": "guido.vanrossum@example.com", "role": "Engineer", "team": "Platform", "status": "active", "last_active": "1h ago", "last_active_rank": 1},
+    {"name": "Donald Knuth", "initials": "DK", "email": "donald.knuth@example.com", "role": "Engineer", "team": "Platform", "status": "active", "last_active": "2h ago", "last_active_rank": 2},
+    {"name": "Linus Torvalds", "initials": "LT", "email": "linus.torvalds@example.com", "role": "Engineer", "team": "Infrastructure", "status": "active", "last_active": "3h ago", "last_active_rank": 3},
+    {"name": "Fei-Fei Li", "initials": "FL", "email": "fei-fei.li@example.com", "role": "Data", "team": "Data", "status": "active", "last_active": "4h ago", "last_active_rank": 4},
+    {"name": "Edsger Dijkstra", "initials": "ED", "email": "edsger.dijkstra@example.com", "role": "Engineer", "team": "Infrastructure", "status": "active", "last_active": "5h ago", "last_active_rank": 5},
+    {"name": "Ken Thompson", "initials": "KT", "email": "ken.thompson@example.com", "role": "Engineer", "team": "Platform", "status": "active", "last_active": "6h ago", "last_active_rank": 6},
+    {"name": "Claude Shannon", "initials": "CS", "email": "claude.shannon@example.com", "role": "Data", "team": "Data", "status": "active", "last_active": "Yesterday", "last_active_rank": 7},
+    {"name": "James Gosling", "initials": "JG", "email": "james.gosling@example.com", "role": "Engineer", "team": "Infrastructure", "status": "active", "last_active": "Yesterday", "last_active_rank": 7},
+    {"name": "Whitfield Diffie", "initials": "WD", "email": "whitfield.diffie@example.com", "role": "Engineer", "team": "Infrastructure", "status": "active", "last_active": "2d ago", "last_active_rank": 8},
+    {"name": "Marlyn Meltzer", "initials": "MM", "email": "marlyn.meltzer@example.com", "role": "Design", "team": "Design", "status": "active", "last_active": "3d ago", "last_active_rank": 9},
+    {"name": "Anita Borg", "initials": "AB", "email": "anita.borg@example.com", "role": "Product", "team": "Growth", "status": "active", "last_active": "4d ago", "last_active_rank": 10},
+    {"name": "Bjarne Stroustrup", "initials": "BS", "email": "bjarne.stroustrup@example.com", "role": "Engineer", "team": "Platform", "status": "suspended", "last_active": "5w ago", "last_active_rank": 11},
+    {"name": "John McCarthy", "initials": "JM", "email": "john.mccarthy@example.com", "role": "Data", "team": "Data", "status": "suspended", "last_active": "6w ago", "last_active_rank": 12},
+    {"name": "Shafi Goldwasser", "initials": "SG", "email": "shafi.goldwasser@example.com", "role": "QA", "team": "Infrastructure", "status": "invited", "last_active": "Never", "last_active_rank": 99},
+    {"name": "Kathleen McNulty", "initials": "KM", "email": "kathleen.mcnulty@example.com", "role": "Support", "team": "Growth", "status": "invited", "last_active": "Never", "last_active_rank": 99}
+  ] %}
+
+  {% set user_rows = [] %}
+  {% for user in users %}
+    {% set status = status_by_value[user.status] %}
+    {% set _ = user_rows.append({
+      "id": "usr-" ~ loop.index,
+      "search": user.name ~ " " ~ user.email ~ " " ~ user.role ~ " " ~ user.team ~ " " ~ status.label,
+      "facets": {"status": user.status, "team": user.team | lower},
+      "sort": {
+        "user": user.name | lower,
+        "role": user.role | lower,
+        "team": user.team | lower,
+        "status": status.rank,
+        "last_active": user.last_active_rank
+      },
+      "cells": {
+        "user": user_identity_cell(user),
+        "role": user.role,
+        "team": user.team,
+        "status": badge(status.label, variant=status.variant),
+        "last_active": "<span class=\"text-nowrap text-body-secondary\">" ~ user.last_active ~ "</span>"
+      }
+    }) %}
+  {% endfor %}
+
+  {% set status_facet_options = [] %}
+  {% for status in user_statuses %}
+    {% set _ = status_facet_options.append({"value": status.value, "label": status.label, "count": users | selectattr("status", "equalto", status.value) | list | length}) %}
+  {% endfor %}
+  {% set team_facet_options = [] %}
+  {% for team in user_teams %}
+    {% set _ = team_facet_options.append({"value": team | lower, "label": team, "count": users | selectattr("team", "equalto", team) | list | length}) %}
+  {% endfor %}
+
+  {#- Users showcases the inline filter variant (facet chips beside the
+      search bar) and plain scroll responsive mode -- Tasks already
+      showcases the picker variant and card/table toggle, so together the
+      two pages demonstrate more of the Data Table's documented range
+      instead of duplicating the same configuration. No row actions, no
+      bulk actions, no selection: this table is read-only, so it needs no
+      page-specific JS at all -- datatable.js's own generic search/sort/
+      facet/pagination behavior is the whole feature. #}
+  {{ datatable(
+    id,
+    columns=[
+      {"key": "user", "label": "User", "card_role": "title", "hideable": false, "width": "16rem"},
+      {"key": "role", "label": "Role", "width": "8rem"},
+      {"key": "team", "label": "Team", "width": "9rem"},
+      {"key": "status", "label": "Status", "width": "8rem"},
+      {"key": "last_active", "label": "Last active", "width": "8rem"}
+    ],
+    rows=user_rows,
+    facets=[
+      {"key": "status", "label": "Status", "options": status_facet_options},
+      {"key": "team", "label": "Team", "options": team_facet_options}
+    ],
+    search_placeholder="Search users...",
+    default_page_size=10,
+    selectable=false,
+    filter_mode="inline",
+    responsive_mode="scroll",
+    extra_class="datatable--users"
+  ) }}
+{%- endmacro %}

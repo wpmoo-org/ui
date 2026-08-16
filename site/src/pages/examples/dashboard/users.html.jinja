@@ -1,0 +1,56 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/datatable_users.html.jinja" import render_users_table %}
+{% from "includes/codepen.html.jinja" import codepen_button, users_codepen_css, users_codepen_js with context %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% set page_category = "Dashboard" %}
+
+{% block title %}Users — Moo UI{% endblock %}
+
+{% macro users_body() %}
+  {#- Read-only directory: search/sort/facet the workspace's people, no
+     row actions or bulk mutation -- Tasks already covers that side of
+     the Data Table's contract, so Users stays deliberately simpler
+     (Phase 4 of the Examples plan) instead of duplicating it. #}
+  <div class="moo-examples-page" data-moo-example-users>
+    {{ render_page_header(
+      "Users",
+      "Everyone with access to this workspace.",
+      id="users"
+    ) }}
+
+    {{ render_users_table(id="examples-users-datatable") }}
+  </div>
+{% endmacro %}
+
+{% block content %}
+  {% set page_markup %}{{ users_body() }}{% endset %}
+  {{ page_markup }}
+{% endblock %}
+
+{% macro users_footer(codepen_action="") %}
+  <footer class="moo-examples-footer text-body-secondary small">
+    <p class="mb-0">
+      Composed from the
+      {{ example_component_reference("datatable") }} and
+      {{ example_component_reference("avatar") }}
+      components.
+    </p>
+    {{ codepen_action }}
+  </footer>
+{% endmacro %}
+
+{% block footer %}
+  {% set page_markup %}{{ users_body() }}{{ users_footer() }}{% endset %}
+  {{ users_footer(codepen_action=codepen_button(
+    "Moo UI — Users",
+    "A read-only workspace user directory built from Moo UI's Data Table and Avatar components.",
+    page_markup,
+    users_codepen_css(),
+    ["moo-ui", "bootstrap", "datatable", "avatar", "css"],
+    js=users_codepen_js(),
+    js_module=true,
+    editors="110"
+  )) }}
+{% endblock %}
