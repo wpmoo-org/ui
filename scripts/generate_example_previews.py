@@ -45,6 +45,13 @@ HIDE_CHROME_CSS = """
 header.moo-catalog__header,
 .moo-auth-page__footer,
 .moo-examples-footer { display: none !important; }
+
+/* Dashboard/Marketing/Settings examples fill the full capture width, which
+   reads cramped once scaled down to a card thumbnail. Inset the app content
+   ~4% per side (about 12% total whitespace) so the preview breathes; the
+   Settings crop formula below already centers the crop on the content, so
+   the extra inset carries through there too. */
+.moo-examples-page { padding-inline: 4% !important; }
 """
 
 EXAMPLE_SLUGS = (
