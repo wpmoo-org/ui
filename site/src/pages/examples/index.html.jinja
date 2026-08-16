@@ -1,10 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
-{% from "components/input.html.jinja" import input %}
-{% from "components/input_group.html.jinja" import input_group, input_group_text %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/example-previews.html.jinja" import example_preview %}
@@ -40,32 +37,47 @@
       ) }}
 
       <section class="moo-catalog__dashboard" data-moo-examples-view="grid" aria-label="Examples">
-        <div class="moo-catalog__toolbar">
-          {% call input_group() %}
-            {{ input(
-              aria_label="Filter examples",
-              id="examples-search",
-              type="search",
-              placeholder="Filter examples..."
-            ) }}
-            {{ input_group_text(render_icon("search", "inline-start")) }}
-          {% endcall %}
-          {% call dropdown("All examples", align="end", extra_class="moo-catalog__status-menu", caret=true) %}
-            {{ dropdown_item("All examples", active=true, attrs='data-moo-catalog-section-filter="all"') }}
-            {% for category in examples | map(attribute="category") | unique | sort %}
-              {{ dropdown_item(category, attrs='data-moo-catalog-section-filter="' ~ (category | lower) ~ '"') }}
-            {% endfor %}
-          {% endcall %}
-          {{ toggle_group(
-            "examples-view",
-            [
-              {"id": "examples-view-grid", "value": "grid", "icon": "layout-grid", "aria_label": "Grid view", "pressed": true},
-              {"id": "examples-view-list", "value": "list", "icon": "list", "aria_label": "List view"}
-            ],
-            "Examples view",
-            variant="outline",
-            extra_class="moo-catalog__view-toggle"
-          ) }}
+        <div class="moo-catalog__toolbar moo-catalog__toolbar--examples">
+          <div class="moo-catalog__toolbar-query" data-moo-catalog-filter-multi>
+            <div class="input-group input-group-sm moo-catalog__searchbar">
+              <span class="moo-catalog__search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
+              <input class="form-control moo-catalog__search" type="search" id="examples-search" placeholder="Filter examples..." aria-label="Filter examples">
+              <button type="button" class="btn btn-ghost btn-icon-sm moo-catalog__filter-trigger" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Filter by section">
+                {{ render_icon("list-filter", "inline-start") }}
+              </button>
+              {% call dropdown_menu(align="end", extra_class="moo-catalog__filter-menu") %}
+                {% for category in examples | map(attribute="category") | unique | sort %}
+                  <li>
+                    <label class="dropdown-item moo-catalog__filter-option">
+                      <input type="checkbox" class="form-check-input" data-moo-catalog-section-filter="{{ category | lower }}" autocomplete="off">
+                      <span>{{ category }}</span>
+                    </label>
+                  </li>
+                {% endfor %}
+                {{ dropdown_divider() }}
+                <li>
+                  <button type="button" class="dropdown-item moo-catalog__filter-clear" data-moo-catalog-filter-clear>
+                    {{ render_icon("x", "inline-start") }}
+                    Clear filters
+                  </button>
+                </li>
+              {% endcall %}
+            </div>
+          </div>
+          <div class="moo-catalog__toolbar-actions">
+            <div class="btn-group btn-group-sm moo-catalog__view-toggle" role="group" aria-label="Examples view">
+              <input type="radio" class="btn-check" name="examples-view" id="examples-view-grid" value="grid" autocomplete="off" checked>
+              <label class="btn btn-outline-secondary moo-catalog__view-option" for="examples-view-grid">
+                {{ render_icon("layout-grid", "inline-start") }}
+                <span class="visually-hidden">Grid view</span>
+              </label>
+              <input type="radio" class="btn-check" name="examples-view" id="examples-view-list" value="list" autocomplete="off">
+              <label class="btn btn-outline-secondary moo-catalog__view-option" for="examples-view-list">
+                {{ render_icon("list", "inline-start") }}
+                <span class="visually-hidden">List view</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         {{ separator(extra_class="my-4") }}

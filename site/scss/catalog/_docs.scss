@@ -20,6 +20,140 @@
   justify-content: space-between;
 }
 
+// The Examples index toolbar mirrors the Data Table's own search/filter +
+// view toggle pattern: a compact input-group-sm search bar with a leading
+// search icon and an icon-only filter picker, plus a joined btn-group view
+// toggle. Scoped to the examples index -- the Components index keeps its
+// own stacked toolbar (search + "All catalog" + "View" dropdowns).
+.moo-catalog__toolbar--examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.moo-catalog__toolbar-query {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 18rem;
+  max-width: 100%;
+}
+
+.moo-catalog__searchbar {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-block-size: 2rem;
+  width: 100%;
+}
+
+.moo-catalog__searchbar .moo-catalog__search {
+  flex: 1 1 auto;
+  max-width: none;
+  min-width: 0;
+  width: 1%;
+  padding-inline-start: 2rem;
+}
+
+.moo-catalog__search-icon {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.625rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.moo-catalog__search-icon > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.moo-catalog__filter-trigger {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  margin-inline-end: 0;
+  border-radius: var(--bs-border-radius-sm);
+  gap: 0;
+}
+
+.moo-catalog__filter-trigger > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+}
+
+.moo-catalog__filter-menu {
+  --bs-dropdown-border-radius: var(--bs-border-radius);
+
+  min-width: 12rem;
+}
+
+.moo-catalog__filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.moo-catalog__filter-option .form-check-input {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.moo-catalog__filter-option:has(.form-check-input:checked) {
+  background-color: var(--moo-muted-surface);
+}
+
+.moo-catalog__filter-clear {
+  color: var(--bs-secondary-color);
+}
+
+.moo-catalog__toolbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+.moo-catalog__view-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-block-size: 2rem;
+  min-width: 2rem;
+  padding-inline: 0.5rem;
+}
+
+.moo-catalog__view-option > [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-catalog__view-toggle .btn-check:checked + .moo-catalog__view-option {
+  border-color: var(--moo-border);
+  color: var(--bs-body-color);
+  background-color: var(--moo-muted-surface);
+}
+
+.moo-catalog__view-toggle .btn-check:focus-visible + .moo-catalog__view-option {
+  z-index: 3;
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 50%, transparent);
+}
+
 .moo-catalog__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
