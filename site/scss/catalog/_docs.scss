@@ -811,3 +811,21 @@
   height: 0.875rem;
   color: var(--bs-secondary-color);
 }
+
+// The LTR/RTL picker is a joined segmented control; the checked option gets
+// the same muted-surface treatment as the theme picker's active state.
+.moo-settings-panel__direction-option {
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+.moo-settings-panel__direction-option [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.moo-settings-panel__direction-group .btn-check:checked + .moo-settings-panel__direction-option {
+  border-color: var(--moo-border);
+  color: var(--bs-body-color);
+  background-color: var(--moo-muted-surface);
+}

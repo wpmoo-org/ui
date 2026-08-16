@@ -45,6 +45,26 @@
         {% endfor %}
       </div>
 
+      <div>
+        {{ typography("Direction", variant="section-title") }}
+        <p class="text-body-secondary small mb-0">
+          Choose the reading direction. RTL flips the layout live.
+        </p>
+      </div>
+
+      <div class="btn-group btn-group-sm moo-settings-panel__direction-group w-100" role="radiogroup" aria-label="Direction">
+        <input type="radio" class="btn-check" name="moo-settings-direction" value="ltr" id="moo-settings-direction-ltr" data-moo-settings-direction autocomplete="off">
+        <label class="btn btn-outline-secondary moo-settings-panel__direction-option" for="moo-settings-direction-ltr">
+          {{ render_icon("arrow-left-to-line", "inline-start") }}
+          LTR
+        </label>
+        <input type="radio" class="btn-check" name="moo-settings-direction" value="rtl" id="moo-settings-direction-rtl" data-moo-settings-direction autocomplete="off">
+        <label class="btn btn-outline-secondary moo-settings-panel__direction-option" for="moo-settings-direction-rtl">
+          {{ render_icon("arrow-right-to-line", "inline-start") }}
+          RTL
+        </label>
+      </div>
+
       {{ separator() }}
 
       <div class="d-flex justify-content-between align-items-center gap-3">

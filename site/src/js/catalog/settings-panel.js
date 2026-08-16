@@ -1,5 +1,6 @@
 const states = new WeakMap();
 const THEME_STORAGE_KEY = "moo:theme";
+const DIRECTION_STORAGE_KEY = "moo:direction";
 
 function effectiveTheme(preference, view) {
   if (preference === "system") {
@@ -27,6 +28,9 @@ export function initSettingsPanel(root = document) {
     const view = root.defaultView || root.ownerDocument?.defaultView;
     const themeInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-theme]")
+    );
+    const directionInputs = Array.from(
+      sheet.querySelectorAll("[data-moo-settings-direction]")
     );
     const reset = sheet.querySelector("[data-moo-settings-reset]");
     const listen = (target, type, handler) => {
@@ -87,25 +91,66 @@ export function initSettingsPanel(root = document) {
       });
     });
 
+    // Phase 7: the LTR/RTL picker flips the document direction live and
+    // persists it under moo:direction so it survives navigation.
+    const readDirection = () => {
+      try {
+        const stored = view.localStorage.getItem(DIRECTION_STORAGE_KEY);
+        if (stored === "ltr" || stored === "rtl") {
+          return stored;
+        }
+      } catch (_) {
+        /* Storage can be unavailable in restricted browsing contexts. */
+      }
+      return "ltr";
+    };
+    const applyDirection = (direction) => {
+      documentElement.dir = direction;
+      try {
+        view.localStorage.setItem(DIRECTION_STORAGE_KEY, direction);
+      } catch (_) {
+        /* Storage is best-effort. */
+      }
+      directionInputs.forEach((input) => {
+        input.checked = input.value === direction;
+      });
+    };
+    directionInputs.forEach((input) => {
+      listen(input, "change", () => {
+        if (input.checked) {
+          applyDirection(input.value);
+        }
+      });
+    });
+
     listen(reset, "click", () => {
       try {
         view.localStorage.removeItem(THEME_STORAGE_KEY);
+        view.localStorage.removeItem(DIRECTION_STORAGE_KEY);
       } catch (_) {
         /* Storage is best-effort. */
       }
       documentElement.dataset.bsTheme = effectiveTheme("system", view);
+      documentElement.dir = "ltr";
       themeInputs.forEach((input) => {
         input.checked = input.value === "system";
+      });
+      directionInputs.forEach((input) => {
+        input.checked = input.value === "ltr";
       });
       syncThemeButton();
     });
 
-    // Reflect the current preference whenever the sheet opens, so a choice
-    // made through the navbar toggle shows up here too.
+    // Reflect the current preferences whenever the sheet opens, so choices
+    // made through the navbar toggle show up here too.
     listen(sheet, "show.bs.offcanvas", () => {
       const preference = readPreference();
       themeInputs.forEach((input) => {
         input.checked = input.value === preference;
+      });
+      const direction = readDirection();
+      directionInputs.forEach((input) => {
+        input.checked = input.value === direction;
       });
     });
   }

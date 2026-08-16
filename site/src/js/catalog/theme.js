@@ -22,9 +22,6 @@ export function initTheme(root = document) {
   const themeButton = root.querySelector(
     "[data-moo-theme], .moo-catalog__theme-toggle"
   );
-  const directionButton = root.querySelector(
-    "[data-moo-direction], .moo-catalog__direction-toggle"
-  );
   const themeIcons = Array.from(
     themeButton?.querySelectorAll("[data-moo-theme-icon]") || []
   );
@@ -89,12 +86,6 @@ export function initTheme(root = document) {
       /* Storage is best-effort. */
     }
     updateThemeButton();
-  });
-
-  listen(directionButton, "click", () => {
-    const direction = documentElement.dir === "rtl" ? "ltr" : "rtl";
-    documentElement.dir = direction;
-    directionButton.textContent = direction === "rtl" ? "LTR" : "RTL";
   });
 
   updateThemeButton();
