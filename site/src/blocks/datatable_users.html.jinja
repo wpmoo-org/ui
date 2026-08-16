@@ -1,15 +1,33 @@
 {% from "components/datatable.html.jinja" import datatable %}
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "components/badge.html.jinja" import badge %}
+{% from "components/checkbox.html.jinja" import checkbox %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/alert_dialog.html.jinja" import alert_dialog, alert_dialog_header %}
+{% from "components/dialog.html.jinja" import dialog_footer %}
+{% from "components/field.html.jinja" import field, field_group, form %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/select.html.jinja" import select %}
+{% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
+{% from "components/table.html.jinja" import table_row_actions %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
 
-{#- Status set drives the table cells and the facet filter; kept
-    module-level so the badge variant and label stay in one place. #}
+{#- Status/role/team sets drive the table cells, the facet filters, the
+    bulk-action menu, and the New User sheet's selects; keeping them
+    module-level lets every surface stay in one order. #}
 {% set user_statuses = [
-  {"value": "active", "label": "Active", "variant": "success", "rank": 0},
-  {"value": "invited", "label": "Invited", "variant": "outline", "rank": 1},
-  {"value": "suspended", "label": "Suspended", "variant": "destructive", "rank": 2}
+  {"value": "active", "label": "Active", "variant": "success", "icon": "circle-check", "rank": 0},
+  {"value": "invited", "label": "Invited", "variant": "outline", "icon": "clock", "rank": 1},
+  {"value": "suspended", "label": "Suspended", "variant": "destructive", "icon": "ban", "rank": 2}
 ] %}
+{% set user_roles = ["Admin", "Engineer", "Data", "Design", "Product", "QA", "Support"] %}
 {% set user_teams = ["Platform", "Infrastructure", "Data", "Growth", "Design"] %}
+{% set user_role_options = [] %}
+{% for role in user_roles %}{% set _ = user_role_options.append({"value": role | lower, "label": role}) %}{% endfor %}
+{% set user_team_options = [] %}
+{% for team in user_teams %}{% set _ = user_team_options.append({"value": team | lower, "label": team}) %}{% endfor %}
+{% set user_status_options = [] %}
+{% for status in user_statuses %}{% set _ = user_status_options.append({"value": status.value, "label": status.label}) %}{% endfor %}
 
 {#- .datatable-item-cell (scss/components/_datatable.scss) is the
    certified shape for an avatar/icon + truncating text pair in a Data
@@ -28,10 +46,132 @@
       badge_aria_label="Active"
     ) }}
     <div class="flex-fill lh-sm" style="min-width: 0;">
-      <div class="fw-medium text-truncate">{{ user.name }}</div>
-      <div class="text-body-secondary small text-truncate">{{ user.email }}</div>
+      <div class="fw-medium text-truncate" data-moo-fill="name">{{ user.name }}</div>
+      <div class="text-body-secondary small text-truncate" data-moo-fill="email">{{ user.email }}</div>
     </div>
   </div>
+{%- endmacro %}
+
+{% macro user_row_actions(name="") -%}
+  {% call table_row_actions(aria_label="User actions" if not name else "User actions for " ~ name, icon="ellipsis-vertical") %}
+    {{ dropdown_item("Edit", icon="pencil", attrs="data-moo-user-edit") }}
+    {{ dropdown_item("Copy email", icon="copy", attrs="data-moo-user-copy") }}
+    {{ dropdown_divider() }}
+    {{ dropdown_item("Delete user", icon="trash-2", destructive=true, attrs="data-moo-user-delete") }}
+  {% endcall %}
+{%- endmacro %}
+
+{#- Row skeleton for the New User sheet. examples-users.js clones it on
+    submit and fills the data-moo-fill text slots, the status badge, and
+    the sort/search/facet attributes from the form -- mirrors Tasks'
+    task_skeleton(). #}
+{% macro user_skeleton(id) -%}
+  <template data-moo-user-skeleton>
+    <div data-moo-user-skeleton-item>
+      {#- A <tr> outside a table context is dropped by the HTML parser,
+          even inside <template>; the skeleton row rides in a throwaway
+          table so it survives parsing (same as Tasks' skeleton). #}
+      <table><tbody>
+        <tr data-datatable-row>
+          <td class="datatable-col-select">
+            {{ checkbox(id ~ "-skeleton-table-select", aria_label="Select row", extra_class="datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
+          </td>
+          <td class="datatable-col" data-datatable-column="user">
+            <div class="datatable-item-cell">
+              {{ avatar(name="", initials="", fallback="—", size="sm", extra_class="invisible") }}
+              <div class="flex-fill lh-sm" style="min-width: 0;">
+                <div class="fw-medium text-truncate" data-moo-fill="name"></div>
+                <div class="text-body-secondary small text-truncate" data-moo-fill="email"></div>
+              </div>
+            </div>
+          </td>
+          <td class="datatable-col" data-datatable-column="role"><span data-moo-fill="role"></span></td>
+          <td class="datatable-col" data-datatable-column="team"><span data-moo-fill="team"></span></td>
+          <td class="datatable-col" data-datatable-column="status" data-moo-badge="status">{{ badge("Active", variant="success") }}</td>
+          <td class="datatable-col" data-datatable-column="last_active"><span class="text-nowrap text-body-secondary">Just now</span></td>
+          <td class="datatable-col text-end" data-datatable-column="actions">{{ user_row_actions() }}</td>
+        </tr>
+      </tbody></table>
+      <article class="datatable-card" data-datatable-card>
+        <div class="datatable-card-header">
+          {{ checkbox(id ~ "-skeleton-card-select", aria_label="Select row", extra_class="datatable-card-select datatable-checkbox-target", input_attrs="data-datatable-select-row", label_wrapper=true) }}
+          <div class="datatable-card-heading">
+            <div class="datatable-card-title" data-moo-fill="name"></div>
+          </div>
+          <div class="datatable-card-actions">{{ user_row_actions() }}</div>
+        </div>
+        <dl class="datatable-card-list">
+          <div class="datatable-card-row" data-datatable-detail-column="role">
+            <dt>Role</dt>
+            <dd class="datatable-card-value" data-moo-fill="role"></dd>
+          </div>
+          <div class="datatable-card-row" data-datatable-detail-column="team">
+            <dt>Team</dt>
+            <dd class="datatable-card-value" data-moo-fill="team"></dd>
+          </div>
+          <div class="datatable-card-row" data-datatable-detail-column="status">
+            <dt>Status</dt>
+            <dd class="datatable-card-value" data-moo-badge="status">{{ badge("Active", variant="success") }}</dd>
+          </div>
+          <div class="datatable-card-row" data-datatable-detail-column="last_active">
+            <dt>Last active</dt>
+            <dd class="datatable-card-value"><span class="text-nowrap text-body-secondary">Just now</span></dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+  </template>
+{%- endmacro %}
+
+{#- New User sheet. One form serves both create and edit: examples-users.js
+    prefills it for Edit and remembers the row being edited. Submitting
+    applies the change to the table on the page; nothing is persisted. #}
+{% macro render_user_sheet() -%}
+  {% call sheet("users-new-sheet", aria_label="User details") %}
+    {{ sheet_header("users-new-sheet", "New user") }}
+    {% call sheet_body() %}
+      {% call form(extra_class="vstack gap-3") %}
+        <p class="text-body-secondary mb-0" data-moo-user-sheet-copy>
+          Fill in the details and add the user — it appears in the table
+          right away. This is a live demo, so nothing is stored.
+        </p>
+        {% call field() %}
+          {{ input(label="Name", id="users-new-name", required=true, placeholder="e.g. Ada Lovelace") }}
+        {% endcall %}
+        {% call field() %}
+          {{ input(label="Email", id="users-new-email", type="email", required=true, placeholder="e.g. ada.lovelace@example.com") }}
+        {% endcall %}
+        {% call field_group() %}
+          {% call field() %}
+            {{ select(label="Role", id="users-new-role", options=user_role_options, selected="engineer") }}
+          {% endcall %}
+          {% call field() %}
+            {{ select(label="Team", id="users-new-team", options=user_team_options, selected="platform") }}
+          {% endcall %}
+        {% endcall %}
+        {% call field() %}
+          {{ select(label="Status", id="users-new-status", options=user_status_options, selected="active") }}
+        {% endcall %}
+        <div class="d-flex justify-content-end gap-2 mt-auto pt-3">
+          {{ button("Cancel", variant="outline", dismiss="offcanvas") }}
+          {{ button("Add user", type="submit", extra_class="moo-user-sheet-submit") }}
+        </div>
+      {% endcall %}
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}
+
+{#- Destructive confirmation behind the Delete user row action.
+    examples-users.js rewrites the name for the targeted row before
+    showing the dialog; the Delete button carries the removal through. #}
+{% macro render_user_delete_dialog() -%}
+  {% call alert_dialog("users-delete-dialog", describedby="users-delete-dialog-description") %}
+    {{ alert_dialog_header("users-delete-dialog", "Delete this user?", "This action cannot be undone.", icon="trash-2") }}
+    {% call dialog_footer() %}
+      {{ button("Cancel", variant="outline", dismiss="modal") }}
+      {{ button("Delete", variant="destructive", dismiss="modal", extra_class="moo-user-delete-confirm") }}
+    {% endcall %}
+  {% endcall %}
 {%- endmacro %}
 
 {% macro render_users_table(id="datatable-users") -%}
@@ -62,6 +202,8 @@
     {% set status = status_by_value[user.status] %}
     {% set _ = user_rows.append({
       "id": "usr-" ~ loop.index,
+      "label": user.name,
+      "card": {"title": user.name, "actions": user_row_actions(user.name)},
       "search": user.name ~ " " ~ user.email ~ " " ~ user.role ~ " " ~ user.team ~ " " ~ status.label,
       "facets": {"status": user.status, "team": user.team | lower},
       "sort": {
@@ -76,7 +218,8 @@
         "role": user.role,
         "team": user.team,
         "status": badge(status.label, variant=status.variant),
-        "last_active": "<span class=\"text-nowrap text-body-secondary\">" ~ user.last_active ~ "</span>"
+        "last_active": "<span class=\"text-nowrap text-body-secondary\">" ~ user.last_active ~ "</span>",
+        "actions": user_row_actions(user.name)
       }
     }) %}
   {% endfor %}
@@ -94,10 +237,10 @@
       search bar) and plain scroll responsive mode -- Tasks already
       showcases the picker variant and card/table toggle, so together the
       two pages demonstrate more of the Data Table's documented range
-      instead of duplicating the same configuration. No row actions, no
-      bulk actions, no selection: this table is read-only, so it needs no
-      page-specific JS at all -- datatable.js's own generic search/sort/
-      facet/pagination behavior is the whole feature. #}
+      instead of duplicating the same configuration. Selection, bulk
+      actions, and row actions (Edit/Copy email/Delete) match Tasks'
+      shape; examples-users.js wires the interactive parts the same way
+      examples-tasks.js does. #}
   {{ datatable(
     id,
     columns=[
@@ -105,7 +248,8 @@
       {"key": "role", "label": "Role", "width": "8rem"},
       {"key": "team", "label": "Team", "width": "9rem"},
       {"key": "status", "label": "Status", "width": "8rem"},
-      {"key": "last_active", "label": "Last active", "width": "8rem"}
+      {"key": "last_active", "label": "Last active", "width": "8rem"},
+      {"key": "actions", "label": "", "sr_label": "Row actions", "sortable": false, "hideable": false, "align": "end", "width": "4rem", "card_role": "actions"}
     ],
     rows=user_rows,
     facets=[
@@ -114,9 +258,16 @@
     ],
     search_placeholder="Search users...",
     default_page_size=10,
-    selectable=false,
+    selection_noun="users",
     filter_mode="inline",
     responsive_mode="scroll",
+    bulk_actions=[
+      {"key": "status", "label": "Update status", "icon": "circle-check-big", "options": user_statuses},
+      {"key": "team", "label": "Set team", "icon": "users", "options": user_team_options},
+      {"key": "delete", "label": "Delete users", "icon": "trash-2", "destructive": true}
+    ],
     extra_class="datatable--users"
   ) }}
+
+  {{ user_skeleton(id) }}
 {%- endmacro %}

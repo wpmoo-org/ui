@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "blocks/datatable_users.html.jinja" import render_users_table %}
+{% from "blocks/datatable_users.html.jinja" import render_users_table, render_user_sheet, render_user_delete_dialog %}
+{% from "components/button.html.jinja" import button %}
 {% from "includes/codepen.html.jinja" import codepen_button, users_codepen_css, users_codepen_js with context %}
 {% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -9,18 +10,23 @@
 {% block title %}Users — Moo UI{% endblock %}
 
 {% macro users_body() %}
-  {#- Read-only directory: search/sort/facet the workspace's people, no
-     row actions or bulk mutation -- Tasks already covers that side of
-     the Data Table's contract, so Users stays deliberately simpler
-     (Phase 4 of the Examples plan) instead of duplicating it. #}
+  {#- Examples pages are full-width app screens: no doc reading measure,
+     no TOC column. The table is a live, in-browser workspace: New User
+     opens a sheet form, rows can be edited, copied, and deleted, bulk
+     selection works, and "Update status" re-renders the status badge --
+     all client-side, nothing is stored. #}
   <div class="moo-examples-page" data-moo-example-users>
     {{ render_page_header(
       "Users",
       "Everyone with access to this workspace.",
-      id="users"
+      id="users",
+      actions=button("New User", icon_start="plus", element="button", sheet_target="users-new-sheet")
     ) }}
 
     {{ render_users_table(id="examples-users-datatable") }}
+
+    {{ render_user_sheet() }}
+    {{ render_user_delete_dialog() }}
   </div>
 {% endmacro %}
 
@@ -33,8 +39,14 @@
   <footer class="moo-examples-footer text-body-secondary small">
     <p class="mb-0">
       Composed from the
-      {{ example_component_reference("datatable") }} and
-      {{ example_component_reference("avatar") }}
+      {{ example_component_reference("sidebar") }},
+      {{ example_component_reference("datatable") }},
+      {{ example_component_reference("avatar") }},
+      {{ example_component_reference("sheet") }},
+      {{ example_component_reference("alert-dialog") }},
+      {{ example_component_reference("dropdown-menu") }},
+      {{ example_component_reference("badge") }}, and
+      {{ example_component_reference("button") }}
       components.
     </p>
     {{ codepen_action }}
@@ -45,12 +57,13 @@
   {% set page_markup %}{{ users_body() }}{{ users_footer() }}{% endset %}
   {{ users_footer(codepen_action=codepen_button(
     "Moo UI — Users",
-    "A read-only workspace user directory built from Moo UI's Data Table and Avatar components.",
+    "A live workspace user directory built from Moo UI's Data Table, Avatar, Sheet, Alert Dialog, Dropdown Menu, Badge, and Button components.",
     page_markup,
     users_codepen_css(),
     ["moo-ui", "bootstrap", "datatable", "avatar", "css"],
     js=users_codepen_js(),
+    js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
     js_module=true,
-    editors="110"
+    editors="111"
   )) }}
 {% endblock %}

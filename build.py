@@ -420,38 +420,47 @@ def example_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("examples", slug, root_path)
 
 
-TASKS_EXAMPLE_JS_IMPORT = (
+EXAMPLE_JS_IMPORT = (
     'import DataTable from "../../../../src/js/components/datatable.js";'
 )
 
 
-def tasks_example_js_source() -> str:
-    # examples-tasks.js is the real page-specific behavior behind the
-    # Tasks example's row actions (Edit/Copy link/Delete task, the New
-    # Task sheet) -- without it a CodePen export only gets the generic
-    # Data Table (sort/search/pagination), not working row actions. It
-    # can't be linked directly as an external module: ui.wpmoo.org sends
-    # no Access-Control-Allow-Origin header, so a cross-origin `import`
-    # from a real CodePen pen is blocked by CORS (verified against the
-    # live site; unpkg.com, used for DataTable below, does send one).
-    # Read from the actual site source (not hand-duplicated here) so the
-    # export can't silently drift from what's really shipping; only the
-    # relative import needs rewriting to the CDN URL every other
-    # codepen_button() call already uses, matching product.version.
+def _example_js_source(module_filename: str, init_call: str) -> str:
+    # A page-specific catalog/*.js module (examples-tasks.js,
+    # examples-users.js, ...) is the real behavior behind an Examples
+    # page's row actions and sheets -- without it a CodePen export only
+    # gets the generic Data Table (sort/search/pagination), not working
+    # row actions. It can't be linked directly as an external module:
+    # ui.wpmoo.org sends no Access-Control-Allow-Origin header, so a
+    # cross-origin `import` from a real CodePen pen is blocked by CORS
+    # (verified against the live site; unpkg.com, used for DataTable
+    # below, does send one). Read from the actual site source (not
+    # hand-duplicated here) so the export can't silently drift from
+    # what's really shipping; only the relative import needs rewriting
+    # to the CDN URL every other codepen_button() call already uses,
+    # matching product.version.
     version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
-    source = (SITE_SRC / "js/catalog/examples-tasks.js").read_text(encoding="utf-8")
-    if TASKS_EXAMPLE_JS_IMPORT not in source:
-        fail("examples-tasks.js's import line changed; update TASKS_EXAMPLE_JS_IMPORT")
+    source = (SITE_SRC / "js/catalog" / module_filename).read_text(encoding="utf-8")
+    if EXAMPLE_JS_IMPORT not in source:
+        fail(f"{module_filename}'s import line changed; update EXAMPLE_JS_IMPORT")
     source = source.replace(
-        TASKS_EXAMPLE_JS_IMPORT,
+        EXAMPLE_JS_IMPORT,
         f'import DataTable from "https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js";',
     )
     return (
         source.rstrip()
         + '\n\ndocument.querySelectorAll(".datatable").forEach((element) => {\n'
         + "  DataTable.getOrCreateInstance(element);\n"
-        + "});\n\ninitExamplesTasks(document);\n"
+        + f"}});\n\n{init_call}\n"
     )
+
+
+def tasks_example_js_source() -> str:
+    return _example_js_source("examples-tasks.js", "initExamplesTasks(document);")
+
+
+def users_example_js_source() -> str:
+    return _example_js_source("examples-users.js", "initExamplesUsers(document);")
 
 
 RELATIVE_LINK = re.compile(r'(href|src)=(["\'])((?:\.\./|\./)[^"\']*)\2')
@@ -745,6 +754,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
     environment.globals["tasks_example_js_source"] = tasks_example_js_source
+    environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
     lucide_renderer = lambda name, position: render_lucide_icon(
         icon_set,

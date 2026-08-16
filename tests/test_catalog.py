@@ -1223,7 +1223,16 @@ class CatalogContractTests(CatalogTestCase):
                 "badge",
                 "button",
             ],
-            "examples/dashboard/users.html": ["datatable", "avatar"],
+            "examples/dashboard/users.html": [
+                "sidebar",
+                "datatable",
+                "avatar",
+                "sheet",
+                "alert-dialog",
+                "dropdown-menu",
+                "badge",
+                "button",
+            ],
             "examples/settings/profile.html": ["form", "field", "input", "textarea"],
             "examples/settings/account.html": ["form", "field", "select"],
             "examples/settings/appearance.html": ["form", "field", "switch"],
@@ -1300,19 +1309,20 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertTrue(payload["js_module"])
                     self.assertEqual(payload["editors"], "111")
                 elif path == "examples/dashboard/users.html":
-                    # Read-only table -- no row actions, no sheet, no bulk
-                    # mutation -- so unlike Tasks it needs no page-specific
-                    # module, just the generic DataTable init.
                     self.assertIn(
                         f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
-                    self.assertNotIn("data-moo-task-edit", payload["js"])
+                    self.assertIn("export function initExamplesUsers", payload["js"])
+                    self.assertIn("initExamplesUsers(document);", payload["js"])
+                    self.assertIn("data-moo-user-edit", payload["js"])
+                    self.assertIn("data-moo-user-delete", payload["js"])
+                    self.assertNotIn("&#34;", payload["js"])
                     self.assertIn("gap: 2rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])
                     self.assertTrue(payload["js_module"])
-                    self.assertEqual(payload["editors"], "110")
+                    self.assertEqual(payload["editors"], "111")
                 elif path.startswith("examples/settings/"):
                     self.assertIn("gap: 3rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])

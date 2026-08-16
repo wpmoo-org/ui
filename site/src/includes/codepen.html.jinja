@@ -365,31 +365,39 @@ body {
 
 {{ examples_header_codepen_css() }}
 {{ examples_footer_codepen_css() }}
+
+#users-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+#users-delete-dialog .modal-description {
+  white-space: pre-line;
+}
 {%- endmacro %}
 
-{#- Users is a read-only table (no row actions, no sheet, no bulk
-   mutation -- see datatable_users.html.jinja), so unlike Tasks it needs
-   no page-specific module at all: the generic DataTable init is the
-   whole story. codepen_button()'s own uses_popover check still adds the
-   Bootstrap CDN external script + popover-init glue on top of this for
-   the footer's component-reference popovers. #}
+{#- Edit/Copy email/Delete user, the New User sheet, and the "Update
+   status" bulk action are wired by examples-users.js, a page-specific
+   module the site's own catalog bundle loads separately (same shape as
+   Tasks' examples-tasks.js below). users_example_js_source() (build.py)
+   inlines that module's real source (CDN import instead of the site's
+   relative one) plus the DataTable init and an
+   initExamplesUsers(document) call, so the export isn't just a
+   read-only table. Inlined rather than linked to ui.wpmoo.org directly:
+   that origin sends no Access-Control-Allow-Origin header, so a
+   cross-origin `import` from a real CodePen pen would be blocked by
+   CORS (unpkg.com, used for DataTable, does send one). #}
 {% macro users_codepen_js() -%}
-import DataTable from "https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/js/datatable.js";
-
-document.querySelectorAll(".datatable").forEach((element) => {
-  DataTable.getOrCreateInstance(element);
-});
+{{ users_example_js_source() | safe }}
 {%- endmacro %}
 
-{#- A bare DataTable init (users_codepen_js() above is that whole
-   story for a read-only table) isn't enough for Tasks specifically --
-   Edit/Copy link/Delete task and the New Task sheet are wired by
-   examples-tasks.js, a page-specific module the site's own catalog
-   bundle loads separately. tasks_example_js_source() (build.py) inlines
-   that module's real source (CDN import instead of the site's relative
-   one) plus the DataTable init and an initExamplesTasks(document) call,
-   so the export isn't just a read-only table. Inlined rather than
-   linked to ui.wpmoo.org directly: that origin sends no
+{#- Same shape as users_codepen_js() above -- Edit/Copy link/Delete
+   task and the New Task sheet are wired by examples-tasks.js, a
+   page-specific module the site's own catalog bundle loads separately.
+   tasks_example_js_source() (build.py) inlines that module's real
+   source (CDN import instead of the site's relative one) plus the
+   DataTable init and an initExamplesTasks(document) call, so the
+   export isn't just a read-only table. Inlined rather than linked to
+   ui.wpmoo.org directly: that origin sends no
    Access-Control-Allow-Origin header, so a cross-origin `import` from a
    real CodePen pen would be blocked by CORS (unpkg.com, used for
    DataTable, does send one). #}

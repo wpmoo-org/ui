@@ -283,6 +283,16 @@
   white-space: pre-line;
 }
 
+// Same two overrides as #tasks-delete-dialog above, for the Users
+// example's own delete confirmation.
+#users-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+#users-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+
 // The Card "Edge-to-edge content" example mirrors the reference: the body
 // scrolls inside a strip that bleeds to the card edges. The negative margins
 // pull the strip to the card edges (and flush against a following footer) by

@@ -14,6 +14,7 @@ MODULES = {
     "command.js": "initCommand",
     "examples-forms.js": "initExamplesForms",
     "examples-tasks.js": "initExamplesTasks",
+    "examples-users.js": "initExamplesUsers",
     "examples-view-toggle.js": "initExamplesViewToggle",
     "toc.js": "initToc",
     "code-preview.js": "initCodePreview",
