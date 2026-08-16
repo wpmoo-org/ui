@@ -18,6 +18,24 @@
         })();
       </script>
       {% include "shell/sidebar.html.jinja" %}
+      <script>
+        (() => {
+          // Apply a saved Sidebar variant synchronously, right after the
+          // sidebar renders and before the rest of the page paints, so a
+          // non-default choice never flashes the default layout first.
+          var sidebar = document.getElementById("catalog-sidebar");
+          if (!sidebar) return;
+          var stored;
+          try {
+            stored = window.localStorage.getItem("moo:sidebar-variant");
+          } catch (_) {
+            return;
+          }
+          if (stored === "sidebar" || stored === "inset" || stored === "floating") {
+            sidebar.dataset.variant = stored;
+          }
+        })();
+      </script>
       {% call sidebar_inset() %}
         {% include "shell/navbar.html.jinja" %}
         <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">

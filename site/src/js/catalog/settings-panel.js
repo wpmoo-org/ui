@@ -1,6 +1,7 @@
 const states = new WeakMap();
 const THEME_STORAGE_KEY = "moo:theme";
 const DIRECTION_STORAGE_KEY = "moo:direction";
+const SIDEBAR_STORAGE_KEY = "moo:sidebar-variant";
 
 function effectiveTheme(preference, view) {
   if (preference === "system") {
@@ -31,6 +32,9 @@ export function initSettingsPanel(root = document) {
     );
     const directionInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-direction]")
+    );
+    const sidebarInputs = Array.from(
+      sheet.querySelectorAll("[data-moo-settings-sidebar]")
     );
     const reset = sheet.querySelector("[data-moo-settings-reset]");
     const listen = (target, type, handler) => {
@@ -123,10 +127,46 @@ export function initSettingsPanel(root = document) {
       });
     });
 
+    // Phase 8: the Sidebar picker switches the catalog layout's data-variant
+    // live (the sidebar SCSS keys off it) and persists the choice.
+    const sidebar = root.querySelector("#catalog-sidebar");
+    const readSidebarVariant = () => {
+      try {
+        const stored = view.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+        if (stored === "sidebar" || stored === "inset" || stored === "floating") {
+          return stored;
+        }
+      } catch (_) {
+        /* Storage can be unavailable in restricted browsing contexts. */
+      }
+      return "sidebar";
+    };
+    const applySidebarVariant = (variant) => {
+      if (sidebar) {
+        sidebar.dataset.variant = variant;
+      }
+      try {
+        view.localStorage.setItem(SIDEBAR_STORAGE_KEY, variant);
+      } catch (_) {
+        /* Storage is best-effort. */
+      }
+      sidebarInputs.forEach((input) => {
+        input.checked = input.value === variant;
+      });
+    };
+    sidebarInputs.forEach((input) => {
+      listen(input, "change", () => {
+        if (input.checked) {
+          applySidebarVariant(input.value);
+        }
+      });
+    });
+
     listen(reset, "click", () => {
       try {
         view.localStorage.removeItem(THEME_STORAGE_KEY);
         view.localStorage.removeItem(DIRECTION_STORAGE_KEY);
+        view.localStorage.removeItem(SIDEBAR_STORAGE_KEY);
       } catch (_) {
         /* Storage is best-effort. */
       }
@@ -137,6 +177,12 @@ export function initSettingsPanel(root = document) {
       });
       directionInputs.forEach((input) => {
         input.checked = input.value === "ltr";
+      });
+      if (sidebar) {
+        sidebar.dataset.variant = "sidebar";
+      }
+      sidebarInputs.forEach((input) => {
+        input.checked = input.value === "sidebar";
       });
       syncThemeButton();
     });
@@ -151,6 +197,10 @@ export function initSettingsPanel(root = document) {
       const direction = readDirection();
       directionInputs.forEach((input) => {
         input.checked = input.value === direction;
+      });
+      const sidebarVariant = readSidebarVariant();
+      sidebarInputs.forEach((input) => {
+        input.checked = input.value === sidebarVariant;
       });
     });
   }

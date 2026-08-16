@@ -46,6 +46,45 @@
       </div>
 
       <div>
+        {{ typography("Sidebar", variant="section-title") }}
+        <p class="text-body-secondary small mb-0">
+          Choose how the sidebar sits on the page.
+        </p>
+      </div>
+
+      <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Sidebar">
+        {% for option in [
+          {"value": "sidebar", "label": "Sidebar", "icon": "panel-left"},
+          {"value": "inset", "label": "Inset", "icon": "panel-left"},
+          {"value": "floating", "label": "Floating", "icon": "panel-left"}
+        ] %}
+          <label class="moo-settings-panel__theme-option">
+            <input type="radio" class="btn-check" name="moo-settings-sidebar" value="{{ option.value }}" data-moo-settings-sidebar autocomplete="off">
+            <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+            <span class="moo-settings-panel__theme-thumb moo-settings-panel__sidebar-thumb moo-settings-panel__sidebar-thumb--{{ option.value }}" aria-hidden="true">
+              <span class="moo-settings-panel__sidebar-thumb-rail">
+                <span class="moo-settings-panel__sidebar-thumb-nav is-wide"></span>
+                <span class="moo-settings-panel__sidebar-thumb-nav"></span>
+                <span class="moo-settings-panel__sidebar-thumb-nav is-short"></span>
+                <span class="moo-settings-panel__sidebar-thumb-nav is-tiny"></span>
+              </span>
+              <span class="moo-settings-panel__sidebar-thumb-panel">
+                <span class="moo-settings-panel__theme-thumb-bar"></span>
+                <span class="moo-settings-panel__theme-thumb-body">
+                  <span class="moo-settings-panel__theme-thumb-line"></span>
+                  <span class="moo-settings-panel__theme-thumb-line is-short"></span>
+                </span>
+              </span>
+            </span>
+            <span class="moo-settings-panel__theme-label">
+              {{ render_icon(option.icon, "inline-start") }}
+              {{ option.label }}
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <div>
         {{ typography("Direction", variant="section-title") }}
         <p class="text-body-secondary small mb-0">
           Choose the reading direction. RTL flips the layout live.
