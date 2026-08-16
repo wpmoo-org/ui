@@ -38,6 +38,16 @@
             window.matchMedia("(prefers-color-scheme: dark)").matches;
           document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
         }
+        // Phase 7: restore a saved reading direction before first paint so an
+        // RTL choice never flashes back to LTR.
+        try {
+          const storedDirection = window.localStorage.getItem("moo:direction");
+          if (storedDirection === "rtl") {
+            document.documentElement.dir = "rtl";
+          }
+        } catch (_) {
+          /* Storage can be unavailable in restricted browsing contexts. */
+        }
         try {
           const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
           if (sidebar === "collapsed" || sidebar === "expanded") {

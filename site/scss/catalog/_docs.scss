@@ -728,6 +728,14 @@
   display: inline-flex;
 }
 
+// The check straddles the inline-end corner, and the +50% translate is
+// physical -- in RTL the corner is on the left, so the same transform would
+// push it toward the top-center. Flip the X translate to keep it on the
+// corner.
+[dir="rtl"] .moo-settings-panel__theme-check {
+  transform: translate(-50%, -50%);
+}
+
 .moo-settings-panel__theme-thumb {
   position: relative;
   display: block;
@@ -810,4 +818,136 @@
   width: 0.875rem;
   height: 0.875rem;
   color: var(--bs-secondary-color);
+}
+
+// The direction picker reuses the theme picker's image-option pattern
+// (thumbnail + corner check + muted unselected). The thumbnail is a neutral
+// window mock whose bar carries a direction arrow and whose lines align to
+// the reading start; the alignment is physical (not logical) so each preview
+// keeps its own direction regardless of the page's current dir.
+.moo-settings-panel__direction-thumb {
+  background: var(--bs-secondary-bg);
+}
+
+.moo-settings-panel__direction-thumb .moo-settings-panel__theme-thumb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-inline: 0.1875rem;
+  background: color-mix(in srgb, var(--bs-border-color) 55%, transparent);
+}
+
+.moo-settings-panel__direction-thumb .moo-settings-panel__theme-thumb-bar [data-icon] {
+  width: 0.5rem;
+  height: 0.5rem;
+  color: var(--bs-secondary-color);
+}
+
+.moo-settings-panel__direction-thumb .moo-settings-panel__theme-thumb-line {
+  background: var(--bs-border-color);
+}
+
+.moo-settings-panel__direction-thumb--rtl .moo-settings-panel__theme-thumb-bar {
+  justify-content: flex-end;
+}
+
+.moo-settings-panel__direction-thumb--ltr .moo-settings-panel__theme-thumb-line {
+  margin-right: auto;
+}
+
+.moo-settings-panel__direction-thumb--rtl .moo-settings-panel__theme-thumb-line {
+  margin-left: auto;
+}
+
+// The Sidebar picker's window mock mirrors the real catalog layout: a
+// sidebar column on the left (light secondary bg) and a content column on
+// the right (top bar + content lines, same visual language as the theme
+// and direction thumbnails). The three variants differ in how the sidebar
+// and content relate:
+// - sidebar: flush, border between sidebar and content
+// - inset: content is a floating card with gap, rounded corners, shadow
+// - floating: sidebar is a detached card with its own gap/radius/shadow
+.moo-settings-panel__sidebar-thumb {
+  display: flex;
+  background: var(--bs-body-bg);
+}
+
+.moo-settings-panel__sidebar-thumb-rail {
+  flex: 0 0 auto;
+  width: 28%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.375rem 0.25rem;
+  background: var(--bs-secondary-bg);
+  border-inline-end: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-settings-panel__sidebar-thumb-nav {
+  display: block;
+  height: 0.1875rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bs-body-color) 28%, transparent);
+}
+
+.moo-settings-panel__sidebar-thumb-nav.is-wide {
+  width: 100%;
+}
+
+.moo-settings-panel__sidebar-thumb-nav.is-short {
+  width: 65%;
+}
+
+.moo-settings-panel__sidebar-thumb-nav.is-tiny {
+  width: 45%;
+}
+
+.moo-settings-panel__sidebar-thumb-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  padding-block-start: 0.25rem;
+}
+
+// The content area's skeleton lines are muted so the sidebar stays the
+// focal point -- no header bar, just a couple of faint paragraph-like lines.
+.moo-settings-panel__sidebar-thumb-panel .moo-settings-panel__theme-thumb-bar {
+  display: none;
+}
+
+.moo-settings-panel__sidebar-thumb-panel .moo-settings-panel__theme-thumb-line {
+  background: color-mix(in srgb, var(--bs-border-color) 25%, transparent);
+}
+
+// Inset: the whole background is the sidebar's secondary bg; only the
+// content panel lifts into a body-bg card with gap, rounded corners, and
+// shadow -- the sidebar's border goes away, the separation is the gap.
+.moo-settings-panel__sidebar-thumb--inset {
+  background: var(--bs-secondary-bg);
+}
+
+.moo-settings-panel__sidebar-thumb--inset .moo-settings-panel__sidebar-thumb-rail {
+  border-inline-end: 0;
+  background: transparent;
+}
+
+.moo-settings-panel__sidebar-thumb--inset .moo-settings-panel__sidebar-thumb-panel {
+  margin: 0.25rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  box-shadow: var(--bs-box-shadow-sm);
+  background: var(--bs-body-bg);
+  overflow: hidden;
+}
+
+// Floating: the sidebar becomes a detached card -- its own margin, radius,
+// shadow, and secondary bg -- while the content area stays flush.
+.moo-settings-panel__sidebar-thumb--floating .moo-settings-panel__sidebar-thumb-rail {
+  margin: 0.25rem;
+  padding: 0.25rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  border-inline-end: 0;
+  background: var(--bs-secondary-bg);
+  box-shadow: var(--bs-box-shadow-sm);
 }

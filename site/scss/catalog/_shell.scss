@@ -168,6 +168,32 @@ body {
   overflow: hidden;
 }
 
+// Inset variant: the content card is rounded but doesn't clip its children
+// (the main scrolls), so the direct children that reach the card's corners
+// -- the top bar and the trailing footer/main -- get the same radius,
+// otherwise square corners poke past the card's rounded ones.
+.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .moo-catalog__header {
+  border-top-left-radius: var(--bs-border-radius-xl);
+  border-top-right-radius: var(--bs-border-radius-xl);
+}
+
+.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .moo-catalog__main:last-child,
+.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .moo-catalog__footer:last-child {
+  border-bottom-left-radius: var(--bs-border-radius-xl);
+  border-bottom-right-radius: var(--bs-border-radius-xl);
+}
+
+// Inset: the content card floats with a gap on every side instead of
+// touching the sidebar, and the sidebar's edge border goes away -- the
+// separation between the page and the card is the gap, not a border.
+.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inset {
+  margin-inline-start: 0.5rem;
+}
+
+.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inner {
+  border-inline-end: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .moo-catalog .sidebar {
     transition: none;
