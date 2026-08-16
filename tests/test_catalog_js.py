@@ -98,27 +98,52 @@ class CatalogJavaScriptTests(CatalogTestCase):
         self.assertNotIn("mooSidebarState", source)
         self.assertFalse((ROOT / "site/static/js/preview.js").exists())
 
-    def test_examples_tasks_row_actions_survive_reparented_menus(self) -> None:
+    def test_examples_row_actions_survive_reparented_menus(self) -> None:
+        for module_name in ("examples-tasks.js", "examples-users.js"):
+            with self.subTest(module_name=module_name):
+                source = without_comments(
+                    (CATALOG_JS / module_name).read_text(encoding="utf-8")
+                )
+
+                self.assertIn("const documentRoot = root.ownerDocument || root;", source)
+                self.assertIn(
+                    'target.closest(".dropdown-menu[data-datatable-row-action-owner]")',
+                    source,
+                )
+                self.assertIn("rowById(ownerId)", source)
+                self.assertIn(
+                    'getAttribute("data-datatable-row-action-trigger")',
+                    source,
+                )
+                self.assertIn("documentRoot.getElementById(triggerId)", source)
+                self.assertIn('documentRoot.addEventListener("click", onPageClick);', source)
+                self.assertIn(
+                    'documentRoot.removeEventListener("click", onPageClick);',
+                    source,
+                )
+
+    def test_examples_users_bulk_updates_keep_datatable_metadata_fresh(self) -> None:
         source = without_comments(
-            (CATALOG_JS / "examples-tasks.js").read_text(encoding="utf-8")
+            (CATALOG_JS / "examples-users.js").read_text(encoding="utf-8")
         )
 
-        self.assertIn("const documentRoot = root.ownerDocument || root;", source)
+        self.assertIn("const syncBulkMetadata = (row, values) => {", source)
+        self.assertRegex(
+            source,
+            r'row\.setAttribute\(\s*"data-datatable-search"',
+        )
+        self.assertIn('row.setAttribute("data-datatable-facet-status", status);', source)
+        self.assertIn('row.setAttribute("data-datatable-facet-team", team);', source)
         self.assertIn(
-            'target.closest(".dropdown-menu[data-datatable-row-action-owner]")',
+            "row.querySelector('[data-datatable-column=\"team\"]')?.setAttribute",
             source,
         )
-        self.assertIn("rowById(ownerId)", source)
         self.assertIn(
-            'getAttribute("data-datatable-row-action-trigger")',
+            "row.querySelector('[data-datatable-column=\"status\"]')?.setAttribute",
             source,
         )
-        self.assertIn("documentRoot.getElementById(triggerId)", source)
-        self.assertIn('documentRoot.addEventListener("click", onPageClick);', source)
-        self.assertIn(
-            'documentRoot.removeEventListener("click", onPageClick);',
-            source,
-        )
+        self.assertIn('if (key !== "status" && key !== "team")', source)
+        self.assertIn("queueMicrotask(reinitTable);", source)
 
     def test_build_copies_catalog_tree_recursively(self) -> None:
         result = self.run_build()

@@ -262,8 +262,14 @@
 // min-width: auto), so the Data Table's own horizontal scroll-fade
 // engages instead of the table stretching the whole page.
 .moo-examples-page {
+  --moo-examples-footer-height: 3rem;
+
   display: grid;
   gap: 3rem;
+}
+
+.moo-examples-page .datatable {
+  --moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);
 }
 
 .moo-examples-page > * {
@@ -488,6 +494,10 @@
 }
 
 @include media-breakpoint-down(sm) {
+  .moo-examples-page {
+    --moo-examples-footer-height: 6rem;
+  }
+
   .moo-auth-page__footer,
   .moo-examples-footer {
     flex-direction: column;

@@ -181,6 +181,10 @@ body {
   padding-bottom: calc(var(--moo-examples-footer-height) + 1.5rem);
 }
 
+.moo-examples-page .datatable {
+  --moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);
+}
+
 .moo-examples-footer {
   position: fixed;
   right: 0;
@@ -293,7 +297,7 @@ body {
 }
 {%- endmacro %}
 
-{% macro tasks_codepen_css() -%}
+{% macro dashboard_datatable_codepen_css(example) -%}
 {#- Same split as settings_codepen_css(): the inset lives on
    .moo-examples-page, not body. No bottom value here -- the footer is
    position: fixed (see examples_footer_codepen_css(), called below),
@@ -303,6 +307,7 @@ body {
   display: grid;
   gap: 2rem;
   align-content: start;
+  inline-size: 100%;
   max-width: 72rem;
   margin: 0 auto;
   padding: 3rem 1.5rem 0;
@@ -315,25 +320,29 @@ body {
 {{ examples_header_codepen_css() }}
 {{ examples_footer_codepen_css() }}
 
-.datatable--tasks .datatable-card-frame {
+.datatable--{{ example }} .datatable-card-frame {
   inline-size: 100%;
 }
 
-.datatable--tasks .datatable-cards {
+.datatable--{{ example }} .datatable-cards {
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 48rem) {
-  .datatable--tasks .datatable-cards {
+  .datatable--{{ example }} .datatable-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 70rem) {
-  .datatable--tasks .datatable-cards {
+  .datatable--{{ example }} .datatable-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+{%- endmacro %}
+
+{% macro tasks_codepen_css() -%}
+{{ dashboard_datatable_codepen_css("tasks") }}
 
 #tasks-delete-dialog {
   --bs-modal-width: 31.25rem;
@@ -345,26 +354,7 @@ body {
 {%- endmacro %}
 
 {% macro users_codepen_css() -%}
-{#- Same split as tasks_codepen_css()/settings_codepen_css(): the inset
-   lives on .moo-examples-page, not body -- the footer stays position:
-   fixed either way (examples_footer_codepen_css()). No responsive-mode
-   overrides needed here (unlike Tasks' .datatable--tasks rules): Users
-   uses the Data Table's default scroll responsive_mode, not cards. #}
-.moo-examples-page {
-  display: grid;
-  gap: 2rem;
-  align-content: start;
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 3rem 1.5rem 0;
-}
-
-.moo-examples-page > * {
-  min-width: 0;
-}
-
-{{ examples_header_codepen_css() }}
-{{ examples_footer_codepen_css() }}
+{{ dashboard_datatable_codepen_css("users") }}
 
 #users-delete-dialog {
   --bs-modal-width: 31.25rem;

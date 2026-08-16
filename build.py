@@ -443,15 +443,46 @@ def _example_js_source(module_filename: str, init_call: str) -> str:
     source = (SITE_SRC / "js/catalog" / module_filename).read_text(encoding="utf-8")
     if EXAMPLE_JS_IMPORT not in source:
         fail(f"{module_filename}'s import line changed; update EXAMPLE_JS_IMPORT")
-    source = source.replace(
-        EXAMPLE_JS_IMPORT,
-        f'import DataTable from "https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js";',
-    )
+    datatable_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js"
+    source = source.replace(EXAMPLE_JS_IMPORT, "let DataTable;")
+    source = source.replace("export function ", "function ")
     return (
         source.rstrip()
-        + '\n\ndocument.querySelectorAll(".datatable").forEach((element) => {\n'
-        + "  DataTable.getOrCreateInstance(element);\n"
-        + f"}});\n\n{init_call}\n"
+        + '\n\nfunction loadMooCodePenBootstrapForExample(callback) {\n'
+        + "  if (window.bootstrap && window.bootstrap.Offcanvas && window.bootstrap.Dropdown && window.bootstrap.Modal) {\n"
+        + "    callback();\n"
+        + "    return;\n"
+        + "  }\n\n"
+        + '  const existing = document.querySelector(\'script[src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js"]\');\n'
+        + "  if (existing) {\n"
+        + '    existing.addEventListener("load", callback, { once: true });\n'
+        + "    return;\n"
+        + "  }\n\n"
+        + '  const script = document.createElement("script");\n'
+        + '  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";\n'
+        + "  script.onload = callback;\n"
+        + "  document.head.appendChild(script);\n"
+        + "}\n\n"
+        + "function startMooExampleDataTable() {\n"
+        + "  loadMooCodePenBootstrapForExample(() => {\n"
+        + f'    import("{datatable_url}")\n'
+        + "      .then((module) => {\n"
+        + "        DataTable = module.default;\n"
+        + '        document.querySelectorAll(".datatable").forEach((element) => {\n'
+        + "          DataTable.getOrCreateInstance(element);\n"
+        + "        });\n"
+        + f"        {init_call}\n"
+        + "      })\n"
+        + "      .catch((error) => {\n"
+        + '        console.error("Moo UI DataTable failed to load for this CodePen example.", error);\n'
+        + "      });\n"
+        + "  });\n"
+        + "}\n\n"
+        + 'if (document.readyState === "loading") {\n'
+        + '  document.addEventListener("DOMContentLoaded", startMooExampleDataTable, { once: true });\n'
+        + "} else {\n"
+        + "  startMooExampleDataTable();\n"
+        + "}\n"
     )
 
 

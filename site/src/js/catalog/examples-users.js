@@ -91,6 +91,8 @@ export function initExamplesUsers(root = document) {
   };
   const hideSheet = () => bootstrap?.Offcanvas.getInstance(sheet)?.hide();
   const selectedLabel = (select) => select?.selectedOptions[0]?.textContent ?? select?.value ?? "";
+  const optionLabel = (select, value) =>
+    Array.from(select?.options ?? []).find((option) => option.value === value)?.textContent.trim() ?? value;
 
   const setSheetMode = (editing) => {
     if (!sheetTitle || !submitButton || !sheetCopy) {
@@ -128,6 +130,44 @@ export function initExamplesUsers(root = document) {
     } else if (dot) {
       dot.remove();
     }
+  };
+
+  const setTeamLabel = (scope, label) => {
+    const rowCell = scope?.matches?.('[data-datatable-column="team"]')
+      ? scope
+      : scope?.querySelector('[data-datatable-column="team"]');
+    if (rowCell) {
+      const labelNode = documentRoot.createElement("span");
+      labelNode.setAttribute("data-moo-fill", "team");
+      labelNode.textContent = label;
+      rowCell.replaceChildren(labelNode);
+      return;
+    }
+
+    const cardValue = scope?.querySelector('[data-datatable-detail-column="team"] .datatable-card-value');
+    if (cardValue) {
+      cardValue.setAttribute("data-moo-fill", "team");
+      cardValue.textContent = label;
+    }
+  };
+
+  const syncBulkMetadata = (row, values) => {
+    const name = row.querySelector('[data-moo-fill="name"]')?.textContent.trim() ?? "";
+    const email = row.querySelector('[data-moo-fill="email"]')?.textContent.trim() ?? "";
+    const roleLabel = row.querySelector('[data-datatable-column="role"]')?.textContent.trim() ?? "";
+    const team = values.team ?? row.getAttribute("data-datatable-facet-team") ?? "";
+    const teamLabel = values.teamLabel ?? row.querySelector('[data-datatable-column="team"]')?.textContent.trim() ?? "";
+    const status = values.status ?? row.getAttribute("data-datatable-facet-status") ?? "";
+    const statusLabel = values.statusLabel ?? optionLabel(fields.status, status);
+
+    row.setAttribute(
+      "data-datatable-search",
+      [name, email, roleLabel, teamLabel, statusLabel].join(" "),
+    );
+    row.setAttribute("data-datatable-facet-status", status);
+    row.setAttribute("data-datatable-facet-team", team);
+    row.querySelector('[data-datatable-column="team"]')?.setAttribute("data-datatable-sort-value", teamLabel.toLowerCase());
+    row.querySelector('[data-datatable-column="status"]')?.setAttribute("data-datatable-sort-value", String(STATUS_RANKS[status] ?? 99));
   };
 
   const applyValues = (row, card, values) => {
@@ -343,25 +383,41 @@ export function initExamplesUsers(root = document) {
     deleteRow = null;
   };
 
-  // datatable.js's own generic bulk-update mechanism (see
-  // collectStatusBadges() above) collapses the status cell to bare text
-  // -- re-render the correct badge in both the row and its card once
-  // that generic update has finished.
+  // datatable.js updates plain cell/card content and cached facets. The
+  // Users demo owns richer badge/avatar/team markup and search/sort metadata,
+  // so restore those hooks and re-read the table after bulk changes.
   const onBulkUpdate = (event) => {
     const { key, value, ids } = event.detail ?? {};
-    if (key !== "status") {
+    if (key !== "status" && key !== "team") {
       return;
     }
-    ids.forEach((id) => {
+    const label = optionLabel(key === "status" ? fields.status : fields.team, value);
+    const updatedIds = Array.isArray(ids) ? ids : [];
+    let updated = false;
+    updatedIds.forEach((id) => {
       const row = rowById(id);
+      if (!row) {
+        return;
+      }
       const card = cardById(id);
-      setStatusBadge(row, value);
-      setStatusBadge(card, value);
-      const avatarActive = value === "active";
-      [row, card].forEach((scope) => {
-        setActiveDot(scope?.querySelector(".avatar"), avatarActive);
-      });
+      if (key === "status") {
+        setStatusBadge(row, value);
+        setStatusBadge(card, value);
+        const avatarActive = value === "active";
+        [row, card].forEach((scope) => {
+          setActiveDot(scope?.querySelector(".avatar"), avatarActive);
+        });
+        syncBulkMetadata(row, { status: value, statusLabel: label });
+      } else {
+        setTeamLabel(row, label);
+        setTeamLabel(card, label);
+        syncBulkMetadata(row, { team: value, teamLabel: label });
+      }
+      updated = true;
     });
+    if (updated) {
+      queueMicrotask(reinitTable);
+    }
   };
 
   form.addEventListener("submit", onSubmit);

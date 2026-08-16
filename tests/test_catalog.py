@@ -207,6 +207,19 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(claim=claim):
                 self.assertNotIn(claim, normalized_source)
 
+    def test_users_example_uses_tasks_datatable_toolbar_pattern(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        users = self.read_output("examples/dashboard/users.html")
+
+        self.assertIn('data-datatable-filter-mode="picker"', users)
+        self.assertIn("datatable-view-toggle", users)
+        self.assertIn('data-datatable-view="table"', users)
+        self.assertIn('value="cards"', users)
+        self.assertNotIn('data-datatable-filter-mode="inline"', users)
+        self.assertNotIn("datatable--responsive-scroll", users)
+
     def test_public_docs_use_moo_ui_brand_name_in_prose(self) -> None:
         result = self.run_build()
 
@@ -1224,7 +1237,6 @@ class CatalogContractTests(CatalogTestCase):
                 "button",
             ],
             "examples/dashboard/users.html": [
-                "sidebar",
                 "datatable",
                 "avatar",
                 "sheet",
@@ -1241,6 +1253,14 @@ class CatalogContractTests(CatalogTestCase):
             ROOT / "site/src/pages/components/index.html.jinja"
         ).read_text(encoding="utf-8")
         self.assertNotIn("component_descriptions", components_index_source)
+        examples_styles_source = (ROOT / "site/scss/catalog/_examples.scss").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(".moo-examples-page .datatable", examples_styles_source)
+        self.assertIn(
+            "--moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);",
+            examples_styles_source,
+        )
 
         for path, component_slugs in expected_footer_components.items():
             with self.subTest(path=path):
@@ -1272,6 +1292,10 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(".moo-examples-footer", payload["css"])
                 self.assertIn(".moo-component-header--has-actions", payload["css"])
                 self.assertIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertIn(
+                    "--moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);",
+                    payload["css"],
+                )
                 self.assertEqual(
                     payload["css_external"],
                     f"https://unpkg.com/@wpmoo/ui@{package_version}/dist/assets/css/moo-ui.css",
@@ -1292,13 +1316,23 @@ class CatalogContractTests(CatalogTestCase):
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
-                    self.assertIn("export function initExamplesTasks", payload["js"])
+                    self.assertIn(
+                        f'import("https://unpkg.com/@wpmoo/ui@{package_version}/dist/js/datatable.js")',
+                        payload["js"],
+                    )
+                    self.assertIn("function initExamplesTasks", payload["js"])
                     self.assertIn("initExamplesTasks(document);", payload["js"])
+                    self.assertNotIn("import DataTable from", payload["js"])
+                    self.assertNotIn("export function", payload["js"])
                     self.assertIn("data-moo-task-edit", payload["js"])
                     self.assertIn("data-moo-task-delete", payload["js"])
                     self.assertNotIn("&#34;", payload["js"])
                     self.assertIn("gap: 2rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])
+                    moo_page_rule = re.search(r"\.moo-examples-page\s*\{([^}]*)\}", payload["css"])
+                    self.assertIsNotNone(moo_page_rule)
+                    self.assertIn("inline-size: 100%;", moo_page_rule.group(1))
+                    self.assertIn("max-width: 72rem;", moo_page_rule.group(1))
                     self.assertIn(".datatable--tasks .datatable-card-frame", payload["css"])
                     self.assertIn("inline-size: 100%;", payload["css"])
                     self.assertIn(".datatable--tasks .datatable-cards", payload["css"])
@@ -1306,7 +1340,7 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr));", payload["css"])
                     self.assertIn("@media (min-width: 70rem)", payload["css"])
                     self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", payload["css"])
-                    self.assertTrue(payload["js_module"])
+                    self.assertFalse(payload["js_module"])
                     self.assertEqual(payload["editors"], "111")
                 elif path == "examples/dashboard/users.html":
                     self.assertIn(
@@ -1314,14 +1348,39 @@ class CatalogContractTests(CatalogTestCase):
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
-                    self.assertIn("export function initExamplesUsers", payload["js"])
+                    self.assertIn(
+                        f'import("https://unpkg.com/@wpmoo/ui@{package_version}/dist/js/datatable.js")',
+                        payload["js"],
+                    )
+                    self.assertIn("function initExamplesUsers", payload["js"])
                     self.assertIn("initExamplesUsers(document);", payload["js"])
+                    self.assertNotIn("import DataTable from", payload["js"])
+                    self.assertNotIn("export function", payload["js"])
                     self.assertIn("data-moo-user-edit", payload["js"])
                     self.assertIn("data-moo-user-delete", payload["js"])
                     self.assertNotIn("&#34;", payload["js"])
                     self.assertIn("gap: 2rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])
-                    self.assertTrue(payload["js_module"])
+                    moo_page_rule = re.search(r"\.moo-examples-page\s*\{([^}]*)\}", payload["css"])
+                    self.assertIsNotNone(moo_page_rule)
+                    self.assertIn("inline-size: 100%;", moo_page_rule.group(1))
+                    self.assertIn("max-width: 72rem;", moo_page_rule.group(1))
+                    self.assertIn(".datatable--users .datatable-card-frame", payload["css"])
+                    self.assertIn("inline-size: 100%;", payload["css"])
+                    self.assertIn(".datatable--users .datatable-cards", payload["css"])
+                    self.assertIn("@media (min-width: 48rem)", payload["css"])
+                    self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr));", payload["css"])
+                    self.assertIn("@media (min-width: 70rem)", payload["css"])
+                    self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", payload["css"])
+                    self.assertIn("max-width: 72rem;", payload["css"])
+                    self.assertNotIn(
+                        '.moo-examples-page:has(.datatable--users[data-datatable-view="cards"])',
+                        payload["css"],
+                    )
+                    self.assertNotIn("max-width: 96rem;", payload["css"])
+                    self.assertNotIn("@media (min-width: 92rem)", payload["css"])
+                    self.assertNotIn("grid-template-columns: repeat(4, minmax(0, 1fr));", payload["css"])
+                    self.assertFalse(payload["js_module"])
                     self.assertEqual(payload["editors"], "111")
                 elif path.startswith("examples/settings/"):
                     self.assertIn("gap: 3rem;", payload["css"])
@@ -1333,6 +1392,9 @@ class CatalogContractTests(CatalogTestCase):
                 for surface in (page[footer_start:], payload["html"]):
                     link_parser = LinkParser()
                     link_parser.feed(surface)
+                    if path == "examples/dashboard/users.html":
+                        sidebar_description = registry["sidebar"]["description"]
+                        self.assertNotIn(sidebar_description, unescape(surface))
                     component_links = [
                         link
                         for link in link_parser.links

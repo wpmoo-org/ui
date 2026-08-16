@@ -519,6 +519,13 @@ class DataTableTests(CatalogTestCase):
         self.assertIn("var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)", source)
         self.assertIn('[dir="rtl"] .datatable-frame [data-datatable-column="actions"]', source)
 
+    def test_datatable_bulk_actions_bottom_offset_is_consumer_overridable(self) -> None:
+        source = DATATABLE_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn("--moo-datatable-bulk-actions-bottom", source)
+        self.assertIn("inset-block-end: var(--moo-datatable-bulk-actions-bottom);", source)
+        self.assertNotIn("inset-block-end: 1rem;", source)
+
     def test_datatable_view_toggle_paints_focus_ring_on_visible_label(self) -> None:
         source = DATATABLE_SCSS.read_text(encoding="utf-8")
 

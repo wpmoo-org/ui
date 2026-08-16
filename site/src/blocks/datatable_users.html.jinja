@@ -40,7 +40,6 @@
     {{ avatar(
       name=user.name,
       initials=user.initials,
-      size="sm",
       badge_dot=(user.status == "active"),
       badge_class="bg-success",
       badge_aria_label="Active"
@@ -78,7 +77,7 @@
           </td>
           <td class="datatable-col" data-datatable-column="user">
             <div class="datatable-item-cell">
-              {{ avatar(name="", initials="", fallback="—", size="sm", extra_class="invisible") }}
+              {{ avatar(name="", initials="", fallback="—", extra_class="invisible") }}
               <div class="flex-fill lh-sm" style="min-width: 0;">
                 <div class="fw-medium text-truncate" data-moo-fill="name"></div>
                 <div class="text-body-secondary small text-truncate" data-moo-fill="email"></div>
@@ -233,14 +232,10 @@
     {% set _ = team_facet_options.append({"value": team | lower, "label": team, "count": users | selectattr("team", "equalto", team) | list | length}) %}
   {% endfor %}
 
-  {#- Users showcases the inline filter variant (facet chips beside the
-      search bar) and plain scroll responsive mode -- Tasks already
-      showcases the picker variant and card/table toggle, so together the
-      two pages demonstrate more of the Data Table's documented range
-      instead of duplicating the same configuration. Selection, bulk
-      actions, and row actions (Edit/Copy email/Delete) match Tasks'
-      shape; examples-users.js wires the interactive parts the same way
-      examples-tasks.js does. #}
+  {#- Match Tasks' Data Table toolbar pattern: picker filters plus a
+      reader-controlled table/card toggle. Selection, bulk actions, and row
+      actions (Edit/Copy email/Delete) follow the same example shape, with
+      examples-users.js wiring the page-specific behavior. #}
   {{ datatable(
     id,
     columns=[
@@ -259,8 +254,9 @@
     search_placeholder="Search users...",
     default_page_size=10,
     selection_noun="users",
-    filter_mode="inline",
-    responsive_mode="scroll",
+    filter_mode="picker",
+    responsive_mode="toggle",
+    responsive_breakpoint="md",
     bulk_actions=[
       {"key": "status", "label": "Update status", "icon": "circle-check-big", "options": user_statuses},
       {"key": "team", "label": "Set team", "icon": "users", "options": user_team_options},
