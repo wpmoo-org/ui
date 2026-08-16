@@ -188,6 +188,12 @@ export function initExamplesUsers(root = document) {
     fillAll("team", values.teamLabel);
 
     for (const scope of scopes) {
+      // The row-action toggle's accessible name embeds the user's name, so
+      // a rename must refresh it too, or assistive tech announces the old
+      // name for the actions.
+      scope
+        ?.querySelector('[data-bs-toggle="dropdown"]')
+        ?.setAttribute("aria-label", `User actions for ${values.name}`);
       setStatusBadge(scope, values.status);
       const avatarEl = scope?.querySelector(".avatar");
       if (avatarEl) {
@@ -247,8 +253,14 @@ export function initExamplesUsers(root = document) {
       const clone = skeleton.content.querySelector("[data-moo-user-skeleton-item]").cloneNode(true);
       const row = clone.querySelector("tr[data-datatable-row]");
       const card = clone.querySelector("article[data-datatable-card]");
-      added += 1;
-      row.id = `usr-new-${added}`;
+      // The module can be disposed and reinitialized on the same page (a
+      // later init resets `added`), so keep allocating until the id is
+      // unused in the live DOM -- duplicate ids would break rowById/card
+      // ownership and the selection-control ids.
+      do {
+        added += 1;
+        row.id = `usr-new-${added}`;
+      } while (rowById(row.id));
       const syncSelect = (scope, suffix) => {
         const input = scope?.querySelector("input[data-datatable-select-row]");
         if (input) {

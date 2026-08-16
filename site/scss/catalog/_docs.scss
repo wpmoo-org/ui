@@ -346,11 +346,11 @@
   margin: calc(var(--bs-card-spacer-x) * -1) 0 calc(var(--bs-card-spacer-x) * -1) calc(var(--bs-card-spacer-x) * -1);
 
   // showcase-preview's own border-bottom (for the stacked grid layout)
-  // doesn't land anywhere useful in this side-by-side row -- a right
+  // doesn't land anywhere useful in this side-by-side row -- an inline-end
   // border softens the seam between the preview's own light colors and a
-  // dark card.
+  // dark card in both LTR and RTL.
   border-bottom: 0;
-  border-right: var(--bs-border-width) solid var(--moo-border);
+  border-inline-end: var(--bs-border-width) solid var(--moo-border);
 }
 
 // The row has room to spare once the page itself reads at doc width
