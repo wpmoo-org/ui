@@ -100,6 +100,13 @@ $moo-info-surface-dark: color-mix(in srgb, $moo-info-dark 20%, transparent) !def
 $moo-info-surface-hover-dark: color-mix(in srgb, $moo-info-dark 30%, transparent) !default;
 $moo-info-foreground-dark: $moo-info-dark !default;
 $moo-sidebar-dark: #1c1c1f !default;
+// Dark-mode input background: a translucent tint that gives form controls a
+// distinct surface against the page background. Light mode stays transparent
+// (the default), but dark mode needs this subtle depth cue so inputs don't
+// rely on border alone for definition. Mixed from muted-surface-dark toward
+// the surface color so it reads as "slightly lighter than the page" without
+// introducing a new hardcoded color.
+$moo-input-bg-dark: color-mix(in srgb, $moo-muted-surface-dark 50%, $moo-surface-dark) !default;
 
 // Bootstrap root variables consumed by the scoped core build. Define them
 // here so themes/_scoped_core.scss can emit Bootstrap's root contract without

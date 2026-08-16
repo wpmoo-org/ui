@@ -5,11 +5,11 @@ $input-padding-y: 0.25rem !default;
 $input-padding-x: 0.625rem !default;
 $input-height: 2rem !default;
 $input-line-height: 1.4285714286 !default;
-$input-bg: transparent !default;
+$input-bg: var(--moo-input-bg, transparent) !default;
 $input-border-color: var(--moo-border) !default;
 $input-border-radius: 0.625rem !default;
 $input-placeholder-color: var(--bs-tertiary-color) !default;
-$input-focus-bg: transparent !default;
+$input-focus-bg: var(--moo-input-bg, transparent) !default;
 // Bootstrap leaves disabled text-control foregrounds null by default
 // (vendor/bootstrap/scss/_variables.scss), which lets real values inherit the
 // normal input color. Use Moo's disabled foreground token so disabled values
