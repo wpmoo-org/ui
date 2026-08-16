@@ -20,11 +20,12 @@
   justify-content: space-between;
 }
 
-// The Examples index toolbar mirrors the Data Table's own search/filter +
-// view toggle pattern: a compact input-group-sm search bar with a leading
-// search icon and an icon-only filter picker, plus a joined btn-group view
-// toggle. Scoped to the examples index -- the Components index keeps its
-// own stacked toolbar (search + "All catalog" + "View" dropdowns).
+// The Examples and Components index toolbars mirror the Data Table's own
+// search/filter + view toggle pattern: a compact input-group-sm search bar
+// with a leading search icon and an icon-only filter picker, plus a joined
+// btn-group view toggle. Both indexes share this layout; each page then adds
+// its own actions (Examples the grid/list toggle, Components its own
+// catalog controls) in the actions slot.
 .moo-catalog__toolbar--examples,
 .moo-catalog__toolbar--components {
   display: flex;
@@ -332,7 +333,9 @@
   display: flex !important;
   flex-direction: row;
   align-items: center;
-  gap: 1rem;
+  // Bootstrap's .gap-4 utility on the card body compiles to
+  // gap: 1.5rem !important, so the row needs the same weight to win.
+  gap: 1rem !important;
 }
 
 [data-moo-catalog-view="list"] .moo-catalog__showcase-preview {
