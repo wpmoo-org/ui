@@ -1,6 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/accordion.html.jinja" import accordion %}
-{% from "components/typography.html.jinja" import typography %}
 {% from "includes/codepen.html.jinja" import codepen_button, marketing_codepen_css with context %}
 {% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -18,7 +17,7 @@
     ) }}
 
     <div class="moo-faq-group">
-      {{ typography("Getting started", variant="section-title", id="faq-getting-started") }}
+      <h2 class="h3" id="faq-getting-started">Getting started</h2>
       {{ accordion(
         "faq-getting-started-accordion",
         [
@@ -44,7 +43,7 @@
     </div>
 
     <div class="moo-faq-group">
-      {{ typography("Building with Moo UI", variant="section-title", id="faq-building") }}
+      <h2 class="h3" id="faq-building">Building with Moo UI</h2>
       {{ accordion(
         "faq-building-accordion",
         [
@@ -69,7 +68,7 @@
     </div>
 
     <div class="moo-faq-group">
-      {{ typography("Licensing & support", variant="section-title", id="faq-licensing") }}
+      <h2 class="h3" id="faq-licensing">Licensing &amp; support</h2>
       {{ accordion(
         "faq-licensing-accordion",
         [
