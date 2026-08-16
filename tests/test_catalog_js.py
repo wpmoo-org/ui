@@ -13,6 +13,7 @@ MODULES = {
     "catalog-filter.js": "initCatalogFilter",
     "catalog-view-toggle.js": "initCatalogViewToggle",
     "command.js": "initCommand",
+    "examples-chart.js": "initExamplesChart",
     "examples-forms.js": "initExamplesForms",
     "examples-tasks.js": "initExamplesTasks",
     "examples-users.js": "initExamplesUsers",

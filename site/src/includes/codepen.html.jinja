@@ -495,6 +495,95 @@ body {
 {{ tasks_example_js_source() | safe }}
 {%- endmacro %}
 
+{#- Dashboard Overview: stat cards + Chart.js charts. The overview page
+   uses the same .moo-examples-page layout as Tasks/Users, but without
+   DataTable — just stat cards and chart containers. Chart.js is loaded
+   from CDN (not bundled in the npm package). #}
+{% macro dashboard_codepen_css() -%}
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  inline-size: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+{%- endmacro %}
+
+{#- Chart.js initialization for the Dashboard Overview CodePen. The chart
+   data is embedded in the HTML as data-moo-chart-data attributes; this
+   script reads them and creates Chart.js instances. #}
+{% macro dashboard_codepen_js() -%}
+function initializeMooDashboardCharts() {
+  if (!window.Chart) {
+    return;
+  }
+
+  document.querySelectorAll("[data-moo-chart]").forEach((container) => {
+    const canvas = container.querySelector("canvas");
+    if (!canvas) return;
+
+    const chartType = container.dataset.mooChart || "line";
+    const chartData = JSON.parse(container.dataset.mooChartData || "null");
+    if (!chartData) return;
+
+    new Chart(canvas, {
+      type: chartType,
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-body-color") } },
+          tooltip: {
+            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-body-bg"),
+            titleColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-body-color"),
+            bodyColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color"),
+            borderColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-border-color"),
+            borderWidth: 1,
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-border-color") + "40" },
+            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color") },
+          },
+          y: {
+            grid: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-border-color") + "40" },
+            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color") },
+          },
+        },
+      },
+    });
+  });
+}
+
+function loadMooDashboardChartJs(callback) {
+  if (window.Chart) {
+    callback();
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js";
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => loadMooDashboardChartJs(initializeMooDashboardCharts), { once: true });
+} else {
+  loadMooDashboardChartJs(initializeMooDashboardCharts);
+}
+{%- endmacro %}
+
 {#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
    in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
    page's own markup (internal links rewritten to absolute ui.wpmoo.org

@@ -10,6 +10,7 @@ import { initCatalogFilter } from "./catalog-filter.js";
 import { initCatalogViewToggle } from "./catalog-view-toggle.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
+import { initExamplesChart } from "./examples-chart.js";
 import { initExamplesForms } from "./examples-forms.js";
 import { initExamplesTasks } from "./examples-tasks.js";
 import { initExamplesUsers } from "./examples-users.js";
@@ -32,6 +33,7 @@ export function initCatalog(root = document) {
     initExamplesForms(root),
     initExamplesTasks(root),
     initExamplesUsers(root),
+    initExamplesChart(root),
     initCatalogViewToggle(root),
     initSettingsPanel(root),
     initToc(root),
