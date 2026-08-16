@@ -582,6 +582,12 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  // The negative margins bleed the strip to the popover's top edge; the
+  // popover's own border-radius isn't an overflow clip, so round the strip's
+  // top corners to the same radius or the image's square corners poke past
+  // the popover's rounded ones.
+  border-top-left-radius: var(--bs-popover-border-radius);
+  border-top-right-radius: var(--bs-popover-border-radius);
   margin: calc(var(--bs-popover-body-padding-y, 0.625rem) * -1) calc(var(--bs-popover-body-padding-x, 0.625rem) * -1) 0.75rem;
   padding: 0.75rem;
   background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
