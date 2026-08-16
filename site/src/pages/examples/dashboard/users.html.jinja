@@ -31,8 +31,7 @@
 {% endmacro %}
 
 {% block content %}
-  {% set page_markup %}{{ users_body() }}{% endset %}
-  {{ page_markup }}
+  {{ users_body() }}
 {% endblock %}
 
 {% macro users_footer(codepen_action="") %}

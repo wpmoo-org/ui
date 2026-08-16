@@ -94,8 +94,7 @@
 {% endmacro %}
 
 {% block content %}
-  {% set page_markup %}{{ pricing_body() }}{% endset %}
-  {{ page_markup }}
+  {{ pricing_body() }}
 {% endblock %}
 
 {% macro pricing_footer(codepen_action="") %}

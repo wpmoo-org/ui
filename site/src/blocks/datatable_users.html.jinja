@@ -202,7 +202,7 @@
     {% set _ = user_rows.append({
       "id": "usr-" ~ loop.index,
       "label": user.name,
-      "card": {"title": user.name, "actions": user_row_actions(user.name)},
+      "card": {"title": "<span data-moo-fill=\"name\">" ~ user.name ~ "</span>", "actions": user_row_actions(user.name)},
       "search": user.name ~ " " ~ user.email ~ " " ~ user.role ~ " " ~ user.team ~ " " ~ status.label,
       "facets": {"status": user.status, "team": user.team | lower},
       "sort": {
@@ -214,8 +214,8 @@
       },
       "cells": {
         "user": user_identity_cell(user),
-        "role": user.role,
-        "team": user.team,
+        "role": "<span data-moo-fill=\"role\">" ~ user.role ~ "</span>",
+        "team": "<span data-moo-fill=\"team\">" ~ user.team ~ "</span>",
         "status": badge(status.label, variant=status.variant),
         "last_active": "<span class=\"text-nowrap text-body-secondary\">" ~ user.last_active ~ "</span>",
         "actions": user_row_actions(user.name)

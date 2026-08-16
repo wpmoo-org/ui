@@ -838,7 +838,7 @@ class CatalogContractTests(CatalogTestCase):
         preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
-        self.assertIn("document.documentElement.dataset.bsTheme = theme", base)
+        self.assertIn("document.documentElement.dataset.bsTheme = storedTheme", base)
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
@@ -1406,16 +1406,21 @@ class CatalogContractTests(CatalogTestCase):
                     else:
                         self.assertIn(".moo-faq", payload["css"])
                         self.assertIn("max-width: 48rem;", payload["css"])
-                        # Duplicate id attributes break Bootstrap collapse
-                        # grouping: data-bs-parent resolves via querySelector
-                        # to the first match, so a section heading sharing
-                        # the accordion's id silently defeats one-open-at-a-
-                        # time. Lock the page's ids unique as a class of bug.
-                        ids = re.findall(r'\bid="([^"]+)"', page)
-                        self.assertEqual(len(ids), len(set(ids)), f"duplicate id attributes on {path}")
                     self.assertFalse(payload["js_module"])
                 else:
                     self.assertFalse(payload["js_module"])
+
+                # Duplicate id attributes break Bootstrap Collapse grouping
+                # (data-bs-parent resolves via querySelector to the first
+                # match) and confuse other id-targeted plugins, so lock every
+                # example page's ids unique as a class of bug -- not just the
+                # FAQ, which is where the collapse case first surfaced.
+                ids = re.findall(r'\bid="([^"]+)"', page)
+                self.assertEqual(
+                    len(ids),
+                    len(set(ids)),
+                    f"duplicate id attributes on {path}",
+                )
 
                 expected_labels = {registry[slug]["label"] for slug in component_slugs}
                 for surface in (page[footer_start:], payload["html"]):

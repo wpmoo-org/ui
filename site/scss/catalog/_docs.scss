@@ -341,6 +341,7 @@
   height: auto;
   aspect-ratio: 16 / 9;
   margin: calc(var(--bs-card-spacer-x) * -1) 0 calc(var(--bs-card-spacer-x) * -1) calc(var(--bs-card-spacer-x) * -1);
+
   // showcase-preview's own border-bottom (for the stacked grid layout)
   // doesn't land anywhere useful in this side-by-side row -- a right
   // border softens the seam between the preview's own light colors and a

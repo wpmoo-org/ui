@@ -572,7 +572,7 @@ if (document.readyState === "loading") {
     "js_module": js_module
   } %}
   <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen" data-moo-codepen-form>
-    <input type="hidden" name="data" value="{{ payload | tojson }}">
+    <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
     {{ button("Open in CodePen", type="submit", variant="outline", size="sm", icon_start="code") }}
   </form>
 {%- endmacro %}

@@ -80,7 +80,7 @@
           {
             "id": "status",
             "title": "What is the current status?",
-            "content": "<p class=\"mb-0\">Moo UI is at the <code>1.0.0-rc.2</code> release candidate. The package's certification manifest has preview status — WPMoo-maintained evidence, not independent accreditation. The Support &amp; Evidence page spells out the supported Bootstrap range, browser policy, and limitations.</p>"
+            "content": "<p class=\"mb-0\">Moo UI is at the <code>{{ product.version }}</code> release candidate. The package's certification manifest has {{ product.certification.status }} status — WPMoo-maintained evidence, not independent accreditation. The Support &amp; Evidence page spells out the supported Bootstrap range, browser policy, and limitations.</p>"
           },
           {
             "id": "help",
@@ -95,8 +95,7 @@
 {% endmacro %}
 
 {% block content %}
-  {% set page_markup %}{{ faq_body() }}{% endset %}
-  {{ page_markup }}
+  {{ faq_body() }}
 {% endblock %}
 
 {% macro faq_footer(codepen_action="") %}

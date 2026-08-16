@@ -78,6 +78,13 @@ export function initExamplesUsers(root = document) {
   }
 
   const statusBadges = collectStatusBadges(tableRoot, ["active", "invited", "suspended"]);
+  // Cloned from a server-rendered active row so the avatar presence dot's
+  // markup stays owned by the avatar macro, not by this module (same reason
+  // collectStatusBadges clones badges instead of hardcoding classes).
+  const activeDotTemplate =
+    tableRoot.querySelector(
+      'tr[data-datatable-facet-status="active"] .avatar .avatar-badge'
+    )?.cloneNode(true) ?? null;
   let added = 0;
   let editRow = null;
   let deleteRow = null;
@@ -118,14 +125,10 @@ export function initExamplesUsers(root = document) {
     if (!avatarEl) {
       return;
     }
-    let dot = avatarEl.querySelector(".avatar-badge");
+    const dot = avatarEl.querySelector(".avatar-badge");
     if (active) {
-      if (!dot) {
-        dot = documentRoot.createElement("span");
-        dot.className = "avatar-badge avatar-badge--dot bg-success";
-        dot.setAttribute("role", "status");
-        dot.setAttribute("aria-label", "Active");
-        avatarEl.appendChild(dot);
+      if (!dot && activeDotTemplate) {
+        avatarEl.appendChild(activeDotTemplate.cloneNode(true));
       }
     } else if (dot) {
       dot.remove();
@@ -297,6 +300,24 @@ export function initExamplesUsers(root = document) {
     bootstrap?.Dropdown.getInstance(toggle)?.hide();
   };
 
+  // A row action opens the sheet/modal from inside a dropdown that then
+  // hides; Bootstrap returns focus to that (now unfocusable) item on hide,
+  // which drops it to <body>. Remember the row-action toggle so we can
+  // return focus to it once the sheet/modal closes.
+  let returnFocusTo = null;
+  const rememberTrigger = (target) => {
+    returnFocusTo =
+      target.closest(".table-row-actions")?.querySelector('[data-bs-toggle="dropdown"]') ??
+      documentRoot.activeElement;
+  };
+  const restoreFocus = () => {
+    const element = returnFocusTo;
+    returnFocusTo = null;
+    if (element?.isConnected) {
+      element.focus();
+    }
+  };
+
   const openEditSheet = (row) => {
     const values = {
       name: row.querySelector('[data-moo-fill="name"]')?.textContent.trim() ?? "",
@@ -325,6 +346,7 @@ export function initExamplesUsers(root = document) {
       if (!row) {
         return;
       }
+      rememberTrigger(target);
       closeRowMenu(target);
       deleteRow = row;
       const name = row.querySelector('[data-moo-fill="name"]')?.textContent.trim() || "this user";
@@ -342,6 +364,7 @@ export function initExamplesUsers(root = document) {
       if (!row) {
         return;
       }
+      rememberTrigger(target);
       closeRowMenu(target);
       openEditSheet(row);
       return;
@@ -365,6 +388,7 @@ export function initExamplesUsers(root = document) {
   };
   const onSheetHidden = () => {
     editRow = null;
+    restoreFocus();
   };
   const onDeleteConfirm = () => {
     const row = deleteRow;
@@ -378,9 +402,14 @@ export function initExamplesUsers(root = document) {
       editRow = null;
     }
     reinitTable();
+    // The deleted row removed its own trigger; move focus to the table's
+    // search control instead of leaving it on <body>.
+    returnFocusTo = null;
+    tableRoot.querySelector(".datatable-search")?.focus();
   };
   const onDeleteDialogHidden = () => {
     deleteRow = null;
+    restoreFocus();
   };
 
   // datatable.js updates plain cell/card content and cached facets. The

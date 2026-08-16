@@ -360,6 +360,7 @@ $moo-datatable-bulk-actions-hover-scale: 1.02 !default;
 // The selection bulk-actions bar is a fixed-position overlay surface; its
 // backdrop blur strength has no Bootstrap equivalent to consume.
 $moo-datatable-bulk-actions-backdrop-blur: 8px !default;
+
 // Fixed shell footers need to lift the floating selection bar above their
 // chrome. Keep the default component position unchanged while giving host
 // surfaces a scoped override hook.

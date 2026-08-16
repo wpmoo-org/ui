@@ -446,6 +446,10 @@ def _example_js_source(module_filename: str, init_call: str) -> str:
     datatable_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js"
     source = source.replace(EXAMPLE_JS_IMPORT, "let DataTable;")
     source = source.replace("export function ", "function ")
+    if re.search(r"^\s*export\b", source, re.MULTILINE):
+        fail(
+            f"{module_filename} uses an export form the CodePen rewrite cannot handle"
+        )
     return (
         source.rstrip()
         + '\n\nfunction loadMooCodePenBootstrapForExample(callback) {\n'
@@ -775,7 +779,11 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
     environment.filters["absolutize_links"] = absolutize_links
-    environment.filters["tojson"] = to_json_attr
+    # A plain json.dumps for the CodePen prefill's double-quoted value
+    # attribute, deliberately NOT registered as tojson so Jinja's built-in
+    # (HTML-safe) tojson stays available for script contexts. Callers pair
+    # it with forceescape so the JSON's own quotes survive the attribute.
+    environment.filters["moo_json"] = to_json_attr
     environment.globals["pretty_url"] = pretty_url
     environment.globals["site_href"] = site_href
     environment.globals["canonical_url"] = canonical_url

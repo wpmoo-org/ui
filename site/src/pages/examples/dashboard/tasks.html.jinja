@@ -30,8 +30,7 @@
 {% endmacro %}
 
 {% block content %}
-  {% set page_markup %}{{ tasks_body() }}{% endset %}
-  {{ page_markup }}
+  {{ tasks_body() }}
 {% endblock %}
 
 {% macro tasks_footer(codepen_action="") %}

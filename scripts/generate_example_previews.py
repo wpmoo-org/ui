@@ -87,48 +87,49 @@ def main() -> None:
 
     with sync_playwright() as playwright, serve_repository() as base_url:
         browser = launch_certification_browser(playwright)
-        context = browser.new_context(viewport=VIEWPORT, device_scale_factor=2)
-        page = context.new_page()
-        for slug in EXAMPLE_SLUGS:
-            url = f"{base_url}/site-dist/examples/{slug}/index.html"
-            response = None
-            # "networkidle" is flaky by nature (Playwright's own docs warn
-            # against relying on it) and reliably reproduced spurious 404s
-            # here after a few pages' worth of prior navigations -- "load"
-            # is deterministic for these static, no-polling pages. The
-            # retry loop stays as a second line of defense.
-            for attempt in range(3):
-                response = page.goto(url, wait_until="load")
-                if response and response.status == 200:
-                    break
-            if not response or response.status != 200:
-                status = response.status if response else "no response"
-                raise SystemExit(f"{slug}: giving up after 3 attempts ({status}) on {url}")
-            page.add_style_tag(content=HIDE_CHROME_CSS)
-            out_path = OUTPUT_DIR / f"{slug}.png"
-            out_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            context = browser.new_context(viewport=VIEWPORT, device_scale_factor=2)
+            page = context.new_page()
+            for slug in EXAMPLE_SLUGS:
+                url = f"{base_url}/site-dist/examples/{slug}/index.html"
+                response = None
+                # "networkidle" is flaky by nature (Playwright's own docs warn
+                # against relying on it) and reliably reproduced spurious 404s
+                # here after a few pages' worth of prior navigations -- "load"
+                # is deterministic for these static, no-polling pages. The
+                # retry loop stays as a second line of defense.
+                for _attempt in range(3):
+                    response = page.goto(url, wait_until="load")
+                    if response and response.status == 200:
+                        break
+                if not response or response.status != 200:
+                    status = response.status if response else "no response"
+                    raise SystemExit(f"{slug}: giving up after 3 attempts ({status}) on {url}")
+                page.add_style_tag(content=HIDE_CHROME_CSS)
+                out_path = OUTPUT_DIR / f"{slug}.png"
+                out_path.parent.mkdir(parents=True, exist_ok=True)
 
-            clip = None
-            selector_pair = CONTENT_CLIP_SELECTOR.get(slug)
-            if selector_pair:
-                nav_selector, content_selector = selector_pair
-                nav_box = page.locator(nav_selector).bounding_box()
-                content_box = page.locator(content_selector).bounding_box()
-                if nav_box and content_box:
-                    left = nav_box["x"]
-                    right = content_box["x"] + content_box["width"]
-                    width = min(VIEWPORT["width"], (right - left) + 2 * left)
-                    clip = {
-                        "x": 0,
-                        "y": 0,
-                        "width": width,
-                        "height": width * 9 / 16,
-                    }
+                clip = None
+                selector_pair = CONTENT_CLIP_SELECTOR.get(slug)
+                if selector_pair:
+                    nav_selector, content_selector = selector_pair
+                    nav_box = page.locator(nav_selector).bounding_box()
+                    content_box = page.locator(content_selector).bounding_box()
+                    if nav_box and content_box:
+                        left = nav_box["x"]
+                        right = content_box["x"] + content_box["width"]
+                        width = min(VIEWPORT["width"], (right - left) + 2 * left)
+                        clip = {
+                            "x": 0,
+                            "y": 0,
+                            "width": width,
+                            "height": width * 9 / 16,
+                        }
 
-            page.screenshot(path=str(out_path), clip=clip)
-            print(f"wrote {out_path.relative_to(ROOT)}")
-        context.close()
-        browser.close()
+                page.screenshot(path=str(out_path), clip=clip)
+                print(f"wrote {out_path.relative_to(ROOT)}")
+        finally:
+            browser.close()
 
 
 if __name__ == "__main__":

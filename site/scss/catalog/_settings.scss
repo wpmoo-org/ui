@@ -15,6 +15,7 @@ $moo-catalog-font-family: "Geist" !default;
 // than the product component shadow scale. Keep the literal at the Sass
 // definition site so catalog.scss stays token-driven.
 $moo-catalog-command-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.25) !default;
+
 // The settings panel's theme-picker thumbnails mock the fixed light and
 // dark palettes (a light preview is always light, a dark one always dark,
 // regardless of the runtime theme). Kept as literals here -- the one place
