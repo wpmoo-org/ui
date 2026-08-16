@@ -735,17 +735,21 @@
 }
 
 .moo-settings-panel__theme-thumb--light {
-  background: #fff;
+  background: #{$moo-catalog-settings-thumb-light};
 }
 
 .moo-settings-panel__theme-thumb--dark {
-  background: #18181b;
+  background: #{$moo-catalog-settings-thumb-dark};
 }
 
 // "System" previews a split between the two palettes so it reads as
 // following the OS rather than forcing either side.
 .moo-settings-panel__theme-thumb--system {
-  background: linear-gradient(90deg, #fff 0 50%, #18181b 50% 100%);
+  background: linear-gradient(
+    90deg,
+    #{$moo-catalog-settings-thumb-light} 0 50%,
+    #{$moo-catalog-settings-thumb-dark} 50% 100%
+  );
 }
 
 .moo-settings-panel__theme-thumb-bar {
@@ -775,17 +779,17 @@
 
 .moo-settings-panel__theme-thumb--light .moo-settings-panel__theme-thumb-bar,
 .moo-settings-panel__theme-thumb--light .moo-settings-panel__theme-thumb-line {
-  background: #e4e4e7;
+  background: #{$moo-catalog-settings-thumb-light-line};
 }
 
 .moo-settings-panel__theme-thumb--dark .moo-settings-panel__theme-thumb-bar,
 .moo-settings-panel__theme-thumb--dark .moo-settings-panel__theme-thumb-line {
-  background: #3f3f46;
+  background: #{$moo-catalog-settings-thumb-dark-line};
 }
 
 .moo-settings-panel__theme-thumb--system .moo-settings-panel__theme-thumb-bar,
 .moo-settings-panel__theme-thumb--system .moo-settings-panel__theme-thumb-line {
-  background: #a1a1aa;
+  background: #{$moo-catalog-settings-thumb-system-line};
 }
 
 .moo-settings-panel__theme-label {
