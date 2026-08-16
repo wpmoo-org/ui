@@ -1,19 +1,26 @@
 const states = new WeakMap();
-const VIEW_STORAGE_KEY = "moo:examples-view";
 const VIEWS = ["grid", "list"];
 
-export function initExamplesViewToggle(root = document) {
+// Grid/list view toggle shared by the Examples and Components index pages.
+// data-moo-catalog-view holds the current view (the CSS hook the list
+// layout reads); the radio group name comes from the inputs themselves and
+// names the localStorage key ("moo:<name>"), so each index keeps its own
+// persisted choice.
+export function initCatalogViewToggle(root = document) {
   if (states.has(root)) {
     return states.get(root);
   }
 
-  const container = root.querySelector("[data-moo-examples-view]");
+  const container = root.querySelector("[data-moo-catalog-view]");
   const listeners = [];
 
   if (container) {
     const view = root.defaultView || root.ownerDocument?.defaultView;
+    const firstInput = container.querySelector('input[type="radio"][name]');
+    const name = firstInput?.name || "catalog-view";
+    const storageKey = `moo:${name}`;
     const inputs = Array.from(
-      container.querySelectorAll('input[name="examples-view"]')
+      container.querySelectorAll(`input[name="${name}"]`)
     );
     const listen = (target, type, handler) => {
       target.addEventListener(type, handler);
@@ -21,7 +28,7 @@ export function initExamplesViewToggle(root = document) {
     };
 
     const applyView = (value) => {
-      container.dataset.mooExamplesView = value;
+      container.dataset.mooCatalogView = value;
       inputs.forEach((input) => {
         input.checked = input.value === value;
       });
@@ -29,7 +36,7 @@ export function initExamplesViewToggle(root = document) {
 
     let stored = null;
     try {
-      stored = view.localStorage.getItem(VIEW_STORAGE_KEY);
+      stored = view.localStorage.getItem(storageKey);
     } catch (_) {
       /* Storage can be unavailable in restricted browsing contexts. */
     }
@@ -44,7 +51,7 @@ export function initExamplesViewToggle(root = document) {
         }
         applyView(input.value);
         try {
-          view.localStorage.setItem(VIEW_STORAGE_KEY, input.value);
+          view.localStorage.setItem(storageKey, input.value);
         } catch (_) {
           /* Storage is best-effort. */
         }

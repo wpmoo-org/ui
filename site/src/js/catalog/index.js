@@ -7,12 +7,12 @@ import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
 import { initCardSpacing } from "./card-spacing.js";
 import { initCatalogFilter } from "./catalog-filter.js";
+import { initCatalogViewToggle } from "./catalog-view-toggle.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
 import { initExamplesForms } from "./examples-forms.js";
 import { initExamplesTasks } from "./examples-tasks.js";
 import { initExamplesUsers } from "./examples-users.js";
-import { initExamplesViewToggle } from "./examples-view-toggle.js";
 import { initHomeMotion } from "./home-motion.js";
 import { initTheme } from "./theme.js";
 import { initToc } from "./toc.js";
@@ -31,7 +31,7 @@ export function initCatalog(root = document) {
     initExamplesForms(root),
     initExamplesTasks(root),
     initExamplesUsers(root),
-    initExamplesViewToggle(root),
+    initCatalogViewToggle(root),
     initToc(root),
     initAcceptancePortal(root),
   ];

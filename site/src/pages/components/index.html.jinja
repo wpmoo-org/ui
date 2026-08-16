@@ -2,11 +2,9 @@
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
-{% from "components/input.html.jinja" import input %}
-{% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/catalog-toolbar.html.jinja" import catalog_search_filter, catalog_view_toggle %}
 {% from "includes/component-previews.html.jinja" import component_preview %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -24,30 +22,17 @@
         actions=render_section_page_actions("components", site_pages, root_path)
       ) }}
 
-      <section class="moo-catalog__dashboard" aria-label="Catalog filters">
-        <div class="moo-catalog__toolbar">
-          {% call input_group() %}
-            {{ input(
-              aria_label="Filter components",
-              id="catalog-search",
-              type="search",
-              placeholder="Filter components..."
-            ) }}
-            {{ input_group_text(render_icon("search", "inline-start")) }}
-          {% endcall %}
-          {% call dropdown("All catalog", align="end", extra_class="moo-catalog__status-menu", caret=true) %}
-            {{ dropdown_item("All catalog", active=true, attrs='data-moo-catalog-section-filter="all"') }}
-            {{ dropdown_item("Components", attrs='data-moo-catalog-section-filter="components"') }}
-            {{ dropdown_item("Utilities", attrs='data-moo-catalog-section-filter="utilities"') }}
-          {% endcall %}
-          {% call dropdown("View", align="end", extra_class="moo-catalog__toolbar-menu", caret=true) %}
-            {{ dropdown_header("Catalog view") }}
-            {{ dropdown_item("Components", href="#components", active=true, icon="blocks") }}
-            {{ dropdown_item("Utilities", href="#utilities", icon="sparkles") }}
-            {{ dropdown_divider() }}
-            {{ dropdown_item("Bootstrap references", href="https://getbootstrap.com/docs/5.3/", icon="book-open") }}
-          {% endcall %}
-        </div>
+      <section class="moo-catalog__dashboard" data-moo-catalog-view="grid" aria-label="Catalog filters">
+        {% call catalog_search_filter("catalog-search", "Filter components", "Filter components...", ["Components", "Utilities"], extra_class="moo-catalog__toolbar--components") %}
+          {{ catalog_view_toggle(
+            "catalog-view",
+            "Components view",
+            [
+              {"value": "grid", "label": "Grid view", "icon": "layout-grid", "checked": true},
+              {"value": "list", "label": "List view", "icon": "list"}
+            ]
+          ) }}
+        {% endcall %}
 
         {{ separator(extra_class="my-4") }}
 
