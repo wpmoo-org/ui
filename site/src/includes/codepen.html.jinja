@@ -253,14 +253,18 @@ body {
 {#- Same split as settings_codepen_css(): the inset lives on
    .moo-examples-page, not body, so the footer (body's other direct
    child, sibling to .moo-examples-page) stays flush with the pen's true
-   edge instead of inheriting a page-level gutter. #}
+   edge instead of inheriting a page-level gutter. Bottom padding is
+   breathing room below the table, before the footer -- .moo-examples-page
+   just grows taller by that amount in normal flow, pushing the footer
+   sibling down with it, the same natural gap .moo-catalog__content's own
+   bottom padding gives the real site. #}
 .moo-examples-page {
   display: grid;
   gap: 2rem;
   align-content: start;
   max-width: 72rem;
   margin: 0 auto;
-  padding: 3rem 1.5rem 0;
+  padding: 3rem 1.5rem 5rem;
 }
 
 .moo-examples-page > * {
