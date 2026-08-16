@@ -36,6 +36,23 @@ export function initSettingsPanel(root = document) {
       }
     };
 
+    // The navbar toggle only has light/dark states; keep its sun/moon icon
+    // and aria-label in step with the effective theme (which resolves
+    // "system" to the OS preference) when the panel changes it.
+    const syncThemeButton = () => {
+      const button = root.querySelector(
+        "[data-moo-theme], .moo-catalog__theme-toggle"
+      );
+      const theme = documentElement.dataset.bsTheme || "light";
+      button?.setAttribute(
+        "aria-label",
+        theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+      );
+      button?.querySelectorAll("[data-moo-theme-icon]").forEach((icon) => {
+        icon.classList.toggle("d-none", icon.dataset.mooThemeIcon !== theme);
+      });
+    };
+
     const readPreference = () => {
       try {
         const stored = view.localStorage.getItem(THEME_STORAGE_KEY);
@@ -45,7 +62,8 @@ export function initSettingsPanel(root = document) {
       } catch (_) {
         /* Storage can be unavailable in restricted browsing contexts. */
       }
-      return "light";
+      // The default is System: follow the OS preference.
+      return "system";
     };
 
     const applyPreference = (preference) => {
@@ -58,6 +76,7 @@ export function initSettingsPanel(root = document) {
       themeInputs.forEach((input) => {
         input.checked = input.value === preference;
       });
+      syncThemeButton();
     };
 
     themeInputs.forEach((input) => {
@@ -74,10 +93,11 @@ export function initSettingsPanel(root = document) {
       } catch (_) {
         /* Storage is best-effort. */
       }
-      documentElement.dataset.bsTheme = "light";
+      documentElement.dataset.bsTheme = effectiveTheme("system", view);
       themeInputs.forEach((input) => {
-        input.checked = input.value === "light";
+        input.checked = input.value === "system";
       });
+      syncThemeButton();
     });
 
     // Reflect the current preference whenever the sheet opens, so a choice

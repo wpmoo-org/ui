@@ -49,7 +49,9 @@ export function initTheme(root = document) {
     } catch (_) {
       /* Storage can be unavailable in restricted browsing contexts. */
     }
-    return "light";
+    // The default is System: follow the OS preference until the visitor
+    // chooses an explicit theme.
+    return "system";
   };
 
   const updateThemeButton = () => {

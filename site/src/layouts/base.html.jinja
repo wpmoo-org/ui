@@ -27,7 +27,8 @@
           const theme = window.localStorage.getItem("moo:theme");
           if (theme === "dark" || theme === "light") {
             document.documentElement.dataset.bsTheme = theme;
-          } else if (theme === "system") {
+          } else {
+            // Unset or "system" means follow the OS preference.
             const dark = window.matchMedia &&
               window.matchMedia("(prefers-color-scheme: dark)").matches;
             document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
