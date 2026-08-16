@@ -52,17 +52,25 @@
         </p>
       </div>
 
-      <div class="btn-group btn-group-sm moo-settings-panel__direction-group w-100" role="radiogroup" aria-label="Direction">
-        <input type="radio" class="btn-check" name="moo-settings-direction" value="ltr" id="moo-settings-direction-ltr" data-moo-settings-direction autocomplete="off">
-        <label class="btn btn-outline-secondary moo-settings-panel__direction-option" for="moo-settings-direction-ltr">
-          {{ render_icon("arrow-left-to-line", "inline-start") }}
-          LTR
-        </label>
-        <input type="radio" class="btn-check" name="moo-settings-direction" value="rtl" id="moo-settings-direction-rtl" data-moo-settings-direction autocomplete="off">
-        <label class="btn btn-outline-secondary moo-settings-panel__direction-option" for="moo-settings-direction-rtl">
-          {{ render_icon("arrow-right-to-line", "inline-start") }}
-          RTL
-        </label>
+      <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Direction">
+        {% for option in [
+          {"value": "ltr", "label": "LTR", "icon": "arrow-left-to-line"},
+          {"value": "rtl", "label": "RTL", "icon": "arrow-right-to-line"}
+        ] %}
+          <label class="moo-settings-panel__theme-option">
+            <input type="radio" class="btn-check" name="moo-settings-direction" value="{{ option.value }}" data-moo-settings-direction autocomplete="off">
+            <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+            <span class="moo-settings-panel__theme-thumb moo-settings-panel__direction-thumb moo-settings-panel__direction-thumb--{{ option.value }}" aria-hidden="true">
+              <span class="moo-settings-panel__theme-thumb-bar">{{ render_icon(option.icon, "inline-end") }}</span>
+              <span class="moo-settings-panel__theme-thumb-body">
+                <span class="moo-settings-panel__theme-thumb-line"></span>
+                <span class="moo-settings-panel__theme-thumb-line is-short"></span>
+                <span class="moo-settings-panel__theme-thumb-line is-tiny"></span>
+              </span>
+            </span>
+            <span class="moo-settings-panel__theme-label">{{ option.label }}</span>
+          </label>
+        {% endfor %}
       </div>
 
       {{ separator() }}

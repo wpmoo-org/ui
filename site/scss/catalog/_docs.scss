@@ -728,6 +728,14 @@
   display: inline-flex;
 }
 
+// The check straddles the inline-end corner, and the +50% translate is
+// physical -- in RTL the corner is on the left, so the same transform would
+// push it toward the top-center. Flip the X translate to keep it on the
+// corner.
+[dir="rtl"] .moo-settings-panel__theme-check {
+  transform: translate(-50%, -50%);
+}
+
 .moo-settings-panel__theme-thumb {
   position: relative;
   display: block;
@@ -812,20 +820,41 @@
   color: var(--bs-secondary-color);
 }
 
-// The LTR/RTL picker is a joined segmented control; the checked option gets
-// the same muted-surface treatment as the theme picker's active state.
-.moo-settings-panel__direction-option {
-  justify-content: center;
-  gap: 0.375rem;
+// The direction picker reuses the theme picker's image-option pattern
+// (thumbnail + corner check + muted unselected). The thumbnail is a neutral
+// window mock whose bar carries a direction arrow and whose lines align to
+// the reading start; the alignment is physical (not logical) so each preview
+// keeps its own direction regardless of the page's current dir.
+.moo-settings-panel__direction-thumb {
+  background: var(--bs-secondary-bg);
 }
 
-.moo-settings-panel__direction-option [data-icon] {
-  width: 0.875rem;
-  height: 0.875rem;
+.moo-settings-panel__direction-thumb .moo-settings-panel__theme-thumb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-inline: 0.1875rem;
+  background: color-mix(in srgb, var(--bs-border-color) 55%, transparent);
 }
 
-.moo-settings-panel__direction-group .btn-check:checked + .moo-settings-panel__direction-option {
-  border-color: var(--moo-border);
-  color: var(--bs-body-color);
-  background-color: var(--moo-muted-surface);
+.moo-settings-panel__direction-thumb .moo-settings-panel__theme-thumb-bar [data-icon] {
+  width: 0.5rem;
+  height: 0.5rem;
+  color: var(--bs-secondary-color);
+}
+
+.moo-settings-panel__direction-thumb .moo-settings-panel__theme-thumb-line {
+  background: var(--bs-border-color);
+}
+
+.moo-settings-panel__direction-thumb--rtl .moo-settings-panel__theme-thumb-bar {
+  justify-content: flex-end;
+}
+
+.moo-settings-panel__direction-thumb--ltr .moo-settings-panel__theme-thumb-line {
+  margin-right: auto;
+}
+
+.moo-settings-panel__direction-thumb--rtl .moo-settings-panel__theme-thumb-line {
+  margin-left: auto;
 }
