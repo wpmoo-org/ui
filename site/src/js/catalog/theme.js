@@ -1,6 +1,17 @@
 const states = new WeakMap();
 const THEME_STORAGE_KEY = "moo:theme";
 
+function prefersDark(view) {
+  return Boolean(view.matchMedia?.("(prefers-color-scheme: dark)").matches);
+}
+
+function resolveTheme(preference, view) {
+  if (preference === "system") {
+    return prefersDark(view) ? "dark" : "light";
+  }
+  return preference === "dark" ? "dark" : "light";
+}
+
 export function initTheme(root = document) {
   if (states.has(root)) {
     return states.get(root);
@@ -25,14 +36,21 @@ export function initTheme(root = document) {
     }
   };
 
-  try {
-    const stored = view.localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "dark" || stored === "light") {
-      documentElement.dataset.bsTheme = stored;
+  // The stored preference is the single source of truth (the settings panel
+  // writes the same key), so the OS-color listener re-reads it each time
+  // instead of tracking its own copy -- both surfaces stay in sync without
+  // shared state.
+  const readPreference = () => {
+    try {
+      const stored = view.localStorage.getItem(THEME_STORAGE_KEY);
+      if (stored === "dark" || stored === "light" || stored === "system") {
+        return stored;
+      }
+    } catch (_) {
+      /* Storage can be unavailable in restricted browsing contexts. */
     }
-  } catch (_) {
-    /* Storage can be unavailable in restricted browsing contexts. */
-  }
+    return "light";
+  };
 
   const updateThemeButton = () => {
     const theme = documentElement.dataset.bsTheme || "light";
@@ -44,6 +62,21 @@ export function initTheme(root = document) {
       icon.classList.toggle("d-none", icon.dataset.mooThemeIcon !== theme);
     });
   };
+
+  const applyPreference = (preference) => {
+    documentElement.dataset.bsTheme = resolveTheme(preference, view);
+    updateThemeButton();
+  };
+
+  applyPreference(readPreference());
+
+  const media = view.matchMedia ? view.matchMedia("(prefers-color-scheme: dark)") : null;
+  listen(media, "change", () => {
+    if (readPreference() === "system") {
+      documentElement.dataset.bsTheme = resolveTheme("system", view);
+      updateThemeButton();
+    }
+  });
 
   listen(themeButton, "click", () => {
     const theme = documentElement.dataset.bsTheme === "dark" ? "light" : "dark";

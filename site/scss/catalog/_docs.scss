@@ -639,3 +639,166 @@
   font-size: 0.875rem;
   text-align: center;
 }
+
+// Global settings panel (Phase 6): the System/Light/Dark theme picker.
+// Each option is a small card with a window-mock preview thumbnail; the
+// checked one gets a primary ring. The radio follows the btn-check pattern
+// (visually hidden, label is the hit target).
+.moo-settings-panel__theme-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.moo-settings-panel__theme-option {
+  position: relative;
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  border-radius: var(--bs-border-radius);
+  cursor: pointer;
+}
+
+.moo-settings-panel__theme-option .btn-check {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+// Selection reads at a glance by muting the unselected options: they drop
+// to partial opacity while the chosen one stays full with a border and
+// focus ring like an input's -- the border picks up the ring token and a
+// soft translucent ring sits outside it -- plus the filled corner check.
+// Legible in both themes, no dominant outline anywhere.
+.moo-settings-panel__theme-option:not(:has(.btn-check:checked)) {
+  opacity: 0.55;
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-thumb {
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:focus-visible) .moo-settings-panel__theme-thumb {
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+}
+
+// A circular selection indicator straddling the image's top corner: the
+// image corner sits at the checkbox's centre, so it sticks out slightly
+// past the edge (translate centers it; the option doesn't clip it). It
+// always carries a ring -- an empty control by default, filled with a check
+// when the option is selected, using foreground/background tokens so both
+// states stay legible over light and dark thumbnails.
+.moo-settings-panel__theme-check {
+  position: absolute;
+  inset-block-start: 0.375rem;
+  inset-inline-end: 0.375rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(1.125rem * 1.25);
+  height: calc(1.125rem * 1.25);
+  border-radius: 999px;
+  border: 2px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  transform: translate(50%, -50%);
+}
+
+.moo-settings-panel__theme-check [data-icon] {
+  width: calc(0.75rem * 1.25);
+  height: calc(0.75rem * 1.25);
+  display: none;
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check {
+  border-color: var(--bs-body-bg);
+  background-color: var(--bs-body-color);
+  color: var(--bs-body-bg);
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check [data-icon] {
+  display: inline-flex;
+}
+
+.moo-settings-panel__theme-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.moo-settings-panel__theme-thumb--light {
+  background: #fff;
+}
+
+.moo-settings-panel__theme-thumb--dark {
+  background: #18181b;
+}
+
+// "System" previews a split between the two palettes so it reads as
+// following the OS rather than forcing either side.
+.moo-settings-panel__theme-thumb--system {
+  background: linear-gradient(90deg, #fff 0 50%, #18181b 50% 100%);
+}
+
+.moo-settings-panel__theme-thumb-bar {
+  display: block;
+  height: 0.375rem;
+}
+
+.moo-settings-panel__theme-thumb-body {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.375rem 0.375rem 0;
+}
+
+.moo-settings-panel__theme-thumb-line {
+  display: block;
+  height: 0.25rem;
+  border-radius: 999px;
+}
+
+.moo-settings-panel__theme-thumb-line.is-short {
+  width: 66%;
+}
+
+.moo-settings-panel__theme-thumb-line.is-tiny {
+  width: 40%;
+}
+
+.moo-settings-panel__theme-thumb--light .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--light .moo-settings-panel__theme-thumb-line {
+  background: #e4e4e7;
+}
+
+.moo-settings-panel__theme-thumb--dark .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--dark .moo-settings-panel__theme-thumb-line {
+  background: #3f3f46;
+}
+
+.moo-settings-panel__theme-thumb--system .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--system .moo-settings-panel__theme-thumb-line {
+  background: #a1a1aa;
+}
+
+.moo-settings-panel__theme-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.moo-settings-panel__theme-label [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--bs-secondary-color);
+}

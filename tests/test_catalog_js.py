@@ -22,6 +22,7 @@ MODULES = {
     "home-motion.js": "initHomeMotion",
     "block-frame.js": "initBlockFrames",
     "card-spacing.js": "initCardSpacing",
+    "settings-panel.js": "initSettingsPanel",
 }
 
 

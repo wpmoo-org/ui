@@ -14,6 +14,7 @@ import { initExamplesForms } from "./examples-forms.js";
 import { initExamplesTasks } from "./examples-tasks.js";
 import { initExamplesUsers } from "./examples-users.js";
 import { initHomeMotion } from "./home-motion.js";
+import { initSettingsPanel } from "./settings-panel.js";
 import { initTheme } from "./theme.js";
 import { initToc } from "./toc.js";
 
@@ -32,6 +33,7 @@ export function initCatalog(root = document) {
     initExamplesTasks(root),
     initExamplesUsers(root),
     initCatalogViewToggle(root),
+    initSettingsPanel(root),
     initToc(root),
     initAcceptancePortal(root),
   ];

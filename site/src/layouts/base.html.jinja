@@ -27,6 +27,10 @@
           const theme = window.localStorage.getItem("moo:theme");
           if (theme === "dark" || theme === "light") {
             document.documentElement.dataset.bsTheme = theme;
+          } else if (theme === "system") {
+            const dark = window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
           }
           const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
           if (sidebar === "collapsed" || sidebar === "expanded") {
