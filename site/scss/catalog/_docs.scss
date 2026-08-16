@@ -333,6 +333,7 @@
   display: flex !important;
   flex-direction: row;
   align-items: center;
+
   // Bootstrap's .gap-4 utility on the card body compiles to
   // gap: 1.5rem !important, so the row needs the same weight to win.
   gap: 1rem !important;
