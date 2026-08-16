@@ -479,6 +479,13 @@
   z-index: 1;
 }
 
+// The CTA sits on the card's muted footer strip; an outline button's
+// transparent surface would read as part of that strip, so fill it with
+// the page surface to keep every plan's action visibly a button.
+.moo-pricing-card .card-footer .btn-outline-secondary {
+  background-color: var(--bs-body-bg);
+}
+
 // FAQ panels read better constrained to a reading column than stretched
 // across the full marketing content width. Groups pair a section heading
 // with its own accordion (each accordion owns its collapse group).
