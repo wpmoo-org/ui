@@ -56,6 +56,8 @@ EXAMPLE_SLUGS = (
     "settings/appearance",
     "dashboard/tasks",
     "dashboard/users",
+    "marketing/pricing",
+    "marketing/faq",
 )
 
 # Settings pages' actual content (nav + form) is narrower than the

@@ -116,6 +116,99 @@
 }
 {%- endmacro %}
 
+{#- Pricing/FAQ are catalog-layout Examples pages (same split as
+   settings_codepen_css(): the inset lives on .moo-examples-page, not
+   body, and the footer is the shared fixed .moo-examples-footer band
+   from examples_footer_codepen_css() below). Only the content column
+   width and the marketing-only rules are custom here. #}
+{% macro marketing_codepen_css() -%}
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  inline-size: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+
+.moo-pricing-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+.moo-pricing-card {
+  height: 100%;
+}
+
+.moo-pricing-card__features {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.moo-pricing-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.moo-pricing-card__inherits {
+  font-weight: 500;
+}
+
+.moo-pricing-card__icon {
+  display: inline-flex;
+  margin-top: 0.125rem;
+  flex: 0 0 auto;
+  color: var(--moo-muted-foreground);
+}
+
+.moo-pricing-card__icon [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-pricing-card--featured {
+  box-shadow: var(--bs-box-shadow-lg);
+  z-index: 1;
+}
+
+.moo-faq-group {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 48rem;
+}
+
+.moo-faq {
+  max-width: 48rem;
+}
+
+@media (min-width: 48rem) {
+  .moo-pricing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .moo-pricing-card--featured {
+    transform: scale(1.04);
+  }
+}
+
+{{ examples_footer_codepen_css() }}
+{%- endmacro %}
+
 {% macro examples_header_codepen_css() -%}
 .moo-component-header {
   max-width: 44rem;

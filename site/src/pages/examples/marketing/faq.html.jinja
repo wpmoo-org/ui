@@ -1,0 +1,124 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/accordion.html.jinja" import accordion %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/codepen.html.jinja" import codepen_button, marketing_codepen_css with context %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% set page_category = "Marketing" %}
+
+{% block title %}FAQ — Moo UI{% endblock %}
+
+{% macro faq_body() %}
+  <div class="moo-examples-page" data-moo-example-faq>
+    {{ render_page_header(
+      "FAQ",
+      "Answers to common questions about getting started, building with Moo UI, and licensing.",
+      id="faq"
+    ) }}
+
+    <div class="moo-faq-group">
+      {{ typography("Getting started", variant="section-title", id="faq-getting-started") }}
+      {{ accordion(
+        "faq-getting-started-accordion",
+        [
+          {
+            "id": "what-is",
+            "title": "What is Moo UI, exactly?",
+            "content": "<p class=\"mb-0\">Moo UI is a Bootstrap 5.3-native component system with a restrained, shadcn-inspired visual language. It keeps Bootstrap's markup, variables, and JavaScript plugins wherever Bootstrap already provides the contract, and adds small documented extensions for the gaps it doesn't — Combobox, Context Menu, DataTable, and Sidebar.</p>",
+            "open": true
+          },
+          {
+            "id": "build-step",
+            "title": "Do I need a build step or a framework?",
+            "content": "<p class=\"mb-0\">No. Most components need only the stylesheet and ordinary HTML. <code>moo-ui.css</code> is a complete Bootstrap CSS build with Moo UI defaults — you use it instead of another Bootstrap stylesheet, not in addition to one. The README shows a working example you can copy in about thirty seconds.</p>"
+          },
+          {
+            "id": "gradual",
+            "title": "Can I adopt it gradually?",
+            "content": "<p class=\"mb-0\">Yes. Keep your existing Bootstrap stylesheet, load the scoped <code>moo.css</code> after it, and wrap only the region you're migrating in a <code>.moo-ui</code> boundary. Start with one screen and adopt the rest later, or replace the full stylesheet up front.</p>"
+          }
+        ],
+        extra_class="moo-faq"
+      ) }}
+    </div>
+
+    <div class="moo-faq-group">
+      {{ typography("Building with Moo UI", variant="section-title", id="faq-building") }}
+      {{ accordion(
+        "faq-building-accordion",
+        [
+          {
+            "id": "bootstrap-js",
+            "title": "Does Moo UI replace Bootstrap's JavaScript?",
+            "content": "<p class=\"mb-0\">No — and that's the point. Bootstrap keeps owning native behavior: Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and the other plugins stay on Bootstrap's own bundle. Moo UI only publishes optional, side-effect-free ESM for the behavior gaps Bootstrap doesn't cover.</p>"
+          },
+          {
+            "id": "optional-modules",
+            "title": "How do the optional modules work?",
+            "content": "<p class=\"mb-0\">Each one is explicit — importing it never scans the document automatically. You call <code>getOrCreateInstance</code> on the element you care about, for example <code>DataTable.getOrCreateInstance(document.querySelector('.datatable'))</code> for sorting, filtering, selection, pagination, and responsive card sync.</p>"
+          },
+          {
+            "id": "theming",
+            "title": "How does theming and dark mode work?",
+            "content": "<p class=\"mb-0\">Every component reads Bootstrap theme tokens, so flipping <code>data-bs-theme</code> retints the whole interface. Try the site's own theme toggle on this page — the switch flips the same token Moo UI components consume.</p>"
+          }
+        ],
+        extra_class="moo-faq"
+      ) }}
+    </div>
+
+    <div class="moo-faq-group">
+      {{ typography("Licensing & support", variant="section-title", id="faq-licensing") }}
+      {{ accordion(
+        "faq-licensing-accordion",
+        [
+          {
+            "id": "license",
+            "title": "What license is Moo UI under?",
+            "content": "<p class=\"mb-0\">MIT. The source code is free to use in commercial projects, internal tools, and client work alike. WPMoo-generated visual assets stay separately protected, and vendored dependencies keep their original licenses.</p>"
+          },
+          {
+            "id": "status",
+            "title": "What is the current status?",
+            "content": "<p class=\"mb-0\">Moo UI is at the <code>1.0.0-rc.2</code> release candidate. The package's certification manifest has preview status — WPMoo-maintained evidence, not independent accreditation. The Support &amp; Evidence page spells out the supported Bootstrap range, browser policy, and limitations.</p>"
+          },
+          {
+            "id": "help",
+            "title": "How do I get help or contribute?",
+            "content": "<p class=\"mb-0\">Start with the GitHub issue tracker — the README's \u201cReport an issue\u201d link lands there. Small documentation corrections, reduced reproductions, accessibility checks, and bounded component improvements are welcome; the contributing guide covers how.</p>"
+          }
+        ],
+        extra_class="moo-faq"
+      ) }}
+    </div>
+  </div>
+{% endmacro %}
+
+{% block content %}
+  {% set page_markup %}{{ faq_body() }}{% endset %}
+  {{ page_markup }}
+{% endblock %}
+
+{% macro faq_footer(codepen_action="") %}
+  <footer class="moo-examples-footer text-body-secondary small">
+    <p class="mb-0">
+      Demo only — these answers are illustrative, not legal advice.
+      Composed from the
+      {{ example_component_reference("accordion") }}
+      component.
+    </p>
+    {{ codepen_action }}
+  </footer>
+{% endmacro %}
+
+{% block footer %}
+  {% set page_markup %}{{ faq_body() }}{{ faq_footer() }}{% endset %}
+  {{ faq_footer(codepen_action=codepen_button(
+    "Moo UI — FAQ",
+    "An FAQ page built entirely from Moo UI's certified Accordion component.",
+    page_markup,
+    marketing_codepen_css(),
+    ["moo-ui", "bootstrap", "css"]
+  )) }}
+{% endblock %}

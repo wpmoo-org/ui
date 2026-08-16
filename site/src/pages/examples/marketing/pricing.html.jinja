@@ -1,0 +1,124 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
+{% from "components/card.html.jinja" import card %}
+{% from "includes/codepen.html.jinja" import codepen_button, marketing_codepen_css with context %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% set page_category = "Marketing" %}
+
+{% block title %}Pricing — Moo UI{% endblock %}
+
+{% macro pricing_body() %}
+  <div class="moo-examples-page" data-moo-example-pricing>
+    {{ render_page_header(
+      "Pricing",
+      "Simple, predictable plans for teams of every size. Upgrade or cancel anytime — nothing here is billed.",
+      id="pricing"
+    ) }}
+
+    {% set pricing_tiers = [
+      {
+        "name": "Starter",
+        "price": "$0 / month",
+        "summary": "For small teams trying things out.",
+        "features": ["Up to 3 projects", "5 team seats", "Community support", "The full component library"],
+        "cta_label": "Start for free",
+        "cta_variant": "outline",
+        "featured": false
+      },
+      {
+        "name": "Pro",
+        "price": "$29 / month",
+        "badge": "Most popular",
+        "badge_variant": "success",
+        "summary": "For teams shipping real products.",
+        "inherits": "Everything in Starter, plus",
+        "features": ["Unlimited projects", "Unlimited seats", "Priority support", "Advanced theming and tokens"],
+        "cta_label": "Choose Pro",
+        "cta_variant": "default",
+        "featured": true
+      },
+      {
+        "name": "Enterprise",
+        "price": "Custom",
+        "summary": "For organizations with dedicated needs.",
+        "inherits": "Everything in Pro, plus",
+        "features": ["SSO and audit logs", "SLA-backed uptime", "Dedicated success engineer", "Custom contract terms"],
+        "cta_label": "Talk to sales",
+        "cta_variant": "outline",
+        "featured": false
+      }
+    ] %}
+
+    <div class="moo-pricing-grid">
+      {% for tier in pricing_tiers %}
+        {% set tier_action = badge(tier.get("badge"), variant=tier.get("badge_variant", "default"), pill=true) if tier.get("badge") else "" %}
+        {% set tier_cta = button(
+          tier.cta_label,
+          variant=tier.cta_variant,
+          size="sm",
+          element="a",
+          href=site_href("examples/auth/sign-up.html", root_path),
+          extra_class="w-100"
+        ) %}
+        {% set tier_class = "moo-pricing-card" ~ (" moo-pricing-card--featured border-primary" if tier.get("featured") else "") %}
+        {% call card(
+          title=tier.name,
+          subtitle=tier.price,
+          action=tier_action,
+          extra_class=tier_class,
+          body_class="d-grid gap-3",
+          footer=tier_cta
+        ) %}
+          <p class="text-body-secondary mb-0">{{ tier.summary }}</p>
+          <ul class="moo-pricing-card__features">
+            {% if tier.get("inherits") %}
+              <li class="moo-pricing-card__inherits">
+                <span class="moo-pricing-card__icon">{{ render_icon("plus", "inline-start") }}</span>
+                <span>{{ tier.inherits }}</span>
+              </li>
+            {% endif %}
+            {% for feature in tier.features %}
+              <li>
+                <span class="moo-pricing-card__icon">{{ render_icon("check", "inline-start") }}</span>
+                {{ feature }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endfor %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% block content %}
+  {% set page_markup %}{{ pricing_body() }}{% endset %}
+  {{ page_markup }}
+{% endblock %}
+
+{% macro pricing_footer(codepen_action="") %}
+  <footer class="moo-examples-footer text-body-secondary small">
+    <p class="mb-0">
+      Demo only — the plan buttons link to the Sign Up screen, not a checkout.
+      Composed from the
+      {{ example_component_reference("card") }},
+      {{ example_component_reference("badge") }}, and
+      {{ example_component_reference("button") }}
+      components.
+    </p>
+    {{ codepen_action }}
+  </footer>
+{% endmacro %}
+
+{% block footer %}
+  {% set page_markup %}{{ pricing_body() }}{{ pricing_footer() }}{% endset %}
+  {{ pricing_footer(codepen_action=codepen_button(
+    "Moo UI — Pricing",
+    "A Pricing page built entirely from Moo UI's certified Card, Badge, and Button components.",
+    page_markup,
+    marketing_codepen_css(),
+    ["moo-ui", "bootstrap", "css"]
+  )) }}
+{% endblock %}

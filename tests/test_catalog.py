@@ -1248,6 +1248,8 @@ class CatalogContractTests(CatalogTestCase):
             "examples/settings/profile.html": ["form", "field", "input", "textarea"],
             "examples/settings/account.html": ["form", "field", "select"],
             "examples/settings/appearance.html": ["form", "field", "switch"],
+            "examples/marketing/pricing.html": ["card", "badge", "button"],
+            "examples/marketing/faq.html": ["accordion"],
         }
         components_index_source = (
             ROOT / "site/src/pages/components/index.html.jinja"
@@ -1385,6 +1387,29 @@ class CatalogContractTests(CatalogTestCase):
                 elif path.startswith("examples/settings/"):
                     self.assertIn("gap: 3rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])
+                elif path.startswith("examples/marketing/"):
+                    self.assertIn("gap: 2rem;", payload["css"])
+                    self.assertIn("align-content: start;", payload["css"])
+                    moo_page_rule = re.search(r"\.moo-examples-page\s*\{([^}]*)\}", payload["css"])
+                    self.assertIsNotNone(moo_page_rule)
+                    self.assertIn("inline-size: 100%;", moo_page_rule.group(1))
+                    self.assertIn("max-width: 64rem;", moo_page_rule.group(1))
+                    self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", payload["css"])
+                    self.assertIn("@media (min-width: 48rem)", payload["css"])
+                    if path == "examples/marketing/pricing.html":
+                        self.assertIn(".moo-pricing-grid", payload["css"])
+                        self.assertIn(".moo-pricing-card__features", payload["css"])
+                    else:
+                        self.assertIn(".moo-faq", payload["css"])
+                        self.assertIn("max-width: 48rem;", payload["css"])
+                        # Duplicate id attributes break Bootstrap collapse
+                        # grouping: data-bs-parent resolves via querySelector
+                        # to the first match, so a section heading sharing
+                        # the accordion's id silently defeats one-open-at-a-
+                        # time. Lock the page's ids unique as a class of bug.
+                        ids = re.findall(r'\bid="([^"]+)"', page)
+                        self.assertEqual(len(ids), len(set(ids)), f"duplicate id attributes on {path}")
+                    self.assertFalse(payload["js_module"])
                 else:
                     self.assertFalse(payload["js_module"])
 
