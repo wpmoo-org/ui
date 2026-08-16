@@ -426,6 +426,10 @@
 }
 
 .moo-pricing-card {
+  // Roomier than the default card inset so the tiers breathe; the card
+  // contract's own --moo-card-spacing token drives every padding.
+  --moo-card-spacing: 1.5rem;
+
   height: 100%;
 }
 
@@ -467,6 +471,10 @@
 // sit side by side so it reads as slightly larger rather than just
 // re-bordered.
 .moo-pricing-card--featured {
+  // A thicker primary frame instead of the hairline every other tier
+  // carries; with the scale-up and strong shadow below it reads as the
+  // highlighted option in both light and dark.
+  border: 3px solid var(--bs-primary);
   box-shadow: var(--bs-box-shadow-lg);
   z-index: 1;
 }

@@ -63,7 +63,7 @@
           href=site_href("examples/auth/sign-up.html", root_path),
           extra_class="w-100"
         ) %}
-        {% set tier_class = "moo-pricing-card" ~ (" moo-pricing-card--featured border-primary" if tier.get("featured") else "") %}
+        {% set tier_class = "moo-pricing-card" ~ (" moo-pricing-card--featured" if tier.get("featured") else "") %}
         {% call card(
           title=tier.name,
           subtitle=tier.price,
