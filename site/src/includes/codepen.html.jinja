@@ -381,7 +381,8 @@ document.querySelectorAll(".datatable").forEach((element) => {
 });
 {%- endmacro %}
 
-{#- The bare DataTable init above wasn't enough for a working export --
+{#- A bare DataTable init (users_codepen_js() above is that whole
+   story for a read-only table) isn't enough for Tasks specifically --
    Edit/Copy link/Delete task and the New Task sheet are wired by
    examples-tasks.js, a page-specific module the site's own catalog
    bundle loads separately. tasks_example_js_source() (build.py) inlines
