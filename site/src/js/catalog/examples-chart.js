@@ -44,8 +44,11 @@ function buildChartTheme(colors) {
     color: colors["--bs-body-color"],
     backgroundColor: colors["--bs-body-bg"],
     borderColor: colors["--bs-border-color"],
-    gridColor: colors["--bs-border-color"],
-    tickColor: colors["--bs-border-color"],
+    // Grid lines use secondary-color (text) instead of border-color so they
+    // remain visible in both light and dark modes. Border-color is too dark
+    // in dark mode; secondary-color adapts better to the theme.
+    gridColor: colors["--bs-secondary-color"],
+    tickColor: colors["--bs-secondary-color"],
     textColor: colors["--bs-body-color"],
     secondaryText: colors["--bs-secondary-color"],
     primary: colors["--bs-primary"],
@@ -65,15 +68,22 @@ function applyThemeToChart(chart, theme) {
     const colorKeys = ["primary", "success", "info", "warning", "danger"];
     const colorKey = colorKeys[index % colorKeys.length];
     const color = theme[colorKey];
+    const mutedColor = `color-mix(in srgb, ${color} 70%, ${theme.secondaryText})`;
+    const isDark = chart.canvas.ownerDocument.documentElement.dataset.bsTheme === "dark";
+    const pointColor = isDark
+      ? `color-mix(in srgb, ${color} 65%, #ffffff)`
+      : color;
 
     if (dataset.type === "line" || !dataset.type) {
-      dataset.borderColor = color;
-      dataset.backgroundColor = color + "33"; // 20% opacity
-      dataset.pointBackgroundColor = color;
-      dataset.pointBorderColor = theme.backgroundColor;
+      dataset.borderColor = mutedColor;
+      dataset.backgroundColor = `color-mix(in srgb, ${color} 15%, transparent)`;
+      dataset.pointBackgroundColor = pointColor;
+      dataset.pointBorderColor = theme.borderColor;
+      dataset.pointHoverBackgroundColor = pointColor;
+      dataset.pointHoverBorderColor = theme.color;
     } else if (dataset.type === "bar") {
-      dataset.backgroundColor = color + "99"; // 60% opacity
-      dataset.borderColor = color;
+      dataset.backgroundColor = `color-mix(in srgb, ${color} 55%, transparent)`;
+      dataset.borderColor = mutedColor;
       dataset.hoverBackgroundColor = color;
     }
   });
@@ -82,7 +92,7 @@ function applyThemeToChart(chart, theme) {
   if (chart.options.scales) {
     Object.values(chart.options.scales).forEach((scale) => {
       if (scale.grid) {
-        scale.grid.color = theme.gridColor + "40"; // 25% opacity
+        scale.grid.color = theme.gridColor + "59"; // 35% opacity
       }
       if (scale.ticks) {
         scale.ticks.color = theme.secondaryText;
@@ -165,19 +175,30 @@ export function initExamplesChart(root = document) {
         const colorKeys = ["primary", "success", "info", "warning", "danger"];
         const colorKey = colorKeys[index % colorKeys.length];
         const color = theme[colorKey];
+        // Mute the dataset color by mixing it with secondary-color (text).
+        // This keeps the hue recognizable but reduces saturation so the
+        // chart feels calmer and doesn't compete with the UI chrome.
+        const mutedColor = `color-mix(in srgb, ${color} 70%, ${theme.secondaryText})`;
+        // Point fill: in light mode use raw primary (already vibrant against
+        // light bg). In dark mode, mix with white so points stay brighter
+        // than the muted line — mirroring the light-mode relationship.
+        const isDark = documentElement.dataset.bsTheme === "dark";
+        const pointColor = isDark
+          ? `color-mix(in srgb, ${color} 65%, #ffffff)`
+          : color;
 
         if (chartType === "line") {
           return {
             ...dataset,
-            borderColor: color,
-            backgroundColor: color + "33",
-            pointBackgroundColor: color,
-            pointBorderColor: theme.backgroundColor,
+            borderColor: mutedColor,
+            backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+            pointBackgroundColor: pointColor,
+            pointBorderColor: theme.borderColor,
             pointBorderWidth: 2,
             pointRadius: 4,
             pointHoverRadius: 7,
-            pointHoverBackgroundColor: color,
-            pointHoverBorderColor: theme.backgroundColor,
+            pointHoverBackgroundColor: pointColor,
+            pointHoverBorderColor: theme.color,
             pointHoverBorderWidth: 3,
             tension: 0.3,
             fill: true,
@@ -186,8 +207,8 @@ export function initExamplesChart(root = document) {
         if (chartType === "bar") {
           return {
             ...dataset,
-            backgroundColor: color + "99",
-            borderColor: color,
+            backgroundColor: `color-mix(in srgb, ${color} 55%, transparent)`,
+            borderColor: mutedColor,
             borderWidth: 1,
             hoverBackgroundColor: color,
             hoverBorderColor: color,
@@ -247,7 +268,7 @@ export function initExamplesChart(root = document) {
           scales: {
             x: {
               grid: {
-                color: theme.gridColor + "20",
+                color: theme.gridColor + "59", // 35% opacity
                 drawBorder: false,
               },
               ticks: {
@@ -260,7 +281,7 @@ export function initExamplesChart(root = document) {
             },
             y: {
               grid: {
-                color: theme.gridColor + "20",
+                color: theme.gridColor + "59", // 35% opacity
                 drawBorder: false,
               },
               ticks: {
