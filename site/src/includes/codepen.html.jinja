@@ -299,12 +299,19 @@ body {
 }
 {%- endmacro %}
 
+{#- The bare DataTable init above wasn't enough for a working export --
+   Edit/Copy link/Delete task and the New Task sheet are wired by
+   examples-tasks.js, a page-specific module the site's own catalog
+   bundle loads separately. tasks_example_js_source() (build.py) inlines
+   that module's real source (CDN import instead of the site's relative
+   one) plus the DataTable init and an initExamplesTasks(document) call,
+   so the export isn't just a read-only table. Inlined rather than
+   linked to ui.wpmoo.org directly: that origin sends no
+   Access-Control-Allow-Origin header, so a cross-origin `import` from a
+   real CodePen pen would be blocked by CORS (unpkg.com, used for
+   DataTable, does send one). #}
 {% macro tasks_codepen_js() -%}
-import DataTable from "https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/js/datatable.js";
-
-document.querySelectorAll(".datatable").forEach((element) => {
-  DataTable.getOrCreateInstance(element);
-});
+{{ tasks_example_js_source() | safe }}
 {%- endmacro %}
 
 {#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)

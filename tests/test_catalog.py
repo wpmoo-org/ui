@@ -1279,6 +1279,11 @@ class CatalogContractTests(CatalogTestCase):
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
+                    self.assertIn("export function initExamplesTasks", payload["js"])
+                    self.assertIn("initExamplesTasks(document);", payload["js"])
+                    self.assertIn("data-moo-task-edit", payload["js"])
+                    self.assertIn("data-moo-task-delete", payload["js"])
+                    self.assertNotIn("&#34;", payload["js"])
                     self.assertIn("gap: 2rem;", payload["css"])
                     self.assertIn("align-content: start;", payload["css"])
                     self.assertIn(".datatable--tasks .datatable-card-frame", payload["css"])
