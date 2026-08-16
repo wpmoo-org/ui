@@ -1,0 +1,25 @@
+{% from "components/popover.html.jinja" import popover_dismiss_trigger %}
+
+{% macro example_component_reference(slug, popover=true, placement="top", learn_more_label="Learn more") -%}
+  {% set ns = namespace(component=None) %}
+  {% for component in catalog %}
+    {% if component.slug == slug %}
+      {% set ns.component = component %}
+    {% endif %}
+  {% endfor %}
+  {% set label = ns.component.label if ns.component else slug | replace("-", " ") | title %}
+  {% set description = ns.component.description if ns.component else "" %}
+  {% set href = site_href("components/" ~ slug ~ ".html", root_path) %}
+  {%- if popover and description %}
+    {% set component_href = canonical_url("components/" ~ slug ~ ".html") %}
+    {% set popover_content -%}
+      <a href='{{ component_href }}' target='_blank' rel='noopener noreferrer' class='moo-examples-footer__preview'><img src='{{ component_preview_absolute_src(slug) }}' alt='' class='moo-catalog__showcase-image w-100' loading='lazy'></a>
+      <strong class='d-block mb-1'>{{ label }}</strong>
+      {{ description }}
+      <a href='{{ component_href }}' target='_blank' rel='noopener noreferrer' class='d-block mt-1'>{{ learn_more_label }}</a>
+    {%- endset %}
+    {{- popover_dismiss_trigger(label, popover_content | trim, placement=placement, html=true, href=none, container="body", extra_class="moo-examples-footer__component-trigger") -}}
+  {%- else -%}
+    <a href="{{ href }}">{{ label }}</a>
+  {%- endif %}
+{%- endmacro %}

@@ -1,0 +1,67 @@
+{% from "components/separator.html.jinja" import separator %}
+{% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
+{% from "components/typography.html.jinja" import typography %}
+
+{#- The global settings panel (Phase 6): a Sheet on every catalog page with
+   an appearance section. It is strictly opt-in and additive -- a first-time
+   visitor's rendering is unchanged until they open the panel and pick a
+   preference, which is persisted under the same moo:theme key theme.js and
+   the base-layout inline restore script already use. settings-panel.js
+   wires the System/Light/Dark radios and the Reset affordance. #}
+{% macro settings_panel() -%}
+  {% call sheet("catalog-settings", aria_label="Settings") %}
+    {{ sheet_header("catalog-settings", "Settings") }}
+    {% call sheet_body(extra_class="d-grid gap-4 align-content-start") %}
+      <div>
+        {{ typography("Appearance", variant="section-title") }}
+        <p class="text-body-secondary small mb-0">
+          Choose how Moo UI looks on this device. Your choice is saved in
+          this browser.
+        </p>
+      </div>
+
+      <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Theme">
+        {% for option in [
+          {"value": "system", "label": "System", "icon": "monitor"},
+          {"value": "light", "label": "Light", "icon": "sun"},
+          {"value": "dark", "label": "Dark", "icon": "moon-star"}
+        ] %}
+          <label class="moo-settings-panel__theme-option">
+            <input type="radio" class="btn-check" name="moo-settings-theme" value="{{ option.value }}" data-moo-settings-theme autocomplete="off">
+            <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+            <span class="moo-settings-panel__theme-thumb moo-settings-panel__theme-thumb--{{ option.value }}" aria-hidden="true">
+              <span class="moo-settings-panel__theme-thumb-bar"></span>
+              <span class="moo-settings-panel__theme-thumb-body">
+                <span class="moo-settings-panel__theme-thumb-line"></span>
+                <span class="moo-settings-panel__theme-thumb-line is-short"></span>
+                <span class="moo-settings-panel__theme-thumb-line is-tiny"></span>
+              </span>
+            </span>
+            <span class="moo-settings-panel__theme-label">
+              {{ render_icon(option.icon, "inline-start") }}
+              {{ option.label }}
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+
+      {{ separator() }}
+
+      <div class="d-flex justify-content-between align-items-center gap-3">
+        <div>
+          <div class="fw-medium">Reset</div>
+          <p class="text-body-secondary small mb-0">
+            Restore the default appearance.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm moo-settings-panel__reset"
+          data-moo-settings-reset
+        >
+          Reset
+        </button>
+      </div>
+    {% endcall %}
+  {% endcall %}
+{%- endmacro %}

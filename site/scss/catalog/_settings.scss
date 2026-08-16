@@ -15,3 +15,14 @@ $moo-catalog-font-family: "Geist" !default;
 // than the product component shadow scale. Keep the literal at the Sass
 // definition site so catalog.scss stays token-driven.
 $moo-catalog-command-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.25) !default;
+
+// The settings panel's theme-picker thumbnails mock the fixed light and
+// dark palettes (a light preview is always light, a dark one always dark,
+// regardless of the runtime theme). Kept as literals here -- the one place
+// the catalog color-literal gate exempts -- so the thumbnail styles in
+// _docs.scss stay token-driven via #{} interpolation.
+$moo-catalog-settings-thumb-light: #ffffff !default;
+$moo-catalog-settings-thumb-dark: #18181b !default;
+$moo-catalog-settings-thumb-light-line: #e4e4e7 !default;
+$moo-catalog-settings-thumb-dark-line: #3f3f46 !default;
+$moo-catalog-settings-thumb-system-line: #a1a1aa !default;

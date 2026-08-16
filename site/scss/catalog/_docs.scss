@@ -20,6 +20,180 @@
   justify-content: space-between;
 }
 
+// The Examples and Components index toolbars mirror the Data Table's own
+// search/filter + view toggle pattern: a compact input-group-sm search bar
+// with a leading search icon and an icon-only filter picker, plus a joined
+// btn-group view toggle. Both indexes share this layout; each page then adds
+// its own actions (Examples the grid/list toggle, Components its own
+// catalog controls) in the actions slot.
+.moo-catalog__toolbar--examples,
+.moo-catalog__toolbar--components {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.moo-catalog__toolbar-query {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 18rem;
+  max-width: 100%;
+}
+
+.moo-catalog__searchbar {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-block-size: 2rem;
+  width: 100%;
+}
+
+.moo-catalog__searchbar .moo-catalog__search {
+  flex: 1 1 auto;
+  max-width: none;
+  min-width: 0;
+  width: 1%;
+  padding-inline-start: 2rem;
+}
+
+.moo-catalog__search-icon {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.625rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-secondary-color);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.moo-catalog__search-icon > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.moo-catalog__filter-trigger {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  margin-inline-end: 0;
+  border-radius: var(--bs-border-radius-sm);
+  gap: 0;
+}
+
+.moo-catalog__filter-trigger > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+}
+
+.moo-catalog__filter-menu {
+  --bs-dropdown-border-radius: var(--bs-border-radius);
+
+  min-width: 12rem;
+}
+
+.moo-catalog__filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.moo-catalog__filter-option .form-check-input {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.moo-catalog__filter-option:has(.form-check-input:checked) {
+  background-color: var(--moo-muted-surface);
+}
+
+.moo-catalog__filter-clear {
+  color: var(--bs-secondary-color);
+}
+
+.moo-catalog__toolbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+// Both the Examples and Components index keep a more compact search bar
+// than the Data Table's own: a capped width so it reads as a smaller box
+// next to the view toggle instead of spanning the whole row, plus a
+// smaller input and a matching icon-only picker.
+.moo-catalog__toolbar--examples .moo-catalog__toolbar-query,
+.moo-catalog__toolbar--components .moo-catalog__toolbar-query {
+  max-width: 32rem;
+}
+
+.moo-catalog__toolbar--examples .moo-catalog__searchbar,
+.moo-catalog__toolbar--components .moo-catalog__searchbar {
+  min-block-size: 1.75rem;
+}
+
+.moo-catalog__toolbar--examples .moo-catalog__searchbar .moo-catalog__search,
+.moo-catalog__toolbar--components .moo-catalog__searchbar .moo-catalog__search {
+  padding-block: 0.1875rem;
+  padding-inline-start: 1.625rem;
+  font-size: 0.75rem;
+}
+
+.moo-catalog__toolbar--examples .moo-catalog__search-icon,
+.moo-catalog__toolbar--components .moo-catalog__search-icon {
+  inset-inline-start: 0.5rem;
+}
+
+.moo-catalog__toolbar--examples .moo-catalog__search-icon > [data-icon],
+.moo-catalog__toolbar--components .moo-catalog__search-icon > [data-icon] {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.moo-catalog__toolbar--examples .moo-catalog__filter-trigger,
+.moo-catalog__toolbar--components .moo-catalog__filter-trigger {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+}
+
+.moo-catalog__view-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-block-size: 2rem;
+  min-width: 2rem;
+  padding-inline: 0.5rem;
+}
+
+.moo-catalog__view-option > [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-catalog__view-toggle .btn-check:checked + .moo-catalog__view-option {
+  border-color: var(--moo-border);
+  color: var(--bs-body-color);
+  background-color: var(--moo-muted-surface);
+}
+
+.moo-catalog__view-toggle .btn-check:focus-visible + .moo-catalog__view-option {
+  z-index: 3;
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 50%, transparent);
+}
+
 .moo-catalog__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
@@ -29,6 +203,21 @@
 
 .moo-catalog__grid--compact {
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+// auto-fit (the default above) collapses unused tracks, which stretches a
+// lone trailing card to the row's full width once its section has fewer
+// items than fit a row (Dashboard's single Tasks card, for example). Fixed
+// tracks keep every card the same width regardless of how many items are
+// in its section.
+.moo-catalog__grid--examples {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .moo-catalog__grid--examples {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .moo-catalog__component-card {
@@ -108,7 +297,71 @@
 }
 
 .moo-catalog__app-card:hover .moo-catalog__showcase-preview>* {
-  transform: scale(1.1);
+  transform: scale(1.05);
+}
+
+// Example cards show a literal screenshot, not hand-drawn art: a fixed
+// 16:9 box (not showcase-preview's fixed 13rem height) so every card
+// crops to the same shape regardless of how tall the underlying page is.
+.moo-catalog__example-preview {
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.moo-catalog__example-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+// List view: one column of rows instead of a card grid, shared by the
+// Examples and Components index pages. card-body's d-grid utility carries
+// Bootstrap's own !important, so the row layout below needs it too to win;
+// the preview shrinks to a fixed-width thumbnail (bleeding only on its own
+// three outer edges, not against the title column) instead of spanning the
+// card's full width.
+[data-moo-catalog-view="list"] .moo-catalog__grid {
+  grid-template-columns: 1fr;
+}
+
+[data-moo-catalog-view="list"] .moo-catalog__showcase-card {
+  min-height: 0;
+}
+
+[data-moo-catalog-view="list"] .moo-catalog__showcase-card .card-body {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+
+  // Bootstrap's .gap-4 utility on the card body compiles to
+  // gap: 1.5rem !important, so the row needs the same weight to win.
+  gap: 1rem !important;
+}
+
+[data-moo-catalog-view="list"] .moo-catalog__showcase-preview {
+  flex: 0 0 auto;
+  width: 10rem;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin: calc(var(--bs-card-spacer-x) * -1) 0 calc(var(--bs-card-spacer-x) * -1) calc(var(--bs-card-spacer-x) * -1);
+
+  // showcase-preview's own border-bottom (for the stacked grid layout)
+  // doesn't land anywhere useful in this side-by-side row -- an inline-end
+  // border softens the seam between the preview's own light colors and a
+  // dark card in both LTR and RTL.
+  border-bottom: 0;
+  border-inline-end: var(--bs-border-width) solid var(--moo-border);
+}
+
+// The row has room to spare once the page itself reads at doc width
+// instead of full-bleed -- widen the thumbnail there so it's actually
+// legible, while narrow viewports keep the smaller default above so it
+// doesn't crowd out the title/description text.
+@media (min-width: 768px) {
+  [data-moo-catalog-view="list"] .moo-catalog__showcase-preview {
+    width: 18rem;
+  }
 }
 
 .moo-doc-page {
@@ -390,4 +643,171 @@
   color: var(--bs-secondary-color);
   font-size: 0.875rem;
   text-align: center;
+}
+
+// Global settings panel (Phase 6): the System/Light/Dark theme picker.
+// Each option is a small card with a window-mock preview thumbnail; the
+// checked one gets a primary ring. The radio follows the btn-check pattern
+// (visually hidden, label is the hit target).
+.moo-settings-panel__theme-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.moo-settings-panel__theme-option {
+  position: relative;
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.375rem;
+  border-radius: var(--bs-border-radius);
+  cursor: pointer;
+}
+
+.moo-settings-panel__theme-option .btn-check {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+// Selection reads at a glance by muting the unselected options: they drop
+// to partial opacity while the chosen one stays full with a border and
+// focus ring like an input's -- the border picks up the ring token and a
+// soft translucent ring sits outside it -- plus the filled corner check.
+// Legible in both themes, no dominant outline anywhere.
+.moo-settings-panel__theme-option:not(:has(.btn-check:checked)) {
+  opacity: 0.55;
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-thumb {
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:focus-visible) .moo-settings-panel__theme-thumb {
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+}
+
+// A circular selection indicator straddling the image's top corner: the
+// image corner sits at the checkbox's centre, so it sticks out slightly
+// past the edge (translate centers it; the option doesn't clip it). It
+// always carries a ring -- an empty control by default, filled with a check
+// when the option is selected, using foreground/background tokens so both
+// states stay legible over light and dark thumbnails.
+.moo-settings-panel__theme-check {
+  position: absolute;
+  inset-block-start: 0.375rem;
+  inset-inline-end: 0.375rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(1.125rem * 1.25);
+  height: calc(1.125rem * 1.25);
+  border-radius: 999px;
+  border: 2px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  transform: translate(50%, -50%);
+}
+
+.moo-settings-panel__theme-check [data-icon] {
+  width: calc(0.75rem * 1.25);
+  height: calc(0.75rem * 1.25);
+  display: none;
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check {
+  border-color: var(--bs-body-bg);
+  background-color: var(--bs-body-color);
+  color: var(--bs-body-bg);
+}
+
+.moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check [data-icon] {
+  display: inline-flex;
+}
+
+.moo-settings-panel__theme-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.moo-settings-panel__theme-thumb--light {
+  background: #{$moo-catalog-settings-thumb-light};
+}
+
+.moo-settings-panel__theme-thumb--dark {
+  background: #{$moo-catalog-settings-thumb-dark};
+}
+
+// "System" previews a split between the two palettes so it reads as
+// following the OS rather than forcing either side.
+.moo-settings-panel__theme-thumb--system {
+  background: linear-gradient(
+    90deg,
+    #{$moo-catalog-settings-thumb-light} 0 50%,
+    #{$moo-catalog-settings-thumb-dark} 50% 100%
+  );
+}
+
+.moo-settings-panel__theme-thumb-bar {
+  display: block;
+  height: 0.375rem;
+}
+
+.moo-settings-panel__theme-thumb-body {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.375rem 0.375rem 0;
+}
+
+.moo-settings-panel__theme-thumb-line {
+  display: block;
+  height: 0.25rem;
+  border-radius: 999px;
+}
+
+.moo-settings-panel__theme-thumb-line.is-short {
+  width: 66%;
+}
+
+.moo-settings-panel__theme-thumb-line.is-tiny {
+  width: 40%;
+}
+
+.moo-settings-panel__theme-thumb--light .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--light .moo-settings-panel__theme-thumb-line {
+  background: #{$moo-catalog-settings-thumb-light-line};
+}
+
+.moo-settings-panel__theme-thumb--dark .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--dark .moo-settings-panel__theme-thumb-line {
+  background: #{$moo-catalog-settings-thumb-dark-line};
+}
+
+.moo-settings-panel__theme-thumb--system .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--system .moo-settings-panel__theme-thumb-line {
+  background: #{$moo-catalog-settings-thumb-system-line};
+}
+
+.moo-settings-panel__theme-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.moo-settings-panel__theme-label [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--bs-secondary-color);
 }

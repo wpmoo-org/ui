@@ -1,0 +1,19 @@
+{# Example preview art is a literal 16:9 browser screenshot of the built
+   page (1280x720 viewport, no full-page scroll), captured by
+   scripts/generate_example_previews.py via Playwright. Unlike
+   Components/Blocks preview art (hand-drawn line art -- see
+   component-previews.html.jinja), these are real renders, so they keep
+   their own colors in dark mode instead of being inverted.
+   example_preview_src() (build.py) resolves to
+   site/static/images/examples/<slug>.png when present, falling back to
+   the shared placeholder otherwise -- a slug with no screenshot yet
+   still renders a real card instead of a broken image. #}
+
+{% macro example_preview(slug, root_path, loading="lazy") -%}
+  <img
+    class="moo-catalog__example-image"
+    src="{{ example_preview_src(slug, root_path) }}"
+    alt=""
+    loading="{{ loading }}"
+  >
+{%- endmacro %}

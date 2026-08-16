@@ -21,6 +21,7 @@
   --moo-datatable-search-filter-menu-width: #{$moo-datatable-search-filter-menu-width};
   --moo-datatable-search-filter-options-menu-width: #{$moo-datatable-search-filter-options-menu-width};
   --moo-datatable-scrollbar-size: #{$moo-datatable-scrollbar-size};
+  --moo-datatable-bulk-actions-bottom: #{$moo-datatable-bulk-actions-bottom};
 }
 
 .datatable-table {
@@ -917,7 +918,7 @@
 
   position: fixed;
   inset-inline-start: 50%;
-  inset-block-end: 1rem;
+  inset-block-end: var(--moo-datatable-bulk-actions-bottom);
   transform: translateX(-50%) scale(1);
   @include transition(transform 0.15s ease-out);
   z-index: var(--bs-zindex-fixed, 1030);

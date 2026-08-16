@@ -1,0 +1,580 @@
+{% from "components/button.html.jinja" import button %}
+
+{% macro example_component_reference_codepen_css() -%}
+.moo-examples-footer__component-trigger {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+.moo-examples-footer__component-trigger:hover,
+.moo-examples-footer__component-trigger:focus-visible {
+  color: var(--bs-link-hover-color);
+}
+
+.moo-examples-footer__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-top-left-radius: var(--bs-popover-border-radius);
+  border-top-right-radius: var(--bs-popover-border-radius);
+  margin: calc(var(--bs-popover-body-padding-y, 0.625rem) * -1) calc(var(--bs-popover-body-padding-x, 0.625rem) * -1) 0.75rem;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-catalog__showcase-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+[data-bs-theme="dark"] .moo-catalog__showcase-image {
+  filter: invert(1) hue-rotate(180deg);
+}
+{%- endmacro %}
+
+{#- These two CSS blocks are the small amount of page-layout CSS each
+   example category owns on top of the shipped moo-ui.css (see
+   site/scss/catalog/_examples.scss) -- a CodePen recreation needs it
+   inlined since it isn't part of the published package. Kept here once,
+   shared by every Auth/Settings page's codepen_button() call, instead of
+   duplicated per page. #}
+
+{% macro auth_codepen_css() -%}
+.moo-auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.moo-auth-page__content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bs-tertiary-bg);
+}
+
+.moo-auth-page__inner {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.moo-auth-page__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+  text-decoration: none;
+}
+
+.moo-auth-page__footnote {
+  text-align: center;
+}
+
+.moo-auth-page__back {
+  justify-self: start;
+}
+
+.moo-auth-page__footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-auth-page__footer > p {
+  text-align: left;
+}
+
+{{ example_component_reference_codepen_css() }}
+
+@media (max-width: 576px) {
+  .moo-auth-page__footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .moo-auth-page__footer > p {
+    text-align: center;
+  }
+}
+{%- endmacro %}
+
+{#- Pricing/FAQ are catalog-layout Examples pages (same split as
+   settings_codepen_css(): the inset lives on .moo-examples-page, not
+   body, and the footer is the shared fixed .moo-examples-footer band
+   from examples_footer_codepen_css() below). Only the content column
+   width and the marketing-only rules are custom here. #}
+{% macro marketing_codepen_css() -%}
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  inline-size: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+
+.moo-pricing-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+.moo-pricing-card {
+  --moo-card-spacing: 1.5rem;
+
+  height: 100%;
+}
+
+.moo-pricing-card__features {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.moo-pricing-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.moo-pricing-card__inherits {
+  font-weight: 500;
+}
+
+.moo-pricing-card__icon {
+  display: inline-flex;
+  margin-top: 0.125rem;
+  flex: 0 0 auto;
+  color: var(--moo-muted-foreground);
+}
+
+.moo-pricing-card__icon [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-pricing-card--featured {
+  border: 3px solid var(--bs-primary);
+  box-shadow: var(--bs-box-shadow-lg);
+  z-index: 1;
+}
+
+.moo-pricing-card .card-footer .btn-outline-secondary {
+  background-color: var(--bs-body-bg);
+}
+
+.moo-faq-group {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 48rem;
+}
+
+.moo-faq {
+  max-width: 48rem;
+}
+
+@media (min-width: 48rem) {
+  .moo-pricing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .moo-pricing-card--featured {
+    transform: scale(1.04);
+  }
+}
+{%- endmacro %}
+
+{% macro examples_header_codepen_css() -%}
+.moo-component-header {
+  max-width: 44rem;
+}
+
+.moo-component-header--has-actions {
+  max-width: 100%;
+}
+
+.moo-component-header > * + * {
+  margin-top: 1rem;
+}
+
+.moo-component-header__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.moo-component-header h1 {
+  margin-bottom: 0;
+  letter-spacing: -0.025em;
+}
+
+.moo-page-description {
+  max-width: 42rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.moo-component-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+{%- endmacro %}
+
+{% macro examples_footer_codepen_css() -%}
+{#- The footer band is position: fixed so it reads as an always-visible
+   app-shell bottom bar, like it does on the real site (there it's pinned
+   by the docs shell around it, not by anything in this page itself).
+   Fixed takes it out of flow, so .moo-examples-page needs bottom
+   clearance equal to its height or the last row/pagination controls
+   would render underneath it -- --moo-examples-footer-height (measured
+   from the actual rendered band, desktop and the stacked mobile layout
+   below) drives both the reserved min-height and that clearance from
+   one place instead of two guesses that can drift apart. z-index is
+   deliberately below Bootstrap's own backdrop/offcanvas/modal tiers
+   (1040+) so an open Sheet or Dialog dims the footer along with the
+   rest of the page, same as real content. #}
+body {
+  --moo-examples-footer-height: 3rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.moo-examples-page {
+  flex: 1 1 auto;
+  padding-bottom: calc(var(--moo-examples-footer-height) + 1.5rem);
+}
+
+.moo-examples-page .datatable {
+  --moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);
+}
+
+.moo-examples-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1020;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--moo-examples-footer-height);
+  padding: 0.75rem 1.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  /* On the real site this band sits inside the docs shell, next to
+     other chrome that already reads as "not page content" -- a hairline
+     border is enough there. Standalone in a CodePen there's nothing else
+     to contrast against (no CodePen action ever renders in its own
+     export, see codepen_button()'s doc comment), so it needs its own
+     visible surface to read as a footer band rather than trailing text.
+     --bs-tertiary-bg (#fafafa in this theme) turned out too close to
+     --bs-body-bg (#fff) to read as a change at all -- secondary-bg
+     (#f4f4f5) is the nearest token with an actually perceptible delta. */
+  background: var(--bs-secondary-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+{#- A static gradient standing in for the real site's scroll-fade-y:
+   that one is scroll-driven (animation-timeline: scroll(self y)), which
+   needs the faded element to be its own overflow:auto scroll container
+   -- exactly the body{height:100vh;overflow:hidden} + .moo-examples-page
+   {overflow-y:auto} setup that broke the Sheet/Offcanvas here before
+   (see codepen-scroll-fade-footer-reverted memory). The whole page
+   scrolls normally now, so instead this is a fixed strip sitting right
+   above the fixed footer -- content fades to the page background as it
+   scrolls under it, no scroll container of its own to fight with fixed
+   descendants. #}
+.moo-examples-footer::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: 2rem;
+  background: linear-gradient(to bottom, transparent, var(--bs-body-bg));
+  pointer-events: none;
+}
+
+{{ example_component_reference_codepen_css() }}
+
+@media (max-width: 576px) {
+  body {
+    --moo-examples-footer-height: 7rem;
+  }
+
+  .moo-examples-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+}
+{%- endmacro %}
+
+{% macro settings_codepen_css() -%}
+{#- padding/max-width/margin:auto all live on .moo-examples-page, not
+   body -- same split tasks_codepen_css() already uses. The footer is
+   body's other direct child (a sibling of .moo-examples-page, see
+   examples_footer_codepen_css()); any inset on body itself -- padding
+   included, not just max-width -- would apply to the footer too and
+   keep its band off the pen's true edge instead of flush like Auth's. #}
+.moo-examples-page {
+  display: grid;
+  gap: 3rem;
+  align-content: start;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+
+.moo-settings-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.moo-settings-layout__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 28rem;
+}
+
+.moo-settings-nav {
+  flex: 0 0 auto;
+  width: 12rem;
+}
+
+@media (max-width: 576px) {
+  .moo-settings-layout {
+    flex-direction: column;
+  }
+
+  .moo-settings-nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+{%- endmacro %}
+
+{% macro dashboard_datatable_codepen_css(example) -%}
+{#- Same split as settings_codepen_css(): the inset lives on
+   .moo-examples-page, not body. No bottom value here -- the footer is
+   position: fixed (see examples_footer_codepen_css(), called below),
+   which sets .moo-examples-page's real bottom padding itself so it
+   always matches the footer's actual reserved height. #}
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  inline-size: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+
+.datatable--{{ example }} .datatable-card-frame {
+  inline-size: 100%;
+}
+
+.datatable--{{ example }} .datatable-cards {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 48rem) {
+  .datatable--{{ example }} .datatable-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 70rem) {
+  .datatable--{{ example }} .datatable-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+{%- endmacro %}
+
+{% macro tasks_codepen_css() -%}
+{{ dashboard_datatable_codepen_css("tasks") }}
+
+#tasks-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+#tasks-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+{%- endmacro %}
+
+{% macro users_codepen_css() -%}
+{{ dashboard_datatable_codepen_css("users") }}
+
+#users-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+#users-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+{%- endmacro %}
+
+{#- Edit/Copy email/Delete user, the New User sheet, and the "Update
+   status" bulk action are wired by examples-users.js, a page-specific
+   module the site's own catalog bundle loads separately (same shape as
+   Tasks' examples-tasks.js below). users_example_js_source() (build.py)
+   inlines that module's real source (CDN import instead of the site's
+   relative one) plus the DataTable init and an
+   initExamplesUsers(document) call, so the export isn't just a
+   read-only table. Inlined rather than linked to ui.wpmoo.org directly:
+   that origin sends no Access-Control-Allow-Origin header, so a
+   cross-origin `import` from a real CodePen pen would be blocked by
+   CORS (unpkg.com, used for DataTable, does send one). #}
+{% macro users_codepen_js() -%}
+{{ users_example_js_source() | safe }}
+{%- endmacro %}
+
+{#- Same shape as users_codepen_js() above -- Edit/Copy link/Delete
+   task and the New Task sheet are wired by examples-tasks.js, a
+   page-specific module the site's own catalog bundle loads separately.
+   tasks_example_js_source() (build.py) inlines that module's real
+   source (CDN import instead of the site's relative one) plus the
+   DataTable init and an initExamplesTasks(document) call, so the
+   export isn't just a read-only table. Inlined rather than linked to
+   ui.wpmoo.org directly: that origin sends no
+   Access-Control-Allow-Origin header, so a cross-origin `import` from a
+   real CodePen pen would be blocked by CORS (unpkg.com, used for
+   DataTable, does send one). #}
+{% macro tasks_codepen_js() -%}
+{{ tasks_example_js_source() | safe }}
+{%- endmacro %}
+
+{#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
+   in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
+   page's own markup (internal links rewritten to absolute ui.wpmoo.org
+   URLs so they still work standalone) plus the shared external
+   moo-ui.css stylesheet, version-locked to the site's own package
+   version so it never drifts from what's actually live. data-moo-codepen-form
+   opts this form out of examples-forms.js's inert-demo-form guard --
+   unlike every other form on an Examples page, this one is meant to
+   really submit.
+
+   Lives in the page's own "demo only / built with X, Y, Z" meta footer,
+   not next to the page/card title -- that title row is the simulated
+   app's own chrome (Tasks' "New Task" button lives there too), and this
+   button is about the demo, not part of it. Callers render their body
+   markup through a local macro twice: once with no action (to capture a
+   clean `html` for the payload below, before this button exists), once
+   with this macro's own output passed back in (for the page actually
+   shown to a visitor) -- see any Examples page for the pattern. #}
+{% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110") -%}
+  {% set uses_popover = 'data-bs-toggle="popover"' in html %}
+  {% set resolved_js_external = js_external %}
+  {% if uses_popover and not resolved_js_external %}
+    {% set resolved_js_external = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js" %}
+  {% endif %}
+  {% set resolved_js = js %}
+  {% if uses_popover and "initializeMooCodePenPopovers" not in resolved_js %}
+    {% set popover_js -%}
+function initializeMooCodePenPopovers() {
+  const Popover = window.bootstrap && window.bootstrap.Popover;
+  if (!Popover) {
+    return;
+  }
+
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach((element) => {
+    Popover.getOrCreateInstance(element);
+  });
+}
+
+function loadMooCodePenBootstrap(callback) {
+  if (window.bootstrap && window.bootstrap.Popover) {
+    callback();
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
+function startMooCodePenPopovers() {
+  loadMooCodePenBootstrap(initializeMooCodePenPopovers);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenPopovers, { once: true });
+} else {
+  startMooCodePenPopovers();
+}
+    {%- endset %}
+    {% set resolved_js = (resolved_js ~ "\n\n" ~ popover_js) | trim %}
+  {% endif %}
+  {% set payload = {
+    "title": title,
+    "description": description,
+    "html": html | absolutize_links,
+    "html_pre_processor": "none",
+    "css": css,
+    "css_pre_processor": "none",
+    "css_starter": "neither",
+    "css_external": "https://unpkg.com/@wpmoo/ui@" ~ product.version ~ "/dist/assets/css/moo-ui.css",
+    "js": resolved_js,
+    "js_pre_processor": "none",
+    "js_external": resolved_js_external,
+    "tags": tags,
+    "editors": editors,
+    "js_module": js_module
+  } %}
+  <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen" data-moo-codepen-form>
+    <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
+    {{ button("Open in CodePen", type="submit", variant="outline", size="sm", icon_start="code") }}
+  </form>
+{%- endmacro %}

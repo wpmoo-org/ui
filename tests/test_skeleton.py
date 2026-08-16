@@ -84,10 +84,14 @@ class SkeletonTests(CatalogTestCase):
 
     def test_skeleton_is_ready_in_catalog_and_pages_build(self) -> None:
         catalog = json.loads((ROOT / "src/registry/components.json").read_text(encoding="utf-8"))
-        self.assertIn(
-            {"slug": "skeleton", "label": "Skeleton", "status": "ready"},
-            catalog,
+        skeleton = next(
+            (component for component in catalog if component.get("slug") == "skeleton"),
+            None,
         )
+        self.assertIsNotNone(skeleton)
+        self.assertEqual(skeleton["label"], "Skeleton")
+        self.assertEqual(skeleton["status"], "ready")
+        self.assertTrue(skeleton.get("description"))
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

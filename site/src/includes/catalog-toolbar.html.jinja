@@ -1,0 +1,83 @@
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_menu %}
+
+{#- The Data Table's search/filter pattern, shared by the Examples and
+   Components index pages: a compact input-group-sm search bar with a
+   leading search icon and an icon-only list-filter picker opening a
+   multi-select category menu. The category checkboxes plus the
+   "Clear filters" reset are driven by catalog-filter.js via the
+   data-moo-catalog-filter-multi container; callers append their own
+   actions (view toggle, menus) through the caller block. #}
+{% macro catalog_search_filter(search_id, search_label, search_placeholder, categories, extra_class="") -%}
+  <div class="moo-catalog__toolbar{% if extra_class %} {{ extra_class }}{% endif %}">
+    <div class="moo-catalog__toolbar-query" data-moo-catalog-filter-multi>
+      <div class="input-group input-group-sm moo-catalog__searchbar">
+        <span class="moo-catalog__search-icon" aria-hidden="true">{{ render_icon("search", "inline-start") }}</span>
+        <input class="form-control moo-catalog__search" type="search" id="{{ search_id }}" placeholder="{{ search_placeholder }}" aria-label="{{ search_label }}">
+        <button type="button" class="btn btn-ghost btn-icon-sm moo-catalog__filter-trigger" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Filter by section">
+          {{ render_icon("list-filter", "inline-start") }}
+        </button>
+        {% call dropdown_menu(align="end", extra_class="moo-catalog__filter-menu") %}
+          {% for category in categories %}
+            <li>
+              <label class="dropdown-item moo-catalog__filter-option">
+                <input type="checkbox" class="form-check-input" data-moo-catalog-section-filter="{{ category | lower }}" autocomplete="off">
+                <span>{{ category }}</span>
+              </label>
+            </li>
+          {% endfor %}
+          {{ dropdown_divider() }}
+          <li>
+            <button type="button" class="dropdown-item moo-catalog__filter-clear" data-moo-catalog-filter-clear>
+              {{ render_icon("x", "inline-start") }}
+              Clear filters
+            </button>
+          </li>
+        {% endcall %}
+      </div>
+    </div>
+    {% set actions %}{{ caller() }}{% endset %}
+    {% if actions | trim %}
+      <div class="moo-catalog__toolbar-actions">{{ actions | safe }}</div>
+    {% endif %}
+  </div>
+{%- endmacro %}
+
+{#- The Data Table's grid/list view toggle: a joined btn-group-sm of radio
+   inputs with icon-only labels. catalog-view-toggle.js restores and
+   persists the choice per group name via localStorage. The inline script
+   below mirrors the Data Table's own view toggle: it applies the stored
+   choice synchronously as the parser reaches it, before the browser paints
+   the server default, so a saved "list" choice never flashes back to grid
+   on load (the later module-script restore is then a no-op). #}
+{% macro catalog_view_toggle(name, aria_label, items) -%}
+  <div class="btn-group btn-group-sm moo-catalog__view-toggle" role="group" aria-label="{{ aria_label }}">
+    {% for item in items %}
+      {% set item_checked = item.checked | default(false, true) %}
+      <input type="radio" class="btn-check" name="{{ name }}" id="{{ name }}-{{ item.value }}" value="{{ item.value }}" autocomplete="off"{% if item_checked %} checked{% endif %}>
+      <label class="btn btn-outline-secondary moo-catalog__view-option" for="{{ name }}-{{ item.value }}">
+        {{ render_icon(item.icon, "inline-start") }}
+        <span class="visually-hidden">{{ item.label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+  <script>
+    (function () {
+      var root = document.currentScript.closest("[data-moo-catalog-view]");
+      if (!root) return;
+      var inputs = root.querySelectorAll('input[type="radio"][name]');
+      var name = inputs.length ? inputs[0].name : "";
+      if (!name) return;
+      var stored;
+      try {
+        stored = window.localStorage.getItem("moo:" + name);
+      } catch (_) {
+        return;
+      }
+      if (stored !== "grid" && stored !== "list") return;
+      root.dataset.mooCatalogView = stored;
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].checked = inputs[i].value === stored;
+      }
+    })();
+  </script>
+{%- endmacro %}

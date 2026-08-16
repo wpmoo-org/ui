@@ -8,8 +8,11 @@ const states = new WeakMap();
 // that field (Forgot Password is the one page shaped like this). This
 // guard closes that gap for the example pages specifically, not sitewide,
 // so the Form component's own catalog page can still demonstrate real
-// submit-driven validation states.
-const SCOPE_SELECTOR = ".moo-auth-page form, [data-moo-example-settings] form";
+// submit-driven validation states. The "Open in CodePen" form (see
+// includes/codepen.html.jinja) is deliberately excluded -- unlike every
+// other form on these pages, it's meant to really submit (to CodePen).
+const SCOPE_SELECTOR =
+  ".moo-auth-page form:not([data-moo-codepen-form]), [data-moo-example-settings] form:not([data-moo-codepen-form])";
 
 export function initExamplesForms(root = document) {
   if (states.has(root)) {

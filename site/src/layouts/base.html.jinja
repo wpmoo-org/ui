@@ -23,11 +23,22 @@
     <link rel="manifest" href="{{ root_path }}site.webmanifest">
     <script>
       (() => {
+        let storedTheme = null;
         try {
-          const theme = window.localStorage.getItem("moo:theme");
-          if (theme === "dark" || theme === "light") {
-            document.documentElement.dataset.bsTheme = theme;
-          }
+          storedTheme = window.localStorage.getItem("moo:theme");
+        } catch (_) {
+          /* Storage can be unavailable in restricted browsing contexts. */
+        }
+        if (storedTheme === "dark" || storedTheme === "light") {
+          document.documentElement.dataset.bsTheme = storedTheme;
+        } else {
+          // Unset or "system" means follow the OS preference; resolved even
+          // when storage access failed, so the System default still applies.
+          const dark = window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
+        }
+        try {
           const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
           if (sidebar === "collapsed" || sidebar === "expanded") {
             document.documentElement.dataset.mooSidebarCatalogState = sidebar;

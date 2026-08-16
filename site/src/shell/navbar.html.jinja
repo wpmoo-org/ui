@@ -3,6 +3,7 @@
 {% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/sidebar.html.jinja" import sidebar_trigger %}
+{% from "includes/settings-panel.html.jinja" import settings_panel %}
 
 {% macro _command_item(href, label) -%}
   <a
@@ -49,6 +50,16 @@
       </div>
 
       <div class="moo-catalog__header-actions">
+        <button
+          class="btn btn-ghost btn-icon moo-catalog__settings-toggle"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#catalog-settings"
+          aria-label="Open settings"
+          aria-controls="catalog-settings"
+        >
+          {{ render_icon("settings", "inline-start") }}
+        </button>
         <button
           class="btn btn-ghost btn-icon moo-catalog__theme-toggle"
           type="button"
@@ -123,3 +134,5 @@
     </div>
   </div>
 </div>
+
+{{ settings_panel() }}

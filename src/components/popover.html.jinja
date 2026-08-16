@@ -14,18 +14,22 @@
   placement="top",
   html=false,
   href="#!",
+  container="",
   extra_class=""
 ) -%}
   {% if not label | trim %}{{ fail("Popover trigger label is required") }}{% endif %}
   {% if not content | trim %}{{ fail("Popover content is required") }}{% endif %}
   {% if placement not in popover_placements %}{{ fail("Unknown popover placement: " ~ placement) }}{% endif %}
   <a
+    {% if href %}
     href="{{ href }}"
+    {% endif %}
     role="button"
     tabindex="0"
     class="btn btn-outline-secondary{% if extra_class %} {{ extra_class }}{% endif %}"
     data-bs-toggle="popover"
     data-bs-trigger="focus"
+    {% if container %}data-bs-container="{{ container }}"{% endif %}
     data-bs-placement="{{ placement }}"
     {% if title %}data-bs-title="{{ title }}"{% endif %}
     data-bs-content="{{ content }}"

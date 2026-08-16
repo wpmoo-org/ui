@@ -262,8 +262,14 @@
 // min-width: auto), so the Data Table's own horizontal scroll-fade
 // engages instead of the table stretching the whole page.
 .moo-examples-page {
+  --moo-examples-footer-height: 3rem;
+
   display: grid;
   gap: 3rem;
+}
+
+.moo-examples-page .datatable {
+  --moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);
 }
 
 .moo-examples-page > * {
@@ -280,6 +286,16 @@
 // The per-row copy joins two sentences with a line break; the default
 // description collapses whitespace, so opt this dialog into pre-line.
 #tasks-delete-dialog .modal-description {
+  white-space: pre-line;
+}
+
+// Same two overrides as #tasks-delete-dialog above, for the Users
+// example's own delete confirmation.
+#users-delete-dialog {
+  --bs-modal-width: 31.25rem;
+}
+
+#users-delete-dialog .modal-description {
   white-space: pre-line;
 }
 
@@ -381,13 +397,117 @@
 // A full-width chrome band pinned below the demo area, on the page's own
 // background rather than the demo backdrop -- reads as site meta info
 // (like a real app's footer), not as trailing copy on the sign-in/sign-up/
-// forgot-password example itself.
+// forgot-password example itself. A single thin row: credit text on the
+// left, "Open in CodePen" pinned to the right corner -- not stacked, so
+// the band stays a strip instead of growing into its own block.
 .moo-auth-page__footer {
+  display: flex;
   flex: 0 0 auto;
-  padding: 1rem 1.5rem;
-  text-align: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
   background: var(--bs-body-bg);
   border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-auth-page__footer > p {
+  text-align: left;
+}
+
+// Pricing/FAQ are catalog-layout Examples pages like Settings/Dashboard:
+// they render inside .moo-examples-page (the shared Examples app shell)
+// rather than standing alone like the Auth pages, so only the content
+// rules are custom here -- the pricing card grid and the FAQ column.
+.moo-pricing-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+.moo-pricing-card {
+  // Roomier than the default card inset so the tiers breathe; the card
+  // contract's own --moo-card-spacing token drives every padding.
+  --moo-card-spacing: 1.5rem;
+
+  height: 100%;
+}
+
+.moo-pricing-card__features {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.moo-pricing-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+// The "Everything in X, plus" lead row reads as a tier inheriting the one
+// below, so it gets a bolder weight than the plain check rows.
+.moo-pricing-card__inherits {
+  font-weight: 500;
+}
+
+.moo-pricing-card__icon {
+  display: inline-flex;
+  margin-top: 0.125rem;
+  flex: 0 0 auto;
+  color: var(--moo-muted-foreground);
+}
+
+.moo-pricing-card__icon [data-icon] {
+  width: 1rem;
+  height: 1rem;
+}
+
+// The featured ("Most popular") tier sits a step above its neighbors: a
+// stronger shadow at every width, plus a small scale-up once the cards
+// sit side by side so it reads as slightly larger rather than just
+// re-bordered.
+.moo-pricing-card--featured {
+  // A thicker primary frame instead of the hairline every other tier
+  // carries; with the scale-up and strong shadow below it reads as the
+  // highlighted option in both light and dark.
+  border: 3px solid var(--bs-primary);
+  box-shadow: var(--bs-box-shadow-lg);
+  z-index: 1;
+}
+
+// The CTA sits on the card's muted footer strip; an outline button's
+// transparent surface would read as part of that strip, so fill it with
+// the page surface to keep every plan's action visibly a button.
+.moo-pricing-card .card-footer .btn-outline-secondary {
+  background-color: var(--bs-body-bg);
+}
+
+// FAQ panels read better constrained to a reading column than stretched
+// across the full marketing content width. Groups pair a section heading
+// with its own accordion (each accordion owns its collapse group).
+.moo-faq-group {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 48rem;
+}
+
+.moo-faq {
+  max-width: 48rem;
+}
+
+@include media-breakpoint-up(md) {
+  .moo-pricing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .moo-pricing-card--featured {
+    transform: scale(1.04);
+  }
 }
 
 // Settings pages are real navigation (a distinct URL per section), not a
@@ -420,5 +540,73 @@
     flex-direction: row !important;
     flex-wrap: wrap;
     width: 100%;
+  }
+}
+
+// Settings/Dashboard's meta footer lives in layouts/catalog.html.jinja's
+// footer block, not inside the example page's own content. That matches the
+// Auth examples' page-shell footer: content scrolls above it, while the demo
+// disclaimer and CodePen action stay in the fixed bottom band.
+.moo-examples-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--bs-body-bg);
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-examples-footer__component-trigger {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+.moo-examples-footer__component-trigger:hover,
+.moo-examples-footer__component-trigger:focus-visible {
+  color: var(--bs-link-hover-color);
+}
+
+// Mirrors .moo-catalog__showcase-preview (the same tinted, bled-to-edge
+// panel the Components gallery card uses for its own preview art) --
+// bled to the popover's own edges via its padding tokens instead of the
+// card's, since this sits in a popover body, not a card body.
+.moo-examples-footer__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  // The negative margins bleed the strip to the popover's top edge; the
+  // popover's own border-radius isn't an overflow clip, so round the strip's
+  // top corners to the same radius or the image's square corners poke past
+  // the popover's rounded ones.
+  border-top-left-radius: var(--bs-popover-border-radius);
+  border-top-right-radius: var(--bs-popover-border-radius);
+  margin: calc(var(--bs-popover-body-padding-y, 0.625rem) * -1) calc(var(--bs-popover-body-padding-x, 0.625rem) * -1) 0.75rem;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+@include media-breakpoint-down(sm) {
+  .moo-examples-page {
+    --moo-examples-footer-height: 7rem;
+  }
+
+  .moo-auth-page__footer,
+  .moo-examples-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .moo-auth-page__footer > p {
+    text-align: center;
   }
 }

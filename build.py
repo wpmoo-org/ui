@@ -405,8 +405,114 @@ def component_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("components", slug, root_path)
 
 
+def component_preview_absolute_src(slug: str) -> str:
+    for extension in ("webp", "png"):
+        if (SITE_STATIC / "images" / "components" / f"{slug}.{extension}").is_file():
+            return absolute_asset_url(f"assets/images/components/{slug}.{extension}")
+    return absolute_asset_url("assets/images/placeholder.webp")
+
+
 def block_preview_src(slug: str, root_path: str) -> str:
     return _preview_src("blocks", slug, root_path)
+
+
+def example_preview_src(slug: str, root_path: str) -> str:
+    return _preview_src("examples", slug, root_path)
+
+
+EXAMPLE_JS_IMPORT = (
+    'import DataTable from "../../../../src/js/components/datatable.js";'
+)
+
+
+def _example_js_source(module_filename: str, init_call: str) -> str:
+    # A page-specific catalog/*.js module (examples-tasks.js,
+    # examples-users.js, ...) is the real behavior behind an Examples
+    # page's row actions and sheets -- without it a CodePen export only
+    # gets the generic Data Table (sort/search/pagination), not working
+    # row actions. It can't be linked directly as an external module:
+    # ui.wpmoo.org sends no Access-Control-Allow-Origin header, so a
+    # cross-origin `import` from a real CodePen pen is blocked by CORS
+    # (verified against the live site; unpkg.com, used for DataTable
+    # below, does send one). Read from the actual site source (not
+    # hand-duplicated here) so the export can't silently drift from
+    # what's really shipping; only the relative import needs rewriting
+    # to the CDN URL every other codepen_button() call already uses,
+    # matching product.version.
+    version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
+    source = (SITE_SRC / "js/catalog" / module_filename).read_text(encoding="utf-8")
+    if EXAMPLE_JS_IMPORT not in source:
+        fail(f"{module_filename}'s import line changed; update EXAMPLE_JS_IMPORT")
+    datatable_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js"
+    source = source.replace(EXAMPLE_JS_IMPORT, "let DataTable;")
+    source = source.replace("export function ", "function ")
+    if re.search(r"^\s*export\b", source, re.MULTILINE):
+        fail(
+            f"{module_filename} uses an export form the CodePen rewrite cannot handle"
+        )
+    return (
+        source.rstrip()
+        + '\n\nfunction loadMooCodePenBootstrapForExample(callback) {\n'
+        + "  if (window.bootstrap && window.bootstrap.Offcanvas && window.bootstrap.Dropdown && window.bootstrap.Modal) {\n"
+        + "    callback();\n"
+        + "    return;\n"
+        + "  }\n\n"
+        + '  const existing = document.querySelector(\'script[src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js"]\');\n'
+        + "  if (existing) {\n"
+        + '    existing.addEventListener("load", callback, { once: true });\n'
+        + "    return;\n"
+        + "  }\n\n"
+        + '  const script = document.createElement("script");\n'
+        + '  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";\n'
+        + "  script.onload = callback;\n"
+        + "  document.head.appendChild(script);\n"
+        + "}\n\n"
+        + "function startMooExampleDataTable() {\n"
+        + "  loadMooCodePenBootstrapForExample(() => {\n"
+        + f'    import("{datatable_url}")\n'
+        + "      .then((module) => {\n"
+        + "        DataTable = module.default;\n"
+        + '        document.querySelectorAll(".datatable").forEach((element) => {\n'
+        + "          DataTable.getOrCreateInstance(element);\n"
+        + "        });\n"
+        + f"        {init_call}\n"
+        + "      })\n"
+        + "      .catch((error) => {\n"
+        + '        console.error("Moo UI DataTable failed to load for this CodePen example.", error);\n'
+        + "      });\n"
+        + "  });\n"
+        + "}\n\n"
+        + 'if (document.readyState === "loading") {\n'
+        + '  document.addEventListener("DOMContentLoaded", startMooExampleDataTable, { once: true });\n'
+        + "} else {\n"
+        + "  startMooExampleDataTable();\n"
+        + "}\n"
+    )
+
+
+def tasks_example_js_source() -> str:
+    return _example_js_source("examples-tasks.js", "initExamplesTasks(document);")
+
+
+def users_example_js_source() -> str:
+    return _example_js_source("examples-users.js", "initExamplesUsers(document);")
+
+
+RELATIVE_LINK = re.compile(r'(href|src)=(["\'])((?:\.\./|\./)[^"\']*)\2')
+
+
+def absolutize_links(value: object) -> str:
+    def repl(match: re.Match[str]) -> str:
+        attr, quote, path = match.group(1), match.group(2), match.group(3)
+        cleaned = re.sub(r"^(\.\./)+", "", path)
+        cleaned = re.sub(r"^\./", "", cleaned)
+        return f"{attr}={quote}{SITE_ORIGIN}/{cleaned}{quote}"
+
+    return RELATIVE_LINK.sub(repl, str(value))
+
+
+def to_json_attr(value: object) -> str:
+    return json.dumps(value)
 
 
 PAGE_META_SET = re.compile(
@@ -598,8 +704,12 @@ def page_metadata(
             slug = entry.get("slug", slug)
 
     template_meta = extract_template_metadata(page)
-    raw_title = template_meta.get("page_title") or (entry or {}).get("label") or SITE_NAME
-    description = template_meta.get("page_description") or _entry_description(entry)
+    if kind == "component":
+        raw_title = (entry or {}).get("label") or template_meta.get("page_title") or SITE_NAME
+        description = _entry_description(entry) or template_meta.get("page_description")
+    else:
+        raw_title = template_meta.get("page_title") or (entry or {}).get("label") or SITE_NAME
+        description = template_meta.get("page_description") or _entry_description(entry)
     image = template_meta.get("page_image") or image
     image_alt = template_meta.get("page_image_alt") or f"{raw_title} page preview"
     title = raw_title if raw_title == SITE_NAME or raw_title.endswith("Moo UI") else f"{raw_title} — {SITE_NAME}"
@@ -668,12 +778,22 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["format_html"] = format_html
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
+    environment.filters["absolutize_links"] = absolutize_links
+    # A plain json.dumps for the CodePen prefill's double-quoted value
+    # attribute, deliberately NOT registered as tojson so Jinja's built-in
+    # (HTML-safe) tojson stays available for script contexts. Callers pair
+    # it with forceescape so the JSON's own quotes survive the attribute.
+    environment.filters["moo_json"] = to_json_attr
     environment.globals["pretty_url"] = pretty_url
     environment.globals["site_href"] = site_href
     environment.globals["canonical_url"] = canonical_url
     environment.globals["fail"] = fail
     environment.globals["component_preview_src"] = component_preview_src
+    environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
+    environment.globals["example_preview_src"] = example_preview_src
+    environment.globals["tasks_example_js_source"] = tasks_example_js_source
+    environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
     lucide_renderer = lambda name, position: render_lucide_icon(
         icon_set,
@@ -983,9 +1103,9 @@ def _load_page_registry(
         # label, so a page header cannot silently override a reviewed name.
         label = override.get("label") or metadata.get("page_title") or _fallback_label(slug)
         description = (
-            metadata.get("page_description")
-            or override.get("description")
+            override.get("description")
             or override.get("summary")
+            or metadata.get("page_description")
             or DEFAULT_META_DESCRIPTION
         )
         category = metadata.get("page_category") or override.get("category") or ""

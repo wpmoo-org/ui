@@ -2,60 +2,15 @@
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
-{% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
-{% from "components/input.html.jinja" import input %}
-{% from "components/input_group.html.jinja" import input_group, input_group_text %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/catalog-toolbar.html.jinja" import catalog_search_filter, catalog_view_toggle %}
 {% from "includes/component-previews.html.jinja" import component_preview %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
 {% block title %}Components — Moo UI{% endblock %}
-
-{% set component_descriptions = {
-  "button": "Trigger actions with Bootstrap buttons shaped to the Moo UI visual language.",
-  "button-group": "Join related actions into one compact control surface.",
-  "card": "Group content, metadata, and actions inside a flexible surface.",
-  "typography": "Keep headings, support copy, and inline code consistent.",
-  "kbd": "Show keyboard input in clear surrounding instructions.",
-  "input": "Capture single-line text with native form-control behavior.",
-  "textarea": "Capture longer messages with the same field contract.",
-  "input-group": "Attach text, shortcuts, and actions to a field.",
-  "select": "Let users choose from a native option list.",
-  "dropdown-menu": "Collect secondary actions in a Bootstrap dropdown.",
-  "badge": "Mark counts, labels, and compact statuses.",
-  "avatar": "Represent people, teams, or accounts.",
-  "navigation": "Group static destinations for sidebars and sections.",
-  "separator": "Separate content with horizontal and vertical rules.",
-  "skeleton": "Show a loading placeholder while real content arrives.",
-  "sidebar": "Compose a collapsible app shell navigation from ready parts.",
-  "close-button": "Dismiss alerts, dialogs, and other transient content.",
-  "alert": "Surface a contextual message with an icon, title, and action.",
-  "breadcrumb": "Show the current page's location within a hierarchy.",
-  "pagination": "Navigate a series of related content across multiple pages.",
-  "progress": "Show the completion progress of a task as a slim bar.",
-  "table": "Display rows and columns of related data.",
-  "checkbox": "Toggle a single option on or off.",
-  "radio-group": "Choose exactly one option from a set.",
-  "switch": "Toggle a setting on or off.",
-  "spinner": "Show an indeterminate loading state.",
-  "accordion": "Reveal one section of content at a time.",
-  "tabs": "Switch between related views in the same space.",
-  "collapsible": "Toggle the visibility of a section of content.",
-  "tooltip": "Attach short contextual hints to focused controls.",
-  "popover": "Show compact contextual detail in a Bootstrap popover.",
-  "dialog": "Open modal content with Bootstrap's dialog contract.",
-  "toast": "Show transient status updates in a corner stack.",
-  "sheet": "Slide a supporting panel in from the viewport edge.",
-  "field": "Structure form controls with labels, help text, errors, and groups.",
-  "form": "Compose complete Bootstrap forms from Field primitives.",
-  "combobox": "Search and select from a compact Bootstrap dropdown input.",
-  "toggle-group": "Group mutually exclusive or multi-select toggle buttons.",
-  "alert-dialog": "Ask users to confirm disruptive actions in a modal.",
-  "menubar": "Arrange top-level command menus with Bootstrap dropdowns."
-} %}
 
 {% block content %}
   <div class="moo-doc-layout">
@@ -67,30 +22,17 @@
         actions=render_section_page_actions("components", site_pages, root_path)
       ) }}
 
-      <section class="moo-catalog__dashboard" aria-label="Catalog filters">
-        <div class="moo-catalog__toolbar">
-          {% call input_group() %}
-            {{ input(
-              aria_label="Filter components",
-              id="catalog-search",
-              type="search",
-              placeholder="Filter components..."
-            ) }}
-            {{ input_group_text(render_icon("search", "inline-start")) }}
-          {% endcall %}
-          {% call dropdown("All catalog", align="end", extra_class="moo-catalog__status-menu", caret=true) %}
-            {{ dropdown_item("All catalog", active=true, attrs='data-moo-catalog-section-filter="all"') }}
-            {{ dropdown_item("Components", attrs='data-moo-catalog-section-filter="components"') }}
-            {{ dropdown_item("Utilities", attrs='data-moo-catalog-section-filter="utilities"') }}
-          {% endcall %}
-          {% call dropdown("View", align="end", extra_class="moo-catalog__toolbar-menu", caret=true) %}
-            {{ dropdown_header("Catalog view") }}
-            {{ dropdown_item("Components", href="#components", active=true, icon="blocks") }}
-            {{ dropdown_item("Utilities", href="#utilities", icon="sparkles") }}
-            {{ dropdown_divider() }}
-            {{ dropdown_item("Bootstrap references", href="https://getbootstrap.com/docs/5.3/", icon="book-open") }}
-          {% endcall %}
-        </div>
+      <section class="moo-catalog__dashboard" data-moo-catalog-view="grid" aria-label="Catalog filters">
+        {% call catalog_search_filter("catalog-search", "Filter components", "Filter components...", ["Components", "Utilities"], extra_class="moo-catalog__toolbar--components") %}
+          {{ catalog_view_toggle(
+            "catalog-view",
+            "Components view",
+            [
+              {"value": "grid", "label": "Grid view", "icon": "layout-grid", "checked": true},
+              {"value": "list", "label": "List view", "icon": "list"}
+            ]
+          ) }}
+        {% endcall %}
 
         {{ separator(extra_class="my-4") }}
 
@@ -107,7 +49,7 @@
                     <a class="stretched-link text-body text-decoration-none" href="{{ site_href("components/" ~ component.slug ~ ".html", root_path) }}">{{ component.label }}</a>
                   </h2>
                   <p class="text-body-secondary mb-0">
-                    {{ component_descriptions.get(component.slug, "Bootstrap-native component primitive.") }}
+                    {{ component.description }}
                   </p>
                 </div>
               {% endcall %}

@@ -2,211 +2,253 @@
   {
     "slug": "button",
     "label": "Button",
-    "status": "ready"
+    "status": "ready",
+    "description": "Use Bootstrap button styles for reliable production actions: publish, review, and move work forward."
   },
   {
     "slug": "button-group",
     "label": "Button Group",
-    "status": "ready"
+    "status": "ready",
+    "description": "Join related controls into one compact action surface."
   },
   {
     "slug": "card",
     "label": "Card",
-    "status": "ready"
+    "status": "ready",
+    "description": "Display a structured surface with a header, body, and optional footer."
   },
   {
     "slug": "typography",
     "label": "Typography",
-    "status": "ready"
+    "status": "ready",
+    "description": "Align headings, labels, and body copy with Bootstrap's utility-first text semantics and Moo UI tokenized roles."
   },
   {
     "slug": "kbd",
     "label": "Kbd",
-    "status": "ready"
+    "status": "ready",
+    "description": "Show keyboard shortcuts as readable command keys in concise operator and editor workflows."
   },
   {
     "slug": "input",
     "label": "Input",
-    "status": "ready"
+    "status": "ready",
+    "description": "A native input primitive with Bootstrap form semantics for labeled, helper-aware, and validated fields."
   },
   {
     "slug": "textarea",
     "label": "Textarea",
-    "status": "ready"
+    "status": "ready",
+    "description": "Use multiline input with Bootstrap-native textarea semantics for status notes, messages, and review context."
   },
   {
     "slug": "input-group",
     "label": "Input Group",
-    "status": "ready"
+    "status": "ready",
+    "description": "Add icons, text, buttons, and helper content to inputs with Bootstrap's native grouping behavior."
   },
   {
     "slug": "select",
     "label": "Select",
-    "status": "ready"
+    "status": "ready",
+    "description": "Choose one value from native option menus in admin forms."
   },
   {
     "slug": "dropdown-menu",
     "label": "Dropdown Menu",
-    "status": "ready"
+    "status": "ready",
+    "description": "Collect contextual actions in one compact surface using Bootstrap's native dropdown behavior and placement."
   },
   {
     "slug": "badge",
     "label": "Badge",
-    "status": "ready"
+    "status": "ready",
+    "description": "Add compact labels, counts, and statuses with Bootstrap's native badge component."
   },
   {
     "slug": "avatar",
     "label": "Avatar",
-    "status": "ready"
+    "status": "ready",
+    "description": "Represent people, teams, or accounts with a compact image or initials fallback."
   },
   {
     "slug": "navigation",
     "label": "Navigation",
-    "status": "ready"
+    "status": "ready",
+    "description": "Create compact, semantic navigation surfaces with Bootstrap-native nav patterns for app shells."
   },
   {
     "slug": "separator",
     "label": "Separator",
-    "status": "ready"
+    "status": "ready",
+    "description": "Split admin workflows and list sections with Bootstrap-native separators."
   },
   {
     "slug": "skeleton",
     "label": "Skeleton",
-    "status": "ready"
+    "status": "ready",
+    "description": "Show loading structure with Bootstrap-native placeholders so lists, cards, and tables stay stable while data fetches."
   },
   {
     "slug": "sidebar",
     "label": "Sidebar",
-    "status": "ready"
+    "status": "ready",
+    "description": "Compose an application shell with Bootstrap-native sidebar primitives: provider, regions, menus, and inset content."
   },
   {
     "slug": "close-button",
     "label": "Close Button",
-    "status": "ready"
+    "status": "ready",
+    "description": "Dismiss alerts, dialogs, and other transient content with Bootstrap's native .btn-close."
   },
   {
     "slug": "alert",
     "label": "Alert",
-    "status": "ready"
+    "status": "ready",
+    "description": "Surface a contextual message with Bootstrap's native alert region."
   },
   {
     "slug": "breadcrumb",
     "label": "Breadcrumb",
-    "status": "ready"
+    "status": "ready",
+    "description": "Indicate the current page's location within a hierarchy using Bootstrap's native breadcrumb list."
   },
   {
     "slug": "pagination",
     "label": "Pagination",
-    "status": "ready"
+    "status": "ready",
+    "description": "Navigate paged results with native Bootstrap pagination controls."
   },
   {
     "slug": "progress",
     "label": "Progress",
-    "status": "ready"
+    "status": "ready",
+    "description": "Show the completion progress of a task using Bootstrap's native progress bar."
   },
   {
     "slug": "table",
     "label": "Table",
-    "status": "ready"
+    "status": "ready",
+    "description": "Display related rows and columns with Bootstrap's native, responsive table markup."
   },
   {
     "slug": "checkbox",
     "label": "Checkbox",
-    "status": "ready"
+    "status": "ready",
+    "description": "Toggle a single option using Bootstrap's native checkbox contract."
   },
   {
     "slug": "radio-group",
     "label": "Radio Group",
-    "status": "ready"
+    "status": "ready",
+    "description": "Let users choose one option from a related set using native Bootstrap radio controls."
   },
   {
     "slug": "switch",
     "label": "Switch",
-    "status": "ready"
+    "status": "ready",
+    "description": "Activate feature flags and settings with Bootstrap's native form-switch control."
   },
   {
     "slug": "spinner",
     "label": "Spinner",
-    "status": "ready"
+    "status": "ready",
+    "description": "Show an indeterminate loading state using the same loader-circle icon as the reference, spun with Bootstrap's own animation."
   },
   {
     "slug": "accordion",
     "label": "Accordion",
-    "status": "ready"
+    "status": "ready",
+    "description": "Reveal one section of content at a time using Bootstrap's Collapse plugin."
   },
   {
     "slug": "tabs",
     "label": "Tabs",
-    "status": "ready"
+    "status": "ready",
+    "description": "Switch between compact operational views with Bootstrap's native tab behavior."
   },
   {
     "slug": "collapsible",
     "label": "Collapsible",
-    "status": "ready"
+    "status": "ready",
+    "description": "Reveal secondary details in place with documented Button markup and Bootstrap's Collapse behavior."
   },
   {
     "slug": "tooltip",
     "label": "Tooltip",
-    "status": "ready"
+    "status": "ready",
+    "description": "Show compact context hints for controls and actions on hover or keyboard focus with Bootstrap's native tooltip plugin."
   },
   {
     "slug": "popover",
     "label": "Popover",
-    "status": "ready"
+    "status": "ready",
+    "description": "Add compact, contextual details to workflow actions with Bootstrap's native popover behavior."
   },
   {
     "slug": "dialog",
     "label": "Dialog",
-    "status": "ready"
+    "status": "ready",
+    "description": "A window overlaid on the page, built from Bootstrap's own Modal plugin and auto-initialized through its data attribute API."
   },
   {
     "slug": "toast",
     "label": "Toast",
-    "status": "ready"
+    "status": "ready",
+    "description": "Surface short operational updates that should stay visible long enough to be noticed."
   },
   {
     "slug": "sheet",
     "label": "Sheet",
-    "status": "ready"
+    "status": "ready",
+    "description": "A side panel that slides from the viewport edge using Bootstrap's Offcanvas behavior."
   },
   {
     "slug": "field",
     "label": "Field",
-    "status": "ready"
+    "status": "ready",
+    "description": "Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch controls into accessible, label-first fields using Bootstrap-native validation and semantic grouping."
   },
   {
     "slug": "form",
     "label": "Form",
-    "status": "ready"
+    "status": "ready",
+    "description": "Build complete Bootstrap forms from native form and fieldset markup, visible labels, descriptions, validation feedback, and documented Field components."
   },
   {
     "slug": "combobox",
     "label": "Combobox",
-    "status": "ready"
+    "status": "ready",
+    "description": "Autocomplete input for selecting one or more items from a suggestion list."
   },
   {
     "slug": "toggle-group",
     "label": "Toggle Group",
-    "status": "ready"
+    "status": "ready",
+    "description": "Group related toggle buttons using Bootstrap's native checkbox and radio button-check contract."
   },
   {
     "slug": "alert-dialog",
     "label": "Alert Dialog",
-    "status": "ready"
+    "status": "ready",
+    "description": "A modal dialog that interrupts the user with important content and expects a response, built on Dialog's static-backdrop option."
   },
   {
     "slug": "menubar",
     "label": "Menubar",
-    "status": "ready"
+    "status": "ready",
+    "description": "A bordered toolbar row that groups several documented Bootstrap Dropdown Menu contracts."
   },
   {
     "slug": "context-menu",
     "label": "Context Menu",
-    "status": "ready"
+    "status": "ready",
+    "description": "A right-click menu built on Bootstrap's documented dropdown-menu surface, with Moo UI owning only the pointer/keyboard invocation Bootstrap does not provide."
   },
   {
     "slug": "datatable",
     "label": "Data Table",
-    "status": "ready"
+    "status": "ready",
+    "description": "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
   }
 ]
