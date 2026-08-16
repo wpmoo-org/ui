@@ -157,7 +157,20 @@
 {%- endmacro %}
 
 {% macro examples_footer_codepen_css() -%}
+{#- The footer band is position: fixed so it reads as an always-visible
+   app-shell bottom bar, like it does on the real site (there it's pinned
+   by the docs shell around it, not by anything in this page itself).
+   Fixed takes it out of flow, so .moo-examples-page needs bottom
+   clearance equal to its height or the last row/pagination controls
+   would render underneath it -- --moo-examples-footer-height (measured
+   from the actual rendered band, desktop and the stacked mobile layout
+   below) drives both the reserved min-height and that clearance from
+   one place instead of two guesses that can drift apart. z-index is
+   deliberately below Bootstrap's own backdrop/offcanvas/modal tiers
+   (1040+) so an open Sheet or Dialog dims the footer along with the
+   rest of the page, same as real content. #}
 body {
+  --moo-examples-footer-height: 3rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -165,14 +178,20 @@ body {
 
 .moo-examples-page {
   flex: 1 1 auto;
+  padding-bottom: calc(var(--moo-examples-footer-height) + 1.5rem);
 }
 
 .moo-examples-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1020;
   display: flex;
-  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  min-height: var(--moo-examples-footer-height);
   padding: 0.75rem 1.5rem;
   color: var(--bs-secondary-color);
   font-size: 0.875rem;
@@ -189,9 +208,34 @@ body {
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
 
+{#- A static gradient standing in for the real site's scroll-fade-y:
+   that one is scroll-driven (animation-timeline: scroll(self y)), which
+   needs the faded element to be its own overflow:auto scroll container
+   -- exactly the body{height:100vh;overflow:hidden} + .moo-examples-page
+   {overflow-y:auto} setup that broke the Sheet/Offcanvas here before
+   (see codepen-scroll-fade-footer-reverted memory). The whole page
+   scrolls normally now, so instead this is a fixed strip sitting right
+   above the fixed footer -- content fades to the page background as it
+   scrolls under it, no scroll container of its own to fight with fixed
+   descendants. #}
+.moo-examples-footer::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: 2rem;
+  background: linear-gradient(to bottom, transparent, var(--bs-body-bg));
+  pointer-events: none;
+}
+
 {{ example_component_reference_codepen_css() }}
 
 @media (max-width: 576px) {
+  body {
+    --moo-examples-footer-height: 6rem;
+  }
+
   .moo-examples-footer {
     flex-direction: column;
     align-items: stretch;
@@ -251,20 +295,17 @@ body {
 
 {% macro tasks_codepen_css() -%}
 {#- Same split as settings_codepen_css(): the inset lives on
-   .moo-examples-page, not body, so the footer (body's other direct
-   child, sibling to .moo-examples-page) stays flush with the pen's true
-   edge instead of inheriting a page-level gutter. Bottom padding is
-   breathing room below the table, before the footer -- .moo-examples-page
-   just grows taller by that amount in normal flow, pushing the footer
-   sibling down with it, the same natural gap .moo-catalog__content's own
-   bottom padding gives the real site. #}
+   .moo-examples-page, not body. No bottom value here -- the footer is
+   position: fixed (see examples_footer_codepen_css(), called below),
+   which sets .moo-examples-page's real bottom padding itself so it
+   always matches the footer's actual reserved height. #}
 .moo-examples-page {
   display: grid;
   gap: 2rem;
   align-content: start;
   max-width: 72rem;
   margin: 0 auto;
-  padding: 3rem 1.5rem 5rem;
+  padding: 3rem 1.5rem 0;
 }
 
 .moo-examples-page > * {
