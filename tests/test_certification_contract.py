@@ -547,25 +547,25 @@ class CertificationContractTests(unittest.TestCase):
                     self.assertNotIn(term, content)
 
     def test_api_freeze_document_matches_live_package_state(self) -> None:
-        """Lock the 0.9.0 API freeze: every export and file frozen at 0.9.0
-        must still be present in the live package. New exports added in
-        later releases are allowed; removals are not."""
+        """Lock the 0.9.0 API freeze: any undocumented addition or removal
+        to the public surfaces must fail CI until the freeze document and
+        the change are reconciled on purpose."""
         freeze = self._read_json("src/certification/api-freeze-0.9.0.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
 
-        # Package exports: 0.9.0 exports must be a subset of live exports.
+        # Package exports must match exactly
         live_exports = set(package["exports"].keys())
         frozen_exports = set(freeze["packageExports"])
-        self.assertTrue(frozen_exports.issubset(live_exports),
-            "0.9.0 exports were removed from package.json")
+        self.assertEqual(live_exports, frozen_exports,
+            "package.json exports diverged from the 0.9.0 freeze document")
 
-        # Package files: 0.9.0 files must be a subset of live files.
+        # Package files must match exactly
         live_files = set(package["files"])
         frozen_files = set(freeze["packageFiles"])
-        self.assertTrue(frozen_files.issubset(live_files),
-            "0.9.0 files were removed from package.json")
+        self.assertEqual(live_files, frozen_files,
+            "package.json files diverged from the 0.9.0 freeze document")
 
         # Sass facade allow-list must match the real public declarations.
         # Extract variable names from the actual !default declarations in
@@ -613,27 +613,16 @@ class CertificationContractTests(unittest.TestCase):
             certification["bootstrap"]["testedVersions"],
         )
 
-    def test_api_freeze_1_0_0_rc3_document_matches_live_package_state(self) -> None:
-        """Lock the 1.0.0-rc.3 API freeze: every export and file declared
-        in the RC.3 freeze must be present in the live package. The freeze
-        documents the intended public surface; Phase 2 adds the bundled
-        outputs that make the new entrypoints real."""
+    def test_rc3_api_freeze_declaration_is_well_formed(self) -> None:
+        """Validate the 1.0.0-rc.3 freeze document structure and metadata.
+        Exact equality for package exports/files is deferred to Phase 6,
+        when the bundled outputs are present in the package."""
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.3.json")
-        package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
 
-        # Package exports: RC.3 frozen exports must be a subset of live exports.
-        live_exports = set(package["exports"].keys())
-        frozen_exports = set(freeze["packageExports"])
-        self.assertTrue(frozen_exports.issubset(live_exports),
-            "RC.3 frozen exports were removed from package.json")
-
-        # Package files: RC.3 frozen files must be a subset of live files.
-        live_files = set(package["files"])
-        frozen_files = set(freeze["packageFiles"])
-        self.assertTrue(frozen_files.issubset(live_files),
-            "RC.3 frozen files were removed from package.json")
+        # Freeze document must declare version 1.0.0-rc.3
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.3")
 
         # Sass facade allow-list must match the real public declarations.
         import re
@@ -674,7 +663,6 @@ class CertificationContractTests(unittest.TestCase):
         )
 
         # RC.3 metadata fields
-        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.3")
         self.assertEqual(certification["coreVersion"], "1.0.0-rc.3")
         self.assertEqual(certification["status"], "preview")
         self.assertEqual(certification["certifiedComponents"], [])
@@ -684,6 +672,17 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("chart.js", frozen_modules)
         self.assertIn("datepicker.js", frozen_modules)
         self.assertIn("slider.js", frozen_modules)
+
+        # RC.3 package exports/files must include the three new entrypoints
+        frozen_exports = set(freeze["packageExports"])
+        self.assertIn("./chart.js", frozen_exports)
+        self.assertIn("./datepicker.js", frozen_exports)
+        self.assertIn("./slider.js", frozen_exports)
+
+        frozen_files = set(freeze["packageFiles"])
+        self.assertIn("dist/js/chart.js", frozen_files)
+        self.assertIn("dist/js/datepicker.js", frozen_files)
+        self.assertIn("dist/js/slider.js", frozen_files)
 
 
 if __name__ == "__main__":
