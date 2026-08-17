@@ -387,7 +387,14 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         recorder = load_recorder()
         payload = recorder.record_boundary_baseline(ROOT)
 
-        for section in ("package", "npmPackFiles", "coreOutputs"):
+        for section in (
+            "package",
+            "npmPackFiles",
+            "distFiles",
+            "siteDistFiles",
+            "coreOutputs",
+            "siteOutputs",
+        ):
             with self.subTest(section=section):
                 self.assertEqual(payload[section], self.fixture[section])
 
