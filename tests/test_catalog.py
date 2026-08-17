@@ -2307,7 +2307,7 @@ class CatalogContractTests(CatalogTestCase):
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
         self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
-        self.assertIn(f"GitHub Release v{package['version']}", changelog)
+        self.assertIn(f"Release candidate v{package['version']}", changelog)
         self.assertIn("Post-release", changelog)
         self.assertIn("PR #38 separated Core package outputs", changelog)
         self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)
