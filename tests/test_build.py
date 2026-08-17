@@ -225,24 +225,47 @@ class BuildTests(CatalogTestCase):
         self.assertFalse((PACKAGE_DIST / "js/slider.min.js").exists())
 
     def test_canonical_and_minified_bundles_have_equivalent_exports(self) -> None:
-        """Canonical and minified bundles must expose the same public API."""
-        import re
+        """Canonical and minified bundles must expose the same public API.
 
+        Uses Node.js dynamic import() to compare sorted Object.keys(module)
+        for each pair, ensuring runtime-level equivalence rather than
+        regex-based text matching."""
         for base_name in ("chart", "datepicker"):
-            canonical = (PACKAGE_DIST / f"js/{base_name}.js").read_text(encoding="utf-8")
-            minified = (PACKAGE_DIST / f"js/{base_name}.min.js").read_text(encoding="utf-8")
+            canonical_path = PACKAGE_DIST / f"js/{base_name}.js"
+            minified_path = PACKAGE_DIST / f"js/{base_name}.min.js"
 
             with self.subTest(module=base_name):
-                # Extract export statements (handle both spaced and minified formats)
-                canonical_exports = set(re.findall(r'export\s*{([^}]+)}', canonical))
-                minified_exports = set(re.findall(r'export\s*{([^}]+)}', minified))
+                self.assertTrue(canonical_path.is_file())
+                self.assertTrue(minified_path.is_file())
 
-                # Both should have the same export structure
-                self.assertEqual(len(canonical_exports), len(minified_exports),
-                    f"{base_name}: canonical and minified have different export counts")
+                node_script = (
+                    f"const c = await import('{canonical_path}');"
+                    f"const m = await import('{minified_path}');"
+                    "const ck = Object.keys(c).sort();"
+                    "const mk = Object.keys(m).sort();"
+                    "if (JSON.stringify(ck) !== JSON.stringify(mk)) {"
+                    "  console.error('CANONICAL:', JSON.stringify(ck));"
+                    "  console.error('MINIFIED:', JSON.stringify(mk));"
+                    "  process.exit(1);"
+                    "}"
+                    "console.log(JSON.stringify(ck));"
+                )
+                result = subprocess.run(
+                    ["node", "--input-type=module", "-e", node_script],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(
+                    result.returncode, 0,
+                    f"{base_name}: canonical and minified export keys differ:\n"
+                    f"stdout: {result.stdout}\nstderr: {result.stderr}",
+                )
 
-                # Check for default export presence
-                canonical_has_default = "as default" in canonical
-                minified_has_default = "as default" in minified
-                self.assertEqual(canonical_has_default, minified_has_default,
-                    f"{base_name}: canonical and minified differ in default export")
+    def test_no_sourcemap_files_are_generated(self) -> None:
+        """The locked esbuild configuration must not produce .map files."""
+        map_files = list((PACKAGE_DIST / "js").glob("*.map"))
+        self.assertEqual(
+            map_files, [],
+            f"Unexpected sourcemap files in dist/js/: {[f.name for f in map_files]}",
+        )

@@ -1,7 +1,7 @@
 {
   "freezeVersion": "1.0.0-rc.3",
   "frozenAt": "2026-08-17",
-  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze. Adds chart.js, datepicker.js, and slider.js as optional public ESM entrypoints. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
+  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze. Adds canonical and minified Chart.js and Datepicker bundles (chart.js, chart.min.js, datepicker.js, datepicker.min.js) and a plain ESM Slider wrapper (slider.js) as optional public entrypoints. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
 
   "packageExports": [
     "./moo-ui.css",

@@ -547,25 +547,35 @@ class CertificationContractTests(unittest.TestCase):
                     self.assertNotIn(term, content)
 
     def test_api_freeze_document_matches_live_package_state(self) -> None:
-        """Lock the 0.9.0 API freeze: any undocumented addition or removal
-        to the public surfaces must fail CI until the freeze document and
-        the change are reconciled on purpose."""
+        """Lock the 0.9.0 API freeze: any undocumented removal from the
+        public surfaces must fail CI.  Additive exports/files introduced
+        by later release candidates (e.g. 1.0.0-rc.3) are tolerated --
+        exact equality for those is enforced by the rc.3 freeze test and
+        ultimately by the Phase 6 package-surface gate."""
         freeze = self._read_json("src/certification/api-freeze-0.9.0.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
 
-        # Package exports must match exactly
+        # Frozen 0.9.0 package exports must be a subset of current exports.
+        # Removals fail; additive RC.3 entries are allowed.
         live_exports = set(package["exports"].keys())
         frozen_exports = set(freeze["packageExports"])
-        self.assertEqual(live_exports, frozen_exports,
-            "package.json exports diverged from the 0.9.0 freeze document")
+        removed_exports = frozen_exports - live_exports
+        self.assertFalse(
+            removed_exports,
+            f"0.9.0 frozen exports were removed from package.json: {removed_exports}",
+        )
 
-        # Package files must match exactly
+        # Frozen 0.9.0 package files must be a subset of current files.
+        # Removals fail; additive RC.3 entries are allowed.
         live_files = set(package["files"])
         frozen_files = set(freeze["packageFiles"])
-        self.assertEqual(live_files, frozen_files,
-            "package.json files diverged from the 0.9.0 freeze document")
+        removed_files = frozen_files - live_files
+        self.assertFalse(
+            removed_files,
+            f"0.9.0 frozen files were removed from package.json: {removed_files}",
+        )
 
         # Sass facade allow-list must match the real public declarations.
         # Extract variable names from the actual !default declarations in
