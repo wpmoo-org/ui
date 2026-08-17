@@ -2,7 +2,7 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 1.0.0-rc.2 is a Bootstrap 5.3-native component system with a restrained,
+Moo UI 1.0.0-rc.3 is a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
@@ -14,7 +14,7 @@ implementation.
 
 ## Version And Support
 
-- npm package: `@wpmoo/ui@1.0.0-rc.2`
+- npm package: `@wpmoo/ui@1.0.0-rc.3`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -35,6 +35,11 @@ not independent or accredited certification.
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
+- `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.5.1 bundled)
+- `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
+- `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (vanillajs-datepicker 1.3.4 bundled)
+- `@wpmoo/ui/datepicker.min.js`: minified Datepicker bundle (artifact variant of datepicker.js)
+- `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
 - `@wpmoo/ui/scss/facade-settings`: public Sass variable allow-list (LibSass `@import`)
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
@@ -45,7 +50,7 @@ import.
 
 ## Installation Facts
 
-- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css`
+- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0-rc.3/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
@@ -69,8 +74,8 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 ```
 
 Optional Moo UI ESM is imported only for documented gaps and must be initialized
-explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
-`sidebar.js` does not scan the document.
+explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
+`sidebar.js`, `chart.js`, `datepicker.js`, or `slider.js` does not scan the document.
 
 ## Runtime Ownership
 
@@ -83,6 +88,12 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
   optional Moo UI ESM composed with Bootstrap Table and controls
 - Sidebar state and responsive coordination: optional Moo UI ESM composed with
   Bootstrap behavior
+- Chart rendering with light/dark theme toggle: optional Moo UI ESM, self-contained
+  bundle (Chart.js 4.5.1 bundled at build time)
+- Datepicker with shadcn-like trigger/popover/calendar: optional Moo UI ESM,
+  self-contained bundle (vanillajs-datepicker 1.3.4 bundled at build time)
+- Slider with native range input semantics: optional Moo UI ESM, no third-party
+  runtime
 
 ## Documentation
 
@@ -150,8 +161,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 ## Agent Guidance
 
 - Preserve Bootstrap behavior before adding custom behavior.
-- Use Moo UI ESM only for Combobox, Context Menu, DataTable, and Sidebar unless future
-  documentation adds another public entrypoint.
+- Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
+  Datepicker, and Slider unless future documentation adds another public entrypoint.
 - Do not invent public Sass APIs, aggregate JavaScript entrypoints, or
   certification claims.
 - Treat shadcn/ui as visual direction only; examples and implementation should

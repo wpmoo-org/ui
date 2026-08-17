@@ -23,6 +23,11 @@ CORE_OUTPUTS = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
 }
 
 

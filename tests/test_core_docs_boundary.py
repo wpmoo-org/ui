@@ -26,6 +26,11 @@ CORE_OUTPUTS = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
 }
 FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
 CORE_SOURCE_ROOTS = ("src", "scss")
@@ -128,6 +133,11 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/context-menu.js",
             "js/datatable.js",
             "js/sidebar.js",
+            "js/slider.js",
+            "js/chart.js",
+            "js/chart.min.js",
+            "js/datepicker.js",
+            "js/datepicker.min.js",
         }
         expected_site_files = {
             "index.html",
@@ -146,6 +156,11 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/context-menu.js",
             "js/datatable.js",
             "js/sidebar.js",
+            "js/slider.js",
+            "js/chart.js",
+            "js/chart.min.js",
+            "js/datepicker.js",
+            "js/datepicker.min.js",
             "components/button/index.html",
             "blocks/sidebar-floating/index.html",
             "utils/scroll-fade/index.html",

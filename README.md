@@ -150,17 +150,19 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
 | `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |
 | `@wpmoo/ui/chart.js` | Optional Chart ESM lifecycle (Chart.js 4.5.1 bundled) |
+| `@wpmoo/ui/chart.min.js` | Minified Chart bundle (artifact variant of chart.js) |
 | `@wpmoo/ui/datepicker.js` | Optional Datepicker ESM lifecycle (vanillajs-datepicker 1.3.4 engine bundled) |
+| `@wpmoo/ui/datepicker.min.js` | Minified Datepicker bundle (artifact variant of datepicker.js) |
 | `@wpmoo/ui/slider.js` | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
 | `@wpmoo/ui/scss/facade-settings` | Public Sass variable allow-list (LibSass `@import`) |
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
 
-The tarball also contains `README.md`, `LICENSE`, and `ASSET_LICENSE.md`. It
-does not publish catalog templates, preview artwork, catalog JavaScript, or
-internal SCSS partials beyond the facade's required settings import. Internal
-Sass partials and Jinja macros are repository build tools, not npm APIs.
+The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
+THIRD_PARTY_NOTICES.md. It does not publish catalog templates, preview
+artwork, catalog JavaScript, or internal SCSS partials beyond the facade's
+required settings import. Internal Sass partials and Jinja macros are repository build tools, not npm APIs.
 
 ## Why Bootstrap Teams Try It
 

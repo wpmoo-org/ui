@@ -16,6 +16,42 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-3">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.3</span>
+            <span class="text-body-secondary">Self-contained component build pipeline</span>
+          </div>
+          <h2 id="release-1-0-0-rc-3">Chart, Datepicker, and Slider Build Pipeline</h2>
+          <p>
+            Moo UI 1.0.0-rc.3 adds Chart.js, Datepicker, and Slider as optional
+            public ESM entrypoints with a self-contained esbuild pipeline.
+            Certification remains <code>preview</code>.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span><code>@wpmoo/ui/chart.js</code> and <code>@wpmoo/ui/chart.min.js</code> public ESM entrypoints with Chart.js 4.5.1 bundled at build time via the locked esbuild 0.28.1 pipeline.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span><code>@wpmoo/ui/datepicker.js</code> and <code>@wpmoo/ui/datepicker.min.js</code> public ESM entrypoints with vanillajs-datepicker 1.3.4 bundled at build time.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span><code>@wpmoo/ui/slider.js</code> public ESM entrypoint as a plain wrapper around native <code>input[type="range"]</code> with no third-party runtime.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Package metadata, API freeze document, and generated public metadata for <code>@wpmoo/ui@1.0.0-rc.3</code>; the certification manifest remains <code>preview</code> and its component list remains empty.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>GitHub Release v1.0.0-rc.3</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-2">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.2</span>
@@ -359,6 +395,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0-rc-3", "label": "v1.0.0-rc.3"},
       {"id": "release-1-0-0-rc-2", "label": "v1.0.0-rc.2"},
       {"id": "release-1-0-0-rc-1", "label": "v1.0.0-rc.1"},
       {"id": "release-0-7-1", "label": "v0.7.1"},

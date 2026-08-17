@@ -2265,7 +2265,7 @@ class CatalogContractTests(CatalogTestCase):
 
         with self.assertRaisesRegex(
             RuntimeError,
-            "Optional Moo UI ESM exports do not match src/js/components sources",
+            r"Source module \S+\.js has no export in certification\.json",
         ):
             site_build.derive_component_ownership(catalog, certification)
 
