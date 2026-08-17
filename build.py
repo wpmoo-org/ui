@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 import tempfile
 import textwrap
 import time
@@ -56,7 +57,14 @@ LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
-CORE_JS_MODULES = ("combobox.js", "sidebar.js", "context-menu.js", "datatable.js")
+CORE_JS_MODULES = (
+    "combobox.js",
+    "sidebar.js",
+    "context-menu.js",
+    "datatable.js",
+    "slider.js",
+)
+BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
@@ -993,10 +1001,27 @@ def derive_component_ownership(
         for module in certification.get("publicEntrypoints", {}).get("esm", [])
     }
     source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
-    if exported_moo_modules != source_moo_modules:
-        raise RuntimeError(
-            "Optional Moo UI ESM exports do not match src/js/components sources"
-        )
+
+    # Check that each exported module either matches a source file or is a
+    # minified variant of a source file
+    for exported in exported_moo_modules:
+        if exported.endswith(".min"):
+            canonical = exported.removesuffix(".min")
+            if canonical not in source_moo_modules:
+                raise RuntimeError(
+                    f"Minified export {exported}.js has no canonical source {canonical}.js"
+                )
+        elif exported not in source_moo_modules:
+            raise RuntimeError(
+                f"Exported module {exported}.js has no source in src/js/components/"
+            )
+
+    # Check that each source file has a corresponding export
+    for source in source_moo_modules:
+        if source not in exported_moo_modules:
+            raise RuntimeError(
+                f"Source module {source}.js has no export in certification.json"
+            )
 
     certified = set(certification.get("certifiedComponents", []))
     unknown_certified = certified.difference(entry["slug"] for entry in catalog)
@@ -1232,13 +1257,74 @@ def copy_package_js() -> None:
     package_js_dir.mkdir(parents=True, exist_ok=True)
     for module_name in CORE_JS_MODULES:
         shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
+    for module_name in BUNDLED_JS_MODULES:
+        _bundle_module(module_name, minify=False)
+        _bundle_module(module_name, minify=True)
+
+
+def _bundle_module(module_name: str, *, minify: bool) -> None:
+    """Bundle a module using esbuild with the locked configuration.
+
+    Args:
+        module_name: The module name (e.g., "chart.js")
+        minify: Whether to minify the output
+    """
+    source = JS_COMPONENTS / module_name
+    if not source.is_file():
+        raise FileNotFoundError(f"Bundled module source not found: {source}")
+
+    suffix = ".min.js" if minify else ".js"
+    output_name = module_name.replace(".js", suffix) if minify else module_name
+    output = PACKAGE_DIST / "js" / output_name
+
+    esbuild_cmd = shutil.which("esbuild")
+    if not esbuild_cmd:
+        node_modules_esbuild = ROOT / "node_modules" / ".bin" / "esbuild"
+        if node_modules_esbuild.is_file():
+            esbuild_cmd = str(node_modules_esbuild)
+        else:
+            raise RuntimeError(
+                "esbuild not found; run `npm install` to install the locked devDependency"
+            )
+
+    cmd = [
+        esbuild_cmd,
+        str(source),
+        f"--outfile={output}",
+        "--bundle=true",
+        "--format=esm",
+        "--platform=browser",
+        "--target=es2020",
+        "--tree-shaking=true",
+        f"--minify={'true' if minify else 'false'}",
+    ]
+
+    result = subprocess.run(
+        cmd,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"esbuild failed for {module_name} (minify={minify}):\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
 
 
 def required_core_outputs() -> tuple[Path, ...]:
-    return (
-        *(PACKAGE_DIST / "assets/css" / name for name in CORE_CSS_OUTPUTS),
-        *(PACKAGE_DIST / "js" / name for name in CORE_JS_MODULES),
-    )
+    outputs = []
+    for name in CORE_CSS_OUTPUTS:
+        outputs.append(PACKAGE_DIST / "assets/css" / name)
+    for name in CORE_JS_MODULES:
+        outputs.append(PACKAGE_DIST / "js" / name)
+    for name in BUNDLED_JS_MODULES:
+        outputs.append(PACKAGE_DIST / "js" / name)
+        outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
+    return tuple(outputs)
 
 
 def verify_core_outputs() -> None:
@@ -1269,6 +1355,13 @@ def copy_core_outputs_to_site() -> None:
         package_module = PACKAGE_DIST / "js" / module_name
         shutil.copy2(package_module, components_dir / module_name)
         shutil.copy2(package_module, legacy_js_dir / module_name)
+    for module_name in BUNDLED_JS_MODULES:
+        canonical = PACKAGE_DIST / "js" / module_name
+        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
+        shutil.copy2(canonical, components_dir / module_name)
+        shutil.copy2(canonical, legacy_js_dir / module_name)
+        shutil.copy2(minified, components_dir / minified.name)
+        shutil.copy2(minified, legacy_js_dir / minified.name)
 
 
 def copy_site_assets() -> None:

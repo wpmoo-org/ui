@@ -22,6 +22,11 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
     "scss/_facade-settings.scss",
     "scss/settings/_facade_public.scss",
     "certification.json",
@@ -38,6 +43,11 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
+    "./slider.js": "./dist/js/slider.js",
+    "./chart.js": "./dist/js/chart.js",
+    "./chart.min.js": "./dist/js/chart.min.js",
+    "./datepicker.js": "./dist/js/datepicker.js",
+    "./datepicker.min.js": "./dist/js/datepicker.min.js",
     "./scss/facade-settings": "./scss/_facade-settings.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
@@ -185,7 +195,15 @@ class PackageMetadataTests(unittest.TestCase):
         }
         self.assertEqual(
             modules,
-            {"combobox.js", "sidebar.js", "context-menu.js", "datatable.js"},
+            {
+                "combobox.js",
+                "sidebar.js",
+                "context-menu.js",
+                "datatable.js",
+                "slider.js",
+                "chart.js",
+                "datepicker.js",
+            },
         )
 
     def test_npm_pack_contains_only_the_approved_files(self) -> None:

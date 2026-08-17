@@ -24,7 +24,12 @@
       "./combobox.js",
       "./sidebar.js",
       "./context-menu.js",
-      "./datatable.js"
+      "./datatable.js",
+      "./slider.js",
+      "./chart.js",
+      "./chart.min.js",
+      "./datepicker.js",
+      "./datepicker.min.js"
     ],
     "sass": ["./scss/facade-settings"]
   },

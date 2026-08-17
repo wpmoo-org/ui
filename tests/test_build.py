@@ -36,6 +36,11 @@ class BuildTests(CatalogTestCase):
             "sidebar.js",
             "context-menu.js",
             "datatable.js",
+            "slider.js",
+            "chart.js",
+            "chart.min.js",
+            "datepicker.js",
+            "datepicker.min.js",
         ):
             site_component_module = SITE_DIST / f"assets/js/components/{module_name}"
             site_legacy_module = SITE_DIST / f"js/{module_name}"
