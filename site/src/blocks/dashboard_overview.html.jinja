@@ -13,7 +13,7 @@
   <div class="card card--sm h-100">
     <div class="card-body d-flex flex-column gap-2">
       <div class="d-flex align-items-center justify-content-between">
-        <span class="text-body-secondary small text-uppercase" style="letter-spacing: 0.02em;">{{ label }}</span>
+        <span class="text-body-secondary small text-uppercase ls-wide">{{ label }}</span>
         {% if icon %}
           <span class="text-body-tertiary" data-moo-icon="{{ icon }}"></span>
         {% endif %}
@@ -29,9 +29,8 @@
 {% endmacro %}
 
 {% macro render_chart_container(chart_id, chart_type, chart_data, extra_class="") %}
-  {#- A Chart.js canvas wrapper. The data-moo-chart attribute triggers
-     the examples-chart.js initializer; data-moo-chart-type and
-     data-moo-chart-data configure the chart. #}
+  {#- A Chart.js canvas wrapper. The data-moo-chart and
+     data-moo-chart-data attributes configure the chart initializer. #}
   <div class="card{{ ' ' + extra_class if extra_class }}">
     <div class="card-header">
       <div class="card-header__text">
@@ -42,7 +41,7 @@
       </div>
     </div>
     <div class="card-body">
-      <div data-moo-chart data-moo-chart="{{ chart_type }}" data-moo-chart-data='{{ chart_data.data | tojson }}' style="height: 280px;">
+      <div class="moo-dashboard-chart" data-moo-chart="{{ chart_type }}" data-moo-chart-data='{{ chart_data.data | tojson }}'>
         <canvas id="{{ chart_id }}"></canvas>
       </div>
     </div>
@@ -52,9 +51,8 @@
 {% macro render_dashboard_overview() %}
   {#- Full dashboard overview: 4 stat cards + 2 charts (line + bar).
      All numbers are fictional demo data. #}
-  <div class="moo-examples-page" data-moo-example-dashboard-overview>
-    {#- Stat cards row #}
-    <div class="row g-3 mb-4">
+  {#- Stat cards row #}
+  <div class="row g-3 mb-4">
       <div class="col-sm-6 col-xl-3">
         {{ render_stat_card(
           "Total Revenue",
@@ -91,10 +89,10 @@
           "activity"
         ) }}
       </div>
-    </div>
+  </div>
 
-    {#- Charts row #}
-    <div class="row g-3">
+  {#- Charts row #}
+  <div class="row g-3">
       <div class="col-lg-8">
         {{ render_chart_container(
           "overview-revenue-chart",
@@ -137,6 +135,5 @@
           "h-100"
         ) }}
       </div>
-    </div>
   </div>
 {% endmacro %}

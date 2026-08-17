@@ -48,7 +48,10 @@ class CatalogJavaScriptTests(CatalogTestCase):
                 )
                 self.assertIn(f"export function {initializer}(root = document)", source)
                 self.assertIn("if (states.has(root))", source)
-                self.assertIn("states.set(root, dispose);", source)
+                if module_name == "examples-chart.js":
+                    self.assertIn("states.set(root, release);", source)
+                else:
+                    self.assertIn("states.set(root, dispose);", source)
                 self.assertIn("states.delete(root);", source)
 
     def test_catalog_feature_imports_have_no_document_side_effect(self) -> None:
@@ -66,6 +69,62 @@ class CatalogJavaScriptTests(CatalogTestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_examples_chart_registers_pending_disposal_before_async_load(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
+        )
+
+        pending_state = source.index("const pending =")
+        registered = source.index("states.set(root, release);", pending_state)
+        async_load = source.index("loadChartJs().then", registered)
+
+        self.assertLess(registered, async_load)
+        self.assertIn("pending.disposed", source)
+        self.assertIn("if (pending.disposed)", source)
+
+    def test_examples_chart_uses_effective_dataset_type_for_theme_updates(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
+        )
+
+        self.assertIn("const datasetType = dataset.type || chart.config.type;", source)
+        self.assertIn("if (datasetType === \"line\")", source)
+        self.assertIn("} else if (datasetType === \"bar\")", source)
+        self.assertNotIn("color-mix(in srgb, \${color} 65%, #ffffff)", source)
+
+    def test_examples_chart_uses_a_bright_dark_theme_palette(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
+        )
+
+        self.assertIn('"--bs-info-text-emphasis"', source)
+        self.assertIn('"--bs-success-text-emphasis"', source)
+        self.assertIn('"--bs-warning-text-emphasis"', source)
+        self.assertIn('"--bs-danger-text-emphasis"', source)
+        self.assertIn("const lightPalette", source)
+        self.assertIn("const darkPalette", source)
+        self.assertIn("const palette = isDark ? darkPalette : lightPalette;", source)
+        self.assertIn('primary: colors["--bs-info"]', source)
+        self.assertIn('primary: colors["--bs-info-text-emphasis"]', source)
+        self.assertIn(
+            "color-mix(in srgb, " + "$" + "{color} 92%, " + "$" + "{theme.color})",
+            source,
+        )
+        self.assertIn(
+            "color-mix(in srgb, " + "$" + "{color} 78%, transparent)",
+            source,
+        )
+
+    def test_examples_chart_loader_is_version_pinned_and_integrity_checked(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
+        )
+
+        self.assertIn("chart.js@4.5.1/dist/chart.umd.min.js", source)
+        self.assertIn("const CHART_SRI = \"sha384-", source)
+        self.assertIn("script.integrity = CHART_SRI", source)
+        self.assertIn("script.crossOrigin = \"anonymous\"", source)
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(

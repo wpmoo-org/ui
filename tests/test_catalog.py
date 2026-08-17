@@ -220,6 +220,36 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn('data-datatable-filter-mode="inline"', users)
         self.assertNotIn("datatable--responsive-scroll", users)
 
+    def test_dashboard_overview_owns_one_page_wrapper_and_unique_chart_types(self) -> None:
+        page_source = (
+            ROOT / "site/src/pages/examples/dashboard/overview.html.jinja"
+        ).read_text(encoding="utf-8")
+        block_source = (
+            ROOT / "site/src/blocks/dashboard_overview.html.jinja"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual(page_source.count('class="moo-examples-page"'), 1)
+        self.assertNotIn('class="moo-examples-page"', block_source)
+        self.assertNotIn('style="', block_source)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("examples/dashboard/overview.html")
+
+        self.assertEqual(page.count('data-moo-chart="line"'), 1)
+        self.assertEqual(page.count('data-moo-chart="bar"'), 1)
+        self.assertNotIn("data-moo-chart data-moo-chart=", page)
+
+    def test_dashboard_codepen_css_carries_catalog_only_utility(self) -> None:
+        source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        dashboard_css = source.split(
+            "{% macro dashboard_codepen_css() -%}", 1
+        )[1].split("{%- endmacro %}", 1)[0]
+        self.assertIn(".ls-wide", dashboard_css)
+
     def test_public_docs_use_moo_ui_brand_name_in_prose(self) -> None:
         result = self.run_build()
 

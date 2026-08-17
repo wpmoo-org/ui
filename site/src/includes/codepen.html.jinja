@@ -514,13 +514,22 @@ body {
   min-width: 0;
 }
 
+.ls-wide {
+  letter-spacing: 0.02em;
+}
+
+.moo-dashboard-chart {
+  height: 17.5rem;
+}
+
 {{ examples_header_codepen_css() }}
 {{ examples_footer_codepen_css() }}
 {%- endmacro %}
 
-{#- Chart.js initialization for the Dashboard Overview CodePen. The chart
-   data is embedded in the HTML as data-moo-chart-data attributes; this
-   script reads them and creates Chart.js instances. #}
+{#- Chart.js initialization for the Dashboard Overview CodePen. This is
+   intentionally a simplified copy of examples-chart.js — CodePen needs
+   standalone JS, not the catalog module's import/dispose pattern. Keep
+   the two in sync if the chart data schema changes. #}
 {% macro dashboard_codepen_js() -%}
 function initializeMooDashboardCharts() {
   if (!window.Chart) {
@@ -553,11 +562,11 @@ function initializeMooDashboardCharts() {
         },
         scales: {
           x: {
-            grid: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-border-color") + "40" },
+            grid: { color: "color-mix(in srgb, var(--bs-border-color) 25%, transparent)" },
             ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color") },
           },
           y: {
-            grid: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-border-color") + "40" },
+            grid: { color: "color-mix(in srgb, var(--bs-border-color) 25%, transparent)" },
             ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color") },
           },
         },
@@ -572,7 +581,9 @@ function loadMooDashboardChartJs(callback) {
     return;
   }
   const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js";
+  script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js";
+  script.integrity = "sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ";
+  script.crossOrigin = "anonymous";
   script.onload = callback;
   document.head.appendChild(script);
 }

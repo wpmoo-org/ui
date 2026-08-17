@@ -276,6 +276,10 @@
   min-width: 0;
 }
 
+.moo-dashboard-chart {
+  height: 17.5rem;
+}
+
 // The package's modal--alert contract is a compact 24rem confirmation;
 // the Tasks delete dialog carries a full sentence plus the task title,
 // so it reads better at the regular Dialog width.
@@ -609,4 +613,10 @@
   .moo-auth-page__footer > p {
     text-align: center;
   }
+}
+
+// Small letter-spacing utility for dashboard stat card labels and similar
+// uppercase micro-copy. Bootstrap has no built-in letter-spacing utility.
+.ls-wide {
+  letter-spacing: 0.02em;
 }

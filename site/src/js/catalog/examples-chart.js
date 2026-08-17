@@ -9,7 +9,8 @@
 // without an import map.
 
 const states = new WeakMap();
-const CHART_CDN = "https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js";
+const CHART_CDN = "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js";
+const CHART_SRI = "sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ";
 
 // Bootstrap semantic color tokens that Chart.js should read.
 const COLOR_TOKENS = [
@@ -25,6 +26,11 @@ const COLOR_TOKENS = [
   "--bs-info",
   "--bs-warning",
   "--bs-danger",
+  "--bs-emphasis-color",
+  "--bs-info-text-emphasis",
+  "--bs-success-text-emphasis",
+  "--bs-warning-text-emphasis",
+  "--bs-danger-text-emphasis",
 ];
 
 function readThemeColors(root) {
@@ -39,7 +45,26 @@ function readThemeColors(root) {
 }
 
 // Build a Chart.js color palette from the current theme's CSS variables.
-function buildChartTheme(colors) {
+function buildChartTheme(colors, isDark = false) {
+  // Use the same semantic chart palette in both themes. Bootstrap's primary
+  // token is intentionally near-black in dark mode, so chart data uses blue
+  // info tokens instead of switching to a grayscale series.
+  const lightPalette = {
+    primary: colors["--bs-info"] || colors["--bs-info-text-emphasis"],
+    success: colors["--bs-success"],
+    info: colors["--bs-info"],
+    warning: colors["--bs-warning"],
+    danger: colors["--bs-danger"],
+  };
+  const darkPalette = {
+    primary: colors["--bs-info-text-emphasis"] || colors["--bs-info"],
+    success: colors["--bs-success-text-emphasis"] || colors["--bs-success"],
+    info: colors["--bs-info-text-emphasis"] || colors["--bs-info"],
+    warning: colors["--bs-warning-text-emphasis"] || colors["--bs-warning"],
+    danger: colors["--bs-danger-text-emphasis"] || colors["--bs-danger"],
+  };
+  const palette = isDark ? darkPalette : lightPalette;
+
   return {
     color: colors["--bs-body-color"],
     backgroundColor: colors["--bs-body-bg"],
@@ -51,11 +76,7 @@ function buildChartTheme(colors) {
     tickColor: colors["--bs-secondary-color"],
     textColor: colors["--bs-body-color"],
     secondaryText: colors["--bs-secondary-color"],
-    primary: colors["--bs-primary"],
-    success: colors["--bs-success"],
-    info: colors["--bs-info"],
-    warning: colors["--bs-warning"],
-    danger: colors["--bs-danger"],
+    ...palette,
   };
 }
 
@@ -68,21 +89,19 @@ function applyThemeToChart(chart, theme) {
     const colorKeys = ["primary", "success", "info", "warning", "danger"];
     const colorKey = colorKeys[index % colorKeys.length];
     const color = theme[colorKey];
-    const mutedColor = `color-mix(in srgb, ${color} 70%, ${theme.secondaryText})`;
-    const isDark = chart.canvas.ownerDocument.documentElement.dataset.bsTheme === "dark";
-    const pointColor = isDark
-      ? `color-mix(in srgb, ${color} 65%, #ffffff)`
-      : color;
+    const mutedColor = `color-mix(in srgb, ${color} 92%, ${theme.color})`;
+    const pointColor = color;
+    const datasetType = dataset.type || chart.config.type;
 
-    if (dataset.type === "line" || !dataset.type) {
+    if (datasetType === "line") {
       dataset.borderColor = mutedColor;
-      dataset.backgroundColor = `color-mix(in srgb, ${color} 15%, transparent)`;
+      dataset.backgroundColor = `color-mix(in srgb, ${color} 22%, transparent)`;
       dataset.pointBackgroundColor = pointColor;
       dataset.pointBorderColor = theme.borderColor;
       dataset.pointHoverBackgroundColor = pointColor;
       dataset.pointHoverBorderColor = theme.color;
-    } else if (dataset.type === "bar") {
-      dataset.backgroundColor = `color-mix(in srgb, ${color} 55%, transparent)`;
+    } else if (datasetType === "bar") {
+      dataset.backgroundColor = `color-mix(in srgb, ${color} 78%, transparent)`;
       dataset.borderColor = mutedColor;
       dataset.hoverBackgroundColor = color;
     }
@@ -92,7 +111,7 @@ function applyThemeToChart(chart, theme) {
   if (chart.options.scales) {
     Object.values(chart.options.scales).forEach((scale) => {
       if (scale.grid) {
-        scale.grid.color = theme.gridColor + "59"; // 35% opacity
+        scale.grid.color = `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`;
       }
       if (scale.ticks) {
         scale.ticks.color = theme.secondaryText;
@@ -136,6 +155,8 @@ function loadChartJs() {
     }
     const script = document.createElement("script");
     script.src = CHART_CDN;
+    script.integrity = CHART_SRI;
+    script.crossOrigin = "anonymous";
     script.onload = () => resolve(window.Chart);
     script.onerror = reject;
     document.head.appendChild(script);
@@ -153,13 +174,28 @@ export function initExamplesChart(root = document) {
     return () => {};
   }
 
-  const view = root.defaultView || root.ownerDocument?.defaultView;
   const documentElement = root.documentElement || root.ownerDocument?.documentElement;
+  const pending = {
+    disposed: false,
+    complete: null,
+  };
+
+  const release = () => {
+    pending.disposed = true;
+    if (pending.complete) pending.complete();
+  };
+
+  states.set(root, release);
 
   loadChartJs().then((Chart) => {
+    if (pending.disposed) return;
+
     const charts = [];
     const colors = readThemeColors(root);
-    const theme = buildChartTheme(colors);
+    const theme = buildChartTheme(
+      colors,
+      documentElement.dataset.bsTheme === "dark",
+    );
 
     chartContainers.forEach((container) => {
       const canvas = container.querySelector("canvas");
@@ -175,23 +211,16 @@ export function initExamplesChart(root = document) {
         const colorKeys = ["primary", "success", "info", "warning", "danger"];
         const colorKey = colorKeys[index % colorKeys.length];
         const color = theme[colorKey];
-        // Mute the dataset color by mixing it with secondary-color (text).
-        // This keeps the hue recognizable but reduces saturation so the
-        // chart feels calmer and doesn't compete with the UI chrome.
-        const mutedColor = `color-mix(in srgb, ${color} 70%, ${theme.secondaryText})`;
-        // Point fill: in light mode use raw primary (already vibrant against
-        // light bg). In dark mode, mix with white so points stay brighter
-        // than the muted line — mirroring the light-mode relationship.
-        const isDark = documentElement.dataset.bsTheme === "dark";
-        const pointColor = isDark
-          ? `color-mix(in srgb, ${color} 65%, #ffffff)`
-          : color;
+        // Keep both themes close to their semantic token so the hue remains
+        // consistent when the user toggles the catalog theme.
+        const mutedColor = `color-mix(in srgb, ${color} 92%, ${theme.color})`;
+        const pointColor = color;
 
         if (chartType === "line") {
           return {
             ...dataset,
             borderColor: mutedColor,
-            backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${color} 22%, transparent)`,
             pointBackgroundColor: pointColor,
             pointBorderColor: theme.borderColor,
             pointBorderWidth: 2,
@@ -207,7 +236,7 @@ export function initExamplesChart(root = document) {
         if (chartType === "bar") {
           return {
             ...dataset,
-            backgroundColor: `color-mix(in srgb, ${color} 55%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${color} 78%, transparent)`,
             borderColor: mutedColor,
             borderWidth: 1,
             hoverBackgroundColor: color,
@@ -268,7 +297,7 @@ export function initExamplesChart(root = document) {
           scales: {
             x: {
               grid: {
-                color: theme.gridColor + "59", // 35% opacity
+                color: `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
                 drawBorder: false,
               },
               ticks: {
@@ -281,7 +310,7 @@ export function initExamplesChart(root = document) {
             },
             y: {
               grid: {
-                color: theme.gridColor + "59", // 35% opacity
+                color: `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
                 drawBorder: false,
               },
               ticks: {
@@ -306,12 +335,20 @@ export function initExamplesChart(root = document) {
       charts.push(chart);
     });
 
+    if (pending.disposed) {
+      charts.forEach((chart) => chart.destroy());
+      return;
+    }
+
     // Watch for theme changes and re-theme all charts.
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === "data-bs-theme") {
           const newColors = readThemeColors(root);
-          const newTheme = buildChartTheme(newColors);
+          const newTheme = buildChartTheme(
+            newColors,
+            documentElement.dataset.bsTheme === "dark",
+          );
           charts.forEach((chart) => applyThemeToChart(chart, newTheme));
         }
       });
@@ -325,16 +362,18 @@ export function initExamplesChart(root = document) {
     const dispose = () => {
       observer.disconnect();
       charts.forEach((chart) => chart.destroy());
-      states.delete(root);
+      if (states.get(root) === release) states.delete(root);
     };
 
-    states.set(root, dispose);
+    pending.complete = dispose;
+    if (pending.disposed) dispose();
   }).catch((err) => {
-    console.error("Failed to load Chart.js:", err);
+    // Chart.js failed to load (CDN unreachable, network error, etc.).
+    // The page degrades gracefully — stat cards still render, only the
+    // chart containers remain empty. Log for debugging but don't throw.
+    console.warn("[moo-chart] Chart.js failed to load:", err.message || err);
+    if (states.get(root) === release) states.delete(root);
   });
 
-  return () => {
-    const state = states.get(root);
-    if (state) state();
-  };
+  return release;
 }

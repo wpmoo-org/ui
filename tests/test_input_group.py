@@ -69,6 +69,34 @@ class InputGroupTests(CatalogTestCase):
             source,
         )
 
+    def test_dropdown_groups_keep_open_menus_outside_the_compound_clip(self) -> None:
+        source = (ROOT / "scss/components/_input_group.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            '.input-group:not(:has(> .form-control[type="file"])):not(:has(> .dropdown-menu)) {',
+            source,
+        )
+        self.assertRegex(
+            source,
+            r'\.input-group:not\(:has\(> \.form-control\[type="file"\]\)\):not\(:has\(> \.dropdown-menu\)\) \{\s*overflow: hidden;',
+        )
+
+    def test_pressed_ghost_buttons_preserve_bootstrap_active_color(self) -> None:
+        source = (ROOT / "scss/components/_input_group.scss").read_text(
+            encoding="utf-8"
+        )
+
+        pressed_rule = re.search(
+            r'\.input-group > \.btn-ghost\[aria-pressed="true"\] \{(?P<body>.*?)\n\}',
+            source,
+            re.DOTALL,
+        )
+
+        self.assertIsNotNone(pressed_rule)
+        self.assertIn("color: var(--bs-btn-active-color);", pressed_rule.group("body"))
+
     def test_invalid_validation_group_draws_compound_invalid_ring(self) -> None:
         source = (ROOT / "scss/foundations/_focus.scss").read_text(
             encoding="utf-8"
