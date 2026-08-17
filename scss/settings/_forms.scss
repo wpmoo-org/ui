@@ -45,3 +45,8 @@ $form-check-input-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(i
 // default parent radius lives here while .rounded-pill can still opt into
 // Bootstrap's native pill radius utility.
 $moo-input-group-border-radius: var(--bs-border-radius-lg) !default;
+// Input group addons (text, buttons) share the input's surface in dark mode
+// so the whole group reads as one compound control, not a row of mismatched
+// tiles. Bootstrap defaults to --bs-tertiary-bg which is too distinct from
+// the input bg in dark mode.
+$input-group-addon-bg: var(--moo-input-bg, var(--bs-tertiary-bg)) !default;

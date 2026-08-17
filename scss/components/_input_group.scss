@@ -6,6 +6,8 @@
 .input-group:not(:has(> .form-control[type="file"])) {
   border: $input-border-width solid $input-border-color;
   border-radius: var(--moo-input-group-border-radius);
+  background-color: var(--moo-input-bg, transparent);
+  overflow: hidden;
 }
 
 .input-group.rounded-pill:not(:has(> .form-control[type="file"])) {
@@ -108,11 +110,11 @@
 }
 
 .input-group > .btn-ghost[aria-pressed="true"] {
-  color: var(--bs-primary);
+  color: var(--moo-foreground);
 }
 
 .input-group > .btn-ghost[aria-pressed="true"]::before {
-  opacity: 0;
+  opacity: 1;
 }
 
 .input-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
@@ -127,7 +129,7 @@
 
 .input-group > .input-group-text {
   color: var(--bs-secondary-color);
-  background-color: transparent;
+  background-color: var(--moo-input-bg, transparent);
 }
 
 .input-group > .input-group-text:first-child {
