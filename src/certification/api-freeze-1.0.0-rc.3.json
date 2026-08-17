@@ -13,7 +13,9 @@
     "./context-menu.js",
     "./datatable.js",
     "./chart.js",
+    "./chart.min.js",
     "./datepicker.js",
+    "./datepicker.min.js",
     "./slider.js",
     "./scss/facade-settings",
     "./certification.json",
@@ -30,14 +32,17 @@
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/chart.js",
+    "dist/js/chart.min.js",
     "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
     "dist/js/slider.js",
     "scss/_facade-settings.scss",
     "scss/settings/_facade_public.scss",
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md"
+    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md"
   ],
 
   "sassFacadeAllowList": [
@@ -123,6 +128,17 @@
       "nativeElement": "input[type=\"range\"]"
     }
   ],
+
+  "artifactVariants": {
+    "chart.min.js": {
+      "canonical": "chart.js",
+      "relationship": "Minified artifact variant of chart.js; shares source, exports, lifecycle, and runtime ownership"
+    },
+    "datepicker.min.js": {
+      "canonical": "datepicker.js",
+      "relationship": "Minified artifact variant of datepicker.js; shares source, exports, lifecycle, and runtime ownership"
+    }
+  },
 
   "cssEntrypoints": [
     {

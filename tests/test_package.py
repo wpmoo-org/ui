@@ -33,6 +33,7 @@ EXPECTED_PACKAGE_FILES = {
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",

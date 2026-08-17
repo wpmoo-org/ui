@@ -1277,18 +1277,15 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
     output_name = module_name.replace(".js", suffix) if minify else module_name
     output = PACKAGE_DIST / "js" / output_name
 
-    esbuild_cmd = shutil.which("esbuild")
-    if not esbuild_cmd:
-        node_modules_esbuild = ROOT / "node_modules" / ".bin" / "esbuild"
-        if node_modules_esbuild.is_file():
-            esbuild_cmd = str(node_modules_esbuild)
-        else:
-            raise RuntimeError(
-                "esbuild not found; run `npm install` to install the locked devDependency"
-            )
+    esbuild_cmd = ROOT / "node_modules" / ".bin" / "esbuild"
+    if not esbuild_cmd.is_file():
+        raise RuntimeError(
+            "Locked esbuild binary not found at node_modules/.bin/esbuild; "
+            "run `npm install` to install the locked devDependency"
+        )
 
     cmd = [
-        esbuild_cmd,
+        str(esbuild_cmd),
         str(source),
         f"--outfile={output}",
         "--bundle=true",

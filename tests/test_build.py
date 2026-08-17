@@ -201,3 +201,48 @@ class BuildTests(CatalogTestCase):
 
         introduction = self.read_output("introduction.html")
         self.assertEqual(introduction.count("<footer"), 0)
+
+    def test_bundled_modules_have_no_bare_imports_or_cdn_urls(self) -> None:
+        """Bundled Chart/Datepicker outputs must be self-contained."""
+        for module_name in ("chart.js", "chart.min.js", "datepicker.js", "datepicker.min.js"):
+            module_path = PACKAGE_DIST / "js" / module_name
+            with self.subTest(module=module_name):
+                self.assertTrue(module_path.is_file())
+                content = module_path.read_text(encoding="utf-8")
+                # No bare third-party imports
+                self.assertNotIn('from "chart.js', content)
+                self.assertNotIn('from "vanillajs-datepicker', content)
+                self.assertNotIn("from 'chart.js", content)
+                self.assertNotIn("from 'vanillajs-datepicker", content)
+                # No CDN URLs
+                self.assertNotIn("cdn.jsdelivr.net", content)
+                self.assertNotIn("unpkg.com", content)
+                self.assertNotIn("cdnjs.cloudflare.com", content)
+
+    def test_slider_has_no_minified_variant(self) -> None:
+        """Slider is a plain ESM module; no minified variant should exist."""
+        self.assertTrue((PACKAGE_DIST / "js/slider.js").is_file())
+        self.assertFalse((PACKAGE_DIST / "js/slider.min.js").exists())
+
+    def test_canonical_and_minified_bundles_have_equivalent_exports(self) -> None:
+        """Canonical and minified bundles must expose the same public API."""
+        import re
+
+        for base_name in ("chart", "datepicker"):
+            canonical = (PACKAGE_DIST / f"js/{base_name}.js").read_text(encoding="utf-8")
+            minified = (PACKAGE_DIST / f"js/{base_name}.min.js").read_text(encoding="utf-8")
+
+            with self.subTest(module=base_name):
+                # Extract export statements (handle both spaced and minified formats)
+                canonical_exports = set(re.findall(r'export\s*{([^}]+)}', canonical))
+                minified_exports = set(re.findall(r'export\s*{([^}]+)}', minified))
+
+                # Both should have the same export structure
+                self.assertEqual(len(canonical_exports), len(minified_exports),
+                    f"{base_name}: canonical and minified have different export counts")
+
+                # Check for default export presence
+                canonical_has_default = "as default" in canonical
+                minified_has_default = "as default" in minified
+                self.assertEqual(canonical_has_default, minified_has_default,
+                    f"{base_name}: canonical and minified differ in default export")

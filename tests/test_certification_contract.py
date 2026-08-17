@@ -676,13 +676,25 @@ class CertificationContractTests(unittest.TestCase):
         # RC.3 package exports/files must include the three new entrypoints
         frozen_exports = set(freeze["packageExports"])
         self.assertIn("./chart.js", frozen_exports)
+        self.assertIn("./chart.min.js", frozen_exports)
         self.assertIn("./datepicker.js", frozen_exports)
+        self.assertIn("./datepicker.min.js", frozen_exports)
         self.assertIn("./slider.js", frozen_exports)
 
         frozen_files = set(freeze["packageFiles"])
         self.assertIn("dist/js/chart.js", frozen_files)
+        self.assertIn("dist/js/chart.min.js", frozen_files)
         self.assertIn("dist/js/datepicker.js", frozen_files)
+        self.assertIn("dist/js/datepicker.min.js", frozen_files)
         self.assertIn("dist/js/slider.js", frozen_files)
+        self.assertIn("THIRD_PARTY_NOTICES.md", frozen_files)
+
+        # RC.3 artifact variants must map minified to canonical
+        artifact_variants = freeze.get("artifactVariants", {})
+        self.assertIn("chart.min.js", artifact_variants)
+        self.assertIn("datepicker.min.js", artifact_variants)
+        self.assertEqual(artifact_variants["chart.min.js"]["canonical"], "chart.js")
+        self.assertEqual(artifact_variants["datepicker.min.js"]["canonical"], "datepicker.js")
 
 
 if __name__ == "__main__":
