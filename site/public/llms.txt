@@ -119,6 +119,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Button](https://ui.wpmoo.org/components/button/)
 - [Button Group](https://ui.wpmoo.org/components/button-group/)
 - [Card](https://ui.wpmoo.org/components/card/)
+- [Chart](https://ui.wpmoo.org/components/chart/)
 - [Checkbox](https://ui.wpmoo.org/components/checkbox/)
 - [Close Button](https://ui.wpmoo.org/components/close-button/)
 - [Collapsible](https://ui.wpmoo.org/components/collapsible/)

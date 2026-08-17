@@ -1,0 +1,162 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "components/table.html.jinja" import table %}
+
+{% block title %}Chart — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Chart",
+    "Visualize trends and comparisons with line and bar charts rendered by Chart.js, themed from Bootstrap tokens and re-themed when the light/dark theme changes."
+  ) }}
+
+  <div class="moo-component-examples">
+    <h2 id="usage" class="h4 mb-3">Usage</h2>
+    <p class="mb-4">
+      Render a <code>.moo-chart</code> root with a single child <code>&lt;canvas&gt;</code>.
+      The <code>data-moo-chart</code> attribute sets the chart type and
+      <code>data-moo-chart-data</code> carries the serialized series. The optional
+      Moo UI Chart ESM wraps Chart.js, reads Bootstrap's <code>--bs-*</code> color
+      tokens, and re-themes the chart when <code>data-bs-theme</code> changes. Give the
+      root an explicit height: charts are responsive and fill the space they are given.
+    </p>
+
+    {% set line_chart_example %}
+    <div
+      class="moo-chart"
+      style="height: 17.5rem"
+      data-moo-chart="line"
+      data-moo-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800,6200,6900]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400,5800,6200]}]}'
+    >
+      <canvas role="img" aria-label="Line chart comparing monthly revenue against target"></canvas>
+    </div>
+    {% endset %}
+    {{ render_block_example(
+      "chart-line",
+      "Line chart",
+      "A multi-series line chart. Points, curve tension, and the translucent fill are themed from the active Bootstrap palette.",
+      line_chart_example
+    ) }}
+
+    {% set bar_chart_example %}
+    <div
+      class="moo-chart"
+      style="height: 17.5rem"
+      data-moo-chart="bar"
+      data-moo-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
+    >
+      <canvas role="img" aria-label="Bar chart of daily active visitors across the week"></canvas>
+    </div>
+    {% endset %}
+    {{ render_block_example(
+      "chart-bar",
+      "Bar chart",
+      "A single-series bar chart. Bars share the same semantic palette and re-theme with the page.",
+      bar_chart_example
+    ) }}
+
+    <h2 id="chart-html-anatomy" class="h4 mt-5 mb-3">HTML Anatomy</h2>
+    <p class="mb-4">
+      These are the public HTML hooks that applications can inspect or target.
+      They describe rendered markup, not the repository's internal Jinja build
+      helpers.
+    </p>
+
+    {% set chart_parts = [
+      {"id": "chart-root", "selector": "<code>.moo-chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
+      {"id": "chart-type", "selector": "<code>[data-moo-chart]</code>", "summary": "Chart type and initializer attribute, for example <code>line</code> or <code>bar</code>."},
+      {"id": "chart-data", "selector": "<code>[data-moo-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Malformed JSON throws an explicit diagnostic."},
+      {"id": "chart-canvas", "selector": "<code>.moo-chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
+    ] %}
+
+    {% set chart_parts_rows = [] %}
+    {% for part in chart_parts %}
+      {% set _ = chart_parts_rows.append([part["selector"], part["summary"]]) %}
+    {% endfor %}
+    {{ table(
+      ["Selector", "Purpose"],
+      chart_parts_rows,
+      row_ids=chart_parts | map(attribute="id") | list,
+      row_header=true,
+      extra_class="align-middle mb-5"
+    ) }}
+
+    {% set chart_markup_example %}
+    <div
+      class="moo-chart"
+      style="height: 17.5rem"
+      data-moo-chart="line"
+      data-moo-chart-data='{"labels":["Jan","Feb","Mar"],"datasets":[{"label":"Revenue","data":[4000,3200,4800]}]}'
+    >
+      <canvas role="img" aria-label="Monthly revenue line chart"></canvas>
+    </div>
+    {% endset %}
+    {{ render_code_snippet("chart-html-anatomy-example", chart_markup_example, "html") }}
+
+    <h2 id="chart-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
+    <p>
+      Chart.js is bundled into the published <code>chart.js</code> entrypoint through
+      <code>chart.js/auto</code>; the wrapper never reads <code>window.Chart</code> and never
+      loads a runtime CDN script. Importing the module never scans the document.
+      Initialize only a <code>.moo-chart</code> root your application owns: repeated
+      initialization returns the same instance, and <code>dispose()</code> destroys the
+      Chart.js instance, disconnects the theme observer, cancels pending work, and
+      releases the instance registration.
+    </p>
+    {% set chart_import_example %}
+    import MooChart from "@wpmoo/ui/chart.js";
+
+    const element = document.querySelector(".moo-chart");
+
+    if (element) {
+      const chart = MooChart.getOrCreateInstance(element);
+
+      // getOrCreateInstance is idempotent: the same instance is returned.
+      const again = MooChart.getOrCreateInstance(element);
+      console.assert(chart === again);
+
+      // Later, release Chart.js and the theme observer.
+      chart.dispose();
+    }
+    {% endset %}
+    {{ render_code_snippet("chart-javascript-import", chart_import_example, "js") }}
+
+    <h2 id="chart-theming" class="h4 mt-5 mb-3">Theming</h2>
+    <p class="mb-4">
+      Chart colors are derived from Bootstrap's semantic <code>--bs-*</code> tokens at
+      runtime, not from hardcoded theme values. A <code>MutationObserver</code> watches
+      <code>data-bs-theme</code> on the document element; when you toggle between light
+      and dark (use the theme toggle in this site's header), each chart re-reads the
+      tokens and re-themes its datasets, grid lines, legend, and tooltip without a
+      reload. Charts also reflow on resize: they are responsive and drop
+      aspect-ratio locking, so the same markup fills a desktop card or a narrow
+      mobile viewport without layout-specific switches.
+    </p>
+
+    <h2 id="chart-accessibility" class="h4 mt-5 mb-3">Accessibility</h2>
+    <p class="mb-0">
+      The canvas is a raster of pixels, so give it a text alternative: set
+      <code>role="img"</code> and a descriptive <code>aria-label</code> on the
+      <code>&lt;canvas&gt;</code>, or provide an adjacent data table for the same series.
+      Keep legends visible rather than encoding meaning in color alone, and preserve
+      the default tooltip so individual values remain reachable on touch and with a
+      pointer.
+    </p>
+  </div>
+
+  {{ render_reference(
+    "Rendering and the chart API build on Chart.js; see the",
+    "https://www.chartjs.org/docs/latest/",
+    "Chart.js documentation",
+    extra_references=[
+      {
+        "lead": "For the color tokens the palette reads, see the",
+        "href": "https://getbootstrap.com/docs/5.3/customize/css-variables/",
+        "label": "Bootstrap CSS variables documentation"
+      }
+    ]
+  ) }}
+{% endblock %}

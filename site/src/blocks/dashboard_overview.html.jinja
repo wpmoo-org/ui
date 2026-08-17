@@ -29,8 +29,10 @@
 {% endmacro %}
 
 {% macro render_chart_container(chart_id, chart_type, chart_data, extra_class="") %}
-  {#- A Chart.js canvas wrapper. The data-moo-chart and
-     data-moo-chart-data attributes configure the chart initializer. #}
+  {#- A Chart canvas wrapper using the public Moo Chart contract: the
+     .moo-chart root class plus the data-moo-chart (type) and
+     data-moo-chart-data (serialized data) attributes configure the
+     MooChart initializer. #}
   <div class="card{{ ' ' + extra_class if extra_class }}">
     <div class="card-header">
       <div class="card-header__text">
@@ -41,7 +43,7 @@
       </div>
     </div>
     <div class="card-body">
-      <div class="moo-dashboard-chart" data-moo-chart="{{ chart_type }}" data-moo-chart-data='{{ chart_data.data | tojson }}'>
+      <div class="moo-chart moo-dashboard-chart" data-moo-chart="{{ chart_type }}" data-moo-chart-data='{{ chart_data.data | tojson }}'>
         <canvas id="{{ chart_id }}"></canvas>
       </div>
     </div>

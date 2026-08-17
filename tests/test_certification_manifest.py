@@ -191,7 +191,7 @@ class CertificationManifestTests(unittest.TestCase):
             for component in self.manifest["certifiedComponents"]
         }
         self.assertEqual(actual, expected)
-        self.assertEqual(len(self.manifest["certifiedComponents"]), 42)
+        self.assertEqual(len(self.manifest["certifiedComponents"]), 43)
         self.assertEqual(self.manifest["status"], "preview")
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(self.manifest["coreVersion"], package["version"])

@@ -70,61 +70,58 @@ class CatalogJavaScriptTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_examples_chart_registers_pending_disposal_before_async_load(self) -> None:
+    def test_examples_chart_delegates_to_the_public_moo_chart(self) -> None:
         source = without_comments(
             (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
         )
 
-        pending_state = source.index("const pending =")
-        registered = source.index("states.set(root, release);", pending_state)
-        async_load = source.index("loadChartJs().then", registered)
-
-        self.assertLess(registered, async_load)
-        self.assertIn("pending.disposed", source)
-        self.assertIn("if (pending.disposed)", source)
-
-    def test_examples_chart_uses_effective_dataset_type_for_theme_updates(self) -> None:
-        source = without_comments(
-            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
-        )
-
-        self.assertIn("const datasetType = dataset.type || chart.config.type;", source)
-        self.assertIn("if (datasetType === \"line\")", source)
-        self.assertIn("} else if (datasetType === \"bar\")", source)
-        self.assertNotIn("color-mix(in srgb, \${color} 65%, #ffffff)", source)
-
-    def test_examples_chart_uses_a_bright_dark_theme_palette(self) -> None:
-        source = without_comments(
-            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
-        )
-
-        self.assertIn('"--bs-info-text-emphasis"', source)
-        self.assertIn('"--bs-success-text-emphasis"', source)
-        self.assertIn('"--bs-warning-text-emphasis"', source)
-        self.assertIn('"--bs-danger-text-emphasis"', source)
-        self.assertIn("const lightPalette", source)
-        self.assertIn("const darkPalette", source)
-        self.assertIn("const palette = isDark ? darkPalette : lightPalette;", source)
-        self.assertIn('primary: colors["--bs-info"]', source)
-        self.assertIn('primary: colors["--bs-info-text-emphasis"]', source)
         self.assertIn(
-            "color-mix(in srgb, " + "$" + "{color} 92%, " + "$" + "{theme.color})",
+            'import MooChart from "../../../../src/js/components/chart.js";',
             source,
         )
-        self.assertIn(
-            "color-mix(in srgb, " + "$" + "{color} 78%, transparent)",
-            source,
-        )
+        self.assertIn("MooChart.getOrCreateInstance(element)", source)
+        self.assertIn("instance.dispose()", source)
+        for forbidden in (
+            "CHART_CDN",
+            "CHART_SRI",
+            "loadChartJs",
+            "window.Chart",
+            "chart.umd",
+            "script.src",
+            "script.integrity",
+            "crossOrigin",
+            "new Chart(",
+        ):
+            self.assertNotIn(forbidden, source)
 
-    def test_examples_chart_loader_is_version_pinned_and_integrity_checked(self) -> None:
+    def test_examples_chart_import_resolves_to_the_canonical_bundle(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        built = (DIST / "assets/js/catalog/examples-chart.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertRegex(
+            built,
+            r'import MooChart from "\.\./components/chart\.js\?v=[0-9a-f]+";',
+        )
+        self.assertTrue((DIST / "assets/js/components/chart.js").is_file())
+        self.assertNotIn("src/js/components", without_comments(built))
+
+    def test_examples_chart_themeing_moves_with_the_public_component(self) -> None:
         source = without_comments(
             (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
         )
 
-        self.assertIn("chart.js@4.5.1/dist/chart.umd.min.js", source)
-        self.assertIn("const CHART_SRI = \"sha384-", source)
-        self.assertIn("script.integrity = CHART_SRI", source)
-        self.assertIn("script.crossOrigin = \"anonymous\"", source)
+        # Theming, palettes, and re-theme observers all live in the public
+        # MooChart now; the adapter keeps zero Chart.js knowledge.
+        self.assertNotIn("lightPalette", source)
+        self.assertNotIn("darkPalette", source)
+        self.assertNotIn("--bs-info-text-emphasis", source)
+        self.assertNotIn("color-mix", source)
+        self.assertNotIn("datasetType", source)
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(

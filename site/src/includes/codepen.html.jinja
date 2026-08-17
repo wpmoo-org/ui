@@ -495,10 +495,11 @@ body {
 {{ tasks_example_js_source() | safe }}
 {%- endmacro %}
 
-{#- Dashboard Overview: stat cards + Chart.js charts. The overview page
+{#- Dashboard Overview: stat cards + Moo UI charts. The overview page
    uses the same .moo-examples-page layout as Tasks/Users, but without
-   DataTable — just stat cards and chart containers. Chart.js is loaded
-   from CDN (not bundled in the npm package). #}
+   DataTable — just stat cards and chart containers. Charts are rendered
+   by the public MooChart component, which bundles Chart.js at build time
+   (no runtime Chart.js CDN load). #}
 {% macro dashboard_codepen_css() -%}
 .moo-examples-page {
   display: grid;
@@ -526,72 +527,37 @@ body {
 {{ examples_footer_codepen_css() }}
 {%- endmacro %}
 
-{#- Chart.js initialization for the Dashboard Overview CodePen. This is
-   intentionally a simplified copy of examples-chart.js — CodePen needs
-   standalone JS, not the catalog module's import/dispose pattern. Keep
-   the two in sync if the chart data schema changes. #}
+{#- Chart initialization for the Dashboard Overview CodePen. CodePen is
+   intentionally isolated from the catalog bundle: the catalog loads
+   MooChart from the site's own remapped module path, but a real CodePen
+   pen cannot `import` from ui.wpmoo.org because that origin sends no
+   Access-Control-Allow-Origin header, so the cross-origin import would be
+   blocked by CORS. unpkg.com serves the published @wpmoo/ui bundle with a
+   CORS header, so this small DOM adapter dynamically imports the
+   version-pinned Moo bundle from there. It never loads Chart.js directly:
+   the published dist/js/chart.js already bundles Chart.js and exposes
+   MooChart as its default export. #}
 {% macro dashboard_codepen_js() -%}
-function initializeMooDashboardCharts() {
-  if (!window.Chart) {
-    return;
-  }
-
-  document.querySelectorAll("[data-moo-chart]").forEach((container) => {
-    const canvas = container.querySelector("canvas");
-    if (!canvas) return;
-
-    const chartType = container.dataset.mooChart || "line";
-    const chartData = JSON.parse(container.dataset.mooChartData || "null");
-    if (!chartData) return;
-
-    new Chart(canvas, {
-      type: chartType,
-      data: chartData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-body-color") } },
-          tooltip: {
-            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-body-bg"),
-            titleColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-body-color"),
-            bodyColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color"),
-            borderColor: getComputedStyle(document.documentElement).getPropertyValue("--bs-border-color"),
-            borderWidth: 1,
-          },
-        },
-        scales: {
-          x: {
-            grid: { color: "color-mix(in srgb, var(--bs-border-color) 25%, transparent)" },
-            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color") },
-          },
-          y: {
-            grid: { color: "color-mix(in srgb, var(--bs-border-color) 25%, transparent)" },
-            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--bs-secondary-color") },
-          },
-        },
-      },
-    });
+function initializeMooDashboardCharts(MooChart) {
+  document.querySelectorAll(".moo-chart").forEach((element) => {
+    MooChart.getOrCreateInstance(element);
   });
 }
 
-function loadMooDashboardChartJs(callback) {
-  if (window.Chart) {
-    callback();
-    return;
-  }
-  const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js";
-  script.integrity = "sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ";
-  script.crossOrigin = "anonymous";
-  script.onload = callback;
-  document.head.appendChild(script);
+function startMooDashboardCharts() {
+  import("https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/js/chart.js")
+    .then((module) => {
+      initializeMooDashboardCharts(module.default);
+    })
+    .catch((error) => {
+      console.error("Moo UI Chart failed to load for this CodePen example.", error);
+    });
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => loadMooDashboardChartJs(initializeMooDashboardCharts), { once: true });
+  document.addEventListener("DOMContentLoaded", startMooDashboardCharts, { once: true });
 } else {
-  loadMooDashboardChartJs(initializeMooDashboardCharts);
+  startMooDashboardCharts();
 }
 {%- endmacro %}
 

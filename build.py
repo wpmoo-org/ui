@@ -70,6 +70,7 @@ EVIDENCE_FILES = (
     "phase-1-evidence.json",
     "phase-2-evidence.json",
     "phase-3-evidence.json",
+    "rc-3-evidence.json",
 )
 ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
     "preview-passed",
@@ -86,6 +87,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "alert-dialog": "src/components/alert_dialog.html.jinja",
     "avatar": "src/components/avatar.html.jinja",
     "button": "src/components/button.html.jinja",
+    "chart": "src/components/chart.html.jinja",
     "collapsible": "src/components/collapsible.html.jinja",
     "combobox": "src/components/combobox.html.jinja",
     "context-menu": "src/components/context_menu.html.jinja",

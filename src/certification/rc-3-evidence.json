@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "0.1",
+  "status": "backfill",
+  "releaseTarget": "1.0.0-rc.3",
+  "releaseClaim": "none",
+  "description": "Phase 3C evidence for the 1.0.0-rc.3 optional-entrypoint rollout: promotes the dashboard-only chart to a public MooChart component (src/js/components/chart.js), bundling chart.js@4.5.1 through chart.js/auto at build time. Passing backfill evidence does not add the component to the package manifest's certifiedComponents list until the 1.0.0 release gate is complete.",
+  "components": [
+    {
+      "slug": "chart",
+      "phase": "3C",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "responsive", "lifecycle", "accessibility", "visual"],
+        "not-applicable": ["keyboard", "focus", "rtl"],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_chart.py",
+        "dist/js/chart.js"
+      ],
+      "browserCases": [
+        "desktop-light",
+        "desktop-dark",
+        "mobile-light",
+        "mobile-dark"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/customize/css-variables/",
+        "https://getbootstrap.com/docs/5.3/utilities/colors/"
+      ],
+      "resolvedFindings": [
+        "Bootstrap ships no chart component or plugin (verified: no chart equivalent in js/src/), so Moo owns the entire contract: the .moo-chart root, the data-moo-chart type attribute, the data-moo-chart-data JSON payload, and deterministic child canvas resolution. Chart.js is bundled at build time through chart.js/auto; there is no runtime CDN, script tag, or window.Chart dependency.",
+        "Chart colors resolve from Bootstrap's CSS variables (--bs-info, --bs-info-text-emphasis, --bs-body-color, --bs-border-color) with color-mix() fill and grid derivations instead of hardcoded theme-dependent hex values, so a data-bs-theme change re-themes the chart through a MutationObserver without reintroducing hex-alpha suffix concatenation."
+      ],
+      "limitations": [
+        "Phase 3C browser verification covers the approved dashboard appearance at the 1400x900 desktop and 479x823 mobile baselines in light and dark mode; the supported Bootstrap and browser matrices run at a later gate.",
+        "Only line and bar charts are contracted for 1.0.0-rc.3; other Chart.js chart types are not part of the frozen public API.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    }
+  ]
+}

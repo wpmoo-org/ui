@@ -250,5 +250,11 @@
     "label": "Data Table",
     "status": "ready",
     "description": "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
+  },
+  {
+    "slug": "chart",
+    "label": "Chart",
+    "status": "ready",
+    "description": "Visualize trends and comparisons with line and bar charts rendered by Chart.js, themed from Bootstrap tokens and re-themed when the light/dark theme changes."
   }
 ]

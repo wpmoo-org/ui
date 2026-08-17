@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chart certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 48rem;
+        display: grid;
+        gap: 2rem;
+      }
+
+      .moo-chart {
+        height: 17.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Chart certification fixture</h1>
+
+      <section aria-labelledby="chart-line-title">
+        <h2 id="chart-line-title" class="h5 mb-3">Line chart</h2>
+        <div
+          class="moo-chart"
+          id="certification-chart-line"
+          data-moo-chart="line"
+          data-moo-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400]}]}'
+        >
+          <canvas role="img" aria-label="Line chart comparing monthly revenue against target for the first half of the year"></canvas>
+        </div>
+      </section>
+
+      <section aria-labelledby="chart-bar-title">
+        <h2 id="chart-bar-title" class="h5 mb-3">Bar chart</h2>
+        <div
+          class="moo-chart"
+          id="certification-chart-bar"
+          data-moo-chart="bar"
+          data-moo-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
+        >
+          <canvas role="img" aria-label="Bar chart of daily active visitors across the week"></canvas>
+        </div>
+      </section>
+
+      <section aria-labelledby="chart-invalid-title">
+        <h2 id="chart-invalid-title" class="h5 mb-3">Invalid JSON diagnostic</h2>
+        <div
+          class="moo-chart"
+          id="certification-chart-invalid"
+          data-moo-chart="line"
+          data-moo-chart-data='{not valid json'
+        >
+          <canvas role="img" aria-label="Chart with intentionally malformed data used to verify the diagnostic"></canvas>
+        </div>
+      </section>
+    </main>
+    <script type="module">
+      import MooChart from "/dist/js/chart.js";
+
+      window.CertificationChart = MooChart;
+      window.certificationLineChart = MooChart.getOrCreateInstance(
+        document.querySelector("#certification-chart-line")
+      );
+      window.certificationBarChart = MooChart.getOrCreateInstance(
+        document.querySelector("#certification-chart-bar")
+      );
+      document.body.dataset.chartReady = "true";
+    </script>
+  </body>
+</html>
