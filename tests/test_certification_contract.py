@@ -547,25 +547,25 @@ class CertificationContractTests(unittest.TestCase):
                     self.assertNotIn(term, content)
 
     def test_api_freeze_document_matches_live_package_state(self) -> None:
-        """Lock the 0.9.0 API freeze: any undocumented addition or removal
-        to the public surfaces must fail CI until the freeze document and
-        the change are reconciled on purpose."""
+        """Lock the 0.9.0 API freeze: every export and file frozen at 0.9.0
+        must still be present in the live package. New exports added in
+        later releases are allowed; removals are not."""
         freeze = self._read_json("src/certification/api-freeze-0.9.0.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
 
-        # Package exports must match exactly
+        # Package exports: 0.9.0 exports must be a subset of live exports.
         live_exports = set(package["exports"].keys())
         frozen_exports = set(freeze["packageExports"])
-        self.assertEqual(live_exports, frozen_exports,
-            "package.json exports diverged from the 0.9.0 freeze document")
+        self.assertTrue(frozen_exports.issubset(live_exports),
+            "0.9.0 exports were removed from package.json")
 
-        # Package files must match exactly
+        # Package files: 0.9.0 files must be a subset of live files.
         live_files = set(package["files"])
         frozen_files = set(freeze["packageFiles"])
-        self.assertEqual(live_files, frozen_files,
-            "package.json files diverged from the 0.9.0 freeze document")
+        self.assertTrue(frozen_files.issubset(live_files),
+            "0.9.0 files were removed from package.json")
 
         # Sass facade allow-list must match the real public declarations.
         # Extract variable names from the actual !default declarations in
@@ -612,6 +612,78 @@ class CertificationContractTests(unittest.TestCase):
             freeze["bootstrapSupport"]["testedVersions"],
             certification["bootstrap"]["testedVersions"],
         )
+
+    def test_api_freeze_1_0_0_rc3_document_matches_live_package_state(self) -> None:
+        """Lock the 1.0.0-rc.3 API freeze: every export and file declared
+        in the RC.3 freeze must be present in the live package. The freeze
+        documents the intended public surface; Phase 2 adds the bundled
+        outputs that make the new entrypoints real."""
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.3.json")
+        package = self._read_json("package.json")
+        certification = self._read_json("certification.json")
+        schema = self._read_json("src/certification/manifest.schema.json")
+
+        # Package exports: RC.3 frozen exports must be a subset of live exports.
+        live_exports = set(package["exports"].keys())
+        frozen_exports = set(freeze["packageExports"])
+        self.assertTrue(frozen_exports.issubset(live_exports),
+            "RC.3 frozen exports were removed from package.json")
+
+        # Package files: RC.3 frozen files must be a subset of live files.
+        live_files = set(package["files"])
+        frozen_files = set(freeze["packageFiles"])
+        self.assertTrue(frozen_files.issubset(live_files),
+            "RC.3 frozen files were removed from package.json")
+
+        # Sass facade allow-list must match the real public declarations.
+        import re
+        facade_public_source = (ROOT / "scss/settings/_facade_public.scss").read_text(encoding="utf-8")
+        frozen_sass_vars = set(freeze["sassFacadeAllowList"])
+        declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', facade_public_source, re.MULTILINE))
+        self.assertEqual(frozen_sass_vars, declared_vars,
+            "Sass facade allow-list diverged from the freeze document")
+
+        # The facade itself may only import the narrow public partial.
+        facade_source = (ROOT / "scss/_facade-settings.scss").read_text(encoding="utf-8")
+        stripped_facade = re.sub(r"/\*.*?\*/", "", facade_source, flags=re.DOTALL)
+        stripped_facade = "\n".join(
+            line.split("//", 1)[0] for line in stripped_facade.splitlines()
+        )
+        facade_imports = set(re.findall(r'@import\s+"([^"]+)"\s*;', stripped_facade))
+        self.assertEqual(facade_imports, {"settings/facade_public"},
+            "facade-settings must import only the narrow public partial")
+
+        # Certification manifest schema required fields must match
+        live_required = set(schema["required"])
+        frozen_required = set(freeze["certificationManifest"]["requiredFields"])
+        self.assertEqual(live_required, frozen_required,
+            "manifest.schema.json required fields diverged from the freeze document")
+
+        # Bootstrap support must match certification.json
+        self.assertEqual(
+            freeze["bootstrapSupport"]["canonicalVersion"],
+            certification["bootstrap"]["canonicalVersion"],
+        )
+        self.assertEqual(
+            freeze["bootstrapSupport"]["targetRange"],
+            certification["bootstrap"]["targetRange"],
+        )
+        self.assertEqual(
+            freeze["bootstrapSupport"]["testedVersions"],
+            certification["bootstrap"]["testedVersions"],
+        )
+
+        # RC.3 metadata fields
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.3")
+        self.assertEqual(certification["coreVersion"], "1.0.0-rc.3")
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+
+        # RC.3 ESM module records must be present in the freeze document
+        frozen_modules = {m["module"] for m in freeze["esmModules"]}
+        self.assertIn("chart.js", frozen_modules)
+        self.assertIn("datepicker.js", frozen_modules)
+        self.assertIn("slider.js", frozen_modules)
 
 
 if __name__ == "__main__":

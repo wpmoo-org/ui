@@ -1,0 +1,186 @@
+{
+  "freezeVersion": "1.0.0-rc.3",
+  "frozenAt": "2026-08-17",
+  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze. Adds chart.js, datepicker.js, and slider.js as optional public ESM entrypoints. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
+
+  "packageExports": [
+    "./moo-ui.css",
+    "./moo-ui.min.css",
+    "./moo.css",
+    "./moo.min.css",
+    "./combobox.js",
+    "./sidebar.js",
+    "./context-menu.js",
+    "./datatable.js",
+    "./scss/facade-settings",
+    "./certification.json",
+    "./package.json"
+  ],
+
+  "packageFiles": [
+    "dist/assets/css/moo-ui.css",
+    "dist/assets/css/moo-ui.min.css",
+    "dist/assets/css/moo.css",
+    "dist/assets/css/moo.min.css",
+    "dist/js/combobox.js",
+    "dist/js/sidebar.js",
+    "dist/js/context-menu.js",
+    "dist/js/datatable.js",
+    "scss/_facade-settings.scss",
+    "scss/settings/_facade_public.scss",
+    "certification.json",
+    "README.md",
+    "LICENSE",
+    "ASSET_LICENSE.md"
+  ],
+
+  "sassFacadeAllowList": [
+    "$primary",
+    "$secondary",
+    "$success",
+    "$info",
+    "$warning",
+    "$danger",
+    "$light",
+    "$dark",
+    "$body-color",
+    "$body-bg",
+    "$border-color",
+    "$border-radius",
+    "$border-radius-sm",
+    "$border-radius-lg",
+    "$font-size-base"
+  ],
+
+  "esmModules": [
+    {
+      "module": "combobox.js",
+      "export": "./combobox.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/combobox.js"
+    },
+    {
+      "module": "sidebar.js",
+      "export": "./sidebar.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/sidebar.js"
+    },
+    {
+      "module": "context-menu.js",
+      "export": "./context-menu.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/context-menu.js"
+    },
+    {
+      "module": "datatable.js",
+      "export": "./datatable.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/datatable.js"
+    },
+    {
+      "module": "chart.js",
+      "export": "./chart.js",
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
+      "source": "src/js/components/chart.js",
+      "bundled": true,
+      "runtime": "chart.js@4.5.1",
+      "markup": {
+        "rootClass": "moo-chart",
+        "typeAttribute": "data-moo-chart",
+        "dataAttribute": "data-moo-chart-data",
+        "childElement": "canvas"
+      }
+    },
+    {
+      "module": "datepicker.js",
+      "export": "./datepicker.js",
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
+      "source": "src/js/components/datepicker.js",
+      "bundled": true,
+      "runtime": "vanillajs-datepicker@1.3.4",
+      "namedExports": ["MooCalendar", "MooDateRangePicker"],
+      "markup": {
+        "rootClass": "moo-date-picker",
+        "rootAttribute": "data-moo-datepicker",
+        "triggerAttribute": "data-moo-datepicker-trigger",
+        "popoverAttribute": "data-moo-datepicker-popover",
+        "calendarAttribute": "data-moo-calendar",
+        "labelAttribute": "data-moo-datepicker-label"
+      }
+    },
+    {
+      "module": "slider.js",
+      "export": "./slider.js",
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
+      "source": "src/js/components/slider.js",
+      "bundled": false,
+      "nativeElement": "input[type=\"range\"]"
+    }
+  ],
+
+  "cssEntrypoints": [
+    {
+      "export": "./moo-ui.css",
+      "purpose": "Full expanded Bootstrap-compatible CSS build",
+      "scope": "unscoped"
+    },
+    {
+      "export": "./moo-ui.min.css",
+      "purpose": "Full minified CSS build",
+      "scope": "unscoped"
+    },
+    {
+      "export": "./moo.css",
+      "purpose": "Scoped expanded component layer for .moo-ui",
+      "scope": "scoped"
+    },
+    {
+      "export": "./moo.min.css",
+      "purpose": "Scoped minified component layer",
+      "scope": "scoped"
+    }
+  ],
+
+  "bootstrapSupport": {
+    "canonicalVersion": "5.3.3",
+    "targetRange": ">=5.3.0 <5.4",
+    "testedVersions": ["5.3.0", "5.3.3", "5.3.8"],
+    "source": "certification.json"
+  },
+
+  "browserPolicy": {
+    "policy": "Certification is in progress; see SUPPORT.md for the intended browser policy.",
+    "exactEvidenceInAttestation": false,
+    "source": "certification.json"
+  },
+
+  "certificationManifest": {
+    "schemaVersion": "0.1",
+    "requiredFields": [
+      "schemaVersion",
+      "status",
+      "coreVersion",
+      "bootstrap",
+      "browserPolicy",
+      "certifiedComponents",
+      "publicEntrypoints",
+      "supportPolicy"
+    ],
+    "source": "src/certification/manifest.schema.json"
+  },
+
+  "documentationSurfaces": [
+    {
+      "file": "README.md",
+      "tracks": ["package exports", "runtime ownership", "installation paths"]
+    },
+    {
+      "file": "SUPPORT.md",
+      "tracks": ["SemVer policy", "breaking changes", "Bootstrap compatibility", "browser policy", "maturity definitions"]
+    },
+    {
+      "file": "site/public/llms.txt",
+      "tracks": ["package exports", "installation facts", "runtime ownership"]
+    }
+  ]
+}
