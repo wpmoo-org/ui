@@ -85,7 +85,10 @@ function makeRoot(attrs = {}, { withCanvas = true } = {}) {
     getAttribute: (name) => (attrMap.has(name) ? attrMap.get(name) : null),
     setAttribute: (name, value) => attrMap.set(name, String(value)),
     matches: (selector) => selector === ".moo-chart",
-    querySelector: (selector) => (selector === "canvas" && withCanvas ? canvas : null),
+    querySelector: (selector) =>
+      ((selector === ":scope > canvas" || selector === "canvas") && withCanvas
+        ? canvas
+        : null),
     querySelectorAll: (selector) => (selector === ".moo-chart" ? [root] : []),
   };
   return root;
@@ -99,6 +102,7 @@ function report(name, details = {}) {
 VALID_DATA = json.dumps(
     {"labels": ["Jan", "Feb"], "datasets": [{"label": "Revenue", "data": [1, 2]}]}
 )
+NODE_TEST_TIMEOUT = 30
 
 
 def without_comments(source: str) -> str:
@@ -114,6 +118,7 @@ class ChartJavaScriptTests(CatalogTestCase):
             check=False,
             capture_output=True,
             text=True,
+            timeout=NODE_TEST_TIMEOUT,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         lines = [line for line in result.stdout.splitlines() if line.strip()]
@@ -265,7 +270,7 @@ report("data-attributes", {{
   values: instance.chart.data.datasets[0].data,
   type: instance.chart.config.type,
   themed: typeof instance.chart.data.datasets[0].backgroundColor === "string"
-    && instance.chart.data.datasets[0].backgroundColor.startsWith("color-mix("),
+    && instance.chart.data.datasets[0].backgroundColor.length > 0,
 }});
 """
         )
@@ -274,6 +279,24 @@ report("data-attributes", {{
         self.assertEqual(case["values"], [1, 2])
         self.assertEqual(case["type"], "bar")
         self.assertTrue(case["themed"])
+
+    def test_unsupported_chart_type_is_rejected(self) -> None:
+        case = self.run_chart_case(
+            """
+const root = makeRoot({ "data-moo-chart": "pie" });
+let message = "";
+try {
+  new MooChart(root);
+} catch (error) {
+  message = error.message;
+}
+report("unsupported-type", { message });
+"""
+        )
+        self.assertEqual(
+            case["message"],
+            'MooChart supports line and bar charts; received "pie".',
+        )
 
     def test_invalid_json_produces_an_explicit_diagnostic(self) -> None:
         case = self.run_chart_case(
@@ -420,6 +443,7 @@ report("catalog-adapter", {{
             check=False,
             capture_output=True,
             text=True,
+            timeout=NODE_TEST_TIMEOUT,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])

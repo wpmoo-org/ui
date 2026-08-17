@@ -12,13 +12,13 @@
       "status": "backfill-passed",
       "evidence": {
         "existing": ["contract", "markup", "theme", "responsive", "lifecycle", "accessibility", "visual"],
-        "not-applicable": ["keyboard", "focus", "rtl"],
+        "not-applicable": [],
         "manual": ["real-device"],
         "missing": ["host-conformance"]
       },
       "automatedEvidence": [
         "tests/test_chart.py",
-        "dist/js/chart.js"
+        "src/js/components/chart.js"
       ],
       "browserCases": [
         "desktop-light",

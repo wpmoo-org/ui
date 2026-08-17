@@ -15,9 +15,14 @@ export function initExamplesChart(root = document) {
   }
 
   const instances = [];
-  root.querySelectorAll(".moo-chart").forEach((element) => {
-    instances.push(MooChart.getOrCreateInstance(element));
-  });
+  try {
+    root.querySelectorAll(".moo-chart").forEach((element) => {
+      instances.push(MooChart.getOrCreateInstance(element));
+    });
+  } catch (error) {
+    instances.forEach((instance) => instance.dispose());
+    throw error;
+  }
 
   const release = () => {
     instances.forEach((instance) => instance.dispose());

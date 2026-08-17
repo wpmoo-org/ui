@@ -7,11 +7,13 @@
    data-bs-theme changes. The contract is frozen in
    src/certification/api-freeze-1.0.0-rc.3.json. #}
 
-{% macro chart(id, data, type="line", aria_label="", extra_class="", attrs="") -%}
+{% macro chart(id, data, aria_label, type="line", extra_class="", attrs="") -%}
   {% if not id | trim %}{{ fail("Chart id is required") }}{% endif %}
-  {% if not data | trim %}{{ fail("Chart data is required") }}{% endif %}
+  {% if not data %}{{ fail("Chart data is required") }}{% endif %}
+  {% if not aria_label | trim %}{{ fail("Chart aria_label is required") }}{% endif %}
   {% if type not in ["line", "bar"] %}{{ fail("Chart type must be 'line' or 'bar'") }}{% endif %}
-  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-moo-chart="{{ type }}" data-moo-chart-data='{{ data }}'{% if attrs %} {{ attrs | safe }}{% endif %}>
-    <canvas role="img"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}></canvas>
+  {% set serialized_data = data if data is string else data | tojson %}
+  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-moo-chart="{{ type }}" data-moo-chart-data='{{ serialized_data }}'{% if attrs %} {{ attrs | safe }}{% endif %}>
+    <canvas role="img" aria-label="{{ aria_label }}"></canvas>
   </div>
 {%- endmacro %}

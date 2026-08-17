@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 
 from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.test_chart import NODE_PREAMBLE, NODE_TEST_TIMEOUT, VALID_DATA
 
 
 CATALOG_JS = ROOT / "site/src/js/catalog"
@@ -71,28 +73,48 @@ class CatalogJavaScriptTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_examples_chart_delegates_to_the_public_moo_chart(self) -> None:
-        source = without_comments(
-            (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                NODE_PREAMBLE.replace(
+                    'import MooChart from "./src/js/components/chart.js";',
+                    'import MooChart from "./src/js/components/chart.js";\n'
+                    'import { initExamplesChart } from "./site/src/js/catalog/examples-chart.js";',
+                )
+                + f"""
+const roots = [makeRoot({{"data-moo-chart": "line", "data-moo-chart-data": {json.dumps(VALID_DATA)}}})];
+const catalogRoot = {{ querySelectorAll: () => roots }};
+const release = initExamplesChart(catalogRoot);
+const sameRelease = initExamplesChart(catalogRoot);
+const initialized = MooChart.getInstance(roots[0]) instanceof MooChart;
+release();
+const disposed = MooChart.getInstance(roots[0]) === null;
+report("catalog-delegation", {{
+  sameRelease: release === sameRelease,
+  initialized,
+  disposed,
+}});
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
         )
-
-        self.assertIn(
-            'import MooChart from "../../../../src/js/components/chart.js";',
-            source,
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout.splitlines()[-1]),
+            {
+                "name": "catalog-delegation",
+                "ok": True,
+                "sameRelease": True,
+                "initialized": True,
+                "disposed": True,
+            },
         )
-        self.assertIn("MooChart.getOrCreateInstance(element)", source)
-        self.assertIn("instance.dispose()", source)
-        for forbidden in (
-            "CHART_CDN",
-            "CHART_SRI",
-            "loadChartJs",
-            "window.Chart",
-            "chart.umd",
-            "script.src",
-            "script.integrity",
-            "crossOrigin",
-            "new Chart(",
-        ):
-            self.assertNotIn(forbidden, source)
 
     def test_examples_chart_import_resolves_to_the_canonical_bundle(
         self,

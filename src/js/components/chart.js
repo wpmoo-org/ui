@@ -21,6 +21,7 @@
 import Chart from "chart.js/auto";
 
 const instances = new WeakMap();
+const SUPPORTED_TYPES = new Set(["line", "bar"]);
 
 // Bootstrap semantic color tokens the chart palette is derived from.
 const COLOR_TOKENS = [
@@ -47,16 +48,33 @@ const COLOR_TOKENS = [
 const DATASET_COLOR_KEYS = ["primary", "success", "info", "warning", "danger"];
 
 function readThemeColors(document, window) {
-  const styles = window.getComputedStyle(document.documentElement);
+  const styles = window?.getComputedStyle?.(document?.documentElement);
   const colors = {};
+  if (!styles) return colors;
   COLOR_TOKENS.forEach((token) => {
     colors[token] = styles.getPropertyValue(token).trim();
   });
   return colors;
 }
 
+function resolveCanvasColor(document, window, value, fallback) {
+  const createElement = document?.createElement;
+  const getComputedStyle = window?.getComputedStyle;
+  const root = document?.documentElement;
+  if (!createElement || !getComputedStyle || !root) return fallback;
+
+  const probe = createElement("span");
+  probe.style.color = value;
+  if (!probe.style.color) return fallback;
+  probe.hidden = true;
+  root.appendChild(probe);
+  const resolved = getComputedStyle(probe).color;
+  probe.remove();
+  return resolved || fallback;
+}
+
 // Build a Chart.js color palette from the current theme's CSS variables.
-function buildChartTheme(colors, isDark = false) {
+function buildChartTheme(colors, isDark = false, resolveColor = (value) => value) {
   // Use the same semantic chart palette in both themes. Bootstrap's primary
   // token is intentionally near-black in dark mode, so chart data uses blue
   // info tokens instead of switching to a grayscale series.
@@ -87,6 +105,7 @@ function buildChartTheme(colors, isDark = false) {
     tickColor: colors["--bs-secondary-color"],
     textColor: colors["--bs-body-color"],
     secondaryText: colors["--bs-secondary-color"],
+    resolveColor,
     ...palette,
   };
 }
@@ -97,13 +116,19 @@ function themeDataset(dataset, index, chartType, theme) {
   const color = theme[colorKey];
   // Keep both themes close to their semantic token so the hue remains
   // consistent when the user toggles the theme.
-  const mutedColor = `color-mix(in srgb, ${color} 92%, ${theme.color})`;
+  const mutedColor = theme.resolveColor(
+    `color-mix(in srgb, ${color} 92%, ${theme.color})`,
+    color,
+  );
   const pointColor = color;
   const datasetType = dataset.type || chartType;
 
   if (datasetType === "line") {
     dataset.borderColor = mutedColor;
-    dataset.backgroundColor = `color-mix(in srgb, ${color} 22%, transparent)`;
+    dataset.backgroundColor = theme.resolveColor(
+      `color-mix(in srgb, ${color} 22%, transparent)`,
+      color,
+    );
     dataset.pointBackgroundColor = pointColor;
     dataset.pointBorderColor = theme.borderColor;
     dataset.pointBorderWidth = 2;
@@ -115,7 +140,10 @@ function themeDataset(dataset, index, chartType, theme) {
     if (dataset.tension === undefined) dataset.tension = 0.3;
     if (dataset.fill === undefined) dataset.fill = true;
   } else if (datasetType === "bar") {
-    dataset.backgroundColor = `color-mix(in srgb, ${color} 78%, transparent)`;
+    dataset.backgroundColor = theme.resolveColor(
+      `color-mix(in srgb, ${color} 78%, transparent)`,
+      color,
+    );
     dataset.borderColor = mutedColor;
     dataset.borderWidth = 1;
     dataset.hoverBackgroundColor = color;
@@ -138,7 +166,10 @@ function applyThemeToChart(chart, theme) {
   if (chart.options.scales) {
     Object.values(chart.options.scales).forEach((scale) => {
       if (scale.grid) {
-        scale.grid.color = `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`;
+        scale.grid.color = theme.resolveColor(
+          `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
+          theme.gridColor,
+        );
       }
       if (scale.ticks) {
         scale.ticks.color = theme.secondaryText;
@@ -202,7 +233,12 @@ function buildChartOptions(theme) {
         callbacks: {
           label: (context) => {
             const label = context.dataset.label || "";
-            const value = context.parsed.y || context.parsed;
+            const parsed = context.parsed;
+            const value =
+              parsed !== null && typeof parsed === "object" ? parsed.y : parsed;
+            if (typeof value !== "number" || !Number.isFinite(value)) {
+              return label;
+            }
             return `${label}: ${value.toLocaleString()}`;
           },
         },
@@ -211,8 +247,10 @@ function buildChartOptions(theme) {
     scales: {
       x: {
         grid: {
-          color: `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
-          drawBorder: false,
+          color: theme.resolveColor(
+            `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
+            theme.gridColor,
+          ),
         },
         ticks: {
           color: theme.secondaryText,
@@ -224,8 +262,10 @@ function buildChartOptions(theme) {
       },
       y: {
         grid: {
-          color: `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
-          drawBorder: false,
+          color: theme.resolveColor(
+            `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
+            theme.gridColor,
+          ),
         },
         ticks: {
           color: theme.secondaryText,
@@ -267,11 +307,16 @@ function resolveChartData(element, config) {
 }
 
 function resolveChartType(element, config) {
-  return (
+  const type =
     config.type ||
     element.getAttribute("data-moo-chart") ||
-    "line"
-  );
+    "line";
+  if (!SUPPORTED_TYPES.has(type)) {
+    throw new TypeError(
+      `MooChart supports line and bar charts; received "${type}".`,
+    );
+  }
+  return type;
 }
 
 export default class MooChart {
@@ -292,7 +337,7 @@ export default class MooChart {
       return existing;
     }
 
-    const canvas = element.querySelector("canvas");
+    const canvas = element.querySelector(":scope > canvas");
     if (!canvas) {
       throw new TypeError(
         "MooChart requires a child <canvas> element inside the .moo-chart root."
@@ -311,19 +356,26 @@ export default class MooChart {
 
     const isDark = this._document?.documentElement?.dataset?.bsTheme === "dark";
     const colors = readThemeColors(this._document, this._window);
-    this._theme = buildChartTheme(colors, isDark);
+    const resolveColor = (value, fallback) =>
+      resolveCanvasColor(this._document, this._window, value, fallback);
+    this._theme = buildChartTheme(colors, isDark, resolveColor);
 
     const datasets = (data.datasets || []).map((dataset, index) =>
       themeDataset({ ...dataset }, index, type, this._theme)
     );
 
+    const options = {
+      ...buildChartOptions(this._theme),
+      ...(this._config.options || {}),
+    };
     this._chart = new Chart(canvas, {
+      ...this._config,
       type,
       data: {
         labels: data.labels || [],
         datasets,
       },
-      options: buildChartOptions(this._theme),
+      options,
     });
 
     this._rethemeFrame = null;
@@ -373,7 +425,9 @@ export default class MooChart {
     if (!this._chart) return;
     const isDark = this._document?.documentElement?.dataset?.bsTheme === "dark";
     const colors = readThemeColors(this._document, this._window);
-    this._theme = buildChartTheme(colors, isDark);
+    const resolveColor = (value, fallback) =>
+      resolveCanvasColor(this._document, this._window, value, fallback);
+    this._theme = buildChartTheme(colors, isDark, resolveColor);
     applyThemeToChart(this._chart, this._theme);
   }
 
