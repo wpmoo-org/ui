@@ -8,6 +8,8 @@
    src/certification/api-freeze-1.0.0-rc.3.json. #}
 
 {% macro chart(id, data, aria_label, type="line", extra_class="", attrs="") -%}
+  {#- The responsive runtime does not lock an aspect ratio; callers must give
+      the root an explicit height, typically through extra_class or attrs. #}
   {% if not id | trim %}{{ fail("Chart id is required") }}{% endif %}
   {% if not data %}{{ fail("Chart data is required") }}{% endif %}
   {% if not aria_label | trim %}{{ fail("Chart aria_label is required") }}{% endif %}

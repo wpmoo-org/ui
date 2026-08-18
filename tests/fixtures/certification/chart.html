@@ -73,6 +73,13 @@
       window.certificationBarChart = MooChart.getOrCreateInstance(
         document.querySelector("#certification-chart-bar")
       );
+      try {
+        MooChart.getOrCreateInstance(
+          document.querySelector("#certification-chart-invalid")
+        );
+      } catch (error) {
+        window.certificationInvalidMessage = error.message;
+      }
       document.body.dataset.chartReady = "true";
     </script>
   </body>

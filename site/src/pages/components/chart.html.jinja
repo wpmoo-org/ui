@@ -27,6 +27,7 @@
     {% set line_chart_example %}
     <div
       class="moo-chart"
+      id="chart-line-example"
       style="height: 17.5rem"
       data-moo-chart="line"
       data-moo-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800,6200,6900]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400,5800,6200]}]}'
@@ -44,6 +45,7 @@
     {% set bar_chart_example %}
     <div
       class="moo-chart"
+      id="chart-bar-example"
       style="height: 17.5rem"
       data-moo-chart="bar"
       data-moo-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
@@ -67,6 +69,7 @@
 
     {% set chart_parts = [
       {"id": "chart-root", "selector": "<code>.moo-chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
+      {"id": "chart-id", "selector": "<code>id</code>", "summary": "Required stable identifier for the chart root and its server-rendered contract."},
       {"id": "chart-type", "selector": "<code>[data-moo-chart]</code>", "summary": "Chart type and initializer attribute, for example <code>line</code> or <code>bar</code>."},
       {"id": "chart-data", "selector": "<code>[data-moo-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Malformed JSON throws an explicit diagnostic."},
       {"id": "chart-canvas", "selector": "<code>.moo-chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
@@ -87,6 +90,7 @@
     {% set chart_markup_example %}
     <div
       class="moo-chart"
+      id="chart-html-example"
       style="height: 17.5rem"
       data-moo-chart="line"
       data-moo-chart-data='{"labels":["Jan","Feb","Mar"],"datasets":[{"label":"Revenue","data":[4000,3200,4800]}]}'
