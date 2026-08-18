@@ -1,6 +1,7 @@
 import Combobox from "../../../../src/js/components/combobox.js";
 import ContextMenu from "../../../../src/js/components/context-menu.js";
 import DataTable from "../../../../src/js/components/datatable.js";
+import Datepicker, { MooCalendar, MooDateRangePicker } from "../../../../src/js/components/datepicker.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
@@ -42,6 +43,24 @@ export function initCatalog(root = document) {
 
   root.querySelectorAll(".combobox").forEach((element) => {
     const instance = Combobox.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-datepicker]").forEach((element) => {
+    const instance = Datepicker.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-datepicker-range]").forEach((element) => {
+    const instance = MooDateRangePicker.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-calendar]").forEach((element) => {
+    if (element.closest("[data-datepicker], [data-datepicker-range]")) {
+      return;
+    }
+    const instance = MooCalendar.getOrCreateInstance(element);
     disposers.push(() => instance.dispose());
   });
 

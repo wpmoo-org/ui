@@ -92,6 +92,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "combobox": "src/components/combobox.html.jinja",
     "context-menu": "src/components/context_menu.html.jinja",
     "datatable": "src/components/datatable.html.jinja",
+    "datepicker": "src/components/datepicker.html.jinja",
     "field": "src/components/field.html.jinja",
     "form": "src/components/field.html.jinja",
     "menubar": "src/components/menubar.html.jinja",

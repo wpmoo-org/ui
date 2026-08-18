@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Datepicker certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 42rem;
+        display: grid;
+        gap: 2rem;
+      }
+
+      .fixture-clipped-card {
+        max-height: 7rem;
+        overflow: hidden;
+        transform: translateZ(0);
+        padding: 1rem;
+        border: var(--bs-border-width) solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius-lg);
+      }
+
+      .fixture-bottom-placement {
+        min-height: 42rem;
+        display: flex;
+        align-items: flex-end;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Datepicker certification fixture</h1>
+
+      <section aria-labelledby="single-title">
+        <h2 id="single-title" class="h5 mb-3">Single date</h2>
+        <div
+          class="moo-datepicker"
+          id="certification-datepicker"
+          data-datepicker
+          data-datepicker-mode="single"
+          data-datepicker-locale="en"
+          data-datepicker-placeholder="Pick a date"
+          data-datepicker-value="2026-08-18"
+          data-datepicker-min-date="2026-08-15"
+          data-datepicker-max-date="2026-08-31"
+          data-datepicker-disabled-dates='["2026-08-22"]'
+        >
+          <label class="form-label" for="certification-datepicker-trigger">Deploy date</label>
+          <button
+            class="btn btn-outline-secondary moo-datepicker__trigger"
+            id="certification-datepicker-trigger"
+            type="button"
+            data-datepicker-trigger
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="certification-datepicker-popover"
+          >
+            <svg data-icon="inline-start" data-lucide="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></g></svg>
+            <span data-datepicker-label>Aug 18, 2026</span>
+          </button>
+          <div
+            class="moo-datepicker__popover"
+            id="certification-datepicker-popover"
+            data-datepicker-popover
+            role="dialog"
+            aria-modal="false"
+            hidden
+          >
+            <div
+              class="moo-calendar"
+              id="certification-datepicker-calendar"
+              data-calendar
+              data-calendar-mode="single"
+              data-calendar-locale="en"
+              data-calendar-value="2026-08-18"
+              data-calendar-min-date="2026-08-15"
+              data-calendar-max-date="2026-08-31"
+              data-calendar-disabled-dates='["2026-08-22"]'
+              role="application"
+              aria-label="Deploy date calendar"
+              tabindex="-1"
+            ></div>
+            <input type="hidden" name="certification_date" value="2026-08-18" data-datepicker-input>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="range-title">
+        <h2 id="range-title" class="h5 mb-3">Range date</h2>
+        <div
+          class="moo-datepicker moo-datepicker--range"
+          id="certification-date-range"
+          data-datepicker-range
+          data-datepicker-mode="range"
+          data-datepicker-locale="en"
+          data-datepicker-placeholder="Pick a date range"
+          data-datepicker-min-date="2026-08-15"
+          data-datepicker-max-date="2026-08-31"
+        >
+          <label class="form-label" for="certification-date-range-trigger">Window</label>
+          <button
+            class="btn btn-outline-secondary moo-datepicker__trigger"
+            id="certification-date-range-trigger"
+            type="button"
+            data-datepicker-trigger
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="certification-date-range-popover"
+          >
+            <svg data-icon="inline-start" data-lucide="calendar-range" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M3 10h18M8 2v4m9 8h-6m2 4H7m0-4h.01M17 18h.01"/></g></svg>
+            <span data-datepicker-label>Pick a date range</span>
+          </button>
+          <div
+            class="moo-datepicker__popover"
+            id="certification-date-range-popover"
+            data-datepicker-popover
+            role="dialog"
+            aria-modal="false"
+            hidden
+          >
+            <div
+              class="moo-calendar"
+              id="certification-date-range-calendar"
+              data-calendar
+              data-calendar-mode="range"
+              data-calendar-locale="en"
+              data-calendar-min-date="2026-08-15"
+              data-calendar-max-date="2026-08-31"
+              role="application"
+              aria-label="Date range calendar"
+              tabindex="-1"
+            ></div>
+            <input type="hidden" name="range_start" value="" data-datepicker-range-start>
+            <input type="hidden" name="range_end" value="" data-datepicker-range-end>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="reset-title">
+        <h2 id="reset-title" class="h5 mb-3">Reset date</h2>
+        <form id="certification-datepicker-reset-form">
+          <div
+            class="moo-datepicker"
+            id="certification-reset-datepicker"
+            data-datepicker
+            data-datepicker-mode="single"
+            data-datepicker-locale="en"
+            data-datepicker-placeholder="Pick a date"
+            data-datepicker-min-date="2026-08-15"
+            data-datepicker-max-date="2026-08-31"
+          >
+            <label class="form-label" for="certification-reset-datepicker-trigger">Resettable date</label>
+            <button
+              class="btn btn-outline-secondary moo-datepicker__trigger"
+              id="certification-reset-datepicker-trigger"
+              type="button"
+              data-datepicker-trigger
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-controls="certification-reset-datepicker-popover"
+            >
+              <svg data-icon="inline-start" data-lucide="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></g></svg>
+              <span data-datepicker-label>Pick a date</span>
+            </button>
+            <div
+              class="moo-datepicker__popover"
+              id="certification-reset-datepicker-popover"
+              data-datepicker-popover
+              role="dialog"
+              aria-modal="false"
+              hidden
+            >
+              <div
+                class="moo-calendar"
+                id="certification-reset-datepicker-calendar"
+                data-calendar
+                data-calendar-mode="single"
+                data-calendar-locale="en"
+                data-calendar-min-date="2026-08-15"
+                data-calendar-max-date="2026-08-31"
+                role="application"
+                aria-label="Resettable date calendar"
+                tabindex="-1"
+              ></div>
+              <input type="hidden" name="reset_date" value="" data-datepicker-input>
+            </div>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm mt-3" type="reset">
+            Reset
+          </button>
+        </form>
+      </section>
+
+      <section aria-labelledby="dropdown-title">
+        <h2 id="dropdown-title" class="h5 mb-3">Dropdown date</h2>
+        <div
+          class="moo-datepicker"
+          id="certification-dropdown-datepicker"
+          data-datepicker
+          data-datepicker-mode="single"
+          data-datepicker-locale="en"
+          data-datepicker-placeholder="Select date"
+          data-datepicker-min-date="1926-01-01"
+          data-datepicker-max-date="2026-12-31"
+        >
+          <label class="form-label" for="certification-dropdown-datepicker-trigger">Date of birth</label>
+          <button
+            class="btn btn-outline-secondary moo-datepicker__trigger"
+            id="certification-dropdown-datepicker-trigger"
+            type="button"
+            data-datepicker-trigger
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="certification-dropdown-datepicker-popover"
+          >
+            <svg data-icon="inline-start" data-lucide="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></g></svg>
+            <span data-datepicker-label>Select date</span>
+          </button>
+          <div
+            class="moo-datepicker__popover"
+            id="certification-dropdown-datepicker-popover"
+            data-datepicker-popover
+            role="dialog"
+            aria-modal="false"
+            hidden
+          >
+            <div
+              class="moo-calendar"
+              id="certification-dropdown-datepicker-calendar"
+              data-calendar
+              data-calendar-mode="single"
+              data-calendar-locale="en"
+              data-calendar-min-date="1926-01-01"
+              data-calendar-max-date="2026-12-31"
+              data-calendar-caption-layout="dropdown"
+              role="application"
+              aria-label="Date of birth calendar"
+              tabindex="-1"
+            ></div>
+            <input type="hidden" name="birth_date" value="" data-datepicker-input>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="clipped-title">
+        <h2 id="clipped-title" class="h5 mb-3">Clipped ancestor date</h2>
+        <div class="fixture-clipped-card" id="certification-clipped-card">
+          <div
+            class="moo-datepicker"
+            id="certification-clipped-datepicker"
+            data-datepicker
+            data-datepicker-mode="single"
+            data-datepicker-locale="en"
+            data-datepicker-placeholder="Pick a date"
+            data-datepicker-value="2026-08-18"
+          >
+            <label class="form-label" for="certification-clipped-datepicker-trigger">Clipped card date</label>
+            <button
+              class="btn btn-outline-secondary moo-datepicker__trigger"
+              id="certification-clipped-datepicker-trigger"
+              type="button"
+              data-datepicker-trigger
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-controls="certification-clipped-datepicker-popover"
+            >
+              <svg data-icon="inline-start" data-lucide="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></g></svg>
+              <span data-datepicker-label>Aug 18, 2026</span>
+            </button>
+            <div
+              class="moo-datepicker__popover"
+              id="certification-clipped-datepicker-popover"
+              data-datepicker-popover
+              role="dialog"
+              aria-modal="false"
+              hidden
+            >
+              <div
+                class="moo-calendar"
+                id="certification-clipped-datepicker-calendar"
+                data-calendar
+                data-calendar-mode="single"
+                data-calendar-locale="en"
+                data-calendar-value="2026-08-18"
+                role="application"
+                aria-label="Clipped card calendar"
+                tabindex="-1"
+              ></div>
+              <input type="hidden" name="clipped_date" value="2026-08-18" data-datepicker-input>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="bounded-inline-title">
+        <h2 id="bounded-inline-title" class="h5 mb-3">Bounded inline calendar</h2>
+        <div
+          class="moo-calendar"
+          id="certification-bounded-calendar"
+          data-calendar
+          data-calendar-mode="single"
+          data-calendar-locale="en"
+          data-calendar-value="2026-08-18"
+          data-calendar-min-date="2026-08-11"
+          data-calendar-max-date="2026-08-31"
+          role="application"
+          aria-label="Bounded release calendar"
+          tabindex="-1"
+        ></div>
+      </section>
+
+      <section aria-labelledby="inline-title">
+        <h2 id="inline-title" class="h5 mb-3">Inline calendar</h2>
+        <div
+          class="moo-calendar"
+          id="certification-calendar"
+          data-calendar
+          data-calendar-mode="single"
+          data-calendar-locale="en"
+          data-calendar-value="2026-08-18"
+          data-calendar-show-presets="true"
+          role="application"
+          aria-label="Standalone release calendar"
+          tabindex="-1"
+        ></div>
+      </section>
+
+      <section aria-labelledby="rtl-title">
+        <h2 id="rtl-title" class="h5 mb-3">RTL date</h2>
+        <div
+          class="moo-datepicker"
+          id="certification-rtl-datepicker"
+          dir="rtl"
+          data-datepicker
+          data-datepicker-mode="single"
+          data-datepicker-locale="ar"
+          data-datepicker-placeholder="اختر تاريخا"
+          data-datepicker-value="2026-08-18"
+        >
+          <button
+            class="btn btn-outline-secondary moo-datepicker__trigger"
+            id="certification-rtl-datepicker-trigger"
+            type="button"
+            data-datepicker-trigger
+            aria-label="اختر تاريخا"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="certification-rtl-datepicker-popover"
+          >
+            <svg data-icon="inline-start" data-lucide="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></g></svg>
+            <span data-datepicker-label>Aug 18, 2026</span>
+          </button>
+          <div
+            class="moo-datepicker__popover"
+            id="certification-rtl-datepicker-popover"
+            data-datepicker-popover
+            role="dialog"
+            aria-modal="false"
+            hidden
+          >
+            <div
+              class="moo-calendar"
+              id="certification-rtl-datepicker-calendar"
+              data-calendar
+              data-calendar-mode="single"
+              data-calendar-locale="ar"
+              data-calendar-value="2026-08-18"
+              role="application"
+              aria-label="تقويم"
+              tabindex="-1"
+            ></div>
+            <input type="hidden" name="rtl_date" value="2026-08-18" data-datepicker-input>
+          </div>
+        </div>
+      </section>
+
+      <section class="fixture-bottom-placement" aria-labelledby="bottom-title">
+        <div>
+          <h2 id="bottom-title" class="h5 mb-3">Viewport edge date</h2>
+          <div
+            class="moo-datepicker"
+            id="certification-bottom-datepicker"
+            data-datepicker
+            data-datepicker-mode="single"
+            data-datepicker-locale="en"
+            data-datepicker-placeholder="Pick a date"
+            data-datepicker-value="2026-08-18"
+          >
+            <label class="form-label" for="certification-bottom-datepicker-trigger">Bottom edge date</label>
+            <button
+              class="btn btn-outline-secondary moo-datepicker__trigger"
+              id="certification-bottom-datepicker-trigger"
+              type="button"
+              data-datepicker-trigger
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-controls="certification-bottom-datepicker-popover"
+            >
+              <svg data-icon="inline-start" data-lucide="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M8 2v4m8-4v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></g></svg>
+              <span data-datepicker-label>Aug 18, 2026</span>
+            </button>
+            <div
+              class="moo-datepicker__popover"
+              id="certification-bottom-datepicker-popover"
+              data-datepicker-popover
+              role="dialog"
+              aria-modal="false"
+              hidden
+            >
+              <div
+                class="moo-calendar"
+                id="certification-bottom-datepicker-calendar"
+                data-calendar
+                data-calendar-mode="single"
+                data-calendar-locale="en"
+                data-calendar-value="2026-08-18"
+                role="application"
+                aria-label="Bottom edge calendar"
+                tabindex="-1"
+              ></div>
+              <input type="hidden" name="bottom_edge_date" value="2026-08-18" data-datepicker-input>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module">
+      import Datepicker, {
+        MooCalendar,
+        MooDateRangePicker,
+      } from "/dist/js/datepicker.js";
+
+      window.CertificationDatepicker = Datepicker;
+      window.CertificationDateRangePicker = MooDateRangePicker;
+      window.CertificationCalendar = MooCalendar;
+
+      window.certificationDatepicker = Datepicker.getOrCreateInstance(
+        document.querySelector("#certification-datepicker")
+      );
+      window.certificationDateRangePicker = MooDateRangePicker.getOrCreateInstance(
+        document.querySelector("#certification-date-range")
+      );
+      window.certificationCalendar = MooCalendar.getOrCreateInstance(
+        document.querySelector("#certification-calendar")
+      );
+      window.certificationBoundedCalendar = MooCalendar.getOrCreateInstance(
+        document.querySelector("#certification-bounded-calendar")
+      );
+      window.certificationResetDatepicker = Datepicker.getOrCreateInstance(
+        document.querySelector("#certification-reset-datepicker")
+      );
+      window.certificationDropdownDatepicker = Datepicker.getOrCreateInstance(
+        document.querySelector("#certification-dropdown-datepicker")
+      );
+      window.certificationRtlDatepicker = Datepicker.getOrCreateInstance(
+        document.querySelector("#certification-rtl-datepicker")
+      );
+      window.certificationClippedDatepicker = Datepicker.getOrCreateInstance(
+        document.querySelector("#certification-clipped-datepicker")
+      );
+      window.certificationBottomDatepicker = Datepicker.getOrCreateInstance(
+        document.querySelector("#certification-bottom-datepicker")
+      );
+
+      await Promise.all([
+        window.certificationDatepicker.calendar.engineReady,
+        window.certificationDateRangePicker.engineReady,
+        window.certificationDateRangePicker.calendar.engineReady,
+        window.certificationCalendar.engineReady,
+        window.certificationBoundedCalendar.engineReady,
+        window.certificationResetDatepicker.calendar.engineReady,
+        window.certificationDropdownDatepicker.calendar.engineReady,
+        window.certificationRtlDatepicker.calendar.engineReady,
+        window.certificationClippedDatepicker.calendar.engineReady,
+        window.certificationBottomDatepicker.calendar.engineReady,
+      ]);
+      const engineErrors = [
+        window.certificationDatepicker.calendar,
+        window.certificationDateRangePicker,
+        window.certificationDateRangePicker.calendar,
+        window.certificationCalendar,
+        window.certificationBoundedCalendar,
+        window.certificationResetDatepicker.calendar,
+        window.certificationDropdownDatepicker.calendar,
+        window.certificationRtlDatepicker.calendar,
+        window.certificationClippedDatepicker.calendar,
+        window.certificationBottomDatepicker.calendar,
+      ].filter((instance) => instance.engineError);
+      if (engineErrors.length) {
+        throw new Error("Datepicker certification engine setup failed");
+      }
+      document.body.dataset.datepickerReady = "true";
+    </script>
+  </body>
+</html>

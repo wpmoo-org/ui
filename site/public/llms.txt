@@ -126,6 +126,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Combobox](https://ui.wpmoo.org/components/combobox/)
 - [Context Menu](https://ui.wpmoo.org/components/context-menu/)
 - [Data Table](https://ui.wpmoo.org/components/datatable/)
+- [Date Picker](https://ui.wpmoo.org/components/datepicker/)
 - [Dialog](https://ui.wpmoo.org/components/dialog/)
 - [Dropdown Menu](https://ui.wpmoo.org/components/dropdown-menu/)
 - [Field](https://ui.wpmoo.org/components/field/)

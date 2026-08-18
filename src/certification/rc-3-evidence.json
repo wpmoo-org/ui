@@ -3,7 +3,7 @@
   "status": "backfill",
   "releaseTarget": "1.0.0-rc.3",
   "releaseClaim": "none",
-  "description": "Phase 3C evidence for the 1.0.0-rc.3 optional-entrypoint rollout: promotes the dashboard-only chart to a public MooChart component (src/js/components/chart.js), bundling chart.js@4.5.1 through chart.js/auto at build time. Passing backfill evidence does not add the component to the package manifest's certifiedComponents list until the 1.0.0 release gate is complete.",
+  "description": "RC.3 evidence for the optional-entrypoint rollout: promotes Chart and Datepicker to public bundled Moo UI components. Passing backfill evidence does not add the component to the package manifest's certifiedComponents list until the 1.0.0 release gate is complete.",
   "components": [
     {
       "slug": "chart",
@@ -37,6 +37,41 @@
       "limitations": [
         "Phase 3C browser verification covers the approved dashboard appearance at the 1400x900 desktop and 479x823 mobile baselines in light and dark mode; the supported Bootstrap and browser matrices run at a later gate.",
         "Only line and bar charts are contracted for 1.0.0-rc.3; other Chart.js chart types are not part of the frozen public API.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "datepicker",
+      "phase": "4",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_datepicker.py",
+        "src/js/components/datepicker.js",
+        "tests/fixtures/certification/datepicker.html"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/buttons/",
+        "https://getbootstrap.com/docs/5.3/forms/overview/",
+        "https://ui.shadcn.com/docs/components/base/date-picker",
+        "https://ui.shadcn.com/docs/components/base/calendar"
+      ],
+      "resolvedFindings": [
+        "Bootstrap ships no core datepicker component, so Moo owns the shadcn-like .moo-datepicker trigger/popover composition and .moo-calendar day-grid contract while reusing Bootstrap Button styling for clickable controls.",
+        "vanillajs-datepicker@1.3.4 is bundled at build time through its verified ESM subpaths, Datepicker and DateRangePicker; its default Bootstrap datepicker CSS is not imported or copied into package output."
+      ],
+      "limitations": [
+        "The 1.0.0-rc.3 Datepicker scope covers single date, date range, and standalone inline calendar usage; time picker and natural-language parsing are out of scope.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
     }

@@ -351,6 +351,20 @@ $moo-field-legend-font-size: 1rem !default;
 $moo-field-legend-margin-bottom: 0.375rem !default;
 $moo-field-separator-opacity: 0.1 !default;
 
+// Datepicker is a Moo-owned shadcn-like composition around Bootstrap button
+// primitives and a bundled date engine. Geometry has no Bootstrap datepicker
+// knob because Bootstrap ships no core datepicker component.
+$moo-datepicker-width: 17.5rem !default;
+$moo-datepicker-popover-offset: 0.375rem !default;
+$moo-calendar-day-size: 2rem !default;
+$moo-calendar-gap: 0.25rem !default;
+$moo-calendar-padding: 0.75rem !default;
+$moo-calendar-preset-gap: 0.375rem !default;
+$moo-calendar-day-border: 0 !default;
+$moo-calendar-day-border-radius: var(--bs-border-radius-sm) !default;
+$moo-calendar-day-range-joined-border-radius: 0 !default;
+$moo-calendar-day-focus-ring-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent) !default;
+
 // Bootstrap has no floating/overlay toolbar primitive, so the Data Table
 // bulk-actions bar's hover affordance (the whole bar scaling up slightly,
 // not a per-button state) has no Bootstrap knob to consume. Exposed as a

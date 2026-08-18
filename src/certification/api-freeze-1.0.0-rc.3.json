@@ -111,12 +111,12 @@
       "runtime": "vanillajs-datepicker@1.3.4",
       "namedExports": ["MooCalendar", "MooDateRangePicker"],
       "markup": {
-        "rootClass": "moo-date-picker",
-        "rootAttribute": "data-moo-datepicker",
-        "triggerAttribute": "data-moo-datepicker-trigger",
-        "popoverAttribute": "data-moo-datepicker-popover",
-        "calendarAttribute": "data-moo-calendar",
-        "labelAttribute": "data-moo-datepicker-label"
+        "rootClass": "moo-datepicker",
+        "rootAttribute": "data-datepicker",
+        "triggerAttribute": "data-datepicker-trigger",
+        "popoverAttribute": "data-datepicker-popover",
+        "calendarAttribute": "data-calendar",
+        "labelAttribute": "data-datepicker-label"
       }
     },
     {

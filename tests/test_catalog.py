@@ -583,6 +583,16 @@ class CatalogContractTests(CatalogTestCase):
             # namespace is a composition of Bootstrap form-control,
             # validation, and Dropdown pieces.
             "combobox": ("combobox", "is-invalid"),
+            # Bootstrap has no native Datepicker component. The public
+            # namespace is a shadcn-like trigger/popover/calendar composition
+            # around Bootstrap Button primitives and a bundled date engine.
+            "datepicker": (
+                "moo-datepicker",
+                "moo-calendar",
+                "btn",
+                "is-invalid",
+                "show",
+            ),
             # Bootstrap Table owns the static table markup only. DataTable is
             # Moo's documented interactive composition around Bootstrap table,
             # dropdown, button, checkbox, badge, and pagination primitives.
@@ -676,6 +686,7 @@ class CatalogContractTests(CatalogTestCase):
                         any(
                             class_name == prefix
                             or class_name.startswith(f"{prefix}-")
+                            or class_name.startswith(f"{prefix}__")
                             for prefix in prefixes
                         ),
                         f".{class_name} belongs to another component or catalog chrome",
@@ -697,6 +708,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         page_level_classes = {
             "form-label",
+            "form-control",
             # Catalog demo surfaces that are not ready component macros: the
             # Card spacing demo's live toggle hook and its scrollable body
             # strip are documented examples, not product components.
@@ -726,8 +738,13 @@ class CatalogContractTests(CatalogTestCase):
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="interactive markup"):
+                # Native <input type="time"> is allowed as a composition
+                # example (pairing Date Picker with a native time input).
+                source_no_time_input = re.sub(
+                    r'<input\s+type="time"[^>]*>', '', source
+                )
                 self.assertNotRegex(
-                    source,
+                    source_no_time_input,
                     r"<(?:button|form|input|kbd|select|textarea)\b",
                 )
 

@@ -261,6 +261,27 @@ class PackageMetadataTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_package_manifest_validator_runs_pack_when_no_stdin(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            bad_cache = Path(temporary_directory) / "not-a-directory"
+            bad_cache.write_text("", encoding="utf-8")
+            env = os.environ.copy()
+            env["npm_config_cache"] = str(bad_cache)
+            result = subprocess.run(
+                [sys.executable, "scripts/verify_package_contents.py"],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            "Package manifest matches the approved package boundary.",
+            result.stdout,
+        )
+
     def test_package_manifest_validator_rejects_missing_dist_output(self) -> None:
         payload = [
             {
