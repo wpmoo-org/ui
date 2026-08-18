@@ -1,4 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/button.html.jinja" import button %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
@@ -17,7 +18,7 @@
   <div class="moo-component-examples">
     {% set line_chart_example %}
     <div
-      class="moo-chart"
+      class="moo-chart w-100"
       id="chart-line-example"
       style="height: 17.5rem"
       data-moo-chart="line"
@@ -33,12 +34,12 @@
     {{ render_component_intro(
       line_chart_example,
       chart_usage,
-      preview_class="moo-example__preview--wide"
+      preview_class="moo-example__preview--medium"
     ) }}
 
     {% set bar_chart_example %}
     <div
-      class="moo-chart"
+      class="moo-chart w-100"
       id="chart-bar-example"
       style="height: 17.5rem"
       data-moo-chart="bar"
@@ -51,7 +52,43 @@
       "chart-bar",
       "Bar chart",
       "A single-series bar chart. Bars share the same semantic palette and re-theme with the page.",
-      bar_chart_example
+      bar_chart_example,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set lifecycle_chart_example %}
+    <div class="d-grid gap-3 w-100" data-moo-chart-live>
+      <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+        <span data-moo-chart-theme>{{ button("Toggle theme", variant="outline", size="sm", icon_start="moon-star") }}</span>
+        {% set lifecycle_button %}
+          {{ button("Dispose", variant="outline", size="sm", icon_start="circle-off", icon_end="rotate-cw") }}
+        {% endset %}
+        {{ lifecycle_button
+          | replace('type="button"', ('type="button" data-moo-chart-lifecycle data-moo-chart-lifecycle-state="live"' | safe))
+          | replace('data-icon="inline-start"', ('data-moo-chart-lifecycle-icon="dispose" data-icon="inline-start"' | safe))
+          | replace('data-icon="inline-end"', ('data-moo-chart-lifecycle-icon="reinit" data-icon="inline-end" hidden' | safe))
+          | replace('Dispose', ('<span data-moo-chart-lifecycle-label>Dispose</span>' | safe))
+          | safe
+        }}
+        <span class="visually-hidden" data-moo-chart-status aria-live="polite">Live</span>
+      </div>
+      <div
+        class="moo-chart w-100"
+        id="chart-lifecycle-example"
+        style="height: 17.5rem"
+        data-moo-chart="line"
+        data-moo-chart-data='{"labels":["Q1","Q2","Q3","Q4"],"datasets":[{"label":"Pipeline","data":[18,24,21,30]}]}'
+      >
+        <canvas role="img" aria-label="Lifecycle chart showing quarterly pipeline movement"></canvas>
+      </div>
+    </div>
+    {% endset %}
+    {{ render_block_example(
+      "chart-lifecycle",
+      "Theme and lifecycle",
+      "Exercise the public chart instance through theme changes, disposal, and reinitialization.",
+      lifecycle_chart_example,
+      preview_class="moo-example__preview--medium bg-body text-body"
     ) }}
 
     <h2 id="chart-html-anatomy" class="h4 mt-5 mb-3">HTML Anatomy</h2>
@@ -126,10 +163,12 @@
     <p class="mb-4">
       Chart colors are derived from Bootstrap's semantic <code>--bs-*</code> tokens at
       runtime, not from hardcoded theme values. A <code>MutationObserver</code> watches
-      <code>data-bs-theme</code> on the document element; when you toggle between light
-      and dark (use the theme toggle in this site's header), each chart re-reads the
-      tokens and re-themes its datasets, grid lines, legend, and tooltip without a
-      reload. Charts also reflow on resize: they are responsive and drop
+      the nearest <code>data-bs-theme</code> scope, falling back to the document
+      element; when that scope changes, each chart re-reads the tokens and re-themes
+      its datasets, grid lines, legend, and tooltip without a reload. Line chart
+      points use their series color for the point fill, border, and hover halo so
+      light theme points do not pick up a dark neutral outline. Charts also
+      reflow on resize: they are responsive and drop
       aspect-ratio locking, so the same markup fills a desktop card or a narrow
       mobile viewport without layout-specific switches.
     </p>

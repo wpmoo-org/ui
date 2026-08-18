@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 import tempfile
-import warnings
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -139,6 +139,85 @@ class CatalogContractTests(CatalogTestCase):
                     sorted_loop in path.read_text(encoding="utf-8"),
                     f"{path.relative_to(ROOT)} must sort components by label",
                 )
+
+    def test_ready_components_have_catalog_icons(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        component_index = self.read_output("components/index.html")
+
+        self.assertIn('href="../components/chart/"', component_index)
+        self.assertNotRegex(
+            component_index,
+            r'href="\.\./components/chart/"[^>]*>[\s\S]{0,240}?data-lucide="component"',
+        )
+
+    def test_dashboard_charts_put_stable_ids_on_the_public_root(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        overview = self.read_output("examples/dashboard/overview/index.html")
+
+        self.assertRegex(
+            overview,
+            r'<div class="moo-chart moo-dashboard-chart" id="overview-revenue-chart"',
+        )
+        self.assertRegex(
+            overview,
+            r'<div class="moo-chart moo-dashboard-chart" id="overview-visitors-chart"',
+        )
+        self.assertNotRegex(
+            overview,
+            r'<canvas id="overview-(?:revenue|visitors)-chart"',
+        )
+
+    def test_ready_example_preview_images_are_present_and_valid(self) -> None:
+        examples = site_build.load_examples()
+
+        missing = []
+        for example in examples:
+            slug = example["slug"]
+            path = STATIC / "images/examples" / f"{slug}.png"
+            if not path.is_file():
+                missing.append(slug)
+                continue
+
+            width, height, _color_type = read_png_ihdr(path)
+            with self.subTest(slug=slug):
+                self.assertGreater(width, 0)
+                self.assertGreater(height, 0)
+                self.assertAlmostEqual(width / height, 16 / 9, delta=0.02)
+
+        self.assertEqual(missing, [])
+
+    def _load_example_preview_generator(self):
+        path = ROOT / "scripts/generate_example_previews.py"
+        spec = importlib.util.spec_from_file_location(
+            "generate_example_previews",
+            path,
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        generator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(generator)
+        return generator
+
+    def test_example_preview_generator_covers_every_example_page(self) -> None:
+        generator = self._load_example_preview_generator()
+
+        generator_slugs = set(generator.resolve_example_slugs(generator.parse_args([])))
+        expected_slugs = {example["slug"] for example in site_build.load_examples()}
+
+        self.assertEqual(generator_slugs, expected_slugs)
+
+    def test_example_preview_generator_can_refresh_a_single_example(self) -> None:
+        generator = self._load_example_preview_generator()
+
+        self.assertEqual(
+            generator.resolve_example_slugs(generator.parse_args(["dashboard/overview"])),
+            ("dashboard/overview",),
+        )
+        self.assertEqual(generator.parse_args([]).slugs, [])
 
     def test_ready_component_sidebar_icons_do_not_fall_back_for_new_components(self) -> None:
         source = (ROOT / "site/src/includes/component-icons.html.jinja").read_text(
@@ -704,7 +783,7 @@ class CatalogContractTests(CatalogTestCase):
                         self.assertIn("noopener", tokens)
                         self.assertIn("noreferrer", tokens)
 
-    def test_ready_component_preview_images_are_valid_when_present(self) -> None:
+    def test_ready_component_preview_images_are_present_and_valid(self) -> None:
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
@@ -713,7 +792,6 @@ class CatalogContractTests(CatalogTestCase):
         ]
         previews_dir = STATIC / "images/components"
         placeholder = STATIC / "images/placeholder.webp"
-        missing: list[str] = []
 
         self.assertTrue(
             is_valid_webp(placeholder),
@@ -725,8 +803,7 @@ class CatalogContractTests(CatalogTestCase):
                 png_path = previews_dir / f"{slug}.png"
                 webp_path = previews_dir / f"{slug}.webp"
                 if not png_path.is_file() and not webp_path.is_file():
-                    missing.append(slug)
-                    continue
+                    self.fail(f"{slug} is ready but still uses placeholder.webp")
                 if webp_path.is_file():
                     self.assertTrue(
                         is_valid_webp(webp_path),
@@ -740,12 +817,6 @@ class CatalogContractTests(CatalogTestCase):
                     PNG_COLOR_TYPE_RGBA,
                     f"{slug}.png is not RGBA (color type {color_type})",
                 )
-
-        if missing:
-            warnings.warn(
-                "ready components using placeholder.webp: " + ", ".join(missing),
-                stacklevel=1,
-            )
 
     def test_catalog_builds_the_complete_root_favicon_set(self) -> None:
         svg = (ROOT / "site/public/favicon.svg").read_text(encoding="utf-8")

@@ -166,6 +166,33 @@ report("dispose", {{
             },
         )
 
+    def test_stale_dispose_does_not_clear_a_newer_instance(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-moo-chart": "line",
+  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+}});
+const stale = MooChart.getOrCreateInstance(root);
+stale.dispose();
+const current = MooChart.getOrCreateInstance(root);
+stale.dispose();
+report("stale-dispose", {{
+  keptCurrent: MooChart.getInstance(root) === current,
+  staleCleared: stale.chart === null,
+}});
+"""
+        )
+        self.assertEqual(
+            case,
+            {
+                "name": "stale-dispose",
+                "ok": True,
+                "keptCurrent": True,
+                "staleCleared": True,
+            },
+        )
+
     def test_data_attribute_feeds_chart_data_and_type(self) -> None:
         case = self.run_chart_case(
             f"""
@@ -189,6 +216,48 @@ report("data-attributes", {{
         self.assertEqual(case["values"], [1, 2])
         self.assertEqual(case["type"], "bar")
         self.assertTrue(case["themed"])
+
+    def test_line_points_use_series_colored_halos_in_light_mode(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-moo-chart": "line",
+  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--bs-info", "rgb(13, 110, 253)"],
+  ["--bs-info-text-emphasis", "rgb(5, 44, 101)"],
+  ["--bs-success", "rgb(25, 135, 84)"],
+  ["--bs-warning", "rgb(255, 193, 7)"],
+  ["--bs-danger", "rgb(220, 53, 69)"],
+]);
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  return {{ color: element.style.color, getPropertyValue: () => "" }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const dataset = instance.chart.data.datasets[0];
+report("line-point-halo", {{
+  borderColor: dataset.borderColor,
+  pointBackgroundColor: dataset.pointBackgroundColor,
+  pointBorderColor: dataset.pointBorderColor,
+  pointHoverBorderColor: dataset.pointHoverBorderColor,
+}});
+"""
+        )
+        self.assertEqual(case["pointBackgroundColor"], "rgb(13, 110, 253)")
+        self.assertEqual(case["pointBorderColor"], "rgb(13, 110, 253)")
+        self.assertEqual(case["pointHoverBorderColor"], "rgb(13, 110, 253)")
+        self.assertNotIn(
+            case["pointBorderColor"],
+            {"rgb(33, 37, 41)", "rgb(222, 226, 230)"},
+        )
 
     def test_unsupported_chart_type_is_rejected(self) -> None:
         case = self.run_chart_case(
@@ -333,6 +402,53 @@ report("theme-observer", {{
         # exactly one coalesced re-theme update.
         self.assertEqual(case["updates"], 1)
 
+    def test_theme_observer_uses_the_nearest_data_bs_theme_scope(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const scopedTheme = {{
+  dataset: {{ bsTheme: "dark" }},
+  getAttribute: (name) => (name === "data-bs-theme" ? scopedTheme.dataset.bsTheme : null),
+}};
+const root = makeRoot({{
+  "data-moo-chart": "line",
+  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+}});
+root.closest = (selector) => (selector === "[data-bs-theme]" ? scopedTheme : null);
+const scopedColors = new Map([
+  ["--bs-body-color", "rgb(222, 226, 230)"],
+  ["--bs-body-bg", "rgb(33, 37, 41)"],
+  ["--bs-secondary-color", "rgb(173, 181, 189)"],
+  ["--bs-border-color", "rgb(73, 80, 87)"],
+  ["--bs-info", "rgb(13, 202, 240)"],
+  ["--bs-info-text-emphasis", "rgb(110, 223, 246)"],
+  ["--bs-success", "rgb(25, 135, 84)"],
+  ["--bs-warning", "rgb(255, 193, 7)"],
+  ["--bs-danger", "rgb(220, 53, 69)"],
+]);
+const documentColors = new Map([
+  ["--bs-info", "rgb(13, 110, 253)"],
+  ["--bs-info-text-emphasis", "rgb(5, 44, 101)"],
+]);
+window.getComputedStyle = (element) => {{
+  const colors = element === scopedTheme ? scopedColors : documentColors;
+  return {{
+    color: element.style?.color || "",
+    getPropertyValue: (token) => colors.get(token) || "",
+  }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const observer = observerLog.at(-1);
+const observation = observer.observed[0];
+const dataset = instance.chart.data.datasets[0];
+report("scoped-theme-observer", {{
+  observedScopedTheme: observation.target === scopedTheme,
+  pointBackgroundColor: dataset.pointBackgroundColor,
+}});
+"""
+        )
+        self.assertTrue(case["observedScopedTheme"])
+        self.assertEqual(case["pointBackgroundColor"], "rgb(110, 223, 246)")
+
     def test_catalog_adapter_initializes_and_disposes_moo_charts(self) -> None:
         result = subprocess.run(
             [
@@ -359,14 +475,20 @@ const release = initExamplesChart(root);
 const reentered = initExamplesChart(root);
 const initialized = roots.every((element) => MooChart.getInstance(element) instanceof MooChart);
 release();
+release();
 const cleared = roots.every((element) => MooChart.getInstance(element) === null);
 const secondRelease = initExamplesChart(root);
+const secondInstance = MooChart.getInstance(roots[0]);
+release();
+const staleReleaseKeptNewState = MooChart.getInstance(roots[0]) === secondInstance;
 report("catalog-adapter", {{
   releaseIsFunction: typeof release === "function",
   idempotent: reentered === release,
   initialized,
   cleared,
   reinitializable: typeof secondRelease === "function" && secondRelease !== release,
+  repeatedReleaseIsSafe: cleared,
+  staleReleaseKeptNewState,
 }});
 """,
             ],
@@ -388,8 +510,298 @@ report("catalog-adapter", {{
                 "initialized": True,
                 "cleared": True,
                 "reinitializable": True,
+                "repeatedReleaseIsSafe": True,
+                "staleReleaseKeptNewState": True,
             },
         )
+
+    def test_catalog_adapter_scopes_lifecycle_theme_to_the_example(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                NODE_PREAMBLE.replace(
+                    'import MooChart from "./src/js/components/chart.js";',
+                    'import MooChart from "./src/js/components/chart.js";\n'
+                    'import { initExamplesChart } from "./site/src/js/catalog/examples-chart.js";',
+                )
+                + f"""
+function makeButton() {{
+  const handlers = new Map();
+  return {{
+    addEventListener: (name, handler) => handlers.set(name, handler),
+    removeEventListener: (name) => handlers.delete(name),
+    click: () => handlers.get("click")?.(),
+  }};
+}}
+const themeButton = makeButton();
+const status = {{ textContent: "" }};
+const previewScope = {{
+  dataset: {{}},
+  ownerDocument,
+}};
+const chartRoot = makeRoot({{
+  "data-moo-chart": "line",
+  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+}});
+const container = {{
+  dataset: {{}},
+  ownerDocument,
+  querySelector: (selector) => {{
+    if (selector === ".moo-chart") return chartRoot;
+    if (selector === "[data-moo-chart-status]") return status;
+    if (selector === "[data-moo-chart-theme]") return themeButton;
+    return null;
+  }},
+  closest: (selector) => (selector === ".moo-example__preview" ? previewScope : null),
+}};
+chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope : null);
+documentElement.dataset.bsTheme = "dark";
+const root = {{
+  querySelectorAll: (selector) => {{
+    if (selector === "[data-moo-chart-live]") return [container];
+    if (selector === ".moo-chart") return [chartRoot];
+    return [];
+  }},
+}};
+const release = initExamplesChart(root);
+const initialLocalTheme = previewScope.dataset.bsTheme;
+themeButton.click();
+const afterToggleLocalTheme = previewScope.dataset.bsTheme;
+const afterToggleDocumentTheme = documentElement.dataset.bsTheme;
+release();
+report("scoped-lifecycle-theme", {{
+  initialLocalTheme,
+  afterToggleLocalTheme,
+  afterToggleDocumentTheme,
+  containerTheme: container.dataset.bsTheme || null,
+  statusMessage: status.textContent,
+}});
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case.get("initialLocalTheme"), "dark")
+        self.assertEqual(case.get("afterToggleLocalTheme"), "light")
+        self.assertEqual(case.get("afterToggleDocumentTheme"), "dark")
+        self.assertIsNone(case["containerTheme"])
+        self.assertEqual(case["statusMessage"], "Example theme: light")
+
+    def test_catalog_adapter_uses_one_stateful_lifecycle_button(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                NODE_PREAMBLE.replace(
+                    'import MooChart from "./src/js/components/chart.js";',
+                    'import MooChart from "./src/js/components/chart.js";\n'
+                    'import { initExamplesChart } from "./site/src/js/catalog/examples-chart.js";',
+                )
+                + f"""
+function makeLifecycleButton() {{
+  const handlers = new Map();
+  const attributes = {{}};
+  const makeIcon = (initialHidden = false) => {{
+    const iconAttributes = new Set(initialHidden ? ["hidden"] : []);
+    return {{
+      getAttribute: (name) => (iconAttributes.has(name) ? "" : null),
+      toggleAttribute: (name, force) => {{
+        if (force) iconAttributes.add(name);
+        else iconAttributes.delete(name);
+      }},
+    }};
+  }};
+  const label = {{ textContent: "Dispose" }};
+  const disposeIcon = makeIcon(false);
+  const reinitIcon = makeIcon(true);
+  const button = {{
+    dataset: {{}},
+    setAttribute: (name, value) => {{ attributes[name] = value; }},
+    getAttribute: (name) => attributes[name] || null,
+    addEventListener: (name, handler) => handlers.set(name, handler),
+    removeEventListener: (name) => handlers.delete(name),
+    click: () => handlers.get("click")?.(),
+    querySelector: (selector) => {{
+      if (selector === "[data-moo-chart-lifecycle-label]") return label;
+      if (selector === '[data-moo-chart-lifecycle-icon="dispose"]') return disposeIcon;
+      if (selector === '[data-moo-chart-lifecycle-icon="reinit"]') return reinitIcon;
+      return null;
+    }},
+  }};
+  return {{ button, label, disposeIcon, reinitIcon }};
+}}
+const themeButton = {{
+  addEventListener: () => {{}},
+  removeEventListener: () => {{}},
+}};
+const lifecycle = makeLifecycleButton();
+const status = {{ textContent: "" }};
+const previewScope = {{ dataset: {{}}, ownerDocument }};
+const chartRoot = makeRoot({{
+  "data-moo-chart": "line",
+  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+}});
+const container = {{
+  ownerDocument,
+  querySelector: (selector) => {{
+    if (selector === ".moo-chart") return chartRoot;
+    if (selector === "[data-moo-chart-status]") return status;
+    if (selector === "[data-moo-chart-theme]") return themeButton;
+    if (selector === "[data-moo-chart-lifecycle]") return lifecycle.button;
+    return null;
+  }},
+  closest: (selector) => (selector === ".moo-example__preview" ? previewScope : null),
+}};
+chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope : null);
+const root = {{
+  querySelectorAll: (selector) => {{
+    if (selector === "[data-moo-chart-live]") return [container];
+    if (selector === ".moo-chart") return [chartRoot];
+    return [];
+  }},
+}};
+const release = initExamplesChart(root);
+const initial = {{
+  hasInstance: MooChart.getInstance(chartRoot) instanceof MooChart,
+  label: lifecycle.label.textContent,
+  state: lifecycle.button.dataset.mooChartLifecycleState,
+  ariaLabel: lifecycle.button.getAttribute("aria-label"),
+  disposeIconHidden: lifecycle.disposeIcon.getAttribute("hidden"),
+  reinitIconHidden: lifecycle.reinitIcon.getAttribute("hidden"),
+}};
+lifecycle.button.click();
+const afterDispose = {{
+  hasInstance: MooChart.getInstance(chartRoot) instanceof MooChart,
+  label: lifecycle.label.textContent,
+  state: lifecycle.button.dataset.mooChartLifecycleState,
+  ariaLabel: lifecycle.button.getAttribute("aria-label"),
+  disposeIconHidden: lifecycle.disposeIcon.getAttribute("hidden"),
+  reinitIconHidden: lifecycle.reinitIcon.getAttribute("hidden"),
+  status: status.textContent,
+}};
+lifecycle.button.click();
+const afterReinit = {{
+  hasInstance: MooChart.getInstance(chartRoot) instanceof MooChart,
+  label: lifecycle.label.textContent,
+  state: lifecycle.button.dataset.mooChartLifecycleState,
+  ariaLabel: lifecycle.button.getAttribute("aria-label"),
+  disposeIconHidden: lifecycle.disposeIcon.getAttribute("hidden"),
+  reinitIconHidden: lifecycle.reinitIcon.getAttribute("hidden"),
+  status: status.textContent,
+}};
+release();
+report("stateful-lifecycle-button", {{
+  initial,
+  afterDispose,
+  afterReinit,
+}});
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+
+        self.assertEqual(
+            case["initial"],
+            {
+                "hasInstance": True,
+                "label": "Dispose",
+                "state": "live",
+                "ariaLabel": "Dispose chart",
+                "disposeIconHidden": None,
+                "reinitIconHidden": "",
+            },
+        )
+        self.assertEqual(
+            case["afterDispose"],
+            {
+                "hasInstance": False,
+                "label": "Reinitialize",
+                "state": "disposed",
+                "ariaLabel": "Reinitialize chart",
+                "disposeIconHidden": "",
+                "reinitIconHidden": None,
+                "status": "Disposed",
+            },
+        )
+        self.assertEqual(
+            case["afterReinit"],
+            {
+                "hasInstance": True,
+                "label": "Dispose",
+                "state": "live",
+                "ariaLabel": "Dispose chart",
+                "disposeIconHidden": None,
+                "reinitIconHidden": "",
+                "status": "Live",
+            },
+        )
+
+    def test_lifecycle_preview_surface_is_the_theme_scope(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/chart.html")
+        lifecycle = page.split('data-example="chart-lifecycle"', 1)[1].split(
+            'data-moo-code-panel',
+            1,
+        )[0]
+
+        self.assertRegex(
+            lifecycle,
+            r'<div class="moo-example__preview[^"]*\bmoo-example__preview--medium\b'
+            r'[^"]*\bbg-body\b[^"]*\btext-body\b[^"]*"',
+        )
+        self.assertIn('data-moo-chart-live', lifecycle)
+
+    def test_lifecycle_controls_are_centered_in_preview(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/chart.html")
+        lifecycle = page.split('data-moo-chart-live', 1)[1].split(
+            'id="chart-lifecycle-example"',
+            1,
+        )[0]
+
+        self.assertRegex(
+            lifecycle,
+            r'class="[^"]*\bd-flex\b[^"]*\bflex-wrap\b[^"]*'
+            r'\balign-items-center\b[^"]*\bjustify-content-center\b[^"]*'
+            r'\bgap-2\b[^"]*"',
+        )
+
+    def test_lifecycle_status_is_accessible_without_a_visible_badge(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/chart.html")
+        lifecycle = page.split('data-moo-chart-live', 1)[1].split(
+            'id="chart-lifecycle-example"',
+            1,
+        )[0]
+
+        self.assertIn('data-moo-chart-status', lifecycle)
+        self.assertIn('aria-live="polite"', lifecycle)
+        self.assertIn('visually-hidden', lifecycle)
+        self.assertNotIn('class="badge', lifecycle)
+        self.assertIn('data-moo-chart-lifecycle', lifecycle)
+        self.assertIn('data-moo-chart-lifecycle-icon="dispose"', lifecycle)
+        self.assertIn('data-moo-chart-lifecycle-icon="reinit"', lifecycle)
+        self.assertNotIn('data-moo-chart-lifecycle-icon="&quot;dispose&quot;"', lifecycle)
+        self.assertNotIn('data-moo-chart-lifecycle-icon="&quot;reinit&quot;"', lifecycle)
+        self.assertNotIn('data-moo-chart-reinit', lifecycle)
+        self.assertNotIn('data-moo-chart-dispose', lifecycle)
 
     def test_public_module_contracts_the_frozen_api(self) -> None:
         source = CHART_JS.read_text(encoding="utf-8")
@@ -474,10 +886,27 @@ report("catalog-adapter", {{
         self.assertIn(".moo-chart", source)
         self.assertIn("data-moo-chart", source)
         self.assertIn("data-moo-chart-data", source)
+        for chart_id in (
+            "chart-line-example",
+            "chart-bar-example",
+            "chart-lifecycle-example",
+        ):
+            self.assertRegex(
+                source,
+                rf'class="moo-chart w-100"\s+id="{chart_id}"',
+            )
+        self.assertRegex(
+            source,
+            r'class="[^"]*\bd-grid\b[^"]*\bgap-3\b[^"]*\bw-100\b[^"]*"\s+data-moo-chart-live',
+        )
+        self.assertEqual(source.count('preview_class="moo-example__preview--medium'), 3)
+        self.assertNotIn('preview_class="moo-example__preview--wide"', source)
         for topic in (
             '"line"',
             '"bar"',
             "theme",
+            "data-moo-chart-live",
+            "data-moo-chart-lifecycle",
             "dispose",
             "resize",
             "aria-label",

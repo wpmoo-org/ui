@@ -47,8 +47,8 @@ const COLOR_TOKENS = [
 // Dataset colors cycle through the semantic palette in this order.
 const DATASET_COLOR_KEYS = ["primary", "success", "info", "warning", "danger"];
 
-function readThemeColors(document, window) {
-  const styles = window?.getComputedStyle?.(document?.documentElement);
+function readThemeColors(themeElement, window) {
+  const styles = window?.getComputedStyle?.(themeElement);
   const colors = {};
   if (!styles) return colors;
   COLOR_TOKENS.forEach((token) => {
@@ -57,7 +57,22 @@ function readThemeColors(document, window) {
   return colors;
 }
 
-function resolveCanvasColor(document, window, value, fallback) {
+function resolveThemeElement(element) {
+  return (
+    element?.closest?.("[data-bs-theme]") ||
+    element?.ownerDocument?.documentElement ||
+    null
+  );
+}
+
+function themeElementIsDark(element) {
+  const theme =
+    element?.getAttribute?.("data-bs-theme") ||
+    element?.dataset?.bsTheme;
+  return theme === "dark";
+}
+
+function resolveCanvasColor(document, window, value, fallback, themeElement) {
   const createElement = document?.createElement;
   const getComputedStyle = window?.getComputedStyle;
   const root = document?.documentElement;
@@ -67,7 +82,8 @@ function resolveCanvasColor(document, window, value, fallback) {
   probe.style.color = value;
   if (!probe.style.color) return fallback;
   probe.hidden = true;
-  root.appendChild(probe);
+  const parent = themeElement?.appendChild ? themeElement : root;
+  parent.appendChild(probe);
   try {
     const resolved = getComputedStyle.call(window, probe).color;
     return resolved || fallback;
@@ -133,12 +149,12 @@ function themeDataset(dataset, index, chartType, theme) {
       color,
     );
     dataset.pointBackgroundColor = pointColor;
-    dataset.pointBorderColor = theme.borderColor;
+    dataset.pointBorderColor = pointColor;
     dataset.pointBorderWidth = 2;
     dataset.pointRadius = 4;
     dataset.pointHoverRadius = 7;
     dataset.pointHoverBackgroundColor = pointColor;
-    dataset.pointHoverBorderColor = theme.color;
+    dataset.pointHoverBorderColor = pointColor;
     dataset.pointHoverBorderWidth = 3;
     if (dataset.tension === undefined) dataset.tension = 0.3;
     if (dataset.fill === undefined) dataset.fill = true;
@@ -378,15 +394,22 @@ export default class MooChart {
     this._document = element.ownerDocument;
     this._window = this._document?.defaultView;
     this._config = config || {};
+    this._themeElement = resolveThemeElement(element);
 
     const data = resolveChartData(element, this._config);
     const type = resolveChartType(element, this._config);
     this._type = type;
 
-    const isDark = this._document?.documentElement?.dataset?.bsTheme === "dark";
-    const colors = readThemeColors(this._document, this._window);
+    const isDark = themeElementIsDark(this._themeElement);
+    const colors = readThemeColors(this._themeElement, this._window);
     const resolveColor = (value, fallback) =>
-      resolveCanvasColor(this._document, this._window, value, fallback);
+      resolveCanvasColor(
+        this._document,
+        this._window,
+        value,
+        fallback,
+        this._themeElement,
+      );
     this._theme = buildChartTheme(colors, isDark, resolveColor);
 
     const datasets = (data.datasets || []).map((dataset, index) =>
@@ -409,8 +432,7 @@ export default class MooChart {
 
     this._rethemeFrame = null;
     this._observer = null;
-    const documentElement = this._document?.documentElement;
-    if (documentElement && this._window?.MutationObserver) {
+    if (this._themeElement && this._window?.MutationObserver) {
       this._observer = new this._window.MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.attributeName === "data-bs-theme") {
@@ -418,7 +440,7 @@ export default class MooChart {
           }
         });
       });
-      this._observer.observe(documentElement, {
+      this._observer.observe(this._themeElement, {
         attributes: true,
         attributeFilter: ["data-bs-theme"],
       });
@@ -452,10 +474,16 @@ export default class MooChart {
 
   _applyTheme() {
     if (!this._chart) return;
-    const isDark = this._document?.documentElement?.dataset?.bsTheme === "dark";
-    const colors = readThemeColors(this._document, this._window);
+    const isDark = themeElementIsDark(this._themeElement);
+    const colors = readThemeColors(this._themeElement, this._window);
     const resolveColor = (value, fallback) =>
-      resolveCanvasColor(this._document, this._window, value, fallback);
+      resolveCanvasColor(
+        this._document,
+        this._window,
+        value,
+        fallback,
+        this._themeElement,
+      );
     this._theme = buildChartTheme(colors, isDark, resolveColor);
     applyThemeToChart(this._chart, this._theme);
   }
@@ -471,6 +499,8 @@ export default class MooChart {
     this._observer = null;
     this._chart?.destroy();
     this._chart = null;
-    instances.delete(this._element);
+    if (instances.get(this._element) === this) {
+      instances.delete(this._element);
+    }
   }
 }

@@ -3,16 +3,20 @@
 
 Boots a local server over the repo root (same pattern as tests/helpers/
 browser_harness.py's serve_repository), loads each built Examples page
-from site-dist/, and saves a 1280x720 (exactly 16:9) viewport screenshot
-to site/static/images/examples/<slug>.png. build.py's
+from site-dist/, and saves a 960x540 (exactly 16:9) viewport screenshot
+at 2x density to site/static/images/examples/<slug>.png. build.py's
 example_preview_src() picks these up automatically on the next build --
 no template or code changes needed after running this.
 
 Run `python3 build.py` first so site-dist/ is current, then:
     python3 scripts/generate_example_previews.py
+
+To refresh one or more specific cards:
+    python3 scripts/generate_example_previews.py dashboard/overview
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -61,6 +65,7 @@ EXAMPLE_SLUGS = (
     "settings/profile",
     "settings/account",
     "settings/appearance",
+    "dashboard/overview",
     "dashboard/tasks",
     "dashboard/users",
     "marketing/pricing",
@@ -81,16 +86,42 @@ CONTENT_CLIP_SELECTOR = {
 }
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "slugs",
+        nargs="*",
+        help="Optional example slug(s) to refresh. Defaults to every example preview.",
+    )
+    args = parser.parse_args(argv)
+    unknown_slugs = [slug for slug in args.slugs if slug not in EXAMPLE_SLUGS]
+    if unknown_slugs:
+        parser.error(
+            "unknown example slug(s): "
+            + ", ".join(unknown_slugs)
+            + "; choose from "
+            + ", ".join(EXAMPLE_SLUGS)
+        )
+    return args
+
+
+def resolve_example_slugs(args: argparse.Namespace) -> tuple[str, ...]:
+    return tuple(args.slugs) or EXAMPLE_SLUGS
+
+
+def main(argv: list[str] | None = None) -> None:
     if not (SITE_DIST / "examples").is_dir():
         raise SystemExit("site-dist/examples not found -- run `python3 build.py` first.")
+
+    args = parse_args(argv)
+    slugs = resolve_example_slugs(args)
 
     with sync_playwright() as playwright, serve_repository() as base_url:
         browser = launch_certification_browser(playwright)
         try:
             context = browser.new_context(viewport=VIEWPORT, device_scale_factor=2)
             page = context.new_page()
-            for slug in EXAMPLE_SLUGS:
+            for slug in slugs:
                 url = f"{base_url}/site-dist/examples/{slug}/index.html"
                 response = None
                 # "networkidle" is flaky by nature (Playwright's own docs warn
