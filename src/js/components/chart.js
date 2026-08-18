@@ -63,14 +63,17 @@ function resolveCanvasColor(document, window, value, fallback) {
   const root = document?.documentElement;
   if (!createElement || !getComputedStyle || !root) return fallback;
 
-  const probe = createElement("span");
+  const probe = createElement.call(document, "span");
   probe.style.color = value;
   if (!probe.style.color) return fallback;
   probe.hidden = true;
   root.appendChild(probe);
-  const resolved = getComputedStyle(probe).color;
-  probe.remove();
-  return resolved || fallback;
+  try {
+    const resolved = getComputedStyle.call(window, probe).color;
+    return resolved || fallback;
+  } finally {
+    probe.remove();
+  }
 }
 
 // Build a Chart.js color palette from the current theme's CSS variables.
@@ -193,7 +196,7 @@ function applyThemeToChart(chart, theme) {
     chart.options.plugins.tooltip.borderColor = theme.borderColor;
   }
 
-  chart.update();
+  chart.update("none");
 }
 
 // Build the Chart.js options object for the approved dashboard appearance.
@@ -286,12 +289,14 @@ function buildChartOptions(theme) {
   };
 }
 
-// Merge order: data-attribute defaults < constructor config < programmatic
-// overrides. Later sources override earlier sources.
+// Resolve data-attribute defaults first; an explicit constructor data value
+// replaces them. The component does not merge arbitrary dataset payloads.
 function resolveChartData(element, config) {
   const raw = element.getAttribute("data-moo-chart-data");
   let attributeData = null;
+  let hasAttributeData = false;
   if (raw !== null && raw.trim() !== "") {
+    hasAttributeData = true;
     try {
       attributeData = JSON.parse(raw);
     } catch (error) {
@@ -300,10 +305,34 @@ function resolveChartData(element, config) {
       );
     }
   }
-  if (!attributeData && !config.data) {
-    attributeData = { labels: [], datasets: [] };
+  const hasConfigData = Object.prototype.hasOwnProperty.call(config, "data");
+  if (!hasConfigData && !hasAttributeData) {
+    return { labels: [], datasets: [] };
   }
-  return config.data || attributeData;
+  const data = hasConfigData ? config.data : attributeData;
+  if (
+    data === null ||
+    data === undefined ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    !Array.isArray(data.labels) ||
+    !Array.isArray(data.datasets)
+  ) {
+    const source = hasConfigData ? "config.data" : "data-moo-chart-data";
+    throw new TypeError(
+      `MooChart ${source} must contain labels and datasets arrays.`,
+    );
+  }
+  return data;
+}
+
+function mergeChartOptions(defaults, overrides = {}) {
+  overrides = overrides || {};
+  const merged = { ...defaults, ...overrides };
+  for (const branch of ["plugins", "scales"]) {
+    merged[branch] = { ...defaults[branch], ...overrides[branch] };
+  }
+  return merged;
 }
 
 function resolveChartType(element, config) {
@@ -364,10 +393,10 @@ export default class MooChart {
       themeDataset({ ...dataset }, index, type, this._theme)
     );
 
-    const options = {
-      ...buildChartOptions(this._theme),
-      ...(this._config.options || {}),
-    };
+    const options = mergeChartOptions(
+      buildChartOptions(this._theme),
+      this._config.options,
+    );
     this._chart = new Chart(canvas, {
       ...this._config,
       type,

@@ -17,6 +17,7 @@ from tests.helpers.browser_harness import (
     serve_repository,
     skip_if_browser_launch_is_sandboxed,
 )
+from tests.helpers.node_harness import NODE_PREAMBLE, NODE_TEST_TIMEOUT, VALID_DATA
 
 
 CHART_JS = ROOT / "src/js/components/chart.js"
@@ -24,97 +25,6 @@ CATALOG_ADAPTER = ROOT / "site/src/js/catalog/examples-chart.js"
 CATALOG_INDEX = ROOT / "site/src/js/catalog/index.js"
 FIXTURE = ROOT / "tests/fixtures/certification/chart.html"
 PAGE = ROOT / "site/src/pages/components/chart.html.jinja"
-
-# Shared Node harness: a minimal, permissive DOM stub good enough to run the
-# real MooChart (and the Chart.js it bundles) outside a browser. The stub
-# tracks MutationObserver activity so lifecycle assertions can inspect what
-# the component observed and when it disconnected.
-NODE_PREAMBLE = """
-import MooChart from "./src/js/components/chart.js";
-
-globalThis.window = globalThis;
-
-const observerLog = [];
-class TrackingObserver {
-  constructor(callback) {
-    this.callback = callback;
-    this.observed = [];
-    this.disconnected = false;
-    observerLog.push(this);
-  }
-  observe(target, options) { this.observed.push({ target, options }); }
-  disconnect() { this.disconnected = true; }
-}
-
-let canceledFrames = 0;
-window.MutationObserver = TrackingObserver;
-window.requestAnimationFrame = (callback) => setTimeout(callback, 0);
-window.cancelAnimationFrame = (id) => { canceledFrames += 1; clearTimeout(id); };
-window.getComputedStyle = () => ({ getPropertyValue: () => "rgb(13, 110, 253)" });
-
-const documentElement = { dataset: { bsTheme: "light" } };
-const ownerDocument = { documentElement, defaultView: window };
-
-function makeCanvas() {
-  const contextHandler = {
-    get(target, prop) {
-      if (prop in target) return target[prop];
-      if (prop === Symbol.toPrimitive) return () => "";
-      return () => (prop === "measureText" ? { width: 0 } : undefined);
-    },
-  };
-  const context = new Proxy({}, contextHandler);
-  const canvas = {
-    nodeType: 1,
-    tagName: "CANVAS",
-    style: {},
-    width: 400,
-    height: 200,
-    getContext: () => context,
-    addEventListener() {},
-    removeEventListener() {},
-    getBoundingClientRect: () => ({
-      x: 0, y: 0, top: 0, left: 0, right: 400, bottom: 200,
-      width: 400, height: 200,
-    }),
-    setAttribute() {},
-    getAttribute: () => null,
-    ownerDocument,
-  };
-  context.canvas = canvas;
-  return canvas;
-}
-
-function makeRoot(attrs = {}, { withCanvas = true } = {}) {
-  const attrMap = new Map(Object.entries(attrs));
-  const canvas = makeCanvas();
-  const root = {
-    nodeType: 1,
-    tagName: "DIV",
-    style: {},
-    ownerDocument,
-    getAttribute: (name) => (attrMap.has(name) ? attrMap.get(name) : null),
-    setAttribute: (name, value) => attrMap.set(name, String(value)),
-    matches: (selector) => selector === ".moo-chart",
-    querySelector: (selector) =>
-      ((selector === ":scope > canvas" || selector === "canvas") && withCanvas
-        ? canvas
-        : null),
-    querySelectorAll: (selector) => (selector === ".moo-chart" ? [root] : []),
-  };
-  return root;
-}
-
-function report(name, details = {}) {
-  console.log(JSON.stringify({ name, ok: true, ...details }));
-}
-"""
-
-VALID_DATA = json.dumps(
-    {"labels": ["Jan", "Feb"], "datasets": [{"label": "Revenue", "data": [1, 2]}]}
-)
-NODE_TEST_TIMEOUT = 30
-
 
 def without_comments(source: str) -> str:
     source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
@@ -332,6 +242,27 @@ report("invalid-json", { message, isSyntaxError });
             "MooChart could not parse data-moo-chart-data as JSON:", case["message"]
         )
 
+    def test_invalid_data_shape_produces_an_explicit_diagnostic(self) -> None:
+        case = self.run_chart_case(
+            """
+const root = makeRoot({
+  "data-moo-chart": "line",
+  "data-moo-chart-data": "null",
+});
+let message = "";
+try {
+  new MooChart(root);
+} catch (error) {
+  message = error.message;
+}
+report("invalid-data-shape", { message });
+"""
+        )
+        self.assertEqual(
+            case["message"],
+            "MooChart data-moo-chart-data must contain labels and datasets arrays.",
+        )
+
     def test_configuration_precedence_overrides_data_attributes(self) -> None:
         case = self.run_chart_case(
             f"""
@@ -483,11 +414,6 @@ report("catalog-adapter", {{
         self.assertIn("const instances = new WeakMap();", source)
         self.assertIn("this._observer", source)
         self.assertIn('attributeFilter: ["data-bs-theme"]', source)
-        self.assertIn(
-            'throw new SyntaxError(\n'
-            "        `MooChart could not parse data-moo-chart-data as JSON",
-            source,
-        )
 
     def test_no_catalog_source_uses_a_chart_cdn_or_window_chart(self) -> None:
         for path in (CHART_JS, CATALOG_ADAPTER, CATALOG_INDEX):
@@ -588,12 +514,13 @@ report("catalog-adapter", {{
                             self.assertTrue(
                                 page.evaluate(
                                     """() => [
-                                      ...document.querySelectorAll('.moo-chart canvas'),
-                                    ].slice(0, 2).every(canvas => {
+                                      '#certification-chart-line',
+                                      '#certification-chart-bar',
+                                    ].map(id => document.querySelector(`${id} canvas`)).every(canvas => {
                                       const data = canvas.getContext('2d').getImageData(
                                         0, 0, canvas.width, canvas.height
                                       ).data;
-                                      return Array.from(data).some(value => value !== 0);
+                                      return data.some(value => value !== 0);
                                     })"""
                                 )
                             )

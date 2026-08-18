@@ -5,7 +5,7 @@ import re
 import subprocess
 
 from tests.helpers import DIST, ROOT, CatalogTestCase
-from tests.test_chart import NODE_PREAMBLE, NODE_TEST_TIMEOUT, VALID_DATA
+from tests.helpers.node_harness import NODE_PREAMBLE, NODE_TEST_TIMEOUT, VALID_DATA
 
 
 CATALOG_JS = ROOT / "site/src/js/catalog"
@@ -85,7 +85,9 @@ class CatalogJavaScriptTests(CatalogTestCase):
                 )
                 + f"""
 const roots = [makeRoot({{"data-moo-chart": "line", "data-moo-chart-data": {json.dumps(VALID_DATA)}}})];
-const catalogRoot = {{ querySelectorAll: () => roots }};
+const catalogRoot = {{
+  querySelectorAll: (selector) => (selector === ".moo-chart" ? roots : []),
+}};
 const release = initExamplesChart(catalogRoot);
 const sameRelease = initExamplesChart(catalogRoot);
 const initialized = MooChart.getInstance(roots[0]) instanceof MooChart;
@@ -105,8 +107,10 @@ report("catalog-delegation", {{
             timeout=NODE_TEST_TIMEOUT,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+        lines = [line for line in result.stdout.splitlines() if line.strip()]
+        self.assertTrue(lines, f"No report emitted; stderr: {result.stderr}")
         self.assertEqual(
-            json.loads(result.stdout.splitlines()[-1]),
+            json.loads(lines[-1]),
             {
                 "name": "catalog-delegation",
                 "ok": True,

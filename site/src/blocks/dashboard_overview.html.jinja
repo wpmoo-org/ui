@@ -44,7 +44,7 @@
     </div>
     <div class="card-body">
       <div class="moo-chart moo-dashboard-chart" data-moo-chart="{{ chart_type }}" data-moo-chart-data='{{ chart_data.data | tojson }}'>
-        <canvas id="{{ chart_id }}"></canvas>
+        <canvas id="{{ chart_id }}" role="img" aria-label="{{ chart_data.title }}"></canvas>
       </div>
     </div>
   </div>
