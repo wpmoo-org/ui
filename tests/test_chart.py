@@ -489,47 +489,49 @@ report("catalog-adapter", {{
                     for case in CERTIFICATION_CASES:
                         with self.subTest(case=case.name):
                             context = new_case_context(browser, case)
-                            page = context.new_page()
-                            evidence = BrowserEvidence(page)
-                            response = page.goto(
-                                f"{base_url}/tests/fixtures/certification/chart.html",
-                                wait_until="networkidle",
-                            )
-                            self.assertIsNotNone(response)
-                            self.assertTrue(response.ok)
-                            prepare_page(page, case)
-
-                            expect(page.locator("body")).to_have_attribute(
-                                "data-chart-ready", "true"
-                            )
-                            self.assertEqual(
-                                page.evaluate(
-                                    """() => [
-                                      window.certificationLineChart.chart.config.type,
-                                      window.certificationBarChart.chart.config.type,
-                                    ]"""
-                                ),
-                                ["line", "bar"],
-                            )
-                            self.assertTrue(
-                                page.evaluate(
-                                    """() => [
-                                      '#certification-chart-line',
-                                      '#certification-chart-bar',
-                                    ].map(id => document.querySelector(`${id} canvas`)).every(canvas => {
-                                      const data = canvas.getContext('2d').getImageData(
-                                        0, 0, canvas.width, canvas.height
-                                      ).data;
-                                      return data.some(value => value !== 0);
-                                    })"""
+                            try:
+                                page = context.new_page()
+                                evidence = BrowserEvidence(page)
+                                response = page.goto(
+                                    f"{base_url}/tests/fixtures/certification/chart.html",
+                                    wait_until="networkidle",
                                 )
-                            )
-                            self.assertIn(
-                                "MooChart could not parse data-moo-chart-data as JSON:",
-                                page.evaluate("() => window.certificationInvalidMessage"),
-                            )
-                            evidence.assert_clean()
-                            context.close()
+                                self.assertIsNotNone(response)
+                                self.assertTrue(response.ok)
+                                prepare_page(page, case)
+
+                                expect(page.locator("body")).to_have_attribute(
+                                    "data-chart-ready", "true"
+                                )
+                                self.assertEqual(
+                                    page.evaluate(
+                                        """() => [
+                                          window.certificationLineChart.chart.config.type,
+                                          window.certificationBarChart.chart.config.type,
+                                        ]"""
+                                    ),
+                                    ["line", "bar"],
+                                )
+                                self.assertTrue(
+                                    page.evaluate(
+                                        """() => [
+                                          '#certification-chart-line',
+                                          '#certification-chart-bar',
+                                        ].map(id => document.querySelector(`${id} canvas`)).every(canvas => {
+                                          const data = canvas.getContext('2d').getImageData(
+                                            0, 0, canvas.width, canvas.height
+                                          ).data;
+                                          return data.some(value => value !== 0);
+                                        })"""
+                                    )
+                                )
+                                self.assertIn(
+                                    "MooChart could not parse data-moo-chart-data as JSON:",
+                                    page.evaluate("() => window.certificationInvalidMessage"),
+                                )
+                                evidence.assert_clean()
+                            finally:
+                                context.close()
                 finally:
                     browser.close()
 
