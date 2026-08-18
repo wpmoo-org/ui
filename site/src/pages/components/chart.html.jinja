@@ -2,6 +2,7 @@
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/example.html.jinja" import render_component_intro %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "components/table.html.jinja" import table %}
 
@@ -14,16 +15,6 @@
   ) }}
 
   <div class="moo-component-examples">
-    <h2 id="usage" class="h4 mb-3">Usage</h2>
-    <p class="mb-4">
-      Render a <code>.moo-chart</code> root with a single child <code>&lt;canvas&gt;</code>.
-      The <code>data-moo-chart</code> attribute sets the chart type and
-      <code>data-moo-chart-data</code> carries the serialized series. The optional
-      Moo UI Chart ESM wraps Chart.js, reads Bootstrap's <code>--bs-*</code> color
-      tokens, and re-themes the chart when <code>data-bs-theme</code> changes. Give the
-      root an explicit height: charts are responsive and fill the space they are given.
-    </p>
-
     {% set line_chart_example %}
     <div
       class="moo-chart"
@@ -35,11 +26,14 @@
       <canvas role="img" aria-label="Line chart comparing monthly revenue against target"></canvas>
     </div>
     {% endset %}
-    {{ render_block_example(
-      "chart-line",
-      "Line chart",
-      "A multi-series line chart. Points, curve tension, and the translucent fill are themed from the active Bootstrap palette.",
-      line_chart_example
+    {% set chart_usage %}
+      <p>Render a <code>.moo-chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-moo-chart</code> attribute accepts <code>line</code> or <code>bar</code>, while <code>data-moo-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
+      <p>Give the root an explicit height: the responsive runtime fills the space it is given without locking an aspect ratio. The optional Moo UI Chart ESM wraps Chart.js, reads Bootstrap's <code>--bs-*</code> tokens, and re-themes when <code>data-bs-theme</code> changes.</p>
+    {% endset %}
+    {{ render_component_intro(
+      line_chart_example,
+      chart_usage,
+      preview_class="moo-example__preview--wide"
     ) }}
 
     {% set bar_chart_example %}

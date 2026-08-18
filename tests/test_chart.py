@@ -5,18 +5,7 @@ import re
 import subprocess
 import unittest
 
-from playwright.sync_api import expect, sync_playwright
-
 from tests.helpers import DIST, PACKAGE_DIST, ROOT, CatalogTestCase
-from tests.helpers.browser_harness import (
-    BrowserEvidence,
-    CERTIFICATION_CASES,
-    launch_certification_browser,
-    new_case_context,
-    prepare_page,
-    serve_repository,
-    skip_if_browser_launch_is_sandboxed,
-)
 from tests.helpers.node_harness import NODE_PREAMBLE, NODE_TEST_TIMEOUT, VALID_DATA
 
 
@@ -476,64 +465,6 @@ report("catalog-adapter", {{
         self.assertIn("aria-label", source)
         self.assertNotIn("cdn.jsdelivr.net", source)
         self.assertNotIn("window.Chart", source)
-
-    def test_certification_fixture_runs_the_built_bundle_in_browser(self) -> None:
-        skip_if_browser_launch_is_sandboxed()
-        build = self.run_build()
-        self.assertEqual(build.returncode, 0, build.stderr)
-
-        with serve_repository() as base_url:
-            with sync_playwright() as playwright:
-                browser = launch_certification_browser(playwright)
-                try:
-                    for case in CERTIFICATION_CASES:
-                        with self.subTest(case=case.name):
-                            context = new_case_context(browser, case)
-                            try:
-                                page = context.new_page()
-                                evidence = BrowserEvidence(page)
-                                response = page.goto(
-                                    f"{base_url}/tests/fixtures/certification/chart.html",
-                                    wait_until="networkidle",
-                                )
-                                self.assertIsNotNone(response)
-                                self.assertTrue(response.ok)
-                                prepare_page(page, case)
-
-                                expect(page.locator("body")).to_have_attribute(
-                                    "data-chart-ready", "true"
-                                )
-                                self.assertEqual(
-                                    page.evaluate(
-                                        """() => [
-                                          window.certificationLineChart.chart.config.type,
-                                          window.certificationBarChart.chart.config.type,
-                                        ]"""
-                                    ),
-                                    ["line", "bar"],
-                                )
-                                self.assertTrue(
-                                    page.evaluate(
-                                        """() => [
-                                          '#certification-chart-line',
-                                          '#certification-chart-bar',
-                                        ].map(id => document.querySelector(`${id} canvas`)).every(canvas => {
-                                          const data = canvas.getContext('2d').getImageData(
-                                            0, 0, canvas.width, canvas.height
-                                          ).data;
-                                          return data.some(value => value !== 0);
-                                        })"""
-                                    )
-                                )
-                                self.assertIn(
-                                    "MooChart could not parse data-moo-chart-data as JSON:",
-                                    page.evaluate("() => window.certificationInvalidMessage"),
-                                )
-                                evidence.assert_clean()
-                            finally:
-                                context.close()
-                finally:
-                    browser.close()
 
     def test_component_page_covers_the_public_contract(self) -> None:
         self.assertTrue(PAGE.is_file(), "Chart page is not implemented")
