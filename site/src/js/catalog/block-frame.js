@@ -140,9 +140,12 @@ export function initBlockFrames(root = document) {
       // If the iframe already finished loading before this module ran (e.g.
       // it was cached and painted synchronously), the load event will never
       // fire again; reveal it immediately instead of leaving the placeholder
-      // stuck over a ready preview.
+      // stuck over a ready preview. A lazy iframe starts on about:blank whose
+      // readyState is already "complete", so the check must also confirm the
+      // document is not the initial blank placeholder before revealing.
       if (
         frame?.contentWindow &&
+        frame.contentWindow.location?.href !== "about:blank" &&
         frame.contentDocument?.readyState === "complete"
       ) {
         revealFrame(shell);

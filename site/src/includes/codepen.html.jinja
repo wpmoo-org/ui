@@ -562,14 +562,15 @@ if (document.readyState === "loading") {
 {%- endmacro %}
 
 {#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
-   in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
-   page's own markup (internal links rewritten to absolute ui.wpmoo.org
-   URLs so they still work standalone) plus the shared external
-   moo-ui.css stylesheet, version-locked to the site's own package
-   version so it never drifts from what's actually live. data-moo-codepen-form
-   opts this form out of examples-forms.js's inert-demo-form guard --
-   unlike every other form on an Examples page, this one is meant to
-   really submit.
+    in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
+    page's own markup (internal links rewritten to absolute ui.wpmoo.org
+    URLs so they still work standalone) plus the shared external
+    moo-ui.css stylesheet, pinned to the published CDN package version
+    (product.codepenCdnVersion) so the pen loads a version that actually
+    exists on npm. data-moo-codepen-form
+    opts this form out of examples-forms.js's inert-demo-form guard --
+    unlike every other form on an Examples page, this one is meant to
+    really submit.
 
    Lives in the page's own "demo only / built with X, Y, Z" meta footer,
    not next to the page/card title -- that title row is the simulated
