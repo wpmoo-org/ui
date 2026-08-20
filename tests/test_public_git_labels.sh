@@ -36,6 +36,7 @@ assert_pass commit-msg $'docs(agent): update bridge docs\n\n# codex in a comment
 assert_pass commit-msg "chore: update generated baselines"
 assert_pass commit-msg "feat(ui): add manual acceptance portal"
 assert_pass commit-msg "fix(docs)!: rename public package path"
+assert_pass commit-msg $'docs(agent): update bridge docs\n\n# shadcn in a comment is ignored'
 assert_fail commit-msg "Use canonical reference checkouts"
 assert_fail commit-msg "Polish rc2 catalog acceptance pass"
 assert_fail commit-msg "Fix combobox and datatable keyboard overlays"
@@ -43,6 +44,9 @@ assert_fail commit-msg "fix docs: missing conventional separator"
 assert_fail commit-msg "fix(): empty scope"
 assert_fail commit-msg "Codex release followup"
 assert_fail commit-msg $'Update release workflow\n\nReviewed by Claude'
+assert_fail commit-msg "feat(rc3): add shadcn-like Slider component"
+assert_fail commit-msg "docs: cite shadcn/ui reference"
+assert_fail commit-msg $'fix(ui): update component copy\n\nSee ui.shadcn.com for the reference.'
 
 assert_ref_pass "refs/heads/fix/release-workflow"
 assert_ref_fail "refs/heads/codex/fix-release-workflow"
