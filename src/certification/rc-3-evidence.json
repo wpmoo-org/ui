@@ -68,7 +68,7 @@
       ],
       "resolvedFindings": [
         "Bootstrap ships no core datepicker component, so Moo owns the shadcn-like .moo-datepicker trigger/popover composition and .moo-calendar day-grid contract while reusing Bootstrap Button styling for clickable controls.",
-        "vanillajs-datepicker@1.3.4 is bundled at build time through its verified ESM subpaths, Datepicker and DateRangePicker; its default Bootstrap datepicker CSS is not imported or copied into package output."
+        "The Datepicker module is self-contained Moo UI ESM with no third-party runtime; it owns date math, keyboard handling, locale formatting, and selection state natively, and no third-party CSS is imported or copied into package output."
       ],
       "limitations": [
         "The 1.0.0-rc.3 Datepicker scope covers single date, date range, and standalone inline calendar usage; time picker and natural-language parsing are out of scope.",

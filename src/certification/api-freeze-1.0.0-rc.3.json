@@ -95,6 +95,7 @@
       "source": "src/js/components/chart.js",
       "bundled": true,
       "runtime": "chart.js@4.5.1",
+      "getters": ["chart", "element"],
       "markup": {
         "rootClass": "moo-chart",
         "typeAttribute": "data-moo-chart",
@@ -107,8 +108,9 @@
       "export": "./datepicker.js",
       "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
       "source": "src/js/components/datepicker.js",
-      "bundled": true,
-      "runtime": "vanillajs-datepicker@1.3.4",
+      "bundled": false,
+      "buildTool": "esbuild",
+      "note": "esbuild-produced canonical + minified artifact pair; the module is self-contained Moo UI ESM with no third-party runtime bundled",
       "namedExports": ["MooCalendar", "MooDateRangePicker"],
       "markup": {
         "rootClass": "moo-datepicker",

@@ -62,7 +62,7 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo UI ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
 | Sidebar state and responsive coordination | Optional Moo UI ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
 | Chart rendering with light/dark theme toggle | Optional Moo UI ESM, self-contained bundle (Chart.js 4.5.1 bundled) | `@wpmoo/ui/chart.js`, then explicit initialization |
-| Datepicker with shadcn-like trigger/popover/calendar | Optional Moo UI ESM, self-contained bundle (vanillajs-datepicker 1.3.4 engine) | `@wpmoo/ui/datepicker.js`, then explicit initialization |
+| Datepicker with shadcn-like trigger/popover/calendar | Optional Moo UI ESM, self-contained (no third-party runtime) | `@wpmoo/ui/datepicker.js`, then explicit initialization |
 | Slider with native range input semantics | Optional Moo UI ESM, no third-party runtime | `@wpmoo/ui/slider.js`, then explicit initialization |
 
 Moo UI does not replace Bootstrap plugins and does not publish a mandatory
@@ -134,7 +134,7 @@ recipes, load order, and troubleshooting.
 | Static page with no interactive plugins | Load CSS only. |
 | Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
 | Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo UI ESM module. |
-| Page using Chart, Datepicker, or Slider | Add only the corresponding optional Moo UI ESM module. Chart and Datepicker bundle their third-party runtimes; Slider has no third-party dependency. |
+| Page using Chart, Datepicker, or Slider | Add only the corresponding optional Moo UI ESM module. Chart bundles its third-party runtime; Datepicker and Slider are self-contained with no third-party dependency. |
 
 ## Public Package Surface
 
@@ -151,7 +151,7 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |
 | `@wpmoo/ui/chart.js` | Optional Chart ESM lifecycle (Chart.js 4.5.1 bundled) |
 | `@wpmoo/ui/chart.min.js` | Minified Chart bundle (artifact variant of chart.js) |
-| `@wpmoo/ui/datepicker.js` | Optional Datepicker ESM lifecycle (vanillajs-datepicker 1.3.4 engine bundled) |
+| `@wpmoo/ui/datepicker.js` | Optional Datepicker ESM lifecycle (self-contained, no third-party runtime) |
 | `@wpmoo/ui/datepicker.min.js` | Minified Datepicker bundle (artifact variant of datepicker.js) |
 | `@wpmoo/ui/slider.js` | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |

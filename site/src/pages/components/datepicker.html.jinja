@@ -27,7 +27,7 @@
     {% endset %}
     {% set usage %}
       <p>Use <code>[data-datepicker]</code> for a single date, <code>[data-datepicker-range]</code> for start/end ranges, and <code>[data-calendar]</code> when the calendar should stay inline. The trigger owns <code>aria-expanded</code> and <code>aria-controls</code>; the popover owns <code>role="dialog"</code>; the calendar owns roving day focus and selection state.</p>
-      <p>The optional Datepicker ESM bundles <code>vanillajs-datepicker@1.3.4</code> as the engine and keeps the visible surface in Moo UI markup. Import <code>@wpmoo/ui/datepicker.js</code>, initialize only the root your page owns, and call <code>dispose()</code> before removing that root in a partial-page or SPA update.</p>
+      <p>The optional Datepicker ESM is a self-contained Moo UI module with no third-party runtime; it owns the visible surface, date math, and selection state. Import <code>@wpmoo/ui/datepicker.js</code>, initialize only the root your page owns, and call <code>dispose()</code> before removing that root in a partial-page or SPA update.</p>
     {% endset %}
     {{ render_component_intro(
       intro,
@@ -86,7 +86,7 @@
     {{ render_example(
       "datepicker-range",
       "Range Picker",
-      "One trigger manages two hidden fields and keeps the completed range visible until focus leaves the picker.",
+      "One trigger manages two hidden fields; selecting the end date completes the range and closes the picker with focus returning to the trigger.",
       range_picker,
       preview_class="moo-example__preview--medium"
     ) }}
@@ -179,7 +179,7 @@
     {% endset %}
     {{ render_rtl_example(
       "datepicker-rtl",
-      "The popover follows the trigger direction and the locale option maps to the bundled date engine language.",
+      "The popover follows the trigger direction and the locale option controls visible formatting in the calendar.",
       rtl_arabic,
       rtl_hebrew,
       rtl_english,
@@ -212,7 +212,7 @@
   <section class="moo-doc-section mt-5" aria-labelledby="datepicker-javascript">
     {{ typography("JavaScript", variant="section-title", id="datepicker-javascript") }}
     <p>
-      The module is explicit and idempotent. It does not scan the document when imported, and it does not expose the underlying engine globally.
+      The module is explicit and idempotent. It does not scan the document when imported, and it owns its state internally with no global leak.
     </p>
     {% set datepicker_import_example %}
     import Datepicker, {
@@ -249,14 +249,14 @@
   </section>
 
   {{ render_reference(
-    "The calendar engine is vanillajs-datepicker@1.3.4, wrapped in Moo UI markup; Bootstrap provides the button and form primitives. See the",
-    "https://mymth.github.io/vanillajs-datepicker/",
-    "vanillajs-datepicker documentation",
+    "The trigger and presets are Bootstrap button primitives; the popover and calendar are Moo UI markup with natively owned date, selection, and keyboard behavior. Bootstrap ships no date picker component. For the button surface, see the",
+    "https://getbootstrap.com/docs/5.3/components/buttons/",
+    "Bootstrap Buttons documentation",
     extra_references=[
       {
-        "lead": "For the button surface reused by the trigger and presets, see the",
-        "href": "https://getbootstrap.com/docs/5.3/components/buttons/",
-        "label": "Bootstrap Buttons documentation"
+        "lead": "For the popover surface and form fields, see the",
+        "href": "https://getbootstrap.com/docs/5.3/components/popovers/",
+        "label": "Bootstrap Popovers documentation"
       }
     ]
   ) }}

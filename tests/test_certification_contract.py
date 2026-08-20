@@ -706,6 +706,21 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(artifact_variants["chart.min.js"]["canonical"], "chart.js")
         self.assertEqual(artifact_variants["datepicker.min.js"]["canonical"], "datepicker.js")
 
+        # Datepicker is self-contained Moo UI ESM produced through esbuild; it
+        # must not claim a third-party runtime or a bundled relationship.
+        datepicker_record = next(
+            m for m in freeze["esmModules"] if m["module"] == "datepicker.js"
+        )
+        self.assertFalse(datepicker_record.get("bundled", True))
+        self.assertNotIn("runtime", datepicker_record)
+        self.assertEqual(datepicker_record.get("buildTool"), "esbuild")
+
+        # Chart.js stays bundled with its third-party runtime.
+        chart_record = next(m for m in freeze["esmModules"] if m["module"] == "chart.js")
+        self.assertTrue(chart_record.get("bundled", False))
+        self.assertEqual(chart_record.get("runtime"), "chart.js@4.5.1")
+        self.assertEqual(chart_record.get("getters"), ["chart", "element"])
+
 
 if __name__ == "__main__":
     unittest.main()

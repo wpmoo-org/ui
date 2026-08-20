@@ -24,6 +24,184 @@ from tests.helpers import (
 )
 
 
+COMPONENT_SELECTOR_PREFIXES = {
+    "button": ("btn", "disabled"),
+    # Button Group's compact select override matches Bootstrap's
+    # `.input-group > .form-select` specificity, so the partial
+    # legitimately references .input-group as an ancestor context.
+    "button_group": ("btn", "input-group"),
+    "card": ("card",),
+    # Breadcrumb's collapsed-segment composition wraps Bootstrap's
+    # native .dropdown inside its own .breadcrumb-dropdown-item, so
+    # the partial scopes a layout rule to that Bootstrap wrapper.
+    "breadcrumb": ("breadcrumb", "dropdown"),
+    # Dropdown toggle rows use Bootstrap Button's .active data-api
+    # state while scoped under .dropdown-item-check. Bootstrap
+    # Dropdown also exposes directional wrappers such as .dropend;
+    # the mobile sidebar placement rule retunes the native dropdown
+    # surface while staying in the dropdown partial.
+    "dropdown": ("dropdown", "dropend", "active"),
+    "input": ("form-control", "form-select"),
+    # Table owns Bootstrap's static table family and the horizontal
+    # scroll-fade helper used beside responsive table wrappers.
+    "table": ("table", "table-responsive", "scroll-fade-x"),
+    # Bootstrap renders both single-line inputs and textareas through
+    # the shared `.form-control` family.
+    "textarea": ("form-control",),
+    # Bootstrap's native select markup is the `.form-select` family,
+    # not a "select-" prefixed one; Select retunes it in place.
+    "select": ("form-select",),
+    # Bootstrap documents vertical navs as `.nav.flex-column`, so the
+    # Navigation partial may scope width fixes to that native utility.
+    "navigation": ("active", "disabled", "flex-column", "nav"),
+    # Bootstrap has no native sidebar component; its public namespace
+    # is owned explicitly by the Sidebar partial and styles.
+    "sidebar": ("sidebar",),
+    # Bootstrap's pagination markup uses .page-item/.page-link, not a
+    # "pagination-" prefixed family.
+    # The icon-only prev/next detection reads Bootstrap's own
+    # utility-class state (.d-none/.d-sm-inline/.visually-hidden)
+    # inside :has(), the same way Data Table reads Bootstrap
+    # utilities, rather than owning those classes.
+    "pagination": ("pagination", "page", "disabled", "d-none", "d-sm-inline", "visually-hidden"),
+    # Bootstrap's own horizontal/vertical divider markup is the bare
+    # <hr> tag and the .vr helper class, not a "separator-" prefixed
+    # family.
+    "separator": ("hr", "vr"),
+    # Bootstrap's checkbox markup uses the shared .form-check family,
+    # not a "checkbox-" prefixed one. The invalid-state focus ring
+    # rule also references .is-invalid to keep the destructive ring
+    # visible on mouse click (matching _focus.scss's pattern for
+    # .form-control.is-invalid and .form-select.is-invalid).
+    "checkbox": ("form-check", "is-invalid"),
+    # The legend reuses Bootstrap's shared .form-label class to
+    # match sibling form labels.
+    "radio_group": ("radio-group", "form-label"),
+    # Bootstrap's switch markup uses the shared .form-switch and
+    # .form-check families, not a "switch-" prefixed one.
+    "switch": ("form-switch", "form-check"),
+    # Bootstrap's own placeholder markup uses the shared .placeholder
+    # family, not a "skeleton-" prefixed one.
+    "skeleton": ("skeleton", "placeholder"),
+    # Bootstrap's own Collapse plugin toggles the bare .collapsed
+    # state class on the trigger; it is not "accordion-" prefixed.
+    "accordion": ("accordion", "collapsed"),
+    # Collapsible is a thin Bootstrap Collapse composition whose
+    # trigger is still a native .btn inside the component scope.
+    "collapsible": ("collapsible", "btn"),
+    # Menubar is backed by Bootstrap Dropdown triggers and menus; the
+    # shared dropdown/show state classes remain scoped under .menubar.
+    "menubar": ("menubar", "dropdown", "show"),
+    # The segmented-control track styles Bootstrap's shared
+    # .nav-link/.active classes within its own .tabs-list scope,
+    # rather than the .nav-pills family Navigation already owns,
+    # and also fixes the grid stacking on Bootstrap's own tab-content
+    # and tab-pane classes.
+    "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
+    # Toggle Group composes Bootstrap's .btn-check + label.btn
+    # contract and suppresses the generic pressed transform only
+    # inside the .toggle-group scope.
+    "toggle_group": ("toggle-group", "btn", "disabled"),
+    # Dialog is the Moo catalog name for Bootstrap's Modal component;
+    # its native selector family is "modal-", not "dialog-".
+    "dialog": ("modal", "show"),
+    # Sheet is the Moo catalog name for Bootstrap's Offcanvas
+    # component; its native selector family is "offcanvas-", plus
+    # the "sheet" marker class used to scope Sheet-only overrides
+    # away from Sidebar's own bare .offcanvas usage.
+    # Bootstrap's Offcanvas source owns .showing and .hiding as
+    # transition lifecycle states alongside .show.
+    "sheet": ("offcanvas", "sheet", "show", "showing", "hiding"),
+    # Field retunes the spacing of Bootstrap's own shared
+    # .form-label/.form-text/.invalid-feedback classes when they sit
+    # inside a .field, rather than owning a "field-" prefixed family
+    # of its own for them.
+    "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+    # Bootstrap has no native Combobox component. The public
+    # namespace is a composition of Bootstrap form-control,
+    # validation, and Dropdown pieces.
+    "combobox": ("combobox", "is-invalid"),
+    # Bootstrap has no native Datepicker component. The public
+    # namespace is a reference-style trigger/popover/calendar composition
+    # around Bootstrap Button primitives (frozen in the RC.3 API
+    # freeze; see DECISIONS.md for the .moo-* selector exception).
+    "datepicker": (
+        "moo-datepicker",
+        "moo-calendar",
+        "btn",
+        "is-invalid",
+        "show",
+    ),
+    # Bootstrap Table owns the static table markup only. DataTable is
+    # Moo's documented interactive composition around Bootstrap table,
+    # dropdown, button, checkbox, badge, and pagination primitives.
+    # The filter-picker trigger's focus-ring rule is scoped with an
+    # .input-group ancestor combinator (it targets DataTable's own
+    # .datatable-filter-picker-trigger, not .input-group itself), so
+    # datatable legitimately references that ancestor context.
+    "datatable": (
+        "datatable",
+        "active",
+        "badge",
+        "btn",
+        "btn-check",
+        "btn-group",
+        "dropdown",
+        "dropdown-header",
+        "dropdown-item",
+        "dropdown-item-check",
+        "form-check",
+        "input-group",
+        "ms-auto",
+        "pagination",
+        "show",
+        "table",
+        "table-responsive",
+        "text-body-secondary",
+        "text-truncate",
+    ),
+    # Input group owns the compound surface around Bootstrap's native
+    # children, so its partial may retune the edge behavior of form,
+    # button, validation, and dropdown children while scoped under
+    # .input-group. Bootstrap's own forms/_input-group.scss styles
+    # both `.input-group > .form-control` and `> .form-select`, so
+    # the group legitimately owns .form-select within its scope too.
+    "input_group": (
+        "input-group",
+        "form-control",
+        "form-select",
+        "btn",
+        "dropdown-menu",
+        "valid-tooltip",
+        "valid-feedback",
+        "invalid-tooltip",
+        "invalid-feedback",
+        "rounded-pill",
+        "show",
+        "disabled",
+    ),
+    "close_button": ("btn-close", "disabled"),
+    # Tooltip is Bootstrap's overlay component; placement/state
+    # classes are emitted by Bootstrap/Popper and retuned only while
+    # still scoped to the tooltip surface.
+    "tooltip": (
+        "tooltip",
+        "bs-tooltip-auto",
+        "bs-tooltip-bottom",
+        "bs-tooltip-end",
+        "bs-tooltip-start",
+        "bs-tooltip-top",
+        "fade",
+        "show",
+    ),
+    # Bootstrap's own alert component positions its native close
+    # button under `.alert-dismissible .btn-close`; this keeps that
+    # ownership scoped to Alert instead of moving an Alert layout
+    # rule into the standalone Close Button partial.
+    "alert": ("alert",),
+}
+
+
 class CodePenPayloadParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -486,181 +664,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotRegex(script_source, r"(?i)(?:iconify|lucide)")
 
     def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
-        allowed_prefixes = {
-            "button": ("btn", "disabled"),
-            # Button Group's compact select override matches Bootstrap's
-            # `.input-group > .form-select` specificity, so the partial
-            # legitimately references .input-group as an ancestor context.
-            "button_group": ("btn", "input-group"),
-            "card": ("card",),
-            # Breadcrumb's collapsed-segment composition wraps Bootstrap's
-            # native .dropdown inside its own .breadcrumb-dropdown-item, so
-            # the partial scopes a layout rule to that Bootstrap wrapper.
-            "breadcrumb": ("breadcrumb", "dropdown"),
-            # Dropdown toggle rows use Bootstrap Button's .active data-api
-            # state while scoped under .dropdown-item-check. Bootstrap
-            # Dropdown also exposes directional wrappers such as .dropend;
-            # the mobile sidebar placement rule retunes the native dropdown
-            # surface while staying in the dropdown partial.
-            "dropdown": ("dropdown", "dropend", "active"),
-            "input": ("form-control", "form-select"),
-            # Table owns Bootstrap's static table family and the horizontal
-            # scroll-fade helper used beside responsive table wrappers.
-            "table": ("table", "table-responsive", "scroll-fade-x"),
-            # Bootstrap renders both single-line inputs and textareas through
-            # the shared `.form-control` family.
-            "textarea": ("form-control",),
-            # Bootstrap's native select markup is the `.form-select` family,
-            # not a "select-" prefixed one; Select retunes it in place.
-            "select": ("form-select",),
-            # Bootstrap documents vertical navs as `.nav.flex-column`, so the
-            # Navigation partial may scope width fixes to that native utility.
-            "navigation": ("active", "disabled", "flex-column", "nav"),
-            # Bootstrap has no native sidebar component; its public namespace
-            # is owned explicitly by the Sidebar partial and styles.
-            "sidebar": ("sidebar",),
-            # Bootstrap's pagination markup uses .page-item/.page-link, not a
-            # "pagination-" prefixed family.
-            # The icon-only prev/next detection reads Bootstrap's own
-            # utility-class state (.d-none/.d-sm-inline/.visually-hidden)
-            # inside :has(), the same way Data Table reads Bootstrap
-            # utilities, rather than owning those classes.
-            "pagination": ("pagination", "page", "disabled", "d-none", "d-sm-inline", "visually-hidden"),
-            # Bootstrap's own horizontal/vertical divider markup is the bare
-            # <hr> tag and the .vr helper class, not a "separator-" prefixed
-            # family.
-            "separator": ("hr", "vr"),
-            # Bootstrap's checkbox markup uses the shared .form-check family,
-            # not a "checkbox-" prefixed one. The invalid-state focus ring
-            # rule also references .is-invalid to keep the destructive ring
-            # visible on mouse click (matching _focus.scss's pattern for
-            # .form-control.is-invalid and .form-select.is-invalid).
-            "checkbox": ("form-check", "is-invalid"),
-            # The legend reuses Bootstrap's shared .form-label class to
-            # match sibling form labels.
-            "radio_group": ("radio-group", "form-label"),
-            # Bootstrap's switch markup uses the shared .form-switch and
-            # .form-check families, not a "switch-" prefixed one.
-            "switch": ("form-switch", "form-check"),
-            # Bootstrap's own placeholder markup uses the shared .placeholder
-            # family, not a "skeleton-" prefixed one.
-            "skeleton": ("skeleton", "placeholder"),
-            # Bootstrap's own Collapse plugin toggles the bare .collapsed
-            # state class on the trigger; it is not "accordion-" prefixed.
-            "accordion": ("accordion", "collapsed"),
-            # Collapsible is a thin Bootstrap Collapse composition whose
-            # trigger is still a native .btn inside the component scope.
-            "collapsible": ("collapsible", "btn"),
-            # Menubar is backed by Bootstrap Dropdown triggers and menus; the
-            # shared dropdown/show state classes remain scoped under .menubar.
-            "menubar": ("menubar", "dropdown", "show"),
-            # The segmented-control track styles Bootstrap's shared
-            # .nav-link/.active classes within its own .tabs-list scope,
-            # rather than the .nav-pills family Navigation already owns,
-            # and also fixes the grid stacking on Bootstrap's own tab-content
-            # and tab-pane classes.
-            "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
-            # Toggle Group composes Bootstrap's .btn-check + label.btn
-            # contract and suppresses the generic pressed transform only
-            # inside the .toggle-group scope.
-            "toggle_group": ("toggle-group", "btn", "disabled"),
-            # Dialog is the Moo catalog name for Bootstrap's Modal component;
-            # its native selector family is "modal-", not "dialog-".
-            "dialog": ("modal", "show"),
-            # Sheet is the Moo catalog name for Bootstrap's Offcanvas
-            # component; its native selector family is "offcanvas-", plus
-            # the "sheet" marker class used to scope Sheet-only overrides
-            # away from Sidebar's own bare .offcanvas usage.
-            # Bootstrap's Offcanvas source owns .showing and .hiding as
-            # transition lifecycle states alongside .show.
-            "sheet": ("offcanvas", "sheet", "show", "showing", "hiding"),
-            # Field retunes the spacing of Bootstrap's own shared
-            # .form-label/.form-text/.invalid-feedback classes when they sit
-            # inside a .field, rather than owning a "field-" prefixed family
-            # of its own for them.
-            "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
-            # Bootstrap has no native Combobox component. The public
-            # namespace is a composition of Bootstrap form-control,
-            # validation, and Dropdown pieces.
-            "combobox": ("combobox", "is-invalid"),
-            # Bootstrap has no native Datepicker component. The public
-            # namespace is a shadcn-like trigger/popover/calendar composition
-            # around Bootstrap Button primitives and a bundled date engine.
-            "datepicker": (
-                "moo-datepicker",
-                "moo-calendar",
-                "btn",
-                "is-invalid",
-                "show",
-            ),
-            # Bootstrap Table owns the static table markup only. DataTable is
-            # Moo's documented interactive composition around Bootstrap table,
-            # dropdown, button, checkbox, badge, and pagination primitives.
-            # The filter-picker trigger's focus-ring rule is scoped with an
-            # .input-group ancestor combinator (it targets DataTable's own
-            # .datatable-filter-picker-trigger, not .input-group itself), so
-            # datatable legitimately references that ancestor context.
-            "datatable": (
-                "datatable",
-                "active",
-                "badge",
-                "btn",
-                "btn-check",
-                "btn-group",
-                "dropdown",
-                "dropdown-header",
-                "dropdown-item",
-                "dropdown-item-check",
-                "form-check",
-                "input-group",
-                "ms-auto",
-                "pagination",
-                "show",
-                "table",
-                "table-responsive",
-                "text-body-secondary",
-                "text-truncate",
-            ),
-            # Input group owns the compound surface around Bootstrap's native
-            # children, so its partial may retune the edge behavior of form,
-            # button, validation, and dropdown children while scoped under
-            # .input-group. Bootstrap's own forms/_input-group.scss styles
-            # both `.input-group > .form-control` and `> .form-select`, so
-            # the group legitimately owns .form-select within its scope too.
-            "input_group": (
-                "input-group",
-                "form-control",
-                "form-select",
-                "btn",
-                "dropdown-menu",
-                "valid-tooltip",
-                "valid-feedback",
-                "invalid-tooltip",
-                "invalid-feedback",
-                "rounded-pill",
-                "show",
-                "disabled",
-            ),
-            "close_button": ("btn-close", "disabled"),
-            # Tooltip is Bootstrap's overlay component; placement/state
-            # classes are emitted by Bootstrap/Popper and retuned only while
-            # still scoped to the tooltip surface.
-            "tooltip": (
-                "tooltip",
-                "bs-tooltip-auto",
-                "bs-tooltip-bottom",
-                "bs-tooltip-end",
-                "bs-tooltip-start",
-                "bs-tooltip-top",
-                "fade",
-                "show",
-            ),
-            # Bootstrap's own alert component positions its native close
-            # button under `.alert-dismissible .btn-close`; this keeps that
-            # ownership scoped to Alert instead of moving an Alert layout
-            # rule into the standalone Close Button partial.
-            "alert": ("alert",),
-        }
+        allowed_prefixes = COMPONENT_SELECTOR_PREFIXES
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
             source = "\n".join(
@@ -691,6 +695,17 @@ class CatalogContractTests(CatalogTestCase):
                         ),
                         f".{class_name} belongs to another component or catalog chrome",
                     )
+
+    def test_datepicker_frozen_moo_namespaces_stay_in_selector_allowlist(self) -> None:
+        """Lock the approved .moo-* selector exception for Datepicker.
+
+        DECISIONS.md approves .moo-datepicker and .moo-calendar as public
+        Datepicker namespaces despite the default "plain namespace" rule, so
+        this test keeps them inside the selector-ownership allow-list. Removing
+        the exception requires a new decision, not a silent gate edit."""
+        prefixes = COMPONENT_SELECTOR_PREFIXES["datepicker"]
+        self.assertIn("moo-datepicker", prefixes)
+        self.assertIn("moo-calendar", prefixes)
 
     def test_component_pages_compose_ready_macros_only(self) -> None:
         catalog = json.loads(

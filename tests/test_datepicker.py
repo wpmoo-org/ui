@@ -142,7 +142,7 @@ class DatepickerMacroTests(CatalogTestCase):
         self.assertIn('data-calendar-min-date="2026-08-10"', output)
         self.assertIn('data-calendar-max-date="2026-08-31"', output)
         self.assertIn('data-calendar-disabled-dates=\'["2026-08-22"]\'', output)
-        self.assertIn('role="application"', output)
+        self.assertNotIn('role="application"', output)
         self.assertIn('aria-label="Release calendar"', output)
         self.assertIn('tabindex="-1"', output)
         self.assertNotIn('data-datepicker-popover', output)
@@ -196,13 +196,13 @@ class DatepickerSourceTests(CatalogTestCase):
             ],
         )
 
-    def test_runtime_uses_verified_vanillajs_exports_without_css_imports(self) -> None:
+    def test_source_has_no_third_party_runtime_imports(self) -> None:
         source = DATEPICKER_JS.read_text(encoding="utf-8")
 
-        self.assertIn('import("vanillajs-datepicker/Datepicker")', source)
-        self.assertIn('import("vanillajs-datepicker/DateRangePicker")', source)
-        self.assertNotIn("new Date(text)", source)
-        self.assertNotRegex(source, r"vanillajs-datepicker/(?:dist/)?css")
+        self.assertNotIn("vanillajs-datepicker", source)
+        self.assertNotIn('from "', source)
+        self.assertNotIn("from '", source)
+        self.assertNotIn("import(", source)
         self.assertNotIn("window.Datepicker", source)
         self.assertNotIn("bootstrap-datepicker", source)
 
@@ -436,6 +436,12 @@ class DatepickerBrowserTests(unittest.TestCase):
             expect(popover).to_be_visible()
             self.assert_calendar_month(page.locator("#certification-datepicker-calendar"), 2026, 8)
 
+            # The calendar grid must resolve an accessible name from the
+            # caller-provided aria-label, not rely on the root wrapper.
+            grid = page.get_by_role("grid", name="Deploy date calendar")
+            expect(grid).to_be_visible()
+            self.assertGreaterEqual(grid.count(), 1)
+
             page.locator('#certification-datepicker-calendar [data-calendar-day="2026-08-20"]').focus()
             page.locator('#certification-datepicker-calendar [data-calendar-day="2026-08-20"]').press("ArrowRight")
             expect(page.locator("#certification-datepicker-calendar")).to_have_attribute(
@@ -479,6 +485,8 @@ class DatepickerBrowserTests(unittest.TestCase):
             range_trigger = range_picker.locator("[data-datepicker-trigger]")
             range_trigger.click()
             page.locator('#certification-date-range-calendar [data-calendar-day="2026-08-24"]').click()
+            # Start selected: calendar stays open, roving focus stays on the day.
+            expect(page.locator("#certification-date-range-popover")).to_be_visible()
             page.locator('#certification-date-range-calendar [data-calendar-day="2026-08-28"]').click()
             expect(page.locator('#certification-date-range-popover input[name="range_start"]')).to_have_value(
                 "2026-08-24"
@@ -490,7 +498,21 @@ class DatepickerBrowserTests(unittest.TestCase):
                 "data-calendar-range",
                 "middle",
             )
-            expect(range_trigger).to_have_attribute("aria-expanded", "true")
+            # End selected: the completed range closes the picker and returns
+            # focus to the trigger, per the frozen contract.
+            expect(range_trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("#certification-date-range-popover")).not_to_be_visible()
+            self.assertTrue(
+                range_trigger.evaluate("element => document.activeElement === element")
+            )
+            self.assertFalse(
+                page.evaluate(
+                    """
+                    () => document.activeElement.matches("[data-calendar-day]")
+                    """
+                )
+            )
+            range_trigger.click()
             expect(page.locator("#certification-date-range-popover")).to_be_visible()
             page.locator("#certification-datepicker-reset-form").locator(
                 'button[type="reset"]'
@@ -576,21 +598,15 @@ class DatepickerBrowserTests(unittest.TestCase):
                   window.certificationDatepicker.dispose();
                   const singleDisposed = window.CertificationDatepicker.getInstance(singleRoot) === null;
                   window.certificationDatepicker = window.CertificationDatepicker.getOrCreateInstance(singleRoot);
-                  await window.certificationDatepicker.calendar.engineReady;
 
                   window.certificationCalendar.dispose();
                   const calendarDisposed = window.CertificationCalendar.getInstance(calendarRoot) === null;
                   window.certificationCalendar = window.CertificationCalendar.getOrCreateInstance(calendarRoot);
-                  await window.certificationCalendar.engineReady;
                   const calendarSet = window.certificationCalendar.setDate("2026-08-19", { emit: false });
 
                   window.certificationDateRangePicker.dispose();
                   const rangeDisposed = window.CertificationDateRangePicker.getInstance(rangeRoot) === null;
                   window.certificationDateRangePicker = window.CertificationDateRangePicker.getOrCreateInstance(rangeRoot);
-                  await Promise.all([
-                    window.certificationDateRangePicker.engineReady,
-                    window.certificationDateRangePicker.calendar.engineReady,
-                  ]);
                   const rangeSet = window.certificationDateRangePicker.setDates(
                     "2026-08-24",
                     "2026-08-28",
@@ -606,12 +622,6 @@ class DatepickerBrowserTests(unittest.TestCase):
                     rangeDisposed,
                     rangeSet,
                     rangeValues: window.certificationDateRangePicker.getDates("yyyy-mm-dd"),
-                    engineErrorCount: [
-                      window.certificationDatepicker.calendar,
-                      window.certificationCalendar,
-                      window.certificationDateRangePicker,
-                      window.certificationDateRangePicker.calendar,
-                    ].filter((instance) => instance.engineError).length,
                   };
                 }
                 """
@@ -627,10 +637,42 @@ class DatepickerBrowserTests(unittest.TestCase):
                     "rangeDisposed": True,
                     "rangeSet": True,
                     "rangeValues": ["2026-08-24", "2026-08-28"],
-                    "engineErrorCount": 0,
                 },
             )
             self.assertEqual(run_axe(page), [])
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_outside_click_returns_focus_to_the_trigger(self) -> None:
+        context, page, evidence = self.open_fixture()
+        try:
+            expect(page.locator("body")).to_have_attribute("data-datepicker-ready", "true")
+
+            # Single picker: open, pointer-click a focusable external button,
+            # and assert the picker closes and focus lands back on the trigger.
+            trigger = page.locator("#certification-datepicker-trigger")
+            outside = page.locator("#certification-outside-target")
+            trigger.click()
+            expect(trigger).to_have_attribute("aria-expanded", "true")
+            outside.click()
+            expect(trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("#certification-datepicker-popover")).not_to_be_visible()
+            self.assertTrue(
+                trigger.evaluate("element => document.activeElement === element")
+            )
+
+            # Range picker: same contract after the second click of a range.
+            range_trigger = page.locator("#certification-date-range-trigger")
+            range_trigger.click()
+            page.locator('#certification-date-range-calendar [data-calendar-day="2026-08-24"]').click()
+            expect(page.locator("#certification-date-range-popover")).to_be_visible()
+            outside.click()
+            expect(range_trigger).to_have_attribute("aria-expanded", "false")
+            expect(page.locator("#certification-date-range-popover")).not_to_be_visible()
+            self.assertTrue(
+                range_trigger.evaluate("element => document.activeElement === element")
+            )
             evidence.assert_clean()
         finally:
             context.close()
@@ -757,17 +799,21 @@ class DatepickerBrowserTests(unittest.TestCase):
                 "data-datepicker-locale",
                 "ar",
             )
-            self.assertEqual(
-                page.evaluate(
-                    """
-                    () => [
-                      window.certificationDatepicker.calendar.engineOptions.language,
-                      window.certificationRtlDatepicker.calendar.engineOptions.language,
-                    ]
-                    """
-                ),
-                ["en", "ar"],
+            # Native locale behavior: opening the Arabic (RTL) picker must
+            # render the visible month caption in Arabic script, proving the
+            # locale option drives visible formatting without an engine.
+            page.locator("#certification-rtl-datepicker-trigger").click()
+            expect(page.locator("#certification-rtl-datepicker-popover")).to_be_visible()
+            rtl_caption = page.locator(
+                "#certification-rtl-datepicker-calendar .moo-calendar__caption"
             )
+            expect(rtl_caption).not_to_have_text("")
+            rtl_text = rtl_caption.inner_text()
+            self.assertTrue(
+                any("\u0600" <= ch <= "\u06FF" for ch in rtl_text),
+                f"Arabic calendar caption did not render Arabic text: {rtl_text!r}",
+            )
+            page.locator("#certification-rtl-datepicker-trigger").click()
 
             bounded = page.locator("#certification-bounded-calendar")
             self.assert_calendar_month(bounded, 2026, 8)

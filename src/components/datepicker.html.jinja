@@ -1,7 +1,7 @@
-{# Datepicker is a Moo-owned public contract. Bootstrap has no shadcn-like
+{# Datepicker is a Moo-owned public contract. Bootstrap has no reference-style
    date picker primitive, so this macro freezes the trigger/popover/calendar
    anatomy while src/js/components/datepicker.js owns focus, selection, range
-   state, and the bundled vanillajs-datepicker engine lifecycle. #}
+   state, and date math natively without a third-party runtime. #}
 
 {% set datepicker_months = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -67,7 +67,7 @@
   {% if not aria_label | trim %}{{ fail("Calendar aria_label is required") }}{% endif %}
   {% if mode not in ["single", "range"] %}{{ fail("Calendar mode must be 'single' or 'range'") }}{% endif %}
   {% set serialized_disabled_dates = disabled_dates if disabled_dates is string else disabled_dates | tojson %}
-  <div class="moo-calendar{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-calendar data-calendar-mode="{{ mode }}" data-calendar-locale="{{ locale }}"{% if value %} data-calendar-value="{{ value }}"{% endif %}{% if start_value %} data-calendar-start-value="{{ start_value }}"{% endif %}{% if end_value %} data-calendar-end-value="{{ end_value }}"{% endif %}{% if min_date %} data-calendar-min-date="{{ min_date }}"{% endif %}{% if max_date %} data-calendar-max-date="{{ max_date }}"{% endif %}{% if disabled_dates %} data-calendar-disabled-dates='{{ serialized_disabled_dates }}'{% endif %}{% if caption_layout %} data-calendar-caption-layout="{{ caption_layout }}"{% endif %}{% if show_presets %} data-calendar-show-presets="true"{% endif %} role="application" aria-label="{{ aria_label }}" tabindex="-1"{% if attrs %} {{ attrs | safe }}{% endif %}></div>
+  <div class="moo-calendar{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-calendar data-calendar-mode="{{ mode }}" data-calendar-locale="{{ locale }}"{% if value %} data-calendar-value="{{ value }}"{% endif %}{% if start_value %} data-calendar-start-value="{{ start_value }}"{% endif %}{% if end_value %} data-calendar-end-value="{{ end_value }}"{% endif %}{% if min_date %} data-calendar-min-date="{{ min_date }}"{% endif %}{% if max_date %} data-calendar-max-date="{{ max_date }}"{% endif %}{% if disabled_dates %} data-calendar-disabled-dates='{{ serialized_disabled_dates }}'{% endif %}{% if caption_layout %} data-calendar-caption-layout="{{ caption_layout }}"{% endif %}{% if show_presets %} data-calendar-show-presets="true"{% endif %} aria-label="{{ aria_label }}" tabindex="-1"{% if attrs %} {{ attrs | safe }}{% endif %}></div>
 {%- endmacro %}
 
 {% macro datepicker(

@@ -83,7 +83,6 @@
               data-calendar-min-date="2026-08-15"
               data-calendar-max-date="2026-08-31"
               data-calendar-disabled-dates='["2026-08-22"]'
-              role="application"
               aria-label="Deploy date calendar"
               tabindex="-1"
             ></div>
@@ -91,6 +90,12 @@
           </div>
         </div>
       </section>
+
+      <p class="mt-4">
+        <button type="button" id="certification-outside-target" class="btn btn-outline-primary">
+          Focusable external target
+        </button>
+      </p>
 
       <section aria-labelledby="range-title">
         <h2 id="range-title" class="h5 mb-3">Range date</h2>
@@ -133,7 +138,6 @@
               data-calendar-locale="en"
               data-calendar-min-date="2026-08-15"
               data-calendar-max-date="2026-08-31"
-              role="application"
               aria-label="Date range calendar"
               tabindex="-1"
             ></div>
@@ -185,7 +189,6 @@
                 data-calendar-locale="en"
                 data-calendar-min-date="2026-08-15"
                 data-calendar-max-date="2026-08-31"
-                role="application"
                 aria-label="Resettable date calendar"
                 tabindex="-1"
               ></div>
@@ -240,7 +243,6 @@
               data-calendar-min-date="1926-01-01"
               data-calendar-max-date="2026-12-31"
               data-calendar-caption-layout="dropdown"
-              role="application"
               aria-label="Date of birth calendar"
               tabindex="-1"
             ></div>
@@ -289,7 +291,6 @@
                 data-calendar-mode="single"
                 data-calendar-locale="en"
                 data-calendar-value="2026-08-18"
-                role="application"
                 aria-label="Clipped card calendar"
                 tabindex="-1"
               ></div>
@@ -310,7 +311,6 @@
           data-calendar-value="2026-08-18"
           data-calendar-min-date="2026-08-11"
           data-calendar-max-date="2026-08-31"
-          role="application"
           aria-label="Bounded release calendar"
           tabindex="-1"
         ></div>
@@ -326,7 +326,6 @@
           data-calendar-locale="en"
           data-calendar-value="2026-08-18"
           data-calendar-show-presets="true"
-          role="application"
           aria-label="Standalone release calendar"
           tabindex="-1"
         ></div>
@@ -372,7 +371,6 @@
               data-calendar-mode="single"
               data-calendar-locale="ar"
               data-calendar-value="2026-08-18"
-              role="application"
               aria-label="تقويم"
               tabindex="-1"
             ></div>
@@ -421,7 +419,6 @@
                 data-calendar-mode="single"
                 data-calendar-locale="en"
                 data-calendar-value="2026-08-18"
-                role="application"
                 aria-label="Bottom edge calendar"
                 tabindex="-1"
               ></div>
@@ -469,33 +466,6 @@
         document.querySelector("#certification-bottom-datepicker")
       );
 
-      await Promise.all([
-        window.certificationDatepicker.calendar.engineReady,
-        window.certificationDateRangePicker.engineReady,
-        window.certificationDateRangePicker.calendar.engineReady,
-        window.certificationCalendar.engineReady,
-        window.certificationBoundedCalendar.engineReady,
-        window.certificationResetDatepicker.calendar.engineReady,
-        window.certificationDropdownDatepicker.calendar.engineReady,
-        window.certificationRtlDatepicker.calendar.engineReady,
-        window.certificationClippedDatepicker.calendar.engineReady,
-        window.certificationBottomDatepicker.calendar.engineReady,
-      ]);
-      const engineErrors = [
-        window.certificationDatepicker.calendar,
-        window.certificationDateRangePicker,
-        window.certificationDateRangePicker.calendar,
-        window.certificationCalendar,
-        window.certificationBoundedCalendar,
-        window.certificationResetDatepicker.calendar,
-        window.certificationDropdownDatepicker.calendar,
-        window.certificationRtlDatepicker.calendar,
-        window.certificationClippedDatepicker.calendar,
-        window.certificationBottomDatepicker.calendar,
-      ].filter((instance) => instance.engineError);
-      if (engineErrors.length) {
-        throw new Error("Datepicker certification engine setup failed");
-      }
       document.body.dataset.datepickerReady = "true";
     </script>
   </body>

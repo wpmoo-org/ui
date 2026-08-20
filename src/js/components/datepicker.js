@@ -1,6 +1,6 @@
-// MooDatepicker - a shadcn-like trigger/popover/calendar wrapper backed by
-// vanillajs-datepicker's date engine. The public UI is owned by Moo UI; the
-// third-party picker presentation is never mounted into the visible page.
+// MooDatepicker - a reference-style trigger/popover/calendar wrapper. The public
+// UI, date math, keyboard handling, locale, and selection behavior are all
+// owned by Moo UI and require no third-party runtime.
 
 const datepickerInstances = new WeakMap();
 const calendarInstances = new WeakMap();
@@ -10,27 +10,6 @@ const DEFAULT_LOCALE = "en";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEKDAY_BASE_SUNDAY = new Date(2026, 7, 16);
 const POPOVER_VIEWPORT_PADDING = 8;
-
-let datepickerEnginePromise = null;
-let dateRangePickerEnginePromise = null;
-
-function loadDatepickerEngine() {
-  if (!datepickerEnginePromise) {
-    datepickerEnginePromise = import("vanillajs-datepicker/Datepicker").then(
-      (module) => module.default,
-    );
-  }
-  return datepickerEnginePromise;
-}
-
-function loadDateRangePickerEngine() {
-  if (!dateRangePickerEnginePromise) {
-    dateRangePickerEnginePromise = import("vanillajs-datepicker/DateRangePicker").then(
-      (module) => module.default,
-    );
-  }
-  return dateRangePickerEnginePromise;
-}
 
 function isElement(element, selector) {
   return element?.nodeType === 1 && Boolean(element.matches?.(selector));
@@ -201,19 +180,6 @@ function readDataConfig(element, config = {}) {
       (dataset.calendarShowPresets === "true" ||
         dataset.datepickerShowPresets === "true"),
   };
-}
-
-function buildEngineOptions(config) {
-  const options = {
-    autohide: false,
-    buttonClass: "btn",
-    format: "yyyy-mm-dd",
-    language: config.locale || DEFAULT_LOCALE,
-  };
-  if (config.minDate) options.minDate = toIso(config.minDate);
-  if (config.maxDate) options.maxDate = toIso(config.maxDate);
-  if (config.disabledDates?.length) options.datesDisabled = [...config.disabledDates];
-  return options;
 }
 
 function dispatch(element, window, name, detail = {}, cancelable = false) {
@@ -452,12 +418,8 @@ export class MooCalendar {
     this._document = element.ownerDocument;
     this._window = this._document.defaultView || window;
     this._listeners = [];
-    this._engine = null;
-    this._engineInput = null;
-    this._engineMount = null;
     this._config = readDataConfig(element, config);
     this._mode = this._config.mode === "range" ? "range" : "single";
-    this.engineOptions = buildEngineOptions(this._config);
     this._disabledDates = new Set(this._config.disabledDates);
     this._selectedDate = parseDate(this._config.value);
     this._rangeStart = parseDate(this._config.startValue);
@@ -468,20 +430,16 @@ export class MooCalendar {
     this._viewDate = startOfMonth(this._activeDate);
     this._captionId =
       this._element.id ? `${this._element.id}-caption` : `moo-calendar-caption-${Math.random().toString(36).slice(2)}`;
+    this._labelId =
+      this._element.id ? `${this._element.id}-label` : `moo-calendar-label-${Math.random().toString(36).slice(2)}`;
 
     calendarInstances.set(element, this);
     this._bindEvents();
     this._render();
-    this.engineReady = this._initEngine();
   }
 
   dispose() {
     removeListeners(this._listeners);
-    this._engine?.destroy?.();
-    this._engine = null;
-    this._engineInput = null;
-    this._engineMount?.remove();
-    this._engineMount = null;
     this._element.replaceChildren();
     calendarInstances.delete(this._element);
   }
@@ -507,7 +465,6 @@ export class MooCalendar {
     this._selectedDate = parsed;
     this._activeDate = parsed;
     this._viewDate = startOfMonth(parsed);
-    this._syncEngine();
     this._render();
     if (options.emit !== false) {
       this._emitChange(true);
@@ -528,7 +485,6 @@ export class MooCalendar {
     }
     this._activeDate = this._rangeEnd || this._rangeStart || this._activeDate;
     this._viewDate = startOfMonth(this._activeDate);
-    this._syncEngine();
     this._render();
     if (options.emit !== false) {
       this._emitChange(Boolean(this._rangeStart && this._rangeEnd));
@@ -540,7 +496,6 @@ export class MooCalendar {
     this._selectedDate = null;
     this._rangeStart = null;
     this._rangeEnd = null;
-    this._syncEngine();
     this._render();
     if (options.emit !== false) {
       this._emitChange(false);
@@ -592,36 +547,6 @@ export class MooCalendar {
         );
       }
     });
-  }
-
-  async _initEngine() {
-    if (typeof this._document?.createElement !== "function") return null;
-    try {
-      const Engine = await loadDatepickerEngine();
-      this._engineMount = this._document.createElement("div");
-      this._engineInput = this._document.createElement("input");
-      this._engineInput.type = "text";
-      this._engineInput.value = this._mode === "single" && this._selectedDate ? toIso(this._selectedDate) : "";
-      this._engineMount.appendChild(this._engineInput);
-      this._engine = new Engine(this._engineInput, {
-        ...this.engineOptions,
-        container: this._engineMount,
-      });
-      this._syncEngine();
-      return this._engine;
-    } catch (error) {
-      this.engineError = error;
-      return null;
-    }
-  }
-
-  _syncEngine() {
-    if (!this._engine) return;
-    if (this._mode === "single" && this._selectedDate) {
-      this._engine.setDate(toIso(this._selectedDate), { clear: true, render: false });
-    } else {
-      this._engine.setDate({ clear: true, render: false });
-    }
   }
 
   _emitChange(complete) {
@@ -753,13 +678,11 @@ export class MooCalendar {
       } else {
         this._rangeEnd = date;
       }
-      this._syncEngine();
       this._render();
       if (emit) this._emitChange(Boolean(this._rangeStart && this._rangeEnd));
       return;
     }
     this._selectedDate = date;
-    this._syncEngine();
     this._render();
     if (emit) this._emitChange(true);
   }
@@ -863,7 +786,18 @@ export class MooCalendar {
     const grid = document.createElement("div");
     grid.className = "moo-calendar__grid";
     grid.setAttribute("role", "grid");
-    grid.setAttribute("aria-labelledby", this._captionId);
+    // The caller-provided calendar name (the root aria-label) must label the
+    // actual role="grid" element, not just the root wrapper. A dedicated,
+    // visually hidden label carries that name and the grid references it, so
+    // the grid resolves an accessible name without fighting the caption's
+    // aria-labelledby.
+    const gridLabel = document.createElement("div");
+    gridLabel.id = this._labelId;
+    gridLabel.className = "visually-hidden";
+    gridLabel.textContent =
+      this._element.getAttribute("aria-label") || formatMonthYear(this._viewDate, this._config.locale);
+    grid.setAttribute("aria-labelledby", this._labelId);
+    grid.appendChild(gridLabel);
     grid.appendChild(weekdays);
     const first = startOfMonth(this._viewDate);
     const weekStart = firstDayOfWeek(this._config.locale);
@@ -1073,7 +1007,14 @@ export default class MooDatepicker {
     });
     addListener(this._listeners, this._document, "pointerdown", (event) => {
       if (this.isOpen() && !datepickerContains(this, event.target)) {
-        this.hide(false);
+        // Defer dismissal so the browser can first move focus to the clicked
+        // target; the deferred hide() then returns focus to the trigger per the
+        // frozen "outside click returns focus to the trigger" contract.
+        this._window.setTimeout(() => {
+          if (this.isOpen() && !datepickerContains(this, event.target)) {
+            this.hide();
+          }
+        }, 0);
       }
     });
     addListener(this._listeners, this._calendarRoot, "change.moo.calendar", (event) => {
@@ -1135,8 +1076,6 @@ export class MooDateRangePicker {
     this._floatingListeners = [];
     this._positionPopover = null;
     this._popoverPortal = null;
-    this._engine = null;
-    this._engineMount = null;
     this._trigger = element.querySelector("[data-datepicker-trigger]");
     this._popover = element.querySelector("[data-datepicker-popover]");
     this._label = element.querySelector("[data-datepicker-label]");
@@ -1156,13 +1095,11 @@ export class MooDateRangePicker {
     this._placeholder = this._config.placeholder;
     this._defaultStartValue = this._startInput.defaultValue || this._startInput.getAttribute("value") || "";
     this._defaultEndValue = this._endInput.defaultValue || this._endInput.getAttribute("value") || "";
-    this.engineOptions = buildEngineOptions(this._config);
     this.calendar = MooCalendar.getOrCreateInstance(this._calendarRoot, this._config);
 
     rangePickerInstances.set(element, this);
     this._syncFromCalendar();
     this._bindEvents();
-    this.engineReady = this._initEngine();
   }
 
   dispose() {
@@ -1171,10 +1108,6 @@ export class MooDateRangePicker {
     stopDatepickerPopoverPositioning(this);
     restoreDatepickerPopover(this);
     removeListeners(this._floatingListeners);
-    this._engine?.destroy?.();
-    this._engine = null;
-    this._engineMount?.remove();
-    this._engineMount = null;
     this.calendar?.dispose();
     rangePickerInstances.delete(this._element);
   }
@@ -1223,7 +1156,6 @@ export class MooDateRangePicker {
     const changed = this.calendar.setDates(startDate, endDate, { emit: false });
     if (changed) {
       this._syncFromCalendar();
-      this._syncEngine();
       if (options.emit !== false) this._emitChange();
     }
     return changed;
@@ -1232,7 +1164,6 @@ export class MooDateRangePicker {
   clear(options = {}) {
     this.calendar.clear({ emit: false });
     this._syncFromCalendar();
-    this._syncEngine();
     if (options.emit !== false) this._emitChange();
   }
 
@@ -1246,7 +1177,12 @@ export class MooDateRangePicker {
     });
     addListener(this._listeners, this._document, "pointerdown", (event) => {
       if (this.isOpen() && !datepickerContains(this, event.target)) {
-        this.hide(false);
+        // Deferred dismissal; see MooDatepicker for the focus contract.
+        this._window.setTimeout(() => {
+          if (this.isOpen() && !datepickerContains(this, event.target)) {
+            this.hide();
+          }
+        }, 0);
       }
     });
     const closeWhenFocusLeaves = () => {
@@ -1260,9 +1196,16 @@ export class MooDateRangePicker {
     addListener(this._listeners, this._popover, "focusout", closeWhenFocusLeaves);
     addListener(this._listeners, this._calendarRoot, "change.moo.calendar", (event) => {
       this._syncFromCalendar();
-      this._syncEngine();
       this._emitChange();
-      this.calendar.focusActiveDay();
+      if (event.detail.complete) {
+        // Selection finished; close and return focus to the trigger. Do not
+        // focus a day inside the now-hidden calendar.
+        this.hide();
+      } else {
+        // Start selected only; keep the calendar open and keep roving focus on
+        // the newly selected day.
+        this.calendar.focusActiveDay();
+      }
     });
     const form = this._startInput.form || this._element.closest("form");
     addListener(this._listeners, form, "reset", () => {
@@ -1270,35 +1213,6 @@ export class MooDateRangePicker {
         this.setDates(this._defaultStartValue, this._defaultEndValue, { emit: false });
       }, 0);
     });
-  }
-
-  async _initEngine() {
-    if (typeof this._document?.createElement !== "function") return null;
-    try {
-      const Engine = await loadDateRangePickerEngine();
-      this._engineMount = this._document.createElement("div");
-      const start = this._document.createElement("input");
-      const end = this._document.createElement("input");
-      start.type = "text";
-      end.type = "text";
-      start.value = this._startInput.value;
-      end.value = this._endInput.value;
-      this._engineMount.append(start, end);
-      this._engine = new Engine(this._engineMount, {
-        ...this.engineOptions,
-        inputs: [start, end],
-      });
-      this._syncEngine();
-      return this._engine;
-    } catch (error) {
-      this.engineError = error;
-      return null;
-    }
-  }
-
-  _syncEngine() {
-    if (!this._engine) return;
-    this._engine.setDates(this._startInput.value || { clear: true }, this._endInput.value || { clear: true });
   }
 
   _syncFromCalendar() {

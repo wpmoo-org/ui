@@ -46,21 +46,6 @@ Moo UI bundles Chart.js into the published `@wpmoo/ui` ESM outputs at build time
 Only the JavaScript runtime is bundled. Chart.js's default CSS is not imported
 or shipped.
 
-## vanillajs-datepicker
-
-Moo UI bundles vanillajs-datepicker into the published `@wpmoo/ui` ESM outputs
-at build time.
-
-- **Library:** vanillajs-datepicker
-- **Version:** 1.3.4
-- **License:** MIT
-- **Source:** <https://github.com/mymth/vanillajs-datepicker>
-- **Copyright:** Copyright (c) 2020 vanillajs-datepicker contributors
-- **Bundled outputs:** `dist/js/datepicker.js` (canonical), `dist/js/datepicker.min.js` (minified)
-
-Only the JavaScript runtime is bundled. vanillajs-datepicker's default CSS is
-not imported or shipped.
-
 ## WPMoo visual assets
 
 WPMoo-generated visual assets, including image assets under `site/static/images/`,

@@ -202,8 +202,12 @@ class BuildTests(CatalogTestCase):
         introduction = self.read_output("introduction.html")
         self.assertEqual(introduction.count("<footer"), 0)
 
-    def test_bundled_modules_have_no_bare_imports_or_cdn_urls(self) -> None:
-        """Bundled Chart/Datepicker outputs must be self-contained."""
+    def test_public_esm_outputs_have_no_bare_imports_or_cdn_urls(self) -> None:
+        """Public Chart/Datepicker outputs must be self-contained.
+
+        Chart.js bundles its runtime; Datepicker is self-contained Moo UI ESM.
+        In both cases the shipped output must never contain a bare third-party
+        specifier or a CDN runtime URL."""
         for module_name in ("chart.js", "chart.min.js", "datepicker.js", "datepicker.min.js"):
             module_path = PACKAGE_DIST / "js" / module_name
             with self.subTest(module=module_name):

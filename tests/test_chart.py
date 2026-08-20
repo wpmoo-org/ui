@@ -816,6 +816,11 @@ report("stateful-lifecycle-button", {{
         self.assertIn("this._observer", source)
         self.assertIn('attributeFilter: ["data-bs-theme"]', source)
 
+        # The documented getters must actually exist in the source so the
+        # API freeze cannot drift from the implementation.
+        self.assertIn("get chart()", source)
+        self.assertIn("get element()", source)
+
     def test_no_catalog_source_uses_a_chart_cdn_or_window_chart(self) -> None:
         for path in (CHART_JS, CATALOG_ADAPTER, CATALOG_INDEX):
             with self.subTest(path=path.relative_to(ROOT)):
