@@ -1,0 +1,287 @@
+from __future__ import annotations
+
+import json
+import subprocess
+
+from build import create_environment
+from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers.node_harness import NODE_TEST_TIMEOUT
+
+
+COMPONENT = ROOT / "src/components/slider.html.jinja"
+PAGE = ROOT / "site/src/pages/components/slider.html.jinja"
+SLIDER_JS = ROOT / "src/js/components/slider.js"
+SLIDER_SCSS = ROOT / "scss/components/_slider.scss"
+FIXTURE = ROOT / "tests/fixtures/certification/slider.html"
+
+
+class SliderTests(CatalogTestCase):
+    def render_slider(self, call: str) -> str:
+        self.assertTrue(COMPONENT.is_file(), "Slider macro is not implemented")
+        template = create_environment().from_string(
+            '{% from "components/slider.html.jinja" import slider, slider_range %}'
+            f"{{{{ {call} }}}}"
+        )
+        return " ".join(template.render().split())
+
+    def run_node(self, script: str) -> dict[str, object]:
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", script],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        lines = [line for line in result.stdout.splitlines() if line.strip()]
+        self.assertTrue(lines, f"No report emitted; stderr: {result.stderr}")
+        return json.loads(lines[-1])
+
+    def test_single_slider_renders_native_range_with_output(self) -> None:
+        output = self.render_slider(
+            'slider(id="volume", label="Volume", name="volume", value=60)'
+        )
+
+        self.assertIn('class="slider"', output)
+        self.assertIn("data-slider", output)
+        self.assertIn('data-slider-orientation="horizontal"', output)
+        self.assertIn('style="--moo-slider-start: 0%; --moo-slider-end: 60.0%;"', output)
+        self.assertIn('<label class="form-label mb-0" for="volume">Volume</label>', output)
+        self.assertIn('class="form-range slider-input"', output)
+        self.assertIn('type="range"', output)
+        self.assertIn('name="volume"', output)
+        self.assertIn("data-slider-input", output)
+        self.assertIn('<output class="small text-body-secondary" for="volume" data-slider-output>60</output>', output)
+        self.assertNotIn('role="slider"', output)
+        self.assertNotIn('role="progressbar"', output)
+
+    def test_range_slider_renders_two_named_native_inputs(self) -> None:
+        output = self.render_slider(
+            'slider_range(id="price", label="Price", start_name="price_min", '
+            'end_name="price_max", start_value=25, end_value=75, step=5)'
+        )
+
+        self.assertIn('class="slider slider--range"', output)
+        self.assertIn('role="group"', output)
+        self.assertEqual(output.count('type="range"'), 2)
+        self.assertIn('id="price-start"', output)
+        self.assertIn('id="price-end"', output)
+        self.assertIn('name="price_min"', output)
+        self.assertIn('name="price_max"', output)
+        self.assertIn('data-slider-thumb="start"', output)
+        self.assertIn('data-slider-thumb="end"', output)
+        self.assertIn('aria-label="Minimum Price"', output)
+        self.assertIn('aria-label="Maximum Price"', output)
+        self.assertIn('data-slider-output>25 - 75</output>', output)
+        self.assertNotIn('role="slider"', output)
+
+    def test_slider_rejects_invalid_macro_contracts(self) -> None:
+        invalid_calls = (
+            'slider(id="", label="Volume")',
+            'slider(id="volume")',
+            'slider(id="volume", label="Volume", aria_label="Volume")',
+            'slider(id="volume", label="Volume", min=10, max=10)',
+            'slider(id="volume", label="Volume", value=120)',
+            'slider(id="volume", label="Volume", orientation="diagonal")',
+            'slider_range(id="price", label="Price", start_value=80, end_value=20)',
+        )
+        for call in invalid_calls:
+            with self.subTest(call=call):
+                with self.assertRaises(ValueError):
+                    self.render_slider(call)
+
+    def test_slider_js_lifecycle_syncs_output_fill_and_range_order(self) -> None:
+        case = self.run_node(
+            r'''
+import Slider from "./src/js/components/slider.js";
+
+class EventStub {
+  constructor(type, options = {}) {
+    this.type = type;
+    this.bubbles = Boolean(options.bubbles);
+  }
+}
+
+class CustomEventStub extends EventStub {}
+
+const ownerWindow = {
+  Event: EventStub,
+  CustomEvent: CustomEventStub,
+  getComputedStyle: () => ({ direction: "ltr" }),
+};
+let ownerDocument;
+
+function makeStyle() {
+  const props = new Map();
+  return {
+    props,
+    setProperty: (name, value) => props.set(name, value),
+    getPropertyValue: (name) => props.get(name) || "",
+  };
+}
+
+function makeEventTarget(base = {}) {
+  const handlers = new Map();
+  return {
+    ...base,
+    addEventListener(type, handler) {
+      handlers.set(type, [...(handlers.get(type) || []), handler]);
+    },
+    removeEventListener(type, handler) {
+      handlers.set(type, (handlers.get(type) || []).filter((item) => item !== handler));
+    },
+    dispatchEvent(event) {
+      (handlers.get(event.type) || []).forEach((handler) => handler(event));
+      return true;
+    },
+  };
+}
+
+ownerDocument = makeEventTarget({ defaultView: ownerWindow });
+
+function makeInput({ value, min = "0", max = "100", step = "5", disabled = false }) {
+  const attrs = new Map();
+  return makeEventTarget({
+    nodeType: 1,
+    type: "range",
+    value: String(value),
+    min,
+    max,
+    step,
+    disabled,
+    focused: false,
+    ownerDocument,
+    setAttribute(name, nextValue) { attrs.set(name, String(nextValue)); },
+    getAttribute(name) { return attrs.get(name) || null; },
+    focus() { this.focused = true; },
+  });
+}
+
+function makeRoot(inputs, orientation = "horizontal") {
+  const output = { textContent: "" };
+  const attrs = new Map();
+  const track = makeEventTarget({
+    getBoundingClientRect: () => ({ left: 0, right: 200, top: 0, bottom: 20, width: 200, height: 20 }),
+  });
+  const root = makeEventTarget({
+    nodeType: 1,
+    dataset: { sliderOrientation: orientation },
+    style: makeStyle(),
+    ownerDocument,
+    matches: (selector) => selector === "[data-slider]",
+    setAttribute(name, value) { attrs.set(name, String(value)); },
+    removeAttribute(name) { attrs.delete(name); },
+    getAttribute(name) { return attrs.get(name) || null; },
+    querySelectorAll: () => inputs,
+    querySelector: (selector) => {
+      if (selector === "[data-slider-track]") return track;
+      if (selector === "[data-slider-output]") return output;
+      return null;
+    },
+  });
+  return { root, track, output, inputs };
+}
+
+const single = makeRoot([makeInput({ value: 60 })]);
+const singleInstance = Slider.getOrCreateInstance(single.root);
+const sameSingle = Slider.getOrCreateInstance(single.root);
+single.inputs[0].value = "80";
+single.inputs[0].dispatchEvent(new EventStub("input", { bubbles: true }));
+
+const range = makeRoot([
+  makeInput({ value: 25 }),
+  makeInput({ value: 75 }),
+]);
+Slider.getOrCreateInstance(range.root);
+range.inputs[0].value = "95";
+range.inputs[0].dispatchEvent(new EventStub("input", { bubbles: true }));
+
+single.track.dispatchEvent({ type: "pointerdown", button: 0, clientX: 100, clientY: 10, preventDefault() {} });
+ownerDocument.dispatchEvent({ type: "pointermove", clientX: 150, clientY: 10, preventDefault() {} });
+ownerDocument.dispatchEvent({ type: "pointerup", clientX: 150, clientY: 10, preventDefault() {} });
+const pointerFocusState = single.root.getAttribute("data-slider-pointer-focus");
+const dragStateAfterRelease = single.root.getAttribute("data-slider-dragging");
+singleInstance.dispose();
+
+console.log(JSON.stringify({
+  name: "slider-js",
+  ok: true,
+  idempotent: sameSingle === singleInstance,
+  singleOutput: single.output.textContent,
+  singleStart: single.root.style.getPropertyValue("--moo-slider-start"),
+  singleEnd: single.root.style.getPropertyValue("--moo-slider-end"),
+  rangeStartValue: range.inputs[0].value,
+  rangeEndValue: range.inputs[1].value,
+  rangeOutput: range.output.textContent,
+  trackClickFocusedInput: single.inputs[0].focused,
+  pointerFocusState,
+  dragStateAfterRelease,
+  pointerFocusDisposed: single.root.getAttribute("data-slider-pointer-focus"),
+  disposed: Slider.getInstance(single.root) === null,
+}));
+'''
+        )
+
+        self.assertEqual(case["name"], "slider-js")
+        self.assertTrue(case["idempotent"])
+        self.assertEqual(case["singleOutput"], "75")
+        self.assertEqual(case["singleStart"], "0%")
+        self.assertEqual(case["singleEnd"], "75%")
+        self.assertEqual(case["rangeStartValue"], "75")
+        self.assertEqual(case["rangeEndValue"], "75")
+        self.assertEqual(case["rangeOutput"], "75 - 75")
+        self.assertTrue(case["trackClickFocusedInput"])
+        self.assertEqual(case["pointerFocusState"], "true")
+        self.assertIsNone(case["dragStateAfterRelease"])
+        self.assertIsNone(case["pointerFocusDisposed"])
+        self.assertTrue(case["disposed"])
+
+    def test_slider_source_stays_native_and_self_contained(self) -> None:
+        source = SLIDER_JS.read_text(encoding="utf-8")
+
+        self.assertIn('matches("[data-slider]")', source)
+        self.assertIn('input[type="range"][data-slider-input]', source)
+        self.assertIn('"data-slider-pointer-focus"', source)
+        self.assertIn('"data-slider-dragging"', source)
+        self.assertIn('"--moo-slider-start"', source)
+        self.assertIn('"--moo-slider-end"', source)
+        self.assertIn("WeakMap", source)
+        self.assertIn("dispose()", source)
+        self.assertNotIn("role=\"slider\"", source)
+        self.assertNotIn("from \"@radix-ui", source)
+        self.assertNotIn("from '" + "@radix-ui", source)
+
+    def test_slider_styles_reuse_bootstrap_range_and_progress_tokens(self) -> None:
+        styles = SLIDER_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn("$form-range-track-bg", styles)
+        self.assertIn("$form-range-track-border-radius", styles)
+        self.assertIn("$form-range-thumb-width * 0.75", styles)
+        self.assertIn("$slider-thumb-margin-top", styles)
+        self.assertIn("$progress-height", styles)
+        self.assertIn("var(--moo-foreground)", styles)
+        self.assertIn("var(--bs-body-bg)", styles)
+        self.assertIn(".slider-input::-webkit-slider-thumb:active", styles)
+        self.assertIn(".slider-input::-moz-range-thumb:active", styles)
+        self.assertIn(".slider-input:disabled::-webkit-slider-thumb", styles)
+        self.assertIn("background-color: var(--moo-muted-surface);", styles)
+        self.assertIn("border-color: var(--moo-disabled-foreground);", styles)
+        self.assertIn(".slider:has(.slider-input:disabled) .slider-track", styles)
+        self.assertIn(".slider:has(.slider-input:disabled) .slider-range", styles)
+        self.assertIn("writing-mode: vertical-lr;", styles)
+        self.assertIn(".slider[data-slider-pointer-focus]", styles)
+        self.assertIn(".slider[data-slider-dragging]", styles)
+        self.assertNotIn("border-color: var(--moo-ring);", styles)
+        self.assertNotIn("#0", styles)
+
+    def test_slider_catalog_page_and_fixture_are_wired(self) -> None:
+        page = PAGE.read_text(encoding="utf-8")
+        fixture = FIXTURE.read_text(encoding="utf-8")
+
+        self.assertIn('from "components/slider.html.jinja" import slider, slider_range', page)
+        self.assertIn("Bootstrap Range documentation", page)
+        self.assertIn("data-slider", fixture)
+        self.assertNotIn("data-moo-slider", fixture)
+        self.assertIn('import Slider from "/dist/js/slider.js";', fixture)
+        self.assertIn('document.body.dataset.sliderReady = "true";', fixture)

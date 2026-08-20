@@ -119,7 +119,7 @@ DataTable.getOrCreateInstance(document.querySelector(".datatable"));
 Sidebar.getOrCreateInstance(document.querySelector('[data-slot="sidebar-wrapper"]'));
 Chart.getOrCreateInstance(document.querySelector(".moo-chart"));
 Datepicker.getOrCreateInstance(document.querySelector("[data-datepicker]"));
-Slider.getOrCreateInstance(document.querySelector("[data-moo-slider]"));
+Slider.getOrCreateInstance(document.querySelector("[data-slider]"));
 ```
 
 See the [Installation guide](https://ui.wpmoo.org/installation/) for CDN

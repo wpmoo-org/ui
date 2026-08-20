@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Slider certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 42rem;
+        display: grid;
+        gap: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Slider certification fixture</h1>
+
+      <form id="slider-fixture-form">
+        <section aria-labelledby="single-title" class="mb-4">
+          <h2 id="single-title" class="h5 mb-3">Single value</h2>
+          <div
+            class="slider"
+            id="certification-slider"
+            data-slider
+            data-slider-orientation="horizontal"
+            style="--moo-slider-start: 0%; --moo-slider-end: 60%;"
+          >
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <label class="form-label mb-0" for="certification-slider-input">Volume</label>
+              <output class="small text-body-secondary" for="certification-slider-input" data-slider-output>60</output>
+            </div>
+            <div class="slider-track" data-slider-track>
+              <div class="slider-range" data-slider-range></div>
+              <input
+                class="form-range slider-input"
+                id="certification-slider-input"
+                type="range"
+                name="volume"
+                min="0"
+                max="100"
+                step="5"
+                value="60"
+                data-slider-input
+              >
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="range-title" class="mb-4">
+          <h2 id="range-title" class="h5 mb-3">Range value</h2>
+          <div
+            class="slider slider--range"
+            id="certification-slider-range"
+            data-slider
+            data-slider-orientation="horizontal"
+            role="group"
+            aria-labelledby="certification-slider-range-label"
+            style="--moo-slider-start: 25%; --moo-slider-end: 75%;"
+          >
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <span class="form-label mb-0" id="certification-slider-range-label">Price range</span>
+              <output class="small text-body-secondary" for="certification-slider-range-start certification-slider-range-end" data-slider-output>25 - 75</output>
+            </div>
+            <div class="slider-track" data-slider-track>
+              <div class="slider-range" data-slider-range></div>
+              <input
+                class="form-range slider-input"
+                id="certification-slider-range-start"
+                type="range"
+                name="price_min"
+                min="0"
+                max="100"
+                step="5"
+                value="25"
+                data-slider-input
+                data-slider-thumb="start"
+                aria-label="Minimum Price range"
+              >
+              <input
+                class="form-range slider-input slider-input--upper"
+                id="certification-slider-range-end"
+                type="range"
+                name="price_max"
+                min="0"
+                max="100"
+                step="5"
+                value="75"
+                data-slider-input
+                data-slider-thumb="end"
+                aria-label="Maximum Price range"
+              >
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="vertical-title" class="mb-4">
+          <h2 id="vertical-title" class="h5 mb-3">Vertical value</h2>
+          <div
+            class="slider slider--vertical"
+            id="certification-slider-vertical"
+            data-slider
+            data-slider-orientation="vertical"
+            style="--moo-slider-start: 0%; --moo-slider-end: 70%;"
+          >
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <label class="form-label mb-0" for="certification-slider-vertical-input">Gain</label>
+              <output class="small text-body-secondary" for="certification-slider-vertical-input" data-slider-output>70</output>
+            </div>
+            <div class="slider-track" data-slider-track>
+              <div class="slider-range" data-slider-range></div>
+              <input
+                class="form-range slider-input"
+                id="certification-slider-vertical-input"
+                type="range"
+                name="gain"
+                min="0"
+                max="100"
+                step="10"
+                value="70"
+                data-slider-input
+              >
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="disabled-title">
+          <h2 id="disabled-title" class="h5 mb-3">Disabled value</h2>
+          <div
+            class="slider"
+            id="certification-slider-disabled"
+            data-slider
+            data-slider-orientation="horizontal"
+            style="--moo-slider-start: 0%; --moo-slider-end: 40%;"
+          >
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <label class="form-label mb-0" for="certification-slider-disabled-input">Disabled volume</label>
+              <output class="small text-body-secondary" for="certification-slider-disabled-input" data-slider-output>40</output>
+            </div>
+            <div class="slider-track" data-slider-track>
+              <div class="slider-range" data-slider-range></div>
+              <input
+                class="form-range slider-input"
+                id="certification-slider-disabled-input"
+                type="range"
+                name="disabled_volume"
+                min="0"
+                max="100"
+                value="40"
+                data-slider-input
+                disabled
+              >
+            </div>
+          </div>
+        </section>
+      </form>
+    </main>
+    <script type="module">
+      import Slider from "/dist/js/slider.js";
+
+      window.CertificationSlider = Slider;
+      window.certificationSlider = Slider.getOrCreateInstance(
+        document.querySelector("#certification-slider")
+      );
+      window.certificationSliderRange = Slider.getOrCreateInstance(
+        document.querySelector("#certification-slider-range")
+      );
+      window.certificationSliderVertical = Slider.getOrCreateInstance(
+        document.querySelector("#certification-slider-vertical")
+      );
+      window.certificationSliderDisabled = Slider.getOrCreateInstance(
+        document.querySelector("#certification-slider-disabled")
+      );
+
+      document.body.dataset.sliderReady = "true";
+    </script>
+  </body>
+</html>

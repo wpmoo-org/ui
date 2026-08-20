@@ -3,7 +3,7 @@
   "status": "backfill",
   "releaseTarget": "1.0.0-rc.3",
   "releaseClaim": "none",
-  "description": "RC.3 evidence for the optional-entrypoint rollout: promotes Chart and Datepicker to public bundled Moo UI components. Passing backfill evidence does not add the component to the package manifest's certifiedComponents list until the 1.0.0 release gate is complete.",
+  "description": "RC.3 evidence for the optional-entrypoint rollout: promotes Chart, Datepicker, and Slider to public Moo UI component entrypoints. Passing backfill evidence does not add the component to the package manifest's certifiedComponents list until the 1.0.0 release gate is complete.",
   "components": [
     {
       "slug": "chart",
@@ -73,6 +73,38 @@
       "limitations": [
         "The 1.0.0-rc.3 Datepicker scope covers single date, date range, and standalone inline calendar usage; time picker and natural-language parsing are out of scope.",
         "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "slider",
+      "phase": "5",
+      "tier": 1,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "keyboard", "focus", "lifecycle", "accessibility"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["theme", "rtl", "responsive", "visual", "host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_slider.py",
+        "src/js/components/slider.js",
+        "tests/fixtures/certification/slider.html"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/forms/range/"
+      ],
+      "resolvedFindings": [
+        "Bootstrap's Range component provides the native input[type=range].form-range control, including disabled, min, max, step, Sass variables, keyboard, and form semantics; Moo keeps those native inputs as the semantic owner instead of creating a custom ARIA slider role.",
+        "Bootstrap 5.3.3 explicitly does not support cross-browser filled tracks, and it provides no two-thumb range composition or live output synchronization, so Slider's optional ESM owns only those enhancement gaps around native range inputs."
+      ],
+      "limitations": [
+        "The 1.0.0-rc.3 Slider scope covers native single-value sliders, two-input range sliders, output synchronization, and the documented horizontal/vertical orientation classes.",
+        "Real-device, final visual acceptance, and generic host-conformance evidence remain pending."
       ]
     }
   ]

@@ -108,8 +108,8 @@ class RehearseRcTests(unittest.TestCase):
             attestation["package"]["sha256"],
             hashlib.sha256(tarball.read_bytes()).hexdigest(),
         )
-        self.assertEqual(len(manifest["certifiedComponents"]), 44)
-        self.assertEqual(len(attestation["components"]), 44)
+        self.assertEqual(len(manifest["certifiedComponents"]), 45)
+        self.assertEqual(len(attestation["components"]), 45)
 
 
 if __name__ == "__main__":

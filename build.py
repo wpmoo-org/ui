@@ -99,6 +99,7 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "radio-group": "src/components/radio_group.html.jinja",
     "sheet": "src/components/sheet.html.jinja",
     "sidebar": "src/components/sidebar.html.jinja",
+    "slider": "src/components/slider.html.jinja",
     "skeleton": "src/components/skeleton.html.jinja",
     "toast": "src/components/toast.html.jinja",
     "toggle-group": "src/components/toggle_group.html.jinja",

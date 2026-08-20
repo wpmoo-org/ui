@@ -126,6 +126,12 @@
     "description": "Show the completion progress of a task using Bootstrap's native progress bar."
   },
   {
+    "slug": "slider",
+    "label": "Slider",
+    "status": "ready",
+    "description": "Select single values and ranges with native range input semantics, shadcn-like track/thumb styling, and optional value output."
+  },
+  {
     "slug": "table",
     "label": "Table",
     "status": "ready",

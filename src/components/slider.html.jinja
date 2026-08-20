@@ -1,0 +1,137 @@
+{% set slider_orientations = ["horizontal", "vertical"] %}
+
+{% macro slider(
+  id,
+  label="",
+  aria_label="",
+  name="",
+  value=50,
+  min=0,
+  max=100,
+  step=1,
+  disabled=false,
+  show_output=true,
+  orientation="horizontal",
+  extra_class="",
+  attrs=""
+) -%}
+  {% set has_label = label | trim %}
+  {% set has_aria_label = aria_label | trim %}
+  {% if not id | trim %}{{ fail("Slider id is required") }}{% endif %}
+  {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Slider requires exactly one of label or aria_label") }}{% endif %}
+  {% if max <= min %}{{ fail("Slider max must be greater than min") }}{% endif %}
+  {% if value < min or value > max %}{{ fail("Slider value must be between min and max") }}{% endif %}
+  {% if orientation not in slider_orientations %}{{ fail("Unknown slider orientation: " ~ orientation) }}{% endif %}
+  {% set percent = ((value - min) / (max - min) * 100) | round(4) %}
+  <div
+    class="slider{% if orientation == "vertical" %} slider--vertical{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+    data-slider
+    data-slider-orientation="{{ orientation }}"
+    style="--moo-slider-start: 0%; --moo-slider-end: {{ percent }}%;"
+    {% if attrs %}{{ attrs | safe }}{% endif %}
+  >
+    {% if has_label or show_output %}
+      <div class="d-flex align-items-center justify-content-between gap-3">
+        {% if has_label %}<label class="form-label mb-0" for="{{ id }}">{{ label }}</label>{% endif %}
+        {% if show_output %}<output class="small text-body-secondary" for="{{ id }}" data-slider-output>{{ value }}</output>{% endif %}
+      </div>
+    {% endif %}
+    <div class="slider-track" data-slider-track>
+      <div class="slider-range" data-slider-range></div>
+      <input
+        class="form-range slider-input"
+        id="{{ id }}"
+        type="range"
+        min="{{ min }}"
+        max="{{ max }}"
+        step="{{ step }}"
+        value="{{ value }}"
+        data-slider-input
+        {% if name %}name="{{ name }}"{% endif %}
+        {% if has_aria_label %}aria-label="{{ aria_label }}"{% endif %}
+        {% if disabled %}disabled{% endif %}
+      >
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro slider_range(
+  id,
+  label="",
+  aria_label="",
+  start_name="",
+  end_name="",
+  start_value=25,
+  end_value=75,
+  min=0,
+  max=100,
+  step=1,
+  disabled=false,
+  show_output=true,
+  orientation="horizontal",
+  extra_class="",
+  attrs=""
+) -%}
+  {% set has_label = label | trim %}
+  {% set has_aria_label = aria_label | trim %}
+  {% if not id | trim %}{{ fail("Slider id is required") }}{% endif %}
+  {% if (has_label and has_aria_label) or (not has_label and not has_aria_label) %}{{ fail("Slider requires exactly one of label or aria_label") }}{% endif %}
+  {% if max <= min %}{{ fail("Slider max must be greater than min") }}{% endif %}
+  {% if start_value < min or start_value > max or end_value < min or end_value > max or start_value > end_value %}{{ fail("Slider range values must be ordered between min and max") }}{% endif %}
+  {% if orientation not in slider_orientations %}{{ fail("Unknown slider orientation: " ~ orientation) }}{% endif %}
+  {% set start_percent = ((start_value - min) / (max - min) * 100) | round(4) %}
+  {% set end_percent = ((end_value - min) / (max - min) * 100) | round(4) %}
+  {% set label_id = id ~ "-label" %}
+  {% set start_id = id ~ "-start" %}
+  {% set end_id = id ~ "-end" %}
+  {% set accessible_name = label if has_label else aria_label %}
+  <div
+    class="slider slider--range{% if orientation == "vertical" %} slider--vertical{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}"
+    data-slider
+    data-slider-orientation="{{ orientation }}"
+    role="group"
+    aria-labelledby="{{ label_id }}"
+    style="--moo-slider-start: {{ start_percent }}%; --moo-slider-end: {{ end_percent }}%;"
+    {% if attrs %}{{ attrs | safe }}{% endif %}
+  >
+    <div class="d-flex align-items-center justify-content-between gap-3">
+      {% if has_label %}
+        <span class="form-label mb-0" id="{{ label_id }}">{{ label }}</span>
+      {% else %}
+        <span class="visually-hidden" id="{{ label_id }}">{{ aria_label }}</span>
+      {% endif %}
+      {% if show_output %}<output class="small text-body-secondary" for="{{ start_id }} {{ end_id }}" data-slider-output>{{ start_value }} - {{ end_value }}</output>{% endif %}
+    </div>
+    <div class="slider-track" data-slider-track>
+      <div class="slider-range" data-slider-range></div>
+      <input
+        class="form-range slider-input"
+        id="{{ start_id }}"
+        type="range"
+        min="{{ min }}"
+        max="{{ max }}"
+        step="{{ step }}"
+        value="{{ start_value }}"
+        data-slider-input
+        data-slider-thumb="start"
+        aria-label="Minimum {{ accessible_name }}"
+        {% if start_name %}name="{{ start_name }}"{% endif %}
+        {% if disabled %}disabled{% endif %}
+      >
+      <input
+        class="form-range slider-input slider-input--upper"
+        id="{{ end_id }}"
+        type="range"
+        min="{{ min }}"
+        max="{{ max }}"
+        step="{{ step }}"
+        value="{{ end_value }}"
+        data-slider-input
+        data-slider-thumb="end"
+        aria-label="Maximum {{ accessible_name }}"
+        {% if end_name %}name="{{ end_name }}"{% endif %}
+        {% if disabled %}disabled{% endif %}
+      >
+    </div>
+  </div>
+{%- endmacro %}

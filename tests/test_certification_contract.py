@@ -29,7 +29,7 @@ class CertificationContractTests(unittest.TestCase):
         inventory_slugs = {component["slug"] for component in inventory["components"]}
         registry_slugs = {component["slug"] for component in registry}
 
-        self.assertEqual(len(inventory["components"]), 44)
+        self.assertEqual(len(inventory["components"]), 45)
         self.assertEqual(inventory_slugs, registry_slugs)
         self.assertEqual(
             {component["slug"] for component in inventory["plannedComponents"]},
@@ -58,7 +58,7 @@ class CertificationContractTests(unittest.TestCase):
             for evidence_path in component["evidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
 
-        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 9})
+        self.assertEqual(tier_counts, {0: 24, 1: 7, 2: 5, 3: 9})
 
     def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
         pilot = self._read_json("src/certification/pilot-evidence.json")
@@ -427,7 +427,7 @@ class CertificationContractTests(unittest.TestCase):
                 [component["slug"] for component in attestation["components"]],
                 [component["slug"] for component in inventory["components"]],
             )
-            self.assertEqual(len(attestation["components"]), 44)
+            self.assertEqual(len(attestation["components"]), 45)
             for component in attestation["components"]:
                 self.assertGreaterEqual(len(component["checks"]), 1)
             self.assertEqual(attestation["manualReviews"], [])
@@ -720,6 +720,21 @@ class CertificationContractTests(unittest.TestCase):
         self.assertTrue(chart_record.get("bundled", False))
         self.assertEqual(chart_record.get("runtime"), "chart.js@4.5.1")
         self.assertEqual(chart_record.get("getters"), ["chart", "element"])
+
+        slider_record = next(m for m in freeze["esmModules"] if m["module"] == "slider.js")
+        self.assertFalse(slider_record.get("bundled", True))
+        self.assertEqual(slider_record.get("nativeElement"), 'input[type="range"]')
+        self.assertEqual(
+            slider_record.get("markup"),
+            {
+                "rootClass": "slider",
+                "rootAttribute": "data-slider",
+                "trackAttribute": "data-slider-track",
+                "rangeAttribute": "data-slider-range",
+                "inputAttribute": "data-slider-input",
+                "outputAttribute": "data-slider-output",
+            },
+        )
 
 
 if __name__ == "__main__":

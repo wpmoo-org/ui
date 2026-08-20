@@ -127,7 +127,15 @@
       "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
       "source": "src/js/components/slider.js",
       "bundled": false,
-      "nativeElement": "input[type=\"range\"]"
+      "nativeElement": "input[type=\"range\"]",
+      "markup": {
+        "rootClass": "slider",
+        "rootAttribute": "data-slider",
+        "trackAttribute": "data-slider-track",
+        "rangeAttribute": "data-slider-range",
+        "inputAttribute": "data-slider-input",
+        "outputAttribute": "data-slider-output"
+      }
     }
   ],
 

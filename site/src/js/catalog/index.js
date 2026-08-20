@@ -2,6 +2,7 @@ import Combobox from "../../../../src/js/components/combobox.js";
 import ContextMenu from "../../../../src/js/components/context-menu.js";
 import DataTable from "../../../../src/js/components/datatable.js";
 import Datepicker, { MooCalendar, MooDateRangePicker } from "../../../../src/js/components/datepicker.js";
+import Slider from "../../../../src/js/components/slider.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
@@ -61,6 +62,11 @@ export function initCatalog(root = document) {
       return;
     }
     const instance = MooCalendar.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-slider]").forEach((element) => {
+    const instance = Slider.getOrCreateInstance(element);
     disposers.push(() => instance.dispose());
   });
 

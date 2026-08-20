@@ -132,6 +132,10 @@ COMPONENT_SELECTOR_PREFIXES = {
         "is-invalid",
         "show",
     ),
+    # Slider keeps Bootstrap's native .form-range input as the semantic
+    # control, while the plain .slider namespace owns the reference-style
+    # track, fill, output, orientation, and lifecycle hook wrapper.
+    "slider": ("slider", "form-range"),
     # Bootstrap Table owns the static table markup only. DataTable is
     # Moo's documented interactive composition around Bootstrap table,
     # dropdown, button, checkbox, badge, and pagination primitives.
