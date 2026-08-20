@@ -1354,9 +1354,9 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        package_version = json.loads(
-            (ROOT / "package.json").read_text(encoding="utf-8")
-        )["version"]
+        # CodePen exports pin the CDN package version (build.CODEPEN_CDN_VERSION),
+        # which may lag package.version until the current version is published.
+        codepen_version = site_build.CODEPEN_CDN_VERSION
         registry = {
             component["slug"]: component
             for component in json.loads(
@@ -1437,7 +1437,7 @@ class CatalogContractTests(CatalogTestCase):
                 )
                 self.assertEqual(
                     payload["css_external"],
-                    f"https://unpkg.com/@wpmoo/ui@{package_version}/dist/assets/css/moo-ui.css",
+                    f"https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/assets/css/moo-ui.css",
                 )
                 self.assertEqual(
                     payload["js_external"],
@@ -1451,12 +1451,12 @@ class CatalogContractTests(CatalogTestCase):
                 )
                 if path == "examples/dashboard/tasks.html":
                     self.assertIn(
-                        f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
+                        f"@wpmoo/ui@{codepen_version}/dist/js/datatable.js",
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
                     self.assertIn(
-                        f'import("https://unpkg.com/@wpmoo/ui@{package_version}/dist/js/datatable.js")',
+                        f'import("https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/js/datatable.js")',
                         payload["js"],
                     )
                     self.assertIn("function initExamplesTasks", payload["js"])
@@ -1483,12 +1483,12 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertEqual(payload["editors"], "111")
                 elif path == "examples/dashboard/users.html":
                     self.assertIn(
-                        f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
+                        f"@wpmoo/ui@{codepen_version}/dist/js/datatable.js",
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
                     self.assertIn(
-                        f'import("https://unpkg.com/@wpmoo/ui@{package_version}/dist/js/datatable.js")',
+                        f'import("https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/js/datatable.js")',
                         payload["js"],
                     )
                     self.assertIn("function initExamplesUsers", payload["js"])

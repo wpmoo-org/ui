@@ -545,7 +545,7 @@ function initializeMooDashboardCharts(MooChart) {
 }
 
 function startMooDashboardCharts() {
-  import("https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/js/chart.js")
+  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
     .then((module) => {
       initializeMooDashboardCharts(module.default);
     })
@@ -631,7 +631,7 @@ if (document.readyState === "loading") {
     "css": css,
     "css_pre_processor": "none",
     "css_starter": "neither",
-    "css_external": "https://unpkg.com/@wpmoo/ui@" ~ product.version ~ "/dist/assets/css/moo-ui.css",
+    "css_external": "https://unpkg.com/@wpmoo/ui@" ~ product.codepenCdnVersion ~ "/dist/assets/css/moo-ui.css",
     "js": resolved_js,
     "js_pre_processor": "none",
     "js_external": resolved_js_external,

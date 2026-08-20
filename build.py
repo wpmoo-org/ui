@@ -449,12 +449,11 @@ def _example_js_source(module_filename: str, init_call: str) -> str:
     # hand-duplicated here) so the export can't silently drift from
     # what's really shipping; only the relative import needs rewriting
     # to the CDN URL every other codepen_button() call already uses,
-    # matching product.version.
-    version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
+    # matching CODEPEN_CDN_VERSION.
     source = (SITE_SRC / "js/catalog" / module_filename).read_text(encoding="utf-8")
     if EXAMPLE_JS_IMPORT not in source:
         fail(f"{module_filename}'s import line changed; update EXAMPLE_JS_IMPORT")
-    datatable_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js"
+    datatable_url = f"https://unpkg.com/@wpmoo/ui@{CODEPEN_CDN_VERSION}/dist/js/datatable.js"
     source = source.replace(EXAMPLE_JS_IMPORT, "let DataTable;")
     source = source.replace("export function ", "function ")
     if re.search(r"^\s*export\b", source, re.MULTILINE):
@@ -868,6 +867,14 @@ def load_support_facts() -> dict[str, object]:
     }
 
 
+# CodePen export URLs pin the package version they load from a CDN. The
+# current package version (1.0.0-rc.3) is not published to npm yet, so a
+# pen pinned to it would 404 and render broken. Until RC.3 is published,
+# the export pins the newest published version; flip this back to
+# package.version once the current version is live on npm.
+CODEPEN_CDN_VERSION = "1.0.0-rc.2"
+
+
 def load_product_facts() -> dict[str, object]:
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     certification = json.loads(
@@ -875,6 +882,7 @@ def load_product_facts() -> dict[str, object]:
     )
     return {
         "version": package["version"],
+        "codepenCdnVersion": CODEPEN_CDN_VERSION,
         "license": package["license"],
         "bootstrapRange": package["peerDependencies"]["bootstrap"],
         "exports": package["exports"],
