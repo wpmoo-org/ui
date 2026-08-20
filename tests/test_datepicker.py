@@ -441,6 +441,16 @@ class DatepickerBrowserTests(unittest.TestCase):
             grid = page.get_by_role("grid", name="Deploy date calendar")
             expect(grid).to_be_visible()
             self.assertGreaterEqual(grid.count(), 1)
+            # The grid's direct children must be rows only; the accessible-name
+            # label lives outside the grid so the ARIA child anatomy stays valid.
+            grid_children = grid.evaluate(
+                "element => Array.from(element.children).map(child => child.getAttribute('role'))"
+            )
+            self.assertTrue(grid_children)
+            self.assertTrue(
+                all(role == "row" for role in grid_children),
+                f"grid children must all be role=row, got {grid_children}",
+            )
 
             page.locator('#certification-datepicker-calendar [data-calendar-day="2026-08-20"]').focus()
             page.locator('#certification-datepicker-calendar [data-calendar-day="2026-08-20"]').press("ArrowRight")

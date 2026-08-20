@@ -771,6 +771,19 @@ export class MooCalendar {
     header.append(prev, caption, next);
     fragment.appendChild(header);
 
+    // The caller-provided calendar name (the root aria-label) must label the
+    // actual role="grid" element, not just the root wrapper. A dedicated,
+    // visually hidden label carries that name and the grid references it by id,
+    // so the grid resolves an accessible name without fighting the caption's
+    // aria-labelledby. The label lives OUTSIDE the grid so the grid's children
+    // stay rows-only per its ARIA role.
+    const gridLabel = document.createElement("div");
+    gridLabel.id = this._labelId;
+    gridLabel.className = "visually-hidden";
+    gridLabel.textContent =
+      this._element.getAttribute("aria-label") || formatMonthYear(this._viewDate, this._config.locale);
+    fragment.appendChild(gridLabel);
+
     const weekdays = document.createElement("div");
     weekdays.className = "moo-calendar__weekdays";
     weekdays.setAttribute("role", "row");
@@ -786,18 +799,7 @@ export class MooCalendar {
     const grid = document.createElement("div");
     grid.className = "moo-calendar__grid";
     grid.setAttribute("role", "grid");
-    // The caller-provided calendar name (the root aria-label) must label the
-    // actual role="grid" element, not just the root wrapper. A dedicated,
-    // visually hidden label carries that name and the grid references it, so
-    // the grid resolves an accessible name without fighting the caption's
-    // aria-labelledby.
-    const gridLabel = document.createElement("div");
-    gridLabel.id = this._labelId;
-    gridLabel.className = "visually-hidden";
-    gridLabel.textContent =
-      this._element.getAttribute("aria-label") || formatMonthYear(this._viewDate, this._config.locale);
     grid.setAttribute("aria-labelledby", this._labelId);
-    grid.appendChild(gridLabel);
     grid.appendChild(weekdays);
     const first = startOfMonth(this._viewDate);
     const weekStart = firstDayOfWeek(this._config.locale);
