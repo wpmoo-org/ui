@@ -40,6 +40,53 @@
   background: var(--bs-body-bg);
 }
 
+// The lazy-loaded preview iframe is blank until it starts rendering, which on
+// a slow host connection reads as an unexplained white flash. Cover that
+// window with an explicit loading surface instead: a muted placeholder that is
+// hidden only once the iframe fires its load event. The iframe stays fully
+// functional (sized and scaled by block-frame.js); only its paint is gated.
+.moo-block-preview__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  transition: opacity 0.2s ease;
+}
+
+.moo-block-preview__loading-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.moo-block-preview__loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 0.125rem solid var(--bs-secondary-color);
+  border-top-color: transparent;
+  border-radius: var(--bs-border-radius-pill);
+  animation: moo-block-preview-spin 0.7s linear infinite;
+}
+
+@keyframes moo-block-preview-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Once loaded, block-frame.js adds this class to fade the placeholder out and
+// reveal the rendered iframe beneath it.
+.moo-block-preview__viewport.is-loaded .moo-block-preview__loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
 // Safari has a long-documented bug where a transform: scale()'d <iframe>
 // can mis-composite after the iframe's own internal content repaints (e.g.
 // opening a dropdown inside it): the outer paint snaps toward the actual
