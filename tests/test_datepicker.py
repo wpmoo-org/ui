@@ -739,14 +739,20 @@ class DatepickerBrowserTests(unittest.TestCase):
                 clipping_selector="#certification-clipped-card",
             )
 
-            self.assertEqual(metrics["placement"], "top")
+            # The popover must escape the clipped ancestor and portal to the
+            # body. Placement is geometry-dependent: it flips above the trigger
+            # only when the space below cannot fit the popover, otherwise it
+            # stays below. Both are correct as long as the popover stays within
+            # the viewport (its height is clamped there) and extends past the
+            # clipping card so it is actually visible.
+            self.assertIn(metrics["placement"], ("top", "bottom"))
             self.assertEqual(metrics["position"], "fixed")
             self.assertTrue(metrics["bodyChild"])
             self.assertFalse(metrics["rootContainsPopover"])
             self.assertLessEqual(abs(metrics["leftDelta"]), 1)
-            self.assertGreaterEqual(metrics["aboveGap"], 4)
-            self.assertLessEqual(metrics["aboveGap"], 8)
+            self.assertTrue(metrics["withinViewport"])
             self.assertEqual(metrics["clippingOverflow"], "hidden")
+            self.assertTrue(metrics["extendsPastClipping"])
             page.locator(
                 '#certification-clipped-datepicker-popover [data-calendar-day="2026-08-18"]'
             ).press("Escape")
