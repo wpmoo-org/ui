@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
+import importlib
 import re
 import subprocess
 import sys
 import unittest
-
-from playwright.sync_api import expect, sync_playwright
 
 from build import create_environment
 from tests.helpers import DIST, ROOT, STATIC, CatalogTestCase, is_valid_webp
@@ -81,6 +80,8 @@ class DatepickerMacroTests(CatalogTestCase):
             "data-datepicker-input required",
             output,
         )
+        popover = output.split('data-datepicker-popover role="dialog"', 1)[1].split("</div>", 1)[0]
+        self.assertNotIn('type="hidden"', popover)
         self.assertIn('aria-describedby="deploy-date-help"', output)
         self.assertNotIn('class="datepicker', output)
 
@@ -121,6 +122,8 @@ class DatepickerMacroTests(CatalogTestCase):
         self.assertIn('type="hidden" name="billing_end" value="2026-08-18"', output)
         self.assertIn('data-datepicker-range-start', output)
         self.assertIn('data-datepicker-range-end', output)
+        popover = output.split('data-datepicker-popover role="dialog"', 1)[1].split("</div>", 1)[0]
+        self.assertNotIn('type="hidden"', popover)
 
     def test_inline_calendar_renders_standalone_grid_contract(self) -> None:
         output = self.render_datepicker(
@@ -286,9 +289,13 @@ class DatepickerSourceTests(CatalogTestCase):
         self.assertIn("color: var(--moo-primary-foreground);", selected_interaction)
 
 
-class DatepickerBrowserTests(unittest.TestCase):
+class _DatepickerBrowserMixin:
     @classmethod
     def setUpClass(cls) -> None:
+        global expect
+        playwright_sync = importlib.import_module("playwright.sync_api")
+
+        expect = playwright_sync.expect
         skip_if_browser_launch_is_sandboxed()
         build = subprocess.run(
             [sys.executable, "build.py"],
@@ -302,7 +309,7 @@ class DatepickerBrowserTests(unittest.TestCase):
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
         cls.addClassCleanup(cls.server.__exit__, None, None, None)
-        cls.playwright_manager = sync_playwright()
+        cls.playwright_manager = playwright_sync.sync_playwright()
         cls.playwright = cls.playwright_manager.__enter__()
         cls.addClassCleanup(cls.playwright_manager.__exit__, None, None, None)
         cls.browser = launch_certification_browser(cls.playwright)
@@ -399,7 +406,8 @@ class DatepickerBrowserTests(unittest.TestCase):
               return {
                 placement: popover.dataset.datepickerPlacement || "",
                 position: getComputedStyle(popover).position,
-                bodyChild: popover.parentElement === document.body,
+                portalHost: popover.parentElement?.matches?.(".moo-ui[data-datepicker-portal-host]") || false,
+                portalHostBodyChild: popover.parentElement?.parentElement === document.body,
                 rootContainsPopover: root ? root.contains(popover) : false,
                 leftDelta: popoverRect.left - triggerRect.left,
                 topGap: popoverRect.top - triggerRect.bottom,
@@ -498,10 +506,10 @@ class DatepickerBrowserTests(unittest.TestCase):
             # Start selected: calendar stays open, roving focus stays on the day.
             expect(page.locator("#certification-date-range-popover")).to_be_visible()
             page.locator('#certification-date-range-calendar [data-calendar-day="2026-08-28"]').click()
-            expect(page.locator('#certification-date-range-popover input[name="range_start"]')).to_have_value(
+            expect(page.locator('input[name="range_start"]')).to_have_value(
                 "2026-08-24"
             )
-            expect(page.locator('#certification-date-range-popover input[name="range_end"]')).to_have_value(
+            expect(page.locator('input[name="range_end"]')).to_have_value(
                 "2026-08-28"
             )
             expect(page.locator('#certification-date-range-calendar [data-calendar-day="2026-08-26"]')).to_have_attribute(
@@ -561,6 +569,27 @@ class DatepickerBrowserTests(unittest.TestCase):
             reset_picker = page.locator("#certification-reset-datepicker")
             reset_trigger = reset_picker.locator("[data-datepicker-trigger]")
             reset_trigger.click()
+            form_association = page.evaluate(
+                """
+                () => {
+                  const input = document.querySelector('input[name="reset_date"]');
+                  const popover = document.querySelector("#certification-reset-datepicker-popover");
+                  return {
+                    formId: input.form?.id || "",
+                    popoverContainsInput: popover.contains(input),
+                    portalHost: popover.parentElement?.matches?.(".moo-ui[data-datepicker-portal-host]") || false,
+                  };
+                }
+                """
+            )
+            self.assertEqual(
+                form_association,
+                {
+                    "formId": "certification-datepicker-reset-form",
+                    "popoverContainsInput": False,
+                    "portalHost": True,
+                },
+            )
             page.locator('#certification-reset-datepicker-calendar [data-calendar-day="2026-08-21"]').click()
             expect(page.locator('input[name="reset_date"]')).to_have_value(
                 "2026-08-21"
@@ -607,16 +636,28 @@ class DatepickerBrowserTests(unittest.TestCase):
 
                   window.certificationDatepicker.dispose();
                   const singleDisposed = window.CertificationDatepicker.getInstance(singleRoot) === null;
+                  const staleSingle = window.certificationDatepicker;
                   window.certificationDatepicker = window.CertificationDatepicker.getOrCreateInstance(singleRoot);
+                  const newSingle = window.certificationDatepicker;
+                  staleSingle.dispose();
+                  const staleSingleNoop = window.CertificationDatepicker.getInstance(singleRoot) === newSingle;
 
                   window.certificationCalendar.dispose();
                   const calendarDisposed = window.CertificationCalendar.getInstance(calendarRoot) === null;
+                  const staleCalendar = window.certificationCalendar;
                   window.certificationCalendar = window.CertificationCalendar.getOrCreateInstance(calendarRoot);
+                  const newCalendar = window.certificationCalendar;
+                  staleCalendar.dispose();
+                  const staleCalendarNoop = window.CertificationCalendar.getInstance(calendarRoot) === newCalendar;
                   const calendarSet = window.certificationCalendar.setDate("2026-08-19", { emit: false });
 
                   window.certificationDateRangePicker.dispose();
                   const rangeDisposed = window.CertificationDateRangePicker.getInstance(rangeRoot) === null;
+                  const staleRange = window.certificationDateRangePicker;
                   window.certificationDateRangePicker = window.CertificationDateRangePicker.getOrCreateInstance(rangeRoot);
+                  const newRange = window.certificationDateRangePicker;
+                  staleRange.dispose();
+                  const staleRangeNoop = window.CertificationDateRangePicker.getInstance(rangeRoot) === newRange;
                   const rangeSet = window.certificationDateRangePicker.setDates(
                     "2026-08-24",
                     "2026-08-28",
@@ -625,11 +666,14 @@ class DatepickerBrowserTests(unittest.TestCase):
 
                   return {
                     singleDisposed,
+                    staleSingleNoop,
                     singleValue: window.certificationDatepicker.getDate("yyyy-mm-dd"),
                     calendarDisposed,
+                    staleCalendarNoop,
                     calendarSet,
                     calendarValue: window.certificationCalendar.getDate("yyyy-mm-dd"),
                     rangeDisposed,
+                    staleRangeNoop,
                     rangeSet,
                     rangeValues: window.certificationDateRangePicker.getDates("yyyy-mm-dd"),
                   };
@@ -640,11 +684,14 @@ class DatepickerBrowserTests(unittest.TestCase):
                 lifecycle,
                 {
                     "singleDisposed": True,
+                    "staleSingleNoop": True,
                     "singleValue": "2026-08-21",
                     "calendarDisposed": True,
+                    "staleCalendarNoop": True,
                     "calendarSet": True,
                     "calendarValue": "2026-08-19",
                     "rangeDisposed": True,
+                    "staleRangeNoop": True,
                     "rangeSet": True,
                     "rangeValues": ["2026-08-24", "2026-08-28"],
                 },
@@ -739,15 +786,16 @@ class DatepickerBrowserTests(unittest.TestCase):
                 clipping_selector="#certification-clipped-card",
             )
 
-            # The popover must escape the clipped ancestor and portal to the
-            # body. Placement is geometry-dependent: it flips above the trigger
-            # only when the space below cannot fit the popover, otherwise it
-            # stays below. Both are correct as long as the popover stays within
-            # the viewport (its height is clamped there) and extends past the
+            # The popover must escape the clipped ancestor and portal through a
+            # transient scoped host under body. Placement is geometry-dependent:
+            # it flips above the trigger only when the space below cannot fit
+            # the popover, otherwise it stays below. Both are correct as long as
+            # the popover stays within the viewport and extends past the
             # clipping card so it is actually visible.
             self.assertIn(metrics["placement"], ("top", "bottom"))
             self.assertEqual(metrics["position"], "fixed")
-            self.assertTrue(metrics["bodyChild"])
+            self.assertTrue(metrics["portalHost"])
+            self.assertTrue(metrics["portalHostBodyChild"])
             self.assertFalse(metrics["rootContainsPopover"])
             self.assertLessEqual(abs(metrics["leftDelta"]), 1)
             self.assertTrue(metrics["withinViewport"])

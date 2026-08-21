@@ -84,7 +84,7 @@ class CatalogJavaScriptTests(CatalogTestCase):
                     'import { initExamplesChart } from "./site/src/js/catalog/examples-chart.js";',
                 )
                 + f"""
-const roots = [makeRoot({{"data-moo-chart": "line", "data-moo-chart-data": {json.dumps(VALID_DATA)}}})];
+const roots = [makeRoot({{"data-chart": "line", "data-chart-data": {json.dumps(VALID_DATA)}}})];
 const catalogRoot = {{
   querySelectorAll: (selector) => (selector === ".moo-chart" ? roots : []),
 }};
@@ -184,7 +184,7 @@ report("catalog-delegation", {{
         self.assertIn("export function initCatalog(root = document)", source)
         self.assertIn("[...disposers].reverse()", source)
         self.assertNotIn(".combobox-input", source)
-        self.assertNotIn("mooSidebarState", source)
+        self.assertNotIn("sidebarState", source)
         self.assertFalse((ROOT / "site/static/js/preview.js").exists())
 
     def test_examples_row_actions_survive_reparented_menus(self) -> None:

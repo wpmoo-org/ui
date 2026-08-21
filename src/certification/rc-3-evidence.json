@@ -18,7 +18,8 @@
       },
       "automatedEvidence": [
         "tests/test_chart.py",
-        "src/js/components/chart.js"
+        "src/js/components/chart.js",
+        "tests/fixtures/certification/chart.html"
       ],
       "browserCases": [
         "desktop-light",
@@ -31,7 +32,7 @@
         "https://getbootstrap.com/docs/5.3/utilities/colors/"
       ],
       "resolvedFindings": [
-        "Bootstrap ships no chart component or plugin (verified: no chart equivalent in js/src/), so Moo owns the entire contract: the .moo-chart root, the data-moo-chart type attribute, the data-moo-chart-data JSON payload, and deterministic child canvas resolution. Chart.js is bundled at build time through chart.js/auto; there is no runtime CDN, script tag, or window.Chart dependency.",
+        "Bootstrap ships no chart component or plugin (verified: no chart equivalent in js/src/), so Moo owns the entire contract: the .moo-chart root, the data-chart type attribute, the data-chart-data JSON payload, and deterministic child canvas resolution. Chart.js is bundled at build time through chart.js/auto; there is no runtime CDN, script tag, or window.Chart dependency.",
         "Chart colors resolve from Bootstrap's CSS variables (--bs-info, --bs-info-text-emphasis, --bs-body-color, --bs-border-color) with color-mix() fill and grid derivations instead of hardcoded theme-dependent hex values, so a data-bs-theme change re-themes the chart through a MutationObserver without reintroducing hex-alpha suffix concatenation."
       ],
       "limitations": [
@@ -78,7 +79,7 @@
     {
       "slug": "slider",
       "phase": "5",
-      "tier": 1,
+      "tier": 3,
       "status": "backfill-passed",
       "evidence": {
         "existing": ["contract", "markup", "keyboard", "focus", "lifecycle", "accessibility"],
@@ -103,7 +104,7 @@
         "Bootstrap 5.3.3 explicitly does not support cross-browser filled tracks, and it provides no two-thumb range composition or live output synchronization, so Slider's optional ESM owns only those enhancement gaps around native range inputs."
       ],
       "limitations": [
-        "The 1.0.0-rc.3 Slider scope covers native single-value sliders, two-input range sliders, output synchronization, and the documented horizontal/vertical orientation classes.",
+        "The 1.0.0-rc.3 Slider scope covers native single-value sliders, two-input range sliders, output synchronization, step=any pointer input, collapsed range expansion, form reset synchronization, disabled controls, and the documented horizontal/vertical orientation classes.",
         "Real-device, final visual acceptance, and generic host-conformance evidence remain pending."
       ]
     }

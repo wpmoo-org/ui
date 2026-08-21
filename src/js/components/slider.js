@@ -36,6 +36,9 @@ function decimalPlaces(value) {
 function snapToStep(value, input) {
   const min = inputMinimum(input);
   const max = inputMaximum(input);
+  if (input.step === "any") {
+    return Number(clamp(value, min, max).toFixed(4));
+  }
   const step = inputStep(input);
   const snapped = min + Math.round((value - min) / step) * step;
   const precision = Math.max(decimalPlaces(step), decimalPlaces(min));
@@ -142,6 +145,16 @@ export default class MooSlider {
       });
       this._listen(input, "keydown", () => this._clearPointerFocus());
       this._listen(input, "focusout", () => this._clearPointerFocus());
+    });
+    const forms = new Set(
+      this._inputs
+        .map((input) => input.form || input.closest?.("form"))
+        .filter(Boolean),
+    );
+    forms.forEach((form) => {
+      this._listen(form, "reset", () => {
+        this._window.setTimeout(() => this._sync(), 0);
+      });
     });
     this._listen(this._track, "pointerdown", (event) => this._handleTrackPointer(event));
   }
@@ -288,10 +301,14 @@ export default class MooSlider {
     if (inputs.length === 1) {
       return inputs[0];
     }
-    return inputs.reduce((nearest, input) => {
-      const nearestDistance = Math.abs(valuePercent(nearest) - percent);
-      const inputDistance = Math.abs(valuePercent(input) - percent);
-      return inputDistance < nearestDistance ? input : nearest;
-    });
+    const [startInput, endInput] = inputs;
+    const startPercent = valuePercent(startInput);
+    const endPercent = valuePercent(endInput);
+    const startDistance = Math.abs(startPercent - percent);
+    const endDistance = Math.abs(endPercent - percent);
+    if (startDistance === endDistance) {
+      return percent >= startPercent ? endInput : startInput;
+    }
+    return endDistance < startDistance ? endInput : startInput;
   }
 }

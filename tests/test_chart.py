@@ -68,8 +68,8 @@ report("invalid-elements", { messages });
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }}, {{ withCanvas: false }});
 let message = "";
 try {{
@@ -89,8 +89,8 @@ report("missing-canvas", {{ message }});
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const before = MooChart.getInstance(root);
 const created = MooChart.getOrCreateInstance(root);
@@ -126,8 +126,8 @@ report("instances", {{
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const instance = MooChart.getOrCreateInstance(root);
 const observer = observerLog.at(-1);
@@ -170,8 +170,8 @@ report("dispose", {{
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const stale = MooChart.getOrCreateInstance(root);
 stale.dispose();
@@ -197,8 +197,8 @@ report("stale-dispose", {{
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "bar",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const instance = MooChart.getOrCreateInstance(root);
 report("data-attributes", {{
@@ -221,8 +221,8 @@ report("data-attributes", {{
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const tokenColors = new Map([
   ["--bs-body-color", "rgb(33, 37, 41)"],
@@ -262,7 +262,7 @@ report("line-point-halo", {{
     def test_unsupported_chart_type_is_rejected(self) -> None:
         case = self.run_chart_case(
             """
-const root = makeRoot({ "data-moo-chart": "pie" });
+const root = makeRoot({ "data-chart": "pie" });
 let message = "";
 try {
   new MooChart(root);
@@ -281,8 +281,8 @@ report("unsupported-type", { message });
         case = self.run_chart_case(
             """
 const root = makeRoot({
-  "data-moo-chart": "line",
-  "data-moo-chart-data": "{not valid json",
+  "data-chart": "line",
+  "data-chart-data": "{not valid json",
 });
 let message = "";
 let isSyntaxError = false;
@@ -297,15 +297,15 @@ report("invalid-json", { message, isSyntaxError });
         )
         self.assertTrue(case["isSyntaxError"])
         self.assertIn(
-            "MooChart could not parse data-moo-chart-data as JSON:", case["message"]
+            "MooChart could not parse data-chart-data as JSON:", case["message"]
         )
 
     def test_invalid_data_shape_produces_an_explicit_diagnostic(self) -> None:
         case = self.run_chart_case(
             """
 const root = makeRoot({
-  "data-moo-chart": "line",
-  "data-moo-chart-data": "null",
+  "data-chart": "line",
+  "data-chart-data": "null",
 });
 let message = "";
 try {
@@ -318,21 +318,39 @@ report("invalid-data-shape", { message });
         )
         self.assertEqual(
             case["message"],
-            "MooChart data-moo-chart-data must contain labels and datasets arrays.",
+            "MooChart data-chart-data must contain labels and datasets arrays.",
+        )
+
+    def test_missing_markup_data_produces_an_explicit_diagnostic(self) -> None:
+        case = self.run_chart_case(
+            """
+const root = makeRoot({ "data-chart": "line" });
+let message = "";
+try {
+  new MooChart(root);
+} catch (error) {
+  message = error.message;
+}
+report("missing-markup-data", { message });
+"""
+        )
+        self.assertEqual(
+            case["message"],
+            "MooChart data-chart-data is required unless config.data is provided.",
         )
 
     def test_configuration_precedence_overrides_data_attributes(self) -> None:
         case = self.run_chart_case(
             f"""
 const attributeOnly = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const defaults = MooChart.getOrCreateInstance(attributeOnly);
 
 const overridden = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const configData = {{ labels: ["Q1"], datasets: [{{ label: "Target", data: [9] }}] }};
 const configured = MooChart.getOrCreateInstance(overridden, {{
@@ -340,7 +358,7 @@ const configured = MooChart.getOrCreateInstance(overridden, {{
   data: configData,
 }});
 
-const programmaticRoot = makeRoot({{ "data-moo-chart": "line" }});
+const programmaticRoot = makeRoot({{ "data-chart": "line" }});
 const programmatic = MooChart.getOrCreateInstance(programmaticRoot, {{
   data: configData,
 }});
@@ -367,8 +385,8 @@ report("precedence", {{
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const instance = MooChart.getOrCreateInstance(root);
 const observer = observerLog.at(-1);
@@ -410,8 +428,8 @@ const scopedTheme = {{
   getAttribute: (name) => (name === "data-bs-theme" ? scopedTheme.dataset.bsTheme : null),
 }};
 const root = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 root.closest = (selector) => (selector === "[data-bs-theme]" ? scopedTheme : null);
 const scopedColors = new Map([
@@ -463,8 +481,8 @@ report("scoped-theme-observer", {{
                 + f"""
 function chartRoot() {{
   return makeRoot({{
-    "data-moo-chart": "line",
-    "data-moo-chart-data": {json.dumps(VALID_DATA)},
+    "data-chart": "line",
+    "data-chart-data": {json.dumps(VALID_DATA)},
   }});
 }}
 const roots = [chartRoot(), chartRoot()];
@@ -542,16 +560,16 @@ const previewScope = {{
   ownerDocument,
 }};
 const chartRoot = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const container = {{
   dataset: {{}},
   ownerDocument,
   querySelector: (selector) => {{
     if (selector === ".moo-chart") return chartRoot;
-    if (selector === "[data-moo-chart-status]") return status;
-    if (selector === "[data-moo-chart-theme]") return themeButton;
+    if (selector === "[data-chart-status]") return status;
+    if (selector === "[data-chart-theme]") return themeButton;
     return null;
   }},
   closest: (selector) => (selector === ".moo-example__preview" ? previewScope : null),
@@ -560,7 +578,7 @@ chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope
 documentElement.dataset.bsTheme = "dark";
 const root = {{
   querySelectorAll: (selector) => {{
-    if (selector === "[data-moo-chart-live]") return [container];
+    if (selector === "[data-chart-live]") return [container];
     if (selector === ".moo-chart") return [chartRoot];
     return [];
   }},
@@ -630,9 +648,9 @@ function makeLifecycleButton() {{
     removeEventListener: (name) => handlers.delete(name),
     click: () => handlers.get("click")?.(),
     querySelector: (selector) => {{
-      if (selector === "[data-moo-chart-lifecycle-label]") return label;
-      if (selector === '[data-moo-chart-lifecycle-icon="dispose"]') return disposeIcon;
-      if (selector === '[data-moo-chart-lifecycle-icon="reinit"]') return reinitIcon;
+      if (selector === "[data-chart-lifecycle-label]") return label;
+      if (selector === '[data-chart-lifecycle-icon="dispose"]') return disposeIcon;
+      if (selector === '[data-chart-lifecycle-icon="reinit"]') return reinitIcon;
       return null;
     }},
   }};
@@ -646,16 +664,16 @@ const lifecycle = makeLifecycleButton();
 const status = {{ textContent: "" }};
 const previewScope = {{ dataset: {{}}, ownerDocument }};
 const chartRoot = makeRoot({{
-  "data-moo-chart": "line",
-  "data-moo-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const container = {{
   ownerDocument,
   querySelector: (selector) => {{
     if (selector === ".moo-chart") return chartRoot;
-    if (selector === "[data-moo-chart-status]") return status;
-    if (selector === "[data-moo-chart-theme]") return themeButton;
-    if (selector === "[data-moo-chart-lifecycle]") return lifecycle.button;
+    if (selector === "[data-chart-status]") return status;
+    if (selector === "[data-chart-theme]") return themeButton;
+    if (selector === "[data-chart-lifecycle]") return lifecycle.button;
     return null;
   }},
   closest: (selector) => (selector === ".moo-example__preview" ? previewScope : null),
@@ -663,7 +681,7 @@ const container = {{
 chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope : null);
 const root = {{
   querySelectorAll: (selector) => {{
-    if (selector === "[data-moo-chart-live]") return [container];
+    if (selector === "[data-chart-live]") return [container];
     if (selector === ".moo-chart") return [chartRoot];
     return [];
   }},
@@ -672,7 +690,7 @@ const release = initExamplesChart(root);
 const initial = {{
   hasInstance: MooChart.getInstance(chartRoot) instanceof MooChart,
   label: lifecycle.label.textContent,
-  state: lifecycle.button.dataset.mooChartLifecycleState,
+  state: lifecycle.button.dataset.chartLifecycleState,
   ariaLabel: lifecycle.button.getAttribute("aria-label"),
   disposeIconHidden: lifecycle.disposeIcon.getAttribute("hidden"),
   reinitIconHidden: lifecycle.reinitIcon.getAttribute("hidden"),
@@ -681,7 +699,7 @@ lifecycle.button.click();
 const afterDispose = {{
   hasInstance: MooChart.getInstance(chartRoot) instanceof MooChart,
   label: lifecycle.label.textContent,
-  state: lifecycle.button.dataset.mooChartLifecycleState,
+  state: lifecycle.button.dataset.chartLifecycleState,
   ariaLabel: lifecycle.button.getAttribute("aria-label"),
   disposeIconHidden: lifecycle.disposeIcon.getAttribute("hidden"),
   reinitIconHidden: lifecycle.reinitIcon.getAttribute("hidden"),
@@ -691,7 +709,7 @@ lifecycle.button.click();
 const afterReinit = {{
   hasInstance: MooChart.getInstance(chartRoot) instanceof MooChart,
   label: lifecycle.label.textContent,
-  state: lifecycle.button.dataset.mooChartLifecycleState,
+  state: lifecycle.button.dataset.chartLifecycleState,
   ariaLabel: lifecycle.button.getAttribute("aria-label"),
   disposeIconHidden: lifecycle.disposeIcon.getAttribute("hidden"),
   reinitIconHidden: lifecycle.reinitIcon.getAttribute("hidden"),
@@ -764,13 +782,13 @@ report("stateful-lifecycle-button", {{
             r'<div class="moo-example__preview[^"]*\bmoo-example__preview--medium\b'
             r'[^"]*\bbg-body\b[^"]*\btext-body\b[^"]*"',
         )
-        self.assertIn('data-moo-chart-live', lifecycle)
+        self.assertIn('data-chart-live', lifecycle)
 
     def test_lifecycle_controls_are_centered_in_preview(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/chart.html")
-        lifecycle = page.split('data-moo-chart-live', 1)[1].split(
+        lifecycle = page.split('data-chart-live', 1)[1].split(
             'id="chart-lifecycle-example"',
             1,
         )[0]
@@ -786,22 +804,22 @@ report("stateful-lifecycle-button", {{
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/chart.html")
-        lifecycle = page.split('data-moo-chart-live', 1)[1].split(
+        lifecycle = page.split('data-chart-live', 1)[1].split(
             'id="chart-lifecycle-example"',
             1,
         )[0]
 
-        self.assertIn('data-moo-chart-status', lifecycle)
+        self.assertIn('data-chart-status', lifecycle)
         self.assertIn('aria-live="polite"', lifecycle)
         self.assertIn('visually-hidden', lifecycle)
         self.assertNotIn('class="badge', lifecycle)
-        self.assertIn('data-moo-chart-lifecycle', lifecycle)
-        self.assertIn('data-moo-chart-lifecycle-icon="dispose"', lifecycle)
-        self.assertIn('data-moo-chart-lifecycle-icon="reinit"', lifecycle)
-        self.assertNotIn('data-moo-chart-lifecycle-icon="&quot;dispose&quot;"', lifecycle)
-        self.assertNotIn('data-moo-chart-lifecycle-icon="&quot;reinit&quot;"', lifecycle)
-        self.assertNotIn('data-moo-chart-reinit', lifecycle)
-        self.assertNotIn('data-moo-chart-dispose', lifecycle)
+        self.assertIn('data-chart-lifecycle', lifecycle)
+        self.assertIn('data-chart-lifecycle-icon="dispose"', lifecycle)
+        self.assertIn('data-chart-lifecycle-icon="reinit"', lifecycle)
+        self.assertNotIn('data-chart-lifecycle-icon="&quot;dispose&quot;"', lifecycle)
+        self.assertNotIn('data-chart-lifecycle-icon="&quot;reinit&quot;"', lifecycle)
+        self.assertNotIn('data-chart-reinit', lifecycle)
+        self.assertNotIn('data-chart-dispose', lifecycle)
 
     def test_public_module_contracts_the_frozen_api(self) -> None:
         source = CHART_JS.read_text(encoding="utf-8")
@@ -875,9 +893,9 @@ report("stateful-lifecycle-button", {{
 
         self.assertIn('import MooChart from "/dist/js/chart.js";', source)
         self.assertIn('class="moo-chart"', source)
-        self.assertIn('data-moo-chart="line"', source)
-        self.assertIn('data-moo-chart="bar"', source)
-        self.assertIn("data-moo-chart-data", source)
+        self.assertIn('data-chart="line"', source)
+        self.assertIn('data-chart="bar"', source)
+        self.assertIn("data-chart-data", source)
         self.assertIn("role=\"img\"", source)
         self.assertIn("aria-label", source)
         self.assertNotIn("cdn.jsdelivr.net", source)
@@ -889,8 +907,8 @@ report("stateful-lifecycle-button", {{
 
         self.assertIn("render_reference(", source)
         self.assertIn(".moo-chart", source)
-        self.assertIn("data-moo-chart", source)
-        self.assertIn("data-moo-chart-data", source)
+        self.assertIn("data-chart", source)
+        self.assertIn("data-chart-data", source)
         for chart_id in (
             "chart-line-example",
             "chart-bar-example",
@@ -902,7 +920,7 @@ report("stateful-lifecycle-button", {{
             )
         self.assertRegex(
             source,
-            r'class="[^"]*\bd-grid\b[^"]*\bgap-3\b[^"]*\bw-100\b[^"]*"\s+data-moo-chart-live',
+            r'class="[^"]*\bd-grid\b[^"]*\bgap-3\b[^"]*\bw-100\b[^"]*"\s+data-chart-live',
         )
         self.assertEqual(source.count('preview_class="moo-example__preview--medium'), 3)
         self.assertNotIn('preview_class="moo-example__preview--wide"', source)
@@ -910,8 +928,8 @@ report("stateful-lifecycle-button", {{
             '"line"',
             '"bar"',
             "theme",
-            "data-moo-chart-live",
-            "data-moo-chart-lifecycle",
+            "data-chart-live",
+            "data-chart-lifecycle",
             "dispose",
             "resize",
             "aria-label",

@@ -13,7 +13,7 @@
 {% macro combobox_chip(item) -%}
   <span class="badge text-bg-secondary combobox-chip" data-value="{{ item["value"] }}">
     <span class="combobox-chip__label">{{ item["label"] }}</span>
-    <button class="combobox-chip__remove" type="button" aria-label="Remove {{ item["label"] }}" data-value="{{ item["value"] }}" data-moo-combobox-chip-remove="true">
+    <button class="combobox-chip__remove" type="button" aria-label="Remove {{ item["label"] }}" data-value="{{ item["value"] }}" data-combobox-chip-remove="true">
       {{ render_icon("x", "inline-end") }}
     </button>
   </span>
@@ -24,13 +24,13 @@
     {% if item.options is defined %}
       {% set state.group_index = state.group_index + 1 %}
       {% set group_id = id ~ "-group-" ~ state.group_index %}
-      <li role="group" aria-labelledby="{{ group_id }}" class="combobox-group" data-moo-combobox-group>
+      <li role="group" aria-labelledby="{{ group_id }}" class="combobox-group" data-combobox-group>
         <div class="dropdown-header combobox-group-label" id="{{ group_id }}">{{ item["label"] }}</div>
         <ul class="list-unstyled mb-0" role="presentation">
           {{ combobox_options(id, item["options"], state) }}
         </ul>
       </li>
-      {% if not loop.last %}<li role="presentation" aria-hidden="true" data-moo-combobox-separator><hr class="dropdown-divider combobox-separator"></li>{% endif %}
+      {% if not loop.last %}<li role="presentation" aria-hidden="true" data-combobox-separator><hr class="dropdown-divider combobox-separator"></li>{% endif %}
     {% else %}
       {% set state.option_index = state.option_index + 1 %}
       {% set option_id = id ~ "-option-" ~ state.option_index %}
@@ -136,7 +136,7 @@
   {% set expanded = "true" if open else "false" %}
   {% set has_selected_value = state.selected_values | length > 0 if multiple else state.label %}
 
-  <div class="combobox{% if multiple %} combobox--multiple{% endif %}{% if state.custom_items %} combobox--custom-items{% endif %}{% if show_clear and not multiple %} combobox--clearable{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" data-moo-combobox-selected="{{ "true" if has_selected_value else "false" }}"{% if multiple %} data-moo-combobox-multiple="true"{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
+  <div class="combobox{% if multiple %} combobox--multiple{% endif %}{% if state.custom_items %} combobox--custom-items{% endif %}{% if show_clear and not multiple %} combobox--clearable{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}" data-combobox-selected="{{ "true" if has_selected_value else "false" }}"{% if multiple %} data-combobox-multiple="true"{% endif %}{% if dir %} dir="{{ dir }}"{% endif %}>
     {% if has_label %}<label class="form-label" for="{{ input_id }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label>{% endif %}
     <div class="combobox-control">
       {% if multiple %}
@@ -154,7 +154,7 @@
           </span>
           <input class="combobox-chips-input combobox-input" id="{{ input_id }}" type="text" role="combobox" autocomplete="off" aria-expanded="{{ expanded }}" aria-controls="{{ listbox_id }}" aria-autocomplete="list"{% if state.highlighted_id %} aria-activedescendant="{{ state.highlighted_id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
           {% if name %}
-            <span data-moo-combobox-value-store="true" data-moo-combobox-name="{{ name }}">
+            <span data-combobox-value-store="true" data-combobox-name="{{ name }}">
               {% for item in items %}
                 {% if item.options is defined %}
                   {% for option in item["options"] %}
@@ -166,12 +166,12 @@
               {% endfor %}
             </span>
           {% endif %}
-          <template data-moo-combobox-chip-icon>{{ render_icon("x", "inline-end") }}</template>
+          <template data-combobox-chip-icon>{{ render_icon("x", "inline-end") }}</template>
         </div>
       {% else %}
-        <input class="form-control combobox-input{% if invalid %} is-invalid{% endif %}" id="{{ input_id }}" type="text" role="combobox" autocomplete="off" aria-expanded="{{ expanded }}" aria-controls="{{ listbox_id }}" aria-autocomplete="list" data-moo-combobox-selected="{{ "true" if state.label else "false" }}"{% if state.highlighted_id %} aria-activedescendant="{{ state.highlighted_id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if state.label %} value="{{ state.label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
+        <input class="form-control combobox-input{% if invalid %} is-invalid{% endif %}" id="{{ input_id }}" type="text" role="combobox" autocomplete="off" aria-expanded="{{ expanded }}" aria-controls="{{ listbox_id }}" aria-autocomplete="list" data-combobox-selected="{{ "true" if state.label else "false" }}"{% if state.highlighted_id %} aria-activedescendant="{{ state.highlighted_id }}"{% endif %}{% if has_aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %}{% if state.label %} value="{{ state.label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
         {% if name %}<input type="hidden" name="{{ name }}" value="{{ state.selected }}">{% endif %}
-        {% if show_clear %}<button type="button" class="combobox-clear" aria-label="{{ clear_aria_label }}" data-moo-combobox-clear="true"{% if not state.label %} hidden{% endif %}{% if disabled %} disabled{% endif %}>{{ render_icon("x", "inline-end") }}</button>{% endif %}
+        {% if show_clear %}<button type="button" class="combobox-clear" aria-label="{{ clear_aria_label }}" data-combobox-clear="true"{% if not state.label %} hidden{% endif %}{% if disabled %} disabled{% endif %}>{{ render_icon("x", "inline-end") }}</button>{% endif %}
         <span class="combobox-indicator" aria-hidden="true"{% if show_clear and state.label %} hidden{% endif %}>{{ render_icon("chevron-down", "inline-end") }}</span>
       {% endif %}
       <ul class="dropdown-menu combobox-menu{% if open %} show{% endif %}" id="{{ listbox_id }}" role="listbox"{% if multiple %} aria-multiselectable="true"{% endif %}>

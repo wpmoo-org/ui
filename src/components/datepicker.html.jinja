@@ -104,9 +104,9 @@
       {{ render_icon("calendar", "inline-start") }}
       <span data-datepicker-label>{{ datepicker_label(value, placeholder) }}</span>
     </button>
+    <input type="hidden" name="{{ name }}" value="{{ value }}" data-datepicker-input{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
     <div class="moo-datepicker__popover" id="{{ popover_id }}" data-datepicker-popover role="dialog" aria-modal="false" hidden>
       {{ calendar(calendar_id, (label or aria_label) ~ " calendar", value=value, min_date=min_date, max_date=max_date, disabled_dates=disabled_dates, locale=locale, caption_layout=caption_layout, show_presets=show_presets) }}
-      <input type="hidden" name="{{ name }}" value="{{ value }}" data-datepicker-input{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
     </div>
   </div>
 {%- endmacro %}
@@ -148,10 +148,10 @@
       {{ render_icon("calendar-range", "inline-start") }}
       <span data-datepicker-label>{{ datepicker_range_label(start_value, end_value, placeholder) }}</span>
     </button>
+    <input type="hidden" name="{{ start_name }}" value="{{ start_value }}" data-datepicker-range-start{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
+    <input type="hidden" name="{{ end_name }}" value="{{ end_value }}" data-datepicker-range-end{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
     <div class="moo-datepicker__popover" id="{{ popover_id }}" data-datepicker-popover role="dialog" aria-modal="false" hidden>
       {{ calendar(calendar_id, (label or aria_label) ~ " calendar", mode="range", start_value=start_value, end_value=end_value, min_date=min_date, max_date=max_date, disabled_dates=disabled_dates, locale=locale, caption_layout=caption_layout, show_presets=show_presets) }}
-      <input type="hidden" name="{{ start_name }}" value="{{ start_value }}" data-datepicker-range-start{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
-      <input type="hidden" name="{{ end_name }}" value="{{ end_value }}" data-datepicker-range-end{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
     </div>
   </div>
 {%- endmacro %}

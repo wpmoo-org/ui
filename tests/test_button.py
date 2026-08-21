@@ -459,7 +459,7 @@ class ButtonTests(CatalogTestCase):
             'button("Show toast", toast_target="toast-basic")'
         )
 
-        self.assertIn('data-moo-toast-target="#toast-basic"', output)
+        self.assertIn('data-toast-target="#toast-basic"', output)
         self.assertNotIn("data-bs-toggle", output)
 
     def test_button_toast_target_requires_button_or_anchor_element(self) -> None:

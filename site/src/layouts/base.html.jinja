@@ -51,14 +51,14 @@
         try {
           const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
           if (sidebar === "collapsed" || sidebar === "expanded") {
-            document.documentElement.dataset.mooSidebarCatalogState = sidebar;
+            document.documentElement.dataset.sidebarCatalogState = sidebar;
             window.setTimeout(() => {
               const shell = document.querySelector(
-                '[data-slot="sidebar-wrapper"][data-moo-sidebar-key="catalog-shell"]'
+                '[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]'
               );
-              if (shell && !shell.hasAttribute("data-moo-sidebar-ready")) {
-                shell.dataset.mooSidebarState = "expanded";
-                delete document.documentElement.dataset.mooSidebarCatalogState;
+              if (shell && !shell.hasAttribute("data-sidebar-ready")) {
+                shell.dataset.sidebarState = "expanded";
+                delete document.documentElement.dataset.sidebarCatalogState;
               }
             }, 1500);
           }

@@ -1,6 +1,6 @@
 {# Chart is a Moo-owned public contract: Bootstrap ships no chart component,
-   so Moo defines the .moo-chart root, the data-moo-chart type attribute, the
-   data-moo-chart-data JSON payload, and the deterministic child <canvas>
+   so Moo defines the .moo-chart root, the data-chart type attribute, the
+   data-chart-data JSON payload, and the deterministic child <canvas>
    resolution. The bundled runtime (src/js/components/chart.js wraps
    chart.js@4.5.1 through chart.js/auto at build time) renders the datasets,
    themes them from Bootstrap's CSS variables, and re-themes when
@@ -15,7 +15,7 @@
   {% if not aria_label | trim %}{{ fail("Chart aria_label is required") }}{% endif %}
   {% if type not in ["line", "bar"] %}{{ fail("Chart type must be 'line' or 'bar'") }}{% endif %}
   {% set serialized_data = data if data is string else data | tojson %}
-  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-moo-chart="{{ type }}" data-moo-chart-data='{{ serialized_data }}'{% if attrs %} {{ attrs | safe }}{% endif %}>
+  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-chart="{{ type }}" data-chart-data='{{ serialized_data }}'{% if attrs %} {{ attrs | safe }}{% endif %}>
     <canvas role="img" aria-label="{{ aria_label }}"></canvas>
   </div>
 {%- endmacro %}

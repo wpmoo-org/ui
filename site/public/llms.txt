@@ -145,6 +145,7 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 - [Sheet](https://ui.wpmoo.org/components/sheet/)
 - [Sidebar](https://ui.wpmoo.org/components/sidebar/)
 - [Skeleton](https://ui.wpmoo.org/components/skeleton/)
+- [Slider](https://ui.wpmoo.org/components/slider/)
 - [Spinner](https://ui.wpmoo.org/components/spinner/)
 - [Switch](https://ui.wpmoo.org/components/switch/)
 - [Table](https://ui.wpmoo.org/components/table/)

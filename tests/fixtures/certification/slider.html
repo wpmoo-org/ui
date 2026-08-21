@@ -126,6 +126,84 @@
                 step="10"
                 value="70"
                 data-slider-input
+                aria-orientation="vertical"
+              >
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="step-any-title" class="mb-4">
+          <h2 id="step-any-title" class="h5 mb-3">Step any value</h2>
+          <div
+            class="slider"
+            id="certification-slider-step-any"
+            data-slider
+            data-slider-orientation="horizontal"
+            style="--moo-slider-start: 0%; --moo-slider-end: 10%;"
+          >
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <label class="form-label mb-0" for="certification-slider-step-any-input">Opacity</label>
+              <output class="small text-body-secondary" for="certification-slider-step-any-input" data-slider-output>10</output>
+            </div>
+            <div class="slider-track" data-slider-track>
+              <div class="slider-range" data-slider-range></div>
+              <input
+                class="form-range slider-input"
+                id="certification-slider-step-any-input"
+                type="range"
+                name="opacity"
+                min="0"
+                max="100"
+                step="any"
+                value="10"
+                data-slider-input
+              >
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="collapsed-range-title" class="mb-4">
+          <h2 id="collapsed-range-title" class="h5 mb-3">Collapsed range</h2>
+          <div
+            class="slider slider--range"
+            id="certification-slider-collapsed-range"
+            data-slider
+            data-slider-orientation="horizontal"
+            role="group"
+            aria-labelledby="certification-slider-collapsed-range-label"
+            style="--moo-slider-start: 50%; --moo-slider-end: 50%;"
+          >
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <span class="form-label mb-0" id="certification-slider-collapsed-range-label">Collapsed price range</span>
+              <output class="small text-body-secondary" for="certification-slider-collapsed-range-start certification-slider-collapsed-range-end" data-slider-output>50 - 50</output>
+            </div>
+            <div class="slider-track" data-slider-track>
+              <div class="slider-range" data-slider-range></div>
+              <input
+                class="form-range slider-input"
+                id="certification-slider-collapsed-range-start"
+                type="range"
+                name="collapsed_price_min"
+                min="0"
+                max="100"
+                step="5"
+                value="50"
+                data-slider-input
+                data-slider-thumb="start"
+                aria-label="Minimum collapsed price range"
+              >
+              <input
+                class="form-range slider-input slider-input--upper"
+                id="certification-slider-collapsed-range-end"
+                type="range"
+                name="collapsed_price_max"
+                min="0"
+                max="100"
+                step="5"
+                value="50"
+                data-slider-input
+                data-slider-thumb="end"
+                aria-label="Maximum collapsed price range"
               >
             </div>
           </div>
@@ -160,6 +238,9 @@
             </div>
           </div>
         </section>
+        <button class="btn btn-outline-secondary btn-sm mt-3" type="reset" id="slider-fixture-reset">
+          Reset sliders
+        </button>
       </form>
     </main>
     <script type="module">
@@ -177,6 +258,12 @@
       );
       window.certificationSliderDisabled = Slider.getOrCreateInstance(
         document.querySelector("#certification-slider-disabled")
+      );
+      window.certificationSliderStepAny = Slider.getOrCreateInstance(
+        document.querySelector("#certification-slider-step-any")
+      );
+      window.certificationSliderCollapsedRange = Slider.getOrCreateInstance(
+        document.querySelector("#certification-slider-collapsed-range")
       );
 
       document.body.dataset.sliderReady = "true";

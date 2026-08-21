@@ -30,36 +30,36 @@ export default class Combobox {
       throw new TypeError("Combobox requires an input, menu, and at least one option.");
     }
 
-    this._isMultiple = element.dataset.mooComboboxMultiple === "true";
+    this._isMultiple = element.dataset.comboboxMultiple === "true";
     this._hidden = this._isMultiple ? null : element.querySelector('input[type="hidden"]');
     this._chipValue = element.querySelector(".combobox-value");
-    this._valueStore = element.querySelector("[data-moo-combobox-value-store]");
-    this._chipIconTemplate = element.querySelector("[data-moo-combobox-chip-icon]");
-    this._clearTrigger = element.querySelector("[data-moo-combobox-clear]");
+    this._valueStore = element.querySelector("[data-combobox-value-store]");
+    this._chipIconTemplate = element.querySelector("[data-combobox-chip-icon]");
+    this._clearTrigger = element.querySelector("[data-combobox-clear]");
     this._indicator = element.querySelector(".combobox-indicator");
-    this._groups = Array.from(element.querySelectorAll("[data-moo-combobox-group]"));
-    this._separators = Array.from(element.querySelectorAll("[data-moo-combobox-separator]"));
+    this._groups = Array.from(element.querySelectorAll("[data-combobox-group]"));
+    this._separators = Array.from(element.querySelectorAll("[data-combobox-separator]"));
     this._listeners = [];
     this._generated = [];
     this._startsOpen = this._menu.classList.contains("show");
 
-    this._empty = this._menu.querySelector("[data-moo-combobox-empty]");
+    this._empty = this._menu.querySelector("[data-combobox-empty]");
     if (!this._empty) {
       this._empty = this._document.createElement("li");
       this._empty.className = "combobox-empty";
       this._empty.hidden = true;
-      this._empty.dataset.mooComboboxEmpty = "true";
+      this._empty.dataset.comboboxEmpty = "true";
       this._empty.textContent = this._config.noResultsText;
       this._menu.appendChild(this._empty);
       this._generated.push(this._empty);
     }
 
-    this._liveRegion = element.querySelector("[data-moo-combobox-live]");
+    this._liveRegion = element.querySelector("[data-combobox-live]");
     if (!this._liveRegion) {
       this._liveRegion = this._document.createElement("span");
       this._liveRegion.className = "visually-hidden";
       this._liveRegion.setAttribute("aria-live", "polite");
-      this._liveRegion.dataset.mooComboboxLive = "true";
+      this._liveRegion.dataset.comboboxLive = "true";
       element.appendChild(this._liveRegion);
       this._generated.push(this._liveRegion);
     }
@@ -67,8 +67,8 @@ export default class Combobox {
     instances.set(element, this);
     this._bindEvents();
     this._toggleClear(
-      this._input.dataset.mooComboboxSelected === "true" ||
-        element.dataset.mooComboboxSelected === "true"
+      this._input.dataset.comboboxSelected === "true" ||
+        element.dataset.comboboxSelected === "true"
     );
     this._syncMultipleValue();
     this._filterOptions({ open: this._startsOpen, activate: this._startsOpen });
@@ -85,8 +85,8 @@ export default class Combobox {
     this._closeMenu(false);
     this._generated.forEach((element) => element.remove());
     this._generated = [];
-    this._chipValue?.querySelectorAll("[data-moo-combobox-generated]").forEach((item) => item.remove());
-    this._valueStore?.querySelectorAll("[data-moo-combobox-generated]").forEach((item) => item.remove());
+    this._chipValue?.querySelectorAll("[data-combobox-generated]").forEach((item) => item.remove());
+    this._valueStore?.querySelectorAll("[data-combobox-generated]").forEach((item) => item.remove());
     instances.delete(this._element);
   }
 
@@ -108,7 +108,7 @@ export default class Combobox {
   }
 
   _optionGroupIsHidden(option) {
-    return option.closest("[data-moo-combobox-group]")?.hidden || false;
+    return option.closest("[data-combobox-group]")?.hidden || false;
   }
 
   _visibleOptions() {
@@ -173,8 +173,8 @@ export default class Combobox {
 
   _toggleClear(selected) {
     const value = selected ? "true" : "false";
-    this._element.dataset.mooComboboxSelected = value;
-    this._input.dataset.mooComboboxSelected = value;
+    this._element.dataset.comboboxSelected = value;
+    this._input.dataset.comboboxSelected = value;
     if (this._clearTrigger) {
       this._clearTrigger.hidden = !selected;
       if (this._indicator) {
@@ -189,7 +189,7 @@ export default class Combobox {
     const chip = this._document.createElement("span");
     chip.className = "badge text-bg-secondary combobox-chip";
     chip.dataset.value = value;
-    chip.dataset.mooComboboxGenerated = "true";
+    chip.dataset.comboboxGenerated = "true";
     const labelElement = this._document.createElement("span");
     labelElement.className = "combobox-chip__label";
     labelElement.textContent = label;
@@ -198,7 +198,7 @@ export default class Combobox {
     remove.className = "combobox-chip__remove";
     remove.type = "button";
     remove.dataset.value = value;
-    remove.dataset.mooComboboxChipRemove = "true";
+    remove.dataset.comboboxChipRemove = "true";
     remove.setAttribute("aria-label", `Remove ${label}`);
     remove.append(this._chipIconTemplate?.content.cloneNode(true) || "x");
     chip.appendChild(remove);
@@ -215,13 +215,13 @@ export default class Combobox {
     }
     if (this._valueStore) {
       this._valueStore.replaceChildren();
-      const name = this._valueStore.dataset.mooComboboxName || "";
+      const name = this._valueStore.dataset.comboboxName || "";
       selected.forEach((option) => {
         const field = this._document.createElement("input");
         field.type = "hidden";
         field.name = name;
         field.value = option.dataset.value || "";
-        field.dataset.mooComboboxGenerated = "true";
+        field.dataset.comboboxGenerated = "true";
         this._valueStore.appendChild(field);
       });
     }
@@ -345,7 +345,7 @@ export default class Combobox {
   _bindEvents() {
     this._listen(this._input, "focus", () => {
       this._openMenu();
-      if (!this._isMultiple && this._input.dataset.mooComboboxSelected === "true") {
+      if (!this._isMultiple && this._input.dataset.comboboxSelected === "true") {
         this._input.select();
       }
       this._setActiveOption(this._visibleOptions()[0] || null);
@@ -387,7 +387,7 @@ export default class Combobox {
   _handleRootClick(event) {
     const target = event.target;
     const trigger = target instanceof this._window.Element
-      ? target.closest("[data-moo-combobox-chip-remove]")
+      ? target.closest("[data-combobox-chip-remove]")
       : null;
     if (trigger) {
       event.preventDefault();

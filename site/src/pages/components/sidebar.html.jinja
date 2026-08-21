@@ -76,10 +76,10 @@
     </p>
 
     {% set sidebar_parts = [
-      {"id": "sidebar-wrapper", "selector": '<code>.sidebar-wrapper[data-slot="sidebar-wrapper"]</code>', "summary": "Wraps the shell and stores <code>data-moo-sidebar-state</code>."},
+      {"id": "sidebar-wrapper", "selector": '<code>.sidebar-wrapper[data-slot="sidebar-wrapper"]</code>', "summary": "Wraps the shell and stores <code>data-sidebar-state</code>."},
       {"id": "sidebar", "selector": '<code>.sidebar[data-slot="sidebar"]</code>', "summary": "Navigation region. It is also a Bootstrap <code>.offcanvas-lg</code> target on smaller viewports."},
-      {"id": "sidebar-trigger", "selector": '<code>[data-moo-sidebar-trigger]</code>', "summary": "Button that toggles the target sidebar and mirrors <code>aria-expanded</code>."},
-      {"id": "sidebar-rail", "selector": '<code>[data-moo-sidebar-rail]</code>', "summary": "Collapsed desktop rail hit target; hidden from normal tab order."},
+      {"id": "sidebar-trigger", "selector": '<code>[data-sidebar-trigger]</code>', "summary": "Button that toggles the target sidebar and mirrors <code>aria-expanded</code>."},
+      {"id": "sidebar-rail", "selector": '<code>[data-sidebar-rail]</code>', "summary": "Collapsed desktop rail hit target; hidden from normal tab order."},
       {"id": "sidebar-content", "selector": '<code>[data-slot="sidebar-content"]</code>', "summary": "Scrollable navigation content."},
       {"id": "sidebar-menu-button", "selector": '<code>[data-slot="sidebar-menu-button"]</code>', "summary": "Link, button, collapse trigger, or dropdown trigger row."},
       {"id": "sidebar-submenu", "selector": '<code>.sidebar-menu-sub.collapse</code>', "summary": "Bootstrap Collapse-backed nested list."},
@@ -100,7 +100,7 @@
 
     {% set sidebar_aside_class = "sidebar offcanvas-lg offcanvas-start" %}
     {% set sidebar_markup_example %}
-    <div class="sidebar-wrapper" data-slot="sidebar-wrapper" data-moo-sidebar-state="expanded">
+    <div class="sidebar-wrapper" data-slot="sidebar-wrapper" data-sidebar-state="expanded">
       <aside id="workspace-sidebar" class="{{ sidebar_aside_class }}" tabindex="-1" data-slot="sidebar">
         <div class="sidebar-inner" data-slot="sidebar-inner">
           <div class="sidebar-content" data-slot="sidebar-content">
@@ -152,7 +152,7 @@
     <p class="mb-0">
       Some design references call this state helper <strong>useSidebar</strong>.
       In Moo UI it is not a React hook. It is the rendered
-      <code>data-moo-sidebar-state</code> attribute plus the public Sidebar
+      <code>data-sidebar-state</code> attribute plus the public Sidebar
       instance that updates it.
     </p>
   </div>

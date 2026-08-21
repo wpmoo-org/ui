@@ -3,13 +3,13 @@
 //
 // Markup contract (see api-freeze-1.0.0-rc.3.json):
 //
-//   <div class="moo-chart" data-moo-chart="line"
-//        data-moo-chart-data='{"labels":[],"datasets":[]}'>
+//   <div class="moo-chart" data-chart="line"
+//        data-chart-data='{"labels":[],"datasets":[]}'>
 //     <canvas></canvas>
 //   </div>
 //
-// `.moo-chart` is the public root class, `data-moo-chart` is the
-// type/init attribute, and `data-moo-chart-data` carries the serialized
+// `.moo-chart` is the public root class, `data-chart` is the
+// type/init attribute, and `data-chart-data` carries the serialized
 // chart data. The canvas is resolved deterministically as the first child
 // <canvas>. Invalid elements, a missing canvas, and malformed JSON all fail
 // with explicit errors rather than rendering an empty chart.
@@ -308,7 +308,7 @@ function buildChartOptions(theme) {
 // Resolve data-attribute defaults first; an explicit constructor data value
 // replaces them. The component does not merge arbitrary dataset payloads.
 function resolveChartData(element, config) {
-  const raw = element.getAttribute("data-moo-chart-data");
+  const raw = element.getAttribute("data-chart-data");
   let attributeData = null;
   let hasAttributeData = false;
   if (raw !== null && raw.trim() !== "") {
@@ -317,13 +317,15 @@ function resolveChartData(element, config) {
       attributeData = JSON.parse(raw);
     } catch (error) {
       throw new SyntaxError(
-        `MooChart could not parse data-moo-chart-data as JSON: ${error.message}`
+        `MooChart could not parse data-chart-data as JSON: ${error.message}`
       );
     }
   }
   const hasConfigData = Object.prototype.hasOwnProperty.call(config, "data");
   if (!hasConfigData && !hasAttributeData) {
-    return { labels: [], datasets: [] };
+    throw new TypeError(
+      "MooChart data-chart-data is required unless config.data is provided.",
+    );
   }
   const data = hasConfigData ? config.data : attributeData;
   if (
@@ -334,7 +336,7 @@ function resolveChartData(element, config) {
     !Array.isArray(data.labels) ||
     !Array.isArray(data.datasets)
   ) {
-    const source = hasConfigData ? "config.data" : "data-moo-chart-data";
+    const source = hasConfigData ? "config.data" : "data-chart-data";
     throw new TypeError(
       `MooChart ${source} must contain labels and datasets arrays.`,
     );
@@ -354,7 +356,7 @@ function mergeChartOptions(defaults, overrides = {}) {
 function resolveChartType(element, config) {
   const type =
     config.type ||
-    element.getAttribute("data-moo-chart") ||
+    element.getAttribute("data-chart") ||
     "line";
   if (!SUPPORTED_TYPES.has(type)) {
     throw new TypeError(
@@ -396,8 +398,8 @@ export default class MooChart {
     this._config = config || {};
     this._themeElement = resolveThemeElement(element);
 
-    const data = resolveChartData(element, this._config);
     const type = resolveChartType(element, this._config);
+    const data = resolveChartData(element, this._config);
     this._type = type;
 
     const isDark = themeElementIsDark(this._themeElement);

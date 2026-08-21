@@ -17,11 +17,49 @@ from tests.helpers import npm_env
 
 ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATION_ROOT = ROOT / "src/certification"
+PUBLIC_COMPONENT_HOOK_SOURCES = (
+    ROOT / "src/components",
+    ROOT / "src/js/components",
+    ROOT / "src/certification",
+    ROOT / "site/src/pages/components",
+    ROOT / "tests/fixtures/certification",
+    ROOT / "conformance/fixtures",
+)
+BANNED_PUBLIC_MOO_COMPONENT_HOOK = re.compile(r"\bdata-moo-[\w-]+\b")
+PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST = {
+    "site/src/pages/components/index.html.jinja": {
+        "data-moo-catalog-section",
+        "data-moo-catalog-view",
+    },
+}
 
 
 class CertificationContractTests(unittest.TestCase):
     def _read_json(self, relative_path: str) -> dict | list:
         return json.loads((ROOT / relative_path).read_text(encoding="utf-8"))
+
+    def test_public_component_hooks_do_not_use_moo_prefixed_data_contracts(self) -> None:
+        checked_extensions = {".css", ".html", ".jinja", ".js", ".json", ".md", ".py", ".scss"}
+        violations: list[str] = []
+
+        for source_root in PUBLIC_COMPONENT_HOOK_SOURCES:
+            for path in source_root.rglob("*"):
+                if not path.is_file() or path.suffix not in checked_extensions:
+                    continue
+                source = path.read_text(encoding="utf-8")
+                relative = path.relative_to(ROOT).as_posix()
+                allowed = PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST.get(relative, set())
+                matches = sorted(
+                    set(BANNED_PUBLIC_MOO_COMPONENT_HOOK.findall(source)) - allowed
+                )
+                if matches:
+                    violations.append(f"{relative}: {', '.join(matches)}")
+
+        self.assertEqual(
+            violations,
+            [],
+            "Public component hooks must use component-owned data-* contracts.",
+        )
 
     def test_evidence_inventory_matches_the_live_component_registry(self) -> None:
         inventory = self._read_json("src/certification/evidence-inventory.json")
@@ -58,7 +96,7 @@ class CertificationContractTests(unittest.TestCase):
             for evidence_path in component["evidence"]:
                 self.assertTrue((ROOT / evidence_path).is_file(), evidence_path)
 
-        self.assertEqual(tier_counts, {0: 24, 1: 7, 2: 5, 3: 9})
+        self.assertEqual(tier_counts, {0: 24, 1: 6, 2: 5, 3: 10})
 
     def test_pilot_evidence_keeps_release_claims_honest(self) -> None:
         pilot = self._read_json("src/certification/pilot-evidence.json")
@@ -628,6 +666,7 @@ class CertificationContractTests(unittest.TestCase):
         Exact equality for package exports/files is deferred to Phase 6,
         when the bundled outputs are present in the package."""
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.3.json")
+        package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
 
@@ -685,6 +724,11 @@ class CertificationContractTests(unittest.TestCase):
 
         # RC.3 package exports/files must include the three new entrypoints
         frozen_exports = set(freeze["packageExports"])
+        self.assertEqual(
+            frozen_exports,
+            set(package["exports"]),
+            "RC.3 package export freeze diverged from package.json",
+        )
         self.assertIn("./chart.js", frozen_exports)
         self.assertIn("./chart.min.js", frozen_exports)
         self.assertIn("./datepicker.js", frozen_exports)
@@ -692,6 +736,11 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("./slider.js", frozen_exports)
 
         frozen_files = set(freeze["packageFiles"])
+        self.assertEqual(
+            frozen_files,
+            set(package["files"]),
+            "RC.3 package file freeze diverged from package.json",
+        )
         self.assertIn("dist/js/chart.js", frozen_files)
         self.assertIn("dist/js/chart.min.js", frozen_files)
         self.assertIn("dist/js/datepicker.js", frozen_files)

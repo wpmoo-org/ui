@@ -7,13 +7,13 @@
     {% call sidebar_provider(key="catalog-shell") %}
       <script>
         (() => {
-          const state = document.documentElement.dataset.mooSidebarCatalogState;
+          const state = document.documentElement.dataset.sidebarCatalogState;
           const shell = document.currentScript.parentElement;
           if (
             (state === "collapsed" || state === "expanded") &&
-            shell?.dataset.mooSidebarKey === "catalog-shell"
+            shell?.dataset.sidebarKey === "catalog-shell"
           ) {
-            shell.dataset.mooSidebarState = state;
+            shell.dataset.sidebarState = state;
           }
         })();
       </script>

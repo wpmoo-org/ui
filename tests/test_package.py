@@ -391,12 +391,22 @@ import Combobox from "@wpmoo/ui/combobox.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
+import Slider from "@wpmoo/ui/slider.js";
+import Chart from "@wpmoo/ui/chart.js";
+import ChartMinified from "@wpmoo/ui/chart.min.js";
+import Datepicker from "@wpmoo/ui/datepicker.js";
+import DatepickerMinified from "@wpmoo/ui/datepicker.min.js";
 
 if (
   Combobox.name !== "Combobox" ||
   Sidebar.name !== "Sidebar" ||
   ContextMenu.name !== "ContextMenu" ||
-  DataTable.name !== "DataTable"
+  DataTable.name !== "DataTable" ||
+  Slider.name !== "MooSlider" ||
+  typeof Chart.getOrCreateInstance !== "function" ||
+  typeof ChartMinified.getOrCreateInstance !== "function" ||
+  typeof Datepicker.getOrCreateInstance !== "function" ||
+  typeof DatepickerMinified.getOrCreateInstance !== "function"
 ) {
   throw new Error("Unexpected public ESM default export");
 }
@@ -537,19 +547,29 @@ for (const specifier of [
                     )
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
-        for module_name in (
+        for module_path in (
             "combobox.js",
             "sidebar.js",
             "context-menu.js",
             "datatable.js",
+            "slider.js",
+            "chart.js",
+            "datepicker.js",
+            "dist/js/chart.min.js",
+            "dist/js/datepicker.min.js",
         ):
-            with self.subTest(module_name=module_name):
+            source_path = (
+                module_path
+                if module_path.startswith("dist/")
+                else f"src/js/components/{module_path}"
+            )
+            with self.subTest(module_path=module_path):
                 result = subprocess.run(
                     [
                         "node",
                         "--input-type=module",
                         "--eval",
-                        f'import("./src/js/components/{module_name}")',
+                        f'import("./{source_path}")',
                     ],
                     cwd=ROOT,
                     check=False,

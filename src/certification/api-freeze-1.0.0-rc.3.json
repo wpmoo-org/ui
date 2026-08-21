@@ -98,8 +98,8 @@
       "getters": ["chart", "element"],
       "markup": {
         "rootClass": "moo-chart",
-        "typeAttribute": "data-moo-chart",
-        "dataAttribute": "data-moo-chart-data",
+        "typeAttribute": "data-chart",
+        "dataAttribute": "data-chart-data",
         "childElement": "canvas"
       }
     },

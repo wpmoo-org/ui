@@ -39,7 +39,7 @@ export default class Sidebar {
     instances.set(element, this);
     this._bindEvents();
     this._restoreState();
-    this._element.setAttribute("data-moo-sidebar-ready", "");
+    this._element.setAttribute("data-sidebar-ready", "");
     this._observeDirection();
   }
 
@@ -51,15 +51,15 @@ export default class Sidebar {
     this._directionObserver?.disconnect();
     this._closeFlyouts();
     this._element
-      .querySelectorAll("[data-moo-sidebar-dropdown-positioned]")
+      .querySelectorAll("[data-sidebar-dropdown-positioned]")
       .forEach((item) => this._clearDropdownPosition(item));
     this._element
-      .querySelectorAll("[data-moo-sidebar-tooltip]")
+      .querySelectorAll("[data-sidebar-tooltip]")
       .forEach((control) => this._disposeTooltip(control));
     this._offcanvas?.dispose();
     this._offcanvas = null;
     this._offcanvasTrigger = null;
-    this._element.removeAttribute("data-moo-sidebar-ready");
+    this._element.removeAttribute("data-sidebar-ready");
     instances.delete(this._element);
   }
 
@@ -79,7 +79,7 @@ export default class Sidebar {
   }
 
   _isCollapsed() {
-    return this._isDesktop() && this._element.dataset.mooSidebarState === "collapsed";
+    return this._isDesktop() && this._element.dataset.sidebarState === "collapsed";
   }
 
   _trigger(name, detail = {}) {
@@ -108,7 +108,7 @@ export default class Sidebar {
   }
 
   _restoreState() {
-    const key = this._element.dataset.mooSidebarKey;
+    const key = this._element.dataset.sidebarKey;
     let stored = null;
     if (key) {
       try {
@@ -120,7 +120,7 @@ export default class Sidebar {
     const initial =
       stored === "collapsed" || stored === "expanded"
         ? stored
-        : this._element.dataset.mooSidebarState === "collapsed"
+        : this._element.dataset.sidebarState === "collapsed"
           ? "collapsed"
           : "expanded";
     this._setState(initial, false, false);
@@ -128,11 +128,11 @@ export default class Sidebar {
 
   _setState(state, persist = true, emit = true) {
     const next = state === "collapsed" ? "collapsed" : "expanded";
-    const previous = this._element.dataset.mooSidebarState;
-    this._element.dataset.mooSidebarState = next;
-    const key = this._element.dataset.mooSidebarKey;
+    const previous = this._element.dataset.sidebarState;
+    this._element.dataset.sidebarState = next;
+    const key = this._element.dataset.sidebarKey;
     if (key === "catalog-shell") {
-      this._root.dataset.mooSidebarCatalogState = next;
+      this._root.dataset.sidebarCatalogState = next;
     }
     if (persist && key) {
       try {
@@ -155,16 +155,16 @@ export default class Sidebar {
 
   _toggle() {
     this._setState(
-      this._element.dataset.mooSidebarState === "collapsed" ? "expanded" : "collapsed"
+      this._element.dataset.sidebarState === "collapsed" ? "expanded" : "collapsed"
     );
   }
 
   _syncControls() {
     const expanded = this._isDesktop()
-      ? this._element.dataset.mooSidebarState === "expanded"
+      ? this._element.dataset.sidebarState === "expanded"
       : this._sidebar?.classList.contains("show") || false;
     this._element
-      .querySelectorAll("[data-moo-sidebar-trigger], [data-moo-sidebar-rail]")
+      .querySelectorAll("[data-sidebar-trigger], [data-sidebar-rail]")
       .forEach((control) => control.setAttribute("aria-expanded", String(expanded)));
   }
 
@@ -186,7 +186,7 @@ export default class Sidebar {
     if (!item) {
       return;
     }
-    delete item.dataset.mooSidebarDropdownPositioned;
+    delete item.dataset.sidebarDropdownPositioned;
     item.style.removeProperty("--moo-sidebar-dropdown-block-start");
     item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
   }
@@ -237,7 +237,7 @@ export default class Sidebar {
       "--moo-sidebar-dropdown-inline-start",
       `${Math.round(inlineStart)}px`
     );
-    item.dataset.mooSidebarDropdownPositioned = "";
+    item.dataset.sidebarDropdownPositioned = "";
   }
 
   _removeFlyoutPortal() {
@@ -281,7 +281,7 @@ export default class Sidebar {
     flyout.removeAttribute("id");
     flyout.classList.remove("collapse", "show", "collapsing");
     flyout.classList.add("sidebar-menu-flyout");
-    flyout.dataset.mooSidebarFlyout = "";
+    flyout.dataset.sidebarFlyout = "";
     flyout.removeAttribute("style");
     flyout.style.setProperty("--moo-sidebar-flyout-block-start", `${Math.round(rect.top)}px`);
     flyout.style.setProperty(
@@ -328,7 +328,7 @@ export default class Sidebar {
     }
     const collapsed = this._isCollapsed();
     const placement = this._root.dir === "rtl" ? "left" : "right";
-    this._element.querySelectorAll("[data-moo-sidebar-tooltip]").forEach((control) => {
+    this._element.querySelectorAll("[data-sidebar-tooltip]").forEach((control) => {
       this._disposeTooltip(control);
       if (
         !collapsed ||
@@ -343,7 +343,7 @@ export default class Sidebar {
       // state-driven Sidebar tooltip instead.
       const anchor = this._tooltipAnchor(control);
       new Tooltip(anchor, {
-        title: control.getAttribute("data-moo-sidebar-tooltip"),
+        title: control.getAttribute("data-sidebar-tooltip"),
         placement,
         container: "body",
         trigger: "hover focus",
@@ -386,7 +386,7 @@ export default class Sidebar {
     this._listen(this._window, "resize", () => {
       this._closeFlyouts();
       this._element
-        .querySelectorAll("[data-moo-sidebar-dropdown-positioned]")
+        .querySelectorAll("[data-sidebar-dropdown-positioned]")
         .forEach((item) => this._clearDropdownPosition(item));
       this._syncControls();
       this._syncTooltips();
@@ -397,18 +397,18 @@ export default class Sidebar {
     if (!(target instanceof this._window.Element) || !this._element.contains(target)) {
       return null;
     }
-    if (target.matches('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]')) {
+    if (target.matches('[data-bs-toggle="dropdown"][data-sidebar-tooltip]')) {
       return target;
     }
     return target.querySelector?.(
-      '[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]'
+      '[data-bs-toggle="dropdown"][data-sidebar-tooltip]'
     ) || null;
   }
 
   _handleControlClick(event) {
     const target = event.target;
     const control = target instanceof this._window.Element
-      ? target.closest("[data-moo-sidebar-trigger], [data-moo-sidebar-rail]")
+      ? target.closest("[data-sidebar-trigger], [data-sidebar-rail]")
       : null;
     if (!control || !this._element.contains(control)) {
       return;
@@ -419,7 +419,7 @@ export default class Sidebar {
       this._toggle();
       return;
     }
-    if (!control.matches("[data-moo-sidebar-trigger]")) {
+    if (!control.matches("[data-sidebar-trigger]")) {
       return;
     }
     const sidebar = this._document.getElementById(control.getAttribute("aria-controls"));
@@ -478,7 +478,7 @@ export default class Sidebar {
     }
     const preferred =
       this._document.querySelector(
-        '[data-slot="sidebar-wrapper"][data-moo-sidebar-key]'
+        '[data-slot="sidebar-wrapper"][data-sidebar-key]'
       ) || this._document.querySelector('[data-slot="sidebar-wrapper"]');
     if (preferred !== this._element) {
       return;

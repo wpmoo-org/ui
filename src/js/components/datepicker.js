@@ -241,19 +241,24 @@ function syncPortaledPopoverContext(instance) {
 
 function portalDatepickerPopover(instance) {
   const popover = instance._popover;
-  if (popover.parentElement === instance._document.body) {
+  if (instance._popoverPortal?.host?.parentElement === instance._document.body) {
     syncPortaledPopoverContext(instance);
     return;
   }
+  const host = instance._document.createElement("div");
+  host.className = "moo-ui";
+  host.dataset.datepickerPortalHost = "";
   instance._popoverPortal = {
     parent: popover.parentNode,
     nextSibling: popover.nextSibling,
+    host,
     hadTheme: popover.hasAttribute("data-bs-theme"),
     theme: popover.getAttribute("data-bs-theme"),
     hadDirection: popover.hasAttribute("dir"),
     direction: popover.getAttribute("dir"),
   };
-  instance._document.body.appendChild(popover);
+  host.appendChild(popover);
+  instance._document.body.appendChild(host);
   syncPortaledPopoverContext(instance);
 }
 
@@ -271,6 +276,7 @@ function restoreDatepickerPopover(instance) {
   } else {
     popover.remove();
   }
+  portal.host?.remove();
 
   if (portal.hadTheme) {
     popover.setAttribute("data-bs-theme", portal.theme);
@@ -418,6 +424,7 @@ export class MooCalendar {
     this._document = element.ownerDocument;
     this._window = this._document.defaultView || window;
     this._listeners = [];
+    this._disposed = false;
     this._config = readDataConfig(element, config);
     this._mode = this._config.mode === "range" ? "range" : "single";
     this._disabledDates = new Set(this._config.disabledDates);
@@ -439,9 +446,13 @@ export class MooCalendar {
   }
 
   dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
     removeListeners(this._listeners);
     this._element.replaceChildren();
-    calendarInstances.delete(this._element);
+    if (calendarInstances.get(this._element) === this) {
+      calendarInstances.delete(this._element);
+    }
   }
 
   getDate(format = undefined) {
@@ -904,6 +915,7 @@ export default class MooDatepicker {
     this._window = this._document.defaultView || window;
     this._listeners = [];
     this._floatingListeners = [];
+    this._disposed = false;
     this._positionPopover = null;
     this._popoverPortal = null;
     this._trigger = element.querySelector("[data-datepicker-trigger]");
@@ -935,13 +947,17 @@ export default class MooDatepicker {
   }
 
   dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
     removeListeners(this._listeners);
     this.hide(false);
     stopDatepickerPopoverPositioning(this);
     restoreDatepickerPopover(this);
     removeListeners(this._floatingListeners);
     this.calendar?.dispose();
-    datepickerInstances.delete(this._element);
+    if (datepickerInstances.get(this._element) === this) {
+      datepickerInstances.delete(this._element);
+    }
   }
 
   show() {
@@ -1076,6 +1092,7 @@ export class MooDateRangePicker {
     this._window = this._document.defaultView || window;
     this._listeners = [];
     this._floatingListeners = [];
+    this._disposed = false;
     this._positionPopover = null;
     this._popoverPortal = null;
     this._trigger = element.querySelector("[data-datepicker-trigger]");
@@ -1105,13 +1122,17 @@ export class MooDateRangePicker {
   }
 
   dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
     removeListeners(this._listeners);
     this.hide(false);
     stopDatepickerPopoverPositioning(this);
     restoreDatepickerPopover(this);
     removeListeners(this._floatingListeners);
     this.calendar?.dispose();
-    rangePickerInstances.delete(this._element);
+    if (rangePickerInstances.get(this._element) === this) {
+      rangePickerInstances.delete(this._element);
+    }
   }
 
   show() {

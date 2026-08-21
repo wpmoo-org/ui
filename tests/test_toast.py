@@ -129,11 +129,11 @@ class ToastTests(CatalogTestCase):
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
 
         self.assertIn(
-            'event.target.closest("[data-moo-toast-target]")',
+            'event.target.closest("[data-toast-target]")',
             script,
         )
         self.assertIn("root.getElementById", script)
         self.assertNotIn(
-            'document.querySelectorAll("[data-moo-toast-target]").forEach',
+            'document.querySelectorAll("[data-toast-target]").forEach',
             script,
         )

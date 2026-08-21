@@ -61,14 +61,14 @@ function setLifecycleButtonState(button, isDisposed) {
   if (!button) return;
   const state = isDisposed ? "disposed" : "live";
   const config = LIFECYCLE_STATES[state];
-  const label = button.querySelector?.("[data-moo-chart-lifecycle-label]");
-  const disposeIcon = button.querySelector?.('[data-moo-chart-lifecycle-icon="dispose"]');
-  const reinitIcon = button.querySelector?.('[data-moo-chart-lifecycle-icon="reinit"]');
+  const label = button.querySelector?.("[data-chart-lifecycle-label]");
+  const disposeIcon = button.querySelector?.('[data-chart-lifecycle-icon="dispose"]');
+  const reinitIcon = button.querySelector?.('[data-chart-lifecycle-icon="reinit"]');
 
   if (button.dataset) {
-    button.dataset.mooChartLifecycleState = state;
+    button.dataset.chartLifecycleState = state;
   } else {
-    button.setAttribute?.("data-moo-chart-lifecycle-state", state);
+    button.setAttribute?.("data-chart-lifecycle-state", state);
   }
   button.setAttribute?.("aria-label", config.ariaLabel);
 
@@ -90,7 +90,7 @@ export function initExamplesChart(root = document) {
   const cleanups = [];
   const liveThemeScopes = new WeakMap();
   try {
-    const liveContainers = Array.from(root.querySelectorAll("[data-moo-chart-live]"));
+    const liveContainers = Array.from(root.querySelectorAll("[data-chart-live]"));
     liveContainers.forEach((container) => {
       const ownerDocument = container.ownerDocument || document;
       const themeScope = resolveLiveThemeScope(container);
@@ -106,7 +106,7 @@ export function initExamplesChart(root = document) {
       if (!chartRoot) return;
 
       const themeScope = liveThemeScopes.get(container) || container;
-      const status = container.querySelector("[data-moo-chart-status]");
+      const status = container.querySelector("[data-chart-status]");
       const setStatus = (message) => {
         if (status) status.textContent = message;
       };
@@ -114,8 +114,8 @@ export function initExamplesChart(root = document) {
         if (!instances.includes(instance)) instances.push(instance);
         return instance;
       };
-      const themeButton = container.querySelector("[data-moo-chart-theme]");
-      const lifecycleButton = container.querySelector("[data-moo-chart-lifecycle]");
+      const themeButton = container.querySelector("[data-chart-theme]");
+      const lifecycleButton = container.querySelector("[data-chart-lifecycle]");
       setLifecycleButtonState(lifecycleButton, false);
 
       const onTheme = () => {

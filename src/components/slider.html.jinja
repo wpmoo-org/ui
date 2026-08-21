@@ -47,6 +47,7 @@
         step="{{ step }}"
         value="{{ value }}"
         data-slider-input
+        {% if orientation == "vertical" %}aria-orientation="vertical"{% endif %}
         {% if name %}name="{{ name }}"{% endif %}
         {% if has_aria_label %}aria-label="{{ aria_label }}"{% endif %}
         {% if disabled %}disabled{% endif %}
@@ -115,6 +116,7 @@
         data-slider-input
         data-slider-thumb="start"
         aria-label="Minimum {{ accessible_name }}"
+        {% if orientation == "vertical" %}aria-orientation="vertical"{% endif %}
         {% if start_name %}name="{{ start_name }}"{% endif %}
         {% if disabled %}disabled{% endif %}
       >
@@ -129,6 +131,7 @@
         data-slider-input
         data-slider-thumb="end"
         aria-label="Maximum {{ accessible_name }}"
+        {% if orientation == "vertical" %}aria-orientation="vertical"{% endif %}
         {% if end_name %}name="{{ end_name }}"{% endif %}
         {% if disabled %}disabled{% endif %}
       >

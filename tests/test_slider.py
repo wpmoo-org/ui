@@ -1,10 +1,23 @@
 from __future__ import annotations
 
 import json
+import importlib
 import subprocess
+import sys
+import unittest
 
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers.browser_harness import (
+    BrowserEvidence,
+    CERTIFICATION_CASES,
+    launch_certification_browser,
+    new_case_context,
+    prepare_page,
+    run_axe,
+    serve_repository,
+    skip_if_browser_launch_is_sandboxed,
+)
 from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 
@@ -13,6 +26,7 @@ PAGE = ROOT / "site/src/pages/components/slider.html.jinja"
 SLIDER_JS = ROOT / "src/js/components/slider.js"
 SLIDER_SCSS = ROOT / "scss/components/_slider.scss"
 FIXTURE = ROOT / "tests/fixtures/certification/slider.html"
+FIXTURE_PATH = "/tests/fixtures/certification/slider.html"
 
 
 class SliderTests(CatalogTestCase):
@@ -76,6 +90,19 @@ class SliderTests(CatalogTestCase):
         self.assertIn('data-slider-output>25 - 75</output>', output)
         self.assertNotIn('role="slider"', output)
 
+    def test_vertical_slider_renders_native_orientation_metadata(self) -> None:
+        single = self.render_slider(
+            'slider(id="height", label="Height", value=40, orientation="vertical")'
+        )
+        range_slider = self.render_slider(
+            'slider_range(id="range-height", label="Height range", '
+            'start_value=30, end_value=70, orientation="vertical")'
+        )
+
+        self.assertIn('class="slider slider--vertical"', single)
+        self.assertIn('aria-orientation="vertical"', single)
+        self.assertEqual(range_slider.count('aria-orientation="vertical"'), 2)
+
     def test_slider_rejects_invalid_macro_contracts(self) -> None:
         invalid_calls = (
             'slider(id="", label="Volume")',
@@ -109,6 +136,7 @@ const ownerWindow = {
   Event: EventStub,
   CustomEvent: CustomEventStub,
   getComputedStyle: () => ({ direction: "ltr" }),
+  setTimeout: (callback) => callback(),
 };
 let ownerDocument;
 
@@ -140,7 +168,7 @@ function makeEventTarget(base = {}) {
 
 ownerDocument = makeEventTarget({ defaultView: ownerWindow });
 
-function makeInput({ value, min = "0", max = "100", step = "5", disabled = false }) {
+function makeInput({ value, min = "0", max = "100", step = "5", disabled = false, form = null }) {
   const attrs = new Map();
   return makeEventTarget({
     nodeType: 1,
@@ -150,6 +178,8 @@ function makeInput({ value, min = "0", max = "100", step = "5", disabled = false
     max,
     step,
     disabled,
+    defaultValue: String(value),
+    form,
     focused: false,
     ownerDocument,
     setAttribute(name, nextValue) { attrs.set(name, String(nextValue)); },
@@ -197,6 +227,27 @@ Slider.getOrCreateInstance(range.root);
 range.inputs[0].value = "95";
 range.inputs[0].dispatchEvent(new EventStub("input", { bubbles: true }));
 
+const collapsedRange = makeRoot([
+  makeInput({ value: 50 }),
+  makeInput({ value: 50 }),
+]);
+Slider.getOrCreateInstance(collapsedRange.root);
+collapsedRange.track.dispatchEvent({ type: "pointerdown", button: 0, clientX: 150, clientY: 10, preventDefault() {} });
+ownerDocument.dispatchEvent({ type: "pointerup", clientX: 150, clientY: 10, preventDefault() {} });
+
+const stepAny = makeRoot([makeInput({ value: 0, step: "any" })]);
+Slider.getOrCreateInstance(stepAny.root);
+stepAny.track.dispatchEvent({ type: "pointerdown", button: 0, clientX: 67, clientY: 10, preventDefault() {} });
+ownerDocument.dispatchEvent({ type: "pointerup", clientX: 67, clientY: 10, preventDefault() {} });
+
+const resetForm = makeEventTarget();
+const resettable = makeRoot([makeInput({ value: 20, form: resetForm })]);
+Slider.getOrCreateInstance(resettable.root);
+resettable.inputs[0].value = "90";
+resettable.inputs[0].dispatchEvent(new EventStub("input", { bubbles: true }));
+resettable.inputs[0].value = resettable.inputs[0].defaultValue;
+resetForm.dispatchEvent(new EventStub("reset", { bubbles: true }));
+
 single.track.dispatchEvent({ type: "pointerdown", button: 0, clientX: 100, clientY: 10, preventDefault() {} });
 ownerDocument.dispatchEvent({ type: "pointermove", clientX: 150, clientY: 10, preventDefault() {} });
 ownerDocument.dispatchEvent({ type: "pointerup", clientX: 150, clientY: 10, preventDefault() {} });
@@ -214,6 +265,12 @@ console.log(JSON.stringify({
   rangeStartValue: range.inputs[0].value,
   rangeEndValue: range.inputs[1].value,
   rangeOutput: range.output.textContent,
+  collapsedRangeStartValue: collapsedRange.inputs[0].value,
+  collapsedRangeEndValue: collapsedRange.inputs[1].value,
+  collapsedRangeFocusedEnd: collapsedRange.inputs[1].focused,
+  stepAnyValue: stepAny.inputs[0].value,
+  resetOutput: resettable.output.textContent,
+  resetEnd: resettable.root.style.getPropertyValue("--moo-slider-end"),
   trackClickFocusedInput: single.inputs[0].focused,
   pointerFocusState,
   dragStateAfterRelease,
@@ -231,6 +288,12 @@ console.log(JSON.stringify({
         self.assertEqual(case["rangeStartValue"], "75")
         self.assertEqual(case["rangeEndValue"], "75")
         self.assertEqual(case["rangeOutput"], "75 - 75")
+        self.assertEqual(case["collapsedRangeStartValue"], "50")
+        self.assertEqual(case["collapsedRangeEndValue"], "75")
+        self.assertTrue(case["collapsedRangeFocusedEnd"])
+        self.assertEqual(case["stepAnyValue"], "33.5")
+        self.assertEqual(case["resetOutput"], "20")
+        self.assertEqual(case["resetEnd"], "20%")
         self.assertTrue(case["trackClickFocusedInput"])
         self.assertEqual(case["pointerFocusState"], "true")
         self.assertIsNone(case["dragStateAfterRelease"])
@@ -256,7 +319,8 @@ console.log(JSON.stringify({
         styles = SLIDER_SCSS.read_text(encoding="utf-8")
 
         self.assertIn("$form-range-track-bg", styles)
-        self.assertIn("$form-range-track-border-radius", styles)
+        self.assertIn("border-radius: var(--bs-border-radius-pill);", styles)
+        self.assertIn("box-shadow: var(--bs-box-shadow-inset);", styles)
         self.assertIn("$form-range-thumb-width * 0.75", styles)
         self.assertIn("$slider-thumb-margin-top", styles)
         self.assertIn("$progress-height", styles)
@@ -285,3 +349,127 @@ console.log(JSON.stringify({
         self.assertNotIn("data-moo-slider", fixture)
         self.assertIn('import Slider from "/dist/js/slider.js";', fixture)
         self.assertIn('document.body.dataset.sliderReady = "true";', fixture)
+
+
+class _SliderBrowserMixin:
+    @classmethod
+    def setUpClass(cls) -> None:
+        global expect
+        playwright_sync = importlib.import_module("playwright.sync_api")
+
+        expect = playwright_sync.expect
+        skip_if_browser_launch_is_sandboxed()
+        build = subprocess.run(
+            [sys.executable, "build.py"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if build.returncode:
+            raise AssertionError(build.stderr)
+        cls.server = serve_repository()
+        cls.base_url = cls.server.__enter__()
+        cls.addClassCleanup(cls.server.__exit__, None, None, None)
+        cls.playwright_manager = playwright_sync.sync_playwright()
+        cls.playwright = cls.playwright_manager.__enter__()
+        cls.addClassCleanup(cls.playwright_manager.__exit__, None, None, None)
+        cls.browser = launch_certification_browser(cls.playwright)
+        cls.addClassCleanup(cls.browser.close)
+
+    def open_fixture(self, case=CERTIFICATION_CASES[0]):
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        response = page.goto(f"{self.base_url}{FIXTURE_PATH}", wait_until="networkidle")
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
+        prepare_page(page, case)
+        return context, page, evidence
+
+    def click_track_percent(self, page, selector: str, percent: float) -> None:
+        track = page.locator(selector).locator("[data-slider-track]")
+        box = track.bounding_box()
+        self.assertIsNotNone(box)
+        assert box is not None
+        track.click(position={"x": box["width"] * percent, "y": box["height"] / 2})
+
+    def test_fixture_proves_slider_lifecycle_form_pointer_and_accessibility(self) -> None:
+        context, page, evidence = self.open_fixture()
+        try:
+            expect(page.locator("body")).to_have_attribute("data-slider-ready", "true")
+
+            single = page.locator("#certification-slider")
+            single_input = page.locator("#certification-slider-input")
+            single_input.focus()
+            single_input.press("ArrowRight")
+            expect(single_input).to_have_value("65")
+            expect(single.locator("[data-slider-output]")).to_have_text("65")
+            self.assertEqual(
+                single.evaluate("element => element.style.getPropertyValue('--moo-slider-end')"),
+                "65%",
+            )
+
+            range_slider = page.locator("#certification-slider-range")
+            page.locator("#certification-slider-range-start").evaluate(
+                """
+                input => {
+                  input.value = "95";
+                  input.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                """
+            )
+            expect(page.locator("#certification-slider-range-start")).to_have_value("75")
+            expect(page.locator("#certification-slider-range-end")).to_have_value("75")
+            expect(range_slider.locator("[data-slider-output]")).to_have_text("75 - 75")
+
+            self.click_track_percent(page, "#certification-slider-collapsed-range", 0.75)
+            expect(page.locator("#certification-slider-collapsed-range-start")).to_have_value("50")
+            expect(page.locator("#certification-slider-collapsed-range-end")).to_have_value("75")
+            expect(
+                page.locator("#certification-slider-collapsed-range [data-slider-output]")
+            ).to_have_text("50 - 75")
+
+            self.click_track_percent(page, "#certification-slider-step-any", 0.335)
+            expect(page.locator("#certification-slider-step-any-input")).to_have_value("33.5")
+            expect(page.locator("#certification-slider-step-any [data-slider-output]")).to_have_text("33.5")
+
+            expect(page.locator("#certification-slider-vertical-input")).to_have_attribute(
+                "aria-orientation",
+                "vertical",
+            )
+
+            self.click_track_percent(page, "#certification-slider-disabled", 0.8)
+            expect(page.locator("#certification-slider-disabled-input")).to_have_value("40")
+
+            page.locator("#slider-fixture-reset").click()
+            expect(single_input).to_have_value("60")
+            expect(single.locator("[data-slider-output]")).to_have_text("60")
+            expect(page.locator("#certification-slider-step-any-input")).to_have_value("10")
+            expect(page.locator("#certification-slider-step-any [data-slider-output]")).to_have_text("10")
+            expect(page.locator("#certification-slider-collapsed-range-end")).to_have_value("50")
+            expect(
+                page.locator("#certification-slider-collapsed-range [data-slider-output]")
+            ).to_have_text("50 - 50")
+
+            form_data = page.evaluate(
+                """
+                () => Object.fromEntries(new FormData(document.querySelector("#slider-fixture-form")))
+                """
+            )
+            self.assertEqual(
+                form_data,
+                {
+                    "volume": "60",
+                    "price_min": "25",
+                    "price_max": "75",
+                    "gain": "70",
+                    "opacity": "10",
+                    "collapsed_price_min": "50",
+                    "collapsed_price_max": "50",
+                },
+            )
+            self.assertEqual(run_axe(page), [])
+            evidence.assert_clean()
+        finally:
+            context.close()

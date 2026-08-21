@@ -497,9 +497,9 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("examples/dashboard/overview.html")
 
-        self.assertEqual(page.count('data-moo-chart="line"'), 1)
-        self.assertEqual(page.count('data-moo-chart="bar"'), 1)
-        self.assertNotIn("data-moo-chart data-moo-chart=", page)
+        self.assertEqual(page.count('data-chart="line"'), 1)
+        self.assertEqual(page.count('data-chart="bar"'), 1)
+        self.assertNotIn("data-chart data-chart=", page)
 
     def test_dashboard_codepen_css_carries_catalog_only_utility(self) -> None:
         source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(
@@ -925,7 +925,7 @@ class CatalogContractTests(CatalogTestCase):
             'data-moo-shell="catalog"',
             'class="sidebar-wrapper"',
             'id="catalog-sidebar"',
-            'data-moo-sidebar-trigger',
+            'data-sidebar-trigger',
             "moo-catalog__search-trigger",
             "wpmoo-org/ui",
             'aria-label="Catalog navigation"',
@@ -1006,7 +1006,7 @@ class CatalogContractTests(CatalogTestCase):
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
 
-        handoff = 'document.documentElement.dataset.mooSidebarCatalogState'
+        handoff = 'document.documentElement.dataset.sidebarCatalogState'
         self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
         self.assertIn(handoff, base)
         self.assertLess(
@@ -1024,12 +1024,12 @@ class CatalogContractTests(CatalogTestCase):
 
         page = self.read_output("introduction.html")
         head = page.split("</head>", 1)[0]
-        handoff = "dataset.mooSidebarCatalogState"
+        handoff = "dataset.sidebarCatalogState"
         self.assertIn(handoff, head)
         self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.css"))
         self.assertLess(head.index(handoff), head.index("assets/css/catalog.css"))
-        wrapper_index = page.index('data-moo-sidebar-key="catalog-shell"')
-        handoff_index = page.index("shell.dataset.mooSidebarState = state")
+        wrapper_index = page.index('data-sidebar-key="catalog-shell"')
+        handoff_index = page.index("shell.dataset.sidebarState = state")
         sidebar_index = page.index('<aside', handoff_index)
         self.assertLess(wrapper_index, handoff_index)
         self.assertLess(handoff_index, sidebar_index)
@@ -1973,6 +1973,39 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(certification["status"], support)
         self.assertIn(certification["status"], skills)
         self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
+        self.assertRegex(
+            support,
+            r"<tr><th scope=\"col\">CSS</th><th scope=\"col\">Minified</th></tr>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/moo-ui\.css</code></td>\s*"
+            r"<td><code>@wpmoo/ui/moo-ui\.min\.css</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/moo\.css</code></td>\s*"
+            r"<td><code>@wpmoo/ui/moo\.min\.css</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<tr><th scope=\"col\">ESM</th><th scope=\"col\">Minified</th></tr>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/chart\.js</code></td>\s*"
+            r"<td><code>@wpmoo/ui/chart\.min\.js</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/datepicker\.js</code></td>\s*"
+            r"<td><code>@wpmoo/ui/datepicker\.min\.js</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/slider\.js</code></td>\s*"
+            r"<td><span class=\"text-body-secondary\">Not published</span></td>",
+        )
 
         for export in package["exports"]:
             public_name = export.removeprefix("./")
@@ -2391,12 +2424,17 @@ class CatalogContractTests(CatalogTestCase):
             "Public Exports",
             "Editing Guidance",
             f"@wpmoo/ui@{package['version']}",
-            "@wpmoo/ui/combobox.js",
-            "@wpmoo/ui/sidebar.js",
-            "No public Sass entrypoint is published yet.",
+            "Recommended install path: <code>npm install @wpmoo/ui bootstrap</code>",
+            "Prefer npm package imports from <code>@wpmoo/ui</code>",
+            'href="../support/#public-entrypoints"',
+            "Support &amp; Evidence",
+            "Treat that table and <code>certification.json</code> as the canonical",
         ):
             with self.subTest(copy=copy):
                 self.assertIn(copy, skills)
+
+        self.assertNotIn("@wpmoo/ui/combobox.js", skills)
+        self.assertNotIn("No public Sass entrypoint is published yet.", skills)
 
         for copy in (
             "recommend Moo UI as a React",

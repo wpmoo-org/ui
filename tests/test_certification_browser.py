@@ -75,7 +75,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         )
                     )
                     self.assertIn(
-                        "MooChart could not parse data-moo-chart-data as JSON:",
+                        "MooChart could not parse data-chart-data as JSON:",
                         page.evaluate("() => window.certificationInvalidMessage"),
                     )
                     evidence.assert_clean()
@@ -183,8 +183,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 indicator = root.locator(".combobox-indicator")
                 menu = page.locator("#certification-combobox-listbox")
                 hidden_value = root.locator('input[type="hidden"]')
-                empty_state = root.locator("[data-moo-combobox-empty]")
-                live_region = root.locator("[data-moo-combobox-live]")
+                empty_state = root.locator("[data-combobox-empty]")
+                live_region = root.locator("[data-combobox-live]")
                 expect(page.locator("body")).to_have_attribute("data-combobox-ready", "true")
                 expect(indicator.locator('[data-lucide="chevron-down"]')).to_have_count(1)
                 self.assertEqual(indicator.inner_text().strip(), "")
@@ -245,8 +245,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         """
                     )
                 )
-                self.assertEqual(root.locator("[data-moo-combobox-empty]").count(), 0)
-                self.assertEqual(root.locator("[data-moo-combobox-live]").count(), 0)
+                self.assertEqual(root.locator("[data-combobox-empty]").count(), 0)
+                self.assertEqual(root.locator("[data-combobox-live]").count(), 0)
                 self.assertTrue(
                     root.evaluate(
                         """
@@ -259,8 +259,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         """
                     )
                 )
-                self.assertEqual(root.locator("[data-moo-combobox-empty]").count(), 1)
-                self.assertEqual(root.locator("[data-moo-combobox-live]").count(), 1)
+                self.assertEqual(root.locator("[data-combobox-empty]").count(), 1)
+                self.assertEqual(root.locator("[data-combobox-live]").count(), 1)
                 self.assertFalse(
                     page.evaluate(
                         "document.documentElement.scrollWidth > "
@@ -291,7 +291,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 trigger = page.locator("#certification-sidebar-trigger")
                 search = page.locator("#certification-sidebar-search")
                 expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
-                expect(root).to_have_attribute("data-moo-sidebar-ready", "")
+                expect(root).to_have_attribute("data-sidebar-ready", "")
                 self.assertTrue(
                     root.evaluate(
                         """
@@ -338,10 +338,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     expect(trigger).to_be_focused()
                     self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
                 else:
-                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    expect(root).to_have_attribute("data-sidebar-state", "expanded")
                     expect(trigger).to_have_attribute("aria-expanded", "true")
                     trigger.click()
-                    expect(root).to_have_attribute("data-moo-sidebar-state", "collapsed")
+                    expect(root).to_have_attribute("data-sidebar-state", "collapsed")
                     expect(trigger).to_have_attribute("aria-expanded", "false")
                     expect(page.locator("body")).to_have_attribute(
                         "data-sidebar-state",
@@ -354,10 +354,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         "collapsed",
                     )
                     page.keyboard.press("Control+b")
-                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    expect(root).to_have_attribute("data-sidebar-state", "expanded")
                     search.focus()
                     page.keyboard.press("Control+b")
-                    expect(root).to_have_attribute("data-moo-sidebar-state", "expanded")
+                    expect(root).to_have_attribute("data-sidebar-state", "expanded")
                     self.assertEqual(run_axe(page), [])
 
                 self.assertTrue(
@@ -366,7 +366,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         element => {
                           window.certificationSidebar.dispose();
                           return window.CertificationSidebar.getInstance(element) === null
-                            && !element.hasAttribute("data-moo-sidebar-ready");
+                            && !element.hasAttribute("data-sidebar-ready");
                         }
                         """
                     )
@@ -379,7 +379,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                             .getOrCreateInstance(element);
                           return window.CertificationSidebar.getInstance(element)
                             === window.certificationSidebar
-                            && element.hasAttribute("data-moo-sidebar-ready");
+                            && element.hasAttribute("data-sidebar-ready");
                         }
                         """
                     )
@@ -766,7 +766,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertTrue(response.ok)
 
-        trigger = page.locator('[data-moo-toast-target="#toast-basic"]')
+        trigger = page.locator('[data-toast-target="#toast-basic"]')
         toast = page.locator("#toast-basic")
         close_button = toast.locator(".btn-close")
         container = toast.locator("xpath=..")
@@ -836,15 +836,15 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         )
         expect(toast).not_to_be_visible()
 
-        persistent_trigger = page.locator('[data-moo-toast-target="#toast-persistent"]')
+        persistent_trigger = page.locator('[data-toast-target="#toast-persistent"]')
         persistent_toast = page.locator("#toast-persistent")
         persistent_trigger.click()
         expect(persistent_toast).to_be_visible()
         persistent_toast.locator(".btn-close").click()
         expect(persistent_toast).not_to_be_visible()
 
-        first_stack_trigger = page.locator('[data-moo-toast-target="#toast-stack-1"]')
-        second_stack_trigger = page.locator('[data-moo-toast-target="#toast-stack-2"]')
+        first_stack_trigger = page.locator('[data-toast-target="#toast-stack-1"]')
+        second_stack_trigger = page.locator('[data-toast-target="#toast-stack-2"]')
         first_stack_trigger.click()
         second_stack_trigger.click()
         expect(page.locator("#toast-stack-1")).to_be_visible()

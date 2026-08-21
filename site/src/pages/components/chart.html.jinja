@@ -21,14 +21,14 @@
       class="moo-chart w-100"
       id="chart-line-example"
       style="height: 17.5rem"
-      data-moo-chart="line"
-      data-moo-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800,6200,6900]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400,5800,6200]}]}'
+      data-chart="line"
+      data-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800,6200,6900]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400,5800,6200]}]}'
     >
       <canvas role="img" aria-label="Line chart comparing monthly revenue against target"></canvas>
     </div>
     {% endset %}
     {% set chart_usage %}
-      <p>Render a <code>.moo-chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-moo-chart</code> attribute accepts <code>line</code> or <code>bar</code>, while <code>data-moo-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
+      <p>Render a <code>.moo-chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-chart</code> attribute accepts <code>line</code> or <code>bar</code>, while <code>data-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
       <p>Give the root an explicit height: the responsive runtime fills the space it is given without locking an aspect ratio. The optional Moo UI Chart ESM wraps Chart.js, reads Bootstrap's <code>--bs-*</code> tokens, and re-themes when <code>data-bs-theme</code> changes.</p>
     {% endset %}
     {{ render_component_intro(
@@ -42,8 +42,8 @@
       class="moo-chart w-100"
       id="chart-bar-example"
       style="height: 17.5rem"
-      data-moo-chart="bar"
-      data-moo-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
+      data-chart="bar"
+      data-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
     >
       <canvas role="img" aria-label="Bar chart of daily active visitors across the week"></canvas>
     </div>
@@ -57,27 +57,27 @@
     ) }}
 
     {% set lifecycle_chart_example %}
-    <div class="d-grid gap-3 w-100" data-moo-chart-live>
+    <div class="d-grid gap-3 w-100" data-chart-live>
       <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-        <span data-moo-chart-theme>{{ button("Toggle theme", variant="outline", size="sm", icon_start="moon-star") }}</span>
+        <span data-chart-theme>{{ button("Toggle theme", variant="outline", size="sm", icon_start="moon-star") }}</span>
         {% set lifecycle_button %}
           {{ button("Dispose", variant="outline", size="sm", icon_start="circle-off", icon_end="rotate-cw") }}
         {% endset %}
         {{ lifecycle_button
-          | replace('type="button"', ('type="button" data-moo-chart-lifecycle data-moo-chart-lifecycle-state="live"' | safe))
-          | replace('data-icon="inline-start"', ('data-moo-chart-lifecycle-icon="dispose" data-icon="inline-start"' | safe))
-          | replace('data-icon="inline-end"', ('data-moo-chart-lifecycle-icon="reinit" data-icon="inline-end" hidden' | safe))
-          | replace('Dispose', ('<span data-moo-chart-lifecycle-label>Dispose</span>' | safe))
+          | replace('type="button"', ('type="button" data-chart-lifecycle data-chart-lifecycle-state="live"' | safe))
+          | replace('data-icon="inline-start"', ('data-chart-lifecycle-icon="dispose" data-icon="inline-start"' | safe))
+          | replace('data-icon="inline-end"', ('data-chart-lifecycle-icon="reinit" data-icon="inline-end" hidden' | safe))
+          | replace('Dispose', ('<span data-chart-lifecycle-label>Dispose</span>' | safe))
           | safe
         }}
-        <span class="visually-hidden" data-moo-chart-status aria-live="polite">Live</span>
+        <span class="visually-hidden" data-chart-status aria-live="polite">Live</span>
       </div>
       <div
         class="moo-chart w-100"
         id="chart-lifecycle-example"
         style="height: 17.5rem"
-        data-moo-chart="line"
-        data-moo-chart-data='{"labels":["Q1","Q2","Q3","Q4"],"datasets":[{"label":"Pipeline","data":[18,24,21,30]}]}'
+        data-chart="line"
+        data-chart-data='{"labels":["Q1","Q2","Q3","Q4"],"datasets":[{"label":"Pipeline","data":[18,24,21,30]}]}'
       >
         <canvas role="img" aria-label="Lifecycle chart showing quarterly pipeline movement"></canvas>
       </div>
@@ -101,8 +101,8 @@
     {% set chart_parts = [
       {"id": "chart-root", "selector": "<code>.moo-chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
       {"id": "chart-id", "selector": "<code>id</code>", "summary": "Required stable identifier for the chart root and its server-rendered contract."},
-      {"id": "chart-type", "selector": "<code>[data-moo-chart]</code>", "summary": "Chart type and initializer attribute. Only <code>line</code> and <code>bar</code> are supported for 1.0.0-rc.3; other values throw a TypeError."},
-      {"id": "chart-data", "selector": "<code>[data-moo-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Malformed JSON throws an explicit diagnostic."},
+      {"id": "chart-type", "selector": "<code>[data-chart]</code>", "summary": "Chart type and initializer attribute. Only <code>line</code> and <code>bar</code> are supported for 1.0.0-rc.3; other values throw a TypeError."},
+      {"id": "chart-data", "selector": "<code>[data-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Malformed JSON throws an explicit diagnostic."},
       {"id": "chart-canvas", "selector": "<code>.moo-chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
     ] %}
 
@@ -123,8 +123,8 @@
       class="moo-chart"
       id="chart-html-example"
       style="height: 17.5rem"
-      data-moo-chart="line"
-      data-moo-chart-data='{"labels":["Jan","Feb","Mar"],"datasets":[{"label":"Revenue","data":[4000,3200,4800]}]}'
+      data-chart="line"
+      data-chart-data='{"labels":["Jan","Feb","Mar"],"datasets":[{"label":"Revenue","data":[4000,3200,4800]}]}'
     >
       <canvas role="img" aria-label="Monthly revenue line chart"></canvas>
     </div>

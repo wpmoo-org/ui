@@ -130,7 +130,7 @@ export function initBootstrapPreview(root = document) {
     };
     listen(root, "click", (event) => {
       const trigger = event.target instanceof view.Element
-        ? event.target.closest("[data-moo-toast-target]")
+        ? event.target.closest("[data-toast-target]")
         : null;
       const selector = trigger?.dataset.mooToastTarget || "";
       const id = selector.startsWith("#") ? selector.slice(1) : selector;

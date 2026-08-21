@@ -34,8 +34,8 @@
       <div
         class="sidebar-wrapper"
         data-slot="sidebar-wrapper"
-        data-moo-sidebar-state="expanded"
-        data-moo-sidebar-key="conformance-shell"
+        data-sidebar-state="expanded"
+        data-sidebar-key="conformance-shell"
       >
         <aside
           id="fixture-sidebar"
@@ -65,7 +65,7 @@
                         class="sidebar-menu-button active"
                         href="#fixture-overview"
                         data-slot="sidebar-menu-button"
-                        data-moo-sidebar-tooltip="Overview"
+                        data-sidebar-tooltip="Overview"
                         aria-current="page"
                       >
                         <span class="sidebar-menu-button__text">
@@ -78,7 +78,7 @@
                         class="sidebar-menu-button"
                         href="#fixture-activity"
                         data-slot="sidebar-menu-button"
-                        data-moo-sidebar-tooltip="Activity"
+                        data-sidebar-tooltip="Activity"
                       >
                         <span class="sidebar-menu-button__text">
                           <span class="sidebar-menu-button__title">Activity</span>
@@ -93,7 +93,7 @@
           <button
             class="sidebar-rail"
             type="button"
-            data-moo-sidebar-rail
+            data-sidebar-rail
             aria-label="Toggle sidebar"
             tabindex="-1"
           ></button>
@@ -105,7 +105,7 @@
               class="btn btn-ghost btn-icon-sm sidebar-trigger"
               id="fixture-sidebar-trigger"
               type="button"
-              data-moo-sidebar-trigger
+              data-sidebar-trigger
               data-bs-target="#fixture-sidebar"
               aria-label="Toggle sidebar"
               aria-controls="fixture-sidebar"
@@ -128,7 +128,7 @@
               </button>
             </div>
 
-            <div class="combobox" id="fixture-combobox" data-moo-combobox-selected="false">
+            <div class="combobox" id="fixture-combobox" data-combobox-selected="false">
               <label class="form-label" for="fixture-combobox-input">Reviewer</label>
               <div class="combobox-control">
                 <input
@@ -140,7 +140,7 @@
                   aria-expanded="false"
                   aria-controls="fixture-combobox-listbox"
                   aria-autocomplete="list"
-                  data-moo-combobox-selected="false"
+                  data-combobox-selected="false"
                   data-conformance-combobox-trigger
                   placeholder="Select a reviewer"
                 >
