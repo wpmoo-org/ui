@@ -16,6 +16,7 @@ from tests.helpers import npm_env
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PROJECT_DOCS_ROOT = ROOT.parent / "docs"
 CERTIFICATION_ROOT = ROOT / "src/certification"
 PUBLIC_COMPONENT_HOOK_SOURCES = (
     ROOT / "src/components",
@@ -32,6 +33,9 @@ PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST = {
         "data-moo-catalog-view",
     },
 }
+ACTIVE_RC3_PLAN_DOCS = (
+    PROJECT_DOCS_ROOT / "plans/2026-08-17-chart-datepicker-slider-1-0-0-rc3.md",
+)
 
 
 class CertificationContractTests(unittest.TestCase):
@@ -59,6 +63,29 @@ class CertificationContractTests(unittest.TestCase):
             violations,
             [],
             "Public component hooks must use component-owned data-* contracts.",
+        )
+
+    def test_active_rc3_plan_docs_match_current_public_component_contracts(self) -> None:
+        if not PROJECT_DOCS_ROOT.is_dir():
+            self.skipTest("UI project docs are not mounted in this checkout")
+
+        stale_claims: list[str] = []
+        banned_patterns = (
+            "data-moo-chart",
+            "data-moo-slider",
+            "vanillajs-datepicker",
+        )
+        for path in ACTIVE_RC3_PLAN_DOCS:
+            source = path.read_text(encoding="utf-8")
+            relative = path.relative_to(PROJECT_DOCS_ROOT).as_posix()
+            for pattern in banned_patterns:
+                if pattern in source:
+                    stale_claims.append(f"{relative}: {pattern}")
+
+        self.assertEqual(
+            stale_claims,
+            [],
+            "Active RC.3 plan docs must match the current public component contracts.",
         )
 
     def test_evidence_inventory_matches_the_live_component_registry(self) -> None:

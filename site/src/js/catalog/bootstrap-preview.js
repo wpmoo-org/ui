@@ -132,7 +132,7 @@ export function initBootstrapPreview(root = document) {
       const trigger = event.target instanceof view.Element
         ? event.target.closest("[data-toast-target]")
         : null;
-      const selector = trigger?.dataset.mooToastTarget || "";
+      const selector = trigger?.dataset.toastTarget || "";
       const id = selector.startsWith("#") ? selector.slice(1) : selector;
       const target = id ? root.getElementById(id) : null;
       if (target) {

@@ -132,6 +132,8 @@ class ToastTests(CatalogTestCase):
             'event.target.closest("[data-toast-target]")',
             script,
         )
+        self.assertIn("dataset.toastTarget", script)
+        self.assertNotIn("mooToastTarget", script)
         self.assertIn("root.getElementById", script)
         self.assertNotIn(
             'document.querySelectorAll("[data-toast-target]").forEach',
