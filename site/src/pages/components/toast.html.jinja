@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/toast.html.jinja" import toast_container, toast_template %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% block title %}Toast — Moo UI{% endblock %}
 
@@ -32,6 +32,101 @@
       intro,
       toast_usage,
       "moo-example__preview--narrow"
+    ) }}
+
+    {% set types %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Default", variant="outline", toast_target="toast-variant-default-template") }}
+        {{ button("Success", variant="outline", toast_target="toast-variant-success-template") }}
+        {{ button("Info", variant="outline", toast_target="toast-variant-info-template") }}
+        {{ button("Warning", variant="outline", toast_target="toast-variant-warning-template") }}
+        {{ button("Error", variant="outline", toast_target="toast-variant-error-template") }}
+      </div>
+      {% call toast_container(placement="bottom-end", stacked=true) %}
+        {{ toast_template(
+          "toast-variant-default-template",
+          "Event created",
+          "Sunday, December 3 at 9:00 AM"
+        ) }}
+        {{ toast_template(
+          "toast-variant-success-template",
+          "Event created",
+          "The event was added to your calendar.",
+          variant="success"
+        ) }}
+        {{ toast_template(
+          "toast-variant-info-template",
+          "Heads up",
+          "Invitees will receive an email confirmation.",
+          variant="info"
+        ) }}
+        {{ toast_template(
+          "toast-variant-warning-template",
+          "Check availability",
+          "Two invitees have a scheduling conflict.",
+          variant="warning"
+        ) }}
+        {{ toast_template(
+          "toast-variant-error-template",
+          "Event not created",
+          "The calendar service could not be reached.",
+          priority="assertive",
+          variant="destructive"
+        ) }}
+      {% endcall %}
+    {% endset %}
+    {% set types_source %}
+      <div class="toast" data-toast-variant="success" role="status" aria-live="polite" aria-atomic="true">
+        <div class="toast-header">
+          <span class="toast-status-icon" aria-hidden="true">
+            <i class="lucide lucide-circle-check" data-icon="inline-start" aria-hidden="true"></i>
+          </span>
+          <strong class="me-auto">Event created</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">The event was added to your calendar.</div>
+      </div>
+
+      <div class="toast" data-toast-variant="info" role="status" aria-live="polite" aria-atomic="true">
+        <div class="toast-header">
+          <span class="toast-status-icon" aria-hidden="true">
+            <i class="lucide lucide-info" data-icon="inline-start" aria-hidden="true"></i>
+          </span>
+          <strong class="me-auto">Heads up</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">Invitees will receive an email confirmation.</div>
+      </div>
+
+      <div class="toast" data-toast-variant="warning" role="status" aria-live="polite" aria-atomic="true">
+        <div class="toast-header">
+          <span class="toast-status-icon" aria-hidden="true">
+            <i class="lucide lucide-triangle-alert" data-icon="inline-start" aria-hidden="true"></i>
+          </span>
+          <strong class="me-auto">Check availability</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">Two invitees have a scheduling conflict.</div>
+      </div>
+
+      <div class="toast" data-toast-variant="destructive" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <span class="toast-status-icon" aria-hidden="true">
+            <i class="lucide lucide-circle-alert" data-icon="inline-start" aria-hidden="true"></i>
+          </span>
+          <strong class="me-auto">Event not created</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">The calendar service could not be reached.</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "types",
+      "Types",
+      "Set <code>data-toast-variant</code> on the Toast root to apply the status-icon pattern.",
+      types,
+      preview_class="moo-example__preview--narrow",
+      source_content=types_source
     ) }}
   </div>
 

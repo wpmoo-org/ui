@@ -447,6 +447,11 @@ $moo-datatable-preview-shell-max-width: 82rem !default;
 // Bootstrap Toast has no deck gap, peek, scale-step, or slide-in timing knobs.
 // Keep the stacked catalog presentation on scoped Sass settings so the runtime
 // can consume the same values through the Toast container.
+$moo-toast-status-icon-size: 1rem !default;
+$moo-toast-status-icon-gap: .5rem !default;
+// Bootstrap Toast has no deck gap, peek, scale-step, or slide-in timing knobs.
+// Keep the indexed deck presentation on Bootstrap-scoped Sass settings so the
+// runtime can consume the same values through the Toast container.
 $moo-toast-stack-gap: .75rem !default;
 $moo-toast-stack-peek: .75rem !default;
 $moo-toast-stack-scale-step: .1 !default;

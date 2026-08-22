@@ -26,10 +26,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn('data-bs-theme="dark"', render_example_block)
         self.assertEqual(render_example_block.count("{{ rendered | safe }}"), 1)
         self.assertIn("portal_content=\"\"", render_example_block)
+        self.assertIn("source_content=\"\"", render_example_block)
         self.assertIn(
             "{% set rendered_portal = portal_content | dedent_html %}",
             render_example_block,
         )
+        self.assertIn("{% if source_content %}", render_example_block)
         self.assertIn("{{ rendered_portal | safe }}", render_example_block)
         self.assertIn("portal_content=arabic_portal", template)
         self.assertIn("portal_content=hebrew_portal", template)

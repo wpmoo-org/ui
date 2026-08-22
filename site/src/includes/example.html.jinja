@@ -1,10 +1,14 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "components/tabs.html.jinja" import tabs %}
 
-{% macro render_example(id, title, description, content, preview_class="", show_header=true, portal_content="") %}
+{% macro render_example(id, title, description, content, preview_class="", show_header=true, portal_content="", source_content="") %}
   {% set rendered = content | dedent_html %}
   {% set rendered_portal = portal_content | dedent_html %}
-  {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
+  {% if source_content %}
+    {% set source = source_content | dedent_html %}
+  {% else %}
+    {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
+  {% endif %}
   {% set title_slug = title | slugify %}
   <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
     {% if show_header %}

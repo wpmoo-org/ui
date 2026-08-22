@@ -17,6 +17,20 @@
   "assertive": {"role": "alert", "live": "assertive"}
 } %}
 
+{% set toast_variant_icons = {
+  "default": "",
+  "success": "circle-check",
+  "info": "info",
+  "warning": "triangle-alert",
+  "destructive": "circle-alert",
+  "loading": "loader-circle"
+} %}
+
+{% set toast_variant_aliases = {
+  "danger": "destructive",
+  "error": "destructive"
+} %}
+
 {% macro toast_container(placement="bottom-end", extra_class="", stacked=false) -%}
   {% if placement not in toast_placements %}{{ fail("Unknown toast placement: " ~ placement) }}{% endif %}
   {% if stacked and placement != "bottom-end" %}{{ fail("stacked Toast containers require placement=bottom-end") }}{% endif %}
@@ -27,15 +41,20 @@
   </div>
 {%- endmacro %}
 
-{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo") -%}
+{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo", variant="default") -%}
   {% if not id | trim %}{{ fail("Toast id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Toast title is required") }}{% endif %}
   {% if not body | trim %}{{ fail("Toast body is required") }}{% endif %}
   {% if priority not in toast_priorities %}{{ fail("Unknown toast priority: " ~ priority) }}{% endif %}
+  {% set requested_variant = variant | default("default", true) | trim %}
+  {% set toast_variant = toast_variant_aliases[requested_variant] if requested_variant in toast_variant_aliases else requested_variant %}
+  {% if toast_variant not in toast_variant_icons %}{{ fail("Unknown toast variant: " ~ requested_variant) }}{% endif %}
   {% set semantics = toast_priorities[priority] %}
+  {% set status_icon = toast_variant_icons[toast_variant] %}
   <div
     id="{{ id }}"
     class="toast"
+    {% if toast_variant != "default" %}data-toast-variant="{{ toast_variant }}"{% endif %}
     role="{{ semantics.role }}"
     aria-live="{{ semantics.live }}"
     aria-atomic="true"
@@ -43,6 +62,7 @@
     {% if delay != 5000 %}data-bs-delay="{{ delay }}"{% endif %}
   >
     <div class="toast-header">
+      {% if status_icon %}<span class="toast-status-icon" aria-hidden="true">{{ render_icon(status_icon, "inline-start") }}</span>{% endif %}
       <strong class="me-auto">{{ title }}</strong>
       {% if timestamp %}<small>{{ timestamp }}</small>{% endif %}
       {{ close_button(aria_label=dismiss_aria_label, dismiss="toast") }}
@@ -56,8 +76,8 @@
   </div>
 {%- endmacro %}
 
-{% macro toast_template(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo") -%}
+{% macro toast_template(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo", variant="default") -%}
   <template id="{{ id }}" data-toast-template="toast">
-    {{ toast(id, title, body, timestamp, autohide, delay, dismiss_aria_label, priority, action_label, action_aria_label) }}
+    {{ toast(id, title, body, timestamp, autohide, delay, dismiss_aria_label, priority, action_label, action_aria_label, variant) }}
   </template>
 {%- endmacro %}

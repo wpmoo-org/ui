@@ -49,7 +49,37 @@ class ToastTests(CatalogTestCase):
         self.assertIn('role="alert"', output)
         self.assertIn('aria-live="assertive"', output)
 
-    def test_toast_requires_id_title_body_and_known_priority(self) -> None:
+    def test_toast_supports_status_variants_with_icons(self) -> None:
+        expected_icons = {
+            "success": "circle-check",
+            "info": "info",
+            "warning": "triangle-alert",
+            "destructive": "circle-alert",
+            "loading": "loader-circle",
+        }
+        for variant, icon in expected_icons.items():
+            with self.subTest(variant=variant):
+                output = self.render(
+                    f'{{{{ toast("toast-{variant}", "Title", "Body", variant="{variant}") }}}}'
+                )
+
+                self.assertIn(f'data-toast-variant="{variant}"', output)
+                self.assertIn('<span class="toast-status-icon" aria-hidden="true">', output)
+                self.assertIn(f'data-lucide="{icon}"', output)
+                self.assertIn('data-icon="inline-start"', output)
+
+    def test_toast_accepts_error_and_odoo_danger_as_destructive_variant_aliases(self) -> None:
+        for alias in ("error", "danger"):
+            with self.subTest(alias=alias):
+                output = self.render(
+                    f'{{{{ toast("toast-{alias}", "Sync failed", "Try again.", variant="{alias}") }}}}'
+                )
+
+                self.assertIn('data-toast-variant="destructive"', output)
+                self.assertIn('data-lucide="circle-alert"', output)
+                self.assertNotIn(f'data-toast-variant="{alias}"', output)
+
+    def test_toast_requires_id_title_body_and_known_priority_and_variant(self) -> None:
         with self.assertRaisesRegex(ValueError, "Toast id is required"):
             self.render('{{ toast("   ", "Title", "Body") }}')
         with self.assertRaisesRegex(ValueError, "Toast title is required"):
@@ -58,6 +88,8 @@ class ToastTests(CatalogTestCase):
             self.render('{{ toast("id", "Title", "   ") }}')
         with self.assertRaisesRegex(ValueError, "Unknown toast priority: loud"):
             self.render('{{ toast("id", "Title", "Body", priority="loud") }}')
+        with self.assertRaisesRegex(ValueError, "Unknown toast variant: urgent"):
+            self.render('{{ toast("id", "Title", "Body", variant="urgent") }}')
 
     def test_toast_timestamp_is_optional(self) -> None:
         output = self.render('{{ toast("id", "Title", "Body") }}')
@@ -132,6 +164,15 @@ class ToastTests(CatalogTestCase):
         self.assertIn('<template id="toast-template" data-toast-template="toast">', output)
         self.assertEqual(output.count('class="toast"'), 1)
 
+    def test_toast_template_forwards_status_variant(self) -> None:
+        output = self.render(
+            '{% from "components/toast.html.jinja" import toast_template %}'
+            '{{ toast_template("toast-template", "Event created", "Saved.", variant="success") }}'
+        )
+
+        self.assertIn('data-toast-variant="success"', output)
+        self.assertIn('data-lucide="circle-check"', output)
+
     def test_stacked_container_supports_a_bottom_end_deck(self) -> None:
         source = COMPONENT.read_text(encoding="utf-8")
         self.assertIn("stacked=false", source)
@@ -166,9 +207,51 @@ class ToastTests(CatalogTestCase):
         self.assertIn('placement="bottom-end"', source)
         self.assertIn('stacked=true', source)
         self.assertIn('action_label="Undo"', source)
-        self.assertEqual(source.count("toast_target="), 1)
+        self.assertEqual(source.count('toast_target="toast-demo-template"'), 1)
         self.assertNotIn("toast-basic", source)
         self.assertNotIn("toast-stack-", source)
+
+    def test_page_documents_standard_status_variants(self) -> None:
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '{% from "includes/example.html.jinja" import render_component_intro, render_example %}',
+            source,
+        )
+        self.assertIn('render_example(', source)
+        for variant in ("default", "success", "info", "warning", "error"):
+            with self.subTest(variant=variant):
+                self.assertIn(f'toast_target="toast-variant-{variant}-template"', source)
+                self.assertIn(f'"toast-variant-{variant}-template"', source)
+        self.assertIn('variant="success"', source)
+        self.assertIn('variant="info"', source)
+        self.assertIn('variant="warning"', source)
+        self.assertIn('variant="destructive"', source)
+
+    def test_types_example_source_panel_documents_variant_html_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/toast.html")
+        code_marker = 'id="types-code"'
+        code_start = page.index(code_marker)
+        pre_start = page.rfind("<pre", 0, code_start)
+        pre_end = page.index("</pre>", code_start)
+        types_code = page[pre_start:pre_end]
+
+        self.assertIn("data-toast-variant", types_code)
+        self.assertIn("success", types_code)
+        self.assertIn("info", types_code)
+        self.assertIn("warning", types_code)
+        self.assertIn("destructive", types_code)
+        self.assertIn("role", types_code)
+        self.assertIn("aria-live", types_code)
+        self.assertIn("toast-status-icon", types_code)
+        self.assertNotIn("toast_template(", types_code)
+        self.assertNotIn("variant=&quot;success&quot;", types_code)
+        self.assertNotIn("data-toast-target", types_code)
+        self.assertIn('data-toast-target="#toast-variant-success-template"', page)
+        self.assertIn('data-toast-variant="success"', page)
 
     def test_catalog_bootstrap_module_creates_repeated_toast_instances(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
@@ -227,6 +310,16 @@ class ToastTests(CatalogTestCase):
         self.assertIn("height $moo-toast-stack-height-transition-duration ease", styles)
         self.assertIn("focus-within", styles)
         self.assertIn("prefers-reduced-motion", styles)
+        self.assertIn("toast-status-icon", styles)
+        self.assertIn('[data-toast-variant="success"]', styles)
+        self.assertIn('[data-toast-variant="info"]', styles)
+        self.assertIn('[data-toast-variant="warning"]', styles)
+        self.assertIn('[data-toast-variant="destructive"]', styles)
+        self.assertIn('[data-toast-variant="loading"]', styles)
+        self.assertIn("$moo-toast-status-icon-size", styles)
+        self.assertIn("$moo-toast-status-icon-gap", styles)
+        self.assertIn("$moo-toast-status-icon-size", settings)
+        self.assertIn("$moo-toast-status-icon-gap", settings)
         self.assertIn("$moo-toast-stack-gap", settings)
         self.assertIn("$moo-toast-stack-peek", settings)
         self.assertIn("$moo-toast-stack-scale-step", settings)
