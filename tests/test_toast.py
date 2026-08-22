@@ -208,10 +208,9 @@ class ToastTests(CatalogTestCase):
         self.assertIn('stacked=true', source)
         self.assertIn('action_label="Undo"', source)
         self.assertEqual(source.count('toast_target="toast-demo-template"'), 1)
-        self.assertNotIn("toast-basic", source)
         self.assertNotIn("toast-stack-", source)
 
-    def test_page_documents_standard_status_variants(self) -> None:
+    def test_page_documents_basic_default_toast_and_standard_status_variants(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn(
@@ -219,7 +218,28 @@ class ToastTests(CatalogTestCase):
             source,
         )
         self.assertIn('render_example(', source)
-        for variant in ("default", "success", "info", "warning", "error"):
+        self.assertIn('"basic"', source)
+        self.assertIn('"Basic"', source)
+        self.assertIn('toast_target="toast-basic-template"', source)
+        self.assertIn('"toast-basic-template"', source)
+        self.assertIn("Use <code>.toast</code>", source)
+        self.assertIn("<code>.toast-header</code>", source)
+        self.assertIn("<code>.toast-body</code>", source)
+        self.assertNotIn("Use the default Toast without <code>data-toast-variant</code>", source)
+        basic_start = source.index('{% set basic %}')
+        basic_end = source.index('{% set basic_source %}')
+        basic_example = source[basic_start:basic_end]
+        self.assertIn('toast_container(placement="bottom-end", stacked=true)', basic_example)
+        self.assertIn('"variants"', source)
+        self.assertIn('"Variants"', source)
+        variants_render_start = source.index('{{ render_example(\n      "variants"')
+        variants_render_end = source.index("source_content=variants_source", variants_render_start)
+        variants_render = source[variants_render_start:variants_render_end]
+        self.assertIn('preview_class="moo-example__preview--medium"', variants_render)
+        self.assertNotIn('preview_class="moo-example__preview--narrow"', variants_render)
+        self.assertNotIn('"types"', source)
+        self.assertNotIn('"Types"', source)
+        for variant in ("success", "info", "warning", "destructive", "loading"):
             with self.subTest(variant=variant):
                 self.assertIn(f'toast_target="toast-variant-{variant}-template"', source)
                 self.assertIn(f'"toast-variant-{variant}-template"', source)
@@ -227,31 +247,53 @@ class ToastTests(CatalogTestCase):
         self.assertIn('variant="info"', source)
         self.assertIn('variant="warning"', source)
         self.assertIn('variant="destructive"', source)
+        self.assertIn('variant="loading"', source)
+        self.assertNotIn('toast-variant-error-template', source)
 
-    def test_types_example_source_panel_documents_variant_html_contract(self) -> None:
+    def test_basic_example_source_panel_documents_default_html_contract(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/toast.html")
-        code_marker = 'id="types-code"'
+        code_marker = 'id="basic-code"'
         code_start = page.index(code_marker)
         pre_start = page.rfind("<pre", 0, code_start)
         pre_end = page.index("</pre>", code_start)
-        types_code = page[pre_start:pre_end]
+        basic_code = page[pre_start:pre_end]
 
-        self.assertIn("data-toast-variant", types_code)
-        self.assertIn("success", types_code)
-        self.assertIn("info", types_code)
-        self.assertIn("warning", types_code)
-        self.assertIn("destructive", types_code)
-        self.assertIn("role", types_code)
-        self.assertIn("aria-live", types_code)
-        self.assertIn("toast-status-icon", types_code)
-        self.assertNotIn("toast_template(", types_code)
-        self.assertNotIn("variant=&quot;success&quot;", types_code)
-        self.assertNotIn("data-toast-target", types_code)
+        self.assertIn("toast", basic_code)
+        self.assertIn("role", basic_code)
+        self.assertIn("aria-live", basic_code)
+        self.assertNotIn("data-toast-variant", basic_code)
+        self.assertNotIn("data-toast-target", basic_code)
+        self.assertIn('data-toast-target="#toast-basic-template"', page)
+
+    def test_variants_example_source_panel_documents_variant_html_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/toast.html")
+        code_marker = 'id="variants-code"'
+        code_start = page.index(code_marker)
+        pre_start = page.rfind("<pre", 0, code_start)
+        pre_end = page.index("</pre>", code_start)
+        variants_code = page[pre_start:pre_end]
+
+        self.assertIn("data-toast-variant", variants_code)
+        self.assertIn("success", variants_code)
+        self.assertIn("info", variants_code)
+        self.assertIn("warning", variants_code)
+        self.assertIn("destructive", variants_code)
+        self.assertIn("loading", variants_code)
+        self.assertIn("role", variants_code)
+        self.assertIn("aria-live", variants_code)
+        self.assertIn("toast-status-icon", variants_code)
+        self.assertNotIn("toast_template(", variants_code)
+        self.assertNotIn("variant=&quot;success&quot;", variants_code)
+        self.assertNotIn("data-toast-target", variants_code)
         self.assertIn('data-toast-target="#toast-variant-success-template"', page)
         self.assertIn('data-toast-variant="success"', page)
+        self.assertIn('data-toast-variant="loading"', page)
 
     def test_catalog_bootstrap_module_creates_repeated_toast_instances(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
@@ -316,6 +358,8 @@ class ToastTests(CatalogTestCase):
         self.assertIn('[data-toast-variant="warning"]', styles)
         self.assertIn('[data-toast-variant="destructive"]', styles)
         self.assertIn('[data-toast-variant="loading"]', styles)
+        self.assertIn('.toast[data-toast-variant="loading"] .toast-status-icon [data-icon]', styles)
+        self.assertIn("animation: none", styles)
         self.assertIn("$moo-toast-status-icon-size", styles)
         self.assertIn("$moo-toast-status-icon-gap", styles)
         self.assertIn("$moo-toast-status-icon-size", settings)

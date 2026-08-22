@@ -109,6 +109,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .toast[data-toast-variant="loading"] .toast-status-icon [data-icon] {
+    animation: none;
+  }
+
   .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
     transition: none;
   }

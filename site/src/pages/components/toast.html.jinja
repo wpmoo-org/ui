@@ -34,20 +34,43 @@
       "moo-example__preview--narrow"
     ) }}
 
-    {% set types %}
-      <div class="d-flex flex-wrap gap-2">
-        {{ button("Default", variant="outline", toast_target="toast-variant-default-template") }}
-        {{ button("Success", variant="outline", toast_target="toast-variant-success-template") }}
-        {{ button("Info", variant="outline", toast_target="toast-variant-info-template") }}
-        {{ button("Warning", variant="outline", toast_target="toast-variant-warning-template") }}
-        {{ button("Error", variant="outline", toast_target="toast-variant-error-template") }}
-      </div>
+    {% set basic %}
+      {{ button("Show Toast", variant="outline", toast_target="toast-basic-template") }}
       {% call toast_container(placement="bottom-end", stacked=true) %}
         {{ toast_template(
-          "toast-variant-default-template",
+          "toast-basic-template",
           "Event created",
           "Sunday, December 3 at 9:00 AM"
         ) }}
+      {% endcall %}
+    {% endset %}
+    {% set basic_source %}
+      <div class="toast" role="status" aria-live="polite" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Event created</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">Sunday, December 3 at 9:00 AM</div>
+      </div>
+    {% endset %}
+    {{ render_example(
+      "basic",
+      "Basic",
+      "Use <code>.toast</code> with polite live-region attributes, a <code>.toast-header</code>, a dismiss button, and a <code>.toast-body</code> for routine feedback.",
+      basic,
+      preview_class="moo-example__preview--narrow",
+      source_content=basic_source
+    ) }}
+
+    {% set variants %}
+      <div class="d-flex flex-wrap gap-2">
+        {{ button("Success", variant="outline", toast_target="toast-variant-success-template") }}
+        {{ button("Info", variant="outline", toast_target="toast-variant-info-template") }}
+        {{ button("Warning", variant="outline", toast_target="toast-variant-warning-template") }}
+        {{ button("Destructive", variant="outline", toast_target="toast-variant-destructive-template") }}
+        {{ button("Loading", variant="outline", toast_target="toast-variant-loading-template") }}
+      </div>
+      {% call toast_container(placement="bottom-end", stacked=true) %}
         {{ toast_template(
           "toast-variant-success-template",
           "Event created",
@@ -67,15 +90,21 @@
           variant="warning"
         ) }}
         {{ toast_template(
-          "toast-variant-error-template",
+          "toast-variant-destructive-template",
           "Event not created",
           "The calendar service could not be reached.",
           priority="assertive",
           variant="destructive"
         ) }}
+        {{ toast_template(
+          "toast-variant-loading-template",
+          "Syncing calendar",
+          "This can take a moment.",
+          variant="loading"
+        ) }}
       {% endcall %}
     {% endset %}
-    {% set types_source %}
+    {% set variants_source %}
       <div class="toast" data-toast-variant="success" role="status" aria-live="polite" aria-atomic="true">
         <div class="toast-header">
           <span class="toast-status-icon" aria-hidden="true">
@@ -119,14 +148,25 @@
         </div>
         <div class="toast-body">The calendar service could not be reached.</div>
       </div>
+
+      <div class="toast" data-toast-variant="loading" role="status" aria-live="polite" aria-atomic="true">
+        <div class="toast-header">
+          <span class="toast-status-icon" aria-hidden="true">
+            <i class="lucide lucide-loader-circle" data-icon="inline-start" aria-hidden="true"></i>
+          </span>
+          <strong class="me-auto">Syncing calendar</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">This can take a moment.</div>
+      </div>
     {% endset %}
     {{ render_example(
-      "types",
-      "Types",
-      "Set <code>data-toast-variant</code> on the Toast root to apply the status-icon pattern.",
-      types,
-      preview_class="moo-example__preview--narrow",
-      source_content=types_source
+      "variants",
+      "Variants",
+      "Use <code>variant=\"success\"</code> or another supported variant in a Moo macro. In plain HTML, set <code>data-toast-variant=\"success\"</code> on the <code>.toast</code> root. Catalog <code>data-toast-target</code> attributes only wire demo buttons; urgent failures still need <code>priority=\"assertive\"</code> in macros or <code>role=\"alert\"</code> with <code>aria-live=\"assertive\"</code> in plain HTML. The loading variant is visual only and does not auto-resolve a Promise.",
+      variants,
+      preview_class="moo-example__preview--medium",
+      source_content=variants_source
     ) }}
   </div>
 
