@@ -752,9 +752,9 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
-    def test_toast_catalog_portals_viewport_and_keyboard_contracts(self) -> None:
+    def test_toast_catalog_repeated_trigger_stacked_deck_contracts(self) -> None:
         context = self.browser.new_context(
-            viewport={"width": 390, "height": 844},
+            viewport={"width": 900, "height": 844},
             reduced_motion="no-preference",
         )
         page = context.new_page()
@@ -766,99 +766,116 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertTrue(response.ok)
 
-        trigger = page.locator('[data-toast-target="#toast-basic"]')
-        toast = page.locator("#toast-basic")
-        close_button = toast.locator(".btn-close")
-        container = toast.locator("xpath=..")
-        preview_ancestors = toast.locator(
-            "xpath=ancestor::div[contains(@class, 'moo-example__preview')]"
-        )
-        self.assertEqual(container.locator(".toast").count(), 1)
-        self.assertEqual(preview_ancestors.count(), 0)
-        expect(toast).to_have_attribute("role", "status")
-        expect(toast).to_have_attribute("aria-live", "polite")
-        expect(close_button).to_have_attribute("aria-label", "Close")
+        trigger = page.locator('[data-toast-target="#toast-demo-template"]')
+        deck = page.locator('.toast-container--stacked[data-toast-stack="deck"]')
+        generated = deck.locator('[data-toast-generated="true"]')
+        self.assertEqual(trigger.count(), 1)
+        expect(deck.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
+        expect(deck.locator('[data-toast-stack-index]')).to_have_count(0)
 
-        trigger.focus()
-        trigger.press("Enter")
-        expect(toast).to_be_visible()
-        self.assertTrue(
-            toast.evaluate(
-                """
-                element => {
-                  window.__catalogToastInstance = bootstrap.Toast.getInstance(element);
-                  const box = element.getBoundingClientRect();
-                  const viewport = window.visualViewport;
-                  return box.left >= viewport.offsetLeft - 1
-                    && box.top >= viewport.offsetTop - 1
-                    && box.right <= viewport.offsetLeft + viewport.width + 1
-                    && box.bottom <= viewport.offsetTop + viewport.height + 1;
-                }
-                """
-            )
-        )
-        close_button.click()
-        expect(toast).not_to_be_visible()
+        for _ in range(6):
+            trigger.click()
 
-        trigger.focus()
-        trigger.press("Space")
-        expect(toast).to_be_visible()
-        self.assertTrue(
-            toast.evaluate(
-                "element => bootstrap.Toast.getInstance(element) === window.__catalogToastInstance"
-            )
+        expect(generated).to_have_count(6)
+        expect(deck.locator(".toast.show")).to_have_count(6)
+        visible = deck.locator('.toast.show:not([data-toast-stack-limited])')
+        limited = deck.locator('.toast.show[data-toast-stack-limited]')
+        expect(visible).to_have_count(3)
+        expect(limited).to_have_count(3)
+        ids = generated.evaluate_all("elements => elements.map(element => element.id)")
+        indexes = visible.evaluate_all(
+            "elements => elements.map(element => element.dataset.toastStackIndex)"
         )
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(sorted(indexes), ["0", "1", "2"])
+        self.assertEqual(
+            sorted(
+                visible.evaluate_all(
+                    "elements => elements.map(element => element.style.getPropertyValue('--moo-toast-stack-z'))"
+                )
+            ),
+            ["1", "2", "3"],
+        )
+
+        newest = visible.last
+        newest_box = newest.bounding_box()
+        self.assertIsNotNone(newest_box)
+        client_width = page.evaluate("document.documentElement.clientWidth")
+        self.assertAlmostEqual(
+            newest_box["x"] + newest_box["width"],
+            client_width - 16,
+            delta=2,
+        )
+        self.assertLessEqual(newest_box["y"] + newest_box["height"], 845)
+        self.assertGreater(newest_box["x"] + newest_box["width"] / 2, client_width / 2)
+        expect(newest.locator(".btn-close")).to_have_attribute("aria-label", "Close")
+        expect(newest.locator('[data-bs-dismiss="toast"]')).to_have_count(2)
+
+        older = visible.first
+        older_before = older.bounding_box()
+        self.assertIsNotNone(older_before)
+        self.assertLess(older_before["y"], newest_box["y"])
+        newest.hover()
+        page.wait_for_timeout(250)
+        older_after = older.bounding_box()
+        self.assertIsNotNone(older_after)
+        self.assertNotEqual(older_before["y"], older_after["y"])
+
+        close_button = newest.locator(".btn-close")
         close_button.focus()
-        close_button.press("Space")
-        expect(toast).not_to_be_visible()
-
-        trigger.press("Enter")
-        expect(toast).to_be_visible()
-        close_button.focus()
+        expect(close_button).to_be_focused()
         close_button.press("Enter")
-        expect(toast).not_to_be_visible()
-
-        trigger.press("Enter")
-        expect(toast).to_be_visible()
-        close_button.focus()
-        page.evaluate(
-            """
-            () => document
-              .querySelector("#toast-basic .btn-close")
-              .dispatchEvent(new KeyboardEvent("keydown", {
-                key: " ",
-                bubbles: true,
-                cancelable: true,
-                ctrlKey: true,
-                altKey: true,
-              }))
-            """
+        expect(generated).to_have_count(5)
+        expect(visible).to_have_count(3)
+        expect(limited).to_have_count(2)
+        self.assertEqual(
+            sorted(
+                visible.evaluate_all(
+                    "elements => elements.map(element => element.dataset.toastStackIndex)"
+                )
+            ),
+            ["0", "1", "2"],
         )
-        expect(toast).not_to_be_visible()
+        expect(page.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
 
-        persistent_trigger = page.locator('[data-toast-target="#toast-persistent"]')
-        persistent_toast = page.locator("#toast-persistent")
-        persistent_trigger.click()
-        expect(persistent_toast).to_be_visible()
-        persistent_toast.locator(".btn-close").click()
-        expect(persistent_toast).not_to_be_visible()
-
-        first_stack_trigger = page.locator('[data-toast-target="#toast-stack-1"]')
-        second_stack_trigger = page.locator('[data-toast-target="#toast-stack-2"]')
-        first_stack_trigger.click()
-        second_stack_trigger.click()
-        expect(page.locator("#toast-stack-1")).to_be_visible()
-        expect(page.locator("#toast-stack-2")).to_be_visible()
-        self.assertTrue(
-            page.evaluate(
-                """
-                () => document.querySelector('#toast-stack-1').parentElement
-                  === document.querySelector('#toast-stack-2').parentElement
-                """
-            )
-        )
+        page.mouse.move(0, 0)
+        expect(generated).to_have_count(0, timeout=7000)
+        self.assertEqual(deck.locator('[data-toast-stack-index]').count(), 0)
+        self.assertEqual(run_axe(page), [])
         evidence.assert_clean()
         context.close()
+
+    def test_toast_stack_fallback_fixture_keeps_static_toasts_in_flow(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/toast-stack-fallback.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                deck = page.locator("#certification-toast-stack-fallback")
+                toasts = deck.locator(":scope > .toast")
+                expect(toasts).to_have_count(2)
+                self.assertEqual(
+                    toasts.evaluate_all(
+                        "elements => elements.map(element => element.dataset.toastStackIndex || null)"
+                    ),
+                    [None, None],
+                )
+                first_box = toasts.nth(0).bounding_box()
+                second_box = toasts.nth(1).bounding_box()
+                self.assertIsNotNone(first_box)
+                self.assertIsNotNone(second_box)
+                self.assertGreaterEqual(second_box["y"], first_box["y"] + first_box["height"])
+                self.assertEqual(run_axe(page), [])
+                evidence.assert_clean()
+                context.close()
 
     def test_toast_fixture_proves_status_dismissal_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:

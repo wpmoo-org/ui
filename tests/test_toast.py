@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
 
 
 COMPONENT = ROOT / "src/components/toast.html.jinja"
 PAGE = ROOT / "site/src/pages/components/toast.html.jinja"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
+TOAST_SCSS = ROOT / "scss/components/_toast.scss"
+COMPONENT_SETTINGS = ROOT / "scss/settings/_components.scss"
+PRIMARY_VARIABLES = ROOT / "scss/_primary_variables.scss"
 
 
 class ToastTests(CatalogTestCase):
@@ -106,26 +109,68 @@ class ToastTests(CatalogTestCase):
                 '{% call toast_container(placement="huge") %}Content{% endcall %}'
             )
 
-    def test_page_composes_toast_with_button_data_hook_trigger(self) -> None:
+    def test_toast_supports_native_action_markup(self) -> None:
+        source = COMPONENT.read_text(encoding="utf-8")
+        self.assertIn("action_label", source)
+
+        output = self.render(
+            '{{ toast("toast-action", "Event created", "Saved.", action_label="Undo") }}'
+        )
+
+        self.assertIn("Undo", output)
+        self.assertIn('data-bs-dismiss="toast"', output)
+
+    def test_toast_template_renders_one_toast_root(self) -> None:
+        source = COMPONENT.read_text(encoding="utf-8")
+        self.assertIn("macro toast_template(", source)
+
+        output = self.render(
+            '{% from "components/toast.html.jinja" import toast_template %}'
+            '{{ toast_template("toast-template", "Event created", "Saved.") }}'
+        )
+
+        self.assertIn('<template id="toast-template" data-toast-template="toast">', output)
+        self.assertEqual(output.count('class="toast"'), 1)
+
+    def test_stacked_container_supports_a_bottom_end_deck(self) -> None:
+        source = COMPONENT.read_text(encoding="utf-8")
+        self.assertIn("stacked=false", source)
+
+        output = self.render(
+            '{% call toast_container(placement="bottom-end", stacked=true) %}x{% endcall %}'
+        )
+
+        self.assertIn("toast-container--stacked", output)
+        self.assertIn('data-toast-stack="deck"', output)
+        self.assertIn("bottom-0 end-0", output)
+
+        with self.assertRaisesRegex(ValueError, "stacked Toast containers require placement=bottom-end"):
+            self.render(
+                '{% call toast_container(placement="top-end", stacked=true) %}x{% endcall %}'
+            )
+        with self.assertRaisesRegex(ValueError, "stacked Toast containers require placement=bottom-end"):
+            self.render(
+                '{% call toast_container(placement="bottom-center", stacked=true) %}x{% endcall %}'
+            )
+
+    def test_page_composes_one_repeated_trigger_and_template_deck(self) -> None:
         self.assertTrue(PAGE.is_file(), "Toast page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn('{% from "components/button.html.jinja" import button %}', source)
         self.assertIn(
-            '{% from "components/toast.html.jinja" import toast, toast_container %}',
+            '{% from "components/toast.html.jinja" import toast_container, toast_template %}',
             source,
         )
-        self.assertIn('toast_target="toast-basic"', source)
-        self.assertIn("portal_content=basic_toast", source)
-        self.assertIn("portal_content=stacking_toasts", source)
-        self.assertIn("portal_content=persistent_toast", source)
-        self.assertIn("arabic_portal=rtl_arabic_toast", source)
-        self.assertIn("hebrew_portal=rtl_hebrew_toast", source)
-        self.assertIn("english_portal=rtl_english_toast", source)
-        self.assertIn("autohide=false", source)
-        self.assertIn('dir="rtl"', source)
+        self.assertIn('toast_target="toast-demo-template"', source)
+        self.assertIn('placement="bottom-end"', source)
+        self.assertIn('stacked=true', source)
+        self.assertIn('action_label="Undo"', source)
+        self.assertEqual(source.count("toast_target="), 1)
+        self.assertNotIn("toast-basic", source)
+        self.assertNotIn("toast-stack-", source)
 
-    def test_catalog_bootstrap_module_delegates_toast_triggers(self) -> None:
+    def test_catalog_bootstrap_module_creates_repeated_toast_instances(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
 
         self.assertIn(
@@ -133,9 +178,42 @@ class ToastTests(CatalogTestCase):
             script,
         )
         self.assertIn("dataset.toastTarget", script)
-        self.assertNotIn("mooToastTarget", script)
         self.assertIn("root.getElementById", script)
+        self.assertIn("template.content.cloneNode", script)
+        self.assertIn("data-toast-generated", script)
+        self.assertIn("data-toast-stack-sequence", script)
+        self.assertIn("toastStackVisibleLimit", script)
+        self.assertIn("data-toast-stack-limited", script)
+        self.assertIn("Toast.getOrCreateInstance", script)
+        self.assertIn("show.bs.toast", script)
+        self.assertIn("shown.bs.toast", script)
+        self.assertIn("hidden.bs.toast", script)
+        self.assertIn("listen(root", script)
+        self.assertNotIn("document.addEventListener", script)
         self.assertNotIn(
             'document.querySelectorAll("[data-toast-target]").forEach',
             script,
         )
+
+    def test_toast_stack_styles_and_settings_define_runtime_contract(self) -> None:
+        styles = TOAST_SCSS.read_text(encoding="utf-8")
+        settings = COMPONENT_SETTINGS.read_text(encoding="utf-8")
+        primary = read_primary_variables()
+
+        self.assertIn("toast-container--stacked[data-toast-stack=\"deck\"]", styles)
+        self.assertIn(":has(> .toast[data-toast-stack-index])", styles)
+        self.assertIn("margin-bottom: 0", styles)
+        self.assertIn("--moo-toast-stack-collapsed-y", styles)
+        self.assertIn("--moo-toast-stack-expanded-y", styles)
+        self.assertIn("data-toast-stack-limited", styles)
+        self.assertIn("opacity: 0", styles)
+        self.assertIn("pointer-events: none", styles)
+        self.assertIn("transform-origin: bottom right", styles)
+        self.assertIn("focus-within", styles)
+        self.assertIn("prefers-reduced-motion", styles)
+        self.assertIn("$moo-toast-stack-overlap-step", settings)
+        self.assertIn("$moo-toast-stack-scale-step", settings)
+        self.assertIn("$moo-toast-stack-transition-duration", settings)
+        self.assertIn("$moo-toast-stack-overlap-step", primary)
+        self.assertIn("$moo-toast-stack-scale-step", primary)
+        self.assertIn("$moo-toast-stack-transition-duration", primary)

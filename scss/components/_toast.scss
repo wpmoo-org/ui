@@ -1,9 +1,6 @@
-// The design reference's own Toast page is deprecated in favor of Sonner,
-// so this partial retunes Bootstrap's own --bs-toast-* custom properties
-// toward Sonner's
-// visual weight (larger radius, quieter border tone, a softer diffuse
-// shadow, fuller padding, a lighter-weight title) while keeping Bootstrap's
-// own header/body composition and the public "Toast" name and API.
+// Bootstrap owns Toast markup, lifecycle classes, placement utilities, and
+// autohide behavior. This partial only retunes the native surface and opts
+// an explicitly indexed bottom-end container into the catalog deck layout.
 .toast {
   --bs-toast-border-radius: var(--bs-border-radius-lg);
   --bs-toast-border-color: var(--moo-border);
@@ -18,8 +15,44 @@
 }
 
 .toast-header strong {
-  // Bootstrap's own toast markup titles with a bare <strong>, which
-  // renders at the browser's default bold (700); Sonner's title sits at a
-  // lighter 500.
   font-weight: $font-weight-medium;
+}
+
+.toast-container--stacked[data-toast-stack="deck"] {
+  --moo-toast-stack-overlap-step: #{$moo-toast-stack-overlap-step};
+  --moo-toast-stack-scale-step: #{$moo-toast-stack-scale-step};
+}
+
+// Without runtime indexes, the container remains readable Bootstrap flow.
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) {
+  display: grid;
+  align-items: end;
+}
+
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
+  grid-area: 1 / 1;
+  margin-bottom: 0;
+  transform: translateY(var(--moo-toast-stack-collapsed-y, 0px))
+    scale(var(--moo-toast-stack-scale, 1));
+  transform-origin: bottom right;
+  z-index: var(--moo-toast-stack-z, 1);
+  transition:
+    transform $moo-toast-stack-transition-duration ease,
+    opacity $moo-toast-stack-transition-duration ease;
+}
+
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-limited] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-index],
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-index] {
+  transform: translateY(var(--moo-toast-stack-expanded-y, 0px)) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
+    transition: none;
+  }
 }

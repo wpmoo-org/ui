@@ -1,13 +1,6 @@
-{# Toast wraps Bootstrap's own opt-in Toast plugin. Unlike Dialog (Modal) or
-   Sheet (Offcanvas), Bootstrap ships no data-api click trigger for toasts —
-   its own docs recommend a hand-wired click listener that calls .show().
-   The catalog mirrors that with one generic, catalog-only convention:
-   button(toast_target=...) renders data-toast-target (a Moo-owned data
-   hook, deliberately not data-bs-*) and the catalog Bootstrap preview module
-   wires one delegated listener. A consuming app is expected to wire its
-   own trigger the same way Bootstrap's docs show; data-toast-target is
-   catalog sugar, not a public Moo/Bootstrap contract. #}
-
+{# Toast uses Bootstrap markup and lifecycle. The catalog may target a Toast
+   template to create one independent Toast per trigger activation. #}
+{% from "components/button.html.jinja" import button %}
 {% from "components/close_button.html.jinja" import close_button %}
 
 {% set toast_placements = {
@@ -24,14 +17,17 @@
   "assertive": {"role": "alert", "live": "assertive"}
 } %}
 
-{% macro toast_container(placement="bottom-end", extra_class="") -%}
+{% macro toast_container(placement="bottom-end", extra_class="", stacked=false) -%}
   {% if placement not in toast_placements %}{{ fail("Unknown toast placement: " ~ placement) }}{% endif %}
-  <div class="toast-container position-fixed {{ toast_placements[placement] }} p-3{% if extra_class %} {{ extra_class }}{% endif %}">
+  {% if stacked and placement != "bottom-end" %}{{ fail("stacked Toast containers require placement=bottom-end") }}{% endif %}
+  {% set classes = "toast-container position-fixed " ~ toast_placements[placement] ~ " p-3" %}
+  {% if stacked %}{% set classes = classes ~ " toast-container--stacked" %}{% endif %}
+  <div class="{{ classes }}{% if extra_class %} {{ extra_class }}{% endif %}"{% if stacked %} data-toast-stack="deck"{% endif %}>
     {{ caller() | trim | safe }}
   </div>
 {%- endmacro %}
 
-{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite") -%}
+{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo") -%}
   {% if not id | trim %}{{ fail("Toast id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Toast title is required") }}{% endif %}
   {% if not body | trim %}{{ fail("Toast body is required") }}{% endif %}
@@ -51,6 +47,17 @@
       {% if timestamp %}<small>{{ timestamp }}</small>{% endif %}
       {{ close_button(aria_label=dismiss_aria_label, dismiss="toast") }}
     </div>
-    <div class="toast-body">{{ body }}</div>
+    <div class="toast-body">
+      {{ body }}
+      {% if action_label %}
+        {{ button(action_label, variant="link", size="sm", extra_class="p-0 ms-2", dismiss="toast", aria_label=action_aria_label) }}
+      {% endif %}
+    </div>
   </div>
+{%- endmacro %}
+
+{% macro toast_template(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo") -%}
+  <template id="{{ id }}" data-toast-template="toast">
+    {{ toast(id, title, body, timestamp, autohide, delay, dismiss_aria_label, priority, action_label, action_aria_label) }}
+  </template>
 {%- endmacro %}

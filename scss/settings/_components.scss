@@ -443,3 +443,10 @@ $moo-datatable-page-size-menu-min-width: 4rem !default;
 // Catalog preview chrome: maximum width of the full-bleed release-review
 // preview pages that host the Data Table block.
 $moo-datatable-preview-shell-max-width: 82rem !default;
+
+// Bootstrap Toast has no deck-overlap, scale-step, or transition-duration
+// knobs. Keep the stacked catalog presentation on scoped Sass settings so
+// the runtime can consume the same values through the Toast container.
+$moo-toast-stack-overlap-step: .55 !default;
+$moo-toast-stack-scale-step: .035 !default;
+$moo-toast-stack-transition-duration: .18s !default;

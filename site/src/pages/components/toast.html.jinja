@@ -1,8 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/toast.html.jinja" import toast, toast_container %}
+{% from "components/toast.html.jinja" import toast_container, toast_template %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% block title %}Toast — Moo UI{% endblock %}
 
@@ -14,121 +14,29 @@
 
   <div class="moo-component-examples">
     {% set intro %}
-      {{ button("Show toast", variant="outline", toast_target="toast-intro") }}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-intro", "Workflow", "Backup completed successfully.", timestamp="just now") }}
+      {{ button("Show Toast", variant="outline", toast_target="toast-demo-template") }}
+      {% call toast_container(placement="bottom-end", stacked=true) %}
+        {{ toast_template(
+          "toast-demo-template",
+          "Event created",
+          "Sunday, December 3 at 9:00 AM",
+          action_label="Undo"
+        ) }}
       {% endcall %}
     {% endset %}
     {% set toast_usage %}
-      <p>Use <code>.toast</code> for short, temporary updates that should be noticed without interrupting the current page. Place toasts inside a fixed <code>.toast-container</code>, trigger them from the action or event that produced the update, and keep each message concise enough to read before it disappears.</p>
-      <p>Choose live-region priority based on urgency: routine success or sync messages should be polite, while urgent interruptions can be assertive. Keep persistent toasts dismissible when acknowledgement is required, and avoid using toast alone for errors that the user must fix inside a form.</p>
-      <p>Bootstrap Toast owns reveal, autohide, dismissal, stacking, and placement behavior. Keep related toasts in one container, use timestamps only when they add useful context, and make sure the same information is still available elsewhere if it affects a durable workflow state.</p>
+      <p>Click the same <code>Show Toast</code> action as many times as needed. The bottom-right deck keeps the newest three Toasts visible, with its own close, Undo, and auto-hide behavior.</p>
+      <p>Keep messages concise, use polite live-region priority for routine updates, and provide durable workflow feedback elsewhere when a notification represents a state that must persist.</p>
     {% endset %}
     {{ render_component_intro(
       intro,
       toast_usage,
       "moo-example__preview--narrow"
     ) }}
-
-    {% set basic %}
-      {{ button("Show approval toast", variant="outline", toast_target="toast-basic") }}
-    {% endset %}
-    {% set basic_toast %}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-basic", "Workflow", "Backup completed successfully.", timestamp="just now") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "basic",
-      "Basic",
-      "Point a trigger at the rendered toast ID; Bootstrap owns reveal and dismissal behavior.",
-      basic,
-      portal_content=basic_toast
-    ) }}
-
-    {% set stacking %}
-      <div class="d-flex flex-wrap gap-2">
-        {{ button("Show first alert", variant="outline", toast_target="toast-stack-1") }}
-        {{ button("Show second alert", variant="outline", toast_target="toast-stack-2") }}
-      </div>
-    {% endset %}
-    {% set stacking_toasts %}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-stack-1", "Ingestion", "Invoice set synced.", timestamp="1 min ago") }}
-        {{ toast("toast-stack-2", "Ingestion", "Receipt batch synced.", timestamp="just now") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "stacking",
-      "Stacking",
-      "Stack multiple follow-up events in one container so they retain spacing and timing.",
-      stacking,
-      portal_content=stacking_toasts
-    ) }}
-
-    {% set persistent %}
-      {{ button("Show persistent toast", variant="outline", toast_target="toast-persistent") }}
-    {% endset %}
-    {% set persistent_toast %}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-persistent", "Queue", "Sync timed out — retry from the operations panel.", autohide=false, priority="assertive") }}
-      {% endcall %}
-    {% endset %}
-    {{ render_example(
-      "persistent",
-      "No autohide",
-      "Set <code>autohide=false</code> for actions that require manual acknowledgement; use <code>priority=\"assertive\"</code> only for an urgent interruption.",
-      persistent,
-      portal_content=persistent_toast
-    ) }}
-
-    {% set rtl_arabic %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ button("إظهار تنبيه المراجعة", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-arabic") }}
-      </div>
-    {% endset %}
-    {% set rtl_arabic_toast %}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-rtl-arabic", "المراجعة", "تمت مراجعة الطلب بنجاح.", timestamp="الآن") }}
-      {% endcall %}
-    {% endset %}
-
-    {% set rtl_hebrew %}
-      <div class="d-inline-flex" dir="rtl">
-        {{ button("הצג התראת סקירה", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-hebrew") }}
-      </div>
-    {% endset %}
-    {% set rtl_hebrew_toast %}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-rtl-hebrew", "סקירה", "הבקשה אושרה בהצלחה.", timestamp="כרגע") }}
-      {% endcall %}
-    {% endset %}
-
-    {% set rtl_english %}
-      <div class="d-inline-flex" dir="ltr">
-        {{ button("Show review toast", variant="outline", icon_start="circle-alert", toast_target="toast-rtl-english") }}
-      </div>
-    {% endset %}
-    {% set rtl_english_toast %}
-      {% call toast_container(placement="bottom-end") %}
-        {{ toast("toast-rtl-english", "Review", "The request passed review.", timestamp="now") }}
-      {% endcall %}
-    {% endset %}
-
-    {{ render_rtl_example(
-      "toast",
-      "Compare Arabic, Hebrew, and English toast actions inside a compact RTL shell.",
-      rtl_arabic,
-      rtl_hebrew,
-      rtl_english,
-      arabic_portal=rtl_arabic_toast,
-      hebrew_portal=rtl_hebrew_toast,
-      english_portal=rtl_english_toast
-    ) }}
   </div>
 
   {{ render_reference(
-    "For Bootstrap's Toast plugin options, stacking, and accessibility notes, see the",
+    "For Bootstrap's Toast plugin options and accessibility notes, see the",
     "https://getbootstrap.com/docs/5.3/components/toasts/",
     "Bootstrap Toasts documentation"
   ) }}
