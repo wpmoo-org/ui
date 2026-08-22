@@ -19,22 +19,32 @@
 }
 
 .toast-container--stacked[data-toast-stack="deck"] {
-  --moo-toast-stack-overlap-step: #{$moo-toast-stack-overlap-step};
+  --moo-toast-stack-gap: #{$moo-toast-stack-gap};
+  --moo-toast-stack-peek: #{$moo-toast-stack-peek};
   --moo-toast-stack-scale-step: #{$moo-toast-stack-scale-step};
+  --moo-toast-stack-min-scale: #{$moo-toast-stack-min-scale};
 }
 
 // Without runtime indexes, the container remains readable Bootstrap flow.
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) {
-  display: grid;
-  align-items: end;
+  bottom: 1rem !important;
+  inset-inline-end: 1rem !important;
+  height: 0;
+  max-width: calc(100vw - 2rem);
+  padding: 0 !important;
+  width: unquote("min(24rem, calc(100vw - 2rem))");
 }
 
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
-  grid-area: 1 / 1;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  max-width: none;
   margin-bottom: 0;
+  position: absolute;
+  width: 100%;
   transform: translateY(var(--moo-toast-stack-collapsed-y, 0px))
     scale(var(--moo-toast-stack-scale, 1));
-  transform-origin: bottom right;
+  transform-origin: bottom center;
   z-index: var(--moo-toast-stack-z, 1);
   transition:
     transform $moo-toast-stack-transition-duration ease,

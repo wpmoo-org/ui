@@ -149,6 +149,7 @@ export function initBootstrapPreview(root = document) {
     const clearToastStackState = (toast) => {
       toast.removeAttribute("data-toast-stack-index");
       toast.removeAttribute("data-toast-stack-limited");
+      toast.removeAttribute("inert");
       toast.style.removeProperty("--moo-toast-stack-collapsed-y");
       toast.style.removeProperty("--moo-toast-stack-expanded-y");
       toast.style.removeProperty("--moo-toast-stack-scale");
@@ -168,17 +169,21 @@ export function initBootstrapPreview(root = document) {
       ));
       const spacingSource = toasts[0] || container;
       const computed = view.getComputedStyle(spacingSource);
-      const spacing = readPixels(
-        computed.getPropertyValue("--bs-toast-spacing"),
+      const gap = readPixels(
+        computed.getPropertyValue("--moo-toast-stack-gap"),
         computed,
       );
-      const overlapStep = readNumber(
-        computed.getPropertyValue("--moo-toast-stack-overlap-step"),
-        0.55,
+      const peek = readPixels(
+        computed.getPropertyValue("--moo-toast-stack-peek"),
+        computed,
       );
       const scaleStep = readNumber(
         computed.getPropertyValue("--moo-toast-stack-scale-step"),
-        0.035,
+        0.1,
+      );
+      const minScale = readNumber(
+        computed.getPropertyValue("--moo-toast-stack-min-scale"),
+        0.5,
       );
 
       toasts.sort((left, right) => {
@@ -194,18 +199,24 @@ export function initBootstrapPreview(root = document) {
           (Number.isFinite(leftSequence) ? leftSequence : 0);
       });
 
+      const stackHeight = toasts[0]?.offsetHeight ||
+        toasts[0]?.getBoundingClientRect().height || 0;
       let expandedOffset = 0;
       toasts.forEach((toast, index) => {
         const height = toast.offsetHeight || toast.getBoundingClientRect().height;
-        const collapsedOffset = -(index * spacing * overlapStep);
-        const scale = Math.max(0.82, 1 - index * scaleStep);
+        const scale = Math.max(minScale, 1 - index * scaleStep);
+        const collapsedOffset = -(
+          index * peek + (1 - scale) * stackHeight
+        );
         const limited = index >= toastStackVisibleLimit;
 
         toast.dataset.toastStackIndex = String(index);
         if (limited) {
           toast.setAttribute("data-toast-stack-limited", "");
+          toast.setAttribute("inert", "");
         } else {
           toast.removeAttribute("data-toast-stack-limited");
+          toast.removeAttribute("inert");
         }
         toast.style.setProperty(
           "--moo-toast-stack-collapsed-y",
@@ -220,7 +231,7 @@ export function initBootstrapPreview(root = document) {
           "--moo-toast-stack-z",
           String(Math.max(1, toastStackVisibleLimit - index)),
         );
-        expandedOffset -= height + spacing;
+        expandedOffset -= height + gap;
       });
     };
 
@@ -264,7 +275,7 @@ export function initBootstrapPreview(root = document) {
         toast.id = `${template.id}-${sequence}`;
         toast.setAttribute("data-toast-generated", "true");
         toast.setAttribute("data-toast-stack-sequence", String(sequence));
-        container.append(toast);
+        container.prepend(toast);
         const instance = Toast.getOrCreateInstance(toast);
         bootstrapInstances.add(instance);
         instance.show();

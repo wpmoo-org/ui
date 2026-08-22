@@ -789,6 +789,19 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual(sorted(indexes), ["0", "1", "2"])
         self.assertEqual(
+            generated.evaluate_all(
+                "elements => elements.map(element => element.dataset.toastStackIndex)"
+            ),
+            ["0", "1", "2", "3", "4", "5"],
+        )
+        self.assertTrue(
+            all(
+                limited.evaluate_all(
+                    "elements => elements.map(element => element.hasAttribute('inert'))"
+                )
+            )
+        )
+        self.assertEqual(
             sorted(
                 visible.evaluate_all(
                     "elements => elements.map(element => element.style.getPropertyValue('--moo-toast-stack-z'))"
@@ -797,7 +810,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             ["1", "2", "3"],
         )
 
-        newest = visible.last
+        newest = deck.locator('.toast.show[data-toast-stack-index="0"]')
         newest_box = newest.bounding_box()
         self.assertIsNotNone(newest_box)
         client_width = page.evaluate("document.documentElement.clientWidth")
@@ -806,12 +819,17 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             client_width - 16,
             delta=2,
         )
+        self.assertAlmostEqual(newest_box["width"], 384, delta=2)
+        self.assertEqual(
+            newest.evaluate("element => getComputedStyle(element).transformOrigin"),
+            f"{newest_box['width'] / 2:g}px {newest_box['height']:g}px",
+        )
         self.assertLessEqual(newest_box["y"] + newest_box["height"], 845)
         self.assertGreater(newest_box["x"] + newest_box["width"] / 2, client_width / 2)
         expect(newest.locator(".btn-close")).to_have_attribute("aria-label", "Close")
         expect(newest.locator('[data-bs-dismiss="toast"]')).to_have_count(2)
 
-        older = visible.first
+        older = deck.locator('.toast.show[data-toast-stack-index="1"]')
         older_before = older.bounding_box()
         self.assertIsNotNone(older_before)
         self.assertLess(older_before["y"], newest_box["y"])
