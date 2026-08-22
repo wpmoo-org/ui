@@ -64,12 +64,14 @@
 }
 
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-index],
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-index] {
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-index],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
   transform: translateY(var(--moo-toast-stack-expanded-y, 0px)) scale(1);
 }
 
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-entering],
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-entering] {
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-entering],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-entering] {
   transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
     scale(var(--moo-toast-stack-scale, 1));
 }

@@ -168,6 +168,10 @@ export function initBootstrapPreview(root = document) {
           child.classList.contains("showing") ||
           child === pendingToast)
       ));
+      if (toasts.length === 0) {
+        container.removeAttribute("data-toast-stack-hovering");
+        return;
+      }
       const spacingSource = toasts[0] || container;
       const computed = view.getComputedStyle(spacingSource);
       const gap = readPixels(
@@ -230,10 +234,43 @@ export function initBootstrapPreview(root = document) {
         toast.style.setProperty("--moo-toast-stack-scale", String(scale));
         toast.style.setProperty(
           "--moo-toast-stack-z",
-          String(Math.max(1, toastStackVisibleLimit - index)),
+          String(1000 - index),
         );
         expandedOffset -= height + gap;
       });
+    };
+    const isPointerInsideToastStack = (container, event) => {
+      if (!isStackContainer(container)) {
+        return false;
+      }
+      return Array.from(container.children).some((child) => {
+        if (
+          !(child instanceof view.HTMLElement) ||
+          !child.classList.contains("toast") ||
+          child.hasAttribute("data-toast-stack-limited")
+        ) {
+          return false;
+        }
+        const rect = child.getBoundingClientRect();
+        return event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom;
+      });
+    };
+    const markToastStackHovering = (container) => {
+      if (!isStackContainer(container)) {
+        return;
+      }
+      container.setAttribute("data-toast-stack-hovering", "");
+      updateToastStack(container);
+    };
+    const releaseToastStackHovering = (container) => {
+      if (!isStackContainer(container)) {
+        return;
+      }
+      container.removeAttribute("data-toast-stack-hovering");
+      updateToastStack(container);
     };
 
     const hideToastFromDismissControl = (dismiss) => {
@@ -250,6 +287,29 @@ export function initBootstrapPreview(root = document) {
         instance.hide();
       }
     };
+    listen(root, "pointerover", (event) => {
+      const toast = event.target instanceof view.Element
+        ? event.target.closest(".toast")
+        : null;
+      const container = getStackContainer(toast);
+      if (container && toast?.parentElement === container) {
+        markToastStackHovering(container);
+      }
+    }, true);
+    listen(root, "pointermove", (event) => {
+      root
+        .querySelectorAll(
+          '.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]',
+        )
+        .forEach((container) => {
+          if (
+            isStackContainer(container) &&
+            !isPointerInsideToastStack(container, event)
+          ) {
+            releaseToastStackHovering(container);
+          }
+        });
+    }, true);
     listen(root, "click", (event) => {
       const trigger = event.target instanceof view.Element
         ? event.target.closest("[data-toast-target]")

@@ -814,12 +814,16 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             )
         )
         self.assertEqual(
-            sorted(
-                visible.evaluate_all(
-                    "elements => elements.map(element => element.style.getPropertyValue('--moo-toast-stack-z'))"
-                )
+            visible.evaluate_all(
+                "elements => elements.map(element => element.style.getPropertyValue('--moo-toast-stack-z'))"
             ),
-            ["1", "2", "3"],
+            ["1000", "999", "998"],
+        )
+        self.assertEqual(
+            limited.evaluate_all(
+                "elements => elements.map(element => element.style.getPropertyValue('--moo-toast-stack-z'))"
+            ),
+            ["997", "996", "995"],
         )
 
         newest = deck.locator('.toast.show[data-toast-stack-index="0"]')
@@ -852,12 +856,29 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertNotEqual(older_before["y"], older_after["y"])
 
         close_button = newest.locator(".btn-close")
+        close_button.click()
+        page.wait_for_timeout(150)
+        expect(generated).to_have_count(5)
+        expect(visible).to_have_count(3)
+        hover_held_tops = visible.evaluate_all(
+            "elements => elements.map(element => element.getBoundingClientRect().top)"
+        )
+        self.assertGreater(hover_held_tops[0] - hover_held_tops[1], 60)
+        page.mouse.move(0, 0)
+        page.wait_for_timeout(250)
+        hover_released_tops = visible.evaluate_all(
+            "elements => elements.map(element => element.getBoundingClientRect().top)"
+        )
+        self.assertLess(hover_released_tops[0] - hover_released_tops[1], 40)
+
+        newest = deck.locator('.toast.show[data-toast-stack-index="0"]')
+        close_button = newest.locator(".btn-close")
         close_button.focus()
         expect(close_button).to_be_focused()
         close_button.press("Enter")
-        expect(generated).to_have_count(5)
+        expect(generated).to_have_count(4)
         expect(visible).to_have_count(3)
-        expect(limited).to_have_count(2)
+        expect(limited).to_have_count(1)
         self.assertEqual(
             sorted(
                 visible.evaluate_all(

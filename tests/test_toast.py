@@ -215,6 +215,7 @@ class ToastTests(CatalogTestCase):
         self.assertIn("--moo-toast-stack-expanded-y", styles)
         self.assertIn("data-toast-stack-limited", styles)
         self.assertIn("data-toast-stack-entering", styles)
+        self.assertIn("data-toast-stack-hovering", styles)
         self.assertIn(
             "var(--moo-toast-stack-enter-y, 150%)",
             styles,
@@ -256,4 +257,11 @@ class ToastTests(CatalogTestCase):
         self.assertIn("Toast.getOrCreateInstance(toast, { animation: false })", script)
         self.assertIn("toast.setAttribute(\"inert\", \"\")", script)
         self.assertIn("toast.removeAttribute(\"inert\")", script)
+        self.assertIn("data-toast-stack-hovering", script)
+        self.assertIn("isPointerInsideToastStack", script)
+        self.assertIn('listen(root, "pointerover"', script)
+        self.assertIn('listen(root, "pointermove"', script)
+        self.assertIn('container.setAttribute("data-toast-stack-hovering", "")', script)
+        self.assertIn('container.removeAttribute("data-toast-stack-hovering")', script)
+        self.assertIn("1000 - index", script)
         self.assertIn("(1 - scale) * stackHeight", script)
