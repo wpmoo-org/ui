@@ -444,11 +444,14 @@ $moo-datatable-page-size-menu-min-width: 4rem !default;
 // preview pages that host the Data Table block.
 $moo-datatable-preview-shell-max-width: 82rem !default;
 
-// Bootstrap Toast has no deck gap, peek, scale-step, or transition-duration
-// knobs. Keep the stacked catalog presentation on scoped Sass settings so
-// the runtime can consume the same values through the Toast container.
+// Bootstrap Toast has no deck gap, peek, scale-step, or slide-in timing knobs.
+// Keep the stacked catalog presentation on scoped Sass settings so the runtime
+// can consume the same values through the Toast container.
 $moo-toast-stack-gap: .75rem !default;
 $moo-toast-stack-peek: .75rem !default;
 $moo-toast-stack-scale-step: .1 !default;
 $moo-toast-stack-min-scale: .5 !default;
-$moo-toast-stack-transition-duration: .18s !default;
+$moo-toast-stack-enter-y: 150% !default;
+$moo-toast-stack-transition-duration: .5s !default;
+$moo-toast-stack-height-transition-duration: .15s !default;
+$moo-toast-stack-transition-timing-function: cubic-bezier(.22, 1, .36, 1) !default;

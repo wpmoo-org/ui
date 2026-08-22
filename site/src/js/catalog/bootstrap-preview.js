@@ -149,6 +149,7 @@ export function initBootstrapPreview(root = document) {
     const clearToastStackState = (toast) => {
       toast.removeAttribute("data-toast-stack-index");
       toast.removeAttribute("data-toast-stack-limited");
+      toast.removeAttribute("data-toast-stack-entering");
       toast.removeAttribute("inert");
       toast.style.removeProperty("--moo-toast-stack-collapsed-y");
       toast.style.removeProperty("--moo-toast-stack-expanded-y");
@@ -275,10 +276,19 @@ export function initBootstrapPreview(root = document) {
         toast.id = `${template.id}-${sequence}`;
         toast.setAttribute("data-toast-generated", "true");
         toast.setAttribute("data-toast-stack-sequence", String(sequence));
+        toast.setAttribute("data-toast-stack-entering", "");
         container.prepend(toast);
-        const instance = Toast.getOrCreateInstance(toast);
+        updateToastStack(container, toast);
+        const instance = Toast.getOrCreateInstance(toast, { animation: false });
         bootstrapInstances.add(instance);
         instance.show();
+        view.setTimeout(() => {
+          view.requestAnimationFrame(() => {
+            if (toast.isConnected) {
+              toast.removeAttribute("data-toast-stack-entering");
+            }
+          });
+        }, 80);
       } else if (target instanceof view.HTMLElement) {
         const instance = Toast.getOrCreateInstance(target);
         bootstrapInstances.add(instance);

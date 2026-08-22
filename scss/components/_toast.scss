@@ -23,6 +23,7 @@
   --moo-toast-stack-peek: #{$moo-toast-stack-peek};
   --moo-toast-stack-scale-step: #{$moo-toast-stack-scale-step};
   --moo-toast-stack-min-scale: #{$moo-toast-stack-min-scale};
+  --moo-toast-stack-enter-y: #{$moo-toast-stack-enter-y};
 }
 
 // Without runtime indexes, the container remains readable Bootstrap flow.
@@ -47,8 +48,14 @@
   transform-origin: bottom center;
   z-index: var(--moo-toast-stack-z, 1);
   transition:
-    transform $moo-toast-stack-transition-duration ease,
-    opacity $moo-toast-stack-transition-duration ease;
+    transform $moo-toast-stack-transition-duration $moo-toast-stack-transition-timing-function,
+    opacity $moo-toast-stack-transition-duration ease,
+    height $moo-toast-stack-height-transition-duration ease;
+}
+
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-entering] {
+  transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
+    scale(var(--moo-toast-stack-scale, 1));
 }
 
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-limited] {
@@ -59,6 +66,12 @@
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-index],
 .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-index] {
   transform: translateY(var(--moo-toast-stack-expanded-y, 0px)) scale(1);
+}
+
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-entering],
+.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-entering] {
+  transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
+    scale(var(--moo-toast-stack-scale, 1));
 }
 
 @media (prefers-reduced-motion: reduce) {

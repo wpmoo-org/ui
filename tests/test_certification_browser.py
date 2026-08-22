@@ -773,7 +773,19 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         expect(deck.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
         expect(deck.locator('[data-toast-stack-index]')).to_have_count(0)
 
-        for _ in range(6):
+        trigger.click()
+        expect(generated).to_have_count(1)
+        entry_translate_y = generated.first.evaluate(
+            "element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42"
+        )
+        self.assertGreater(entry_translate_y, 20)
+        page.wait_for_timeout(650)
+        settled_translate_y = generated.first.evaluate(
+            "element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42"
+        )
+        self.assertAlmostEqual(settled_translate_y, 0, delta=1)
+
+        for _ in range(5):
             trigger.click()
 
         expect(generated).to_have_count(6)
