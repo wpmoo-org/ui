@@ -326,6 +326,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('class="visually-hidden" data-moo-copy-status role="status"', page)
         self.assertNotIn("data-moo-code-copy hidden", page)
         self.assertIn('class="moo-code scroll-fade-x no-scrollbar"', page)
+        self.assertIn('tabindex="0"', page)
 
         catalog_css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-doc-code-panel {", catalog_css)

@@ -448,6 +448,53 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("certified components", output)
                 self.assertNotIn("certified Data Table", output)
 
+    def test_codepen_payloads_do_not_claim_certified_components_before_certification(self) -> None:
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        claim_pattern = re.compile(r"\bcertified\b[^.]{0,160}\bcomponents?\b")
+        for path in sorted((ROOT / "site-dist").rglob("*.html")):
+            parser = CodePenPayloadParser()
+            parser.feed(path.read_text(encoding="utf-8"))
+            for index, payload in enumerate(parser.payloads):
+                for key in ("title", "description", "html", "css", "js"):
+                    text = " ".join(unescape(str(payload.get(key, ""))).lower().split())
+                    with self.subTest(
+                        page=path.relative_to(ROOT / "site-dist").as_posix(),
+                        payload=index,
+                        key=key,
+                    ):
+                        self.assertIsNone(claim_pattern.search(text))
+
+    def test_codepen_payloads_do_not_import_unpublished_pinned_package_entrypoints(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        codepen_version = site_build.CODEPEN_CDN_VERSION
+        published_rc2_js_entrypoints = {"datatable.js"}
+        import_pattern = re.compile(
+            rf"@wpmoo/ui@{re.escape(codepen_version)}/dist/js/(?P<entrypoint>[a-z.-]+\.js)"
+        )
+
+        for path in sorted((ROOT / "site-dist").rglob("*.html")):
+            parser = CodePenPayloadParser()
+            parser.feed(path.read_text(encoding="utf-8"))
+            for index, payload in enumerate(parser.payloads):
+                for match in import_pattern.finditer(str(payload.get("js", ""))):
+                    entrypoint = match.group("entrypoint")
+                    with self.subTest(
+                        page=path.relative_to(ROOT / "site-dist").as_posix(),
+                        payload=index,
+                        entrypoint=entrypoint,
+                    ):
+                        self.assertIn(entrypoint, published_rc2_js_entrypoints)
+
     def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
         certification = json.loads(
             (ROOT / "certification.json").read_text(encoding="utf-8")
@@ -1876,11 +1923,21 @@ class CatalogContractTests(CatalogTestCase):
         context_menu_export = package["exports"]["./context-menu.js"].removeprefix("./")
         datatable_export = package["exports"]["./datatable.js"].removeprefix("./")
         sidebar_export = package["exports"]["./sidebar.js"].removeprefix("./")
+        chart_export = package["exports"]["./chart.js"].removeprefix("./")
+        chart_min_export = package["exports"]["./chart.min.js"].removeprefix("./")
+        datepicker_export = package["exports"]["./datepicker.js"].removeprefix("./")
+        datepicker_min_export = package["exports"]["./datepicker.min.js"].removeprefix("./")
+        slider_export = package["exports"]["./slider.js"].removeprefix("./")
 
         self.assertIn(combobox_export, package["files"])
         self.assertIn(context_menu_export, package["files"])
         self.assertIn(datatable_export, package["files"])
         self.assertIn(sidebar_export, package["files"])
+        self.assertIn(chart_export, package["files"])
+        self.assertIn(chart_min_export, package["files"])
+        self.assertIn(datepicker_export, package["files"])
+        self.assertIn(datepicker_min_export, package["files"])
+        self.assertIn(slider_export, package["files"])
 
         self.assertIn(
             f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo-ui.css",
@@ -1905,6 +1962,9 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../components/context-menu/">Context Menu</a>', installation)
         self.assertIn('href="../components/datatable/">Data Table</a>', installation)
         self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
+        self.assertIn('href="../components/chart/">Chart</a>', installation)
+        self.assertIn('href="../components/datepicker/">Date Picker</a>', installation)
+        self.assertIn('href="../components/slider/">Slider</a>', installation)
         self.assertIn(
             'import Combobox from &quot;@wpmoo/ui/combobox.js&quot;',
             installation,
@@ -1919,6 +1979,18 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn(
             'import Sidebar from &quot;@wpmoo/ui/sidebar.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import Chart from &quot;@wpmoo/ui/chart.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import Datepicker from &quot;@wpmoo/ui/datepicker.js&quot;',
+            installation,
+        )
+        self.assertIn(
+            'import Slider from &quot;@wpmoo/ui/slider.js&quot;',
             installation,
         )
         self.assertIn(
@@ -1937,10 +2009,33 @@ class CatalogContractTests(CatalogTestCase):
             f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{sidebar_export}",
             installation,
         )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{chart_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{chart_min_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{datepicker_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{datepicker_min_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{slider_export}",
+            installation,
+        )
         self.assertIn("Combobox.getOrCreateInstance", installation)
         self.assertIn("ContextMenu.getOrCreateInstance", installation)
         self.assertIn("DataTable.getOrCreateInstance", installation)
         self.assertIn("Sidebar.getOrCreateInstance", installation)
+        self.assertIn("Chart.getOrCreateInstance", installation)
+        self.assertIn("Datepicker.getOrCreateInstance", installation)
+        self.assertIn("Slider.getOrCreateInstance", installation)
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)

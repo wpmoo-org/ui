@@ -827,6 +827,22 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         )
 
         newest = deck.locator('.toast.show[data-toast-stack-index="0"]')
+        page.wait_for_function(
+            """
+            () => {
+              const newest = document.querySelector(
+                '.toast-container--stacked[data-toast-stack="deck"] .toast.show[data-toast-stack-index="0"]'
+              );
+              if (!newest || newest.hasAttribute("data-toast-stack-entering")) {
+                return false;
+              }
+              const translateY = new DOMMatrixReadOnly(
+                getComputedStyle(newest).transform
+              ).m42;
+              return Math.abs(translateY) <= 1;
+            }
+            """
+        )
         newest_box = newest.bounding_box()
         self.assertIsNotNone(newest_box)
         client_width = page.evaluate("document.documentElement.clientWidth")
@@ -887,7 +903,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             ),
             ["0", "1", "2"],
         )
-        expect(page.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
+        expect(deck.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
 
         page.mouse.move(0, 0)
         expect(generated).to_have_count(0, timeout=7000)

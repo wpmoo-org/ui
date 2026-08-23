@@ -454,7 +454,7 @@ class ButtonTests(CatalogTestCase):
 
         self.assertIn('data-bs-dismiss="toast"', output)
 
-    def test_button_toast_target_renders_moo_data_hook(self) -> None:
+    def test_button_toast_target_renders_toast_data_hook(self) -> None:
         output = self.render_button(
             'button("Show toast", toast_target="toast-basic")'
         )

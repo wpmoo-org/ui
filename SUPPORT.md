@@ -4,9 +4,10 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI is currently in the `0.x` development series. Production certification
-is being introduced incrementally; a component's presence in the catalog does
-not by itself mean that it has completed certification.
+Moo UI is currently in the `1.0.0-rc.3` release-candidate certification phase.
+Production certification is being introduced incrementally; a component's
+presence in the catalog does not by itself mean that it has completed
+certification.
 
 ## Supported Public Surfaces
 

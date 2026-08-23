@@ -1,6 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "blocks/dashboard_overview.html.jinja" import render_dashboard_overview %}
-{% from "includes/codepen.html.jinja" import codepen_button, dashboard_codepen_css, dashboard_codepen_js with context %}
 {% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
@@ -40,15 +39,5 @@
 {% endmacro %}
 
 {% block footer %}
-  {% set page_markup %}{{ dashboard_body() }}{{ dashboard_footer() }}{% endset %}
-  {{ dashboard_footer(codepen_action=codepen_button(
-    "Moo UI — Dashboard Overview",
-    "A live dashboard screen with stat cards and Chart.js charts built from Moo UI's Card and Button components.",
-    page_markup,
-    dashboard_codepen_css(),
-    ["moo-ui", "bootstrap", "dashboard", "chart.js", "css"],
-    js=dashboard_codepen_js(),
-    js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
-    editors="111"
-  )) }}
+  {{ dashboard_footer() }}
 {% endblock %}

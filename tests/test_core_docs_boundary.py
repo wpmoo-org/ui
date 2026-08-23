@@ -378,6 +378,17 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(ROOT).as_posix()):
                 source = path.read_text(encoding="utf-8")
                 self.assertIn("site/static/images/", source)
+
+    def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        self.assertEqual(package["version"], "1.0.0-rc.3")
+
+        for relative in ("SUPPORT.md", "SECURITY.md"):
+            with self.subTest(relative=relative):
+                source = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn("1.0.0-rc.3", source)
+                self.assertNotIn("currently in the `0.x` development series", source)
+                self.assertNotIn("current `0.x` release line", source)
                 self.assertNotIn(
                     "static/images/",
                     source.replace("site/static/images/", ""),

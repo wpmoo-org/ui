@@ -1,6 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
-{% from "components/toast.html.jinja" import toast_container, toast_template %}
+{% from "components/toast.html.jinja" import toast, toast_container, toast_template %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/example.html.jinja" import render_component_intro, render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
@@ -36,7 +36,7 @@
 
     {% set basic %}
       {{ button("Show Toast", variant="outline", toast_target="toast-basic-template") }}
-      {% call toast_container(placement="bottom-end", stacked=true) %}
+      {% call toast_container(placement="bottom-end") %}
         {{ toast_template(
           "toast-basic-template",
           "Event created",
@@ -45,13 +45,11 @@
       {% endcall %}
     {% endset %}
     {% set basic_source %}
-      <div class="toast" role="status" aria-live="polite" aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto">Event created</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">Sunday, December 3 at 9:00 AM</div>
-      </div>
+      {{ toast(
+        "toast-basic",
+        "Event created",
+        "Sunday, December 3 at 9:00 AM"
+      ) }}
     {% endset %}
     {{ render_example(
       "basic",
@@ -70,7 +68,7 @@
         {{ button("Destructive", variant="outline", toast_target="toast-variant-destructive-template") }}
         {{ button("Loading", variant="outline", toast_target="toast-variant-loading-template") }}
       </div>
-      {% call toast_container(placement="bottom-end", stacked=true) %}
+      {% call toast_container(placement="bottom-end") %}
         {{ toast_template(
           "toast-variant-success-template",
           "Event created",
@@ -105,60 +103,37 @@
       {% endcall %}
     {% endset %}
     {% set variants_source %}
-      <div class="toast" data-toast-variant="success" role="status" aria-live="polite" aria-atomic="true">
-        <div class="toast-header">
-          <span class="toast-status-icon" aria-hidden="true">
-            <i class="lucide lucide-circle-check" data-icon="inline-start" aria-hidden="true"></i>
-          </span>
-          <strong class="me-auto">Event created</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">The event was added to your calendar.</div>
-      </div>
-
-      <div class="toast" data-toast-variant="info" role="status" aria-live="polite" aria-atomic="true">
-        <div class="toast-header">
-          <span class="toast-status-icon" aria-hidden="true">
-            <i class="lucide lucide-info" data-icon="inline-start" aria-hidden="true"></i>
-          </span>
-          <strong class="me-auto">Heads up</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">Invitees will receive an email confirmation.</div>
-      </div>
-
-      <div class="toast" data-toast-variant="warning" role="status" aria-live="polite" aria-atomic="true">
-        <div class="toast-header">
-          <span class="toast-status-icon" aria-hidden="true">
-            <i class="lucide lucide-triangle-alert" data-icon="inline-start" aria-hidden="true"></i>
-          </span>
-          <strong class="me-auto">Check availability</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">Two invitees have a scheduling conflict.</div>
-      </div>
-
-      <div class="toast" data-toast-variant="destructive" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <span class="toast-status-icon" aria-hidden="true">
-            <i class="lucide lucide-circle-alert" data-icon="inline-start" aria-hidden="true"></i>
-          </span>
-          <strong class="me-auto">Event not created</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">The calendar service could not be reached.</div>
-      </div>
-
-      <div class="toast" data-toast-variant="loading" role="status" aria-live="polite" aria-atomic="true">
-        <div class="toast-header">
-          <span class="toast-status-icon" aria-hidden="true">
-            <i class="lucide lucide-loader-circle" data-icon="inline-start" aria-hidden="true"></i>
-          </span>
-          <strong class="me-auto">Syncing calendar</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">This can take a moment.</div>
-      </div>
+      {{ toast(
+        "toast-variant-success",
+        "Event created",
+        "The event was added to your calendar.",
+        variant="success"
+      ) }}
+      {{ toast(
+        "toast-variant-info",
+        "Heads up",
+        "Invitees will receive an email confirmation.",
+        variant="info"
+      ) }}
+      {{ toast(
+        "toast-variant-warning",
+        "Check availability",
+        "Two invitees have a scheduling conflict.",
+        variant="warning"
+      ) }}
+      {{ toast(
+        "toast-variant-destructive",
+        "Event not created",
+        "The calendar service could not be reached.",
+        priority="assertive",
+        variant="destructive"
+      ) }}
+      {{ toast(
+        "toast-variant-loading",
+        "Syncing calendar",
+        "This can take a moment.",
+        variant="loading"
+      ) }}
     {% endset %}
     {{ render_example(
       "variants",

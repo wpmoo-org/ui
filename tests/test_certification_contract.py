@@ -88,6 +88,24 @@ class CertificationContractTests(unittest.TestCase):
             "Active RC.3 plan docs must match the current public component contracts.",
         )
 
+    def test_toast_public_wiring_hooks_are_recorded_in_component_contract(self) -> None:
+        if not PROJECT_DOCS_ROOT.is_dir():
+            self.skipTest("UI project docs are not mounted in this checkout")
+
+        source = (PROJECT_DOCS_ROOT / "contracts/COMPONENTS.md").read_text(
+            encoding="utf-8"
+        )
+        toast_section = source.split("## Toast Contract", 1)[1].split("\n## ", 1)[0]
+
+        for hook in (
+            "data-toast-target",
+            'data-toast-template="toast"',
+            "data-toast-variant",
+            "data-toast-stack",
+        ):
+            with self.subTest(hook=hook):
+                self.assertIn(hook, toast_section)
+
     def test_evidence_inventory_matches_the_live_component_registry(self) -> None:
         inventory = self._read_json("src/certification/evidence-inventory.json")
         registry = self._read_json("src/registry/components.json")
@@ -689,9 +707,8 @@ class CertificationContractTests(unittest.TestCase):
         )
 
     def test_rc3_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.3 freeze document structure and metadata.
-        Exact equality for package exports/files is deferred to Phase 6,
-        when the bundled outputs are present in the package."""
+        """Validate the 1.0.0-rc.3 freeze document structure, metadata,
+        and exact package export/file equality against package.json."""
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.3.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
@@ -811,6 +828,12 @@ class CertificationContractTests(unittest.TestCase):
                 "outputAttribute": "data-slider-output",
             },
         )
+
+    def test_rc3_freeze_test_docstring_matches_enforced_equality(self) -> None:
+        docstring = self.test_rc3_api_freeze_declaration_is_well_formed.__doc__ or ""
+
+        self.assertIn("exact package export/file equality", docstring)
+        self.assertNotIn("deferred", docstring)
 
 
 if __name__ == "__main__":
