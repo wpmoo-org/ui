@@ -15,6 +15,7 @@ CATALOG_INDEX = ROOT / "site/src/js/catalog/index.js"
 FIXTURE = ROOT / "tests/fixtures/certification/chart.html"
 CHART_MACRO = ROOT / "src/components/chart.html.jinja"
 PAGE = ROOT / "site/src/pages/components/chart.html.jinja"
+CHARTS_PAGE = ROOT / "site/src/pages/charts.html.jinja"
 PUBLIC_CHART_TYPES = (
     "area",
     "line",
@@ -333,7 +334,7 @@ report("family-defaults", {{ reportByType }});
                 self.assertEqual(report_by_type[chart_type]["mode"], "nearest")
                 self.assertTrue(report_by_type[chart_type]["intersect"])
 
-    def test_line_points_use_series_colored_halos_in_light_mode(self) -> None:
+    def test_line_points_use_series_colors_in_light_mode(self) -> None:
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
@@ -359,7 +360,7 @@ window.getComputedStyle = (element) => {{
 }};
 const instance = MooChart.getOrCreateInstance(root);
 const dataset = instance.chart.data.datasets[0];
-report("line-point-halo", {{
+report("line-point-colors", {{
   borderColor: dataset.borderColor,
   pointBackgroundColor: dataset.pointBackgroundColor,
   pointBorderColor: dataset.pointBorderColor,
@@ -505,6 +506,74 @@ report("options-merge", {{
         self.assertTrue(case["xStacked"])
         self.assertTrue(case["yStacked"])
         self.assertFalse(case["legendDisplay"])
+
+    def test_legend_point_markers_are_compact_circles(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "area",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+}});
+const instance = MooChart.getOrCreateInstance(root);
+const labels = instance.chart.options.plugins.legend.labels;
+report("legend-point-markers", {{
+  usePointStyle: labels.usePointStyle,
+  pointStyle: labels.pointStyle ?? null,
+  boxWidth: labels.boxWidth ?? null,
+  boxHeight: labels.boxHeight ?? null,
+  pointStyleWidth: labels.pointStyleWidth ?? null,
+}});
+"""
+        )
+        self.assertTrue(case["usePointStyle"])
+        self.assertEqual(case["pointStyle"], "circle")
+        self.assertEqual(case["boxWidth"], 6)
+        self.assertEqual(case["boxHeight"], 6)
+        self.assertIsNone(case["pointStyleWidth"])
+
+    def test_point_hover_markers_stay_readable_without_oversizing_legend(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const dataByType = {{
+  area: {VALID_DATA},
+  line: {VALID_DATA},
+  radar: {{ labels: ["Speed", "Quality"], datasets: [{{ label: "Score", data: [7, 9] }}] }},
+  scatter: {{ labels: [], datasets: [{{ label: "Leads", data: [{{ x: 1, y: 4 }}, {{ x: 2, y: 8 }}] }}] }},
+}};
+const reportByType = {{}};
+for (const publicType of Object.keys(dataByType)) {{
+  const root = makeRoot({{
+    "data-chart": publicType,
+    "data-chart-data": JSON.stringify(dataByType[publicType]),
+  }});
+  const instance = MooChart.getOrCreateInstance(root);
+  const dataset = instance.chart.data.datasets[0];
+  const labels = instance.chart.options.plugins.legend.labels;
+  reportByType[publicType] = {{
+    markerSize: labels.boxWidth,
+    pointRadius: dataset.pointRadius ?? null,
+    pointHoverRadius: dataset.pointHoverRadius ?? null,
+    pointHoverBorderWidth: dataset.pointHoverBorderWidth ?? null,
+  }};
+  instance.dispose();
+}}
+report("line-area-hover-points", {{ reportByType }});
+"""
+        )
+        report_by_type = case["reportByType"]
+        self.assertEqual(report_by_type["area"]["pointRadius"], 0)
+        for chart_type in ("area", "line", "radar", "scatter"):
+            with self.subTest(chart_type=chart_type):
+                report = report_by_type[chart_type]
+                self.assertEqual(report["markerSize"], 6)
+                self.assertEqual(report["pointHoverRadius"] * 2, 10)
+                self.assertEqual(report["pointHoverBorderWidth"], 0)
+        for chart_type in ("line", "radar", "scatter"):
+            with self.subTest(chart_type=chart_type):
+                self.assertEqual(
+                    report_by_type[chart_type]["pointRadius"] * 2,
+                    report_by_type[chart_type]["markerSize"],
+                )
 
     def test_data_chart_options_are_safe_json_pass_through_with_config_precedence(
         self,
@@ -1011,7 +1080,7 @@ report("stateful-lifecycle-button", {{
     def test_lifecycle_preview_surface_is_the_theme_scope(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_output("components/chart.html")
+        page = self.read_output("charts.html")
         lifecycle = page.split('data-example="chart-lifecycle"', 1)[1].split(
             'data-moo-code-panel',
             1,
@@ -1027,7 +1096,7 @@ report("stateful-lifecycle-button", {{
     def test_lifecycle_controls_are_centered_in_preview(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_output("components/chart.html")
+        page = self.read_output("charts.html")
         lifecycle = page.split('data-chart-live', 1)[1].split(
             'id="chart-lifecycle-example"',
             1,
@@ -1043,7 +1112,7 @@ report("stateful-lifecycle-button", {{
     def test_lifecycle_status_is_accessible_without_a_visible_badge(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
-        page = self.read_output("components/chart.html")
+        page = self.read_output("charts.html")
         lifecycle = page.split('data-chart-live', 1)[1].split(
             'id="chart-lifecycle-example"',
             1,
@@ -1165,6 +1234,66 @@ report("stateful-lifecycle-button", {{
         self.assertIn("data-chart", source)
         self.assertIn("data-chart-data", source)
         self.assertIn("data-chart-options", source)
+        self.assertIn('href="../../charts/"', source)
+        self.assertIn("View chart examples", source)
+        for chart_type in PUBLIC_CHART_TYPES:
+            with self.subTest(chart_type=chart_type):
+                self.assertIn(chart_type, source)
+        self.assertRegex(
+            source,
+            r'class="moo-chart w-100"\s+id="chart-area-default"',
+        )
+        for gallery_id in (
+            "chart-area-step",
+            "chart-area-stacked",
+            "chart-bar-default",
+            "chart-bar-horizontal",
+            "chart-bar-multiple",
+            "chart-bar-stacked",
+            "chart-bar-negative",
+            "chart-line-default",
+            "chart-line-plain",
+            "chart-line-step",
+            "chart-line-multiple",
+            "chart-pie-default",
+            "chart-doughnut-default",
+            "chart-doughnut-ring",
+            "chart-radar-default",
+            "chart-radar-multiple",
+            "chart-polar-area",
+            "chart-radial-progress",
+            "chart-scatter-default",
+            "chart-bubble-default",
+            "chart-tooltip-index",
+            "chart-tooltip-nearest",
+            "chart-lifecycle",
+            "chart-lifecycle-example",
+        ):
+            self.assertNotIn(gallery_id, source)
+        self.assertIn('role="img"', source)
+        self.assertIn("aria-label", source)
+        for topic in (
+            "<code>line</code>",
+            "<code>bar</code>",
+            "theme",
+            "dispose",
+            "resize",
+            "aria-label",
+            "mobile",
+        ):
+            self.assertIn(topic, source)
+        self.assertNotIn("window.Chart", source)
+        self.assertNotIn("Recharts", source)
+
+    def test_charts_page_contains_the_live_gallery(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(CHARTS_PAGE.is_file(), "Charts gallery page is not implemented")
+        source = self.read_output("charts.html")
+
+        self.assertIn(">Charts<", source)
+        self.assertIn("Chart.js documentation", source)
+        self.assertIn('href="../components/chart/"', source)
         for chart_type in PUBLIC_CHART_TYPES:
             with self.subTest(chart_type=chart_type):
                 self.assertIn(f'data-chart="{chart_type}"', source)
@@ -1198,25 +1327,11 @@ report("stateful-lifecycle-button", {{
                 source,
                 rf'class="moo-chart w-100"\s+id="{chart_id}"',
             )
-        self.assertIn("chart-tooltip-index", source)
-        self.assertIn('role="img"', source)
-        self.assertIn("aria-label", source)
         self.assertRegex(
             source,
             r'class="[^"]*\bd-grid\b[^"]*\bgap-3\b[^"]*\bw-100\b[^"]*"\s+data-chart-live',
         )
-        for topic in (
-            '"line"',
-            '"bar"',
-            "theme",
-            "data-chart-live",
-            "data-chart-lifecycle",
-            "dispose",
-            "resize",
-            "aria-label",
-            "mobile",
-        ):
-            self.assertIn(topic, source)
+        self.assertIn("data-chart-lifecycle", source)
         self.assertNotIn("window.Chart", source)
         self.assertNotIn("Recharts", source)
 

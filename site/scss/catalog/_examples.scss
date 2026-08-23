@@ -83,6 +83,7 @@
 }
 
 .moo-component-examples {
+  min-width: 0;
   margin-top: 4rem;
 }
 
@@ -105,6 +106,12 @@
 .moo-example__header {
   max-width: 44rem;
   margin-bottom: 1rem;
+}
+
+.moo-example__header--in-surface {
+  max-width: none;
+  margin-bottom: 0;
+  padding: 1rem 1rem 0;
 }
 
 .moo-example__header h2 {
@@ -243,6 +250,168 @@
 .moo-example__preview--fit>* {
   width: auto;
   max-width: 100%;
+}
+
+.moo-chart-template-nav {
+  --moo-chart-template-nav-fade-size: 1.75rem;
+  --moo-chart-template-nav-overlap-size: 0.5rem;
+  --moo-chart-template-nav-solid-size: 1.25rem;
+
+  position: sticky;
+  z-index: 15;
+  top: 0.75rem;
+  min-width: 0;
+  isolation: isolate;
+}
+
+.moo-chart-template-nav::before,
+.moo-chart-template-nav::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 0;
+  height: calc(
+    var(--moo-chart-template-nav-fade-size) +
+    var(--moo-chart-template-nav-solid-size) +
+    var(--moo-chart-template-nav-overlap-size)
+  );
+  pointer-events: none;
+  content: "";
+}
+
+.moo-chart-template-nav::before {
+  bottom: calc(100% - var(--moo-chart-template-nav-overlap-size));
+  background: linear-gradient(
+    to top,
+    var(--bs-body-bg) 0,
+    var(--bs-body-bg) calc(
+      var(--moo-chart-template-nav-overlap-size) +
+      var(--moo-chart-template-nav-solid-size)
+    ),
+    rgba(var(--bs-body-bg-rgb), 0) 100%
+  );
+}
+
+.moo-chart-template-nav::after {
+  top: calc(100% - var(--moo-chart-template-nav-overlap-size));
+  background: linear-gradient(
+    to bottom,
+    var(--bs-body-bg) 0,
+    var(--bs-body-bg) calc(
+      var(--moo-chart-template-nav-overlap-size) +
+      var(--moo-chart-template-nav-solid-size)
+    ),
+    rgba(var(--bs-body-bg-rgb), 0) 100%
+  );
+}
+
+.moo-chart-template-nav__list {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 0.375rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  box-shadow: 0 0.25rem 1rem rgba(var(--bs-body-color-rgb), 0.04);
+}
+
+.moo-chart-template-nav__list .nav-link {
+  flex: 0 0 auto;
+  padding: 0.375rem 0.75rem;
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.moo-chart-template-nav__list .nav-link:hover,
+.moo-chart-template-nav__list .nav-link:focus-visible {
+  color: var(--bs-body-color);
+}
+
+.moo-chart-template-nav__list.nav-pills .nav-link.active {
+  color: var(--bs-body-color);
+  background-color: var(--bs-tertiary-bg);
+}
+
+.moo-chart-example {
+  min-width: 0;
+}
+
+.moo-chart-example .moo-example__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  margin-bottom: 0.5rem;
+}
+
+.moo-chart-example .moo-example__label,
+.moo-chart-example .moo-example__actions,
+.moo-chart-example__actions {
+  display: inline-flex;
+  align-items: center;
+}
+
+.moo-chart-example .moo-example__label {
+  gap: 0.375rem;
+  min-width: 0;
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  line-height: $line-height-sm;
+}
+
+.moo-chart-example .moo-example__label [data-icon] {
+  width: $font-size-sm;
+  height: $font-size-sm;
+}
+
+.moo-chart-example .moo-example__actions {
+  min-width: 0;
+  margin-inline-start: auto;
+}
+
+.moo-chart-example__actions {
+  gap: 0.375rem;
+  margin-inline-start: auto;
+}
+
+.moo-chart-example__actions [data-moo-code-copy-target] {
+  color: var(--bs-body-color);
+}
+
+.moo-chart-example__actions [data-moo-code-copy-target] [data-moo-copy-icon]:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moo-chart-example__actions [data-moo-code-copy-target] [data-icon] {
+  width: $font-size-sm;
+  height: $font-size-sm;
+}
+
+.moo-chart-example__codepen {
+  display: inline-flex;
+  margin: 0;
+}
+
+.moo-chart-example__codepen .btn {
+  white-space: nowrap;
+}
+
+.moo-chart-example__surface {
+  min-width: 0;
+}
+
+.moo-chart-example__preview {
+  min-width: 0;
+}
+
+.moo-chart-example__preview > .moo-chart {
+  min-width: 0;
 }
 
 .moo-example__preview--shell {

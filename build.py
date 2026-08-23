@@ -660,6 +660,14 @@ def build_site_pages(
     if blocks_page:
         pages.append(blocks_page)
     pages.extend(child_pages(blocks, "blocks", "block"))
+    pages.append(
+        {
+            "slug": "charts",
+            "label": "Charts",
+            "href": "charts/index.html",
+            "kind": "doc",
+        }
+    )
     pages.extend(child_pages(utilities, "utils", "utility"))
 
     for section in sections:

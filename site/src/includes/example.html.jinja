@@ -1,7 +1,23 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "components/tabs.html.jinja" import tabs %}
 
-{% macro render_example(id, title, description, content, preview_class="", show_header=true, portal_content="", source_content="") %}
+{% macro render_example(
+  id,
+  title,
+  description,
+  content,
+  preview_class="",
+  show_header=true,
+  portal_content="",
+  source_content="",
+  extra_class="",
+  surface_class="",
+  toolbar_label="",
+  toolbar_icon="",
+  toolbar_action="",
+  header_inside_surface=false,
+  source_class=""
+) %}
   {% set rendered = content | dedent_html %}
   {% set rendered_portal = portal_content | dedent_html %}
   {% if source_content %}
@@ -10,18 +26,37 @@
     {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
   {% endif %}
   {% set title_slug = title | slugify %}
-  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
-    {% if show_header %}
+  <section class="moo-example{% if extra_class %} {{ extra_class }}{% endif %}" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
+    {% if toolbar_label or toolbar_action %}
+      <div class="moo-example__toolbar">
+        {% if toolbar_label %}
+          <span class="moo-example__label">
+            {% if toolbar_icon %}{{ render_icon(toolbar_icon, "inline-start") }}{% endif %}
+            {{ toolbar_label }}
+          </span>
+        {% endif %}
+        {% if toolbar_action %}
+          <div class="moo-example__actions">{{ toolbar_action | safe }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+    {% if show_header and not header_inside_surface %}
       <div class="moo-example__header">
         {{ typography(title, variant="example-title", id=title_slug) }}
         <p class="text-body-secondary mb-0">{{ description | safe }}</p>
       </div>
     {% endif %}
-    <div class="moo-example__surface">
+    <div class="moo-example__surface{% if surface_class %} {{ surface_class }}{% endif %}">
+      {% if show_header and header_inside_surface %}
+        <div class="moo-example__header moo-example__header--in-surface">
+          {{ typography(title, variant="example-title", id=title_slug) }}
+          <p class="text-body-secondary mb-0">{{ description | safe }}</p>
+        </div>
+      {% endif %}
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {{ rendered | safe }}
       </div>
-      <div class="moo-example__source" data-moo-code-panel data-expanded="false">
+      <div class="moo-example__source{% if source_class %} {{ source_class }}{% endif %}" data-moo-code-panel data-expanded="false">
         <pre class="moo-code scroll-fade-x no-scrollbar" id="{{ id }}-code" tabindex="0"><span class="moo-code__lines" aria-hidden="true"></span><code class="language-html">{{ source | highlight_html }}</code></pre>
         <div class="moo-code__reveal">
           <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-code-toggle aria-expanded="false" aria-controls="{{ id }}-code">

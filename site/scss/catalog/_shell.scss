@@ -11,6 +11,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html:has(.moo-catalog),
+body:has(.moo-catalog) {
+  height: 100%;
+  overflow: hidden;
+}
+
 // Catalog-chrome-only display typeface. The Moo UI product itself
 // (moo-ui.scss) stays on Bootstrap's system-ui default; see the
 // $moo-catalog-font-family knob in _settings.scss for the single

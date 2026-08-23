@@ -1,0 +1,60 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "includes/chart-template.html.jinja" import render_chart_gallery, render_chart_gallery_nav with context %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block title %}Charts — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Charts",
+        "Live Chart.js examples themed from Bootstrap tokens and rendered through the public Moo UI Chart contract.",
+        id="charts",
+        actions=render_section_page_actions("charts", site_pages, root_path)
+      ) }}
+
+      <p class="text-body-secondary mb-4">
+        Use these examples when you want to see what the Chart component can produce.
+        For the public HTML, macro, accessibility, and JavaScript contract, start with
+        the <a href="{{ site_href("components/chart.html", root_path) }}">Chart component documentation</a>.
+      </p>
+
+      {{ render_chart_gallery_nav() }}
+
+      <div class="moo-component-examples">
+        {{ render_chart_gallery() }}
+      </div>
+
+      {{ render_reference(
+        "Rendering and the chart API build on Chart.js; see the",
+        "https://www.chartjs.org/docs/latest/",
+        "Chart.js documentation",
+        extra_references=[
+          {
+            "lead": "For the color tokens the palette reads, see the",
+            "href": "https://getbootstrap.com/docs/5.3/customize/css-variables/",
+            "label": "Bootstrap CSS variables documentation"
+          }
+        ]
+      ) }}
+
+      {{ render_section_page_pagination("charts", site_pages, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "charts", "label": "Charts"},
+      {"id": "chart-area", "label": "Area Charts"},
+      {"id": "chart-bar", "label": "Bar Charts"},
+      {"id": "chart-line", "label": "Line Charts"},
+      {"id": "chart-pie", "label": "Pie Charts"},
+      {"id": "chart-radar", "label": "Radar Charts"},
+      {"id": "chart-radial", "label": "Radial Charts"},
+      {"id": "chart-tooltip", "label": "Tooltip"},
+      {"id": "chart-lifecycle", "label": "Theme and lifecycle"}
+    ]) }}
+  </div>
+{% endblock %}

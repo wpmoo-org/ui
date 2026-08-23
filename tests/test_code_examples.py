@@ -16,9 +16,9 @@ class CodeExampleTests(CatalogTestCase):
             template.index("{% macro render_component_intro(")
         ]
 
-        self.assertEqual(render_example_block.count('class="moo-example__surface"'), 1)
+        self.assertEqual(render_example_block.count('class="moo-example__surface'), 1)
         self.assertEqual(render_example_block.count('class="moo-example__preview'), 1)
-        self.assertEqual(render_example_block.count('class="moo-example__source"'), 1)
+        self.assertEqual(render_example_block.count('class="moo-example__source'), 1)
         self.assertIn("data-moo-code-panel", render_example_block)
         self.assertIn("data-moo-code-toggle", render_example_block)
         self.assertIn('aria-expanded="false"', render_example_block)
@@ -280,8 +280,8 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("navigator.clipboard.writeText(code.textContent)", script)
         self.assertIn('copyStatus.textContent = "Copied";', script)
         self.assertIn('copyStatus.textContent = "Copy failed";', script)
-        self.assertIn("setCopyState(true);", script)
-        self.assertIn("setCopyState(false);", script)
+        self.assertIn("setCopyButtonState(copyButton, true);", script)
+        self.assertIn("setCopyButtonState(copyButton, false);", script)
         self.assertIn('copyButton.dataset.mooCopied = copied ? "true" : "false";', script)
         self.assertIn("renderCodeLineNumbers", script)
         self.assertIn('panel.querySelector(".moo-code__lines")', script)

@@ -19,6 +19,7 @@
 {% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "components", "blocks"]) | list %}
 {% set components_open = current_section == "components" %}
 {% set examples_open = current_section == "examples" %}
+{% set charts_active = current_section == "sections" and current_slug == "charts" %}
 {% set home_active = current_section == "sections" and current_slug == "index" %}
 
 {% set component_children = [{
@@ -37,8 +38,10 @@
 {% endfor %}
 
 {% set catalog_items = [
+  {"kind": "link", "label": "Examples", "href": "examples/index.html", "icon": "list-todo", "active": examples_open},
   {"kind": "submenu", "id": "shell-components-menu", "label": "Components", "icon": "component", "open": components_open, "active": components_open, "children": component_children},
-  {"kind": "link", "label": blocks_page.label, "href": blocks_page.href, "icon": blocks_page.icon, "active": current_section == "blocks"}
+  {"kind": "link", "label": blocks_page.label, "href": blocks_page.href, "icon": blocks_page.icon, "active": current_section == "blocks"},
+  {"kind": "link", "label": "Charts", "href": "charts/index.html", "icon": "chart-area", "active": charts_active}
 ] %}
 {#- One utility ships today; the entry links straight to it and keeps the
     Catalog group's Utilities slot for later growth. #}
@@ -63,16 +66,13 @@
   }) %}
 {% endfor %}
 
-{% set examples_entry = {"kind": "link", "label": "Examples", "href": "examples/index.html", "icon": "list-todo", "active": examples_open} %}
-
 {% set nav_groups = [
   {
     "label": "Getting Started",
     "entries": [
       {"kind": "link", "label": "Home", "href": "index.html", "icon": "house", "active": home_active},
       {"kind": "link", "label": introduction.label, "href": introduction.href, "icon": introduction.icon, "active": current_section == "sections" and current_slug == introduction.slug},
-      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug},
-      examples_entry
+      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug}
     ]
   },
   {"label": "Catalog", "entries": catalog_items},

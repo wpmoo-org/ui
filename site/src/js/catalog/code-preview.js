@@ -22,6 +22,20 @@ export function initCodePreview(root = document) {
     timers.add(timer);
     return timer;
   };
+  const setCopyButtonState = (copyButton, copied) => {
+    if (!copyButton) {
+      return;
+    }
+    const copyIcon = copyButton.querySelector('[data-moo-copy-icon="copy"]');
+    const checkIcon = copyButton.querySelector('[data-moo-copy-icon="check"]');
+    if (copyIcon && checkIcon) {
+      copyIcon.hidden = copied;
+      checkIcon.hidden = !copied;
+    }
+    copyButton.dataset.mooCopied = copied ? "true" : "false";
+    copyButton.setAttribute("aria-label", copied ? "Copied" : "Copy code");
+    copyButton.setAttribute("title", copied ? "Copied" : "Copy code");
+  };
 
   root.querySelectorAll("[data-moo-copy-page]").forEach((trigger) => {
     listen(trigger, "click", async () => {
@@ -43,6 +57,53 @@ export function initCodePreview(root = document) {
         delay(() => {
           label.textContent = previous;
         }, 1600);
+      }
+    });
+  });
+  root.querySelectorAll("[data-moo-code-copy-target]").forEach((trigger) => {
+    const targetSelector = trigger.getAttribute("data-moo-code-copy-target");
+    const copyStatus = trigger
+      .closest("[data-moo-code-copy-scope]")
+      ?.querySelector("[data-moo-copy-status]");
+    let copyResetTimer = null;
+    listen(trigger, "click", async () => {
+      const target = targetSelector ? root.querySelector(targetSelector) : null;
+      const code = target?.matches?.("code") ? target : target?.querySelector?.("code");
+      if (!code) {
+        if (copyStatus) {
+          copyStatus.textContent = "Copy failed";
+          delay(() => {
+            copyStatus.textContent = "";
+          }, 2000);
+        }
+        setCopyButtonState(trigger, false);
+        return;
+      }
+      try {
+        await view.navigator.clipboard.writeText(code.textContent);
+        if (copyStatus) {
+          copyStatus.textContent = "Copied";
+        }
+        setCopyButtonState(trigger, true);
+        if (copyResetTimer) {
+          view.clearTimeout(copyResetTimer);
+          timers.delete(copyResetTimer);
+        }
+        copyResetTimer = delay(() => {
+          if (copyStatus) {
+            copyStatus.textContent = "";
+          }
+          setCopyButtonState(trigger, false);
+          copyResetTimer = null;
+        }, 1600);
+      } catch (_) {
+        if (copyStatus) {
+          copyStatus.textContent = "Copy failed";
+          delay(() => {
+            copyStatus.textContent = "";
+          }, 2000);
+        }
+        setCopyButtonState(trigger, false);
       }
     });
   });
@@ -117,20 +178,9 @@ export function initCodePreview(root = document) {
     const toggle = panel.querySelector("[data-moo-code-toggle]");
     const copyButton = panel.querySelector("[data-moo-code-copy]");
     const copyStatus = panel.querySelector("[data-moo-copy-status]");
-    const copyIcon = copyButton?.querySelector('[data-moo-copy-icon="copy"]');
-    const checkIcon = copyButton?.querySelector('[data-moo-copy-icon="check"]');
     const scroller = panel.querySelector(".moo-code");
     const code = panel.querySelector("code");
     let copyResetTimer = null;
-    const setCopyState = (copied) => {
-      if (copyIcon && checkIcon) {
-        copyIcon.hidden = copied;
-        checkIcon.hidden = !copied;
-      }
-      copyButton.dataset.mooCopied = copied ? "true" : "false";
-      copyButton.setAttribute("aria-label", copied ? "Copied" : "Copy code");
-      copyButton.setAttribute("title", copied ? "Copied" : "Copy code");
-    };
     renderCodeLineNumbers(panel);
     listen(toggle, "click", () => {
       panel.dataset.expanded = "true";
@@ -145,19 +195,19 @@ export function initCodePreview(root = document) {
       try {
         await view.navigator.clipboard.writeText(code.textContent);
         copyStatus.textContent = "Copied";
-        setCopyState(true);
+        setCopyButtonState(copyButton, true);
         if (copyResetTimer) {
           view.clearTimeout(copyResetTimer);
           timers.delete(copyResetTimer);
         }
         copyResetTimer = delay(() => {
           copyStatus.textContent = "";
-          setCopyState(false);
+          setCopyButtonState(copyButton, false);
           copyResetTimer = null;
         }, 1600);
       } catch (_) {
         copyStatus.textContent = "Copy failed";
-        setCopyState(false);
+        setCopyButtonState(copyButton, false);
         delay(() => {
           copyStatus.textContent = "";
         }, 2000);

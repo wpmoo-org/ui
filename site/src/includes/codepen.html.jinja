@@ -538,27 +538,28 @@ body {
    the published dist/js/chart.js already bundles Chart.js and exposes
    MooChart as its default export. #}
 {% macro dashboard_codepen_js() -%}
-function initializeMooDashboardCharts(MooChart) {
-  document.querySelectorAll(".moo-chart").forEach((element) => {
-    MooChart.getOrCreateInstance(element);
-  });
+// This pen includes the copyable dashboard markup and CSS. The Moo Chart
+// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
+// package is published to npm; do not import chart.js from the older pinned
+// CodePen CDN package.
+{%- endmacro %}
+
+{% macro chart_codepen_css() -%}
+body {
+  padding: 2rem;
 }
 
-function startMooDashboardCharts() {
-  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
-    .then((module) => {
-      initializeMooDashboardCharts(module.default);
-    })
-    .catch((error) => {
-      console.error("Moo UI Chart failed to load for this CodePen example.", error);
-    });
+.moo-chart {
+  max-width: 42rem;
+  margin-inline: auto;
 }
+{%- endmacro %}
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startMooDashboardCharts, { once: true });
-} else {
-  startMooDashboardCharts();
-}
+{% macro chart_codepen_js() -%}
+// This pen includes the copyable Moo Chart markup and CSS. The Moo Chart
+// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
+// package is published to npm; do not import chart.js from the older pinned
+// CodePen CDN package.
 {%- endmacro %}
 
 {#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
@@ -580,7 +581,7 @@ if (document.readyState === "loading") {
    clean `html` for the payload below, before this button exists), once
    with this macro's own output passed back in (for the page actually
    shown to a visitor) -- see any Examples page for the pattern. #}
-{% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110") -%}
+{% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110", label="Open in CodePen", icon="code", extra_class="") -%}
   {% set uses_popover = 'data-bs-toggle="popover"' in html %}
   {% set resolved_js_external = js_external %}
   {% if uses_popover and not resolved_js_external %}
@@ -640,8 +641,8 @@ if (document.readyState === "loading") {
     "editors": editors,
     "js_module": js_module
   } %}
-  <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen" data-moo-codepen-form>
+  <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen{% if extra_class %} {{ extra_class }}{% endif %}" data-moo-codepen-form>
     <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
-    {{ button("Open in CodePen", type="submit", variant="outline", size="sm", icon_start="code") }}
+    {{ button(label, type="submit", variant="outline", size="sm", icon_start=icon) }}
   </form>
 {%- endmacro %}

@@ -1111,7 +1111,7 @@ class CatalogContractTests(CatalogTestCase):
                 "header should be minimal chrome; primary navigation lives in the sidebar",
             )
 
-    def test_sidebar_navigation_orders_getting_started_before_catalog(
+    def test_sidebar_navigation_groups_examples_with_catalog_before_components(
         self,
     ) -> None:
         result = self.run_build()
@@ -1125,15 +1125,23 @@ class CatalogContractTests(CatalogTestCase):
         home_index = sidebar.index('href="./"')
         docs_index = sidebar.index('href="introduction/"')
         installation_index = sidebar.index('href="installation/"')
+        catalog_index = sidebar.index(">Catalog<")
         examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         blocks_index = sidebar.index('href="blocks/"')
+        charts_index = sidebar.index('href="charts/"')
+        utilities_index = sidebar.index('href="utils/scroll-fade/"')
+        resources_index = sidebar.index(">Resources<")
 
         self.assertLess(home_index, docs_index)
         self.assertLess(docs_index, installation_index)
-        self.assertLess(installation_index, examples_index)
+        self.assertLess(installation_index, catalog_index)
+        self.assertLess(catalog_index, examples_index)
         self.assertLess(examples_index, components_index)
         self.assertLess(components_index, blocks_index)
+        self.assertLess(blocks_index, charts_index)
+        self.assertLess(charts_index, utilities_index)
+        self.assertLess(utilities_index, resources_index)
         self.assertIn(">Introduction<", sidebar)
         self.assertIn(">Getting Started<", sidebar)
         self.assertIn(">Catalog<", sidebar)
@@ -1343,7 +1351,7 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
-        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', utility)
+        self.assertIn('aria-label="Previous page: Charts"', utility)
         self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
@@ -1357,7 +1365,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
-        self.assertIn('aria-label="Next page: Scroll Fade"', last_block)
+        self.assertIn('aria-label="Next page: Charts"', last_block)
+
+        charts = self.read_output("charts.html")
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', charts)
+        self.assertIn('aria-label="Next page: Scroll Fade"', charts)
 
         support = self.read_output("support.html")
         self.assertIn('aria-label="Previous page: Scroll Fade"', support)

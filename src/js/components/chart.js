@@ -45,6 +45,9 @@ const CHART_TYPES = new Map([
 ]);
 const SUPPORTED_TYPE_LIST = Array.from(CHART_TYPES.keys());
 const UNSAFE_OPTION_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const POINT_MARKER_SIZE = 6;
+const POINT_MARKER_RADIUS = POINT_MARKER_SIZE / 2;
+const POINT_HOVER_RADIUS = 5;
 
 // Bootstrap semantic color tokens the chart palette is derived from.
 const COLOR_TOKENS = [
@@ -195,14 +198,14 @@ function themeDataset(dataset, index, metadata, theme) {
     dataset.backgroundColor = translucentColor(theme, color);
     dataset.pointBackgroundColor = pointColor;
     dataset.pointBorderColor = pointColor;
-    dataset.pointBorderWidth = 2;
+    dataset.pointBorderWidth = 0;
     if (dataset.pointRadius === undefined) {
-      dataset.pointRadius = effectiveMetadata.pointRadiusDefault ?? 4;
+      dataset.pointRadius = effectiveMetadata.pointRadiusDefault ?? POINT_MARKER_RADIUS;
     }
-    dataset.pointHoverRadius = 7;
+    dataset.pointHoverRadius = POINT_HOVER_RADIUS;
     dataset.pointHoverBackgroundColor = pointColor;
     dataset.pointHoverBorderColor = pointColor;
-    dataset.pointHoverBorderWidth = 3;
+    dataset.pointHoverBorderWidth = 0;
     if (dataset.tension === undefined) dataset.tension = 0.3;
     if (effectiveMetadata.fillByDefault && dataset.fill === undefined) {
       dataset.fill = true;
@@ -236,8 +239,9 @@ function themeDataset(dataset, index, metadata, theme) {
     dataset.pointHoverBackgroundColor = pointColor;
     dataset.pointHoverBorderColor = pointColor;
     if (dataset.borderWidth === undefined) dataset.borderWidth = 2;
-    if (dataset.pointRadius === undefined) dataset.pointRadius = 3;
-    if (dataset.pointHoverRadius === undefined) dataset.pointHoverRadius = 6;
+    if (dataset.pointRadius === undefined) dataset.pointRadius = POINT_MARKER_RADIUS;
+    if (dataset.pointHoverRadius === undefined) dataset.pointHoverRadius = POINT_HOVER_RADIUS;
+    if (dataset.pointHoverBorderWidth === undefined) dataset.pointHoverBorderWidth = 0;
     if (dataset.fill === undefined) dataset.fill = true;
   } else if (datasetType === "scatter" || datasetType === "bubble") {
     dataset.backgroundColor = translucentColor(theme, color, 72);
@@ -245,10 +249,19 @@ function themeDataset(dataset, index, metadata, theme) {
     dataset.hoverBackgroundColor = color;
     dataset.hoverBorderColor = color;
     if (dataset.borderWidth === undefined) dataset.borderWidth = 1;
-    if (datasetType === "scatter" && dataset.pointRadius === undefined) {
-      dataset.pointRadius = 4;
+    if (datasetType === "scatter") {
+      if (dataset.pointRadius === undefined) {
+        dataset.pointRadius = POINT_MARKER_RADIUS;
+      }
+      if (dataset.pointHoverRadius === undefined) {
+        dataset.pointHoverRadius = POINT_HOVER_RADIUS;
+      }
+      if (dataset.pointHoverBorderWidth === undefined) {
+        dataset.pointHoverBorderWidth = 0;
+      }
+    } else if (dataset.pointHoverRadius === undefined) {
+      dataset.pointHoverRadius = 7;
     }
-    if (dataset.pointHoverRadius === undefined) dataset.pointHoverRadius = 7;
   }
   return dataset;
 }
@@ -422,6 +435,9 @@ function buildChartOptions(theme, metadata, window) {
         labels: {
           color: theme.textColor,
           usePointStyle: true,
+          pointStyle: "circle",
+          boxWidth: POINT_MARKER_SIZE,
+          boxHeight: POINT_MARKER_SIZE,
           padding: 20,
         },
       },
