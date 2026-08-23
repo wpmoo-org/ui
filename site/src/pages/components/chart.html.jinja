@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
+{% from "components/chart.html.jinja" import chart %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
@@ -7,88 +8,393 @@
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "components/table.html.jinja" import table %}
 
+{% macro chart_example(example_id, title, description, chart_id, type, data, aria_label, options=None, preview_class="moo-example__preview--medium") %}
+  {% set example %}
+    {{ chart(
+      chart_id,
+      data,
+      aria_label,
+      type=type,
+      options=options,
+      extra_class="w-100",
+      attrs='style="height: 17.5rem"'
+    ) }}
+  {% endset %}
+  {{ render_block_example(
+    example_id,
+    title,
+    description,
+    example,
+    preview_class=preview_class
+  ) }}
+{% endmacro %}
+
 {% block title %}Chart — Moo UI{% endblock %}
 
 {% block content %}
+  {% set public_types = "area, line, bar, pie, doughnut, polarArea, radar, scatter, and bubble" %}
   {{ render_page_header(
     "Chart",
-    "Visualize trends and comparisons with line and bar charts rendered by Chart.js, themed from Bootstrap tokens and re-themed when the light/dark theme changes."
+    "Visualize trends, comparisons, distributions, radial values, and point data with Chart.js-native chart types themed from Bootstrap tokens."
   ) }}
 
   <div class="moo-component-examples">
-    {% set line_chart_example %}
-    <div
-      class="moo-chart w-100"
-      id="chart-line-example"
-      style="height: 17.5rem"
-      data-chart="line"
-      data-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800,6200,6900]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400,5800,6200]}]}'
-    >
-      <canvas role="img" aria-label="Line chart comparing monthly revenue against target"></canvas>
-    </div>
+    {% set area_default_data = {
+      "labels": ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+      "datasets": [
+        {"label": "Desktop", "data": [186, 305, 237, 273, 209, 214]},
+        {"label": "Mobile", "data": [80, 200, 120, 190, 130, 140]}
+      ]
+    } %}
+    {% set intro_preview %}
+      {{ chart(
+        "chart-area-default",
+        area_default_data,
+        "Area chart comparing desktop and mobile visitors over six months",
+        type="area",
+        extra_class="w-100",
+        attrs='style="height: 17.5rem"'
+      ) }}
     {% endset %}
     {% set chart_usage %}
-      <p>Render a <code>.moo-chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-chart</code> attribute accepts <code>line</code> or <code>bar</code>, while <code>data-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
-      <p>Give the root an explicit height: the responsive runtime fills the space it is given without locking an aspect ratio. The optional Moo UI Chart ESM wraps Chart.js, reads Bootstrap's <code>--bs-*</code> tokens, and re-themes when <code>data-bs-theme</code> changes.</p>
+      <p>Render a <code>.moo-chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-chart</code> attribute accepts <code>{{ public_types }}</code>, while <code>data-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
+      <p>Use <code>data-chart-options</code> for JSON-object Chart.js options such as stacked scales, interaction mode, cutout, rotation, or legend display. Functions and callbacks are not serializable in HTML; pass them through the programmatic <code>getOrCreateInstance</code> config instead.</p>
+      <p>Give the root an explicit height. Radial Charts are represented by Chart.js <code>doughnut</code> and <code>polarArea</code>, not by a separate public <code>radial</code> type.</p>
     {% endset %}
     {{ render_component_intro(
-      line_chart_example,
+      intro_preview,
       chart_usage,
       preview_class="moo-example__preview--medium"
     ) }}
 
-    {% set bar_chart_example %}
-    <div
-      class="moo-chart w-100"
-      id="chart-bar-example"
-      style="height: 17.5rem"
-      data-chart="bar"
-      data-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
-    >
-      <canvas role="img" aria-label="Bar chart of daily active visitors across the week"></canvas>
-    </div>
-    {% endset %}
-    {{ render_block_example(
-      "chart-bar",
-      "Bar chart",
-      "A single-series bar chart. Bars share the same semantic palette and re-theme with the page.",
-      bar_chart_example,
-      preview_class="moo-example__preview--medium"
+    <h2 id="chart-area" class="h4 mt-5 mb-3">Area Charts</h2>
+    {% set area_step_data = {
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [
+        {"label": "Visitors", "data": [120, 160, 140, 210, 190, 240], "stepped": true}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-area-step",
+      "Area chart - step",
+      "Stepped area data for inventory, quota, or capacity changes.",
+      "chart-area-step",
+      "area",
+      area_step_data,
+      "Stepped area chart showing visitor changes across six months"
     ) }}
 
-    {% set lifecycle_chart_example %}
-    <div class="d-grid gap-3 w-100" data-chart-live>
-      <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-        <span data-chart-theme>{{ button("Toggle theme", variant="outline", size="sm", icon_start="moon-star") }}</span>
-        {% set lifecycle_button %}
-          {{ button("Dispose", variant="outline", size="sm", icon_start="circle-off", icon_end="rotate-cw") }}
-        {% endset %}
-        {{ lifecycle_button
-          | replace('type="button"', ('type="button" data-chart-lifecycle data-chart-lifecycle-state="live"' | safe))
-          | replace('data-icon="inline-start"', ('data-chart-lifecycle-icon="dispose" data-icon="inline-start"' | safe))
-          | replace('data-icon="inline-end"', ('data-chart-lifecycle-icon="reinit" data-icon="inline-end" hidden' | safe))
-          | replace('Dispose', ('<span data-chart-lifecycle-label>Dispose</span>' | safe))
-          | safe
-        }}
-        <span class="visually-hidden" data-chart-status aria-live="polite">Live</span>
-      </div>
-      <div
-        class="moo-chart w-100"
-        id="chart-lifecycle-example"
-        style="height: 17.5rem"
-        data-chart="line"
-        data-chart-data='{"labels":["Q1","Q2","Q3","Q4"],"datasets":[{"label":"Pipeline","data":[18,24,21,30]}]}'
-      >
-        <canvas role="img" aria-label="Lifecycle chart showing quarterly pipeline movement"></canvas>
-      </div>
-    </div>
-    {% endset %}
-    {{ render_block_example(
-      "chart-lifecycle",
-      "Theme and lifecycle",
-      "Exercise the public chart instance through theme changes, disposal, and reinitialization.",
-      lifecycle_chart_example,
-      preview_class="moo-example__preview--medium bg-body text-body"
+    {% set area_stacked_data = {
+      "labels": ["Q1", "Q2", "Q3", "Q4"],
+      "datasets": [
+        {"label": "Desktop", "data": [62, 78, 83, 91], "stack": "traffic"},
+        {"label": "Mobile", "data": [48, 64, 72, 86], "stack": "traffic"}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-area-stacked",
+      "Area chart - stacked",
+      "Stack related area series with JSON-safe scale options.",
+      "chart-area-stacked",
+      "area",
+      area_stacked_data,
+      "Stacked area chart comparing desktop and mobile traffic by quarter",
+      options={"scales": {"y": {"stacked": true}}}
+    ) }}
+
+    <h2 id="chart-bar" class="h4 mt-5 mb-3">Bar Charts</h2>
+    {% set bar_default_data = {
+      "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      "datasets": [{"label": "Visitors", "data": [120, 190, 150, 220, 180, 90, 110]}]
+    } %}
+    {{ chart_example(
+      "chart-bar-default",
+      "Bar chart",
+      "Compare a single series across a compact time window.",
+      "chart-bar-default",
+      "bar",
+      bar_default_data,
+      "Bar chart of daily active visitors across the week"
+    ) }}
+
+    {% set bar_horizontal_data = {
+      "labels": ["Organic", "Referral", "Direct", "Social"],
+      "datasets": [{"label": "Sessions", "data": [242, 184, 156, 93]}]
+    } %}
+    {{ chart_example(
+      "chart-bar-horizontal",
+      "Bar chart - horizontal",
+      "Use Chart.js index-axis options for label-heavy comparisons.",
+      "chart-bar-horizontal",
+      "bar",
+      bar_horizontal_data,
+      "Horizontal bar chart comparing traffic sessions by channel",
+      options={"indexAxis": "y"}
+    ) }}
+
+    {% set bar_multiple_data = {
+      "labels": ["Q1", "Q2", "Q3", "Q4"],
+      "datasets": [
+        {"label": "New", "data": [38, 44, 57, 63]},
+        {"label": "Returning", "data": [52, 61, 68, 74]}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-bar-multiple",
+      "Bar chart - multiple",
+      "Place related series side by side with the same semantic palette.",
+      "chart-bar-multiple",
+      "bar",
+      bar_multiple_data,
+      "Grouped bar chart comparing new and returning accounts by quarter"
+    ) }}
+
+    {% set bar_stacked_data = {
+      "labels": ["Q1", "Q2", "Q3", "Q4"],
+      "datasets": [
+        {"label": "Desktop", "data": [34, 45, 49, 53], "stack": "traffic"},
+        {"label": "Mobile", "data": [28, 38, 44, 51], "stack": "traffic"}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-bar-stacked",
+      "Bar chart - stacked",
+      "Stack bars with options while keeping the public data shape unchanged.",
+      "chart-bar-stacked",
+      "bar",
+      bar_stacked_data,
+      "Stacked bar chart comparing desktop and mobile traffic by quarter",
+      options={"scales": {"x": {"stacked": true}, "y": {"stacked": true}}}
+    ) }}
+
+    {% set bar_negative_data = {
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May"],
+      "datasets": [{"label": "Net change", "data": [12, -8, 18, -5, 24]}]
+    } %}
+    {{ chart_example(
+      "chart-bar-negative",
+      "Bar chart - negative",
+      "Show positive and negative movement on the same axis.",
+      "chart-bar-negative",
+      "bar",
+      bar_negative_data,
+      "Bar chart showing positive and negative net change by month"
+    ) }}
+
+    <h2 id="chart-line" class="h4 mt-5 mb-3">Line Charts</h2>
+    {% set line_default_data = {
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+      "datasets": [
+        {"label": "Revenue", "data": [4000, 3200, 4800, 5100, 4600, 5800, 6200, 6900]},
+        {"label": "Target", "data": [3800, 4000, 4200, 4600, 5000, 5400, 5800, 6200]}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-line-default",
+      "Line chart",
+      "Keep the existing filled line default for backward-compatible dashboard charts.",
+      "chart-line-default",
+      "line",
+      line_default_data,
+      "Line chart comparing monthly revenue against target"
+    ) }}
+
+    {% set line_plain_data = {
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [{"label": "Conversion", "data": [22, 24, 27, 26, 31, 34], "fill": false}]
+    } %}
+    {{ chart_example(
+      "chart-line-plain",
+      "Line chart - plain",
+      "Turn fill off per dataset when the line itself is the signal.",
+      "chart-line-plain",
+      "line",
+      line_plain_data,
+      "Plain line chart showing conversion rate over six months"
+    ) }}
+
+    {% set line_step_data = {
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [{"label": "Plan limit", "data": [50, 50, 75, 75, 100, 100], "fill": false, "stepped": true}]
+    } %}
+    {{ chart_example(
+      "chart-line-step",
+      "Line chart - step",
+      "Use stepped line data for threshold changes and plan limits.",
+      "chart-line-step",
+      "line",
+      line_step_data,
+      "Stepped line chart showing plan limit changes over six months"
+    ) }}
+
+    {% set line_multiple_data = {
+      "labels": ["W1", "W2", "W3", "W4", "W5"],
+      "datasets": [
+        {"label": "Desktop", "data": [42, 49, 53, 57, 62], "fill": false},
+        {"label": "Mobile", "data": [31, 36, 44, 48, 55], "fill": false}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-line-multiple",
+      "Line chart - multiple",
+      "Compare several plain line series without changing the public wrapper.",
+      "chart-line-multiple",
+      "line",
+      line_multiple_data,
+      "Multiple line chart comparing desktop and mobile weekly usage"
+    ) }}
+
+    <h2 id="chart-pie" class="h4 mt-5 mb-3">Pie Charts</h2>
+    {% set pie_data = {
+      "labels": ["Direct", "Search", "Referral", "Social"],
+      "datasets": [{"label": "Traffic", "data": [42, 28, 18, 12]}]
+    } %}
+    {{ chart_example(
+      "chart-pie-default",
+      "Pie chart",
+      "Show a simple part-to-whole distribution with themed slices.",
+      "chart-pie-default",
+      "pie",
+      pie_data,
+      "Pie chart showing traffic share by channel"
+    ) }}
+
+    {% set doughnut_data = {
+      "labels": ["Basic", "Pro", "Enterprise"],
+      "datasets": [{"label": "Plans", "data": [44, 39, 17]}]
+    } %}
+    {{ chart_example(
+      "chart-doughnut-default",
+      "Doughnut chart",
+      "Use the Chart.js doughnut type for compact segmented totals.",
+      "chart-doughnut-default",
+      "doughnut",
+      doughnut_data,
+      "Doughnut chart showing plan distribution"
+    ) }}
+
+    {{ chart_example(
+      "chart-doughnut-ring",
+      "Doughnut chart - ring",
+      "Adjust the ring cutout with JSON-safe Chart.js options.",
+      "chart-doughnut-ring",
+      "doughnut",
+      doughnut_data,
+      "Doughnut ring chart showing plan distribution",
+      options={"cutout": "72%"}
+    ) }}
+
+    <h2 id="chart-radar" class="h4 mt-5 mb-3">Radar Charts</h2>
+    {% set radar_data = {
+      "labels": ["Speed", "Quality", "Support", "Reliability", "Cost"],
+      "datasets": [{"label": "Current", "data": [8, 7, 9, 8, 6]}]
+    } %}
+    {{ chart_example(
+      "chart-radar-default",
+      "Radar chart",
+      "Compare multiple dimensions around a radial scale.",
+      "chart-radar-default",
+      "radar",
+      radar_data,
+      "Radar chart comparing operational dimensions"
+    ) }}
+
+    {% set radar_multiple_data = {
+      "labels": ["Speed", "Quality", "Support", "Reliability", "Cost"],
+      "datasets": [
+        {"label": "Current", "data": [8, 7, 9, 8, 6]},
+        {"label": "Target", "data": [9, 9, 9, 9, 7]}
+      ]
+    } %}
+    {{ chart_example(
+      "chart-radar-multiple",
+      "Radar chart - multiple",
+      "Overlay related profiles while preserving the same label array.",
+      "chart-radar-multiple",
+      "radar",
+      radar_multiple_data,
+      "Radar chart comparing current and target operational profiles"
+    ) }}
+
+    <h2 id="chart-radial" class="h4 mt-5 mb-3">Radial Charts</h2>
+    {% set polar_area_data = {
+      "labels": ["North", "South", "East", "West"],
+      "datasets": [{"label": "Regions", "data": [30, 45, 28, 36]}]
+    } %}
+    {{ chart_example(
+      "chart-polar-area",
+      "Polar area chart",
+      "Represent radial area values with Chart.js <code>polarArea</code>.",
+      "chart-polar-area",
+      "polarArea",
+      polar_area_data,
+      "Polar area chart comparing regional volume"
+    ) }}
+
+    {% set radial_progress_data = {
+      "labels": ["Complete", "Remaining"],
+      "datasets": [{"label": "Progress", "data": [72, 28]}]
+    } %}
+    {{ chart_example(
+      "chart-radial-progress",
+      "Radial progress",
+      "Use doughnut options for a radial progress shape without adding a separate type alias.",
+      "chart-radial-progress",
+      "doughnut",
+      radial_progress_data,
+      "Radial progress doughnut chart showing completion percentage",
+      options={"rotation": -90, "circumference": 180, "cutout": "72%"}
+    ) }}
+
+    <h2 id="chart-tooltip" class="h4 mt-5 mb-3">Tooltip</h2>
+    {% set scatter_data = {
+      "labels": [],
+      "datasets": [{"label": "Leads", "data": [{"x": 12, "y": 18}, {"x": 19, "y": 26}, {"x": 28, "y": 32}, {"x": 38, "y": 44}]}]
+    } %}
+    {{ chart_example(
+      "chart-scatter-default",
+      "Scatter chart",
+      "Use object point data while keeping the required <code>{labels, datasets}</code> shape.",
+      "chart-scatter-default",
+      "scatter",
+      scatter_data,
+      "Scatter chart plotting leads by fit and intent scores"
+    ) }}
+
+    {% set bubble_data = {
+      "labels": [],
+      "datasets": [{"label": "Deals", "data": [{"x": 10, "y": 20, "r": 6}, {"x": 18, "y": 28, "r": 10}, {"x": 26, "y": 35, "r": 14}, {"x": 34, "y": 44, "r": 9}]}]
+    } %}
+    {{ chart_example(
+      "chart-bubble-default",
+      "Bubble chart",
+      "Carry radius on each point for weighted two-axis comparisons.",
+      "chart-bubble-default",
+      "bubble",
+      bubble_data,
+      "Bubble chart plotting deals by fit intent and value radius"
+    ) }}
+
+    {{ chart_example(
+      "chart-tooltip-index",
+      "Tooltip - index",
+      "Override interaction mode through JSON options for grouped cartesian tooltips.",
+      "chart-tooltip-index",
+      "line",
+      line_multiple_data,
+      "Line chart demonstrating index tooltip interaction",
+      options={"interaction": {"mode": "index", "intersect": false}}
+    ) }}
+
+    {{ chart_example(
+      "chart-tooltip-nearest",
+      "Tooltip - nearest",
+      "Use nearest-point interaction for sparse point data.",
+      "chart-tooltip-nearest",
+      "scatter",
+      scatter_data,
+      "Scatter chart demonstrating nearest tooltip interaction",
+      options={"interaction": {"mode": "nearest", "intersect": true}}
     ) }}
 
     <h2 id="chart-html-anatomy" class="h4 mt-5 mb-3">HTML Anatomy</h2>
@@ -101,8 +407,9 @@
     {% set chart_parts = [
       {"id": "chart-root", "selector": "<code>.moo-chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
       {"id": "chart-id", "selector": "<code>id</code>", "summary": "Required stable identifier for the chart root and its server-rendered contract."},
-      {"id": "chart-type", "selector": "<code>[data-chart]</code>", "summary": "Chart type and initializer attribute. Only <code>line</code> and <code>bar</code> are supported for 1.0.0-rc.3; other values throw a TypeError."},
-      {"id": "chart-data", "selector": "<code>[data-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Malformed JSON throws an explicit diagnostic."},
+      {"id": "chart-type", "selector": "<code>[data-chart]</code>", "summary": "Chart type and initializer attribute. Supported values are <code>area</code>, <code>line</code>, <code>bar</code>, <code>pie</code>, <code>doughnut</code>, <code>polarArea</code>, <code>radar</code>, <code>scatter</code>, and <code>bubble</code>."},
+      {"id": "chart-data", "selector": "<code>[data-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Scatter and bubble data keep <code>labels: []</code> with object points inside datasets."},
+      {"id": "chart-options", "selector": "<code>[data-chart-options]</code>", "summary": "Optional JSON-object Chart.js options pass-through. Unsafe prototype keys are ignored and programmatic config wins."},
       {"id": "chart-canvas", "selector": "<code>.moo-chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
     ] %}
 
@@ -119,23 +426,22 @@
     ) }}
 
     {% set chart_markup_example %}
-    <div
-      class="moo-chart"
-      id="chart-html-example"
-      style="height: 17.5rem"
-      data-chart="line"
-      data-chart-data='{"labels":["Jan","Feb","Mar"],"datasets":[{"label":"Revenue","data":[4000,3200,4800]}]}'
-    >
-      <canvas role="img" aria-label="Monthly revenue line chart"></canvas>
-    </div>
+    {{ chart(
+      "chart-html-example",
+      {"labels": ["Jan", "Feb", "Mar"], "datasets": [{"label": "Revenue", "data": [4000, 3200, 4800]}]},
+      "Monthly revenue line chart",
+      type="line",
+      options={"plugins": {"legend": {"display": false}}},
+      attrs='style="height: 17.5rem"'
+    ) }}
     {% endset %}
     {{ render_code_snippet("chart-html-anatomy-example", chart_markup_example, "html") }}
 
     <h2 id="chart-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
     <p>
       Chart.js is bundled into the published <code>chart.js</code> entrypoint through
-      <code>chart.js/auto</code>; the wrapper never reads <code>window.Chart</code> and never
-      loads a runtime CDN script. Importing the module never scans the document.
+      <code>chart.js/auto</code>; the wrapper never reads a browser global Chart
+      object and never loads a runtime CDN script. Importing the module never scans the document.
       Initialize only a <code>.moo-chart</code> root your application owns: repeated
       initialization returns the same instance, and <code>dispose()</code> destroys the
       Chart.js instance, disconnects the theme observer, cancels pending work, and
@@ -159,6 +465,25 @@
     {% endset %}
     {{ render_code_snippet("chart-javascript-import", chart_import_example, "js") }}
 
+    {% set chart_tooltip_callback_example %}
+    import MooChart from "@wpmoo/ui/chart.js";
+
+    MooChart.getOrCreateInstance(document.querySelector("#chart-tooltip-custom"), {
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label(context) {
+                return `${context.dataset.label}: ${context.formattedValue}`;
+              },
+            },
+          },
+        },
+      },
+    });
+    {% endset %}
+    {{ render_code_snippet("chart-tooltip-callback", chart_tooltip_callback_example, "js") }}
+
     <h2 id="chart-theming" class="h4 mt-5 mb-3">Theming</h2>
     <p class="mb-4">
       Chart colors are derived from Bootstrap's semantic <code>--bs-*</code> tokens at
@@ -172,6 +497,40 @@
       aspect-ratio locking, so the same markup fills a desktop card or a narrow
       mobile viewport without layout-specific switches.
     </p>
+
+    {% set lifecycle_chart_example %}
+    <div class="d-grid gap-3 w-100" data-chart-live>
+      <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+        <span data-chart-theme>{{ button("Toggle theme", variant="outline", size="sm", icon_start="moon-star") }}</span>
+        {% set lifecycle_button %}
+          {{ button("Dispose", variant="outline", size="sm", icon_start="circle-off", icon_end="rotate-cw") }}
+        {% endset %}
+        {{ lifecycle_button
+          | replace('type="button"', ('type="button" data-chart-lifecycle data-chart-lifecycle-state="live"' | safe))
+          | replace('data-icon="inline-start"', ('data-chart-lifecycle-icon="dispose" data-icon="inline-start"' | safe))
+          | replace('data-icon="inline-end"', ('data-chart-lifecycle-icon="reinit" data-icon="inline-end" hidden' | safe))
+          | replace('Dispose', ('<span data-chart-lifecycle-label>Dispose</span>' | safe))
+          | safe
+        }}
+        <span class="visually-hidden" data-chart-status aria-live="polite">Live</span>
+      </div>
+      {{ chart(
+        "chart-lifecycle-example",
+        {"labels": ["Q1", "Q2", "Q3", "Q4"], "datasets": [{"label": "Pipeline", "data": [18, 24, 21, 30]}]},
+        "Lifecycle chart showing quarterly pipeline movement",
+        type="line",
+        extra_class="w-100",
+        attrs='style="height: 17.5rem"'
+      ) }}
+    </div>
+    {% endset %}
+    {{ render_block_example(
+      "chart-lifecycle",
+      "Theme and lifecycle",
+      "Exercise the public chart instance through theme changes, disposal, and reinitialization.",
+      lifecycle_chart_example,
+      preview_class="moo-example__preview--medium bg-body text-body"
+    ) }}
 
     <h2 id="chart-accessibility" class="h4 mt-5 mb-3">Accessibility</h2>
     <p class="mb-0">

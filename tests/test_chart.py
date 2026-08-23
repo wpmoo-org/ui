@@ -13,7 +13,19 @@ CHART_JS = ROOT / "src/js/components/chart.js"
 CATALOG_ADAPTER = ROOT / "site/src/js/catalog/examples-chart.js"
 CATALOG_INDEX = ROOT / "site/src/js/catalog/index.js"
 FIXTURE = ROOT / "tests/fixtures/certification/chart.html"
+CHART_MACRO = ROOT / "src/components/chart.html.jinja"
 PAGE = ROOT / "site/src/pages/components/chart.html.jinja"
+PUBLIC_CHART_TYPES = (
+    "area",
+    "line",
+    "bar",
+    "pie",
+    "doughnut",
+    "polarArea",
+    "radar",
+    "scatter",
+    "bubble",
+)
 
 def without_comments(source: str) -> str:
     source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
@@ -217,6 +229,110 @@ report("data-attributes", {{
         self.assertEqual(case["type"], "bar")
         self.assertTrue(case["themed"])
 
+    def test_supported_chart_types_are_the_public_rc3_contract(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const chartDataByType = {{
+  area: {{ labels: ["Apr", "May"], datasets: [{{ label: "Desktop", data: [142, 188] }}] }},
+  line: {{ labels: ["Apr", "May"], datasets: [{{ label: "Mobile", data: [85, 122] }}] }},
+  bar: {{ labels: ["Apr", "May"], datasets: [{{ label: "Orders", data: [44, 58] }}] }},
+  pie: {{ labels: ["Direct", "Search"], datasets: [{{ label: "Traffic", data: [62, 38] }}] }},
+  doughnut: {{ labels: ["Direct", "Search"], datasets: [{{ label: "Traffic", data: [62, 38] }}] }},
+  polarArea: {{ labels: ["North", "South"], datasets: [{{ label: "Regions", data: [30, 45] }}] }},
+  radar: {{ labels: ["Speed", "Quality"], datasets: [{{ label: "Score", data: [7, 9] }}] }},
+  scatter: {{ labels: [], datasets: [{{ label: "Leads", data: [{{ x: 1, y: 4 }}, {{ x: 2, y: 8 }}] }}] }},
+  bubble: {{ labels: [], datasets: [{{ label: "Deals", data: [{{ x: 1, y: 4, r: 6 }}, {{ x: 2, y: 8, r: 12 }}] }}] }},
+}};
+const reportByType = {{}};
+for (const publicType of {json.dumps(PUBLIC_CHART_TYPES)}) {{
+  const root = makeRoot({{
+    "data-chart": publicType,
+    "data-chart-data": JSON.stringify(chartDataByType[publicType]),
+  }});
+  const instance = MooChart.getOrCreateInstance(root);
+  const dataset = instance.chart.data.datasets[0];
+  reportByType[publicType] = {{
+    chartType: instance.chart.config.type,
+    labels: instance.chart.data.labels,
+    fill: dataset.fill ?? null,
+    pointRadius: dataset.pointRadius ?? null,
+    dataIsArray: Array.isArray(dataset.data),
+  }};
+  instance.dispose();
+}}
+report("supported-types", {{ reportByType }});
+"""
+        )
+        report_by_type = case["reportByType"]
+        self.assertEqual(set(report_by_type), set(PUBLIC_CHART_TYPES))
+        self.assertEqual(report_by_type["area"]["chartType"], "line")
+        self.assertTrue(report_by_type["area"]["fill"])
+        self.assertEqual(report_by_type["area"]["pointRadius"], 0)
+        self.assertEqual(report_by_type["line"]["chartType"], "line")
+        self.assertTrue(report_by_type["line"]["fill"])
+        self.assertEqual(report_by_type["bar"]["chartType"], "bar")
+        for chart_type in ("pie", "doughnut", "polarArea", "radar", "scatter", "bubble"):
+            with self.subTest(chart_type=chart_type):
+                self.assertEqual(report_by_type[chart_type]["chartType"], chart_type)
+                self.assertTrue(report_by_type[chart_type]["dataIsArray"])
+        self.assertEqual(report_by_type["scatter"]["labels"], [])
+        self.assertEqual(report_by_type["bubble"]["labels"], [])
+
+    def test_chart_family_defaults_match_cartesian_arc_radial_and_point_types(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const familyData = {{
+  pie: {{ labels: ["Direct", "Search"], datasets: [{{ label: "Traffic", data: [62, 38] }}] }},
+  doughnut: {{ labels: ["Direct", "Search"], datasets: [{{ label: "Traffic", data: [62, 38] }}] }},
+  polarArea: {{ labels: ["North", "South"], datasets: [{{ label: "Regions", data: [30, 45] }}] }},
+  radar: {{ labels: ["Speed", "Quality"], datasets: [{{ label: "Score", data: [7, 9] }}] }},
+  scatter: {{ labels: [], datasets: [{{ label: "Leads", data: [{{ x: 1, y: 4 }}, {{ x: 2, y: 8 }}] }}] }},
+  bubble: {{ labels: [], datasets: [{{ label: "Deals", data: [{{ x: 1, y: 4, r: 6 }}, {{ x: 2, y: 8, r: 12 }}] }}] }},
+}};
+const reportByType = {{}};
+for (const publicType of ["pie", "doughnut", "polarArea", "radar", "scatter", "bubble"]) {{
+  const root = makeRoot({{
+    "data-chart": publicType,
+    "data-chart-data": JSON.stringify(familyData[publicType]),
+  }});
+  const instance = MooChart.getOrCreateInstance(root);
+  const scales = instance.chart.options.scales || {{}};
+  reportByType[publicType] = {{
+    hasX: Object.prototype.hasOwnProperty.call(scales, "x"),
+    hasY: Object.prototype.hasOwnProperty.call(scales, "y"),
+    hasR: Object.prototype.hasOwnProperty.call(scales, "r"),
+    xType: scales.x?.type ?? null,
+    yType: scales.y?.type ?? null,
+    mode: instance.chart.options.interaction?.mode ?? null,
+    intersect: instance.chart.options.interaction?.intersect ?? null,
+  }};
+  instance.dispose();
+}}
+report("family-defaults", {{ reportByType }});
+"""
+        )
+        report_by_type = case["reportByType"]
+        for chart_type in ("pie", "doughnut"):
+            with self.subTest(chart_type=chart_type):
+                self.assertFalse(report_by_type[chart_type]["hasX"])
+                self.assertFalse(report_by_type[chart_type]["hasY"])
+                self.assertFalse(report_by_type[chart_type]["hasR"])
+                self.assertEqual(report_by_type[chart_type]["mode"], "nearest")
+        for chart_type in ("polarArea", "radar"):
+            with self.subTest(chart_type=chart_type):
+                self.assertFalse(report_by_type[chart_type]["hasX"])
+                self.assertFalse(report_by_type[chart_type]["hasY"])
+                self.assertTrue(report_by_type[chart_type]["hasR"])
+                self.assertEqual(report_by_type[chart_type]["mode"], "nearest")
+        for chart_type in ("scatter", "bubble"):
+            with self.subTest(chart_type=chart_type):
+                self.assertTrue(report_by_type[chart_type]["hasX"])
+                self.assertTrue(report_by_type[chart_type]["hasY"])
+                self.assertEqual(report_by_type[chart_type]["xType"], "linear")
+                self.assertEqual(report_by_type[chart_type]["yType"], "linear")
+                self.assertEqual(report_by_type[chart_type]["mode"], "nearest")
+                self.assertTrue(report_by_type[chart_type]["intersect"])
+
     def test_line_points_use_series_colored_halos_in_light_mode(self) -> None:
         case = self.run_chart_case(
             f"""
@@ -262,7 +378,7 @@ report("line-point-halo", {{
     def test_unsupported_chart_type_is_rejected(self) -> None:
         case = self.run_chart_case(
             """
-const root = makeRoot({ "data-chart": "pie" });
+const root = makeRoot({ "data-chart": "radial" });
 let message = "";
 try {
   new MooChart(root);
@@ -274,7 +390,7 @@ report("unsupported-type", { message });
         )
         self.assertEqual(
             case["message"],
-            'MooChart supports line and bar charts; received "pie".',
+            'MooChart supports area, line, bar, pie, doughnut, polarArea, radar, scatter, and bubble charts; received "radial".',
         )
 
     def test_invalid_json_produces_an_explicit_diagnostic(self) -> None:
@@ -298,6 +414,30 @@ report("invalid-json", { message, isSyntaxError });
         self.assertTrue(case["isSyntaxError"])
         self.assertIn(
             "MooChart could not parse data-chart-data as JSON:", case["message"]
+        )
+
+    def test_invalid_data_chart_options_json_produces_an_explicit_diagnostic(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart-options": "{{not valid json",
+}});
+let message = "";
+let isSyntaxError = false;
+try {{
+  new MooChart(root);
+}} catch (error) {{
+  message = error.message;
+  isSyntaxError = error instanceof SyntaxError;
+}}
+report("invalid-options-json", {{ message, isSyntaxError }});
+"""
+        )
+        self.assertTrue(case["isSyntaxError"])
+        self.assertIn(
+            "MooChart could not parse data-chart-options as JSON:", case["message"]
         )
 
     def test_invalid_data_shape_produces_an_explicit_diagnostic(self) -> None:
@@ -338,6 +478,106 @@ report("missing-markup-data", { message });
             case["message"],
             "MooChart data-chart-data is required unless config.data is provided.",
         )
+
+    def test_data_chart_options_json_merges_into_chart_options(self) -> None:
+        options = {
+            "indexAxis": "y",
+            "scales": {"x": {"stacked": True}, "y": {"stacked": True}},
+            "plugins": {"legend": {"display": False}},
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart-options": {json.dumps(json.dumps(options))},
+}});
+const instance = MooChart.getOrCreateInstance(root);
+report("options-merge", {{
+  indexAxis: instance.chart.options.indexAxis,
+  xStacked: instance.chart.options.scales.x.stacked,
+  yStacked: instance.chart.options.scales.y.stacked,
+  legendDisplay: instance.chart.options.plugins.legend.display,
+}});
+"""
+        )
+        self.assertEqual(case["indexAxis"], "y")
+        self.assertTrue(case["xStacked"])
+        self.assertTrue(case["yStacked"])
+        self.assertFalse(case["legendDisplay"])
+
+    def test_data_chart_options_are_safe_json_pass_through_with_config_precedence(
+        self,
+    ) -> None:
+        raw_options = (
+            '{"indexAxis":"y","plugins":{"legend":{"display":false}},'
+            '"__proto__":{"polluted":"yes"},'
+            '"constructor":{"prototype":{"polluted":"yes"}},'
+            '"prototype":{"polluted":"yes"}}'
+        )
+        case = self.run_chart_case(
+            f"""
+delete Object.prototype.polluted;
+const root = makeRoot({{
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+  "data-chart-options": {json.dumps(raw_options)},
+}});
+const instance = MooChart.getOrCreateInstance(root, {{
+  options: {{
+    plugins: {{
+      legend: {{ display: true }},
+    }},
+  }},
+}});
+report("safe-options", {{
+  indexAxis: instance.chart.options.indexAxis,
+  legendDisplay: instance.chart.options.plugins.legend.display,
+  protoPolluted: Object.prototype.polluted === "yes",
+  hasOwnConstructor: Object.prototype.hasOwnProperty.call(
+    instance.chart.options,
+    "constructor",
+  ),
+  hasOwnPrototype: Object.prototype.hasOwnProperty.call(
+    instance.chart.options,
+    "prototype",
+  ),
+  hasOwnProto: Object.prototype.hasOwnProperty.call(
+    instance.chart.options,
+    "__proto__",
+  ),
+}});
+"""
+        )
+        self.assertEqual(case["indexAxis"], "y")
+        self.assertTrue(case["legendDisplay"])
+        self.assertFalse(case["protoPolluted"])
+        self.assertFalse(case["hasOwnConstructor"])
+        self.assertFalse(case["hasOwnPrototype"])
+        self.assertFalse(case["hasOwnProto"])
+
+    def test_reduced_motion_prefers_zero_duration_chart_animation(self) -> None:
+        case = self.run_chart_case(
+            f"""
+window.matchMedia = (query) => ({{
+  matches: query === "(prefers-reduced-motion: reduce)",
+  media: query,
+  addEventListener() {{}},
+  removeEventListener() {{}},
+}});
+const root = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+}});
+const instance = MooChart.getOrCreateInstance(root);
+report("reduced-motion", {{
+  animation: instance.chart.options.animation,
+  hoverDuration: instance.chart.options.hover.animationDuration,
+}});
+"""
+        )
+        self.assertFalse(case["animation"])
+        self.assertEqual(case["hoverDuration"], 0)
 
     def test_configuration_precedence_overrides_data_attributes(self) -> None:
         case = self.run_chart_case(
@@ -839,6 +1079,19 @@ report("stateful-lifecycle-button", {{
         self.assertIn("get chart()", source)
         self.assertIn("get element()", source)
 
+    def test_chart_macro_accepts_all_public_types_and_options(self) -> None:
+        source = CHART_MACRO.read_text(encoding="utf-8")
+
+        self.assertIn("options=None", source)
+        self.assertIn("data-chart-options", source)
+        self.assertIn('data-chart="{{ type }}"', source)
+        self.assertIn("data-chart-data", source)
+        self.assertIn('<canvas role="img" aria-label="{{ aria_label }}"></canvas>', source)
+        self.assertNotIn('["line", "bar"]', source)
+        for chart_type in PUBLIC_CHART_TYPES:
+            with self.subTest(chart_type=chart_type):
+                self.assertIn(f'"{chart_type}"', source)
+
     def test_no_catalog_source_uses_a_chart_cdn_or_window_chart(self) -> None:
         for path in (CHART_JS, CATALOG_ADAPTER, CATALOG_INDEX):
             with self.subTest(path=path.relative_to(ROOT)):
@@ -902,28 +1155,56 @@ report("stateful-lifecycle-button", {{
         self.assertNotIn("window.Chart", source)
 
     def test_component_page_covers_the_public_contract(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(PAGE.is_file(), "Chart page is not implemented")
-        source = PAGE.read_text(encoding="utf-8")
+        source = self.read_output("components/chart.html")
 
-        self.assertIn("render_reference(", source)
+        self.assertIn("Chart.js documentation", source)
         self.assertIn(".moo-chart", source)
         self.assertIn("data-chart", source)
         self.assertIn("data-chart-data", source)
+        self.assertIn("data-chart-options", source)
+        for chart_type in PUBLIC_CHART_TYPES:
+            with self.subTest(chart_type=chart_type):
+                self.assertIn(f'data-chart="{chart_type}"', source)
         for chart_id in (
-            "chart-line-example",
-            "chart-bar-example",
+            "chart-area-default",
+            "chart-area-step",
+            "chart-area-stacked",
+            "chart-bar-default",
+            "chart-bar-horizontal",
+            "chart-bar-multiple",
+            "chart-bar-stacked",
+            "chart-bar-negative",
+            "chart-line-default",
+            "chart-line-plain",
+            "chart-line-step",
+            "chart-line-multiple",
+            "chart-pie-default",
+            "chart-doughnut-default",
+            "chart-doughnut-ring",
+            "chart-radar-default",
+            "chart-radar-multiple",
+            "chart-polar-area",
+            "chart-radial-progress",
+            "chart-scatter-default",
+            "chart-bubble-default",
+            "chart-tooltip-index",
+            "chart-tooltip-nearest",
             "chart-lifecycle-example",
         ):
             self.assertRegex(
                 source,
                 rf'class="moo-chart w-100"\s+id="{chart_id}"',
             )
+        self.assertIn("chart-tooltip-index", source)
+        self.assertIn('role="img"', source)
+        self.assertIn("aria-label", source)
         self.assertRegex(
             source,
             r'class="[^"]*\bd-grid\b[^"]*\bgap-3\b[^"]*\bw-100\b[^"]*"\s+data-chart-live',
         )
-        self.assertEqual(source.count('preview_class="moo-example__preview--medium'), 3)
-        self.assertNotIn('preview_class="moo-example__preview--wide"', source)
         for topic in (
             '"line"',
             '"bar"',
@@ -936,6 +1217,8 @@ report("stateful-lifecycle-button", {{
             "mobile",
         ):
             self.assertIn(topic, source)
+        self.assertNotIn("window.Chart", source)
+        self.assertNotIn("Recharts", source)
 
 
 if __name__ == "__main__":

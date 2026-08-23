@@ -32,12 +32,12 @@
         "https://getbootstrap.com/docs/5.3/utilities/colors/"
       ],
       "resolvedFindings": [
-        "Bootstrap ships no chart component or plugin (verified: no chart equivalent in js/src/), so Moo owns the entire contract: the .moo-chart root, the data-chart type attribute, the data-chart-data JSON payload, and deterministic child canvas resolution. Chart.js is bundled at build time through chart.js/auto; there is no runtime CDN, script tag, or window.Chart dependency.",
-        "Chart colors resolve from Bootstrap's CSS variables (--bs-info, --bs-info-text-emphasis, --bs-body-color, --bs-border-color) with color-mix() fill and grid derivations instead of hardcoded theme-dependent hex values, so a data-bs-theme change re-themes the chart through a MutationObserver without reintroducing hex-alpha suffix concatenation."
+        "Bootstrap ships no chart component or plugin (verified: no chart equivalent in js/src/), so Moo owns the entire contract: the .moo-chart root, the data-chart type attribute, the data-chart-data JSON payload, optional data-chart-options JSON object, and deterministic child canvas resolution. Chart.js is bundled at build time through chart.js/auto; there is no runtime CDN, script tag, or window.Chart dependency.",
+        "Chart colors resolve from Bootstrap's CSS variables (--bs-info, --bs-info-text-emphasis, --bs-body-color, --bs-border-color) with color-mix() fill and grid derivations instead of hardcoded theme-dependent hex values, so a data-bs-theme change re-themes the chart through a MutationObserver without reintroducing hex-alpha suffix concatenation.",
+        "Moo Chart contracts area, line, bar, pie, doughnut, polarArea, radar, scatter, and bubble for 1.0.0-rc.3. data-chart-options is a JSON-object-only Chart.js options pass-through, not a Moo-owned schema; callbacks remain programmatic-only."
       ],
       "limitations": [
-        "Phase 3C browser verification covers the approved dashboard appearance at the 1400x900 desktop and 479x823 mobile baselines in light and dark mode; the supported Bootstrap and browser matrices run at a later gate.",
-        "Only line and bar charts are contracted for 1.0.0-rc.3; other Chart.js chart types are not part of the frozen public API.",
+        "Phase 3C browser verification covers the approved dashboard appearance at the 1400x900 desktop and 479x823 mobile baselines in light and dark mode; expanded Chart gallery browser evidence covers each public data-chart value before manual acceptance.",
         "Real-device and generic host-conformance evidence remain pending."
       ]
     },

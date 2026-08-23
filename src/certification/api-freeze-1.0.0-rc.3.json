@@ -100,7 +100,20 @@
         "rootClass": "moo-chart",
         "typeAttribute": "data-chart",
         "dataAttribute": "data-chart-data",
-        "childElement": "canvas"
+        "optionsAttribute": "data-chart-options",
+        "supportedTypes": [
+          "area",
+          "line",
+          "bar",
+          "pie",
+          "doughnut",
+          "polarArea",
+          "radar",
+          "scatter",
+          "bubble"
+        ],
+        "canvas": ":scope > canvas",
+        "optionsContract": "JSON-object-only Chart.js options pass-through; functions/callbacks are not serializable and must use programmatic config"
       }
     },
     {

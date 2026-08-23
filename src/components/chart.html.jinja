@@ -1,21 +1,24 @@
 {# Chart is a Moo-owned public contract: Bootstrap ships no chart component,
    so Moo defines the .moo-chart root, the data-chart type attribute, the
-   data-chart-data JSON payload, and the deterministic child <canvas>
-   resolution. The bundled runtime (src/js/components/chart.js wraps
-   chart.js@4.5.1 through chart.js/auto at build time) renders the datasets,
-   themes them from Bootstrap's CSS variables, and re-themes when
-   data-bs-theme changes. The contract is frozen in
+   data-chart-data JSON payload, optional data-chart-options JSON object, and
+   the deterministic child <canvas> resolution. The bundled runtime
+   (src/js/components/chart.js wraps chart.js@4.5.1 through chart.js/auto at
+   build time) renders the datasets, themes them from Bootstrap's CSS
+   variables, and re-themes when data-bs-theme changes. The contract is frozen in
    src/certification/api-freeze-1.0.0-rc.3.json. #}
 
-{% macro chart(id, data, aria_label, type="line", extra_class="", attrs="") -%}
+{% macro chart(id, data, aria_label, type="line", options=None, extra_class="", attrs="") -%}
   {#- The responsive runtime does not lock an aspect ratio; callers must give
       the root an explicit height, typically through extra_class or attrs. #}
+  {% set chart_types = ["area", "line", "bar", "pie", "doughnut", "polarArea", "radar", "scatter", "bubble"] %}
   {% if not id | trim %}{{ fail("Chart id is required") }}{% endif %}
   {% if not data %}{{ fail("Chart data is required") }}{% endif %}
   {% if not aria_label | trim %}{{ fail("Chart aria_label is required") }}{% endif %}
-  {% if type not in ["line", "bar"] %}{{ fail("Chart type must be 'line' or 'bar'") }}{% endif %}
+  {% if type not in chart_types %}{{ fail("Chart type must be one of: area, line, bar, pie, doughnut, polarArea, radar, scatter, bubble") }}{% endif %}
   {% set serialized_data = data if data is string else data | tojson %}
-  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-chart="{{ type }}" data-chart-data='{{ serialized_data }}'{% if attrs %} {{ attrs | safe }}{% endif %}>
+  {% set has_options = options is not none and options != "" and options != {} %}
+  {% if has_options %}{% set serialized_options = options if options is string else options | tojson %}{% endif %}
+  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-chart="{{ type }}" data-chart-data='{{ serialized_data }}'{% if has_options %} data-chart-options='{{ serialized_options }}'{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}>
     <canvas role="img" aria-label="{{ aria_label }}"></canvas>
   </div>
 {%- endmacro %}

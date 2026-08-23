@@ -106,6 +106,29 @@ class CertificationContractTests(unittest.TestCase):
             with self.subTest(hook=hook):
                 self.assertIn(hook, toast_section)
 
+    def test_chart_public_wiring_hooks_are_recorded_in_component_contract(self) -> None:
+        if not PROJECT_DOCS_ROOT.is_dir():
+            self.skipTest("UI project docs are not mounted in this checkout")
+
+        source = (PROJECT_DOCS_ROOT / "contracts/COMPONENTS.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("## Chart Contract", source)
+        chart_section = source.split("## Chart Contract", 1)[1].split("\n## ", 1)[0]
+
+        for hook in (
+            "data-chart",
+            "data-chart-data",
+            "data-chart-options",
+            "area",
+            "polarArea",
+            "bubble",
+            "chart.js/auto",
+            "window.Chart",
+        ):
+            with self.subTest(hook=hook):
+                self.assertIn(hook, chart_section)
+
     def test_evidence_inventory_matches_the_live_component_registry(self) -> None:
         inventory = self._read_json("src/certification/evidence-inventory.json")
         registry = self._read_json("src/registry/components.json")
@@ -813,6 +836,28 @@ class CertificationContractTests(unittest.TestCase):
         self.assertTrue(chart_record.get("bundled", False))
         self.assertEqual(chart_record.get("runtime"), "chart.js@4.5.1")
         self.assertEqual(chart_record.get("getters"), ["chart", "element"])
+        self.assertEqual(
+            chart_record.get("markup"),
+            {
+                "rootClass": "moo-chart",
+                "typeAttribute": "data-chart",
+                "dataAttribute": "data-chart-data",
+                "optionsAttribute": "data-chart-options",
+                "supportedTypes": [
+                    "area",
+                    "line",
+                    "bar",
+                    "pie",
+                    "doughnut",
+                    "polarArea",
+                    "radar",
+                    "scatter",
+                    "bubble",
+                ],
+                "canvas": ":scope > canvas",
+                "optionsContract": "JSON-object-only Chart.js options pass-through; functions/callbacks are not serializable and must use programmatic config",
+            },
+        )
 
         slider_record = next(m for m in freeze["esmModules"] if m["module"] == "slider.js")
         self.assertFalse(slider_record.get("bundled", True))

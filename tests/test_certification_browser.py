@@ -54,18 +54,39 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     )
                     self.assertEqual(
                         page.evaluate(
-                            """() => [
-                              window.certificationLineChart.chart.config.type,
-                              window.certificationBarChart.chart.config.type,
-                            ]"""
+                            """() => Object.fromEntries(
+                              Object.entries(window.certificationCharts).map(
+                                ([name, instance]) => [
+                                  name,
+                                  instance.chart.config.type,
+                                ],
+                              )
+                            )"""
                         ),
-                        ["line", "bar"],
+                        {
+                            "line": "line",
+                            "bar": "bar",
+                            "area": "line",
+                            "pie": "pie",
+                            "doughnut": "doughnut",
+                            "polarArea": "polarArea",
+                            "radar": "radar",
+                            "scatter": "scatter",
+                            "bubble": "bubble",
+                        },
                     )
                     self.assertTrue(
                         page.evaluate(
                             """() => [
                               '#certification-chart-line',
                               '#certification-chart-bar',
+                              '#certification-chart-area',
+                              '#certification-chart-pie',
+                              '#certification-chart-doughnut',
+                              '#certification-chart-polar-area',
+                              '#certification-chart-radar',
+                              '#certification-chart-scatter',
+                              '#certification-chart-bubble',
                             ].map(id => document.querySelector(`${id} canvas`)).every(canvas => {
                               const data = canvas.getContext('2d').getImageData(
                                 0, 0, canvas.width, canvas.height
@@ -78,6 +99,32 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         "MooChart could not parse data-chart-data as JSON:",
                         page.evaluate("() => window.certificationInvalidMessage"),
                     )
+                    self.assertIn(
+                        "MooChart could not parse data-chart-options as JSON:",
+                        page.evaluate(
+                            "() => window.certificationInvalidOptionsMessage"
+                        ),
+                    )
+                    self.assertEqual(
+                        page.locator(
+                            ".moo-chart[data-certification-chart] "
+                            "> canvas[role='img'][aria-label]"
+                        ).count(),
+                        9,
+                    )
+                    self.assertTrue(
+                        page.locator(
+                            ".moo-chart[data-certification-chart] "
+                            "> canvas[role='img'][aria-label]"
+                        ).evaluate_all(
+                            """
+                            canvases => canvases.every((canvas) =>
+                              canvas.getAttribute('aria-label').trim().length > 0
+                            )
+                            """
+                        )
+                    )
+                    self.assertEqual(run_axe(page), [])
                     evidence.assert_clean()
                 finally:
                     context.close()

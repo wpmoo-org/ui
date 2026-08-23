@@ -4,15 +4,18 @@
 // Markup contract (see api-freeze-1.0.0-rc.3.json):
 //
 //   <div class="moo-chart" data-chart="line"
-//        data-chart-data='{"labels":[],"datasets":[]}'>
+//        data-chart-data='{"labels":[],"datasets":[]}'
+//        data-chart-options='{"plugins":{"legend":{"display":false}}}'>
 //     <canvas></canvas>
 //   </div>
 //
 // `.moo-chart` is the public root class, `data-chart` is the
 // type/init attribute, and `data-chart-data` carries the serialized
-// chart data. The canvas is resolved deterministically as the first child
-// <canvas>. Invalid elements, a missing canvas, and malformed JSON all fail
-// with explicit errors rather than rendering an empty chart.
+// chart data. `data-chart-options` is an optional JSON-object Chart.js
+// options pass-through for copyable HTML examples. The canvas is resolved
+// deterministically as the first child <canvas>. Invalid elements, a missing
+// canvas, and malformed JSON all fail with explicit errors rather than
+// rendering an empty chart.
 //
 // Chart.js is imported as a module and bundled into the published ESM
 // output; this wrapper never reads `window.Chart` and never loads a
@@ -21,7 +24,27 @@
 import Chart from "chart.js/auto";
 
 const instances = new WeakMap();
-const SUPPORTED_TYPES = new Set(["line", "bar"]);
+const CHART_TYPES = new Map([
+  [
+    "area",
+    {
+      chartType: "line",
+      family: "cartesian",
+      fillByDefault: true,
+      pointRadiusDefault: 0,
+    },
+  ],
+  ["line", { chartType: "line", family: "cartesian", fillByDefault: true }],
+  ["bar", { chartType: "bar", family: "cartesian" }],
+  ["pie", { chartType: "pie", family: "arc" }],
+  ["doughnut", { chartType: "doughnut", family: "arc" }],
+  ["polarArea", { chartType: "polarArea", family: "radial" }],
+  ["radar", { chartType: "radar", family: "radial" }],
+  ["scatter", { chartType: "scatter", family: "point" }],
+  ["bubble", { chartType: "bubble", family: "point" }],
+]);
+const SUPPORTED_TYPE_LIST = Array.from(CHART_TYPES.keys());
+const UNSAFE_OPTION_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 // Bootstrap semantic color tokens the chart palette is derived from.
 const COLOR_TOKENS = [
@@ -129,35 +152,61 @@ function buildChartTheme(colors, isDark = false, resolveColor = (value) => value
   };
 }
 
+function translucentColor(theme, color, amount = 22) {
+  return theme.resolveColor(
+    `color-mix(in srgb, ${color} ${amount}%, transparent)`,
+    color,
+  );
+}
+
+function mutedSeriesColor(theme, color) {
+  return theme.resolveColor(
+    `color-mix(in srgb, ${color} 92%, ${theme.color})`,
+    color,
+  );
+}
+
+function datasetColors(theme, count) {
+  return Array.from({ length: Math.max(count, 1) }, (_, itemIndex) => {
+    const colorKey = DATASET_COLOR_KEYS[itemIndex % DATASET_COLOR_KEYS.length];
+    return theme[colorKey];
+  });
+}
+
+function datasetMetadata(dataset, metadata) {
+  return dataset.type && CHART_TYPES.has(dataset.type)
+    ? CHART_TYPES.get(dataset.type)
+    : metadata;
+}
+
 // Apply themed colors to a dataset in place, keyed by its position.
-function themeDataset(dataset, index, chartType, theme) {
+function themeDataset(dataset, index, metadata, theme) {
   const colorKey = DATASET_COLOR_KEYS[index % DATASET_COLOR_KEYS.length];
   const color = theme[colorKey];
   // Keep both themes close to their semantic token so the hue remains
   // consistent when the user toggles the theme.
-  const mutedColor = theme.resolveColor(
-    `color-mix(in srgb, ${color} 92%, ${theme.color})`,
-    color,
-  );
+  const mutedColor = mutedSeriesColor(theme, color);
   const pointColor = color;
-  const datasetType = dataset.type || chartType;
+  const effectiveMetadata = datasetMetadata(dataset, metadata);
+  const datasetType = dataset.type || effectiveMetadata.chartType;
 
   if (datasetType === "line") {
     dataset.borderColor = mutedColor;
-    dataset.backgroundColor = theme.resolveColor(
-      `color-mix(in srgb, ${color} 22%, transparent)`,
-      color,
-    );
+    dataset.backgroundColor = translucentColor(theme, color);
     dataset.pointBackgroundColor = pointColor;
     dataset.pointBorderColor = pointColor;
     dataset.pointBorderWidth = 2;
-    dataset.pointRadius = 4;
+    if (dataset.pointRadius === undefined) {
+      dataset.pointRadius = effectiveMetadata.pointRadiusDefault ?? 4;
+    }
     dataset.pointHoverRadius = 7;
     dataset.pointHoverBackgroundColor = pointColor;
     dataset.pointHoverBorderColor = pointColor;
     dataset.pointHoverBorderWidth = 3;
     if (dataset.tension === undefined) dataset.tension = 0.3;
-    if (dataset.fill === undefined) dataset.fill = true;
+    if (effectiveMetadata.fillByDefault && dataset.fill === undefined) {
+      dataset.fill = true;
+    }
   } else if (datasetType === "bar") {
     dataset.backgroundColor = theme.resolveColor(
       `color-mix(in srgb, ${color} 78%, transparent)`,
@@ -168,17 +217,48 @@ function themeDataset(dataset, index, chartType, theme) {
     dataset.hoverBackgroundColor = color;
     dataset.hoverBorderColor = color;
     dataset.borderRadius = 4;
+  } else if (datasetType === "pie" || datasetType === "doughnut" || datasetType === "polarArea") {
+    const colors = datasetColors(theme, dataset.data?.length || 0);
+    dataset.backgroundColor = colors.map((seriesColor) =>
+      translucentColor(theme, seriesColor, 78)
+    );
+    dataset.borderColor = colors.map((seriesColor) =>
+      mutedSeriesColor(theme, seriesColor)
+    );
+    dataset.hoverBackgroundColor = colors;
+    dataset.hoverBorderColor = colors;
+    if (dataset.borderWidth === undefined) dataset.borderWidth = 1;
+  } else if (datasetType === "radar") {
+    dataset.borderColor = mutedColor;
+    dataset.backgroundColor = translucentColor(theme, color, 18);
+    dataset.pointBackgroundColor = pointColor;
+    dataset.pointBorderColor = pointColor;
+    dataset.pointHoverBackgroundColor = pointColor;
+    dataset.pointHoverBorderColor = pointColor;
+    if (dataset.borderWidth === undefined) dataset.borderWidth = 2;
+    if (dataset.pointRadius === undefined) dataset.pointRadius = 3;
+    if (dataset.pointHoverRadius === undefined) dataset.pointHoverRadius = 6;
+    if (dataset.fill === undefined) dataset.fill = true;
+  } else if (datasetType === "scatter" || datasetType === "bubble") {
+    dataset.backgroundColor = translucentColor(theme, color, 72);
+    dataset.borderColor = mutedColor;
+    dataset.hoverBackgroundColor = color;
+    dataset.hoverBorderColor = color;
+    if (dataset.borderWidth === undefined) dataset.borderWidth = 1;
+    if (datasetType === "scatter" && dataset.pointRadius === undefined) {
+      dataset.pointRadius = 4;
+    }
+    if (dataset.pointHoverRadius === undefined) dataset.pointHoverRadius = 7;
   }
   return dataset;
 }
 
 // Apply theme colors to an already-built Chart.js instance (re-theming).
-function applyThemeToChart(chart, theme) {
+function applyThemeToChart(chart, theme, metadata) {
   if (!chart) return;
 
-  const chartType = chart.config.type;
   chart.data.datasets.forEach((dataset, index) => {
-    themeDataset(dataset, index, dataset.type || chartType, theme);
+    themeDataset(dataset, index, metadata, theme);
   });
 
   // Update scale colors.
@@ -195,6 +275,15 @@ function applyThemeToChart(chart, theme) {
       }
       if (scale.title) {
         scale.title.color = theme.textColor;
+      }
+      if (scale.angleLines) {
+        scale.angleLines.color = theme.resolveColor(
+          `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
+          theme.gridColor,
+        );
+      }
+      if (scale.pointLabels) {
+        scale.pointLabels.color = theme.secondaryText;
       }
     });
   }
@@ -215,15 +304,119 @@ function applyThemeToChart(chart, theme) {
   chart.update("none");
 }
 
-// Build the Chart.js options object for the approved dashboard appearance.
-function buildChartOptions(theme) {
+function themedGrid(theme) {
   return {
+    color: theme.resolveColor(
+      `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
+      theme.gridColor,
+    ),
+  };
+}
+
+function themedTicks(theme, extra = {}) {
+  return {
+    color: theme.secondaryText,
+    padding: 8,
+    ...extra,
+  };
+}
+
+function cartesianScales(theme, metadata) {
+  const scaleType = metadata.family === "point" ? "linear" : undefined;
+  return {
+    x: {
+      ...(scaleType ? { type: scaleType } : {}),
+      grid: themedGrid(theme),
+      ticks: themedTicks(theme),
+      border: {
+        display: false,
+      },
+    },
+    y: {
+      ...(scaleType ? { type: scaleType } : {}),
+      grid: themedGrid(theme),
+      ticks: themedTicks(theme),
+      border: {
+        display: false,
+      },
+    },
+  };
+}
+
+function radialScale(theme) {
+  return {
+    r: {
+      angleLines: {
+        color: theme.resolveColor(
+          `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
+          theme.gridColor,
+        ),
+      },
+      grid: themedGrid(theme),
+      pointLabels: {
+        color: theme.secondaryText,
+      },
+      ticks: themedTicks(theme, {
+        backdropColor: "transparent",
+      }),
+    },
+  };
+}
+
+function defaultInteraction(metadata) {
+  if (metadata.family === "point" || metadata.family === "arc" || metadata.family === "radial") {
+    return {
+      mode: "nearest",
+      intersect: true,
+    };
+  }
+  return {
+    mode: "index",
+    intersect: false,
+  };
+}
+
+function prefersReducedMotion(window) {
+  return !!window?.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+}
+
+function formatNumber(value) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value.toLocaleString()
+    : "";
+}
+
+function tooltipLabel(context) {
+  const label = context.dataset.label || context.label || "";
+  const parsed = context.parsed;
+  const raw = context.raw;
+
+  if (parsed !== null && typeof parsed === "object") {
+    const values = [];
+    if (typeof parsed.x === "number" && Number.isFinite(parsed.x)) {
+      values.push(`X: ${formatNumber(parsed.x)}`);
+    }
+    if (typeof parsed.y === "number" && Number.isFinite(parsed.y)) {
+      values.push(`Y: ${formatNumber(parsed.y)}`);
+    }
+    if (raw && typeof raw === "object" && typeof raw.r === "number") {
+      values.push(`Radius: ${formatNumber(raw.r)}`);
+    }
+    if (!values.length) return label;
+    return label ? `${label}: ${values.join(", ")}` : values.join(", ");
+  }
+
+  const value = formatNumber(parsed);
+  if (!value) return label;
+  return label ? `${label}: ${value}` : value;
+}
+
+// Build the Chart.js options object for the approved dashboard appearance.
+function buildChartOptions(theme, metadata, window) {
+  const options = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
+    interaction: defaultInteraction(metadata),
     plugins: {
       legend: {
         labels: {
@@ -250,48 +443,7 @@ function buildChartOptions(theme) {
         bodySpacing: 6,
         usePointStyle: true,
         callbacks: {
-          label: (context) => {
-            const label = context.dataset.label || "";
-            const parsed = context.parsed;
-            const value =
-              parsed !== null && typeof parsed === "object" ? parsed.y : parsed;
-            if (typeof value !== "number" || !Number.isFinite(value)) {
-              return label;
-            }
-            return `${label}: ${value.toLocaleString()}`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          color: theme.resolveColor(
-            `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
-            theme.gridColor,
-          ),
-        },
-        ticks: {
-          color: theme.secondaryText,
-          padding: 8,
-        },
-        border: {
-          display: false,
-        },
-      },
-      y: {
-        grid: {
-          color: theme.resolveColor(
-            `color-mix(in srgb, ${theme.gridColor} 35%, transparent)`,
-            theme.gridColor,
-          ),
-        },
-        ticks: {
-          color: theme.secondaryText,
-          padding: 8,
-        },
-        border: {
-          display: false,
+          label: tooltipLabel,
         },
       },
     },
@@ -303,6 +455,19 @@ function buildChartOptions(theme) {
       animationDuration: 200,
     },
   };
+
+  if (metadata.family === "cartesian" || metadata.family === "point") {
+    options.scales = cartesianScales(theme, metadata);
+  } else if (metadata.family === "radial") {
+    options.scales = radialScale(theme);
+  }
+
+  if (prefersReducedMotion(window)) {
+    options.animation = false;
+    options.hover.animationDuration = 0;
+  }
+
+  return options;
 }
 
 // Resolve data-attribute defaults first; an explicit constructor data value
@@ -344,26 +509,64 @@ function resolveChartData(element, config) {
   return data;
 }
 
-function mergeChartOptions(defaults, overrides = {}) {
-  overrides = overrides || {};
-  const merged = { ...defaults, ...overrides };
-  for (const branch of ["plugins", "scales"]) {
-    merged[branch] = { ...defaults[branch], ...overrides[branch] };
+function readOptionsAttribute(element) {
+  const raw = element.getAttribute("data-chart-options");
+  if (raw === null || raw.trim() === "") return {};
+  try {
+    const value = JSON.parse(raw);
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new TypeError("MooChart data-chart-options must be a JSON object.");
+    }
+    return value;
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new SyntaxError(
+        `MooChart could not parse data-chart-options as JSON: ${error.message}`,
+      );
+    }
+    throw error;
   }
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function optionEntries(value) {
+  return Object.entries(value || {}).filter(
+    ([key]) => !UNSAFE_OPTION_KEYS.has(key),
+  );
+}
+
+function mergeChartOptions(defaults = {}, overrides = {}) {
+  const merged = { ...defaults };
+  optionEntries(overrides).forEach(([key, value]) => {
+    merged[key] =
+      isPlainObject(value) && isPlainObject(defaults[key])
+        ? mergeChartOptions(defaults[key], value)
+        : value;
+  });
   return merged;
 }
 
+function supportedTypesMessage() {
+  return SUPPORTED_TYPE_LIST.slice(0, -1).join(", ")
+    + ", and "
+    + SUPPORTED_TYPE_LIST[SUPPORTED_TYPE_LIST.length - 1];
+}
+
 function resolveChartType(element, config) {
-  const type =
+  const publicType =
     config.type ||
     element.getAttribute("data-chart") ||
     "line";
-  if (!SUPPORTED_TYPES.has(type)) {
+  const metadata = CHART_TYPES.get(publicType);
+  if (!metadata) {
     throw new TypeError(
-      `MooChart supports line and bar charts; received "${type}".`,
+      `MooChart supports ${supportedTypesMessage()} charts; received "${publicType}".`,
     );
   }
-  return type;
+  return { publicType, ...metadata };
 }
 
 export default class MooChart {
@@ -398,9 +601,11 @@ export default class MooChart {
     this._config = config || {};
     this._themeElement = resolveThemeElement(element);
 
-    const type = resolveChartType(element, this._config);
+    const metadata = resolveChartType(element, this._config);
     const data = resolveChartData(element, this._config);
-    this._type = type;
+    const attributeOptions = readOptionsAttribute(element);
+    this._type = metadata.publicType;
+    this._metadata = metadata;
 
     const isDark = themeElementIsDark(this._themeElement);
     const colors = readThemeColors(this._themeElement, this._window);
@@ -415,16 +620,19 @@ export default class MooChart {
     this._theme = buildChartTheme(colors, isDark, resolveColor);
 
     const datasets = (data.datasets || []).map((dataset, index) =>
-      themeDataset({ ...dataset }, index, type, this._theme)
+      themeDataset({ ...dataset }, index, metadata, this._theme)
     );
 
     const options = mergeChartOptions(
-      buildChartOptions(this._theme),
+      mergeChartOptions(
+        buildChartOptions(this._theme, metadata, this._window),
+        attributeOptions,
+      ),
       this._config.options,
     );
     this._chart = new Chart(canvas, {
       ...this._config,
-      type,
+      type: metadata.chartType,
       data: {
         labels: data.labels || [],
         datasets,
@@ -487,7 +695,7 @@ export default class MooChart {
         this._themeElement,
       );
     this._theme = buildChartTheme(colors, isDark, resolveColor);
-    applyThemeToChart(this._chart, this._theme);
+    applyThemeToChart(this._chart, this._theme, this._metadata);
   }
 
   dispose() {
