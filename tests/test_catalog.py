@@ -1489,6 +1489,35 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertEqual(len(parser.buttons), 1)
                 self.assertEqual(parser.buttons[0]["type"], "submit")
                 payload = parser.payloads[0]
+                self.assertEqual(payload["html"].count('class="moo-codepen-signature"'), 1)
+                signature_start = payload["html"].index('<div class="moo-codepen-signature"')
+                page_start = payload["html"].index('<div class="moo-examples-page"', signature_start)
+                signature_html = payload["html"][signature_start:page_start]
+                self.assertIn("Bootstrap markup. shadcn feel.", signature_html)
+                self.assertNotIn('data-bs-toggle="popover"', signature_html)
+                self.assertIn('class="moo-codepen-signature__note"', signature_html)
+                self.assertIn(
+                    '<span class="moo-codepen-signature__note-line">Moo UI is not another shadcn clone.</span>',
+                    signature_html,
+                )
+                self.assertIn(
+                    '<span class="moo-codepen-signature__note-line">It brings the shadcn/ui feel to</span>',
+                    signature_html,
+                )
+                self.assertIn(
+                    '<span class="moo-codepen-signature__note-line">Bootstrap-native HTML.</span>',
+                    signature_html,
+                )
+                self.assertIn('class="moo-codepen-signature__learn-more"', signature_html)
+                self.assertIn('data-lucide="external-link"', signature_html)
+                self.assertIn("Learn more", signature_html)
+                self.assertIn(".moo-codepen-signature", payload["css"])
+                signature_css = payload["css"].split(".moo-codepen-signature {", 1)[1].split("}", 1)[0]
+                self.assertIn(
+                    "bottom: calc(var(--moo-codepen-footer-height, var(--moo-examples-footer-height, 0rem)) + 1rem);",
+                    signature_css,
+                )
+                self.assertNotIn("top:", signature_css)
                 self.assertIn("moo-examples-footer", payload["html"])
                 self.assertNotIn("data-moo-codepen-form", payload["html"])
                 self.assertIn(".moo-examples-footer", payload["css"])
