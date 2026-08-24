@@ -149,6 +149,265 @@ report("catalog-delegation", {{
         self.assertNotIn("color-mix", source)
         self.assertNotIn("datasetType", source)
 
+    def test_settings_theme_builder_state_attributes_are_catalog_scoped(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "settings-panel.js").read_text(encoding="utf-8")
+        )
+        styles = without_comments(
+            (ROOT / "site/scss/catalog/_docs.scss").read_text(encoding="utf-8")
+        )
+
+        self.assertNotIn("mooThemeStyle", source)
+        self.assertNotIn("mooBaseColor", source)
+        self.assertNotIn("data-moo-theme-style", styles)
+        self.assertNotIn("data-moo-base-color", styles)
+        self.assertIn("mooCatalogThemeBuilderStyle", source)
+        self.assertIn("mooCatalogThemeBuilderBaseColor", source)
+        self.assertIn("data-moo-catalog-theme-builder-style", styles)
+        self.assertIn("data-moo-catalog-theme-builder-base-color", styles)
+
+    def test_settings_theme_builder_applies_tokens_persistence_and_reset(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+
+const storage = new Map();
+const localStorage = {
+  getItem: (key) => (storage.has(key) ? storage.get(key) : null),
+  setItem: (key, value) => storage.set(key, String(value)),
+  removeItem: (key) => storage.delete(key),
+};
+
+function makeClassList(initial = []) {
+  const values = new Set(initial);
+  return {
+    toggle(name, force) {
+      const shouldAdd = force ?? !values.has(name);
+      if (shouldAdd) values.add(name);
+      else values.delete(name);
+      return shouldAdd;
+    },
+    contains: (name) => values.has(name),
+  };
+}
+
+function makeEmitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => {
+    listeners.set(type, [...(listeners.get(type) || []), handler]);
+  };
+  node.removeEventListener = (type, handler) => {
+    listeners.set(
+      type,
+      (listeners.get(type) || []).filter((candidate) => candidate !== handler)
+    );
+  };
+  node.dispatch = (type) => {
+    (listeners.get(type) || []).forEach((handler) =>
+      handler({ type, currentTarget: node, target: node })
+    );
+  };
+  node.click = () => node.dispatch("click");
+  return node;
+}
+
+function makeStyle() {
+  const values = new Map();
+  return {
+    setProperty: (name, value) => values.set(name, value),
+    removeProperty: (name) => values.delete(name),
+    getPropertyValue: (name) => values.get(name) || "",
+  };
+}
+
+function makeOption(value, label) {
+  const attributes = {};
+  return makeEmitter({
+    dataset: { mooCatalogThemeBuilderOption: value },
+    classList: makeClassList(),
+    attributes,
+    setAttribute: (name, value) => {
+      attributes[name] = String(value);
+    },
+    querySelector: (selector) =>
+      selector === "[data-moo-catalog-theme-builder-option-label]"
+        ? { textContent: label }
+        : null,
+  });
+}
+
+function makeControl(labels) {
+  const options = Object.entries(labels).map(([value, label]) =>
+    makeOption(value, label)
+  );
+  const value = { textContent: "" };
+  return {
+    options,
+    value,
+    root: {
+      querySelectorAll: (selector) =>
+        selector === "[data-moo-catalog-theme-builder-option]" ? options : [],
+      querySelector: (selector) =>
+        selector === "[data-moo-catalog-theme-builder-value]" ? value : null,
+    },
+  };
+}
+
+const selectors = {
+  style: "[data-moo-catalog-theme-builder-style]",
+  baseColor: "[data-moo-catalog-theme-builder-base-color]",
+  chartPalette: "[data-moo-catalog-theme-builder-chart-palette]",
+  headingFont: "[data-moo-catalog-theme-builder-heading-font]",
+  bodyFont: "[data-moo-catalog-theme-builder-body-font]",
+  radius: "[data-moo-catalog-theme-builder-radius]",
+};
+
+const controls = {
+  style: makeControl({ default: "Default", soft: "Soft", solid: "Solid" }),
+  baseColor: makeControl({ neutral: "Neutral", blue: "Blue" }),
+  chartPalette: makeControl({ default: "Default", pastel: "Pastel", vivid: "Vivid" }),
+  headingFont: makeControl({ default: "Default", system: "System" }),
+  bodyFont: makeControl({ default: "Default", geist: "Geist" }),
+  radius: makeControl({ default: "Default", compact: "Compact" }),
+};
+
+const fieldRoots = Object.fromEntries(
+  Object.entries(selectors).map(([key, selector]) => [selector, controls[key].root])
+);
+const reset = makeEmitter();
+const sheet = makeEmitter({
+  querySelectorAll: () => [],
+  querySelector: (selector) =>
+    selector === "[data-moo-settings-reset]" ? reset : fieldRoots[selector] || null,
+});
+const documentElement = {
+  dataset: { bsTheme: "light" },
+  dir: "ltr",
+  style: makeStyle(),
+};
+const root = {
+  documentElement,
+  defaultView: { localStorage, matchMedia: () => ({ matches: false }) },
+  querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
+};
+
+localStorage.setItem(
+  "moo:theme-builder",
+  JSON.stringify({
+    style: "soft",
+    baseColor: "blue",
+    chartPalette: "pastel",
+    headingFont: "system",
+    bodyFont: "geist",
+    radius: "compact",
+  })
+);
+
+const dispose = initSettingsPanel(root);
+
+function selectedValue(key) {
+  return (
+    controls[key].options.find((option) => option.classList.contains("active"))
+      ?.dataset.mooCatalogThemeBuilderOption || null
+  );
+}
+
+function optionFor(key, value) {
+  return controls[key].options.find(
+    (option) => option.dataset.mooCatalogThemeBuilderOption === value
+  );
+}
+
+const initial = {
+  styleDataset: documentElement.dataset.mooCatalogThemeBuilderStyle,
+  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
+  broadStyleDataset: Object.hasOwn(documentElement.dataset, "mooThemeStyle"),
+  broadBaseDataset: Object.hasOwn(documentElement.dataset, "mooBaseColor"),
+  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
+  heading: documentElement.style.getPropertyValue("--moo-heading-font-family"),
+  body: documentElement.style.getPropertyValue("--bs-body-font-family"),
+  radius: documentElement.style.getPropertyValue("--bs-border-radius"),
+  selectedStyle: selectedValue("style"),
+  selectedChart: selectedValue("chartPalette"),
+  styleLabel: controls.style.value.textContent,
+  softPressed: optionFor("style", "soft").attributes["aria-pressed"],
+};
+
+optionFor("chartPalette", "vivid").click();
+const persisted = JSON.parse(localStorage.getItem("moo:theme-builder"));
+const afterClick = {
+  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  selectedChart: selectedValue("chartPalette"),
+  persistedChart: persisted.chartPalette,
+};
+
+reset.click();
+const afterReset = {
+  styleDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderStyle"
+  ),
+  baseDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderBaseColor"
+  ),
+  chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
+  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  selectedStyle: selectedValue("style"),
+  selectedBase: selectedValue("baseColor"),
+  selectedChart: selectedValue("chartPalette"),
+  storedBuilder: localStorage.getItem("moo:theme-builder"),
+};
+
+dispose();
+console.log(JSON.stringify({ initial, afterClick, afterReset }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["initial"]["styleDataset"], "soft")
+        self.assertEqual(case["initial"]["baseDataset"], "blue")
+        self.assertFalse(case["initial"]["broadStyleDataset"])
+        self.assertFalse(case["initial"]["broadBaseDataset"])
+        self.assertEqual(case["initial"]["primary"], "rgb(37, 99, 235)")
+        self.assertEqual(case["initial"]["chart1"], "rgb(103, 169, 232)")
+        self.assertEqual(
+            case["initial"]["heading"],
+            'system-ui, -apple-system, "Segoe UI", sans-serif',
+        )
+        self.assertEqual(
+            case["initial"]["body"],
+            '"Geist", system-ui, -apple-system, "Segoe UI", sans-serif',
+        )
+        self.assertEqual(case["initial"]["radius"], "0.25rem")
+        self.assertEqual(case["initial"]["selectedStyle"], "soft")
+        self.assertEqual(case["initial"]["selectedChart"], "pastel")
+        self.assertEqual(case["initial"]["styleLabel"], "Soft")
+        self.assertEqual(case["initial"]["softPressed"], "true")
+        self.assertEqual(case["afterClick"]["chart5"], "rgb(225, 29, 72)")
+        self.assertEqual(case["afterClick"]["selectedChart"], "vivid")
+        self.assertEqual(case["afterClick"]["persistedChart"], "vivid")
+        self.assertFalse(case["afterReset"]["styleDataset"])
+        self.assertFalse(case["afterReset"]["baseDataset"])
+        self.assertEqual(case["afterReset"]["chart1"], "")
+        self.assertEqual(case["afterReset"]["primary"], "")
+        self.assertEqual(case["afterReset"]["selectedStyle"], "default")
+        self.assertEqual(case["afterReset"]["selectedBase"], "neutral")
+        self.assertEqual(case["afterReset"]["selectedChart"], "default")
+        self.assertIsNone(case["afterReset"]["storedBuilder"])
+
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(
             (CATALOG_JS / "index.js").read_text(encoding="utf-8")

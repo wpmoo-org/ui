@@ -4,7 +4,7 @@
 {% from "components/card.html.jinja" import card %}
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Context Menu — Moo UI{% endblock %}
@@ -56,7 +56,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "basic",
       "Basic",
       "Right-click the card, or focus it and press " ~ kbd("Shift") ~ "+" ~ kbd("F10") ~ " (or the " ~ kbd("ContextMenu") ~ " key). The corner button is the explicit fallback trigger for touch and keyboard-only use.",
@@ -77,7 +77,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "shortcuts",
       "Shortcuts",
       "Add compact shortcut text to the end of an item while preserving the Bootstrap dropdown-item structure.",
@@ -102,7 +102,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "groups",
       "Groups",
       "Group related actions with Bootstrap dropdown headers and dividers inside the same flat menu.",
@@ -123,7 +123,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "icons",
       "Icons",
       "Use the Dropdown Menu icon slot when actions need quick visual recognition.",
@@ -143,7 +143,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "disabled",
       "Disabled item",
       "A disabled item stays visible for context but cannot receive roving focus or be activated.",
@@ -164,7 +164,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "checkboxes",
       "Checkboxes",
       "Toggleable options use Bootstrap's button toggle Data API, so selecting one keeps the menu open instead of closing it.",
@@ -186,7 +186,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "radio",
       "Radio",
       "Single-select options reuse the checkbox item's dropdown-item button so keyboard roving focus and Bootstrap's button-toggle Data API keep working; Moo UI adds only the mutual-exclusivity between grouped options.",
@@ -206,7 +206,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "destructive",
       "Destructive",
       "Mark destructive actions with the shared danger text utility while keeping the menu item anatomy unchanged.",
@@ -226,7 +226,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("context-menu", "Context Menu",
       "sides",
       "Sides",
       "Use Bootstrap's end alignment for the fallback trigger while pointer invocation continues to position from the right-click location.",

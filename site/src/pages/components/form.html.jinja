@@ -8,7 +8,7 @@
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Form — Moo UI{% endblock %}
@@ -89,7 +89,7 @@
     </div>
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("form", "Form",
     "account-settings",
     "Field composition",
     "Compose a native <code>&lt;form&gt;</code> from Field, Fieldset, and Bootstrap form-control contracts.",
@@ -130,7 +130,7 @@
     </div>
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("form", "Form",
     "deploy-request",
     "Validation feedback",
     "Keep required inputs, helper text, and invalid feedback close to the field they describe.",
@@ -157,7 +157,7 @@
     {% endcall %}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("form", "Form",
     "access-policy",
     "Grouped controls",
     "Use Fieldset for related choices even when the child controls already own their labels.",

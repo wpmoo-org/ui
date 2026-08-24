@@ -2,7 +2,7 @@
 {% from "components/accordion.html.jinja" import accordion %}
 {% from "components/card.html.jinja" import card %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Accordion — Moo UI{% endblock %}
@@ -70,7 +70,7 @@
         ]
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("accordion", "Accordion",
       "basic",
       "Basic",
       "Only one item stays open at a time; opening another closes the current one.",
@@ -103,7 +103,7 @@
         always_open=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("accordion", "Accordion",
       "multiple",
       "Multiple",
       "Set <code>always_open=true</code> to let more than one item stay open at the same time.",
@@ -134,7 +134,7 @@
         flush=false
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("accordion", "Accordion",
       "bordered",
       "Bordered",
       "Use a bordered accordion for policy blocks that sit directly on surface boundaries.",
@@ -165,7 +165,7 @@
         ]
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("accordion", "Accordion",
       "disabled",
       "Disabled",
       "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",
@@ -201,7 +201,7 @@
         ) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("accordion", "Accordion",
       "in-card",
       "In a card",
       "Wrap the accordion in a card for settings surfaces that need a clearer container boundary.",

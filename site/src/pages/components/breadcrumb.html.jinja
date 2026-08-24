@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/breadcrumb.html.jinja" import breadcrumb %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Breadcrumb — Moo UI{% endblock %}
@@ -37,7 +37,7 @@
         {"label": "Growth dashboard"}
       ]) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("breadcrumb", "Breadcrumb",
       "trail",
       "Trail",
       "Every item but the last links back up the hierarchy; the last item marks <code>aria-current=\"page\"</code>.",
@@ -51,7 +51,7 @@
         {"label": "Growth dashboard"}
       ], divider="•") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("breadcrumb", "Breadcrumb",
       "custom-separator",
       "Custom separator",
       "Swap the divider glyph per instance through Bootstrap's own --bs-breadcrumb-divider custom property.",
@@ -69,7 +69,7 @@
         {"label": "Breadcrumb"}
       ], divider="•") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("breadcrumb", "Breadcrumb",
       "dropdown",
       "Dropdown",
       "Let a middle segment open a menu of sibling sections instead of linking to just one.",
@@ -84,7 +84,7 @@
         {"label": "Growth dashboard"}
       ]) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("breadcrumb", "Breadcrumb",
       "collapsed",
       "Collapsed",
       "Mark skipped levels with an ellipsis segment when the full trail would crowd the layout.",

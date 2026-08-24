@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Separator — Moo UI{% endblock %}
@@ -44,7 +44,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("separator", "Separator",
       "horizontal",
       "Horizontal divider",
       "Use a horizontal separator to split stacked content blocks.",
@@ -61,7 +61,7 @@
         <span class="text-body-secondary">Published</span>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("separator", "Separator",
       "vertical",
       "Vertical divider",
       "Use <code>.vr</code> inside compact flex layouts to separate adjacent inline sections.",
@@ -96,7 +96,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("separator", "Separator",
       "menu",
       "Menu-like grouping",
       "For vertical stacks, pair short labels with separators to mimic sidebar menu rhythm.",
@@ -122,7 +122,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("separator", "Separator",
       "list",
       "List divider",
       "Separate list rows when content stays in the same visual density.",

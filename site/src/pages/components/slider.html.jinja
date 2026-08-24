@@ -4,7 +4,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Slider - Moo UI{% endblock %}
@@ -42,7 +42,7 @@
         value=50
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("slider", "Slider",
       "slider-default",
       "Default",
       "A single native range input drives the filled track and output text.",
@@ -61,7 +61,7 @@
         step=5
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("slider", "Slider",
       "slider-range",
       "Range",
       "Two coordinated native range inputs preserve form submission while sharing one filled track.",
@@ -80,7 +80,7 @@
         value=3.5
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("slider", "Slider",
       "slider-steps",
       "Steps",
       "Use the native <code>min</code>, <code>max</code>, and <code>step</code> attributes for snapping and form values.",
@@ -97,7 +97,7 @@
         orientation="vertical"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("slider", "Slider",
       "slider-vertical",
       "Vertical",
       "Set <code>orientation=&quot;vertical&quot;</code> when the value control belongs beside a compact visual scale.",
@@ -114,7 +114,7 @@
         disabled=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("slider", "Slider",
       "slider-disabled",
       "Disabled",
       "The disabled state stays on the native input, so it cannot be focused, changed, or submitted.",

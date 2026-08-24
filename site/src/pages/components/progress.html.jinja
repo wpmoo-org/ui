@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/progress.html.jinja" import progress %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Progress — Moo UI{% endblock %}
@@ -34,7 +34,7 @@
         {{ progress(66, aria_label="Upload progress") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("progress", "Progress",
       "default",
       "Default",
       "A slim, rounded bar; the fill width is driven entirely by <code>value</code>/<code>max</code>.",
@@ -49,7 +49,7 @@
         {{ progress(90, aria_label="Step 3 progress") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("progress", "Progress",
       "values",
       "Values",
       "Stack several bars to compare progress across related tasks.",
@@ -62,7 +62,7 @@
         {{ progress(40, aria_label="Download progress", show_label=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("progress", "Progress",
       "with-label",
       "With label",
       "Set <code>show_label=true</code> to render the name and percentage above the bar; the 4px track is too thin for readable inline text.",

@@ -4,7 +4,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Date Picker — Moo UI{% endblock %}
@@ -43,7 +43,7 @@
         placeholder="Pick a date"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("datepicker", "Date Picker",
       "datepicker-basic",
       "Basic",
       "A button-like trigger opens a compact calendar popover and writes the selected value to a hidden form field.",
@@ -65,7 +65,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("datepicker", "Date Picker",
       "datepicker-time-picker",
       "Time Picker",
       "A Date Picker paired with a native time input for selecting a time; the time field stays a plain form control.",
@@ -83,7 +83,7 @@
         end_value="2026-08-27"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("datepicker", "Date Picker",
       "datepicker-range",
       "Range Picker",
       "One trigger manages two hidden fields; selecting the end date completes the range and closes the picker with focus returning to the trigger.",
@@ -102,7 +102,7 @@
         caption_layout="dropdown"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("datepicker", "Date Picker",
       "datepicker-birth-date",
       "Date Of Birth",
       "Month and year selectors keep long historical ranges manageable without changing the calendar contract.",
@@ -119,7 +119,7 @@
         show_presets=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("datepicker", "Date Picker",
       "datepicker-presets",
       "Presets",
       "Preset buttons set common dates while preserving the same hidden input serialization.",
@@ -138,7 +138,7 @@
         show_presets=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("datepicker", "Date Picker",
       "datepicker-inline-calendar",
       "Inline Calendar",
       "Use the same calendar directly when the date choice is the main task on the screen.",

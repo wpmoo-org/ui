@@ -214,10 +214,10 @@ class ToastTests(CatalogTestCase):
         source = PAGE.read_text(encoding="utf-8")
 
         self.assertIn(
-            '{% from "includes/example.html.jinja" import render_component_intro, render_example %}',
+            '{% from "includes/example.html.jinja" import render_component_intro, render_component_example with context %}',
             source,
         )
-        self.assertIn('render_example(', source)
+        self.assertIn('render_component_example("toast", "Toast",', source)
         self.assertIn('"basic"', source)
         self.assertIn('"Basic"', source)
         self.assertIn('toast_target="toast-basic-template"', source)
@@ -232,14 +232,19 @@ class ToastTests(CatalogTestCase):
         self.assertIn('toast_container(placement="bottom-end")', basic_example)
         self.assertNotIn("stacked=true", basic_example)
         basic_source_start = source.index('{% set basic_source %}')
-        basic_source_end = source.index('{{ render_example(\n      "basic"', basic_source_start)
+        basic_source_end = source.index(
+            '{{ render_component_example("toast", "Toast",\n      "basic"',
+            basic_source_start,
+        )
         basic_source = source[basic_source_start:basic_source_end]
         self.assertIn('{{ toast(', basic_source)
         self.assertNotIn("<button", basic_source)
         self.assertNotIn('class="toast', basic_source)
         self.assertIn('"variants"', source)
         self.assertIn('"Variants"', source)
-        variants_render_start = source.index('{{ render_example(\n      "variants"')
+        variants_render_start = source.index(
+            '{{ render_component_example("toast", "Toast",\n      "variants"'
+        )
         variants_render_end = source.index("source_content=variants_source", variants_render_start)
         variants_render = source[variants_render_start:variants_render_end]
         self.assertIn('preview_class="moo-example__preview--medium"', variants_render)
@@ -257,7 +262,10 @@ class ToastTests(CatalogTestCase):
         self.assertIn('variant="loading"', source)
         self.assertNotIn('toast-variant-error-template', source)
         variants_source_start = source.index('{% set variants_source %}')
-        variants_source_end = source.index('{{ render_example(\n      "variants"', variants_source_start)
+        variants_source_end = source.index(
+            '{{ render_component_example("toast", "Toast",\n      "variants"',
+            variants_source_start,
+        )
         variants_source = source[variants_source_start:variants_source_end]
         self.assertIn('{{ toast(', variants_source)
         self.assertNotIn("<button", variants_source)

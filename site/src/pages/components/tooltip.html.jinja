@@ -3,7 +3,7 @@
 {% from "components/kbd.html.jinja" import kbd %}
 {% from "components/tooltip.html.jinja" import tooltip_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Tooltip — Moo UI{% endblock %}
@@ -32,7 +32,7 @@
     {% set basic %}
       {{ tooltip_trigger("Check sync status", "Workspace status is visible from the project settings panel.") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tooltip", "Tooltip",
       "basic",
       "Basic",
       "Use a focusable trigger for one-line operational context without opening modals.",
@@ -48,7 +48,7 @@
         {{ button("Left", variant="outline", tooltip="Preview opens to the left", tooltip_placement="left") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tooltip", "Tooltip",
       "placements",
       "Side",
       "Choose <code>tooltip_placement</code> for compact command bars and density-sensitive tooltips.",
@@ -65,7 +65,7 @@
         tooltip_html=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tooltip", "Tooltip",
       "keyboard-shortcut",
       "With keyboard shortcut",
       "Use compact shortcut badges in tooltip content and let Bootstrap sanitize the markup.",
@@ -84,7 +84,7 @@
         {{ button("Archive", variant="outline", disabled=true) }}
       </span>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tooltip", "Tooltip",
       "disabled-button",
       "Disabled button",
       "A <code>disabled</code> element never fires hover or focus events, so wrap it in a focusable <code>&lt;span&gt;</code> and attach the tooltip there, per Bootstrap's own guidance.",

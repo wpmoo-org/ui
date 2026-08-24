@@ -8,7 +8,7 @@
 {% from "components/spinner.html.jinja" import spinner %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Input Group — Moo UI{% endblock %}
@@ -61,7 +61,7 @@
         {{ field_description("icon-start-search-help", "Icon positioned at the start.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "icon-start",
       "Icon at start",
       "Place a decorative icon in <code>input-group-text</code> before the input when it clarifies the field's purpose.",
@@ -84,7 +84,7 @@
         {{ field_description("icon-end-password-help", "Icon positioned at the end.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "icon-end",
       "Icon at end",
       "Place the addon after the input when the affordance belongs to the trailing edge.",
@@ -103,7 +103,7 @@
         {{ input_group_text("12 results") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "search-results",
       "Search results",
       "Keep a result count in the same surface while the input remains the editable control.",
@@ -139,7 +139,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "text-addons",
       "Text",
       "",
@@ -204,7 +204,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "button-addon",
       "Button",
       "",
@@ -222,7 +222,7 @@
         {{ input_group_text(kbd("⌘K")) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "kbd",
       "Kbd",
       "Use a single keyboard hint in the trailing addon; avoid splitting one shortcut into separate visual controls.",
@@ -267,7 +267,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "dropdown",
       "Dropdown",
       "Use an icon-only menu for file actions or a labeled menu when the input action needs a search scope.",
@@ -326,7 +326,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "spinner",
       "Spinner",
       "Use compact loading indicators inside addons when the input value is waiting on async work.",
@@ -359,7 +359,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "block-start",
       "Block-start addons",
       "Place a label-like addon above an input or textarea while keeping the control focusable.",
@@ -379,7 +379,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "block-end-input",
       "Block-end input",
       "Place a unit below the input when the supporting content belongs to the field.",
@@ -400,7 +400,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "block-end-textarea",
       "Block-end textarea",
       "Keep a counter and action below the textarea when both belong to the field.",
@@ -420,7 +420,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input-group", "Input Group",
       "custom-input",
       "Custom Input",
       "Combine a textarea and action in one Bootstrap input group.",

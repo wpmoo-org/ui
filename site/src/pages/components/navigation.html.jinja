@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/navigation.html.jinja" import nav_item, nav_menu %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Navigation — Moo UI{% endblock %}
@@ -38,7 +38,7 @@
         {{ nav_item("Settings", href="#", disabled=true) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("navigation", "Navigation",
       "horizontal-pills",
       "Pills",
       "Use a compact pill row for workspace routes where current context should be clearly emphasized.",
@@ -55,7 +55,7 @@
         {{ nav_item("Settings", href="#", icon="settings") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("navigation", "Navigation",
       "sidebar",
       "Sidebar list",
       "Use one-level, icon-led sidebar items for predictable routes; nested flyouts are handled in a dedicated sidebar pattern.",
@@ -70,7 +70,7 @@
         {{ nav_item("Archived", href="#") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("navigation", "Navigation",
       "underline",
       "Underline",
       "Use underlines for lightweight filters in narrow views where emphasis should stay subtle.",
@@ -84,7 +84,7 @@
         {{ nav_item("Disabled", disabled=true) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("navigation", "Navigation",
       "base",
       "Base nav",
       "Use the base style when surrounding layout defines the visual weight and only the active link needs state.",

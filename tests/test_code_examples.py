@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import re
+from html import unescape
 
 from build import dedent_html, format_html
 from tests.helpers import ROOT, CatalogTestCase
@@ -38,6 +40,61 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("portal_content=english_portal", template)
         self.assertEqual(render_example_block.count("{{ source | highlight_html }}"), 1)
         self.assertNotIn("line_numbers", render_example_block)
+
+    def test_component_examples_render_catalog_toolbar_actions(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/button.html")
+        example_start = page.index('data-example="primary"')
+        example_end = page.index('data-example="outline"', example_start)
+        example = page[example_start:example_end]
+        self.assertIn('class="moo-example__toolbar"', example)
+        header_start = example.index('class="moo-example__header"')
+        toolbar_start = example.index('class="moo-example__toolbar"')
+        toolbar_end = example.index('class="moo-example__surface"', toolbar_start)
+        toolbar = example[toolbar_start:toolbar_end]
+        surface_start = example.index('class="moo-example__surface"')
+
+        self.assertLess(header_start, toolbar_start)
+        self.assertLess(toolbar_start, surface_start)
+
+        self.assertIn("Button", toolbar)
+        self.assertIn('data-lucide="mouse-pointer-click"', toolbar)
+        self.assertIn('data-moo-code-copy-target="#primary-code"', toolbar)
+        self.assertIn('data-moo-copy-icon="copy"', toolbar)
+        self.assertIn('data-moo-copy-icon="check" hidden', toolbar)
+        self.assertIn("Try in CodePen", toolbar)
+        self.assertIn("data-moo-codepen-form", toolbar)
+        self.assertNotIn("View Code", toolbar)
+
+        match = re.search(
+            r'<input type="hidden" name="data" value="([^"]+)"',
+            toolbar,
+        )
+        self.assertIsNotNone(match)
+        payload = json.loads(unescape(match.group(1)))
+
+        self.assertEqual(payload["title"], "Moo UI Button - Primary")
+        self.assertEqual(payload["tags"], ["moo-ui", "button", "components"])
+        self.assertIn('class="moo-codepen-example-shell"', payload["html"])
+        self.assertIn('<button class="btn btn-primary" type="button">', payload["html"])
+        self.assertIn("min-height: 100vh;", payload["css"])
+        self.assertIn(".moo-codepen-example-shell", payload["css"])
+        shell_css = payload["css"].split(".moo-codepen-example-shell {", 1)[1].split("}", 1)[0]
+        self.assertIn("display: grid;", shell_css)
+        self.assertIn("place-items: center;", shell_css)
+        full_width_css = payload["css"].split(".moo-codepen-example-shell > :where(", 1)[1].split("}", 1)[0]
+        self.assertIn(".w-100", full_width_css)
+        self.assertIn(".accordion", full_width_css)
+        self.assertIn(".slider", full_width_css)
+        self.assertIn("width: 100%;", full_width_css)
+        self.assertIn("@wpmoo/ui@", payload["css_external"])
+        self.assertEqual(
+            payload["js_external"],
+            "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+        )
+        self.assertFalse(payload["js_module"])
 
     def test_source_formatter_indents_nested_macro_markup(self) -> None:
         source = """

@@ -4,7 +4,7 @@
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 
 {% block title %}Button — Moo UI{% endblock %}
 
@@ -34,7 +34,7 @@
     {% set primary_example %}
       {{ button("Primary") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "primary",
       "Primary",
       "Use the primary button for the main action in a small decision area.",
@@ -44,7 +44,7 @@
     {% set outline_example %}
       {{ button("Outline", variant="outline") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "outline",
       "Outline",
       "An outlined button with no fill.",
@@ -54,7 +54,7 @@
     {% set secondary_example %}
       {{ button("Secondary", variant="secondary") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "secondary",
       "Secondary",
       "A muted button for secondary actions.",
@@ -64,7 +64,7 @@
     {% set ghost_example %}
       {{ button("Ghost", variant="ghost") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "ghost",
       "Ghost",
       "A transparent button with no background or border.",
@@ -74,7 +74,7 @@
     {% set destructive_example %}
       {{ button("Destructive", variant="destructive") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "destructive",
       "Destructive",
       "A destructive button for dangerous actions.",
@@ -84,7 +84,7 @@
     {% set link_example %}
       {{ button("Link", variant="link") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "link",
       "Link",
       "A button styled as a hyperlink.",
@@ -111,7 +111,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "size",
       "Size",
       "Use the <code>size</code> prop after choosing the button variant.",
@@ -121,7 +121,7 @@
     {% set icon_example %}
       {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="send") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "icon",
       "Icon",
       "An icon-only button. Always provide an <code>aria-label</code>; the icon alone is not an accessible name.",
@@ -134,7 +134,7 @@
         {{ button("Fork", variant="outline", icon_end="git-fork") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "with-icon",
       "With Icon",
       "Remember to add the <code>icon_start</code> or <code>icon_end</code> parameter to the button for the correct spacing.",
@@ -148,7 +148,7 @@
         {{ button("Saving", variant="outline", loading=true, disabled=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "button-states",
       "States",
       "Use disabled and loading states to make temporary limits and async work obvious to operators.",
@@ -161,7 +161,7 @@
         {{ button("", variant="outline", size="icon", aria_label="Arrow up", icon_start="arrow-up", extra_class="rounded-pill") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "rounded",
       "Rounded",
       "Use the <code>rounded-pill</code> class to make the button rounded.",
@@ -174,7 +174,7 @@
         {{ button("Downloading", loading=true, disabled=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "spinner",
       "Spinner",
       "Render a spinner inside the button to show a loading state. The <code>loading</code> parameter replaces the leading icon with a spinning loader and sets <code>aria-busy</code>.",
@@ -187,7 +187,7 @@
         {{ button("Invite collaborators", variant="outline", extra_class="w-100") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "full-width-actions",
       "Block buttons",
       "<code>d-grid gap-2</code> stacks actions with consistent spacing, while <code>w-100</code> lets each button fill the available width. This is a layout choice, not a new button variant.",
@@ -197,7 +197,7 @@
     {% set toggle_state %}
       {{ button("Follow this ticket", variant="outline", toggle=true) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "toggle-state",
       "Toggle states",
       "<code>data-bs-toggle=\"button\"</code> keeps the pressed state synchronized. <code>aria-pressed=\"false\"</code> marks an initial inactive state.",
@@ -228,7 +228,7 @@
     {% set related_button_group_description %}
       Group adjacent actions that belong together. See the <a href="{{ site_href("components/button-group.html", root_path) }}">Button Group</a> component for broader toolbar behavior.
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button", "Button",
       "related-button-group",
       "Button Group",
       related_button_group_description,

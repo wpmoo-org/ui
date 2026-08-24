@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/pagination.html.jinja" import pagination, pagination_ellipsis, pagination_item, pagination_next, pagination_prev %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Pagination — Moo UI{% endblock %}
@@ -44,7 +44,7 @@
         {{ pagination_next() }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("pagination", "Pagination",
       "default",
       "Default",
       "Use page numbers with Previous/Next and an ellipsis for long result sets.",
@@ -61,7 +61,7 @@
         {{ pagination_next(label="Next") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("pagination", "Pagination",
       "disabled-ends",
       "Disabled boundary",
       "Keep Previous disabled on the first page while remaining actions stay available.",
@@ -85,7 +85,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("pagination", "Pagination",
       "sizes",
       "Sizes",
       "Use compact and larger controls with Bootstrap size variants when the layout needs density.",

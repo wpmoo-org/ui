@@ -51,6 +51,7 @@ const POINT_HOVER_RADIUS = 5;
 const CHART_LABEL_FONT_SIZE = 12;
 const LINE_STROKE_WIDTH = 1.5;
 const RADAR_STROKE_WIDTH = 1.5;
+const MARKER_BORDER_WIDTH = 1;
 const POINT_MARKER_STYLE = "circle";
 const TOOLTIP_MARKER_SIZE = POINT_MARKER_SIZE * Math.SQRT2;
 const TOOLTIP_MARKER_BOX_PADDING =
@@ -251,11 +252,18 @@ function tooltipLabelColor(context) {
   return {
     borderColor: options.borderColor,
     backgroundColor: options.backgroundColor,
-    borderWidth: options.borderWidth,
+    borderWidth: MARKER_BORDER_WIDTH,
     borderDash: options.borderDash,
     borderDashOffset: options.borderDashOffset,
     borderRadius: 0,
   };
+}
+
+function legendLabels(chart) {
+  return Chart.defaults.plugins.legend.labels.generateLabels(chart).map((item) => ({
+    ...item,
+    lineWidth: MARKER_BORDER_WIDTH,
+  }));
 }
 
 function datasetMetadata(dataset, metadata) {
@@ -575,6 +583,7 @@ function buildChartOptions(theme, metadata, window) {
           pointStyle: POINT_MARKER_STYLE,
           boxWidth: POINT_MARKER_SIZE,
           boxHeight: POINT_MARKER_SIZE,
+          generateLabels: legendLabels,
           font: {
             size: CHART_LABEL_FONT_SIZE,
           },

@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Badge — Moo UI{% endblock %}
@@ -38,7 +38,7 @@
         {{ badge("Outline", variant="outline") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("badge", "Badge",
       "variants",
       "Variants",
       "Use a compact set: default, secondary, destructive, and outline.",
@@ -53,7 +53,7 @@
         {{ badge("Blocked", variant="destructive") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("badge", "Badge",
       "status",
       "Status labels",
       "Reserve extra Bootstrap statuses for product states that need a recognizable semantic cue.",
@@ -72,7 +72,7 @@
         </span>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("badge", "Badge",
       "counts",
       "Counts",
       "When a badge is only a number, add visually hidden context so screen readers hear what the count means.",

@@ -7,7 +7,7 @@
 {% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 
 {% block title %}Card — Moo UI{% endblock %}
 
@@ -56,7 +56,7 @@
         </ul>
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("card", "Card",
       "size",
       "Size",
       "Use <code>size=\"sm\"</code> to tighten the card rhythm for compact surfaces. Sections and the inline inset share one spacing token.",
@@ -96,7 +96,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("card", "Card",
       "spacing",
       "Spacing",
       "The card exposes <code>--moo-card-spacing</code> so a consumer can retune the section gap and part inset in one place.",
@@ -119,7 +119,7 @@
         </div>
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("card", "Card",
       "spacing-edge-to-edge",
       "Scrollable",
       "Scroll long body content inside a <code>card-scroll</code> strip that bleeds to the card edges. Above a footer, the strip sits flush against the divider.",
@@ -141,7 +141,7 @@
         <p class="mb-0">A practical talk on component APIs, accessibility, and shipping faster.</p>
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("card", "Card",
       "image",
       "Image",
       "Add an image before the card header to create a featured card. The image clips to the card's top corners.",

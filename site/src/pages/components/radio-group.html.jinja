@@ -2,7 +2,7 @@
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/field.html.jinja" import field, fieldset %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Radio Group — Moo UI{% endblock %}
@@ -56,7 +56,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("radio-group", "Radio Group",
       "default",
       "Default",
       "Use one compact set of mutually exclusive options for a common selection workflow.",
@@ -87,7 +87,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("radio-group", "Radio Group",
       "description",
       "Description",
       "Show option-level helper text when each choice has a different operational impact.",
@@ -110,7 +110,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("radio-group", "Radio Group",
       "fieldset",
       "Fieldset",
       "Add a fieldset-level description and standard field spacing when the whole group needs shared context.",
@@ -136,7 +136,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("radio-group", "Radio Group",
       "disabled",
       "Disabled",
       "Disable only options that are currently unavailable in the current environment.",
@@ -162,7 +162,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("radio-group", "Radio Group",
       "invalid",
       "Invalid",
       "Use the invalid and feedback parameters to show a validation error across the whole group.",

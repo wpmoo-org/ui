@@ -4,7 +4,7 @@
 {% from "components/input.html.jinja" import input %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Dialog — Moo UI{% endblock %}
@@ -57,7 +57,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dialog", "Dialog",
       "basic",
       "Basic",
       "Use a Button trigger, concise copy, and a focused form inside Bootstrap's modal structure.",
@@ -78,7 +78,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dialog", "Dialog",
       "custom-close",
       "Custom close action",
       "Keep Bootstrap's header close button available, then add task-specific actions in the footer.",
@@ -98,7 +98,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dialog", "Dialog",
       "no-close",
       "Explicit dismissal",
       "Use a static backdrop when a dialog should close only through visible actions.",
@@ -130,7 +130,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dialog", "Dialog",
       "sizes",
       "Sizes",
       "Set <code>size</code> to <code>sm</code>, <code>lg</code>, <code>xl</code>, or <code>fullscreen</code>; the default matches the basic example above.",
@@ -151,7 +151,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dialog", "Dialog",
       "scrollable",
       "Scrollable content",
       "Add <code>.modal-dialog-scrollable</code> so the dialog body scrolls internally instead of the whole page.",
@@ -171,7 +171,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dialog", "Dialog",
       "static-backdrop",
       "Static backdrop",
       "Set <code>static=true</code> to disable backdrop-click and Escape dismissal for unsaved-state confirmations.",

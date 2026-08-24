@@ -2,7 +2,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "components/field.html.jinja" import field, field_description, field_error, field_group, fieldset %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Select — Moo UI{% endblock %}
@@ -108,7 +108,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("select", "Select",
       "default",
       "Default",
       "Use one native `<code>form-select</code>` control for direct queue routing.",
@@ -125,7 +125,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("select", "Select",
       "groups",
       "Groups",
       "Group related values with `<code>optgroup</code>` when a long list is still static.",
@@ -143,7 +143,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("select", "Select",
       "disabled",
       "Disabled",
       "Keep the control visible and clear when route changes are temporarily blocked.",
@@ -165,7 +165,7 @@
         {{ field_error("select-invalid-workspace-error", "Choose a valid queue before continuing.") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("select", "Select",
       "invalid",
       "Invalid",
       "Use `<code>is-invalid</code>` with helper/error messaging in the same control set.",
@@ -210,7 +210,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("select", "Select",
       "field-form",
       "Form rhythm",
       "Use field grouping when multiple selects share one form decision.",

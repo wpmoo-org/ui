@@ -439,8 +439,16 @@ for (const publicType of Object.keys(dataByType)) {{
   }});
   const instance = MooChart.getOrCreateInstance(root);
   const dataset = instance.chart.data.datasets[0];
+  const legendItem = instance.chart.legend.legendItems[0];
+  const tooltipColor = instance.chart.options.plugins.tooltip.callbacks.labelColor({{
+    chart: instance.chart,
+    datasetIndex: 0,
+    dataIndex: 0,
+  }});
   reportByType[publicType] = {{
     borderWidth: dataset.borderWidth ?? null,
+    legendLineWidth: legendItem.lineWidth ?? null,
+    tooltipBorderWidth: tooltipColor.borderWidth ?? null,
     pointRadius: dataset.pointRadius ?? null,
     pointHoverRadius: dataset.pointHoverRadius ?? null,
   }};
@@ -451,11 +459,15 @@ report("thin-strokes", {{ reportByType }});
         )
         report_by_type = case["reportByType"]
         self.assertEqual(report_by_type["area"]["borderWidth"], 1.5)
+        self.assertEqual(report_by_type["area"]["legendLineWidth"], 1)
+        self.assertEqual(report_by_type["area"]["tooltipBorderWidth"], 1)
         self.assertEqual(report_by_type["area"]["pointRadius"], 0)
         self.assertEqual(report_by_type["area"]["pointHoverRadius"], 5)
         for chart_type in ("line", "radar"):
             with self.subTest(chart_type=chart_type):
                 self.assertEqual(report_by_type[chart_type]["borderWidth"], 1.5)
+                self.assertEqual(report_by_type[chart_type]["legendLineWidth"], 1)
+                self.assertEqual(report_by_type[chart_type]["tooltipBorderWidth"], 1)
                 self.assertEqual(report_by_type[chart_type]["pointRadius"], 3)
                 self.assertEqual(report_by_type[chart_type]["pointHoverRadius"], 5)
 
@@ -1331,6 +1343,20 @@ report("stateful-lifecycle-button", {{
             r'[^"]*\bbg-body\b[^"]*\btext-body\b[^"]*"',
         )
         self.assertIn('data-chart-live', lifecycle)
+
+    def test_chart_toolbar_copy_icons_use_toggleable_wrappers(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("charts.html")
+        toolbar = page.split('class="moo-chart-example__actions"', 1)[1].split(
+            "</button>",
+            1,
+        )[0]
+
+        self.assertIn('data-moo-code-copy-target="#chart-area-default-example-code"', toolbar)
+        self.assertIn('<span data-moo-copy-icon="copy">', toolbar)
+        self.assertIn('<span data-moo-copy-icon="check" hidden>', toolbar)
+        self.assertNotIn("<svg data-moo-copy-icon", toolbar)
 
     def test_lifecycle_controls_are_centered_in_preview(self) -> None:
         result = self.run_build()

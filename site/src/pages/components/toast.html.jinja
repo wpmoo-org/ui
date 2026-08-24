@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/toast.html.jinja" import toast, toast_container, toast_template %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% block title %}Toast — Moo UI{% endblock %}
 
@@ -51,7 +51,7 @@
         "Sunday, December 3 at 9:00 AM"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toast", "Toast",
       "basic",
       "Basic",
       "Use <code>.toast</code> with polite live-region attributes, a <code>.toast-header</code>, a dismiss button, and a <code>.toast-body</code> for routine feedback.",
@@ -135,7 +135,7 @@
         variant="loading"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toast", "Toast",
       "variants",
       "Variants",
       "Use <code>variant=\"success\"</code> or another supported variant in a Moo macro. In plain HTML, set <code>data-toast-variant=\"success\"</code> on the <code>.toast</code> root. Catalog <code>data-toast-target</code> attributes only wire demo buttons; urgent failures still need <code>priority=\"assertive\"</code> in macros or <code>role=\"alert\"</code> with <code>aria-live=\"assertive\"</code> in plain HTML. The loading variant is visual only and does not auto-resolve a Promise.",

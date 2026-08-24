@@ -3,7 +3,7 @@
 {% from "components/table.html.jinja" import table, table_row_actions %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_divider %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Table — Moo UI{% endblock %}
@@ -51,7 +51,7 @@
         row_header=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("table", "Table",
       "basic",
       "Basic",
       "Render statuses with documented Badge markup and right-align the numeric column.",
@@ -68,7 +68,7 @@
         row_header=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("table", "Table",
       "footer",
       "Footer",
       "Pass <code>footer</code> for a summary row that closes out a usage ledger.",
@@ -112,7 +112,7 @@
         row_header=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("table", "Table",
       "actions",
       "Actions",
       "A row-actions column composed from an icon-only dropdown trigger and documented Bootstrap Dropdown Menu markup.",
@@ -139,7 +139,7 @@
         row_header=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("table", "Table",
       "compact",
       "Compact, striped, and hoverable",
       "Bootstrap's own <code>striped</code>, <code>hover</code>, and <code>small</code> modifiers combine freely for denser, scannable rows.",

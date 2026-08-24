@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "components/typography.html.jinja" import typography %}
 
 {% block title %}Typography — Moo UI{% endblock %}
@@ -38,7 +38,7 @@
         {{ typography("Incident summary", variant="example-title") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "headings",
       "Headings",
       "Map semantic intent to the heading roles first, then use utility classes when visual level and HTML level need to differ.",
@@ -55,7 +55,7 @@
         <h6 class="mb-0">h6. Open action items</h6>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "semantic-headings",
       "Semantic headings",
       "Keep the document outline meaningful when screen readers and search indexing are reading this content.",
@@ -72,7 +72,7 @@
         <p class="h6 mb-0">h6. Audit log</p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "heading-utilities",
       "Heading utilities",
       "Use heading utility classes when the visual style must stay large but the document structure should stay compact.",
@@ -82,7 +82,7 @@
     {% set customizing_headings %}
       <h3 class="mb-0">Maintenance window <small class="text-body-secondary">Planned 02:00–03:00 UTC</small></h3>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "customizing-headings",
       "Customizing headings",
       "Use <code>small.text-body-secondary</code> for contextual metadata that should stay subordinate to the heading.",
@@ -99,7 +99,7 @@
         <h1 class="display-6 mb-0">Display 6 · Legible</h1>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "display-headings",
       "Display headings",
       "Use <code>display-1</code> through <code>display-6</code> when a heading needs more visual presence than the surrounding content hierarchy.",
@@ -113,7 +113,7 @@
         {{ typography("Section label", variant="section-label") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "supporting-text",
       "Supporting text",
       "Use lead, secondary, and label roles to show hierarchy without inventing one-off text styles for each page.",
@@ -123,7 +123,7 @@
     {% set lead %}
       <p class="lead mb-0">Lead copy is useful for a short onboarding message or migration note.</p>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "lead",
       "Lead",
       "Add <code>lead</code> when an introductory paragraph needs more visual weight than ordinary body copy.",
@@ -142,7 +142,7 @@
         <p class="mb-0"><em>This line carries emphasis.</em></p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "inline-elements",
       "Inline text elements",
       "Use semantic inline elements for their meaning: <code>mark</code> highlights, <code>del</code> removes, <code>ins</code> adds, and <code>strong</code>/<code>em</code> convey emphasis.",
@@ -152,7 +152,7 @@
     {% set abbreviation %}
       <p class="mb-0"><abbr title="HyperText Markup Language" class="initialism">HTML</abbr> keeps its expanded meaning available on hover.</p>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "abbreviation",
       "Abbreviations",
       "Add a <code>title</code> to <code>abbr</code> so an acronym has an accessible expanded meaning; <code>initialism</code> gives it a slightly smaller treatment.",
@@ -169,7 +169,7 @@
         </figcaption>
       </figure>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "blockquote",
       "Blockquotes",
       "Wrap a quotation in <code>blockquote</code> and keep its attribution outside the quote with <code>blockquote-footer</code> and <code>cite</code>.",
@@ -196,7 +196,7 @@
         </figure>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "blockquote-alignment",
       "Blockquote alignment",
       "Use <code>text-center</code> or <code>text-end</code> on the figure to align a quote and its attribution together.",
@@ -222,7 +222,7 @@
         </dl>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "lists",
       "Lists",
       "Use <code>list-unstyled</code> for quiet lists, <code>list-inline</code> for compact rows, and the grid classes to align a description list.",
@@ -236,7 +236,7 @@
         <p class="text-end mb-0">End-aligned text closes the row cleanly.</p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "text-alignment",
       "Alignment",
       "Use <code>text-start</code>, <code>text-center</code>, and <code>text-end</code> to align text without a custom selector.",
@@ -250,7 +250,7 @@
         <p class="text-capitalize mb-0">quiet system status</p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "text-transform",
       "Transform",
       "Use <code>text-lowercase</code>, <code>text-uppercase</code>, or <code>text-capitalize</code> when the displayed casing is part of the content treatment.",
@@ -264,7 +264,7 @@
         <p class="fst-italic mb-0">A quiet note that stays in the same hierarchy.</p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "text-scale",
       "Size and emphasis",
       "Use <code>fs-*</code> for font size and <code>fw-*</code>/<code>fst-*</code> for weight or italics; these utilities change treatment without replacing semantic elements.",
@@ -278,7 +278,7 @@
         <p class="lh-lg mb-0">Large line-height gives a longer sentence more air.</p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "line-height",
       "Line height",
       "Use <code>lh-1</code>, <code>lh-base</code>, or <code>lh-lg</code> when text density needs to change without a custom line-height declaration.",
@@ -291,7 +291,7 @@
         <p class="text-decoration-line-through mb-0">Strike through an obsolete process step that was revised.</p>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "text-decoration",
       "Text decoration",
       "Use <code>text-decoration-underline</code> or <code>text-decoration-line-through</code> when the decoration communicates the text state.",
@@ -301,7 +301,7 @@
     {% set monospace %}
       <p class="font-monospace mb-0">npm run lint --workspace=ui</p>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "monospace",
       "Monospace",
       "Apply <code>font-monospace</code> to identifiers and terminal-like values when a fixed-width face improves scanning.",
@@ -311,7 +311,7 @@
     {% set inline_code %}
       <p class="mb-0">Use {{ typography("npm run format", variant="inline-code") }} for local CI-aligned formatting.</p>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("typography", "Typography",
       "inline-code",
       "Inline code",
       "Wrap public classes, attributes, and contracts in <code>&lt;code&gt;</code> so technical names stay distinct inside prose.",

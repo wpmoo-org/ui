@@ -2,7 +2,7 @@
 {% from "components/field.html.jinja" import field, field_description, field_group, fieldset %}
 {% from "components/switch.html.jinja" import switch %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% macro switch_field(id, label, description="", checked=false, disabled=false, invalid=false) -%}
@@ -60,7 +60,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("switch", "Switch",
       "description",
       "Description",
       "Add supporting copy below the label with <code>description</code>.",
@@ -76,7 +76,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("switch", "Switch",
       "disabled",
       "Disabled",
       "Disabled switches lower opacity and drop pointer interaction in both states.",
@@ -96,7 +96,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("switch", "Switch",
       "invalid",
       "Invalid",
       "Set <code>invalid=true</code> to pair with a form's validation state.",

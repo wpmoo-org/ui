@@ -41,12 +41,8 @@
         aria-label="Copy code"
         title="Copy code"
       >
-        {{ render_icon("copy", "inline-start")
-          | replace('data-icon="inline-start"', ('data-moo-copy-icon="copy" data-icon="inline-start"' | safe))
-        }}
-        {{ render_icon("check", "inline-start")
-          | replace('data-icon="inline-start"', ('data-moo-copy-icon="check" data-icon="inline-start" hidden' | safe))
-        }}
+        <span data-moo-copy-icon="copy">{{ render_icon("copy", "inline-start") }}</span>
+        <span data-moo-copy-icon="check" hidden>{{ render_icon("check", "inline-start") }}</span>
       </button>
       {{ codepen_button(
         "Moo UI " ~ title,

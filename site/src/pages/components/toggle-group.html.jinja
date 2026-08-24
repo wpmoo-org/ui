@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/toggle_group.html.jinja" import toggle_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Toggle Group — Moo UI{% endblock %}
@@ -49,7 +49,7 @@
         type="multiple"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toggle-group", "Toggle Group",
       "default",
       "Default",
       "Independent checkbox items let more than one stay pressed at once.",
@@ -70,7 +70,7 @@
         variant="outline"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toggle-group", "Toggle Group",
       "outline",
       "Outline variant, single selection",
       "Radio items share one name so exactly one method stays pressed.",
@@ -104,7 +104,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toggle-group", "Toggle Group",
       "sizes",
       "Sizes",
       "size sets btn-sm/btn-lg directly on each item, the same scale a plain Button uses.",
@@ -124,7 +124,7 @@
         type="multiple"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toggle-group", "Toggle Group",
       "disabled",
       "Disabled item",
       "A single item can be disabled without affecting its neighbors.",
@@ -145,7 +145,7 @@
         vertical=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("toggle-group", "Toggle Group",
       "vertical",
       "Vertical",
       "vertical=true switches the flex container to a column and applies the shared vertical spacing token.",

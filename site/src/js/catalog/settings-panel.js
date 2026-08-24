@@ -23,8 +23,8 @@ const BUILDER_SELECTORS = {
 };
 
 const BUILDER_DATASETS = {
-  style: "mooThemeStyle",
-  baseColor: "mooBaseColor",
+  style: "mooCatalogThemeBuilderStyle",
+  baseColor: "mooCatalogThemeBuilderBaseColor",
 };
 
 const BUILDER_OPTION_SELECTOR = "[data-moo-catalog-theme-builder-option]";
