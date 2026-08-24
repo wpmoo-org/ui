@@ -1489,52 +1489,35 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertEqual(len(parser.buttons), 1)
                 self.assertEqual(parser.buttons[0]["type"], "submit")
                 payload = parser.payloads[0]
-                self.assertEqual(payload["html"].count('class="moo-codepen-signature"'), 1)
-                signature_start = payload["html"].index('<div class="moo-codepen-signature"')
-                page_start = payload["html"].index('<div class="moo-examples-page"', signature_start)
-                signature_html = payload["html"][signature_start:page_start]
-                self.assertIn("Bootstrap markup. shadcn feel.", signature_html)
-                self.assertNotIn('data-bs-toggle="popover"', signature_html)
-                self.assertIn('class="moo-codepen-signature__note"', signature_html)
-                self.assertIn(
-                    '<span class="moo-codepen-signature__note-line">Moo UI is not another shadcn clone.</span>',
-                    signature_html,
-                )
-                self.assertIn(
-                    '<span class="moo-codepen-signature__note-line">It brings the shadcn/ui feel to</span>',
-                    signature_html,
-                )
-                self.assertIn(
-                    '<span class="moo-codepen-signature__note-line">Bootstrap-native HTML.</span>',
-                    signature_html,
-                )
-                self.assertIn('class="moo-codepen-signature__learn-more"', signature_html)
-                self.assertIn('data-lucide="external-link"', signature_html)
-                self.assertIn("Learn more", signature_html)
-                self.assertIn(".moo-codepen-signature", payload["css"])
-                signature_css = payload["css"].split(".moo-codepen-signature {", 1)[1].split("}", 1)[0]
-                self.assertIn(
-                    "bottom: calc(var(--moo-codepen-footer-height, var(--moo-examples-footer-height, 0rem)) + 1rem);",
-                    signature_css,
-                )
-                self.assertNotIn("top:", signature_css)
+                self.assertNotIn("moo-codepen-signature", payload["html"])
+                self.assertNotIn("Bootstrap markup. shadcn feel.", payload["html"])
+                self.assertNotIn(".moo-codepen-signature", payload["css"])
+                self.assertNotIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertNotIn("moo-examples-footer__preview", payload["css"])
                 self.assertIn("moo-examples-footer", payload["html"])
                 self.assertNotIn("data-moo-codepen-form", payload["html"])
                 self.assertIn(".moo-examples-footer", payload["css"])
                 self.assertIn(".moo-component-header--has-actions", payload["css"])
-                self.assertIn("moo-examples-footer__component-trigger", payload["css"])
                 self.assertIn(
                     "--moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);",
                     payload["css"],
                 )
                 self.assertEqual(
                     payload["css_external"],
-                    f"https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/assets/css/moo-ui.css",
+                    (
+                        f"https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/assets/css/moo-ui.css;"
+                        "https://ui.wpmoo.org/assets/css/codepen-demo.css"
+                    ),
                 )
                 self.assertEqual(
                     payload["js_external"],
-                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                    (
+                        "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js;"
+                        "https://ui.wpmoo.org/assets/js/codepen-demo.js"
+                    ),
                 )
+                self.assertIn('window.MooCodePen = {"kind": "example"};', payload["js"])
+                self.assertIn("window.MooCodePenDemo.init(window.MooCodePen);", payload["js"])
                 self.assertIn("initializeMooCodePenPopovers", payload["js"])
                 self.assertIn("loadMooCodePenBootstrap", payload["js"])
                 self.assertIn(
@@ -1772,7 +1755,7 @@ class CatalogContractTests(CatalogTestCase):
                     '<footer class="moo-auth-page__footer'
                 )
                 self.assertGreater(payload_footer_start, payload_main_end)
-                self.assertIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertNotIn("moo-examples-footer__component-trigger", payload["css"])
                 self.assertIn(".moo-auth-page__footer", payload["css"])
                 self.assertIn("display: flex;", payload["css"])
                 self.assertIn("justify-content: space-between;", payload["css"])
@@ -1781,8 +1764,13 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("padding: 1rem 1.5rem;", payload["css"])
                 self.assertEqual(
                     payload["js_external"],
-                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                    (
+                        "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js;"
+                        "https://ui.wpmoo.org/assets/js/codepen-demo.js"
+                    ),
                 )
+                self.assertIn('window.MooCodePen = {"kind": "example"};', payload["js"])
+                self.assertIn("window.MooCodePenDemo.init(window.MooCodePen);", payload["js"])
                 self.assertIn("initializeMooCodePenPopovers", payload["js"])
                 self.assertIn("loadMooCodePenBootstrap", payload["js"])
                 self.assertIn(

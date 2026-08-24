@@ -77,96 +77,90 @@ class CodeExampleTests(CatalogTestCase):
 
         self.assertEqual(payload["title"], "Moo UI Button - Primary")
         self.assertEqual(payload["tags"], ["moo-ui", "button", "components"])
-        self.assertIn('class="moo-codepen-signature"', payload["html"])
-        self.assertIn("Bootstrap markup. shadcn feel.", payload["html"])
-        self.assertIn('class="moo-codepen-signature__note"', payload["html"])
-        self.assertIn('<span class="moo-codepen-signature__note-line">Moo UI is not another shadcn clone.</span>', payload["html"])
-        self.assertIn(
-            '<span class="moo-codepen-signature__note-line">It brings the shadcn/ui feel to</span>',
+        self.assertNotIn("moo-codepen-signature", payload["html"])
+        self.assertNotIn("moo-codepen-footer", payload["html"])
+        self.assertNotIn("moo-examples-footer__component-trigger", payload["html"])
+        self.assertNotIn('data-bs-toggle="popover"', payload["html"])
+        self.assertNotIn("This demo is composed from the", payload["html"])
+        self.assertNotIn(
+            'class="container min-vh-100 d-flex align-items-center justify-content-center py-5"',
             payload["html"],
         )
-        self.assertIn(
-            '<span class="moo-codepen-signature__note-line">Bootstrap-native HTML.</span>',
-            payload["html"],
+        self.assertNotIn('class="row w-100 justify-content-center"', payload["html"])
+        self.assertNotIn('class="col-12 col-lg-8 d-flex justify-content-center"', payload["html"])
+        self.assertNotIn("moo-codepen-example-shell", payload["html"])
+        self.assertEqual(
+            payload["html"].strip(),
+            '<button class="btn btn-primary" type="button">Primary</button>',
         )
-        self.assertIn(
-            '<a class="moo-codepen-signature__learn-more" href="https://ui.wpmoo.org/" target="_blank" rel="noopener noreferrer">',
-            payload["html"],
+        self.assertEqual(payload["css"], "")
+        self.assertNotIn(".moo-codepen-signature", payload["css"])
+        self.assertNotIn(".moo-codepen-footer", payload["css"])
+        self.assertNotIn(".moo-examples-footer__component-trigger", payload["css"])
+        self.assertNotIn("--moo-codepen-footer-height", payload["css"])
+        self.assertNotIn(".moo-codepen-example-shell", payload["css"])
+        self.assertEqual(
+            payload["css_external"],
+            (
+                "https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css;"
+                "https://ui.wpmoo.org/assets/css/codepen-demo.css"
+            ),
         )
-        self.assertIn("Learn more", payload["html"])
-        self.assertIn('data-lucide="external-link"', payload["html"])
-        self.assertIn('<footer class="moo-codepen-footer text-body-secondary small">', payload["html"])
-        self.assertNotIn("Demo only", payload["html"])
-        self.assertIn("This demo is composed from the", payload["html"])
-        self.assertIn('class="btn btn-outline-secondary moo-examples-footer__component-trigger"', payload["html"])
-        self.assertIn('data-bs-toggle="popover"', payload["html"])
-        self.assertIn('data-bs-content="', payload["html"])
-        self.assertIn("moo-examples-footer__preview", payload["html"])
-        self.assertIn("assets/images/components/button.webp", payload["html"])
-        self.assertIn("https://ui.wpmoo.org/components/button/", payload["html"])
-        self.assertIn(">Button</a> component.", payload["html"])
-        self.assertIn('class="moo-codepen-example-shell"', payload["html"])
-        self.assertIn('<button class="btn btn-primary" type="button">', payload["html"])
-        self.assertIn("min-height: 100vh;", payload["css"])
-        self.assertIn(".moo-codepen-signature", payload["css"])
-        signature_css = payload["css"].split(".moo-codepen-signature {", 1)[1].split("}", 1)[0]
-        self.assertIn("position: fixed;", signature_css)
-        self.assertIn(
-            "bottom: calc(var(--moo-codepen-footer-height, var(--moo-examples-footer-height, 0rem)) + 1rem);",
-            signature_css,
-        )
-        self.assertIn("left: 1rem;", signature_css)
-        self.assertNotIn("top:", signature_css)
-        self.assertNotIn("right:", signature_css)
-        lockup_css = payload["css"].split(".moo-codepen-signature__lockup {", 1)[1].split("}", 1)[0]
-        self.assertIn("border: 0;", lockup_css)
-        self.assertIn("background: transparent;", lockup_css)
-        self.assertIn("box-shadow: none;", lockup_css)
-        note_css = payload["css"].split(
-            ".moo-codepen-signature__note {",
-            1,
-        )[1].split("}", 1)[0]
-        self.assertIn(
-            "margin-left: calc(var(--moo-codepen-signature-lockup-padding) + var(--moo-codepen-signature-mark-size) + var(--moo-codepen-signature-gap));",
-            note_css,
-        )
-        self.assertIn("color: var(--bs-tertiary-color);", note_css)
-        self.assertIn("font-size: 0.8125rem;", note_css)
-        note_line_css = payload["css"].split(
-            ".moo-codepen-signature__note-line {",
-            1,
-        )[1].split("}", 1)[0]
-        self.assertIn("display: block;", note_line_css)
-        self.assertIn("white-space: nowrap;", note_line_css)
-        learn_more_css = payload["css"].split(
-            ".moo-codepen-signature__learn-more {",
-            1,
-        )[1].split("}", 1)[0]
-        self.assertIn("display: inline-flex;", learn_more_css)
-        self.assertIn("margin-top: 0.125rem;", learn_more_css)
-        self.assertIn(".moo-codepen-footer", payload["css"])
-        self.assertIn(".moo-examples-footer__component-trigger", payload["css"])
-        footer_css = payload["css"].split(".moo-codepen-footer {", 1)[1].split("}", 1)[0]
-        self.assertIn("position: fixed;", footer_css)
-        self.assertIn("bottom: 0;", footer_css)
-        self.assertIn("background: var(--bs-secondary-bg);", footer_css)
-        self.assertIn("--moo-codepen-footer-height: 3rem;", payload["css"])
-        self.assertIn(".moo-codepen-example-shell", payload["css"])
-        shell_css = payload["css"].split(".moo-codepen-example-shell {", 1)[1].split("}", 1)[0]
-        self.assertIn("display: grid;", shell_css)
-        self.assertIn("place-items: center;", shell_css)
-        full_width_css = payload["css"].split(".moo-codepen-example-shell > :where(", 1)[1].split("}", 1)[0]
-        self.assertIn(".w-100", full_width_css)
-        self.assertIn(".accordion", full_width_css)
-        self.assertIn(".slider", full_width_css)
-        self.assertIn("width: 100%;", full_width_css)
-        self.assertIn("@wpmoo/ui@", payload["css_external"])
         self.assertEqual(
             payload["js_external"],
-            "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+            (
+                "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js;"
+                "https://ui.wpmoo.org/assets/js/codepen-demo.js"
+            ),
         )
-        self.assertIn("initializeMooCodePenPopovers", payload["js"])
+        config_match = re.search(
+            r"window\.MooCodePen = (\{[\s\S]*?\});",
+            payload["js"],
+        )
+        self.assertIsNotNone(config_match)
+        config = json.loads(config_match.group(1))
+        self.assertEqual(config["kind"], "component")
+        self.assertEqual(len(config["components"]), 1)
+        component = config["components"][0]
+        self.assertEqual(component["slug"], "button")
+        self.assertEqual(component["label"], "Button")
+        self.assertIn("button", component["description"].lower())
+        self.assertEqual(component["href"], "https://ui.wpmoo.org/components/button/")
+        self.assertEqual(
+            component["previewSrc"],
+            "https://ui.wpmoo.org/assets/images/components/button.webp",
+        )
+        self.assertIn(
+            "window.MooCodePenDemo.init(window.MooCodePen);",
+            payload["js"],
+        )
+        self.assertNotIn("initializeMooCodePenPopovers", payload["js"])
         self.assertFalse(payload["js_module"])
+        self.assertTrue((ROOT / "site-dist/assets/js/codepen-demo.js").is_file())
+        self.assertTrue((ROOT / "site-dist/assets/css/codepen-demo.css").is_file())
+        demo_css = (ROOT / "site-dist/assets/css/codepen-demo.css").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("body.moo-codepen-demo", demo_css)
+        self.assertIn("body.moo-codepen-component-demo", demo_css)
+        component_body_css = demo_css.split(
+            "body.moo-codepen-component-demo {", 1
+        )[1].split("}", 1)[0]
+        self.assertIn("display: grid;", component_body_css)
+        self.assertIn("place-items: center;", component_body_css)
+        self.assertIn("padding: 2rem;", component_body_css)
+        self.assertIn("body.moo-codepen-component-demo > :where(", demo_css)
+        self.assertNotIn('.container > .row > [class*="col"]', demo_css)
+        self.assertIn(".moo-codepen-signature", demo_css)
+        self.assertIn(".moo-codepen-footer", demo_css)
+        self.assertIn(".moo-examples-footer__component-trigger", demo_css)
+        self.assertIn(".slider", demo_css)
+        demo_js = (ROOT / "site-dist/assets/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('document.body.classList.add("moo-codepen-demo")', demo_js)
+        self.assertNotIn("ensureStyles", demo_js)
+        self.assertNotIn('document.createElement("style")', demo_js)
 
     def test_source_formatter_indents_nested_macro_markup(self) -> None:
         source = """
