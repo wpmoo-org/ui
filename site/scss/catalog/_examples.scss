@@ -149,9 +149,9 @@
 .moo-example__surface {
   min-width: 0;
   overflow: hidden;
-  border: var(--bs-border-width) solid var(--bs-border-color);
+  border: var(--bs-border-width) solid var(--bs-card-border-color, var(--bs-border-color));
   border-radius: var(--bs-border-radius-xl);
-  background: var(--bs-body-bg);
+  background: var(--bs-card-bg, var(--bs-body-bg));
 }
 
 .moo-example:has(.dropdown-menu.show) {

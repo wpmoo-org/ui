@@ -376,6 +376,154 @@ report("line-point-colors", {{
             {"rgb(33, 37, 41)", "rgb(222, 226, 230)"},
         )
 
+    def test_chart_palette_tokens_override_bootstrap_semantic_fallbacks(self) -> None:
+        chart_data = {
+            "labels": ["Jan", "Feb"],
+            "datasets": [
+                {"label": "Desktop", "data": [18, 24]},
+                {"label": "Mobile", "data": [12, 20]},
+            ],
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(json.dumps(chart_data))},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--bs-info", "rgb(13, 110, 253)"],
+  ["--bs-success", "rgb(25, 135, 84)"],
+  ["--bs-warning", "rgb(255, 193, 7)"],
+  ["--bs-danger", "rgb(220, 53, 69)"],
+  ["--moo-chart-1", "rgb(103, 169, 232)"],
+  ["--moo-chart-2", "rgb(118, 187, 170)"],
+]);
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  return {{ color: element.style.color, getPropertyValue: () => "" }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const datasets = instance.chart.data.datasets;
+report("chart-palette-tokens", {{
+  firstPoint: datasets[0].pointBackgroundColor,
+  firstHover: datasets[0].pointHoverBackgroundColor,
+  secondPoint: datasets[1].pointBackgroundColor,
+  secondHover: datasets[1].pointHoverBackgroundColor,
+}});
+"""
+        )
+        self.assertEqual(case["firstPoint"], "rgb(103, 169, 232)")
+        self.assertEqual(case["firstHover"], "rgb(103, 169, 232)")
+        self.assertEqual(case["secondPoint"], "rgb(118, 187, 170)")
+        self.assertEqual(case["secondHover"], "rgb(118, 187, 170)")
+
+    def test_line_area_and_radar_strokes_are_thin_enough_for_points(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const dataByType = {{
+  area: {VALID_DATA},
+  line: {VALID_DATA},
+  radar: {{ labels: ["Speed", "Quality"], datasets: [{{ label: "Score", data: [7, 9] }}] }},
+}};
+const reportByType = {{}};
+for (const publicType of Object.keys(dataByType)) {{
+  const root = makeRoot({{
+    "data-chart": publicType,
+    "data-chart-data": JSON.stringify(dataByType[publicType]),
+  }});
+  const instance = MooChart.getOrCreateInstance(root);
+  const dataset = instance.chart.data.datasets[0];
+  reportByType[publicType] = {{
+    borderWidth: dataset.borderWidth ?? null,
+    pointRadius: dataset.pointRadius ?? null,
+    pointHoverRadius: dataset.pointHoverRadius ?? null,
+  }};
+  instance.dispose();
+}}
+report("thin-strokes", {{ reportByType }});
+"""
+        )
+        report_by_type = case["reportByType"]
+        self.assertEqual(report_by_type["area"]["borderWidth"], 1.5)
+        self.assertEqual(report_by_type["area"]["pointRadius"], 0)
+        self.assertEqual(report_by_type["area"]["pointHoverRadius"], 5)
+        for chart_type in ("line", "radar"):
+            with self.subTest(chart_type=chart_type):
+                self.assertEqual(report_by_type[chart_type]["borderWidth"], 1.5)
+                self.assertEqual(report_by_type[chart_type]["pointRadius"], 3)
+                self.assertEqual(report_by_type[chart_type]["pointHoverRadius"], 5)
+
+    def test_explicit_dataset_colors_are_preserved_during_retheme(self) -> None:
+        chart_data = {
+            "labels": ["Jan", "Feb"],
+            "datasets": [
+                {
+                    "label": "Custom",
+                    "data": [18, 24],
+                    "backgroundColor": "rgb(9, 10, 11)",
+                    "borderColor": "rgb(1, 2, 3)",
+                }
+            ],
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(json.dumps(chart_data))},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--bs-info", "rgb(13, 110, 253)"],
+  ["--bs-success", "rgb(25, 135, 84)"],
+  ["--bs-warning", "rgb(255, 193, 7)"],
+  ["--bs-danger", "rgb(220, 53, 69)"],
+  ["--moo-chart-1", "rgb(103, 169, 232)"],
+]);
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  return {{ color: element.style.color, getPropertyValue: () => "" }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const observer = observerLog.at(-1);
+const dataset = instance.chart.data.datasets[0];
+const before = {{
+  backgroundColor: dataset.backgroundColor,
+  borderColor: dataset.borderColor,
+  pointBackgroundColor: dataset.pointBackgroundColor,
+}};
+
+tokenColors.set("--moo-chart-1", "rgb(37, 99, 235)");
+observer.callback([{{ attributeName: "style" }}]);
+await new Promise((resolve) => setTimeout(resolve, 20));
+
+report("explicit-colors", {{
+  before,
+  after: {{
+    backgroundColor: dataset.backgroundColor,
+    borderColor: dataset.borderColor,
+    pointBackgroundColor: dataset.pointBackgroundColor,
+  }},
+}});
+"""
+        )
+        self.assertEqual(case["before"]["backgroundColor"], "rgb(9, 10, 11)")
+        self.assertEqual(case["before"]["borderColor"], "rgb(1, 2, 3)")
+        self.assertEqual(case["before"]["pointBackgroundColor"], "rgb(103, 169, 232)")
+        self.assertEqual(case["after"]["backgroundColor"], "rgb(9, 10, 11)")
+        self.assertEqual(case["after"]["borderColor"], "rgb(1, 2, 3)")
+        self.assertEqual(case["after"]["pointBackgroundColor"], "rgb(37, 99, 235)")
+
     def test_unsupported_chart_type_is_rejected(self) -> None:
         case = self.run_chart_case(
             """
@@ -511,25 +659,76 @@ report("options-merge", {{
         case = self.run_chart_case(
             f"""
 const root = makeRoot({{
-  "data-chart": "area",
+  "data-chart": "pie",
   "data-chart-data": {json.dumps(VALID_DATA)},
 }});
 const instance = MooChart.getOrCreateInstance(root);
 const labels = instance.chart.options.plugins.legend.labels;
+const tooltip = instance.chart.options.plugins.tooltip;
+const tooltipPoint = tooltip.callbacks.labelPointStyle();
+const legendItem = instance.chart.legend.legendItems[0];
+const tooltipColor = tooltip.callbacks.labelColor({{
+  chart: instance.chart,
+  datasetIndex: 0,
+  dataIndex: 0,
+}});
 report("legend-point-markers", {{
-  usePointStyle: labels.usePointStyle,
-  pointStyle: labels.pointStyle ?? null,
-  boxWidth: labels.boxWidth ?? null,
-  boxHeight: labels.boxHeight ?? null,
-  pointStyleWidth: labels.pointStyleWidth ?? null,
+  legendUsePointStyle: labels.usePointStyle,
+  legendPointStyle: labels.pointStyle ?? null,
+  legendBoxWidth: labels.boxWidth ?? null,
+  legendBoxHeight: labels.boxHeight ?? null,
+  legendFontSize: labels.font.size,
+  legendPointStyleWidth: labels.pointStyleWidth ?? null,
+  legendTextOffset: labels.boxWidth + labels.font.size / 2,
+  legendVisualDiameter: labels.boxHeight * Math.SQRT2,
+  legendFillStyle: legendItem.fillStyle,
+  legendStrokeStyle: legendItem.strokeStyle,
+  legendLineWidth: legendItem.lineWidth,
+  tooltipUsePointStyle: tooltip.usePointStyle,
+  tooltipBoxWidth: tooltip.boxWidth ?? null,
+  tooltipBoxHeight: tooltip.boxHeight ?? null,
+  tooltipBoxPadding: tooltip.boxPadding ?? null,
+  tooltipTextOffset: tooltip.boxWidth + 2 + tooltip.boxPadding,
+  tooltipVisualDiameter: Math.min(tooltip.boxWidth, tooltip.boxHeight),
+  tooltipPointStyle: tooltipPoint.pointStyle ?? null,
+  tooltipRotation: tooltipPoint.rotation ?? null,
+  tooltipBorderColor: tooltipColor.borderColor,
+  tooltipBackgroundColor: tooltipColor.backgroundColor,
+  tooltipBorderWidth: tooltipColor.borderWidth,
 }});
 """
         )
-        self.assertTrue(case["usePointStyle"])
-        self.assertEqual(case["pointStyle"], "circle")
-        self.assertEqual(case["boxWidth"], 6)
-        self.assertEqual(case["boxHeight"], 6)
-        self.assertIsNone(case["pointStyleWidth"])
+        self.assertTrue(case["legendUsePointStyle"])
+        self.assertEqual(case["legendPointStyle"], "circle")
+        self.assertEqual(case["legendBoxWidth"], 6)
+        self.assertEqual(case["legendBoxHeight"], 6)
+        self.assertIsNone(case["legendPointStyleWidth"])
+        self.assertTrue(case["tooltipUsePointStyle"])
+        self.assertAlmostEqual(
+            case["tooltipBoxWidth"],
+            case["legendVisualDiameter"],
+            places=4,
+        )
+        self.assertAlmostEqual(
+            case["tooltipBoxHeight"],
+            case["legendVisualDiameter"],
+            places=4,
+        )
+        self.assertAlmostEqual(
+            case["tooltipVisualDiameter"],
+            case["legendVisualDiameter"],
+            places=4,
+        )
+        self.assertAlmostEqual(
+            case["tooltipTextOffset"],
+            case["legendTextOffset"],
+            places=4,
+        )
+        self.assertEqual(case["tooltipPointStyle"], "circle")
+        self.assertEqual(case["tooltipRotation"], 0)
+        self.assertEqual(case["tooltipBackgroundColor"], case["legendFillStyle"])
+        self.assertEqual(case["tooltipBorderColor"], case["legendStrokeStyle"])
+        self.assertEqual(case["tooltipBorderWidth"], case["legendLineWidth"])
 
     def test_point_hover_markers_stay_readable_without_oversizing_legend(self) -> None:
         case = self.run_chart_case(
@@ -724,10 +923,50 @@ report("theme-observer", {{
         )
         self.assertTrue(case["observedDocumentElement"])
         self.assertTrue(case["attributes"])
-        self.assertEqual(case["attributeFilter"], ["data-bs-theme"])
+        self.assertEqual(case["attributeFilter"], ["data-bs-theme", "style"])
         # One unrelated mutation plus one data-bs-theme mutation must produce
         # exactly one coalesced re-theme update.
         self.assertEqual(case["updates"], 1)
+
+    def test_theme_observer_rethemes_when_inline_chart_tokens_change(self) -> None:
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--bs-info", "rgb(13, 110, 253)"],
+  ["--bs-success", "rgb(25, 135, 84)"],
+  ["--bs-warning", "rgb(255, 193, 7)"],
+  ["--bs-danger", "rgb(220, 53, 69)"],
+]);
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  return {{ color: element.style.color, getPropertyValue: () => "" }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const observer = observerLog.at(-1);
+const before = instance.chart.data.datasets[0].pointBackgroundColor;
+
+tokenColors.set("--moo-chart-1", "rgb(103, 169, 232)");
+observer.callback([{{ attributeName: "style" }}]);
+await new Promise((resolve) => setTimeout(resolve, 20));
+
+report("style-token-retheme", {{
+  before,
+  after: instance.chart.data.datasets[0].pointBackgroundColor,
+}});
+"""
+        )
+        self.assertEqual(case["before"], "rgb(13, 110, 253)")
+        self.assertEqual(case["after"], "rgb(103, 169, 232)")
 
     def test_theme_observer_uses_the_nearest_data_bs_theme_scope(self) -> None:
         case = self.run_chart_case(
@@ -1141,7 +1380,7 @@ report("stateful-lifecycle-button", {{
         self.assertIn("dispose()", source)
         self.assertIn("const instances = new WeakMap();", source)
         self.assertIn("this._observer", source)
-        self.assertIn('attributeFilter: ["data-bs-theme"]', source)
+        self.assertIn('attributeFilter: ["data-bs-theme", "style"]', source)
 
         # The documented getters must actually exist in the source so the
         # API freeze cannot drift from the implementation.

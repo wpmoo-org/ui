@@ -48,8 +48,27 @@ const UNSAFE_OPTION_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const POINT_MARKER_SIZE = 6;
 const POINT_MARKER_RADIUS = POINT_MARKER_SIZE / 2;
 const POINT_HOVER_RADIUS = 5;
+const CHART_LABEL_FONT_SIZE = 12;
+const LINE_STROKE_WIDTH = 1.5;
+const RADAR_STROKE_WIDTH = 1.5;
+const POINT_MARKER_STYLE = "circle";
+const TOOLTIP_MARKER_SIZE = POINT_MARKER_SIZE * Math.SQRT2;
+const TOOLTIP_MARKER_BOX_PADDING =
+  POINT_MARKER_SIZE + CHART_LABEL_FONT_SIZE / 2 - TOOLTIP_MARKER_SIZE - 2;
+const THEMED_DATASET_STATE = Symbol("mooChartThemeState");
+const DATASET_COLOR_FIELDS = [
+  "backgroundColor",
+  "borderColor",
+  "hoverBackgroundColor",
+  "hoverBorderColor",
+  "pointBackgroundColor",
+  "pointBorderColor",
+  "pointHoverBackgroundColor",
+  "pointHoverBorderColor",
+];
 
-// Bootstrap semantic color tokens the chart palette is derived from.
+// Bootstrap semantic color tokens plus optional Moo chart palette tokens the
+// chart palette is derived from.
 const COLOR_TOKENS = [
   "--bs-body-color",
   "--bs-body-bg",
@@ -68,9 +87,14 @@ const COLOR_TOKENS = [
   "--bs-success-text-emphasis",
   "--bs-warning-text-emphasis",
   "--bs-danger-text-emphasis",
+  "--moo-chart-1",
+  "--moo-chart-2",
+  "--moo-chart-3",
+  "--moo-chart-4",
+  "--moo-chart-5",
 ];
 
-// Dataset colors cycle through the semantic palette in this order.
+// Dataset colors cycle through the chart palette in this order.
 const DATASET_COLOR_KEYS = ["primary", "success", "info", "warning", "danger"];
 
 function readThemeColors(themeElement, window) {
@@ -124,18 +148,36 @@ function buildChartTheme(colors, isDark = false, resolveColor = (value) => value
   // token is intentionally near-black in dark mode, so chart data uses blue
   // info tokens instead of switching to a grayscale series.
   const lightPalette = {
-    primary: colors["--bs-info"] || colors["--bs-info-text-emphasis"],
-    success: colors["--bs-success"],
-    info: colors["--bs-info"],
-    warning: colors["--bs-warning"],
-    danger: colors["--bs-danger"],
+    primary:
+      colors["--moo-chart-1"] ||
+      colors["--bs-info"] ||
+      colors["--bs-info-text-emphasis"],
+    success: colors["--moo-chart-2"] || colors["--bs-success"],
+    info: colors["--moo-chart-3"] || colors["--bs-info"],
+    warning: colors["--moo-chart-4"] || colors["--bs-warning"],
+    danger: colors["--moo-chart-5"] || colors["--bs-danger"],
   };
   const darkPalette = {
-    primary: colors["--bs-info-text-emphasis"] || colors["--bs-info"],
-    success: colors["--bs-success-text-emphasis"] || colors["--bs-success"],
-    info: colors["--bs-info-text-emphasis"] || colors["--bs-info"],
-    warning: colors["--bs-warning-text-emphasis"] || colors["--bs-warning"],
-    danger: colors["--bs-danger-text-emphasis"] || colors["--bs-danger"],
+    primary:
+      colors["--moo-chart-1"] ||
+      colors["--bs-info-text-emphasis"] ||
+      colors["--bs-info"],
+    success:
+      colors["--moo-chart-2"] ||
+      colors["--bs-success-text-emphasis"] ||
+      colors["--bs-success"],
+    info:
+      colors["--moo-chart-3"] ||
+      colors["--bs-info-text-emphasis"] ||
+      colors["--bs-info"],
+    warning:
+      colors["--moo-chart-4"] ||
+      colors["--bs-warning-text-emphasis"] ||
+      colors["--bs-warning"],
+    danger:
+      colors["--moo-chart-5"] ||
+      colors["--bs-danger-text-emphasis"] ||
+      colors["--bs-danger"],
   };
   const palette = isDark ? darkPalette : lightPalette;
 
@@ -176,6 +218,46 @@ function datasetColors(theme, count) {
   });
 }
 
+function datasetThemeState(dataset) {
+  if (!dataset[THEMED_DATASET_STATE]) {
+    const explicitColorFields = new Set(
+      DATASET_COLOR_FIELDS.filter((field) =>
+        Object.prototype.hasOwnProperty.call(dataset, field)
+      )
+    );
+    Object.defineProperty(dataset, THEMED_DATASET_STATE, {
+      value: { explicitColorFields },
+    });
+  }
+  return dataset[THEMED_DATASET_STATE];
+}
+
+function setThemedColor(dataset, field, value, themeState) {
+  if (!themeState.explicitColorFields.has(field)) {
+    dataset[field] = value;
+  }
+}
+
+function tooltipPointStyle() {
+  return {
+    pointStyle: POINT_MARKER_STYLE,
+    rotation: 0,
+  };
+}
+
+function tooltipLabelColor(context) {
+  const meta = context.chart.getDatasetMeta(context.datasetIndex);
+  const options = meta.controller.getStyle(context.dataIndex);
+  return {
+    borderColor: options.borderColor,
+    backgroundColor: options.backgroundColor,
+    borderWidth: options.borderWidth,
+    borderDash: options.borderDash,
+    borderDashOffset: options.borderDashOffset,
+    borderRadius: 0,
+  };
+}
+
 function datasetMetadata(dataset, metadata) {
   return dataset.type && CHART_TYPES.has(dataset.type)
     ? CHART_TYPES.get(dataset.type)
@@ -192,62 +274,117 @@ function themeDataset(dataset, index, metadata, theme) {
   const pointColor = color;
   const effectiveMetadata = datasetMetadata(dataset, metadata);
   const datasetType = dataset.type || effectiveMetadata.chartType;
+  const themeState = datasetThemeState(dataset);
 
   if (datasetType === "line") {
-    dataset.borderColor = mutedColor;
-    dataset.backgroundColor = translucentColor(theme, color);
-    dataset.pointBackgroundColor = pointColor;
-    dataset.pointBorderColor = pointColor;
+    setThemedColor(dataset, "borderColor", mutedColor, themeState);
+    setThemedColor(
+      dataset,
+      "backgroundColor",
+      translucentColor(theme, color),
+      themeState,
+    );
+    setThemedColor(dataset, "pointBackgroundColor", pointColor, themeState);
+    setThemedColor(dataset, "pointBorderColor", pointColor, themeState);
     dataset.pointBorderWidth = 0;
+    if (dataset.borderWidth === undefined) {
+      dataset.borderWidth = LINE_STROKE_WIDTH;
+    }
     if (dataset.pointRadius === undefined) {
-      dataset.pointRadius = effectiveMetadata.pointRadiusDefault ?? POINT_MARKER_RADIUS;
+      dataset.pointRadius =
+        effectiveMetadata.pointRadiusDefault ?? POINT_MARKER_RADIUS;
     }
     dataset.pointHoverRadius = POINT_HOVER_RADIUS;
-    dataset.pointHoverBackgroundColor = pointColor;
-    dataset.pointHoverBorderColor = pointColor;
+    setThemedColor(
+      dataset,
+      "pointHoverBackgroundColor",
+      pointColor,
+      themeState,
+    );
+    setThemedColor(dataset, "pointHoverBorderColor", pointColor, themeState);
     dataset.pointHoverBorderWidth = 0;
     if (dataset.tension === undefined) dataset.tension = 0.3;
     if (effectiveMetadata.fillByDefault && dataset.fill === undefined) {
       dataset.fill = true;
     }
   } else if (datasetType === "bar") {
-    dataset.backgroundColor = theme.resolveColor(
-      `color-mix(in srgb, ${color} 78%, transparent)`,
-      color,
+    setThemedColor(
+      dataset,
+      "backgroundColor",
+      theme.resolveColor(
+        `color-mix(in srgb, ${color} 78%, transparent)`,
+        color,
+      ),
+      themeState,
     );
-    dataset.borderColor = mutedColor;
+    setThemedColor(dataset, "borderColor", mutedColor, themeState);
     dataset.borderWidth = 1;
-    dataset.hoverBackgroundColor = color;
-    dataset.hoverBorderColor = color;
+    setThemedColor(dataset, "hoverBackgroundColor", color, themeState);
+    setThemedColor(dataset, "hoverBorderColor", color, themeState);
     dataset.borderRadius = 4;
-  } else if (datasetType === "pie" || datasetType === "doughnut" || datasetType === "polarArea") {
+  } else if (
+    datasetType === "pie" ||
+    datasetType === "doughnut" ||
+    datasetType === "polarArea"
+  ) {
     const colors = datasetColors(theme, dataset.data?.length || 0);
-    dataset.backgroundColor = colors.map((seriesColor) =>
-      translucentColor(theme, seriesColor, 78)
+    setThemedColor(
+      dataset,
+      "backgroundColor",
+      colors.map((seriesColor) =>
+        translucentColor(theme, seriesColor, 78)
+      ),
+      themeState,
     );
-    dataset.borderColor = colors.map((seriesColor) =>
-      mutedSeriesColor(theme, seriesColor)
+    setThemedColor(
+      dataset,
+      "borderColor",
+      colors.map((seriesColor) =>
+        mutedSeriesColor(theme, seriesColor)
+      ),
+      themeState,
     );
-    dataset.hoverBackgroundColor = colors;
-    dataset.hoverBorderColor = colors;
+    setThemedColor(dataset, "hoverBackgroundColor", colors, themeState);
+    setThemedColor(dataset, "hoverBorderColor", colors, themeState);
     if (dataset.borderWidth === undefined) dataset.borderWidth = 1;
   } else if (datasetType === "radar") {
-    dataset.borderColor = mutedColor;
-    dataset.backgroundColor = translucentColor(theme, color, 18);
-    dataset.pointBackgroundColor = pointColor;
-    dataset.pointBorderColor = pointColor;
-    dataset.pointHoverBackgroundColor = pointColor;
-    dataset.pointHoverBorderColor = pointColor;
-    if (dataset.borderWidth === undefined) dataset.borderWidth = 2;
+    setThemedColor(dataset, "borderColor", mutedColor, themeState);
+    setThemedColor(
+      dataset,
+      "backgroundColor",
+      translucentColor(theme, color, 18),
+      themeState,
+    );
+    setThemedColor(dataset, "pointBackgroundColor", pointColor, themeState);
+    setThemedColor(dataset, "pointBorderColor", pointColor, themeState);
+    setThemedColor(
+      dataset,
+      "pointHoverBackgroundColor",
+      pointColor,
+      themeState,
+    );
+    setThemedColor(dataset, "pointHoverBorderColor", pointColor, themeState);
+    if (dataset.borderWidth === undefined) {
+      dataset.borderWidth = RADAR_STROKE_WIDTH;
+    }
     if (dataset.pointRadius === undefined) dataset.pointRadius = POINT_MARKER_RADIUS;
-    if (dataset.pointHoverRadius === undefined) dataset.pointHoverRadius = POINT_HOVER_RADIUS;
-    if (dataset.pointHoverBorderWidth === undefined) dataset.pointHoverBorderWidth = 0;
+    if (dataset.pointHoverRadius === undefined) {
+      dataset.pointHoverRadius = POINT_HOVER_RADIUS;
+    }
+    if (dataset.pointHoverBorderWidth === undefined) {
+      dataset.pointHoverBorderWidth = 0;
+    }
     if (dataset.fill === undefined) dataset.fill = true;
   } else if (datasetType === "scatter" || datasetType === "bubble") {
-    dataset.backgroundColor = translucentColor(theme, color, 72);
-    dataset.borderColor = mutedColor;
-    dataset.hoverBackgroundColor = color;
-    dataset.hoverBorderColor = color;
+    setThemedColor(
+      dataset,
+      "backgroundColor",
+      translucentColor(theme, color, 72),
+      themeState,
+    );
+    setThemedColor(dataset, "borderColor", mutedColor, themeState);
+    setThemedColor(dataset, "hoverBackgroundColor", color, themeState);
+    setThemedColor(dataset, "hoverBorderColor", color, themeState);
     if (dataset.borderWidth === undefined) dataset.borderWidth = 1;
     if (datasetType === "scatter") {
       if (dataset.pointRadius === undefined) {
@@ -435,9 +572,12 @@ function buildChartOptions(theme, metadata, window) {
         labels: {
           color: theme.textColor,
           usePointStyle: true,
-          pointStyle: "circle",
+          pointStyle: POINT_MARKER_STYLE,
           boxWidth: POINT_MARKER_SIZE,
           boxHeight: POINT_MARKER_SIZE,
+          font: {
+            size: CHART_LABEL_FONT_SIZE,
+          },
           padding: 20,
         },
       },
@@ -454,12 +594,17 @@ function buildChartOptions(theme, metadata, window) {
           weight: "600",
         },
         bodyFont: {
-          size: 12,
+          size: CHART_LABEL_FONT_SIZE,
         },
         bodySpacing: 6,
         usePointStyle: true,
+        boxWidth: TOOLTIP_MARKER_SIZE,
+        boxHeight: TOOLTIP_MARKER_SIZE,
+        boxPadding: TOOLTIP_MARKER_BOX_PADDING,
         callbacks: {
           label: tooltipLabel,
+          labelColor: tooltipLabelColor,
+          labelPointStyle: tooltipPointStyle,
         },
       },
     },
@@ -661,14 +806,17 @@ export default class MooChart {
     if (this._themeElement && this._window?.MutationObserver) {
       this._observer = new this._window.MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-          if (mutation.attributeName === "data-bs-theme") {
+          if (
+            mutation.attributeName === "data-bs-theme" ||
+            mutation.attributeName === "style"
+          ) {
             this._scheduleRetheme();
           }
         });
       });
       this._observer.observe(this._themeElement, {
         attributes: true,
-        attributeFilter: ["data-bs-theme"],
+        attributeFilter: ["data-bs-theme", "style"],
       });
     }
 

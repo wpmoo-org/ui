@@ -140,7 +140,11 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("min-width: 0;", surface)
         self.assertIn("overflow: hidden;", surface)
         self.assertIn(
-            "border: var(--bs-border-width) solid var(--bs-border-color);",
+            "border: var(--bs-border-width) solid var(--bs-card-border-color, var(--bs-border-color));",
+            surface,
+        )
+        self.assertIn(
+            "background: var(--bs-card-bg, var(--bs-body-bg));",
             surface,
         )
         active_example = css.split(".moo-example:has(.dropdown-menu.show) {", 1)[1].split("}", 1)[0]

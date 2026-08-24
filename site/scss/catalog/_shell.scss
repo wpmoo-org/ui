@@ -5,7 +5,7 @@ body {
   // tuned for contrast against --moo-surface, and read as barely distinct
   // in dark mode against tertiary-bg's lighter default.
   background: var(--moo-surface);
-  font-family: $moo-catalog-font-family, var(--bs-body-font-family);
+  font-family: var(--moo-catalog-font-family, #{$moo-catalog-font-family}), var(--bs-body-font-family);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -166,7 +166,7 @@ body:has(.moo-catalog) {
   --moo-doc-toc-offset: calc(2rem + 5px);
 
   min-height: 100vh;
-  font-family: $moo-catalog-font-family, var(--bs-body-font-family);
+  font-family: var(--moo-catalog-font-family, #{$moo-catalog-font-family}), var(--bs-body-font-family);
 }
 
 .moo-catalog > .sidebar-wrapper {

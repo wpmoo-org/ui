@@ -2,12 +2,162 @@ const states = new WeakMap();
 const THEME_STORAGE_KEY = "moo:theme";
 const DIRECTION_STORAGE_KEY = "moo:direction";
 const SIDEBAR_STORAGE_KEY = "moo:sidebar-variant";
+const BUILDER_STORAGE_KEY = "moo:theme-builder";
+
+const BUILDER_DEFAULTS = {
+  style: "default",
+  baseColor: "neutral",
+  chartPalette: "default",
+  headingFont: "default",
+  bodyFont: "default",
+  radius: "default",
+};
+
+const BUILDER_SELECTORS = {
+  style: "[data-moo-catalog-theme-builder-style]",
+  baseColor: "[data-moo-catalog-theme-builder-base-color]",
+  chartPalette: "[data-moo-catalog-theme-builder-chart-palette]",
+  headingFont: "[data-moo-catalog-theme-builder-heading-font]",
+  bodyFont: "[data-moo-catalog-theme-builder-body-font]",
+  radius: "[data-moo-catalog-theme-builder-radius]",
+};
+
+const BUILDER_DATASETS = {
+  style: "mooThemeStyle",
+  baseColor: "mooBaseColor",
+};
+
+const BUILDER_OPTION_SELECTOR = "[data-moo-catalog-theme-builder-option]";
+const BUILDER_VALUE_SELECTOR = "[data-moo-catalog-theme-builder-value]";
+
+const BASE_COLOR_TOKENS = ["--bs-primary", "--moo-primary", "--moo-ring"];
+const CHART_PALETTE_TOKENS = [
+  "--moo-chart-1",
+  "--moo-chart-2",
+  "--moo-chart-3",
+  "--moo-chart-4",
+  "--moo-chart-5",
+];
+const FONT_TOKENS = [
+  "--bs-body-font-family",
+  "--moo-catalog-font-family",
+  "--moo-heading-font-family",
+];
+const RADIUS_TOKENS = [
+  "--bs-border-radius",
+  "--bs-border-radius-sm",
+  "--bs-border-radius-lg",
+  "--bs-border-radius-xl",
+  "--bs-border-radius-xxl",
+];
+
+const BASE_COLOR_PRESETS = {
+  neutral: {},
+  blue: {
+    "--bs-primary": "rgb(37, 99, 235)",
+    "--moo-primary": "rgb(37, 99, 235)",
+    "--moo-ring": "rgb(96, 165, 250)",
+  },
+  emerald: {
+    "--bs-primary": "rgb(5, 150, 105)",
+    "--moo-primary": "rgb(5, 150, 105)",
+    "--moo-ring": "rgb(52, 211, 153)",
+  },
+  violet: {
+    "--bs-primary": "rgb(124, 58, 237)",
+    "--moo-primary": "rgb(124, 58, 237)",
+    "--moo-ring": "rgb(167, 139, 250)",
+  },
+};
+
+const CHART_PALETTE_PRESETS = {
+  default: {},
+  pastel: {
+    "--moo-chart-1": "rgb(103, 169, 232)",
+    "--moo-chart-2": "rgb(118, 187, 170)",
+    "--moo-chart-3": "rgb(246, 198, 110)",
+    "--moo-chart-4": "rgb(198, 157, 232)",
+    "--moo-chart-5": "rgb(238, 135, 142)",
+  },
+  vivid: {
+    "--moo-chart-1": "rgb(37, 99, 235)",
+    "--moo-chart-2": "rgb(5, 150, 105)",
+    "--moo-chart-3": "rgb(217, 119, 6)",
+    "--moo-chart-4": "rgb(124, 58, 237)",
+    "--moo-chart-5": "rgb(225, 29, 72)",
+  },
+};
+
+const FONT_PRESETS = {
+  headingFont: {
+    default: {},
+    geist: { "--moo-heading-font-family": '"Geist", var(--bs-body-font-family)' },
+    system: { "--moo-heading-font-family": 'system-ui, -apple-system, "Segoe UI", sans-serif' },
+  },
+  bodyFont: {
+    default: {},
+    geist: {
+      "--bs-body-font-family": '"Geist", system-ui, -apple-system, "Segoe UI", sans-serif',
+      "--moo-catalog-font-family": '"Geist"',
+    },
+    system: {
+      "--bs-body-font-family": 'system-ui, -apple-system, "Segoe UI", sans-serif',
+      "--moo-catalog-font-family": "system-ui",
+    },
+  },
+};
+
+const RADIUS_PRESETS = {
+  default: {},
+  compact: {
+    "--bs-border-radius": "0.25rem",
+    "--bs-border-radius-sm": "0.1875rem",
+    "--bs-border-radius-lg": "0.375rem",
+    "--bs-border-radius-xl": "0.5rem",
+    "--bs-border-radius-xxl": "0.75rem",
+  },
+  large: {
+    "--bs-border-radius": "0.75rem",
+    "--bs-border-radius-sm": "0.5rem",
+    "--bs-border-radius-lg": "1rem",
+    "--bs-border-radius-xl": "1.25rem",
+    "--bs-border-radius-xxl": "1.5rem",
+  },
+};
+
+const BUILDER_PRESETS = {
+  style: new Set(["default", "soft", "solid", "nova"]),
+  baseColor: new Set(Object.keys(BASE_COLOR_PRESETS)),
+  chartPalette: new Set(Object.keys(CHART_PALETTE_PRESETS)),
+  headingFont: new Set(Object.keys(FONT_PRESETS.headingFont)),
+  bodyFont: new Set(Object.keys(FONT_PRESETS.bodyFont)),
+  radius: new Set(Object.keys(RADIUS_PRESETS)),
+};
 
 function effectiveTheme(preference, view) {
   if (preference === "system") {
     return view.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
   return preference === "dark" ? "dark" : "light";
+}
+
+function normalizedBuilderPreference(candidate = {}) {
+  return Object.fromEntries(
+    Object.entries(BUILDER_DEFAULTS).map(([key, fallback]) => {
+      const value = candidate[key];
+      return [key, BUILDER_PRESETS[key].has(value) ? value : fallback];
+    })
+  );
+}
+
+function applyTokenSet(style, tokenNames, tokenValues = {}) {
+  if (!style) return;
+  tokenNames.forEach((token) => {
+    style.removeProperty(token);
+  });
+  Object.entries(tokenValues).forEach(([token, value]) => {
+    style.setProperty(token, value);
+  });
 }
 
 // Global settings panel (Phase 6): wires the System/Light/Dark theme radios
@@ -35,6 +185,20 @@ export function initSettingsPanel(root = document) {
     );
     const sidebarInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-sidebar]")
+    );
+    const builderControls = Object.fromEntries(
+      Object.entries(BUILDER_SELECTORS).map(([key, selector]) => {
+        const fieldRoot = sheet.querySelector(selector);
+        return [
+          key,
+          {
+            options: Array.from(
+              fieldRoot?.querySelectorAll(BUILDER_OPTION_SELECTOR) || []
+            ),
+            value: fieldRoot?.querySelector(BUILDER_VALUE_SELECTOR),
+          },
+        ];
+      })
     );
     const reset = sheet.querySelector("[data-moo-settings-reset]");
     const listen = (target, type, handler) => {
@@ -94,6 +258,103 @@ export function initSettingsPanel(root = document) {
         }
       });
     });
+
+    const syncBuilderControls = (preference) => {
+      Object.entries(builderControls).forEach(([key, control]) => {
+        let selectedLabel = preference[key];
+        control.options.forEach((option) => {
+          const isSelected =
+            option.dataset.mooCatalogThemeBuilderOption === preference[key];
+          option.classList.toggle("active", isSelected);
+          option.setAttribute("aria-pressed", String(isSelected));
+          if (isSelected) {
+            selectedLabel =
+              option
+                .querySelector("[data-moo-catalog-theme-builder-option-label]")
+                ?.textContent?.trim() || selectedLabel;
+          }
+        });
+        if (control.value) {
+          control.value.textContent = selectedLabel;
+        }
+      });
+    };
+
+    const readBuilderPreference = () => {
+      try {
+        const raw = view.localStorage.getItem(BUILDER_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          return normalizedBuilderPreference(parsed);
+        }
+      } catch (_) {
+        /* Storage can be unavailable or contain stale JSON. */
+      }
+      return normalizedBuilderPreference();
+    };
+
+    const persistBuilderPreference = (preference) => {
+      try {
+        view.localStorage.setItem(
+          BUILDER_STORAGE_KEY,
+          JSON.stringify(preference)
+        );
+      } catch (_) {
+        /* Storage is best-effort. */
+      }
+    };
+
+    const applyBuilderPreference = (candidate, { persist = true } = {}) => {
+      const preference = normalizedBuilderPreference(candidate);
+      Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
+        if (preference[key] === BUILDER_DEFAULTS[key]) {
+          delete documentElement.dataset[datasetKey];
+        } else {
+          documentElement.dataset[datasetKey] = preference[key];
+        }
+      });
+      applyTokenSet(
+        documentElement.style,
+        BASE_COLOR_TOKENS,
+        BASE_COLOR_PRESETS[preference.baseColor]
+      );
+      applyTokenSet(
+        documentElement.style,
+        CHART_PALETTE_TOKENS,
+        CHART_PALETTE_PRESETS[preference.chartPalette]
+      );
+      applyTokenSet(
+        documentElement.style,
+        RADIUS_TOKENS,
+        RADIUS_PRESETS[preference.radius]
+      );
+      applyTokenSet(
+        documentElement.style,
+        FONT_TOKENS,
+        {
+          ...FONT_PRESETS.headingFont[preference.headingFont],
+          ...FONT_PRESETS.bodyFont[preference.bodyFont],
+        }
+      );
+      syncBuilderControls(preference);
+      if (persist) {
+        persistBuilderPreference(preference);
+      }
+      return preference;
+    };
+
+    Object.entries(builderControls).forEach(([key, control]) => {
+      control.options.forEach((option) => {
+        listen(option, "click", () => {
+          applyBuilderPreference({
+            ...readBuilderPreference(),
+            [key]: option.dataset.mooCatalogThemeBuilderOption,
+          });
+        });
+      });
+    });
+
+    applyBuilderPreference(readBuilderPreference(), { persist: false });
 
     // Phase 7: the LTR/RTL picker flips the document direction live and
     // persists it under moo:direction so it survives navigation.
@@ -167,6 +428,7 @@ export function initSettingsPanel(root = document) {
         view.localStorage.removeItem(THEME_STORAGE_KEY);
         view.localStorage.removeItem(DIRECTION_STORAGE_KEY);
         view.localStorage.removeItem(SIDEBAR_STORAGE_KEY);
+        view.localStorage.removeItem(BUILDER_STORAGE_KEY);
       } catch (_) {
         /* Storage is best-effort. */
       }
@@ -184,6 +446,7 @@ export function initSettingsPanel(root = document) {
       sidebarInputs.forEach((input) => {
         input.checked = input.value === "sidebar";
       });
+      applyBuilderPreference(BUILDER_DEFAULTS, { persist: false });
       syncThemeButton();
     });
 
@@ -202,6 +465,7 @@ export function initSettingsPanel(root = document) {
       sidebarInputs.forEach((input) => {
         input.checked = input.value === sidebarVariant;
       });
+      syncBuilderControls(readBuilderPreference());
     });
   }
 

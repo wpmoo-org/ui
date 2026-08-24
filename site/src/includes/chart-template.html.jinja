@@ -231,16 +231,22 @@
 
   <h2 id="chart-theming" class="h4 mt-5 mb-3">Theming</h2>
   <p class="mb-4">
-    Chart colors are derived from Bootstrap's semantic <code>--bs-*</code> tokens at
-    runtime, not from hardcoded theme values. A <code>MutationObserver</code> watches
-    the nearest <code>data-bs-theme</code> scope, falling back to the document
-    element; when that scope changes, each chart re-reads the tokens and re-themes
-    its datasets, grid lines, legend, and tooltip without a reload. Line chart
-    points use their series color for the point fill, border, and hover state so
-    light theme points do not pick up a dark neutral outline. Charts also
-    reflow on resize: they are responsive and drop aspect-ratio locking, so the
-    same markup fills a desktop card or a narrow mobile viewport without
-    layout-specific switches.
+    Chart colors are derived from <code>--moo-chart-1</code> through
+    <code>--moo-chart-5</code>, falling back to Bootstrap's semantic
+    <code>--bs-*</code> tokens at runtime. Cartesian, radar, scatter, and bubble
+    charts assign that palette by dataset; pie, doughnut, and polar area charts
+    cycle it by slice. Explicit Chart.js dataset color fields are preserved, while
+    unset color fields continue to follow the active palette. A
+    <code>MutationObserver</code> watches the nearest <code>data-bs-theme</code>
+    scope, falling back to the document element; when that scope or its inline
+    chart-token styles change, each chart re-reads the tokens and re-themes its
+    datasets, grid lines, legend, and tooltip without a reload. Legend and
+    tooltip markers use matching compact circular swatches with the same border
+    color and text offset, while thin line, area, and radar strokes keep point
+    markers readable. Line chart points use their series color for the point
+    fill, border, and hover state. Charts also reflow on resize: they are
+    responsive and drop aspect-ratio locking, so the same markup fills a desktop
+    card or a narrow mobile viewport without layout-specific switches.
   </p>
 
   <h2 id="chart-accessibility" class="h4 mt-5 mb-3">Accessibility</h2>

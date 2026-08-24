@@ -645,14 +645,115 @@
   text-align: center;
 }
 
+[data-moo-theme-style="soft"] .moo-catalog {
+  --moo-muted-surface: color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color));
+  --moo-border: color-mix(in srgb, var(--bs-body-color) 14%, transparent);
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-tertiary-bg: color-mix(in srgb, var(--bs-body-bg) 96%, var(--bs-body-color));
+  --bs-border-color: var(--moo-border);
+  --bs-card-bg: color-mix(in srgb, var(--bs-body-bg) 98%, var(--bs-body-color));
+  --bs-card-border-color: var(--moo-border);
+}
+
+[data-moo-theme-style="solid"] .moo-catalog {
+  --moo-muted-surface: color-mix(in srgb, var(--bs-body-color) 9%, var(--bs-body-bg));
+  --moo-border: color-mix(in srgb, var(--bs-body-color) 24%, transparent);
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-tertiary-bg: color-mix(in srgb, var(--bs-body-color) 6%, var(--bs-body-bg));
+  --bs-border-color: var(--moo-border);
+  --bs-card-bg: color-mix(in srgb, var(--bs-body-color) 3%, var(--bs-body-bg));
+  --bs-card-border-color: var(--moo-border);
+}
+
+[data-moo-theme-style="nova"] .moo-catalog {
+  --moo-muted-surface: color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg));
+  --moo-border: color-mix(in srgb, var(--bs-primary) 22%, transparent);
+  --moo-sidebar-accent: color-mix(in srgb, var(--bs-primary) 10%, var(--bs-body-bg));
+  --bs-secondary-bg: var(--moo-muted-surface);
+  --bs-tertiary-bg: color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg));
+  --bs-border-color: var(--moo-border);
+  --bs-card-bg: color-mix(in srgb, var(--bs-primary) 3%, var(--bs-body-bg));
+  --bs-card-border-color: var(--moo-border);
+}
+
+[data-moo-base-color] .moo-catalog {
+  --moo-sidebar-accent: color-mix(in srgb, var(--bs-primary) 10%, var(--bs-body-bg));
+}
+
+.moo-catalog :where(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .offcanvas-title) {
+  font-family: var(--moo-heading-font-family, inherit);
+}
+
 // Global settings panel (Phase 6): the System/Light/Dark theme picker.
 // Each option is a small card with a window-mock preview thumbnail; the
 // checked one gets a primary ring. The radio follows the btn-check pattern
 // (visually hidden, label is the hit target).
+.moo-settings-panel__form {
+  gap: 1.5rem;
+}
+
+#catalog-settings .field-fieldset {
+  min-inline-size: 0;
+}
+
+#catalog-settings .field-legend {
+  font-size: 0.875rem;
+}
+
+#catalog-settings .field-description {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.moo-settings-panel__builder-group {
+  gap: 0.625rem;
+}
+
+.moo-settings-panel__dropdown-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.moo-settings-panel__dropdown-field > .form-label {
+  margin-bottom: 0;
+  color: var(--bs-body-color);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.moo-settings-panel__dropdown,
+.moo-settings-panel__dropdown-trigger {
+  width: 100%;
+}
+
+.moo-settings-panel__dropdown-trigger {
+  justify-content: space-between;
+  min-inline-size: 8.5rem;
+}
+
+.moo-settings-panel__dropdown-trigger > [data-icon] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.moo-settings-panel__dropdown-menu {
+  --bs-dropdown-min-width: 100%;
+}
+
+.moo-settings-panel__dropdown-item {
+  gap: 0.5rem;
+}
+
 .moo-settings-panel__theme-group {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+}
+
+.moo-settings-panel__theme-group--compact {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .moo-settings-panel__theme-option {
