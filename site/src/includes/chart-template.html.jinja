@@ -32,6 +32,7 @@
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
   {% set code_id = example_id ~ "-code" %}
+  {% set codepen_can_use_current_chart_runtime = product.codepenCdnVersion == product.version %}
   {% set chart_actions %}
     <div class="moo-chart-example__actions" data-moo-code-copy-scope>
       <button
@@ -44,17 +45,19 @@
         <span data-moo-copy-icon="copy">{{ render_icon("copy", "inline-start") }}</span>
         <span data-moo-copy-icon="check" hidden>{{ render_icon("check", "inline-start") }}</span>
       </button>
-      {{ codepen_button(
-        "Moo UI " ~ title,
-        description | striptags,
-        source,
-        chart_codepen_css(),
-        ["moo-ui", "chartjs", "charts"],
-        js=chart_codepen_js(),
-        label="Try in CodePen",
-        icon="codepen",
-        extra_class="moo-chart-example__codepen"
-      ) }}
+      {% if codepen_can_use_current_chart_runtime %}
+        {{ codepen_button(
+          "Moo UI " ~ title,
+          description | striptags,
+          source,
+          chart_codepen_css(),
+          ["moo-ui", "chartjs", "charts"],
+          js=chart_codepen_js(),
+          label="Try in CodePen",
+          icon="codepen",
+          extra_class="moo-chart-example__codepen"
+        ) }}
+      {% endif %}
       <span class="visually-hidden" data-moo-copy-status role="status"></span>
     </div>
   {% endset %}

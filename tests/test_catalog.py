@@ -495,6 +495,25 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIn(entrypoint, published_rc2_js_entrypoints)
 
+    def test_codepen_hides_rc3_only_interactive_examples_until_cdn_is_current(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        self.assertNotEqual(
+            site_build.CODEPEN_CDN_VERSION,
+            json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"],
+        )
+        for path in (
+            "components/chart.html",
+            "components/datepicker.html",
+            "components/slider.html",
+            "charts/index.html",
+        ):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                self.assertNotIn("Try in CodePen", page)
+                self.assertNotIn("data-moo-codepen-form", page)
+
     def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
         certification = json.loads(
             (ROOT / "certification.json").read_text(encoding="utf-8")
