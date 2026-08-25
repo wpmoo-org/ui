@@ -148,23 +148,48 @@
               "data-moo-catalog-theme-builder-base-color",
               [
                 {"value": "neutral", "label": "Neutral"},
-                {"value": "blue", "label": "Blue"},
-                {"value": "emerald", "label": "Emerald"},
-                {"value": "violet", "label": "Violet"}
+                {"value": "zinc", "label": "Zinc"},
+                {"value": "stone", "label": "Stone"},
+                {"value": "slate", "label": "Slate"},
+                {"value": "mauve", "label": "Mauve"}
               ],
               selected="neutral",
               swatch_group="base-color"
             ) }}
             {{ settings_dropdown_row(
+              "Theme color",
+              "moo-theme-builder-theme-color",
+              "data-moo-catalog-theme-builder-theme-color",
+              [
+                {"value": "neutral", "label": "Neutral"},
+                {"value": "blue", "label": "Blue"},
+                {"value": "emerald", "label": "Emerald"},
+                {"value": "violet", "label": "Violet"},
+                {"value": "amber", "label": "Amber"},
+                {"value": "rose", "label": "Rose"},
+                {"value": "cyan", "label": "Cyan"},
+                {"value": "orange", "label": "Orange"},
+                {"value": "pink", "label": "Pink"},
+                {"value": "red", "label": "Red"}
+              ],
+              selected="neutral",
+              swatch_group="theme-color"
+            ) }}
+            {{ settings_dropdown_row(
               "Chart color",
-              "moo-theme-builder-chart-palette",
-              "data-moo-catalog-theme-builder-chart-palette",
+              "moo-theme-builder-chart-color",
+              "data-moo-catalog-theme-builder-chart-color",
               [
                 {"value": "default", "label": "Default"},
                 {"value": "pastel", "label": "Pastel"},
-                {"value": "vivid", "label": "Vivid"}
+                {"value": "vivid", "label": "Vivid"},
+                {"value": "blue", "label": "Blue"},
+                {"value": "emerald", "label": "Emerald"},
+                {"value": "violet", "label": "Violet"},
+                {"value": "amber", "label": "Amber"},
+                {"value": "rose", "label": "Rose"}
               ],
-              swatch_group="chart-palette"
+              swatch_group="chart-color"
             ) }}
             {{ settings_dropdown_row(
               "Heading font",

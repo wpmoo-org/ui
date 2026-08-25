@@ -333,28 +333,46 @@ class CatalogContractTests(CatalogTestCase):
             "data-moo-catalog-theme-builder-base-color", 1
         )
         base_dropdown, after_base = after_style.split(
-            "data-moo-catalog-theme-builder-chart-palette", 1
+            "data-moo-catalog-theme-builder-theme-color", 1
         )
-        chart_dropdown, font_dropdowns = after_base.split(
+        theme_dropdown, after_theme = after_base.split(
+            "data-moo-catalog-theme-builder-chart-color", 1
+        )
+        chart_dropdown, font_dropdowns = after_theme.split(
             "data-moo-catalog-theme-builder-heading-font", 1
         )
 
         self.assertNotIn("data-moo-catalog-theme-builder-swatch", style_dropdown)
         for swatch in (
             "base-color-neutral",
-            "base-color-blue",
-            "base-color-emerald",
-            "base-color-violet",
+            "base-color-zinc",
+            "base-color-stone",
+            "base-color-slate",
+            "base-color-mauve",
         ):
             with self.subTest(swatch=swatch):
                 self.assertIn(
                     f'data-moo-catalog-theme-builder-swatch="{swatch}"',
                     base_dropdown,
                 )
+        self.assertNotIn('data-moo-catalog-theme-builder-swatch="base-color-blue"', base_dropdown)
         for swatch in (
-            "chart-palette-default",
-            "chart-palette-pastel",
-            "chart-palette-vivid",
+            "theme-color-neutral",
+            "theme-color-blue",
+            "theme-color-emerald",
+            "theme-color-violet",
+        ):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'data-moo-catalog-theme-builder-swatch="{swatch}"',
+                    theme_dropdown,
+                )
+        for swatch in (
+            "chart-color-default",
+            "chart-color-pastel",
+            "chart-color-vivid",
+            "chart-color-emerald",
+            "chart-color-violet",
         ):
             with self.subTest(swatch=swatch):
                 self.assertIn(
@@ -370,7 +388,7 @@ class CatalogContractTests(CatalogTestCase):
             styles,
         )
         self.assertIn(
-            'data-moo-catalog-theme-builder-swatch="base-color-blue"',
+            'data-moo-catalog-theme-builder-swatch="theme-color-blue"',
             styles,
         )
 

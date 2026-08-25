@@ -26,6 +26,7 @@ MODULES = {
     "block-frame.js": "initBlockFrames",
     "card-spacing.js": "initCardSpacing",
     "settings-panel.js": "initSettingsPanel",
+    "theme-builder-schema.js": None,
 }
 
 
@@ -44,6 +45,8 @@ class CatalogJavaScriptTests(CatalogTestCase):
 
     def test_catalog_features_have_idempotent_init_and_disposal(self) -> None:
         for module_name, initializer in MODULES.items():
+            if initializer is None:
+                continue
             with self.subTest(module_name=module_name):
                 source = without_comments(
                     (CATALOG_JS / module_name).read_text(encoding="utf-8")
@@ -59,7 +62,7 @@ class CatalogJavaScriptTests(CatalogTestCase):
     def test_catalog_feature_imports_have_no_document_side_effect(self) -> None:
         imports = "\n".join(
             f'import * as module{index} from "./site/src/js/catalog/{module_name}";\n'
-            f'if (typeof module{index}.{initializer} !== "function") process.exit(2);'
+            f'if ({json.dumps(initializer)} && typeof module{index}.{initializer} !== "function") process.exit(2);'
             for index, (module_name, initializer) in enumerate(MODULES.items())
         )
         result = subprocess.run(
@@ -71,6 +74,109 @@ class CatalogJavaScriptTests(CatalogTestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_theme_builder_schema_migrates_legacy_state(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  normalizeThemeBuilderState,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+const state = normalizeThemeBuilderState({
+  style: "soft",
+  baseColor: "blue",
+  chartPalette: "pastel",
+  headingFont: "system",
+  bodyFont: "geist",
+  radius: "compact",
+});
+
+console.log(JSON.stringify(state));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        state = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(
+            state,
+            {
+                "schemaVersion": 1,
+                "style": "soft",
+                "baseColor": "neutral",
+                "themeColor": "blue",
+                "chartColor": "pastel",
+                "headingFont": "system",
+                "bodyFont": "geist",
+                "radius": "compact",
+            },
+        )
+
+    def test_theme_builder_schema_resolves_only_public_tokens(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+  normalizeThemeBuilderState,
+  resolveThemeBuilderTokens,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+const tokens = resolveThemeBuilderTokens(normalizeThemeBuilderState({
+  themeColor: "emerald",
+  chartColor: "violet",
+}));
+const darkTokens = resolveThemeBuilderTokens(
+  normalizeThemeBuilderState({ baseColor: "zinc" }),
+  { theme: "dark" }
+);
+const tokenNames = Object.keys(tokens);
+console.log(JSON.stringify({
+  tokenNames,
+  unknownTokens: tokenNames.filter(
+    (token) => !PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST.includes(token)
+  ),
+  hasDataSelectorToken: tokenNames.some((token) => token.includes("data-moo")),
+  primaryRgb: tokens["--bs-primary-rgb"],
+  foreground: tokens["--moo-primary-foreground"],
+  foregroundDark: tokens["--moo-primary-foreground-dark"],
+  chart1: tokens["--moo-chart-1"],
+  darkBodyBg: darkTokens["--bs-body-bg"],
+  darkBodyBgRgb: darkTokens["--bs-body-bg-rgb"],
+  darkSecondaryBgRgb: darkTokens["--bs-secondary-bg-rgb"],
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["unknownTokens"], [])
+        self.assertFalse(case["hasDataSelectorToken"])
+        self.assertEqual(case["primaryRgb"], "5, 150, 105")
+        self.assertEqual(case["foreground"], "rgb(255, 255, 255)")
+        self.assertEqual(case["foregroundDark"], "rgb(6, 78, 59)")
+        self.assertEqual(case["chart1"], "rgb(139, 92, 246)")
+        self.assertEqual(case["darkBodyBg"], "rgb(9, 9, 11)")
+        self.assertEqual(case["darkBodyBgRgb"], "9, 9, 11")
+        self.assertEqual(case["darkSecondaryBgRgb"], "39, 39, 42")
 
     def test_examples_chart_delegates_to_the_public_moo_chart(self) -> None:
         result = subprocess.run(
@@ -257,10 +363,15 @@ function makeControl(labels) {
   };
 }
 
+function makeRadio(value, checked = false) {
+  return makeEmitter({ value, checked });
+}
+
 const selectors = {
   style: "[data-moo-catalog-theme-builder-style]",
   baseColor: "[data-moo-catalog-theme-builder-base-color]",
-  chartPalette: "[data-moo-catalog-theme-builder-chart-palette]",
+  themeColor: "[data-moo-catalog-theme-builder-theme-color]",
+  chartColor: "[data-moo-catalog-theme-builder-chart-color]",
   headingFont: "[data-moo-catalog-theme-builder-heading-font]",
   bodyFont: "[data-moo-catalog-theme-builder-body-font]",
   radius: "[data-moo-catalog-theme-builder-radius]",
@@ -268,8 +379,9 @@ const selectors = {
 
 const controls = {
   style: makeControl({ default: "Default", soft: "Soft", solid: "Solid" }),
-  baseColor: makeControl({ neutral: "Neutral", blue: "Blue" }),
-  chartPalette: makeControl({ default: "Default", pastel: "Pastel", vivid: "Vivid" }),
+  baseColor: makeControl({ neutral: "Neutral", zinc: "Zinc" }),
+  themeColor: makeControl({ neutral: "Neutral", blue: "Blue" }),
+  chartColor: makeControl({ default: "Default", pastel: "Pastel", vivid: "Vivid" }),
   headingFont: makeControl({ default: "Default", system: "System" }),
   bodyFont: makeControl({ default: "Default", geist: "Geist" }),
   radius: makeControl({ default: "Default", compact: "Compact" }),
@@ -279,8 +391,14 @@ const fieldRoots = Object.fromEntries(
   Object.entries(selectors).map(([key, selector]) => [selector, controls[key].root])
 );
 const reset = makeEmitter();
+const themeInputs = [
+  makeRadio("system", true),
+  makeRadio("light"),
+  makeRadio("dark"),
+];
 const sheet = makeEmitter({
-  querySelectorAll: () => [],
+  querySelectorAll: (selector) =>
+    selector === "[data-moo-settings-theme]" ? themeInputs : [],
   querySelector: (selector) =>
     selector === "[data-moo-settings-reset]" ? reset : fieldRoots[selector] || null,
 });
@@ -325,25 +443,49 @@ function optionFor(key, value) {
 const initial = {
   styleDataset: documentElement.dataset.mooCatalogThemeBuilderStyle,
   baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
+  themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor,
   broadStyleDataset: Object.hasOwn(documentElement.dataset, "mooThemeStyle"),
   broadBaseDataset: Object.hasOwn(documentElement.dataset, "mooBaseColor"),
   primary: documentElement.style.getPropertyValue("--bs-primary"),
+  primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
+  foreground: documentElement.style.getPropertyValue("--moo-primary-foreground"),
   chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
   heading: documentElement.style.getPropertyValue("--moo-heading-font-family"),
   body: documentElement.style.getPropertyValue("--bs-body-font-family"),
   radius: documentElement.style.getPropertyValue("--bs-border-radius"),
   selectedStyle: selectedValue("style"),
-  selectedChart: selectedValue("chartPalette"),
+  selectedBase: selectedValue("baseColor"),
+  selectedTheme: selectedValue("themeColor"),
+  selectedChart: selectedValue("chartColor"),
   styleLabel: controls.style.value.textContent,
   softPressed: optionFor("style", "soft").attributes["aria-pressed"],
+  migratedBuilder: JSON.parse(localStorage.getItem("moo:theme-builder")),
 };
 
-optionFor("chartPalette", "vivid").click();
+optionFor("baseColor", "zinc").click();
+const afterBaseLight = {
+  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
+  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
+  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
+};
+
+const darkInput = themeInputs.find((input) => input.value === "dark");
+darkInput.checked = true;
+darkInput.dispatch("change");
+const afterThemeDark = {
+  theme: documentElement.dataset.bsTheme,
+  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
+  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
+  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  darkChecked: darkInput.checked,
+};
+
+optionFor("chartColor", "vivid").click();
 const persisted = JSON.parse(localStorage.getItem("moo:theme-builder"));
 const afterClick = {
   chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
-  selectedChart: selectedValue("chartPalette"),
-  persistedChart: persisted.chartPalette,
+  selectedChart: selectedValue("chartColor"),
+  persistedChart: persisted.chartColor,
 };
 
 reset.click();
@@ -356,16 +498,30 @@ const afterReset = {
     documentElement.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
+  themeDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderThemeColor"
+  ),
   chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
+  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
+  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
   primary: documentElement.style.getPropertyValue("--bs-primary"),
+  primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
   selectedStyle: selectedValue("style"),
   selectedBase: selectedValue("baseColor"),
-  selectedChart: selectedValue("chartPalette"),
+  selectedTheme: selectedValue("themeColor"),
+  selectedChart: selectedValue("chartColor"),
   storedBuilder: localStorage.getItem("moo:theme-builder"),
 };
 
 dispose();
-console.log(JSON.stringify({ initial, afterClick, afterReset }));
+console.log(JSON.stringify({
+  initial,
+  afterBaseLight,
+  afterThemeDark,
+  afterClick,
+  afterReset,
+}));
 """,
             ],
             cwd=ROOT,
@@ -378,10 +534,13 @@ console.log(JSON.stringify({ initial, afterClick, afterReset }));
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertEqual(case["initial"]["styleDataset"], "soft")
-        self.assertEqual(case["initial"]["baseDataset"], "blue")
+        self.assertIsNone(case["initial"].get("baseDataset"))
+        self.assertEqual(case["initial"]["themeDataset"], "blue")
         self.assertFalse(case["initial"]["broadStyleDataset"])
         self.assertFalse(case["initial"]["broadBaseDataset"])
         self.assertEqual(case["initial"]["primary"], "rgb(37, 99, 235)")
+        self.assertEqual(case["initial"]["primaryRgb"], "37, 99, 235")
+        self.assertEqual(case["initial"]["foreground"], "rgb(255, 255, 255)")
         self.assertEqual(case["initial"]["chart1"], "rgb(103, 169, 232)")
         self.assertEqual(
             case["initial"]["heading"],
@@ -393,18 +552,38 @@ console.log(JSON.stringify({ initial, afterClick, afterReset }));
         )
         self.assertEqual(case["initial"]["radius"], "0.25rem")
         self.assertEqual(case["initial"]["selectedStyle"], "soft")
+        self.assertEqual(case["initial"]["selectedBase"], "neutral")
+        self.assertEqual(case["initial"]["selectedTheme"], "blue")
         self.assertEqual(case["initial"]["selectedChart"], "pastel")
         self.assertEqual(case["initial"]["styleLabel"], "Soft")
         self.assertEqual(case["initial"]["softPressed"], "true")
+        self.assertEqual(case["initial"]["migratedBuilder"]["schemaVersion"], 1)
+        self.assertEqual(case["initial"]["migratedBuilder"]["baseColor"], "neutral")
+        self.assertEqual(case["initial"]["migratedBuilder"]["themeColor"], "blue")
+        self.assertEqual(case["initial"]["migratedBuilder"]["chartColor"], "pastel")
+        self.assertNotIn("chartPalette", case["initial"]["migratedBuilder"])
+        self.assertEqual(case["afterBaseLight"]["baseDataset"], "zinc")
+        self.assertEqual(case["afterBaseLight"]["bodyBg"], "rgb(250, 250, 250)")
+        self.assertEqual(case["afterBaseLight"]["bodyBgRgb"], "250, 250, 250")
+        self.assertEqual(case["afterThemeDark"]["theme"], "dark")
+        self.assertEqual(case["afterThemeDark"]["bodyBg"], "rgb(9, 9, 11)")
+        self.assertEqual(case["afterThemeDark"]["bodyBgRgb"], "9, 9, 11")
+        self.assertEqual(case["afterThemeDark"]["primary"], "rgb(37, 99, 235)")
+        self.assertTrue(case["afterThemeDark"]["darkChecked"])
         self.assertEqual(case["afterClick"]["chart5"], "rgb(225, 29, 72)")
         self.assertEqual(case["afterClick"]["selectedChart"], "vivid")
         self.assertEqual(case["afterClick"]["persistedChart"], "vivid")
         self.assertFalse(case["afterReset"]["styleDataset"])
         self.assertFalse(case["afterReset"]["baseDataset"])
+        self.assertFalse(case["afterReset"]["themeDataset"])
         self.assertEqual(case["afterReset"]["chart1"], "")
+        self.assertEqual(case["afterReset"]["bodyBg"], "")
+        self.assertEqual(case["afterReset"]["bodyBgRgb"], "")
         self.assertEqual(case["afterReset"]["primary"], "")
+        self.assertEqual(case["afterReset"]["primaryRgb"], "")
         self.assertEqual(case["afterReset"]["selectedStyle"], "default")
         self.assertEqual(case["afterReset"]["selectedBase"], "neutral")
+        self.assertEqual(case["afterReset"]["selectedTheme"], "neutral")
         self.assertEqual(case["afterReset"]["selectedChart"], "default")
         self.assertIsNone(case["afterReset"]["storedBuilder"])
 
@@ -414,6 +593,8 @@ console.log(JSON.stringify({ initial, afterClick, afterReset }));
         )
 
         for module_name, initializer in MODULES.items():
+            if initializer is None:
+                continue
             self.assertRegex(
                 source,
                 rf'import \{{ {initializer} \}} from "\./{re.escape(module_name)}";',
