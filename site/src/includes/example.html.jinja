@@ -1,6 +1,6 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "components/tabs.html.jinja" import tabs %}
-{% from "includes/codepen.html.jinja" import codepen_button with context %}
+{% from "includes/codepen.html.jinja" import codepen_button_if_available with context %}
 {% from "includes/component-icons.html.jinja" import component_icons %}
 
 {% macro render_example(
@@ -107,7 +107,6 @@
     {{ preview_source | safe }}
     {% if portal_source %}{{ portal_source | safe }}{% endif %}
   {% endset %}
-  {% set codepen_requires_current_package = component_slug in ["chart", "datepicker", "slider"] %}
   <div class="moo-example__toolbar-actions" data-moo-code-copy-scope>
     <button
       class="btn btn-outline-secondary btn-icon-sm"
@@ -119,21 +118,19 @@
       <span data-moo-copy-icon="copy">{{ render_icon("copy", "inline-start") }}</span>
       <span data-moo-copy-icon="check" hidden>{{ render_icon("check", "inline-start") }}</span>
     </button>
-    {% if product.codepenCdnVersion == product.version or not codepen_requires_current_package %}
-      {{ codepen_button(
-        "Moo UI " ~ component_label ~ " - " ~ title,
-        description | striptags,
-        codepen_html | dedent_html | format_html,
-        "",
-        ["moo-ui", component_slug, "components"],
-        js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
-        label="Try in CodePen",
-        icon="codepen",
-        extra_class="moo-example__codepen",
-        component_slug=component_slug,
-        component_label=component_label
-      ) }}
-    {% endif %}
+    {{ codepen_button_if_available(
+      "Moo UI " ~ component_label ~ " - " ~ title,
+      description | striptags,
+      codepen_html | dedent_html | format_html,
+      "",
+      ["moo-ui", component_slug, "components"],
+      js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+      label="Try in CodePen",
+      icon="codepen",
+      extra_class="moo-example__codepen",
+      component_slug=component_slug,
+      component_label=component_label
+    ) }}
     <span class="visually-hidden" data-moo-copy-status role="status"></span>
   </div>
 {% endmacro %}

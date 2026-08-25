@@ -1,5 +1,7 @@
 {% from "components/button.html.jinja" import button %}
 
+{% set codepen_current_package_required_slugs = ["chart", "datepicker", "slider"] %}
+
 {#- These two CSS blocks are the small amount of page-layout CSS each
    example category owns on top of the shipped moo-ui.css (see
    site/scss/catalog/_examples.scss) -- a CodePen recreation needs it
@@ -643,4 +645,26 @@ if (document.readyState === "loading") {
     <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
     {{ button(label, type="submit", variant="outline", size="sm", icon_start=icon) }}
   </form>
+{%- endmacro %}
+
+{% macro codepen_button_if_available(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110", label="Open in CodePen", icon="code", extra_class="", component_slug="", component_label="") -%}
+  {% set needs_current_package = component_slug in codepen_current_package_required_slugs %}
+  {% if product.codepenCdnVersion == product.version or not needs_current_package %}
+    {{ codepen_button(
+      title,
+      description,
+      html,
+      css,
+      tags,
+      js=js,
+      js_external=js_external,
+      js_module=js_module,
+      editors=editors,
+      label=label,
+      icon=icon,
+      extra_class=extra_class,
+      component_slug=component_slug,
+      component_label=component_label
+    ) }}
+  {% endif %}
 {%- endmacro %}

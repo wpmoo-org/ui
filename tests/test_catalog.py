@@ -514,6 +514,23 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("Try in CodePen", page)
                 self.assertNotIn("data-moo-codepen-form", page)
 
+    def test_codepen_runtime_gating_policy_is_owned_by_codepen_include(self) -> None:
+        codepen_source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("codepen_button_if_available", codepen_source)
+        self.assertIn("codepen_current_package_required_slugs", codepen_source)
+
+        for template in (
+            "site/src/includes/example.html.jinja",
+            "site/src/includes/chart-template.html.jinja",
+        ):
+            with self.subTest(template=template):
+                source = (ROOT / template).read_text(encoding="utf-8")
+                self.assertNotIn("product.codepenCdnVersion", source)
+                self.assertNotIn("codepenCurrentPackage", source)
+                self.assertNotIn('"chart", "datepicker", "slider"', source)
+
     def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
         certification = json.loads(
             (ROOT / "certification.json").read_text(encoding="utf-8")
