@@ -26,6 +26,7 @@ MODULES = {
     "block-frame.js": "initBlockFrames",
     "card-spacing.js": "initCardSpacing",
     "settings-panel.js": "initSettingsPanel",
+    "theme-builder-export.js": None,
     "theme-builder-schema.js": None,
 }
 
@@ -177,6 +178,86 @@ console.log(JSON.stringify({
         self.assertEqual(case["darkBodyBg"], "rgb(9, 9, 11)")
         self.assertEqual(case["darkBodyBgRgb"], "9, 9, 11")
         self.assertEqual(case["darkSecondaryBgRgb"], "39, 39, 42")
+
+    def test_theme_builder_export_emits_json_and_safe_css(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+import {
+  serializeThemeBuilderPresetCss,
+  serializeThemeBuilderPresetJson,
+} from "./site/src/js/catalog/theme-builder-export.js";
+
+const candidate = {
+  style: "soft",
+  baseColor: "zinc",
+  themeColor: "emerald",
+  chartColor: "violet",
+  headingFont: "system",
+  bodyFont: "geist",
+  radius: "compact",
+  chartPalette: "pastel",
+};
+const css = serializeThemeBuilderPresetCss(candidate);
+const json = JSON.parse(
+  serializeThemeBuilderPresetJson(candidate, { mooUiVersion: "1.0.0-test" })
+);
+const declarationTokens = Array.from(
+  css.matchAll(/^\\s*(--[\\w-]+):/gm),
+  (match) => match[1]
+);
+console.log(JSON.stringify({
+  css,
+  json,
+  forbiddenSelector: css.includes("[data-moo"),
+  leakedCatalogToken: css.includes("--moo-catalog-font-family"),
+  unknownTokens: declarationTokens.filter(
+    (token) => !PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST.includes(token)
+  ),
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        css = case["css"]
+        self.assertIn(':root,\n[data-bs-theme="light"] {', css)
+        self.assertIn('[data-bs-theme="dark"] {', css)
+        self.assertIn("--bs-primary-rgb: 5, 150, 105;", css)
+        self.assertIn("--moo-primary-foreground: rgb(255, 255, 255);", css)
+        self.assertIn("--moo-primary-foreground-dark: rgb(6, 78, 59);", css)
+        self.assertIn("--moo-chart-1: rgb(139, 92, 246);", css)
+        self.assertIn("--bs-body-bg: rgb(250, 250, 250);", css)
+        self.assertIn("--bs-body-bg: rgb(9, 9, 11);", css)
+        self.assertFalse(case["forbiddenSelector"])
+        self.assertFalse(case["leakedCatalogToken"])
+        self.assertEqual(case["unknownTokens"], [])
+        self.assertEqual(
+            case["json"],
+            {
+                "schemaVersion": 1,
+                "mooUiVersion": "1.0.0-test",
+                "style": "soft",
+                "baseColor": "zinc",
+                "themeColor": "emerald",
+                "chartColor": "violet",
+                "headingFont": "system",
+                "bodyFont": "geist",
+                "radius": "compact",
+            },
+        )
 
     def test_examples_chart_delegates_to_the_public_moo_chart(self) -> None:
         result = subprocess.run(
