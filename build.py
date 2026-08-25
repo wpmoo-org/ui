@@ -138,6 +138,113 @@ HTML_ATTRIBUTE = re.compile(
     r"(?P<space>\s+)(?P<name>[^\s=/>]+)"
     r"(?:(?P<equals>\s*=\s*)(?P<value>\"[^\"]*\"|'[^']*'|[^\s>]+))?"
 )
+JS_TOKEN = re.compile(
+    r"(?P<comment>//[^\n]*|/\*.*?\*/)"
+    r"|(?P<string>\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)"
+    r"|(?P<number>\b\d+(?:\.\d+)?\b)"
+    r"|(?P<word>\b[A-Za-z_$][\w$]*\b)"
+    r"|(?P<operator>=>|===|!==|==|!=|<=|>=|\+\+|--|&&|\|\||[=+\-*/%<>!?:])"
+    r"|(?P<punctuation>[{}[\]();,.])",
+    re.DOTALL,
+)
+JS_KEYWORDS = frozenset(
+    (
+        "as",
+        "async",
+        "await",
+        "break",
+        "case",
+        "catch",
+        "class",
+        "const",
+        "continue",
+        "default",
+        "do",
+        "else",
+        "export",
+        "extends",
+        "finally",
+        "for",
+        "from",
+        "function",
+        "if",
+        "import",
+        "in",
+        "let",
+        "new",
+        "of",
+        "return",
+        "static",
+        "switch",
+        "throw",
+        "try",
+        "var",
+        "while",
+        "yield",
+    )
+)
+JS_CONSTANTS = frozenset(("false", "null", "true", "undefined"))
+CSS_PROPERTY = re.compile(
+    r"(?P<space>\s*)(?P<name>-?[_A-Za-z][\w-]*)(?P<tail>\s*)(?=:)"
+)
+CSS_FUNCTION = re.compile(r"-?[_A-Za-z][\w-]*(?=\()")
+CSS_NUMBER = re.compile(r"-?(?:\d*\.)?\d+(?:[A-Za-z%]+)?")
+CSS_VARIABLE = re.compile(r"--[_A-Za-z][\w-]*")
+CSS_STRING = re.compile(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'", re.DOTALL)
+SHELL_TOKEN = re.compile(
+    r"(?P<comment>#[^\n]*)"
+    r"|(?P<string>\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"
+    r"|(?P<property>(?<!\S)[A-Za-z_][\w]*(?==))"
+    r"|(?P<operator>(?<!\S)--?[\w-]+)"
+    r"|(?P<word>(?<!\S)(?:\.{1,2}/|/|~|\w)[^\s]*)"
+)
+PYTHON_TOKEN = re.compile(
+    r"(?P<comment>#[^\n]*)"
+    r"|(?P<string>\"\"\".*?\"\"\"|'''.*?'''|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"
+    r"|(?P<number>\b\d+(?:\.\d+)?\b)"
+    r"|(?P<function>\b[A-Za-z_]\w*(?=\s*\())"
+    r"|(?P<word>\b[A-Za-z_]\w*\b)"
+    r"|(?P<operator>==|!=|<=|>=|->|:=|//=|\*\*=|[=+\-*/%<>!&|^~])"
+    r"|(?P<punctuation>[{}[\]();,.:])",
+    re.DOTALL,
+)
+PYTHON_KEYWORDS = frozenset(
+    (
+        "and",
+        "as",
+        "assert",
+        "async",
+        "await",
+        "break",
+        "class",
+        "continue",
+        "def",
+        "del",
+        "elif",
+        "else",
+        "except",
+        "finally",
+        "for",
+        "from",
+        "global",
+        "if",
+        "import",
+        "in",
+        "is",
+        "lambda",
+        "nonlocal",
+        "not",
+        "or",
+        "pass",
+        "raise",
+        "return",
+        "try",
+        "while",
+        "with",
+        "yield",
+    )
+)
+PYTHON_CONSTANTS = frozenset(("False", "None", "True"))
 VOID_ELEMENTS = {
     "area",
     "base",
@@ -353,16 +460,224 @@ def _highlight_html_token(value: str) -> str:
     return _syntax_token("tag", f"{opening}{name}{attributes}{closing}")
 
 
+def _highlight_html_text(value: str, embedded_language: str | None) -> str:
+    if embedded_language == "js":
+        return _highlight_javascript(value)
+    if embedded_language == "css":
+        return _highlight_css(value)
+    return escape(value)
+
+
 def highlight_html(value: object) -> Markup:
     source = str(value)
     highlighted: list[str] = []
     position = 0
+    embedded_language: str | None = None
     for match in HTML_TOKEN.finditer(source):
-        highlighted.append(escape(source[position : match.start()]))
-        highlighted.append(_highlight_html_token(match.group()))
+        highlighted.append(
+            _highlight_html_text(source[position : match.start()], embedded_language)
+        )
+        token = match.group()
+        highlighted.append(_highlight_html_token(token))
+        html_match = HTML_TAG.fullmatch(token)
+        if html_match is not None:
+            tag_name = html_match.group("name").lower()
+            is_closing = html_match.group("open").startswith("</")
+            is_void = html_match.group("close").startswith("/")
+            if tag_name == "script":
+                embedded_language = None if is_closing or is_void else "js"
+            elif tag_name == "style":
+                embedded_language = None if is_closing or is_void else "css"
         position = match.end()
-    highlighted.append(escape(source[position:]))
+    highlighted.append(_highlight_html_text(source[position:], embedded_language))
     return Markup("".join(highlighted))
+
+
+def _highlight_javascript(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    for match in JS_TOKEN.finditer(value):
+        highlighted.append(escape(value[position : match.start()]))
+        kind = match.lastgroup
+        token = match.group()
+        if kind == "word":
+            if token in JS_KEYWORDS:
+                highlighted.append(_syntax_token("keyword", escape(token)))
+            elif token in JS_CONSTANTS:
+                highlighted.append(_syntax_token("constant", escape(token)))
+            else:
+                highlighted.append(escape(token))
+        elif kind in {"comment", "string", "number", "operator", "punctuation"}:
+            highlighted.append(_syntax_token(kind, escape(token)))
+        else:
+            highlighted.append(escape(token))
+        position = match.end()
+    highlighted.append(escape(value[position:]))
+    return "".join(highlighted)
+
+
+def _highlight_css_selector(value: str) -> str:
+    if not value.strip():
+        return escape(value)
+
+    match = re.fullmatch(
+        r"(?P<lead>\s*)(?P<body>.*?)(?P<trail>\s*)",
+        value,
+        re.DOTALL,
+    )
+    if match is None or not match.group("body"):
+        return escape(value)
+
+    return (
+        escape(match.group("lead"))
+        + _syntax_token("selector", escape(match.group("body")))
+        + escape(match.group("trail"))
+    )
+
+
+def _highlight_css(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    in_block = False
+
+    while position < len(value):
+        if value.startswith("/*", position):
+            end = value.find("*/", position + 2)
+            end = len(value) if end == -1 else end + 2
+            highlighted.append(_syntax_token("comment", escape(value[position:end])))
+            position = end
+            continue
+
+        string = CSS_STRING.match(value, position)
+        if string is not None:
+            highlighted.append(_syntax_token("string", escape(string.group())))
+            position = string.end()
+            continue
+
+        character = value[position]
+        if not in_block:
+            next_brace = value.find("{", position)
+            if next_brace == -1:
+                highlighted.append(_highlight_css_selector(value[position:]))
+                break
+            highlighted.append(_highlight_css_selector(value[position:next_brace]))
+            highlighted.append(_syntax_token("punctuation", "{"))
+            position = next_brace + 1
+            in_block = True
+            continue
+
+        if character == "}":
+            highlighted.append(_syntax_token("punctuation", "}"))
+            position += 1
+            in_block = False
+            continue
+
+        property_match = CSS_PROPERTY.match(value, position)
+        if property_match is not None:
+            highlighted.append(escape(property_match.group("space")))
+            highlighted.append(
+                _syntax_token("property", escape(property_match.group("name")))
+            )
+            highlighted.append(escape(property_match.group("tail")))
+            position = property_match.end()
+            continue
+
+        variable = CSS_VARIABLE.match(value, position)
+        if variable is not None:
+            highlighted.append(_syntax_token("variable", escape(variable.group())))
+            position = variable.end()
+            continue
+
+        function = CSS_FUNCTION.match(value, position)
+        if function is not None:
+            highlighted.append(_syntax_token("function", escape(function.group())))
+            position = function.end()
+            continue
+
+        number = CSS_NUMBER.match(value, position)
+        if number is not None:
+            highlighted.append(_syntax_token("number", escape(number.group())))
+            position = number.end()
+            continue
+
+        if character in ":;,()":
+            highlighted.append(_syntax_token("punctuation", escape(character)))
+        else:
+            highlighted.append(escape(character))
+        position += 1
+
+    return "".join(highlighted)
+
+
+def _highlight_shell(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    for match in SHELL_TOKEN.finditer(value):
+        highlighted.append(escape(value[position : match.start()]))
+        kind = match.lastgroup
+        token = match.group()
+        if kind == "word":
+            highlighted.append(_syntax_token("function", escape(token)))
+        elif kind in {"comment", "operator", "property", "string"}:
+            highlighted.append(_syntax_token(kind, escape(token)))
+        else:
+            highlighted.append(escape(token))
+        position = match.end()
+    highlighted.append(escape(value[position:]))
+    return "".join(highlighted)
+
+
+def _highlight_python(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    for match in PYTHON_TOKEN.finditer(value):
+        highlighted.append(escape(value[position : match.start()]))
+        kind = match.lastgroup
+        token = match.group()
+        if kind == "word":
+            if token in PYTHON_KEYWORDS:
+                highlighted.append(_syntax_token("keyword", escape(token)))
+            elif token in PYTHON_CONSTANTS:
+                highlighted.append(_syntax_token("constant", escape(token)))
+            else:
+                highlighted.append(escape(token))
+        elif kind == "function":
+            if token in PYTHON_KEYWORDS:
+                highlighted.append(_syntax_token("keyword", escape(token)))
+            elif token in PYTHON_CONSTANTS:
+                highlighted.append(_syntax_token("constant", escape(token)))
+            else:
+                highlighted.append(_syntax_token("function", escape(token)))
+        elif kind in {"comment", "number", "operator", "punctuation", "string"}:
+            highlighted.append(_syntax_token(kind, escape(token)))
+        else:
+            highlighted.append(escape(token))
+        position = match.end()
+    highlighted.append(escape(value[position:]))
+    return "".join(highlighted)
+
+
+def highlight_code(value: object, language: object = "text") -> Markup:
+    source = str(value)
+    normalized_language = str(language).strip().lower()
+    if normalized_language in {"html", "htm", "xml", "svg"}:
+        return highlight_html(source)
+    if normalized_language in {
+        "js",
+        "javascript",
+        "mjs",
+        "cjs",
+        "ts",
+        "typescript",
+    }:
+        return Markup(_highlight_javascript(source))
+    if normalized_language in {"css", "scss"}:
+        return Markup(_highlight_css(source))
+    if normalized_language in {"bash", "console", "sh", "shell", "zsh"}:
+        return Markup(_highlight_shell(source))
+    if normalized_language in {"py", "python"}:
+        return Markup(_highlight_python(source))
+    return Markup(escape(source))
 
 
 def slugify(value: object) -> str:
@@ -795,6 +1110,7 @@ def create_environment(icon_renderer=None) -> Environment:
     )
     environment.filters["dedent_html"] = dedent_html
     environment.filters["format_html"] = format_html
+    environment.filters["highlight_code"] = highlight_code
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
     environment.filters["absolutize_links"] = absolutize_links

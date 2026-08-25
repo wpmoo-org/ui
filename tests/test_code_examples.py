@@ -4,6 +4,7 @@ import json
 import re
 from html import unescape
 
+import build
 from build import dedent_html, format_html
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -368,6 +369,77 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn(".token.tag {", catalog_css)
         self.assertIn(".token.attr-name", catalog_css)
         self.assertIn(".token.attr-value", catalog_css)
+
+    def test_doc_code_snippets_highlight_language_specific_tokens(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("installation.html")
+        snippet_start = page.index('id="installation-esm-code"')
+        snippet_end = page.index("</pre>", snippet_start)
+        snippet = page[snippet_start:snippet_end]
+
+        self.assertIn('<code class="language-js">', snippet)
+        self.assertIn('<span class="token keyword">import</span>', snippet)
+        self.assertIn('<span class="token keyword">const</span>', snippet)
+        self.assertIn(
+            '<span class="token string">&quot;@wpmoo/ui/chart.js&quot;</span>',
+            snippet,
+        )
+
+        cdn_snippet_start = page.index('id="installation-esm-cdn-code"')
+        cdn_snippet_end = page.index("</pre>", cdn_snippet_start)
+        cdn_snippet = page[cdn_snippet_start:cdn_snippet_end]
+        self.assertIn('<code class="language-html">', cdn_snippet)
+        self.assertIn('<span class="token keyword">import</span>', cdn_snippet)
+        self.assertIn(
+            '<span class="token string">'
+            '&quot;https://cdn.jsdelivr.net/npm/@wpmoo/ui@1.0.0-rc.3/dist/js/chart.js&quot;'
+            "</span>",
+            cdn_snippet,
+        )
+
+        contributing = self.read_output("contributing.html")
+        setup_start = contributing.index('id="contributing-local-setup-code"')
+        setup_end = contributing.index("</pre>", setup_start)
+        setup_snippet = contributing[setup_start:setup_end]
+        self.assertIn('<code class="language-shell">', setup_snippet)
+        self.assertIn('<span class="token function">python3</span>', setup_snippet)
+        self.assertIn('<span class="token operator">-m</span>', setup_snippet)
+        self.assertIn(
+            '<span class="token property">npm_config_cache</span>',
+            setup_snippet,
+        )
+
+        css = str(
+            build.highlight_code(
+                ".sample {\n  color: var(--bs-body-color);\n}", "css"
+            )
+        )
+        self.assertIn('<span class="token selector">.sample</span>', css)
+        self.assertIn('<span class="token property">color</span>', css)
+        self.assertIn('<span class="token function">var</span>', css)
+
+        python = str(
+            build.highlight_code(
+                "from pathlib import Path\n"
+                "\n"
+                "if Path('.').exists():\n"
+                "    print('ok')\n",
+                "python",
+            )
+        )
+        self.assertIn('<span class="token keyword">from</span>', python)
+        self.assertIn('<span class="token keyword">if</span>', python)
+        self.assertIn('<span class="token function">Path</span>', python)
+        self.assertIn('<span class="token function">print</span>', python)
+        self.assertIn('<span class="token string">&#x27;.&#x27;</span>', python)
+
+        catalog_css = self.read_output("assets/css/catalog.css")
+        self.assertIn(".token.keyword", catalog_css)
+        self.assertIn(".token.string", catalog_css)
+        self.assertIn(".token.selector", catalog_css)
+        self.assertIn(".token.property", catalog_css)
 
     def test_inline_code_chips_apply_across_catalog_prose_contexts(self) -> None:
         result = self.run_build()

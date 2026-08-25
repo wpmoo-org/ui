@@ -2030,33 +2030,34 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../components/chart/">Chart</a>', installation)
         self.assertIn('href="../components/datepicker/">Date Picker</a>', installation)
         self.assertIn('href="../components/slider/">Slider</a>', installation)
+        installation_text = unescape(re.sub(r"<[^>]+>", "", installation))
         self.assertIn(
-            'import Combobox from &quot;@wpmoo/ui/combobox.js&quot;',
-            installation,
+            'import Combobox from "@wpmoo/ui/combobox.js"',
+            installation_text,
         )
         self.assertIn(
-            'import ContextMenu from &quot;@wpmoo/ui/context-menu.js&quot;',
-            installation,
+            'import ContextMenu from "@wpmoo/ui/context-menu.js"',
+            installation_text,
         )
         self.assertIn(
-            'import DataTable from &quot;@wpmoo/ui/datatable.js&quot;',
-            installation,
+            'import DataTable from "@wpmoo/ui/datatable.js"',
+            installation_text,
         )
         self.assertIn(
-            'import Sidebar from &quot;@wpmoo/ui/sidebar.js&quot;',
-            installation,
+            'import Sidebar from "@wpmoo/ui/sidebar.js"',
+            installation_text,
         )
         self.assertIn(
-            'import Chart from &quot;@wpmoo/ui/chart.js&quot;',
-            installation,
+            'import Chart from "@wpmoo/ui/chart.js"',
+            installation_text,
         )
         self.assertIn(
-            'import Datepicker from &quot;@wpmoo/ui/datepicker.js&quot;',
-            installation,
+            'import Datepicker from "@wpmoo/ui/datepicker.js"',
+            installation_text,
         )
         self.assertIn(
-            'import Slider from &quot;@wpmoo/ui/slider.js&quot;',
-            installation,
+            'import Slider from "@wpmoo/ui/slider.js"',
+            installation_text,
         )
         self.assertIn(
             f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{combobox_export}",
@@ -2094,13 +2095,13 @@ class CatalogContractTests(CatalogTestCase):
             f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{slider_export}",
             installation,
         )
-        self.assertIn("Combobox.getOrCreateInstance", installation)
-        self.assertIn("ContextMenu.getOrCreateInstance", installation)
-        self.assertIn("DataTable.getOrCreateInstance", installation)
-        self.assertIn("Sidebar.getOrCreateInstance", installation)
-        self.assertIn("Chart.getOrCreateInstance", installation)
-        self.assertIn("Datepicker.getOrCreateInstance", installation)
-        self.assertIn("Slider.getOrCreateInstance", installation)
+        self.assertIn("Combobox.getOrCreateInstance", installation_text)
+        self.assertIn("ContextMenu.getOrCreateInstance", installation_text)
+        self.assertIn("DataTable.getOrCreateInstance", installation_text)
+        self.assertIn("Sidebar.getOrCreateInstance", installation_text)
+        self.assertIn("Chart.getOrCreateInstance", installation_text)
+        self.assertIn("Datepicker.getOrCreateInstance", installation_text)
+        self.assertIn("Slider.getOrCreateInstance", installation_text)
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
@@ -2255,8 +2256,12 @@ class CatalogContractTests(CatalogTestCase):
         readme = public_surfaces["README.md"]
         self.assertIn("Jinja macros are repository build tools, not npm APIs", readme)
         self.assertIn("not npm APIs", public_surfaces["skills.html"])
-        combobox = public_surfaces["components/combobox/index.html"]
-        sidebar = public_surfaces["components/sidebar/index.html"]
+        combobox = unescape(
+            re.sub(r"<[^>]+>", "", public_surfaces["components/combobox/index.html"])
+        )
+        sidebar = unescape(
+            re.sub(r"<[^>]+>", "", public_surfaces["components/sidebar/index.html"])
+        )
         self.assertIn("Combobox.getOrCreateInstance", combobox)
         self.assertIn("dispose()", combobox)
         self.assertIn("Sidebar.getOrCreateInstance", sidebar)

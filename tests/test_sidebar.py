@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from html import unescape
 
 from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_scss_aggregate
@@ -745,11 +746,12 @@ class SidebarTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         page = self.read_output("components/sidebar.html")
+        page_text = unescape(re.sub(r"<[^>]+>", "", page))
         self.assertIn("useSidebar", page)
         self.assertIn("data-sidebar-state", page)
         self.assertIn("@wpmoo/ui/sidebar.js", page)
-        self.assertIn("Sidebar.getOrCreateInstance(element)", page)
-        self.assertIn("sidebar.dispose()", page)
+        self.assertIn("Sidebar.getOrCreateInstance(element)", page_text)
+        self.assertIn("sidebar.dispose()", page_text)
         self.assertNotIn("static/js/preview.js", page)
         self.assertNotIn("useSidebar()", page)
 

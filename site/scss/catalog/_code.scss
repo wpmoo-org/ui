@@ -160,20 +160,32 @@
 
 .token.comment,
 .token.doctype,
+.token.operator,
 .token.punctuation {
   color: var(--bs-tertiary-color);
 }
 
+.token.keyword,
+.token.selector,
 .token.tag {
   color: var(--bs-info-text-emphasis);
 }
 
-.token.attr-name {
+.token.attr-name,
+.token.function,
+.token.property {
   color: var(--bs-success-text-emphasis);
 }
 
-.token.attr-value {
+.token.attr-value,
+.token.number,
+.token.string,
+.token.variable {
   color: var(--bs-code-color);
+}
+
+.token.constant {
+  color: var(--bs-warning-text-emphasis);
 }
 
 [dir="rtl"] .moo-example__preview {
