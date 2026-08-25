@@ -149,9 +149,12 @@
 .moo-example__surface {
   min-width: 0;
   overflow: hidden;
-  border: var(--bs-border-width) solid var(--bs-card-border-color, var(--bs-border-color));
+  border: var(--bs-border-width) solid var(--bs-border-color-translucent);
   border-radius: var(--bs-border-radius-xl);
-  background: var(--bs-card-bg, var(--bs-body-bg));
+  // Keep live preview surfaces on the theme's body canvas and stable Bootstrap
+  // border. Theme Builder style presets retune card fills and borders for
+  // catalog chrome, but component examples should not inherit that decoration.
+  background: var(--bs-body-bg);
 }
 
 .moo-example:has(.dropdown-menu.show) {

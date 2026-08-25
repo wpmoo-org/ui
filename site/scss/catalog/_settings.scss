@@ -26,3 +26,35 @@ $moo-catalog-settings-thumb-dark: #18181b !default;
 $moo-catalog-settings-thumb-light-line: #e4e4e7 !default;
 $moo-catalog-settings-thumb-dark-line: #3f3f46 !default;
 $moo-catalog-settings-thumb-system-line: #a1a1aa !default;
+$moo-catalog-settings-swatch-neutral: #71717a !default;
+$moo-catalog-settings-swatch-blue: #2563eb !default;
+$moo-catalog-settings-swatch-emerald: #059669 !default;
+$moo-catalog-settings-swatch-violet: #7c3aed !default;
+$moo-catalog-settings-swatch-chart-default: #0d6efd !default;
+$moo-catalog-settings-swatch-chart-pastel-a: #67a9e8 !default;
+$moo-catalog-settings-swatch-chart-pastel-b: #76bbaa !default;
+$moo-catalog-settings-swatch-chart-vivid-a: #2563eb !default;
+$moo-catalog-settings-swatch-chart-vivid-b: #059669 !default;
+$moo-catalog-settings-swatch-check: #ffffff !default;
+
+// Catalog code-panel syntax colors are documentation chrome, not product
+// component tokens. Keep the literals at this Sass definition site so the
+// rendered CSS consumes private --moo-code-* custom properties and the token
+// palette can move independently from Bootstrap semantic colors.
+$moo-catalog-code-muted: #71717a !default;
+$moo-catalog-code-keyword: #e11d48 !default;
+$moo-catalog-code-selector: #2563eb !default;
+$moo-catalog-code-tag: #1d4ed8 !default;
+$moo-catalog-code-property: #7c3aed !default;
+$moo-catalog-code-function: #059669 !default;
+$moo-catalog-code-string: #0369a1 !default;
+$moo-catalog-code-constant: #b45309 !default;
+
+$moo-catalog-code-muted-dark: #a1a1aa !default;
+$moo-catalog-code-keyword-dark: #fb7185 !default;
+$moo-catalog-code-selector-dark: #93c5fd !default;
+$moo-catalog-code-tag-dark: #60a5fa !default;
+$moo-catalog-code-property-dark: #c4b5fd !default;
+$moo-catalog-code-function-dark: #6ee7b7 !default;
+$moo-catalog-code-string-dark: #7dd3fc !default;
+$moo-catalog-code-constant-dark: #fbbf24 !default;

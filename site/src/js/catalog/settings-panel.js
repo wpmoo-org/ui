@@ -196,11 +196,15 @@ export function initSettingsPanel(root = document) {
               fieldRoot?.querySelectorAll(BUILDER_OPTION_SELECTOR) || []
             ),
             value: fieldRoot?.querySelector(BUILDER_VALUE_SELECTOR),
+            swatch: fieldRoot?.querySelector(
+              "[data-moo-catalog-theme-builder-trigger-swatch]"
+            ),
           },
         ];
       })
     );
     const reset = sheet.querySelector("[data-moo-settings-reset]");
+    let builderTransitionGeneration = 0;
     const listen = (target, type, handler) => {
       target?.addEventListener(type, handler);
       if (target) {
@@ -262,6 +266,7 @@ export function initSettingsPanel(root = document) {
     const syncBuilderControls = (preference) => {
       Object.entries(builderControls).forEach(([key, control]) => {
         let selectedLabel = preference[key];
+        let selectedSwatch = "";
         control.options.forEach((option) => {
           const isSelected =
             option.dataset.mooCatalogThemeBuilderOption === preference[key];
@@ -272,10 +277,19 @@ export function initSettingsPanel(root = document) {
               option
                 .querySelector("[data-moo-catalog-theme-builder-option-label]")
                 ?.textContent?.trim() || selectedLabel;
+            selectedSwatch = option.dataset.mooCatalogThemeBuilderSwatch || "";
           }
         });
         if (control.value) {
           control.value.textContent = selectedLabel;
+        }
+        if (control.swatch) {
+          if (selectedSwatch) {
+            control.swatch.dataset.mooCatalogThemeBuilderTriggerSwatch =
+              selectedSwatch;
+          } else {
+            delete control.swatch.dataset.mooCatalogThemeBuilderTriggerSwatch;
+          }
         }
       });
     };
@@ -304,39 +318,75 @@ export function initSettingsPanel(root = document) {
       }
     };
 
+    const withBuilderTransitionSuppressed = (work) => {
+      documentElement.dataset.mooCatalogThemeBuilderUpdating = "true";
+      builderTransitionGeneration += 1;
+      const generation = builderTransitionGeneration;
+      const clear = () => {
+        if (generation === builderTransitionGeneration) {
+          delete documentElement.dataset.mooCatalogThemeBuilderUpdating;
+        }
+      };
+      const afterPaint =
+        typeof view.requestAnimationFrame === "function"
+          ? (callback) =>
+              view.requestAnimationFrame(() => {
+                view.requestAnimationFrame(callback);
+              })
+          : (callback) => {
+              const setTimeoutFallback =
+                typeof view.setTimeout === "function"
+                  ? view.setTimeout.bind(view)
+                  : typeof globalThis.setTimeout === "function"
+                    ? globalThis.setTimeout.bind(globalThis)
+                    : null;
+              if (setTimeoutFallback) {
+                setTimeoutFallback(callback, 32);
+              } else {
+                callback();
+              }
+            };
+
+      const result = work();
+      afterPaint(clear);
+      return result;
+    };
+
     const applyBuilderPreference = (candidate, { persist = true } = {}) => {
       const preference = normalizedBuilderPreference(candidate);
-      Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
-        if (preference[key] === BUILDER_DEFAULTS[key]) {
-          delete documentElement.dataset[datasetKey];
-        } else {
-          documentElement.dataset[datasetKey] = preference[key];
-        }
+      withBuilderTransitionSuppressed(() => {
+        Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
+          if (preference[key] === BUILDER_DEFAULTS[key]) {
+            delete documentElement.dataset[datasetKey];
+          } else {
+            documentElement.dataset[datasetKey] = preference[key];
+          }
+        });
+        applyTokenSet(
+          documentElement.style,
+          BASE_COLOR_TOKENS,
+          BASE_COLOR_PRESETS[preference.baseColor]
+        );
+        applyTokenSet(
+          documentElement.style,
+          CHART_PALETTE_TOKENS,
+          CHART_PALETTE_PRESETS[preference.chartPalette]
+        );
+        applyTokenSet(
+          documentElement.style,
+          RADIUS_TOKENS,
+          RADIUS_PRESETS[preference.radius]
+        );
+        applyTokenSet(
+          documentElement.style,
+          FONT_TOKENS,
+          {
+            ...FONT_PRESETS.headingFont[preference.headingFont],
+            ...FONT_PRESETS.bodyFont[preference.bodyFont],
+          }
+        );
+        syncBuilderControls(preference);
       });
-      applyTokenSet(
-        documentElement.style,
-        BASE_COLOR_TOKENS,
-        BASE_COLOR_PRESETS[preference.baseColor]
-      );
-      applyTokenSet(
-        documentElement.style,
-        CHART_PALETTE_TOKENS,
-        CHART_PALETTE_PRESETS[preference.chartPalette]
-      );
-      applyTokenSet(
-        documentElement.style,
-        RADIUS_TOKENS,
-        RADIUS_PRESETS[preference.radius]
-      );
-      applyTokenSet(
-        documentElement.style,
-        FONT_TOKENS,
-        {
-          ...FONT_PRESETS.headingFont[preference.headingFont],
-          ...FONT_PRESETS.bodyFont[preference.bodyFont],
-        }
-      );
-      syncBuilderControls(preference);
       if (persist) {
         persistBuilderPreference(preference);
       }

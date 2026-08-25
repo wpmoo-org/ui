@@ -3,13 +3,14 @@
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
 
-{% macro settings_dropdown_row(label, id, hook, options, selected="default") -%}
+{% macro settings_dropdown_row(label, id, hook, options, selected="default", swatch_group="") -%}
   {% set current = namespace(label=selected) %}
   {% for option in options %}
     {% if option.value == selected %}
       {% set current.label = option.label %}
     {% endif %}
   {% endfor %}
+  {% set current_swatch = (swatch_group ~ "-" ~ selected) if swatch_group else "" %}
   {% call field(extra_class="moo-settings-panel__dropdown-field") %}
     <span class="form-label" id="{{ id }}-label">{{ label }}</span>
     <div class="dropdown moo-settings-panel__dropdown" {{ hook }}>
@@ -23,16 +24,25 @@
         data-moo-catalog-theme-builder-trigger
       >
         <span id="{{ id }}-value" data-moo-catalog-theme-builder-value>{{ current.label }}</span>
+        {% if current_swatch %}
+          <span
+            class="moo-settings-panel__dropdown-trigger-swatch"
+            data-moo-catalog-theme-builder-trigger-swatch="{{ current_swatch }}"
+            aria-hidden="true"
+          ></span>
+        {% endif %}
         {{ render_icon("chevron-down", "inline-end") }}
       </button>
       {% call dropdown_menu(align="end", extra_class="moo-settings-panel__dropdown-menu") %}
         {% for option in options %}
           {% set is_selected = option.value == selected %}
+          {% set swatch = (swatch_group ~ "-" ~ option.value) if swatch_group else "" %}
           <li>
             <button
               class="dropdown-item dropdown-item-check moo-settings-panel__dropdown-item{% if is_selected %} active{% endif %}"
               type="button"
               data-moo-catalog-theme-builder-option="{{ option.value }}"
+              {% if swatch %}data-moo-catalog-theme-builder-swatch="{{ swatch }}"{% endif %}
               aria-pressed="{{ 'true' if is_selected else 'false' }}"
             >
               <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
@@ -142,7 +152,8 @@
                 {"value": "emerald", "label": "Emerald"},
                 {"value": "violet", "label": "Violet"}
               ],
-              selected="neutral"
+              selected="neutral",
+              swatch_group="base-color"
             ) }}
             {{ settings_dropdown_row(
               "Chart color",
@@ -152,7 +163,8 @@
                 {"value": "default", "label": "Default"},
                 {"value": "pastel", "label": "Pastel"},
                 {"value": "vivid", "label": "Vivid"}
-              ]
+              ],
+              swatch_group="chart-palette"
             ) }}
             {{ settings_dropdown_row(
               "Heading font",

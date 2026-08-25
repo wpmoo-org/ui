@@ -307,6 +307,73 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
+    def test_catalog_github_link_stays_neutral_when_base_color_changes(self) -> None:
+        styles = read_catalog_styles()
+        match = re.search(
+            r"\.moo-catalog__github-link\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+
+        self.assertIsNotNone(match)
+        body = match.group("body")
+        self.assertIn("--bs-btn-color: var(--bs-body-color);", body)
+        self.assertIn("--bs-btn-bg: var(--bs-secondary-bg);", body)
+        self.assertIn("--bs-btn-border-color: var(--bs-border-color);", body)
+        self.assertIn("--bs-btn-hover-bg: var(--bs-tertiary-bg);", body)
+        self.assertNotIn("var(--moo-primary", body)
+        self.assertNotIn("var(--bs-primary", body)
+
+    def test_settings_builder_color_dropdowns_render_swatch_indicators(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("components/button.html")
+        settings_panel = page.split('id="catalog-settings"', 1)[1]
+        style_dropdown, after_style = settings_panel.split(
+            "data-moo-catalog-theme-builder-base-color", 1
+        )
+        base_dropdown, after_base = after_style.split(
+            "data-moo-catalog-theme-builder-chart-palette", 1
+        )
+        chart_dropdown, font_dropdowns = after_base.split(
+            "data-moo-catalog-theme-builder-heading-font", 1
+        )
+
+        self.assertNotIn("data-moo-catalog-theme-builder-swatch", style_dropdown)
+        for swatch in (
+            "base-color-neutral",
+            "base-color-blue",
+            "base-color-emerald",
+            "base-color-violet",
+        ):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'data-moo-catalog-theme-builder-swatch="{swatch}"',
+                    base_dropdown,
+                )
+        for swatch in (
+            "chart-palette-default",
+            "chart-palette-pastel",
+            "chart-palette-vivid",
+        ):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'data-moo-catalog-theme-builder-swatch="{swatch}"',
+                    chart_dropdown,
+                )
+        self.assertNotIn("data-moo-catalog-theme-builder-swatch", font_dropdowns)
+
+        styles = read_catalog_styles()
+        self.assertIn(
+            ".moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch] "
+            ".dropdown-item-check__indicator",
+            styles,
+        )
+        self.assertIn(
+            'data-moo-catalog-theme-builder-swatch="base-color-blue"',
+            styles,
+        )
+
     def test_visible_component_lists_are_sorted_by_label(self) -> None:
         sorted_loop = (
             '{% for component in catalog | sort(attribute="label") %}'

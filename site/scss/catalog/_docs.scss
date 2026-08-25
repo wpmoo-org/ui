@@ -667,8 +667,8 @@
 
 [data-moo-catalog-theme-builder-style="nova"] .moo-catalog {
   --moo-muted-surface: color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg));
-  --moo-border: color-mix(in srgb, var(--bs-primary) 22%, transparent);
-  --moo-sidebar-accent: color-mix(in srgb, var(--bs-primary) 10%, var(--bs-body-bg));
+  --moo-border: color-mix(in srgb, var(--bs-body-color) 14%, transparent);
+  --moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--bs-body-bg));
   --bs-secondary-bg: var(--moo-muted-surface);
   --bs-tertiary-bg: color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg));
   --bs-border-color: var(--moo-border);
@@ -677,7 +677,19 @@
 }
 
 [data-moo-catalog-theme-builder-base-color] .moo-catalog {
-  --moo-sidebar-accent: color-mix(in srgb, var(--bs-primary) 10%, var(--bs-body-bg));
+  --moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--bs-body-bg));
+}
+
+[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="nova"] .moo-catalog,
+[data-bs-theme="dark"][data-moo-catalog-theme-builder-base-color] .moo-catalog {
+  --moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 32%, var(--bs-body-bg));
+}
+
+[data-moo-catalog-theme-builder-updating] .moo-catalog,
+[data-moo-catalog-theme-builder-updating] .moo-catalog *,
+[data-moo-catalog-theme-builder-updating] .moo-catalog *::before,
+[data-moo-catalog-theme-builder-updating] .moo-catalog *::after {
+  transition: none !important;
 }
 
 .moo-catalog :where(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .offcanvas-title) {
@@ -729,13 +741,34 @@
 }
 
 .moo-settings-panel__dropdown-trigger {
+  gap: 0.5rem;
   justify-content: space-between;
   min-inline-size: 8.5rem;
 }
 
+.moo-settings-panel__dropdown-trigger > [data-moo-catalog-theme-builder-value] {
+  min-width: 0;
+  margin-inline-end: auto;
+}
+
 .moo-settings-panel__dropdown-trigger > [data-icon] {
+  flex: 0 0 auto;
   width: 0.875rem;
   height: 0.875rem;
+}
+
+.moo-settings-panel__dropdown-trigger-swatch {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+  --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
+  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: var(--bs-border-width) solid var(--moo-settings-panel-swatch-border);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--moo-settings-panel-swatch-background);
 }
 
 .moo-settings-panel__dropdown-menu {
@@ -744,6 +777,59 @@
 
 .moo-settings-panel__dropdown-item {
   gap: 0.5rem;
+}
+
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+  --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
+  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+
+  border-color: var(--moo-settings-panel-swatch-border);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--moo-settings-panel-swatch-background);
+}
+
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch].active .dropdown-item-check__indicator {
+  border-color: var(--moo-settings-panel-swatch-border);
+  background: var(--moo-settings-panel-swatch-background);
+  color: #{$moo-catalog-settings-swatch-check};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-neutral"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-blue"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-blue"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-blue};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-emerald"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-emerald"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-emerald};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-violet"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-violet"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-violet};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-palette-default"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-palette-default"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-chart-default};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-palette-pastel"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-palette-pastel"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-chart-pastel-a};
+  --moo-settings-panel-swatch-background: linear-gradient(135deg, #{$moo-catalog-settings-swatch-chart-pastel-a} 0 50%, #{$moo-catalog-settings-swatch-chart-pastel-b} 50% 100%);
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-palette-vivid"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-palette-vivid"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-chart-vivid-a};
+  --moo-settings-panel-swatch-background: linear-gradient(135deg, #{$moo-catalog-settings-swatch-chart-vivid-a} 0 50%, #{$moo-catalog-settings-swatch-chart-vivid-b} 50% 100%);
 }
 
 .moo-settings-panel__theme-group {

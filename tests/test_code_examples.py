@@ -264,13 +264,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("min-width: 0;", surface)
         self.assertIn("overflow: hidden;", surface)
         self.assertIn(
-            "border: var(--bs-border-width) solid var(--bs-card-border-color, var(--bs-border-color));",
+            "border: var(--bs-border-width) solid var(--bs-border-color-translucent);",
             surface,
         )
-        self.assertIn(
-            "background: var(--bs-card-bg, var(--bs-body-bg));",
-            surface,
-        )
+        self.assertIn("background: var(--bs-body-bg);", surface)
+        self.assertNotIn("--bs-card-bg", surface)
+        self.assertNotIn("--bs-card-border-color", surface)
         active_example = css.split(".moo-example:has(.dropdown-menu.show) {", 1)[1].split("}", 1)[0]
         active_surface = css.split(".moo-example__surface:has(.dropdown-menu.show) {", 1)[1].split("}", 1)[0]
         self.assertIn("position: relative;", active_example)
@@ -288,6 +287,8 @@ class CodeExampleTests(CatalogTestCase):
             "border-top: var(--bs-border-width) solid var(--bs-border-color);",
             source,
         )
+        self.assertIn("background: var(--moo-code-surface);", source)
+        self.assertNotIn("--bs-tertiary-bg", source)
         source_code = css.split(".moo-example__source pre {", 1)[1].split(
             "}", 1
         )[0]
@@ -300,6 +301,11 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("line-height: 1.75;", source_code)
         reveal = css.split(".moo-code__reveal {", 1)[1].split("}", 1)[0]
         self.assertNotIn("padding-bottom:", reveal)
+        self.assertIn("var(--moo-code-surface)", reveal)
+        self.assertNotIn("--bs-tertiary-bg", reveal)
+        lines = css.split(".moo-code__lines {", 1)[1].split("}", 1)[0]
+        self.assertIn("background: var(--moo-code-surface);", lines)
+        self.assertNotIn("--bs-tertiary-bg", lines)
         reveal_button = css.split(".moo-code__reveal .btn {", 1)[1].split(
             "}", 1
         )[0]
@@ -331,6 +337,109 @@ class CodeExampleTests(CatalogTestCase):
                 page.count("moo-example__surface"),
                 page.count('<div class="moo-example__preview'),
             )
+
+    def test_theme_builder_base_color_does_not_recolor_borders(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/catalog.css")
+
+        base_color = css.split(
+            '[data-moo-catalog-theme-builder-base-color] .moo-catalog {', 1
+        )[1].split("}", 1)[0]
+        self.assertIn(
+            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--bs-body-bg));",
+            base_color,
+        )
+        self.assertNotIn("var(--bs-primary)", base_color)
+        self.assertNotIn("border", base_color)
+
+        dark_base_color_selector = (
+            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-base-color] .moo-catalog'
+        )
+        self.assertIn(dark_base_color_selector, css)
+        dark_base_color = css.split(f"{dark_base_color_selector} {{", 1)[1].split("}", 1)[0]
+        self.assertIn(
+            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 32%, var(--bs-body-bg));",
+            dark_base_color,
+        )
+
+        nova = css.split(
+            '[data-moo-catalog-theme-builder-style="nova"] .moo-catalog {', 1
+        )[1].split("}", 1)[0]
+        self.assertIn(
+            "--moo-muted-surface: color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg));",
+            nova,
+        )
+        self.assertIn(
+            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--bs-body-bg));",
+            nova,
+        )
+        self.assertIn(
+            "--bs-tertiary-bg: color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg));",
+            nova,
+        )
+        self.assertIn(
+            "--moo-border: color-mix(in srgb, var(--bs-body-color) 14%, transparent);",
+            nova,
+        )
+        self.assertNotIn("--moo-border: color-mix(in srgb, var(--bs-primary)", nova)
+
+        dark_nova_selector = (
+            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="nova"] .moo-catalog'
+        )
+        self.assertIn(dark_nova_selector, css)
+        dark_nova = css.split(
+            f"{dark_nova_selector},\n"
+            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-base-color] .moo-catalog {',
+            1,
+        )[1].split("}", 1)[0]
+        self.assertIn(
+            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 32%, var(--bs-body-bg));",
+            dark_nova,
+        )
+
+    def test_syntax_highlight_colors_use_catalog_code_tokens(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = self.read_output("assets/css/catalog.css")
+
+        catalog_tokens = css.split(".moo-catalog {", 1)[1].split("}", 1)[0]
+        for token in (
+            "--moo-code-muted:",
+            "--moo-code-keyword:",
+            "--moo-code-selector:",
+            "--moo-code-tag:",
+            "--moo-code-property:",
+            "--moo-code-function:",
+            "--moo-code-string:",
+            "--moo-code-constant:",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, catalog_tokens)
+
+        dark_selector = '[data-bs-theme=dark] .moo-catalog {'
+        self.assertIn(dark_selector, css)
+        dark_catalog = css.split(dark_selector, 1)[1].split("}", 1)[0]
+        self.assertIn("--moo-code-keyword:", dark_catalog)
+        self.assertIn("--moo-code-string:", dark_catalog)
+
+        selector_contracts = {
+            ".token.comment": "--moo-code-muted",
+            ".token.keyword": "--moo-code-keyword",
+            ".token.selector": "--moo-code-selector",
+            ".token.tag": "--moo-code-tag",
+            ".token.attr-name": "--moo-code-property",
+            ".token.function": "--moo-code-function",
+            ".token.property": "--moo-code-property",
+            ".token.string": "--moo-code-string",
+            ".token.constant": "--moo-code-constant",
+        }
+        for selector, token in selector_contracts.items():
+            with self.subTest(selector=selector):
+                rule = css.split(f"{selector} {{", 1)[1].split("}", 1)[0]
+                self.assertIn(f"color: var({token});", rule)
 
     def test_rendered_code_has_syntax_tokens_lines_and_clean_indent(self) -> None:
         source = """

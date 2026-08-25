@@ -25,7 +25,7 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Continue", dismiss="modal") }}
+          {{ button("Continue", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -49,7 +49,7 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Discard", dismiss="modal") }}
+          {{ button("Discard", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -70,7 +70,7 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Leave", dismiss="modal") }}
+          {{ button("Leave", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -92,7 +92,7 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Keep running", variant="outline", dismiss="modal") }}
-          {{ button("Stop import", dismiss="modal") }}
+          {{ button("Stop import", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -114,7 +114,7 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Keep running", variant="outline", dismiss="modal") }}
-          {{ button("Pause sync", dismiss="modal") }}
+          {{ button("Pause sync", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}

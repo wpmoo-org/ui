@@ -1,11 +1,50 @@
 from __future__ import annotations
 
+from html.parser import HTMLParser
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/alert_dialog.html.jinja"
 PAGE = ROOT / "site/src/pages/components/alert-dialog.html.jinja"
+
+
+class AlertDialogFooterButtonParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.depth = 0
+        self.alert_depth: int | None = None
+        self.footer_depth: int | None = None
+        self.footer_button_classes: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attrs_dict = dict(attrs)
+        classes = (attrs_dict.get("class") or "").split()
+
+        if tag == "div" and "modal--alert" in classes:
+            self.alert_depth = self.depth
+
+        if (
+            self.alert_depth is not None
+            and tag == "div"
+            and "modal-footer" in classes
+        ):
+            self.footer_depth = self.depth
+
+        if self.footer_depth is not None and tag in ("a", "button", "input"):
+            self.footer_button_classes.append(attrs_dict.get("class") or "")
+
+        self.depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        self.depth -= 1
+
+        if self.footer_depth is not None and self.depth <= self.footer_depth:
+            self.footer_depth = None
+
+        if self.alert_depth is not None and self.depth <= self.alert_depth:
+            self.alert_depth = None
 
 
 class AlertDialogTests(CatalogTestCase):
@@ -119,6 +158,24 @@ class AlertDialogTests(CatalogTestCase):
         self.assertIn("{% call alert_dialog(", source)
         self.assertNotIn("{% call dialog(", source)
         self.assertNotIn("static=true", source)
+
+    def test_page_alert_dialog_actions_do_not_render_primary_buttons(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/alert-dialog.html")
+        parser = AlertDialogFooterButtonParser()
+        parser.feed(page)
+
+        self.assertGreaterEqual(len(parser.footer_button_classes), 2)
+        self.assertFalse(
+            [
+                classes
+                for classes in parser.footer_button_classes
+                if "btn-primary" in classes.split()
+            ],
+            "Alert Dialog examples should not inherit the base-color primary action style.",
+        )
 
     def test_page_includes_small_media_and_tabbed_rtl_examples(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
