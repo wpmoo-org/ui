@@ -115,7 +115,7 @@ console.log(JSON.stringify(state));
                 "style": "soft",
                 "baseColor": "neutral",
                 "themeColor": "blue",
-                "chartColor": "pastel",
+                "chartColor": "neutral",
                 "headingFont": "system",
                 "bodyFont": "geist",
                 "radius": "compact",
@@ -155,8 +155,8 @@ console.log(JSON.stringify({
   foregroundDark: tokens["--moo-primary-foreground-dark"],
   chart1: tokens["--moo-chart-1"],
   darkBodyBg: darkTokens["--bs-body-bg"],
-  darkBodyBgRgb: darkTokens["--bs-body-bg-rgb"],
-  darkSecondaryBgRgb: darkTokens["--bs-secondary-bg-rgb"],
+  darkSurface: darkTokens["--moo-surface"],
+  darkSecondaryBg: darkTokens["--bs-secondary-bg"],
 }));
 """,
             ],
@@ -171,13 +171,13 @@ console.log(JSON.stringify({
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertEqual(case["unknownTokens"], [])
         self.assertFalse(case["hasDataSelectorToken"])
-        self.assertEqual(case["primaryRgb"], "5, 150, 105")
-        self.assertEqual(case["foreground"], "rgb(255, 255, 255)")
-        self.assertEqual(case["foregroundDark"], "rgb(6, 78, 59)")
-        self.assertEqual(case["chart1"], "rgb(139, 92, 246)")
-        self.assertEqual(case["darkBodyBg"], "rgb(9, 9, 11)")
-        self.assertEqual(case["darkBodyBgRgb"], "9, 9, 11")
-        self.assertEqual(case["darkSecondaryBgRgb"], "39, 39, 42")
+        self.assertEqual(case["primaryRgb"], "47, 179, 68")
+        self.assertEqual(case["foreground"], "rgb(17, 24, 39)")
+        self.assertEqual(case["foregroundDark"], "rgb(17, 24, 39)")
+        self.assertEqual(case["chart1"], "rgb(174, 62, 201)")
+        self.assertEqual(case["darkBodyBg"], "var(--moo-surface)")
+        self.assertEqual(case["darkSurface"], "oklch(0.141 0.005 285.823)")
+        self.assertEqual(case["darkSecondaryBg"], "var(--moo-muted-surface)")
 
     def test_theme_builder_export_emits_json_and_safe_css(self) -> None:
         result = subprocess.run(
@@ -235,12 +235,13 @@ console.log(JSON.stringify({
         css = case["css"]
         self.assertIn(':root,\n[data-bs-theme="light"] {', css)
         self.assertIn('[data-bs-theme="dark"] {', css)
-        self.assertIn("--bs-primary-rgb: 5, 150, 105;", css)
-        self.assertIn("--moo-primary-foreground: rgb(255, 255, 255);", css)
-        self.assertIn("--moo-primary-foreground-dark: rgb(6, 78, 59);", css)
-        self.assertIn("--moo-chart-1: rgb(139, 92, 246);", css)
-        self.assertIn("--bs-body-bg: rgb(250, 250, 250);", css)
-        self.assertIn("--bs-body-bg: rgb(9, 9, 11);", css)
+        self.assertIn("--bs-primary-rgb: 47, 179, 68;", css)
+        self.assertIn("--moo-primary-foreground: rgb(17, 24, 39);", css)
+        self.assertIn("--moo-primary-foreground-dark: rgb(17, 24, 39);", css)
+        self.assertIn("--moo-chart-1: rgb(174, 62, 201);", css)
+        self.assertIn("--bs-body-bg: var(--moo-surface);", css)
+        self.assertIn("--moo-surface: oklch(1 0 0);", css)
+        self.assertIn("--moo-surface: oklch(0.141 0.005 285.823);", css)
         self.assertFalse(case["forbiddenSelector"])
         self.assertFalse(case["leakedCatalogToken"])
         self.assertEqual(case["unknownTokens"], [])
@@ -251,8 +252,8 @@ console.log(JSON.stringify({
                 "mooUiVersion": "1.0.0-test",
                 "style": "soft",
                 "baseColor": "zinc",
-                "themeColor": "emerald",
-                "chartColor": "violet",
+                "themeColor": "green",
+                "chartColor": "purple",
                 "headingFont": "system",
                 "bodyFont": "geist",
                 "radius": "compact",
@@ -351,7 +352,7 @@ report("catalog-delegation", {{
         self.assertIn("mooCatalogThemeBuilderStyle", source)
         self.assertIn("mooCatalogThemeBuilderBaseColor", source)
         self.assertIn("data-moo-catalog-theme-builder-style", styles)
-        self.assertIn("data-moo-catalog-theme-builder-base-color", styles)
+        self.assertIn("data-moo-catalog-theme-builder-theme-color", styles)
 
     def test_settings_theme_builder_applies_tokens_persistence_and_reset(self) -> None:
         result = subprocess.run(
@@ -462,7 +463,7 @@ const controls = {
   style: makeControl({ default: "Default", soft: "Soft", solid: "Solid" }),
   baseColor: makeControl({ neutral: "Neutral", zinc: "Zinc" }),
   themeColor: makeControl({ neutral: "Neutral", blue: "Blue" }),
-  chartColor: makeControl({ default: "Default", pastel: "Pastel", vivid: "Vivid" }),
+  chartColor: makeControl({ neutral: "Neutral", teal: "Teal" }),
   headingFont: makeControl({ default: "Default", system: "System" }),
   bodyFont: makeControl({ default: "Default", geist: "Geist" }),
   radius: makeControl({ default: "Default", compact: "Compact" }),
@@ -546,6 +547,7 @@ const initial = {
 optionFor("baseColor", "zinc").click();
 const afterBaseLight = {
   baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
+  sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
   bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
   bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
 };
@@ -555,13 +557,14 @@ darkInput.checked = true;
 darkInput.dispatch("change");
 const afterThemeDark = {
   theme: documentElement.dataset.bsTheme,
+  sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
   bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
   bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
   primary: documentElement.style.getPropertyValue("--bs-primary"),
   darkChecked: darkInput.checked,
 };
 
-optionFor("chartColor", "vivid").click();
+optionFor("chartColor", "teal").click();
 const persisted = JSON.parse(localStorage.getItem("moo:theme-builder"));
 const afterClick = {
   chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
@@ -619,10 +622,10 @@ console.log(JSON.stringify({
         self.assertEqual(case["initial"]["themeDataset"], "blue")
         self.assertFalse(case["initial"]["broadStyleDataset"])
         self.assertFalse(case["initial"]["broadBaseDataset"])
-        self.assertEqual(case["initial"]["primary"], "rgb(37, 99, 235)")
-        self.assertEqual(case["initial"]["primaryRgb"], "37, 99, 235")
+        self.assertEqual(case["initial"]["primary"], "rgb(6, 111, 209)")
+        self.assertEqual(case["initial"]["primaryRgb"], "6, 111, 209")
         self.assertEqual(case["initial"]["foreground"], "rgb(255, 255, 255)")
-        self.assertEqual(case["initial"]["chart1"], "rgb(103, 169, 232)")
+        self.assertEqual(case["initial"]["chart1"], "rgb(82, 82, 91)")
         self.assertEqual(
             case["initial"]["heading"],
             'system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -635,29 +638,31 @@ console.log(JSON.stringify({
         self.assertEqual(case["initial"]["selectedStyle"], "soft")
         self.assertEqual(case["initial"]["selectedBase"], "neutral")
         self.assertEqual(case["initial"]["selectedTheme"], "blue")
-        self.assertEqual(case["initial"]["selectedChart"], "pastel")
+        self.assertEqual(case["initial"]["selectedChart"], "neutral")
         self.assertEqual(case["initial"]["styleLabel"], "Soft")
         self.assertEqual(case["initial"]["softPressed"], "true")
         self.assertEqual(case["initial"]["migratedBuilder"]["schemaVersion"], 1)
         self.assertEqual(case["initial"]["migratedBuilder"]["baseColor"], "neutral")
         self.assertEqual(case["initial"]["migratedBuilder"]["themeColor"], "blue")
-        self.assertEqual(case["initial"]["migratedBuilder"]["chartColor"], "pastel")
+        self.assertEqual(case["initial"]["migratedBuilder"]["chartColor"], "neutral")
         self.assertNotIn("chartPalette", case["initial"]["migratedBuilder"])
         self.assertEqual(case["afterBaseLight"]["baseDataset"], "zinc")
-        self.assertEqual(case["afterBaseLight"]["bodyBg"], "rgb(250, 250, 250)")
-        self.assertEqual(case["afterBaseLight"]["bodyBgRgb"], "250, 250, 250")
+        self.assertEqual(case["afterBaseLight"]["sidebar"], "oklch(0.985 0 0)")
+        self.assertEqual(case["afterBaseLight"]["bodyBg"], "")
+        self.assertEqual(case["afterBaseLight"]["bodyBgRgb"], "")
         self.assertEqual(case["afterThemeDark"]["theme"], "dark")
-        self.assertEqual(case["afterThemeDark"]["bodyBg"], "rgb(9, 9, 11)")
-        self.assertEqual(case["afterThemeDark"]["bodyBgRgb"], "9, 9, 11")
-        self.assertEqual(case["afterThemeDark"]["primary"], "rgb(37, 99, 235)")
+        self.assertEqual(case["afterThemeDark"]["sidebar"], "oklch(0.21 0.006 285.885)")
+        self.assertEqual(case["afterThemeDark"]["bodyBg"], "")
+        self.assertEqual(case["afterThemeDark"]["bodyBgRgb"], "")
+        self.assertEqual(case["afterThemeDark"]["primary"], "rgb(6, 111, 209)")
         self.assertTrue(case["afterThemeDark"]["darkChecked"])
-        self.assertEqual(case["afterClick"]["chart5"], "rgb(225, 29, 72)")
-        self.assertEqual(case["afterClick"]["selectedChart"], "vivid")
-        self.assertEqual(case["afterClick"]["persistedChart"], "vivid")
+        self.assertEqual(case["afterClick"]["chart5"], "rgb(7, 100, 72)")
+        self.assertEqual(case["afterClick"]["selectedChart"], "teal")
+        self.assertEqual(case["afterClick"]["persistedChart"], "teal")
         self.assertFalse(case["afterReset"]["styleDataset"])
         self.assertFalse(case["afterReset"]["baseDataset"])
         self.assertFalse(case["afterReset"]["themeDataset"])
-        self.assertEqual(case["afterReset"]["chart1"], "")
+        self.assertEqual(case["afterReset"]["chart1"], "rgb(82, 82, 91)")
         self.assertEqual(case["afterReset"]["bodyBg"], "")
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")
         self.assertEqual(case["afterReset"]["primary"], "")
@@ -665,7 +670,7 @@ console.log(JSON.stringify({
         self.assertEqual(case["afterReset"]["selectedStyle"], "default")
         self.assertEqual(case["afterReset"]["selectedBase"], "neutral")
         self.assertEqual(case["afterReset"]["selectedTheme"], "neutral")
-        self.assertEqual(case["afterReset"]["selectedChart"], "default")
+        self.assertEqual(case["afterReset"]["selectedChart"], "neutral")
         self.assertIsNone(case["afterReset"]["storedBuilder"])
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:

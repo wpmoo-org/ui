@@ -97,6 +97,7 @@ export function initSettingsPanel(root = document) {
     );
     const reset = sheet.querySelector("[data-moo-settings-reset]");
     let builderTransitionGeneration = 0;
+    let builderPreference = null;
     const listen = (target, type, handler) => {
       target?.addEventListener(type, handler);
       if (target) {
@@ -188,6 +189,9 @@ export function initSettingsPanel(root = document) {
     };
 
     const readBuilderPreference = () => {
+      if (builderPreference) {
+        return builderPreference;
+      }
       try {
         const raw = view.localStorage.getItem(BUILDER_STORAGE_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
@@ -196,12 +200,14 @@ export function initSettingsPanel(root = document) {
           if (raw && JSON.stringify(parsed) !== JSON.stringify(normalized)) {
             persistBuilderPreference(normalized);
           }
+          builderPreference = normalized;
           return normalized;
         }
       } catch (_) {
         /* Storage can be unavailable or contain stale JSON. */
       }
-      return normalizedBuilderPreference();
+      builderPreference = normalizedBuilderPreference();
+      return builderPreference;
     };
 
     const persistBuilderPreference = (preference) => {
@@ -251,6 +257,7 @@ export function initSettingsPanel(root = document) {
 
     const applyBuilderPreference = (candidate, { persist = true } = {}) => {
       const preference = normalizedBuilderPreference(candidate);
+      builderPreference = preference;
       withBuilderTransitionSuppressed(() => {
         Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
           if (preference[key] === THEME_BUILDER_DEFAULTS[key]) {
@@ -264,6 +271,7 @@ export function initSettingsPanel(root = document) {
           PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
           resolveThemeBuilderTokens(preference, {
             theme: documentElement.dataset.bsTheme,
+            surface: "catalog",
           })
         );
         syncBuilderControls(preference);

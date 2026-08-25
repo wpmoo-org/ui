@@ -347,8 +347,10 @@ class CatalogContractTests(CatalogTestCase):
             "base-color-neutral",
             "base-color-zinc",
             "base-color-stone",
-            "base-color-slate",
             "base-color-mauve",
+            "base-color-olive",
+            "base-color-mist",
+            "base-color-taupe",
         ):
             with self.subTest(swatch=swatch):
                 self.assertIn(
@@ -359,8 +361,17 @@ class CatalogContractTests(CatalogTestCase):
         for swatch in (
             "theme-color-neutral",
             "theme-color-blue",
-            "theme-color-emerald",
-            "theme-color-violet",
+            "theme-color-azure",
+            "theme-color-indigo",
+            "theme-color-purple",
+            "theme-color-orange",
+            "theme-color-pink",
+            "theme-color-red",
+            "theme-color-yellow",
+            "theme-color-lime",
+            "theme-color-green",
+            "theme-color-teal",
+            "theme-color-cyan",
         ):
             with self.subTest(swatch=swatch):
                 self.assertIn(
@@ -368,11 +379,19 @@ class CatalogContractTests(CatalogTestCase):
                     theme_dropdown,
                 )
         for swatch in (
-            "chart-color-default",
-            "chart-color-pastel",
-            "chart-color-vivid",
-            "chart-color-emerald",
-            "chart-color-violet",
+            "chart-color-neutral",
+            "chart-color-blue",
+            "chart-color-azure",
+            "chart-color-indigo",
+            "chart-color-purple",
+            "chart-color-orange",
+            "chart-color-pink",
+            "chart-color-red",
+            "chart-color-yellow",
+            "chart-color-lime",
+            "chart-color-green",
+            "chart-color-teal",
+            "chart-color-cyan",
         ):
             with self.subTest(swatch=swatch):
                 self.assertIn(

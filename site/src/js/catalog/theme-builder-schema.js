@@ -5,7 +5,7 @@ export const THEME_BUILDER_DEFAULTS = {
   style: "default",
   baseColor: "neutral",
   themeColor: "neutral",
-  chartColor: "default",
+  chartColor: "neutral",
   headingFont: "default",
   bodyFont: "default",
   radius: "default",
@@ -23,6 +23,11 @@ export const PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST = [
   "--bs-border-color",
   "--bs-card-bg",
   "--bs-card-border-color",
+  "--moo-surface",
+  "--moo-foreground",
+  "--moo-muted-surface",
+  "--moo-muted-foreground",
+  "--moo-border",
   "--bs-primary",
   "--bs-primary-rgb",
   "--bs-link-color",
@@ -32,6 +37,10 @@ export const PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST = [
   "--moo-primary-foreground",
   "--moo-primary-foreground-dark",
   "--moo-ring",
+  "--moo-sidebar",
+  "--moo-sidebar-foreground",
+  "--moo-sidebar-accent",
+  "--moo-sidebar-border",
   "--moo-chart-1",
   "--moo-chart-2",
   "--moo-chart-3",
@@ -48,28 +57,36 @@ export const PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST = [
 
 export const THEME_BUILDER_OPTIONS = {
   style: ["default", "soft", "solid", "nova"],
-  baseColor: ["neutral", "zinc", "stone", "slate", "mauve"],
+  baseColor: ["neutral", "stone", "zinc", "mauve", "olive", "mist", "taupe"],
   themeColor: [
     "neutral",
     "blue",
-    "emerald",
-    "violet",
-    "amber",
-    "rose",
-    "cyan",
+    "azure",
+    "indigo",
+    "purple",
     "orange",
     "pink",
     "red",
+    "yellow",
+    "lime",
+    "green",
+    "teal",
+    "cyan",
   ],
   chartColor: [
-    "default",
-    "pastel",
-    "vivid",
+    "neutral",
     "blue",
-    "emerald",
-    "violet",
-    "amber",
-    "rose",
+    "azure",
+    "indigo",
+    "purple",
+    "orange",
+    "pink",
+    "red",
+    "yellow",
+    "lime",
+    "green",
+    "teal",
+    "cyan",
   ],
   headingFont: ["default", "geist", "system"],
   bodyFont: ["default", "geist", "system"],
@@ -81,241 +98,227 @@ const OPTION_SETS = Object.fromEntries(
 );
 
 const LEGACY_ACTION_BASE_COLORS = new Set(["blue", "emerald", "violet"]);
+const BASE_COLOR_ALIASES = {
+  slate: "mist",
+};
+const ACTION_COLOR_ALIASES = {
+  emerald: "green",
+  violet: "purple",
+  amber: "yellow",
+  rose: "pink",
+};
 
-const BASE_COLOR_TOKENS = {
-  neutral: { light: {}, dark: {} },
-  zinc: {
-    light: {
-      "--bs-body-bg": "rgb(250, 250, 250)",
-      "--bs-body-bg-rgb": "250, 250, 250",
-      "--bs-body-color": "rgb(24, 24, 27)",
-      "--bs-secondary-color": "rgb(113, 113, 122)",
-      "--bs-secondary-bg": "rgb(244, 244, 245)",
-      "--bs-secondary-bg-rgb": "244, 244, 245",
-      "--bs-tertiary-bg": "rgb(250, 250, 250)",
-      "--bs-tertiary-bg-rgb": "250, 250, 250",
-      "--bs-border-color": "rgb(228, 228, 231)",
-      "--bs-card-bg": "rgb(255, 255, 255)",
-      "--bs-card-border-color": "rgb(228, 228, 231)",
-    },
-    dark: {
-      "--bs-body-bg": "rgb(9, 9, 11)",
-      "--bs-body-bg-rgb": "9, 9, 11",
-      "--bs-body-color": "rgb(244, 244, 245)",
-      "--bs-secondary-color": "rgb(161, 161, 170)",
-      "--bs-secondary-bg": "rgb(39, 39, 42)",
-      "--bs-secondary-bg-rgb": "39, 39, 42",
-      "--bs-tertiary-bg": "rgb(24, 24, 27)",
-      "--bs-tertiary-bg-rgb": "24, 24, 27",
-      "--bs-border-color": "rgb(63, 63, 70)",
-      "--bs-card-bg": "rgb(12, 12, 14)",
-      "--bs-card-border-color": "rgb(63, 63, 70)",
-    },
-  },
+const BASE_COLOR_SCALES = {
+  neutral: { light: null, dark: null },
   stone: {
     light: {
-      "--bs-body-bg": "rgb(250, 250, 249)",
-      "--bs-body-bg-rgb": "250, 250, 249",
-      "--bs-body-color": "rgb(28, 25, 23)",
-      "--bs-secondary-color": "rgb(120, 113, 108)",
-      "--bs-secondary-bg": "rgb(245, 245, 244)",
-      "--bs-secondary-bg-rgb": "245, 245, 244",
-      "--bs-tertiary-bg": "rgb(250, 250, 249)",
-      "--bs-tertiary-bg-rgb": "250, 250, 249",
-      "--bs-border-color": "rgb(231, 229, 228)",
-      "--bs-card-bg": "rgb(255, 255, 255)",
-      "--bs-card-border-color": "rgb(231, 229, 228)",
+      surface: "oklch(1 0 0)",
+      foreground: "oklch(0.147 0.004 49.25)",
+      mutedSurface: "oklch(0.97 0.001 106.424)",
+      mutedForeground: "oklch(0.553 0.013 58.071)",
+      accent: "oklch(0.97 0.001 106.424)",
+      border: "oklch(0.923 0.003 48.717)",
+      card: "oklch(1 0 0)",
+      sidebar: "oklch(0.985 0.001 106.423)",
+      sidebarForeground: "oklch(0.147 0.004 49.25)",
+      sidebarAccent: "oklch(0.97 0.001 106.424)",
+      sidebarBorder: "oklch(0.923 0.003 48.717)",
     },
     dark: {
-      "--bs-body-bg": "rgb(12, 10, 9)",
-      "--bs-body-bg-rgb": "12, 10, 9",
-      "--bs-body-color": "rgb(245, 245, 244)",
-      "--bs-secondary-color": "rgb(168, 162, 158)",
-      "--bs-secondary-bg": "rgb(41, 37, 36)",
-      "--bs-secondary-bg-rgb": "41, 37, 36",
-      "--bs-tertiary-bg": "rgb(28, 25, 23)",
-      "--bs-tertiary-bg-rgb": "28, 25, 23",
-      "--bs-border-color": "rgb(68, 64, 60)",
-      "--bs-card-bg": "rgb(15, 13, 12)",
-      "--bs-card-border-color": "rgb(68, 64, 60)",
+      surface: "oklch(0.147 0.004 49.25)",
+      foreground: "oklch(0.985 0.001 106.423)",
+      mutedSurface: "oklch(0.268 0.007 34.298)",
+      mutedForeground: "oklch(0.709 0.01 56.259)",
+      accent: "oklch(0.268 0.007 34.298)",
+      border: "oklch(1 0 0 / 10%)",
+      card: "oklch(0.216 0.006 56.043)",
+      sidebar: "oklch(0.216 0.006 56.043)",
+      sidebarForeground: "oklch(0.985 0.001 106.423)",
+      sidebarAccent: "oklch(0.268 0.007 34.298)",
+      sidebarBorder: "oklch(1 0 0 / 10%)",
     },
   },
-  slate: {
+  zinc: {
     light: {
-      "--bs-body-bg": "rgb(248, 250, 252)",
-      "--bs-body-bg-rgb": "248, 250, 252",
-      "--bs-body-color": "rgb(15, 23, 42)",
-      "--bs-secondary-color": "rgb(100, 116, 139)",
-      "--bs-secondary-bg": "rgb(241, 245, 249)",
-      "--bs-secondary-bg-rgb": "241, 245, 249",
-      "--bs-tertiary-bg": "rgb(248, 250, 252)",
-      "--bs-tertiary-bg-rgb": "248, 250, 252",
-      "--bs-border-color": "rgb(226, 232, 240)",
-      "--bs-card-bg": "rgb(255, 255, 255)",
-      "--bs-card-border-color": "rgb(226, 232, 240)",
+      surface: "oklch(1 0 0)",
+      foreground: "oklch(0.141 0.005 285.823)",
+      mutedSurface: "oklch(0.967 0.001 286.375)",
+      mutedForeground: "oklch(0.552 0.016 285.938)",
+      accent: "oklch(0.967 0.001 286.375)",
+      border: "oklch(0.92 0.004 286.32)",
+      card: "oklch(1 0 0)",
+      sidebar: "oklch(0.985 0 0)",
+      sidebarForeground: "oklch(0.141 0.005 285.823)",
+      sidebarAccent: "oklch(0.967 0.001 286.375)",
+      sidebarBorder: "oklch(0.92 0.004 286.32)",
     },
     dark: {
-      "--bs-body-bg": "rgb(2, 6, 23)",
-      "--bs-body-bg-rgb": "2, 6, 23",
-      "--bs-body-color": "rgb(248, 250, 252)",
-      "--bs-secondary-color": "rgb(148, 163, 184)",
-      "--bs-secondary-bg": "rgb(30, 41, 59)",
-      "--bs-secondary-bg-rgb": "30, 41, 59",
-      "--bs-tertiary-bg": "rgb(15, 23, 42)",
-      "--bs-tertiary-bg-rgb": "15, 23, 42",
-      "--bs-border-color": "rgb(51, 65, 85)",
-      "--bs-card-bg": "rgb(8, 13, 25)",
-      "--bs-card-border-color": "rgb(51, 65, 85)",
+      surface: "oklch(0.141 0.005 285.823)",
+      foreground: "oklch(0.985 0 0)",
+      mutedSurface: "oklch(0.274 0.006 286.033)",
+      mutedForeground: "oklch(0.705 0.015 286.067)",
+      accent: "oklch(0.274 0.006 286.033)",
+      border: "oklch(1 0 0 / 10%)",
+      card: "oklch(0.21 0.006 285.885)",
+      sidebar: "oklch(0.21 0.006 285.885)",
+      sidebarForeground: "oklch(0.985 0 0)",
+      sidebarAccent: "oklch(0.274 0.006 286.033)",
+      sidebarBorder: "oklch(1 0 0 / 10%)",
     },
   },
   mauve: {
     light: {
-      "--bs-body-bg": "rgb(251, 250, 252)",
-      "--bs-body-bg-rgb": "251, 250, 252",
-      "--bs-body-color": "rgb(31, 28, 35)",
-      "--bs-secondary-color": "rgb(116, 107, 124)",
-      "--bs-secondary-bg": "rgb(246, 243, 248)",
-      "--bs-secondary-bg-rgb": "246, 243, 248",
-      "--bs-tertiary-bg": "rgb(251, 250, 252)",
-      "--bs-tertiary-bg-rgb": "251, 250, 252",
-      "--bs-border-color": "rgb(233, 228, 238)",
-      "--bs-card-bg": "rgb(255, 255, 255)",
-      "--bs-card-border-color": "rgb(233, 228, 238)",
+      surface: "oklch(1 0 0)",
+      foreground: "oklch(0.145 0.008 326)",
+      mutedSurface: "oklch(0.96 0.003 325.6)",
+      mutedForeground: "oklch(0.542 0.034 322.5)",
+      accent: "oklch(0.96 0.003 325.6)",
+      border: "oklch(0.922 0.005 325.62)",
+      card: "oklch(1 0 0)",
+      sidebar: "oklch(0.985 0 0)",
+      sidebarForeground: "oklch(0.145 0.008 326)",
+      sidebarAccent: "oklch(0.96 0.003 325.6)",
+      sidebarBorder: "oklch(0.922 0.005 325.62)",
     },
     dark: {
-      "--bs-body-bg": "rgb(12, 10, 14)",
-      "--bs-body-bg-rgb": "12, 10, 14",
-      "--bs-body-color": "rgb(250, 247, 252)",
-      "--bs-secondary-color": "rgb(168, 156, 177)",
-      "--bs-secondary-bg": "rgb(42, 36, 48)",
-      "--bs-secondary-bg-rgb": "42, 36, 48",
-      "--bs-tertiary-bg": "rgb(31, 28, 35)",
-      "--bs-tertiary-bg-rgb": "31, 28, 35",
-      "--bs-border-color": "rgb(70, 62, 78)",
-      "--bs-card-bg": "rgb(16, 14, 19)",
-      "--bs-card-border-color": "rgb(70, 62, 78)",
+      surface: "oklch(0.145 0.008 326)",
+      foreground: "oklch(0.985 0 0)",
+      mutedSurface: "oklch(0.263 0.024 320.12)",
+      mutedForeground: "oklch(0.711 0.019 323.02)",
+      accent: "oklch(0.263 0.024 320.12)",
+      border: "oklch(1 0 0 / 10%)",
+      card: "oklch(0.212 0.019 322.12)",
+      sidebar: "oklch(0.212 0.019 322.12)",
+      sidebarForeground: "oklch(0.985 0 0)",
+      sidebarAccent: "oklch(0.263 0.024 320.12)",
+      sidebarBorder: "oklch(1 0 0 / 10%)",
+    },
+  },
+  olive: {
+    light: {
+      surface: "oklch(1 0 0)",
+      foreground: "oklch(0.153 0.006 107.1)",
+      mutedSurface: "oklch(0.966 0.005 106.5)",
+      mutedForeground: "oklch(0.58 0.031 107.3)",
+      accent: "oklch(0.966 0.005 106.5)",
+      border: "oklch(0.93 0.007 106.5)",
+      card: "oklch(1 0 0)",
+      sidebar: "oklch(0.988 0.003 106.5)",
+      sidebarForeground: "oklch(0.153 0.006 107.1)",
+      sidebarAccent: "oklch(0.966 0.005 106.5)",
+      sidebarBorder: "oklch(0.93 0.007 106.5)",
+    },
+    dark: {
+      surface: "oklch(0.153 0.006 107.1)",
+      foreground: "oklch(0.988 0.003 106.5)",
+      mutedSurface: "oklch(0.286 0.016 107.4)",
+      mutedForeground: "oklch(0.737 0.021 106.9)",
+      accent: "oklch(0.286 0.016 107.4)",
+      border: "oklch(1 0 0 / 10%)",
+      card: "oklch(0.228 0.013 107.4)",
+      sidebar: "oklch(0.228 0.013 107.4)",
+      sidebarForeground: "oklch(0.988 0.003 106.5)",
+      sidebarAccent: "oklch(0.286 0.016 107.4)",
+      sidebarBorder: "oklch(1 0 0 / 10%)",
+    },
+  },
+  mist: {
+    light: {
+      surface: "oklch(1 0 0)",
+      foreground: "oklch(0.148 0.004 228.8)",
+      mutedSurface: "oklch(0.963 0.002 197.1)",
+      mutedForeground: "oklch(0.56 0.021 213.5)",
+      accent: "oklch(0.963 0.002 197.1)",
+      border: "oklch(0.925 0.005 214.3)",
+      card: "oklch(1 0 0)",
+      sidebar: "oklch(0.987 0.002 197.1)",
+      sidebarForeground: "oklch(0.148 0.004 228.8)",
+      sidebarAccent: "oklch(0.963 0.002 197.1)",
+      sidebarBorder: "oklch(0.925 0.005 214.3)",
+    },
+    dark: {
+      surface: "oklch(0.148 0.004 228.8)",
+      foreground: "oklch(0.987 0.002 197.1)",
+      mutedSurface: "oklch(0.275 0.011 216.9)",
+      mutedForeground: "oklch(0.723 0.014 214.4)",
+      accent: "oklch(0.275 0.011 216.9)",
+      border: "oklch(1 0 0 / 10%)",
+      card: "oklch(0.218 0.008 223.9)",
+      sidebar: "oklch(0.218 0.008 223.9)",
+      sidebarForeground: "oklch(0.987 0.002 197.1)",
+      sidebarAccent: "oklch(0.275 0.011 216.9)",
+      sidebarBorder: "oklch(1 0 0 / 10%)",
+    },
+  },
+  taupe: {
+    light: {
+      surface: "oklch(1 0 0)",
+      foreground: "oklch(0.147 0.004 49.3)",
+      mutedSurface: "oklch(0.96 0.002 17.2)",
+      mutedForeground: "oklch(0.547 0.021 43.1)",
+      accent: "oklch(0.96 0.002 17.2)",
+      border: "oklch(0.922 0.005 34.3)",
+      card: "oklch(1 0 0)",
+      sidebar: "oklch(0.986 0.002 67.8)",
+      sidebarForeground: "oklch(0.147 0.004 49.3)",
+      sidebarAccent: "oklch(0.96 0.002 17.2)",
+      sidebarBorder: "oklch(0.922 0.005 34.3)",
+    },
+    dark: {
+      surface: "oklch(0.147 0.004 49.3)",
+      foreground: "oklch(0.986 0.002 67.8)",
+      mutedSurface: "oklch(0.268 0.011 36.5)",
+      mutedForeground: "oklch(0.714 0.014 41.2)",
+      accent: "oklch(0.268 0.011 36.5)",
+      border: "oklch(1 0 0 / 10%)",
+      card: "oklch(0.214 0.009 43.1)",
+      sidebar: "oklch(0.214 0.009 43.1)",
+      sidebarForeground: "oklch(0.986 0.002 67.8)",
+      sidebarAccent: "oklch(0.268 0.011 36.5)",
+      sidebarBorder: "oklch(1 0 0 / 10%)",
     },
   },
 };
 
+const ACTION_COLOR_SEEDS = {
+  blue: "#066fd1",
+  azure: "#4299e1",
+  indigo: "#4263eb",
+  purple: "#ae3ec9",
+  pink: "#d6336c",
+  red: "#d63939",
+  orange: "#f76707",
+  yellow: "#f59f00",
+  lime: "#74b816",
+  green: "#2fb344",
+  teal: "#0ca678",
+  cyan: "#17a2b8",
+};
+
 const THEME_COLOR_TOKENS = {
   neutral: {},
-  blue: colorTokens({
-    primary: "rgb(37, 99, 235)",
-    rgb: "37, 99, 235",
-    hover: "rgb(29, 78, 216)",
-    ring: "rgb(96, 165, 250)",
-    foregroundDark: "rgb(30, 64, 175)",
-  }),
-  emerald: colorTokens({
-    primary: "rgb(5, 150, 105)",
-    rgb: "5, 150, 105",
-    hover: "rgb(4, 120, 87)",
-    ring: "rgb(52, 211, 153)",
-    foregroundDark: "rgb(6, 78, 59)",
-  }),
-  violet: colorTokens({
-    primary: "rgb(124, 58, 237)",
-    rgb: "124, 58, 237",
-    hover: "rgb(109, 40, 217)",
-    ring: "rgb(167, 139, 250)",
-    foregroundDark: "rgb(76, 29, 149)",
-  }),
-  amber: colorTokens({
-    primary: "rgb(217, 119, 6)",
-    rgb: "217, 119, 6",
-    hover: "rgb(180, 83, 9)",
-    ring: "rgb(251, 191, 36)",
-    foregroundDark: "rgb(120, 53, 15)",
-  }),
-  rose: colorTokens({
-    primary: "rgb(225, 29, 72)",
-    rgb: "225, 29, 72",
-    hover: "rgb(190, 18, 60)",
-    ring: "rgb(251, 113, 133)",
-    foregroundDark: "rgb(136, 19, 55)",
-  }),
-  cyan: colorTokens({
-    primary: "rgb(8, 145, 178)",
-    rgb: "8, 145, 178",
-    hover: "rgb(14, 116, 144)",
-    ring: "rgb(34, 211, 238)",
-    foregroundDark: "rgb(21, 94, 117)",
-  }),
-  orange: colorTokens({
-    primary: "rgb(234, 88, 12)",
-    rgb: "234, 88, 12",
-    hover: "rgb(194, 65, 12)",
-    ring: "rgb(251, 146, 60)",
-    foregroundDark: "rgb(124, 45, 18)",
-  }),
-  pink: colorTokens({
-    primary: "rgb(219, 39, 119)",
-    rgb: "219, 39, 119",
-    hover: "rgb(190, 24, 93)",
-    ring: "rgb(244, 114, 182)",
-    foregroundDark: "rgb(131, 24, 67)",
-  }),
-  red: colorTokens({
-    primary: "rgb(220, 38, 38)",
-    rgb: "220, 38, 38",
-    hover: "rgb(185, 28, 28)",
-    ring: "rgb(248, 113, 113)",
-    foregroundDark: "rgb(127, 29, 29)",
-  }),
+  ...Object.fromEntries(
+    Object.entries(ACTION_COLOR_SEEDS).map(([name, seed]) => [
+      name,
+      colorTokensFromSeed(seed),
+    ])
+  ),
 };
 
 const CHART_COLOR_TOKENS = {
-  default: {},
-  pastel: chartTokens([
-    "rgb(103, 169, 232)",
-    "rgb(118, 187, 170)",
-    "rgb(246, 198, 110)",
-    "rgb(198, 157, 232)",
-    "rgb(238, 135, 142)",
+  neutral: chartTokens([
+    "rgb(82, 82, 91)",
+    "rgb(113, 113, 122)",
+    "rgb(161, 161, 170)",
+    "rgb(63, 63, 70)",
+    "rgb(39, 39, 42)",
   ]),
-  vivid: chartTokens([
-    "rgb(37, 99, 235)",
-    "rgb(5, 150, 105)",
-    "rgb(217, 119, 6)",
-    "rgb(124, 58, 237)",
-    "rgb(225, 29, 72)",
-  ]),
-  blue: chartTokens([
-    "rgb(37, 99, 235)",
-    "rgb(96, 165, 250)",
-    "rgb(147, 197, 253)",
-    "rgb(29, 78, 216)",
-    "rgb(30, 64, 175)",
-  ]),
-  emerald: chartTokens([
-    "rgb(5, 150, 105)",
-    "rgb(52, 211, 153)",
-    "rgb(110, 231, 183)",
-    "rgb(4, 120, 87)",
-    "rgb(6, 95, 70)",
-  ]),
-  violet: chartTokens([
-    "rgb(139, 92, 246)",
-    "rgb(167, 139, 250)",
-    "rgb(196, 181, 253)",
-    "rgb(124, 58, 237)",
-    "rgb(109, 40, 217)",
-  ]),
-  amber: chartTokens([
-    "rgb(217, 119, 6)",
-    "rgb(245, 158, 11)",
-    "rgb(251, 191, 36)",
-    "rgb(180, 83, 9)",
-    "rgb(146, 64, 14)",
-  ]),
-  rose: chartTokens([
-    "rgb(225, 29, 72)",
-    "rgb(244, 63, 94)",
-    "rgb(251, 113, 133)",
-    "rgb(190, 18, 60)",
-    "rgb(159, 18, 57)",
-  ]),
+  ...Object.fromEntries(
+    Object.entries(ACTION_COLOR_SEEDS).map(([name, seed]) => [
+      name,
+      chartTokensFromSeed(seed),
+    ])
+  ),
 };
 
 const RADIUS_TOKENS = {
@@ -353,22 +356,110 @@ const FONT_TOKENS = {
   },
 };
 
-function colorTokens({ primary, rgb, hover, ring, foregroundDark }) {
+function colorTokensFromSeed(seed) {
+  const scale = colorScale(seed);
+  const primary = scale[500];
+  const hover = scale[600];
+  const ring = scale[400];
+  const foreground = contrastColor(primary);
+
   return {
-    "--bs-primary": primary,
-    "--bs-primary-rgb": rgb,
-    "--bs-link-color": primary,
-    "--bs-link-hover-color": hover,
-    "--bs-focus-ring-color": `rgba(${rgb}, 0.25)`,
-    "--moo-primary": primary,
-    "--moo-primary-foreground": "rgb(255, 255, 255)",
-    "--moo-primary-foreground-dark": foregroundDark,
-    "--moo-ring": ring,
+    "--bs-primary": rgbValue(primary),
+    "--bs-primary-rgb": rgbCsv(primary),
+    "--bs-link-color": rgbValue(primary),
+    "--bs-link-hover-color": rgbValue(hover),
+    "--bs-focus-ring-color": `rgba(${rgbCsv(primary)}, 0.25)`,
+    "--moo-primary": rgbValue(primary),
+    "--moo-primary-foreground": foreground,
+    "--moo-primary-foreground-dark": foreground,
+    "--moo-ring": rgbValue(ring),
   };
 }
 
 function chartTokens(values) {
   return Object.fromEntries(values.map((value, index) => [`--moo-chart-${index + 1}`, value]));
+}
+
+function chartTokensFromSeed(seed) {
+  return chartTokenEntriesFromScale(colorScale(seed));
+}
+
+function chartTokenEntriesFromScale(scale) {
+  return chartTokens([
+    rgbValue(scale[500]),
+    rgbValue(scale[400]),
+    rgbValue(scale[300]),
+    rgbValue(scale[600]),
+    rgbValue(scale[700]),
+  ]);
+}
+
+function colorScale(seed) {
+  const rgb = hexToRgb(seed);
+  return {
+    100: tintRgb(rgb, 80),
+    200: tintRgb(rgb, 60),
+    300: tintRgb(rgb, 40),
+    400: tintRgb(rgb, 20),
+    500: rgb,
+    600: shadeRgb(rgb, 20),
+    700: shadeRgb(rgb, 40),
+    800: shadeRgb(rgb, 60),
+    900: shadeRgb(rgb, 80),
+  };
+}
+
+function hexToRgb(hex) {
+  const value = Number.parseInt(hex.replace("#", ""), 16);
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+function tintRgb(rgb, weight) {
+  return mixRgb([255, 255, 255], rgb, weight);
+}
+
+function shadeRgb(rgb, weight) {
+  return mixRgb([0, 0, 0], rgb, weight);
+}
+
+function mixRgb(target, rgb, weight) {
+  const ratio = weight / 100;
+  return rgb.map((channel, index) =>
+    Math.round(target[index] * ratio + channel * (1 - ratio))
+  );
+}
+
+function rgbValue(rgb) {
+  return `rgb(${rgbCsv(rgb)})`;
+}
+
+function rgbCsv(rgb) {
+  return rgb.join(", ");
+}
+
+function contrastColor(rgb) {
+  const light = [255, 255, 255];
+  const dark = [17, 24, 39];
+  return contrastRatio(rgb, light) >= contrastRatio(rgb, dark)
+    ? rgbValue(light)
+    : rgbValue(dark);
+}
+
+function contrastRatio(a, b) {
+  const [lighter, darker] = [relativeLuminance(a), relativeLuminance(b)].sort(
+    (left, right) => right - left
+  );
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function relativeLuminance(rgb) {
+  const [red, green, blue] = rgb.map((channel) => {
+    const value = channel / 255;
+    return value <= 0.03928
+      ? value / 12.92
+      : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 }
 
 function cleanObject(candidate) {
@@ -378,7 +469,14 @@ function cleanObject(candidate) {
 }
 
 function enumValue(key, candidate) {
-  return OPTION_SETS[key].has(candidate) ? candidate : THEME_BUILDER_DEFAULTS[key];
+  const aliases =
+    key === "baseColor"
+      ? BASE_COLOR_ALIASES
+      : key === "themeColor" || key === "chartColor"
+        ? ACTION_COLOR_ALIASES
+        : {};
+  const value = Object.hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
+  return OPTION_SETS[key].has(value) ? value : THEME_BUILDER_DEFAULTS[key];
 }
 
 function colorMode(candidate) {
@@ -405,11 +503,58 @@ export function normalizeThemeBuilderState(candidate = {}) {
   };
 }
 
-export function resolveThemeBuilderTokens(candidate = {}, { theme = "light" } = {}) {
+function fullBaseColorTokens(scale) {
+  if (!scale) {
+    return {};
+  }
+  return {
+    "--moo-surface": scale.surface,
+    "--moo-foreground": scale.foreground,
+    "--moo-muted-surface": scale.mutedSurface,
+    "--moo-muted-foreground": scale.mutedForeground,
+    "--moo-border": scale.border,
+    "--bs-body-bg": "var(--moo-surface)",
+    "--bs-body-color": "var(--moo-foreground)",
+    "--bs-secondary-color": "var(--moo-muted-foreground)",
+    "--bs-secondary-bg": "var(--moo-muted-surface)",
+    "--bs-tertiary-bg": scale.accent,
+    "--bs-border-color": "var(--moo-border)",
+    "--bs-card-bg": scale.card,
+    "--bs-card-border-color": "var(--moo-border)",
+    "--moo-sidebar": scale.sidebar,
+    "--moo-sidebar-foreground": scale.sidebarForeground,
+    "--moo-sidebar-accent": scale.sidebarAccent,
+    "--moo-sidebar-border": scale.sidebarBorder,
+  };
+}
+
+function catalogBaseColorTokens(scale) {
+  if (!scale) {
+    return {};
+  }
+  return {
+    "--moo-sidebar": scale.sidebar,
+    "--moo-sidebar-foreground": scale.sidebarForeground,
+    "--moo-sidebar-accent": scale.sidebarAccent,
+    "--moo-sidebar-border": scale.sidebarBorder,
+  };
+}
+
+function baseColorTokensFor(state, mode, surface) {
+  const scale = BASE_COLOR_SCALES[state.baseColor]?.[mode] || null;
+  return surface === "catalog"
+    ? catalogBaseColorTokens(scale)
+    : fullBaseColorTokens(scale);
+}
+
+export function resolveThemeBuilderTokens(
+  candidate = {},
+  { theme = "light", surface = "export" } = {}
+) {
   const state = normalizeThemeBuilderState(candidate);
   const mode = colorMode(theme);
   return {
-    ...BASE_COLOR_TOKENS[state.baseColor][mode],
+    ...baseColorTokensFor(state, mode, surface),
     ...THEME_COLOR_TOKENS[state.themeColor],
     ...CHART_COLOR_TOKENS[state.chartColor],
     ...RADIUS_TOKENS[state.radius],
