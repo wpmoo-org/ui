@@ -2,7 +2,6 @@ export const THEME_BUILDER_SCHEMA_VERSION = 1;
 
 export const THEME_BUILDER_DEFAULTS = {
   schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
-  style: "default",
   baseColor: "neutral",
   themeColor: "neutral",
   chartColor: "neutral",
@@ -13,50 +12,46 @@ export const THEME_BUILDER_DEFAULTS = {
 
 export const PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST = [
   "--bs-body-bg",
-  "--bs-body-bg-rgb",
   "--bs-body-color",
-  "--bs-secondary-color",
-  "--bs-secondary-bg",
-  "--bs-secondary-bg-rgb",
-  "--bs-tertiary-bg",
-  "--bs-tertiary-bg-rgb",
+  "--bs-body-font-family",
   "--bs-border-color",
+  "--bs-border-radius",
+  "--bs-border-radius-lg",
+  "--bs-border-radius-sm",
+  "--bs-border-radius-xl",
+  "--bs-border-radius-xxl",
   "--bs-card-bg",
   "--bs-card-border-color",
-  "--moo-surface",
-  "--moo-foreground",
-  "--moo-muted-surface",
-  "--moo-muted-foreground",
-  "--moo-border",
-  "--bs-primary",
-  "--bs-primary-rgb",
+  "--bs-focus-ring-color",
   "--bs-link-color",
   "--bs-link-hover-color",
-  "--bs-focus-ring-color",
-  "--moo-primary",
-  "--moo-primary-foreground",
-  "--moo-primary-foreground-dark",
-  "--moo-ring",
-  "--moo-sidebar",
-  "--moo-sidebar-foreground",
-  "--moo-sidebar-accent",
-  "--moo-sidebar-border",
+  "--bs-primary",
+  "--bs-primary-rgb",
+  "--bs-secondary-bg",
+  "--bs-secondary-color",
+  "--bs-tertiary-bg",
+  "--moo-border",
   "--moo-chart-1",
   "--moo-chart-2",
   "--moo-chart-3",
   "--moo-chart-4",
   "--moo-chart-5",
-  "--bs-border-radius",
-  "--bs-border-radius-sm",
-  "--bs-border-radius-lg",
-  "--bs-border-radius-xl",
-  "--bs-border-radius-xxl",
-  "--bs-body-font-family",
+  "--moo-foreground",
   "--moo-heading-font-family",
+  "--moo-muted-foreground",
+  "--moo-muted-surface",
+  "--moo-primary",
+  "--moo-primary-foreground",
+  "--moo-primary-foreground-dark",
+  "--moo-ring",
+  "--moo-sidebar",
+  "--moo-sidebar-accent",
+  "--moo-sidebar-border",
+  "--moo-sidebar-foreground",
+  "--moo-surface",
 ];
 
 export const THEME_BUILDER_OPTIONS = {
-  style: ["default", "soft", "solid", "nova"],
   baseColor: ["neutral", "stone", "zinc", "mauve", "olive", "mist", "taupe"],
   themeColor: [
     "neutral",
@@ -362,43 +357,6 @@ const FONT_TOKENS = {
   },
 };
 
-const SOFT_STYLE_TOKENS = {
-  "--moo-muted-surface": "color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color))",
-  "--moo-border": "color-mix(in srgb, var(--bs-body-color) 14%, transparent)",
-  "--bs-secondary-bg": "var(--moo-muted-surface)",
-  "--bs-tertiary-bg": "color-mix(in srgb, var(--bs-body-bg) 96%, var(--bs-body-color))",
-  "--bs-border-color": "var(--moo-border)",
-  "--bs-card-bg": "color-mix(in srgb, var(--bs-body-bg) 98%, var(--bs-body-color))",
-  "--bs-card-border-color": "var(--moo-border)",
-};
-
-const SOLID_STYLE_TOKENS = {
-  "--moo-muted-surface": "color-mix(in srgb, var(--bs-body-color) 9%, var(--bs-body-bg))",
-  "--moo-border": "color-mix(in srgb, var(--bs-body-color) 24%, transparent)",
-  "--bs-secondary-bg": "var(--moo-muted-surface)",
-  "--bs-tertiary-bg": "color-mix(in srgb, var(--bs-body-color) 6%, var(--bs-body-bg))",
-  "--bs-border-color": "var(--moo-border)",
-  "--bs-card-bg": "color-mix(in srgb, var(--bs-body-color) 3%, var(--bs-body-bg))",
-  "--bs-card-border-color": "var(--moo-border)",
-};
-
-const NOVA_STYLE_TOKENS = {
-  "--moo-muted-surface": "color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg))",
-  "--moo-border": "color-mix(in srgb, var(--bs-body-color) 14%, transparent)",
-  "--bs-secondary-bg": "var(--moo-muted-surface)",
-  "--bs-tertiary-bg": "color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg))",
-  "--bs-border-color": "var(--moo-border)",
-  "--bs-card-bg": "color-mix(in srgb, var(--bs-primary) 3%, var(--bs-body-bg))",
-  "--bs-card-border-color": "var(--moo-border)",
-};
-
-const STYLE_TOKENS = {
-  default: { light: {}, dark: {} },
-  soft: { light: SOFT_STYLE_TOKENS, dark: SOFT_STYLE_TOKENS },
-  solid: { light: SOLID_STYLE_TOKENS, dark: SOLID_STYLE_TOKENS },
-  nova: { light: NOVA_STYLE_TOKENS, dark: NOVA_STYLE_TOKENS },
-};
-
 const SIDEBAR_ACCENT_TOKENS = {
   light: {
     "--moo-sidebar-accent": "color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar))",
@@ -408,6 +366,8 @@ const SIDEBAR_ACCENT_TOKENS = {
   },
 };
 
+// Keep both foreground tokens for preset compatibility; the action scale is
+// mode-independent in RC.3, so dark foreground intentionally mirrors light.
 function colorTokensFromSeed(name, seed) {
   const scale = colorScale(seed);
   const foregroundColor = actionPrimaryForeground(name);
@@ -437,13 +397,19 @@ function actionPrimaryForeground(name) {
 }
 
 function actionPrimaryStep(scale, foreground) {
-  return (
-    ACTION_PRIMARY_STEPS.find(
-      (step) =>
-        contrastRatio(scale[step], foreground) >=
-        ACTION_PRIMARY_MIN_CONTRAST
-    ) || 500
+  const accessibleStep = ACTION_PRIMARY_STEPS.find(
+    (step) =>
+      contrastRatio(scale[step], foreground) >=
+      ACTION_PRIMARY_MIN_CONTRAST
   );
+  if (accessibleStep !== undefined) {
+    return accessibleStep;
+  }
+
+  return ACTION_PRIMARY_STEPS.reduce((best, step) => {
+    const contrast = contrastRatio(scale[step], foreground);
+    return contrast > best.contrast ? { step, contrast } : best;
+  }, { step: ACTION_PRIMARY_STEPS[0], contrast: -Infinity }).step;
 }
 
 function chartTokens(values) {
@@ -555,7 +521,6 @@ export function normalizeThemeBuilderState(candidate = {}) {
 
   return {
     schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
-    style: enumValue("style", source.style),
     baseColor: enumValue("baseColor", source.baseColor),
     themeColor: enumValue("themeColor", source.themeColor ?? legacyThemeColor),
     chartColor: enumValue("chartColor", chartColor),
@@ -602,6 +567,8 @@ function catalogBaseColorTokens(scale) {
   };
 }
 
+// Existing catalog callers can ask for sidebar-only base-color tokens; the
+// default public resolver surface remains the full preset token set.
 function baseColorTokensFor(state, mode, surface) {
   const scale = BASE_COLOR_SCALES[state.baseColor]?.[mode] || null;
   return surface === "catalog"
@@ -609,15 +576,8 @@ function baseColorTokensFor(state, mode, surface) {
     : fullBaseColorTokens(scale);
 }
 
-function styleTokensFor(state, mode) {
-  return STYLE_TOKENS[state.style]?.[mode] || {};
-}
-
 function sidebarAccentTokensFor(state, mode) {
-  if (
-    state.style !== "nova" &&
-    state.themeColor === THEME_BUILDER_DEFAULTS.themeColor
-  ) {
+  if (state.themeColor === THEME_BUILDER_DEFAULTS.themeColor) {
     return {};
   }
   return SIDEBAR_ACCENT_TOKENS[mode];
@@ -636,7 +596,6 @@ export function resolveThemeBuilderTokens(
     ...RADIUS_TOKENS[state.radius],
     ...FONT_TOKENS.headingFont[state.headingFont],
     ...FONT_TOKENS.bodyFont[state.bodyFont],
-    ...styleTokensFor(state, mode),
     ...sidebarAccentTokensFor(state, mode),
   };
 }
@@ -653,8 +612,12 @@ function baseColorPayload() {
   );
 }
 
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 export function createThemeBuilderFirstPaintPayload() {
-  return {
+  return cloneJson({
     schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
     defaults: THEME_BUILDER_DEFAULTS,
     options: THEME_BUILDER_OPTIONS,
@@ -670,8 +633,7 @@ export function createThemeBuilderFirstPaintPayload() {
       radius: RADIUS_TOKENS,
       headingFont: FONT_TOKENS.headingFont,
       bodyFont: FONT_TOKENS.bodyFont,
-      style: STYLE_TOKENS,
       sidebarAccent: SIDEBAR_ACCENT_TOKENS,
     },
-  };
+  });
 }

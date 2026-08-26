@@ -12,7 +12,6 @@ const SIDEBAR_STORAGE_KEY = "moo:sidebar-variant";
 const BUILDER_STORAGE_KEY = "moo:theme-builder";
 
 const BUILDER_SELECTORS = {
-  style: "[data-moo-catalog-theme-builder-style]",
   baseColor: "[data-moo-catalog-theme-builder-base-color]",
   themeColor: "[data-moo-catalog-theme-builder-theme-color]",
   chartColor: "[data-moo-catalog-theme-builder-chart-color]",
@@ -22,7 +21,6 @@ const BUILDER_SELECTORS = {
 };
 
 const BUILDER_DATASETS = {
-  style: "mooCatalogThemeBuilderStyle",
   baseColor: "mooCatalogThemeBuilderBaseColor",
   themeColor: "mooCatalogThemeBuilderThemeColor",
 };

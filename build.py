@@ -65,6 +65,7 @@ CORE_JS_MODULES = (
     "slider.js",
 )
 BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
@@ -1148,13 +1149,20 @@ def theme_builder_first_paint_payload() -> dict[str, object]:
         console.log(JSON.stringify(createThemeBuilderFirstPaintPayload()));
         """
     )
-    result = subprocess.run(
-        ["node", "--input-type=module", "--eval", script],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation timed out "
+            f"after {THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS} seconds"
+        ) from exc
     if result.returncode != 0:
         raise RuntimeError(
             "Theme Builder first-paint payload generation failed:\n"

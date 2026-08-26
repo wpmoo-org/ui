@@ -323,6 +323,84 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("var(--moo-primary", body)
         self.assertNotIn("var(--bs-primary", body)
 
+    def test_settings_mode_picker_chrome_is_not_theme_builder_tinted(self) -> None:
+        styles = read_catalog_styles()
+
+        for token in (
+            "--moo-settings-panel-option-border",
+            "--moo-settings-panel-option-active-border",
+            "--moo-settings-panel-option-check-bg",
+            "--moo-settings-panel-option-check-border",
+            "--moo-settings-panel-option-check-color",
+            "--moo-settings-panel-option-active-check-bg",
+            "--moo-settings-panel-option-active-check-border",
+            "--moo-settings-panel-option-active-check-color",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, styles)
+
+        theme_thumb = re.search(
+            r"(?m)^\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(theme_thumb)
+        self.assertIn(
+            "border: var(--bs-border-width) solid var(--moo-settings-panel-option-border);",
+            theme_thumb.group("body"),
+        )
+
+        checked_thumb = re.search(
+            r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:checked\) "
+            r"\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(checked_thumb)
+        checked_thumb_body = checked_thumb.group("body")
+        self.assertIn(
+            "border-color: var(--moo-settings-panel-option-active-border);",
+            checked_thumb_body,
+        )
+        self.assertNotIn("var(--moo-ring)", checked_thumb_body)
+
+        theme_check = re.search(
+            r"(?m)^\.moo-settings-panel__theme-check\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(theme_check)
+        theme_check_body = theme_check.group("body")
+        for value in (
+            "border: 2px solid var(--moo-settings-panel-option-check-border);",
+            "background-color: var(--moo-settings-panel-option-check-bg);",
+            "color: var(--moo-settings-panel-option-check-color);",
+        ):
+            with self.subTest(value=value):
+                self.assertIn(value, theme_check_body)
+
+        checked_check = re.search(
+            r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:checked\) "
+            r"\.moo-settings-panel__theme-check\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(checked_check)
+        checked_check_body = checked_check.group("body")
+        for value in (
+            "border-color: var(--moo-settings-panel-option-active-check-border);",
+            "background-color: var(--moo-settings-panel-option-active-check-bg);",
+            "color: var(--moo-settings-panel-option-active-check-color);",
+        ):
+            with self.subTest(value=value):
+                self.assertIn(value, checked_check_body)
+
+        for mutable_token in (
+            "var(--bs-border-color)",
+            "var(--bs-body-bg)",
+            "var(--bs-body-color)",
+        ):
+            with self.subTest(mutable_token=mutable_token):
+                self.assertNotIn(mutable_token, theme_thumb.group("body"))
+                self.assertNotIn(mutable_token, theme_check_body)
+                self.assertNotIn(mutable_token, checked_check_body)
+
     def test_settings_builder_color_dropdowns_render_swatch_indicators(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

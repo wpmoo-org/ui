@@ -32,7 +32,6 @@ export function createThemeBuilderPreset(
   return {
     schemaVersion: state.schemaVersion,
     mooUiVersion,
-    style: state.style,
     baseColor: state.baseColor,
     themeColor: state.themeColor,
     chartColor: state.chartColor,

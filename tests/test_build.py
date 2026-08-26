@@ -4,10 +4,30 @@ import shutil
 import subprocess
 import sys
 
+import build
 from tests.helpers import PACKAGE_DIST, ROOT, SITE_DIST, CatalogTestCase
 
 
 class BuildTests(CatalogTestCase):
+    def test_theme_builder_first_paint_payload_times_out_cleanly(self) -> None:
+        original_run = build.subprocess.run
+
+        def fake_run(*args, **kwargs):
+            raise subprocess.TimeoutExpired(
+                cmd=args[0] if args else kwargs.get("args"),
+                timeout=kwargs.get("timeout"),
+            )
+
+        try:
+            build.subprocess.run = fake_run
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "Theme Builder first-paint payload generation timed out",
+            ):
+                build.theme_builder_first_paint_payload()
+        finally:
+            build.subprocess.run = original_run
+
     def test_build_creates_static_entrypoints(self) -> None:
         result = self.run_build()
 

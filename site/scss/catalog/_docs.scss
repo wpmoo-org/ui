@@ -664,6 +664,28 @@
   gap: 1.5rem;
 }
 
+#catalog-settings {
+  --moo-settings-panel-option-border: #{$moo-catalog-settings-option-border};
+  --moo-settings-panel-option-active-border: #{$moo-catalog-settings-option-active-border};
+  --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg};
+  --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border};
+  --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color};
+  --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg};
+  --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border};
+  --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color};
+}
+
+[data-bs-theme="dark"] #catalog-settings {
+  --moo-settings-panel-option-border: #{$moo-catalog-settings-option-border-dark};
+  --moo-settings-panel-option-active-border: #{$moo-catalog-settings-option-active-border-dark};
+  --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
+  --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
+  --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
+  --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg-dark};
+  --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border-dark};
+  --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color-dark};
+}
+
 #catalog-settings .field-fieldset {
   min-inline-size: 0;
 }
@@ -955,13 +977,13 @@
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-thumb {
-  border-color: var(--moo-ring);
-  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+  border-color: var(--moo-settings-panel-option-active-border);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 40%, transparent);
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:focus-visible) .moo-settings-panel__theme-thumb {
-  border-color: var(--moo-ring);
-  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+  border-color: var(--moo-settings-panel-option-active-border);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 40%, transparent);
 }
 
 // A circular selection indicator straddling the image's top corner: the
@@ -981,9 +1003,9 @@
   width: calc(1.125rem * 1.25);
   height: calc(1.125rem * 1.25);
   border-radius: 999px;
-  border: 2px solid var(--bs-border-color);
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  border: 2px solid var(--moo-settings-panel-option-check-border);
+  background-color: var(--moo-settings-panel-option-check-bg);
+  color: var(--moo-settings-panel-option-check-color);
   transform: translate(50%, -50%);
 }
 
@@ -994,9 +1016,9 @@
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check {
-  border-color: var(--bs-body-bg);
-  background-color: var(--bs-body-color);
-  color: var(--bs-body-bg);
+  border-color: var(--moo-settings-panel-option-active-check-border);
+  background-color: var(--moo-settings-panel-option-active-check-bg);
+  color: var(--moo-settings-panel-option-active-check-color);
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check [data-icon] {
@@ -1017,7 +1039,7 @@
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  border: var(--bs-border-width) solid var(--bs-border-color);
+  border: var(--bs-border-width) solid var(--moo-settings-panel-option-border);
   border-radius: var(--bs-border-radius-sm);
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }

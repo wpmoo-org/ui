@@ -347,9 +347,9 @@ class CodeExampleTests(CatalogTestCase):
         for selector in (
             '[data-moo-catalog-theme-builder-style="soft"] .moo-catalog',
             '[data-moo-catalog-theme-builder-style="solid"] .moo-catalog',
-            '[data-moo-catalog-theme-builder-style="nova"] .moo-catalog',
+            '[data-moo-catalog-theme-builder-style="tinted"] .moo-catalog',
             "[data-moo-catalog-theme-builder-theme-color] .moo-catalog",
-            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="nova"] .moo-catalog',
+            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="tinted"] .moo-catalog',
             '[data-bs-theme="dark"][data-moo-catalog-theme-builder-theme-color] .moo-catalog',
         ):
             self.assertNotIn(selector, css)
@@ -360,6 +360,9 @@ class CodeExampleTests(CatalogTestCase):
             1,
         )[1].split("}", 1)[0]
         self.assertIn("transition: none !important;", updating)
+
+        self.assertNotIn(".moo-settings-panel__surface-preview", css)
+        self.assertNotIn(".moo-settings-panel__option-preview", css)
 
     def test_syntax_highlight_colors_use_catalog_code_tokens(self) -> None:
         result = self.run_build()

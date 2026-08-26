@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import re
+import subprocess
 import tempfile
 
 from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 SCSS = ROOT / "scss"
 SITE_SCSS = ROOT / "site/scss"
@@ -352,6 +355,47 @@ def catalog_literal_offenders(path: Path) -> list[str]:
 
 
 class DesignGateTests(CatalogTestCase):
+    def test_neutral_chart_defaults_match_theme_builder_schema(self) -> None:
+        palette = (ROOT / "scss/settings/_palette.scss").read_text(encoding="utf-8")
+        sass_values = dict(
+            re.findall(
+                r"\$(moo-chart-[1-5]):\s*(#[0-9a-fA-F]{6})\s*!default;",
+                palette,
+            )
+        )
+        self.assertEqual(len(sass_values), 5)
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { resolveThemeBuilderTokens } from "./site/src/js/catalog/theme-builder-schema.js";
+const tokens = resolveThemeBuilderTokens({ chartColor: "neutral" });
+console.log(JSON.stringify(Object.fromEntries(
+  [1, 2, 3, 4, 5].map((index) => [`moo-chart-${index}`, tokens[`--moo-chart-${index}`]])
+)));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        js_values = json.loads(result.stdout.splitlines()[-1])
+        expected = {
+            key: (
+                f"rgb({int(value[1:3], 16)}, "
+                f"{int(value[3:5], 16)}, "
+                f"{int(value[5:7], 16)})"
+            )
+            for key, value in sass_values.items()
+        }
+        self.assertEqual(js_values, expected)
+
     def test_scss_source_surface_uses_only_owned_layers(self) -> None:
         root_files = {
             path.name for path in SCSS.glob("*.scss")

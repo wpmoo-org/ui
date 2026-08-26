@@ -132,17 +132,6 @@
         {% call fieldset("Theme Builder", description="Tune catalog tokens and chart colors for this browser.") %}
           {% call field_group(extra_class="moo-settings-panel__builder-group") %}
             {{ settings_dropdown_row(
-              "Style",
-              "moo-theme-builder-style",
-              "data-moo-catalog-theme-builder-style",
-              [
-                {"value": "default", "label": "Default"},
-                {"value": "soft", "label": "Soft"},
-                {"value": "solid", "label": "Solid"},
-                {"value": "nova", "label": "Nova"}
-              ]
-            ) }}
-            {{ settings_dropdown_row(
               "Base color",
               "moo-theme-builder-base-color",
               "data-moo-catalog-theme-builder-base-color",

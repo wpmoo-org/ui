@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
+from pathlib import Path
 
 from tests.helpers import DIST, ROOT, CatalogTestCase
 from tests.helpers.node_harness import NODE_PREAMBLE, NODE_TEST_TIMEOUT, VALID_DATA
@@ -29,6 +31,13 @@ MODULES = {
     "theme-builder-export.js": None,
     "theme-builder-schema.js": None,
 }
+
+
+def theme_preset_contract_paths() -> list[Path]:
+    return [
+        ROOT / "docs/contracts/THEME_PRESETS.md",
+        ROOT.parent / "docs/contracts/THEME_PRESETS.md",
+    ]
 
 
 def without_comments(source: str) -> str:
@@ -88,7 +97,7 @@ import {
 } from "./site/src/js/catalog/theme-builder-schema.js";
 
 const state = normalizeThemeBuilderState({
-  style: "soft",
+  style: "nova",
   baseColor: "blue",
   chartPalette: "pastel",
   headingFont: "system",
@@ -112,7 +121,6 @@ console.log(JSON.stringify(state));
             state,
             {
                 "schemaVersion": 1,
-                "style": "soft",
                 "baseColor": "neutral",
                 "themeColor": "blue",
                 "chartColor": "neutral",
@@ -179,6 +187,31 @@ console.log(JSON.stringify({
         self.assertEqual(case["darkSurface"], "oklch(0.141 0.005 285.823)")
         self.assertEqual(case["darkSecondaryBg"], "var(--moo-muted-surface)")
 
+    def test_theme_builder_public_token_allow_list_is_alphabetized(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+console.log(JSON.stringify(PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        tokens = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(tokens, sorted(tokens))
+
     def test_theme_builder_action_colors_keep_primary_text_readable(self) -> None:
         result = subprocess.run(
             [
@@ -242,7 +275,7 @@ console.log(JSON.stringify(Object.fromEntries(themeColors.map((themeColor) => {
                 self.assertGreaterEqual(tokens["contrast"], 4.5)
         self.assertEqual(cases["yellow"]["primary"], "rgb(250, 204, 21)")
 
-    def test_theme_builder_schema_resolves_public_style_tokens(self) -> None:
+    def test_theme_builder_ignores_legacy_style_axis(self) -> None:
         result = subprocess.run(
             [
                 "node",
@@ -251,33 +284,35 @@ console.log(JSON.stringify(Object.fromEntries(themeColors.map((themeColor) => {
                 """
 import {
   PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+  THEME_BUILDER_DEFAULTS,
+  THEME_BUILDER_OPTIONS,
+  normalizeThemeBuilderState,
   resolveThemeBuilderTokens,
 } from "./site/src/js/catalog/theme-builder-schema.js";
 
-const lightTokens = resolveThemeBuilderTokens({
-  style: "nova",
+const defaultTokens = resolveThemeBuilderTokens({});
+const ignoredStyleCases = Object.fromEntries(
+  ["soft", "solid", "tinted", "nova"].map((style) => [
+    style,
+    JSON.stringify(resolveThemeBuilderTokens({ style })) === JSON.stringify(defaultTokens),
+  ])
+);
+const tokens = resolveThemeBuilderTokens({
+  style: "tinted",
   baseColor: "zinc",
   themeColor: "blue",
 });
-const darkTokens = resolveThemeBuilderTokens({
-  style: "nova",
-  baseColor: "zinc",
-  themeColor: "blue",
-}, { theme: "dark" });
-const softTokens = resolveThemeBuilderTokens({ style: "soft" });
-const tokenNames = [
-  ...Object.keys(lightTokens),
-  ...Object.keys(darkTokens),
-  ...Object.keys(softTokens),
-];
+const tokenNames = Object.keys(tokens);
+const normalized = normalizeThemeBuilderState({ style: "nova", baseColor: "zinc" });
 
 console.log(JSON.stringify({
-  lightMutedSurface: lightTokens["--moo-muted-surface"],
-  lightCardBg: lightTokens["--bs-card-bg"],
-  lightSidebarAccent: lightTokens["--moo-sidebar-accent"],
-  darkSidebarAccent: darkTokens["--moo-sidebar-accent"],
-  softMutedSurface: softTokens["--moo-muted-surface"],
-  softBorder: softTokens["--moo-border"],
+  defaultKeys: Object.keys(THEME_BUILDER_DEFAULTS),
+  optionKeys: Object.keys(THEME_BUILDER_OPTIONS),
+  normalizedKeys: Object.keys(normalized),
+  ignoredStyleCases,
+  mutedSurface: tokens["--moo-muted-surface"],
+  cardBg: tokens["--bs-card-bg"],
+  sidebarAccent: tokens["--moo-sidebar-accent"],
   unknownTokens: tokenNames.filter(
     (token) => !PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST.includes(token)
   ),
@@ -294,29 +329,24 @@ console.log(JSON.stringify({
 
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
+        self.assertNotIn("style", case["defaultKeys"])
+        self.assertNotIn("style", case["optionKeys"])
+        self.assertNotIn("style", case["normalizedKeys"])
         self.assertEqual(
-            case["lightMutedSurface"],
-            "color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg))",
+            case["ignoredStyleCases"],
+            {"soft": True, "solid": True, "tinted": True, "nova": True},
         )
         self.assertEqual(
-            case["lightCardBg"],
-            "color-mix(in srgb, var(--bs-primary) 3%, var(--bs-body-bg))",
+            case["mutedSurface"],
+            "oklch(0.967 0.001 286.375)",
         )
         self.assertEqual(
-            case["lightSidebarAccent"],
+            case["cardBg"],
+            "oklch(1 0 0)",
+        )
+        self.assertEqual(
+            case["sidebarAccent"],
             "color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar))",
-        )
-        self.assertEqual(
-            case["darkSidebarAccent"],
-            "color-mix(in srgb, var(--moo-ring) 32%, var(--moo-sidebar))",
-        )
-        self.assertEqual(
-            case["softMutedSurface"],
-            "color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color))",
-        )
-        self.assertEqual(
-            case["softBorder"],
-            "color-mix(in srgb, var(--bs-body-color) 14%, transparent)",
         )
         self.assertEqual(case["unknownTokens"], [])
         self.assertFalse(case["hasDataSelectorToken"])
@@ -384,14 +414,10 @@ console.log(JSON.stringify({
         self.assertIn("--bs-body-bg: var(--moo-surface);", css)
         self.assertIn("--moo-surface: oklch(1 0 0);", css)
         self.assertIn("--moo-surface: oklch(0.141 0.005 285.823);", css)
-        self.assertIn(
-            "--moo-muted-surface: color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color));",
-            css,
-        )
-        self.assertIn(
-            "--bs-card-bg: color-mix(in srgb, var(--bs-body-bg) 98%, var(--bs-body-color));",
-            css,
-        )
+        self.assertIn("--moo-muted-surface: oklch(0.967 0.001 286.375);", css)
+        self.assertIn("--bs-card-bg: oklch(1 0 0);", css)
+        self.assertNotIn("color-mix(in srgb, var(--bs-body-bg) 92%", css)
+        self.assertNotIn("color-mix(in srgb, var(--bs-body-bg) 98%", css)
         self.assertIn(
             "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar));",
             css,
@@ -408,7 +434,6 @@ console.log(JSON.stringify({
             {
                 "schemaVersion": 1,
                 "mooUiVersion": "1.0.0-test",
-                "style": "soft",
                 "baseColor": "zinc",
                 "themeColor": "green",
                 "chartColor": "purple",
@@ -417,6 +442,54 @@ console.log(JSON.stringify({
                 "radius": "compact",
             },
         )
+
+    def test_theme_builder_export_does_not_advertise_unresolved_rgb_companions(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+import {
+  serializeThemeBuilderPresetCss,
+} from "./site/src/js/catalog/theme-builder-export.js";
+
+const unsupportedRgb = [
+  "--bs-body-bg-rgb",
+  "--bs-secondary-bg-rgb",
+  "--bs-tertiary-bg-rgb",
+];
+const css = serializeThemeBuilderPresetCss({
+  baseColor: "zinc",
+  style: "soft",
+  themeColor: "blue",
+});
+const declarationTokens = Array.from(
+  css.matchAll(/^\\s*(--[\\w-]+):/gm),
+  (match) => match[1]
+);
+console.log(JSON.stringify({
+  cssRgb: unsupportedRgb.filter((token) => declarationTokens.includes(token)),
+  allowListRgb: unsupportedRgb.filter((token) =>
+    PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST.includes(token)
+  ),
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["cssRgb"], [])
+        self.assertEqual(case["allowListRgb"], [])
 
     def test_theme_builder_first_paint_payload_matches_contract(self) -> None:
         result = subprocess.run(
@@ -427,6 +500,7 @@ console.log(JSON.stringify({
                 """
 import {
   PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+  THEME_BUILDER_OPTIONS,
   createThemeBuilderFirstPaintPayload,
 } from "./site/src/js/catalog/theme-builder-schema.js";
 import {
@@ -435,6 +509,7 @@ import {
 
 console.log(JSON.stringify({
   allowList: PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+  options: THEME_BUILDER_OPTIONS,
   payload: createThemeBuilderFirstPaintPayload(),
   presetFields: Object.keys(createThemeBuilderPreset({})),
 }));
@@ -449,11 +524,13 @@ console.log(JSON.stringify({
 
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
-        contract_path = ROOT.parent / "docs/contracts/THEME_PRESETS.md"
-        self.assertTrue(contract_path.is_file(), "missing theme preset contract")
-        contract = contract_path.read_text(encoding="utf-8")
+        public_contract = ROOT / "docs/contracts/THEME_PRESETS.md"
+        self.assertTrue(
+            public_contract.is_file(),
+            "missing public Theme Preset contract",
+        )
 
-        def contract_json_block(name: str) -> list[str]:
+        def contract_json_block(contract: str, name: str):
             match = re.search(
                 rf"<!-- {re.escape(name)}:start -->\s*```json\s*(.*?)\s*```\s*<!-- {re.escape(name)}:end -->",
                 contract,
@@ -462,14 +539,26 @@ console.log(JSON.stringify({
             self.assertIsNotNone(match, f"missing {name} contract block")
             return json.loads(match.group(1))
 
-        self.assertEqual(
-            contract_json_block("theme-preset-schema-fields"),
-            case["presetFields"],
-        )
-        self.assertEqual(
-            contract_json_block("theme-preset-public-token-allow-list"),
-            case["allowList"],
-        )
+        for contract_path in theme_preset_contract_paths():
+            if not contract_path.is_file():
+                continue
+            with self.subTest(contract_path=contract_path):
+                contract = contract_path.read_text(encoding="utf-8")
+                self.assertEqual(
+                    contract_json_block(contract, "theme-preset-schema-fields"),
+                    case["presetFields"],
+                )
+                self.assertEqual(
+                    contract_json_block(contract, "theme-preset-schema-enums"),
+                    case["options"],
+                )
+                self.assertEqual(
+                    contract_json_block(
+                        contract,
+                        "theme-preset-public-token-allow-list",
+                    ),
+                    case["allowList"],
+                )
 
         build_result = self.run_build()
         self.assertEqual(build_result.returncode, 0, build_result.stderr)
@@ -481,6 +570,330 @@ console.log(JSON.stringify({
         )
         self.assertIsNotNone(payload_match, "missing first-paint payload")
         self.assertEqual(json.loads(payload_match.group(1)), case["payload"])
+
+    def test_theme_builder_first_paint_payload_is_defensive_copy(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  createThemeBuilderFirstPaintPayload,
+  resolveThemeBuilderTokens,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+const first = createThemeBuilderFirstPaintPayload();
+first.defaults.baseColor = "mutated";
+first.options.baseColor.push("mutated");
+first.aliases.baseColor.slate = "mutated";
+first.tokens.themeColor.blue["--bs-primary"] = "mutated";
+
+const second = createThemeBuilderFirstPaintPayload();
+const tokens = resolveThemeBuilderTokens({ themeColor: "blue" });
+
+console.log(JSON.stringify({
+  secondDefaultBaseColor: second.defaults.baseColor,
+  secondBaseColorOptions: second.options.baseColor,
+  secondSlateAlias: second.aliases.baseColor.slate,
+  secondBluePrimary: second.tokens.themeColor.blue["--bs-primary"],
+  resolvedBluePrimary: tokens["--bs-primary"],
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["secondDefaultBaseColor"], "neutral")
+        self.assertNotIn("mutated", case["secondBaseColorOptions"])
+        self.assertEqual(case["secondSlateAlias"], "mist")
+        self.assertEqual(case["secondBluePrimary"], "rgb(6, 111, 209)")
+        self.assertEqual(case["resolvedBluePrimary"], "rgb(6, 111, 209)")
+
+    def test_theme_builder_first_paint_script_matches_schema_tokens(self) -> None:
+        build_result = self.run_build()
+        self.assertEqual(build_result.returncode, 0, build_result.stderr)
+        page = (DIST / "index.html").read_text(encoding="utf-8")
+        inline_scripts = re.findall(
+            r"<script>\s*(\(\(\) => \{.*?\}\)\(\);)\s*</script>",
+            page,
+            flags=re.DOTALL,
+        )
+        inline_script = next(
+            (script for script in inline_scripts if "themeBuilderFirstPaint" in script),
+            None,
+        )
+        self.assertIsNotNone(inline_script, "missing Theme Builder first-paint script")
+
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  THEME_BUILDER_DEFAULTS,
+  normalizeThemeBuilderState,
+  resolveThemeBuilderTokens,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+const inlineScript = process.env.MOO_THEME_BUILDER_FIRST_PAINT_SCRIPT;
+const fixtures = [
+  {
+    label: "legacy alias light",
+    theme: "light",
+    state: { baseColor: "slate", chartPalette: "pastel" },
+  },
+  {
+    label: "legacy action dark",
+    theme: "dark",
+    state: { baseColor: "blue", chartPalette: "violet" },
+  },
+  {
+    label: "legacy style ignored",
+    theme: "light",
+    state: { style: "nova", baseColor: "zinc" },
+  },
+  {
+    label: "full modern light",
+    theme: "light",
+    state: {
+      style: "tinted",
+      baseColor: "mauve",
+      themeColor: "amber",
+      chartColor: "emerald",
+      headingFont: "geist",
+      bodyFont: "system",
+      radius: "large",
+    },
+  },
+  {
+    label: "invalid enums dark",
+    theme: "dark",
+    state: {
+      style: "broken",
+      baseColor: "broken",
+      themeColor: "broken",
+      chartColor: "broken",
+      headingFont: "broken",
+      bodyFont: "broken",
+      radius: "broken",
+    },
+  },
+];
+
+function makeStyle() {
+  const values = {};
+  return {
+    values,
+    setProperty(name, value) {
+      values[name] = value;
+    },
+  };
+}
+
+function makeStorage(fixture) {
+  const values = new Map([
+    ["moo:theme", fixture.theme],
+    ["moo:theme-builder", JSON.stringify(fixture.state)],
+  ]);
+  return {
+    getItem: (key) => values.get(key) ?? null,
+  };
+}
+
+function expectedDataset(state, mode) {
+  const dataset = { bsTheme: mode };
+  Object.entries({
+    baseColor: "mooCatalogThemeBuilderBaseColor",
+    themeColor: "mooCatalogThemeBuilderThemeColor",
+  }).forEach(([key, datasetKey]) => {
+    if (state[key] !== THEME_BUILDER_DEFAULTS[key]) {
+      dataset[datasetKey] = state[key];
+    }
+  });
+  return dataset;
+}
+
+function diffObject(actual, expected) {
+  const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
+  return Array.from(keys)
+    .filter((key) => actual[key] !== expected[key])
+    .map((key) => ({ key, actual: actual[key] ?? null, expected: expected[key] ?? null }));
+}
+
+function runInlineScript(fixture) {
+  const style = makeStyle();
+  const documentElement = {
+    dataset: { bsTheme: "light" },
+    dir: "ltr",
+    style,
+  };
+  globalThis.window = {
+    localStorage: makeStorage(fixture),
+    matchMedia: () => ({ matches: fixture.theme === "dark" }),
+    setTimeout: () => 0,
+  };
+  globalThis.document = {
+    documentElement,
+    querySelector: () => null,
+  };
+
+  eval(inlineScript);
+
+  return {
+    dataset: { ...documentElement.dataset },
+    tokens: style.values,
+  };
+}
+
+const reports = fixtures.map((fixture) => {
+  const actual = runInlineScript(fixture);
+  const state = normalizeThemeBuilderState(fixture.state);
+  const expectedTokens = resolveThemeBuilderTokens(state, { theme: fixture.theme });
+  return {
+    label: fixture.label,
+    tokenDiff: diffObject(actual.tokens, expectedTokens),
+    datasetDiff: diffObject(actual.dataset, expectedDataset(state, fixture.theme)),
+  };
+});
+const failures = reports.filter(
+  (report) => report.tokenDiff.length || report.datasetDiff.length
+);
+if (failures.length) {
+  console.error(JSON.stringify(failures, null, 2));
+  process.exit(1);
+}
+console.log(JSON.stringify(reports.map((report) => report.label)));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+            env={
+                **os.environ,
+                "MOO_THEME_BUILDER_FIRST_PAINT_SCRIPT": inline_script,
+            },
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout.splitlines()[-1]),
+            [
+                "legacy alias light",
+                "legacy action dark",
+                "legacy style ignored",
+                "full modern light",
+                "invalid enums dark",
+            ],
+        )
+
+    def test_theme_builder_resolver_surface_option_is_preserved(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { resolveThemeBuilderTokens } from "./site/src/js/catalog/theme-builder-schema.js";
+
+const candidate = { baseColor: "zinc", chartColor: "neutral" };
+const defaultTokens = resolveThemeBuilderTokens(candidate);
+const exportTokens = resolveThemeBuilderTokens(candidate, { surface: "export" });
+const catalogTokens = resolveThemeBuilderTokens(candidate, { surface: "catalog" });
+
+console.log(JSON.stringify({
+  defaultEqualsExport: JSON.stringify(defaultTokens) === JSON.stringify(exportTokens),
+  exportBodyBg: exportTokens["--bs-body-bg"] ?? null,
+  exportSurface: exportTokens["--moo-surface"] ?? null,
+  exportSidebar: exportTokens["--moo-sidebar"] ?? null,
+  catalogBodyBg: catalogTokens["--bs-body-bg"] ?? null,
+  catalogSurface: catalogTokens["--moo-surface"] ?? null,
+  catalogSidebar: catalogTokens["--moo-sidebar"] ?? null,
+  catalogChart1: catalogTokens["--moo-chart-1"] ?? null,
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertTrue(case["defaultEqualsExport"])
+        self.assertEqual(case["exportBodyBg"], "var(--moo-surface)")
+        self.assertEqual(case["exportSurface"], "oklch(1 0 0)")
+        self.assertEqual(case["exportSidebar"], "oklch(0.985 0 0)")
+        self.assertIsNone(case["catalogBodyBg"])
+        self.assertIsNone(case["catalogSurface"])
+        self.assertEqual(case["catalogSidebar"], "oklch(0.985 0 0)")
+        self.assertEqual(case["catalogChart1"], "rgb(82, 82, 91)")
+
+    def test_theme_builder_settings_options_match_schema(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { THEME_BUILDER_OPTIONS } from "./site/src/js/catalog/theme-builder-schema.js";
+console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        schema_options = json.loads(result.stdout.splitlines()[-1])
+        template = (ROOT / "site/src/includes/settings-panel.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        def kebab_case(value: str) -> str:
+            return re.sub(r"(?<!^)([A-Z])", r"-\1", value).lower()
+
+        for key, expected in schema_options.items():
+            hook = f"data-moo-catalog-theme-builder-{kebab_case(key)}"
+            pattern = (
+                rf'"{re.escape(hook)}",\s*'
+                r"\[(.*?)\]\s*"
+                r'(?:,\s*selected="[^"]+")?\s*'
+                r'(?:,\s*swatch_group="[^"]+")?\s*'
+                r'(?:,\s*preview_group="[^"]+")?\s*'
+                r"\)\s*\}\}"
+            )
+            match = re.search(pattern, template, flags=re.DOTALL)
+            self.assertIsNotNone(match, f"missing settings hook for {key}")
+            actual = re.findall(r'\{"value":\s*"([^"]+)"', match.group(1))
+            self.assertEqual(actual, expected, key)
+
+        self.assertNotIn("data-moo-catalog-theme-builder-style", template)
+        self.assertNotIn("moo-theme-builder-style", template)
+
+    def test_theme_builder_settings_panel_omits_surface_style_axis(self) -> None:
+        template = (ROOT / "site/src/includes/settings-panel.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertNotIn('"Surface"', template)
+        self.assertNotIn('"Style"', template)
+        self.assertNotIn("data-moo-catalog-theme-builder-preview", template)
+        self.assertNotIn("moo-settings-panel__surface-preview", template)
 
     def test_examples_chart_delegates_to_the_public_moo_chart(self) -> None:
         result = subprocess.run(
@@ -571,7 +984,7 @@ report("catalog-delegation", {{
         self.assertNotIn("mooBaseColor", source)
         self.assertNotIn("data-moo-theme-style", styles)
         self.assertNotIn("data-moo-base-color", styles)
-        self.assertIn("mooCatalogThemeBuilderStyle", source)
+        self.assertNotIn("mooCatalogThemeBuilderStyle", source)
         self.assertIn("mooCatalogThemeBuilderBaseColor", source)
         self.assertIn("data-moo-catalog-theme-builder-updating", styles)
         self.assertNotIn("data-moo-catalog-theme-builder-style=", styles)
@@ -676,7 +1089,6 @@ function makeRadio(value, checked = false) {
 }
 
 const selectors = {
-  style: "[data-moo-catalog-theme-builder-style]",
   baseColor: "[data-moo-catalog-theme-builder-base-color]",
   themeColor: "[data-moo-catalog-theme-builder-theme-color]",
   chartColor: "[data-moo-catalog-theme-builder-chart-color]",
@@ -686,7 +1098,6 @@ const selectors = {
 };
 
 const controls = {
-  style: makeControl({ default: "Default", soft: "Soft", solid: "Solid" }),
   baseColor: makeControl({ neutral: "Neutral", zinc: "Zinc" }),
   themeColor: makeControl({ neutral: "Neutral", blue: "Blue" }),
   chartColor: makeControl({ neutral: "Neutral", teal: "Teal" }),
@@ -708,7 +1119,9 @@ const sheet = makeEmitter({
   querySelectorAll: (selector) =>
     selector === "[data-moo-settings-theme]" ? themeInputs : [],
   querySelector: (selector) =>
-    selector === "[data-moo-settings-reset]" ? reset : fieldRoots[selector] || null,
+    selector === "[data-moo-settings-reset]"
+      ? reset
+      : fieldRoots[selector] || null,
 });
 const documentElement = {
   dataset: { bsTheme: "light" },
@@ -749,7 +1162,10 @@ function optionFor(key, value) {
 }
 
 const initial = {
-  styleDataset: documentElement.dataset.mooCatalogThemeBuilderStyle,
+  styleDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderStyle"
+  ),
   baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
   themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor,
   broadStyleDataset: Object.hasOwn(documentElement.dataset, "mooThemeStyle"),
@@ -764,12 +1180,9 @@ const initial = {
   heading: documentElement.style.getPropertyValue("--moo-heading-font-family"),
   body: documentElement.style.getPropertyValue("--bs-body-font-family"),
   radius: documentElement.style.getPropertyValue("--bs-border-radius"),
-  selectedStyle: selectedValue("style"),
   selectedBase: selectedValue("baseColor"),
   selectedTheme: selectedValue("themeColor"),
   selectedChart: selectedValue("chartColor"),
-  styleLabel: controls.style.value.textContent,
-  softPressed: optionFor("style", "soft").attributes["aria-pressed"],
   migratedBuilder: JSON.parse(localStorage.getItem("moo:theme-builder")),
 };
 
@@ -825,7 +1238,6 @@ const afterReset = {
   bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
   primary: documentElement.style.getPropertyValue("--bs-primary"),
   primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
-  selectedStyle: selectedValue("style"),
   selectedBase: selectedValue("baseColor"),
   selectedTheme: selectedValue("themeColor"),
   selectedChart: selectedValue("chartColor"),
@@ -851,7 +1263,7 @@ console.log(JSON.stringify({
 
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
-        self.assertEqual(case["initial"]["styleDataset"], "soft")
+        self.assertFalse(case["initial"]["styleDataset"])
         self.assertIsNone(case["initial"].get("baseDataset"))
         self.assertEqual(case["initial"]["themeDataset"], "blue")
         self.assertFalse(case["initial"]["broadStyleDataset"])
@@ -862,13 +1274,10 @@ console.log(JSON.stringify({
         self.assertEqual(case["initial"]["chart1"], "rgb(82, 82, 91)")
         self.assertEqual(
             case["initial"]["mutedSurface"],
-            "color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color))",
+            "",
         )
-        self.assertEqual(case["initial"]["secondaryBg"], "var(--moo-muted-surface)")
-        self.assertEqual(
-            case["initial"]["cardBg"],
-            "color-mix(in srgb, var(--bs-body-bg) 98%, var(--bs-body-color))",
-        )
+        self.assertEqual(case["initial"]["secondaryBg"], "")
+        self.assertEqual(case["initial"]["cardBg"], "")
         self.assertEqual(
             case["initial"]["heading"],
             'system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -878,13 +1287,11 @@ console.log(JSON.stringify({
             '"Geist", system-ui, -apple-system, "Segoe UI", sans-serif',
         )
         self.assertEqual(case["initial"]["radius"], "0.25rem")
-        self.assertEqual(case["initial"]["selectedStyle"], "soft")
         self.assertEqual(case["initial"]["selectedBase"], "neutral")
         self.assertEqual(case["initial"]["selectedTheme"], "blue")
         self.assertEqual(case["initial"]["selectedChart"], "neutral")
-        self.assertEqual(case["initial"]["styleLabel"], "Soft")
-        self.assertEqual(case["initial"]["softPressed"], "true")
         self.assertEqual(case["initial"]["migratedBuilder"]["schemaVersion"], 1)
+        self.assertNotIn("style", case["initial"]["migratedBuilder"])
         self.assertEqual(case["initial"]["migratedBuilder"]["baseColor"], "neutral")
         self.assertEqual(case["initial"]["migratedBuilder"]["themeColor"], "blue")
         self.assertEqual(case["initial"]["migratedBuilder"]["chartColor"], "neutral")
@@ -924,7 +1331,6 @@ console.log(JSON.stringify({
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")
         self.assertEqual(case["afterReset"]["primary"], "")
         self.assertEqual(case["afterReset"]["primaryRgb"], "")
-        self.assertEqual(case["afterReset"]["selectedStyle"], "default")
         self.assertEqual(case["afterReset"]["selectedBase"], "neutral")
         self.assertEqual(case["afterReset"]["selectedTheme"], "neutral")
         self.assertEqual(case["afterReset"]["selectedChart"], "neutral")

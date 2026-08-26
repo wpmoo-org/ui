@@ -77,6 +77,7 @@
             };
             const hasOwn = (object, key) =>
               Object.prototype.hasOwnProperty.call(object, key);
+            // Keep this in sync with normalizeThemeBuilderState().
             const enumValue = (key, candidate) => {
               const aliases =
                 key === "baseColor"
@@ -96,7 +97,6 @@
                 : undefined;
             const state = {
               schemaVersion: themeBuilderFirstPaint.schemaVersion,
-              style: enumValue("style", source.style),
               baseColor: enumValue("baseColor", source.baseColor),
               themeColor: enumValue("themeColor", source.themeColor ?? legacyThemeColor),
               chartColor: enumValue("chartColor", source.chartColor ?? source.chartPalette),
@@ -115,16 +115,13 @@
               tokenGroups.radius[state.radius],
               tokenGroups.headingFont[state.headingFont],
               tokenGroups.bodyFont[state.bodyFont],
-              tokenGroups.style[state.style]?.[builderMode],
-              state.style === "nova" ||
-                state.themeColor !== themeBuilderFirstPaint.defaults.themeColor
+              state.themeColor !== themeBuilderFirstPaint.defaults.themeColor
                 ? tokenGroups.sidebarAccent[builderMode]
                 : {}
             );
 
             applyTokens(tokens);
             Object.entries({
-              style: "mooCatalogThemeBuilderStyle",
               baseColor: "mooCatalogThemeBuilderBaseColor",
               themeColor: "mooCatalogThemeBuilderThemeColor"
             }).forEach(([key, datasetKey]) => {
