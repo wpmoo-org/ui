@@ -271,7 +271,6 @@ export function initSettingsPanel(root = document) {
           PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
           resolveThemeBuilderTokens(preference, {
             theme: documentElement.dataset.bsTheme,
-            surface: "catalog",
           })
         );
         syncBuilderControls(preference);

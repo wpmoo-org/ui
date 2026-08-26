@@ -56,6 +56,11 @@ MOO_SHARED_TOKENS = {
     "--moo-sidebar-foreground": "var(--moo-foreground)",
     "--moo-sidebar-accent": "var(--moo-muted-surface)",
     "--moo-sidebar-border": "var(--moo-border)",
+    "--moo-chart-1": "$moo-chart-1",
+    "--moo-chart-2": "$moo-chart-2",
+    "--moo-chart-3": "$moo-chart-3",
+    "--moo-chart-4": "$moo-chart-4",
+    "--moo-chart-5": "$moo-chart-5",
 }
 
 # Component partials must consume shared primitives (Bootstrap Sass/CSS scales

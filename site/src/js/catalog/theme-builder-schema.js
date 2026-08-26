@@ -288,19 +288,25 @@ const ACTION_COLOR_SEEDS = {
   pink: "#d6336c",
   red: "#d63939",
   orange: "#f76707",
-  yellow: "#f59f00",
+  yellow: "#facc15",
   lime: "#74b816",
   green: "#2fb344",
   teal: "#0ca678",
   cyan: "#17a2b8",
 };
 
+const ACTION_PRIMARY_STEPS = [500, 600, 700, 800, 900];
+const ACTION_PRIMARY_LIGHT_FOREGROUND = [255, 255, 255];
+const ACTION_PRIMARY_DARK_FOREGROUND = [17, 24, 39];
+const ACTION_PRIMARY_DARK_FOREGROUND_COLORS = new Set(["yellow"]);
+const ACTION_PRIMARY_MIN_CONTRAST = 4.5;
+
 const THEME_COLOR_TOKENS = {
   neutral: {},
   ...Object.fromEntries(
     Object.entries(ACTION_COLOR_SEEDS).map(([name, seed]) => [
       name,
-      colorTokensFromSeed(seed),
+      colorTokensFromSeed(name, seed),
     ])
   ),
 };
@@ -356,12 +362,60 @@ const FONT_TOKENS = {
   },
 };
 
-function colorTokensFromSeed(seed) {
+const SOFT_STYLE_TOKENS = {
+  "--moo-muted-surface": "color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color))",
+  "--moo-border": "color-mix(in srgb, var(--bs-body-color) 14%, transparent)",
+  "--bs-secondary-bg": "var(--moo-muted-surface)",
+  "--bs-tertiary-bg": "color-mix(in srgb, var(--bs-body-bg) 96%, var(--bs-body-color))",
+  "--bs-border-color": "var(--moo-border)",
+  "--bs-card-bg": "color-mix(in srgb, var(--bs-body-bg) 98%, var(--bs-body-color))",
+  "--bs-card-border-color": "var(--moo-border)",
+};
+
+const SOLID_STYLE_TOKENS = {
+  "--moo-muted-surface": "color-mix(in srgb, var(--bs-body-color) 9%, var(--bs-body-bg))",
+  "--moo-border": "color-mix(in srgb, var(--bs-body-color) 24%, transparent)",
+  "--bs-secondary-bg": "var(--moo-muted-surface)",
+  "--bs-tertiary-bg": "color-mix(in srgb, var(--bs-body-color) 6%, var(--bs-body-bg))",
+  "--bs-border-color": "var(--moo-border)",
+  "--bs-card-bg": "color-mix(in srgb, var(--bs-body-color) 3%, var(--bs-body-bg))",
+  "--bs-card-border-color": "var(--moo-border)",
+};
+
+const NOVA_STYLE_TOKENS = {
+  "--moo-muted-surface": "color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg))",
+  "--moo-border": "color-mix(in srgb, var(--bs-body-color) 14%, transparent)",
+  "--bs-secondary-bg": "var(--moo-muted-surface)",
+  "--bs-tertiary-bg": "color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg))",
+  "--bs-border-color": "var(--moo-border)",
+  "--bs-card-bg": "color-mix(in srgb, var(--bs-primary) 3%, var(--bs-body-bg))",
+  "--bs-card-border-color": "var(--moo-border)",
+};
+
+const STYLE_TOKENS = {
+  default: { light: {}, dark: {} },
+  soft: { light: SOFT_STYLE_TOKENS, dark: SOFT_STYLE_TOKENS },
+  solid: { light: SOLID_STYLE_TOKENS, dark: SOLID_STYLE_TOKENS },
+  nova: { light: NOVA_STYLE_TOKENS, dark: NOVA_STYLE_TOKENS },
+};
+
+const SIDEBAR_ACCENT_TOKENS = {
+  light: {
+    "--moo-sidebar-accent": "color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar))",
+  },
+  dark: {
+    "--moo-sidebar-accent": "color-mix(in srgb, var(--moo-ring) 32%, var(--moo-sidebar))",
+  },
+};
+
+function colorTokensFromSeed(name, seed) {
   const scale = colorScale(seed);
-  const primary = scale[500];
-  const hover = scale[600];
-  const ring = scale[400];
-  const foreground = contrastColor(primary);
+  const foregroundColor = actionPrimaryForeground(name);
+  const primaryStep = actionPrimaryStep(scale, foregroundColor);
+  const primary = scale[primaryStep];
+  const hover = scale[Math.min(primaryStep + 100, 900)];
+  const ring = scale[primaryStep > 600 ? primaryStep - 200 : 400];
+  const foreground = rgbValue(foregroundColor);
 
   return {
     "--bs-primary": rgbValue(primary),
@@ -374,6 +428,22 @@ function colorTokensFromSeed(seed) {
     "--moo-primary-foreground-dark": foreground,
     "--moo-ring": rgbValue(ring),
   };
+}
+
+function actionPrimaryForeground(name) {
+  return ACTION_PRIMARY_DARK_FOREGROUND_COLORS.has(name)
+    ? ACTION_PRIMARY_DARK_FOREGROUND
+    : ACTION_PRIMARY_LIGHT_FOREGROUND;
+}
+
+function actionPrimaryStep(scale, foreground) {
+  return (
+    ACTION_PRIMARY_STEPS.find(
+      (step) =>
+        contrastRatio(scale[step], foreground) >=
+        ACTION_PRIMARY_MIN_CONTRAST
+    ) || 500
+  );
 }
 
 function chartTokens(values) {
@@ -435,14 +505,6 @@ function rgbValue(rgb) {
 
 function rgbCsv(rgb) {
   return rgb.join(", ");
-}
-
-function contrastColor(rgb) {
-  const light = [255, 255, 255];
-  const dark = [17, 24, 39];
-  return contrastRatio(rgb, light) >= contrastRatio(rgb, dark)
-    ? rgbValue(light)
-    : rgbValue(dark);
 }
 
 function contrastRatio(a, b) {
@@ -547,6 +609,20 @@ function baseColorTokensFor(state, mode, surface) {
     : fullBaseColorTokens(scale);
 }
 
+function styleTokensFor(state, mode) {
+  return STYLE_TOKENS[state.style]?.[mode] || {};
+}
+
+function sidebarAccentTokensFor(state, mode) {
+  if (
+    state.style !== "nova" &&
+    state.themeColor === THEME_BUILDER_DEFAULTS.themeColor
+  ) {
+    return {};
+  }
+  return SIDEBAR_ACCENT_TOKENS[mode];
+}
+
 export function resolveThemeBuilderTokens(
   candidate = {},
   { theme = "light", surface = "export" } = {}
@@ -560,5 +636,42 @@ export function resolveThemeBuilderTokens(
     ...RADIUS_TOKENS[state.radius],
     ...FONT_TOKENS.headingFont[state.headingFont],
     ...FONT_TOKENS.bodyFont[state.bodyFont],
+    ...styleTokensFor(state, mode),
+    ...sidebarAccentTokensFor(state, mode),
+  };
+}
+
+function baseColorPayload() {
+  return Object.fromEntries(
+    THEME_BUILDER_OPTIONS.baseColor.map((baseColor) => [
+      baseColor,
+      {
+        light: baseColorTokensFor({ baseColor }, "light", "export"),
+        dark: baseColorTokensFor({ baseColor }, "dark", "export"),
+      },
+    ])
+  );
+}
+
+export function createThemeBuilderFirstPaintPayload() {
+  return {
+    schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
+    defaults: THEME_BUILDER_DEFAULTS,
+    options: THEME_BUILDER_OPTIONS,
+    aliases: {
+      baseColor: BASE_COLOR_ALIASES,
+      actionColor: ACTION_COLOR_ALIASES,
+    },
+    legacyActionBaseColors: Array.from(LEGACY_ACTION_BASE_COLORS),
+    tokens: {
+      baseColor: baseColorPayload(),
+      themeColor: THEME_COLOR_TOKENS,
+      chartColor: CHART_COLOR_TOKENS,
+      radius: RADIUS_TOKENS,
+      headingFont: FONT_TOKENS.headingFont,
+      bodyFont: FONT_TOKENS.bodyFont,
+      style: STYLE_TOKENS,
+      sidebarAccent: SIDEBAR_ACCENT_TOKENS,
+    },
   };
 }

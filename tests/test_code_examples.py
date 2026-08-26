@@ -338,66 +338,28 @@ class CodeExampleTests(CatalogTestCase):
                 page.count('<div class="moo-example__preview'),
             )
 
-    def test_theme_builder_base_color_does_not_recolor_borders(self) -> None:
+    def test_theme_builder_preview_tokens_are_schema_owned(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
         css = self.read_output("assets/css/catalog.css")
 
-        base_color = css.split(
-            '[data-moo-catalog-theme-builder-base-color] .moo-catalog {', 1
-        )[1].split("}", 1)[0]
-        self.assertIn(
-            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--bs-body-bg));",
-            base_color,
-        )
-        self.assertNotIn("var(--bs-primary)", base_color)
-        self.assertNotIn("border", base_color)
+        for selector in (
+            '[data-moo-catalog-theme-builder-style="soft"] .moo-catalog',
+            '[data-moo-catalog-theme-builder-style="solid"] .moo-catalog',
+            '[data-moo-catalog-theme-builder-style="nova"] .moo-catalog',
+            "[data-moo-catalog-theme-builder-theme-color] .moo-catalog",
+            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="nova"] .moo-catalog',
+            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-theme-color] .moo-catalog',
+        ):
+            self.assertNotIn(selector, css)
 
-        dark_base_color_selector = (
-            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-base-color] .moo-catalog'
-        )
-        self.assertIn(dark_base_color_selector, css)
-        dark_base_color = css.split(f"{dark_base_color_selector} {{", 1)[1].split("}", 1)[0]
-        self.assertIn(
-            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 32%, var(--bs-body-bg));",
-            dark_base_color,
-        )
-
-        nova = css.split(
-            '[data-moo-catalog-theme-builder-style="nova"] .moo-catalog {', 1
-        )[1].split("}", 1)[0]
-        self.assertIn(
-            "--moo-muted-surface: color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg));",
-            nova,
-        )
-        self.assertIn(
-            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--bs-body-bg));",
-            nova,
-        )
-        self.assertIn(
-            "--bs-tertiary-bg: color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg));",
-            nova,
-        )
-        self.assertIn(
-            "--moo-border: color-mix(in srgb, var(--bs-body-color) 14%, transparent);",
-            nova,
-        )
-        self.assertNotIn("--moo-border: color-mix(in srgb, var(--bs-primary)", nova)
-
-        dark_nova_selector = (
-            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="nova"] .moo-catalog'
-        )
-        self.assertIn(dark_nova_selector, css)
-        dark_nova = css.split(
-            f"{dark_nova_selector},\n"
-            '[data-bs-theme="dark"][data-moo-catalog-theme-builder-base-color] .moo-catalog {',
+        self.assertIn("[data-moo-catalog-theme-builder-updating] .moo-catalog", css)
+        updating = css.split(
+            "[data-moo-catalog-theme-builder-updating] .moo-catalog,",
             1,
         )[1].split("}", 1)[0]
-        self.assertIn(
-            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 32%, var(--bs-body-bg));",
-            dark_nova,
-        )
+        self.assertIn("transition: none !important;", updating)
 
     def test_syntax_highlight_colors_use_catalog_code_tokens(self) -> None:
         result = self.run_build()

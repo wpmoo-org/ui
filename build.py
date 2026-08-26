@@ -1141,6 +1141,29 @@ def create_environment(icon_renderer=None) -> Environment:
     return environment
 
 
+def theme_builder_first_paint_payload() -> dict[str, object]:
+    script = textwrap.dedent(
+        """
+        import { createThemeBuilderFirstPaintPayload } from "./site/src/js/catalog/theme-builder-schema.js";
+        console.log(JSON.stringify(createThemeBuilderFirstPaintPayload()));
+        """
+    )
+    result = subprocess.run(
+        ["node", "--input-type=module", "--eval", script],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation failed:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+    return json.loads(result.stdout.splitlines()[-1])
+
+
 def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
     source_file = registry_root / filename
     if not source_file.exists():
@@ -1947,6 +1970,7 @@ def render_pages(version: str | None = None) -> None:
         for component in catalog
     ]
     site_pages = build_site_pages(sections, catalog, utilities, blocks, examples)
+    theme_builder_first_paint = theme_builder_first_paint_payload()
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -1990,6 +2014,7 @@ def render_pages(version: str | None = None) -> None:
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
+            theme_builder_first_paint=theme_builder_first_paint,
         )
         output_file.write_text(rendered, encoding="utf-8")
 

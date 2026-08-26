@@ -645,46 +645,6 @@
   text-align: center;
 }
 
-[data-moo-catalog-theme-builder-style="soft"] .moo-catalog {
-  --moo-muted-surface: color-mix(in srgb, var(--bs-body-bg) 92%, var(--bs-body-color));
-  --moo-border: color-mix(in srgb, var(--bs-body-color) 14%, transparent);
-  --bs-secondary-bg: var(--moo-muted-surface);
-  --bs-tertiary-bg: color-mix(in srgb, var(--bs-body-bg) 96%, var(--bs-body-color));
-  --bs-border-color: var(--moo-border);
-  --bs-card-bg: color-mix(in srgb, var(--bs-body-bg) 98%, var(--bs-body-color));
-  --bs-card-border-color: var(--moo-border);
-}
-
-[data-moo-catalog-theme-builder-style="solid"] .moo-catalog {
-  --moo-muted-surface: color-mix(in srgb, var(--bs-body-color) 9%, var(--bs-body-bg));
-  --moo-border: color-mix(in srgb, var(--bs-body-color) 24%, transparent);
-  --bs-secondary-bg: var(--moo-muted-surface);
-  --bs-tertiary-bg: color-mix(in srgb, var(--bs-body-color) 6%, var(--bs-body-bg));
-  --bs-border-color: var(--moo-border);
-  --bs-card-bg: color-mix(in srgb, var(--bs-body-color) 3%, var(--bs-body-bg));
-  --bs-card-border-color: var(--moo-border);
-}
-
-[data-moo-catalog-theme-builder-style="nova"] .moo-catalog {
-  --moo-muted-surface: color-mix(in srgb, var(--bs-primary) 9%, var(--bs-body-bg));
-  --moo-border: color-mix(in srgb, var(--bs-body-color) 14%, transparent);
-  --moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar));
-  --bs-secondary-bg: var(--moo-muted-surface);
-  --bs-tertiary-bg: color-mix(in srgb, var(--bs-primary) 6%, var(--bs-body-bg));
-  --bs-border-color: var(--moo-border);
-  --bs-card-bg: color-mix(in srgb, var(--bs-primary) 3%, var(--bs-body-bg));
-  --bs-card-border-color: var(--moo-border);
-}
-
-[data-moo-catalog-theme-builder-theme-color] .moo-catalog {
-  --moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar));
-}
-
-[data-bs-theme="dark"][data-moo-catalog-theme-builder-style="nova"] .moo-catalog,
-[data-bs-theme="dark"][data-moo-catalog-theme-builder-theme-color] .moo-catalog {
-  --moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 32%, var(--moo-sidebar));
-}
-
 [data-moo-catalog-theme-builder-updating] .moo-catalog,
 [data-moo-catalog-theme-builder-updating] .moo-catalog *,
 [data-moo-catalog-theme-builder-updating] .moo-catalog *::before,

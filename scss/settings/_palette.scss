@@ -63,6 +63,11 @@ $moo-info-surface: color-mix(in srgb, $moo-info 10%, transparent) !default;
 $moo-info-surface-hover: color-mix(in srgb, $moo-info 20%, transparent) !default;
 $moo-info-foreground: $moo-info !default;
 $moo-sidebar: $light !default;
+$moo-chart-1: #52525b !default;
+$moo-chart-2: #71717a !default;
+$moo-chart-3: #a1a1aa !default;
+$moo-chart-4: #3f3f46 !default;
+$moo-chart-5: #27272a !default;
 // $black (#0a0a0a), not $dark (#18181b, zinc-900) -- the reference's own
 // dark-mode --background is #0a0a0a exactly, and $black already carried
 // that value without being wired to this token.

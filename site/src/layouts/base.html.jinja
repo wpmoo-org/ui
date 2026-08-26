@@ -66,291 +66,72 @@
           /* localStorage can be unavailable in restricted browsing contexts. */
         }
         try {
+          const themeBuilderFirstPaint = {{ theme_builder_first_paint | tojson }};
           const rawBuilder = window.localStorage.getItem("moo:theme-builder");
-          const builder = rawBuilder ? JSON.parse(rawBuilder) : null;
-          if (builder && typeof builder === "object" && !Array.isArray(builder)) {
+          const source = rawBuilder ? JSON.parse(rawBuilder) : null;
+          if (source && typeof source === "object" && !Array.isArray(source)) {
             const applyTokens = (tokens) => {
               Object.entries(tokens).forEach(([token, value]) => {
                 document.documentElement.style.setProperty(token, value);
               });
             };
-            const style = ["soft", "solid", "nova"].includes(builder.style)
-              ? builder.style
-              : "";
-            const baseColorAlias = builder.baseColor === "slate" ? "mist" : builder.baseColor;
-            const baseColor = ["stone", "zinc", "mauve", "olive", "mist", "taupe"].includes(baseColorAlias)
-              ? baseColorAlias
-              : "";
-            const actionColorAliases = {
-              emerald: "green",
-              violet: "purple",
-              amber: "yellow",
-              rose: "pink"
+            const hasOwn = (object, key) =>
+              Object.prototype.hasOwnProperty.call(object, key);
+            const enumValue = (key, candidate) => {
+              const aliases =
+                key === "baseColor"
+                  ? themeBuilderFirstPaint.aliases.baseColor
+                  : key === "themeColor" || key === "chartColor"
+                    ? themeBuilderFirstPaint.aliases.actionColor
+                    : {};
+              const value = hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
+              return (themeBuilderFirstPaint.options[key] || []).includes(value)
+                ? value
+                : themeBuilderFirstPaint.defaults[key];
             };
-            const actionColorNames = [
-              "blue",
-              "azure",
-              "indigo",
-              "purple",
-              "orange",
-              "pink",
-              "red",
-              "yellow",
-              "lime",
-              "green",
-              "teal",
-              "cyan"
-            ];
-            const normalizeActionColor = (candidate) => {
-              const value = actionColorAliases[candidate] || candidate;
-              return actionColorNames.includes(value) ? value : "";
+            const legacyThemeColor =
+              source.themeColor === undefined &&
+              themeBuilderFirstPaint.legacyActionBaseColors.includes(source.baseColor)
+                ? source.baseColor
+                : undefined;
+            const state = {
+              schemaVersion: themeBuilderFirstPaint.schemaVersion,
+              style: enumValue("style", source.style),
+              baseColor: enumValue("baseColor", source.baseColor),
+              themeColor: enumValue("themeColor", source.themeColor ?? legacyThemeColor),
+              chartColor: enumValue("chartColor", source.chartColor ?? source.chartPalette),
+              headingFont: enumValue("headingFont", source.headingFont),
+              bodyFont: enumValue("bodyFont", source.bodyFont),
+              radius: enumValue("radius", source.radius)
             };
-            const normalizeChartColor = (candidate) => {
-              const value = actionColorAliases[candidate] || candidate;
-              return value === "neutral" || actionColorNames.includes(value) ? value : "neutral";
-            };
-            const legacyThemeColor = normalizeActionColor(builder.baseColor);
-            const themeColor = normalizeActionColor(builder.themeColor) || legacyThemeColor;
-            const chartColor = normalizeChartColor(builder.chartColor ?? builder.chartPalette);
             const builderMode =
               document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
+            const tokenGroups = themeBuilderFirstPaint.tokens;
+            const tokens = Object.assign(
+              {},
+              tokenGroups.baseColor[state.baseColor]?.[builderMode],
+              tokenGroups.themeColor[state.themeColor],
+              tokenGroups.chartColor[state.chartColor],
+              tokenGroups.radius[state.radius],
+              tokenGroups.headingFont[state.headingFont],
+              tokenGroups.bodyFont[state.bodyFont],
+              tokenGroups.style[state.style]?.[builderMode],
+              state.style === "nova" ||
+                state.themeColor !== themeBuilderFirstPaint.defaults.themeColor
+                ? tokenGroups.sidebarAccent[builderMode]
+                : {}
+            );
 
-            if (style) {
-              document.documentElement.dataset.mooCatalogThemeBuilderStyle = style;
-            }
-            if (baseColor) {
-              document.documentElement.dataset.mooCatalogThemeBuilderBaseColor = baseColor;
-            }
-            if (themeColor) {
-              document.documentElement.dataset.mooCatalogThemeBuilderThemeColor = themeColor;
-            }
-            const baseColorTokens = {
-              stone: {
-                light: {
-                  "--moo-sidebar": "oklch(0.985 0.001 106.423)",
-                  "--moo-sidebar-foreground": "oklch(0.147 0.004 49.25)",
-                  "--moo-sidebar-accent": "oklch(0.97 0.001 106.424)",
-                  "--moo-sidebar-border": "oklch(0.923 0.003 48.717)"
-                },
-                dark: {
-                  "--moo-sidebar": "oklch(0.216 0.006 56.043)",
-                  "--moo-sidebar-foreground": "oklch(0.985 0.001 106.423)",
-                  "--moo-sidebar-accent": "oklch(0.268 0.007 34.298)",
-                  "--moo-sidebar-border": "oklch(1 0 0 / 10%)"
-                }
-              },
-              zinc: {
-                light: {
-                  "--moo-sidebar": "oklch(0.985 0 0)",
-                  "--moo-sidebar-foreground": "oklch(0.141 0.005 285.823)",
-                  "--moo-sidebar-accent": "oklch(0.967 0.001 286.375)",
-                  "--moo-sidebar-border": "oklch(0.92 0.004 286.32)"
-                },
-                dark: {
-                  "--moo-sidebar": "oklch(0.21 0.006 285.885)",
-                  "--moo-sidebar-foreground": "oklch(0.985 0 0)",
-                  "--moo-sidebar-accent": "oklch(0.274 0.006 286.033)",
-                  "--moo-sidebar-border": "oklch(1 0 0 / 10%)"
-                }
-              },
-              mauve: {
-                light: {
-                  "--moo-sidebar": "oklch(0.985 0 0)",
-                  "--moo-sidebar-foreground": "oklch(0.145 0.008 326)",
-                  "--moo-sidebar-accent": "oklch(0.96 0.003 325.6)",
-                  "--moo-sidebar-border": "oklch(0.922 0.005 325.62)"
-                },
-                dark: {
-                  "--moo-sidebar": "oklch(0.212 0.019 322.12)",
-                  "--moo-sidebar-foreground": "oklch(0.985 0 0)",
-                  "--moo-sidebar-accent": "oklch(0.263 0.024 320.12)",
-                  "--moo-sidebar-border": "oklch(1 0 0 / 10%)"
-                }
-              },
-              olive: {
-                light: {
-                  "--moo-sidebar": "oklch(0.988 0.003 106.5)",
-                  "--moo-sidebar-foreground": "oklch(0.153 0.006 107.1)",
-                  "--moo-sidebar-accent": "oklch(0.966 0.005 106.5)",
-                  "--moo-sidebar-border": "oklch(0.93 0.007 106.5)"
-                },
-                dark: {
-                  "--moo-sidebar": "oklch(0.228 0.013 107.4)",
-                  "--moo-sidebar-foreground": "oklch(0.988 0.003 106.5)",
-                  "--moo-sidebar-accent": "oklch(0.286 0.016 107.4)",
-                  "--moo-sidebar-border": "oklch(1 0 0 / 10%)"
-                }
-              },
-              mist: {
-                light: {
-                  "--moo-sidebar": "oklch(0.987 0.002 197.1)",
-                  "--moo-sidebar-foreground": "oklch(0.148 0.004 228.8)",
-                  "--moo-sidebar-accent": "oklch(0.963 0.002 197.1)",
-                  "--moo-sidebar-border": "oklch(0.925 0.005 214.3)"
-                },
-                dark: {
-                  "--moo-sidebar": "oklch(0.218 0.008 223.9)",
-                  "--moo-sidebar-foreground": "oklch(0.987 0.002 197.1)",
-                  "--moo-sidebar-accent": "oklch(0.275 0.011 216.9)",
-                  "--moo-sidebar-border": "oklch(1 0 0 / 10%)"
-                }
-              },
-              taupe: {
-                light: {
-                  "--moo-sidebar": "oklch(0.986 0.002 67.8)",
-                  "--moo-sidebar-foreground": "oklch(0.147 0.004 49.3)",
-                  "--moo-sidebar-accent": "oklch(0.96 0.002 17.2)",
-                  "--moo-sidebar-border": "oklch(0.922 0.005 34.3)"
-                },
-                dark: {
-                  "--moo-sidebar": "oklch(0.214 0.009 43.1)",
-                  "--moo-sidebar-foreground": "oklch(0.986 0.002 67.8)",
-                  "--moo-sidebar-accent": "oklch(0.268 0.011 36.5)",
-                  "--moo-sidebar-border": "oklch(1 0 0 / 10%)"
-                }
+            applyTokens(tokens);
+            Object.entries({
+              style: "mooCatalogThemeBuilderStyle",
+              baseColor: "mooCatalogThemeBuilderBaseColor",
+              themeColor: "mooCatalogThemeBuilderThemeColor"
+            }).forEach(([key, datasetKey]) => {
+              if (state[key] !== themeBuilderFirstPaint.defaults[key]) {
+                document.documentElement.dataset[datasetKey] = state[key];
               }
-            };
-            if (baseColorTokens[baseColor]) {
-              applyTokens(baseColorTokens[baseColor][builderMode]);
-            }
-            const actionColorSeeds = {
-              blue: "#066fd1",
-              azure: "#4299e1",
-              indigo: "#4263eb",
-              purple: "#ae3ec9",
-              pink: "#d6336c",
-              red: "#d63939",
-              orange: "#f76707",
-              yellow: "#f59f00",
-              lime: "#74b816",
-              green: "#2fb344",
-              teal: "#0ca678",
-              cyan: "#17a2b8"
-            };
-            const hexToRgb = (hex) => {
-              const value = Number.parseInt(hex.replace("#", ""), 16);
-              return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
-            };
-            const mixRgb = (target, rgb, weight) => {
-              const ratio = weight / 100;
-              return rgb.map((channel, index) =>
-                Math.round(target[index] * ratio + channel * (1 - ratio))
-              );
-            };
-            const tintRgb = (rgb, weight) => mixRgb([255, 255, 255], rgb, weight);
-            const shadeRgb = (rgb, weight) => mixRgb([0, 0, 0], rgb, weight);
-            const rgbCsv = (rgb) => rgb.join(", ");
-            const rgbValue = (rgb) => "rgb(" + rgbCsv(rgb) + ")";
-            const relativeLuminance = (rgb) => {
-              const linear = rgb.map((channel) => {
-                const value = channel / 255;
-                return value <= 0.03928
-                  ? value / 12.92
-                  : Math.pow((value + 0.055) / 1.055, 2.4);
-              });
-              return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
-            };
-            const contrastRatio = (a, b) => {
-              const left = relativeLuminance(a);
-              const right = relativeLuminance(b);
-              const lighter = Math.max(left, right);
-              const darker = Math.min(left, right);
-              return (lighter + 0.05) / (darker + 0.05);
-            };
-            const contrastColor = (rgb) => {
-              const light = [255, 255, 255];
-              const dark = [17, 24, 39];
-              return contrastRatio(rgb, light) >= contrastRatio(rgb, dark)
-                ? rgbValue(light)
-                : rgbValue(dark);
-            };
-            const colorScale = (seed) => {
-              const rgb = hexToRgb(seed);
-              return {
-                300: tintRgb(rgb, 40),
-                400: tintRgb(rgb, 20),
-                500: rgb,
-                600: shadeRgb(rgb, 20),
-                700: shadeRgb(rgb, 40)
-              };
-            };
-            const chartValuesFromScale = (scale) => [
-              rgbValue(scale[500]),
-              rgbValue(scale[400]),
-              rgbValue(scale[300]),
-              rgbValue(scale[600]),
-              rgbValue(scale[700])
-            ];
-            const actionTokensFromSeed = (seed) => {
-              const scale = colorScale(seed);
-              const foreground = contrastColor(scale[500]);
-              return {
-                "--bs-primary": rgbValue(scale[500]),
-                "--bs-primary-rgb": rgbCsv(scale[500]),
-                "--bs-link-color": rgbValue(scale[500]),
-                "--bs-link-hover-color": rgbValue(scale[600]),
-                "--bs-focus-ring-color": "rgba(" + rgbCsv(scale[500]) + ", 0.25)",
-                "--moo-primary": rgbValue(scale[500]),
-                "--moo-primary-foreground": foreground,
-                "--moo-primary-foreground-dark": foreground,
-                "--moo-ring": rgbValue(scale[400])
-              };
-            };
-            if (actionColorSeeds[themeColor]) {
-              applyTokens(actionTokensFromSeed(actionColorSeeds[themeColor]));
-            }
-            const applyChartColor = (values) => {
-              applyTokens(Object.fromEntries(
-                values.map((value, index) => ["--moo-chart-" + (index + 1), value])
-              ));
-            };
-            const neutralChartValues = [
-              "rgb(82, 82, 91)",
-              "rgb(113, 113, 122)",
-              "rgb(161, 161, 170)",
-              "rgb(63, 63, 70)",
-              "rgb(39, 39, 42)"
-            ];
-            if (chartColor === "neutral") {
-              applyChartColor(neutralChartValues);
-            } else if (actionColorSeeds[chartColor]) {
-              applyChartColor(chartValuesFromScale(colorScale(actionColorSeeds[chartColor])));
-            }
-            if (builder.headingFont === "geist") {
-              applyTokens({
-                "--moo-heading-font-family": "\"Geist\", var(--bs-body-font-family)"
-              });
-            } else if (builder.headingFont === "system") {
-              applyTokens({
-                "--moo-heading-font-family": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
-              });
-            }
-            if (builder.bodyFont === "geist") {
-              applyTokens({
-                "--bs-body-font-family": "\"Geist\", system-ui, -apple-system, \"Segoe UI\", sans-serif"
-              });
-            } else if (builder.bodyFont === "system") {
-              applyTokens({
-                "--bs-body-font-family": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
-              });
-            }
-            if (builder.radius === "compact") {
-              applyTokens({
-                "--bs-border-radius": "0.25rem",
-                "--bs-border-radius-sm": "0.1875rem",
-                "--bs-border-radius-lg": "0.375rem",
-                "--bs-border-radius-xl": "0.5rem",
-                "--bs-border-radius-xxl": "0.75rem"
-              });
-            } else if (builder.radius === "large") {
-              applyTokens({
-                "--bs-border-radius": "0.75rem",
-                "--bs-border-radius-sm": "0.5rem",
-                "--bs-border-radius-lg": "1rem",
-                "--bs-border-radius-xl": "1.25rem",
-                "--bs-border-radius-xxl": "1.5rem"
-              });
-            }
+            });
           }
         } catch (_) {
           /* Theme Builder storage is best-effort and never blocks paint. */

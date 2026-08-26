@@ -35,6 +35,21 @@ def invoke_runner(base_url, report_out):
     )
 
 
+def failed_assertion_summary(report):
+    failures = []
+    for fixture in report["fixtures"]:
+        for category in fixture["categories"]:
+            for assertion in category["assertions"]:
+                if assertion["status"] != "fail":
+                    continue
+                reason = assertion.get("reason", "no reason reported")
+                failures.append(
+                    f"{fixture['name']}::{category['id']}::{assertion['id']}: "
+                    f"{reason}"
+                )
+    return "\n".join(failures)
+
+
 class ConformanceRunnerCliTests(unittest.TestCase):
     def test_runner_requires_base_url(self):
         process = subprocess.run(
@@ -71,7 +86,10 @@ class ConformanceRunnerTests(unittest.TestCase):
         self.assertEqual(
             self.process.returncode,
             0,
-            f"runner stderr:\n{self.process.stderr}",
+            "runner stderr:\n"
+            f"{self.process.stderr}\n"
+            "failed assertions:\n"
+            f"{failed_assertion_summary(self.report)}",
         )
         summary = self.report["summary"]
         self.assertEqual(summary["result"], "pass")
