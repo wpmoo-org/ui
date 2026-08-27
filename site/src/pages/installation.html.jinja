@@ -127,7 +127,7 @@
         import Slider from "@wpmoo/ui/slider.js";
 
         const chart = Chart.getOrCreateInstance(
-          document.querySelector(".moo-chart")
+          document.querySelector(".chart")
         );
         const combobox = Combobox.getOrCreateInstance(
           document.querySelector(".combobox")
@@ -168,7 +168,7 @@
           import Sidebar from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./sidebar.js"] | replace("./", "") }}";
           import Slider from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./slider.js"] | replace("./", "") }}";
 
-          const chartRoot = document.querySelector(".moo-chart");
+          const chartRoot = document.querySelector(".chart");
           if (chartRoot) {
             Chart.getOrCreateInstance(chartRoot);
           }

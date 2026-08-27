@@ -2,7 +2,7 @@
 // delegated to the public MooChart component (src/js/components/chart.js),
 // which bundles Chart.js at build time through `chart.js/auto`. This module
 // never touches Chart.js, a CDN, or `window.Chart` itself — it only discovers
-// `.moo-chart` roots in the catalog and wires their disposal into
+// `.chart` roots in the catalog and wires their disposal into
 // initCatalog's dispose chain.
 
 import MooChart from "../../../../src/js/components/chart.js";
@@ -98,11 +98,11 @@ export function initExamplesChart(root = document) {
       liveThemeScopes.set(container, themeScope);
     });
 
-    root.querySelectorAll(".moo-chart").forEach((element) => {
+    root.querySelectorAll(".chart").forEach((element) => {
       instances.push(MooChart.getOrCreateInstance(element));
     });
     liveContainers.forEach((container) => {
-      const chartRoot = container.querySelector(".moo-chart");
+      const chartRoot = container.querySelector(".chart");
       if (!chartRoot) return;
 
       const themeScope = liveThemeScopes.get(container) || container;

@@ -71,12 +71,12 @@ function makeRoot(attrs = {}, { withCanvas = true } = {}) {
     ownerDocument,
     getAttribute: (name) => (attrMap.has(name) ? attrMap.get(name) : null),
     setAttribute: (name, value) => attrMap.set(name, String(value)),
-    matches: (selector) => selector === ".moo-chart",
+    matches: (selector) => selector === ".chart",
     querySelector: (selector) =>
       ((selector === ":scope > canvas" || selector === "canvas") && withCanvas
         ? canvas
         : null),
-    querySelectorAll: (selector) => (selector === ".moo-chart" ? [root] : []),
+    querySelectorAll: (selector) => (selector === ".chart" ? [root] : []),
   };
   return root;
 }

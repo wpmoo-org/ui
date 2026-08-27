@@ -1,5 +1,5 @@
 {# Chart is a Moo-owned public contract: Bootstrap ships no chart component,
-   so Moo defines the .moo-chart root, the data-chart type attribute, the
+   so Moo defines the .chart root, the data-chart type attribute, the
    data-chart-data JSON payload, optional data-chart-options JSON object, and
    the deterministic child <canvas> resolution. The bundled runtime
    (src/js/components/chart.js wraps chart.js@4.5.1 through chart.js/auto at
@@ -19,7 +19,7 @@
   {% set serialized_data = data if data is string else data | tojson %}
   {% set has_options = options is not none and options != "" and options != {} %}
   {% if has_options %}{% set serialized_options = options if options is string else options | tojson %}{% endif %}
-  <div class="moo-chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-chart="{{ type }}" data-chart-data='{{ serialized_data }}'{% if has_options %} data-chart-options='{{ serialized_options }}'{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}>
+  <div class="chart{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-chart="{{ type }}" data-chart-data='{{ serialized_data }}'{% if has_options %} data-chart-options='{{ serialized_options }}'{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}>
     <canvas role="img" aria-label="{{ aria_label }}"></canvas>
   </div>
 {%- endmacro %}

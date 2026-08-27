@@ -119,7 +119,7 @@
 {% endmacro %}
 
 {% macro render_chart_usage(root_path="", show_gallery_link=false) %}
-  <p>Render a <code>.moo-chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-chart</code> attribute accepts <code>{{ chart_public_types }}</code>, while <code>data-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
+  <p>Render a <code>.chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-chart</code> attribute accepts <code>{{ chart_public_types }}</code>, while <code>data-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
   <p>Use <code>data-chart-options</code> for JSON-object Chart.js options such as stacked scales, interaction mode, cutout, rotation, or legend display. Functions and callbacks are not serializable in HTML; pass them through the programmatic <code>getOrCreateInstance</code> config instead.</p>
   <p>Give the root an explicit height. Radial Charts are represented by Chart.js <code>doughnut</code> and <code>polarArea</code>, not by a separate public <code>radial</code> type.</p>
   {% if show_gallery_link %}
@@ -156,24 +156,44 @@
   </p>
 
   {% set chart_parts = [
-    {"id": "chart-root", "selector": "<code>.moo-chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
+    {"id": "chart-root", "selector": "<code>.chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
     {"id": "chart-id", "selector": "<code>id</code>", "summary": "Required stable identifier for the chart root and its server-rendered contract."},
     {"id": "chart-type", "selector": "<code>[data-chart]</code>", "summary": "Chart type and initializer attribute. Supported values are <code>area</code>, <code>line</code>, <code>bar</code>, <code>pie</code>, <code>doughnut</code>, <code>polarArea</code>, <code>radar</code>, <code>scatter</code>, and <code>bubble</code>."},
     {"id": "chart-data", "selector": "<code>[data-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Scatter and bubble data keep <code>labels: []</code> with object points inside datasets."},
     {"id": "chart-options", "selector": "<code>[data-chart-options]</code>", "summary": "Optional JSON-object Chart.js options pass-through. Unsafe prototype keys are ignored and programmatic config wins."},
-    {"id": "chart-canvas", "selector": "<code>.moo-chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
+    {"id": "chart-canvas", "selector": "<code>.chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
   ] %}
 
-  {% set chart_parts_rows = [] %}
+  {% set chart_part_rows = namespace(by_id={}) %}
   {% for part in chart_parts %}
-    {% set _ = chart_parts_rows.append([part["selector"], part["summary"]]) %}
+    {% set _ = chart_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
   {% endfor %}
+  {% set chart_row_groups = [
+    {
+      "heading_id": "chart-anatomy-root",
+      "title": "Root",
+      "rows": [chart_part_rows.by_id["chart-root"], chart_part_rows.by_id["chart-id"]],
+      "row_ids": ["chart-root", "chart-id"]
+    },
+    {
+      "heading_id": "chart-anatomy-contract",
+      "title": "Data Contract",
+      "rows": [chart_part_rows.by_id["chart-type"], chart_part_rows.by_id["chart-data"], chart_part_rows.by_id["chart-options"]],
+      "row_ids": ["chart-type", "chart-data", "chart-options"]
+    },
+    {
+      "heading_id": "chart-anatomy-render-target",
+      "title": "Render Target",
+      "rows": [chart_part_rows.by_id["chart-canvas"]],
+      "row_ids": ["chart-canvas"]
+    }
+  ] %}
   {{ table(
     ["Selector", "Purpose"],
-    chart_parts_rows,
-    row_ids=chart_parts | map(attribute="id") | list,
+    [],
+    row_groups=chart_row_groups,
     row_header=true,
-    extra_class="align-middle mb-5 moo-doc-anatomy-table",
+    extra_class="align-middle mb-5 moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
     responsive_class="scroll-fade-x no-scrollbar"
   ) }}
 
@@ -194,7 +214,7 @@
     Chart.js is bundled into the published <code>chart.js</code> entrypoint through
     <code>chart.js/auto</code>; the wrapper never reads a browser global Chart
     object and never loads a runtime CDN script. Importing the module never scans the document.
-    Initialize only a <code>.moo-chart</code> root your application owns: repeated
+    Initialize only a <code>.chart</code> root your application owns: repeated
     initialization returns the same instance, and <code>dispose()</code> destroys the
     Chart.js instance, disconnects the theme observer, cancels pending work, and
     releases the instance registration.
@@ -202,7 +222,7 @@
   {% set chart_import_example %}
   import MooChart from "@wpmoo/ui/chart.js";
 
-  const element = document.querySelector(".moo-chart");
+  const element = document.querySelector(".chart");
 
   if (element) {
     const chart = MooChart.getOrCreateInstance(element);
@@ -218,7 +238,7 @@
   {{ render_chart_code_section(
     "chart-javascript-init",
     "Initialize a chart",
-    "Use this when a page already renders a .moo-chart root and needs the wrapper to attach Chart.js.",
+    "Use this when a page already renders a .chart root and needs the wrapper to attach Chart.js.",
     "chart-javascript-import",
     chart_import_example
   ) }}

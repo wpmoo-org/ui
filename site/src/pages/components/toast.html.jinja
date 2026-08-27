@@ -36,7 +36,7 @@
 
     {% set basic %}
       {{ button("Show Toast", variant="outline", toast_target="toast-basic-template") }}
-      {% call toast_container(placement="bottom-end") %}
+      {% call toast_container(placement="bottom-end", stacked=true) %}
         {{ toast_template(
           "toast-basic-template",
           "Event created",
@@ -68,7 +68,7 @@
         {{ button("Destructive", variant="outline", toast_target="toast-variant-destructive-template") }}
         {{ button("Loading", variant="outline", toast_target="toast-variant-loading-template") }}
       </div>
-      {% call toast_container(placement="bottom-end") %}
+      {% call toast_container(placement="bottom-end", stacked=true) %}
         {{ toast_template(
           "toast-variant-success-template",
           "Event created",

@@ -965,7 +965,7 @@ console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
         self.assertNotIn("data-moo-catalog-theme-builder-preview", template)
         self.assertNotIn("moo-settings-panel__surface-preview", template)
 
-    def test_examples_chart_delegates_to_the_public_moo_chart(self) -> None:
+    def test_examples_chart_delegates_to_the_public_chart_root(self) -> None:
         result = subprocess.run(
             [
                 "node",
@@ -979,7 +979,7 @@ console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
                 + f"""
 const roots = [makeRoot({{"data-chart": "line", "data-chart-data": {json.dumps(VALID_DATA)}}})];
 const catalogRoot = {{
-  querySelectorAll: (selector) => (selector === ".moo-chart" ? roots : []),
+  querySelectorAll: (selector) => (selector === ".chart" ? roots : []),
 }};
 const release = initExamplesChart(catalogRoot);
 const sameRelease = initExamplesChart(catalogRoot);
@@ -1011,6 +1011,188 @@ report("catalog-delegation", {{
                 "initialized": True,
                 "disposed": True,
             },
+        )
+
+    def test_component_toc_links_top_level_sections_and_examples_in_dom_order(
+        self,
+    ) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initToc } from "./site/src/js/catalog/toc.js";
+
+const elementsById = new Map();
+let top = 0;
+
+function makeClassList(element) {
+  return {
+    toggle(name, force) {
+      const classes = new Set((element.className || "").split(/\\s+/).filter(Boolean));
+      if (force) classes.add(name);
+      else classes.delete(name);
+      element.className = Array.from(classes).join(" ");
+    },
+  };
+}
+
+function element(tagName, attrs = {}, textContent = "") {
+  const attributes = new Map(Object.entries(attrs));
+  const node = {
+    nodeType: 1,
+    tagName: tagName.toUpperCase(),
+    className: attrs.class || "",
+    textContent,
+    children: [],
+    hidden: false,
+    style: {},
+    classList: null,
+    appendChild(child) {
+      this.children.push(child);
+      child.parentElement = this;
+      return child;
+    },
+    remove() {
+      if (!this.parentElement) return;
+      this.parentElement.children = this.parentElement.children.filter(
+        (child) => child !== this,
+      );
+    },
+    getAttribute(name) {
+      if (name === "class") return this.className;
+      if (name === "href" && this.href) return this.href;
+      return attributes.has(name) ? attributes.get(name) : null;
+    },
+    setAttribute(name, value) {
+      attributes.set(name, String(value));
+      if (name === "class") this.className = String(value);
+      if (name === "href") this.href = String(value);
+    },
+    removeAttribute(name) {
+      attributes.delete(name);
+    },
+    addEventListener() {},
+    removeEventListener() {},
+    matches(selector) {
+      if (selector === "h2[id]") return this.tagName === "H2" && Boolean(this.getAttribute("id"));
+      if (selector === ".moo-example[aria-labelledby]") {
+        return (this.className || "").split(/\\s+/).includes("moo-example")
+          && Boolean(this.getAttribute("aria-labelledby"));
+      }
+      return false;
+    },
+    querySelector(selector) {
+      if (selector === "[data-moo-component-toc-nav]") {
+        return this.children.find((child) => child.getAttribute("data-moo-component-toc-nav") !== null) || null;
+      }
+      return null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+    getBoundingClientRect() {
+      top += 48;
+      return { top, bottom: top + 24, left: 0, right: 160, width: 160, height: 24 };
+    },
+  };
+  node.classList = makeClassList(node);
+  const id = node.getAttribute("id");
+  if (id) elementsById.set(id, node);
+  return node;
+}
+
+const view = {
+  Node: { DOCUMENT_POSITION_FOLLOWING: 4 },
+  location: { hash: "" },
+  history: { pushState() {} },
+  scrollX: 0,
+  scrollY: 0,
+  setTimeout(callback) { callback(); return 1; },
+  clearTimeout() {},
+  requestAnimationFrame(callback) { callback(); return 1; },
+  cancelAnimationFrame() {},
+  getComputedStyle() { return { fontSize: "16px" }; },
+  matchMedia() { return { matches: false }; },
+  scrollTo() {},
+  addEventListener() {},
+  removeEventListener() {},
+};
+
+const componentNav = element("nav", { "data-moo-component-toc-nav": "" });
+const componentToc = element("aside", { "data-moo-component-toc": "" });
+componentToc.appendChild(componentNav);
+
+const usage = element("h2", { id: "usage" }, "Usage");
+const exampleTitle = element("h2", { id: "application-shell" }, "Application shell");
+const example = element(
+  "section",
+  { class: "moo-example", "aria-labelledby": "application-shell" },
+);
+const composition = element("h2", { id: "composition" }, "Composition");
+const anatomy = element("h2", { id: "sidebar-html-anatomy" }, "HTML Anatomy");
+const componentExamples = element("div", { class: "moo-component-examples" });
+componentExamples.children = [usage, example, composition, anatomy];
+
+const main = element("main", { class: "moo-catalog__main" });
+main.scrollTop = 0;
+main.clientHeight = 800;
+main.scrollHeight = 1600;
+main.scrollTo = ({ top: nextTop }) => { main.scrollTop = nextTop; };
+
+const root = {
+  defaultView: view,
+  documentElement: element("html"),
+  createElement: (tagName) => element(tagName),
+  getElementById: (id) => elementsById.get(id) || null,
+  querySelector(selector) {
+    if (selector === "[data-moo-component-toc]") return componentToc;
+    if (selector === ".moo-component-examples") return componentExamples;
+    if (selector === ".moo-catalog__main") return main;
+    if (selector === "[data-moo-chart-template-nav]") return null;
+    return null;
+  },
+  querySelectorAll(selector) {
+    if (selector === ".moo-component-examples > .moo-example[aria-labelledby]") {
+      return [example];
+    }
+    if (selector === ".moo-doc-toc .nav-link") {
+      return componentNav.children;
+    }
+    return [];
+  },
+};
+
+initToc(root);
+
+console.log(JSON.stringify({
+  hidden: componentToc.hidden,
+  links: componentNav.children.map((link) => ({
+    href: link.getAttribute("href"),
+    text: link.textContent,
+  })),
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertFalse(case["hidden"])
+        self.assertEqual(
+            case["links"],
+            [
+                {"href": "#usage", "text": "Usage"},
+                {"href": "#application-shell", "text": "Application shell"},
+                {"href": "#composition", "text": "Composition"},
+                {"href": "#sidebar-html-anatomy", "text": "HTML Anatomy"},
+            ],
         )
 
     def test_examples_chart_import_resolves_to_the_canonical_bundle(

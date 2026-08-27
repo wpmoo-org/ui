@@ -196,16 +196,36 @@
       {"id": "datepicker-popover", "selector": "<code>[data-datepicker-popover]</code>", "summary": "Popover surface with <code>role=\"dialog\"</code>, <code>aria-modal=\"false\"</code>, and <code>hidden</code> while closed."},
       {"id": "datepicker-calendar", "selector": "<code>[data-calendar]</code>", "summary": "Standalone calendar root. The runtime renders caption controls, weekdays, six weeks of day buttons, disabled state, selected state, and range state."}
     ] %}
-    {% set datepicker_parts_rows = [] %}
+    {% set datepicker_part_rows = namespace(by_id={}) %}
     {% for part in datepicker_parts %}
-      {% set _ = datepicker_parts_rows.append([part["selector"], part["summary"]]) %}
+      {% set _ = datepicker_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
     {% endfor %}
+    {% set datepicker_row_groups = [
+      {
+        "heading_id": "datepicker-anatomy-roots",
+        "title": "Roots",
+        "rows": [datepicker_part_rows.by_id["datepicker-root"], datepicker_part_rows.by_id["datepicker-range-root"]],
+        "row_ids": ["datepicker-root", "datepicker-range-root"]
+      },
+      {
+        "heading_id": "datepicker-anatomy-trigger",
+        "title": "Trigger",
+        "rows": [datepicker_part_rows.by_id["datepicker-trigger"]],
+        "row_ids": ["datepicker-trigger"]
+      },
+      {
+        "heading_id": "datepicker-anatomy-popover",
+        "title": "Popover",
+        "rows": [datepicker_part_rows.by_id["datepicker-popover"], datepicker_part_rows.by_id["datepicker-calendar"]],
+        "row_ids": ["datepicker-popover", "datepicker-calendar"]
+      }
+    ] %}
     {{ table(
       ["Selector", "Purpose"],
-      datepicker_parts_rows,
-      row_ids=datepicker_parts | map(attribute="id") | list,
+      [],
+      row_groups=datepicker_row_groups,
       row_header=true,
-      extra_class="align-middle moo-doc-anatomy-table",
+      extra_class="align-middle moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
       responsive_class="scroll-fade-x no-scrollbar"
     ) }}
   </section>

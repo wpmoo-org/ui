@@ -97,7 +97,7 @@
       "runtime": "chart.js@4.5.1",
       "getters": ["chart", "element"],
       "markup": {
-        "rootClass": "moo-chart",
+        "rootClass": "chart",
         "typeAttribute": "data-chart",
         "dataAttribute": "data-chart-data",
         "optionsAttribute": "data-chart-options",

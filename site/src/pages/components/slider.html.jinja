@@ -171,16 +171,36 @@
       {"id": "slider-input", "selector": '<span class="moo-doc-selector-stack"><code>input[type="range"]</code><code>.form-range</code><code>[data-slider-input]</code></span>', "summary": "Native range input. It owns keyboard behavior, form serialization, disabled state, and accessible slider semantics."},
       {"id": "slider-output", "selector": "<code>[data-slider-output]</code>", "summary": "Optional output element synchronized from the current native input value or value range."}
     ] %}
-    {% set slider_parts_rows = [] %}
+    {% set slider_part_rows = namespace(by_id={}) %}
     {% for part in slider_parts %}
-      {% set _ = slider_parts_rows.append([part["selector"], part["summary"]]) %}
+      {% set _ = slider_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
     {% endfor %}
+    {% set slider_row_groups = [
+      {
+        "heading_id": "slider-anatomy-root",
+        "title": "Root",
+        "rows": [slider_part_rows.by_id["slider-root"]],
+        "row_ids": ["slider-root"]
+      },
+      {
+        "heading_id": "slider-anatomy-track",
+        "title": "Track",
+        "rows": [slider_part_rows.by_id["slider-track"], slider_part_rows.by_id["slider-fill"], slider_part_rows.by_id["slider-input"]],
+        "row_ids": ["slider-track", "slider-fill", "slider-input"]
+      },
+      {
+        "heading_id": "slider-anatomy-output",
+        "title": "Output",
+        "rows": [slider_part_rows.by_id["slider-output"]],
+        "row_ids": ["slider-output"]
+      }
+    ] %}
     {{ table(
       ["Selector", "Purpose"],
-      slider_parts_rows,
-      row_ids=slider_parts | map(attribute="id") | list,
+      [],
+      row_groups=slider_row_groups,
       row_header=true,
-      extra_class="align-middle moo-doc-anatomy-table",
+      extra_class="align-middle moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
       responsive_class="scroll-fade-x no-scrollbar"
     ) }}
   </section>

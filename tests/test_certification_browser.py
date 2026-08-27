@@ -107,14 +107,14 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     )
                     self.assertEqual(
                         page.locator(
-                            ".moo-chart[data-certification-chart] "
+                            ".chart[data-certification-chart] "
                             "> canvas[role='img'][aria-label]"
                         ).count(),
                         9,
                     )
                     self.assertTrue(
                         page.locator(
-                            ".moo-chart[data-certification-chart] "
+                            ".chart[data-certification-chart] "
                             "> canvas[role='img'][aria-label]"
                         ).evaluate_all(
                             """
@@ -814,7 +814,10 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertTrue(response.ok)
 
         trigger = page.locator('[data-toast-target="#toast-demo-template"]')
-        deck = page.locator('.toast-container--stacked[data-toast-stack="deck"]')
+        deck = page.locator(
+            '.toast-container--stacked[data-toast-stack="deck"]'
+            ':has(> template#toast-demo-template)'
+        )
         generated = deck.locator('[data-toast-generated="true"]')
         self.assertEqual(trigger.count(), 1)
         expect(deck.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
@@ -955,6 +958,61 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         page.mouse.move(0, 0)
         expect(generated).to_have_count(0, timeout=7000)
         self.assertEqual(deck.locator('[data-toast-stack-index]').count(), 0)
+        self.assertEqual(run_axe(page), [])
+        evidence.assert_clean()
+        context.close()
+
+    def test_toast_catalog_component_examples_use_stacked_deck(self) -> None:
+        context = self.browser.new_context(
+            viewport={"width": 900, "height": 844},
+            reduced_motion="no-preference",
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        response = page.goto(
+            f"{self.base_url}/site-dist/components/toast/index.html",
+            wait_until="networkidle",
+        )
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
+
+        examples = {
+            "basic": [
+                "#toast-basic-template",
+                "#toast-basic-template",
+                "#toast-basic-template",
+            ],
+            "variants": [
+                "#toast-variant-success-template",
+                "#toast-variant-info-template",
+                "#toast-variant-warning-template",
+            ],
+        }
+        for section_id, target_selectors in examples.items():
+            with self.subTest(section=section_id):
+                section = page.locator(f'section[aria-labelledby="{section_id}"]')
+                deck = section.locator(
+                    '.toast-container--stacked[data-toast-stack="deck"]'
+                )
+                generated = deck.locator('[data-toast-generated="true"]')
+                expect(deck).to_have_count(1)
+                expect(generated).to_have_count(0)
+
+                for target_selector in target_selectors:
+                    section.locator(f'[data-toast-target="{target_selector}"]').click()
+
+                expect(generated).to_have_count(len(target_selectors))
+                expect(deck.locator(".toast.show")).to_have_count(
+                    len(target_selectors)
+                )
+                self.assertEqual(
+                    generated.evaluate_all(
+                        "elements => elements.map(element => "
+                        "element.dataset.toastStackIndex)"
+                    ),
+                    [str(index) for index in range(len(target_selectors))],
+                )
+
         self.assertEqual(run_axe(page), [])
         evidence.assert_clean()
         context.close()

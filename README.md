@@ -117,7 +117,7 @@ Combobox.getOrCreateInstance(document.querySelector(".combobox"));
 ContextMenu.getOrCreateInstance(document.querySelector(".context-menu"));
 DataTable.getOrCreateInstance(document.querySelector(".datatable"));
 Sidebar.getOrCreateInstance(document.querySelector('[data-slot="sidebar-wrapper"]'));
-Chart.getOrCreateInstance(document.querySelector(".moo-chart"));
+Chart.getOrCreateInstance(document.querySelector(".chart"));
 Datepicker.getOrCreateInstance(document.querySelector("[data-datepicker]"));
 Slider.getOrCreateInstance(document.querySelector("[data-slider]"));
 ```

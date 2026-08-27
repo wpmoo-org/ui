@@ -194,7 +194,7 @@ class ToastTests(CatalogTestCase):
                 '{% call toast_container(placement="bottom-center", stacked=true) %}x{% endcall %}'
             )
 
-    def test_page_composes_one_repeated_trigger_and_template_deck(self) -> None:
+    def test_page_composes_repeated_trigger_template_decks(self) -> None:
         self.assertTrue(PAGE.is_file(), "Toast page is not implemented")
         source = PAGE.read_text(encoding="utf-8")
 
@@ -207,7 +207,7 @@ class ToastTests(CatalogTestCase):
         self.assertIn('stacked=true', source)
         self.assertIn('action_label="Undo"', source)
         self.assertEqual(source.count('toast_target="toast-demo-template"'), 1)
-        self.assertEqual(source.count('stacked=true'), 1)
+        self.assertEqual(source.count('stacked=true'), 3)
         self.assertNotIn("toast-stack-", source)
 
     def test_page_documents_basic_default_toast_and_standard_status_variants(self) -> None:
@@ -229,8 +229,10 @@ class ToastTests(CatalogTestCase):
         basic_start = source.index('{% set basic %}')
         basic_end = source.index('{% set basic_source %}')
         basic_example = source[basic_start:basic_end]
-        self.assertIn('toast_container(placement="bottom-end")', basic_example)
-        self.assertNotIn("stacked=true", basic_example)
+        self.assertIn(
+            'toast_container(placement="bottom-end", stacked=true)',
+            basic_example,
+        )
         basic_source_start = source.index('{% set basic_source %}')
         basic_source_end = source.index(
             '{{ render_component_example("toast", "Toast",\n      "basic"',
@@ -249,6 +251,13 @@ class ToastTests(CatalogTestCase):
         variants_render = source[variants_render_start:variants_render_end]
         self.assertIn('preview_class="moo-example__preview--medium"', variants_render)
         self.assertNotIn('preview_class="moo-example__preview--narrow"', variants_render)
+        variants_start = source.index('{% set variants %}')
+        variants_end = source.index('{% set variants_source %}')
+        variants_example = source[variants_start:variants_end]
+        self.assertIn(
+            'toast_container(placement="bottom-end", stacked=true)',
+            variants_example,
+        )
         self.assertNotIn('"types"', source)
         self.assertNotIn('"Types"', source)
         for variant in ("success", "info", "warning", "destructive", "loading"):

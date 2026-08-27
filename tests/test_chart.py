@@ -51,7 +51,7 @@ class ChartJavaScriptTests(CatalogTestCase):
     def test_constructor_rejects_invalid_elements(self) -> None:
         case = self.run_chart_case(
             """
-const candidates = [null, undefined, {}, "moo-chart", { nodeType: 3 }];
+const candidates = [null, undefined, {}, "chart", { nodeType: 3 }];
 const messages = [];
 for (const candidate of candidates) {
   try {
@@ -74,7 +74,7 @@ report("invalid-elements", { messages });
         )
         self.assertEqual(
             case["messages"],
-            ["MooChart requires a .moo-chart root element."] * 6,
+            ["MooChart requires a .chart root element."] * 6,
         )
 
     def test_constructor_requires_child_canvas(self) -> None:
@@ -95,7 +95,7 @@ report("missing-canvas", {{ message }});
         )
         self.assertEqual(
             case["message"],
-            "MooChart requires a child <canvas> element inside the .moo-chart root.",
+            "MooChart requires a child <canvas> element inside the .chart root.",
         )
 
     def test_instance_lookup_is_idempotent(self) -> None:
@@ -1087,7 +1087,7 @@ report("scoped-theme-observer", {{
         self.assertTrue(case["observedScopedTheme"])
         self.assertEqual(case["pointBackgroundColor"], "rgb(110, 223, 246)")
 
-    def test_catalog_adapter_initializes_and_disposes_moo_charts(self) -> None:
+    def test_catalog_adapter_initializes_and_disposes_chart_roots(self) -> None:
         result = subprocess.run(
             [
                 "node",
@@ -1107,7 +1107,7 @@ function chartRoot() {{
 }}
 const roots = [chartRoot(), chartRoot()];
 const root = {{
-  querySelectorAll: (selector) => (selector === ".moo-chart" ? roots : []),
+  querySelectorAll: (selector) => (selector === ".chart" ? roots : []),
 }};
 const release = initExamplesChart(root);
 const reentered = initExamplesChart(root);
@@ -1187,7 +1187,7 @@ const container = {{
   dataset: {{}},
   ownerDocument,
   querySelector: (selector) => {{
-    if (selector === ".moo-chart") return chartRoot;
+    if (selector === ".chart") return chartRoot;
     if (selector === "[data-chart-status]") return status;
     if (selector === "[data-chart-theme]") return themeButton;
     return null;
@@ -1199,7 +1199,7 @@ documentElement.dataset.bsTheme = "dark";
 const root = {{
   querySelectorAll: (selector) => {{
     if (selector === "[data-chart-live]") return [container];
-    if (selector === ".moo-chart") return [chartRoot];
+    if (selector === ".chart") return [chartRoot];
     return [];
   }},
 }};
@@ -1290,7 +1290,7 @@ const chartRoot = makeRoot({{
 const container = {{
   ownerDocument,
   querySelector: (selector) => {{
-    if (selector === ".moo-chart") return chartRoot;
+    if (selector === ".chart") return chartRoot;
     if (selector === "[data-chart-status]") return status;
     if (selector === "[data-chart-theme]") return themeButton;
     if (selector === "[data-chart-lifecycle]") return lifecycle.button;
@@ -1302,7 +1302,7 @@ chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope
 const root = {{
   querySelectorAll: (selector) => {{
     if (selector === "[data-chart-live]") return [container];
-    if (selector === ".moo-chart") return [chartRoot];
+    if (selector === ".chart") return [chartRoot];
     return [];
   }},
 }};
@@ -1539,7 +1539,7 @@ report("stateful-lifecycle-button", {{
         source = FIXTURE.read_text(encoding="utf-8")
 
         self.assertIn('import MooChart from "/dist/js/chart.js";', source)
-        self.assertIn('class="moo-chart"', source)
+        self.assertIn('class="chart"', source)
         self.assertIn('data-chart="line"', source)
         self.assertIn('data-chart="bar"', source)
         self.assertIn("data-chart-data", source)
@@ -1555,7 +1555,11 @@ report("stateful-lifecycle-button", {{
         source = self.read_output("components/chart.html")
 
         self.assertIn("Chart.js documentation", source)
-        self.assertIn(".moo-chart", source)
+        self.assertIn(".chart", source)
+        self.assertNotIn('class="moo-chart"', source)
+        self.assertNotIn('document.querySelector(".moo-chart")', source)
+        self.assertNotIn("<code>.moo-chart</code>", source)
+        self.assertNotIn(".moo-chart root", source)
         self.assertIn("data-chart", source)
         self.assertIn("data-chart-data", source)
         self.assertIn("data-chart-options", source)
@@ -1566,7 +1570,7 @@ report("stateful-lifecycle-button", {{
                 self.assertIn(chart_type, source)
         self.assertRegex(
             source,
-            r'class="moo-chart w-100"\s+id="chart-area-default"',
+            r'class="chart w-100"\s+id="chart-area-default"',
         )
         for gallery_id in (
             "chart-area-step",
@@ -1618,8 +1622,8 @@ report("stateful-lifecycle-button", {{
         ordered_contracts = (
             '<h2 id="chart-javascript"',
             '<h3 class="h6" id="chart-javascript-init">Initialize a chart</h3>',
-            '<p class="mb-0"><span class="text-body-secondary">Use this when a page already renders a .moo-chart root',
-            "Use this when a page already renders a .moo-chart root and needs the wrapper to attach Chart.js.",
+            '<p class="mb-0"><span class="text-body-secondary">Use this when a page already renders a .chart root',
+            "Use this when a page already renders a .chart root and needs the wrapper to attach Chart.js.",
             'id="chart-javascript-import-code"',
             '<h3 class="h6" id="chart-javascript-callbacks">Customize tooltips</h3>',
             '<p class="mb-0"><span class="text-body-secondary">Use this for non-serializable Chart.js options',
@@ -1682,7 +1686,7 @@ report("stateful-lifecycle-button", {{
         ):
             self.assertRegex(
                 source,
-                rf'class="moo-chart w-100"\s+id="{chart_id}"',
+                rf'class="chart w-100"\s+id="{chart_id}"',
             )
         self.assertRegex(
             source,

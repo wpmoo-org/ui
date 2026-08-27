@@ -44,6 +44,21 @@ class TableTests(CatalogTestCase):
         self.assertIn('<tr id="row-x">', output)
         self.assertIn('<th scope="row">x</th>', output)
 
+    def test_table_row_groups_render_section_rows_before_group_rows(self) -> None:
+        output = self.render_table(
+            'table(["Selector", "Purpose"], [], row_groups=['
+            '{"heading_id": "group-root", "title": "Root", '
+            '"rows": [["<code>.root</code>", "Root hook"]], '
+            '"row_ids": ["row-root"]}'
+            "], row_header=true)"
+        )
+
+        self.assertIn('<tr class="moo-table-section-row" id="group-root">', output)
+        self.assertIn('<th scope="rowgroup" colspan="2">Root</th>', output)
+        self.assertIn('<tr id="row-root">', output)
+        self.assertIn('<th scope="row"><code>.root</code></th>', output)
+        self.assertIn("<td>Root hook</td>", output)
+
     def test_table_caption_renders_when_provided(self) -> None:
         self.assertIn(
             "<caption>Cap</caption>",

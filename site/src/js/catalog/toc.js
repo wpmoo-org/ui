@@ -8,9 +8,20 @@ export function initToc(root = document) {
   const view = root.defaultView || root.ownerDocument?.defaultView;
   const componentToc = root.querySelector("[data-moo-component-toc]");
   const componentNav = componentToc?.querySelector("[data-moo-component-toc-nav]");
-  const examples = Array.from(
-    root.querySelectorAll(".moo-component-examples > .moo-example[aria-labelledby]")
-  );
+  const componentExamples = root.querySelector(".moo-component-examples");
+  const componentSections = Array.from(componentExamples?.children ?? [])
+    .map((child) => {
+      if (child.matches?.("h2[id]")) {
+        return { titleId: child.getAttribute("id"), title: child };
+      }
+      if (child.matches?.(".moo-example[aria-labelledby]")) {
+        const titleId = child.getAttribute("aria-labelledby");
+        const title = titleId ? root.getElementById(titleId) : null;
+        return title ? { titleId, title } : null;
+      }
+      return null;
+    })
+    .filter(Boolean);
   const generatedLinks = [];
   const listeners = [];
   const timers = new Set();
@@ -32,10 +43,8 @@ export function initToc(root = document) {
     timers.clear();
   };
 
-  if (componentToc && componentNav && examples.length > 0) {
-    examples.forEach((example) => {
-      const titleId = example.getAttribute("aria-labelledby");
-      const title = titleId ? root.getElementById(titleId) : null;
+  if (componentToc && componentNav && componentSections.length > 0) {
+    componentSections.forEach(({ titleId, title }) => {
       if (!titleId || !title?.textContent?.trim()) {
         return;
       }

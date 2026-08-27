@@ -12,7 +12,8 @@
   small=false,
   borderless=false,
   extra_class="",
-  responsive_class=""
+  responsive_class="",
+  row_groups=[]
 ) -%}
   {% if not headers %}{{ fail("Table headers are required") }}{% endif %}
   {% set classes = "table" %}
@@ -34,19 +35,43 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in rows %}
-          {% set row_id = row_ids[loop.index0] if loop.index0 < row_ids | length else "" %}
-          <tr{% if row_id %} id="{{ row_id }}"{% endif %}>
-            {% for cell in row %}
-              {% set column_align = align[loop.index0] if loop.index0 < align | length else "" %}
-              {% if row_header and loop.first %}
-                <th scope="row"{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</th>
-              {% else %}
-                <td{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</td>
-              {% endif %}
+        {% if row_groups %}
+          {% for group in row_groups %}
+            {% set group_id = group.get("heading_id", "") %}
+            {% set group_rows = group.get("rows", []) %}
+            {% set group_row_ids = group.get("row_ids", []) %}
+            <tr class="moo-table-section-row"{% if group_id %} id="{{ group_id }}"{% endif %}>
+              <th scope="rowgroup" colspan="{{ headers | length }}">{{ group.get("title", "") }}</th>
+            </tr>
+            {% for row in group_rows %}
+              {% set row_id = group_row_ids[loop.index0] if loop.index0 < group_row_ids | length else "" %}
+              <tr{% if row_id %} id="{{ row_id }}"{% endif %}>
+                {% for cell in row %}
+                  {% set column_align = align[loop.index0] if loop.index0 < align | length else "" %}
+                  {% if row_header and loop.first %}
+                    <th scope="row"{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</th>
+                  {% else %}
+                    <td{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</td>
+                  {% endif %}
+                {% endfor %}
+              </tr>
             {% endfor %}
-          </tr>
-        {% endfor %}
+          {% endfor %}
+        {% else %}
+          {% for row in rows %}
+            {% set row_id = row_ids[loop.index0] if loop.index0 < row_ids | length else "" %}
+            <tr{% if row_id %} id="{{ row_id }}"{% endif %}>
+              {% for cell in row %}
+                {% set column_align = align[loop.index0] if loop.index0 < align | length else "" %}
+                {% if row_header and loop.first %}
+                  <th scope="row"{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</th>
+                {% else %}
+                  <td{% if column_align %} class="text-{{ column_align }}"{% endif %}>{{ cell | safe }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        {% endif %}
       </tbody>
       {% if footer %}
         <tfoot>

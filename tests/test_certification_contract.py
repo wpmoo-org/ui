@@ -839,7 +839,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(
             chart_record.get("markup"),
             {
-                "rootClass": "moo-chart",
+                "rootClass": "chart",
                 "typeAttribute": "data-chart",
                 "dataAttribute": "data-chart-data",
                 "optionsAttribute": "data-chart-options",

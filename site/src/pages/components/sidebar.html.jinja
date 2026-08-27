@@ -76,8 +76,10 @@
     </p>
 
     {% set sidebar_parts = [
-      {"id": "sidebar-wrapper", "selector": '<code>.sidebar-wrapper[data-slot="sidebar-wrapper"]</code>', "summary": "Wraps the shell and stores <code>data-sidebar-state</code>."},
-      {"id": "sidebar", "selector": '<code>.sidebar[data-slot="sidebar"]</code>', "summary": "Navigation region. It is also a Bootstrap <code>.offcanvas-lg</code> target on smaller viewports."},
+      {"id": "sidebar-wrapper-class", "selector": '<code>.sidebar-wrapper</code>', "summary": "Shell layout class. Wraps the sidebar and inset surfaces."},
+      {"id": "sidebar-wrapper-slot", "selector": '<code>[data-slot="sidebar-wrapper"]</code>', "summary": "Sidebar JavaScript root hook; the same element stores <code>data-sidebar-state</code>."},
+      {"id": "sidebar-class", "selector": '<code>.sidebar</code>', "summary": "Navigation region class. Carries the sidebar surface and Bootstrap Offcanvas classes."},
+      {"id": "sidebar-slot", "selector": '<code>[data-slot="sidebar"]</code>', "summary": "Sidebar JavaScript region hook inside the wrapper."},
       {"id": "sidebar-trigger", "selector": '<code>[data-sidebar-trigger]</code>', "summary": "Button that toggles the target sidebar and mirrors <code>aria-expanded</code>."},
       {"id": "sidebar-rail", "selector": '<code>[data-sidebar-rail]</code>', "summary": "Collapsed desktop rail hit target; hidden from normal tab order."},
       {"id": "sidebar-content", "selector": '<code>[data-slot="sidebar-content"]</code>', "summary": "Scrollable navigation content."},
@@ -86,16 +88,42 @@
       {"id": "sidebar-inset", "selector": '<code>.sidebar-inset</code>', "summary": "Page content surface next to the sidebar."}
     ] %}
 
-    {% set sidebar_parts_rows = [] %}
+    {% set sidebar_part_rows = namespace(by_id={}) %}
     {% for part in sidebar_parts %}
-      {% set _ = sidebar_parts_rows.append([part["selector"], part["summary"]]) %}
+      {% set _ = sidebar_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
     {% endfor %}
+  {% set sidebar_row_groups = [
+    {
+      "heading_id": "sidebar-anatomy-shell",
+      "title": "Shell",
+      "rows": [sidebar_part_rows.by_id["sidebar-wrapper-class"], sidebar_part_rows.by_id["sidebar-wrapper-slot"], sidebar_part_rows.by_id["sidebar-class"], sidebar_part_rows.by_id["sidebar-slot"]],
+      "row_ids": ["sidebar-wrapper-class", "sidebar-wrapper-slot", "sidebar-class", "sidebar-slot"]
+    },
+    {
+      "heading_id": "sidebar-anatomy-controls",
+      "title": "Controls",
+      "rows": [sidebar_part_rows.by_id["sidebar-trigger"], sidebar_part_rows.by_id["sidebar-rail"]],
+      "row_ids": ["sidebar-trigger", "sidebar-rail"]
+    },
+    {
+      "heading_id": "sidebar-anatomy-navigation",
+      "title": "Navigation",
+      "rows": [sidebar_part_rows.by_id["sidebar-content"], sidebar_part_rows.by_id["sidebar-menu-button"], sidebar_part_rows.by_id["sidebar-submenu"]],
+      "row_ids": ["sidebar-content", "sidebar-menu-button", "sidebar-submenu"]
+    },
+    {
+      "heading_id": "sidebar-anatomy-content",
+      "title": "Content",
+      "rows": [sidebar_part_rows.by_id["sidebar-inset"]],
+      "row_ids": ["sidebar-inset"]
+    }
+  ] %}
   {{ table(
     ["Selector", "Purpose"],
-    sidebar_parts_rows,
-    row_ids=sidebar_parts | map(attribute="id") | list,
+    [],
+    row_groups=sidebar_row_groups,
     row_header=true,
-    extra_class="align-middle mb-5 moo-doc-anatomy-table",
+    extra_class="align-middle mb-5 moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
     responsive_class="scroll-fade-x no-scrollbar"
   ) }}
 

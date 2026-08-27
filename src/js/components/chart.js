@@ -3,13 +3,13 @@
 //
 // Markup contract (see api-freeze-1.0.0-rc.3.json):
 //
-//   <div class="moo-chart" data-chart="line"
+//   <div class="chart" data-chart="line"
 //        data-chart-data='{"labels":[],"datasets":[]}'
 //        data-chart-options='{"plugins":{"legend":{"display":false}}}'>
 //     <canvas></canvas>
 //   </div>
 //
-// `.moo-chart` is the public root class, `data-chart` is the
+// `.chart` is the public root class, `data-chart` is the
 // type/init attribute, and `data-chart-data` carries the serialized
 // chart data. `data-chart-options` is an optional JSON-object Chart.js
 // options pass-through for copyable HTML examples. The canvas is resolved
@@ -755,8 +755,8 @@ export default class MooChart {
   }
 
   constructor(element, config = {}) {
-    if (element?.nodeType !== 1 || !element.matches(".moo-chart")) {
-      throw new TypeError("MooChart requires a .moo-chart root element.");
+    if (element?.nodeType !== 1 || !element.matches(".chart")) {
+      throw new TypeError("MooChart requires a .chart root element.");
     }
     const existing = instances.get(element);
     if (existing) {
@@ -766,7 +766,7 @@ export default class MooChart {
     const canvas = element.querySelector(":scope > canvas");
     if (!canvas) {
       throw new TypeError(
-        "MooChart requires a child <canvas> element inside the .moo-chart root."
+        "MooChart requires a child <canvas> element inside the .chart root."
       );
     }
 

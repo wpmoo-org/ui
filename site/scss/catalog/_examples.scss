@@ -150,6 +150,40 @@
   min-width: 34rem;
 }
 
+.moo-doc-anatomy-table--grouped thead th {
+  padding-block-end: 0.7rem;
+}
+
+.moo-doc-anatomy-table--grouped tbody tr:not(.moo-table-section-row) > :is(th, td) {
+  padding-block: 0.58rem;
+  vertical-align: top;
+}
+
+.moo-doc-anatomy-table--grouped .moo-table-section-row > th {
+  width: auto;
+  min-width: 0;
+  padding: 1.1rem 0.5rem 0.38rem;
+  padding-inline-end: 0.5rem;
+  border-bottom: 0;
+  color: var(--bs-emphasis-color);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 650;
+  white-space: normal;
+}
+
+.moo-doc-anatomy-table--grouped .moo-table-section-row:first-child > th {
+  padding-top: 0.55rem;
+}
+
+.moo-doc-anatomy-table--grouped .moo-table-section-row:not(:first-child) > th {
+  border-top: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.moo-doc-anatomy-table--grouped .moo-table-section-row + tr > :is(th, td) {
+  border-top-color: transparent;
+}
+
 .moo-doc-selector-stack {
   display: inline-flex;
   flex-direction: column;
@@ -435,7 +469,7 @@
   min-width: 0;
 }
 
-.moo-chart-example__preview > .moo-chart {
+.moo-chart-example__preview > .chart {
   min-width: 0;
 }
 

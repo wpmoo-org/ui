@@ -685,11 +685,11 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertRegex(
             overview,
-            r'<div class="moo-chart moo-dashboard-chart" id="overview-revenue-chart"',
+            r'<div class="chart moo-dashboard-chart" id="overview-revenue-chart"',
         )
         self.assertRegex(
             overview,
-            r'<div class="moo-chart moo-dashboard-chart" id="overview-visitors-chart"',
+            r'<div class="chart moo-dashboard-chart" id="overview-visitors-chart"',
         )
         self.assertNotRegex(
             overview,
@@ -2370,7 +2370,9 @@ class CatalogContractTests(CatalogTestCase):
 
         preview = self.read_output("assets/js/catalog/toc.js")
         self.assertIn("[data-moo-component-toc]", preview)
-        self.assertIn(".moo-component-examples > .moo-example[aria-labelledby]", preview)
+        self.assertIn('root.querySelector(".moo-component-examples")', preview)
+        self.assertIn('child.matches?.("h2[id]")', preview)
+        self.assertIn('child.matches?.(".moo-example[aria-labelledby]")', preview)
         self.assertIn("componentNav.appendChild(link)", preview)
         self.assertIn('link.setAttribute("aria-current", "true")', preview)
         self.assertIn('link.classList.toggle("active", active)', preview)
