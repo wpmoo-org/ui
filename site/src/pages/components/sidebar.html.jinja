@@ -90,13 +90,14 @@
     {% for part in sidebar_parts %}
       {% set _ = sidebar_parts_rows.append([part["selector"], part["summary"]]) %}
     {% endfor %}
-    {{ table(
-      ["Selector", "Purpose"],
-      sidebar_parts_rows,
-      row_ids=sidebar_parts | map(attribute="id") | list,
-      row_header=true,
-      extra_class="align-middle mb-5"
-    ) }}
+  {{ table(
+    ["Selector", "Purpose"],
+    sidebar_parts_rows,
+    row_ids=sidebar_parts | map(attribute="id") | list,
+    row_header=true,
+    extra_class="align-middle mb-5 moo-doc-anatomy-table",
+    responsive_class="scroll-fade-x no-scrollbar"
+  ) }}
 
     {% set sidebar_aside_class = "sidebar offcanvas-lg offcanvas-start" %}
     {% set sidebar_markup_example %}

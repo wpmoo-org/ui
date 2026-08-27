@@ -187,6 +187,55 @@ console.log(JSON.stringify({
         self.assertEqual(case["darkSurface"], "oklch(0.141 0.005 285.823)")
         self.assertEqual(case["darkSecondaryBg"], "var(--moo-muted-surface)")
 
+    def test_theme_builder_neutral_base_aligns_bootstrap_borders(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import {
+  normalizeThemeBuilderState,
+  resolveThemeBuilderTokens,
+} from "./site/src/js/catalog/theme-builder-schema.js";
+
+const lightTokens = resolveThemeBuilderTokens(
+  normalizeThemeBuilderState({ baseColor: "neutral" }),
+  { theme: "light" }
+);
+const darkTokens = resolveThemeBuilderTokens(
+  normalizeThemeBuilderState({ baseColor: "neutral" }),
+  { theme: "dark" }
+);
+
+console.log(JSON.stringify({
+  lightMooBorder: lightTokens["--moo-border"] ?? null,
+  lightBootstrapBorder: lightTokens["--bs-border-color"] ?? null,
+  lightCardBorder: lightTokens["--bs-card-border-color"] ?? null,
+  darkMooBorder: darkTokens["--moo-border"] ?? null,
+  darkBootstrapBorder: darkTokens["--bs-border-color"] ?? null,
+  darkCardBorder: darkTokens["--bs-card-border-color"] ?? null,
+  darkSidebarBorder: darkTokens["--moo-sidebar-border"] ?? null,
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["lightMooBorder"], "#e4e4e7")
+        self.assertEqual(case["lightBootstrapBorder"], "var(--moo-border)")
+        self.assertEqual(case["lightCardBorder"], "var(--moo-border)")
+        self.assertEqual(case["darkMooBorder"], "oklch(1 0 0 / 10%)")
+        self.assertEqual(case["darkBootstrapBorder"], "var(--moo-border)")
+        self.assertEqual(case["darkCardBorder"], "var(--moo-border)")
+        self.assertEqual(case["darkSidebarBorder"], "oklch(1 0 0 / 10%)")
+
     def test_theme_builder_public_token_allow_list_is_alphabetized(self) -> None:
         result = subprocess.run(
             [
@@ -346,7 +395,7 @@ console.log(JSON.stringify({
         )
         self.assertEqual(
             case["sidebarAccent"],
-            "color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar))",
+            "color-mix(in srgb, var(--moo-ring) 10%, var(--moo-sidebar))",
         )
         self.assertEqual(case["unknownTokens"], [])
         self.assertFalse(case["hasDataSelectorToken"])
@@ -419,7 +468,7 @@ console.log(JSON.stringify({
         self.assertNotIn("color-mix(in srgb, var(--bs-body-bg) 92%", css)
         self.assertNotIn("color-mix(in srgb, var(--bs-body-bg) 98%", css)
         self.assertIn(
-            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar));",
+            "--moo-sidebar-accent: color-mix(in srgb, var(--moo-ring) 10%, var(--moo-sidebar));",
             css,
         )
         self.assertIn(
@@ -756,7 +805,10 @@ function runInlineScript(fixture) {
 const reports = fixtures.map((fixture) => {
   const actual = runInlineScript(fixture);
   const state = normalizeThemeBuilderState(fixture.state);
-  const expectedTokens = resolveThemeBuilderTokens(state, { theme: fixture.theme });
+  const expectedTokens = resolveThemeBuilderTokens(state, {
+    theme: fixture.theme,
+    surface: "catalog",
+  });
   return {
     label: fixture.label,
     tokenDiff: diffObject(actual.tokens, expectedTokens),
@@ -813,11 +865,20 @@ const catalogTokens = resolveThemeBuilderTokens(candidate, { surface: "catalog" 
 console.log(JSON.stringify({
   defaultEqualsExport: JSON.stringify(defaultTokens) === JSON.stringify(exportTokens),
   exportBodyBg: exportTokens["--bs-body-bg"] ?? null,
+  exportBodyColor: exportTokens["--bs-body-color"] ?? null,
   exportSurface: exportTokens["--moo-surface"] ?? null,
+  exportForeground: exportTokens["--moo-foreground"] ?? null,
   exportSidebar: exportTokens["--moo-sidebar"] ?? null,
+  exportSidebarForeground: exportTokens["--moo-sidebar-foreground"] ?? null,
   catalogBodyBg: catalogTokens["--bs-body-bg"] ?? null,
+  catalogBodyColor: catalogTokens["--bs-body-color"] ?? null,
+  catalogCardBg: catalogTokens["--bs-card-bg"] ?? null,
   catalogSurface: catalogTokens["--moo-surface"] ?? null,
+  catalogForeground: catalogTokens["--moo-foreground"] ?? null,
+  catalogSecondaryColor: catalogTokens["--bs-secondary-color"] ?? null,
+  catalogMutedForeground: catalogTokens["--moo-muted-foreground"] ?? null,
   catalogSidebar: catalogTokens["--moo-sidebar"] ?? null,
+  catalogSidebarForeground: catalogTokens["--moo-sidebar-foreground"] ?? null,
   catalogChart1: catalogTokens["--moo-chart-1"] ?? null,
 }));
 """,
@@ -833,11 +894,20 @@ console.log(JSON.stringify({
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertTrue(case["defaultEqualsExport"])
         self.assertEqual(case["exportBodyBg"], "var(--moo-surface)")
+        self.assertEqual(case["exportBodyColor"], "var(--moo-foreground)")
         self.assertEqual(case["exportSurface"], "oklch(1 0 0)")
+        self.assertEqual(case["exportForeground"], "oklch(0.141 0.005 285.823)")
         self.assertEqual(case["exportSidebar"], "oklch(0.985 0 0)")
-        self.assertIsNone(case["catalogBodyBg"])
-        self.assertIsNone(case["catalogSurface"])
+        self.assertEqual(case["exportSidebarForeground"], "oklch(0.141 0.005 285.823)")
+        self.assertEqual(case["catalogBodyBg"], "var(--moo-surface)")
+        self.assertIsNone(case["catalogBodyColor"])
+        self.assertEqual(case["catalogCardBg"], "oklch(1 0 0)")
+        self.assertEqual(case["catalogSurface"], "oklch(1 0 0)")
+        self.assertIsNone(case["catalogForeground"])
+        self.assertIsNone(case["catalogSecondaryColor"])
+        self.assertIsNone(case["catalogMutedForeground"])
         self.assertEqual(case["catalogSidebar"], "oklch(0.985 0 0)")
+        self.assertIsNone(case["catalogSidebarForeground"])
         self.assertEqual(case["catalogChart1"], "rgb(82, 82, 91)")
 
     def test_theme_builder_settings_options_match_schema(self) -> None:
@@ -1075,12 +1145,12 @@ function makeControl(labels) {
   return {
     options,
     value,
-    root: {
+    root: makeEmitter({
       querySelectorAll: (selector) =>
         selector === "[data-moo-catalog-theme-builder-option]" ? options : [],
       querySelector: (selector) =>
         selector === "[data-moo-catalog-theme-builder-value]" ? value : null,
-    },
+    }),
   };
 }
 
@@ -1186,15 +1256,66 @@ const initial = {
   migratedBuilder: JSON.parse(localStorage.getItem("moo:theme-builder")),
 };
 
+optionFor("baseColor", "zinc").dispatch("pointerenter");
+const afterBasePreview = {
+  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor || null,
+  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  selectedBase: selectedValue("baseColor"),
+  persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
+};
+controls.baseColor.root.dispatch("hidden.bs.dropdown");
+const afterBasePreviewHiddenClear = {
+  baseDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderBaseColor"
+  ),
+  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  selectedBase: selectedValue("baseColor"),
+  persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
+};
+optionFor("baseColor", "zinc").dispatch("pointerenter");
+optionFor("baseColor", "zinc").dispatch("pointerleave");
+const afterBasePreviewClear = {
+  baseDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderBaseColor"
+  ),
+  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  selectedBase: selectedValue("baseColor"),
+  persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
+};
+
+optionFor("themeColor", "neutral").dispatch("pointerenter");
+const afterThemePreview = {
+  themeDataset: Object.hasOwn(
+    documentElement.dataset,
+    "mooCatalogThemeBuilderThemeColor"
+  ),
+  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  selectedTheme: selectedValue("themeColor"),
+  persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
+};
+optionFor("themeColor", "neutral").dispatch("pointerleave");
+const afterThemePreviewClear = {
+  themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor || null,
+  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  selectedTheme: selectedValue("themeColor"),
+  persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
+};
+
 optionFor("baseColor", "zinc").click();
 const afterBaseLight = {
   baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
   surface: documentElement.style.getPropertyValue("--moo-surface"),
   foreground: documentElement.style.getPropertyValue("--moo-foreground"),
+  mutedForeground: documentElement.style.getPropertyValue("--moo-muted-foreground"),
   sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
+  sidebarForeground: documentElement.style.getPropertyValue("--moo-sidebar-foreground"),
   bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
+  bodyColor: documentElement.style.getPropertyValue("--bs-body-color"),
   bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
   secondaryBg: documentElement.style.getPropertyValue("--bs-secondary-bg"),
+  secondaryColor: documentElement.style.getPropertyValue("--bs-secondary-color"),
 };
 
 const darkInput = themeInputs.find((input) => input.value === "dark");
@@ -1204,11 +1325,28 @@ const afterThemeDark = {
   theme: documentElement.dataset.bsTheme,
   surface: documentElement.style.getPropertyValue("--moo-surface"),
   foreground: documentElement.style.getPropertyValue("--moo-foreground"),
+  mutedForeground: documentElement.style.getPropertyValue("--moo-muted-foreground"),
   sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
+  sidebarForeground: documentElement.style.getPropertyValue("--moo-sidebar-foreground"),
   bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
+  bodyColor: documentElement.style.getPropertyValue("--bs-body-color"),
   bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
+  secondaryColor: documentElement.style.getPropertyValue("--bs-secondary-color"),
   primary: documentElement.style.getPropertyValue("--bs-primary"),
   darkChecked: darkInput.checked,
+};
+
+optionFor("chartColor", "teal").dispatch("focusin");
+const afterChartPreview = {
+  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  selectedChart: selectedValue("chartColor"),
+  persistedChart: JSON.parse(localStorage.getItem("moo:theme-builder")).chartColor,
+};
+optionFor("chartColor", "teal").dispatch("focusout");
+const afterChartPreviewClear = {
+  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  selectedChart: selectedValue("chartColor"),
+  persistedChart: JSON.parse(localStorage.getItem("moo:theme-builder")).chartColor,
 };
 
 optionFor("chartColor", "teal").click();
@@ -1247,8 +1385,15 @@ const afterReset = {
 dispose();
 console.log(JSON.stringify({
   initial,
+  afterBasePreview,
+  afterBasePreviewHiddenClear,
+  afterBasePreviewClear,
+  afterThemePreview,
+  afterThemePreviewClear,
   afterBaseLight,
   afterThemeDark,
+  afterChartPreview,
+  afterChartPreviewClear,
   afterClick,
   afterReset,
 }));
@@ -1296,30 +1441,58 @@ console.log(JSON.stringify({
         self.assertEqual(case["initial"]["migratedBuilder"]["themeColor"], "blue")
         self.assertEqual(case["initial"]["migratedBuilder"]["chartColor"], "neutral")
         self.assertNotIn("chartPalette", case["initial"]["migratedBuilder"])
+        self.assertEqual(case["afterBasePreview"]["baseDataset"], "zinc")
+        self.assertEqual(case["afterBasePreview"]["surface"], "oklch(1 0 0)")
+        self.assertEqual(case["afterBasePreview"]["selectedBase"], "neutral")
+        self.assertEqual(case["afterBasePreview"]["persistedBase"], "neutral")
+        self.assertFalse(case["afterBasePreviewHiddenClear"]["baseDataset"])
+        self.assertEqual(case["afterBasePreviewHiddenClear"]["surface"], "")
+        self.assertEqual(case["afterBasePreviewHiddenClear"]["selectedBase"], "neutral")
+        self.assertEqual(case["afterBasePreviewHiddenClear"]["persistedBase"], "neutral")
+        self.assertFalse(case["afterBasePreviewClear"]["baseDataset"])
+        self.assertEqual(case["afterBasePreviewClear"]["surface"], "")
+        self.assertEqual(case["afterBasePreviewClear"]["selectedBase"], "neutral")
+        self.assertEqual(case["afterBasePreviewClear"]["persistedBase"], "neutral")
+        self.assertFalse(case["afterThemePreview"]["themeDataset"])
+        self.assertEqual(case["afterThemePreview"]["primary"], "")
+        self.assertEqual(case["afterThemePreview"]["selectedTheme"], "blue")
+        self.assertEqual(case["afterThemePreview"]["persistedTheme"], "blue")
+        self.assertEqual(case["afterThemePreviewClear"]["themeDataset"], "blue")
+        self.assertEqual(case["afterThemePreviewClear"]["primary"], "rgb(6, 111, 209)")
+        self.assertEqual(case["afterThemePreviewClear"]["selectedTheme"], "blue")
+        self.assertEqual(case["afterThemePreviewClear"]["persistedTheme"], "blue")
         self.assertEqual(case["afterBaseLight"]["baseDataset"], "zinc")
         self.assertEqual(case["afterBaseLight"]["surface"], "oklch(1 0 0)")
-        self.assertEqual(
-            case["afterBaseLight"]["foreground"],
-            "oklch(0.141 0.005 285.823)",
-        )
+        self.assertEqual(case["afterBaseLight"]["foreground"], "")
+        self.assertEqual(case["afterBaseLight"]["mutedForeground"], "")
         self.assertEqual(case["afterBaseLight"]["sidebar"], "oklch(0.985 0 0)")
+        self.assertEqual(case["afterBaseLight"]["sidebarForeground"], "")
         self.assertEqual(case["afterBaseLight"]["bodyBg"], "var(--moo-surface)")
+        self.assertEqual(case["afterBaseLight"]["bodyColor"], "")
         self.assertEqual(case["afterBaseLight"]["bodyBgRgb"], "")
         self.assertEqual(case["afterBaseLight"]["secondaryBg"], "var(--moo-muted-surface)")
+        self.assertEqual(case["afterBaseLight"]["secondaryColor"], "")
         self.assertEqual(case["afterThemeDark"]["theme"], "dark")
         self.assertEqual(
             case["afterThemeDark"]["surface"],
             "oklch(0.141 0.005 285.823)",
         )
-        self.assertEqual(
-            case["afterThemeDark"]["foreground"],
-            "oklch(0.985 0 0)",
-        )
+        self.assertEqual(case["afterThemeDark"]["foreground"], "")
+        self.assertEqual(case["afterThemeDark"]["mutedForeground"], "")
         self.assertEqual(case["afterThemeDark"]["sidebar"], "oklch(0.21 0.006 285.885)")
+        self.assertEqual(case["afterThemeDark"]["sidebarForeground"], "")
         self.assertEqual(case["afterThemeDark"]["bodyBg"], "var(--moo-surface)")
+        self.assertEqual(case["afterThemeDark"]["bodyColor"], "")
         self.assertEqual(case["afterThemeDark"]["bodyBgRgb"], "")
+        self.assertEqual(case["afterThemeDark"]["secondaryColor"], "")
         self.assertEqual(case["afterThemeDark"]["primary"], "rgb(6, 111, 209)")
         self.assertTrue(case["afterThemeDark"]["darkChecked"])
+        self.assertEqual(case["afterChartPreview"]["chart5"], "rgb(7, 100, 72)")
+        self.assertEqual(case["afterChartPreview"]["selectedChart"], "neutral")
+        self.assertEqual(case["afterChartPreview"]["persistedChart"], "neutral")
+        self.assertEqual(case["afterChartPreviewClear"]["chart5"], "rgb(39, 39, 42)")
+        self.assertEqual(case["afterChartPreviewClear"]["selectedChart"], "neutral")
+        self.assertEqual(case["afterChartPreviewClear"]["persistedChart"], "neutral")
         self.assertEqual(case["afterClick"]["chart5"], "rgb(7, 100, 72)")
         self.assertEqual(case["afterClick"]["selectedChart"], "teal")
         self.assertEqual(case["afterClick"]["persistedChart"], "teal")

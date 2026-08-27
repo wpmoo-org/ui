@@ -27,6 +27,7 @@ const BUILDER_DATASETS = {
 
 const BUILDER_OPTION_SELECTOR = "[data-moo-catalog-theme-builder-option]";
 const BUILDER_VALUE_SELECTOR = "[data-moo-catalog-theme-builder-value]";
+const BUILDER_PREVIEW_KEYS = new Set(["baseColor", "themeColor", "chartColor"]);
 
 function effectiveTheme(preference, view) {
   if (preference === "system") {
@@ -85,6 +86,7 @@ export function initSettingsPanel(root = document) {
             options: Array.from(
               fieldRoot?.querySelectorAll(BUILDER_OPTION_SELECTOR) || []
             ),
+            root: fieldRoot,
             value: fieldRoot?.querySelector(BUILDER_VALUE_SELECTOR),
             swatch: fieldRoot?.querySelector(
               "[data-moo-catalog-theme-builder-trigger-swatch]"
@@ -96,6 +98,7 @@ export function initSettingsPanel(root = document) {
     const reset = sheet.querySelector("[data-moo-settings-reset]");
     let builderTransitionGeneration = 0;
     let builderPreference = null;
+    let builderPreview = null;
     const listen = (target, type, handler) => {
       target?.addEventListener(type, handler);
       if (target) {
@@ -253,24 +256,30 @@ export function initSettingsPanel(root = document) {
       return result;
     };
 
+    const applyBuilderTokens = (preference) => {
+      Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
+        if (preference[key] === THEME_BUILDER_DEFAULTS[key]) {
+          delete documentElement.dataset[datasetKey];
+        } else {
+          documentElement.dataset[datasetKey] = preference[key];
+        }
+      });
+      applyTokenSet(
+        documentElement.style,
+        PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+        resolveThemeBuilderTokens(preference, {
+          theme: documentElement.dataset.bsTheme,
+          surface: "catalog",
+        })
+      );
+    };
+
     const applyBuilderPreference = (candidate, { persist = true } = {}) => {
       const preference = normalizedBuilderPreference(candidate);
+      builderPreview = null;
       builderPreference = preference;
       withBuilderTransitionSuppressed(() => {
-        Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
-          if (preference[key] === THEME_BUILDER_DEFAULTS[key]) {
-            delete documentElement.dataset[datasetKey];
-          } else {
-            documentElement.dataset[datasetKey] = preference[key];
-          }
-        });
-        applyTokenSet(
-          documentElement.style,
-          PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
-          resolveThemeBuilderTokens(preference, {
-            theme: documentElement.dataset.bsTheme,
-          })
-        );
+        applyBuilderTokens(preference);
         syncBuilderControls(preference);
       });
       if (persist) {
@@ -279,12 +288,57 @@ export function initSettingsPanel(root = document) {
       return preference;
     };
 
+    const previewBuilderPreference = (key, value) => {
+      builderPreview = { key, value };
+      const preference = normalizedBuilderPreference({
+        ...readBuilderPreference(),
+        [key]: value,
+      });
+      withBuilderTransitionSuppressed(() => applyBuilderTokens(preference));
+      return preference;
+    };
+
+    const restoreBuilderPreview = (key, value) => {
+      if (
+        !builderPreview ||
+        builderPreview.key !== key ||
+        builderPreview.value !== value
+      ) {
+        return;
+      }
+      builderPreview = null;
+      applyBuilderPreference(readBuilderPreference(), { persist: false });
+    };
+
     Object.entries(builderControls).forEach(([key, control]) => {
+      if (BUILDER_PREVIEW_KEYS.has(key)) {
+        listen(control.root, "hidden.bs.dropdown", () => {
+          if (builderPreview?.key === key) {
+            builderPreview = null;
+            applyBuilderPreference(readBuilderPreference(), { persist: false });
+          }
+        });
+      }
       control.options.forEach((option) => {
+        const value = option.dataset.mooCatalogThemeBuilderOption;
+        if (BUILDER_PREVIEW_KEYS.has(key)) {
+          listen(option, "pointerenter", () => {
+            previewBuilderPreference(key, value);
+          });
+          listen(option, "focusin", () => {
+            previewBuilderPreference(key, value);
+          });
+          listen(option, "pointerleave", () => {
+            restoreBuilderPreview(key, value);
+          });
+          listen(option, "focusout", () => {
+            restoreBuilderPreview(key, value);
+          });
+        }
         listen(option, "click", () => {
           applyBuilderPreference({
             ...readBuilderPreference(),
-            [key]: option.dataset.mooCatalogThemeBuilderOption,
+            [key]: value,
           });
         });
       });

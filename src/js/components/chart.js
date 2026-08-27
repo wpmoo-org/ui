@@ -219,15 +219,21 @@ function datasetColors(theme, count) {
   });
 }
 
-function datasetThemeState(dataset) {
+function explicitDatasetColorFields(dataset) {
+  return new Set(
+    DATASET_COLOR_FIELDS.filter((field) =>
+      Object.prototype.hasOwnProperty.call(dataset, field)
+    )
+  );
+}
+
+function datasetThemeState(dataset, explicitColorFields = null) {
   if (!dataset[THEMED_DATASET_STATE]) {
-    const explicitColorFields = new Set(
-      DATASET_COLOR_FIELDS.filter((field) =>
-        Object.prototype.hasOwnProperty.call(dataset, field)
-      )
-    );
     Object.defineProperty(dataset, THEMED_DATASET_STATE, {
-      value: { explicitColorFields },
+      value: {
+        explicitColorFields:
+          explicitColorFields || explicitDatasetColorFields(dataset),
+      },
     });
   }
   return dataset[THEMED_DATASET_STATE];
@@ -273,7 +279,7 @@ function datasetMetadata(dataset, metadata) {
 }
 
 // Apply themed colors to a dataset in place, keyed by its position.
-function themeDataset(dataset, index, metadata, theme) {
+function themeDataset(dataset, index, metadata, theme, explicitColorFields = null) {
   const colorKey = DATASET_COLOR_KEYS[index % DATASET_COLOR_KEYS.length];
   const color = theme[colorKey];
   // Keep both themes close to their semantic token so the hue remains
@@ -282,7 +288,7 @@ function themeDataset(dataset, index, metadata, theme) {
   const pointColor = color;
   const effectiveMetadata = datasetMetadata(dataset, metadata);
   const datasetType = dataset.type || effectiveMetadata.chartType;
-  const themeState = datasetThemeState(dataset);
+  const themeState = datasetThemeState(dataset, explicitColorFields);
 
   if (datasetType === "line") {
     setThemedColor(dataset, "borderColor", mutedColor, themeState);
@@ -412,11 +418,11 @@ function themeDataset(dataset, index, metadata, theme) {
 }
 
 // Apply theme colors to an already-built Chart.js instance (re-theming).
-function applyThemeToChart(chart, theme, metadata) {
+function applyThemeToChart(chart, theme, metadata, explicitColorFields = []) {
   if (!chart) return;
 
   chart.data.datasets.forEach((dataset, index) => {
-    themeDataset(dataset, index, metadata, theme);
+    themeDataset(dataset, index, metadata, theme, explicitColorFields[index]);
   });
 
   // Update scale colors.
@@ -776,6 +782,9 @@ export default class MooChart {
     const attributeOptions = readOptionsAttribute(element);
     this._type = metadata.publicType;
     this._metadata = metadata;
+    this._datasetExplicitColorFields = (data.datasets || []).map((dataset) =>
+      explicitDatasetColorFields(dataset)
+    );
 
     const isDark = themeElementIsDark(this._themeElement);
     const colors = readThemeColors(this._themeElement, this._window);
@@ -790,7 +799,13 @@ export default class MooChart {
     this._theme = buildChartTheme(colors, isDark, resolveColor);
 
     const datasets = (data.datasets || []).map((dataset, index) =>
-      themeDataset({ ...dataset }, index, metadata, this._theme)
+      themeDataset(
+        { ...dataset },
+        index,
+        metadata,
+        this._theme,
+        this._datasetExplicitColorFields[index],
+      )
     );
 
     const options = mergeChartOptions(
@@ -808,6 +823,9 @@ export default class MooChart {
         datasets,
       },
       options,
+    });
+    this._chart.data.datasets.forEach((dataset, index) => {
+      datasetThemeState(dataset, this._datasetExplicitColorFields[index]);
     });
 
     this._rethemeFrame = null;
@@ -868,7 +886,12 @@ export default class MooChart {
         this._themeElement,
       );
     this._theme = buildChartTheme(colors, isDark, resolveColor);
-    applyThemeToChart(this._chart, this._theme, this._metadata);
+    applyThemeToChart(
+      this._chart,
+      this._theme,
+      this._metadata,
+      this._datasetExplicitColorFields,
+    );
   }
 
   dispose() {

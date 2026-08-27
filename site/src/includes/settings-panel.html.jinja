@@ -60,7 +60,7 @@
    while the Theme Builder section is intentionally scoped to catalog preview
    tokens rather than a public component data API. #}
 {% macro settings_panel() -%}
-  {% call sheet("catalog-settings", aria_label="Settings") %}
+  {% call sheet("catalog-settings", backdrop=false, scroll=true, aria_label="Settings") %}
     {{ sheet_header("catalog-settings", "Settings") }}
     {% call sheet_body() %}
       {% call form(extra_class="moo-settings-panel__form") %}

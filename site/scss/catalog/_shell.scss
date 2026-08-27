@@ -32,9 +32,9 @@ body:has(.moo-catalog) {
   font-display: optional;
 }
 
-// Styled like a real search input (border + body background) rather than a
-// filled pill, so the Cmd/Ctrl+K hint on the right reads as a shortcut on a
-// field, not decoration on a button.
+// Header search follows the reference command trigger: a quiet filled control with
+// no visible resting border, so it reads as top-bar chrome instead of a form
+// field.
 .moo-catalog__search-trigger {
   height: 2rem;
   width: 10rem;
@@ -44,29 +44,24 @@ body:has(.moo-catalog) {
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
   color: var(--bs-secondary-color);
-  border: var(--bs-border-width) solid var(--bs-border-color);
+  border: var(--bs-border-width) solid transparent;
   border-radius: var(--bs-border-radius);
-  background: var(--bs-body-bg);
+  background: color-mix(in srgb, var(--bs-secondary-bg) 55%, var(--bs-body-bg));
   font-size: 0.875rem;
   font-weight: 400;
   box-shadow: none;
 }
 
-// A full-strength --moo-muted-surface fill exactly matches Kbd's own
-// background (both draw from the same token), so the "⌘K" shortcut hint
-// this trigger renders disappeared into its own hover state. Blending
-// toward the resting background instead of using the token at full
-// strength keeps the hover tint visibly lighter than Kbd's solid fill,
-// without inventing a translucent-overlay token Moo's surface system
-// doesn't otherwise have.
 .moo-catalog__search-trigger:hover {
-  background: color-mix(in srgb, var(--moo-muted-surface) 50%, var(--bs-body-bg));
+  color: var(--bs-secondary-color);
+  border-color: transparent;
+  background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));
 }
 
 .moo-catalog__search-trigger:focus-visible {
-  // Match Bootstrap form-control disabled surface so the focused catalog
-  // search still reads like an input while the border remains visible.
-  background: $input-disabled-bg;
+  color: var(--bs-secondary-color);
+  border-color: transparent;
+  background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));
 }
 
 .moo-catalog__search-trigger-lead {
@@ -165,7 +160,7 @@ body:has(.moo-catalog) {
 
 .moo-catalog {
   --moo-catalog-header-height: 4rem;
-  --moo-catalog-header-bg-opacity: 0.94;
+  --moo-catalog-header-bg-mix: 94%;
   --moo-catalog-header-backdrop-filter: blur(0.75rem);
   --moo-doc-lead-font-size: 1rem;
   --moo-doc-lead-line-height: 1.5;
@@ -201,6 +196,10 @@ body:has(.moo-catalog) {
 .moo-catalog > .sidebar-wrapper {
   height: 100svh;
   overflow: hidden;
+}
+
+:root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {
+  background: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
 }
 
 // Inset variant: the content card is rounded but doesn't clip its children
@@ -240,7 +239,7 @@ body:has(.moo-catalog) {
   z-index: $zindex-fixed;
   top: 0;
   min-height: var(--moo-catalog-header-height);
-  background: rgba(var(--bs-body-bg-rgb), var(--moo-catalog-header-bg-opacity));
+  background: color-mix(in srgb, var(--bs-body-bg) var(--moo-catalog-header-bg-mix), transparent);
   backdrop-filter: var(--moo-catalog-header-backdrop-filter);
 }
 
@@ -334,6 +333,13 @@ body:has(.moo-catalog) {
   --bs-btn-hover-border-color: var(--moo-border);
   --bs-btn-active-border-color: var(--moo-border);
   box-shadow: var(--bs-box-shadow-sm);
+}
+
+[data-bs-theme="dark"] .moo-catalog__sidebar-toggle,
+[data-bs-theme="dark"] .moo-catalog__nav-menu-trigger {
+  --bs-btn-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 85%, transparent);
+  --bs-btn-active-border-color: var(--moo-border);
 }
 
 .moo-catalog__nav-dropdown .dropdown-menu {

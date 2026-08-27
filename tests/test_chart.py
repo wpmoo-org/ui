@@ -536,6 +536,66 @@ report("explicit-colors", {{
         self.assertEqual(case["after"]["borderColor"], "rgb(1, 2, 3)")
         self.assertEqual(case["after"]["pointBackgroundColor"], "rgb(37, 99, 235)")
 
+    def test_unset_dataset_colors_follow_inline_chart_tokens_during_retheme(self) -> None:
+        chart_data = {
+            "labels": ["Mon", "Tue"],
+            "datasets": [{"label": "Visitors", "data": [120, 190]}],
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(json.dumps(chart_data))},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--bs-info", "rgb(13, 110, 253)"],
+  ["--bs-success", "rgb(25, 135, 84)"],
+  ["--bs-warning", "rgb(255, 193, 7)"],
+  ["--bs-danger", "rgb(220, 53, 69)"],
+  ["--moo-chart-1", "rgb(103, 169, 232)"],
+]);
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  return {{ color: element.style.color, getPropertyValue: () => "" }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const observer = observerLog.at(-1);
+const dataset = instance.chart.data.datasets[0];
+instance.chart.data.datasets[0] = {{ ...dataset }};
+const rethemedDataset = instance.chart.data.datasets[0];
+const before = {{
+  backgroundColor: rethemedDataset.backgroundColor,
+  borderColor: rethemedDataset.borderColor,
+  hoverBackgroundColor: rethemedDataset.hoverBackgroundColor,
+}};
+
+tokenColors.set("--moo-chart-1", "rgb(174, 62, 201)");
+observer.callback([{{ attributeName: "style" }}]);
+await new Promise((resolve) => setTimeout(resolve, 20));
+
+report("unset-colors-retheme", {{
+  before,
+  after: {{
+    backgroundColor: rethemedDataset.backgroundColor,
+    borderColor: rethemedDataset.borderColor,
+    hoverBackgroundColor: rethemedDataset.hoverBackgroundColor,
+  }},
+}});
+"""
+        )
+        self.assertEqual(case["before"]["backgroundColor"], "rgb(103, 169, 232)")
+        self.assertEqual(case["before"]["borderColor"], "rgb(103, 169, 232)")
+        self.assertEqual(case["before"]["hoverBackgroundColor"], "rgb(103, 169, 232)")
+        self.assertEqual(case["after"]["backgroundColor"], "rgb(174, 62, 201)")
+        self.assertEqual(case["after"]["borderColor"], "rgb(174, 62, 201)")
+        self.assertEqual(case["after"]["hoverBackgroundColor"], "rgb(174, 62, 201)")
+
     def test_unsupported_chart_type_is_rejected(self) -> None:
         case = self.run_chart_case(
             """
@@ -1549,6 +1609,38 @@ report("stateful-lifecycle-button", {{
             self.assertIn(topic, source)
         self.assertNotIn("window.Chart", source)
         self.assertNotIn("Recharts", source)
+
+    def test_component_page_labels_adjacent_javascript_snippets(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        source = self.read_output("components/chart.html")
+
+        ordered_contracts = (
+            '<h2 id="chart-javascript"',
+            '<h3 class="h6" id="chart-javascript-init">Initialize a chart</h3>',
+            '<p class="mb-0"><span class="text-body-secondary">Use this when a page already renders a .moo-chart root',
+            "Use this when a page already renders a .moo-chart root and needs the wrapper to attach Chart.js.",
+            'id="chart-javascript-import-code"',
+            '<h3 class="h6" id="chart-javascript-callbacks">Customize tooltips</h3>',
+            '<p class="mb-0"><span class="text-body-secondary">Use this for non-serializable Chart.js options',
+            "Use this for non-serializable Chart.js options, such as tooltip callback functions.",
+            'id="chart-tooltip-callback-code"',
+            '<h2 id="chart-theming"',
+        )
+        last_index = -1
+        for contract in ordered_contracts:
+            with self.subTest(contract=contract):
+                index = source.find(contract)
+                self.assertGreater(index, last_index)
+                last_index = index
+
+        template = (ROOT / "site/src/includes/chart-template.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("render_chart_code_section(", template)
+        self.assertIn('variant="subsection-title"', template)
+        self.assertNotIn('<h3 id="chart-javascript-init"', template)
+        self.assertNotIn('<h3 id="chart-javascript-callbacks"', template)
 
     def test_charts_page_contains_the_live_gallery(self) -> None:
         result = self.run_build()

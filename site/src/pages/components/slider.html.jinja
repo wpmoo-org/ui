@@ -168,7 +168,7 @@
       {"id": "slider-root", "selector": "<code>[data-slider]</code>", "summary": "Slider root and lifecycle target. It owns fill state and optional output synchronization."},
       {"id": "slider-track", "selector": "<code>[data-slider-track]</code>", "summary": "Visual track wrapper. It receives pointer clicks and positions the filled range."},
       {"id": "slider-fill", "selector": "<code>[data-slider-range]</code>", "summary": "Decorative fill element. It is not a progressbar and has no ARIA role."},
-      {"id": "slider-input", "selector": "<code>input[type=&quot;range&quot;].form-range[data-slider-input]</code>", "summary": "Native range input. It owns keyboard behavior, form serialization, disabled state, and accessible slider semantics."},
+      {"id": "slider-input", "selector": '<span class="moo-doc-selector-stack"><code>input[type="range"]</code><code>.form-range</code><code>[data-slider-input]</code></span>', "summary": "Native range input. It owns keyboard behavior, form serialization, disabled state, and accessible slider semantics."},
       {"id": "slider-output", "selector": "<code>[data-slider-output]</code>", "summary": "Optional output element synchronized from the current native input value or value range."}
     ] %}
     {% set slider_parts_rows = [] %}
@@ -180,7 +180,8 @@
       slider_parts_rows,
       row_ids=slider_parts | map(attribute="id") | list,
       row_header=true,
-      extra_class="align-middle"
+      extra_class="align-middle moo-doc-anatomy-table",
+      responsive_class="scroll-fade-x no-scrollbar"
     ) }}
   </section>
 

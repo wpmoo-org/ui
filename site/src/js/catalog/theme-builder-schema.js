@@ -103,6 +103,21 @@ const ACTION_COLOR_ALIASES = {
   rose: "pink",
 };
 
+const NEUTRAL_BASE_BORDER_TOKENS = {
+  light: {
+    "--moo-border": "#e4e4e7",
+    "--bs-border-color": "var(--moo-border)",
+    "--bs-card-border-color": "var(--moo-border)",
+    "--moo-sidebar-border": "#e4e4e7",
+  },
+  dark: {
+    "--moo-border": "oklch(1 0 0 / 10%)",
+    "--bs-border-color": "var(--moo-border)",
+    "--bs-card-border-color": "var(--moo-border)",
+    "--moo-sidebar-border": "oklch(1 0 0 / 10%)",
+  },
+};
+
 const BASE_COLOR_SCALES = {
   neutral: { light: null, dark: null },
   stone: {
@@ -359,7 +374,7 @@ const FONT_TOKENS = {
 
 const SIDEBAR_ACCENT_TOKENS = {
   light: {
-    "--moo-sidebar-accent": "color-mix(in srgb, var(--moo-ring) 20%, var(--moo-sidebar))",
+    "--moo-sidebar-accent": "color-mix(in srgb, var(--moo-ring) 10%, var(--moo-sidebar))",
   },
   dark: {
     "--moo-sidebar-accent": "color-mix(in srgb, var(--moo-ring) 32%, var(--moo-sidebar))",
@@ -560,16 +575,28 @@ function catalogBaseColorTokens(scale) {
     return {};
   }
   return {
+    "--moo-surface": scale.surface,
+    "--moo-muted-surface": scale.mutedSurface,
+    "--moo-border": scale.border,
+    "--bs-body-bg": "var(--moo-surface)",
+    "--bs-secondary-bg": "var(--moo-muted-surface)",
+    "--bs-tertiary-bg": scale.accent,
+    "--bs-border-color": "var(--moo-border)",
+    "--bs-card-bg": scale.card,
+    "--bs-card-border-color": "var(--moo-border)",
     "--moo-sidebar": scale.sidebar,
-    "--moo-sidebar-foreground": scale.sidebarForeground,
     "--moo-sidebar-accent": scale.sidebarAccent,
     "--moo-sidebar-border": scale.sidebarBorder,
   };
 }
 
-// Existing catalog callers can ask for sidebar-only base-color tokens; the
-// default public resolver surface remains the full preset token set.
+// Catalog preview keeps Base color scoped to surfaces and borders so body,
+// muted, and sidebar text stay neutral while cards, inputs, and shells move.
+// The default public resolver surface remains the full preset token set.
 function baseColorTokensFor(state, mode, surface) {
+  if (state.baseColor === "neutral") {
+    return { ...NEUTRAL_BASE_BORDER_TOKENS[mode] };
+  }
   const scale = BASE_COLOR_SCALES[state.baseColor]?.[mode] || null;
   return surface === "catalog"
     ? catalogBaseColorTokens(scale)
@@ -605,8 +632,8 @@ function baseColorPayload() {
     THEME_BUILDER_OPTIONS.baseColor.map((baseColor) => [
       baseColor,
       {
-        light: baseColorTokensFor({ baseColor }, "light", "export"),
-        dark: baseColorTokensFor({ baseColor }, "dark", "export"),
+        light: baseColorTokensFor({ baseColor }, "light", "catalog"),
+        dark: baseColorTokensFor({ baseColor }, "dark", "catalog"),
       },
     ])
   );

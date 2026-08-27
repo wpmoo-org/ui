@@ -133,17 +133,32 @@
   line-height: var(--moo-doc-table-line-height);
 }
 
-.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) {
+.moo-doc-anatomy-table,
+.moo-component-examples .datatable-feature-table {
   min-width: 64rem;
 }
 
-.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) :is(th, td):first-child {
-  width: 22rem;
-  min-width: 22rem;
+.moo-doc-anatomy-table :is(th, td):first-child,
+.moo-component-examples .datatable-feature-table :is(th, td):first-child {
+  width: 1%;
+  padding-inline-end: 1.25rem;
+  white-space: nowrap;
 }
 
-.moo-component-examples :is(.datatable-anatomy-table, .datatable-feature-table) :is(th, td):last-child {
+.moo-doc-anatomy-table :is(th, td):last-child,
+.moo-component-examples .datatable-feature-table :is(th, td):last-child {
   min-width: 34rem;
+}
+
+.moo-doc-selector-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.moo-doc-selector-stack code {
+  white-space: nowrap;
 }
 
 .moo-example__surface {

@@ -339,6 +339,21 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(token=token):
                 self.assertIn(token, styles)
 
+        settings_tokens = re.search(
+            r"(?m)^#catalog-settings\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(settings_tokens)
+        settings_tokens_body = settings_tokens.group("body")
+        self.assertIn(
+            "--moo-settings-panel-option-border: var(--bs-border-color);",
+            settings_tokens_body,
+        )
+        self.assertIn(
+            "--moo-settings-panel-option-active-border: var(--bs-border-color);",
+            settings_tokens_body,
+        )
+
         theme_thumb = re.search(
             r"(?m)^\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
             styles,
@@ -348,6 +363,84 @@ class CatalogContractTests(CatalogTestCase):
             "border: var(--bs-border-width) solid var(--moo-settings-panel-option-border);",
             theme_thumb.group("body"),
         )
+        self.assertIn("isolation: isolate;", theme_thumb.group("body"))
+        self.assertIn("background-clip: padding-box;", theme_thumb.group("body"))
+
+        for selector, token in (
+            (
+                r"\.moo-settings-panel__theme-thumb--light",
+                "$moo-catalog-settings-thumb-light",
+            ),
+            (
+                r"\.moo-settings-panel__theme-thumb--dark",
+                "$moo-catalog-settings-thumb-dark",
+            ),
+        ):
+            with self.subTest(selector=selector):
+                thumb_variant = re.search(
+                    rf"(?ms)^{selector}\s*\{{(?P<body>.*?)^\}}",
+                    styles,
+                )
+                self.assertIsNotNone(thumb_variant)
+                variant_body = thumb_variant.group("body")
+                self.assertIn(f"background-color: #{{{token}}};", variant_body)
+                self.assertNotIn("background:", variant_body)
+
+        system_thumb = re.search(
+            r"(?ms)^\.moo-settings-panel__theme-thumb--system\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(system_thumb)
+        system_thumb_body = system_thumb.group("body")
+        self.assertIn(
+            "background-color: #{$moo-catalog-settings-thumb-dark};",
+            system_thumb_body,
+        )
+        self.assertNotIn("background:", system_thumb_body)
+        self.assertNotIn("background-image:", system_thumb_body)
+
+        system_thumb_layer = re.search(
+            r"(?ms)^\.moo-settings-panel__theme-thumb--system::before\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(system_thumb_layer)
+        system_thumb_layer_body = system_thumb_layer.group("body")
+        for value in (
+            'content: "";',
+            "position: absolute;",
+            "inset: 0;",
+            "z-index: 0;",
+            "border-radius: calc(var(--bs-border-radius-sm) - var(--bs-border-width));",
+            "background-image: linear-gradient(",
+            "#{$moo-catalog-settings-thumb-light} 0 50%",
+            "#{$moo-catalog-settings-thumb-dark} 50% 100%",
+            "pointer-events: none;",
+        ):
+            with self.subTest(value=value):
+                self.assertIn(value, system_thumb_layer_body)
+
+        dark_system_thumb_layer = re.search(
+            r'(?ms)^\[data-bs-theme="dark"\] \.moo-settings-panel__theme-thumb--system::before\s*'
+            r"\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(dark_system_thumb_layer)
+        self.assertIn(
+            "#{$moo-catalog-settings-system-thumb-light-dark} 0 50%",
+            dark_system_thumb_layer.group("body"),
+        )
+
+        system_thumb_content = re.search(
+            r"(?ms)^\.moo-settings-panel__theme-thumb--system > "
+            r"\.moo-settings-panel__theme-thumb-bar,\n"
+            r"\.moo-settings-panel__theme-thumb--system > "
+            r"\.moo-settings-panel__theme-thumb-body\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(system_thumb_content)
+        system_thumb_content_body = system_thumb_content.group("body")
+        self.assertIn("position: relative;", system_thumb_content_body)
+        self.assertIn("z-index: 1;", system_thumb_content_body)
 
         checked_thumb = re.search(
             r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:checked\) "
@@ -360,7 +453,24 @@ class CatalogContractTests(CatalogTestCase):
             "border-color: var(--moo-settings-panel-option-active-border);",
             checked_thumb_body,
         )
+        self.assertIn(
+            "box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 80%, transparent);",
+            checked_thumb_body,
+        )
         self.assertNotIn("var(--moo-ring)", checked_thumb_body)
+
+        focused_thumb = re.search(
+            r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:focus-visible\) "
+            r"\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(focused_thumb)
+        focused_thumb_body = focused_thumb.group("body")
+        self.assertIn("border-color: var(--moo-ring);", focused_thumb_body)
+        self.assertIn(
+            "box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);",
+            focused_thumb_body,
+        )
 
         theme_check = re.search(
             r"(?m)^\.moo-settings-panel__theme-check\s*\{(?P<body>[^}]*)\}",
@@ -391,6 +501,18 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(value=value):
                 self.assertIn(value, checked_check_body)
 
+        dark_system_checked_check = re.search(
+            r'(?ms)^\[data-bs-theme="dark"\] '
+            r'\.moo-settings-panel__theme-option:has\(\.btn-check\[value="system"\]:checked\) '
+            r"\.moo-settings-panel__theme-check\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(dark_system_checked_check)
+        self.assertIn(
+            "background-color: #{$moo-catalog-settings-system-active-check-bg-dark};",
+            dark_system_checked_check.group("body"),
+        )
+
         for mutable_token in (
             "var(--bs-border-color)",
             "var(--bs-body-bg)",
@@ -400,6 +522,19 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn(mutable_token, theme_thumb.group("body"))
                 self.assertNotIn(mutable_token, theme_check_body)
                 self.assertNotIn(mutable_token, checked_check_body)
+
+    def test_settings_panel_keeps_page_context_visible_without_backdrop(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("components/button.html")
+        match = re.search(r'<div\b[^>]*\bid="catalog-settings"[^>]*>', page)
+
+        self.assertIsNotNone(match, "catalog settings panel root not found")
+        settings_root = match.group(0)
+        self.assertIn('class="offcanvas offcanvas-end sheet"', settings_root)
+        self.assertIn('data-bs-backdrop="false"', settings_root)
+        self.assertIn('data-bs-scroll="true"', settings_root)
 
     def test_settings_builder_color_dropdowns_render_swatch_indicators(self) -> None:
         result = self.run_build()
@@ -487,6 +622,32 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(
             'data-moo-catalog-theme-builder-swatch="theme-color-blue"',
             styles,
+        )
+        base_neutral_style = re.search(
+            r'\.moo-settings-panel__dropdown-trigger-swatch'
+            r'\[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"\],\n'
+            r'\.moo-settings-panel__dropdown-item'
+            r'\[data-moo-catalog-theme-builder-swatch="base-color-neutral"\] '
+            r'\.dropdown-item-check__indicator \{\n(?P<body>.*?)\n\}',
+            styles,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(
+            base_neutral_style,
+            "base color Neutral swatch should have an explicit quiet default style",
+        )
+        base_neutral_body = base_neutral_style.group("body")
+        self.assertIn(
+            "--moo-settings-panel-swatch-background: var(--bs-body-bg);",
+            base_neutral_body,
+        )
+        self.assertIn(
+            "--moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-border) 68%, transparent);",
+            base_neutral_body,
+        )
+        self.assertIn(
+            "--moo-settings-panel-swatch-check-color: var(--bs-body-color);",
+            base_neutral_body,
         )
 
     def test_visible_component_lists_are_sorted_by_label(self) -> None:
@@ -1233,7 +1394,54 @@ class CatalogContractTests(CatalogTestCase):
 
         catalog_scss = read_catalog_styles()
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
-        self.assertIn("background: $input-disabled-bg;", catalog_scss)
+
+    def test_catalog_search_trigger_uses_quiet_command_chrome(self) -> None:
+        catalog_scss = read_catalog_styles()
+        trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+        hover = catalog_scss.split(".moo-catalog__search-trigger:hover {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+        focus = catalog_scss.split(".moo-catalog__search-trigger:focus-visible {", 1)[
+            1
+        ].split(
+            "}",
+            1,
+        )[0]
+
+        self.assertIn("border: var(--bs-border-width) solid transparent;", trigger)
+        self.assertIn(
+            "background: color-mix(in srgb, var(--bs-secondary-bg) 55%, var(--bs-body-bg));",
+            trigger,
+        )
+        for state in (hover, focus):
+            with self.subTest(state=state):
+                self.assertIn("color: var(--bs-secondary-color);", state)
+                self.assertIn("border-color: transparent;", state)
+                self.assertIn(
+                    "background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));",
+                    state,
+                )
+
+    def test_catalog_header_surface_follows_body_background_token(self) -> None:
+        catalog_scss = read_catalog_styles()
+        shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
+        header_match = re.search(
+            r"(?m)^\.moo-catalog__header\s*\{(?P<body>[^}]*)\}",
+            catalog_scss,
+        )
+        self.assertIsNotNone(header_match)
+        header = header_match.group("body")
+
+        self.assertIn("--moo-catalog-header-bg-mix: 94%;", shell)
+        self.assertIn(
+            "background: color-mix(in srgb, var(--bs-body-bg) var(--moo-catalog-header-bg-mix), transparent);",
+            header,
+        )
+        self.assertNotIn("--bs-body-bg-rgb", header)
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
@@ -1298,6 +1506,18 @@ class CatalogContractTests(CatalogTestCase):
         sidebar_index = page.index('<aside', handoff_index)
         self.assertLess(wrapper_index, handoff_index)
         self.assertLess(handoff_index, sidebar_index)
+
+    def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
+        catalog_scss = read_catalog_styles()
+        sidebar = catalog_scss.split(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {',
+            1,
+        )[1].split("}", 1)[0]
+
+        self.assertIn(
+            "background: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));",
+            sidebar,
+        )
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
         catalog_scss = read_catalog_styles()

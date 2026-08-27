@@ -99,6 +99,14 @@
   ) }}
 {% endmacro %}
 
+{% macro render_chart_code_section(title_id, title, description, snippet_id, snippet) %}
+  <div class="moo-doc-code-caption mt-4 mb-2">
+    {{ typography(title, variant="subsection-title", id=title_id) }}
+    <p class="mb-0">{{ typography(description, variant="muted") }}</p>
+  </div>
+  {{ render_code_snippet(snippet_id, snippet, "js") }}
+{% endmacro %}
+
 {% macro render_chart_intro_preview() %}
   {{ chart(
     "chart-area-default",
@@ -165,7 +173,8 @@
     chart_parts_rows,
     row_ids=chart_parts | map(attribute="id") | list,
     row_header=true,
-    extra_class="align-middle mb-5"
+    extra_class="align-middle mb-5 moo-doc-anatomy-table",
+    responsive_class="scroll-fade-x no-scrollbar"
   ) }}
 
   {% set chart_markup_example %}
@@ -206,7 +215,13 @@
     chart.dispose();
   }
   {% endset %}
-  {{ render_code_snippet("chart-javascript-import", chart_import_example, "js") }}
+  {{ render_chart_code_section(
+    "chart-javascript-init",
+    "Initialize a chart",
+    "Use this when a page already renders a .moo-chart root and needs the wrapper to attach Chart.js.",
+    "chart-javascript-import",
+    chart_import_example
+  ) }}
 
   {% set chart_tooltip_callback_example %}
   import MooChart from "@wpmoo/ui/chart.js";
@@ -225,7 +240,13 @@
     },
   });
   {% endset %}
-  {{ render_code_snippet("chart-tooltip-callback", chart_tooltip_callback_example, "js") }}
+  {{ render_chart_code_section(
+    "chart-javascript-callbacks",
+    "Customize tooltips",
+    "Use this for non-serializable Chart.js options, such as tooltip callback functions.",
+    "chart-tooltip-callback",
+    chart_tooltip_callback_example
+  ) }}
 
   <h2 id="chart-theming" class="h4 mt-5 mb-3">Theming</h2>
   <p class="mb-4">

@@ -665,8 +665,8 @@
 }
 
 #catalog-settings {
-  --moo-settings-panel-option-border: #{$moo-catalog-settings-option-border};
-  --moo-settings-panel-option-active-border: #{$moo-catalog-settings-option-active-border};
+  --moo-settings-panel-option-border: var(--bs-border-color);
+  --moo-settings-panel-option-active-border: var(--bs-border-color);
   --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg};
   --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border};
   --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color};
@@ -676,8 +676,9 @@
 }
 
 [data-bs-theme="dark"] #catalog-settings {
-  --moo-settings-panel-option-border: #{$moo-catalog-settings-option-border-dark};
-  --moo-settings-panel-option-active-border: #{$moo-catalog-settings-option-active-border-dark};
+  --bs-offcanvas-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+  --moo-settings-panel-option-border: var(--bs-border-color);
+  --moo-settings-panel-option-active-border: var(--bs-border-color);
   --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
   --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
   --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
@@ -743,6 +744,7 @@
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
   --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
   --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+  --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
 
   display: inline-flex;
   flex: 0 0 auto;
@@ -765,6 +767,7 @@
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
   --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
   --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+  --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
 
   border-color: var(--moo-settings-panel-swatch-border);
   border-radius: var(--bs-border-radius-pill);
@@ -774,12 +777,15 @@
 .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch].active .dropdown-item-check__indicator {
   border-color: var(--moo-settings-panel-swatch-border);
   background: var(--moo-settings-panel-swatch-background);
-  color: #{$moo-catalog-settings-swatch-check};
+  color: var(--moo-settings-panel-swatch-check-color);
 }
 
 .moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"],
 .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-neutral"] .dropdown-item-check__indicator {
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+  --moo-settings-panel-swatch-background: var(--bs-body-bg);
+  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-border) 68%, transparent);
+  --moo-settings-panel-swatch-check-color: var(--bs-body-color);
 }
 
 .moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-zinc"],
@@ -978,12 +984,12 @@
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-thumb {
   border-color: var(--moo-settings-panel-option-active-border);
-  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 40%, transparent);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 80%, transparent);
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:focus-visible) .moo-settings-panel__theme-thumb {
-  border-color: var(--moo-settings-panel-option-active-border);
-  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 40%, transparent);
+  border-color: var(--moo-ring);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
 }
 
 // A circular selection indicator straddling the image's top corner: the
@@ -1025,6 +1031,10 @@
   display: inline-flex;
 }
 
+[data-bs-theme="dark"] .moo-settings-panel__theme-option:has(.btn-check[value="system"]:checked) .moo-settings-panel__theme-check {
+  background-color: #{$moo-catalog-settings-system-active-check-bg-dark};
+}
+
 // The check straddles the inline-end corner, and the +50% translate is
 // physical -- in RTL the corner is on the left, so the same transform would
 // push it toward the top-center. Flip the X translate to keep it on the
@@ -1034,6 +1044,7 @@
 }
 
 .moo-settings-panel__theme-thumb {
+  isolation: isolate;
   position: relative;
   display: block;
   width: 100%;
@@ -1041,25 +1052,50 @@
   overflow: hidden;
   border: var(--bs-border-width) solid var(--moo-settings-panel-option-border);
   border-radius: var(--bs-border-radius-sm);
+  background-clip: padding-box;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .moo-settings-panel__theme-thumb--light {
-  background: #{$moo-catalog-settings-thumb-light};
+  background-color: #{$moo-catalog-settings-thumb-light};
 }
 
 .moo-settings-panel__theme-thumb--dark {
-  background: #{$moo-catalog-settings-thumb-dark};
+  background-color: #{$moo-catalog-settings-thumb-dark};
 }
 
 // "System" previews a split between the two palettes so it reads as
 // following the OS rather than forcing either side.
 .moo-settings-panel__theme-thumb--system {
-  background: linear-gradient(
+  background-color: #{$moo-catalog-settings-thumb-dark};
+}
+
+.moo-settings-panel__theme-thumb--system::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: calc(var(--bs-border-radius-sm) - var(--bs-border-width));
+  background-image: linear-gradient(
     90deg,
     #{$moo-catalog-settings-thumb-light} 0 50%,
     #{$moo-catalog-settings-thumb-dark} 50% 100%
   );
+  pointer-events: none;
+}
+
+[data-bs-theme="dark"] .moo-settings-panel__theme-thumb--system::before {
+  background-image: linear-gradient(
+    90deg,
+    #{$moo-catalog-settings-system-thumb-light-dark} 0 50%,
+    #{$moo-catalog-settings-thumb-dark} 50% 100%
+  );
+}
+
+.moo-settings-panel__theme-thumb--system > .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--system > .moo-settings-panel__theme-thumb-body {
+  position: relative;
+  z-index: 1;
 }
 
 .moo-settings-panel__theme-thumb-bar {
