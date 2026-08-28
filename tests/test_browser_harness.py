@@ -10,13 +10,17 @@ back to a silently different engine.
 from __future__ import annotations
 
 import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 from unittest import mock
+from urllib.request import urlopen
 
 from tests.helpers.browser_harness import (
     BrowserCase,
     launch_certification_browser,
     new_case_context,
+    serve_directory,
 )
 
 
@@ -108,6 +112,22 @@ class NewCaseContextEngineOptionsTests(unittest.TestCase):
                 _, kwargs = browser.new_context.call_args
                 self.assertEqual(kwargs["is_mobile"], True)
                 self.assertEqual(kwargs["has_touch"], True)
+
+
+class ServeDirectoryTests(unittest.TestCase):
+    def test_serve_directory_handles_requests_without_per_request_threads(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "index.html").write_text("ok", encoding="utf-8")
+
+            with serve_directory(root) as base_url:
+                with mock.patch(
+                    "threading.Thread.start",
+                    side_effect=RuntimeError("request thread blocked"),
+                ):
+                    with urlopen(f"{base_url}/index.html", timeout=5) as response:
+                        self.assertEqual(response.status, 200)
+                        self.assertEqual(response.read(), b"ok")
 
 
 if __name__ == "__main__":

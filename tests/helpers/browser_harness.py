@@ -5,7 +5,7 @@ import unittest
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Iterator
 from urllib.parse import urlsplit
@@ -192,7 +192,7 @@ def run_axe(page: Page) -> list[dict[str, object]]:
 @contextmanager
 def serve_directory(directory: Path) -> Iterator[str]:
     handler = partial(_QuietHandler, directory=str(directory))
-    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    server = HTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
