@@ -118,9 +118,6 @@ export function initSettingsPanel(root = document) {
         "aria-label",
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
       );
-      button?.querySelectorAll("[data-moo-theme-icon]").forEach((icon) => {
-        icon.classList.toggle("d-none", icon.dataset.mooThemeIcon !== theme);
-      });
     };
 
     const readPreference = () => {

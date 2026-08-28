@@ -847,6 +847,7 @@ for (const publicType of Object.keys(dataByType)) {{
   const labels = instance.chart.options.plugins.legend.labels;
   reportByType[publicType] = {{
     markerSize: labels.boxWidth,
+    clip: dataset.clip ?? null,
     pointRadius: dataset.pointRadius ?? null,
     pointHoverRadius: dataset.pointHoverRadius ?? null,
     pointHoverBorderWidth: dataset.pointHoverBorderWidth ?? null,
@@ -858,6 +859,8 @@ report("line-area-hover-points", {{ reportByType }});
         )
         report_by_type = case["reportByType"]
         self.assertEqual(report_by_type["area"]["pointRadius"], 0)
+        self.assertEqual(report_by_type["area"]["clip"], 6)
+        self.assertEqual(report_by_type["line"]["clip"], 6)
         for chart_type in ("area", "line", "radar", "scatter"):
             with self.subTest(chart_type=chart_type):
                 report = report_by_type[chart_type]

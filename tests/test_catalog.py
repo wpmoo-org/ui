@@ -1447,8 +1447,18 @@ class CatalogContractTests(CatalogTestCase):
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
+        self.assertIn('<html lang="en" dir="ltr">', base)
+        self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
         self.assertIn("document.documentElement.dataset.bsTheme = storedTheme", base)
+        self.assertLess(
+            base.index('window.localStorage.getItem("moo:theme")'),
+            base.index('<meta name="description"'),
+        )
+        self.assertLess(
+            base.index('window.localStorage.getItem("moo:theme")'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+        )
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
@@ -1464,17 +1474,28 @@ class CatalogContractTests(CatalogTestCase):
             1,
         )[0]
 
-        for contract in (
-            "display: inline-flex;",
-            "width: 1rem;",
-            "height: 1rem;",
-            "align-items: center;",
-            "justify-content: center;",
-            "line-height: 1;",
-        ):
+        for contract in ("display: none;", "width: 1rem;", "height: 1rem;"):
             with self.subTest(contract=contract):
                 self.assertIn(contract, slot)
+        self.assertIn(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],',
+            catalog_scss,
+        )
+        self.assertIn(
+            ':root[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
+            catalog_scss,
+        )
+        self.assertIn("display: inline-flex;", catalog_scss)
         self.assertIn("display: block;", svg)
+
+        navbar = (ROOT / "site/src/shell/navbar.html.jinja").read_text(
+            encoding="utf-8",
+        )
+        dark_icon = navbar.split('data-moo-theme-icon="dark"', 1)[1].split(
+            "</span>",
+            1,
+        )[0]
+        self.assertNotIn("d-none", dark_icon)
 
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
@@ -1509,15 +1530,30 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
         catalog_scss = read_catalog_styles()
-        sidebar = catalog_scss.split(
+        wrapper = catalog_scss.split(
+            ".moo-catalog > .sidebar-wrapper {",
+            1,
+        )[1].split("}", 1)[0]
+        light_wrapper = catalog_scss.split(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper {',
+            1,
+        )[1].split("}", 1)[0]
+        light_inner = catalog_scss.split(
             ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {',
             1,
         )[1].split("}", 1)[0]
+        light_inset = catalog_scss.split(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {',
+            1,
+        )[1].split("}", 1)[0]
 
+        self.assertIn("--moo-catalog-sidebar-bg: var(--moo-sidebar);", wrapper)
         self.assertIn(
-            "background: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));",
-            sidebar,
+            "--moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));",
+            light_wrapper,
         )
+        self.assertIn("background: var(--moo-catalog-sidebar-bg);", light_inner)
+        self.assertIn("background: var(--moo-catalog-sidebar-bg);", light_inset)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
         catalog_scss = read_catalog_styles()

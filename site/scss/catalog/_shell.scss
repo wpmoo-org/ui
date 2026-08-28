@@ -144,12 +144,17 @@ body:has(.moo-catalog) {
 }
 
 .moo-catalog__theme-toggle [data-moo-theme-icon] {
-  display: inline-flex;
+  display: none;
   width: 1rem;
   height: 1rem;
   align-items: center;
   justify-content: center;
   line-height: 1;
+}
+
+:root:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],
+:root[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"] {
+  display: inline-flex;
 }
 
 .moo-catalog__theme-toggle svg {
@@ -194,12 +199,22 @@ body:has(.moo-catalog) {
 }
 
 .moo-catalog > .sidebar-wrapper {
+  --moo-catalog-sidebar-bg: var(--moo-sidebar);
+
   height: 100svh;
   overflow: hidden;
 }
 
+:root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper {
+  --moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
+}
+
 :root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {
-  background: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
+  background: var(--moo-catalog-sidebar-bg);
+}
+
+:root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {
+  background: var(--moo-catalog-sidebar-bg);
 }
 
 // Inset variant: the content card is rounded but doesn't clip its children

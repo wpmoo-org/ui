@@ -52,6 +52,7 @@ const CHART_LABEL_FONT_SIZE = 12;
 const LINE_STROKE_WIDTH = 1.5;
 const RADAR_STROKE_WIDTH = 1.5;
 const MARKER_BORDER_WIDTH = 1;
+const POINT_CLIP_PADDING = POINT_HOVER_RADIUS + MARKER_BORDER_WIDTH;
 const POINT_MARKER_STYLE = "circle";
 const TOOLTIP_MARKER_SIZE = POINT_MARKER_SIZE * Math.SQRT2;
 const TOOLTIP_MARKER_BOX_PADDING =
@@ -296,6 +297,9 @@ function themeDataset(dataset, index, metadata, theme, explicitColorFields = nul
     dataset.pointBorderWidth = 0;
     if (dataset.borderWidth === undefined) {
       dataset.borderWidth = LINE_STROKE_WIDTH;
+    }
+    if (dataset.clip === undefined) {
+      dataset.clip = POINT_CLIP_PADDING;
     }
     if (dataset.pointRadius === undefined) {
       dataset.pointRadius =

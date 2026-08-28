@@ -22,9 +22,6 @@ export function initTheme(root = document) {
   const themeButton = root.querySelector(
     "[data-moo-theme], .moo-catalog__theme-toggle"
   );
-  const themeIcons = Array.from(
-    themeButton?.querySelectorAll("[data-moo-theme-icon]") || []
-  );
   const listeners = [];
   const listen = (target, type, handler) => {
     target?.addEventListener(type, handler);
@@ -57,9 +54,6 @@ export function initTheme(root = document) {
       "aria-label",
       theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
     );
-    themeIcons.forEach((icon) => {
-      icon.classList.toggle("d-none", icon.dataset.mooThemeIcon !== theme);
-    });
   };
 
   const applyPreference = (preference) => {
