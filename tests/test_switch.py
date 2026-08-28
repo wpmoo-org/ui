@@ -252,8 +252,8 @@ class SwitchTests(CatalogTestCase):
         rule = re.search(
             r"(?P<selectors>\.form-check-input:is\(\[type=\"checkbox\"\], "
             r"\[type=\"radio\"\]\)[^{]+)\{\n"
-            r"\s+border-color: var\(--bs-primary\);\n"
-            r"\s+background-color: var\(--bs-primary\);",
+            r"\s+border-color: var\(--moo-primary\);\n"
+            r"\s+background-color: var\(--moo-primary\);",
             source,
         )
 
