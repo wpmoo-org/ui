@@ -1678,6 +1678,20 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
             f"stderr: {result.stderr}"
         )
 
+    if not minify:
+        _normalize_esbuild_module_comments(output)
+
+
+def _normalize_esbuild_module_comments(output: Path) -> None:
+    source = output.read_text(encoding="utf-8")
+    normalized = re.sub(
+        r"(?m)^// .*(node_modules/.+)$",
+        r"// \1",
+        source,
+    )
+    if normalized != source:
+        output.write_text(normalized, encoding="utf-8")
+
 
 def required_core_outputs() -> tuple[Path, ...]:
     outputs = []

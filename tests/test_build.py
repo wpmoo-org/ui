@@ -251,6 +251,33 @@ class BuildTests(CatalogTestCase):
                 self.assertNotIn("unpkg.com", content)
                 self.assertNotIn("cdnjs.cloudflare.com", content)
 
+    def test_bundled_module_comments_are_path_stable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "chart.js"
+            output.write_text(
+                "\n".join(
+                    (
+                        "var helper = true;",
+                        "// ../../../../projects/ui/html/node_modules/chart.js/dist/chart.js",
+                        "// /tmp/ui-html/node_modules/@kurkle/color/dist/color.esm.js",
+                        "// src/js/components/chart.js",
+                    )
+                ),
+                encoding="utf-8",
+            )
+
+            build._normalize_esbuild_module_comments(output)
+
+            self.assertEqual(
+                output.read_text(encoding="utf-8").splitlines(),
+                [
+                    "var helper = true;",
+                    "// node_modules/chart.js/dist/chart.js",
+                    "// node_modules/@kurkle/color/dist/color.esm.js",
+                    "// src/js/components/chart.js",
+                ],
+            )
+
     def test_slider_has_no_minified_variant(self) -> None:
         """Slider is a plain ESM module; no minified variant should exist."""
         self.require_full_build()
