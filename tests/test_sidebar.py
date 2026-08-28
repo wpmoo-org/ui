@@ -284,6 +284,21 @@ class SidebarTests(CatalogTestCase):
         )
         self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-badge"))
 
+    def test_sidebar_active_item_suppresses_background_across_menu_hover_gaps(self) -> None:
+        styles = read_sidebar_styles()
+        gap_hover_selector = (
+            ".sidebar-content:has(.sidebar-menu:is(:hover, :focus-within)) "
+            '.sidebar-menu-button[aria-current="page"]:not(:hover):not(:focus-visible),'
+        )
+        button_hover_selector = (
+            ".sidebar-content:has(.sidebar-menu-button:not([aria-current=\"page\"]):is(:hover, :focus-visible)) "
+            '.sidebar-menu-button[aria-current="page"]:not(:hover):not(:focus-visible)'
+        )
+
+        self.assertIn(gap_hover_selector, styles)
+        self.assertIn(button_hover_selector, styles)
+        self.assertIn("background: transparent", _css_block(styles, button_hover_selector))
+
     def test_sidebar_menu_sub_item_badge_reserves_trailing_space(self) -> None:
         styles = read_sidebar_styles()
 
