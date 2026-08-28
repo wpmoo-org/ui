@@ -39,6 +39,7 @@ export default class Sidebar {
     instances.set(element, this);
     this._bindEvents();
     this._restoreState();
+    this._scrollActiveItemIntoView();
     this._element.setAttribute("data-sidebar-ready", "");
     this._observeDirection();
   }
@@ -124,6 +125,42 @@ export default class Sidebar {
           ? "collapsed"
           : "expanded";
     this._setState(initial, false, false);
+  }
+
+  _scrollActiveItemIntoView() {
+    const activeRoute = this._element.querySelector(
+      '[data-slot="sidebar-content"] a[data-slot="sidebar-menu-button"][aria-current="page"], ' +
+        '[data-slot="sidebar-content"] a.sidebar-menu-button[aria-current="page"], ' +
+        '[data-slot="sidebar-content"] a.sidebar-menu-button.active'
+    );
+    const active = activeRoute || this._element.querySelector(
+      '[data-slot="sidebar-content"] [data-slot="sidebar-menu-button"][aria-current="page"], ' +
+        '[data-slot="sidebar-content"] .sidebar-menu-button[aria-current="page"], ' +
+        '[data-slot="sidebar-content"] .sidebar-menu-button.active'
+    );
+    const content = active?.closest?.('[data-slot="sidebar-content"]');
+    if (!active || !content || content.clientHeight <= 0) {
+      return;
+    }
+    const maxScrollTop = content.scrollHeight - content.clientHeight;
+    if (maxScrollTop <= 0) {
+      return;
+    }
+
+    const contentRect = content.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    if (contentRect.height <= 0 || activeRect.height <= 0) {
+      return;
+    }
+
+    const targetScrollTop =
+      content.scrollTop +
+      activeRect.top -
+      contentRect.top -
+      (content.clientHeight - activeRect.height) / 2;
+    content.scrollTop = Math.round(
+      Math.min(Math.max(targetScrollTop, 0), maxScrollTop)
+    );
   }
 
   _setState(state, persist = true, emit = true) {

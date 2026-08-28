@@ -36,6 +36,41 @@
           }
         })();
       </script>
+      <script data-moo-sidebar-active-prepaint>
+        (() => {
+          // Match Sidebar's active route positioning before the deferred
+          // catalog module loads, so deep menu pages never flash from the top.
+          const shell = document.currentScript.closest('[data-slot="sidebar-wrapper"]');
+          const active = shell?.querySelector(
+            '[data-slot="sidebar-content"] a[data-slot="sidebar-menu-button"][aria-current="page"], ' +
+              '[data-slot="sidebar-content"] a.sidebar-menu-button[aria-current="page"], ' +
+              '[data-slot="sidebar-content"] a.sidebar-menu-button.active'
+          );
+          const content = active?.closest('[data-slot="sidebar-content"]');
+          if (!active || !content || content.clientHeight <= 0) {
+            return;
+          }
+          const maxScrollTop = content.scrollHeight - content.clientHeight;
+          if (maxScrollTop <= 0) {
+            return;
+          }
+
+          const contentRect = content.getBoundingClientRect();
+          const activeRect = active.getBoundingClientRect();
+          if (contentRect.height <= 0 || activeRect.height <= 0) {
+            return;
+          }
+
+          const targetScrollTop =
+            content.scrollTop +
+            activeRect.top -
+            contentRect.top -
+            (content.clientHeight - activeRect.height) / 2;
+          content.scrollTop = Math.round(
+            Math.min(Math.max(targetScrollTop, 0), maxScrollTop)
+          );
+        })();
+      </script>
       {% call sidebar_inset() %}
         {% include "shell/navbar.html.jinja" %}
         <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">

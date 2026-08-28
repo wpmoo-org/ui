@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 import re
+import subprocess
 from html import unescape
 
 from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_scss_aggregate
+from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
@@ -35,6 +38,20 @@ def _css_block(styles: str, selector: str) -> str:
 
 
 class SidebarTests(CatalogTestCase):
+    def run_sidebar_case(self, script: str) -> dict[str, object]:
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", script],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        lines = [line for line in result.stdout.splitlines() if line.strip()]
+        self.assertTrue(lines, f"No report emitted; stderr: {result.stderr}")
+        return json.loads(lines[-1])
+
     def render_sidebar(self, source: str) -> str:
         template = create_environment().from_string(
             '{% from "components/sidebar.html.jinja" import '
@@ -800,6 +817,89 @@ class SidebarTests(CatalogTestCase):
         self.assertNotIn("SIDEBAR_STORAGE_PREFIX", catalog)
         self.assertNotIn("openSidebarFlyout", catalog)
 
+    def test_sidebar_centers_active_item_inside_scrollable_content_on_init(self) -> None:
+        case = self.run_sidebar_case(
+            """
+import Sidebar from "./src/js/components/sidebar.js";
+
+const listeners = [];
+const makeEventTarget = (extra = {}) => ({
+  addEventListener(type, handler, options) {
+    listeners.push({ target: this, type, handler, options });
+  },
+  removeEventListener() {},
+  ...extra,
+});
+const window = makeEventTarget({
+  bootstrap: {},
+  CustomEvent: class CustomEvent {
+    constructor(type, options = {}) {
+      this.type = type;
+      Object.assign(this, options);
+    }
+  },
+  matchMedia: () => ({ matches: true }),
+  localStorage: { getItem: () => null, setItem() {} },
+});
+const documentElement = { dataset: {}, dir: "ltr" };
+const document = makeEventTarget({
+  defaultView: window,
+  documentElement,
+  querySelector: () => null,
+});
+const sidebar = makeEventTarget({
+  classList: { contains: () => false },
+});
+let contentScrollTop = 0;
+const content = {
+  clientHeight: 400,
+  scrollHeight: 1200,
+  get scrollTop() {
+    return contentScrollTop;
+  },
+  set scrollTop(value) {
+    contentScrollTop = value;
+  },
+  getBoundingClientRect: () => ({ top: 0, bottom: 400, height: 400 }),
+};
+const activeParent = {
+  closest: (selector) => (selector === '[data-slot="sidebar-content"]' ? content : null),
+  getBoundingClientRect: () => ({ top: 236, bottom: 268, height: 32 }),
+};
+const activeRoute = {
+  closest: (selector) => (selector === '[data-slot="sidebar-content"]' ? content : null),
+  getBoundingClientRect: () => ({ top: 840, bottom: 872, height: 32 }),
+};
+const root = makeEventTarget({
+  nodeType: 1,
+  dataset: { sidebarState: "expanded" },
+  ownerDocument: document,
+  dispatchEvent: () => true,
+  matches: (selector) => selector === '[data-slot="sidebar-wrapper"]',
+  querySelector: (selector) => {
+    if (selector === '[data-slot="sidebar"]') {
+      return sidebar;
+    }
+    if (selector.includes(" a[") && selector.includes('[aria-current="page"]')) {
+      return activeRoute;
+    }
+    if (selector.includes(".active")) {
+      return activeParent;
+    }
+    return null;
+  },
+  querySelectorAll: () => [],
+  setAttribute() {},
+  removeAttribute() {},
+});
+
+new Sidebar(root);
+console.log(JSON.stringify({ scrollTop: contentScrollTop }));
+"""
+        )
+
+        self.assertEqual(case["scrollTop"], 656)
+
     def test_catalog_hands_off_persisted_state_before_sidebar_content(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_sidebar_styles()
@@ -835,6 +935,19 @@ class SidebarTests(CatalogTestCase):
             r"@media \(prefers-reduced-motion: reduce\)\s*\{\s*"
             r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
         )
+
+    def test_catalog_prepositions_active_sidebar_item_before_inset_content(self) -> None:
+        layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+
+        self.assertIn("data-moo-sidebar-active-prepaint", layout)
+        sidebar_index = layout.index('{% include "shell/sidebar.html.jinja" %}')
+        active_scroll_index = layout.index("data-moo-sidebar-active-prepaint")
+        inset_index = layout.index("{% call sidebar_inset() %}")
+
+        self.assertLess(sidebar_index, active_scroll_index)
+        self.assertLess(active_scroll_index, inset_index)
+        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', layout)
+        self.assertIn("content.scrollTop = Math.round", layout)
 
     def test_sidebar_shortcut_ignores_editable_targets(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
