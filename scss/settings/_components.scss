@@ -115,6 +115,8 @@ $pagination-disabled-bg: transparent !default;
 $pagination-disabled-border-color: transparent !default;
 // The reference progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;
+$progress-bar-color: var(--moo-primary-foreground) !default;
+$progress-bar-bg: var(--moo-primary) !default;
 // Bootstrap's checkbox/radio default is 1em which follows the parent
 // font-size (14px here). The reference uses a fixed 16px (size-4), so
 // pin the width to 1rem to match 1:1 regardless of context font-size.

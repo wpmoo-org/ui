@@ -37,7 +37,7 @@ $slider-thumb-margin-top: ($progress-height - $slider-thumb-size) * 0.5;
 .slider-range {
   inset-inline-start: var(--moo-slider-start, 0%);
   inset-inline-end: calc(100% - var(--moo-slider-end, 0%));
-  background-color: var(--moo-foreground);
+  background-color: var(--moo-primary);
 }
 
 .slider-input {
@@ -70,7 +70,7 @@ $slider-thumb-margin-top: ($progress-height - $slider-thumb-size) * 0.5;
   background-color: var(--bs-body-bg);
   border-width: var(--bs-border-width);
   border-style: solid;
-  border-color: var(--moo-foreground);
+  border-color: var(--moo-primary);
   box-shadow: var(--bs-box-shadow-sm);
   pointer-events: auto;
 }
@@ -83,19 +83,19 @@ $slider-thumb-margin-top: ($progress-height - $slider-thumb-size) * 0.5;
   background-color: var(--bs-body-bg);
   border-width: var(--bs-border-width);
   border-style: solid;
-  border-color: var(--moo-foreground);
+  border-color: var(--moo-primary);
   box-shadow: var(--bs-box-shadow-sm);
   pointer-events: auto;
 }
 
 .slider-input::-webkit-slider-thumb:active {
   background-color: var(--bs-body-bg);
-  border-color: var(--moo-foreground);
+  border-color: var(--moo-primary);
 }
 
 .slider-input::-moz-range-thumb:active {
   background-color: var(--bs-body-bg);
-  border-color: var(--moo-foreground);
+  border-color: var(--moo-primary);
 }
 
 .slider-input:focus-visible::-webkit-slider-thumb {

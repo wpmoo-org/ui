@@ -5,6 +5,12 @@
   transform: none;
 }
 
+.toggle-group > .btn-check:checked + .btn {
+  --bs-btn-active-color: var(--moo-primary-foreground);
+  --bs-btn-active-bg: var(--moo-primary);
+  --bs-btn-active-border-color: var(--moo-primary);
+}
+
 .toggle-group > .btn-check:focus-visible + .btn,
 .toggle-group > .btn-check:checked:focus-visible + .btn {
   border-color: var(--moo-ring);
