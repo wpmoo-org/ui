@@ -23,8 +23,9 @@
   left: 50%;
   width: 0.32em;
   height: 0.58em;
-  border: solid var(--moo-primary-foreground);
-  border-width: 0 0.14em 0.14em 0;
+  border-color: var(--moo-primary-foreground);
+  border-style: solid;
+  border-width: $moo-form-checkmark-border-width;
   content: "";
   transform: translate(-50%, -55%) rotate(45deg);
   transform-origin: center;
@@ -33,8 +34,8 @@
 .form-check-input[type="checkbox"]:indeterminate:not([role="switch"]) {
   --#{$prefix}form-check-bg-image: linear-gradient(var(--moo-primary-foreground), var(--moo-primary-foreground));
 
-  background-size: 62% 14%;
-  background-position: center;
+  background-size: $moo-form-check-indeterminate-bg-size;
+  background-position: $moo-form-check-indeterminate-bg-position;
 }
 
 .form-check-input[type="radio"]:checked {

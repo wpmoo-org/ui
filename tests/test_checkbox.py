@@ -6,6 +6,8 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/checkbox.html.jinja"
 PAGE = ROOT / "site/src/pages/components/checkbox.html.jinja"
+CHECKBOX_SCSS = ROOT / "scss/components/_checkbox.scss"
+FORMS_SETTINGS = ROOT / "scss/settings/_forms.scss"
 
 
 class CheckboxTests(CatalogTestCase):
@@ -81,6 +83,23 @@ class CheckboxTests(CatalogTestCase):
             output,
         )
         self.assertIn('aria-describedby="c5-description"', output)
+
+    def test_checked_glyph_uses_right_and_bottom_border_geometry(self) -> None:
+        settings = FORMS_SETTINGS.read_text(encoding="utf-8")
+        component = CHECKBOX_SCSS.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "$moo-form-checkmark-border-width: 0 0.14em 0.14em 0 !default;",
+            settings,
+        )
+        self.assertNotIn(
+            "$moo-form-checkmark-border-width: 0 0 0.14em 0.14em !default;",
+            settings,
+        )
+        self.assertIn(
+            "border-width: $moo-form-checkmark-border-width;",
+            component,
+        )
 
     def test_page_uses_render_rtl_example(self) -> None:
         source = PAGE.read_text(encoding="utf-8")

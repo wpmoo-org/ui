@@ -780,7 +780,10 @@ function diffObject(actual, expected) {
 function runInlineScript(fixture) {
   const style = makeStyle();
   const documentElement = {
-    dataset: { bsTheme: "light" },
+    // The real document runs the theme-restoration inline script before the
+    // Theme Builder first-paint script. Seed the same state here so dark
+    // fixtures exercise the catalog-surface token branch.
+    dataset: { bsTheme: fixture.theme },
     dir: "ltr",
     style,
   };

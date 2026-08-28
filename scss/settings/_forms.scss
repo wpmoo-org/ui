@@ -48,6 +48,9 @@ $form-check-input-checked-bg-color: var(--moo-primary) !default;
 $form-check-input-checked-border-color: var(--moo-primary) !default;
 $form-check-input-indeterminate-bg-color: var(--moo-primary) !default;
 $form-check-input-indeterminate-border-color: var(--moo-primary) !default;
+$moo-form-checkmark-border-width: 0 0.14em 0.14em 0 !default;
+$moo-form-check-indeterminate-bg-size: 62% 14% !default;
+$moo-form-check-indeterminate-bg-position: center !default;
 $form-range-thumb-bg: var(--moo-primary) !default;
 $form-range-thumb-active-bg: color-mix(in srgb, var(--moo-primary) 85%, var(--moo-surface)) !default;
 // Moo promotes Bootstrap input groups from separate child borders to one

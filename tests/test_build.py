@@ -3,6 +3,9 @@ from __future__ import annotations
 import shutil
 import subprocess
 import sys
+import tempfile
+from pathlib import Path
+from unittest import mock
 
 import build
 from tests.helpers import PACKAGE_DIST, ROOT, SITE_DIST, CatalogTestCase
@@ -302,12 +305,69 @@ class BuildTests(CatalogTestCase):
             f"Unexpected sourcemap files in dist/js/: {[f.name for f in map_files]}",
         )
 
-    def test_dist_reader_tests_self_provision_from_empty_outputs(self) -> None:
-        for path in (PACKAGE_DIST, SITE_DIST):
-            if path.exists():
-                shutil.rmtree(path)
+    def test_dist_reader_self_provision_does_not_delete_shared_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            shared_package_dist = Path(temp_dir) / "dist"
+            shared_site_dist = Path(temp_dir) / "site-dist"
+            shared_package_dist.mkdir()
+            shared_site_dist.mkdir()
 
-        try:
+            original_rmtree = shutil.rmtree
+
+            def guarded_rmtree(path, *args, **kwargs):
+                if Path(path) in {shared_package_dist, shared_site_dist}:
+                    raise AssertionError(f"deleted shared output path: {path}")
+                return original_rmtree(path, *args, **kwargs)
+
+            def fake_run_build(_self):
+                return subprocess.CompletedProcess(["build.py"], 0, "", "")
+
+            with (
+                mock.patch("tests.test_build.PACKAGE_DIST", shared_package_dist),
+                mock.patch("tests.test_build.SITE_DIST", shared_site_dist),
+                mock.patch("tests.test_build.shutil.rmtree", guarded_rmtree),
+                mock.patch("tests.test_build.subprocess.run") as run,
+                mock.patch.object(BuildTests, "run_build", fake_run_build),
+            ):
+                run.return_value = subprocess.CompletedProcess(
+                    ["python", "-m", "unittest"],
+                    0,
+                    "",
+                    "",
+                )
+                self.test_dist_reader_tests_self_provision_from_empty_outputs()
+
+    def _copy_isolated_build_checkout(self, destination: Path) -> None:
+        root = ROOT.resolve()
+
+        def ignore_build_outputs(directory: str, names: list[str]) -> set[str]:
+            ignored = {
+                ".git",
+                ".pytest_cache",
+                ".venv",
+                "__pycache__",
+                "node_modules",
+            }.intersection(names)
+            if Path(directory).resolve() == root:
+                ignored.update({"dist", "site-dist"}.intersection(names))
+            return ignored
+
+        shutil.copytree(
+            ROOT,
+            destination,
+            ignore=ignore_build_outputs,
+        )
+        node_modules = ROOT / "node_modules"
+        if node_modules.is_dir():
+            (destination / "node_modules").symlink_to(
+                node_modules,
+                target_is_directory=True,
+            )
+
+    def test_dist_reader_tests_self_provision_from_empty_outputs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="moo-ui-build-test-") as temp_dir:
+            isolated_root = Path(temp_dir) / "html"
+            self._copy_isolated_build_checkout(isolated_root)
             result = subprocess.run(
                 [
                     sys.executable,
@@ -318,11 +378,9 @@ class BuildTests(CatalogTestCase):
                     "tests.test_build.BuildTests.test_no_sourcemap_files_are_generated",
                     "tests.test_build.BuildTests.test_slider_has_no_minified_variant",
                 ],
-                cwd=ROOT,
+                cwd=isolated_root,
                 check=False,
                 capture_output=True,
                 text=True,
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        finally:
-            self.run_build()
