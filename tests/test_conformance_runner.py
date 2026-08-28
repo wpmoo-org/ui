@@ -1,10 +1,12 @@
 import json
+import importlib.util
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from jsonschema import Draft202012Validator
 
@@ -17,6 +19,13 @@ RUNNER = ROOT / "conformance" / "runner" / "run.py"
 CONTRACT_PATH = ROOT / "conformance" / "contract" / "conformance-contract.json"
 REPORT_SCHEMA_PATH = ROOT / "conformance" / "contract" / "report.schema.json"
 RUN_TIMEOUT_SECONDS = 600
+
+
+def load_runner_module():
+    spec = importlib.util.spec_from_file_location("conformance_runner", RUNNER)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def invoke_runner(base_url, report_out):
@@ -59,6 +68,54 @@ class ConformanceRunnerCliTests(unittest.TestCase):
             timeout=60,
         )
         self.assertEqual(process.returncode, 2)
+
+    def test_runner_writes_report_when_browser_close_loses_driver(self):
+        runner = load_runner_module()
+        report = {
+            "summary": {
+                "assertionsPassed": 1,
+                "assertionsFailed": 0,
+                "assertionsSkipped": 0,
+                "result": "pass",
+            }
+        }
+
+        class PlaywrightManager:
+            def __enter__(self):
+                return object()
+
+            def __exit__(self, exc_type, exc, traceback):
+                return None
+
+        class Browser:
+            def close(self):
+                raise Exception("Connection closed while reading from the driver")
+
+        with tempfile.TemporaryDirectory(prefix="moo-close-report-") as scratch:
+            report_path = Path(scratch) / "report.json"
+            with mock.patch.object(
+                runner, "sync_playwright", return_value=PlaywrightManager()
+            ), mock.patch.object(
+                runner, "launch_browser", return_value=Browser()
+            ), mock.patch.object(
+                runner, "run_contract", return_value=report
+            ):
+                status = runner.main(
+                    [
+                        "--base-url",
+                        "http://127.0.0.1:1",
+                        "--contract",
+                        str(CONTRACT_PATH),
+                        "--report-out",
+                        str(report_path),
+                    ]
+                )
+
+            self.assertEqual(status, 0)
+            self.assertEqual(
+                json.loads(report_path.read_text(encoding="utf-8")),
+                report,
+            )
 
 
 class ConformanceRunnerTests(unittest.TestCase):
