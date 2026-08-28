@@ -49,15 +49,22 @@ class TableTests(CatalogTestCase):
             'table(["Selector", "Purpose"], [], row_groups=['
             '{"heading_id": "group-root", "title": "Root", '
             '"rows": [["<code>.root</code>", "Root hook"]], '
-            '"row_ids": ["row-root"]}'
+            '"row_ids": ["row-root"]},'
+            '{"heading_id": "group-data", "title": "Data", '
+            '"rows": [["<code>[data-chart]</code>", "Data hook"]], '
+            '"row_ids": ["row-data"]}'
             "], row_header=true)"
         )
 
+        self.assertEqual(output.count("<tbody>"), 2)
         self.assertIn('<tr class="moo-table-section-row" id="group-root">', output)
         self.assertIn('<th scope="rowgroup" colspan="2">Root</th>', output)
         self.assertIn('<tr id="row-root">', output)
         self.assertIn('<th scope="row"><code>.root</code></th>', output)
         self.assertIn("<td>Root hook</td>", output)
+        self.assertIn('<tr class="moo-table-section-row" id="group-data">', output)
+        self.assertIn('<th scope="rowgroup" colspan="2">Data</th>', output)
+        self.assertIn('<tr id="row-data">', output)
 
     def test_table_caption_renders_when_provided(self) -> None:
         self.assertIn(

@@ -9,6 +9,10 @@ from tests.helpers import PACKAGE_DIST, ROOT, SITE_DIST, CatalogTestCase
 
 
 class BuildTests(CatalogTestCase):
+    def require_full_build(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_theme_builder_first_paint_payload_times_out_cleanly(self) -> None:
         original_run = build.subprocess.run
 
@@ -228,6 +232,7 @@ class BuildTests(CatalogTestCase):
         Chart.js bundles its runtime; Datepicker is self-contained Moo UI ESM.
         In both cases the shipped output must never contain a bare third-party
         specifier or a CDN runtime URL."""
+        self.require_full_build()
         for module_name in ("chart.js", "chart.min.js", "datepicker.js", "datepicker.min.js"):
             module_path = PACKAGE_DIST / "js" / module_name
             with self.subTest(module=module_name):
@@ -245,6 +250,7 @@ class BuildTests(CatalogTestCase):
 
     def test_slider_has_no_minified_variant(self) -> None:
         """Slider is a plain ESM module; no minified variant should exist."""
+        self.require_full_build()
         self.assertTrue((PACKAGE_DIST / "js/slider.js").is_file())
         self.assertFalse((PACKAGE_DIST / "js/slider.min.js").exists())
 
@@ -254,6 +260,7 @@ class BuildTests(CatalogTestCase):
         Uses Node.js dynamic import() to compare sorted Object.keys(module)
         for each pair, ensuring runtime-level equivalence rather than
         regex-based text matching."""
+        self.require_full_build()
         for base_name in ("chart", "datepicker"):
             canonical_path = PACKAGE_DIST / f"js/{base_name}.js"
             minified_path = PACKAGE_DIST / f"js/{base_name}.min.js"
@@ -288,8 +295,34 @@ class BuildTests(CatalogTestCase):
 
     def test_no_sourcemap_files_are_generated(self) -> None:
         """The locked esbuild configuration must not produce .map files."""
+        self.require_full_build()
         map_files = list((PACKAGE_DIST / "js").glob("*.map"))
         self.assertEqual(
             map_files, [],
             f"Unexpected sourcemap files in dist/js/: {[f.name for f in map_files]}",
         )
+
+    def test_dist_reader_tests_self_provision_from_empty_outputs(self) -> None:
+        for path in (PACKAGE_DIST, SITE_DIST):
+            if path.exists():
+                shutil.rmtree(path)
+
+        try:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "unittest",
+                    "tests.test_build.BuildTests.test_public_esm_outputs_have_no_bare_imports_or_cdn_urls",
+                    "tests.test_build.BuildTests.test_canonical_and_minified_bundles_have_equivalent_exports",
+                    "tests.test_build.BuildTests.test_no_sourcemap_files_are_generated",
+                    "tests.test_build.BuildTests.test_slider_has_no_minified_variant",
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        finally:
+            self.run_build()

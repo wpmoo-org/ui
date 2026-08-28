@@ -34,9 +34,9 @@
           {% endfor %}
         </tr>
       </thead>
-      <tbody>
-        {% if row_groups %}
-          {% for group in row_groups %}
+      {% if row_groups %}
+        {% for group in row_groups %}
+          <tbody>
             {% set group_id = group.get("heading_id", "") %}
             {% set group_rows = group.get("rows", []) %}
             {% set group_row_ids = group.get("row_ids", []) %}
@@ -56,8 +56,10 @@
                 {% endfor %}
               </tr>
             {% endfor %}
-          {% endfor %}
-        {% else %}
+          </tbody>
+        {% endfor %}
+      {% else %}
+        <tbody>
           {% for row in rows %}
             {% set row_id = row_ids[loop.index0] if loop.index0 < row_ids | length else "" %}
             <tr{% if row_id %} id="{{ row_id }}"{% endif %}>
@@ -71,8 +73,8 @@
               {% endfor %}
             </tr>
           {% endfor %}
-        {% endif %}
-      </tbody>
+        </tbody>
+      {% endif %}
       {% if footer %}
         <tfoot>
           <tr>

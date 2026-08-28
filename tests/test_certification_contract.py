@@ -128,6 +128,37 @@ class CertificationContractTests(unittest.TestCase):
         ):
             with self.subTest(hook=hook):
                 self.assertIn(hook, chart_section)
+        self.assertIn(
+            "Dataset-level `datasets[].type` remains a Chart.js-native pass-through",
+            chart_section,
+        )
+
+    def test_parent_chart_contract_uses_public_chart_root(self) -> None:
+        if not PROJECT_DOCS_ROOT.is_dir():
+            self.skipTest("UI project docs are not mounted in this checkout")
+
+        source = (PROJECT_DOCS_ROOT / "contracts/COMPONENTS.md").read_text(
+            encoding="utf-8"
+        )
+        chart_contract = source.split("## Chart Contract", 1)[1].split(
+            "\n## ",
+            1,
+        )[0]
+        chart_runtime_contract = source.split(
+            "### Chart Runtime Contract",
+            1,
+        )[1].split("###", 1)[0]
+
+        self.assertIn("Public root selector: `.chart`.", chart_contract)
+        self.assertIn(
+            "One `.chart` root owns one Chart.js instance",
+            chart_runtime_contract,
+        )
+        self.assertNotIn("Public root selector: `.moo-chart`.", chart_contract)
+        self.assertNotIn(
+            "One `.moo-chart` root owns one Chart.js instance",
+            chart_runtime_contract,
+        )
 
     def test_evidence_inventory_matches_the_live_component_registry(self) -> None:
         inventory = self._read_json("src/certification/evidence-inventory.json")

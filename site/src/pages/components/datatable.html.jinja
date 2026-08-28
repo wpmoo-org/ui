@@ -115,54 +115,54 @@
         "id": "root",
         "title": "Root",
         "rows": [
-          {"id": "root", "selector": "<code>.datatable</code>", "summary": "Root element for one interactive table instance and its page-size default."}
+          {"id": "datatable-anatomy-root-row", "selector": "<code>.datatable</code>", "summary": "Root element for one interactive table instance and its page-size default."}
         ]
       },
       {
         "id": "toolbar",
         "title": "Toolbar",
         "rows": [
-          {"id": "toolbar", "selector": "<code>[data-datatable-toolbar]</code>", "summary": "Search, facets, reset action, and column visibility controls."},
-          {"id": "search", "selector": "<code>[data-datatable-search]</code>", "summary": "Search input that filters against each row's server-rendered search string."},
-          {"id": "facet", "selector": "<code>[data-datatable-facet]</code>", "summary": "Facet dropdown root that groups multi-select filter options by key."},
-          {"id": "responsive-toggle", "selector": "<code>.datatable-view-toggle</code>", "summary": "Table/Cards toolbar control so the reader, not only the breakpoint, picks the layout."}
+          {"id": "datatable-anatomy-toolbar-row", "selector": "<code>[data-datatable-toolbar]</code>", "summary": "Search, facets, reset action, and column visibility controls."},
+          {"id": "datatable-anatomy-search-row", "selector": "<code>[data-datatable-search]</code>", "summary": "Search input that filters against each row's server-rendered search string."},
+          {"id": "datatable-anatomy-facet-row", "selector": "<code>[data-datatable-facet]</code>", "summary": "Facet dropdown root that groups multi-select filter options by key."},
+          {"id": "datatable-anatomy-responsive-toggle-row", "selector": "<code>.datatable-view-toggle</code>", "summary": "Table/Cards toolbar control so the reader, not only the breakpoint, picks the layout."}
         ]
       },
       {
         "id": "table-surface",
         "title": "Table Surface",
         "rows": [
-          {"id": "frame", "selector": "<code>.datatable-frame</code>", "summary": "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."},
-          {"id": "responsive-scroll", "selector": "<code>.table-responsive.scroll-fade-x</code>", "summary": "Horizontal viewport for full-width tables when every column should remain inspectable."},
-          {"id": "column", "selector": "<code>th[data-datatable-column]</code>", "summary": "Column ownership hook used by sorting, hiding, and cell updates."},
-          {"id": "row", "selector": "<code>tr[data-datatable-row]</code>", "summary": "Server-rendered row with search text, facet values, and stable id."},
-          {"id": "select-row", "selector": "<code>[data-datatable-select-row]</code>", "summary": "Native checkbox for row selection."},
-          {"id": "sort-value", "selector": "<code>td[data-datatable-sort-value]</code>", "summary": "Optional sort value that avoids parsing rich cell content."}
+          {"id": "datatable-anatomy-frame-row", "selector": "<code>.datatable-frame</code>", "summary": "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."},
+          {"id": "datatable-anatomy-responsive-scroll-row", "selector": "<code>.table-responsive.scroll-fade-x</code>", "summary": "Horizontal viewport for full-width tables when every column should remain inspectable."},
+          {"id": "datatable-anatomy-column-row", "selector": "<code>th[data-datatable-column]</code>", "summary": "Column ownership hook used by sorting, hiding, and cell updates."},
+          {"id": "datatable-anatomy-row-row", "selector": "<code>tr[data-datatable-row]</code>", "summary": "Server-rendered row with search text, facet values, and stable id."},
+          {"id": "datatable-anatomy-select-row-row", "selector": "<code>[data-datatable-select-row]</code>", "summary": "Native checkbox for row selection."},
+          {"id": "datatable-anatomy-sort-value-row", "selector": "<code>td[data-datatable-sort-value]</code>", "summary": "Optional sort value that avoids parsing rich cell content."}
         ]
       },
       {
         "id": "cards",
         "title": "Cards",
         "rows": [
-          {"id": "responsive-cards", "selector": "<code>.datatable-card-frame</code>", "summary": "Responsive card list that mirrors table rows with title and action areas in the card header, then secondary fields in the card body."},
-          {"id": "cards", "selector": "<code>[data-datatable-cards]</code>", "summary": "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."}
+          {"id": "datatable-anatomy-responsive-cards-row", "selector": "<code>.datatable-card-frame</code>", "summary": "Responsive card list that mirrors table rows with title and action areas in the card header, then secondary fields in the card body."},
+          {"id": "datatable-anatomy-cards-row", "selector": "<code>[data-datatable-cards]</code>", "summary": "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."}
         ]
       },
       {
         "id": "state-actions",
         "title": "State & Actions",
         "rows": [
-          {"id": "empty", "selector": "<code>[data-datatable-empty]</code>", "summary": "Accessible empty-state surface shown when filtering leaves no matching rows, with a clear-filters action."},
-          {"id": "results-summary", "selector": "<code>[data-datatable-results-summary]</code>", "summary": "Live page-range summary such as <code>Showing 1-10 of 24</code>, or <code>No results</code> when nothing matches."},
-          {"id": "select-all", "selector": "<code>[data-datatable-select-all]</code>", "summary": "Selects or clears the current page rows from the shared toolbar, keeping the control in the same place in table and card views."},
-          {"id": "bulk-actions", "selector": "<code>[data-datatable-bulk-actions]</code>", "summary": "Fixed selection toolbar shown after at least one row is selected."}
+          {"id": "datatable-anatomy-empty-row", "selector": "<code>[data-datatable-empty]</code>", "summary": "Accessible empty-state surface shown when filtering leaves no matching rows, with a clear-filters action."},
+          {"id": "datatable-anatomy-results-summary-row", "selector": "<code>[data-datatable-results-summary]</code>", "summary": "Live page-range summary such as <code>Showing 1-10 of 24</code>, or <code>No results</code> when nothing matches."},
+          {"id": "datatable-anatomy-select-all-row", "selector": "<code>[data-datatable-select-all]</code>", "summary": "Selects or clears the current page rows from the shared toolbar, keeping the control in the same place in table and card views."},
+          {"id": "datatable-anatomy-bulk-actions-row", "selector": "<code>[data-datatable-bulk-actions]</code>", "summary": "Fixed selection toolbar shown after at least one row is selected."}
         ]
       },
       {
         "id": "pagination",
         "title": "Pagination",
         "rows": [
-          {"id": "pagination", "selector": "<code>[data-datatable-pagination]</code>", "summary": "Pagination region that owns page size and page navigation controls."}
+          {"id": "datatable-anatomy-pagination-row", "selector": "<code>[data-datatable-pagination]</code>", "summary": "Pagination region that owns page size and page navigation controls."}
         ]
       }
     ] %}

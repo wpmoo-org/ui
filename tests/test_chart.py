@@ -98,6 +98,31 @@ report("missing-canvas", {{ message }});
             "MooChart requires a child <canvas> element inside the .chart root.",
         )
 
+    def test_dataset_type_stays_chartjs_native_and_public_aliases_are_root_only(self) -> None:
+        source = CHART_JS.read_text(encoding="utf-8")
+        self.assertNotIn("function datasetMetadata", source)
+
+        case = self.run_chart_case(
+            """
+const data = {
+  labels: ["Jan", "Feb"],
+  datasets: [{ type: "line", label: "Revenue", data: [1, 2] }]
+};
+const root = makeRoot({
+  "data-chart": "bar",
+  "data-chart-data": JSON.stringify(data),
+});
+const instance = MooChart.getOrCreateInstance(root);
+report("dataset-native-type", {
+  chartType: instance.chart.config.type,
+  datasetType: instance.chart.data.datasets[0].type,
+});
+instance.dispose();
+"""
+        )
+        self.assertEqual(case["chartType"], "bar")
+        self.assertEqual(case["datasetType"], "line")
+
     def test_instance_lookup_is_idempotent(self) -> None:
         case = self.run_chart_case(
             f"""

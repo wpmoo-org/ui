@@ -272,12 +272,6 @@ function legendLabels(chart) {
   }));
 }
 
-function datasetMetadata(dataset, metadata) {
-  return dataset.type && CHART_TYPES.has(dataset.type)
-    ? CHART_TYPES.get(dataset.type)
-    : metadata;
-}
-
 // Apply themed colors to a dataset in place, keyed by its position.
 function themeDataset(dataset, index, metadata, theme, explicitColorFields = null) {
   const colorKey = DATASET_COLOR_KEYS[index % DATASET_COLOR_KEYS.length];
@@ -286,8 +280,7 @@ function themeDataset(dataset, index, metadata, theme, explicitColorFields = nul
   // consistent when the user toggles the theme.
   const mutedColor = mutedSeriesColor(theme, color);
   const pointColor = color;
-  const effectiveMetadata = datasetMetadata(dataset, metadata);
-  const datasetType = dataset.type || effectiveMetadata.chartType;
+  const datasetType = dataset.type || metadata.chartType;
   const themeState = datasetThemeState(dataset, explicitColorFields);
 
   if (datasetType === "line") {
@@ -306,7 +299,7 @@ function themeDataset(dataset, index, metadata, theme, explicitColorFields = nul
     }
     if (dataset.pointRadius === undefined) {
       dataset.pointRadius =
-        effectiveMetadata.pointRadiusDefault ?? POINT_MARKER_RADIUS;
+        metadata.pointRadiusDefault ?? POINT_MARKER_RADIUS;
     }
     dataset.pointHoverRadius = POINT_HOVER_RADIUS;
     setThemedColor(
@@ -318,7 +311,7 @@ function themeDataset(dataset, index, metadata, theme, explicitColorFields = nul
     setThemedColor(dataset, "pointHoverBorderColor", pointColor, themeState);
     dataset.pointHoverBorderWidth = 0;
     if (dataset.tension === undefined) dataset.tension = 0.3;
-    if (effectiveMetadata.fillByDefault && dataset.fill === undefined) {
+    if (metadata.fillByDefault && dataset.fill === undefined) {
       dataset.fill = true;
     }
   } else if (datasetType === "bar") {

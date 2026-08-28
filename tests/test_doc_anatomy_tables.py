@@ -25,24 +25,52 @@ ANATOMY_GROUPS_BY_PAGE = {
         ("chart-anatomy-render-target", "Render Target", ["chart-canvas"]),
     ),
     "components/datatable.html": (
-        ("datatable-anatomy-root", "Root", ["root"]),
+        ("datatable-anatomy-root", "Root", ["datatable-anatomy-root-row"]),
         (
             "datatable-anatomy-toolbar",
             "Toolbar",
-            ["toolbar", "search", "facet", "responsive-toggle"],
+            [
+                "datatable-anatomy-toolbar-row",
+                "datatable-anatomy-search-row",
+                "datatable-anatomy-facet-row",
+                "datatable-anatomy-responsive-toggle-row",
+            ],
         ),
         (
             "datatable-anatomy-table-surface",
             "Table Surface",
-            ["frame", "responsive-scroll", "column", "row", "select-row", "sort-value"],
+            [
+                "datatable-anatomy-frame-row",
+                "datatable-anatomy-responsive-scroll-row",
+                "datatable-anatomy-column-row",
+                "datatable-anatomy-row-row",
+                "datatable-anatomy-select-row-row",
+                "datatable-anatomy-sort-value-row",
+            ],
         ),
-        ("datatable-anatomy-cards", "Cards", ["responsive-cards", "cards"]),
+        (
+            "datatable-anatomy-cards",
+            "Cards",
+            [
+                "datatable-anatomy-responsive-cards-row",
+                "datatable-anatomy-cards-row",
+            ],
+        ),
         (
             "datatable-anatomy-state-actions",
             "State & Actions",
-            ["empty", "results-summary", "select-all", "bulk-actions"],
+            [
+                "datatable-anatomy-empty-row",
+                "datatable-anatomy-results-summary-row",
+                "datatable-anatomy-select-all-row",
+                "datatable-anatomy-bulk-actions-row",
+            ],
         ),
-        ("datatable-anatomy-pagination", "Pagination", ["pagination"]),
+        (
+            "datatable-anatomy-pagination",
+            "Pagination",
+            ["datatable-anatomy-pagination-row"],
+        ),
     ),
     "components/datepicker.html": (
         (
@@ -92,6 +120,27 @@ ANATOMY_GROUPS_BY_PAGE = {
 }
 
 
+class UniqueIdParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.ids: list[str] = []
+        self.template_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "template":
+            self.template_depth += 1
+            return
+        if self.template_depth:
+            return
+        attributes = dict(attrs)
+        if "id" in attributes and attributes["id"]:
+            self.ids.append(attributes["id"])
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "template" and self.template_depth:
+            self.template_depth -= 1
+
+
 class AnatomyTableParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -123,7 +172,12 @@ class AnatomyTableParser(HTMLParser):
                 "row_ids": [],
                 "row_group_ids": [],
                 "row_group_labels": [],
+                "tbody_count": 0,
             }
+        if tag == "tbody" and self.current_table is not None:
+            tbody_count = self.current_table["tbody_count"]
+            assert isinstance(tbody_count, int)
+            self.current_table["tbody_count"] = tbody_count + 1
         if (
             tag == "tr"
             and self.current_table is not None
@@ -221,12 +275,23 @@ class DocAnatomyTableTests(CatalogTestCase):
                     table["row_group_labels"],
                     [label for _group_id, label, _row_ids in groups],
                 )
+                self.assertEqual(table["tbody_count"], len(groups))
                 expected_row_ids = [
                     row_id
                     for _group_id, _label, row_ids in groups
                     for row_id in row_ids
                 ]
                 self.assertEqual(table["row_ids"], expected_row_ids)
+
+    def test_datatable_component_page_has_unique_live_ids(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        parser = UniqueIdParser()
+        parser.feed(self.read_output("components/datatable.html"))
+        duplicates = sorted({item for item in parser.ids if parser.ids.count(item) > 1})
+
+        self.assertEqual([], duplicates)
 
     def test_selector_purpose_anatomy_tables_size_selector_column_to_content(
         self,
