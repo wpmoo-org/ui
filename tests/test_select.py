@@ -104,3 +104,20 @@ class SelectTests(CatalogTestCase):
         self.assertIn("optgroup", select_scss)
         self.assertIn("color: var(--bs-body-color);", select_scss)
         self.assertIn("background-color: var(--bs-body-bg);", select_scss)
+
+    def test_component_page_identifies_the_native_select_surface(self) -> None:
+        registry = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        select_entry = next(item for item in registry if item["slug"] == "select")
+        source = PAGE.read_text(encoding="utf-8")
+
+        self.assertEqual(select_entry["label"], "Native Select")
+        self.assertIn("{% block title %}Native Select — Moo UI{% endblock %}", source)
+        self.assertIn('"Native Select",', source)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("components/select.html")
+        self.assertRegex(page, r"<h1\b[^>]*>Native Select</h1>")
+        self.assertIn("Choose one value from native option menus", page)

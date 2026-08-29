@@ -17,7 +17,7 @@
 {% block content %}
 {{ render_page_header(
 "Field",
-"Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch controls into accessible,
+"Compose the ready Input, Textarea, Native Select, Checkbox, Radio Group, and Switch controls into accessible,
 label-first fields using Bootstrap-native validation and semantic grouping."
 ) }}
 
@@ -199,7 +199,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endset %}
   {{ render_component_example("field", "Field",
   "select",
-  "Select",
+  "Native Select",
   "Use native select markup with the same visible-label and helper-text flow as other fields.",
   select_field,
   preview_class="moo-example__preview--narrow"

@@ -5,7 +5,7 @@
 {% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
-{% block title %}Select — Moo UI{% endblock %}
+{% block title %}Native Select — Moo UI{% endblock %}
 
 {% set fruit_options = [
   {"value": "", "label": "Choose a workspace", "selected": true, "disabled": true},
@@ -59,7 +59,7 @@
 
 {% block content %}
   {{ render_page_header(
-    "Select",
+    "Native Select",
     "Choose one value from native option menus in admin forms."
   ) }}
 
@@ -67,7 +67,7 @@
     {% set intro %}
       {% call field() %}
         {{ select(
-          label="Select",
+          label="Native Select",
           id="select-intro",
           options=[
             {"value": "", "label": "Choose an option", "selected": true, "disabled": true},
@@ -108,7 +108,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_component_example("select", "Select",
+    {{ render_component_example("select", "Native Select",
       "default",
       "Default",
       "Use one native `<code>form-select</code>` control for direct queue routing.",
@@ -125,7 +125,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_component_example("select", "Select",
+    {{ render_component_example("select", "Native Select",
       "groups",
       "Groups",
       "Group related values with `<code>optgroup</code>` when a long list is still static.",
@@ -143,7 +143,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_component_example("select", "Select",
+    {{ render_component_example("select", "Native Select",
       "disabled",
       "Disabled",
       "Keep the control visible and clear when route changes are temporarily blocked.",
@@ -165,7 +165,7 @@
         {{ field_error("select-invalid-workspace-error", "Choose a valid queue before continuing.") }}
       </div>
     {% endset %}
-    {{ render_component_example("select", "Select",
+    {{ render_component_example("select", "Native Select",
       "invalid",
       "Invalid",
       "Use `<code>is-invalid</code>` with helper/error messaging in the same control set.",
@@ -210,7 +210,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_component_example("select", "Select",
+    {{ render_component_example("select", "Native Select",
       "field-form",
       "Form rhythm",
       "Use field grouping when multiple selects share one form decision.",

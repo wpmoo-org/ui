@@ -49,7 +49,7 @@
   },
   {
     "slug": "select",
-    "label": "Select",
+    "label": "Native Select",
     "status": "ready",
     "description": "Choose one value from native option menus in admin forms."
   },
@@ -213,7 +213,7 @@
     "slug": "field",
     "label": "Field",
     "status": "ready",
-    "description": "Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch controls into accessible, label-first fields using Bootstrap-native validation and semantic grouping."
+    "description": "Compose the ready Input, Textarea, Native Select, Checkbox, Radio Group, and Switch controls into accessible, label-first fields using Bootstrap-native validation and semantic grouping."
   },
   {
     "slug": "form",
