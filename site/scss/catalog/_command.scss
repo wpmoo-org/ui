@@ -60,6 +60,10 @@
   color: var(--bs-body-color);
 }
 
+.moo-catalog__command-list .list-group-flush > .moo-catalog__command-item {
+  border-radius: var(--bs-border-radius);
+}
+
 .moo-catalog__command-item+.moo-catalog__command-item {
   margin-top: 0.125rem;
 }

@@ -1408,6 +1408,22 @@ class CatalogContractTests(CatalogTestCase):
         catalog_scss = read_catalog_styles()
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
 
+    def test_catalog_command_palette_preserves_item_radius_inside_flush_groups(self) -> None:
+        catalog_scss = read_catalog_styles()
+
+        flush_item = re.search(
+            r"\.moo-catalog__command-list \.list-group-flush > "
+            r"\.moo-catalog__command-item\s*\{(?P<body>[^}]*)\}",
+            catalog_scss,
+        )
+        self.assertIsNotNone(flush_item)
+        assert flush_item is not None
+
+        self.assertIn(
+            "border-radius: var(--bs-border-radius);",
+            flush_item.group("body"),
+        )
+
     def test_catalog_search_trigger_uses_quiet_command_chrome(self) -> None:
         catalog_scss = read_catalog_styles()
         trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[1].split(
