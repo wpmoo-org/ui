@@ -50,7 +50,7 @@
 {%- endmacro %}
 
 {% macro sheet_body(extra_class="") -%}
-  <div class="offcanvas-body{% if extra_class %} {{ extra_class }}{% endif %}">
+  <div class="offcanvas-body scroll-fade-y no-scrollbar{% if extra_class %} {{ extra_class }}{% endif %}">
     {{ caller() | trim | safe }}
   </div>
 {%- endmacro %}

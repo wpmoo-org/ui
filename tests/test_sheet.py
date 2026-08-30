@@ -89,8 +89,44 @@ class SheetTests(CatalogTestCase):
     def test_sheet_body_wraps_caller_content(self) -> None:
         output = self.render('{% call sheet_body() %}Body text{% endcall %}')
 
-        self.assertIn('class="offcanvas-body"', output)
+        self.assertIn('class="offcanvas-body scroll-fade-y no-scrollbar"', output)
         self.assertIn("Body text", output)
+
+    def test_sheet_body_preserves_extra_classes_after_scroll_affordance(self) -> None:
+        output = self.render(
+            '{% call sheet_body(extra_class="d-grid gap-3") %}Body text{% endcall %}'
+        )
+
+        self.assertIn(
+            'class="offcanvas-body scroll-fade-y no-scrollbar d-grid gap-3"',
+            output,
+        )
+
+    def test_settings_panel_sheet_body_uses_shared_vertical_scroll_affordance(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        settings = home.split('id="catalog-settings"', 1)[1].split(
+            "</aside>",
+            1,
+        )[0]
+
+        self.assertIn('class="offcanvas-body scroll-fade-y no-scrollbar"', settings)
+
+    def test_certification_fixture_sheet_bodies_use_shared_vertical_scroll_affordance(
+        self,
+    ) -> None:
+        source = (ROOT / "tests/fixtures/certification/sheet.html").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(
+            source.count('class="offcanvas-body scroll-fade-y no-scrollbar"'),
+            2,
+        )
 
     def test_page_composes_sheet_with_button_data_api_trigger(self) -> None:
         self.assertTrue(PAGE.is_file(), "Sheet page is not implemented")
