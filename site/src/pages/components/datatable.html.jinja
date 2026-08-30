@@ -190,7 +190,7 @@
       responsive_class="scroll-fade-x no-scrollbar"
     ) }}
 
-    {% set interactive = namespace(input="<" ~ "input", button="<" ~ "button") %}
+    {% set interactive = namespace(input=("<" ~ "input") | safe, button=("<" ~ "button") | safe) %}
     {% set bootstrap = namespace(
       form_control="form" ~ "-control",
       form_control_sm="form" ~ "-control-sm",
