@@ -105,6 +105,42 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                             "() => window.certificationInvalidOptionsMessage"
                         ),
                     )
+                    invalid_data_message = page.locator(
+                        "#certification-chart-invalid-message"
+                    )
+                    invalid_options_message = page.locator(
+                        "#certification-chart-invalid-options-message"
+                    )
+                    self.assertEqual(invalid_data_message.count(), 1)
+                    self.assertEqual(invalid_options_message.count(), 1)
+                    expect(invalid_data_message).to_be_visible()
+                    expect(invalid_options_message).to_be_visible()
+                    expect(invalid_data_message).to_have_attribute(
+                        "data-chart-diagnostic", "ready"
+                    )
+                    expect(invalid_options_message).to_have_attribute(
+                        "data-chart-diagnostic", "ready"
+                    )
+                    self.assertIn(
+                        "MooChart could not parse data-chart-data as JSON:",
+                        invalid_data_message.inner_text(),
+                    )
+                    self.assertIn(
+                        "MooChart could not parse data-chart-options as JSON:",
+                        invalid_options_message.inner_text(),
+                    )
+                    self.assertEqual(
+                        page.locator("#certification-chart-invalid").get_attribute(
+                            "hidden"
+                        ),
+                        "",
+                    )
+                    self.assertEqual(
+                        page.locator(
+                            "#certification-chart-invalid-options"
+                        ).get_attribute("hidden"),
+                        "",
+                    )
                     self.assertEqual(
                         page.locator(
                             ".chart[data-certification-chart] "
@@ -1071,7 +1107,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
-    def test_toast_fixture_proves_status_dismissal_and_lifecycle(self) -> None:
+    def test_toast_fixture_proves_template_stack_dismissal_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
                 context = new_case_context(self.browser, case)
@@ -1087,83 +1123,98 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 body = page.locator("body")
                 trigger = page.locator("#certification-toast-trigger")
-                toast = page.locator("#certification-toast")
-                close_button = toast.locator(".btn-close")
-                expect(body).to_have_attribute("data-toast-ready", "true")
-                self.assertTrue(
-                    toast.evaluate(
-                        "element => bootstrap.Toast.getInstance(element) "
-                        "=== window.certificationToast"
-                    )
+                template_deck = page.locator("#certification-toast-container")
+                deck = page.locator(
+                    '.toast-container--stacked[data-toast-stack="deck"]'
+                    '[data-moo-catalog-toast-stack="shared"]'
                 )
-                expect(toast).to_have_attribute("role", "status")
-                expect(toast).to_have_attribute("aria-live", "polite")
-                expect(toast).to_have_attribute("aria-atomic", "true")
+                generated = deck.locator('[data-toast-generated="true"]')
+                expect(body).to_have_attribute("data-toast-ready", "true")
+                expect(trigger).to_have_attribute(
+                    "data-toast-target",
+                    "#certification-toast-template",
+                )
+                expect(
+                    template_deck.locator("template[data-toast-template=\"toast\"]")
+                ).to_have_count(1)
+                expect(template_deck.locator('[data-toast-generated="true"]')).to_have_count(0)
+                expect(deck).to_have_count(0)
 
                 trigger.focus()
-                page.evaluate(
+                trigger.click()
+                trigger.click()
+                expect(deck).to_have_count(1)
+                expect(generated).to_have_count(2)
+                expect(deck.locator(".toast.show")).to_have_count(2)
+                expect(trigger).to_be_focused()
+
+                self.assertEqual(
+                    generated.evaluate_all(
+                        "elements => elements.map(element => element.dataset.toastStackIndex)"
+                    ),
+                    ["0", "1"],
+                )
+                generated_ids = generated.evaluate_all(
+                    "elements => elements.map(element => element.id)"
+                )
+                self.assertEqual(len(generated_ids), len(set(generated_ids)))
+
+                newest = deck.locator('.toast.show[data-toast-stack-index="0"]')
+                expect(newest).to_have_attribute("role", "status")
+                expect(newest).to_have_attribute("aria-live", "polite")
+                expect(newest).to_have_attribute("aria-atomic", "true")
+                expect(newest.locator(".btn-close")).to_have_attribute(
+                    "aria-label",
+                    "Close notification",
+                )
+                expect(newest.locator('[data-bs-dismiss="toast"]')).to_have_count(2)
+                page.wait_for_function(
                     """
-                    () => new Promise(resolve => {
-                      const toast = document.querySelector("#certification-toast");
-                      toast.addEventListener("shown.bs.toast", resolve, { once: true });
-                      document.querySelector("#certification-toast-trigger").click();
-                    })
+                    () => {
+                      const newest = document.querySelector(
+                        '.toast-container--stacked[data-toast-stack="deck"][data-moo-catalog-toast-stack="shared"] .toast.show[data-toast-stack-index="0"]'
+                      );
+                      if (!newest || newest.hasAttribute("data-toast-stack-entering")) {
+                        return false;
+                      }
+                      const translateY = new DOMMatrixReadOnly(
+                        getComputedStyle(newest).transform
+                      ).m42;
+                      return Math.abs(translateY) <= 1;
+                    }
                     """
                 )
-                self.assertTrue(toast.evaluate("element => element.classList.contains('show')"))
-                expect(trigger).to_be_focused()
-                toast_box = toast.bounding_box()
-                self.assertIsNotNone(toast_box)
-                self.assertGreaterEqual(toast_box["x"], -1)
+
+                toast_rect = newest.evaluate(
+                    """
+                    element => {
+                        const rect = element.getBoundingClientRect();
+                        return {
+                            left: rect.left,
+                            right: rect.right,
+                            top: rect.top,
+                            bottom: rect.bottom,
+                        };
+                    }
+                    """
+                )
+                self.assertGreaterEqual(toast_rect["left"], -1)
                 self.assertLessEqual(
-                    toast_box["x"] + toast_box["width"],
+                    toast_rect["right"],
                     case.viewport["width"] + 1,
+                )
+                self.assertLessEqual(
+                    toast_rect["bottom"],
+                    case.viewport["height"] + 1,
                 )
                 self.assertEqual(run_axe(page), [])
 
+                close_button = newest.locator(".btn-close")
                 close_button.focus()
-                page.evaluate(
-                    """
-                    () => new Promise(resolve => {
-                      const toast = document.querySelector("#certification-toast");
-                      toast.addEventListener("hidden.bs.toast", resolve, { once: true });
-                      toast.querySelector(".btn-close").click();
-                    })
-                    """
-                )
-                self.assertFalse(toast.evaluate("element => element.classList.contains('show')"))
-                self.assertTrue(
-                    toast.evaluate(
-                        """
-                        element => {
-                          window.certificationToast.dispose();
-                          return bootstrap.Toast.getInstance(element) === null;
-                        }
-                        """
-                    )
-                )
-                self.assertTrue(
-                    toast.evaluate(
-                        """
-                        element => {
-                          window.certificationToast = bootstrap.Toast
-                            .getOrCreateInstance(element, { autohide: false });
-                          return bootstrap.Toast.getInstance(element)
-                            === window.certificationToast;
-                        }
-                        """
-                    )
-                )
-                page.evaluate(
-                    """
-                    () => new Promise(resolve => {
-                      const toast = document.querySelector("#certification-toast");
-                      toast.addEventListener("shown.bs.toast", resolve, { once: true });
-                      document.querySelector("#certification-toast-trigger").click();
-                    })
-                    """
-                )
-                self.assertTrue(toast.evaluate("element => element.classList.contains('show')"))
+                close_button.press("Enter")
+                expect(generated).to_have_count(1)
+                expect(deck.locator(".toast.show")).to_have_count(1)
+                expect(template_deck.locator('[data-toast-generated="true"]')).to_have_count(0)
                 self.assertEqual(page.locator(".modal-backdrop, .offcanvas-backdrop").count(), 0)
                 self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
                 self.assertFalse(
@@ -1194,6 +1245,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 trigger = page.locator("#certification-sheet-trigger")
                 sheet = page.locator("#certification-sheet")
                 close_button = sheet.locator(".btn-close")
+                sheet_body = sheet.locator(".offcanvas-body")
                 name_input = page.locator("#certification-sheet-name")
                 page.evaluate(
                     """
@@ -1208,6 +1260,22 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(sheet).to_have_attribute("role", "dialog")
                 expect(sheet).to_have_attribute("aria-modal", "true")
                 expect(sheet).to_be_focused()
+                expect(sheet_body).to_have_class(
+                    "offcanvas-body scroll-fade-y no-scrollbar"
+                )
+                sheet_body_style = sheet_body.evaluate(
+                    """
+                    element => {
+                      const style = getComputedStyle(element);
+                      return {
+                        maskImage: style.maskImage,
+                        scrollbarWidth: style.scrollbarWidth,
+                      };
+                    }
+                    """
+                )
+                self.assertNotEqual(sheet_body_style["maskImage"], "none")
+                self.assertEqual(sheet_body_style["scrollbarWidth"], "none")
                 self.assertEqual(page.locator(".offcanvas-backdrop.show").count(), 1)
                 self.assertEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
 
@@ -1275,6 +1343,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                 scroll_trigger = page.locator("#certification-scroll-sheet-trigger")
                 scroll_sheet = page.locator("#certification-scroll-sheet")
+                scroll_sheet_body = scroll_sheet.locator(".offcanvas-body")
                 page.evaluate(
                     """
                     () => new Promise(resolve => {
@@ -1286,6 +1355,9 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 self.assertTrue(
                     scroll_sheet.evaluate("element => element.classList.contains('show')")
+                )
+                expect(scroll_sheet_body).to_have_class(
+                    "offcanvas-body scroll-fade-y no-scrollbar"
                 )
                 self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
                 self.assertNotEqual(page.evaluate("getComputedStyle(document.body).overflow"), "hidden")
@@ -3088,8 +3160,38 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
 
                 alert = page.locator("#certification-close-button-alert")
+                alert_body = page.locator("#certification-close-button-alert-body")
                 dismiss = page.locator("#certification-close-button-dismiss")
                 expect(dismiss).to_have_attribute("data-bs-dismiss", "alert")
+                close_spacing = page.evaluate(
+                    """
+                    () => {
+                      const alert = document.querySelector("#certification-close-button-alert");
+                      const body = document.querySelector("#certification-close-button-alert-body");
+                      const button = document.querySelector("#certification-close-button-dismiss");
+                      const alertRect = alert.getBoundingClientRect();
+                      const bodyRect = body.getBoundingClientRect();
+                      const buttonRect = button.getBoundingClientRect();
+                      const direction = getComputedStyle(alert).direction;
+                      return {
+                        inlineGap: direction === "rtl"
+                          ? bodyRect.left - buttonRect.right
+                          : buttonRect.left - bodyRect.right,
+                        outerGap: direction === "rtl"
+                          ? buttonRect.left - alertRect.left
+                          : alertRect.right - buttonRect.right,
+                        verticalCenterDelta: Math.abs(
+                          (buttonRect.top + buttonRect.height / 2)
+                          - (alertRect.top + alertRect.height / 2)
+                        ),
+                      };
+                    }
+                    """
+                )
+                expect(alert_body).to_be_visible()
+                self.assertGreaterEqual(close_spacing["inlineGap"], 6)
+                self.assertGreaterEqual(close_spacing["outerGap"], 8)
+                self.assertLessEqual(close_spacing["verticalCenterDelta"], 1)
                 page.evaluate(
                     """
                     () => new Promise(resolve => {

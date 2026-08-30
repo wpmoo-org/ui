@@ -45,6 +45,8 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path: str) -> str:
         public_path = urlsplit(path).path.lstrip("/")
+        if public_path.startswith("assets/"):
+            return str(ROOT / "site-dist" / public_path)
         if public_path in SITE_PUBLIC_FILES:
             return str(SITE_PUBLIC / public_path)
         return super().translate_path(path)
