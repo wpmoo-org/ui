@@ -3325,6 +3325,27 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(empty).to_have_attribute("aria-valuenow", "0")
                 complete = page.locator("#certification-progress-complete")
                 expect(complete).to_have_attribute("aria-valuenow", "100")
+                bounds = page.locator("[data-certification-progress-bounds]")
+                expect(bounds).to_have_class(re.compile(r"\bd-grid\b"))
+                expect(bounds).to_have_class(re.compile(r"\bgap-2\b"))
+                expect(
+                    page.locator("#certification-progress-empty-label")
+                ).to_have_text("0% empty")
+                expect(page.locator("#certification-progress-complete-label")).to_have_text(
+                    "100% complete"
+                )
+                self.assertEqual(
+                    page.locator("#certification-progress-empty").evaluate(
+                        "element => element.closest('[data-certification-progress-bound]')?.id"
+                    ),
+                    "certification-progress-empty-bound",
+                )
+                self.assertEqual(
+                    page.locator("#certification-progress-complete").evaluate(
+                        "element => element.closest('[data-certification-progress-bound]')?.id"
+                    ),
+                    "certification-progress-complete-bound",
+                )
 
                 self.assertEqual(
                     page.locator("html").get_attribute("dir"),
