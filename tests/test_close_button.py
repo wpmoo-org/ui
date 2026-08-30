@@ -6,6 +6,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/close_button.html.jinja"
 PAGE = ROOT / "site/src/pages/components/close-button.html.jinja"
+FIXTURE = ROOT / "tests/fixtures/certification/close-button.html"
 
 
 class CloseButtonTests(CatalogTestCase):
@@ -46,6 +47,22 @@ class CloseButtonTests(CatalogTestCase):
             '<button type="button" class="btn-close" aria-label="Close"'
             ' data-bs-dismiss="alert"></button>',
             self.render_close_button('close_button(dismiss="alert")'),
+        )
+
+    def test_certification_fixture_uses_alert_body_for_dismissible_context(
+        self,
+    ) -> None:
+        source = FIXTURE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '<div class="alert-body" id="certification-close-button-alert-body">',
+            source,
+        )
+        self.assertIn(
+            '<button\n'
+            '            type="button"\n'
+            '            class="btn-close"',
+            source,
         )
 
     def test_close_button_requires_visible_aria_label(self) -> None:

@@ -67,6 +67,22 @@ class AlertTests(CatalogTestCase):
             output,
         )
 
+    def test_alert_dismissible_reserves_tokenized_close_button_space(self) -> None:
+        source = (ROOT / "scss/components/_alert.scss").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "$moo-alert-dismissible-close-space: "
+            "$btn-close-width + ($btn-close-padding-x * 2) + 0.5rem !default;",
+            source,
+        )
+        self.assertIn(
+            "padding-inline-end: calc(var(--bs-alert-padding-x) + "
+            "#{$moo-alert-dismissible-close-space});",
+            source,
+        )
+        self.assertIn("inset-block-start: 50%;", source)
+        self.assertIn("transform: translateY(-50%);", source)
+
     def test_alert_action_renders_trusted_markup(self) -> None:
         output = self.render_alert('alert("Heads up!", action="<button>Go</button>")')
         self.assertIn('<div class="alert-action"><button>Go</button></div>', output)
