@@ -1,30 +1,30 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "blocks/datatable_release_review.html.jinja" import render_release_review_table %}
 {% from "components/table.html.jinja" import table %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "pages/examples/dashboard/tasks.html.jinja" import tasks_body with context %}
 
 {% block title %}Data Table - Moo UI{% endblock %}
 
 {% block content %}
   {{ render_page_header(
     "Data Table",
-    "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
+    "Build live server-rendered work queues with search, facets, sorting, selection, bulk actions, column visibility, pagination, and responsive card views."
   ) }}
 
   <div class="moo-component-examples">
-    {% set release_review_table %}
-      {{ render_release_review_table(id="datatable-release-reviews", responsive_mode="toggle") }}
+    {% set tasks_table %}
+      {{ tasks_body() }}
     {% endset %}
     {{ render_block_example(
-      "release-review-queue",
-      "Release review queue",
-      "A shadcn-admin-inspired work queue with original release-review content. Search, filter, sort, select, and switch between list and card views from one surface.",
-      release_review_table,
+      "tasks-work-queue",
+      "Tasks work queue",
+      "A live Tasks dashboard reused from Examples. Create, edit, copy, and delete tasks while Data Table keeps search, filters, sorting, selection, pagination, and card view in sync.",
+      tasks_table,
       preview_class="moo-example__preview--shell",
-      frame_src=site_href("blocks/previews/datatable-release-review.html", root_path),
+      frame_src=site_href("blocks/previews/datatable-tasks.html", root_path),
       frame_width=1280,
       frame_height=900,
       frame_viewports=[

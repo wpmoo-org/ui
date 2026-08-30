@@ -534,7 +534,7 @@ class DataTableTests(CatalogTestCase):
         self.assertIn("box-shadow: 0 0 0 #{$moo-form-focus-ring-width}", source)
         self.assertIn("z-index: 3;", source)
 
-    def test_documentation_page_contains_the_rendered_release_review_showcase(
+    def test_documentation_page_reuses_the_live_tasks_showcase(
         self,
     ) -> None:
         self.assertTrue(DOCUMENTATION_PAGE.is_file())
@@ -542,8 +542,16 @@ class DataTableTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         page = self.read_output("components/datatable.html")
-        self.assertIn('data-example="release-review-queue"', page)
+        self.assertIn('data-example="tasks-work-queue"', page)
+        self.assertIn('src="../../blocks/previews/datatable-tasks/"', page)
         self.assertIn('https://ui.wpmoo.org/components/datatable/', page)
+        preview = self.read_output("blocks/previews/datatable-tasks.html")
+        self.assertIn('class="container-fluid py-4"', preview)
+        self.assertIn('class="mx-auto datatable-preview-shell"', preview)
+        self.assertIn('data-moo-example-tasks', preview)
+        self.assertIn('id="examples-tasks-datatable"', preview)
+        self.assertIn('data-moo-task-delete', preview)
+        self.assertIn('id="tasks-delete-dialog"', preview)
         self.assertIn("datatable--responsive-toggle", page)
         self.assertIn("datatable-view-toggle", page)
         self.assertIn('data-datatable-empty', page)

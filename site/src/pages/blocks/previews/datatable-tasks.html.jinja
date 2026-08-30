@@ -1,0 +1,12 @@
+{% extends "layouts/block-preview.html.jinja" %}
+{% from "pages/examples/dashboard/tasks.html.jinja" import tasks_body with context %}
+
+{% block title %}Data Table Tasks Preview - Moo UI{% endblock %}
+
+{% block content %}
+  <section class="container-fluid py-4">
+    <div class="mx-auto datatable-preview-shell">
+      {{ tasks_body() }}
+    </div>
+  </section>
+{% endblock %}

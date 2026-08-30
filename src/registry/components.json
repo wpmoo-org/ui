@@ -255,7 +255,7 @@
     "slug": "datatable",
     "label": "Data Table",
     "status": "ready",
-    "description": "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
+    "description": "Build live server-rendered work queues with search, facets, sorting, selection, bulk actions, column visibility, pagination, and responsive card views."
   },
   {
     "slug": "chart",
