@@ -153,13 +153,30 @@
         </section>
       </div>
 
-      <section aria-labelledby="chart-invalid-title">
+      <section aria-labelledby="chart-invalid-title" data-certification-chart-diagnostics>
         <h2 id="chart-invalid-title" class="h5 mb-3">Invalid JSON diagnostics</h2>
+        <div class="d-grid gap-2" role="status" aria-live="polite" aria-atomic="true">
+          <div
+            class="alert alert-secondary mb-0"
+            id="certification-chart-invalid-message"
+            data-chart-diagnostic-message
+          >
+            Waiting for malformed data diagnostic.
+          </div>
+          <div
+            class="alert alert-secondary mb-0"
+            id="certification-chart-invalid-options-message"
+            data-chart-diagnostic-message
+          >
+            Waiting for malformed options diagnostic.
+          </div>
+        </div>
         <div
           class="chart"
           id="certification-chart-invalid"
           data-chart="line"
           data-chart-data='{not valid json'
+          hidden
         >
           <canvas role="img" aria-label="Chart with intentionally malformed data used to verify the diagnostic"></canvas>
         </div>
@@ -169,6 +186,7 @@
           data-chart="line"
           data-chart-data='{"labels":["Jan"],"datasets":[{"label":"Revenue","data":[1]}]}'
           data-chart-options='{not valid json'
+          hidden
         >
           <canvas role="img" aria-label="Chart with intentionally malformed options used to verify the diagnostic"></canvas>
         </div>
@@ -200,12 +218,21 @@
       );
       window.certificationLineChart = window.certificationCharts.line;
       window.certificationBarChart = window.certificationCharts.bar;
+      const setDiagnostic = (id, message) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        element.textContent = message;
+        element.dataset.chartDiagnostic = "ready";
+      };
+
       try {
         MooChart.getOrCreateInstance(
           document.querySelector("#certification-chart-invalid")
         );
       } catch (error) {
         window.certificationInvalidMessage = error.message;
+        setDiagnostic("certification-chart-invalid-message", error.message);
       }
       try {
         MooChart.getOrCreateInstance(
@@ -213,6 +240,7 @@
         );
       } catch (error) {
         window.certificationInvalidOptionsMessage = error.message;
+        setDiagnostic("certification-chart-invalid-options-message", error.message);
       }
       document.body.dataset.chartReady = "true";
     </script>

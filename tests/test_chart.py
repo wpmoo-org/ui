@@ -1571,6 +1571,17 @@ report("stateful-lifecycle-button", {{
         self.assertIn('data-chart="line"', source)
         self.assertIn('data-chart="bar"', source)
         self.assertIn("data-chart-data", source)
+        self.assertIn('data-certification-chart-diagnostics', source)
+        self.assertIn('id="certification-chart-invalid-message"', source)
+        self.assertIn('id="certification-chart-invalid-options-message"', source)
+        self.assertIn('data-chart-diagnostic-message', source)
+        self.assertIn('id="certification-chart-invalid"', source)
+        self.assertIn('id="certification-chart-invalid-options"', source)
+        self.assertIn('setDiagnostic("certification-chart-invalid-message"', source)
+        self.assertIn(
+            'setDiagnostic("certification-chart-invalid-options-message"',
+            source,
+        )
         self.assertIn("role=\"img\"", source)
         self.assertIn("aria-label", source)
         self.assertNotIn("cdn.jsdelivr.net", source)
