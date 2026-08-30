@@ -337,6 +337,22 @@ console.log(JSON.stringify({
         self.assertIn("writing-mode: vertical-lr;", styles)
         self.assertIn(".slider[data-slider-pointer-focus]", styles)
         self.assertIn(".slider[data-slider-dragging]", styles)
+        self.assertIn(
+            ".slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus::-webkit-slider-thumb",
+            styles,
+        )
+        self.assertIn(
+            ".slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus::-moz-range-thumb",
+            styles,
+        )
+        self.assertNotIn(
+            ".slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus-visible::-webkit-slider-thumb",
+            styles,
+        )
+        self.assertNotIn(
+            ".slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus-visible::-moz-range-thumb",
+            styles,
+        )
         self.assertNotIn("border-color: var(--moo-ring);", styles)
         self.assertNotIn("#0", styles)
 

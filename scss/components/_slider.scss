@@ -114,11 +114,13 @@ $slider-thumb-margin-top: ($progress-height - $slider-thumb-size) * 0.5;
   box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
 }
 
-.slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus-visible::-webkit-slider-thumb {
+// Safari can keep pointer-driven range focus out of :focus-visible, while
+// Bootstrap's native .form-range:focus thumb halo still applies.
+.slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus::-webkit-slider-thumb {
   box-shadow: var(--bs-box-shadow-sm);
 }
 
-.slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus-visible::-moz-range-thumb {
+.slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus::-moz-range-thumb {
   box-shadow: var(--bs-box-shadow-sm);
 }
 
