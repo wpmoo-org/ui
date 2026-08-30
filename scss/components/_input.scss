@@ -2,6 +2,12 @@
   min-height: $input-height;
 }
 
+// Text inputs should visually match the outer box of an Input Group, whose
+// border is promoted to the parent wrapper.
+.form-control:not(textarea):not([type="file"]):not(.form-control-sm, .form-control-lg) {
+  min-height: calc(#{$input-height} + #{$input-border-width} * 2);
+}
+
 .form-control:disabled,
 .form-select:disabled {
   opacity: var(--moo-disabled-control-opacity);
