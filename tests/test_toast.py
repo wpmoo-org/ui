@@ -10,6 +10,7 @@ BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 TOAST_SCSS = ROOT / "scss/components/_toast.scss"
 COMPONENT_SETTINGS = ROOT / "scss/settings/_components.scss"
 PRIMARY_VARIABLES = ROOT / "scss/_primary_variables.scss"
+FIXTURE = ROOT / "tests/fixtures/certification/toast.html"
 
 
 class ToastTests(CatalogTestCase):
@@ -436,3 +437,23 @@ class ToastTests(CatalogTestCase):
         self.assertIn('container.removeAttribute("data-toast-stack-hovering")', script)
         self.assertIn("1000 - index", script)
         self.assertIn("(1 - scale) * stackHeight", script)
+
+    def test_certification_fixture_matches_current_stacked_deck_contract(self) -> None:
+        source = FIXTURE.read_text(encoding="utf-8")
+
+        self.assertIn('data-toast-target="#certification-toast-template"', source)
+        self.assertIn(
+            'class="toast-container toast-container--stacked position-fixed bottom-0 end-0 p-3"',
+            source,
+        )
+        self.assertIn('data-toast-stack="deck"', source)
+        self.assertIn('<template id="certification-toast-template" data-toast-template="toast">', source)
+        self.assertIn('id="certification-toast-template"', source)
+        self.assertIn(
+            'import { initBootstrapPreview } from "/assets/js/catalog/bootstrap-preview.js";',
+            source,
+        )
+        self.assertIn("initBootstrapPreview(document)", source)
+        self.assertNotIn("bootstrapPreviewPaths", source)
+        self.assertNotIn("position-fixed top-0 end-0", source)
+        self.assertNotIn("window.certificationToast", source)

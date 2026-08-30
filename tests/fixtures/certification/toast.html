@@ -16,42 +16,60 @@
   <body>
     <main aria-labelledby="fixture-title">
       <h1 id="fixture-title">Toast certification fixture</h1>
-      <button class="btn btn-primary" id="certification-toast-trigger" type="button">
+      <button
+        class="btn btn-primary"
+        id="certification-toast-trigger"
+        type="button"
+        data-toast-target="#certification-toast-template"
+      >
         Show notification
       </button>
     </main>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-      <div
-        class="toast"
-        id="certification-toast"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <div class="toast-header">
-          <strong class="me-auto">Deployment complete</strong>
-          <small>just now</small>
-          <button
-            class="btn-close"
-            type="button"
-            data-bs-dismiss="toast"
-            aria-label="Close notification"
-          ></button>
+    <div
+      class="toast-container toast-container--stacked position-fixed bottom-0 end-0 p-3"
+      id="certification-toast-container"
+      data-toast-stack="deck"
+    >
+      <template id="certification-toast-template" data-toast-template="toast">
+        <div
+          class="toast"
+          id="certification-toast-template"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          data-bs-autohide="false"
+        >
+          <div class="toast-header">
+            <strong class="me-auto">Deployment complete</strong>
+            <small>just now</small>
+            <button
+              class="btn-close"
+              type="button"
+              data-bs-dismiss="toast"
+              aria-label="Close notification"
+            ></button>
+          </div>
+          <div class="toast-body">
+            The production bundle is ready for review.
+            <button
+              class="btn btn-link btn-sm p-0 ms-2"
+              type="button"
+              data-bs-dismiss="toast"
+              aria-label="Undo"
+            >
+              Undo
+            </button>
+          </div>
         </div>
-        <div class="toast-body">The production bundle is ready for review.</div>
-      </div>
+      </template>
     </div>
 
     <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      const toastElement = document.querySelector("#certification-toast");
-      window.certificationToast = new bootstrap.Toast(toastElement, {
-        autohide: false,
-      });
-      document.querySelector("#certification-toast-trigger").addEventListener("click", () => {
-        window.certificationToast.show();
-      });
+    <script type="module">
+      import { initBootstrapPreview } from "/assets/js/catalog/bootstrap-preview.js";
+
+      initBootstrapPreview(document);
       document.body.dataset.toastReady = "true";
     </script>
   </body>
