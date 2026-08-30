@@ -59,7 +59,7 @@
 }
 
 // Without runtime indexes, the container remains readable Bootstrap flow.
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) {
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] {
   bottom: 1rem !important;
   inset-inline-end: 1rem !important;
   height: 0;
@@ -68,7 +68,7 @@
   width: unquote("min(24rem, calc(100vw - 2rem))");
 }
 
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-index] {
   inset-block-end: 0;
   inset-inline-end: 0;
   max-width: none;
@@ -85,25 +85,25 @@
     height $moo-toast-stack-height-transition-duration ease;
 }
 
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-entering] {
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-entering] {
   transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
     scale(var(--moo-toast-stack-scale, 1));
 }
 
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-limited] {
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-limited] {
   opacity: 0;
   pointer-events: none;
 }
 
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-index],
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-index],
-.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:hover > .toast[data-toast-stack-index],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:focus-within > .toast[data-toast-stack-index],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active][data-toast-stack-hovering] > .toast[data-toast-stack-index] {
   transform: translateY(var(--moo-toast-stack-expanded-y, 0px)) scale(1);
 }
 
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):hover > .toast[data-toast-stack-entering],
-.toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]):focus-within > .toast[data-toast-stack-entering],
-.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-entering] {
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:hover > .toast[data-toast-stack-entering],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:focus-within > .toast[data-toast-stack-entering],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active][data-toast-stack-hovering] > .toast[data-toast-stack-entering] {
   transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
     scale(var(--moo-toast-stack-scale, 1));
 }
@@ -113,7 +113,7 @@
     animation: none;
   }
 
-  .toast-container--stacked[data-toast-stack="deck"]:has(> .toast[data-toast-stack-index]) > .toast[data-toast-stack-index] {
+  .toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-index] {
     transition: none;
   }
 }

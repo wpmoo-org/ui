@@ -9,6 +9,7 @@ export function initBootstrapPreview(root = document) {
   const listeners = [];
   const modalPlaceholders = new Map();
   const bootstrapInstances = new Set();
+  const sharedToastStacks = new Map();
   const listen = (target, type, handler, options) => {
     target?.addEventListener(type, handler, options);
     if (target) {
@@ -127,6 +128,25 @@ export function initBootstrapPreview(root = document) {
       );
       return isStackContainer(container) ? container : null;
     };
+    const getSharedToastStack = (sourceContainer) => {
+      if (!isStackContainer(sourceContainer) || !root.body) {
+        return sourceContainer;
+      }
+
+      const key = sourceContainer.dataset.toastStack || "deck";
+      const existing = sharedToastStacks.get(key);
+      if (existing?.isConnected) {
+        return existing;
+      }
+
+      const container = root.createElement("div");
+      container.className = sourceContainer.className;
+      container.dataset.toastStack = key;
+      container.dataset.mooCatalogToastStack = "shared";
+      root.body.appendChild(container);
+      sharedToastStacks.set(key, container);
+      return container;
+    };
     const readNumber = (value, fallback) => {
       const number = Number.parseFloat(value);
       return Number.isFinite(number) ? number : fallback;
@@ -170,8 +190,10 @@ export function initBootstrapPreview(root = document) {
       ));
       if (toasts.length === 0) {
         container.removeAttribute("data-toast-stack-hovering");
+        container.removeAttribute("data-toast-stack-active");
         return;
       }
+      container.setAttribute("data-toast-stack-active", "");
       const spacingSource = toasts[0] || container;
       const computed = view.getComputedStyle(spacingSource);
       const gap = readPixels(
@@ -322,16 +344,17 @@ export function initBootstrapPreview(root = document) {
         target.dataset.toastTemplate === "toast"
       ) {
         const template = target;
-        const container = template.parentElement;
+        const sourceContainer = template.parentElement;
         const fragment = template.content.cloneNode(true);
         const toast = fragment.firstElementChild;
         if (
-          !(container instanceof view.HTMLElement) ||
+          !(sourceContainer instanceof view.HTMLElement) ||
           !(toast instanceof view.HTMLElement) ||
           !toast.classList.contains("toast")
         ) {
           return;
         }
+        const container = getSharedToastStack(sourceContainer);
         const sequence = ++toastSequence;
         toast.id = `${template.id}-${sequence}`;
         toast.setAttribute("data-toast-generated", "true");
@@ -425,6 +448,8 @@ export function initBootstrapPreview(root = document) {
         placeholder.remove();
       }
     });
+    sharedToastStacks.forEach((container) => container.remove());
+    sharedToastStacks.clear();
     bootstrapInstances.forEach((instance) => instance.dispose());
     states.delete(root);
   };

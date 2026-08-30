@@ -814,16 +814,24 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertTrue(response.ok)
 
         trigger = page.locator('[data-toast-target="#toast-demo-template"]')
-        deck = page.locator(
+        template_deck = page.locator(
             '.toast-container--stacked[data-toast-stack="deck"]'
             ':has(> template#toast-demo-template)'
         )
+        deck = page.locator(
+            '.toast-container--stacked[data-toast-stack="deck"]'
+            '[data-moo-catalog-toast-stack="shared"]'
+        )
         generated = deck.locator('[data-toast-generated="true"]')
         self.assertEqual(trigger.count(), 1)
-        expect(deck.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
-        expect(deck.locator('[data-toast-stack-index]')).to_have_count(0)
+        expect(
+            template_deck.locator("template[data-toast-template=\"toast\"]")
+        ).to_have_count(1)
+        expect(template_deck.locator('[data-toast-stack-index]')).to_have_count(0)
+        expect(deck).to_have_count(0)
 
         trigger.click()
+        expect(deck).to_have_count(1)
         expect(generated).to_have_count(1)
         entry_translate_y = generated.first.evaluate(
             "element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42"
@@ -881,7 +889,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             """
             () => {
               const newest = document.querySelector(
-                '.toast-container--stacked[data-toast-stack="deck"] .toast.show[data-toast-stack-index="0"]'
+                '.toast-container--stacked[data-toast-stack="deck"][data-moo-catalog-toast-stack="shared"] .toast.show[data-toast-stack-index="0"]'
               );
               if (!newest || newest.hasAttribute("data-toast-stack-entering")) {
                 return false;
@@ -953,7 +961,9 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             ),
             ["0", "1", "2"],
         )
-        expect(deck.locator("template[data-toast-template=\"toast\"]")).to_have_count(1)
+        expect(
+            template_deck.locator("template[data-toast-template=\"toast\"]")
+        ).to_have_count(1)
 
         page.mouse.move(0, 0)
         expect(generated).to_have_count(0, timeout=7000)
@@ -988,29 +998,41 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 "#toast-variant-warning-template",
             ],
         }
+        deck = page.locator(
+            '.toast-container--stacked[data-toast-stack="deck"]'
+            '[data-moo-catalog-toast-stack="shared"]'
+        )
+        generated = deck.locator('[data-toast-generated="true"]')
+        expected_count = 0
         for section_id, target_selectors in examples.items():
             with self.subTest(section=section_id):
                 section = page.locator(f'section[aria-labelledby="{section_id}"]')
-                deck = section.locator(
+                template_deck = section.locator(
                     '.toast-container--stacked[data-toast-stack="deck"]'
                 )
-                generated = deck.locator('[data-toast-generated="true"]')
-                expect(deck).to_have_count(1)
-                expect(generated).to_have_count(0)
+                expect(template_deck).to_have_count(1)
+                expect(
+                    template_deck.locator('[data-toast-generated="true"]')
+                ).to_have_count(0)
 
                 for target_selector in target_selectors:
                     section.locator(f'[data-toast-target="{target_selector}"]').click()
 
-                expect(generated).to_have_count(len(target_selectors))
+                expected_count += len(target_selectors)
+                expect(deck).to_have_count(1)
+                expect(generated).to_have_count(expected_count)
                 expect(deck.locator(".toast.show")).to_have_count(
-                    len(target_selectors)
+                    expected_count
                 )
+                expect(
+                    template_deck.locator('[data-toast-generated="true"]')
+                ).to_have_count(0)
                 self.assertEqual(
                     generated.evaluate_all(
                         "elements => elements.map(element => "
                         "element.dataset.toastStackIndex)"
                     ),
-                    [str(index) for index in range(len(target_selectors))],
+                    [str(index) for index in range(expected_count)],
                 )
 
         self.assertEqual(run_axe(page), [])
