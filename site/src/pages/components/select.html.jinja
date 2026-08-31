@@ -101,12 +101,12 @@
     ] %}
 
     {% set default %}
-      <div class="d-flex justify-content-center">
+      {% call field(extra_class="w-100") %}
         {{ select(
           aria_label="Route queue",
           options=simple_options
         ) }}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("select", "Native Select",
       "default",
@@ -117,13 +117,13 @@
     ) }}
 
     {% set groups %}
-      <div class="d-flex justify-content-center">
+      {% call field(extra_class="w-100") %}
         {{ select(
           aria_label="Grouped queue options",
           options=grouped_options,
           selected="release"
         ) }}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("select", "Native Select",
       "groups",
@@ -134,14 +134,14 @@
     ) }}
 
     {% set disabled %}
-      <div class="d-flex justify-content-center">
+      {% call field(extra_class="w-100") %}
         {{ select(
           aria_label="Disabled queue select",
           options=quick_options,
           disabled=true,
           selected="critical"
         ) }}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("select", "Native Select",
       "disabled",
@@ -152,7 +152,7 @@
     ) }}
 
     {% set invalid %}
-      <div class="vstack gap-2 w-auto">
+      {% call field(extra_class="w-100", invalid=true) %}
         {{ select(
           label="Route queue",
           id="select-invalid-workspace",
@@ -163,7 +163,7 @@
         ) }}
         {{ field_description("select-invalid-workspace-help", "Select a queue so the action has a valid target.") }}
         {{ field_error("select-invalid-workspace-error", "Choose a valid queue before continuing.") }}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("select", "Native Select",
       "invalid",
@@ -220,58 +220,64 @@
 
     {% set rtl_arabic %}
       <div dir="rtl" class="d-grid gap-2 w-auto">
-        {{ select(
-          label="مساحة العمل",
-          id="select-rtl-arabic",
-          options=[
-            {"value": "", "label": "اختر مساحة العمل", "selected": true, "disabled": true},
-            {"value": "ops", "label": "العمليات"},
-            {"value": "design", "label": "التصميم"},
-            {"value": "analytics", "label": "التحليلات"}
-          ],
-          dir="rtl",
-          required=true,
-          describedby="select-rtl-arabic-help"
-        ) }}
-        {{ field_description("select-rtl-arabic-help", "حدد مساحة العمل لتوجيه الإشعارات.") }}
+        {% call field() %}
+          {{ select(
+            label="مساحة العمل",
+            id="select-rtl-arabic",
+            options=[
+              {"value": "", "label": "اختر مساحة العمل", "selected": true, "disabled": true},
+              {"value": "ops", "label": "العمليات"},
+              {"value": "design", "label": "التصميم"},
+              {"value": "analytics", "label": "التحليلات"}
+            ],
+            dir="rtl",
+            required=true,
+            describedby="select-rtl-arabic-help"
+          ) }}
+          {{ field_description("select-rtl-arabic-help", "حدد مساحة العمل لتوجيه الإشعارات.") }}
+        {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
       <div dir="rtl" class="d-grid gap-2 w-auto">
-        {{ select(
-          label="סביבת עבודה",
-          id="select-rtl-hebrew",
-          options=[
-            {"value": "", "label": "בחר סביבת עבודה", "selected": true, "disabled": true},
-            {"value": "ops", "label": "תפעול"},
-            {"value": "design", "label": "עיצוב"},
-            {"value": "analytics", "label": "אנליטיקה"}
-          ],
-          dir="rtl",
-          required=true,
-          describedby="select-rtl-hebrew-help"
-        ) }}
-        {{ field_description("select-rtl-hebrew-help", "בחר סביבת עבודה כדי להפנות התרעות.") }}
+        {% call field() %}
+          {{ select(
+            label="סביבת עבודה",
+            id="select-rtl-hebrew",
+            options=[
+              {"value": "", "label": "בחר סביבת עבודה", "selected": true, "disabled": true},
+              {"value": "ops", "label": "תפעול"},
+              {"value": "design", "label": "עיצוב"},
+              {"value": "analytics", "label": "אנליטיקה"}
+            ],
+            dir="rtl",
+            required=true,
+            describedby="select-rtl-hebrew-help"
+          ) }}
+          {{ field_description("select-rtl-hebrew-help", "בחר סביבת עבודה כדי להפנות התרעות.") }}
+        {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_english %}
       <div dir="ltr" class="d-grid gap-2 w-auto">
-        {{ select(
-          label="Workspace",
-          id="select-rtl-english",
-          options=[
-            {"value": "", "label": "Choose workspace", "selected": true, "disabled": true},
-            {"value": "ops", "label": "Operations"},
-            {"value": "design", "label": "Design"},
-            {"value": "analytics", "label": "Analytics"}
-          ],
-          dir="ltr",
-          required=true,
-          describedby="select-rtl-english-help"
-        ) }}
-        {{ field_description("select-rtl-english-help", "Choose a workspace to route alerts.") }}
+        {% call field() %}
+          {{ select(
+            label="Workspace",
+            id="select-rtl-english",
+            options=[
+              {"value": "", "label": "Choose workspace", "selected": true, "disabled": true},
+              {"value": "ops", "label": "Operations"},
+              {"value": "design", "label": "Design"},
+              {"value": "analytics", "label": "Analytics"}
+            ],
+            dir="ltr",
+            required=true,
+            describedby="select-rtl-english-help"
+          ) }}
+          {{ field_description("select-rtl-english-help", "Choose a workspace to route alerts.") }}
+        {% endcall %}
       </div>
     {% endset %}
     {{ render_rtl_example(

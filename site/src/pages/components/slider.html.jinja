@@ -1,4 +1,5 @@
 {% extends "layouts/catalog.html.jinja" %}
+{% from "components/field.html.jinja" import field %}
 {% from "components/slider.html.jinja" import slider, slider_range %}
 {% from "components/table.html.jinja" import table %}
 {% from "components/typography.html.jinja" import typography %}
@@ -17,12 +18,14 @@
 
   <div class="moo-component-examples">
     {% set intro %}
-      {{ slider(
-        id="slider-intro",
-        label="Volume",
-        name="volume",
-        value=60
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ slider(
+          id="slider-intro",
+          label="Volume",
+          name="volume",
+          value=60
+        ) }}
+      {% endcall %}
     {% endset %}
     {% set usage %}
       <p>Use <code>[data-slider]</code> around one or two native <code>input[type="range"].form-range</code> controls. Bootstrap keeps the real form control semantics, keyboard behavior, disabled state, and Sass customization path; Moo UI adds the shadcn-like filled track, value output synchronization, and public lifecycle wrapper.</p>
@@ -35,12 +38,14 @@
     ) }}
 
     {% set default %}
-      {{ slider(
-        id="slider-default",
-        label="Volume",
-        name="volume",
-        value=50
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ slider(
+          id="slider-default",
+          label="Volume",
+          name="volume",
+          value=50
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("slider", "Slider",
       "slider-default",
@@ -51,15 +56,17 @@
     ) }}
 
     {% set range_example %}
-      {{ slider_range(
-        id="slider-range",
-        label="Price range",
-        start_name="price_min",
-        end_name="price_max",
-        start_value=25,
-        end_value=75,
-        step=5
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ slider_range(
+          id="slider-range",
+          label="Price range",
+          start_name="price_min",
+          end_name="price_max",
+          start_value=25,
+          end_value=75,
+          step=5
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("slider", "Slider",
       "slider-range",
@@ -70,15 +77,17 @@
     ) }}
 
     {% set steps %}
-      {{ slider(
-        id="slider-steps",
-        label="Rating",
-        name="rating",
-        min=0,
-        max=5,
-        step=0.5,
-        value=3.5
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ slider(
+          id="slider-steps",
+          label="Rating",
+          name="rating",
+          min=0,
+          max=5,
+          step=0.5,
+          value=3.5
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("slider", "Slider",
       "slider-steps",
@@ -89,13 +98,15 @@
     ) }}
 
     {% set vertical %}
-      {{ slider(
-        id="slider-vertical",
-        label="Gain",
-        name="gain",
-        value=70,
-        orientation="vertical"
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ slider(
+          id="slider-vertical",
+          label="Gain",
+          name="gain",
+          value=70,
+          orientation="vertical"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("slider", "Slider",
       "slider-vertical",
@@ -106,13 +117,15 @@
     ) }}
 
     {% set disabled %}
-      {{ slider(
-        id="slider-disabled",
-        label="Disabled volume",
-        name="disabled_volume",
-        value=40,
-        disabled=true
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ slider(
+          id="slider-disabled",
+          label="Disabled volume",
+          name="disabled_volume",
+          value=40,
+          disabled=true
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("slider", "Slider",
       "slider-disabled",
@@ -124,32 +137,38 @@
 
     {% set rtl_arabic %}
       <div dir="rtl" class="w-100">
-        {{ slider(
-          id="slider-rtl-arabic",
-          aria_label="مستوى الصوت",
-          name="rtl_arabic_volume",
-          value=60
-        ) }}
+        {% call field(extra_class="w-100") %}
+          {{ slider(
+            id="slider-rtl-arabic",
+            aria_label="مستوى الصوت",
+            name="rtl_arabic_volume",
+            value=60
+          ) }}
+        {% endcall %}
       </div>
     {% endset %}
     {% set rtl_hebrew %}
       <div dir="rtl" class="w-100">
-        {{ slider(
-          id="slider-rtl-hebrew",
-          aria_label="עוצמת קול",
-          name="rtl_hebrew_volume",
-          value=60
-        ) }}
+        {% call field(extra_class="w-100") %}
+          {{ slider(
+            id="slider-rtl-hebrew",
+            aria_label="עוצמת קול",
+            name="rtl_hebrew_volume",
+            value=60
+          ) }}
+        {% endcall %}
       </div>
     {% endset %}
     {% set rtl_english %}
       <div dir="ltr" class="w-100">
-        {{ slider(
-          id="slider-rtl-english",
-          aria_label="Volume",
-          name="rtl_english_volume",
-          value=60
-        ) }}
+        {% call field(extra_class="w-100") %}
+          {{ slider(
+            id="slider-rtl-english",
+            aria_label="Volume",
+            name="rtl_english_volume",
+            value=60
+          ) }}
+        {% endcall %}
       </div>
     {% endset %}
     {{ render_rtl_example(

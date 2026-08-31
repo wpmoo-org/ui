@@ -3,10 +3,158 @@ from __future__ import annotations
 import json
 import re
 from html import unescape
+from html.parser import HTMLParser
 
 import build
 from build import dedent_html, format_html
 from tests.helpers import ROOT, CatalogTestCase
+
+
+_CODEPEN_FIELD_WRAPPER_CLASSES = {"field", "field-group", "field-fieldset"}
+_CODEPEN_FORM_SURFACE_CLASSES = {
+    "combobox",
+    "form-check",
+    "form-control",
+    "form-select",
+    "form-range",
+    "input-group",
+    "moo-datepicker",
+    "radio-group",
+    "slider",
+}
+_CODEPEN_FORM_SURFACE_ROOT_CLASSES = {
+    "combobox",
+    "form-check",
+    "input-group",
+    "moo-datepicker",
+    "radio-group",
+    "slider",
+}
+_CODEPEN_FORM_SURFACE_EXEMPT_CLASSES = {"datatable", "dropdown-menu", "menubar"}
+_CODEPEN_FORM_SURFACE_EXEMPT_TAGS = {
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "tr",
+}
+_HTML_VOID_TAGS = {
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+}
+
+
+class _CodePenPayloadParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self._current: list[str] = []
+        self._in_payload = False
+        self.payloads: list[dict[str, object]] = []
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        if tag != "textarea":
+            return
+
+        attributes = dict(attrs)
+        if attributes.get("name") == "data":
+            self._current = []
+            self._in_payload = True
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "textarea" and self._in_payload:
+            self.payloads.append(json.loads(unescape("".join(self._current))))
+            self._current = []
+            self._in_payload = False
+
+    def handle_data(self, data: str) -> None:
+        if self._in_payload:
+            self._current.append(data)
+
+
+class _CodePenFormSurfaceParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self._stack: list[dict[str, object]] = []
+        self.violations: list[str] = []
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        attributes = dict(attrs)
+        classes = set((attributes.get("class") or "").split())
+        node: dict[str, object] = {
+            "classes": classes,
+            "id": attributes.get("id") or "",
+            "tag": tag,
+        }
+
+        if (
+            self._is_form_surface(tag, attributes, classes)
+            and not self._is_inside_field_wrapper()
+            and not self._is_inside_exempt_surface()
+            and not self._is_inside_unwrapped_form_surface_root()
+        ):
+            self.violations.append(self._format_node(tag, attributes, classes))
+
+        if tag not in _HTML_VOID_TAGS:
+            self._stack.append(node)
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index]["tag"] == tag:
+                del self._stack[index:]
+                break
+
+    def _is_form_surface(
+        self, tag: str, attributes: dict[str, str | None], classes: set[str]
+    ) -> bool:
+        if tag == "input" and attributes.get("type") == "hidden":
+            return False
+
+        return bool(classes & _CODEPEN_FORM_SURFACE_CLASSES)
+
+    def _is_inside_field_wrapper(self) -> bool:
+        return any(
+            node["classes"] & _CODEPEN_FIELD_WRAPPER_CLASSES
+            for node in self._stack
+        )
+
+    def _is_inside_exempt_surface(self) -> bool:
+        return any(
+            node["tag"] in _CODEPEN_FORM_SURFACE_EXEMPT_TAGS
+            or node["classes"] & _CODEPEN_FORM_SURFACE_EXEMPT_CLASSES
+            for node in self._stack
+        )
+
+    def _is_inside_unwrapped_form_surface_root(self) -> bool:
+        return any(
+            node["classes"] & _CODEPEN_FORM_SURFACE_ROOT_CLASSES
+            for node in self._stack
+        )
+
+    def _format_node(
+        self, tag: str, attributes: dict[str, str | None], classes: set[str]
+    ) -> str:
+        id_marker = f"#{attributes['id']}" if attributes.get("id") else ""
+        class_marker = f".{' '.join(sorted(classes))}" if classes else ""
+
+        return f"{tag}{id_marker} {class_marker}".strip()
 
 
 class CodeExampleTests(CatalogTestCase):
@@ -148,6 +296,33 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('"button"', demo_js)
         self.assertNotIn("ensureStyles", demo_js)
         self.assertNotIn('document.createElement("style")', demo_js)
+
+    def test_component_codepen_form_surfaces_are_field_wrapped(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        violations: list[str] = []
+
+        for page_path in sorted((ROOT / "site-dist/components").glob("*/index.html")):
+            payload_parser = _CodePenPayloadParser()
+            payload_parser.feed(page_path.read_text(encoding="utf-8"))
+
+            for payload in payload_parser.payloads:
+                surface_parser = _CodePenFormSurfaceParser()
+                surface_parser.feed(str(payload.get("html", "")))
+
+                for surface in surface_parser.violations:
+                    violations.append(
+                        f"{page_path.parent.name}: {payload['title']}: {surface}"
+                    )
+
+        self.assertEqual(
+            [],
+            violations,
+            "CodePen form surfaces must sit inside .field, .field-group, "
+            "or .field-fieldset unless the surface belongs to a table or menu:\n"
+            + "\n".join(violations),
+        )
 
     def test_source_formatter_indents_nested_macro_markup(self) -> None:
         source = """

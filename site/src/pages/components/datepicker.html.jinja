@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/datepicker.html.jinja" import calendar, datepicker, date_range_picker %}
+{% from "components/field.html.jinja" import field %}
 {% from "components/table.html.jinja" import table %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
@@ -17,13 +18,15 @@
 
   <div class="moo-component-examples">
     {% set intro %}
-      {{ datepicker(
-        id="datepicker-intro",
-        label="Deploy date",
-        name="deploy_date",
-        placeholder="Pick a date",
-        value="2026-08-18"
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-intro",
+          label="Deploy date",
+          name="deploy_date",
+          placeholder="Pick a date",
+          value="2026-08-18"
+        ) }}
+      {% endcall %}
     {% endset %}
     {% set usage %}
       <p>Use <code>[data-datepicker]</code> for a single date, <code>[data-datepicker-range]</code> for start/end ranges, and <code>[data-calendar]</code> when the calendar should stay inline. The trigger owns <code>aria-expanded</code> and <code>aria-controls</code>; the popover owns <code>role="dialog"</code>; the calendar owns roving day focus and selection state.</p>
@@ -36,12 +39,14 @@
     ) }}
 
     {% set basic %}
-      {{ datepicker(
-        id="datepicker-basic",
-        label="Date",
-        name="date",
-        placeholder="Pick a date"
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-basic",
+          label="Date",
+          name="date",
+          placeholder="Pick a date"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("datepicker", "Date Picker",
       "datepicker-basic",
@@ -53,16 +58,18 @@
 
     {% set time_picker %}
       <div class="moo-datepicker-time-row">
-        {{ datepicker(
-          id="datepicker-time-picker",
-          label="Date",
-          name="event_date",
-          placeholder="Pick a date"
-        ) }}
-        <div class="moo-datepicker-time">
+        {% call field(extra_class="flex-grow-1") %}
+          {{ datepicker(
+            id="datepicker-time-picker",
+            label="Date",
+            name="event_date",
+            placeholder="Pick a date"
+          ) }}
+        {% endcall %}
+        {% call field(extra_class="moo-datepicker-time") %}
           <label class="form-label" for="datepicker-time-picker-time">Time</label>
           <input type="time" class="form-control" id="datepicker-time-picker-time" name="event_time" value="10:30" step="1">
-        </div>
+        {% endcall %}
       </div>
     {% endset %}
     {{ render_component_example("datepicker", "Date Picker",
@@ -74,14 +81,16 @@
     ) }}
 
     {% set range_picker %}
-      {{ date_range_picker(
-        id="datepicker-range",
-        label="Date range",
-        start_name="start_date",
-        end_name="end_date",
-        start_value="2026-08-20",
-        end_value="2026-08-27"
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ date_range_picker(
+          id="datepicker-range",
+          label="Date range",
+          start_name="start_date",
+          end_name="end_date",
+          start_value="2026-08-20",
+          end_value="2026-08-27"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("datepicker", "Date Picker",
       "datepicker-range",
@@ -92,15 +101,17 @@
     ) }}
 
     {% set birth_date %}
-      {{ datepicker(
-        id="datepicker-birth-date",
-        label="Date of birth",
-        name="birth_date",
-        placeholder="Select date",
-        min_date="1926-01-01",
-        max_date="2026-12-31",
-        caption_layout="dropdown"
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-birth-date",
+          label="Date of birth",
+          name="birth_date",
+          placeholder="Select date",
+          min_date="1926-01-01",
+          max_date="2026-12-31",
+          caption_layout="dropdown"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("datepicker", "Date Picker",
       "datepicker-birth-date",
@@ -111,13 +122,15 @@
     ) }}
 
     {% set presets %}
-      {{ datepicker(
-        id="datepicker-presets",
-        label="Schedule date",
-        name="schedule_date",
-        placeholder="Pick a date",
-        show_presets=true
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-presets",
+          label="Schedule date",
+          name="schedule_date",
+          placeholder="Pick a date",
+          show_presets=true
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("datepicker", "Date Picker",
       "datepicker-presets",
@@ -147,35 +160,41 @@
     ) }}
 
     {% set rtl_arabic %}
-      {{ datepicker(
-        id="datepicker-rtl-arabic",
-        aria_label="اختر تاريخا",
-        name="rtl_arabic_date",
-        placeholder="اختر تاريخا",
-        locale="ar",
-        value="2026-08-18",
-        attrs='dir="rtl"'
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-rtl-arabic",
+          aria_label="اختر تاريخا",
+          name="rtl_arabic_date",
+          placeholder="اختر تاريخا",
+          locale="ar",
+          value="2026-08-18",
+          attrs='dir="rtl"'
+        ) }}
+      {% endcall %}
     {% endset %}
     {% set rtl_hebrew %}
-      {{ datepicker(
-        id="datepicker-rtl-hebrew",
-        aria_label="בחר תאריך",
-        name="rtl_hebrew_date",
-        placeholder="בחר תאריך",
-        locale="he",
-        value="2026-08-18",
-        attrs='dir="rtl"'
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-rtl-hebrew",
+          aria_label="בחר תאריך",
+          name="rtl_hebrew_date",
+          placeholder="בחר תאריך",
+          locale="he",
+          value="2026-08-18",
+          attrs='dir="rtl"'
+        ) }}
+      {% endcall %}
     {% endset %}
     {% set rtl_english %}
-      {{ datepicker(
-        id="datepicker-rtl-english",
-        aria_label="Pick a date",
-        name="rtl_english_date",
-        placeholder="Pick a date",
-        value="2026-08-18"
-      ) }}
+      {% call field(extra_class="w-100") %}
+        {{ datepicker(
+          id="datepicker-rtl-english",
+          aria_label="Pick a date",
+          name="rtl_english_date",
+          placeholder="Pick a date",
+          value="2026-08-18"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_rtl_example(
       "datepicker-rtl",

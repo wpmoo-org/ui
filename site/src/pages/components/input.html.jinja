@@ -59,15 +59,17 @@
     ) }}
 
     {% set basic %}
-      {{ input(
-        aria_label="Input",
-        placeholder="Enter your text"
-      ) }}
+      {% call field() %}
+        {{ input(
+          aria_label="Input",
+          placeholder="Enter your text"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("input", "Input",
       "basic",
       "Basic",
-      "Use standalone bare inputs when surrounding context already provides the label.",
+      "Use a single input when surrounding context already provides the label.",
       basic,
       "moo-example__preview--narrow"
     ) }}
@@ -182,12 +184,14 @@
     ) }}
 
     {% set file_input %}
-      {% call input_group() %}
-      {{ input(
-        aria_label="Upload",
-        id="input-picture",
-        type="file"
-      ) }}
+      {% call field() %}
+        {% call input_group() %}
+        {{ input(
+          aria_label="Upload",
+          id="input-picture",
+          type="file"
+        ) }}
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_component_example("input", "Input",
@@ -199,19 +203,21 @@
     ) }}
 
     {% set inline %}
-      <div class="d-flex gap-2">
-        {{ input(
-          aria_label="Search",
-          type="search",
-          placeholder="Search..."
-        ) }}
+      <div class="d-flex gap-2 w-100">
+        {% call field(extra_class="flex-fill") %}
+          {{ input(
+            aria_label="Search",
+            type="search",
+            placeholder="Search..."
+          ) }}
+        {% endcall %}
         {{ button("Search") }}
       </div>
     {% endset %}
     {{ render_component_example("input", "Input",
       "inline",
       "Inline",
-      "Place a bare input next to a button in a flex row to create a search input with a button.",
+      "Place an input field next to a button in a flex row to create a search input with a button.",
       inline,
       "moo-example__preview--narrow"
     ) }}
