@@ -85,7 +85,7 @@ export const THEME_BUILDER_OPTIONS = {
   ],
   headingFont: ["default", "geist", "system"],
   bodyFont: ["default", "geist", "system"],
-  radius: ["default", "compact", "large"],
+  radius: ["default", "none", "small", "medium", "large"],
 };
 
 const OPTION_SETS = Object.fromEntries(
@@ -101,6 +101,9 @@ const ACTION_COLOR_ALIASES = {
   violet: "purple",
   amber: "yellow",
   rose: "pink",
+};
+const RADIUS_ALIASES = {
+  compact: "small",
 };
 
 const NEUTRAL_BASE_BORDER_TOKENS = {
@@ -339,12 +342,26 @@ const CHART_COLOR_TOKENS = {
 
 const RADIUS_TOKENS = {
   default: {},
-  compact: {
+  none: {
+    "--bs-border-radius": "0",
+    "--bs-border-radius-sm": "0",
+    "--bs-border-radius-lg": "0",
+    "--bs-border-radius-xl": "0",
+    "--bs-border-radius-xxl": "0",
+  },
+  small: {
     "--bs-border-radius": "0.25rem",
     "--bs-border-radius-sm": "0.1875rem",
     "--bs-border-radius-lg": "0.375rem",
     "--bs-border-radius-xl": "0.5rem",
     "--bs-border-radius-xxl": "0.75rem",
+  },
+  medium: {
+    "--bs-border-radius": "0.5rem",
+    "--bs-border-radius-sm": "0.375rem",
+    "--bs-border-radius-lg": "0.625rem",
+    "--bs-border-radius-xl": "0.75rem",
+    "--bs-border-radius-xxl": "1rem",
   },
   large: {
     "--bs-border-radius": "0.75rem",
@@ -517,6 +534,8 @@ function enumValue(key, candidate) {
       ? BASE_COLOR_ALIASES
       : key === "themeColor" || key === "chartColor"
         ? ACTION_COLOR_ALIASES
+        : key === "radius"
+          ? RADIUS_ALIASES
         : {};
   const value = Object.hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
   return OPTION_SETS[key].has(value) ? value : THEME_BUILDER_DEFAULTS[key];
@@ -651,6 +670,7 @@ export function createThemeBuilderFirstPaintPayload() {
     aliases: {
       baseColor: BASE_COLOR_ALIASES,
       actionColor: ACTION_COLOR_ALIASES,
+      radius: RADIUS_ALIASES,
     },
     legacyActionBaseColors: Array.from(LEGACY_ACTION_BASE_COLORS),
     tokens: {

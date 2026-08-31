@@ -86,6 +86,8 @@
                   ? themeBuilderFirstPaint.aliases.baseColor
                   : key === "themeColor" || key === "chartColor"
                     ? themeBuilderFirstPaint.aliases.actionColor
+                    : key === "radius"
+                      ? themeBuilderFirstPaint.aliases.radius
                     : {};
               const value = hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
               return (themeBuilderFirstPaint.options[key] || []).includes(value)

@@ -126,7 +126,7 @@ console.log(JSON.stringify(state));
                 "chartColor": "neutral",
                 "headingFont": "system",
                 "bodyFont": "geist",
-                "radius": "compact",
+                "radius": "small",
             },
         )
 
@@ -357,6 +357,7 @@ const normalized = normalizeThemeBuilderState({ style: "nova", baseColor: "zinc"
 console.log(JSON.stringify({
   defaultKeys: Object.keys(THEME_BUILDER_DEFAULTS),
   optionKeys: Object.keys(THEME_BUILDER_OPTIONS),
+  options: THEME_BUILDER_OPTIONS,
   normalizedKeys: Object.keys(normalized),
   ignoredStyleCases,
   mutedSurface: tokens["--moo-muted-surface"],
@@ -381,6 +382,10 @@ console.log(JSON.stringify({
         self.assertNotIn("style", case["defaultKeys"])
         self.assertNotIn("style", case["optionKeys"])
         self.assertNotIn("style", case["normalizedKeys"])
+        self.assertEqual(
+            case["options"]["radius"],
+            ["default", "none", "small", "medium", "large"],
+        )
         self.assertEqual(
             case["ignoredStyleCases"],
             {"soft": True, "solid": True, "tinted": True, "nova": True},
@@ -488,7 +493,7 @@ console.log(JSON.stringify({
                 "chartColor": "purple",
                 "headingFont": "system",
                 "bodyFont": "geist",
-                "radius": "compact",
+                "radius": "small",
             },
         )
 
@@ -957,6 +962,17 @@ console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
 
         self.assertNotIn("data-moo-catalog-theme-builder-style", template)
         self.assertNotIn("moo-theme-builder-style", template)
+        self.assertNotIn("settings_radius_dropdown", template)
+        self.assertNotIn("moo-settings-panel__radius", template)
+        builder_hooks = re.findall(
+            r'"(data-moo-catalog-theme-builder-[^"]+)"',
+            template[
+                template.index('{% call fieldset("Theme Builder"') : template.index(
+                    '{% call fieldset("Direction"'
+                )
+            ],
+        )
+        self.assertEqual(builder_hooks[-1], "data-moo-catalog-theme-builder-radius")
 
     def test_theme_builder_settings_panel_omits_surface_style_axis(self) -> None:
         template = (ROOT / "site/src/includes/settings-panel.html.jinja").read_text(
@@ -967,6 +983,22 @@ console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
         self.assertNotIn('"Style"', template)
         self.assertNotIn("data-moo-catalog-theme-builder-preview", template)
         self.assertNotIn("moo-settings-panel__surface-preview", template)
+
+    def test_settings_direction_uses_standard_theme_grid_size(self) -> None:
+        template = (ROOT / "site/src/includes/settings-panel.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        direction_markup = template[
+            template.index('{% call fieldset("Direction"') : template.index(
+                "{{ separator() }}"
+            )
+        ]
+
+        self.assertRegex(
+            direction_markup,
+            r'class="[^"]*\bmoo-settings-panel__theme-group\b',
+        )
+        self.assertNotIn("moo-settings-panel__theme-group--compact", direction_markup)
 
     def test_examples_chart_delegates_to_the_public_chart_root(self) -> None:
         result = subprocess.run(
@@ -1358,7 +1390,13 @@ const controls = {
   chartColor: makeControl({ neutral: "Neutral", teal: "Teal" }),
   headingFont: makeControl({ default: "Default", system: "System" }),
   bodyFont: makeControl({ default: "Default", geist: "Geist" }),
-  radius: makeControl({ default: "Default", compact: "Compact" }),
+  radius: makeControl({
+    default: "Default",
+    none: "None",
+    small: "Small",
+    medium: "Medium",
+    large: "Large",
+  }),
 };
 
 const fieldRoots = Object.fromEntries(
@@ -1625,6 +1663,7 @@ console.log(JSON.stringify({
         self.assertEqual(case["initial"]["migratedBuilder"]["baseColor"], "neutral")
         self.assertEqual(case["initial"]["migratedBuilder"]["themeColor"], "blue")
         self.assertEqual(case["initial"]["migratedBuilder"]["chartColor"], "neutral")
+        self.assertEqual(case["initial"]["migratedBuilder"]["radius"], "small")
         self.assertNotIn("chartPalette", case["initial"]["migratedBuilder"])
         self.assertEqual(case["afterBasePreview"]["baseDataset"], "zinc")
         self.assertEqual(case["afterBasePreview"]["surface"], "oklch(1 0 0)")
