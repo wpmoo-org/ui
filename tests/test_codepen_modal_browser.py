@@ -176,9 +176,57 @@ class CodePenModalBrowserTests(unittest.TestCase):
             self.assertEqual(position["top"], 16)
             self.assertEqual(position["height"], 32)
 
+            def github_colors() -> dict[str, str]:
+                return github.evaluate(
+                    """
+                    (element) => {
+                      const probe = document.createElement("span");
+                      const button = window.getComputedStyle(element);
+                      const body = window.getComputedStyle(document.body);
+                      probe.style.position = "fixed";
+                      probe.style.inset = "auto";
+                      probe.style.backgroundColor = "color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg))";
+                      document.body.appendChild(probe);
+                      const expected = window.getComputedStyle(probe).backgroundColor;
+                      probe.remove();
+                      return {
+                        background: button.backgroundColor,
+                        color: button.color,
+                        bodyBackground: body.backgroundColor,
+                        bodyColor: body.color,
+                        mixedBodyColor: expected,
+                      };
+                    }
+                    """
+                )
+
+            normal_colors = github_colors()
+            self.assertEqual(
+                normal_colors["background"],
+                normal_colors["mixedBodyColor"],
+            )
+            self.assertEqual(normal_colors["color"], normal_colors["bodyBackground"])
+            github.hover()
+            hover_colors = github_colors()
+            self.assertEqual(hover_colors["background"], normal_colors["bodyColor"])
+            self.assertEqual(hover_colors["color"], normal_colors["bodyBackground"])
+
             theme.click()
             expect(page.locator("html")).to_have_attribute("data-bs-theme", "dark")
             expect(theme).to_have_attribute("aria-label", "Switch to light mode")
+            page.mouse.move(0, 0)
+
+            normal_colors = github_colors()
+            self.assertEqual(
+                normal_colors["background"],
+                normal_colors["mixedBodyColor"],
+            )
+            self.assertEqual(normal_colors["color"], normal_colors["bodyBackground"])
+            github.hover()
+            hover_colors = github_colors()
+            self.assertEqual(hover_colors["background"], normal_colors["bodyColor"])
+            self.assertEqual(hover_colors["color"], normal_colors["bodyBackground"])
+
             theme.click()
             expect(page.locator("html")).to_have_attribute("data-bs-theme", "light")
             expect(theme).to_have_attribute("aria-label", "Switch to dark mode")
