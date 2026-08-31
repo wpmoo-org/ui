@@ -1,13 +1,15 @@
 {
   "freezeVersion": "1.0.0-rc.3",
   "frozenAt": "2026-08-17",
-  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze. Adds canonical and minified Chart.js and Datepicker bundles (chart.js, chart.min.js, datepicker.js, datepicker.min.js), a plain ESM Slider wrapper (slider.js), and the root Sass config entrypoint (scss/config) as public entrypoints. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
+  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze, reconciled during post-RC3 1.0.0 preparation. Adds canonical and minified Chart.js and Datepicker bundles (chart.js, chart.min.js, datepicker.js, datepicker.min.js), a plain ESM Slider wrapper (slider.js), the side-effect-free aggregate Moo UI ESM bundle (moo-ui.js, moo-ui.min.js), and the root Sass config entrypoint (scss/config) as public entrypoints. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
 
   "packageExports": [
     "./moo-ui.css",
     "./moo-ui.min.css",
     "./moo.css",
     "./moo.min.css",
+    "./moo-ui.js",
+    "./moo-ui.min.js",
     "./combobox.js",
     "./sidebar.js",
     "./context-menu.js",
@@ -27,6 +29,8 @@
     "dist/assets/css/moo-ui.min.css",
     "dist/assets/css/moo.css",
     "dist/assets/css/moo.min.css",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
@@ -63,6 +67,26 @@
   ],
 
   "esmModules": [
+    {
+      "module": "moo-ui.js",
+      "export": "./moo-ui.js",
+      "lifecycle": ["side-effect-free import", "named lifecycle class exports"],
+      "source": "src/js/moo-ui.js",
+      "bundled": true,
+      "buildTool": "esbuild",
+      "note": "Convenience aggregate for all optional Moo UI ESM modules; importing it never scans the document automatically",
+      "namedExports": [
+        "Chart",
+        "Combobox",
+        "ContextMenu",
+        "DataTable",
+        "Datepicker",
+        "MooCalendar",
+        "MooDateRangePicker",
+        "Sidebar",
+        "Slider"
+      ]
+    },
     {
       "module": "combobox.js",
       "export": "./combobox.js",
@@ -158,6 +182,10 @@
   ],
 
   "artifactVariants": {
+    "moo-ui.min.js": {
+      "canonical": "moo-ui.js",
+      "relationship": "Minified artifact variant of moo-ui.js; shares aggregate exports and side-effect-free import behavior"
+    },
     "chart.min.js": {
       "canonical": "chart.js",
       "relationship": "Minified artifact variant of chart.js; shares source, exports, lifecycle, and runtime ownership"

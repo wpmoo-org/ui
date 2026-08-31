@@ -31,6 +31,8 @@ not independent or accredited certification.
 - `@wpmoo/ui/moo-ui.min.css`: full minified CSS build
 - `@wpmoo/ui/moo.css`: scoped expanded component layer for `.moo-ui`
 - `@wpmoo/ui/moo.min.css`: scoped minified component layer
+- `@wpmoo/ui/moo-ui.js`: optional aggregate ESM lifecycle bundle for all Moo UI modules
+- `@wpmoo/ui/moo-ui.min.js`: minified aggregate ESM bundle
 - `@wpmoo/ui/combobox.js`: optional Combobox ESM lifecycle
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
@@ -74,7 +76,8 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 
 Optional Moo UI ESM is imported only for documented gaps and must be initialized
 explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
-`sidebar.js`, `chart.js`, `datepicker.js`, or `slider.js` does not scan the document.
+`sidebar.js`, `chart.js`, `datepicker.js`, `slider.js`, or the aggregate
+`moo-ui.js` does not scan the document.
 
 ## Runtime Ownership
 
@@ -164,8 +167,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
 
 - Preserve Bootstrap behavior before adding custom behavior.
 - Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
-  Datepicker, and Slider unless future documentation adds another public entrypoint.
-- Do not invent public Sass APIs, aggregate JavaScript entrypoints, or
+  Datepicker, Slider, or the documented aggregate `moo-ui.js` entrypoint.
+- Do not invent public Sass APIs, undocumented JavaScript entrypoints, or
   certification claims.
 - Treat shadcn/ui as visual direction only; examples and implementation should
   remain original and Bootstrap-compatible.

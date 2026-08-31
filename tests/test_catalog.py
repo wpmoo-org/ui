@@ -3045,6 +3045,27 @@ class CatalogContractTests(CatalogTestCase):
         ):
             site_build.derive_component_ownership(catalog, certification)
 
+    def test_ownership_derivation_ignores_public_esm_aggregate(self) -> None:
+        catalog = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        certification["publicEntrypoints"] = {
+            **certification["publicEntrypoints"],
+            "esm": [
+                *certification["publicEntrypoints"]["esm"],
+                "./moo-ui.js",
+                "./moo-ui.min.js",
+            ],
+        }
+
+        ownership = site_build.derive_component_ownership(catalog, certification)
+
+        self.assertEqual(ownership["button"]["runtimeOwner"], "native HTML/CSS")
+        self.assertEqual(ownership["combobox"]["runtimeOwner"], "optional Moo UI ESM")
+
     def test_skills_page_documents_agent_component_guidance(self) -> None:
         result = self.run_build()
 

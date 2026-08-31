@@ -57,6 +57,7 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | --- | --- | --- |
 | Static HTML and CSS components | Browser + Bootstrap markup | `moo-ui.css`, or Bootstrap CSS followed by scoped `moo.css` |
 | Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other Bootstrap plugins | Bootstrap | Bootstrap's JavaScript bundle and documented initialization |
+| All optional Moo UI modules together | Optional Moo UI ESM aggregate | `@wpmoo/ui/moo-ui.js`, then explicit initialization |
 | Combobox | Optional Moo UI ESM | `@wpmoo/ui/combobox.js`, then explicit initialization |
 | Context Menu pointer and keyboard invocation | Optional Moo UI ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
 | DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo UI ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
@@ -65,8 +66,9 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | Datepicker with shadcn-like trigger/popover/calendar | Optional Moo UI ESM, self-contained (no third-party runtime) | `@wpmoo/ui/datepicker.js`, then explicit initialization |
 | Slider with native range input semantics | Optional Moo UI ESM, no third-party runtime | `@wpmoo/ui/slider.js`, then explicit initialization |
 
-Moo UI does not replace Bootstrap plugins and does not publish a mandatory
-aggregate JavaScript runtime.
+Moo UI does not replace Bootstrap plugins. The aggregate module is optional;
+it is a single side-effect-free import for projects that prefer one Moo UI ESM
+entrypoint.
 
 ## Install
 
@@ -122,6 +124,15 @@ Datepicker.getOrCreateInstance(document.querySelector("[data-datepicker]"));
 Slider.getOrCreateInstance(document.querySelector("[data-slider]"));
 ```
 
+When a host prefers one Moo UI module request, use the aggregate export:
+
+```js
+import MooUI, { Combobox, DataTable } from "@wpmoo/ui/moo-ui.js";
+
+Combobox.getOrCreateInstance(document.querySelector(".combobox"));
+MooUI.DataTable.getOrCreateInstance(document.querySelector(".datatable"));
+```
+
 See the [Installation guide](https://ui.wpmoo.org/installation/) for CDN
 recipes, load order, and troubleshooting.
 
@@ -135,6 +146,7 @@ recipes, load order, and troubleshooting.
 | Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
 | Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo UI ESM module. |
 | Page using Chart, Datepicker, or Slider | Add only the corresponding optional Moo UI ESM module. Chart bundles its third-party runtime; Datepicker and Slider are self-contained with no third-party dependency. |
+| Page using several Moo UI ESM modules | Use `@wpmoo/ui/moo-ui.js` as the optional aggregate import. |
 
 ## Public Package Surface
 
@@ -146,6 +158,8 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/moo-ui.min.css` | Full minified CSS build |
 | `@wpmoo/ui/moo.css` | Scoped expanded component layer for `.moo-ui` |
 | `@wpmoo/ui/moo.min.css` | Scoped minified component layer |
+| `@wpmoo/ui/moo-ui.js` | Optional aggregate ESM lifecycle bundle for all Moo UI modules |
+| `@wpmoo/ui/moo-ui.min.js` | Minified aggregate ESM bundle |
 | `@wpmoo/ui/combobox.js` | Optional Combobox ESM lifecycle |
 | `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
 | `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |

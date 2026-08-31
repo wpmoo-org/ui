@@ -23,6 +23,8 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
@@ -44,6 +46,8 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
+    "./moo-ui.js": "./dist/js/moo-ui.js",
+    "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
     "./chart.js": "./dist/js/chart.js",
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
@@ -127,10 +131,14 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["exports"]["./sidebar.js"], "./dist/js/sidebar.js")
         self.assertEqual(package["exports"]["./context-menu.js"], "./dist/js/context-menu.js")
         self.assertEqual(package["exports"]["./datatable.js"], "./dist/js/datatable.js")
+        self.assertEqual(package["exports"]["./moo-ui.js"], "./dist/js/moo-ui.js")
+        self.assertEqual(package["exports"]["./moo-ui.min.js"], "./dist/js/moo-ui.min.js")
         self.assertIn("dist/js/combobox.js", files)
         self.assertIn("dist/js/sidebar.js", files)
         self.assertIn("dist/js/context-menu.js", files)
         self.assertIn("dist/js/datatable.js", files)
+        self.assertIn("dist/js/moo-ui.js", files)
+        self.assertIn("dist/js/moo-ui.min.js", files)
         self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
         self.assertEqual(
             package["exports"]["./certification.json"],
@@ -391,6 +399,21 @@ import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Slider from "@wpmoo/ui/slider.js";
+import MooUI, {
+  Chart as AggregateChart,
+  Combobox as AggregateCombobox,
+  ContextMenu as AggregateContextMenu,
+  DataTable as AggregateDataTable,
+  Datepicker as AggregateDatepicker,
+  MooCalendar,
+  MooDateRangePicker,
+  Sidebar as AggregateSidebar,
+  Slider as AggregateSlider,
+} from "@wpmoo/ui/moo-ui.js";
+import MooUIMinified, {
+  Chart as MinifiedAggregateChart,
+  Datepicker as MinifiedAggregateDatepicker,
+} from "@wpmoo/ui/moo-ui.min.js";
 import Chart from "@wpmoo/ui/chart.js";
 import ChartMinified from "@wpmoo/ui/chart.min.js";
 import Datepicker from "@wpmoo/ui/datepicker.js";
@@ -402,6 +425,26 @@ if (
   ContextMenu.name !== "ContextMenu" ||
   DataTable.name !== "DataTable" ||
   Slider.name !== "MooSlider" ||
+  typeof AggregateCombobox.getOrCreateInstance !== "function" ||
+  typeof AggregateSidebar.getOrCreateInstance !== "function" ||
+  typeof AggregateContextMenu.getOrCreateInstance !== "function" ||
+  typeof AggregateDataTable.getOrCreateInstance !== "function" ||
+  typeof AggregateSlider.getOrCreateInstance !== "function" ||
+  typeof AggregateChart.getOrCreateInstance !== "function" ||
+  typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
+  typeof MooCalendar !== "function" ||
+  typeof MooDateRangePicker !== "function" ||
+  MooUI.Combobox !== AggregateCombobox ||
+  MooUI.Sidebar !== AggregateSidebar ||
+  MooUI.ContextMenu !== AggregateContextMenu ||
+  MooUI.DataTable !== AggregateDataTable ||
+  MooUI.Slider !== AggregateSlider ||
+  MooUI.Chart !== AggregateChart ||
+  MooUI.Datepicker !== AggregateDatepicker ||
+  typeof MooUIMinified.Chart.getOrCreateInstance !== "function" ||
+  typeof MooUIMinified.Datepicker.getOrCreateInstance !== "function" ||
+  MooUIMinified.Chart !== MinifiedAggregateChart ||
+  MooUIMinified.Datepicker !== MinifiedAggregateDatepicker ||
   typeof Chart.getOrCreateInstance !== "function" ||
   typeof ChartMinified.getOrCreateInstance !== "function" ||
   typeof Datepicker.getOrCreateInstance !== "function" ||
@@ -415,6 +458,8 @@ for (const specifier of [
   "@wpmoo/ui/moo-ui.min.css",
   "@wpmoo/ui/moo.css",
   "@wpmoo/ui/moo.min.css",
+  "@wpmoo/ui/moo-ui.js",
+  "@wpmoo/ui/moo-ui.min.js",
   "@wpmoo/ui/certification.json",
 ]) {
   const resolved = import.meta.resolve(specifier);
@@ -552,14 +597,16 @@ for (const specifier of [
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "src/js/moo-ui.js",
             "chart.js",
             "datepicker.js",
             "dist/js/chart.min.js",
             "dist/js/datepicker.min.js",
+            "dist/js/moo-ui.min.js",
         ):
             source_path = (
                 module_path
-                if module_path.startswith("dist/")
+                if module_path.startswith(("dist/", "src/"))
                 else f"src/js/components/{module_path}"
             )
             with self.subTest(module_path=module_path):

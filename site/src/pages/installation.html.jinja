@@ -158,6 +158,18 @@
         slider.dispose();
         {% endset %}
         {{ render_code_snippet("installation-esm", esm_example, "js") }}
+        <p>
+          If your host prefers one Moo UI module request, use the
+          side-effect-free aggregate instead of importing each module
+          separately.
+        </p>
+        {% set esm_aggregate_example %}
+        import MooUI, { Combobox, DataTable } from "@wpmoo/ui/moo-ui.js";
+
+        Combobox.getOrCreateInstance(document.querySelector(".combobox"));
+        MooUI.DataTable.getOrCreateInstance(document.querySelector(".datatable"));
+        {% endset %}
+        {{ render_code_snippet("installation-esm-aggregate", esm_aggregate_example, "js") }}
         {% set esm_cdn_example %}
         <script type="module">
           import Chart from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.js"] | replace("./", "") }}";
@@ -217,10 +229,10 @@
         </p>
         <p>
           Minified browser module URLs are also published for Chart and Date
-          Picker at
-          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.min.js"] | replace("./", "") }}</code>
-          and
-          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./datepicker.min.js"] | replace("./", "") }}</code>.
+          Picker, plus the aggregate bundle, at
+          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.min.js"] | replace("./", "") }}</code>,
+          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./datepicker.min.js"] | replace("./", "") }}</code>, and
+          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./moo-ui.min.js"] | replace("./", "") }}</code>.
         </p>
       </section>
 

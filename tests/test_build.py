@@ -64,6 +64,8 @@ class BuildTests(CatalogTestCase):
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "moo-ui.js",
+            "moo-ui.min.js",
             "chart.js",
             "chart.min.js",
             "datepicker.js",
@@ -146,6 +148,8 @@ class BuildTests(CatalogTestCase):
             self.assertTrue((PACKAGE_DIST / "assets/css/moo-ui.css").is_file())
             self.assertTrue((PACKAGE_DIST / "assets/css/moo.css").is_file())
             self.assertTrue((PACKAGE_DIST / "js/combobox.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/moo-ui.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/moo-ui.min.js").is_file())
             self.assertFalse(SITE_DIST.exists())
         finally:
             self.run_build()
@@ -236,7 +240,14 @@ class BuildTests(CatalogTestCase):
         In both cases the shipped output must never contain a bare third-party
         specifier or a CDN runtime URL."""
         self.require_full_build()
-        for module_name in ("chart.js", "chart.min.js", "datepicker.js", "datepicker.min.js"):
+        for module_name in (
+            "moo-ui.js",
+            "moo-ui.min.js",
+            "chart.js",
+            "chart.min.js",
+            "datepicker.js",
+            "datepicker.min.js",
+        ):
             module_path = PACKAGE_DIST / "js" / module_name
             with self.subTest(module=module_name):
                 self.assertTrue(module_path.is_file())
@@ -259,6 +270,8 @@ class BuildTests(CatalogTestCase):
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "moo-ui.js",
+            "moo-ui.min.js",
             "chart.js",
             "chart.min.js",
             "datepicker.js",
@@ -318,7 +331,7 @@ class BuildTests(CatalogTestCase):
         for each pair, ensuring runtime-level equivalence rather than
         regex-based text matching."""
         self.require_full_build()
-        for base_name in ("chart", "datepicker"):
+        for base_name in ("moo-ui", "chart", "datepicker"):
             canonical_path = PACKAGE_DIST / f"js/{base_name}.js"
             minified_path = PACKAGE_DIST / f"js/{base_name}.min.js"
 

@@ -21,6 +21,8 @@
       "./moo.min.css"
     ],
     "esm": [
+      "./moo-ui.js",
+      "./moo-ui.min.js",
       "./combobox.js",
       "./sidebar.js",
       "./context-menu.js",

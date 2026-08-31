@@ -55,6 +55,7 @@ BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
+JS_ROOT = SRC / "js"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
@@ -65,6 +66,8 @@ CORE_JS_MODULES = (
     "slider.js",
 )
 BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+AGGREGATE_JS_MODULES = ("moo-ui.js",)
+PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
@@ -119,6 +122,9 @@ SOURCE_SNAPSHOT_DIRS = (
     CORE_REGISTRY,
     CERTIFICATION_FIXTURES,
     SCSS,
+)
+SOURCE_SNAPSHOT_FILES = (
+    JS_ROOT / "moo-ui.js",
 )
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
@@ -1370,11 +1376,12 @@ def derive_component_ownership(
         module.lstrip("./").removesuffix(".js")
         for module in certification.get("publicEntrypoints", {}).get("esm", [])
     }
+    component_moo_modules = exported_moo_modules - PUBLIC_ESM_AGGREGATE_MODULES
     source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
 
     # Check that each exported module either matches a source file or is a
     # minified variant of a source file
-    for exported in exported_moo_modules:
+    for exported in component_moo_modules:
         if exported.endswith(".min"):
             canonical = exported.removesuffix(".min")
             if canonical not in source_moo_modules:
@@ -1388,7 +1395,7 @@ def derive_component_ownership(
 
     # Check that each source file has a corresponding export
     for source in source_moo_modules:
-        if source not in exported_moo_modules:
+        if source not in component_moo_modules:
             raise RuntimeError(
                 f"Source module {source}.js has no export in certification.json"
             )
@@ -1429,7 +1436,7 @@ def derive_component_ownership(
             raise RuntimeError(f"bootstrapEvidence must be a list for {slug}")
         has_bootstrap_js = _has_bootstrap_js_evidence(bootstrap_sources)
         runtime_owner = "native HTML/CSS"
-        if slug in exported_moo_modules:
+        if slug in component_moo_modules:
             runtime_owner = "optional Moo UI ESM"
         elif has_bootstrap_js:
             runtime_owner = "Bootstrap plugin"
@@ -1632,6 +1639,9 @@ def copy_package_js() -> None:
     for module_name in BUNDLED_JS_MODULES:
         _bundle_module(module_name, minify=False)
         _bundle_module(module_name, minify=True)
+    for module_name in AGGREGATE_JS_MODULES:
+        _bundle_module(module_name, minify=False)
+        _bundle_module(module_name, minify=True)
 
 
 def js_license_banner(module_name: str) -> str:
@@ -1667,6 +1677,8 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
         minify: Whether to minify the output
     """
     source = JS_COMPONENTS / module_name
+    if module_name in AGGREGATE_JS_MODULES:
+        source = JS_ROOT / module_name
     if not source.is_file():
         raise FileNotFoundError(f"Bundled module source not found: {source}")
 
@@ -1733,6 +1745,9 @@ def required_core_outputs() -> tuple[Path, ...]:
     for name in BUNDLED_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
+    for name in AGGREGATE_JS_MODULES:
+        outputs.append(PACKAGE_DIST / "js" / name)
+        outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
     return tuple(outputs)
 
 
@@ -1765,6 +1780,13 @@ def copy_core_outputs_to_site() -> None:
         shutil.copy2(package_module, components_dir / module_name)
         shutil.copy2(package_module, legacy_js_dir / module_name)
     for module_name in BUNDLED_JS_MODULES:
+        canonical = PACKAGE_DIST / "js" / module_name
+        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
+        shutil.copy2(canonical, components_dir / module_name)
+        shutil.copy2(canonical, legacy_js_dir / module_name)
+        shutil.copy2(minified, components_dir / minified.name)
+        shutil.copy2(minified, legacy_js_dir / minified.name)
+    for module_name in AGGREGATE_JS_MODULES:
         canonical = PACKAGE_DIST / "js" / module_name
         minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
         shutil.copy2(canonical, components_dir / module_name)
@@ -2119,6 +2141,7 @@ def build_site() -> None:
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
+    paths.extend(path for path in SOURCE_SNAPSHOT_FILES if path.exists())
     for folder in SOURCE_SNAPSHOT_DIRS:
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())
