@@ -6,7 +6,7 @@ DataTable, Date Picker, Slider, and Sidebar.
 
 ## Supported Versions
 
-Security review covers the current `1.0.0-rc.3` release-candidate line. Older
+Security review covers the current `1.0.0-rc.4` release-candidate line. Older
 tags remain available for source inspection, but fixes are prepared against the
 current development branch.
 

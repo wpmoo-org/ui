@@ -905,7 +905,7 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIn(entrypoint, published_js_entrypoints)
 
-    def test_codepen_shows_current_interactive_examples_after_rc3_publish(self) -> None:
+    def test_codepen_shows_current_interactive_examples_after_current_publish(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -1157,6 +1157,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-moo-acceptance-key="rc3-component-matrix"', page)
         self.assertIn("0/450", page)
         self.assertNotIn("rc2-component-matrix", page)
+
+    def test_rc4_acceptance_portal_uses_separate_release_state(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rc4_path = DIST / "acceptance/rc4/index.html"
+        self.assertTrue(rc4_path.exists(), "RC.4 needs its own acceptance route")
+        page = rc4_path.read_text(encoding="utf-8")
+
+        self.assertIn("1.0.0-rc.4", page)
+        self.assertIn('data-moo-acceptance-key="rc4-component-matrix"', page)
+        self.assertIn("0/450", page)
+        self.assertNotIn("rc3-component-matrix", page)
 
     def test_certification_fixtures_get_build_time_pagination(self) -> None:
         source = (
@@ -2787,6 +2800,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(certification["status"], support)
         self.assertIn(certification["status"], skills)
         self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
+        self.assertIn("| Export | Minified | Description |", readme)
+        self.assertIn(
+            "| `@wpmoo/ui/moo-ui.css` | `@wpmoo/ui/moo-ui.min.css` | Full CSS build |",
+            readme,
+        )
+        self.assertIn(
+            "| `@wpmoo/ui/chart.js` | `@wpmoo/ui/chart.min.js` | Optional Chart ESM lifecycle",
+            readme,
+        )
+        self.assertIn(
+            "| `@wpmoo/ui/scss/config` | Not published | Public Sass variable allow-list",
+            readme,
+        )
         self.assertRegex(
             support,
             r"<tr><th scope=\"col\">CSS</th><th scope=\"col\">Minified</th></tr>",

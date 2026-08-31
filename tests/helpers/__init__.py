@@ -68,15 +68,27 @@ def read_scss_aggregate(
         source_root = ROOT / "scss"
     if root_imports is None:
         root_imports = set()
+
+    def imported_partial(current: Path, target: str) -> Path | None:
+        relative = Path(target)
+
+        if target in root_imports:
+            return source_root / f"_{target}.scss"
+
+        if target.startswith(f"{prefix}/"):
+            return source_root / relative.parent / f"_{relative.name}.scss"
+
+        candidate = current.parent / relative.parent / f"_{relative.name}.scss"
+        if candidate.is_file():
+            return candidate
+
+        return None
+
     paths = [entrypoint]
     queue: list[Path] = []
     for target in active_scss_imports(source):
-        if target in root_imports:
-            partial = source_root / f"_{target}.scss"
-        elif target.startswith(f"{prefix}/"):
-            relative = Path(target)
-            partial = source_root / relative.parent / f"_{relative.name}.scss"
-        else:
+        partial = imported_partial(entrypoint, target)
+        if partial is None:
             continue
         if not partial.is_file():
             raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
@@ -88,8 +100,9 @@ def read_scss_aggregate(
     while queue:
         current = queue.pop(0)
         for target in active_scss_imports(current.read_text(encoding="utf-8")):
-            relative = Path(target)
-            partial = current.parent / f"_{relative.name}.scss"
+            partial = imported_partial(current, target)
+            if partial is None:
+                continue
             if not partial.is_file():
                 raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
             if partial in seen:

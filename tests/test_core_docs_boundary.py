@@ -388,12 +388,12 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0-rc.3")
+        self.assertEqual(package["version"], "1.0.0-rc.4")
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):
                 source = (ROOT / relative).read_text(encoding="utf-8")
-                self.assertIn("1.0.0-rc.3", source)
+                self.assertIn(package["version"], source)
                 self.assertNotIn("currently in the `0.x` development series", source)
                 self.assertNotIn("current `0.x` release line", source)
                 self.assertNotIn(

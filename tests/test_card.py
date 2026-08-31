@@ -75,3 +75,26 @@ class CardTests(CatalogTestCase):
         self.assertIn('dir="ltr"', english_block)
         self.assertIn("Login to your account", english_block)
         self.assertIn("card-rtl-en-email", english_block)
+
+    def test_card_light_surface_keeps_footer_separately_tinted(self) -> None:
+        source = (ROOT / "scss/components/_card.scss").read_text(encoding="utf-8")
+        settings = (ROOT / "scss/settings/_component_variables.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            "--bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) 5%, var(--moo-surface));",
+            source,
+        )
+        self.assertIn(
+            "--moo-card-footer-bg: #{$moo-card-footer-bg};",
+            source,
+        )
+        self.assertIn(
+            "$moo-card-footer-bg: color-mix(in srgb, var(--moo-muted-surface) 20%, var(--moo-surface)) !default;",
+            settings,
+        )
+        self.assertNotIn(
+            "--moo-card-footer-bg: color-mix(in srgb, var(--moo-muted-surface) 5%, transparent);",
+            source,
+        )

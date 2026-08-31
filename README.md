@@ -152,30 +152,25 @@ recipes, load order, and troubleshooting.
 
 `@wpmoo/ui` exports exactly these public entrypoints:
 
-| Export | Purpose |
-| --- | --- |
-| `@wpmoo/ui/moo-ui.css` | Full expanded CSS build |
-| `@wpmoo/ui/moo-ui.min.css` | Full minified CSS build |
-| `@wpmoo/ui/moo.css` | Scoped expanded component layer for `.moo-ui` |
-| `@wpmoo/ui/moo.min.css` | Scoped minified component layer |
-| `@wpmoo/ui/moo-ui.js` | Optional aggregate ESM lifecycle bundle for all Moo UI modules |
-| `@wpmoo/ui/moo-ui.min.js` | Minified aggregate ESM bundle |
-| `@wpmoo/ui/combobox.js` | Optional Combobox ESM lifecycle |
-| `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
-| `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |
-| `@wpmoo/ui/chart.js` | Optional Chart ESM lifecycle (Chart.js 4.5.1 bundled) |
-| `@wpmoo/ui/chart.min.js` | Minified Chart bundle (artifact variant of chart.js) |
-| `@wpmoo/ui/datepicker.js` | Optional Datepicker ESM lifecycle (self-contained, no third-party runtime) |
-| `@wpmoo/ui/datepicker.min.js` | Minified Datepicker bundle (artifact variant of datepicker.js) |
-| `@wpmoo/ui/slider.js` | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
-| `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
-| `@wpmoo/ui/scss/config` | Public Sass variable allow-list (LibSass `@import`) |
-| `@wpmoo/ui/scss/moo-ui` | Full Bootstrap-compatible Sass source entrypoint |
-| `@wpmoo/ui/scss/moo-core` | Scoped `.moo-ui` Sass source entrypoint |
-| `@wpmoo/ui/scss/components` | Component layer Sass source entrypoint |
-| `@wpmoo/ui/scss/settings` | Moo UI settings aggregate for Bootstrap variable setup |
-| `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
-| `@wpmoo/ui/package.json` | Package metadata |
+| Export | Minified | Description |
+| --- | --- | --- |
+| `@wpmoo/ui/moo-ui.css` | `@wpmoo/ui/moo-ui.min.css` | Full CSS build |
+| `@wpmoo/ui/moo.css` | `@wpmoo/ui/moo.min.css` | Scoped component layer for `.moo-ui` |
+| `@wpmoo/ui/moo-ui.js` | `@wpmoo/ui/moo-ui.min.js` | Optional aggregate ESM lifecycle bundle for all Moo UI modules |
+| `@wpmoo/ui/combobox.js` | Not published | Optional Combobox ESM lifecycle |
+| `@wpmoo/ui/sidebar.js` | Not published | Optional Sidebar ESM lifecycle |
+| `@wpmoo/ui/context-menu.js` | Not published | Optional Context Menu ESM lifecycle |
+| `@wpmoo/ui/datatable.js` | Not published | Optional DataTable ESM lifecycle |
+| `@wpmoo/ui/slider.js` | Not published | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
+| `@wpmoo/ui/chart.js` | `@wpmoo/ui/chart.min.js` | Optional Chart ESM lifecycle (Chart.js 4.5.1 bundled) |
+| `@wpmoo/ui/datepicker.js` | `@wpmoo/ui/datepicker.min.js` | Optional Datepicker ESM lifecycle (self-contained, no third-party runtime) |
+| `@wpmoo/ui/scss/config` | Not published | Public Sass variable allow-list (LibSass `@import`) |
+| `@wpmoo/ui/scss/moo-ui` | Not published | Full Bootstrap-compatible Sass source entrypoint |
+| `@wpmoo/ui/scss/moo-core` | Not published | Scoped `.moo-ui` Sass source entrypoint |
+| `@wpmoo/ui/scss/components` | Not published | Component layer Sass source entrypoint |
+| `@wpmoo/ui/scss/settings` | Not published | Moo UI settings aggregate for Bootstrap variable setup |
+| `@wpmoo/ui/certification.json` | Not published | Versioned support/evidence manifest |
+| `@wpmoo/ui/package.json` | Not published | Package metadata |
 
 The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
 THIRD_PARTY_NOTICES.md. It does not publish catalog templates, preview
@@ -210,7 +205,7 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is at the `1.0.0-rc.3` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.3`. The
+Moo UI is at the `1.0.0-rc.4` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.4`. The
 package's certification manifest currently has `preview` status; catalog
 availability is WPMoo-maintained preview evidence, not independent or
 accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
@@ -247,4 +242,4 @@ Moo UI source code is MIT licensed. WPMoo-generated visual assets under
 `site/static/images/` remain separately protected as described in
 `ASSET_LICENSE.md`. Vendored dependencies retain their original licenses; see
 `LICENSE`, `ASSET_LICENSE.md`, and the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.3/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.4/THIRD_PARTY_NOTICES.md).

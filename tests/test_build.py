@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -264,6 +265,8 @@ class BuildTests(CatalogTestCase):
 
     def test_public_npm_js_outputs_carry_moo_ui_license_banner(self) -> None:
         self.require_full_build()
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+
         for module_name in (
             "combobox.js",
             "sidebar.js",
@@ -280,7 +283,7 @@ class BuildTests(CatalogTestCase):
             with self.subTest(module=module_name):
                 expected_banner = (
                     "/*!\n"
-                    f" * Moo UI {module_name} v1.0.0-rc.3 (https://ui.wpmoo.org/)\n"
+                    f" * Moo UI {module_name} v{package['version']} (https://ui.wpmoo.org/)\n"
                     " * Copyright 2026 WPMoo (https://wpmoo.org)\n"
                     " * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)\n"
                     " */\n"

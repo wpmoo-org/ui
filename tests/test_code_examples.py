@@ -659,7 +659,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('<span class="token keyword">import</span>', cdn_snippet)
         self.assertIn(
             '<span class="token string">'
-            '&quot;https://cdn.jsdelivr.net/npm/@wpmoo/ui@1.0.0-rc.3/dist/js/chart.js&quot;'
+            f"&quot;https://cdn.jsdelivr.net/npm/@wpmoo/ui@{build.CODEPEN_CDN_VERSION}/dist/js/chart.js&quot;"
             "</span>",
             cdn_snippet,
         )

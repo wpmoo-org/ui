@@ -1,0 +1,297 @@
+{
+  "freezeVersion": "1.0.0-rc.4",
+  "frozenAt": "2026-08-17",
+  "description": "API freeze audit for the 1.0.0-rc.4 public API feature freeze, reconciled after the RC.3 publish. Keeps Chart.js, Datepicker, Slider, the side-effect-free aggregate Moo UI ESM bundle (moo-ui.js, moo-ui.min.js), and documented Sass source entrypoints (scss/config, scss/moo-ui, scss/moo-core, scss/components, scss/settings) as the current package contract. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
+
+  "packageExports": [
+    "./moo-ui.css",
+    "./moo-ui.min.css",
+    "./moo.css",
+    "./moo.min.css",
+    "./moo-ui.js",
+    "./moo-ui.min.js",
+    "./combobox.js",
+    "./sidebar.js",
+    "./context-menu.js",
+    "./datatable.js",
+    "./chart.js",
+    "./chart.min.js",
+    "./datepicker.js",
+    "./datepicker.min.js",
+    "./slider.js",
+    "./scss/config",
+    "./scss/moo-ui",
+    "./scss/moo-core",
+    "./scss/components",
+    "./scss/settings",
+    "./certification.json",
+    "./package.json"
+  ],
+
+  "packageFiles": [
+    "dist/assets/css/moo-ui.css",
+    "dist/assets/css/moo-ui.min.css",
+    "dist/assets/css/moo.css",
+    "dist/assets/css/moo.min.css",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
+    "dist/js/combobox.js",
+    "dist/js/sidebar.js",
+    "dist/js/context-menu.js",
+    "dist/js/datatable.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
+    "dist/js/slider.js",
+    "scss/*.scss",
+    "scss/**/*.scss",
+    "certification.json",
+    "README.md",
+    "LICENSE",
+    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+
+  "sassFacadeAllowList": [
+    "$primary",
+    "$secondary",
+    "$success",
+    "$info",
+    "$warning",
+    "$danger",
+    "$light",
+    "$dark",
+    "$body-color",
+    "$body-bg",
+    "$border-color",
+    "$border-radius",
+    "$border-radius-sm",
+    "$border-radius-lg",
+    "$font-size-base"
+  ],
+
+  "sassEntrypoints": [
+    {
+      "export": "./scss/config",
+      "source": "scss/_config.scss",
+      "scope": "public variable allow-list"
+    },
+    {
+      "export": "./scss/moo-ui",
+      "source": "scss/moo-ui.scss",
+      "scope": "full Bootstrap-compatible source entrypoint"
+    },
+    {
+      "export": "./scss/moo-core",
+      "source": "scss/moo-core.scss",
+      "scope": "scoped .moo-ui source entrypoint"
+    },
+    {
+      "export": "./scss/components",
+      "source": "scss/_components.scss",
+      "scope": "component layer source entrypoint"
+    },
+    {
+      "export": "./scss/settings",
+      "source": "scss/_settings.scss",
+      "scope": "settings aggregate loaded before Bootstrap variables"
+    }
+  ],
+
+  "esmModules": [
+    {
+      "module": "moo-ui.js",
+      "export": "./moo-ui.js",
+      "lifecycle": ["side-effect-free import", "named lifecycle class exports"],
+      "source": "src/js/moo-ui.js",
+      "bundled": true,
+      "buildTool": "esbuild",
+      "note": "Convenience aggregate for all optional Moo UI ESM modules; importing it never scans the document automatically",
+      "namedExports": [
+        "Chart",
+        "Combobox",
+        "ContextMenu",
+        "DataTable",
+        "Datepicker",
+        "MooCalendar",
+        "MooDateRangePicker",
+        "Sidebar",
+        "Slider"
+      ]
+    },
+    {
+      "module": "combobox.js",
+      "export": "./combobox.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/combobox.js"
+    },
+    {
+      "module": "sidebar.js",
+      "export": "./sidebar.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/sidebar.js"
+    },
+    {
+      "module": "context-menu.js",
+      "export": "./context-menu.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/context-menu.js"
+    },
+    {
+      "module": "datatable.js",
+      "export": "./datatable.js",
+      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "source": "src/js/components/datatable.js"
+    },
+    {
+      "module": "chart.js",
+      "export": "./chart.js",
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
+      "source": "src/js/components/chart.js",
+      "bundled": true,
+      "runtime": "chart.js@4.5.1",
+      "getters": ["chart", "element"],
+      "markup": {
+        "rootClass": "chart",
+        "typeAttribute": "data-chart",
+        "dataAttribute": "data-chart-data",
+        "optionsAttribute": "data-chart-options",
+        "supportedTypes": [
+          "area",
+          "line",
+          "bar",
+          "pie",
+          "doughnut",
+          "polarArea",
+          "radar",
+          "scatter",
+          "bubble"
+        ],
+        "canvas": ":scope > canvas",
+        "optionsContract": "JSON-object-only Chart.js options pass-through; functions/callbacks are not serializable and must use programmatic config"
+      }
+    },
+    {
+      "module": "datepicker.js",
+      "export": "./datepicker.js",
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
+      "source": "src/js/components/datepicker.js",
+      "bundled": false,
+      "buildTool": "esbuild",
+      "note": "esbuild-produced canonical + minified artifact pair; the module is self-contained Moo UI ESM with no third-party runtime bundled",
+      "namedExports": ["MooCalendar", "MooDateRangePicker"],
+      "publicMethods": {
+        "MooDatepicker": ["show", "hide", "toggle", "isOpen", "getDate", "setDate", "clear", "dispose"],
+        "MooDateRangePicker": ["show", "hide", "toggle", "isOpen", "getDates", "setDates", "clear", "dispose"],
+        "MooCalendar": ["getDate", "getDates", "setDate", "setDates", "clear", "focusActiveDay", "dispose"]
+      },
+      "markup": {
+        "rootClass": "moo-datepicker",
+        "rootAttribute": "data-datepicker",
+        "triggerAttribute": "data-datepicker-trigger",
+        "popoverAttribute": "data-datepicker-popover",
+        "calendarAttribute": "data-calendar",
+        "labelAttribute": "data-datepicker-label"
+      }
+    },
+    {
+      "module": "slider.js",
+      "export": "./slider.js",
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
+      "source": "src/js/components/slider.js",
+      "bundled": false,
+      "nativeElement": "input[type=\"range\"]",
+      "publicMethods": ["dispose"],
+      "markup": {
+        "rootClass": "slider",
+        "rootAttribute": "data-slider",
+        "trackAttribute": "data-slider-track",
+        "rangeAttribute": "data-slider-range",
+        "inputAttribute": "data-slider-input",
+        "outputAttribute": "data-slider-output"
+      }
+    }
+  ],
+
+  "artifactVariants": {
+    "moo-ui.min.js": {
+      "canonical": "moo-ui.js",
+      "relationship": "Minified artifact variant of moo-ui.js; shares aggregate exports and side-effect-free import behavior"
+    },
+    "chart.min.js": {
+      "canonical": "chart.js",
+      "relationship": "Minified artifact variant of chart.js; shares source, exports, lifecycle, and runtime ownership"
+    },
+    "datepicker.min.js": {
+      "canonical": "datepicker.js",
+      "relationship": "Minified artifact variant of datepicker.js; shares source, exports, lifecycle, and runtime ownership"
+    }
+  },
+
+  "cssEntrypoints": [
+    {
+      "export": "./moo-ui.css",
+      "purpose": "Full expanded Bootstrap-compatible CSS build",
+      "scope": "unscoped"
+    },
+    {
+      "export": "./moo-ui.min.css",
+      "purpose": "Full minified CSS build",
+      "scope": "unscoped"
+    },
+    {
+      "export": "./moo.css",
+      "purpose": "Scoped expanded component layer for .moo-ui",
+      "scope": "scoped"
+    },
+    {
+      "export": "./moo.min.css",
+      "purpose": "Scoped minified component layer",
+      "scope": "scoped"
+    }
+  ],
+
+  "bootstrapSupport": {
+    "canonicalVersion": "5.3.3",
+    "targetRange": ">=5.3.0 <5.4",
+    "testedVersions": ["5.3.0", "5.3.3", "5.3.8"],
+    "source": "certification.json"
+  },
+
+  "browserPolicy": {
+    "policy": "Certification is in progress; see SUPPORT.md for the intended browser policy.",
+    "exactEvidenceInAttestation": false,
+    "source": "certification.json"
+  },
+
+  "certificationManifest": {
+    "schemaVersion": "0.1",
+    "requiredFields": [
+      "schemaVersion",
+      "status",
+      "coreVersion",
+      "bootstrap",
+      "browserPolicy",
+      "certifiedComponents",
+      "publicEntrypoints",
+      "supportPolicy"
+    ],
+    "source": "src/certification/manifest.schema.json"
+  },
+
+  "documentationSurfaces": [
+    {
+      "file": "README.md",
+      "tracks": ["package exports", "runtime ownership", "installation paths"]
+    },
+    {
+      "file": "SUPPORT.md",
+      "tracks": ["SemVer policy", "breaking changes", "Bootstrap compatibility", "browser policy", "maturity definitions"]
+    },
+    {
+      "file": "site/public/llms.txt",
+      "tracks": ["package exports", "installation facts", "runtime ownership"]
+    }
+  ]
+}

@@ -181,6 +181,12 @@ $card-title-letter-spacing: -0.01em !default;
 // before Bootstrap's own variables (including $spacer) are defined.
 $moo-card-spacing: 1rem !default;
 $moo-card-spacing-sm: 0.75rem !default;
+// Bootstrap exposes one card-cap background for both headers and footers, but
+// the reference needs no header fill and a separately tuned footer surface.
+// Keep that scoped gap on Moo card knobs, derived from runtime surface tokens
+// so theme changes still flow through Bootstrap's card variables.
+$moo-card-footer-bg: color-mix(in srgb, var(--moo-muted-surface) 20%, var(--moo-surface)) !default;
+$moo-card-footer-bg-dark: color-mix(in srgb, var(--moo-muted-surface) 50%, var(--moo-surface)) !default;
 
 // Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
 // at the browser's bold UA default; the reference renders both header
