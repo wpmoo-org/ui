@@ -1,7 +1,7 @@
 {
   "freezeVersion": "1.0.0-rc.3",
   "frozenAt": "2026-08-17",
-  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze, reconciled during post-RC3 1.0.0 preparation. Adds canonical and minified Chart.js and Datepicker bundles (chart.js, chart.min.js, datepicker.js, datepicker.min.js), a plain ESM Slider wrapper (slider.js), the side-effect-free aggregate Moo UI ESM bundle (moo-ui.js, moo-ui.min.js), and the root Sass config entrypoint (scss/config) as public entrypoints. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
+  "description": "API freeze audit for the 1.0.0-rc.3 public API feature freeze, reconciled during post-RC3 1.0.0 preparation. Adds canonical and minified Chart.js and Datepicker bundles (chart.js, chart.min.js, datepicker.js, datepicker.min.js), a plain ESM Slider wrapper (slider.js), the side-effect-free aggregate Moo UI ESM bundle (moo-ui.js, moo-ui.min.js), and documented Sass source entrypoints (scss/config, scss/moo-ui, scss/moo-core, scss/components, scss/settings). Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
 
   "packageExports": [
     "./moo-ui.css",
@@ -20,6 +20,10 @@
     "./datepicker.min.js",
     "./slider.js",
     "./scss/config",
+    "./scss/moo-ui",
+    "./scss/moo-core",
+    "./scss/components",
+    "./scss/settings",
     "./certification.json",
     "./package.json"
   ],
@@ -40,7 +44,8 @@
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
     "dist/js/slider.js",
-    "scss/_config.scss",
+    "scss/*.scss",
+    "scss/**/*.scss",
     "certification.json",
     "README.md",
     "LICENSE",
@@ -64,6 +69,34 @@
     "$border-radius-sm",
     "$border-radius-lg",
     "$font-size-base"
+  ],
+
+  "sassEntrypoints": [
+    {
+      "export": "./scss/config",
+      "source": "scss/_config.scss",
+      "scope": "public variable allow-list"
+    },
+    {
+      "export": "./scss/moo-ui",
+      "source": "scss/moo-ui.scss",
+      "scope": "full Bootstrap-compatible source entrypoint"
+    },
+    {
+      "export": "./scss/moo-core",
+      "source": "scss/moo-core.scss",
+      "scope": "scoped .moo-ui source entrypoint"
+    },
+    {
+      "export": "./scss/components",
+      "source": "scss/_components.scss",
+      "scope": "component layer source entrypoint"
+    },
+    {
+      "export": "./scss/settings",
+      "source": "scss/_settings.scss",
+      "scope": "settings aggregate loaded before Bootstrap variables"
+    }
   ],
 
   "esmModules": [

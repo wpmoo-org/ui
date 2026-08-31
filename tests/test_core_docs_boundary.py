@@ -273,15 +273,15 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertIsNotNone(style_include_paths)
         self.assertEqual(
             style_include_paths(build.SCSS / "moo-ui.scss"),
-            [str(build.SCSS), str(build.BOOTSTRAP / "scss")],
+            [str(build.SCSS), str(build.BOOTSTRAP.parent)],
         )
         self.assertEqual(
             style_include_paths(build.SCSS / "moo-core.scss"),
-            [str(build.SCSS), str(build.BOOTSTRAP / "scss")],
+            [str(build.SCSS), str(build.BOOTSTRAP.parent)],
         )
         self.assertEqual(
             style_include_paths(build.SITE_SCSS / "catalog.scss"),
-            [str(build.SCSS), str(build.SITE_SCSS), str(build.BOOTSTRAP / "scss")],
+            [str(build.SCSS), str(build.SITE_SCSS), str(build.BOOTSTRAP.parent)],
         )
 
     def test_site_templates_are_in_source_snapshot(self) -> None:

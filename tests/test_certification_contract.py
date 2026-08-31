@@ -715,13 +715,15 @@ class CertificationContractTests(unittest.TestCase):
         reconciled_removed_files = {
             "scss/_facade-settings.scss",
             "scss/settings/_facade_public.scss",
+            "scss/_config.scss",
         }
         removed_files = frozen_files - live_files - reconciled_removed_files
         self.assertFalse(
             removed_files,
             f"0.9.0 frozen files were removed from package.json: {removed_files}",
         )
-        self.assertIn("scss/_config.scss", live_files)
+        self.assertIn("scss/*.scss", live_files)
+        self.assertIn("scss/**/*.scss", live_files)
         self.assertTrue(reconciled_removed_files.isdisjoint(live_files))
 
         # Sass config allow-list must match the real public declarations.
@@ -825,7 +827,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("datepicker.js", frozen_modules)
         self.assertIn("slider.js", frozen_modules)
 
-        # RC.3 package exports/files must include the three new entrypoints
+        # RC.3 package exports/files must include the documented new entrypoints
         frozen_exports = set(freeze["packageExports"])
         self.assertEqual(
             frozen_exports,
@@ -837,6 +839,10 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("./datepicker.js", frozen_exports)
         self.assertIn("./datepicker.min.js", frozen_exports)
         self.assertIn("./slider.js", frozen_exports)
+        self.assertIn("./scss/moo-ui", frozen_exports)
+        self.assertIn("./scss/moo-core", frozen_exports)
+        self.assertIn("./scss/components", frozen_exports)
+        self.assertIn("./scss/settings", frozen_exports)
 
         frozen_files = set(freeze["packageFiles"])
         self.assertEqual(
@@ -849,6 +855,8 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("dist/js/datepicker.js", frozen_files)
         self.assertIn("dist/js/datepicker.min.js", frozen_files)
         self.assertIn("dist/js/slider.js", frozen_files)
+        self.assertIn("scss/*.scss", frozen_files)
+        self.assertIn("scss/**/*.scss", frozen_files)
         self.assertIn("THIRD_PARTY_NOTICES.md", frozen_files)
 
         # RC.3 artifact variants must map minified to canonical

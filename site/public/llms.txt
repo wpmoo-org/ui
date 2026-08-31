@@ -43,11 +43,16 @@ not independent or accredited certification.
 - `@wpmoo/ui/datepicker.min.js`: minified Datepicker bundle (artifact variant of datepicker.js)
 - `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
 - `@wpmoo/ui/scss/config`: public Sass variable allow-list (LibSass `@import`)
+- `@wpmoo/ui/scss/moo-ui`: full Bootstrap-compatible Sass source entrypoint
+- `@wpmoo/ui/scss/moo-core`: scoped `.moo-ui` Sass source entrypoint
+- `@wpmoo/ui/scss/components`: component layer Sass source entrypoint
+- `@wpmoo/ui/scss/settings`: Moo UI settings aggregate for Bootstrap variable setup
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
 
 The npm package does not publish catalog templates, preview artwork, catalog
-JavaScript, or internal SCSS partials beyond the public Sass config.
+JavaScript, or site assets. It ships Sass source files for the documented Sass
+entrypoints; undocumented internal partial paths are not separate public APIs.
 
 ## Installation Facts
 

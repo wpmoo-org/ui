@@ -33,7 +33,13 @@
       "./datepicker.js",
       "./datepicker.min.js"
     ],
-    "sass": ["./scss/config"]
+    "sass": [
+      "./scss/config",
+      "./scss/moo-ui",
+      "./scss/moo-core",
+      "./scss/components",
+      "./scss/settings"
+    ]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
 }

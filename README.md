@@ -170,13 +170,19 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/slider.js` | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
 | `@wpmoo/ui/scss/config` | Public Sass variable allow-list (LibSass `@import`) |
+| `@wpmoo/ui/scss/moo-ui` | Full Bootstrap-compatible Sass source entrypoint |
+| `@wpmoo/ui/scss/moo-core` | Scoped `.moo-ui` Sass source entrypoint |
+| `@wpmoo/ui/scss/components` | Component layer Sass source entrypoint |
+| `@wpmoo/ui/scss/settings` | Moo UI settings aggregate for Bootstrap variable setup |
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
 
 The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
 THIRD_PARTY_NOTICES.md. It does not publish catalog templates, preview
-artwork, catalog JavaScript, or internal SCSS partials beyond the public Sass
-config. Internal Sass partials and Jinja macros are repository build tools, not npm APIs.
+artwork, or catalog JavaScript. Sass source files are included so the
+documented Sass entrypoints can compile in consumer builds that also resolve
+Bootstrap's peer Sass files. Undocumented internal partial paths, undocumented
+Sass variables, and Jinja macros are repository build tools, not npm APIs.
 
 ## Why Bootstrap Teams Try It
 

@@ -89,6 +89,26 @@
         {{ render_code_snippet("installation-scoped-import", scoped_import_example, "js") }}
       </section>
 
+      <section class="moo-doc-section" aria-labelledby="sass-source">
+        {{ typography("Sass Source", variant="section-title", id="sass-source") }}
+        <p>
+          Moo UI ships documented Sass source entrypoints for hosts that compile
+          their own stylesheet. Resolve Bootstrap's peer Sass files from your
+          build, import <code>scss/config</code> before Bootstrap variables when
+          overriding supported tokens, then import the full or scoped Moo UI
+          source entrypoint.
+        </p>
+        {% set sass_source_example %}
+        @import "bootstrap/scss/functions";
+        @import "@wpmoo/ui/scss/config";
+
+        $primary: #3b82f6;
+
+        @import "@wpmoo/ui/scss/moo-ui";
+        {% endset %}
+        {{ render_code_snippet("installation-sass-source", sass_source_example, "scss") }}
+      </section>
+
       <section class="moo-doc-section" aria-labelledby="bootstrap-javascript">
         {{ typography("Bootstrap JavaScript", variant="section-title", id="bootstrap-javascript") }}
         <p>
@@ -257,6 +277,7 @@
       {"id": "choose-path", "label": "Choose This Path"},
       {"id": "full-build", "label": "Full Build"},
       {"id": "scoped-build", "label": "Scoped Adoption"},
+      {"id": "sass-source", "label": "Sass Source"},
       {"id": "bootstrap-javascript", "label": "Bootstrap JavaScript"},
       {"id": "optional-esm", "label": "Optional Moo UI ESM"},
       {"id": "troubleshooting", "label": "Troubleshooting"}

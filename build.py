@@ -1562,7 +1562,7 @@ def style_include_paths(entrypoint: Path) -> list[str]:
     include_paths = [str(SCSS)]
     if entrypoint.is_relative_to(SITE_SCSS):
         include_paths.append(str(SITE_SCSS))
-    include_paths.append(str(BOOTSTRAP / "scss"))
+    include_paths.append(str(BOOTSTRAP.parent))
     return include_paths
 
 
