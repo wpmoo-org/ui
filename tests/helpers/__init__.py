@@ -60,18 +60,24 @@ def read_scss_aggregate(
     entrypoint: Path,
     prefix: str,
     *,
+    root_imports: set[str] | None = None,
     source_root: Path | None = None,
 ) -> str:
     source = entrypoint.read_text(encoding="utf-8")
     if source_root is None:
         source_root = ROOT / "scss"
+    if root_imports is None:
+        root_imports = set()
     paths = [entrypoint]
     queue: list[Path] = []
     for target in active_scss_imports(source):
-        if not target.startswith(f"{prefix}/"):
+        if target in root_imports:
+            partial = source_root / f"_{target}.scss"
+        elif target.startswith(f"{prefix}/"):
+            relative = Path(target)
+            partial = source_root / relative.parent / f"_{relative.name}.scss"
+        else:
             continue
-        relative = Path(target)
-        partial = source_root / relative.parent / f"_{relative.name}.scss"
         if not partial.is_file():
             raise FileNotFoundError(f"Missing imported Sass partial: {partial}")
         paths.append(partial)
@@ -95,7 +101,11 @@ def read_scss_aggregate(
 
 
 def read_settings() -> str:
-    return read_scss_aggregate(ROOT / "scss/_settings.scss", "settings")
+    return read_scss_aggregate(
+        ROOT / "scss/_settings.scss",
+        "settings",
+        root_imports={"config"},
+    )
 
 
 def read_catalog_styles() -> str:
