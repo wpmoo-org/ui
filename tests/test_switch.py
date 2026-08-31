@@ -10,7 +10,7 @@ COMPONENT = ROOT / "src/components/switch.html.jinja"
 PAGE = ROOT / "site/src/pages/components/switch.html.jinja"
 CHECKBOX_SCSS = ROOT / "scss/components/_checkbox.scss"
 FIELD_SCSS = ROOT / "scss/components/_field.scss"
-COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_components.scss"
+COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_component_variables.scss"
 
 
 class SwitchTests(CatalogTestCase):

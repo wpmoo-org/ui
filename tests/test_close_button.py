@@ -91,11 +91,12 @@ class CloseButtonTests(CatalogTestCase):
         source = (ROOT / "scss/components/_close_button.scss").read_text(
             encoding="utf-8"
         )
-        settings = (ROOT / "scss/settings/_components.scss").read_text(
+        settings = (ROOT / "scss/settings/_component_variables.scss").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn('@import "components/close_button";', (ROOT / "scss/_component_layer.scss").read_text(encoding="utf-8"))
+        components = (ROOT / "scss/_components.scss").read_text(encoding="utf-8")
+        self.assertIn('@import "components/close_button";', components)
         self.assertIn("$btn-close-width: 0.75rem !default;", settings)
         self.assertIn("$btn-close-padding-x: 0.34375rem !default;", settings)
         self.assertIn("$btn-close-opacity: 1 !default;", settings)

@@ -8,7 +8,7 @@ COMPONENT = ROOT / "src/components/toast.html.jinja"
 PAGE = ROOT / "site/src/pages/components/toast.html.jinja"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 TOAST_SCSS = ROOT / "scss/components/_toast.scss"
-COMPONENT_SETTINGS = ROOT / "scss/settings/_components.scss"
+COMPONENT_SETTINGS = ROOT / "scss/settings/_component_variables.scss"
 PRIMARY_VARIABLES = ROOT / "scss/_primary_variables.scss"
 FIXTURE = ROOT / "tests/fixtures/certification/toast.html"
 

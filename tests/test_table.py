@@ -7,7 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/table.html.jinja"
 PAGE = ROOT / "site/src/pages/components/table.html.jinja"
 STYLES = ROOT / "scss/components/_table.scss"
-COMPONENT_LAYER = ROOT / "scss/_component_layer.scss"
+COMPONENTS_AGGREGATE = ROOT / "scss/_components.scss"
 
 
 class TableTests(CatalogTestCase):
@@ -166,7 +166,10 @@ class TableTests(CatalogTestCase):
     ) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertIn('@import "components/table";', COMPONENT_LAYER.read_text(encoding="utf-8"))
+        self.assertIn(
+            '@import "components/table";',
+            COMPONENTS_AGGREGATE.read_text(encoding="utf-8"),
+        )
         self.assertIn(
             '.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"])',
             styles,

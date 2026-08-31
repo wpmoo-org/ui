@@ -286,7 +286,7 @@ class DatepickerSourceTests(CatalogTestCase):
     def test_scss_is_imported_after_field_and_before_combobox(self) -> None:
         imports = re.findall(
             r'@import "([^"]+)";',
-            (ROOT / "scss/_component_layer.scss").read_text(encoding="utf-8"),
+            (ROOT / "scss/_components.scss").read_text(encoding="utf-8"),
         )
 
         self.assertLess(

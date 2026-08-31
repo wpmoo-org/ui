@@ -7,7 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/field.html.jinja"
 PAGE = ROOT / "site/src/pages/components/field.html.jinja"
 FIELD_SCSS = ROOT / "scss/components/_field.scss"
-COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_components.scss"
+COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_component_variables.scss"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
 
