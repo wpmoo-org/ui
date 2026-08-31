@@ -496,10 +496,23 @@ body {
    the published dist/js/chart.js already bundles Chart.js and exposes
    MooChart as its default export. #}
 {% macro dashboard_codepen_js() -%}
-// This pen includes the copyable dashboard markup and CSS. The Moo Chart
-// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
-// package is published to npm; do not import chart.js from the older pinned
-// CodePen CDN package.
+function startMooCodePenCharts() {
+  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
+    .then(({ default: MooChart }) => {
+      document.querySelectorAll(".chart").forEach((element) => {
+        MooChart.getOrCreateInstance(element);
+      });
+    })
+    .catch((error) => {
+      console.error("Moo UI Chart failed to load for this CodePen example.", error);
+    });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenCharts, { once: true });
+} else {
+  startMooCodePenCharts();
+}
 {%- endmacro %}
 
 {% macro chart_codepen_css() -%}
@@ -514,10 +527,74 @@ body {
 {%- endmacro %}
 
 {% macro chart_codepen_js() -%}
-// This pen includes the copyable Moo Chart markup and CSS. The Moo Chart
-// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
-// package is published to npm; do not import chart.js from the older pinned
-// CodePen CDN package.
+function startMooCodePenCharts() {
+  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
+    .then(({ default: MooChart }) => {
+      document.querySelectorAll(".chart").forEach((element) => {
+        MooChart.getOrCreateInstance(element);
+      });
+    })
+    .catch((error) => {
+      console.error("Moo UI Chart failed to load for this CodePen example.", error);
+    });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenCharts, { once: true });
+} else {
+  startMooCodePenCharts();
+}
+{%- endmacro %}
+
+{% macro datepicker_codepen_js() -%}
+function startMooCodePenDatepickers() {
+  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/datepicker.js")
+    .then(({ default: MooDatepicker, MooCalendar, MooDateRangePicker }) => {
+      document.querySelectorAll("[data-datepicker]").forEach((element) => {
+        MooDatepicker.getOrCreateInstance(element);
+      });
+
+      document.querySelectorAll("[data-datepicker-range]").forEach((element) => {
+        MooDateRangePicker.getOrCreateInstance(element);
+      });
+
+      document.querySelectorAll("[data-calendar]").forEach((element) => {
+        if (element.closest("[data-datepicker], [data-datepicker-range]")) {
+          return;
+        }
+        MooCalendar.getOrCreateInstance(element);
+      });
+    })
+    .catch((error) => {
+      console.error("Moo UI Date Picker failed to load for this CodePen example.", error);
+    });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenDatepickers, { once: true });
+} else {
+  startMooCodePenDatepickers();
+}
+{%- endmacro %}
+
+{% macro slider_codepen_js() -%}
+function startMooCodePenSliders() {
+  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/slider.js")
+    .then(({ default: MooSlider }) => {
+      document.querySelectorAll("[data-slider]").forEach((element) => {
+        MooSlider.getOrCreateInstance(element);
+      });
+    })
+    .catch((error) => {
+      console.error("Moo UI Slider failed to load for this CodePen example.", error);
+    });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenSliders, { once: true });
+} else {
+  startMooCodePenSliders();
+}
 {%- endmacro %}
 
 {% macro codepen_demo_js(component_slug="", component_label="") -%}
@@ -642,7 +719,7 @@ if (document.readyState === "loading") {
     "js_module": js_module
   } %}
   <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen{% if extra_class %} {{ extra_class }}{% endif %}" data-moo-codepen-form>
-    <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
+    <textarea name="data" hidden>{{ payload | moo_json | forceescape }}</textarea>
     {{ button(label, type="submit", variant="outline", size="sm", icon_start=icon) }}
   </form>
 {%- endmacro %}

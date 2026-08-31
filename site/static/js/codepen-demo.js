@@ -162,6 +162,353 @@
     });
   }
 
+  function initializeToasts(root) {
+    var Toast = window.bootstrap && window.bootstrap.Toast;
+    if (
+      !Toast ||
+      !root.body ||
+      root.body.dataset.mooCodepenToastsReady === "true"
+    ) {
+      return;
+    }
+
+    root.body.dataset.mooCodepenToastsReady = "true";
+
+    var toastSequence = 0;
+    var toastStackVisibleLimit = 3;
+    var sharedToastStacks = new Map();
+
+    function isStackContainer(element) {
+      return element instanceof window.HTMLElement &&
+        element.matches('.toast-container--stacked[data-toast-stack="deck"]');
+    }
+
+    function getStackContainer(toast) {
+      var container = toast && toast.closest
+        ? toast.closest('.toast-container--stacked[data-toast-stack="deck"]')
+        : null;
+      return isStackContainer(container) ? container : null;
+    }
+
+    function getSharedToastStack(sourceContainer) {
+      if (!isStackContainer(sourceContainer)) {
+        return sourceContainer;
+      }
+
+      var key = sourceContainer.dataset.toastStack || "deck";
+      var existing = sharedToastStacks.get(key);
+      if (existing && existing.isConnected) {
+        return existing;
+      }
+
+      var container = root.createElement("div");
+      container.className = sourceContainer.className;
+      container.dataset.toastStack = key;
+      container.dataset.mooCodepenToastStack = "shared";
+      root.body.appendChild(container);
+      sharedToastStacks.set(key, container);
+      return container;
+    }
+
+    function readNumber(value, fallback) {
+      var number = Number.parseFloat(value);
+      return Number.isFinite(number) ? number : fallback;
+    }
+
+    function readPixels(value, computed) {
+      var number = readNumber(value, 0);
+      var normalized = value.trim();
+      if (normalized.endsWith("rem")) {
+        return number * readNumber(window.getComputedStyle(root.documentElement).fontSize, 16);
+      }
+      if (normalized.endsWith("em")) {
+        return number * readNumber(computed.fontSize, 16);
+      }
+      return number;
+    }
+
+    function clearToastStackState(toast) {
+      toast.removeAttribute("data-toast-stack-index");
+      toast.removeAttribute("data-toast-stack-limited");
+      toast.removeAttribute("data-toast-stack-entering");
+      toast.removeAttribute("inert");
+      toast.style.removeProperty("--moo-toast-stack-collapsed-y");
+      toast.style.removeProperty("--moo-toast-stack-expanded-y");
+      toast.style.removeProperty("--moo-toast-stack-scale");
+      toast.style.removeProperty("--moo-toast-stack-z");
+    }
+
+    function updateToastStack(container, pendingToast) {
+      if (!isStackContainer(container)) {
+        return;
+      }
+
+      var toasts = Array.from(container.children).filter(function (child) {
+        return child instanceof window.HTMLElement &&
+          child.classList.contains("toast") &&
+          (
+            child.classList.contains("show") ||
+            child.classList.contains("showing") ||
+            child === pendingToast
+          );
+      });
+
+      if (toasts.length === 0) {
+        container.removeAttribute("data-toast-stack-hovering");
+        container.removeAttribute("data-toast-stack-active");
+        return;
+      }
+
+      container.setAttribute("data-toast-stack-active", "");
+
+      var spacingSource = toasts[0] || container;
+      var computed = window.getComputedStyle(spacingSource);
+      var gap = readPixels(computed.getPropertyValue("--moo-toast-stack-gap"), computed);
+      var peek = readPixels(computed.getPropertyValue("--moo-toast-stack-peek"), computed);
+      var scaleStep = readNumber(
+        computed.getPropertyValue("--moo-toast-stack-scale-step"),
+        0.1
+      );
+      var minScale = readNumber(
+        computed.getPropertyValue("--moo-toast-stack-min-scale"),
+        0.5
+      );
+
+      toasts.sort(function (left, right) {
+        var leftSequence = Number.parseInt(left.dataset.toastStackSequence || "0", 10);
+        var rightSequence = Number.parseInt(right.dataset.toastStackSequence || "0", 10);
+        return (Number.isFinite(rightSequence) ? rightSequence : 0) -
+          (Number.isFinite(leftSequence) ? leftSequence : 0);
+      });
+
+      var stackHeight = (toasts[0] && (
+        toasts[0].offsetHeight ||
+        toasts[0].getBoundingClientRect().height
+      )) || 0;
+      var expandedOffset = 0;
+
+      toasts.forEach(function (toast, index) {
+        var height = toast.offsetHeight || toast.getBoundingClientRect().height;
+        var scale = Math.max(minScale, 1 - index * scaleStep);
+        var collapsedOffset = -(index * peek + (1 - scale) * stackHeight);
+        var limited = index >= toastStackVisibleLimit;
+
+        toast.dataset.toastStackIndex = String(index);
+        if (limited) {
+          toast.setAttribute("data-toast-stack-limited", "");
+          toast.setAttribute("inert", "");
+        } else {
+          toast.removeAttribute("data-toast-stack-limited");
+          toast.removeAttribute("inert");
+        }
+
+        toast.style.setProperty("--moo-toast-stack-collapsed-y", collapsedOffset + "px");
+        toast.style.setProperty("--moo-toast-stack-expanded-y", expandedOffset + "px");
+        toast.style.setProperty("--moo-toast-stack-scale", String(scale));
+        toast.style.setProperty("--moo-toast-stack-z", String(1000 - index));
+        expandedOffset -= height + gap;
+      });
+    }
+
+    function isPointerInsideToastStack(container, event) {
+      if (!isStackContainer(container)) {
+        return false;
+      }
+
+      return Array.from(container.children).some(function (child) {
+        var rect;
+        if (
+          !(child instanceof window.HTMLElement) ||
+          !child.classList.contains("toast") ||
+          child.hasAttribute("data-toast-stack-limited")
+        ) {
+          return false;
+        }
+
+        rect = child.getBoundingClientRect();
+        return event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom;
+      });
+    }
+
+    function markToastStackHovering(container) {
+      if (!isStackContainer(container)) {
+        return;
+      }
+
+      container.setAttribute("data-toast-stack-hovering", "");
+      updateToastStack(container);
+    }
+
+    function releaseToastStackHovering(container) {
+      if (!isStackContainer(container)) {
+        return;
+      }
+
+      container.removeAttribute("data-toast-stack-hovering");
+      updateToastStack(container);
+    }
+
+    function hideToastFromDismissControl(dismiss) {
+      var target;
+      var instance;
+      if (
+        !(dismiss instanceof window.HTMLElement) ||
+        dismiss.matches(":disabled, [aria-disabled='true']")
+      ) {
+        return;
+      }
+
+      target = dismiss.closest(".toast");
+      if (target) {
+        instance = Toast.getOrCreateInstance(target);
+        instance.hide();
+      }
+    }
+
+    root.addEventListener("pointerover", function (event) {
+      var toast = event.target instanceof window.Element
+        ? event.target.closest(".toast")
+        : null;
+      var container = getStackContainer(toast);
+      if (container && toast && toast.parentElement === container) {
+        markToastStackHovering(container);
+      }
+    }, true);
+
+    root.addEventListener("pointermove", function (event) {
+      root
+        .querySelectorAll(
+          '.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]'
+        )
+        .forEach(function (container) {
+          if (
+            isStackContainer(container) &&
+            !isPointerInsideToastStack(container, event)
+          ) {
+            releaseToastStackHovering(container);
+          }
+        });
+    }, true);
+
+    root.addEventListener("click", function (event) {
+      var trigger = event.target instanceof window.Element
+        ? event.target.closest("[data-toast-target]")
+        : null;
+      var selector = trigger && trigger.dataset.toastTarget || "";
+      var id = selector.charAt(0) === "#" ? selector.slice(1) : selector;
+      var target = id ? root.getElementById(id) : null;
+      var template;
+      var sourceContainer;
+      var fragment;
+      var toast;
+      var container;
+      var sequence;
+      var instance;
+
+      if (!trigger) {
+        return;
+      }
+
+      if (
+        target instanceof window.HTMLTemplateElement &&
+        target.dataset.toastTemplate === "toast"
+      ) {
+        event.preventDefault();
+        template = target;
+        sourceContainer = template.parentElement;
+        fragment = template.content.cloneNode(true);
+        toast = fragment.firstElementChild;
+        if (
+          !(sourceContainer instanceof window.HTMLElement) ||
+          !(toast instanceof window.HTMLElement) ||
+          !toast.classList.contains("toast")
+        ) {
+          return;
+        }
+
+        container = getSharedToastStack(sourceContainer);
+        sequence = ++toastSequence;
+        toast.id = template.id + "-" + sequence;
+        toast.setAttribute("data-toast-generated", "true");
+        toast.setAttribute("data-toast-stack-sequence", String(sequence));
+        toast.setAttribute("data-toast-stack-entering", "");
+        container.prepend(toast);
+        updateToastStack(container, toast);
+        instance = Toast.getOrCreateInstance(toast, { animation: false });
+        instance.show();
+        window.setTimeout(function () {
+          window.requestAnimationFrame(function () {
+            if (toast.isConnected) {
+              toast.removeAttribute("data-toast-stack-entering");
+            }
+          });
+        }, 80);
+      } else if (target instanceof window.HTMLElement) {
+        event.preventDefault();
+        instance = Toast.getOrCreateInstance(target);
+        instance.show();
+      }
+    });
+
+    root.addEventListener("show.bs.toast", function (event) {
+      var toast = event.target;
+      var container = getStackContainer(toast);
+      if (container) {
+        updateToastStack(container, toast);
+      }
+    }, true);
+
+    root.addEventListener("shown.bs.toast", function (event) {
+      var toast = event.target;
+      var container = getStackContainer(toast);
+      if (container) {
+        updateToastStack(container, toast);
+      }
+    }, true);
+
+    root.addEventListener("hidden.bs.toast", function (event) {
+      var toast = event.target;
+      var container;
+      var instance;
+      if (!(toast instanceof window.HTMLElement) || !toast.classList.contains("toast")) {
+        return;
+      }
+
+      container = getStackContainer(toast);
+      clearToastStackState(toast);
+      if (toast.dataset.toastGenerated === "true") {
+        instance = Toast.getInstance(toast);
+        if (instance) {
+          instance.dispose();
+        }
+        toast.remove();
+      }
+      if (container) {
+        updateToastStack(container);
+      }
+    }, true);
+
+    root.addEventListener("keydown", function (event) {
+      var dismiss = event.target instanceof window.Element
+        ? event.target.closest('[data-bs-dismiss="toast"]')
+        : null;
+      if (
+        !dismiss ||
+        !event.ctrlKey ||
+        !event.altKey ||
+        (event.key !== " " && event.key !== "Spacebar")
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      hideToastFromDismissControl(dismiss);
+    });
+  }
+
   function render(config) {
     var normalized = normalizeConfig(config);
 
@@ -180,6 +527,7 @@
     }
 
     initializePopovers(document);
+    initializeToasts(document);
   }
 
   window.MooCodePenDemo = {

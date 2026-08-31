@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import re
+from html import unescape
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase, read_settings
 
@@ -7,6 +11,7 @@ from tests.helpers import ROOT, CatalogTestCase, read_settings
 COMPONENT = ROOT / "src/components/toast.html.jinja"
 PAGE = ROOT / "site/src/pages/components/toast.html.jinja"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
+CODEPEN_DEMO_JS = ROOT / "site/static/js/codepen-demo.js"
 TOAST_SCSS = ROOT / "scss/components/_toast.scss"
 COMPONENT_SETTINGS = ROOT / "scss/settings/_component_variables.scss"
 FIXTURE = ROOT / "tests/fixtures/certification/toast.html"
@@ -20,6 +25,19 @@ class ToastTests(CatalogTestCase):
             + source
         )
         return " ".join(template.render().split())
+
+    def toast_codepen_payloads(self) -> list[dict[str, object]]:
+        page = self.read_output("components/toast.html")
+        payloads: list[dict[str, object]] = []
+        for match in re.finditer(
+            r'<textarea name="data" hidden>(.*?)</textarea>',
+            page,
+            re.DOTALL,
+        ):
+            payload = json.loads(unescape(match.group(1)).strip())
+            if str(payload.get("title", "")).startswith("Moo UI Toast - "):
+                payloads.append(payload)
+        return payloads
 
     def test_toast_renders_header_body_and_close_button(self) -> None:
         output = self.render(
@@ -331,6 +349,37 @@ class ToastTests(CatalogTestCase):
         self.assertIn('data-toast-target="#toast-variant-success-template"', page)
         self.assertIn('data-toast-variant="success"', page)
         self.assertIn('data-toast-variant="loading"', page)
+
+    def test_codepen_payload_uses_bootstrap_and_demo_js_for_toast_triggers(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        payloads = self.toast_codepen_payloads()
+        self.assertGreaterEqual(len(payloads), 2)
+        basic = next(
+            payload for payload in payloads
+            if payload["title"] == "Moo UI Toast - Basic"
+        )
+
+        self.assertIn('data-toast-target="#toast-basic-template"', str(basic["html"]))
+        self.assertIn('<template id="toast-basic-template"', str(basic["html"]))
+        self.assertIn("bootstrap.bundle.min.js", str(basic["js_external"]))
+        self.assertIn("codepen-demo.js", str(basic["js_external"]))
+        self.assertNotIn("moo-ui.min.js", str(basic["js_external"]))
+        self.assertNotIn("moo-ui.js", str(basic["js_external"]))
+
+    def test_codepen_demo_wires_toast_templates_without_public_moo_runtime(self) -> None:
+        script = CODEPEN_DEMO_JS.read_text(encoding="utf-8")
+
+        self.assertIn("function initializeToasts(root)", script)
+        self.assertIn('event.target.closest("[data-toast-target]")', script)
+        self.assertIn("target instanceof window.HTMLTemplateElement", script)
+        self.assertIn("template.content.cloneNode(true)", script)
+        self.assertIn("data-toast-generated", script)
+        self.assertIn("data-toast-stack-sequence", script)
+        self.assertIn("Toast.getOrCreateInstance", script)
+        self.assertIn("instance.show()", script)
+        self.assertNotIn("dist/js/moo-ui.min.js", script)
 
     def test_catalog_bootstrap_module_creates_repeated_toast_instances(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")

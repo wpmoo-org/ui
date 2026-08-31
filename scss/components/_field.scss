@@ -1,3 +1,9 @@
+.form-label,
+.form-check-label {
+  // Labels are part of the clickable control surface, not selectable copy.
+  user-select: none;
+}
+
 .field {
   display: flex;
   flex-direction: column;

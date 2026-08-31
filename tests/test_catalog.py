@@ -209,7 +209,9 @@ COMPONENT_SELECTOR_PREFIXES = {
 class CodePenPayloadParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
+        self.in_codepen_data = False
         self.in_codepen_form = False
+        self.current_codepen_data: list[str] = []
         self.forms: list[dict[str, str | None]] = []
         self.buttons: list[dict[str, str | None]] = []
         self.payloads: list[dict[str, object]] = []
@@ -229,8 +231,25 @@ class CodePenPayloadParser(HTMLParser):
             and attributes.get("value")
         ):
             self.payloads.append(json.loads(attributes["value"]))
+        if (
+            self.in_codepen_form
+            and tag == "textarea"
+            and attributes.get("name") == "data"
+        ):
+            self.in_codepen_data = True
+            self.current_codepen_data = []
+
+    def handle_data(self, data: str) -> None:
+        if self.in_codepen_data:
+            self.current_codepen_data.append(data)
 
     def handle_endtag(self, tag: str) -> None:
+        if self.in_codepen_data and tag == "textarea":
+            self.in_codepen_data = False
+            payload = "".join(self.current_codepen_data).strip()
+            if payload:
+                self.payloads.append(json.loads(payload))
+            self.current_codepen_data = []
         if tag == "form":
             self.in_codepen_form = False
 
@@ -820,7 +839,13 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         codepen_version = site_build.CODEPEN_CDN_VERSION
-        published_rc2_js_entrypoints = {"datatable.js"}
+        published_js_entrypoints = {
+            file.removeprefix("dist/js/")
+            for file in json.loads(
+                (ROOT / "package.json").read_text(encoding="utf-8")
+            )["files"]
+            if file.startswith("dist/js/")
+        }
         import_pattern = re.compile(
             rf"@wpmoo/ui@{re.escape(codepen_version)}/dist/js/(?P<entrypoint>[a-z.-]+\.js)"
         )
@@ -836,26 +861,88 @@ class CatalogContractTests(CatalogTestCase):
                         payload=index,
                         entrypoint=entrypoint,
                     ):
-                        self.assertIn(entrypoint, published_rc2_js_entrypoints)
+                        self.assertIn(entrypoint, published_js_entrypoints)
 
-    def test_codepen_hides_rc3_only_interactive_examples_until_cdn_is_current(self) -> None:
+    def test_codepen_shows_current_interactive_examples_after_rc3_publish(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        self.assertNotEqual(
-            site_build.CODEPEN_CDN_VERSION,
-            json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"],
-        )
-        for path in (
-            "components/chart.html",
-            "components/datepicker.html",
-            "components/slider.html",
-            "charts/index.html",
-        ):
+        package_version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))[
+            "version"
+        ]
+        self.assertEqual(site_build.CODEPEN_CDN_VERSION, package_version)
+
+        expected_runtime = {
+            "components/chart.html": ("chart.js", ".chart", "MooChart"),
+            "components/datepicker.html": (
+                "datepicker.js",
+                "[data-datepicker]",
+                "MooDatepicker",
+            ),
+            "components/slider.html": ("slider.js", "[data-slider]", "MooSlider"),
+            "charts/index.html": ("chart.js", ".chart", "MooChart"),
+        }
+        for path, (entrypoint, selector, symbol) in expected_runtime.items():
             with self.subTest(path=path):
                 page = self.read_output(path)
-                self.assertNotIn("Try in CodePen", page)
-                self.assertNotIn("data-moo-codepen-form", page)
+                self.assertIn("Try in CodePen", page)
+                self.assertIn("data-moo-codepen-form", page)
+
+                parser = CodePenPayloadParser()
+                parser.feed(page)
+                payloads = [
+                    payload
+                    for payload in parser.payloads
+                    if f"@wpmoo/ui@{package_version}/dist/js/{entrypoint}"
+                    in str(payload.get("js", ""))
+                ]
+
+                self.assertTrue(payloads, f"{path} does not load {entrypoint}")
+                for payload in payloads:
+                    js = str(payload["js"])
+                    self.assertIn(selector, js)
+                    self.assertIn(symbol, js)
+                    self.assertIn("getOrCreateInstance", js)
+                    self.assertNotIn("should be wired", js)
+
+    def test_codepen_prefill_payloads_use_browser_safe_form_fields(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        for path in ("components/chart.html", "components/datepicker.html"):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                parser = CodePenPayloadParser()
+                parser.feed(page)
+
+                self.assertFalse(
+                    '<input type="hidden" name="data"' in page,
+                    f"{path} should not put the CodePen JSON payload in an attribute",
+                )
+                self.assertTrue(
+                    '<textarea name="data" hidden>' in page,
+                    f"{path} should submit the CodePen JSON payload as field text",
+                )
+                self.assertEqual(page.count("data-moo-codepen-form"), len(parser.payloads))
+                self.assertTrue(all(payload.get("title") for payload in parser.payloads))
+
+    def test_component_codepen_payloads_keep_inline_icons(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("components/datepicker.html")
+        parser = CodePenPayloadParser()
+        parser.feed(page)
+        payload = next(
+            payload
+            for payload in parser.payloads
+            if payload["title"] == "Moo UI Date Picker - Basic"
+        )
+        html = str(payload["html"])
+
+        self.assertIn('data-lucide="calendar"', html)
+        self.assertIn("<svg", html)
+        self.assertNotIn('<i class="lucide lucide-calendar"', html)
 
     def test_codepen_runtime_gating_policy_is_owned_by_codepen_include(self) -> None:
         codepen_source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(
@@ -1456,6 +1543,30 @@ class CatalogContractTests(CatalogTestCase):
                     "background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));",
                     state,
                 )
+
+    def test_catalog_header_controls_share_height_token(self) -> None:
+        catalog_scss = read_catalog_styles()
+        shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
+        search_trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[
+            1
+        ].split("}", 1)[0]
+        sidebar_toggle_match = re.search(
+            r"(?m)^\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
+            catalog_scss,
+        )
+        self.assertIsNotNone(sidebar_toggle_match)
+        assert sidebar_toggle_match is not None
+        sidebar_toggle = sidebar_toggle_match.group("body")
+        github_link = catalog_scss.split(".moo-catalog__github-link {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+
+        self.assertIn("--moo-catalog-control-height: 2rem;", shell)
+        self.assertIn("height: var(--moo-catalog-control-height);", search_trigger)
+        self.assertIn("width: var(--moo-catalog-control-height);", sidebar_toggle)
+        self.assertIn("height: var(--moo-catalog-control-height);", sidebar_toggle)
+        self.assertIn("min-height: var(--moo-catalog-control-height);", github_link)
 
     def test_catalog_header_surface_follows_body_background_token(self) -> None:
         catalog_scss = read_catalog_styles()

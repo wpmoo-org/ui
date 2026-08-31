@@ -7,6 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/field.html.jinja"
 PAGE = ROOT / "site/src/pages/components/field.html.jinja"
 FIELD_SCSS = ROOT / "scss/components/_field.scss"
+COMPONENTS_AGGREGATE_SCSS = ROOT / "scss/_components.scss"
 COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_component_variables.scss"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
@@ -64,6 +65,17 @@ class FieldTests(CatalogTestCase):
         self.assertIn('&[data-invalid="true"] {', source)
         self.assertIn("color: var(--bs-form-invalid-color);", source)
         self.assertNotIn(":has(> .is-invalid) > .form-label", source)
+
+    def test_field_partial_owns_clickable_label_selection_rule(self) -> None:
+        field_source = FIELD_SCSS.read_text(encoding="utf-8")
+        aggregate_source = COMPONENTS_AGGREGATE_SCSS.read_text(encoding="utf-8")
+        css = self.read_output("assets/css/moo-ui.css")
+
+        self.assertIn(".form-label,", field_source)
+        self.assertIn(".form-check-label", field_source)
+        self.assertIn("user-select: none;", field_source)
+        self.assertNotIn("user-select: none;", aggregate_source)
+        self.assertIn(".form-label,\n.form-check-label {\n  user-select: none;", css)
 
     def test_field_description_renders_form_text(self) -> None:
         output = self.render(

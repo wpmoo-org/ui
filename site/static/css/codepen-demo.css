@@ -20,7 +20,16 @@ body.moo-codepen-component-demo {
   place-items: center;
 }
 
-body.moo-codepen-component-demo > :where(:not(.moo-codepen-signature, .moo-codepen-footer)) {
+body.moo-codepen-component-demo > :where(
+  :not(
+    .moo-codepen-signature,
+    .moo-codepen-footer,
+    .modal,
+    .modal-backdrop,
+    .offcanvas,
+    .offcanvas-backdrop
+  )
+) {
   max-width: min(100%, 48rem);
   margin-block: 0;
 }
@@ -45,6 +54,14 @@ body.moo-codepen-component-demo > :where(
   table
 ) {
   width: min(100%, 48rem);
+}
+
+body.moo-codepen-component-demo > :where(.field, .field-group) {
+  width: min(100%, 24rem);
+}
+
+body.moo-codepen-component-demo > :where(.field, .field-group).w-100 {
+  width: min(100%, 24rem) !important;
 }
 
 .moo-codepen-signature {

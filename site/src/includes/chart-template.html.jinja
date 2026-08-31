@@ -31,6 +31,7 @@
 {% macro chart_content_example(example_id, title, description, content, preview_class="moo-example__preview--medium", category_label="Chart") %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
+  {% set codepen_source = rendered | format_codepen_html %}
   {% set code_id = example_id ~ "-code" %}
   {% set chart_actions %}
     <div class="moo-chart-example__actions" data-moo-code-copy-scope>
@@ -47,7 +48,7 @@
       {{ codepen_button_if_available(
         "Moo UI " ~ title,
         description | striptags,
-        source,
+        codepen_source,
         chart_codepen_css(),
         ["moo-ui", "chartjs", "charts"],
         js=chart_codepen_js(),

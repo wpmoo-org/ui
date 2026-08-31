@@ -71,11 +71,3 @@
 @import "components/combobox";
 @import "components/context-menu";
 @import "components/datatable";
-
-// Bootstrap's own .form-label/.form-check-label leave native text selection
-// on; the design reference treats every control label as part of the
-// clickable control surface, not selectable copy.
-.form-label,
-.form-check-label {
-  user-select: none;
-}

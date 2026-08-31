@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button, icon as button_icon %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_item, dropdown_menu %}
-{% from "components/field.html.jinja" import field, field_description %}
+{% from "components/field.html.jinja" import field, field_description, field_group %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group, input_group_block_addon, input_group_text %}
 {% from "components/kbd.html.jinja" import kbd %}
@@ -93,14 +93,16 @@
     ) }}
 
     {% set search_results %}
-      {% call input_group() %}
-        {{ input_group_text(button_icon("search", "inline-start")) }}
-        {{ input(
-          aria_label="Search results",
-          type="search",
-          placeholder="Search..."
-        ) }}
-        {{ input_group_text("12 results") }}
+      {% call field(extra_class="w-100") %}
+        {% call input_group() %}
+          {{ input_group_text(button_icon("search", "inline-start")) }}
+          {{ input(
+            aria_label="Search results",
+            type="search",
+            placeholder="Search..."
+          ) }}
+          {{ input_group_text("12 results") }}
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
@@ -112,32 +114,40 @@
     ) }}
 
     {% set text_addons %}
-      <div class="d-grid gap-3">
-        {% call input_group() %}
-          {{ input_group_text("$") }}
-          {{ input(aria_label="Amount", placeholder="0.00") }}
-          {{ input_group_text("USD") }}
-        {% endcall %}
-        {% call input_group() %}
-          {{ input_group_text("https://") }}
-          {{ input(aria_label="Site path", placeholder="example.com") }}
-          {{ input_group_text(".com") }}
-        {% endcall %}
-        {% call input_group() %}
-          {{ input(aria_label="Work email", placeholder="Enter your username") }}
-          {{ input_group_text("@company.com") }}
-        {% endcall %}
-        {% call input_group() %}
-          {{ textarea(
-            aria_label="Message",
-            placeholder="Enter your message",
-            rows=2
-          ) }}
-          {% call input_group_block_addon("end") %}
-            {{ input_group_text("120 characters left") }}
+      {% call field_group(extra_class="w-100") %}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input_group_text("$") }}
+            {{ input(aria_label="Amount", placeholder="0.00") }}
+            {{ input_group_text("USD") }}
           {% endcall %}
         {% endcall %}
-      </div>
+        {% call field() %}
+          {% call input_group() %}
+            {{ input_group_text("https://") }}
+            {{ input(aria_label="Site path", placeholder="example.com") }}
+            {{ input_group_text(".com") }}
+          {% endcall %}
+        {% endcall %}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(aria_label="Work email", placeholder="Enter your username") }}
+            {{ input_group_text("@company.com") }}
+          {% endcall %}
+        {% endcall %}
+        {% call field() %}
+          {% call input_group() %}
+            {{ textarea(
+              aria_label="Message",
+              placeholder="Enter your message",
+              rows=2
+            ) }}
+            {% call input_group_block_addon("end") %}
+              {{ input_group_text("120 characters left") }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
       "text-addons",
@@ -148,61 +158,67 @@
     ) }}
 
     {% set button_addon %}
-      <div class="d-grid gap-3">
-        {% call input_group() %}
-          {{ input(
-            aria_label="Profile URL",
-            placeholder="https://example.com/moo"
-          ) }}
-          {{ button(
-            "",
-            variant="ghost",
-            size="icon",
-            aria_label="Copy profile URL",
-            icon_start="copy",
-            extra_class="border-0"
-          ) }}
+      {% call field_group(extra_class="w-100") %}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Profile URL",
+              placeholder="https://example.com/moo"
+            ) }}
+            {{ button(
+              "",
+              variant="ghost",
+              size="icon",
+              aria_label="Copy profile URL",
+              icon_start="copy",
+              extra_class="border-0"
+            ) }}
+          {% endcall %}
         {% endcall %}
 
-        {% call input_group("rounded-pill") %}
-          {{ button(
-            "",
-            variant="ghost",
-            size="icon",
-            aria_label="About secure URLs",
-            icon_start="info",
-            extra_class="border-0",
-            popover_title="Your connection is not secure.",
-            popover_content="You should not enter sensitive information on this site.",
-            popover_placement="bottom"
-          ) }}
-          {{ input_group_text("https://") }}
-          {{ input(aria_label="Secure URL") }}
-          {{ button(
-            "",
-            variant="ghost",
-            size="icon",
-            aria_label="Favorite URL",
-            icon_start="star",
-            toggle=true,
-            extra_class="border-0"
-          ) }}
+        {% call field() %}
+          {% call input_group("rounded-pill") %}
+            {{ button(
+              "",
+              variant="ghost",
+              size="icon",
+              aria_label="About secure URLs",
+              icon_start="info",
+              extra_class="border-0",
+              popover_title="Your connection is not secure.",
+              popover_content="You should not enter sensitive information on this site.",
+              popover_placement="bottom"
+            ) }}
+            {{ input_group_text("https://") }}
+            {{ input(aria_label="Secure URL") }}
+            {{ button(
+              "",
+              variant="ghost",
+              size="icon",
+              aria_label="Favorite URL",
+              icon_start="star",
+              toggle=true,
+              extra_class="border-0"
+            ) }}
+          {% endcall %}
         {% endcall %}
 
-        {% call input_group() %}
-          {{ input(
-            aria_label="Search",
-            type="search",
-            placeholder="Type to search..."
-          ) }}
-          {{ button(
-            "Search",
-            variant="ghost",
-            size="default",
-            extra_class="border-0"
-          ) }}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Search",
+              type="search",
+              placeholder="Type to search..."
+            ) }}
+            {{ button(
+              "Search",
+              variant="ghost",
+              size="default",
+              extra_class="border-0"
+            ) }}
+          {% endcall %}
         {% endcall %}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
       "button-addon",
@@ -213,13 +229,15 @@
     ) }}
 
     {% set shortcut %}
-      {% call input_group() %}
-        {{ input(
-          aria_label="Command search",
-          type="search",
-          placeholder="Search commands..."
-        ) }}
-        {{ input_group_text(kbd("⌘K")) }}
+      {% call field(extra_class="w-100") %}
+        {% call input_group() %}
+          {{ input(
+            aria_label="Command search",
+            type="search",
+            placeholder="Search commands..."
+          ) }}
+          {{ input_group_text(kbd("⌘K")) }}
+        {% endcall %}
       {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
@@ -231,41 +249,45 @@
     ) }}
 
     {% set dropdown_groups %}
-      <div class="d-grid gap-3">
-        {% call input_group() %}
-          {{ input(
-            aria_label="File name",
-            placeholder="Enter file name"
-          ) }}
-          {{ button("", variant="ghost", size="icon-sm", aria_label="More file actions", icon_start="ellipsis", dropdown=true, dropdown_offset="0,8", extra_class="border-0") }}
-          {% call dropdown_menu(align="end") %}
-            {{ dropdown_item("Settings") }}
-            {{ dropdown_item("Copy path") }}
-            {{ dropdown_item("Open location") }}
+      {% call field_group(extra_class="w-100") %}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="File name",
+              placeholder="Enter file name"
+            ) }}
+            {{ button("", variant="ghost", size="icon-sm", aria_label="More file actions", icon_start="ellipsis", dropdown=true, dropdown_offset="0,8", extra_class="border-0") }}
+            {% call dropdown_menu(align="end") %}
+              {{ dropdown_item("Settings") }}
+              {{ dropdown_item("Copy path") }}
+              {{ dropdown_item("Open location") }}
+            {% endcall %}
           {% endcall %}
         {% endcall %}
-        {% call input_group() %}
-          {{ input(
-            aria_label="Search query",
-            type="search",
-            placeholder="Enter search query"
-          ) }}
-          {{ button(
-            "Search In...",
-            variant="ghost",
-            size="sm",
-            dropdown=true,
-            dropdown_offset="0,8",
-            icon_end="chevron-down",
-            extra_class="border-0"
-          ) }}
-          {% call dropdown_menu(align="end") %}
-            {{ dropdown_item("Documentation") }}
-            {{ dropdown_item("Blog Posts") }}
-            {{ dropdown_item("Changelog") }}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Search query",
+              type="search",
+              placeholder="Enter search query"
+            ) }}
+            {{ button(
+              "Search In...",
+              variant="ghost",
+              size="sm",
+              dropdown=true,
+              dropdown_offset="0,8",
+              icon_end="chevron-down",
+              extra_class="border-0"
+            ) }}
+            {% call dropdown_menu(align="end") %}
+              {{ dropdown_item("Documentation") }}
+              {{ dropdown_item("Blog Posts") }}
+              {{ dropdown_item("Changelog") }}
+            {% endcall %}
           {% endcall %}
         {% endcall %}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
       "dropdown",
@@ -290,41 +312,49 @@
         {{ spinner("Refreshing data", size="sm") }}
       {% endset %}
 
-      <div class="d-grid gap-3">
-        {% call input_group() %}
-          {{ input(
-            aria_label="Search workspace",
-            type="search",
-            placeholder="Searching..."
-          ) }}
-          {{ input_group_text(inline_spinner, extra_class="px-2") }}
+      {% call field_group(extra_class="w-100") %}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Search workspace",
+              type="search",
+              placeholder="Searching..."
+            ) }}
+            {{ input_group_text(inline_spinner, extra_class="px-2") }}
+          {% endcall %}
         {% endcall %}
-        {% call input_group() %}
-          {{ input_group_text(processing_start, extra_class="gap-2") }}
-          {{ input(
-            aria_label="Processing import",
-            value="Import queue",
-            readonly=true
-          ) }}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input_group_text(processing_start, extra_class="gap-2") }}
+            {{ input(
+              aria_label="Processing import",
+              value="Import queue",
+              readonly=true
+            ) }}
+          {% endcall %}
         {% endcall %}
-        {% call input_group() %}
-          {{ input(
-            aria_label="Saving changes",
-            value="Draft settings",
-            readonly=true
-          ) }}
-          {{ input_group_text(saving_end, extra_class="gap-2") }}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Saving changes",
+              value="Draft settings",
+              readonly=true
+            ) }}
+            {{ input_group_text(saving_end, extra_class="gap-2") }}
+          {% endcall %}
         {% endcall %}
-        {% call input_group() %}
-          {{ input_group_text(button_icon("refresh-cw", "inline-start")) }}
-          {{ input(
-            aria_label="Refreshing data",
-            value="Refreshing data...",
-            readonly=true
-          ) }}
-          {{ input_group_text(refresh_end, extra_class="gap-2") }}
+        {% call field() %}
+          {% call input_group() %}
+            {{ input_group_text(button_icon("refresh-cw", "inline-start")) }}
+            {{ input(
+              aria_label="Refreshing data",
+              value="Refreshing data...",
+              readonly=true
+            ) }}
+            {{ input_group_text(refresh_end, extra_class="gap-2") }}
+          {% endcall %}
         {% endcall %}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
       "spinner",
@@ -335,29 +365,33 @@
     ) }}
 
     {% set block_start %}
-      <div class="d-grid gap-3">
-        {% call input_group() %}
-          {% call input_group_block_addon("start") %}
-            {{ input_group_text("Full Name", for_id="block-start-input") }}
+      {% call field_group(extra_class="w-100") %}
+        {% call field() %}
+          {% call input_group() %}
+            {% call input_group_block_addon("start") %}
+              {{ input_group_text("Full Name", for_id="block-start-input") }}
+            {% endcall %}
+            {{ input(
+              aria_label="Display name",
+              id="block-start-input",
+              placeholder="Enter your name"
+            ) }}
           {% endcall %}
-          {{ input(
-            aria_label="Display name",
-            id="block-start-input",
-            placeholder="Enter your name"
-          ) }}
         {% endcall %}
-        {% call input_group() %}
-          {% call input_group_block_addon("start") %}
-            {{ input_group_text("script.js", for_id="block-start-textarea") }}
+        {% call field() %}
+          {% call input_group() %}
+            {% call input_group_block_addon("start") %}
+              {{ input_group_text("script.js", for_id="block-start-textarea") }}
+            {% endcall %}
+            {{ textarea(
+              aria_label="Code snippet",
+              id="block-start-textarea",
+              placeholder="console.log('Hello, world!');",
+              rows=3
+            ) }}
           {% endcall %}
-          {{ textarea(
-            aria_label="Code snippet",
-            id="block-start-textarea",
-            placeholder="console.log('Hello, world!');",
-            rows=3
-          ) }}
         {% endcall %}
-      </div>
+      {% endcall %}
     {% endset %}
     {{ render_component_example("input-group", "Input Group",
       "block-start",
@@ -368,14 +402,16 @@
     ) }}
 
     {% set block_end_input %}
-      {% call input_group() %}
-        {{ input(
-          aria_label="Amount",
-          id="block-end-input-control",
-          placeholder="Enter amount"
-        ) }}
-        {% call input_group_block_addon("end") %}
-          {{ input_group_text("USD", extra_class="flex-grow-1", for_id="block-end-input-control") }}
+      {% call field(extra_class="w-100") %}
+        {% call input_group() %}
+          {{ input(
+            aria_label="Amount",
+            id="block-end-input-control",
+            placeholder="Enter amount"
+          ) }}
+          {% call input_group_block_addon("end") %}
+            {{ input_group_text("USD", extra_class="flex-grow-1", for_id="block-end-input-control") }}
+          {% endcall %}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -388,15 +424,17 @@
     ) }}
 
     {% set block_end_textarea %}
-      {% call input_group() %}
-        {{ textarea(
-          aria_label="Comment",
-          id="block-end-textarea-control",
-          placeholder="Write a comment..."
-        ) }}
-        {% call input_group_block_addon("end", "d-flex align-items-center justify-content-between") %}
-          {{ input_group_text("0/280", extra_class="flex-grow-1", for_id="block-end-textarea-control") }}
-          {{ button("Post", variant="default") }}
+      {% call field(extra_class="w-100") %}
+        {% call input_group() %}
+          {{ textarea(
+            aria_label="Comment",
+            id="block-end-textarea-control",
+            placeholder="Write a comment..."
+          ) }}
+          {% call input_group_block_addon("end", "d-flex align-items-center justify-content-between") %}
+            {{ input_group_text("0/280", extra_class="flex-grow-1", for_id="block-end-textarea-control") }}
+            {{ button("Post", variant="default") }}
+          {% endcall %}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -409,14 +447,16 @@
     ) }}
 
     {% set custom_input %}
-      {% call input_group() %}
-        {{ textarea(
-          aria_label="Custom message",
-          placeholder="Write a message...",
-          rows=4
-        ) }}
-        {% call input_group_block_addon("end", "justify-content-end") %}
-          {{ button("Submit") }}
+      {% call field(extra_class="w-100") %}
+        {% call input_group() %}
+          {{ textarea(
+            aria_label="Custom message",
+            placeholder="Write a message...",
+            rows=4
+          ) }}
+          {% call input_group_block_addon("end", "justify-content-end") %}
+            {{ button("Submit") }}
+          {% endcall %}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -430,42 +470,48 @@
 
     {% set rtl_arabic %}
       <div dir="rtl">
-        {% call input_group() %}
-          {{ input(
-            aria_label="بحث",
-            id="input-group-rtl-arabic",
-            type="search",
-            placeholder="ابحث داخل المحادثة"
-          ) }}
-          {{ input_group_text(kbd("⌘K")) }}
+        {% call field(extra_class="w-100") %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="بحث",
+              id="input-group-rtl-arabic",
+              type="search",
+              placeholder="ابحث داخل المحادثة"
+            ) }}
+            {{ input_group_text(kbd("⌘K")) }}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_hebrew %}
       <div dir="rtl">
-        {% call input_group() %}
-          {{ input(
-            aria_label="חיפוש",
-            id="input-group-rtl-hebrew",
-            type="search",
-            placeholder="חפש בצ'אנל"
-          ) }}
-          {{ input_group_text(kbd("⌘K")) }}
+        {% call field(extra_class="w-100") %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="חיפוש",
+              id="input-group-rtl-hebrew",
+              type="search",
+              placeholder="חפש בצ'אנל"
+            ) }}
+            {{ input_group_text(kbd("⌘K")) }}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
 
     {% set rtl_english %}
       <div dir="ltr">
-        {% call input_group() %}
-          {{ input(
-            aria_label="Search",
-            id="input-group-rtl-english",
-            type="search",
-            placeholder="Search the channel"
-          ) }}
-          {{ input_group_text(kbd("⌘K")) }}
+        {% call field(extra_class="w-100") %}
+          {% call input_group() %}
+            {{ input(
+              aria_label="Search",
+              id="input-group-rtl-english",
+              type="search",
+              placeholder="Search the channel"
+            ) }}
+            {{ input_group_text(kbd("⌘K")) }}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}

@@ -479,40 +479,40 @@ console.log(JSON.stringify(Object.fromEntries(
             entrypoint_imports["moo-ui.scss"],
             [
                 "settings",
-                "../vendor/bootstrap/scss/mixins/banner",
-                "../vendor/bootstrap/scss/functions",
-                "../vendor/bootstrap/scss/variables",
-                "../vendor/bootstrap/scss/variables-dark",
-                "../vendor/bootstrap/scss/maps",
-                "../vendor/bootstrap/scss/mixins",
-                "../vendor/bootstrap/scss/utilities",
-                "../vendor/bootstrap/scss/root",
-                "../vendor/bootstrap/scss/reboot",
-                "../vendor/bootstrap/scss/type",
-                "../vendor/bootstrap/scss/images",
-                "../vendor/bootstrap/scss/containers",
-                "../vendor/bootstrap/scss/grid",
-                "../vendor/bootstrap/scss/forms/form-range",
-                "../vendor/bootstrap/scss/forms/floating-labels",
-                "../vendor/bootstrap/scss/transitions",
-                "../vendor/bootstrap/scss/navbar",
-                "../vendor/bootstrap/scss/progress",
-                "../vendor/bootstrap/scss/list-group",
-                "../vendor/bootstrap/scss/carousel",
-                "../vendor/bootstrap/scss/spinners",
-                "../vendor/bootstrap/scss/placeholders",
-                "../vendor/bootstrap/scss/helpers/clearfix",
-                "../vendor/bootstrap/scss/helpers/colored-links",
-                "../vendor/bootstrap/scss/helpers/focus-ring",
-                "../vendor/bootstrap/scss/helpers/icon-link",
-                "../vendor/bootstrap/scss/helpers/ratio",
-                "../vendor/bootstrap/scss/helpers/position",
-                "../vendor/bootstrap/scss/helpers/stacks",
-                "../vendor/bootstrap/scss/helpers/visually-hidden",
-                "../vendor/bootstrap/scss/helpers/stretched-link",
-                "../vendor/bootstrap/scss/helpers/text-truncation",
-                "../vendor/bootstrap/scss/helpers/vr",
-                "../vendor/bootstrap/scss/utilities/api",
+                "bootstrap/scss/mixins/banner",
+                "bootstrap/scss/functions",
+                "bootstrap/scss/variables",
+                "bootstrap/scss/variables-dark",
+                "bootstrap/scss/maps",
+                "bootstrap/scss/mixins",
+                "bootstrap/scss/utilities",
+                "bootstrap/scss/root",
+                "bootstrap/scss/reboot",
+                "bootstrap/scss/type",
+                "bootstrap/scss/images",
+                "bootstrap/scss/containers",
+                "bootstrap/scss/grid",
+                "bootstrap/scss/forms/form-range",
+                "bootstrap/scss/forms/floating-labels",
+                "bootstrap/scss/transitions",
+                "bootstrap/scss/navbar",
+                "bootstrap/scss/progress",
+                "bootstrap/scss/list-group",
+                "bootstrap/scss/carousel",
+                "bootstrap/scss/spinners",
+                "bootstrap/scss/placeholders",
+                "bootstrap/scss/helpers/clearfix",
+                "bootstrap/scss/helpers/colored-links",
+                "bootstrap/scss/helpers/focus-ring",
+                "bootstrap/scss/helpers/icon-link",
+                "bootstrap/scss/helpers/ratio",
+                "bootstrap/scss/helpers/position",
+                "bootstrap/scss/helpers/stacks",
+                "bootstrap/scss/helpers/visually-hidden",
+                "bootstrap/scss/helpers/stretched-link",
+                "bootstrap/scss/helpers/text-truncation",
+                "bootstrap/scss/helpers/vr",
+                "bootstrap/scss/utilities/api",
                 "themes/standalone_root",
                 "utilities/scroll_fade_primitives",
                 "components",
@@ -522,13 +522,13 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(
             entrypoint_imports["moo-core.scss"],
             [
-                "functions",
+                "bootstrap/scss/functions",
                 "settings",
-                "variables",
-                "variables-dark",
-                "maps",
-                "mixins",
-                "utilities",
+                "bootstrap/scss/variables",
+                "bootstrap/scss/variables-dark",
+                "bootstrap/scss/maps",
+                "bootstrap/scss/mixins",
+                "bootstrap/scss/utilities",
                 "themes/scoped_core",
                 "foundations/core_global_primitives",
                 "components",
@@ -548,18 +548,18 @@ console.log(JSON.stringify(Object.fromEntries(
     def test_sidebar_aggregate_imports_ownership_layers_in_order(self) -> None:
         sidebar = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
         expected = [
-            "components/sidebar/layout",
-            "components/sidebar/menus",
-            "components/sidebar/identity",
-            "components/sidebar/inset",
-            "components/sidebar/collapsed",
+            "sidebar/layout",
+            "sidebar/menus",
+            "sidebar/identity",
+            "sidebar/inset",
+            "sidebar/collapsed",
         ]
         imports = active_scss_import_list(sidebar)
 
         self.assertEqual(imports, expected)
         self.assertEqual(
             owned_partial_targets(COMPONENTS_SCSS / "sidebar"),
-            set(expected),
+            {f"components/{target}" for target in expected},
         )
 
     def test_catalog_aggregate_imports_ownership_layers_in_order(self) -> None:
@@ -695,27 +695,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 for target in aggregate_imports
                 if target != "utilities/scroll_fade"
                 and target != "foundations/focus"
-                and not target.startswith("forms/")
-                and target not in {
-                    "tables",
-                    "buttons",
-                    "dropdown",
-                    "button-group",
-                    "nav",
-                    "card",
-                    "accordion",
-                    "breadcrumb",
-                    "pagination",
-                    "badge",
-                    "alert",
-                    "close",
-                    "toasts",
-                    "modal",
-                    "tooltip",
-                    "popover",
-                    "offcanvas",
-                    "helpers/color-bg",
-                }
+                and not target.startswith("bootstrap/scss/")
             )
         )
 
@@ -744,7 +724,21 @@ console.log(JSON.stringify(Object.fromEntries(
 
         for path in component_partials():
             target = partial_import_target(path)
-            self.assertIn(target, imports, f"{target} is not imported")
+            accepted_targets = {target}
+            try:
+                relative_to_components = path.relative_to(COMPONENTS_SCSS)
+            except ValueError:
+                pass
+            else:
+                accepted_targets.add(
+                    relative_to_components.with_name(
+                        relative_to_components.stem.removeprefix("_")
+                    ).with_suffix("").as_posix()
+                )
+            self.assertFalse(
+                accepted_targets.isdisjoint(imports),
+                f"{target} is not imported",
+            )
 
     def test_component_styles_consume_shared_primitives_only(self) -> None:
         self.assertEqual(

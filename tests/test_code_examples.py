@@ -70,11 +70,12 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn("View Code", toolbar)
 
         match = re.search(
-            r'<input type="hidden" name="data" value="([^"]+)"',
+            r'<textarea name="data" hidden>(.*?)</textarea>',
             toolbar,
+            re.DOTALL,
         )
         self.assertIsNotNone(match)
-        payload = json.loads(unescape(match.group(1)))
+        payload = json.loads(unescape(match.group(1)).strip())
 
         self.assertEqual(payload["title"], "Moo UI Button - Primary")
         self.assertEqual(payload["tags"], ["moo-ui", "button", "components"])
@@ -103,7 +104,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(
             payload["css_external"],
             (
-                "https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css;"
+                f"https://unpkg.com/@wpmoo/ui@{build.CODEPEN_CDN_VERSION}/dist/assets/css/moo-ui.css;"
                 "https://ui.wpmoo.org/assets/css/codepen-demo.css"
             ),
         )
@@ -205,7 +206,37 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(
             format_html(source),
             '<button class="btn btn-ghost" type="button" aria-label="Copy profile URL">\n'
-            '  <i class="lucide lucide-copy" data-icon="inline-start" aria-hidden="true" />\n'
+            '  <i class="lucide lucide-copy" data-icon="inline-start" aria-hidden="true"></i>\n'
+            "</button>",
+        )
+
+    def test_source_formatter_closes_lucide_placeholders_before_visible_text(self) -> None:
+        source = """
+          <button class="btn btn-outline-secondary moo-datepicker__trigger" type="button">
+            <svg
+              data-icon="inline-start"
+              data-lucide="calendar"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 2v4m8-4v4"/>
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M3 10h18"/>
+            </svg>
+            <span data-datepicker-label>Pick a date</span>
+          </button>
+        """
+
+        self.assertEqual(
+            format_html(source),
+            '<button class="btn btn-outline-secondary moo-datepicker__trigger" type="button">\n'
+            '  <i class="lucide lucide-calendar" data-icon="inline-start" aria-hidden="true"></i>\n'
+            "  <span data-datepicker-label>Pick a date</span>\n"
             "</button>",
         )
 
@@ -231,7 +262,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('aria-labelledby="usage"', template)
         self.assertIn('<h2 class="h4" id="usage">Usage</h2>', template)
 
-        excluded_component_intro_pages = {"datatable", "sidebar"}
+        excluded_component_intro_pages = {"chart", "datatable", "sidebar"}
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
