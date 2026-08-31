@@ -335,10 +335,18 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertIsNotNone(match)
         body = match.group("body")
-        self.assertIn("--bs-btn-color: var(--bs-body-color);", body)
-        self.assertIn("--bs-btn-bg: var(--bs-secondary-bg);", body)
-        self.assertIn("--bs-btn-border-color: var(--bs-border-color);", body)
-        self.assertIn("--bs-btn-hover-bg: var(--bs-tertiary-bg);", body)
+        self.assertIn("--bs-btn-color: var(--bs-body-bg);", body)
+        self.assertIn(
+            "--bs-btn-bg: color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg));",
+            body,
+        )
+        self.assertIn("--bs-btn-border-color: var(--bs-btn-bg);", body)
+        self.assertIn("--bs-btn-hover-color: var(--bs-body-bg);", body)
+        self.assertIn("--bs-btn-hover-bg: var(--bs-body-color);", body)
+        self.assertIn("--bs-btn-hover-border-color: var(--bs-body-color);", body)
+        self.assertIn("--bs-btn-active-color: var(--bs-body-bg);", body)
+        self.assertIn("--bs-btn-active-bg: var(--bs-body-color);", body)
+        self.assertIn("--bs-btn-active-border-color: var(--bs-body-color);", body)
         self.assertNotIn("var(--moo-primary", body)
         self.assertNotIn("var(--bs-primary", body)
 
