@@ -138,3 +138,51 @@ class CodePenModalBrowserTests(unittest.TestCase):
             "Moo UI Alert Dialog - Basic",
             "Discard draft",
         )
+
+    def test_component_codepen_demo_adds_header_actions_without_settings(self) -> None:
+        payload = self.codepen_payload("button", "Moo UI Button - Primary")
+        self.assertNotIn("window.MooCodePenThemeBuilder =", str(payload["js"]))
+        context, page = self.render_component_codepen(payload)
+        try:
+            evidence = BrowserEvidence(page)
+            actions = page.locator(".moo-codepen-actions")
+            settings = page.locator("[data-moo-codepen-settings-toggle]")
+            theme = page.locator("[data-moo-codepen-theme-toggle]")
+            github = page.locator(".moo-codepen-actions__github-link")
+
+            expect(actions).to_have_count(1)
+            expect(settings).to_have_count(0)
+            expect(page.locator("#moo-codepen-settings")).to_have_count(0)
+            expect(theme).to_have_attribute("aria-label", "Switch to dark mode")
+            expect(github).to_have_attribute("href", "https://github.com/wpmoo-org/ui")
+            expect(github).to_contain_text("wpmoo-org/ui")
+
+            position = actions.evaluate(
+                """
+                (element) => {
+                  const rect = element.getBoundingClientRect();
+                  const styles = window.getComputedStyle(element);
+                  return {
+                    position: styles.position,
+                    right: Math.round(window.innerWidth - rect.right),
+                    top: Math.round(rect.top),
+                    height: Math.round(rect.height),
+                  };
+                }
+                """
+            )
+            self.assertEqual(position["position"], "fixed")
+            self.assertEqual(position["right"], 16)
+            self.assertEqual(position["top"], 16)
+            self.assertEqual(position["height"], 32)
+
+            theme.click()
+            expect(page.locator("html")).to_have_attribute("data-bs-theme", "dark")
+            expect(theme).to_have_attribute("aria-label", "Switch to light mode")
+            theme.click()
+            expect(page.locator("html")).to_have_attribute("data-bs-theme", "light")
+            expect(theme).to_have_attribute("aria-label", "Switch to dark mode")
+
+            evidence.assert_clean()
+        finally:
+            context.close()
