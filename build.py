@@ -65,6 +65,9 @@ CORE_JS_MODULES = (
     "slider.js",
 )
 BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+PACKAGE_MANIFEST = ROOT / "package.json"
+MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
+MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
 THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
 EVIDENCE_FILES = (
     "pilot-evidence.json",
@@ -1623,10 +1626,37 @@ def copy_package_js() -> None:
     package_js_dir = PACKAGE_DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
     for module_name in CORE_JS_MODULES:
-        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
+        target = package_js_dir / module_name
+        shutil.copy2(JS_COMPONENTS / module_name, target)
+        apply_js_license_banner(target, module_name)
     for module_name in BUNDLED_JS_MODULES:
         _bundle_module(module_name, minify=False)
         _bundle_module(module_name, minify=True)
+
+
+def js_license_banner(module_name: str) -> str:
+    package = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))
+    homepage = package.get("homepage", "https://ui.wpmoo.org/")
+    return (
+        "/*!\n"
+        f" * Moo UI {module_name} v{package['version']} ({homepage})\n"
+        f" * Copyright 2026 WPMoo ({MOO_UI_COPYRIGHT_URL})\n"
+        f" * Licensed under {package.get('license', 'MIT')} ({MOO_UI_LICENSE_URL})\n"
+        " */\n"
+    )
+
+
+def apply_js_license_banner(output: Path, module_name: str) -> None:
+    source = output.read_text(encoding="utf-8")
+    banner = js_license_banner(module_name)
+    if source.startswith(banner):
+        return
+    if source.startswith("/*!\n * Moo UI "):
+        marker = "*/"
+        marker_index = source.find(marker)
+        if marker_index != -1:
+            source = source[marker_index + len(marker) :]
+    output.write_text(banner + source.lstrip(), encoding="utf-8")
 
 
 def _bundle_module(module_name: str, *, minify: bool) -> None:
@@ -1680,6 +1710,7 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
 
     if not minify:
         _normalize_esbuild_module_comments(output)
+    apply_js_license_banner(output, output_name)
 
 
 def _normalize_esbuild_module_comments(output: Path) -> None:

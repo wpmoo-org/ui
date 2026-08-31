@@ -727,7 +727,7 @@ class SidebarTests(CatalogTestCase):
             page.index('id="usage"'),
             page.index('id="application-shell"'),
             page.index('id="composition"'),
-            page.index('assets/images/sidebar-structure.webp'),
+            page.index('assets/images/sidebar-structure-classes.webp'),
             page.index('id="sidebar-html-anatomy"'),
             page.index('id="sidebar-javascript"'),
             page.index('id="sidebar-state"'),
@@ -737,7 +737,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("<table", page)
         self.assertIn("<th scope=\"col\">Selector</th>", page)
         self.assertIn("<th scope=\"col\">Purpose</th>", page)
-        self.assertTrue((DIST / "assets/images/sidebar-structure.webp").is_file())
+        self.assertTrue((DIST / "assets/images/sidebar-structure-classes.webp").is_file())
 
     def test_sidebar_catalog_page_documents_public_html_anatomy(self) -> None:
         source = (ROOT / "site/src/pages/components/sidebar.html.jinja").read_text(

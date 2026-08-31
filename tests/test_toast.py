@@ -152,6 +152,13 @@ class ToastTests(CatalogTestCase):
 
         self.assertIn("Undo", output)
         self.assertIn('data-bs-dismiss="toast"', output)
+        self.assertNotIn('aria-label="Undo"', output)
+
+        explicit = self.render(
+            '{{ toast("toast-action", "Event created", "Saved.", '
+            'action_label="Retry", action_aria_label="Retry upload") }}'
+        )
+        self.assertIn('aria-label="Retry upload"', explicit)
 
     def test_toast_template_renders_one_toast_root(self) -> None:
         source = COMPONENT.read_text(encoding="utf-8")
@@ -448,7 +455,7 @@ class ToastTests(CatalogTestCase):
         )
         self.assertIn('data-toast-stack="deck"', source)
         self.assertIn('<template id="certification-toast-template" data-toast-template="toast">', source)
-        self.assertIn('id="certification-toast-template"', source)
+        self.assertEqual(source.count('id="certification-toast-template"'), 1)
         self.assertIn(
             'import { initBootstrapPreview } from "/assets/js/catalog/bootstrap-preview.js";',
             source,

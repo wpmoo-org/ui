@@ -329,7 +329,9 @@ function themeDataset(dataset, index, metadata, theme, explicitColorFields = nul
       themeState,
     );
     setThemedColor(dataset, "borderColor", mutedColor, themeState);
-    dataset.borderWidth = 1;
+    if (dataset.borderWidth === undefined) {
+      dataset.borderWidth = 1;
+    }
     setThemedColor(dataset, "hoverBackgroundColor", color, themeState);
     setThemedColor(dataset, "hoverBorderColor", color, themeState);
     dataset.borderRadius = 4;

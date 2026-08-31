@@ -926,6 +926,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(page.count('data-chart="line"'), 1)
         self.assertEqual(page.count('data-chart="bar"'), 1)
         self.assertNotIn("data-chart data-chart=", page)
+        self.assertNotIn('data-moo-icon="', page)
+        self.assertGreaterEqual(page.count('data-lucide="'), 4)
 
     def test_dashboard_codepen_css_carries_catalog_only_utility(self) -> None:
         source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(

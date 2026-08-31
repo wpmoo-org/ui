@@ -805,6 +805,12 @@ def check_overlay_close_restore(state, params):
             "fail",
             reason="Escape did not hide the overlay",
         )
+    try:
+        state.page.wait_for_function(
+            ACTIVE_IS_TRIGGER_JS, arg=trigger, timeout=SCENARIO_TIMEOUT_MS
+        )
+    except PlaywrightTimeoutError:
+        pass
     restored = state.page.evaluate(ACTIVE_IS_TRIGGER_JS, trigger)
     status = "pass" if restored else "fail"
     return Outcome(

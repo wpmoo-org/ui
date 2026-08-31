@@ -100,12 +100,15 @@
   {% set serialized_disabled_dates = disabled_dates if disabled_dates is string else disabled_dates | tojson %}
   <div class="moo-datepicker{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-datepicker data-datepicker-mode="single" data-datepicker-locale="{{ locale }}" data-datepicker-placeholder="{{ placeholder }}"{% if value %} data-datepicker-value="{{ value }}"{% endif %}{% if min_date %} data-datepicker-min-date="{{ min_date }}"{% endif %}{% if max_date %} data-datepicker-max-date="{{ max_date }}"{% endif %}{% if disabled_dates %} data-datepicker-disabled-dates='{{ serialized_disabled_dates }}'{% endif %}{% if show_presets %} data-datepicker-show-presets="true"{% endif %}{% if disabled %} data-datepicker-disabled="true"{% endif %}{% if invalid %} data-invalid="true"{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}>
     {% if label %}<label class="form-label" for="{{ id }}-trigger">{{ label }}</label>{% endif %}
-    <button class="btn btn-outline-secondary moo-datepicker__trigger{% if invalid %} is-invalid{% endif %}" id="{{ id }}-trigger" type="button" data-datepicker-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover_id }}"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if disabled %} disabled{% endif %}>
+    <button class="btn btn-outline-secondary moo-datepicker__trigger{% if invalid %} is-invalid{% endif %}" id="{{ id }}-trigger" type="button" data-datepicker-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover_id }}"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if disabled %} disabled{% endif %}>
       {{ render_icon("calendar", "inline-start") }}
       <span data-datepicker-label>{{ datepicker_label(value, placeholder) }}</span>
     </button>
-    <input type="hidden" name="{{ name }}" value="{{ value }}" data-datepicker-input{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
-    <div class="moo-datepicker__popover" id="{{ popover_id }}" data-datepicker-popover role="dialog" aria-modal="false" hidden>
+    <input type="hidden" name="{{ name }}" value="{{ value }}" data-datepicker-input{% if disabled %} disabled{% endif %}>
+    {% if required %}
+      <input type="text" class="visually-hidden moo-datepicker__validation" value="{{ value }}" data-datepicker-validation required{% if disabled %} disabled{% endif %} tabindex="-1" aria-label="{{ (label or aria_label) }} selected date">
+    {% endif %}
+    <div class="moo-datepicker__popover" id="{{ popover_id }}" data-datepicker-popover role="dialog" aria-modal="false" aria-label="{{ (label or aria_label) }} calendar" hidden>
       {{ calendar(calendar_id, (label or aria_label) ~ " calendar", value=value, min_date=min_date, max_date=max_date, disabled_dates=disabled_dates, locale=locale, caption_layout=caption_layout, show_presets=show_presets) }}
     </div>
   </div>
@@ -142,15 +145,19 @@
   {% set popover_id = id ~ "-popover" %}
   {% set calendar_id = id ~ "-calendar" %}
   {% set serialized_disabled_dates = disabled_dates if disabled_dates is string else disabled_dates | tojson %}
+  {% set validation_value = start_value ~ " - " ~ end_value if start_value and end_value else "" %}
   <div class="moo-datepicker moo-datepicker--range{% if extra_class %} {{ extra_class }}{% endif %}" id="{{ id }}" data-datepicker-range data-datepicker-mode="range" data-datepicker-locale="{{ locale }}" data-datepicker-placeholder="{{ placeholder }}"{% if start_value %} data-datepicker-start-value="{{ start_value }}"{% endif %}{% if end_value %} data-datepicker-end-value="{{ end_value }}"{% endif %}{% if min_date %} data-datepicker-min-date="{{ min_date }}"{% endif %}{% if max_date %} data-datepicker-max-date="{{ max_date }}"{% endif %}{% if disabled_dates %} data-datepicker-disabled-dates='{{ serialized_disabled_dates }}'{% endif %}{% if show_presets %} data-datepicker-show-presets="true"{% endif %}{% if disabled %} data-datepicker-disabled="true"{% endif %}{% if invalid %} data-invalid="true"{% endif %}{% if attrs %} {{ attrs | safe }}{% endif %}>
     {% if label %}<label class="form-label" for="{{ id }}-trigger">{{ label }}</label>{% endif %}
-    <button class="btn btn-outline-secondary moo-datepicker__trigger{% if invalid %} is-invalid{% endif %}" id="{{ id }}-trigger" type="button" data-datepicker-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover_id }}"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if disabled %} disabled{% endif %}>
+    <button class="btn btn-outline-secondary moo-datepicker__trigger{% if invalid %} is-invalid{% endif %}" id="{{ id }}-trigger" type="button" data-datepicker-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ popover_id }}"{% if aria_label %} aria-label="{{ aria_label }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if describedby %} aria-describedby="{{ describedby }}"{% endif %}{% if disabled %} disabled{% endif %}>
       {{ render_icon("calendar-range", "inline-start") }}
       <span data-datepicker-label>{{ datepicker_range_label(start_value, end_value, placeholder) }}</span>
     </button>
-    <input type="hidden" name="{{ start_name }}" value="{{ start_value }}" data-datepicker-range-start{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
-    <input type="hidden" name="{{ end_name }}" value="{{ end_value }}" data-datepicker-range-end{% if required %} required{% endif %}{% if disabled %} disabled{% endif %}>
-    <div class="moo-datepicker__popover" id="{{ popover_id }}" data-datepicker-popover role="dialog" aria-modal="false" hidden>
+    <input type="hidden" name="{{ start_name }}" value="{{ start_value }}" data-datepicker-range-start{% if disabled %} disabled{% endif %}>
+    <input type="hidden" name="{{ end_name }}" value="{{ end_value }}" data-datepicker-range-end{% if disabled %} disabled{% endif %}>
+    {% if required %}
+      <input type="text" class="visually-hidden moo-datepicker__validation" value="{{ validation_value }}" data-datepicker-validation required{% if disabled %} disabled{% endif %} tabindex="-1" aria-label="{{ (label or aria_label) }} selected date range">
+    {% endif %}
+    <div class="moo-datepicker__popover" id="{{ popover_id }}" data-datepicker-popover role="dialog" aria-modal="false" aria-label="{{ (label or aria_label) }} calendar" hidden>
       {{ calendar(calendar_id, (label or aria_label) ~ " calendar", mode="range", start_value=start_value, end_value=end_value, min_date=min_date, max_date=max_date, disabled_dates=disabled_dates, locale=locale, caption_layout=caption_layout, show_presets=show_presets) }}
     </div>
   </div>

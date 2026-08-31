@@ -125,6 +125,11 @@
       "buildTool": "esbuild",
       "note": "esbuild-produced canonical + minified artifact pair; the module is self-contained Moo UI ESM with no third-party runtime bundled",
       "namedExports": ["MooCalendar", "MooDateRangePicker"],
+      "publicMethods": {
+        "MooDatepicker": ["show", "hide", "toggle", "isOpen", "getDate", "setDate", "clear", "dispose"],
+        "MooDateRangePicker": ["show", "hide", "toggle", "isOpen", "getDates", "setDates", "clear", "dispose"],
+        "MooCalendar": ["getDate", "getDates", "setDate", "setDates", "clear", "focusActiveDay", "dispose"]
+      },
       "markup": {
         "rootClass": "moo-datepicker",
         "rootAttribute": "data-datepicker",
@@ -141,6 +146,7 @@
       "source": "src/js/components/slider.js",
       "bundled": false,
       "nativeElement": "input[type=\"range\"]",
+      "publicMethods": ["dispose"],
       "markup": {
         "rootClass": "slider",
         "rootAttribute": "data-slider",

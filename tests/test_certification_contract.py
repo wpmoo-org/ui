@@ -861,6 +861,40 @@ class CertificationContractTests(unittest.TestCase):
         self.assertFalse(datepicker_record.get("bundled", True))
         self.assertNotIn("runtime", datepicker_record)
         self.assertEqual(datepicker_record.get("buildTool"), "esbuild")
+        self.assertEqual(
+            datepicker_record.get("publicMethods"),
+            {
+                "MooDatepicker": [
+                    "show",
+                    "hide",
+                    "toggle",
+                    "isOpen",
+                    "getDate",
+                    "setDate",
+                    "clear",
+                    "dispose",
+                ],
+                "MooDateRangePicker": [
+                    "show",
+                    "hide",
+                    "toggle",
+                    "isOpen",
+                    "getDates",
+                    "setDates",
+                    "clear",
+                    "dispose",
+                ],
+                "MooCalendar": [
+                    "getDate",
+                    "getDates",
+                    "setDate",
+                    "setDates",
+                    "clear",
+                    "focusActiveDay",
+                    "dispose",
+                ],
+            },
+        )
 
         # Chart.js stays bundled with its third-party runtime.
         chart_record = next(m for m in freeze["esmModules"] if m["module"] == "chart.js")
@@ -893,6 +927,7 @@ class CertificationContractTests(unittest.TestCase):
         slider_record = next(m for m in freeze["esmModules"] if m["module"] == "slider.js")
         self.assertFalse(slider_record.get("bundled", True))
         self.assertEqual(slider_record.get("nativeElement"), 'input[type="range"]')
+        self.assertEqual(slider_record.get("publicMethods"), ["dispose"])
         self.assertEqual(
             slider_record.get("markup"),
             {
@@ -910,6 +945,22 @@ class CertificationContractTests(unittest.TestCase):
 
         self.assertIn("exact package export/file equality", docstring)
         self.assertNotIn("deferred", docstring)
+
+    def test_rc3_manual_acceptance_export_is_recorded(self) -> None:
+        record_path = (
+            CERTIFICATION_ROOT
+            / "manual-acceptance/2026-08-30-rc3-manual-acceptance.md"
+        )
+
+        self.assertTrue(record_path.is_file(), "RC.3 manual acceptance record is missing")
+        record = record_path.read_text(encoding="utf-8")
+
+        self.assertIn("Result: `450/450`", record)
+        self.assertIn("Acceptance export generated at (UTC, ISO-8601): `2026-08-30T23:11:25.771Z`", record)
+        self.assertIn("Devices and browser versions match the rc2 manual acceptance pass.", record)
+        self.assertIn("- [x] macOS Safari", record)
+        self.assertIn("- [x] iOS Safari", record)
+        self.assertIn("- [x] Android Chrome", record)
 
 
 if __name__ == "__main__":

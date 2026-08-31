@@ -75,7 +75,12 @@ function addDays(date, amount) {
 }
 
 function addMonths(date, amount) {
-  return new Date(date.getFullYear(), date.getMonth() + amount, date.getDate());
+  const targetStart = new Date(date.getFullYear(), date.getMonth() + amount, 1);
+  const targetDay = Math.min(
+    date.getDate(),
+    daysInMonth(targetStart.getFullYear(), targetStart.getMonth()),
+  );
+  return new Date(targetStart.getFullYear(), targetStart.getMonth(), targetDay);
 }
 
 function firstDayOfWeek(locale = DEFAULT_LOCALE) {
@@ -197,22 +202,46 @@ function setHiddenValue(input, value) {
   input.value = value || "";
 }
 
+function setValidationValue(input, value) {
+  if (!input) return;
+  input.value = value || "";
+}
+
+function setDatepickerInvalid(element, trigger, invalid) {
+  if (invalid) {
+    element.dataset.invalid = "true";
+    trigger.classList.add("is-invalid");
+    trigger.setAttribute("aria-invalid", "true");
+    return;
+  }
+  delete element.dataset.invalid;
+  trigger.classList.remove("is-invalid");
+  trigger.removeAttribute("aria-invalid");
+}
+
+function syncDatepickerValidation(element, trigger, validationInput) {
+  if (validationInput?.required && validationInput.checkValidity()) {
+    setDatepickerInvalid(element, trigger, false);
+  }
+}
+
 function clamp(value, min, max) {
   if (max < min) return min;
   return Math.min(Math.max(value, min), max);
 }
 
 function cssPixelValue(element, property, fallback) {
-  const value = element ? getComputedStyle(element).getPropertyValue(property).trim() : "";
+  const view = element?.ownerDocument?.defaultView || window;
+  const value = element ? view.getComputedStyle(element).getPropertyValue(property).trim() : "";
   const parsed = Number.parseFloat(value);
   if (!Number.isFinite(parsed)) return fallback;
   if (value.endsWith("rem")) {
     const root = element.ownerDocument.documentElement;
-    const fontSize = Number.parseFloat(getComputedStyle(root).fontSize);
+    const fontSize = Number.parseFloat(view.getComputedStyle(root).fontSize);
     return Number.isFinite(fontSize) ? parsed * fontSize : fallback;
   }
   if (value.endsWith("em")) {
-    const fontSize = Number.parseFloat(getComputedStyle(element).fontSize);
+    const fontSize = Number.parseFloat(view.getComputedStyle(element).fontSize);
     return Number.isFinite(fontSize) ? parsed * fontSize : fallback;
   }
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -620,9 +649,13 @@ export class MooCalendar {
     if (event.key in keyMap) {
       nextDate = addDays(this._activeDate, keyMap[event.key]);
     } else if (event.key === "Home") {
-      nextDate = addDays(this._activeDate, -this._activeDate.getDay());
+      const weekStart = firstDayOfWeek(this._config.locale);
+      const weekdayOffset = (this._activeDate.getDay() - weekStart + 7) % 7;
+      nextDate = addDays(this._activeDate, -weekdayOffset);
     } else if (event.key === "End") {
-      nextDate = addDays(this._activeDate, 6 - this._activeDate.getDay());
+      const weekStart = firstDayOfWeek(this._config.locale);
+      const weekdayOffset = (this._activeDate.getDay() - weekStart + 7) % 7;
+      nextDate = addDays(this._activeDate, 6 - weekdayOffset);
     } else if (event.key === "PageUp") {
       nextDate = addMonths(this._activeDate, -1);
     } else if (event.key === "PageDown") {
@@ -832,12 +865,15 @@ export class MooCalendar {
         button.textContent = String(date.getDate());
         button.tabIndex = sameDate(date, this._activeDate) ? 0 : -1;
         button.setAttribute("aria-label", formatDisplay(date, this._config.locale));
-        button.dataset.calendarSelected = String(this._isSelected(date));
+        const selected = this._isSelected(date);
+        button.dataset.calendarSelected = String(selected);
+        cell.setAttribute("aria-selected", selected ? "true" : "false");
         if (date.getMonth() !== this._viewDate.getMonth()) {
           button.dataset.calendarOutside = "true";
         }
         if (sameDate(date, new Date())) {
           button.dataset.calendarToday = "true";
+          button.setAttribute("aria-current", "date");
         }
         const rangeState = this._rangeState(date);
         if (rangeState) {
@@ -924,6 +960,7 @@ export default class MooDatepicker {
     this._input =
       element.querySelector("[data-datepicker-input]") ||
       element.querySelector('input[type="hidden"]');
+    this._validationInput = element.querySelector("[data-datepicker-validation]");
     this._calendarRoot = element.querySelector("[data-calendar]");
     if (!this._trigger || !this._popover || !this._label || !this._input || !this._calendarRoot) {
       throw new TypeError("MooDatepicker requires a trigger, popover, calendar, and hidden input.");
@@ -1043,6 +1080,11 @@ export default class MooDatepicker {
       }
     });
     const form = this._input.form || this._element.closest("form");
+    addListener(this._listeners, this._validationInput, "invalid", (event) => {
+      event.preventDefault();
+      setDatepickerInvalid(this._element, this._trigger, true);
+      this._trigger.focus({ preventScroll: true });
+    });
     addListener(this._listeners, form, "reset", () => {
       this._window.setTimeout(() => {
         if (this._defaultValue) {
@@ -1057,6 +1099,8 @@ export default class MooDatepicker {
   _syncFromCalendar() {
     const value = this.calendar.getDate("yyyy-mm-dd") || "";
     setHiddenValue(this._input, value);
+    setValidationValue(this._validationInput, value);
+    syncDatepickerValidation(this._element, this._trigger, this._validationInput);
     this._element.dataset.datepickerValue = value;
     this._label.textContent = value
       ? formatDisplay(parseDate(value), this._config.locale)
@@ -1100,6 +1144,7 @@ export class MooDateRangePicker {
     this._label = element.querySelector("[data-datepicker-label]");
     this._startInput = element.querySelector("[data-datepicker-range-start]");
     this._endInput = element.querySelector("[data-datepicker-range-end]");
+    this._validationInput = element.querySelector("[data-datepicker-validation]");
     this._calendarRoot = element.querySelector("[data-calendar]");
     if (!this._trigger || !this._popover || !this._label || !this._startInput || !this._endInput || !this._calendarRoot) {
       throw new TypeError("MooDateRangePicker requires a trigger, popover, calendar, and start/end hidden inputs.");
@@ -1231,6 +1276,11 @@ export class MooDateRangePicker {
       }
     });
     const form = this._startInput.form || this._element.closest("form");
+    addListener(this._listeners, this._validationInput, "invalid", (event) => {
+      event.preventDefault();
+      setDatepickerInvalid(this._element, this._trigger, true);
+      this._trigger.focus({ preventScroll: true });
+    });
     addListener(this._listeners, form, "reset", () => {
       this._window.setTimeout(() => {
         this.setDates(this._defaultStartValue, this._defaultEndValue, { emit: false });
@@ -1242,6 +1292,8 @@ export class MooDateRangePicker {
     const [startValue = "", endValue = ""] = this.calendar.getDates("yyyy-mm-dd");
     setHiddenValue(this._startInput, startValue || "");
     setHiddenValue(this._endInput, endValue || "");
+    setValidationValue(this._validationInput, startValue && endValue ? `${startValue} - ${endValue}` : "");
+    syncDatepickerValidation(this._element, this._trigger, this._validationInput);
     this._element.dataset.datepickerStartValue = startValue || "";
     this._element.dataset.datepickerEndValue = endValue || "";
     if (startValue && endValue) {

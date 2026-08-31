@@ -561,6 +561,33 @@ report("explicit-colors", {{
         self.assertEqual(case["after"]["borderColor"], "rgb(1, 2, 3)")
         self.assertEqual(case["after"]["pointBackgroundColor"], "rgb(37, 99, 235)")
 
+    def test_explicit_bar_border_width_is_preserved(self) -> None:
+        chart_data = {
+            "labels": ["Jan", "Feb"],
+            "datasets": [
+                {
+                    "label": "Revenue",
+                    "data": [18, 24],
+                    "borderWidth": 3,
+                }
+            ],
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(json.dumps(chart_data))},
+}});
+const instance = MooChart.getOrCreateInstance(root);
+const dataset = instance.chart.data.datasets[0];
+
+report("bar-border-width", {{
+  borderWidth: dataset.borderWidth,
+}});
+"""
+        )
+        self.assertEqual(case["borderWidth"], 3)
+
     def test_unset_dataset_colors_follow_inline_chart_tokens_during_retheme(self) -> None:
         chart_data = {
             "labels": ["Mon", "Tue"],

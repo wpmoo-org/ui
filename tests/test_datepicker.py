@@ -69,7 +69,8 @@ class DatepickerMacroTests(CatalogTestCase):
         self.assertIn(">Aug 18, 2026<", output)
         self.assertIn(
             '<div class="moo-datepicker__popover" id="deploy-date-popover" '
-            'data-datepicker-popover role="dialog" aria-modal="false" hidden>',
+            'data-datepicker-popover role="dialog" aria-modal="false" '
+            'aria-label="Deploy date calendar" hidden>',
             output,
         )
         self.assertIn('class="moo-calendar"', output)
@@ -77,13 +78,40 @@ class DatepickerMacroTests(CatalogTestCase):
         self.assertIn('tabindex="-1"', output)
         self.assertIn(
             'type="hidden" name="deploy_date" value="2026-08-18" '
-            "data-datepicker-input required",
+            "data-datepicker-input",
             output,
         )
+        self.assertNotIn('aria-required="true"', output)
+        self.assertIn(
+            'type="text" class="visually-hidden moo-datepicker__validation" '
+            'value="2026-08-18" data-datepicker-validation required',
+            output,
+        )
+        self.assertNotIn("data-datepicker-input required", output)
         popover = output.split('data-datepicker-popover role="dialog"', 1)[1].split("</div>", 1)[0]
         self.assertNotIn('type="hidden"', popover)
         self.assertIn('aria-describedby="deploy-date-help"', output)
         self.assertNotIn('class="datepicker', output)
+
+    def test_range_picker_required_state_uses_a_validation_control(self) -> None:
+        output = self.render_datepicker(
+            '{{ date_range_picker('
+            'id="billing-window", '
+            'label="Billing window", '
+            'start_name="billing_start", '
+            'end_name="billing_end", '
+            'required=true'
+            ') }}'
+        )
+
+        self.assertNotIn('aria-required="true"', output)
+        self.assertIn(
+            'type="text" class="visually-hidden moo-datepicker__validation" '
+            'value="" data-datepicker-validation required',
+            output,
+        )
+        self.assertNotIn("data-datepicker-range-start required", output)
+        self.assertNotIn("data-datepicker-range-end required", output)
 
     def test_single_datepicker_label_uses_placeholder_for_invalid_values(self) -> None:
         output = self.render_datepicker(
@@ -868,6 +896,10 @@ class _DatepickerBrowserMixin:
             # locale option drives visible formatting without an engine.
             page.locator("#certification-rtl-datepicker-trigger").click()
             expect(page.locator("#certification-rtl-datepicker-popover")).to_be_visible()
+            expect(page.locator("#certification-rtl-datepicker-popover")).to_have_attribute(
+                "aria-label",
+                "اختر تاريخا calendar",
+            )
             rtl_caption = page.locator(
                 "#certification-rtl-datepicker-calendar .moo-calendar__caption"
             )
@@ -876,6 +908,26 @@ class _DatepickerBrowserMixin:
             self.assertTrue(
                 any("\u0600" <= ch <= "\u06FF" for ch in rtl_text),
                 f"Arabic calendar caption did not render Arabic text: {rtl_text!r}",
+            )
+            page.locator(
+                '#certification-rtl-datepicker-calendar [data-calendar-day="2026-08-18"]'
+            ).focus()
+            page.locator(
+                '#certification-rtl-datepicker-calendar [data-calendar-day="2026-08-18"]'
+            ).press("Home")
+            expect(page.locator("#certification-rtl-datepicker-calendar")).to_have_attribute(
+                "data-calendar-active-date",
+                "2026-08-15",
+            )
+            page.locator(
+                '#certification-rtl-datepicker-calendar [data-calendar-day="2026-08-18"]'
+            ).focus()
+            page.locator(
+                '#certification-rtl-datepicker-calendar [data-calendar-day="2026-08-18"]'
+            ).press("End")
+            expect(page.locator("#certification-rtl-datepicker-calendar")).to_have_attribute(
+                "data-calendar-active-date",
+                "2026-08-21",
             )
             page.locator("#certification-rtl-datepicker-trigger").click()
 
@@ -888,6 +940,12 @@ class _DatepickerBrowserMixin:
             self.assert_calendar_month(inline, 2026, 8)
             expect(inline.locator('[data-calendar-day="2026-08-18"]')).to_have_attribute(
                 "data-calendar-selected",
+                "true",
+            )
+            self.assertEqual(
+                inline.locator('[data-calendar-day="2026-08-18"]').evaluate(
+                    "element => element.closest('[role=\"gridcell\"]')?.getAttribute('aria-selected')"
+                ),
                 "true",
             )
             today_iso = page.evaluate(
@@ -903,8 +961,71 @@ class _DatepickerBrowserMixin:
                 }
                 """
             )
+            expect(inline.locator(f'[data-calendar-day="{today_iso}"]')).to_have_attribute(
+                "aria-current",
+                "date",
+            )
+            page.evaluate(
+                """
+                () => window.certificationCalendar.setDate("2026-03-31", { emit: false })
+                """
+            )
+            inline.locator('[data-calendar-day="2026-03-31"]').press("PageUp")
+            expect(inline).to_have_attribute("data-calendar-active-date", "2026-02-28")
             inline.locator('[data-calendar-preset="today"]').click()
             expect(inline).to_have_attribute("data-calendar-value", today_iso)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_required_picker_participates_in_native_form_validation(self) -> None:
+        context, page, evidence = self.open_fixture()
+        try:
+            expect(page.locator("body")).to_have_attribute("data-datepicker-ready", "true")
+            required = page.locator("#certification-required-datepicker")
+            trigger = page.locator("#certification-required-datepicker-trigger")
+            validation = required.locator("[data-datepicker-validation]")
+
+            self.assertFalse(
+                page.evaluate(
+                    """
+                    () => document
+                      .querySelector("#certification-required-form")
+                      .checkValidity()
+                    """
+                )
+            )
+            self.assertEqual(validation.input_value(), "")
+            page.evaluate(
+                """
+                () => document
+                  .querySelector("#certification-required-form")
+                  .reportValidity()
+                """
+            )
+            expect(trigger).to_have_attribute("aria-invalid", "true")
+            self.assertTrue(
+                trigger.evaluate("element => document.activeElement === element")
+            )
+
+            trigger.click()
+            page.locator(
+                '#certification-required-datepicker-calendar [data-calendar-day="2026-08-20"]'
+            ).click()
+            expect(page.locator('input[name="required_date"]')).to_have_value(
+                "2026-08-20"
+            )
+            self.assertEqual(validation.input_value(), "2026-08-20")
+            self.assertTrue(
+                page.evaluate(
+                    """
+                    () => document
+                      .querySelector("#certification-required-form")
+                      .checkValidity()
+                    """
+                )
+            )
+            expect(trigger).not_to_have_attribute("aria-invalid", "true")
             evidence.assert_clean()
         finally:
             context.close()

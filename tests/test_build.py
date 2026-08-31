@@ -251,6 +251,33 @@ class BuildTests(CatalogTestCase):
                 self.assertNotIn("unpkg.com", content)
                 self.assertNotIn("cdnjs.cloudflare.com", content)
 
+    def test_public_npm_js_outputs_carry_moo_ui_license_banner(self) -> None:
+        self.require_full_build()
+        for module_name in (
+            "combobox.js",
+            "sidebar.js",
+            "context-menu.js",
+            "datatable.js",
+            "slider.js",
+            "chart.js",
+            "chart.min.js",
+            "datepicker.js",
+            "datepicker.min.js",
+        ):
+            with self.subTest(module=module_name):
+                expected_banner = (
+                    "/*!\n"
+                    f" * Moo UI {module_name} v1.0.0-rc.3 (https://ui.wpmoo.org/)\n"
+                    " * Copyright 2026 WPMoo (https://wpmoo.org)\n"
+                    " * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)\n"
+                    " */\n"
+                )
+                content = (PACKAGE_DIST / f"js/{module_name}").read_text(
+                    encoding="utf-8"
+                )
+                self.assertTrue(content.startswith(expected_banner))
+                self.assertEqual(content.count(expected_banner), 1)
+
     def test_bundled_module_comments_are_path_stable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "chart.js"

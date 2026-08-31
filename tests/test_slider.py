@@ -248,6 +248,12 @@ resettable.inputs[0].dispatchEvent(new EventStub("input", { bubbles: true }));
 resettable.inputs[0].value = resettable.inputs[0].defaultValue;
 resetForm.dispatchEvent(new EventStub("reset", { bubbles: true }));
 
+const staleLifecycle = makeRoot([makeInput({ value: 30 })]);
+const staleInstance = Slider.getOrCreateInstance(staleLifecycle.root);
+staleInstance.dispose();
+const replacementInstance = Slider.getOrCreateInstance(staleLifecycle.root);
+staleInstance.dispose();
+
 single.track.dispatchEvent({ type: "pointerdown", button: 0, clientX: 100, clientY: 10, preventDefault() {} });
 ownerDocument.dispatchEvent({ type: "pointermove", clientX: 150, clientY: 10, preventDefault() {} });
 ownerDocument.dispatchEvent({ type: "pointerup", clientX: 150, clientY: 10, preventDefault() {} });
@@ -271,6 +277,7 @@ console.log(JSON.stringify({
   stepAnyValue: stepAny.inputs[0].value,
   resetOutput: resettable.output.textContent,
   resetEnd: resettable.root.style.getPropertyValue("--moo-slider-end"),
+  staleDisposeKeepsReplacement: Slider.getInstance(staleLifecycle.root) === replacementInstance,
   trackClickFocusedInput: single.inputs[0].focused,
   pointerFocusState,
   dragStateAfterRelease,
@@ -294,6 +301,7 @@ console.log(JSON.stringify({
         self.assertEqual(case["stepAnyValue"], "33.5")
         self.assertEqual(case["resetOutput"], "20")
         self.assertEqual(case["resetEnd"], "20%")
+        self.assertTrue(case["staleDisposeKeepsReplacement"])
         self.assertTrue(case["trackClickFocusedInput"])
         self.assertEqual(case["pointerFocusState"], "true")
         self.assertIsNone(case["dragStateAfterRelease"])

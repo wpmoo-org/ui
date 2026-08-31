@@ -41,7 +41,7 @@
   </div>
 {%- endmacro %}
 
-{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo", variant="default") -%}
+{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="", variant="default") -%}
   {% if not id | trim %}{{ fail("Toast id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Toast title is required") }}{% endif %}
   {% if not body | trim %}{{ fail("Toast body is required") }}{% endif %}
@@ -76,7 +76,7 @@
   </div>
 {%- endmacro %}
 
-{% macro toast_template(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="Undo", variant="default") -%}
+{% macro toast_template(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="", variant="default") -%}
   <template id="{{ id }}" data-toast-template="toast">
     {{ toast(id, title, body, timestamp, autohide, delay, dismiss_aria_label, priority, action_label, action_aria_label, variant) }}
   </template>

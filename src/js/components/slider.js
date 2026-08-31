@@ -83,6 +83,7 @@ export default class MooSlider {
     this._listeners = [];
     this._dragListeners = [];
     this._draggingInput = null;
+    this._disposed = false;
     this._inputs = Array.from(
       element.querySelectorAll(':scope input[type="range"][data-slider-input]')
     );
@@ -102,13 +103,17 @@ export default class MooSlider {
   }
 
   dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
     this._clearDragListeners();
     this._clearPointerFocus();
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
     this._listeners = [];
-    instances.delete(this._element);
+    if (instances.get(this._element) === this) {
+      instances.delete(this._element);
+    }
   }
 
   _listen(target, type, handler, options) {
