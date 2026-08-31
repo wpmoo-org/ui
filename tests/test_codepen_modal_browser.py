@@ -14,6 +14,7 @@ from tests.helpers.browser_harness import (
     launch_certification_browser,
     new_case_context,
     prepare_page,
+    serve_repository,
     skip_if_browser_launch_is_sandboxed,
 )
 
@@ -22,6 +23,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         skip_if_browser_launch_is_sandboxed()
+        cls.server = serve_repository()
+        cls.base_url = cls.server.__enter__()
         cls.playwright_manager = sync_playwright()
         cls.playwright = cls.playwright_manager.__enter__()
         cls.browser = launch_certification_browser(cls.playwright)
@@ -30,11 +33,10 @@ class CodePenModalBrowserTests(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.browser.close()
         cls.playwright_manager.__exit__(None, None, None)
+        cls.server.__exit__(None, None, None)
 
-    def codepen_payload(self, component: str, title: str) -> dict[str, object]:
-        source = ROOT.joinpath(
-            f"site-dist/components/{component}/index.html"
-        ).read_text(encoding="utf-8")
+    def codepen_payload_from_page(self, page_path: str, title: str) -> dict[str, object]:
+        source = ROOT.joinpath(f"site-dist/{page_path}").read_text(encoding="utf-8")
         for match in re.finditer(
             r'<textarea name="data" hidden>(.*?)</textarea>',
             source,
@@ -45,9 +47,18 @@ class CodePenModalBrowserTests(unittest.TestCase):
                 return payload
         raise AssertionError(f"CodePen payload not found: {title}")
 
+    def codepen_payload(self, component: str, title: str) -> dict[str, object]:
+        return self.codepen_payload_from_page(
+            f"components/{component}/index.html",
+            title,
+        )
+
     def render_component_codepen(self, payload: dict[str, object]):
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         page = context.new_page()
+        response = page.goto(f"{self.base_url}/site-dist/index.html", wait_until="load")
+        self.assertIsNotNone(response)
+        self.assertTrue(response.ok)
         page.set_content(
             f"""
             <!doctype html>
@@ -66,10 +77,20 @@ class CodePenModalBrowserTests(unittest.TestCase):
         page.add_style_tag(path=ROOT / "site-dist/assets/css/moo-ui.css")
         page.add_style_tag(path=ROOT / "site-dist/assets/css/codepen-demo.css")
         page.add_script_tag(path=ROOT / "site-dist/assets/js/bootstrap.bundle.min.js")
+        page.add_script_tag(content=f'window.MooCodePenRuntimeBaseUrl = "{self.base_url}/";')
         page.add_script_tag(path=ROOT / "site-dist/assets/js/codepen-demo.js")
-        page.add_script_tag(content=str(payload["js"]))
+        payload_js = self.remap_codepen_package_imports(str(payload["js"]))
+        if payload_js.strip():
+            page.add_script_tag(content=payload_js)
         prepare_page(page, CERTIFICATION_CASES[0])
         return context, page
+
+    def remap_codepen_package_imports(self, script: str) -> str:
+        return re.sub(
+            r"https://unpkg\.com/@wpmoo/ui@[^/]+/dist/js/",
+            f"{self.base_url}/dist/js/",
+            script,
+        )
 
     def assert_modal_covers_codepen_viewport(
         self,
@@ -125,6 +146,121 @@ class CodePenModalBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_js_component_codepen_payloads_initialize_component_runtimes(self) -> None:
+        cases = [
+            ("chart", "Moo UI Basic"),
+            ("combobox", "Moo UI Combobox - Basic"),
+            ("context-menu", "Moo UI Context Menu - Basic"),
+            ("datepicker", "Moo UI Date Picker - Basic"),
+            ("slider", "Moo UI Slider - Default"),
+        ]
+
+        for component, title in cases:
+            with self.subTest(component=component):
+                payload = self.codepen_payload(component, title)
+                context, page = self.render_component_codepen(payload)
+                try:
+                    evidence = BrowserEvidence(page)
+
+                    if component == "chart":
+                        page.wait_for_function(
+                            """
+                            () => {
+                              const canvas = document.querySelector(".chart canvas");
+                              if (!canvas || !canvas.width || !canvas.height) {
+                                return false;
+                              }
+                              const data = canvas
+                                .getContext("2d")
+                                .getImageData(0, 0, canvas.width, canvas.height)
+                                .data;
+                              return data.some((channel) => channel !== 0);
+                            }
+                            """,
+                            timeout=5000,
+                        )
+                    elif component == "combobox":
+                        combobox_input = page.locator(".combobox-input").first
+                        combobox_input.click()
+                        expect(page.locator(".combobox-menu.show")).to_have_count(1)
+                        combobox_input.fill("Ada")
+                        page.get_by_role("option", name="Ada Lovelace").click()
+                        expect(combobox_input).to_have_value("Ada Lovelace")
+                        self.assertEqual(
+                            page.locator('input[type="hidden"][name="reviewer"]').input_value(),
+                            "ada",
+                        )
+                    elif component == "context-menu":
+                        page.locator("#context-menu-basic-surface").click(button="right")
+                        expect(page.locator(".context-menu-menu.show")).to_have_count(1)
+                        expect(page.locator("[data-context-menu-fallback]")).to_have_attribute(
+                            "aria-expanded",
+                            "true",
+                        )
+                    elif component == "datepicker":
+                        page.locator("[data-datepicker-trigger]").first.click()
+                        expect(
+                            page.locator("[data-datepicker-popover]:not([hidden])")
+                        ).to_have_count(1)
+                        expect(page.locator("[data-calendar-day]").first).to_be_visible()
+                    elif component == "slider":
+                        page.locator("[data-slider-input]").first.evaluate(
+                            """
+                            (element) => {
+                              element.value = "75";
+                              element.dispatchEvent(new Event("input", { bubbles: true }));
+                            }
+                            """
+                        )
+                        expect(page.locator("[data-slider-output]")).to_have_text("75")
+
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_dashboard_datatable_codepen_payloads_initialize_runtime(self) -> None:
+        cases = [
+            ("examples/dashboard/tasks/index.html", "Moo UI \u2014 Tasks"),
+            ("examples/dashboard/users/index.html", "Moo UI \u2014 Users"),
+        ]
+
+        for page_path, title in cases:
+            with self.subTest(page=page_path):
+                payload = self.codepen_payload_from_page(page_path, title)
+                context, page = self.render_component_codepen(payload)
+                try:
+                    evidence = BrowserEvidence(page)
+                    search = page.locator("[data-datatable-search]").first
+                    empty = page.locator("[data-datatable-empty]").first
+                    summary = page.locator("[data-datatable-results-summary]").first
+
+                    expect(empty).to_be_hidden()
+                    search.fill("zzzz-no-matching-row")
+                    expect(empty).to_be_visible()
+                    expect(empty.locator(".datatable-empty-title")).to_have_text(
+                        "No matching results"
+                    )
+                    expect(summary).to_have_text("No results")
+
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_toast_codepen_demo_button_shows_toast(self) -> None:
+        payload = self.codepen_payload("toast", "Moo UI Toast - Basic")
+        context, page = self.render_component_codepen(payload)
+        try:
+            evidence = BrowserEvidence(page)
+            page.get_by_role("button", name="Show Toast").click()
+
+            expect(page.locator(".toast.show")).to_have_count(1)
+            expect(page.locator(".toast.show .toast-body")).to_contain_text(
+                "Sunday, December 3 at 9:00 AM"
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_dialog_codepen_modal_covers_the_viewport(self) -> None:
         self.assert_modal_covers_codepen_viewport(
             "dialog",
@@ -156,6 +292,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(theme).to_have_attribute("aria-label", "Switch to dark mode")
             expect(github).to_have_attribute("href", "https://github.com/wpmoo-org/ui")
             expect(github).to_contain_text("wpmoo-org/ui")
+            expect(page.locator(".moo-codepen-footer")).to_contain_text(
+                "Button component."
+            )
 
             position = actions.evaluate(
                 """

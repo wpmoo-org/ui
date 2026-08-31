@@ -2,7 +2,104 @@
   "use strict";
 
   var SITE_ORIGIN = "https://ui.wpmoo.org";
+  var DEFAULT_PACKAGE_VERSION = "latest";
+  var DEFAULT_RUNTIME_BASE_URL = "https://unpkg.com/@wpmoo/ui@";
+  var BOOTSTRAP_BUNDLE_SRC = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";
   var THEME_STORAGE_KEY = "moo:theme";
+  var componentRuntimePromises = {};
+  var COMPONENT_LABELS = {
+    "accordion": "Accordion",
+    "alert": "Alert",
+    "alert-dialog": "Alert Dialog",
+    "avatar": "Avatar",
+    "badge": "Badge",
+    "breadcrumb": "Breadcrumb",
+    "button": "Button",
+    "button-group": "Button Group",
+    "card": "Card",
+    "chart": "Chart",
+    "checkbox": "Checkbox",
+    "close-button": "Close Button",
+    "collapsible": "Collapsible",
+    "combobox": "Combobox",
+    "context-menu": "Context Menu",
+    "datatable": "Data Table",
+    "datepicker": "Date Picker",
+    "dialog": "Dialog",
+    "dropdown-menu": "Dropdown Menu",
+    "field": "Field",
+    "form": "Form",
+    "input": "Input",
+    "input-group": "Input Group",
+    "kbd": "Kbd",
+    "menubar": "Menubar",
+    "navigation": "Navigation",
+    "pagination": "Pagination",
+    "popover": "Popover",
+    "progress": "Progress",
+    "radio-group": "Radio Group",
+    "select": "Native Select",
+    "separator": "Separator",
+    "sheet": "Sheet",
+    "sidebar": "Sidebar",
+    "skeleton": "Skeleton",
+    "slider": "Slider",
+    "spinner": "Spinner",
+    "switch": "Switch",
+    "table": "Table",
+    "tabs": "Tabs",
+    "textarea": "Textarea",
+    "toast": "Toast",
+    "toggle-group": "Toggle Group",
+    "tooltip": "Tooltip",
+    "typography": "Typography"
+  };
+  var COMPONENT_DETECTORS = [
+    { slug: "accordion", selector: ".accordion" },
+    { slug: "alert-dialog", selector: ".modal--alert" },
+    { slug: "alert", selector: ".alert" },
+    { slug: "avatar", selector: ".avatar" },
+    { slug: "breadcrumb", selector: ".breadcrumb" },
+    { slug: "button-group", selector: ".btn-group, .btn-toolbar" },
+    { slug: "chart", selector: ".chart" },
+    { slug: "collapsible", selector: '[data-bs-toggle="collapse"], .collapse' },
+    { slug: "combobox", selector: ".combobox" },
+    { slug: "context-menu", selector: ".context-menu" },
+    { slug: "datatable", selector: ".datatable" },
+    { slug: "datepicker", selector: "[data-datepicker], [data-datepicker-range], [data-calendar]" },
+    { slug: "dialog", selector: ".modal" },
+    { slug: "dropdown-menu", selector: ".dropdown-menu" },
+    { slug: "form", selector: ".field-form" },
+    { slug: "field", selector: ".field, .field-group, .field-fieldset" },
+    { slug: "input-group", selector: ".input-group" },
+    { slug: "textarea", selector: "textarea.form-control" },
+    { slug: "input", selector: ".form-control" },
+    { slug: "kbd", selector: "kbd" },
+    { slug: "menubar", selector: ".menubar" },
+    { slug: "tabs", selector: '.nav-tabs, [data-bs-toggle="tab"]' },
+    { slug: "navigation", selector: ".nav" },
+    { slug: "pagination", selector: ".pagination" },
+    { slug: "popover", selector: '[data-bs-toggle="popover"]' },
+    { slug: "progress", selector: ".progress" },
+    { slug: "switch", selector: ".form-switch" },
+    { slug: "toggle-group", selector: ".toggle-group" },
+    { slug: "radio-group", selector: '.form-check-input[type="radio"]' },
+    { slug: "checkbox", selector: '.form-check-input[type="checkbox"]' },
+    { slug: "select", selector: "select.form-select" },
+    { slug: "separator", selector: ".separator, hr" },
+    { slug: "sheet", selector: ".offcanvas" },
+    { slug: "sidebar", selector: '[data-slot="sidebar-wrapper"]' },
+    { slug: "skeleton", selector: ".skeleton" },
+    { slug: "slider", selector: "[data-slider]" },
+    { slug: "spinner", selector: ".spinner-border, .spinner-grow" },
+    { slug: "table", selector: ".table" },
+    { slug: "toast", selector: ".toast, [data-toast-template]" },
+    { slug: "tooltip", selector: '[data-bs-toggle="tooltip"]' },
+    { slug: "typography", selector: ".display-1, .display-2, .display-3, .display-4, .display-5, .display-6, .lead, blockquote" },
+    { slug: "card", selector: ".card" },
+    { slug: "close-button", selector: ".btn-close" },
+    { slug: "button", selector: ".btn" }
+  ];
 
   function onReady(callback) {
     if (document.readyState === "loading") {
@@ -20,6 +117,40 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function ensureTrailingSlash(value) {
+    return value.endsWith("/") ? value : value + "/";
+  }
+
+  function readPackageVersion(config) {
+    var version = String(config && config.packageVersion ? config.packageVersion : "").trim();
+    var stylesheet;
+    var match;
+
+    if (version) {
+      return version;
+    }
+
+    stylesheet = document.querySelector(
+      'link[href*="@wpmoo/ui@"][href*="/dist/assets/css/moo-ui.css"]'
+    );
+    match = stylesheet && stylesheet.href.match(/@wpmoo\/ui@([^/]+)\//);
+    return match && match[1] ? match[1] : DEFAULT_PACKAGE_VERSION;
+  }
+
+  function runtimeBaseUrl(config) {
+    var base = String(
+      (config && config.runtimeBaseUrl) ||
+      window.MooCodePenRuntimeBaseUrl ||
+      ""
+    ).trim();
+
+    if (base) {
+      return ensureTrailingSlash(base);
+    }
+
+    return DEFAULT_RUNTIME_BASE_URL + encodeURIComponent(readPackageVersion(config)) + "/";
   }
 
   function normalizeComponent(component) {
@@ -45,16 +176,82 @@
     };
   }
 
+  function labelFromSlug(slug) {
+    return String(slug || "")
+      .split("-")
+      .filter(Boolean)
+      .map(function (part) {
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      })
+      .join(" ");
+  }
+
+  function componentFromSlug(slug) {
+    return normalizeComponent({
+      slug: slug,
+      label: COMPONENT_LABELS[slug] || labelFromSlug(slug)
+    });
+  }
+
   function normalizeConfig(config) {
     var source = config || window.MooCodePen || {};
     var components = Array.isArray(source.components) ? source.components : [];
 
     return {
       kind: source.kind || "",
+      packageVersion: String(source.packageVersion || "").trim(),
+      runtimeBaseUrl: String(source.runtimeBaseUrl || "").trim(),
       components: components.map(normalizeComponent).filter(function (component) {
         return component.slug || component.label;
       })
     };
+  }
+
+  function isExampleCodePen(root) {
+    return Boolean(
+      root.querySelector(".moo-examples-page, .moo-auth-page, .moo-examples-footer, .moo-auth-page__footer")
+    );
+  }
+
+  function detectComponentSlug(root) {
+    var detected = "";
+
+    COMPONENT_DETECTORS.some(function (component) {
+      try {
+        if (root.querySelector(component.selector)) {
+          detected = component.slug;
+          return true;
+        }
+      } catch (_) {
+        /* Component detector selectors are static; ignore unavailable selector syntax defensively. */
+      }
+
+      return false;
+    });
+
+    return detected;
+  }
+
+  function inferCodePenConfig(root) {
+    var slug;
+
+    if (window.MooCodePen) {
+      return window.MooCodePen;
+    }
+
+    if (isExampleCodePen(root)) {
+      return { kind: "example" };
+    }
+
+    slug = detectComponentSlug(root);
+    if (slug) {
+      return {
+        kind: "component",
+        components: [componentFromSlug(slug)]
+      };
+    }
+
+    return { kind: "example" };
   }
 
   function iconSvg(name) {
@@ -247,27 +444,69 @@
     document.body.appendChild(footer);
   }
 
-  function initializePopovers(root) {
-    var Popover = window.bootstrap && window.bootstrap.Popover;
-    if (!Popover) {
+  function hasBootstrapPlugins(names) {
+    var bootstrap = window.bootstrap;
+    return Boolean(bootstrap) && names.every(function (name) {
+      return Boolean(bootstrap[name]);
+    });
+  }
+
+  function withBootstrap(names, callback) {
+    var script;
+
+    if (hasBootstrapPlugins(names)) {
+      callback();
       return;
     }
 
-    root.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (element) {
-      Popover.getOrCreateInstance(element);
+    script = document.querySelector('script[src="' + BOOTSTRAP_BUNDLE_SRC + '"]');
+    if (!script) {
+      script = document.createElement("script");
+      script.src = BOOTSTRAP_BUNDLE_SRC;
+      document.head.appendChild(script);
+    }
+
+    script.addEventListener("load", function () {
+      if (hasBootstrapPlugins(names)) {
+        callback();
+      }
+    }, { once: true });
+  }
+
+  function initializePopovers(root) {
+    withBootstrap(["Popover"], function () {
+      var Popover = window.bootstrap && window.bootstrap.Popover;
+
+      root.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (element) {
+        Popover.getOrCreateInstance(element);
+      });
     });
   }
 
   function initializeToasts(root) {
-    var Toast = window.bootstrap && window.bootstrap.Toast;
     if (
-      !Toast ||
       !root.body ||
-      root.body.dataset.mooCodepenToastsReady === "true"
+      root.body.dataset.mooCodepenToastsReady === "true" ||
+      root.body.dataset.mooCodepenToastsQueued === "true"
     ) {
       return;
     }
 
+    root.body.dataset.mooCodepenToastsQueued = "true";
+
+    withBootstrap(["Toast"], function () {
+      wireToasts(root);
+    });
+  }
+
+  function wireToasts(root) {
+    var Toast = window.bootstrap && window.bootstrap.Toast;
+
+    if (!Toast || !root.body) {
+      return;
+    }
+
+    delete root.body.dataset.mooCodepenToastsQueued;
     root.body.dataset.mooCodepenToastsReady = "true";
 
     var toastSequence = 0;
@@ -605,8 +844,168 @@
     });
   }
 
+  var COMPONENT_RUNTIMES = {
+    "chart": {
+      entrypoint: "dist/js/chart.js",
+      selector: ".chart",
+      label: "Chart",
+      init: function (module, root) {
+        var MooChart = module.default;
+        if (!MooChart) {
+          return;
+        }
+
+        root.querySelectorAll(".chart").forEach(function (element) {
+          MooChart.getOrCreateInstance(element);
+        });
+      }
+    },
+    "combobox": {
+      entrypoint: "dist/js/combobox.js",
+      selector: ".combobox",
+      label: "Combobox",
+      init: function (module, root) {
+        var Combobox = module.default;
+        if (!Combobox) {
+          return;
+        }
+
+        root.querySelectorAll(".combobox").forEach(function (element) {
+          Combobox.getOrCreateInstance(element);
+        });
+      }
+    },
+    "context-menu": {
+      entrypoint: "dist/js/context-menu.js",
+      selector: ".context-menu",
+      label: "Context Menu",
+      init: function (module, root) {
+        var ContextMenu = module.default;
+        if (!ContextMenu) {
+          return;
+        }
+
+        root.querySelectorAll(".context-menu").forEach(function (element) {
+          ContextMenu.getOrCreateInstance(element);
+        });
+      }
+    },
+    "datatable": {
+      entrypoint: "dist/js/datatable.js",
+      selector: ".datatable",
+      label: "Data Table",
+      init: function (module, root) {
+        var DataTable = module.default;
+        if (!DataTable) {
+          return;
+        }
+
+        root.querySelectorAll(".datatable").forEach(function (element) {
+          DataTable.getOrCreateInstance(element);
+        });
+      }
+    },
+    "datepicker": {
+      entrypoint: "dist/js/datepicker.js",
+      selector: "[data-datepicker]",
+      label: "Date Picker",
+      init: function (module, root) {
+        var MooCalendar = module.MooCalendar;
+        var MooDatepicker = module.default;
+        var MooDateRangePicker = module.MooDateRangePicker;
+
+        if (MooDatepicker) {
+          root.querySelectorAll("[data-datepicker]").forEach(function (element) {
+            MooDatepicker.getOrCreateInstance(element);
+          });
+        }
+
+        if (MooDateRangePicker) {
+          root.querySelectorAll("[data-datepicker-range]").forEach(function (element) {
+            MooDateRangePicker.getOrCreateInstance(element);
+          });
+        }
+
+        if (MooCalendar) {
+          root.querySelectorAll("[data-calendar]").forEach(function (element) {
+            if (element.closest("[data-datepicker], [data-datepicker-range]")) {
+              return;
+            }
+
+            MooCalendar.getOrCreateInstance(element);
+          });
+        }
+      }
+    },
+    "sidebar": {
+      entrypoint: "dist/js/sidebar.js",
+      selector: '[data-slot="sidebar-wrapper"]',
+      label: "Sidebar",
+      init: function (module, root) {
+        var Sidebar = module.default;
+        if (!Sidebar) {
+          return;
+        }
+
+        root.querySelectorAll('[data-slot="sidebar-wrapper"]').forEach(function (element) {
+          Sidebar.getOrCreateInstance(element);
+        });
+      }
+    },
+    "slider": {
+      entrypoint: "dist/js/slider.js",
+      selector: "[data-slider]",
+      label: "Slider",
+      init: function (module, root) {
+        var MooSlider = module.default;
+        if (!MooSlider) {
+          return;
+        }
+
+        root.querySelectorAll("[data-slider]").forEach(function (element) {
+          MooSlider.getOrCreateInstance(element);
+        });
+      }
+    }
+  };
+
+  function loadComponentRuntime(config, runtime) {
+    var url = runtimeBaseUrl(config) + runtime.entrypoint;
+
+    if (!componentRuntimePromises[url]) {
+      componentRuntimePromises[url] = import(url);
+    }
+
+    return componentRuntimePromises[url];
+  }
+
+  function initializeComponentRuntimes(config, root) {
+    if (config.kind !== "component") {
+      return;
+    }
+
+    config.components.forEach(function (component) {
+      var runtime = COMPONENT_RUNTIMES[component.slug];
+
+      if (!runtime || !root.querySelector(runtime.selector)) {
+        return;
+      }
+
+      loadComponentRuntime(config, runtime)
+        .then(function (module) {
+          runtime.init(module, root);
+        })
+        .catch(function (error) {
+          console.error(
+            "Moo UI " + runtime.label + " failed to load for this CodePen example.",
+            error
+          );
+        });
+    });
+  }
+
   function render(config) {
-    var normalized = normalizeConfig(config);
+    var normalized = normalizeConfig(config || inferCodePenConfig(document));
 
     if (normalized.kind !== "component" && normalized.kind !== "example") {
       return;
@@ -625,6 +1024,7 @@
 
     initializePopovers(document);
     initializeToasts(document);
+    initializeComponentRuntimes(normalized, document);
   }
 
   window.MooCodePenDemo = {
@@ -635,9 +1035,37 @@
     }
   };
 
-  onReady(function () {
-    if (window.MooCodePen) {
-      render(window.MooCodePen);
+  function observeCodePenConfig() {
+    var currentConfig = window.MooCodePen;
+
+    try {
+      Object.defineProperty(window, "MooCodePen", {
+        configurable: true,
+        get: function () {
+          return currentConfig;
+        },
+        set: function (config) {
+          currentConfig = config;
+          if (config) {
+            window.MooCodePenDemo.init(config);
+          }
+        }
+      });
+    } catch (_) {
+      /* Older embedded browsers still get the already-assigned config below. */
     }
-  });
+
+    if (currentConfig) {
+      window.MooCodePenDemo.init(currentConfig);
+      return;
+    }
+
+    onReady(function () {
+      if (!currentConfig) {
+        window.MooCodePenDemo.init(inferCodePenConfig(document));
+      }
+    });
+  }
+
+  observeCodePenConfig();
 })();

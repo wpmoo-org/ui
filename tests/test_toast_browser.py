@@ -77,7 +77,9 @@ class ToastBrowserTests(unittest.TestCase):
             page.add_style_tag(path=ROOT / "site-dist/assets/css/codepen-demo.css")
             page.add_script_tag(path=ROOT / "site-dist/assets/js/bootstrap.bundle.min.js")
             page.add_script_tag(path=ROOT / "site-dist/assets/js/codepen-demo.js")
-            page.add_script_tag(content=str(payload["js"]))
+            payload_js = str(payload["js"])
+            if payload_js.strip():
+                page.add_script_tag(content=payload_js)
             prepare_page(page, CERTIFICATION_CASES[0])
 
             expect(page.locator("body")).to_have_attribute(

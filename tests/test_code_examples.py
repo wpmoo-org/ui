@@ -115,28 +115,10 @@ class CodeExampleTests(CatalogTestCase):
                 "https://ui.wpmoo.org/assets/js/codepen-demo.js"
             ),
         )
-        config_match = re.search(
-            r"window\.MooCodePen = (\{[\s\S]*?\});",
-            payload["js"],
-        )
-        self.assertIsNotNone(config_match)
-        config = json.loads(config_match.group(1))
-        self.assertEqual(config["kind"], "component")
-        self.assertEqual(len(config["components"]), 1)
-        component = config["components"][0]
-        self.assertEqual(component["slug"], "button")
-        self.assertEqual(component["label"], "Button")
-        self.assertIn("button", component["description"].lower())
-        self.assertEqual(component["href"], "https://ui.wpmoo.org/components/button/")
-        self.assertEqual(
-            component["previewSrc"],
-            "https://ui.wpmoo.org/assets/images/components/button.webp",
-        )
-        self.assertIn(
-            "window.MooCodePenDemo.init(window.MooCodePen);",
-            payload["js"],
-        )
+        self.assertEqual(payload["js"], "")
+        self.assertNotIn("window.MooCodePen", payload["js"])
         self.assertNotIn("initializeMooCodePenPopovers", payload["js"])
+        self.assertNotIn("getOrCreateInstance", payload["js"])
         self.assertFalse(payload["js_module"])
         self.assertTrue((ROOT / "site-dist/assets/js/codepen-demo.js").is_file())
         self.assertTrue((ROOT / "site-dist/assets/css/codepen-demo.css").is_file())
@@ -161,6 +143,9 @@ class CodeExampleTests(CatalogTestCase):
             encoding="utf-8"
         )
         self.assertIn('document.body.classList.add("moo-codepen-demo")', demo_js)
+        self.assertIn('function inferCodePenConfig(root)', demo_js)
+        self.assertIn('function observeCodePenConfig()', demo_js)
+        self.assertIn('"button"', demo_js)
         self.assertNotIn("ensureStyles", demo_js)
         self.assertNotIn('document.createElement("style")', demo_js)
 

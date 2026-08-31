@@ -879,18 +879,39 @@ class CatalogContractTests(CatalogTestCase):
             "version"
         ]
         self.assertEqual(site_build.CODEPEN_CDN_VERSION, package_version)
+        demo_js = (ROOT / "site-dist/assets/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
 
         expected_runtime = {
-            "components/chart.html": ("chart.js", ".chart", "MooChart"),
+            "components/chart.html": ("chart", "chart.js", ".chart", "MooChart"),
+            "components/combobox.html": (
+                "combobox",
+                "combobox.js",
+                ".combobox",
+                "Combobox",
+            ),
+            "components/context-menu.html": (
+                "context-menu",
+                "context-menu.js",
+                ".context-menu",
+                "ContextMenu",
+            ),
             "components/datepicker.html": (
+                "datepicker",
                 "datepicker.js",
                 "[data-datepicker]",
                 "MooDatepicker",
             ),
-            "components/slider.html": ("slider.js", "[data-slider]", "MooSlider"),
-            "charts/index.html": ("chart.js", ".chart", "MooChart"),
+            "components/slider.html": (
+                "slider",
+                "slider.js",
+                "[data-slider]",
+                "MooSlider",
+            ),
+            "charts/index.html": ("chart", "chart.js", ".chart", "MooChart"),
         }
-        for path, (entrypoint, selector, symbol) in expected_runtime.items():
+        for path, (component_slug, entrypoint, selector, symbol) in expected_runtime.items():
             with self.subTest(path=path):
                 page = self.read_output(path)
                 self.assertIn("Try in CodePen", page)
@@ -898,20 +919,19 @@ class CatalogContractTests(CatalogTestCase):
 
                 parser = CodePenPayloadParser()
                 parser.feed(page)
-                payloads = [
-                    payload
-                    for payload in parser.payloads
-                    if f"@wpmoo/ui@{package_version}/dist/js/{entrypoint}"
-                    in str(payload.get("js", ""))
-                ]
-
-                self.assertTrue(payloads, f"{path} does not load {entrypoint}")
-                for payload in payloads:
+                self.assertTrue(parser.payloads, f"{path} has no CodePen payloads")
+                for payload in parser.payloads:
                     js = str(payload["js"])
-                    self.assertIn(selector, js)
-                    self.assertIn(symbol, js)
-                    self.assertIn("getOrCreateInstance", js)
+                    self.assertNotIn("window.MooCodePen", js)
+                    self.assertNotIn(f"dist/js/{entrypoint}", js)
+                    self.assertNotIn("getOrCreateInstance", js)
                     self.assertNotIn("should be wired", js)
+
+                self.assertIn(f'"{component_slug}"', demo_js)
+                self.assertIn(f"dist/js/{entrypoint}", demo_js)
+                self.assertIn(selector, demo_js)
+                self.assertIn(symbol, demo_js)
+                self.assertIn("getOrCreateInstance", demo_js)
 
     def test_codepen_prefill_payloads_use_browser_safe_form_fields(self) -> None:
         result = self.run_build()
@@ -2140,11 +2160,14 @@ class CatalogContractTests(CatalogTestCase):
                         "https://ui.wpmoo.org/assets/js/codepen-demo.js"
                     ),
                 )
-                self.assertIn('window.MooCodePen = {"kind": "example"};', payload["js"])
-                self.assertIn("window.MooCodePenDemo.init(window.MooCodePen);", payload["js"])
-                self.assertIn("initializeMooCodePenPopovers", payload["js"])
-                self.assertIn("loadMooCodePenBootstrap", payload["js"])
-                self.assertIn(
+                self.assertNotIn("window.MooCodePen", payload["js"])
+                self.assertNotIn(
+                    "window.MooCodePenDemo.init(window.MooCodePen);",
+                    payload["js"],
+                )
+                self.assertNotIn("initializeMooCodePenPopovers", payload["js"])
+                self.assertNotIn("loadMooCodePenBootstrap", payload["js"])
+                self.assertNotIn(
                     "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
                     payload["js"],
                 )
@@ -2393,11 +2416,14 @@ class CatalogContractTests(CatalogTestCase):
                         "https://ui.wpmoo.org/assets/js/codepen-demo.js"
                     ),
                 )
-                self.assertIn('window.MooCodePen = {"kind": "example"};', payload["js"])
-                self.assertIn("window.MooCodePenDemo.init(window.MooCodePen);", payload["js"])
-                self.assertIn("initializeMooCodePenPopovers", payload["js"])
-                self.assertIn("loadMooCodePenBootstrap", payload["js"])
-                self.assertIn(
+                self.assertNotIn("window.MooCodePen", payload["js"])
+                self.assertNotIn(
+                    "window.MooCodePenDemo.init(window.MooCodePen);",
+                    payload["js"],
+                )
+                self.assertNotIn("initializeMooCodePenPopovers", payload["js"])
+                self.assertNotIn("loadMooCodePenBootstrap", payload["js"])
+                self.assertNotIn(
                     "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
                     payload["js"],
                 )

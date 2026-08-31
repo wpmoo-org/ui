@@ -1,6 +1,6 @@
 {% from "components/button.html.jinja" import button %}
 
-{% set codepen_current_package_required_slugs = ["chart", "datepicker", "slider"] %}
+{% set codepen_current_package_required_slugs = ["chart", "combobox", "context-menu", "datatable", "datepicker", "sidebar", "slider"] %}
 
 {#- These two CSS blocks are the small amount of page-layout CSS each
    example category owns on top of the shipped moo-ui.css (see
@@ -526,104 +526,6 @@ body {
 }
 {%- endmacro %}
 
-{% macro chart_codepen_js() -%}
-function startMooCodePenCharts() {
-  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
-    .then(({ default: MooChart }) => {
-      document.querySelectorAll(".chart").forEach((element) => {
-        MooChart.getOrCreateInstance(element);
-      });
-    })
-    .catch((error) => {
-      console.error("Moo UI Chart failed to load for this CodePen example.", error);
-    });
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startMooCodePenCharts, { once: true });
-} else {
-  startMooCodePenCharts();
-}
-{%- endmacro %}
-
-{% macro datepicker_codepen_js() -%}
-function startMooCodePenDatepickers() {
-  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/datepicker.js")
-    .then(({ default: MooDatepicker, MooCalendar, MooDateRangePicker }) => {
-      document.querySelectorAll("[data-datepicker]").forEach((element) => {
-        MooDatepicker.getOrCreateInstance(element);
-      });
-
-      document.querySelectorAll("[data-datepicker-range]").forEach((element) => {
-        MooDateRangePicker.getOrCreateInstance(element);
-      });
-
-      document.querySelectorAll("[data-calendar]").forEach((element) => {
-        if (element.closest("[data-datepicker], [data-datepicker-range]")) {
-          return;
-        }
-        MooCalendar.getOrCreateInstance(element);
-      });
-    })
-    .catch((error) => {
-      console.error("Moo UI Date Picker failed to load for this CodePen example.", error);
-    });
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startMooCodePenDatepickers, { once: true });
-} else {
-  startMooCodePenDatepickers();
-}
-{%- endmacro %}
-
-{% macro slider_codepen_js() -%}
-function startMooCodePenSliders() {
-  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/slider.js")
-    .then(({ default: MooSlider }) => {
-      document.querySelectorAll("[data-slider]").forEach((element) => {
-        MooSlider.getOrCreateInstance(element);
-      });
-    })
-    .catch((error) => {
-      console.error("Moo UI Slider failed to load for this CodePen example.", error);
-    });
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startMooCodePenSliders, { once: true });
-} else {
-  startMooCodePenSliders();
-}
-{%- endmacro %}
-
-{% macro codepen_demo_js(component_slug="", component_label="") -%}
-  {% set ns = namespace(meta={"kind": "example"}, component=None) %}
-  {% for component in catalog %}
-    {% if component.slug == component_slug %}
-      {% set ns.component = component %}
-    {% endif %}
-  {% endfor %}
-  {% if component_slug and component_label %}
-    {% set ns.meta = {
-      "kind": "component",
-      "components": [
-        {
-          "slug": component_slug,
-          "label": component_label,
-          "description": ns.component.description if ns.component else "",
-          "href": canonical_url("components/" ~ component_slug ~ ".html"),
-          "previewSrc": component_preview_absolute_src(component_slug)
-        }
-      ]
-    } %}
-  {% endif %}
-window.MooCodePen = {{ ns.meta | moo_json | safe }};
-if (window.MooCodePenDemo) {
-  window.MooCodePenDemo.init(window.MooCodePen);
-}
-{%- endmacro %}
-
 {#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
     in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
     page's own markup (internal links rewritten to absolute ui.wpmoo.org
@@ -663,45 +565,7 @@ if (window.MooCodePenDemo) {
   {% if demo_js_external not in resolved_js_external %}
     {% set resolved_js_external = (resolved_js_external ~ ";" ~ demo_js_external) if resolved_js_external else demo_js_external %}
   {% endif %}
-  {% set demo_js = codepen_demo_js(component_slug, component_label) | trim %}
-  {% set resolved_js = (demo_js ~ "\n\n" ~ js) | trim %}
-  {% if uses_popover and "initializeMooCodePenPopovers" not in resolved_js %}
-    {% set popover_js -%}
-function initializeMooCodePenPopovers() {
-  const Popover = window.bootstrap && window.bootstrap.Popover;
-  if (!Popover) {
-    return;
-  }
-
-  document.querySelectorAll('[data-bs-toggle="popover"]').forEach((element) => {
-    Popover.getOrCreateInstance(element);
-  });
-}
-
-function loadMooCodePenBootstrap(callback) {
-  if (window.bootstrap && window.bootstrap.Popover) {
-    callback();
-    return;
-  }
-
-  const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";
-  script.onload = callback;
-  document.head.appendChild(script);
-}
-
-function startMooCodePenPopovers() {
-  loadMooCodePenBootstrap(initializeMooCodePenPopovers);
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startMooCodePenPopovers, { once: true });
-} else {
-  startMooCodePenPopovers();
-}
-    {%- endset %}
-    {% set resolved_js = (resolved_js ~ "\n\n" ~ popover_js) | trim %}
-  {% endif %}
+  {% set resolved_js = js | trim %}
   {% set payload = {
     "title": title,
     "description": description,

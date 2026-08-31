@@ -1,7 +1,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/chart.html.jinja" import chart %}
 {% from "components/table.html.jinja" import table %}
-{% from "includes/codepen.html.jinja" import chart_codepen_css, chart_codepen_js, codepen_button_if_available with context %}
+{% from "includes/codepen.html.jinja" import chart_codepen_css, codepen_button_if_available with context %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/example.html.jinja" import render_component_intro, render_example %}
 {% from "components/typography.html.jinja" import typography %}
@@ -51,7 +51,6 @@
         codepen_source,
         chart_codepen_css(),
         ["moo-ui", "chartjs", "charts"],
-        js=chart_codepen_js(),
         label="Try in CodePen",
         icon="codepen",
         extra_class="moo-chart-example__codepen",
