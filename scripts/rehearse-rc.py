@@ -132,7 +132,7 @@ def step_install_and_smoke() -> None:
             ),
             (
                 "tests.test_package.PackageMetadataTests."
-                "test_sass_facade_compiles_from_a_clean_consumer"
+                "test_sass_config_compiles_from_a_clean_consumer"
             ),
             "-v",
         ]

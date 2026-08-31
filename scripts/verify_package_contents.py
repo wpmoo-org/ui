@@ -29,8 +29,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "scss/_facade-settings.scss",
-    "scss/settings/_facade_public.scss",
+    "scss/_config.scss",
     "package.json",
 }
 

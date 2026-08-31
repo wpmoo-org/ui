@@ -404,7 +404,7 @@ console.log(JSON.stringify(Object.fromEntries(
             root_files,
             {
                 "_components.scss",
-                "_facade-settings.scss",
+                "_config.scss",
                 "_settings.scss",
                 "moo-core.scss",
                 "moo-ui.scss",
@@ -440,6 +440,11 @@ console.log(JSON.stringify(Object.fromEntries(
         settings = (SCSS / "_settings.scss").read_text(
             encoding="utf-8"
         )
+        self.assertEqual(
+            active_scss_import_list(settings)[:1],
+            ["config"],
+        )
+
         expected = [
             "settings/palette",
             "settings/forms",
@@ -453,17 +458,14 @@ console.log(JSON.stringify(Object.fromEntries(
         ]
 
         self.assertEqual(imports, expected)
-        # _facade_public.scss is the narrow public allow-list: it is owned
-        # by _palette.scss's leading import (and by the public facade), not
-        # a direct _settings.scss import.
         self.assertEqual(
             owned_partial_targets(SCSS / "settings"),
-            set(expected) | {"settings/facade_public"},
+            set(expected),
         )
         palette_imports = active_scss_import_list(
             (SCSS / "settings/_palette.scss").read_text(encoding="utf-8")
         )
-        self.assertEqual(palette_imports[:1], ["facade_public"])
+        self.assertEqual(palette_imports, [])
 
     def test_entrypoints_import_theme_and_foundation_layers_in_order(self) -> None:
         entrypoint_imports = {

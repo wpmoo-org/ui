@@ -9,7 +9,7 @@ while Moo UI adds optional, explicit ESM only for documented gaps.
 
 Use Moo UI when a project already uses Bootstrap or wants server-rendered HTML
 with Bootstrap-compatible classes, variables, and plugin behavior. Do not use
-Moo UI as evidence for a React, Tailwind, Radix, or public Sass-facade
+Moo UI as evidence for a React, Tailwind, Radix, or internal Sass-source
 implementation.
 
 ## Version And Support
@@ -40,13 +40,12 @@ not independent or accredited certification.
 - `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
 - `@wpmoo/ui/datepicker.min.js`: minified Datepicker bundle (artifact variant of datepicker.js)
 - `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
-- `@wpmoo/ui/scss/facade-settings`: public Sass variable allow-list (LibSass `@import`)
+- `@wpmoo/ui/scss/config`: public Sass variable allow-list (LibSass `@import`)
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
 
 The npm package does not publish catalog templates, preview artwork, catalog
-JavaScript, or internal SCSS partials beyond the facade's required settings
-import.
+JavaScript, or internal SCSS partials beyond the public Sass config.
 
 ## Installation Facts
 

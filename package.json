@@ -36,7 +36,7 @@
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
     "./datepicker.min.js": "./dist/js/datepicker.min.js",
-    "./scss/facade-settings": "./scss/_facade-settings.scss",
+    "./scss/config": "./scss/_config.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -54,8 +54,7 @@
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "scss/_facade-settings.scss",
-    "scss/settings/_facade_public.scss",
+    "scss/_config.scss",
     "certification.json",
     "README.md",
     "LICENSE",

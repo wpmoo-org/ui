@@ -27,8 +27,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "scss/_facade-settings.scss",
-    "scss/settings/_facade_public.scss",
+    "scss/_config.scss",
     "certification.json",
     "README.md",
     "LICENSE",
@@ -49,7 +48,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
     "./datepicker.min.js": "./dist/js/datepicker.min.js",
-    "./scss/facade-settings": "./scss/_facade-settings.scss",
+    "./scss/config": "./scss/_config.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
@@ -435,8 +434,8 @@ for (const specifier of [
             )
             self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
 
-    def test_sass_facade_compiles_from_a_clean_consumer(self) -> None:
-        """Phase 0C discipline: test the facade from a clean consumer
+    def test_sass_config_compiles_from_a_clean_consumer(self) -> None:
+        """Phase 0C discipline: test the config from a clean consumer
         fixture without source-tree shortcuts. Mirrors the tarball-install
         pattern from test_real_tarball_resolves_from_a_clean_consumer."""
         import sass
@@ -480,7 +479,7 @@ for (const specifier of [
             scss_dir = consumer_root / "scss"
             scss_dir.mkdir(exist_ok=True)
             (scss_dir / "defaults.scss").write_text(
-                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                '@import "@wpmoo/ui/scss/config";\n'
                 "@import \"bootstrap/scss/functions\";\n"
                 "@import \"bootstrap/scss/variables\";\n"
                 "@import \"bootstrap/scss/variables-dark\";\n"
@@ -498,7 +497,7 @@ for (const specifier of [
 
             # --- Assertion 2: overriding $primary changes the output ---
             (scss_dir / "override.scss").write_text(
-                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                '@import "@wpmoo/ui/scss/config";\n'
                 "$primary: #3b82f6;\n"
                 '@import "bootstrap/scss/functions";\n'
                 '@import "bootstrap/scss/variables";\n'
@@ -523,16 +522,16 @@ for (const specifier of [
                 self.assertNotIn("_forms", output)
 
             # --- Assertion 4: non-allow-listed variables must not leak ---
-            # The facade may only expose the frozen 15-variable allow-list.
+            # The config may only expose the frozen 15-variable allow-list.
             # Referencing an internal declaration ($white from the palette,
-            # $moo-destructive derived token) after the facade import must
-            # fail with Sass's own undefined-variable error. If the facade
+            # $moo-destructive derived token) after the config import must
+            # fail with Sass's own undefined-variable error. If the config
             # ever re-imports the full internal settings partial, these
             # compilations succeed and this assertion fails for real.
             for leaked_variable in ("$white", "$moo-destructive"):
                 with self.subTest(leaked_variable=leaked_variable):
                     (scss_dir / "leak.scss").write_text(
-                        '@import "@wpmoo/ui/scss/facade-settings";\n'
+                        '@import "@wpmoo/ui/scss/config";\n'
                         f".leak-test {{ color: {leaked_variable}; }}\n",
                         encoding="utf-8",
                     )

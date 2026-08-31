@@ -2772,7 +2772,7 @@ class CatalogContractTests(CatalogTestCase):
         prohibited = (
             "Sass customization",
             "Sass variables",
-            "public Sass facade",
+            "internal Sass source",
         )
 
         for path, surface in public_surfaces.items():

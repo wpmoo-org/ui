@@ -685,9 +685,10 @@ class CertificationContractTests(unittest.TestCase):
 
     def test_api_freeze_document_matches_live_package_state(self) -> None:
         """Lock the 0.9.0 API freeze: any undocumented removal from the
-        public surfaces must fail CI.  Additive exports/files introduced
-        by later release candidates (e.g. 1.0.0-rc.3) are tolerated --
-        exact equality for those is enforced by the rc.3 freeze test and
+        public surfaces must fail CI. Additive exports/files introduced
+        by later release candidates are tolerated, and the RC.3 Sass
+        config rename is explicitly reconciled below. Exact equality for
+        current exports/files is enforced by the rc.3 freeze test and
         ultimately by the Phase 6 package-surface gate."""
         freeze = self._read_json("src/certification/api-freeze-0.9.0.json")
         package = self._read_json("package.json")
@@ -698,47 +699,52 @@ class CertificationContractTests(unittest.TestCase):
         # Removals fail; additive RC.3 entries are allowed.
         live_exports = set(package["exports"].keys())
         frozen_exports = set(freeze["packageExports"])
-        removed_exports = frozen_exports - live_exports
+        reconciled_removed_exports = {"./scss/facade-settings"}
+        removed_exports = frozen_exports - live_exports - reconciled_removed_exports
         self.assertFalse(
             removed_exports,
             f"0.9.0 frozen exports were removed from package.json: {removed_exports}",
         )
+        self.assertIn("./scss/config", live_exports)
+        self.assertNotIn("./scss/facade-settings", live_exports)
 
         # Frozen 0.9.0 package files must be a subset of current files.
         # Removals fail; additive RC.3 entries are allowed.
         live_files = set(package["files"])
         frozen_files = set(freeze["packageFiles"])
-        removed_files = frozen_files - live_files
+        reconciled_removed_files = {
+            "scss/_facade-settings.scss",
+            "scss/settings/_facade_public.scss",
+        }
+        removed_files = frozen_files - live_files - reconciled_removed_files
         self.assertFalse(
             removed_files,
             f"0.9.0 frozen files were removed from package.json: {removed_files}",
         )
+        self.assertIn("scss/_config.scss", live_files)
+        self.assertTrue(reconciled_removed_files.isdisjoint(live_files))
 
-        # Sass facade allow-list must match the real public declarations.
+        # Sass config allow-list must match the real public declarations.
         # Extract variable names from the actual !default declarations in
-        # the narrow public partial -- not from facade comments -- so any
+        # the narrow public config -- not from header comments -- so any
         # widening of the public surface (e.g. re-importing the full
-        # internal palette into _facade_public.scss) grows the extracted
+        # internal settings aggregate into _config.scss) grows the extracted
         # set past the freeze document and fails for real.
         import re
-        facade_public_source = (ROOT / "scss/settings/_facade_public.scss").read_text(encoding="utf-8")
+        config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
         frozen_sass_vars = set(freeze["sassFacadeAllowList"])
-        declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', facade_public_source, re.MULTILINE))
+        declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', config_source, re.MULTILINE))
         self.assertEqual(frozen_sass_vars, declared_vars,
-            "Sass facade allow-list diverged from the freeze document")
-
-        # The facade itself may only import the narrow public partial;
-        # importing the full internal palette would re-leak ~35 variables.
-        facade_source = (ROOT / "scss/_facade-settings.scss").read_text(encoding="utf-8")
-        # Strip comments first so the documented usage recipes in the
-        # header are not mistaken for real imports.
-        stripped_facade = re.sub(r"/\*.*?\*/", "", facade_source, flags=re.DOTALL)
-        stripped_facade = "\n".join(
-            line.split("//", 1)[0] for line in stripped_facade.splitlines()
+            "Sass config allow-list diverged from the freeze document")
+        stripped_config = re.sub(r"/\*.*?\*/", "", config_source, flags=re.DOTALL)
+        stripped_config = "\n".join(
+            line.split("//", 1)[0] for line in stripped_config.splitlines()
         )
-        facade_imports = set(re.findall(r'@import\s+"([^"]+)"\s*;', stripped_facade))
-        self.assertEqual(facade_imports, {"settings/facade_public"},
-            "facade-settings must import only the narrow public partial")
+        self.assertEqual(
+            re.findall(r'@import\s+"([^"]+)"\s*;', stripped_config),
+            [],
+            "scss/_config.scss must not import internal settings partials",
+        )
 
         # Certification manifest schema required fields must match
         live_required = set(schema["required"])
@@ -771,23 +777,22 @@ class CertificationContractTests(unittest.TestCase):
         # Freeze document must declare version 1.0.0-rc.3
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.3")
 
-        # Sass facade allow-list must match the real public declarations.
+        # Sass config allow-list must match the real public declarations.
         import re
-        facade_public_source = (ROOT / "scss/settings/_facade_public.scss").read_text(encoding="utf-8")
+        config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
         frozen_sass_vars = set(freeze["sassFacadeAllowList"])
-        declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', facade_public_source, re.MULTILINE))
+        declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', config_source, re.MULTILINE))
         self.assertEqual(frozen_sass_vars, declared_vars,
-            "Sass facade allow-list diverged from the freeze document")
-
-        # The facade itself may only import the narrow public partial.
-        facade_source = (ROOT / "scss/_facade-settings.scss").read_text(encoding="utf-8")
-        stripped_facade = re.sub(r"/\*.*?\*/", "", facade_source, flags=re.DOTALL)
-        stripped_facade = "\n".join(
-            line.split("//", 1)[0] for line in stripped_facade.splitlines()
+            "Sass config allow-list diverged from the freeze document")
+        stripped_config = re.sub(r"/\*.*?\*/", "", config_source, flags=re.DOTALL)
+        stripped_config = "\n".join(
+            line.split("//", 1)[0] for line in stripped_config.splitlines()
         )
-        facade_imports = set(re.findall(r'@import\s+"([^"]+)"\s*;', stripped_facade))
-        self.assertEqual(facade_imports, {"settings/facade_public"},
-            "facade-settings must import only the narrow public partial")
+        self.assertEqual(
+            re.findall(r'@import\s+"([^"]+)"\s*;', stripped_config),
+            [],
+            "scss/_config.scss must not import internal settings partials",
+        )
 
         # Certification manifest schema required fields must match
         live_required = set(schema["required"])

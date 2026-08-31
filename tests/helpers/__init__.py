@@ -77,8 +77,7 @@ def read_scss_aggregate(
         paths.append(partial)
         queue.append(partial)
     seen = set(paths)
-    # Follow imports nested inside the included partials (e.g.
-    # settings/_palette.scss importing facade_public) so their
+    # Follow imports nested inside the included partials so their
     # declarations still contribute to the aggregate.
     while queue:
         current = queue.pop(0)

@@ -31,7 +31,7 @@
       "./datepicker.js",
       "./datepicker.min.js"
     ],
-    "sass": ["./scss/facade-settings"]
+    "sass": ["./scss/config"]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
 }
