@@ -1,0 +1,24 @@
+// Moo UI public Sass config
+//
+// Import this before Bootstrap variables so overrides take precedence.
+//
+// Only the variables below are public. Derived $moo-* tokens and component
+// knobs are internal and may change without notice.
+
+$primary: #171717 !default; // Brand color
+$secondary: #f4f4f5 !default; // Secondary surface color
+$success: #047857 !default; // Success color
+$info: #0369a1 !default; // Informational color
+$warning: #b45309 !default; // Warning color
+$danger: #e7000b !default; // Destructive color
+$light: #fafafa !default; // Light surface color
+$dark: #18181b !default; // Dark surface color
+
+$body-color: #18181b !default; // Document text color
+$body-bg: #fff !default; // Document background color
+$font-size-base: 0.875rem !default; // Bootstrap-compatible base font size
+
+$border-color: #e4e4e7 !default; // Default border color
+$border-radius: 0.5rem !default; // Default radius
+$border-radius-sm: 0.375rem !default; // Small radius
+$border-radius-lg: 0.625rem !default; // Large radius

@@ -75,12 +75,12 @@ class SkeletonTests(CatalogTestCase):
 
     def test_skeleton_component_partial_is_imported_into_main_bundle(self) -> None:
         styles = (ROOT / "scss/moo-ui.scss").read_text(encoding="utf-8")
-        component_layer = (ROOT / "scss/_component_layer.scss").read_text(
+        components = (ROOT / "scss/_components.scss").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn('@import "component_layer";', styles)
-        self.assertIn('@import "components/skeleton";', component_layer)
+        self.assertIn('@import "components";', styles)
+        self.assertIn('@import "components/skeleton";', components)
 
     def test_skeleton_is_ready_in_catalog_and_pages_build(self) -> None:
         catalog = json.loads((ROOT / "src/registry/components.json").read_text(encoding="utf-8"))

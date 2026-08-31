@@ -26,6 +26,11 @@ CORE_OUTPUTS = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
 }
 FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
 CORE_SOURCE_ROOTS = ("src", "scss")
@@ -128,6 +133,11 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/context-menu.js",
             "js/datatable.js",
             "js/sidebar.js",
+            "js/slider.js",
+            "js/chart.js",
+            "js/chart.min.js",
+            "js/datepicker.js",
+            "js/datepicker.min.js",
         }
         expected_site_files = {
             "index.html",
@@ -146,6 +156,11 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/context-menu.js",
             "js/datatable.js",
             "js/sidebar.js",
+            "js/slider.js",
+            "js/chart.js",
+            "js/chart.min.js",
+            "js/datepicker.js",
+            "js/datepicker.min.js",
             "components/button/index.html",
             "blocks/sidebar-floating/index.html",
             "utils/scroll-fade/index.html",
@@ -281,7 +296,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             ROOT / "src/js/components/combobox.js",
             ROOT / "src/icons/lucide-icons.json",
             ROOT / "src/registry/components.json",
-            ROOT / "scss/_primary_variables.scss",
+            ROOT / "scss/_settings.scss",
         )
 
         for path in required_paths:
@@ -363,6 +378,17 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(ROOT).as_posix()):
                 source = path.read_text(encoding="utf-8")
                 self.assertIn("site/static/images/", source)
+
+    def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        self.assertEqual(package["version"], "1.0.0-rc.3")
+
+        for relative in ("SUPPORT.md", "SECURITY.md"):
+            with self.subTest(relative=relative):
+                source = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn("1.0.0-rc.3", source)
+                self.assertNotIn("currently in the `0.x` development series", source)
+                self.assertNotIn("current `0.x` release line", source)
                 self.assertNotIn(
                     "static/images/",
                     source.replace("site/static/images/", ""),
@@ -372,7 +398,14 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         recorder = load_recorder()
         payload = recorder.record_boundary_baseline(ROOT)
 
-        for section in ("package", "npmPackFiles", "coreOutputs"):
+        for section in (
+            "package",
+            "npmPackFiles",
+            "distFiles",
+            "siteDistFiles",
+            "coreOutputs",
+            "siteOutputs",
+        ):
             with self.subTest(section=section):
                 self.assertEqual(payload[section], self.fixture[section])
 

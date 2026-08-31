@@ -59,6 +59,14 @@ export function initBlockFrames(root = document) {
     clampViewportScroll(viewport);
     updateSizeLabel(shell, width, height);
   };
+  const revealFrame = (shell) => {
+    // The iframe has finished loading its content; fade out the loading
+    // placeholder so the rendered preview shows through. idempotent.
+    const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
+    if (viewport) {
+      viewport.classList.add("is-loaded");
+    }
+  };
   const resizeAll = () => shells.forEach(resize);
   const setActiveButton = (buttons, activeButton) => {
     buttons.forEach((button) => {
@@ -101,6 +109,10 @@ export function initBlockFrames(root = document) {
     }
     if (frame.getAttribute("src") !== src) {
       frame.setAttribute("src", src);
+      // A different preview is about to load; bring the loading placeholder
+      // back until the new document fires its load event.
+      const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
+      viewport?.classList.remove("is-loaded");
     }
     resize(shell);
   };
@@ -120,7 +132,24 @@ export function initBlockFrames(root = document) {
       shells.forEach((shell) => observer.observe(shell));
     }
     shells.forEach((shell) => {
-      listen(shell.querySelector("[data-moo-block-frame]"), "load", () => resize(shell));
+      const frame = shell.querySelector("[data-moo-block-frame]");
+      listen(frame, "load", () => {
+        revealFrame(shell);
+        resize(shell);
+      });
+      // If the iframe already finished loading before this module ran (e.g.
+      // it was cached and painted synchronously), the load event will never
+      // fire again; reveal it immediately instead of leaving the placeholder
+      // stuck over a ready preview. A lazy iframe starts on about:blank whose
+      // readyState is already "complete", so the check must also confirm the
+      // document is not the initial blank placeholder before revealing.
+      if (
+        frame?.contentWindow &&
+        frame.contentWindow.location?.href !== "about:blank" &&
+        frame.contentDocument?.readyState === "complete"
+      ) {
+        revealFrame(shell);
+      }
       const viewport = shell.querySelector("[data-moo-block-frame-viewport]");
       if (viewport) {
         listen(viewport, "scroll", () => clampViewportScroll(viewport));

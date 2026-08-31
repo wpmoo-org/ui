@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Skeleton — Moo UI{% endblock %}
@@ -35,7 +35,7 @@
     {% set basic %}
       {{ skeleton(width="9.5rem", height="1rem") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "basic",
       "Basic",
       "Use precise width/height values to reserve space before the final copy is available.",
@@ -51,7 +51,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "profile-row",
       "Profile row",
       "Pair a circular avatar placeholder with name and role lines while a workspace member loads.",
@@ -67,7 +67,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "card",
       "Card",
       "Keep the card frame and metadata rhythm consistent while a feed card prepares on the page.",
@@ -82,7 +82,7 @@
         {{ skeleton(width="72%", height=".875rem") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "text",
       "Text block",
       "Use varying line lengths to preserve paragraph alignment when prose arrives.",
@@ -102,7 +102,7 @@
         {{ skeleton(width="6rem", height="2rem") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "form",
       "Form",
       "Hold labels and control height while a billing form is still resolving.",
@@ -120,7 +120,7 @@
         {% endfor %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "list-rows",
       "List rows",
       "Hold row height for a repeated list, such as a support triage queue, while it loads.",
@@ -148,7 +148,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("skeleton", "Skeleton",
       "table",
       "Table rows",
       "Represent headers and rows with matching geometry so sorting and selection actions can appear without jump.",

@@ -69,12 +69,12 @@
   // (still a shared token, no new value) and widen the column by the same
   // margin the card's sides consume, so the icon rail itself keeps its full
   // width instead of shrinking.
-  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] {
+  .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] {
     flex-basis: calc(var(--moo-sidebar-width-icon) + #{$spacer});
     width: calc(var(--moo-sidebar-width-icon) + #{$spacer});
   }
 
-  .sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] .sidebar-inner {
+  .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] .sidebar-inner {
     box-shadow: var(--bs-box-shadow);
   }
 }

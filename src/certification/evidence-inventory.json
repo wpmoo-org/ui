@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "baseline",
-  "description": "Preview evidence inventory for the 42-component Moo UI Core release-candidate surface. Profile status remains conservative: automated and manual release evidence may exist for specific contracts, while whole-profile certification categories stay missing until the certification harness produces final attestation.",
+  "description": "Preview evidence inventory for the 45-component Moo UI Core release-candidate surface. Profile status remains conservative: automated and manual release evidence may exist for specific contracts, while whole-profile certification categories stay missing until the certification harness produces final attestation.",
   "genericHostConformanceKit": {
     "status": "built-and-self-proven",
     "contractVersion": "1.0",
@@ -112,6 +112,7 @@
     {"slug": "breadcrumb", "profile": "t0-interactive", "evidence": ["tests/test_breadcrumb.py"]},
     {"slug": "pagination", "profile": "t0-interactive", "evidence": ["tests/test_pagination.py"]},
     {"slug": "progress", "profile": "t0-static", "evidence": ["tests/test_progress.py"]},
+    {"slug": "slider", "profile": "t3-runtime-composite", "evidence": ["tests/test_slider.py", "src/js/components/slider.js", "tests/fixtures/certification/slider.html"]},
     {"slug": "table", "profile": "t0-static", "evidence": ["tests/test_table.py"]},
     {"slug": "checkbox", "profile": "t0-interactive", "evidence": ["tests/test_checkbox.py", "conformance/reports/2026-08-05-reference-host-shell.json"]},
     {"slug": "radio-group", "profile": "t0-interactive", "evidence": ["tests/test_radio_group.py", "conformance/reports/2026-08-05-reference-host-shell.json"]},
@@ -132,7 +133,9 @@
     {"slug": "alert-dialog", "profile": "t3-runtime-composite", "evidence": ["tests/test_alert_dialog.py", "tests/test_dialog.py"]},
     {"slug": "menubar", "profile": "t3-runtime-composite", "evidence": ["tests/test_menubar.py", "tests/test_dropdown_menu.py"]},
     {"slug": "context-menu", "profile": "t3-runtime-composite", "evidence": ["tests/test_context_menu.py", "src/js/components/context-menu.js"]},
-    {"slug": "datatable", "profile": "t3-runtime-composite", "evidence": ["tests/test_datatable.py", "src/js/components/datatable.js"]}
+    {"slug": "datatable", "profile": "t3-runtime-composite", "evidence": ["tests/test_datatable.py", "src/js/components/datatable.js"]},
+    {"slug": "chart", "profile": "t3-runtime-composite", "evidence": ["tests/test_chart.py", "src/js/components/chart.js", "tests/fixtures/certification/chart.html"]},
+    {"slug": "datepicker", "profile": "t3-runtime-composite", "evidence": ["tests/test_datepicker.py", "src/js/components/datepicker.js", "tests/fixtures/certification/datepicker.html"]}
   ],
   "plannedComponents": []
 }

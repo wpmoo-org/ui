@@ -1,0 +1,43 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/dashboard_overview.html.jinja" import render_dashboard_overview %}
+{% from "includes/example-component-reference.html.jinja" import example_component_reference with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% set page_category = "Dashboard" %}
+
+{% block title %}Overview — Moo UI{% endblock %}
+
+{% macro dashboard_body() %}
+  {#- Examples pages are full-width app screens: no doc reading measure,
+     no TOC column. The dashboard is a live, in-browser screen: stat cards
+     and Chart.js charts re-theme on light/dark toggle, all client-side. #}
+  <div class="moo-examples-page" data-moo-example-dashboard-overview>
+    {{ render_page_header(
+      "Overview",
+      "A live dashboard with stat cards and charts — changes stay in your browser.",
+      id="overview"
+    ) }}
+
+    {{ render_dashboard_overview() }}
+  </div>
+{% endmacro %}
+
+{% block content %}
+  {{ dashboard_body() }}
+{% endblock %}
+
+{% macro dashboard_footer(codepen_action="") %}
+  <footer class="moo-examples-footer text-body-secondary small">
+    <p class="mb-0">
+      Composed from the
+      {{ example_component_reference("card") }} and
+      {{ example_component_reference("button") }}
+      components, with charts powered by Chart.js.
+    </p>
+    {{ codepen_action }}
+  </footer>
+{% endmacro %}
+
+{% block footer %}
+  {{ dashboard_footer() }}
+{% endblock %}

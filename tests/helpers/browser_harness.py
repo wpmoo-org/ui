@@ -5,7 +5,7 @@ import unittest
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Iterator
 from urllib.parse import urlsplit
@@ -45,6 +45,11 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path: str) -> str:
         public_path = urlsplit(path).path.lstrip("/")
+        if public_path.startswith("assets/"):
+            local_asset = Path(self.directory) / public_path
+            if local_asset.exists():
+                return str(local_asset)
+            return str(ROOT / "site-dist" / public_path)
         if public_path in SITE_PUBLIC_FILES:
             return str(SITE_PUBLIC / public_path)
         return super().translate_path(path)
@@ -192,7 +197,7 @@ def run_axe(page: Page) -> list[dict[str, object]]:
 @contextmanager
 def serve_directory(directory: Path) -> Iterator[str]:
     handler = partial(_QuietHandler, directory=str(directory))
-    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    server = HTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:

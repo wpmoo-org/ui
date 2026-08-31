@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "1.0.0-rc.2",
+  "coreVersion": "1.0.0-rc.3",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -24,9 +24,14 @@
       "./combobox.js",
       "./sidebar.js",
       "./context-menu.js",
-      "./datatable.js"
+      "./datatable.js",
+      "./slider.js",
+      "./chart.js",
+      "./chart.min.js",
+      "./datepicker.js",
+      "./datepicker.min.js"
     ],
-    "sass": ["./scss/facade-settings"]
+    "sass": ["./scss/config"]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
 }

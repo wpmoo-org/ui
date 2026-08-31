@@ -34,8 +34,8 @@
 .moo-catalog__command-body {
   max-height: 24rem;
   padding: 0.5rem;
+  scroll-padding-block: 0.5rem;
   overflow-y: auto;
-  border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
 
 .moo-catalog__command-group + .moo-catalog__command-group {
@@ -60,7 +60,13 @@
   color: var(--bs-body-color);
 }
 
-.moo-catalog__command-item+.moo-catalog__command-item {
+.moo-catalog__command-list .list-group-flush > .moo-catalog__command-item {
+  border-radius: var(--bs-border-radius);
+}
+
+/* Bootstrap collapses active list-group siblings; command rows keep fixed spacing. */
+.moo-catalog__command-item + .moo-catalog__command-item,
+.moo-catalog__command-item + .moo-catalog__command-item.active {
   margin-top: 0.125rem;
 }
 

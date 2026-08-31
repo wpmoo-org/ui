@@ -1,6 +1,8 @@
 // Bootstrap's base .alert has a transparent bg/border until a contextual
 // .alert-{state} modifier sets them; the design reference's quiet style
 // keeps a visible neutral border even on the unmodified/default alert.
+$moo-alert-dismissible-close-space: $btn-close-width + ($btn-close-padding-x * 2) + 0.5rem !default;
+
 .alert {
   --bs-alert-border-color: var(--moo-border);
   --bs-alert-color: var(--moo-foreground);
@@ -16,15 +18,16 @@
   padding-right: 0;
   padding-left: 0;
   padding-inline-start: var(--bs-alert-padding-x);
-  padding-inline-end: calc(var(--bs-alert-padding-x) + 1.5rem);
+  padding-inline-end: calc(var(--bs-alert-padding-x) + #{$moo-alert-dismissible-close-space});
 }
 
 .alert-dismissible .btn-close {
   top: auto;
   right: auto;
-  inset-block-start: var(--bs-alert-padding-y);
+  inset-block-start: 50%;
   inset-inline-end: var(--bs-alert-padding-x);
   padding: $btn-close-padding-y $btn-close-padding-x;
+  transform: translateY(-50%);
 }
 
 // The reference's destructive alert keeps the same neutral surface and

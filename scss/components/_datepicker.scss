@@ -1,0 +1,237 @@
+.moo-datepicker {
+  --moo-datepicker-width: #{$moo-datepicker-width};
+  --moo-datepicker-popover-offset: #{$moo-datepicker-popover-offset};
+
+  position: relative;
+  width: 100%;
+  max-width: var(--moo-datepicker-width);
+}
+
+.moo-datepicker__trigger {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: start;
+}
+
+.moo-datepicker__trigger [data-datepicker-label] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moo-datepicker__trigger.is-invalid {
+  border-color: var(--bs-form-invalid-border-color);
+  color: var(--bs-form-invalid-color);
+}
+
+.moo-datepicker-time-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $spacer * .75;
+  width: 100%;
+}
+
+.moo-datepicker-time-row .moo-datepicker {
+  flex: 1 1 12rem;
+  width: auto;
+}
+
+.moo-datepicker-time {
+  flex: 0 0 auto;
+  width: calc(#{$moo-datepicker-width} / 2);
+  max-width: 9rem;
+}
+
+.moo-datepicker__popover {
+  position: absolute;
+  inset-block-start: calc(100% + var(--moo-datepicker-popover-offset));
+  inset-inline-start: 0;
+  z-index: $zindex-dropdown;
+  width: max-content;
+  max-width: calc(100vw - #{$spacer});
+  padding: $moo-datepicker-padding;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow-lg);
+}
+
+.moo-datepicker__popover[hidden] {
+  display: none !important;
+}
+
+.moo-datepicker__popover.show {
+  display: block;
+}
+
+.moo-datepicker__popover[data-datepicker-placement] {
+  inset: auto;
+}
+
+.moo-calendar {
+  --moo-datepicker-day-size: #{$moo-datepicker-day-size};
+  --moo-datepicker-gap: #{$moo-datepicker-gap};
+  --moo-datepicker-padding: #{$moo-datepicker-padding};
+  --moo-datepicker-preset-gap: #{$moo-datepicker-preset-gap};
+  --moo-datepicker-day-border-radius: #{$moo-datepicker-day-border-radius};
+  --moo-datepicker-day-range-joined-border-radius: #{$moo-datepicker-day-range-joined-border-radius};
+
+  width: calc(var(--moo-datepicker-day-size) * 7 + var(--moo-datepicker-gap) * 6);
+  max-width: 100%;
+  color: var(--bs-body-color);
+}
+
+.moo-calendar__header {
+  display: grid;
+  grid-template-columns: var(--moo-datepicker-day-size) minmax(0, 1fr) var(--moo-datepicker-day-size);
+  align-items: center;
+  gap: var(--moo-datepicker-gap);
+  margin-bottom: $spacer * 0.75;
+}
+
+.moo-calendar__caption {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--moo-datepicker-gap);
+  font-weight: $font-weight-medium;
+}
+
+.moo-calendar__select {
+  min-width: 0;
+  height: $input-height-sm;
+  padding: 0 $spacer * 0.375;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-sm);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font: inherit;
+}
+
+.moo-calendar__nav {
+  color: var(--bs-secondary-color);
+}
+
+.moo-calendar__nav:hover,
+.moo-calendar__nav:focus-visible {
+  color: var(--bs-body-color);
+}
+
+.moo-calendar__nav-icon {
+  font-size: $font-size-lg;
+  line-height: 1;
+}
+
+.moo-calendar__weekdays,
+.moo-calendar__week {
+  display: grid;
+  grid-template-columns: repeat(7, var(--moo-datepicker-day-size));
+  gap: var(--moo-datepicker-gap);
+}
+
+.moo-calendar__week + .moo-calendar__week {
+  margin-top: var(--moo-datepicker-gap);
+}
+
+.moo-calendar__weekdays {
+  margin-bottom: var(--moo-datepicker-gap);
+}
+
+.moo-calendar__weekday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--moo-datepicker-day-size);
+  height: $spacer * 1.5;
+  color: var(--bs-secondary-color);
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.moo-calendar__cell {
+  position: relative;
+  width: var(--moo-datepicker-day-size);
+  height: var(--moo-datepicker-day-size);
+}
+
+.moo-calendar__day {
+  position: relative;
+  display: inline-flex;
+  width: var(--moo-datepicker-day-size);
+  height: var(--moo-datepicker-day-size);
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--moo-datepicker-day-border-radius);
+  background: transparent;
+  color: var(--bs-body-color);
+  font: inherit;
+  line-height: 1;
+}
+
+.moo-calendar__day:hover:not(:disabled),
+.moo-calendar__day:focus-visible {
+  background: var(--moo-muted-surface);
+  outline: 0;
+}
+
+.moo-calendar__day:focus-visible {
+  box-shadow: $moo-datepicker-day-focus-ring-shadow;
+}
+
+.moo-calendar__day[data-calendar-selected="true"] {
+  background: var(--moo-primary);
+  color: var(--moo-primary-foreground);
+}
+
+.moo-calendar__day[data-calendar-selected="true"]:hover:not(:disabled),
+.moo-calendar__day[data-calendar-selected="true"]:focus-visible {
+  background: var(--moo-primary);
+  color: var(--moo-primary-foreground);
+}
+
+.moo-calendar__day[data-calendar-range="middle"] {
+  border-radius: var(--moo-datepicker-day-range-joined-border-radius);
+  background: color-mix(in srgb, var(--moo-primary) 14%, transparent);
+  color: var(--bs-body-color);
+}
+
+.moo-calendar__day[data-calendar-range="start"] {
+  border-start-end-radius: var(--moo-datepicker-day-range-joined-border-radius);
+  border-end-end-radius: var(--moo-datepicker-day-range-joined-border-radius);
+}
+
+.moo-calendar__day[data-calendar-range="end"] {
+  border-start-start-radius: var(--moo-datepicker-day-range-joined-border-radius);
+  border-end-start-radius: var(--moo-datepicker-day-range-joined-border-radius);
+}
+
+.moo-calendar__day[data-calendar-outside="true"] {
+  color: var(--bs-secondary-color);
+}
+
+.moo-calendar__day[data-calendar-today="true"]:not([data-calendar-selected="true"]) {
+  outline: var(--bs-border-width) solid var(--bs-border-color);
+  outline-offset: calc(-1 * var(--bs-border-width));
+}
+
+.moo-calendar__day:disabled {
+  color: var(--moo-disabled-foreground);
+  cursor: default;
+  opacity: var(--moo-disabled-control-opacity);
+}
+
+.moo-calendar__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--moo-datepicker-preset-gap);
+  margin-top: $spacer * 0.75;
+}
+
+.moo-calendar__preset {
+  flex: 0 0 auto;
+}

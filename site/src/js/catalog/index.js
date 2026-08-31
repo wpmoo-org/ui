@@ -1,6 +1,8 @@
 import Combobox from "../../../../src/js/components/combobox.js";
 import ContextMenu from "../../../../src/js/components/context-menu.js";
 import DataTable from "../../../../src/js/components/datatable.js";
+import Datepicker, { MooCalendar, MooDateRangePicker } from "../../../../src/js/components/datepicker.js";
+import Slider from "../../../../src/js/components/slider.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
@@ -10,6 +12,7 @@ import { initCatalogFilter } from "./catalog-filter.js";
 import { initCatalogViewToggle } from "./catalog-view-toggle.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
+import { initExamplesChart } from "./examples-chart.js";
 import { initExamplesForms } from "./examples-forms.js";
 import { initExamplesTasks } from "./examples-tasks.js";
 import { initExamplesUsers } from "./examples-users.js";
@@ -32,6 +35,7 @@ export function initCatalog(root = document) {
     initExamplesForms(root),
     initExamplesTasks(root),
     initExamplesUsers(root),
+    initExamplesChart(root),
     initCatalogViewToggle(root),
     initSettingsPanel(root),
     initToc(root),
@@ -40,6 +44,29 @@ export function initCatalog(root = document) {
 
   root.querySelectorAll(".combobox").forEach((element) => {
     const instance = Combobox.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-datepicker]").forEach((element) => {
+    const instance = Datepicker.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-datepicker-range]").forEach((element) => {
+    const instance = MooDateRangePicker.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-calendar]").forEach((element) => {
+    if (element.closest("[data-datepicker], [data-datepicker-range]")) {
+      return;
+    }
+    const instance = MooCalendar.getOrCreateInstance(element);
+    disposers.push(() => instance.dispose());
+  });
+
+  root.querySelectorAll("[data-slider]").forEach((element) => {
+    const instance = Slider.getOrCreateInstance(element);
     disposers.push(() => instance.dispose());
   });
 

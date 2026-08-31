@@ -6,6 +6,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/close_button.html.jinja"
 PAGE = ROOT / "site/src/pages/components/close-button.html.jinja"
+FIXTURE = ROOT / "tests/fixtures/certification/close-button.html"
 
 
 class CloseButtonTests(CatalogTestCase):
@@ -48,6 +49,22 @@ class CloseButtonTests(CatalogTestCase):
             self.render_close_button('close_button(dismiss="alert")'),
         )
 
+    def test_certification_fixture_uses_alert_body_for_dismissible_context(
+        self,
+    ) -> None:
+        source = FIXTURE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            '<div class="alert-body" id="certification-close-button-alert-body">',
+            source,
+        )
+        self.assertIn(
+            '<button\n'
+            '            type="button"\n'
+            '            class="btn-close"',
+            source,
+        )
+
     def test_close_button_requires_visible_aria_label(self) -> None:
         with self.assertRaisesRegex(ValueError, "Close button aria_label is required"):
             self.render_close_button('close_button(aria_label="   ")')
@@ -74,11 +91,12 @@ class CloseButtonTests(CatalogTestCase):
         source = (ROOT / "scss/components/_close_button.scss").read_text(
             encoding="utf-8"
         )
-        settings = (ROOT / "scss/settings/_components.scss").read_text(
+        settings = (ROOT / "scss/settings/_component_variables.scss").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn('@import "components/close_button";', (ROOT / "scss/_component_layer.scss").read_text(encoding="utf-8"))
+        components = (ROOT / "scss/_components.scss").read_text(encoding="utf-8")
+        self.assertIn('@import "components/close_button";', components)
         self.assertIn("$btn-close-width: 0.75rem !default;", settings)
         self.assertIn("$btn-close-padding-x: 0.34375rem !default;", settings)
         self.assertIn("$btn-close-opacity: 1 !default;", settings)

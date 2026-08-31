@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import json
 import re
+import subprocess
+from html import unescape
 
 from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_scss_aggregate
+from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
@@ -34,6 +38,20 @@ def _css_block(styles: str, selector: str) -> str:
 
 
 class SidebarTests(CatalogTestCase):
+    def run_sidebar_case(self, script: str) -> dict[str, object]:
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", script],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        lines = [line for line in result.stdout.splitlines() if line.strip()]
+        self.assertTrue(lines, f"No report emitted; stderr: {result.stderr}")
+        return json.loads(lines[-1])
+
     def render_sidebar(self, source: str) -> str:
         template = create_environment().from_string(
             '{% from "components/sidebar.html.jinja" import '
@@ -62,10 +80,10 @@ class SidebarTests(CatalogTestCase):
         )
 
         self.assertIn('class="sidebar-wrapper"', output)
-        self.assertIn('data-moo-sidebar-key="catalog-shell"', output)
+        self.assertIn('data-sidebar-key="catalog-shell"', output)
         self.assertIn('id="catalog-sidebar"', output)
         self.assertIn('aria-label="Catalog navigation"', output)
-        self.assertIn('data-moo-sidebar-trigger', output)
+        self.assertIn('data-sidebar-trigger', output)
         self.assertIn('data-bs-target="#catalog-sidebar"', output)
         self.assertIn('aria-controls="catalog-sidebar"', output)
         self.assertIn('aria-expanded="true"', output)
@@ -84,7 +102,7 @@ class SidebarTests(CatalogTestCase):
         )
 
         self.assertIn('aria-current="page"', output)
-        self.assertIn('data-moo-sidebar-tooltip="Button"', output)
+        self.assertIn('data-sidebar-tooltip="Button"', output)
         self.assertIn('id="projects-sub"', output)
         self.assertIn('class="sidebar-menu-sub collapse show"', output)
         self.assertIn('data-bs-toggle="collapse"', output)
@@ -243,19 +261,19 @@ class SidebarTests(CatalogTestCase):
         self.assertIn(".sidebar-menu-item:has(> .sidebar-menu-badge) > .sidebar-menu-button", styles)
         self.assertIn(".sidebar-group:has(.sidebar-group-action) .sidebar-group-label", styles)
         self.assertIn(
-            "[data-moo-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-group-action",
+            "[data-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-group-action",
             styles,
         )
         self.assertIn(
-            "[data-moo-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-menu-badge",
+            "[data-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-menu-badge",
             styles,
         )
         self.assertIn(
-            "[data-moo-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-menu-skeleton",
+            "[data-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-menu-skeleton",
             styles,
         )
         self.assertIn(
-            "[data-moo-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-menu-skeleton__line",
+            "[data-sidebar-state=\"collapsed\"] .sidebar[data-collapsible=\"icon\"] .sidebar-menu-skeleton__line",
             styles,
         )
 
@@ -271,17 +289,32 @@ class SidebarTests(CatalogTestCase):
             "justify-content: center",
             _css_block(
                 styles,
-                '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton',
+                '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton',
             ),
         )
         self.assertIn(
             "display: none",
             _css_block(
                 styles,
-                '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton__line',
+                '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton__line',
             ),
         )
         self.assertIn("position: absolute", _css_block(styles, ".sidebar-menu-badge"))
+
+    def test_sidebar_active_item_suppresses_background_across_menu_hover_gaps(self) -> None:
+        styles = read_sidebar_styles()
+        gap_hover_selector = (
+            ".sidebar-content:has(.sidebar-menu:is(:hover, :focus-within)) "
+            '.sidebar-menu-button[aria-current="page"]:not(:hover):not(:focus-visible),'
+        )
+        button_hover_selector = (
+            ".sidebar-content:has(.sidebar-menu-button:not([aria-current=\"page\"]):is(:hover, :focus-visible)) "
+            '.sidebar-menu-button[aria-current="page"]:not(:hover):not(:focus-visible)'
+        )
+
+        self.assertIn(gap_hover_selector, styles)
+        self.assertIn(button_hover_selector, styles)
+        self.assertIn("background: transparent", _css_block(styles, button_hover_selector))
 
     def test_sidebar_menu_sub_item_badge_reserves_trailing_space(self) -> None:
         styles = read_sidebar_styles()
@@ -315,11 +348,11 @@ class SidebarTests(CatalogTestCase):
         )
         collapsed_inset = _css_block(
             styles,
-            '.sidebar-wrapper[data-moo-sidebar-state="collapsed"] .sidebar-inset',
+            '.sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar-inset',
         )
         flyout_layer = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"])',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"])',
         )
         flyout_text = _css_block(
             styles,
@@ -481,19 +514,19 @@ class SidebarTests(CatalogTestCase):
         )
         collapsed_account_hover = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:hover',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:hover',
         )
         collapsed_account_open = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account[aria-expanded="true"]',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account[aria-expanded="true"]',
         )
         collapsed_account_button = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account',
         )
         collapsed_account_focus = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:focus-visible',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-item--account > .sidebar-menu-button--account:focus-visible',
         )
         self.assertIn("background: transparent", collapsed_account_hover)
         self.assertIn("background: transparent", collapsed_account_open)
@@ -522,19 +555,19 @@ class SidebarTests(CatalogTestCase):
         )
         collapsed_workspace_hover = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:hover',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:hover',
         )
         collapsed_workspace_open = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace[aria-expanded="true"]',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace[aria-expanded="true"]',
         )
         collapsed_workspace_focus = _css_block(
             styles,
-            '[data-moo-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:focus-visible',
+            '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:focus-visible',
         )
         collapsed_header_dropdown = _css_block(
             dropdown_styles,
-            '[data-slot="sidebar-header"] [data-moo-sidebar-dropdown-positioned] > .dropdown-menu',
+            '[data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu',
         )
 
         self.assertIn("cursor: default", identity_cursors)
@@ -633,7 +666,7 @@ class SidebarTests(CatalogTestCase):
             "margin-inline-start: $spacer * 0.5",
             _css_block(
                 styles,
-                '.sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset',
+                '.sidebar-wrapper[data-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset',
             ),
         )
 
@@ -654,7 +687,7 @@ class SidebarTests(CatalogTestCase):
             "margin-inline-end: $spacer * 0.5",
             _css_block(
                 styles,
-                '.sidebar-wrapper[data-moo-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset',
+                '.sidebar-wrapper[data-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset',
             ),
         )
 
@@ -694,7 +727,7 @@ class SidebarTests(CatalogTestCase):
             page.index('id="usage"'),
             page.index('id="application-shell"'),
             page.index('id="composition"'),
-            page.index('assets/images/sidebar-structure.webp'),
+            page.index('assets/images/sidebar-structure-classes.webp'),
             page.index('id="sidebar-html-anatomy"'),
             page.index('id="sidebar-javascript"'),
             page.index('id="sidebar-state"'),
@@ -704,7 +737,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("<table", page)
         self.assertIn("<th scope=\"col\">Selector</th>", page)
         self.assertIn("<th scope=\"col\">Purpose</th>", page)
-        self.assertTrue((DIST / "assets/images/sidebar-structure.webp").is_file())
+        self.assertTrue((DIST / "assets/images/sidebar-structure-classes.webp").is_file())
 
     def test_sidebar_catalog_page_documents_public_html_anatomy(self) -> None:
         source = (ROOT / "site/src/pages/components/sidebar.html.jinja").read_text(
@@ -717,8 +750,8 @@ class SidebarTests(CatalogTestCase):
         public_hooks = (
             ".sidebar-wrapper",
             ".sidebar",
-            "[data-moo-sidebar-trigger]",
-            "[data-moo-sidebar-rail]",
+            "[data-sidebar-trigger]",
+            "[data-sidebar-rail]",
             "[data-slot=\"sidebar-content\"]",
             "[data-slot=\"sidebar-menu-button\"]",
             ".sidebar-menu-sub.collapse",
@@ -745,23 +778,24 @@ class SidebarTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         page = self.read_output("components/sidebar.html")
+        page_text = unescape(re.sub(r"<[^>]+>", "", page))
         self.assertIn("useSidebar", page)
-        self.assertIn("data-moo-sidebar-state", page)
+        self.assertIn("data-sidebar-state", page)
         self.assertIn("@wpmoo/ui/sidebar.js", page)
-        self.assertIn("Sidebar.getOrCreateInstance(element)", page)
-        self.assertIn("sidebar.dispose()", page)
+        self.assertIn("Sidebar.getOrCreateInstance(element)", page_text)
+        self.assertIn("sidebar.dispose()", page_text)
         self.assertNotIn("static/js/preview.js", page)
         self.assertNotIn("useSidebar()", page)
 
         sidebar_js = self.read_output("assets/js/components/sidebar.js")
-        self.assertIn("dataset.mooSidebarState", sidebar_js)
+        self.assertIn("dataset.sidebarState", sidebar_js)
         catalog_js = self.read_output("assets/js/catalog/index.js")
         self.assertRegex(
             catalog_js,
             r'import Sidebar from "\.\./components/sidebar\.js(?:\?v=[0-9a-f]+)?";',
         )
         self.assertIn("Sidebar.getOrCreateInstance(element);", catalog_js)
-        self.assertNotIn("dataset.mooSidebarState", catalog_js)
+        self.assertNotIn("dataset.sidebarState", catalog_js)
 
     def test_public_sidebar_module_owns_instance_lifecycle(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
@@ -783,6 +817,89 @@ class SidebarTests(CatalogTestCase):
         self.assertNotIn("SIDEBAR_STORAGE_PREFIX", catalog)
         self.assertNotIn("openSidebarFlyout", catalog)
 
+    def test_sidebar_centers_active_item_inside_scrollable_content_on_init(self) -> None:
+        case = self.run_sidebar_case(
+            """
+import Sidebar from "./src/js/components/sidebar.js";
+
+const listeners = [];
+const makeEventTarget = (extra = {}) => ({
+  addEventListener(type, handler, options) {
+    listeners.push({ target: this, type, handler, options });
+  },
+  removeEventListener() {},
+  ...extra,
+});
+const window = makeEventTarget({
+  bootstrap: {},
+  CustomEvent: class CustomEvent {
+    constructor(type, options = {}) {
+      this.type = type;
+      Object.assign(this, options);
+    }
+  },
+  matchMedia: () => ({ matches: true }),
+  localStorage: { getItem: () => null, setItem() {} },
+});
+const documentElement = { dataset: {}, dir: "ltr" };
+const document = makeEventTarget({
+  defaultView: window,
+  documentElement,
+  querySelector: () => null,
+});
+const sidebar = makeEventTarget({
+  classList: { contains: () => false },
+});
+let contentScrollTop = 0;
+const content = {
+  clientHeight: 400,
+  scrollHeight: 1200,
+  get scrollTop() {
+    return contentScrollTop;
+  },
+  set scrollTop(value) {
+    contentScrollTop = value;
+  },
+  getBoundingClientRect: () => ({ top: 0, bottom: 400, height: 400 }),
+};
+const activeParent = {
+  closest: (selector) => (selector === '[data-slot="sidebar-content"]' ? content : null),
+  getBoundingClientRect: () => ({ top: 236, bottom: 268, height: 32 }),
+};
+const activeRoute = {
+  closest: (selector) => (selector === '[data-slot="sidebar-content"]' ? content : null),
+  getBoundingClientRect: () => ({ top: 840, bottom: 872, height: 32 }),
+};
+const root = makeEventTarget({
+  nodeType: 1,
+  dataset: { sidebarState: "expanded" },
+  ownerDocument: document,
+  dispatchEvent: () => true,
+  matches: (selector) => selector === '[data-slot="sidebar-wrapper"]',
+  querySelector: (selector) => {
+    if (selector === '[data-slot="sidebar"]') {
+      return sidebar;
+    }
+    if (selector.includes(" a[") && selector.includes('[aria-current="page"]')) {
+      return activeRoute;
+    }
+    if (selector.includes(".active")) {
+      return activeParent;
+    }
+    return null;
+  },
+  querySelectorAll: () => [],
+  setAttribute() {},
+  removeAttribute() {},
+});
+
+new Sidebar(root);
+console.log(JSON.stringify({ scrollTop: contentScrollTop }));
+"""
+        )
+
+        self.assertEqual(case["scrollTop"], 656)
+
     def test_catalog_hands_off_persisted_state_before_sidebar_content(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_sidebar_styles()
@@ -793,19 +910,19 @@ class SidebarTests(CatalogTestCase):
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
         restore_index = source.index("this._restoreState();")
-        ready_index = source.index('setAttribute("data-moo-sidebar-ready", "")')
+        ready_index = source.index('setAttribute("data-sidebar-ready", "")')
         self.assertLess(restore_index, ready_index)
         self.assertNotIn("requestAnimationFrame", source[restore_index:ready_index])
         self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
         self.assertLess(
             layout.index('{% call sidebar_provider(key="catalog-shell") %}'),
-            layout.index("shell.dataset.mooSidebarState = state"),
+            layout.index("shell.dataset.sidebarState = state"),
         )
         self.assertLess(
-            layout.index("shell.dataset.mooSidebarState = state"),
+            layout.index("shell.dataset.sidebarState = state"),
             layout.index('{% include "shell/sidebar.html.jinja" %}'),
         )
-        self.assertIn('removeAttribute("data-moo-sidebar-ready")', source)
+        self.assertIn('removeAttribute("data-sidebar-ready")', source)
         self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
         self.assertRegex(
             styles,
@@ -818,6 +935,19 @@ class SidebarTests(CatalogTestCase):
             r"@media \(prefers-reduced-motion: reduce\)\s*\{\s*"
             r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
         )
+
+    def test_catalog_prepositions_active_sidebar_item_before_inset_content(self) -> None:
+        layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+
+        self.assertIn("data-moo-sidebar-active-prepaint", layout)
+        sidebar_index = layout.index('{% include "shell/sidebar.html.jinja" %}')
+        active_scroll_index = layout.index("data-moo-sidebar-active-prepaint")
+        inset_index = layout.index("{% call sidebar_inset() %}")
+
+        self.assertLess(sidebar_index, active_scroll_index)
+        self.assertLess(active_scroll_index, inset_index)
+        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', layout)
+        self.assertIn("content.scrollTop = Math.round", layout)
 
     def test_sidebar_shortcut_ignores_editable_targets(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
@@ -844,7 +974,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("_disposeTooltip", script)
         self.assertIn('show.bs.dropdown', script)
         self.assertIn('hidden.bs.dropdown', script)
-        self.assertIn('[data-bs-toggle="dropdown"][data-moo-sidebar-tooltip]', script)
+        self.assertIn('[data-bs-toggle="dropdown"][data-sidebar-tooltip]', script)
 
     def test_sidebar_identity_triggers_skip_collapsed_tooltips(self) -> None:
         script = SIDEBAR_JS.read_text(encoding="utf-8")
@@ -863,7 +993,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("sidebar-menu-flyout", script)
         self.assertIn('flyout.removeAttribute("style")', script)
         self.assertIn("this._flyoutOwner === item", script)
-        self.assertIn("mooSidebarFlyout", script)
+        self.assertIn("sidebarFlyout", script)
         self.assertIn("sidebar-menu-item--flyout-open", script)
         self.assertIn('querySelector(":scope > .sidebar-menu-sub")', script)
         self.assertIn("stopImmediatePropagation", script)
@@ -887,8 +1017,8 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("_positionDropdown", script)
         self.assertIn("_clearDropdownPosition", script)
-        self.assertIn("mooSidebarDropdownPositioned", script)
-        self.assertIn("[data-moo-sidebar-dropdown-positioned]", script)
+        self.assertIn("sidebarDropdownPositioned", script)
+        self.assertIn("[data-sidebar-dropdown-positioned]", script)
         self.assertIn("--moo-sidebar-dropdown-inline-start", script)
         self.assertIn("--moo-sidebar-dropdown-block-start", script)
         self.assertIn("rect.bottom + gap", script)

@@ -9,8 +9,8 @@
 :where([data-bs-theme="dark"]) .form-switch .form-check-input:checked {
   --#{$prefix}form-switch-bg: #{escape-svg($moo-switch-checked-bg-image-dark)};
 
-  background-color: var(--moo-foreground);
-  border-color: var(--moo-foreground);
+  background-color: var(--moo-primary);
+  border-color: var(--moo-primary);
   filter: none;
 }
 

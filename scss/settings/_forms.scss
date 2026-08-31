@@ -5,11 +5,11 @@ $input-padding-y: 0.25rem !default;
 $input-padding-x: 0.625rem !default;
 $input-height: 2rem !default;
 $input-line-height: 1.4285714286 !default;
-$input-bg: transparent !default;
+$input-bg: var(--moo-input-bg, transparent) !default;
 $input-border-color: var(--moo-border) !default;
 $input-border-radius: 0.625rem !default;
 $input-placeholder-color: var(--bs-tertiary-color) !default;
-$input-focus-bg: transparent !default;
+$input-focus-bg: var(--moo-input-bg, transparent) !default;
 // Bootstrap leaves disabled text-control foregrounds null by default
 // (vendor/bootstrap/scss/_variables.scss), which lets real values inherit the
 // normal input color. Use Moo's disabled foreground token so disabled values
@@ -40,8 +40,26 @@ $form-check-input-focus-border: var(--moo-border) !default;
 // strong enough to clear the 3:1 focus-indicator contrast target on white and
 // dark surfaces.
 $form-check-input-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) color-mix(in srgb, var(--moo-ring) 50%, transparent) !default;
+// Bootstrap's native checked/range controls consume Sass variables rather
+// than component CSS variables. Point those Sass defaults at Moo's runtime
+// primary token so Theme color previews update checkboxes, radios, switches,
+// and range thumbs without replacing Bootstrap's markup contract.
+$form-check-input-checked-bg-color: var(--moo-primary) !default;
+$form-check-input-checked-border-color: var(--moo-primary) !default;
+$form-check-input-indeterminate-bg-color: var(--moo-primary) !default;
+$form-check-input-indeterminate-border-color: var(--moo-primary) !default;
+$moo-form-checkmark-border-width: 0 0.14em 0.14em 0 !default;
+$moo-form-check-indeterminate-bg-size: 62% 14% !default;
+$moo-form-check-indeterminate-bg-position: center !default;
+$form-range-thumb-bg: var(--moo-primary) !default;
+$form-range-thumb-active-bg: color-mix(in srgb, var(--moo-primary) 85%, var(--moo-surface)) !default;
 // Moo promotes Bootstrap input groups from separate child borders to one
 // compound border. Bootstrap has no parent input-group radius knob, so the
 // default parent radius lives here while .rounded-pill can still opt into
 // Bootstrap's native pill radius utility.
 $moo-input-group-border-radius: var(--bs-border-radius-lg) !default;
+// Input group addons (text, buttons) share the exact input surface so the
+// whole group reads as one compound control, not a row of mismatched tiles.
+// Bootstrap defaults addons to --bs-tertiary-bg; Moo ties them to $input-bg
+// so light-mode transparent inputs and dark-mode --moo-input-bg stay aligned.
+$input-group-addon-bg: $input-bg !default;

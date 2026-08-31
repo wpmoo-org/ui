@@ -1,0 +1,692 @@
+{% from "components/button.html.jinja" import button %}
+{% from "components/chart.html.jinja" import chart %}
+{% from "components/table.html.jinja" import table %}
+{% from "includes/codepen.html.jinja" import chart_codepen_css, chart_codepen_js, codepen_button_if_available with context %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/example.html.jinja" import render_component_intro, render_example %}
+{% from "components/typography.html.jinja" import typography %}
+
+{% set chart_public_types = "area, line, bar, pie, doughnut, polarArea, radar, scatter, and bubble" %}
+
+{% set chart_area_default_data = {
+  "labels": ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+  "datasets": [
+    {"label": "Desktop", "data": [186, 305, 237, 273, 209, 214]},
+    {"label": "Mobile", "data": [80, 200, 120, 190, 130, 140]}
+  ]
+} %}
+
+{% set chart_type_labels = {
+  "area": "Area Chart",
+  "line": "Line Chart",
+  "bar": "Bar Chart",
+  "pie": "Pie Chart",
+  "doughnut": "Doughnut Chart",
+  "polarArea": "Polar Area Chart",
+  "radar": "Radar Chart",
+  "scatter": "Scatter Chart",
+  "bubble": "Bubble Chart"
+} %}
+
+{% macro chart_content_example(example_id, title, description, content, preview_class="moo-example__preview--medium", category_label="Chart") %}
+  {% set rendered = content | dedent_html %}
+  {% set source = rendered | format_html %}
+  {% set code_id = example_id ~ "-code" %}
+  {% set chart_actions %}
+    <div class="moo-chart-example__actions" data-moo-code-copy-scope>
+      <button
+        class="btn btn-outline-secondary btn-icon-xs"
+        type="button"
+        data-moo-code-copy-target="#{{ code_id }}"
+        aria-label="Copy code"
+        title="Copy code"
+      >
+        <span data-moo-copy-icon="copy">{{ render_icon("copy", "inline-start") }}</span>
+        <span data-moo-copy-icon="check" hidden>{{ render_icon("check", "inline-start") }}</span>
+      </button>
+      {{ codepen_button_if_available(
+        "Moo UI " ~ title,
+        description | striptags,
+        source,
+        chart_codepen_css(),
+        ["moo-ui", "chartjs", "charts"],
+        js=chart_codepen_js(),
+        label="Try in CodePen",
+        icon="codepen",
+        extra_class="moo-chart-example__codepen",
+        component_slug="chart",
+        component_label="Chart"
+      ) }}
+      <span class="visually-hidden" data-moo-copy-status role="status"></span>
+    </div>
+  {% endset %}
+  {{ render_example(
+    example_id,
+    title,
+    description,
+    rendered,
+    preview_class=("moo-chart-example__preview" ~ (" " ~ preview_class if preview_class else "")),
+    source_content=source,
+    extra_class="moo-chart-example",
+    surface_class="moo-chart-example__surface",
+    toolbar_label=category_label,
+    toolbar_icon="chart-no-axes-combined",
+    toolbar_action=chart_actions,
+    header_inside_surface=true,
+    source_class="moo-chart-example__source"
+  ) }}
+{% endmacro %}
+
+{% macro chart_example(example_id, title, description, chart_id, type, data, aria_label, options=None, preview_class="moo-example__preview--medium", category_label="") %}
+  {% set example %}
+    {{ chart(
+      chart_id,
+      data,
+      aria_label,
+      type=type,
+      options=options,
+      extra_class="w-100",
+      attrs='style="height: 17.5rem"'
+    ) }}
+  {% endset %}
+  {{ chart_content_example(
+    example_id,
+    title,
+    description,
+    example,
+    preview_class=preview_class,
+    category_label=category_label or chart_type_labels[type]
+  ) }}
+{% endmacro %}
+
+{% macro render_chart_code_section(title_id, title, description, snippet_id, snippet) %}
+  <div class="moo-doc-code-caption mt-4 mb-2">
+    {{ typography(title, variant="subsection-title", id=title_id) }}
+    <p class="mb-0">{{ typography(description, variant="muted") }}</p>
+  </div>
+  {{ render_code_snippet(snippet_id, snippet, "js") }}
+{% endmacro %}
+
+{% macro render_chart_intro_preview() %}
+  {{ chart(
+    "chart-area-default",
+    chart_area_default_data,
+    "Area chart comparing desktop and mobile visitors over six months",
+    type="area",
+    extra_class="w-100",
+    attrs='style="height: 17.5rem"'
+  ) }}
+{% endmacro %}
+
+{% macro render_chart_usage(root_path="", show_gallery_link=false) %}
+  <p>Render a <code>.chart</code> root with one direct child <code>&lt;canvas&gt;</code>. The <code>data-chart</code> attribute accepts <code>{{ chart_public_types }}</code>, while <code>data-chart-data</code> carries the serialized <code>{labels, datasets}</code> data.</p>
+  <p>Use <code>data-chart-options</code> for JSON-object Chart.js options such as stacked scales, interaction mode, cutout, rotation, or legend display. Functions and callbacks are not serializable in HTML; pass them through the programmatic <code>getOrCreateInstance</code> config instead.</p>
+  <p>Give the root an explicit height. Radial Charts are represented by Chart.js <code>doughnut</code> and <code>polarArea</code>, not by a separate public <code>radial</code> type.</p>
+  {% if show_gallery_link %}
+    <div class="mt-3">
+      {{ button(
+        "View chart examples",
+        variant="outline",
+        size="sm",
+        element="a",
+        href=site_href("charts/index.html", root_path),
+        icon_end="arrow-right"
+      ) }}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro render_chart_intro_usage(root_path="", show_gallery_link=false) %}
+  {% set usage %}
+    {{ render_chart_usage(root_path=root_path, show_gallery_link=show_gallery_link) }}
+  {% endset %}
+  {{ render_component_intro(
+    render_chart_intro_preview(),
+    usage,
+    preview_class="moo-example__preview--medium"
+  ) }}
+{% endmacro %}
+
+{% macro render_chart_contract_sections() %}
+  <h2 id="chart-html-anatomy" class="h4 mt-5 mb-3">HTML Anatomy</h2>
+  <p class="mb-4">
+    These are the public HTML hooks that applications can inspect or target.
+    They describe rendered markup, not the repository's internal Jinja build
+    helpers.
+  </p>
+
+  {% set chart_parts = [
+    {"id": "chart-root", "selector": "<code>.chart</code>", "summary": "Public root element. It owns the Chart.js instance and the theme observer."},
+    {"id": "chart-id", "selector": "<code>id</code>", "summary": "Required stable identifier for the chart root and its server-rendered contract."},
+    {"id": "chart-type", "selector": "<code>[data-chart]</code>", "summary": "Chart type and initializer attribute. Supported values are <code>area</code>, <code>line</code>, <code>bar</code>, <code>pie</code>, <code>doughnut</code>, <code>polarArea</code>, <code>radar</code>, <code>scatter</code>, and <code>bubble</code>."},
+    {"id": "chart-data", "selector": "<code>[data-chart-data]</code>", "summary": "Serialized <code>{labels, datasets}</code> JSON. Scatter and bubble data keep <code>labels: []</code> with object points inside datasets."},
+    {"id": "chart-options", "selector": "<code>[data-chart-options]</code>", "summary": "Optional JSON-object Chart.js options pass-through. Unsafe prototype keys are ignored and programmatic config wins."},
+    {"id": "chart-canvas", "selector": "<code>.chart &gt; canvas</code>", "summary": "The first child canvas. It is resolved deterministically and is required."}
+  ] %}
+
+  {% set chart_part_rows = namespace(by_id={}) %}
+  {% for part in chart_parts %}
+    {% set _ = chart_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
+  {% endfor %}
+  {% set chart_row_groups = [
+    {
+      "heading_id": "chart-anatomy-root",
+      "title": "Root",
+      "rows": [chart_part_rows.by_id["chart-root"], chart_part_rows.by_id["chart-id"]],
+      "row_ids": ["chart-root", "chart-id"]
+    },
+    {
+      "heading_id": "chart-anatomy-contract",
+      "title": "Data Contract",
+      "rows": [chart_part_rows.by_id["chart-type"], chart_part_rows.by_id["chart-data"], chart_part_rows.by_id["chart-options"]],
+      "row_ids": ["chart-type", "chart-data", "chart-options"]
+    },
+    {
+      "heading_id": "chart-anatomy-render-target",
+      "title": "Render Target",
+      "rows": [chart_part_rows.by_id["chart-canvas"]],
+      "row_ids": ["chart-canvas"]
+    }
+  ] %}
+  {{ table(
+    ["Selector", "Purpose"],
+    [],
+    row_groups=chart_row_groups,
+    row_header=true,
+    extra_class="align-middle mb-5 moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
+    responsive_class="scroll-fade-x no-scrollbar"
+  ) }}
+
+  {% set chart_markup_example %}
+  {{ chart(
+    "chart-html-example",
+    {"labels": ["Jan", "Feb", "Mar"], "datasets": [{"label": "Revenue", "data": [4000, 3200, 4800]}]},
+    "Monthly revenue line chart",
+    type="line",
+    options={"plugins": {"legend": {"display": false}}},
+    attrs='style="height: 17.5rem"'
+  ) }}
+  {% endset %}
+  {{ render_code_snippet("chart-html-anatomy-example", chart_markup_example, "html") }}
+
+  <h2 id="chart-javascript" class="h4 mt-5 mb-3">JavaScript</h2>
+  <p>
+    Chart.js is bundled into the published <code>chart.js</code> entrypoint through
+    <code>chart.js/auto</code>; the wrapper never reads a browser global Chart
+    object and never loads a runtime CDN script. Importing the module never scans the document.
+    Initialize only a <code>.chart</code> root your application owns: repeated
+    initialization returns the same instance, and <code>dispose()</code> destroys the
+    Chart.js instance, disconnects the theme observer, cancels pending work, and
+    releases the instance registration.
+  </p>
+  {% set chart_import_example %}
+  import MooChart from "@wpmoo/ui/chart.js";
+
+  const element = document.querySelector(".chart");
+
+  if (element) {
+    const chart = MooChart.getOrCreateInstance(element);
+
+    // getOrCreateInstance is idempotent: the same instance is returned.
+    const again = MooChart.getOrCreateInstance(element);
+    console.assert(chart === again);
+
+    // Later, release Chart.js and the theme observer.
+    chart.dispose();
+  }
+  {% endset %}
+  {{ render_chart_code_section(
+    "chart-javascript-init",
+    "Initialize a chart",
+    "Use this when a page already renders a .chart root and needs the wrapper to attach Chart.js.",
+    "chart-javascript-import",
+    chart_import_example
+  ) }}
+
+  {% set chart_tooltip_callback_example %}
+  import MooChart from "@wpmoo/ui/chart.js";
+
+  MooChart.getOrCreateInstance(document.querySelector("#chart-tooltip-custom"), {
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label(context) {
+              return `${context.dataset.label}: ${context.formattedValue}`;
+            },
+          },
+        },
+      },
+    },
+  });
+  {% endset %}
+  {{ render_chart_code_section(
+    "chart-javascript-callbacks",
+    "Customize tooltips",
+    "Use this for non-serializable Chart.js options, such as tooltip callback functions.",
+    "chart-tooltip-callback",
+    chart_tooltip_callback_example
+  ) }}
+
+  <h2 id="chart-theming" class="h4 mt-5 mb-3">Theming</h2>
+  <p class="mb-4">
+    Chart colors are derived from <code>--moo-chart-1</code> through
+    <code>--moo-chart-5</code>, falling back to Bootstrap's semantic
+    <code>--bs-*</code> tokens at runtime. Cartesian, radar, scatter, and bubble
+    charts assign that palette by dataset; pie, doughnut, and polar area charts
+    cycle it by slice. Explicit Chart.js dataset color fields are preserved, while
+    unset color fields continue to follow the active palette. A
+    <code>MutationObserver</code> watches the nearest <code>data-bs-theme</code>
+    scope, falling back to the document element; when that scope or its inline
+    chart-token styles change, each chart re-reads the tokens and re-themes its
+    datasets, grid lines, legend, and tooltip without a reload. Legend and
+    tooltip markers use matching compact circular swatches with the same border
+    color and text offset, while thin line, area, and radar strokes keep point
+    markers readable. Line chart points use their series color for the point
+    fill, border, and hover state. Charts also reflow on resize: they are
+    responsive and drop aspect-ratio locking, so the same markup fills a desktop
+    card or a narrow mobile viewport without layout-specific switches.
+  </p>
+
+  <h2 id="chart-accessibility" class="h4 mt-5 mb-3">Accessibility</h2>
+  <p class="mb-0">
+    The canvas is a raster of pixels, so give it a text alternative: set
+    <code>role="img"</code> and a descriptive <code>aria-label</code> on the
+    <code>&lt;canvas&gt;</code>, or provide an adjacent data table for the same series.
+    Keep legends visible rather than encoding meaning in color alone, and preserve
+    the default tooltip so individual values remain reachable on touch and with a
+    pointer.
+  </p>
+{% endmacro %}
+
+{% macro render_chart_gallery_nav() %}
+  <nav class="moo-chart-template-nav mb-4" aria-label="Chart examples" data-moo-chart-template-nav>
+    <div class="moo-chart-template-nav__list nav nav-pills flex-nowrap overflow-auto no-scrollbar">
+      <a class="nav-link" href="#chart-area">Area</a>
+      <a class="nav-link" href="#chart-bar">Bar</a>
+      <a class="nav-link" href="#chart-line">Line</a>
+      <a class="nav-link" href="#chart-pie">Pie</a>
+      <a class="nav-link" href="#chart-radar">Radar</a>
+      <a class="nav-link" href="#chart-radial">Radial</a>
+      <a class="nav-link" href="#chart-tooltip">Tooltip</a>
+    </div>
+  </nav>
+{% endmacro %}
+
+{% macro render_chart_gallery() %}
+  {{ chart_example(
+    "chart-area-default-example",
+    "Area chart",
+    "Compare related traffic series in a larger featured preview.",
+    "chart-area-default",
+    "area",
+    chart_area_default_data,
+    "Area chart comparing desktop and mobile visitors over six months"
+  ) }}
+
+  <h2 id="chart-area" class="h4 mt-5 mb-3">Area Charts</h2>
+  {% set area_step_data = {
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "datasets": [
+      {"label": "Visitors", "data": [120, 160, 140, 210, 190, 240], "stepped": true}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-area-step",
+    "Area chart - step",
+    "Stepped area data for inventory, quota, or capacity changes.",
+    "chart-area-step",
+    "area",
+    area_step_data,
+    "Stepped area chart showing visitor changes across six months"
+  ) }}
+
+  {% set area_stacked_data = {
+    "labels": ["Q1", "Q2", "Q3", "Q4"],
+    "datasets": [
+      {"label": "Desktop", "data": [62, 78, 83, 91], "stack": "traffic"},
+      {"label": "Mobile", "data": [48, 64, 72, 86], "stack": "traffic"}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-area-stacked",
+    "Area chart - stacked",
+    "Stack related area series with JSON-safe scale options.",
+    "chart-area-stacked",
+    "area",
+    area_stacked_data,
+    "Stacked area chart comparing desktop and mobile traffic by quarter",
+    options={"scales": {"y": {"stacked": true}}}
+  ) }}
+
+  <h2 id="chart-bar" class="h4 mt-5 mb-3">Bar Charts</h2>
+  {% set bar_default_data = {
+    "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "datasets": [{"label": "Visitors", "data": [120, 190, 150, 220, 180, 90, 110]}]
+  } %}
+  {{ chart_example(
+    "chart-bar-default",
+    "Bar chart",
+    "Compare a single series across a compact time window.",
+    "chart-bar-default",
+    "bar",
+    bar_default_data,
+    "Bar chart of daily active visitors across the week"
+  ) }}
+
+  {% set bar_horizontal_data = {
+    "labels": ["Organic", "Referral", "Direct", "Social"],
+    "datasets": [{"label": "Sessions", "data": [242, 184, 156, 93]}]
+  } %}
+  {{ chart_example(
+    "chart-bar-horizontal",
+    "Bar chart - horizontal",
+    "Use Chart.js index-axis options for label-heavy comparisons.",
+    "chart-bar-horizontal",
+    "bar",
+    bar_horizontal_data,
+    "Horizontal bar chart comparing traffic sessions by channel",
+    options={"indexAxis": "y"}
+  ) }}
+
+  {% set bar_multiple_data = {
+    "labels": ["Q1", "Q2", "Q3", "Q4"],
+    "datasets": [
+      {"label": "New", "data": [38, 44, 57, 63]},
+      {"label": "Returning", "data": [52, 61, 68, 74]}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-bar-multiple",
+    "Bar chart - multiple",
+    "Place related series side by side with the same semantic palette.",
+    "chart-bar-multiple",
+    "bar",
+    bar_multiple_data,
+    "Grouped bar chart comparing new and returning accounts by quarter"
+  ) }}
+
+  {% set bar_stacked_data = {
+    "labels": ["Q1", "Q2", "Q3", "Q4"],
+    "datasets": [
+      {"label": "Desktop", "data": [34, 45, 49, 53], "stack": "traffic"},
+      {"label": "Mobile", "data": [28, 38, 44, 51], "stack": "traffic"}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-bar-stacked",
+    "Bar chart - stacked",
+    "Stack bars with options while keeping the public data shape unchanged.",
+    "chart-bar-stacked",
+    "bar",
+    bar_stacked_data,
+    "Stacked bar chart comparing desktop and mobile traffic by quarter",
+    options={"scales": {"x": {"stacked": true}, "y": {"stacked": true}}}
+  ) }}
+
+  {% set bar_negative_data = {
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May"],
+    "datasets": [{"label": "Net change", "data": [12, -8, 18, -5, 24]}]
+  } %}
+  {{ chart_example(
+    "chart-bar-negative",
+    "Bar chart - negative",
+    "Show positive and negative movement on the same axis.",
+    "chart-bar-negative",
+    "bar",
+    bar_negative_data,
+    "Bar chart showing positive and negative net change by month"
+  ) }}
+
+  <h2 id="chart-line" class="h4 mt-5 mb-3">Line Charts</h2>
+  {% set line_default_data = {
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+    "datasets": [
+      {"label": "Revenue", "data": [4000, 3200, 4800, 5100, 4600, 5800, 6200, 6900]},
+      {"label": "Target", "data": [3800, 4000, 4200, 4600, 5000, 5400, 5800, 6200]}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-line-default",
+    "Line chart",
+    "Keep the existing filled line default for backward-compatible dashboard charts.",
+    "chart-line-default",
+    "line",
+    line_default_data,
+    "Line chart comparing monthly revenue against target"
+  ) }}
+
+  {% set line_plain_data = {
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "datasets": [{"label": "Conversion", "data": [22, 24, 27, 26, 31, 34], "fill": false}]
+  } %}
+  {{ chart_example(
+    "chart-line-plain",
+    "Line chart - plain",
+    "Turn fill off per dataset when the line itself is the signal.",
+    "chart-line-plain",
+    "line",
+    line_plain_data,
+    "Plain line chart showing conversion rate over six months"
+  ) }}
+
+  {% set line_step_data = {
+    "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "datasets": [{"label": "Plan limit", "data": [50, 50, 75, 75, 100, 100], "fill": false, "stepped": true}]
+  } %}
+  {{ chart_example(
+    "chart-line-step",
+    "Line chart - step",
+    "Use stepped line data for threshold changes and plan limits.",
+    "chart-line-step",
+    "line",
+    line_step_data,
+    "Stepped line chart showing plan limit changes over six months"
+  ) }}
+
+  {% set line_multiple_data = {
+    "labels": ["W1", "W2", "W3", "W4", "W5"],
+    "datasets": [
+      {"label": "Desktop", "data": [42, 49, 53, 57, 62], "fill": false},
+      {"label": "Mobile", "data": [31, 36, 44, 48, 55], "fill": false}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-line-multiple",
+    "Line chart - multiple",
+    "Compare several plain line series without changing the public wrapper.",
+    "chart-line-multiple",
+    "line",
+    line_multiple_data,
+    "Multiple line chart comparing desktop and mobile weekly usage"
+  ) }}
+
+  <h2 id="chart-pie" class="h4 mt-5 mb-3">Pie Charts</h2>
+  {% set pie_data = {
+    "labels": ["Direct", "Search", "Referral", "Social"],
+    "datasets": [{"label": "Traffic", "data": [42, 28, 18, 12]}]
+  } %}
+  {{ chart_example(
+    "chart-pie-default",
+    "Pie chart",
+    "Show a simple part-to-whole distribution with themed slices.",
+    "chart-pie-default",
+    "pie",
+    pie_data,
+    "Pie chart showing traffic share by channel"
+  ) }}
+
+  {% set doughnut_data = {
+    "labels": ["Basic", "Pro", "Enterprise"],
+    "datasets": [{"label": "Plans", "data": [44, 39, 17]}]
+  } %}
+  {{ chart_example(
+    "chart-doughnut-default",
+    "Doughnut chart",
+    "Use the Chart.js doughnut type for compact segmented totals.",
+    "chart-doughnut-default",
+    "doughnut",
+    doughnut_data,
+    "Doughnut chart showing plan distribution"
+  ) }}
+
+  {{ chart_example(
+    "chart-doughnut-ring",
+    "Doughnut chart - ring",
+    "Adjust the ring cutout with JSON-safe Chart.js options.",
+    "chart-doughnut-ring",
+    "doughnut",
+    doughnut_data,
+    "Doughnut ring chart showing plan distribution",
+    options={"cutout": "72%"}
+  ) }}
+
+  <h2 id="chart-radar" class="h4 mt-5 mb-3">Radar Charts</h2>
+  {% set radar_data = {
+    "labels": ["Speed", "Quality", "Support", "Reliability", "Cost"],
+    "datasets": [{"label": "Current", "data": [8, 7, 9, 8, 6]}]
+  } %}
+  {{ chart_example(
+    "chart-radar-default",
+    "Radar chart",
+    "Compare multiple dimensions around a radial scale.",
+    "chart-radar-default",
+    "radar",
+    radar_data,
+    "Radar chart comparing operational dimensions"
+  ) }}
+
+  {% set radar_multiple_data = {
+    "labels": ["Speed", "Quality", "Support", "Reliability", "Cost"],
+    "datasets": [
+      {"label": "Current", "data": [8, 7, 9, 8, 6]},
+      {"label": "Target", "data": [9, 9, 9, 9, 7]}
+    ]
+  } %}
+  {{ chart_example(
+    "chart-radar-multiple",
+    "Radar chart - multiple",
+    "Overlay related profiles while preserving the same label array.",
+    "chart-radar-multiple",
+    "radar",
+    radar_multiple_data,
+    "Radar chart comparing current and target operational profiles"
+  ) }}
+
+  <h2 id="chart-radial" class="h4 mt-5 mb-3">Radial Charts</h2>
+  {% set polar_area_data = {
+    "labels": ["North", "South", "East", "West"],
+    "datasets": [{"label": "Regions", "data": [30, 45, 28, 36]}]
+  } %}
+  {{ chart_example(
+    "chart-polar-area",
+    "Polar area chart",
+    "Represent radial area values with Chart.js <code>polarArea</code>.",
+    "chart-polar-area",
+    "polarArea",
+    polar_area_data,
+    "Polar area chart comparing regional volume"
+  ) }}
+
+  {% set radial_progress_data = {
+    "labels": ["Complete", "Remaining"],
+    "datasets": [{"label": "Progress", "data": [72, 28]}]
+  } %}
+  {{ chart_example(
+    "chart-radial-progress",
+    "Radial progress",
+    "Use doughnut options for a radial progress shape without adding a separate type alias.",
+    "chart-radial-progress",
+    "doughnut",
+    radial_progress_data,
+    "Radial progress doughnut chart showing completion percentage",
+    options={"rotation": -90, "circumference": 180, "cutout": "72%"}
+  ) }}
+
+  <h2 id="chart-tooltip" class="h4 mt-5 mb-3">Tooltip</h2>
+  {% set scatter_data = {
+    "labels": [],
+    "datasets": [{"label": "Leads", "data": [{"x": 12, "y": 18}, {"x": 19, "y": 26}, {"x": 28, "y": 32}, {"x": 38, "y": 44}]}]
+  } %}
+  {{ chart_example(
+    "chart-scatter-default",
+    "Scatter chart",
+    "Use object point data while keeping the required <code>{labels, datasets}</code> shape.",
+    "chart-scatter-default",
+    "scatter",
+    scatter_data,
+    "Scatter chart plotting leads by fit and intent scores"
+  ) }}
+
+  {% set bubble_data = {
+    "labels": [],
+    "datasets": [{"label": "Deals", "data": [{"x": 10, "y": 20, "r": 6}, {"x": 18, "y": 28, "r": 10}, {"x": 26, "y": 35, "r": 14}, {"x": 34, "y": 44, "r": 9}]}]
+  } %}
+  {{ chart_example(
+    "chart-bubble-default",
+    "Bubble chart",
+    "Carry radius on each point for weighted two-axis comparisons.",
+    "chart-bubble-default",
+    "bubble",
+    bubble_data,
+    "Bubble chart plotting deals by fit intent and value radius"
+  ) }}
+
+  {{ chart_example(
+    "chart-tooltip-index",
+    "Tooltip - index",
+    "Override interaction mode through JSON options for grouped cartesian tooltips.",
+    "chart-tooltip-index",
+    "line",
+    line_multiple_data,
+    "Line chart demonstrating index tooltip interaction",
+    options={"interaction": {"mode": "index", "intersect": false}}
+  ) }}
+
+  {{ chart_example(
+    "chart-tooltip-nearest",
+    "Tooltip - nearest",
+    "Use nearest-point interaction for sparse point data.",
+    "chart-tooltip-nearest",
+    "scatter",
+    scatter_data,
+    "Scatter chart demonstrating nearest tooltip interaction",
+    options={"interaction": {"mode": "nearest", "intersect": true}}
+  ) }}
+
+  <h2 id="chart-lifecycle" class="h4 mt-5 mb-3">Theme and lifecycle</h2>
+  {% set lifecycle_chart_example %}
+  <div class="d-grid gap-3 w-100" data-chart-live>
+    <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+      <span data-chart-theme>{{ button("Toggle theme", variant="outline", size="sm", icon_start="moon-star") }}</span>
+      {% set lifecycle_button %}
+        {{ button("Dispose", variant="outline", size="sm", icon_start="circle-off", icon_end="rotate-cw") }}
+      {% endset %}
+      {{ lifecycle_button
+        | replace('type="button"', ('type="button" data-chart-lifecycle data-chart-lifecycle-state="live"' | safe))
+        | replace('data-icon="inline-start"', ('data-chart-lifecycle-icon="dispose" data-icon="inline-start"' | safe))
+        | replace('data-icon="inline-end"', ('data-chart-lifecycle-icon="reinit" data-icon="inline-end" hidden' | safe))
+        | replace('Dispose', ('<span data-chart-lifecycle-label>Dispose</span>' | safe))
+        | safe
+      }}
+      <span class="visually-hidden" data-chart-status aria-live="polite">Live</span>
+    </div>
+    {{ chart(
+      "chart-lifecycle-example",
+      {"labels": ["Q1", "Q2", "Q3", "Q4"], "datasets": [{"label": "Pipeline", "data": [18, 24, 21, 30]}]},
+      "Lifecycle chart showing quarterly pipeline movement",
+      type="line",
+      extra_class="w-100",
+      attrs='style="height: 17.5rem"'
+    ) }}
+  </div>
+  {% endset %}
+  {{ chart_content_example(
+    "chart-lifecycle",
+    "Theme and lifecycle",
+    "Exercise the public chart instance through theme changes, disposal, and reinitialization.",
+    lifecycle_chart_example,
+    preview_class="moo-example__preview--medium bg-body text-body",
+    category_label="Chart"
+  ) }}
+{% endmacro %}

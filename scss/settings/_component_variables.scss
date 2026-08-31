@@ -115,6 +115,8 @@ $pagination-disabled-bg: transparent !default;
 $pagination-disabled-border-color: transparent !default;
 // The reference progress track is a slim 4px bar; Bootstrap's default is 1rem.
 $progress-height: 0.25rem !default;
+$progress-bar-color: var(--moo-primary-foreground) !default;
+$progress-bar-bg: var(--moo-primary) !default;
 // Bootstrap's checkbox/radio default is 1em which follows the parent
 // font-size (14px here). The reference uses a fixed 16px (size-4), so
 // pin the width to 1rem to match 1:1 regardless of context font-size.
@@ -143,7 +145,7 @@ $moo-switch-checked-bg-image-dark: url("data:image/svg+xml,<svg xmlns='http://ww
 // underline on hover); Bootstrap's default tints the expanded trigger with
 // $primary-bg-subtle / $primary-text-emphasis. Referencing the resting
 // --bs-accordion-bg/-color custom properties (rather than the Sass
-// variables, which primary_variables.scss loads before Bootstrap defines
+// variables, which settings.scss loads before Bootstrap defines
 // them) matches the trigger's own resting look so expanding an item
 // changes nothing but the chevron and revealed content.
 $accordion-button-active-bg: var(--bs-accordion-bg) !default;
@@ -351,6 +353,23 @@ $moo-field-legend-font-size: 1rem !default;
 $moo-field-legend-margin-bottom: 0.375rem !default;
 $moo-field-separator-opacity: 0.1 !default;
 
+// Datepicker is a Moo-owned reference-style composition around Bootstrap button
+// primitives; Bootstrap ships no datepicker core component, so trigger/popover
+// geometry is Moo-owned.
+$moo-datepicker-width: 17.5rem !default;
+$moo-datepicker-popover-offset: 0.375rem !default;
+
+// The calendar grid geometry (day size, gap, padding, preset spacing, day
+// radii, focus ring) is also Moo-owned: Bootstrap has no calendar primitive
+// that could carry these values, so each is exposed as a !default knob.
+$moo-datepicker-day-size: 2rem !default;
+$moo-datepicker-gap: 0.25rem !default;
+$moo-datepicker-padding: 0.75rem !default;
+$moo-datepicker-preset-gap: 0.375rem !default;
+$moo-datepicker-day-border-radius: var(--bs-border-radius-sm) !default;
+$moo-datepicker-day-range-joined-border-radius: 0 !default;
+$moo-datepicker-day-focus-ring-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent) !default;
+
 // Bootstrap has no floating/overlay toolbar primitive, so the Data Table
 // bulk-actions bar's hover affordance (the whole bar scaling up slightly,
 // not a per-button state) has no Bootstrap knob to consume. Exposed as a
@@ -377,7 +396,7 @@ $moo-datatable-actions-cell-fade-width: 1.25rem !default;
 // Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
 // these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
 $moo-datatable-frame-header-min-height: 2.78125rem !default;
-// Bootstrap's checkbox width variable is not available while primary settings
+// Bootstrap's checkbox width variable is not available while Moo settings
 // are aggregated, so keep Data Table's select inset derived from Moo's compact
 // checkbox box and Bootstrap's default 1px frame border. Now matches the
 // global $form-check-input-width (1rem / 16px) set above.
@@ -426,3 +445,20 @@ $moo-datatable-page-size-menu-min-width: 4rem !default;
 // Catalog preview chrome: maximum width of the full-bleed release-review
 // preview pages that host the Data Table block.
 $moo-datatable-preview-shell-max-width: 82rem !default;
+
+// Bootstrap Toast has no deck gap, peek, scale-step, or slide-in timing knobs.
+// Keep the stacked catalog presentation on scoped Sass settings so the runtime
+// can consume the same values through the Toast container.
+$moo-toast-status-icon-size: 1rem !default;
+$moo-toast-status-icon-gap: .5rem !default;
+// Bootstrap Toast has no deck gap, peek, scale-step, or slide-in timing knobs.
+// Keep the indexed deck presentation on Bootstrap-scoped Sass settings so the
+// runtime can consume the same values through the Toast container.
+$moo-toast-stack-gap: .75rem !default;
+$moo-toast-stack-peek: .75rem !default;
+$moo-toast-stack-scale-step: .1 !default;
+$moo-toast-stack-min-scale: .5 !default;
+$moo-toast-stack-enter-y: 150% !default;
+$moo-toast-stack-transition-duration: .5s !default;
+$moo-toast-stack-height-transition-duration: .15s !default;
+$moo-toast-stack-transition-timing-function: cubic-bezier(.22, 1, .36, 1) !default;

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "0.1",
+  "status": "backfill",
+  "releaseTarget": "1.0.0-rc.3",
+  "releaseClaim": "none",
+  "description": "RC.3 evidence for the optional-entrypoint rollout: promotes Chart, Datepicker, and Slider to public Moo UI component entrypoints. Passing backfill evidence does not add the component to the package manifest's certifiedComponents list until the 1.0.0 release gate is complete.",
+  "components": [
+    {
+      "slug": "chart",
+      "phase": "3C",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "responsive", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_chart.py",
+        "src/js/components/chart.js",
+        "tests/fixtures/certification/chart.html"
+      ],
+      "browserCases": [
+        "desktop-light",
+        "desktop-dark",
+        "mobile-light",
+        "mobile-dark"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/customize/css-variables/",
+        "https://getbootstrap.com/docs/5.3/utilities/colors/"
+      ],
+      "resolvedFindings": [
+        "Bootstrap ships no chart component or plugin (verified: no chart equivalent in js/src/), so Moo owns the entire contract: the .chart root, the data-chart type attribute, the data-chart-data JSON payload, optional data-chart-options JSON object, and deterministic child canvas resolution. Chart.js is bundled at build time through chart.js/auto; there is no runtime CDN, script tag, or window.Chart dependency.",
+        "Chart colors resolve from Bootstrap's CSS variables (--bs-info, --bs-info-text-emphasis, --bs-body-color, --bs-border-color) with color-mix() fill and grid derivations instead of hardcoded theme-dependent hex values, so a data-bs-theme change re-themes the chart through a MutationObserver without reintroducing hex-alpha suffix concatenation.",
+        "Moo Chart contracts area, line, bar, pie, doughnut, polarArea, radar, scatter, and bubble for 1.0.0-rc.3. data-chart-options is a JSON-object-only Chart.js options pass-through, not a Moo-owned schema; callbacks remain programmatic-only."
+      ],
+      "limitations": [
+        "Phase 3C browser verification covers the approved dashboard appearance at the 1400x900 desktop and 479x823 mobile baselines in light and dark mode; expanded Chart gallery browser evidence covers each public data-chart value before manual acceptance.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "datepicker",
+      "phase": "4",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "theme", "rtl", "responsive", "keyboard", "focus", "lifecycle", "accessibility", "visual"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_datepicker.py",
+        "src/js/components/datepicker.js",
+        "tests/fixtures/certification/datepicker.html"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/components/buttons/",
+        "https://getbootstrap.com/docs/5.3/forms/overview/",
+        "https://ui.shadcn.com/docs/components/base/date-picker",
+        "https://ui.shadcn.com/docs/components/base/calendar"
+      ],
+      "resolvedFindings": [
+        "Bootstrap ships no core datepicker component, so Moo owns the shadcn-like .moo-datepicker trigger/popover composition and .moo-calendar day-grid contract while reusing Bootstrap Button styling for clickable controls.",
+        "The Datepicker module is self-contained Moo UI ESM with no third-party runtime; it owns date math, keyboard handling, locale formatting, and selection state natively, and no third-party CSS is imported or copied into package output."
+      ],
+      "limitations": [
+        "The 1.0.0-rc.3 Datepicker scope covers single date, date range, and standalone inline calendar usage; time picker and natural-language parsing are out of scope.",
+        "Real-device and generic host-conformance evidence remain pending."
+      ]
+    },
+    {
+      "slug": "slider",
+      "phase": "5",
+      "tier": 3,
+      "status": "backfill-passed",
+      "evidence": {
+        "existing": ["contract", "markup", "keyboard", "focus", "lifecycle", "accessibility"],
+        "not-applicable": [],
+        "manual": ["real-device"],
+        "missing": ["theme", "rtl", "responsive", "visual", "host-conformance"]
+      },
+      "automatedEvidence": [
+        "tests/test_slider.py",
+        "src/js/components/slider.js",
+        "tests/fixtures/certification/slider.html"
+      ],
+      "browserCases": [
+        "desktop-light-ltr",
+        "mobile-dark-rtl"
+      ],
+      "bootstrapEvidence": [
+        "https://getbootstrap.com/docs/5.3/forms/range/"
+      ],
+      "resolvedFindings": [
+        "Bootstrap's Range component provides the native input[type=range].form-range control, including disabled, min, max, step, Sass variables, keyboard, and form semantics; Moo keeps those native inputs as the semantic owner instead of creating a custom ARIA slider role.",
+        "Bootstrap 5.3.3 explicitly does not support cross-browser filled tracks, and it provides no two-thumb range composition or live output synchronization, so Slider's optional ESM owns only those enhancement gaps around native range inputs."
+      ],
+      "limitations": [
+        "The 1.0.0-rc.3 Slider scope covers native single-value sliders, two-input range sliders, output synchronization, step=any pointer input, collapsed range expansion, form reset synchronization, disabled controls, and the documented horizontal/vertical orientation classes.",
+        "Real-device, final visual acceptance, and generic host-conformance evidence remain pending."
+      ]
+    }
+  ]
+}

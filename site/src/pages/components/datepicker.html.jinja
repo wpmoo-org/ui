@@ -1,0 +1,284 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/datepicker.html.jinja" import calendar, datepicker, date_range_picker %}
+{% from "components/table.html.jinja" import table %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Date Picker — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Date Picker",
+    "Select single dates and ranges with a button trigger, popover, and keyboardable calendar."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set intro %}
+      {{ datepicker(
+        id="datepicker-intro",
+        label="Deploy date",
+        name="deploy_date",
+        placeholder="Pick a date",
+        value="2026-08-18"
+      ) }}
+    {% endset %}
+    {% set usage %}
+      <p>Use <code>[data-datepicker]</code> for a single date, <code>[data-datepicker-range]</code> for start/end ranges, and <code>[data-calendar]</code> when the calendar should stay inline. The trigger owns <code>aria-expanded</code> and <code>aria-controls</code>; the popover owns <code>role="dialog"</code>; the calendar owns roving day focus and selection state.</p>
+      <p>The optional Datepicker ESM is a self-contained Moo UI module with no third-party runtime; it owns the visible surface, date math, and selection state. Import <code>@wpmoo/ui/datepicker.js</code>, initialize only the root your page owns, and call <code>dispose()</code> before removing that root in a partial-page or SPA update.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      usage,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set basic %}
+      {{ datepicker(
+        id="datepicker-basic",
+        label="Date",
+        name="date",
+        placeholder="Pick a date"
+      ) }}
+    {% endset %}
+    {{ render_component_example("datepicker", "Date Picker",
+      "datepicker-basic",
+      "Basic",
+      "A button-like trigger opens a compact calendar popover and writes the selected value to a hidden form field.",
+      basic,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set time_picker %}
+      <div class="moo-datepicker-time-row">
+        {{ datepicker(
+          id="datepicker-time-picker",
+          label="Date",
+          name="event_date",
+          placeholder="Pick a date"
+        ) }}
+        <div class="moo-datepicker-time">
+          <label class="form-label" for="datepicker-time-picker-time">Time</label>
+          <input type="time" class="form-control" id="datepicker-time-picker-time" name="event_time" value="10:30" step="1">
+        </div>
+      </div>
+    {% endset %}
+    {{ render_component_example("datepicker", "Date Picker",
+      "datepicker-time-picker",
+      "Time Picker",
+      "A Date Picker paired with a native time input for selecting a time; the time field stays a plain form control.",
+      time_picker,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set range_picker %}
+      {{ date_range_picker(
+        id="datepicker-range",
+        label="Date range",
+        start_name="start_date",
+        end_name="end_date",
+        start_value="2026-08-20",
+        end_value="2026-08-27"
+      ) }}
+    {% endset %}
+    {{ render_component_example("datepicker", "Date Picker",
+      "datepicker-range",
+      "Range Picker",
+      "One trigger manages two hidden fields; selecting the end date completes the range and closes the picker with focus returning to the trigger.",
+      range_picker,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set birth_date %}
+      {{ datepicker(
+        id="datepicker-birth-date",
+        label="Date of birth",
+        name="birth_date",
+        placeholder="Select date",
+        min_date="1926-01-01",
+        max_date="2026-12-31",
+        caption_layout="dropdown"
+      ) }}
+    {% endset %}
+    {{ render_component_example("datepicker", "Date Picker",
+      "datepicker-birth-date",
+      "Date Of Birth",
+      "Month and year selectors keep long historical ranges manageable without changing the calendar contract.",
+      birth_date,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set presets %}
+      {{ datepicker(
+        id="datepicker-presets",
+        label="Schedule date",
+        name="schedule_date",
+        placeholder="Pick a date",
+        show_presets=true
+      ) }}
+    {% endset %}
+    {{ render_component_example("datepicker", "Date Picker",
+      "datepicker-presets",
+      "Presets",
+      "Preset buttons set common dates while preserving the same hidden input serialization.",
+      presets,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set inline_calendar %}
+      {{ calendar(
+        id="datepicker-inline-calendar",
+        aria_label="Release calendar",
+        value="2026-08-18",
+        min_date="2026-08-10",
+        max_date="2026-09-15",
+        disabled_dates=["2026-08-22", "2026-08-23"],
+        show_presets=true
+      ) }}
+    {% endset %}
+    {{ render_component_example("datepicker", "Date Picker",
+      "datepicker-inline-calendar",
+      "Inline Calendar",
+      "Use the same calendar directly when the date choice is the main task on the screen.",
+      inline_calendar,
+      preview_class="moo-example__preview--medium"
+    ) }}
+
+    {% set rtl_arabic %}
+      {{ datepicker(
+        id="datepicker-rtl-arabic",
+        aria_label="اختر تاريخا",
+        name="rtl_arabic_date",
+        placeholder="اختر تاريخا",
+        locale="ar",
+        value="2026-08-18",
+        attrs='dir="rtl"'
+      ) }}
+    {% endset %}
+    {% set rtl_hebrew %}
+      {{ datepicker(
+        id="datepicker-rtl-hebrew",
+        aria_label="בחר תאריך",
+        name="rtl_hebrew_date",
+        placeholder="בחר תאריך",
+        locale="he",
+        value="2026-08-18",
+        attrs='dir="rtl"'
+      ) }}
+    {% endset %}
+    {% set rtl_english %}
+      {{ datepicker(
+        id="datepicker-rtl-english",
+        aria_label="Pick a date",
+        name="rtl_english_date",
+        placeholder="Pick a date",
+        value="2026-08-18"
+      ) }}
+    {% endset %}
+    {{ render_rtl_example(
+      "datepicker-rtl",
+      "The popover follows the trigger direction and the locale option controls visible formatting in the calendar.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--medium"
+    ) }}
+  </div>
+
+  <section class="moo-doc-section mt-5" aria-labelledby="datepicker-html-anatomy">
+    {{ typography("HTML Anatomy", variant="section-title", id="datepicker-html-anatomy") }}
+    {% set datepicker_parts = [
+      {"id": "datepicker-root", "selector": "<code>[data-datepicker]</code>", "summary": "Single-date root. It owns the trigger, popover, calendar root, hidden field, and instance lifecycle."},
+      {"id": "datepicker-range-root", "selector": "<code>[data-datepicker-range]</code>", "summary": "Range root. It uses the same popover and one calendar while syncing start and end hidden fields."},
+      {"id": "datepicker-trigger", "selector": "<code>[data-datepicker-trigger]</code>", "summary": "Button-like trigger with <code>type=\"button\"</code>, <code>aria-haspopup=\"dialog\"</code>, <code>aria-expanded</code>, and <code>aria-controls</code>."},
+      {"id": "datepicker-popover", "selector": "<code>[data-datepicker-popover]</code>", "summary": "Popover surface with <code>role=\"dialog\"</code>, <code>aria-modal=\"false\"</code>, and <code>hidden</code> while closed."},
+      {"id": "datepicker-calendar", "selector": "<code>[data-calendar]</code>", "summary": "Standalone calendar root. The runtime renders caption controls, weekdays, six weeks of day buttons, disabled state, selected state, and range state."}
+    ] %}
+    {% set datepicker_part_rows = namespace(by_id={}) %}
+    {% for part in datepicker_parts %}
+      {% set _ = datepicker_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
+    {% endfor %}
+    {% set datepicker_row_groups = [
+      {
+        "heading_id": "datepicker-anatomy-roots",
+        "title": "Roots",
+        "rows": [datepicker_part_rows.by_id["datepicker-root"], datepicker_part_rows.by_id["datepicker-range-root"]],
+        "row_ids": ["datepicker-root", "datepicker-range-root"]
+      },
+      {
+        "heading_id": "datepicker-anatomy-trigger",
+        "title": "Trigger",
+        "rows": [datepicker_part_rows.by_id["datepicker-trigger"]],
+        "row_ids": ["datepicker-trigger"]
+      },
+      {
+        "heading_id": "datepicker-anatomy-popover",
+        "title": "Popover",
+        "rows": [datepicker_part_rows.by_id["datepicker-popover"], datepicker_part_rows.by_id["datepicker-calendar"]],
+        "row_ids": ["datepicker-popover", "datepicker-calendar"]
+      }
+    ] %}
+    {{ table(
+      ["Selector", "Purpose"],
+      [],
+      row_groups=datepicker_row_groups,
+      row_header=true,
+      extra_class="align-middle moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
+      responsive_class="scroll-fade-x no-scrollbar"
+    ) }}
+  </section>
+
+  <section class="moo-doc-section mt-5" aria-labelledby="datepicker-javascript">
+    {{ typography("JavaScript", variant="section-title", id="datepicker-javascript") }}
+    <p>
+      The module is explicit and idempotent. It does not scan the document when imported, and it owns its state internally with no global leak.
+    </p>
+    {% set datepicker_import_example %}
+    import Datepicker, {
+      MooCalendar,
+      MooDateRangePicker,
+    } from "@wpmoo/ui/datepicker.js";
+
+    const datepicker = Datepicker.getOrCreateInstance(
+      document.querySelector("[data-datepicker]")
+    );
+    const range = MooDateRangePicker.getOrCreateInstance(
+      document.querySelector("[data-datepicker-range]")
+    );
+    const calendar = MooCalendar.getOrCreateInstance(
+      document.querySelector("#datepicker-inline-calendar")
+    );
+
+    datepicker.setDate("2026-08-18");
+    range.setDates("2026-08-20", "2026-08-27");
+    calendar.clear();
+
+    datepicker.dispose();
+    range.dispose();
+    calendar.dispose();
+    {% endset %}
+    {{ render_code_snippet("datepicker-javascript-import", datepicker_import_example, "js") }}
+  </section>
+
+  <section class="moo-doc-section mt-5" aria-labelledby="datepicker-values">
+    {{ typography("Values", variant="section-title", id="datepicker-values") }}
+    <p class="mb-0">
+      Hidden form values use <code>yyyy-mm-dd</code> strings. Public getters return a local <code>Date</code> object by default, or the same <code>yyyy-mm-dd</code> serialization when called with that format string. The <code>locale</code> option controls visible formatting in the calendar and trigger label, defaulting to <code>en</code>.
+    </p>
+  </section>
+
+  {{ render_reference(
+    "The trigger and presets are Bootstrap button primitives; the popover and calendar are Moo UI markup with natively owned date, selection, and keyboard behavior. Bootstrap ships no date picker component. For the button surface, see the",
+    "https://getbootstrap.com/docs/5.3/components/buttons/",
+    "Bootstrap Buttons documentation",
+    extra_references=[
+      {
+        "lead": "For the popover surface and form fields, see the",
+        "href": "https://getbootstrap.com/docs/5.3/components/popovers/",
+        "label": "Bootstrap Popovers documentation"
+      }
+    ]
+  ) }}
+{% endblock %}

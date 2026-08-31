@@ -2,12 +2,17 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
+import tempfile
+from pathlib import Path
 from typing import Any
 
 
 APPROVED_TARBALL_FILES = {
     "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md",
     "LICENSE",
     "README.md",
     "certification.json",
@@ -19,8 +24,12 @@ APPROVED_TARBALL_FILES = {
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
-    "scss/_facade-settings.scss",
-    "scss/settings/_facade_public.scss",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
+    "scss/_config.scss",
     "package.json",
 }
 
@@ -57,9 +66,48 @@ def validate_package_manifest(payload: Any) -> None:
     raise ValueError("npm pack contents do not match the package boundary; " + "; ".join(details))
 
 
+def npm_env() -> dict[str, str]:
+    env = os.environ.copy()
+    cache = env.get("npm_config_cache")
+    if not cache or not npm_cache_is_writable(Path(cache)):
+        env["npm_config_cache"] = os.path.join(
+            tempfile.gettempdir(),
+            "wpmoo-npm-cache",
+        )
+    return env
+
+
+def npm_cache_is_writable(cache: Path) -> bool:
+    try:
+        probe_dir = cache / "_cacache" / "tmp"
+        probe_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=probe_dir):
+            pass
+    except OSError:
+        return False
+    return True
+
+
+def load_manifest_payload() -> Any:
+    stdin_payload = "" if sys.stdin.isatty() else sys.stdin.read()
+    if stdin_payload.strip():
+        return json.loads(stdin_payload)
+
+    result = subprocess.run(
+        ["npm", "pack", "--dry-run", "--json"],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=npm_env(),
+    )
+    if result.returncode:
+        raise ValueError(result.stderr.strip() or "npm pack --dry-run --json failed")
+    return json.loads(result.stdout)
+
+
 def main() -> int:
     try:
-        validate_package_manifest(json.load(sys.stdin))
+        validate_package_manifest(load_manifest_payload())
     except (json.JSONDecodeError, ValueError) as error:
         print(f"Package manifest validation failed: {error}", file=sys.stderr)
         return 1

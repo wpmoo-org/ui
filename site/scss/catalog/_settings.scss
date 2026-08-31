@@ -26,3 +26,63 @@ $moo-catalog-settings-thumb-dark: #18181b !default;
 $moo-catalog-settings-thumb-light-line: #e4e4e7 !default;
 $moo-catalog-settings-thumb-dark-line: #3f3f46 !default;
 $moo-catalog-settings-thumb-system-line: #a1a1aa !default;
+$moo-catalog-settings-option-border: $border-color !default;
+$moo-catalog-settings-option-border-dark: $border-color-dark !default;
+$moo-catalog-settings-option-active-border: $moo-ring !default;
+$moo-catalog-settings-option-active-border-dark: $moo-ring-dark !default;
+$moo-catalog-settings-option-check-bg: $moo-surface !default;
+$moo-catalog-settings-option-check-bg-dark: $moo-surface-dark !default;
+$moo-catalog-settings-option-check-border: $border-color !default;
+$moo-catalog-settings-option-check-border-dark: $border-color-dark !default;
+$moo-catalog-settings-option-check-color: $moo-foreground !default;
+$moo-catalog-settings-option-check-color-dark: $moo-foreground-dark !default;
+$moo-catalog-settings-option-active-check-bg: $moo-foreground !default;
+$moo-catalog-settings-option-active-check-bg-dark: $moo-foreground-dark !default;
+$moo-catalog-settings-option-active-check-border: $moo-surface !default;
+$moo-catalog-settings-option-active-check-border-dark: $moo-surface-dark !default;
+$moo-catalog-settings-option-active-check-color: $moo-surface !default;
+$moo-catalog-settings-option-active-check-color-dark: $moo-surface-dark !default;
+$moo-catalog-settings-system-thumb-light-dark: color-mix(in srgb, $moo-catalog-settings-thumb-light 88%, $moo-catalog-settings-thumb-dark) !default;
+$moo-catalog-settings-system-active-check-bg-dark: color-mix(in srgb, $moo-catalog-settings-option-active-check-bg-dark 88%, $moo-catalog-settings-option-active-check-color-dark) !default;
+$moo-catalog-settings-swatch-neutral: #71717a !default;
+$moo-catalog-settings-swatch-zinc: #71717a !default;
+$moo-catalog-settings-swatch-stone: #78716c !default;
+$moo-catalog-settings-swatch-mauve: #746b7c !default;
+$moo-catalog-settings-swatch-olive: #6f775f !default;
+$moo-catalog-settings-swatch-mist: #617783 !default;
+$moo-catalog-settings-swatch-taupe: #746a63 !default;
+$moo-catalog-settings-swatch-blue: #066fd1 !default;
+$moo-catalog-settings-swatch-azure: #4299e1 !default;
+$moo-catalog-settings-swatch-indigo: #4263eb !default;
+$moo-catalog-settings-swatch-purple: #ae3ec9 !default;
+$moo-catalog-settings-swatch-pink: #d6336c !default;
+$moo-catalog-settings-swatch-red: #d63939 !default;
+$moo-catalog-settings-swatch-orange: #f76707 !default;
+$moo-catalog-settings-swatch-yellow: #f59f00 !default;
+$moo-catalog-settings-swatch-lime: #74b816 !default;
+$moo-catalog-settings-swatch-green: #2fb344 !default;
+$moo-catalog-settings-swatch-teal: #0ca678 !default;
+$moo-catalog-settings-swatch-cyan: #17a2b8 !default;
+$moo-catalog-settings-swatch-check: #ffffff !default;
+
+// Catalog code-panel syntax colors are documentation chrome, not product
+// component tokens. Keep the literals at this Sass definition site so the
+// rendered CSS consumes private --moo-code-* custom properties and the token
+// palette can move independently from Bootstrap semantic colors.
+$moo-catalog-code-muted: #71717a !default;
+$moo-catalog-code-keyword: #e11d48 !default;
+$moo-catalog-code-selector: #2563eb !default;
+$moo-catalog-code-tag: #1d4ed8 !default;
+$moo-catalog-code-property: #7c3aed !default;
+$moo-catalog-code-function: #059669 !default;
+$moo-catalog-code-string: #0369a1 !default;
+$moo-catalog-code-constant: #b45309 !default;
+
+$moo-catalog-code-muted-dark: #a1a1aa !default;
+$moo-catalog-code-keyword-dark: #fb7185 !default;
+$moo-catalog-code-selector-dark: #93c5fd !default;
+$moo-catalog-code-tag-dark: #60a5fa !default;
+$moo-catalog-code-property-dark: #c4b5fd !default;
+$moo-catalog-code-function-dark: #6ee7b7 !default;
+$moo-catalog-code-string-dark: #7dd3fc !default;
+$moo-catalog-code-constant-dark: #fbbf24 !default;

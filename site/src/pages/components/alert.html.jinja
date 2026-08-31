@@ -2,7 +2,7 @@
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Alert — Moo UI{% endblock %}
@@ -39,7 +39,7 @@
         icon="info"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "basic",
       "Basic",
       "Pair an icon with a title and description inside a quiet bordered region.",
@@ -55,7 +55,7 @@
         icon="circle-alert"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "destructive",
       "Destructive",
       "Use <code>variant=\"destructive\"</code> for errors that need immediate attention.",
@@ -71,7 +71,7 @@
         action=button("Upgrade plan", variant="outline", size="sm")
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "action",
       "Action",
       "Place one documented Button action inline with the alert message when a direct response is useful.",
@@ -87,7 +87,7 @@
         icon="triangle-alert"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "warning",
       "Warning",
       "Use <code>variant=\"warning\"</code> for time-sensitive notices that need attention but aren't blocking.",
@@ -103,7 +103,7 @@
         icon="circle-check"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "success",
       "Success",
       "Use <code>variant=\"success\"</code> to confirm a completed action or a positive state change.",
@@ -119,7 +119,7 @@
         icon="sparkles"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "info",
       "Info",
       "Use <code>variant=\"info\"</code> for neutral, informational notices that don't require action.",
@@ -135,7 +135,7 @@
         dismissible=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert", "Alert",
       "dismissible",
       "Dismissible",
       "Add a Close Button; wire <code>data-bs-dismiss=\"alert\"</code> when the alert should remove itself.",

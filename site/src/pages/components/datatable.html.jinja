@@ -1,30 +1,30 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "blocks/datatable_release_review.html.jinja" import render_release_review_table %}
 {% from "components/table.html.jinja" import table %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "pages/examples/dashboard/tasks.html.jinja" import tasks_body with context %}
 
 {% block title %}Data Table - Moo UI{% endblock %}
 
 {% block content %}
   {{ render_page_header(
     "Data Table",
-    "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
+    "Build live server-rendered work queues with search, facets, sorting, selection, bulk actions, column visibility, pagination, and responsive card views."
   ) }}
 
   <div class="moo-component-examples">
-    {% set release_review_table %}
-      {{ render_release_review_table(id="datatable-release-reviews", responsive_mode="toggle") }}
+    {% set tasks_table %}
+      {{ tasks_body() }}
     {% endset %}
     {{ render_block_example(
-      "release-review-queue",
-      "Release review queue",
-      "A shadcn-admin-inspired work queue with original release-review content. Search, filter, sort, select, and switch between list and card views from one surface.",
-      release_review_table,
+      "tasks-work-queue",
+      "Tasks work queue",
+      "A live Tasks dashboard reused from Examples. Create, edit, copy, and delete tasks while Data Table keeps search, filters, sorting, selection, pagination, and card view in sync.",
+      tasks_table,
       preview_class="moo-example__preview--shell",
-      frame_src=site_href("blocks/previews/datatable-release-review.html", root_path),
+      frame_src=site_href("blocks/previews/datatable-tasks.html", root_path),
       frame_width=1280,
       frame_height=900,
       frame_viewports=[
@@ -110,36 +110,87 @@
       helpers.
     </p>
 
-    {% set anatomy_rows = [
-      ["<code>.datatable</code>", "Root element for one interactive table instance and its page-size default."],
-      ["<code>[data-datatable-toolbar]</code>", "Search, facets, reset action, and column visibility controls."],
-      ["<code>[data-datatable-search]</code>", "Search input that filters against each row's server-rendered search string."],
-      ["<code>[data-datatable-facet]</code>", "Facet dropdown root that groups multi-select filter options by key."],
-      ["<code>.datatable-frame</code>", "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."],
-      ["<code>.table-responsive.scroll-fade-x</code>", "Horizontal viewport for full-width tables when every column should remain inspectable."],
-      ["<code>.datatable-card-frame</code>", "Responsive card list that mirrors table rows with title and action areas in the card header, then secondary fields in the card body."],
-      ["<code>.datatable-view-toggle</code>", "Table/Cards toolbar control so the reader, not only the breakpoint, picks the layout."],
-      ["<code>[data-datatable-cards]</code>", "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."],
-      ["<code>[data-datatable-empty]</code>", "Accessible empty-state surface shown when filtering leaves no matching rows, with a clear-filters action."],
-      ["<code>[data-datatable-results-summary]</code>", "Live page-range summary such as <code>Showing 1-10 of 24</code>, or <code>No results</code> when nothing matches."],
-      ["<code>th[data-datatable-column]</code>", "Column ownership hook used by sorting, hiding, and cell updates."],
-      ["<code>tr[data-datatable-row]</code>", "Server-rendered row with search text, facet values, and stable id."],
-      ["<code>[data-datatable-select-row]</code>", "Native checkbox for row selection."],
-      ["<code>[data-datatable-select-all]</code>", "Selects or clears the current page rows from the shared toolbar, keeping the control in the same place in table and card views."],
-      ["<code>td[data-datatable-sort-value]</code>", "Optional sort value that avoids parsing rich cell content."],
-      ["<code>[data-datatable-bulk-actions]</code>", "Fixed selection toolbar shown after at least one row is selected."],
-      ["<code>[data-datatable-pagination]</code>", "Pagination region that owns page size and page navigation controls."]
+    {% set anatomy_groups = [
+      {
+        "id": "root",
+        "title": "Root",
+        "rows": [
+          {"id": "datatable-anatomy-root-row", "selector": "<code>.datatable</code>", "summary": "Root element for one interactive table instance and its page-size default."}
+        ]
+      },
+      {
+        "id": "toolbar",
+        "title": "Toolbar",
+        "rows": [
+          {"id": "datatable-anatomy-toolbar-row", "selector": "<code>[data-datatable-toolbar]</code>", "summary": "Search, facets, reset action, and column visibility controls."},
+          {"id": "datatable-anatomy-search-row", "selector": "<code>[data-datatable-search]</code>", "summary": "Search input that filters against each row's server-rendered search string."},
+          {"id": "datatable-anatomy-facet-row", "selector": "<code>[data-datatable-facet]</code>", "summary": "Facet dropdown root that groups multi-select filter options by key."},
+          {"id": "datatable-anatomy-responsive-toggle-row", "selector": "<code>.datatable-view-toggle</code>", "summary": "Table/Cards toolbar control so the reader, not only the breakpoint, picks the layout."}
+        ]
+      },
+      {
+        "id": "table-surface",
+        "title": "Table Surface",
+        "rows": [
+          {"id": "datatable-anatomy-frame-row", "selector": "<code>.datatable-frame</code>", "summary": "Rounded, bordered table viewport around Bootstrap's responsive table wrapper."},
+          {"id": "datatable-anatomy-responsive-scroll-row", "selector": "<code>.table-responsive.scroll-fade-x</code>", "summary": "Horizontal viewport for full-width tables when every column should remain inspectable."},
+          {"id": "datatable-anatomy-column-row", "selector": "<code>th[data-datatable-column]</code>", "summary": "Column ownership hook used by sorting, hiding, and cell updates."},
+          {"id": "datatable-anatomy-row-row", "selector": "<code>tr[data-datatable-row]</code>", "summary": "Server-rendered row with search text, facet values, and stable id."},
+          {"id": "datatable-anatomy-select-row-row", "selector": "<code>[data-datatable-select-row]</code>", "summary": "Native checkbox for row selection."},
+          {"id": "datatable-anatomy-sort-value-row", "selector": "<code>td[data-datatable-sort-value]</code>", "summary": "Optional sort value that avoids parsing rich cell content."}
+        ]
+      },
+      {
+        "id": "cards",
+        "title": "Cards",
+        "rows": [
+          {"id": "datatable-anatomy-responsive-cards-row", "selector": "<code>.datatable-card-frame</code>", "summary": "Responsive card list that mirrors table rows with title and action areas in the card header, then secondary fields in the card body."},
+          {"id": "datatable-anatomy-cards-row", "selector": "<code>[data-datatable-cards]</code>", "summary": "Responsive card viewport kept in pagination, sorting, filtering, selection, and column-visibility sync with the table."}
+        ]
+      },
+      {
+        "id": "state-actions",
+        "title": "State & Actions",
+        "rows": [
+          {"id": "datatable-anatomy-empty-row", "selector": "<code>[data-datatable-empty]</code>", "summary": "Accessible empty-state surface shown when filtering leaves no matching rows, with a clear-filters action."},
+          {"id": "datatable-anatomy-results-summary-row", "selector": "<code>[data-datatable-results-summary]</code>", "summary": "Live page-range summary such as <code>Showing 1-10 of 24</code>, or <code>No results</code> when nothing matches."},
+          {"id": "datatable-anatomy-select-all-row", "selector": "<code>[data-datatable-select-all]</code>", "summary": "Selects or clears the current page rows from the shared toolbar, keeping the control in the same place in table and card views."},
+          {"id": "datatable-anatomy-bulk-actions-row", "selector": "<code>[data-datatable-bulk-actions]</code>", "summary": "Fixed selection toolbar shown after at least one row is selected."}
+        ]
+      },
+      {
+        "id": "pagination",
+        "title": "Pagination",
+        "rows": [
+          {"id": "datatable-anatomy-pagination-row", "selector": "<code>[data-datatable-pagination]</code>", "summary": "Pagination region that owns page size and page navigation controls."}
+        ]
+      }
     ] %}
+    {% set anatomy_row_groups = [] %}
+    {% for group in anatomy_groups %}
+      {% set group_rows = [] %}
+      {% set group_row_ids = [] %}
+      {% for row in group["rows"] %}
+        {% set _ = group_rows.append([row["selector"], row["summary"]]) %}
+        {% set _ = group_row_ids.append(row["id"]) %}
+      {% endfor %}
+      {% set _ = anatomy_row_groups.append({
+        "heading_id": "datatable-anatomy-" ~ group["id"],
+        "title": group["title"],
+        "rows": group_rows,
+        "row_ids": group_row_ids
+      }) %}
+    {% endfor %}
     {{ table(
       ["Selector", "Purpose"],
-      anatomy_rows,
-      row_ids=["root", "toolbar", "search", "facet", "frame", "responsive-scroll", "responsive-cards", "responsive-toggle", "cards", "empty", "results-summary", "column", "row", "select-row", "select-all", "sort-value", "bulk-actions", "pagination"],
+      [],
+      row_groups=anatomy_row_groups,
       row_header=true,
-      extra_class="align-middle mb-5 datatable-anatomy-table",
+      extra_class="align-middle mb-5 moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
       responsive_class="scroll-fade-x no-scrollbar"
     ) }}
 
-    {% set interactive = namespace(input="<" ~ "input", button="<" ~ "button") %}
+    {% set interactive = namespace(input=("<" ~ "input") | safe, button=("<" ~ "button") | safe) %}
     {% set bootstrap = namespace(
       form_control="form" ~ "-control",
       form_control_sm="form" ~ "-control-sm",

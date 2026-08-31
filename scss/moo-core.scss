@@ -8,7 +8,7 @@ $enable-dark-mode: false;
 $moo-spinner-animation-name: moo-spinner-rotate;
 
 @import "functions";
-@import "primary_variables";
+@import "settings";
 @import "variables";
 @import "variables-dark";
 @import "maps";
@@ -40,9 +40,7 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 }
 
 @scope (.moo-ui) {
-  @import "bootstrap_component_layer";
-  @import "foundations/focus";
-  @import "component_layer";
+  @import "components";
 }
 
 @import "foundations/core_state_layer";

@@ -34,6 +34,9 @@ class TypographyTests(CatalogTestCase):
             'typography("Example", variant="example-title", id="example")': (
                 '<h2 class="h4" id="example">Example</h2>'
             ),
+            'typography("Subsection", variant="subsection-title", id="subsection")': (
+                '<h3 class="h6" id="subsection">Subsection</h3>'
+            ),
             'typography("Quiet context", variant="muted")': (
                 '<span class="text-body-secondary">Quiet context</span>'
             ),

@@ -1,0 +1,207 @@
+$slider-thumb-size: $form-range-thumb-width * 0.75;
+$slider-thumb-margin-top: ($progress-height - $slider-thumb-size) * 0.5;
+
+.slider {
+  display: grid;
+  gap: $form-text-margin-top;
+  width: 100%;
+}
+
+.slider-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: $form-range-track-width;
+  height: $slider-thumb-size;
+  cursor: $form-range-track-cursor;
+  touch-action: none;
+}
+
+.slider-track::before,
+.slider-range {
+  position: absolute;
+  inset-block-start: 50%;
+  height: $progress-height;
+  border-radius: var(--bs-border-radius-pill);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.slider-track::before {
+  content: "";
+  inset-inline: 0;
+  background-color: $form-range-track-bg;
+  box-shadow: var(--bs-box-shadow-inset);
+}
+
+.slider-range {
+  inset-inline-start: var(--moo-slider-start, 0%);
+  inset-inline-end: calc(100% - var(--moo-slider-end, 0%));
+  background-color: var(--moo-primary);
+}
+
+.slider-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.slider-input::-webkit-slider-runnable-track {
+  height: $progress-height;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.slider-input::-moz-range-track {
+  height: $progress-height;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.slider-input::-webkit-slider-thumb {
+  position: relative;
+  z-index: 1;
+  width: $slider-thumb-size;
+  height: $slider-thumb-size;
+  margin-top: $slider-thumb-margin-top;
+  background-color: var(--bs-body-bg);
+  border-width: var(--bs-border-width);
+  border-style: solid;
+  border-color: var(--moo-primary);
+  box-shadow: var(--bs-box-shadow-sm);
+  pointer-events: auto;
+}
+
+.slider-input::-moz-range-thumb {
+  position: relative;
+  z-index: 1;
+  width: $slider-thumb-size;
+  height: $slider-thumb-size;
+  background-color: var(--bs-body-bg);
+  border-width: var(--bs-border-width);
+  border-style: solid;
+  border-color: var(--moo-primary);
+  box-shadow: var(--bs-box-shadow-sm);
+  pointer-events: auto;
+}
+
+.slider-input::-webkit-slider-thumb:active {
+  background-color: var(--bs-body-bg);
+  border-color: var(--moo-primary);
+}
+
+.slider-input::-moz-range-thumb:active {
+  background-color: var(--bs-body-bg);
+  border-color: var(--moo-primary);
+}
+
+.slider-input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.slider-input:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.slider[data-slider-dragging] .slider-input::-webkit-slider-thumb {
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+.slider[data-slider-dragging] .slider-input::-moz-range-thumb {
+  box-shadow: 0 0 0 #{$moo-form-focus-ring-width} color-mix(in srgb, #{$moo-form-focus-ring-color} 50%, transparent);
+}
+
+// Safari can keep pointer-driven range focus out of :focus-visible, while
+// Bootstrap's native .form-range:focus thumb halo still applies.
+.slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus::-webkit-slider-thumb {
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.slider[data-slider-pointer-focus]:not([data-slider-dragging]) .slider-input:focus::-moz-range-thumb {
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.slider-input:disabled {
+  opacity: 1;
+}
+
+.slider-input:disabled::-webkit-slider-thumb {
+  background-color: var(--moo-muted-surface);
+  border-color: var(--moo-disabled-foreground);
+  box-shadow: none;
+  cursor: default;
+}
+
+.slider-input:disabled::-moz-range-thumb {
+  background-color: var(--moo-muted-surface);
+  border-color: var(--moo-disabled-foreground);
+  box-shadow: none;
+  cursor: default;
+}
+
+.slider-input:disabled:focus-visible::-webkit-slider-thumb,
+.slider[data-slider-dragging] .slider-input:disabled::-webkit-slider-thumb,
+.slider[data-slider-pointer-focus] .slider-input:disabled:focus-visible::-webkit-slider-thumb {
+  background-color: var(--moo-muted-surface);
+  border-color: var(--moo-disabled-foreground);
+  box-shadow: none;
+}
+
+.slider-input:disabled:focus-visible::-moz-range-thumb,
+.slider[data-slider-dragging] .slider-input:disabled::-moz-range-thumb,
+.slider[data-slider-pointer-focus] .slider-input:disabled:focus-visible::-moz-range-thumb {
+  background-color: var(--moo-muted-surface);
+  border-color: var(--moo-disabled-foreground);
+  box-shadow: none;
+}
+
+.slider:has(.slider-input:disabled) .slider-track {
+  cursor: default;
+}
+
+.slider:has(.slider-input:disabled) .slider-range {
+  background-color: var(--moo-disabled-foreground);
+}
+
+.slider--range .slider-input--upper {
+  z-index: 2;
+}
+
+.slider--vertical {
+  width: max-content;
+}
+
+.slider--vertical .slider-track {
+  justify-content: center;
+  justify-self: center;
+  width: $slider-thumb-size;
+  height: $input-height * 4;
+}
+
+.slider--vertical .slider-track::before {
+  inset-block: 0;
+  inset-inline: auto;
+  width: $progress-height;
+  height: auto;
+  transform: none;
+}
+
+.slider--vertical .slider-range {
+  inset-block-start: calc(100% - var(--moo-slider-end, 0%));
+  inset-block-end: var(--moo-slider-start, 0%);
+  inset-inline-start: 50%;
+  inset-inline-end: auto;
+  width: $progress-height;
+  height: auto;
+  transform: translateX(-50%);
+}
+
+.slider--vertical .slider-input {
+  width: 100%;
+  height: 100%;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}

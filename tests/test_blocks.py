@@ -191,3 +191,33 @@ class BlocksTests(CatalogTestCase):
         self.assertIn(".moo-sidebar-demo--portal-shell .sidebar-inset__header", styles)
         self.assertIn("data-moo-block-frame-shell", script)
         self.assertIn("ResizeObserver", script)
+
+    def test_block_preview_loading_placeholder_and_reveal_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("blocks/sidebar-floating.html")
+        styles = self.read_output("assets/css/catalog.css")
+        script = self.read_output("assets/js/catalog/block-frame.js")
+
+        # The loading placeholder markup must ship with the block frame.
+        self.assertIn("moo-block-preview__loading", page)
+        self.assertIn("data-moo-block-frame-loading", page)
+        self.assertIn("Loading preview", page)
+
+        # The reveal state must be wired: CSS fades the placeholder out on
+        # .is-loaded, and the script toggles that class.
+        self.assertIn(".moo-block-preview__viewport.is-loaded", styles)
+        self.assertIn("moo-block-preview__loading", styles)
+        self.assertIn("is-loaded", script)
+        self.assertIn("revealFrame", script)
+
+        # Variant switching must bring the placeholder back for the new src.
+        self.assertIn("classList.remove(\"is-loaded\")", script)
+
+        # The cached-load shortcut must not reveal a still-lazy about:blank
+        # frame; the guard must check the document URL, not only readyState.
+        self.assertIn('href !== "about:blank"', script)
+
+        # The load listener must reveal and resize the frame together.
+        self.assertIn("listen(frame, \"load\"", script)

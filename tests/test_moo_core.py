@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from tests.helpers import DIST, ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 from tests.helpers.css_contract import (
     assert_allowed_global_rules,
     assert_animation_closure,
@@ -126,24 +126,30 @@ class MooCoreTests(CatalogTestCase):
         for fragment in REQUIRED_TOPOLOGY_FRAGMENTS:
             self.assertIn(fragment, css)
 
-    def test_bootstrap_component_layer_is_ordered_and_explicit(self) -> None:
-        layer = SCSS / "_bootstrap_component_layer.scss"
+    def test_components_aggregate_keeps_bootstrap_and_moo_layers_explicit(self) -> None:
+        layer = SCSS / "_components.scss"
 
-        self.assertTrue(layer.is_file(), "missing Bootstrap component layer")
-        imports = active_scss_imports(layer.read_text(encoding="utf-8"))
-        normalized = [
+        self.assertTrue(layer.is_file(), "missing Moo components aggregate")
+        source = layer.read_text(encoding="utf-8")
+        imports = active_scss_imports(source)
+        bootstrap_imports = [
             item.removeprefix("../vendor/bootstrap/scss/")
             .removeprefix("bootstrap/scss/")
             for item in imports
+            if not item.startswith("components/")
+            and not item.startswith("foundations/")
+            and not item.startswith("utilities/")
         ]
-        self.assertEqual(normalized, REQUIRED_BOOTSTRAP_IMPORTS)
-        self.assertEqual(len(normalized), len(set(normalized)))
-        self.assertFalse(FORBIDDEN_BOOTSTRAP_IMPORTS.intersection(normalized))
+        self.assertEqual(bootstrap_imports, REQUIRED_BOOTSTRAP_IMPORTS)
+        self.assertEqual(len(bootstrap_imports), len(set(bootstrap_imports)))
+        self.assertFalse(FORBIDDEN_BOOTSTRAP_IMPORTS.intersection(bootstrap_imports))
+        self.assertNotIn("@import \"bootstrap_component_layer\";", source)
+        self.assertNotIn("@import \"component_layer\";", source)
 
-    def test_component_layer_imports_every_moo_partial_once(self) -> None:
-        layer = SCSS / "_component_layer.scss"
+    def test_components_aggregate_imports_every_moo_partial_once(self) -> None:
+        layer = SCSS / "_components.scss"
 
-        self.assertTrue(layer.is_file(), "missing Moo component layer")
+        self.assertTrue(layer.is_file(), "missing Moo components aggregate")
         source = layer.read_text(encoding="utf-8")
         imported_components = active_component_imports(source)
         expected_components = {
@@ -176,7 +182,7 @@ class MooCoreTests(CatalogTestCase):
 
     def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
         overlay_layer = OVERLAY_BACKDROP_SCSS.read_text(encoding="utf-8")
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
             encoding="utf-8"
         )
@@ -189,7 +195,7 @@ class MooCoreTests(CatalogTestCase):
             "$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;",
             "$moo-overlay-backdrop-filter: blur(8px) !default;",
         ):
-            self.assertIn(knob, primary_variables)
+            self.assertIn(knob, settings)
 
         for token in (
             "--moo-overlay-backdrop-opacity: #{$moo-overlay-backdrop-opacity}",

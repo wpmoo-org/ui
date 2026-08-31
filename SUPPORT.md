@@ -4,9 +4,10 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI is currently in the `0.x` development series. Production certification
-is being introduced incrementally; a component's presence in the catalog does
-not by itself mean that it has completed certification.
+Moo UI is currently in the `1.0.0-rc.3` release-candidate certification phase.
+Production certification is being introduced incrementally; a component's
+presence in the catalog does not by itself mean that it has completed
+certification.
 
 ## Supported Public Surfaces
 
@@ -19,8 +20,8 @@ Moo UI treats the following documented surfaces as public contracts:
   scoped versus unscoped stylesheet behavior;
 - documented exports, options, lifecycle methods, and events of public ESM
   modules;
-- variables explicitly listed by the public Sass facade
-  (`scss/_facade-settings.scss`): `$primary`, `$secondary`, `$success`,
+- variables explicitly listed by the public Sass config
+  (`scss/_config.scss`): `$primary`, `$secondary`, `$success`,
   `$info`, `$warning`, `$danger`, `$light`, `$dark`, `$body-color`,
   `$body-bg`, `$border-color`, `$border-radius`, `$border-radius-sm`,
   `$border-radius-lg`, `$font-size-base`;

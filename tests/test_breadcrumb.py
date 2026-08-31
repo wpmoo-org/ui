@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import ROOT, CatalogTestCase, read_settings
 
 
 COMPONENT = ROOT / "src/components/breadcrumb.html.jinja"
@@ -88,7 +88,7 @@ class BreadcrumbTests(CatalogTestCase):
 
     def test_breadcrumb_bridges_bootstrap_rtl_chevron_output(self) -> None:
         styles = (ROOT / "scss/components/_breadcrumb.scss").read_text(encoding="utf-8")
-        tokens = read_primary_variables()
+        tokens = read_settings()
 
         self.assertIn('$breadcrumb-divider: quote(">") !default;', tokens)
         self.assertIn('$breadcrumb-divider-flipped: quote("<") !default;', tokens)

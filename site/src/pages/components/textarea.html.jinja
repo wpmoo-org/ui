@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import field, field_group, field_description, field_error %}
 {% from "components/textarea.html.jinja" import textarea %}
@@ -54,7 +54,7 @@
       {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("textarea", "Textarea",
       "basic",
       "Basic",
       "Pair the control with visible labels and helper text when it needs accessible context and predictable spacing.",
@@ -79,7 +79,7 @@
       {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("textarea", "Textarea",
       "disabled",
       "Disabled",
       "Use <code>disabled</code> for controls that must stay visible but cannot be edited yet.",
@@ -109,7 +109,7 @@
       {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("textarea", "Textarea",
       "invalid",
       "Invalid",
       "Show invalid state with <code>aria_invalid</code> and a helper/error pair for clear, accessible feedback.",
@@ -130,7 +130,7 @@
       {{ button("Send message", extra_class="w-100") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("textarea", "Textarea",
       "button",
       "Button",
       "Connect a compact textarea to a form action when composition needs a quick send step.",

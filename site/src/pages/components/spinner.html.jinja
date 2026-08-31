@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/spinner.html.jinja" import spinner %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Spinner — Moo UI{% endblock %}
@@ -34,7 +34,7 @@
     {% set default %}
       {{ spinner() }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("spinner", "Spinner",
       "default",
       "Default",
       "A rotating <code>loader-circle</code> icon built from <code>currentColor</code>, so it adapts to any theme without extra CSS.",
@@ -44,7 +44,7 @@
     {% set small %}
       {{ spinner(size="sm") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("spinner", "Spinner",
       "small",
       "Small",
       "Set <code>size=\"sm\"</code> to use inside compact contexts like buttons.",
@@ -57,7 +57,7 @@
         {{ button("Please wait", variant="outline", loading=true, disabled=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("spinner", "Spinner",
       "button",
       "Button",
       "Set <code>loading=true</code> on a button to swap its leading icon for a spinner.",

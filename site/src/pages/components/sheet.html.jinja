@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Sheet — Moo UI{% endblock %}
@@ -49,7 +49,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("sheet", "Sheet",
       "basic",
       "Basic",
       "Use <code>sheet_target</code> on a button to open an off-canvas panel while staying in your current context.",
@@ -83,7 +83,7 @@
         {% call sheet_body() %}<p class="mb-0">Set <code>placement="bottom"</code>.</p>{% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("sheet", "Sheet",
       "placements",
       "Placement",
       "Control which screen edge anchors the panel by setting <code>placement</code> to <code>start</code>, <code>end</code>, <code>top</code>, or <code>bottom</code>.",
@@ -104,7 +104,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("sheet", "Sheet",
       "scroll",
       "Body scrolling",
       "Prefer <code>backdrop=false</code> + <code>scroll=true</code> only when users need to keep the page context visible.",
@@ -129,7 +129,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("sheet", "Sheet",
       "no-close-button",
       "No close button",
       "Hide the header close affordance with <code>dismiss=false</code> and provide an explicit in-panel action instead.",
@@ -154,7 +154,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("sheet", "Sheet",
       "workflow",
       "Task workflow panel",
       "Use a panel as a compact context surface for related operations that should stay connected to the main page.",

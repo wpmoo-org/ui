@@ -4,7 +4,7 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Combobox — Moo UI{% endblock %}
@@ -95,7 +95,7 @@
       items=reviewer_items
     ) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "basic",
     "Basic",
     "A single-line input with a flat suggestion list, matching the shadcn Basic combobox anatomy before any advanced variants are added.",
@@ -117,7 +117,7 @@
       {{ field_description("combobox-review-areas-help", "Choose every area this review should cover.") }}
     {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "multiple",
     "Multiple",
     "A chip input that keeps multiple selected review areas in the same searchable suggestion list.",
@@ -136,7 +136,7 @@
       show_clear=true
     ) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "clear-button",
     "Clear Button",
     "A single-select combobox that reveals a clear button after a reviewer is selected.",
@@ -153,7 +153,7 @@
       items=timezone_items
     ) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "groups",
     "Groups",
     "Group related options with Bootstrap dropdown headers and dividers inside the listbox.",
@@ -170,7 +170,7 @@
       items=request_type_items
     ) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "custom-items",
     "Custom Items",
     "Show richer option rows with secondary text while keeping the same Bootstrap dropdown item structure.",
@@ -188,7 +188,7 @@
       invalid=true
     ) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "invalid",
     "Invalid",
     "Use Bootstrap validation styling and aria-invalid for inputs that fail validation.",
@@ -206,7 +206,7 @@
       disabled=true
     ) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("combobox", "Combobox",
     "disabled",
     "Disabled",
     "Disable the input when the combobox is unavailable.",

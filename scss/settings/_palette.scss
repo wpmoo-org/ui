@@ -1,5 +1,3 @@
-@import "facade_public";
-
 $white: #fff !default;
 $black: #0a0a0a !default;
 
@@ -63,6 +61,11 @@ $moo-info-surface: color-mix(in srgb, $moo-info 10%, transparent) !default;
 $moo-info-surface-hover: color-mix(in srgb, $moo-info 20%, transparent) !default;
 $moo-info-foreground: $moo-info !default;
 $moo-sidebar: $light !default;
+$moo-chart-1: #52525b !default;
+$moo-chart-2: #71717a !default;
+$moo-chart-3: #a1a1aa !default;
+$moo-chart-4: #3f3f46 !default;
+$moo-chart-5: #27272a !default;
 // $black (#0a0a0a), not $dark (#18181b, zinc-900) -- the reference's own
 // dark-mode --background is #0a0a0a exactly, and $black already carried
 // that value without being wired to this token.
@@ -84,9 +87,9 @@ $moo-destructive-surface-hover-dark: color-mix(in srgb, $moo-destructive-dark 30
 $moo-destructive-foreground-dark: $moo-destructive-dark !default;
 $moo-form-invalid-border-color-dark: color-mix(in srgb, $moo-destructive-dark 50%, transparent) !default;
 $moo-form-invalid-ring-color-dark: color-mix(in srgb, $moo-destructive-dark 40%, transparent) !default;
-// Dark-mode warning/success: lighter tints of the facade_public base hues,
+// Dark-mode warning/success: lighter tints of the public config base hues,
 // mixed toward $light so they stay readable on dark surfaces. Everything
-// derives from facade_public variables only.
+// derives from public config variables only.
 $moo-warning-dark: color-mix(in srgb, $light 60%, $warning) !default;
 $moo-warning-surface-dark: color-mix(in srgb, $moo-warning-dark 20%, transparent) !default;
 $moo-warning-surface-hover-dark: color-mix(in srgb, $moo-warning-dark 30%, transparent) !default;
@@ -100,6 +103,13 @@ $moo-info-surface-dark: color-mix(in srgb, $moo-info-dark 20%, transparent) !def
 $moo-info-surface-hover-dark: color-mix(in srgb, $moo-info-dark 30%, transparent) !default;
 $moo-info-foreground-dark: $moo-info-dark !default;
 $moo-sidebar-dark: #1c1c1f !default;
+// Dark-mode input background: a translucent tint that gives form controls a
+// distinct surface against the page background. Light mode stays transparent
+// (the default), but dark mode needs this subtle depth cue so inputs don't
+// rely on border alone for definition. Mixed from muted-surface-dark toward
+// the surface color so it reads as "slightly lighter than the page" without
+// introducing a new hardcoded color.
+$moo-input-bg-dark: color-mix(in srgb, $moo-muted-surface-dark 50%, $moo-surface-dark) !default;
 
 // Bootstrap root variables consumed by the scoped core build. Define them
 // here so themes/_scoped_core.scss can emit Bootstrap's root contract without

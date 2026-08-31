@@ -7,7 +7,7 @@ from tests.helpers import (
     ROOT,
     CatalogTestCase,
     read_catalog_styles,
-    read_primary_variables,
+    read_settings,
 )
 
 
@@ -125,13 +125,13 @@ class ComboboxTests(CatalogTestCase):
         )
 
         self.assertIn('class="combobox combobox--multiple"', output)
-        self.assertIn('data-moo-combobox-multiple="true"', output)
+        self.assertIn('data-combobox-multiple="true"', output)
         self.assertIn('class="form-control combobox-chips"', output)
         self.assertIn('class="combobox-value"', output)
         self.assertEqual(output.count('class="badge text-bg-secondary combobox-chip"'), 2)
         self.assertIn('aria-label="Remove Security"', output)
         self.assertIn('aria-label="Remove Billing"', output)
-        self.assertIn('data-moo-combobox-chip-remove="true"', output)
+        self.assertIn('data-combobox-chip-remove="true"', output)
         self.assertIn("combobox-chips-input", output)
         self.assertIn('role="combobox"', output)
         self.assertIn('placeholder="Add review area"', output)
@@ -175,20 +175,20 @@ class ComboboxTests(CatalogTestCase):
         )
 
         self.assertIn('class="combobox combobox--clearable"', selected_output)
-        self.assertIn('data-moo-combobox-selected="true"', selected_output)
+        self.assertIn('data-combobox-selected="true"', selected_output)
         self.assertIn('class="form-control combobox-input"', selected_output)
         self.assertIn('value="Grace Hopper"', selected_output)
         self.assertIn('type="hidden" name="reviewer" value="grace"', selected_output)
         self.assertIn('class="combobox-clear"', selected_output)
         self.assertIn('aria-label="Clear selection"', selected_output)
-        self.assertIn('data-moo-combobox-clear="true"', selected_output)
+        self.assertIn('data-combobox-clear="true"', selected_output)
         self.assertIn('data-lucide="x"', selected_output)
         self.assertNotIn("btn-close", selected_output)
-        self.assertNotIn('data-moo-combobox-clear="true" hidden', selected_output)
+        self.assertNotIn('data-combobox-clear="true" hidden', selected_output)
         self.assertIn('class="combobox-indicator" aria-hidden="true" hidden', selected_output)
         self.assertIn('data-lucide="chevron-down"', selected_output)
-        self.assertIn('data-moo-combobox-selected="false"', empty_output)
-        self.assertIn('data-moo-combobox-clear="true" hidden', empty_output)
+        self.assertIn('data-combobox-selected="false"', empty_output)
+        self.assertIn('data-combobox-clear="true" hidden', empty_output)
         self.assertIn('class="combobox-indicator" aria-hidden="true">', empty_output)
 
     def test_combobox_renders_grouped_items_anatomy(self) -> None:
@@ -224,7 +224,7 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn(">Europe<", output)
         self.assertIn('class="list-unstyled mb-0" role="presentation"', output)
         self.assertIn(
-            '<li role="presentation" aria-hidden="true" data-moo-combobox-separator>',
+            '<li role="presentation" aria-hidden="true" data-combobox-separator>',
             output,
         )
         self.assertIn('class="dropdown-divider combobox-separator"', output)
@@ -257,7 +257,7 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_menus_scroll_with_hidden_scrollbar_when_long(self) -> None:
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        variables = read_primary_variables()
+        variables = read_settings()
 
         self.assertIn(".combobox-menu {", scss)
         menu_source = scss.split(".combobox-menu {", 1)[1]
@@ -274,7 +274,7 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_custom_item_typography_matches_reference_contract(self) -> None:
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        variables = read_primary_variables()
+        variables = read_settings()
 
         self.assertIn("$moo-combobox-option-line-height: 1.25rem !default;", variables)
         self.assertIn("$moo-combobox-description-font-size: 0.75rem !default;", variables)
@@ -482,12 +482,12 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn("removeEventListener(type, handler, options)", source)
         self.assertIn(".combobox-input", source)
         self.assertIn(".combobox-option", source)
-        self.assertIn("mooComboboxMultiple", source)
-        self.assertIn("data-moo-combobox-chip-remove", source)
+        self.assertIn("comboboxMultiple", source)
+        self.assertIn("data-combobox-chip-remove", source)
         self.assertIn('event.key === "Backspace"', source)
         self.assertIn('event.key === "Tab"', source)
         self.assertIn('this._hidden.value = option.dataset.value || ""', source)
-        self.assertIn("data-moo-combobox-group", source)
+        self.assertIn("data-combobox-group", source)
         self.assertNotIn("combobox-popup-trigger", source)
         self.assertIn(
             'import Combobox from "../../../../src/js/components/combobox.js";',

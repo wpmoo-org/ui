@@ -7,6 +7,8 @@
     <h2 class="h3"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
   {%- elif variant == "example-title" -%}
     <h2 class="h4"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h2>
+  {%- elif variant == "subsection-title" -%}
+    <h3 class="h6"{% if id %} id="{{ id }}"{% endif %}>{{ content }}</h3>
   {%- elif variant == "muted" -%}
     <span class="text-body-secondary">{{ content }}</span>
   {%- elif variant == "section-label" -%}

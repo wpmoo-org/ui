@@ -1,8 +1,7 @@
-// $primary compiles to a literal color and does not invert with color
-// mode, but the design reference's progress fill does (near-black in
-// light, near-white in dark) — verified against the live reference page.
-// Anchor the fill to --moo-foreground, which already inverts correctly
-// per theme, instead of the non-inverting primary token.
+// Bootstrap exposes progress fill as a component CSS variable. Keep the track
+// geometry native, but bind the fill to the same runtime primary token used by
+// buttons, checked controls, and active selection affordances.
 .progress {
-  --bs-progress-bar-bg: var(--moo-foreground);
+  --bs-progress-bar-color: var(--moo-primary-foreground);
+  --bs-progress-bar-bg: var(--moo-primary);
 }

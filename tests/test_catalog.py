@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 import tempfile
-import warnings
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -20,8 +20,190 @@ from tests.helpers import (
     is_valid_webp,
     read_catalog_styles,
     read_png_ihdr,
-    read_primary_variables,
+    read_settings,
 )
+
+
+COMPONENT_SELECTOR_PREFIXES = {
+    "button": ("btn", "disabled"),
+    # Button Group's compact select override matches Bootstrap's
+    # `.input-group > .form-select` specificity, so the partial
+    # legitimately references .input-group as an ancestor context.
+    "button_group": ("btn", "input-group"),
+    "card": ("card",),
+    # Breadcrumb's collapsed-segment composition wraps Bootstrap's
+    # native .dropdown inside its own .breadcrumb-dropdown-item, so
+    # the partial scopes a layout rule to that Bootstrap wrapper.
+    "breadcrumb": ("breadcrumb", "dropdown"),
+    # Dropdown toggle rows use Bootstrap Button's .active data-api
+    # state while scoped under .dropdown-item-check. Bootstrap
+    # Dropdown also exposes directional wrappers such as .dropend;
+    # the mobile sidebar placement rule retunes the native dropdown
+    # surface while staying in the dropdown partial.
+    "dropdown": ("dropdown", "dropend", "active"),
+    "input": ("form-control", "form-select"),
+    # Table owns Bootstrap's static table family and the horizontal
+    # scroll-fade helper used beside responsive table wrappers.
+    "table": ("table", "table-responsive", "scroll-fade-x"),
+    # Bootstrap renders both single-line inputs and textareas through
+    # the shared `.form-control` family.
+    "textarea": ("form-control",),
+    # Bootstrap's native select markup is the `.form-select` family,
+    # not a "select-" prefixed one; Select retunes it in place.
+    "select": ("form-select",),
+    # Bootstrap documents vertical navs as `.nav.flex-column`, so the
+    # Navigation partial may scope width fixes to that native utility.
+    "navigation": ("active", "disabled", "flex-column", "nav"),
+    # Bootstrap has no native sidebar component; its public namespace
+    # is owned explicitly by the Sidebar partial and styles.
+    "sidebar": ("sidebar",),
+    # Bootstrap's pagination markup uses .page-item/.page-link, not a
+    # "pagination-" prefixed family.
+    # The icon-only prev/next detection reads Bootstrap's own
+    # utility-class state (.d-none/.d-sm-inline/.visually-hidden)
+    # inside :has(), the same way Data Table reads Bootstrap
+    # utilities, rather than owning those classes.
+    "pagination": ("pagination", "page", "disabled", "d-none", "d-sm-inline", "visually-hidden"),
+    # Bootstrap's own horizontal/vertical divider markup is the bare
+    # <hr> tag and the .vr helper class, not a "separator-" prefixed
+    # family.
+    "separator": ("hr", "vr"),
+    # Bootstrap's checkbox markup uses the shared .form-check family,
+    # not a "checkbox-" prefixed one. The invalid-state focus ring
+    # rule also references .is-invalid to keep the destructive ring
+    # visible on mouse click (matching _focus.scss's pattern for
+    # .form-control.is-invalid and .form-select.is-invalid).
+    "checkbox": ("form-check", "is-invalid"),
+    # The legend reuses Bootstrap's shared .form-label class to
+    # match sibling form labels.
+    "radio_group": ("radio-group", "form-label"),
+    # Bootstrap's switch markup uses the shared .form-switch and
+    # .form-check families, not a "switch-" prefixed one.
+    "switch": ("form-switch", "form-check"),
+    # Bootstrap's own placeholder markup uses the shared .placeholder
+    # family, not a "skeleton-" prefixed one.
+    "skeleton": ("skeleton", "placeholder"),
+    # Bootstrap's own Collapse plugin toggles the bare .collapsed
+    # state class on the trigger; it is not "accordion-" prefixed.
+    "accordion": ("accordion", "collapsed"),
+    # Collapsible is a thin Bootstrap Collapse composition whose
+    # trigger is still a native .btn inside the component scope.
+    "collapsible": ("collapsible", "btn"),
+    # Menubar is backed by Bootstrap Dropdown triggers and menus; the
+    # shared dropdown/show state classes remain scoped under .menubar.
+    "menubar": ("menubar", "dropdown", "show"),
+    # The segmented-control track styles Bootstrap's shared
+    # .nav-link/.active classes within its own .tabs-list scope,
+    # rather than the .nav-pills family Navigation already owns,
+    # and also fixes the grid stacking on Bootstrap's own tab-content
+    # and tab-pane classes.
+    "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
+    # Toggle Group composes Bootstrap's .btn-check + label.btn
+    # contract and suppresses the generic pressed transform only
+    # inside the .toggle-group scope.
+    "toggle_group": ("toggle-group", "btn", "disabled"),
+    # Dialog is the Moo catalog name for Bootstrap's Modal component;
+    # its native selector family is "modal-", not "dialog-".
+    "dialog": ("modal", "show"),
+    # Sheet is the Moo catalog name for Bootstrap's Offcanvas
+    # component; its native selector family is "offcanvas-", plus
+    # the "sheet" marker class used to scope Sheet-only overrides
+    # away from Sidebar's own bare .offcanvas usage.
+    # Bootstrap's Offcanvas source owns .showing and .hiding as
+    # transition lifecycle states alongside .show.
+    "sheet": ("offcanvas", "sheet", "show", "showing", "hiding"),
+    # Field retunes the spacing of Bootstrap's own shared
+    # .form-label/.form-text/.invalid-feedback classes when they sit
+    # inside a .field, rather than owning a "field-" prefixed family
+    # of its own for them.
+    "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+    # Bootstrap has no native Combobox component. The public
+    # namespace is a composition of Bootstrap form-control,
+    # validation, and Dropdown pieces.
+    "combobox": ("combobox", "is-invalid"),
+    # Bootstrap has no native Datepicker component. The public
+    # namespace is a reference-style trigger/popover/calendar composition
+    # around Bootstrap Button primitives (frozen in the RC.3 API
+    # freeze; see DECISIONS.md for the .moo-* selector exception).
+    "datepicker": (
+        "moo-datepicker",
+        "moo-calendar",
+        "btn",
+        "is-invalid",
+        "show",
+    ),
+    # Slider keeps Bootstrap's native .form-range input as the semantic
+    # control, while the plain .slider namespace owns the reference-style
+    # track, fill, output, orientation, and lifecycle hook wrapper.
+    "slider": ("slider", "form-range"),
+    # Bootstrap Table owns the static table markup only. DataTable is
+    # Moo's documented interactive composition around Bootstrap table,
+    # dropdown, button, checkbox, badge, and pagination primitives.
+    # The filter-picker trigger's focus-ring rule is scoped with an
+    # .input-group ancestor combinator (it targets DataTable's own
+    # .datatable-filter-picker-trigger, not .input-group itself), so
+    # datatable legitimately references that ancestor context.
+    "datatable": (
+        "datatable",
+        "active",
+        "badge",
+        "btn",
+        "btn-check",
+        "btn-group",
+        "dropdown",
+        "dropdown-header",
+        "dropdown-item",
+        "dropdown-item-check",
+        "form-check",
+        "input-group",
+        "ms-auto",
+        "pagination",
+        "show",
+        "table",
+        "table-responsive",
+        "text-body-secondary",
+        "text-truncate",
+    ),
+    # Input group owns the compound surface around Bootstrap's native
+    # children, so its partial may retune the edge behavior of form,
+    # button, validation, and dropdown children while scoped under
+    # .input-group. Bootstrap's own forms/_input-group.scss styles
+    # both `.input-group > .form-control` and `> .form-select`, so
+    # the group legitimately owns .form-select within its scope too.
+    "input_group": (
+        "input-group",
+        "form-control",
+        "form-select",
+        "btn",
+        "dropdown-menu",
+        "valid-tooltip",
+        "valid-feedback",
+        "invalid-tooltip",
+        "invalid-feedback",
+        "rounded-pill",
+        "show",
+        "disabled",
+    ),
+    "close_button": ("btn-close", "disabled"),
+    # Tooltip is Bootstrap's overlay component; placement/state
+    # classes are emitted by Bootstrap/Popper and retuned only while
+    # still scoped to the tooltip surface.
+    "tooltip": (
+        "tooltip",
+        "bs-tooltip-auto",
+        "bs-tooltip-bottom",
+        "bs-tooltip-end",
+        "bs-tooltip-start",
+        "bs-tooltip-top",
+        "fade",
+        "show",
+    ),
+    # Bootstrap's own alert component positions its native close
+    # button under `.alert-dismissible .btn-close`; this keeps that
+    # ownership scoped to Alert instead of moving an Alert layout
+    # rule into the standalone Close Button partial.
+    "alert": ("alert",),
+}
 
 
 class CodePenPayloadParser(HTMLParser):
@@ -125,6 +307,349 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
+    def test_catalog_github_link_stays_neutral_when_base_color_changes(self) -> None:
+        styles = read_catalog_styles()
+        match = re.search(
+            r"\.moo-catalog__github-link\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+
+        self.assertIsNotNone(match)
+        body = match.group("body")
+        self.assertIn("--bs-btn-color: var(--bs-body-color);", body)
+        self.assertIn("--bs-btn-bg: var(--bs-secondary-bg);", body)
+        self.assertIn("--bs-btn-border-color: var(--bs-border-color);", body)
+        self.assertIn("--bs-btn-hover-bg: var(--bs-tertiary-bg);", body)
+        self.assertNotIn("var(--moo-primary", body)
+        self.assertNotIn("var(--bs-primary", body)
+
+    def test_settings_mode_picker_chrome_is_not_theme_builder_tinted(self) -> None:
+        styles = read_catalog_styles()
+
+        for token in (
+            "--moo-settings-panel-option-border",
+            "--moo-settings-panel-option-active-border",
+            "--moo-settings-panel-option-check-bg",
+            "--moo-settings-panel-option-check-border",
+            "--moo-settings-panel-option-check-color",
+            "--moo-settings-panel-option-active-check-bg",
+            "--moo-settings-panel-option-active-check-border",
+            "--moo-settings-panel-option-active-check-color",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, styles)
+
+        settings_tokens = re.search(
+            r"(?m)^#catalog-settings\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(settings_tokens)
+        settings_tokens_body = settings_tokens.group("body")
+        self.assertIn(
+            "--moo-settings-panel-option-border: var(--bs-border-color);",
+            settings_tokens_body,
+        )
+        self.assertIn(
+            "--moo-settings-panel-option-active-border: var(--bs-border-color);",
+            settings_tokens_body,
+        )
+
+        theme_thumb = re.search(
+            r"(?m)^\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(theme_thumb)
+        self.assertIn(
+            "border: var(--bs-border-width) solid var(--moo-settings-panel-option-border);",
+            theme_thumb.group("body"),
+        )
+        self.assertIn("isolation: isolate;", theme_thumb.group("body"))
+        self.assertIn("background-clip: padding-box;", theme_thumb.group("body"))
+
+        for selector, token in (
+            (
+                r"\.moo-settings-panel__theme-thumb--light",
+                "$moo-catalog-settings-thumb-light",
+            ),
+            (
+                r"\.moo-settings-panel__theme-thumb--dark",
+                "$moo-catalog-settings-thumb-dark",
+            ),
+        ):
+            with self.subTest(selector=selector):
+                thumb_variant = re.search(
+                    rf"(?ms)^{selector}\s*\{{(?P<body>.*?)^\}}",
+                    styles,
+                )
+                self.assertIsNotNone(thumb_variant)
+                variant_body = thumb_variant.group("body")
+                self.assertIn(f"background-color: #{{{token}}};", variant_body)
+                self.assertNotIn("background:", variant_body)
+
+        system_thumb = re.search(
+            r"(?ms)^\.moo-settings-panel__theme-thumb--system\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(system_thumb)
+        system_thumb_body = system_thumb.group("body")
+        self.assertIn(
+            "background-color: #{$moo-catalog-settings-thumb-dark};",
+            system_thumb_body,
+        )
+        self.assertNotIn("background:", system_thumb_body)
+        self.assertNotIn("background-image:", system_thumb_body)
+
+        system_thumb_layer = re.search(
+            r"(?ms)^\.moo-settings-panel__theme-thumb--system::before\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(system_thumb_layer)
+        system_thumb_layer_body = system_thumb_layer.group("body")
+        for value in (
+            'content: "";',
+            "position: absolute;",
+            "inset: 0;",
+            "z-index: 0;",
+            "border-radius: calc(var(--bs-border-radius-sm) - var(--bs-border-width));",
+            "background-image: linear-gradient(",
+            "#{$moo-catalog-settings-thumb-light} 0 50%",
+            "#{$moo-catalog-settings-thumb-dark} 50% 100%",
+            "pointer-events: none;",
+        ):
+            with self.subTest(value=value):
+                self.assertIn(value, system_thumb_layer_body)
+
+        dark_system_thumb_layer = re.search(
+            r'(?ms)^\[data-bs-theme="dark"\] \.moo-settings-panel__theme-thumb--system::before\s*'
+            r"\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(dark_system_thumb_layer)
+        self.assertIn(
+            "#{$moo-catalog-settings-system-thumb-light-dark} 0 50%",
+            dark_system_thumb_layer.group("body"),
+        )
+
+        system_thumb_content = re.search(
+            r"(?ms)^\.moo-settings-panel__theme-thumb--system > "
+            r"\.moo-settings-panel__theme-thumb-bar,\n"
+            r"\.moo-settings-panel__theme-thumb--system > "
+            r"\.moo-settings-panel__theme-thumb-body\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(system_thumb_content)
+        system_thumb_content_body = system_thumb_content.group("body")
+        self.assertIn("position: relative;", system_thumb_content_body)
+        self.assertIn("z-index: 1;", system_thumb_content_body)
+
+        checked_thumb = re.search(
+            r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:checked\) "
+            r"\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(checked_thumb)
+        checked_thumb_body = checked_thumb.group("body")
+        self.assertIn(
+            "border-color: var(--moo-settings-panel-option-active-border);",
+            checked_thumb_body,
+        )
+        self.assertIn(
+            "box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 80%, transparent);",
+            checked_thumb_body,
+        )
+        self.assertNotIn("var(--moo-ring)", checked_thumb_body)
+
+        focused_thumb = re.search(
+            r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:focus-visible\) "
+            r"\.moo-settings-panel__theme-thumb\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(focused_thumb)
+        focused_thumb_body = focused_thumb.group("body")
+        self.assertIn("border-color: var(--moo-ring);", focused_thumb_body)
+        self.assertIn(
+            "box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);",
+            focused_thumb_body,
+        )
+
+        theme_check = re.search(
+            r"(?m)^\.moo-settings-panel__theme-check\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(theme_check)
+        theme_check_body = theme_check.group("body")
+        for value in (
+            "border: 2px solid var(--moo-settings-panel-option-check-border);",
+            "background-color: var(--moo-settings-panel-option-check-bg);",
+            "color: var(--moo-settings-panel-option-check-color);",
+        ):
+            with self.subTest(value=value):
+                self.assertIn(value, theme_check_body)
+
+        checked_check = re.search(
+            r"(?m)^\.moo-settings-panel__theme-option:has\(\.btn-check:checked\) "
+            r"\.moo-settings-panel__theme-check\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(checked_check)
+        checked_check_body = checked_check.group("body")
+        for value in (
+            "border-color: var(--moo-settings-panel-option-active-check-border);",
+            "background-color: var(--moo-settings-panel-option-active-check-bg);",
+            "color: var(--moo-settings-panel-option-active-check-color);",
+        ):
+            with self.subTest(value=value):
+                self.assertIn(value, checked_check_body)
+
+        dark_system_checked_check = re.search(
+            r'(?ms)^\[data-bs-theme="dark"\] '
+            r'\.moo-settings-panel__theme-option:has\(\.btn-check\[value="system"\]:checked\) '
+            r"\.moo-settings-panel__theme-check\s*\{(?P<body>.*?)^\}",
+            styles,
+        )
+        self.assertIsNotNone(dark_system_checked_check)
+        self.assertIn(
+            "background-color: #{$moo-catalog-settings-system-active-check-bg-dark};",
+            dark_system_checked_check.group("body"),
+        )
+
+        for mutable_token in (
+            "var(--bs-border-color)",
+            "var(--bs-body-bg)",
+            "var(--bs-body-color)",
+        ):
+            with self.subTest(mutable_token=mutable_token):
+                self.assertNotIn(mutable_token, theme_thumb.group("body"))
+                self.assertNotIn(mutable_token, theme_check_body)
+                self.assertNotIn(mutable_token, checked_check_body)
+
+    def test_settings_panel_keeps_page_context_visible_without_backdrop(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("components/button.html")
+        match = re.search(r'<div\b[^>]*\bid="catalog-settings"[^>]*>', page)
+
+        self.assertIsNotNone(match, "catalog settings panel root not found")
+        settings_root = match.group(0)
+        self.assertIn('class="offcanvas offcanvas-end sheet"', settings_root)
+        self.assertIn('data-bs-backdrop="false"', settings_root)
+        self.assertIn('data-bs-scroll="true"', settings_root)
+
+    def test_settings_builder_color_dropdowns_render_swatch_indicators(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("components/button.html")
+        settings_panel = page.split('id="catalog-settings"', 1)[1]
+        style_dropdown, after_style = settings_panel.split(
+            "data-moo-catalog-theme-builder-base-color", 1
+        )
+        base_dropdown, after_base = after_style.split(
+            "data-moo-catalog-theme-builder-theme-color", 1
+        )
+        theme_dropdown, after_theme = after_base.split(
+            "data-moo-catalog-theme-builder-chart-color", 1
+        )
+        chart_dropdown, font_dropdowns = after_theme.split(
+            "data-moo-catalog-theme-builder-heading-font", 1
+        )
+
+        self.assertNotIn("data-moo-catalog-theme-builder-swatch", style_dropdown)
+        for swatch in (
+            "base-color-neutral",
+            "base-color-zinc",
+            "base-color-stone",
+            "base-color-mauve",
+            "base-color-olive",
+            "base-color-mist",
+            "base-color-taupe",
+        ):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'data-moo-catalog-theme-builder-swatch="{swatch}"',
+                    base_dropdown,
+                )
+        self.assertNotIn('data-moo-catalog-theme-builder-swatch="base-color-blue"', base_dropdown)
+        for swatch in (
+            "theme-color-neutral",
+            "theme-color-blue",
+            "theme-color-azure",
+            "theme-color-indigo",
+            "theme-color-purple",
+            "theme-color-orange",
+            "theme-color-pink",
+            "theme-color-red",
+            "theme-color-yellow",
+            "theme-color-lime",
+            "theme-color-green",
+            "theme-color-teal",
+            "theme-color-cyan",
+        ):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'data-moo-catalog-theme-builder-swatch="{swatch}"',
+                    theme_dropdown,
+                )
+        for swatch in (
+            "chart-color-neutral",
+            "chart-color-blue",
+            "chart-color-azure",
+            "chart-color-indigo",
+            "chart-color-purple",
+            "chart-color-orange",
+            "chart-color-pink",
+            "chart-color-red",
+            "chart-color-yellow",
+            "chart-color-lime",
+            "chart-color-green",
+            "chart-color-teal",
+            "chart-color-cyan",
+        ):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'data-moo-catalog-theme-builder-swatch="{swatch}"',
+                    chart_dropdown,
+                )
+        self.assertNotIn("data-moo-catalog-theme-builder-swatch", font_dropdowns)
+
+        styles = read_catalog_styles()
+        self.assertIn(
+            ".moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch] "
+            ".dropdown-item-check__indicator",
+            styles,
+        )
+        self.assertIn(
+            'data-moo-catalog-theme-builder-swatch="theme-color-blue"',
+            styles,
+        )
+        base_neutral_style = re.search(
+            r'\.moo-settings-panel__dropdown-trigger-swatch'
+            r'\[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"\],\n'
+            r'\.moo-settings-panel__dropdown-item'
+            r'\[data-moo-catalog-theme-builder-swatch="base-color-neutral"\] '
+            r'\.dropdown-item-check__indicator \{\n(?P<body>.*?)\n\}',
+            styles,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(
+            base_neutral_style,
+            "base color Neutral swatch should have an explicit quiet default style",
+        )
+        base_neutral_body = base_neutral_style.group("body")
+        self.assertIn(
+            "--moo-settings-panel-swatch-background: var(--bs-body-bg);",
+            base_neutral_body,
+        )
+        self.assertIn(
+            "--moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-border) 68%, transparent);",
+            base_neutral_body,
+        )
+        self.assertIn(
+            "--moo-settings-panel-swatch-check-color: var(--bs-body-color);",
+            base_neutral_body,
+        )
+
     def test_visible_component_lists_are_sorted_by_label(self) -> None:
         sorted_loop = (
             '{% for component in catalog | sort(attribute="label") %}'
@@ -139,6 +664,85 @@ class CatalogContractTests(CatalogTestCase):
                     sorted_loop in path.read_text(encoding="utf-8"),
                     f"{path.relative_to(ROOT)} must sort components by label",
                 )
+
+    def test_ready_components_have_catalog_icons(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        component_index = self.read_output("components/index.html")
+
+        self.assertIn('href="../components/chart/"', component_index)
+        self.assertNotRegex(
+            component_index,
+            r'href="\.\./components/chart/"[^>]*>[\s\S]{0,240}?data-lucide="component"',
+        )
+
+    def test_dashboard_charts_put_stable_ids_on_the_public_root(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        overview = self.read_output("examples/dashboard/overview/index.html")
+
+        self.assertRegex(
+            overview,
+            r'<div class="chart moo-dashboard-chart" id="overview-revenue-chart"',
+        )
+        self.assertRegex(
+            overview,
+            r'<div class="chart moo-dashboard-chart" id="overview-visitors-chart"',
+        )
+        self.assertNotRegex(
+            overview,
+            r'<canvas id="overview-(?:revenue|visitors)-chart"',
+        )
+
+    def test_ready_example_preview_images_are_present_and_valid(self) -> None:
+        examples = site_build.load_examples()
+
+        missing = []
+        for example in examples:
+            slug = example["slug"]
+            path = STATIC / "images/examples" / f"{slug}.png"
+            if not path.is_file():
+                missing.append(slug)
+                continue
+
+            width, height, _color_type = read_png_ihdr(path)
+            with self.subTest(slug=slug):
+                self.assertGreater(width, 0)
+                self.assertGreater(height, 0)
+                self.assertAlmostEqual(width / height, 16 / 9, delta=0.02)
+
+        self.assertEqual(missing, [])
+
+    def _load_example_preview_generator(self):
+        path = ROOT / "scripts/generate_example_previews.py"
+        spec = importlib.util.spec_from_file_location(
+            "generate_example_previews",
+            path,
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        generator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(generator)
+        return generator
+
+    def test_example_preview_generator_covers_every_example_page(self) -> None:
+        generator = self._load_example_preview_generator()
+
+        generator_slugs = set(generator.resolve_example_slugs(generator.parse_args([])))
+        expected_slugs = {example["slug"] for example in site_build.load_examples()}
+
+        self.assertEqual(generator_slugs, expected_slugs)
+
+    def test_example_preview_generator_can_refresh_a_single_example(self) -> None:
+        generator = self._load_example_preview_generator()
+
+        self.assertEqual(
+            generator.resolve_example_slugs(generator.parse_args(["dashboard/overview"])),
+            ("dashboard/overview",),
+        )
+        self.assertEqual(generator.parse_args([]).slugs, [])
 
     def test_ready_component_sidebar_icons_do_not_fall_back_for_new_components(self) -> None:
         source = (ROOT / "site/src/includes/component-icons.html.jinja").read_text(
@@ -187,6 +791,89 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("certified components", output)
                 self.assertNotIn("certified Data Table", output)
 
+    def test_codepen_payloads_do_not_claim_certified_components_before_certification(self) -> None:
+        certification = json.loads(
+            (ROOT / "certification.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(certification["status"], "preview")
+        self.assertEqual(certification["certifiedComponents"], [])
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        claim_pattern = re.compile(r"\bcertified\b[^.]{0,160}\bcomponents?\b")
+        for path in sorted((ROOT / "site-dist").rglob("*.html")):
+            parser = CodePenPayloadParser()
+            parser.feed(path.read_text(encoding="utf-8"))
+            for index, payload in enumerate(parser.payloads):
+                for key in ("title", "description", "html", "css", "js"):
+                    text = " ".join(unescape(str(payload.get(key, ""))).lower().split())
+                    with self.subTest(
+                        page=path.relative_to(ROOT / "site-dist").as_posix(),
+                        payload=index,
+                        key=key,
+                    ):
+                        self.assertIsNone(claim_pattern.search(text))
+
+    def test_codepen_payloads_do_not_import_unpublished_pinned_package_entrypoints(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        codepen_version = site_build.CODEPEN_CDN_VERSION
+        published_rc2_js_entrypoints = {"datatable.js"}
+        import_pattern = re.compile(
+            rf"@wpmoo/ui@{re.escape(codepen_version)}/dist/js/(?P<entrypoint>[a-z.-]+\.js)"
+        )
+
+        for path in sorted((ROOT / "site-dist").rglob("*.html")):
+            parser = CodePenPayloadParser()
+            parser.feed(path.read_text(encoding="utf-8"))
+            for index, payload in enumerate(parser.payloads):
+                for match in import_pattern.finditer(str(payload.get("js", ""))):
+                    entrypoint = match.group("entrypoint")
+                    with self.subTest(
+                        page=path.relative_to(ROOT / "site-dist").as_posix(),
+                        payload=index,
+                        entrypoint=entrypoint,
+                    ):
+                        self.assertIn(entrypoint, published_rc2_js_entrypoints)
+
+    def test_codepen_hides_rc3_only_interactive_examples_until_cdn_is_current(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        self.assertNotEqual(
+            site_build.CODEPEN_CDN_VERSION,
+            json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"],
+        )
+        for path in (
+            "components/chart.html",
+            "components/datepicker.html",
+            "components/slider.html",
+            "charts/index.html",
+        ):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                self.assertNotIn("Try in CodePen", page)
+                self.assertNotIn("data-moo-codepen-form", page)
+
+    def test_codepen_runtime_gating_policy_is_owned_by_codepen_include(self) -> None:
+        codepen_source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("codepen_button_if_available", codepen_source)
+        self.assertIn("codepen_current_package_required_slugs", codepen_source)
+
+        for template in (
+            "site/src/includes/example.html.jinja",
+            "site/src/includes/chart-template.html.jinja",
+        ):
+            with self.subTest(template=template):
+                source = (ROOT / template).read_text(encoding="utf-8")
+                self.assertNotIn("product.codepenCdnVersion", source)
+                self.assertNotIn("codepenCurrentPackage", source)
+                self.assertNotIn('"chart", "datepicker", "slider"', source)
+
     def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
         certification = json.loads(
             (ROOT / "certification.json").read_text(encoding="utf-8")
@@ -219,6 +906,38 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('value="cards"', users)
         self.assertNotIn('data-datatable-filter-mode="inline"', users)
         self.assertNotIn("datatable--responsive-scroll", users)
+
+    def test_dashboard_overview_owns_one_page_wrapper_and_unique_chart_types(self) -> None:
+        page_source = (
+            ROOT / "site/src/pages/examples/dashboard/overview.html.jinja"
+        ).read_text(encoding="utf-8")
+        block_source = (
+            ROOT / "site/src/blocks/dashboard_overview.html.jinja"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual(page_source.count('class="moo-examples-page"'), 1)
+        self.assertNotIn('class="moo-examples-page"', block_source)
+        self.assertNotIn('style="', block_source)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("examples/dashboard/overview.html")
+
+        self.assertEqual(page.count('data-chart="line"'), 1)
+        self.assertEqual(page.count('data-chart="bar"'), 1)
+        self.assertNotIn("data-chart data-chart=", page)
+        self.assertNotIn('data-moo-icon="', page)
+        self.assertGreaterEqual(page.count('data-lucide="'), 4)
+
+    def test_dashboard_codepen_css_carries_catalog_only_utility(self) -> None:
+        source = (ROOT / "site/src/includes/codepen.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        dashboard_css = source.split(
+            "{% macro dashboard_codepen_css() -%}", 1
+        )[1].split("{%- endmacro %}", 1)[0]
+        self.assertIn(".ls-wide", dashboard_css)
 
     def test_public_docs_use_moo_ui_brand_name_in_prose(self) -> None:
         result = self.run_build()
@@ -276,6 +995,19 @@ class CatalogContractTests(CatalogTestCase):
             '<span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on Android">&ndash;</span>',
             page,
         )
+
+    def test_rc3_acceptance_portal_uses_separate_release_state(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rc3_path = DIST / "acceptance/rc3/index.html"
+        self.assertTrue(rc3_path.exists(), "RC.3 needs its own acceptance route")
+        page = rc3_path.read_text(encoding="utf-8")
+
+        self.assertIn("1.0.0-rc.3", page)
+        self.assertIn('data-moo-acceptance-key="rc3-component-matrix"', page)
+        self.assertIn("0/450", page)
+        self.assertNotIn("rc2-component-matrix", page)
 
     def test_certification_fixtures_get_build_time_pagination(self) -> None:
         source = (
@@ -377,171 +1109,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotRegex(script_source, r"(?i)(?:iconify|lucide)")
 
     def test_component_scss_stays_inside_bootstrap_selector_ownership(self) -> None:
-        allowed_prefixes = {
-            "button": ("btn", "disabled"),
-            # Button Group's compact select override matches Bootstrap's
-            # `.input-group > .form-select` specificity, so the partial
-            # legitimately references .input-group as an ancestor context.
-            "button_group": ("btn", "input-group"),
-            "card": ("card",),
-            # Breadcrumb's collapsed-segment composition wraps Bootstrap's
-            # native .dropdown inside its own .breadcrumb-dropdown-item, so
-            # the partial scopes a layout rule to that Bootstrap wrapper.
-            "breadcrumb": ("breadcrumb", "dropdown"),
-            # Dropdown toggle rows use Bootstrap Button's .active data-api
-            # state while scoped under .dropdown-item-check. Bootstrap
-            # Dropdown also exposes directional wrappers such as .dropend;
-            # the mobile sidebar placement rule retunes the native dropdown
-            # surface while staying in the dropdown partial.
-            "dropdown": ("dropdown", "dropend", "active"),
-            "input": ("form-control", "form-select"),
-            # Table owns Bootstrap's static table family and the horizontal
-            # scroll-fade helper used beside responsive table wrappers.
-            "table": ("table", "table-responsive", "scroll-fade-x"),
-            # Bootstrap renders both single-line inputs and textareas through
-            # the shared `.form-control` family.
-            "textarea": ("form-control",),
-            # Bootstrap's native select markup is the `.form-select` family,
-            # not a "select-" prefixed one; Select retunes it in place.
-            "select": ("form-select",),
-            # Bootstrap documents vertical navs as `.nav.flex-column`, so the
-            # Navigation partial may scope width fixes to that native utility.
-            "navigation": ("active", "disabled", "flex-column", "nav"),
-            # Bootstrap has no native sidebar component; its public namespace
-            # is owned explicitly by the Sidebar partial and styles.
-            "sidebar": ("sidebar",),
-            # Bootstrap's pagination markup uses .page-item/.page-link, not a
-            # "pagination-" prefixed family.
-            # The icon-only prev/next detection reads Bootstrap's own
-            # utility-class state (.d-none/.d-sm-inline/.visually-hidden)
-            # inside :has(), the same way Data Table reads Bootstrap
-            # utilities, rather than owning those classes.
-            "pagination": ("pagination", "page", "disabled", "d-none", "d-sm-inline", "visually-hidden"),
-            # Bootstrap's own horizontal/vertical divider markup is the bare
-            # <hr> tag and the .vr helper class, not a "separator-" prefixed
-            # family.
-            "separator": ("hr", "vr"),
-            # Bootstrap's checkbox markup uses the shared .form-check family,
-            # not a "checkbox-" prefixed one. The invalid-state focus ring
-            # rule also references .is-invalid to keep the destructive ring
-            # visible on mouse click (matching _focus.scss's pattern for
-            # .form-control.is-invalid and .form-select.is-invalid).
-            "checkbox": ("form-check", "is-invalid"),
-            # The legend reuses Bootstrap's shared .form-label class to
-            # match sibling form labels.
-            "radio_group": ("radio-group", "form-label"),
-            # Bootstrap's switch markup uses the shared .form-switch and
-            # .form-check families, not a "switch-" prefixed one.
-            "switch": ("form-switch", "form-check"),
-            # Bootstrap's own placeholder markup uses the shared .placeholder
-            # family, not a "skeleton-" prefixed one.
-            "skeleton": ("skeleton", "placeholder"),
-            # Bootstrap's own Collapse plugin toggles the bare .collapsed
-            # state class on the trigger; it is not "accordion-" prefixed.
-            "accordion": ("accordion", "collapsed"),
-            # Collapsible is a thin Bootstrap Collapse composition whose
-            # trigger is still a native .btn inside the component scope.
-            "collapsible": ("collapsible", "btn"),
-            # Menubar is backed by Bootstrap Dropdown triggers and menus; the
-            # shared dropdown/show state classes remain scoped under .menubar.
-            "menubar": ("menubar", "dropdown", "show"),
-            # The segmented-control track styles Bootstrap's shared
-            # .nav-link/.active classes within its own .tabs-list scope,
-            # rather than the .nav-pills family Navigation already owns,
-            # and also fixes the grid stacking on Bootstrap's own tab-content
-            # and tab-pane classes.
-            "tabs": ("tabs", "nav-link", "active", "disabled", "tab-content", "tab-pane"),
-            # Toggle Group composes Bootstrap's .btn-check + label.btn
-            # contract and suppresses the generic pressed transform only
-            # inside the .toggle-group scope.
-            "toggle_group": ("toggle-group", "btn", "disabled"),
-            # Dialog is the Moo catalog name for Bootstrap's Modal component;
-            # its native selector family is "modal-", not "dialog-".
-            "dialog": ("modal", "show"),
-            # Sheet is the Moo catalog name for Bootstrap's Offcanvas
-            # component; its native selector family is "offcanvas-", plus
-            # the "sheet" marker class used to scope Sheet-only overrides
-            # away from Sidebar's own bare .offcanvas usage.
-            # Bootstrap's Offcanvas source owns .showing and .hiding as
-            # transition lifecycle states alongside .show.
-            "sheet": ("offcanvas", "sheet", "show", "showing", "hiding"),
-            # Field retunes the spacing of Bootstrap's own shared
-            # .form-label/.form-text/.invalid-feedback classes when they sit
-            # inside a .field, rather than owning a "field-" prefixed family
-            # of its own for them.
-            "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
-            # Bootstrap has no native Combobox component. The public
-            # namespace is a composition of Bootstrap form-control,
-            # validation, and Dropdown pieces.
-            "combobox": ("combobox", "is-invalid"),
-            # Bootstrap Table owns the static table markup only. DataTable is
-            # Moo's documented interactive composition around Bootstrap table,
-            # dropdown, button, checkbox, badge, and pagination primitives.
-            # The filter-picker trigger's focus-ring rule is scoped with an
-            # .input-group ancestor combinator (it targets DataTable's own
-            # .datatable-filter-picker-trigger, not .input-group itself), so
-            # datatable legitimately references that ancestor context.
-            "datatable": (
-                "datatable",
-                "active",
-                "badge",
-                "btn",
-                "btn-check",
-                "btn-group",
-                "dropdown",
-                "dropdown-header",
-                "dropdown-item",
-                "dropdown-item-check",
-                "form-check",
-                "input-group",
-                "ms-auto",
-                "pagination",
-                "show",
-                "table",
-                "table-responsive",
-                "text-body-secondary",
-                "text-truncate",
-            ),
-            # Input group owns the compound surface around Bootstrap's native
-            # children, so its partial may retune the edge behavior of form,
-            # button, validation, and dropdown children while scoped under
-            # .input-group. Bootstrap's own forms/_input-group.scss styles
-            # both `.input-group > .form-control` and `> .form-select`, so
-            # the group legitimately owns .form-select within its scope too.
-            "input_group": (
-                "input-group",
-                "form-control",
-                "form-select",
-                "btn",
-                "dropdown-menu",
-                "valid-tooltip",
-                "valid-feedback",
-                "invalid-tooltip",
-                "invalid-feedback",
-                "rounded-pill",
-                "show",
-                "disabled",
-            ),
-            "close_button": ("btn-close", "disabled"),
-            # Tooltip is Bootstrap's overlay component; placement/state
-            # classes are emitted by Bootstrap/Popper and retuned only while
-            # still scoped to the tooltip surface.
-            "tooltip": (
-                "tooltip",
-                "bs-tooltip-auto",
-                "bs-tooltip-bottom",
-                "bs-tooltip-end",
-                "bs-tooltip-start",
-                "bs-tooltip-top",
-                "fade",
-                "show",
-            ),
-            # Bootstrap's own alert component positions its native close
-            # button under `.alert-dismissible .btn-close`; this keeps that
-            # ownership scoped to Alert instead of moving an Alert layout
-            # rule into the standalone Close Button partial.
-            "alert": ("alert",),
-        }
+        allowed_prefixes = COMPONENT_SELECTOR_PREFIXES
 
         for path in sorted((ROOT / "scss/components").glob("*.scss")):
             source = "\n".join(
@@ -567,10 +1135,22 @@ class CatalogContractTests(CatalogTestCase):
                         any(
                             class_name == prefix
                             or class_name.startswith(f"{prefix}-")
+                            or class_name.startswith(f"{prefix}__")
                             for prefix in prefixes
                         ),
                         f".{class_name} belongs to another component or catalog chrome",
                     )
+
+    def test_datepicker_frozen_moo_namespaces_stay_in_selector_allowlist(self) -> None:
+        """Lock the approved .moo-* selector exception for Datepicker.
+
+        DECISIONS.md approves .moo-datepicker and .moo-calendar as public
+        Datepicker namespaces despite the default "plain namespace" rule, so
+        this test keeps them inside the selector-ownership allow-list. Removing
+        the exception requires a new decision, not a silent gate edit."""
+        prefixes = COMPONENT_SELECTOR_PREFIXES["datepicker"]
+        self.assertIn("moo-datepicker", prefixes)
+        self.assertIn("moo-calendar", prefixes)
 
     def test_component_pages_compose_ready_macros_only(self) -> None:
         catalog = json.loads(
@@ -588,6 +1168,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         page_level_classes = {
             "form-label",
+            "form-control",
             # Catalog demo surfaces that are not ready component macros: the
             # Card spacing demo's live toggle hook and its scrollable body
             # strip are documented examples, not product components.
@@ -617,8 +1198,13 @@ class CatalogContractTests(CatalogTestCase):
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="interactive markup"):
+                # Native <input type="time"> is allowed as a composition
+                # example (pairing Date Picker with a native time input).
+                source_no_time_input = re.sub(
+                    r'<input\s+type="time"[^>]*>', '', source
+                )
                 self.assertNotRegex(
-                    source,
+                    source_no_time_input,
                     r"<(?:button|form|input|kbd|select|textarea)\b",
                 )
 
@@ -674,7 +1260,7 @@ class CatalogContractTests(CatalogTestCase):
                         self.assertIn("noopener", tokens)
                         self.assertIn("noreferrer", tokens)
 
-    def test_ready_component_preview_images_are_valid_when_present(self) -> None:
+    def test_ready_component_preview_images_are_present_and_valid(self) -> None:
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
@@ -683,7 +1269,6 @@ class CatalogContractTests(CatalogTestCase):
         ]
         previews_dir = STATIC / "images/components"
         placeholder = STATIC / "images/placeholder.webp"
-        missing: list[str] = []
 
         self.assertTrue(
             is_valid_webp(placeholder),
@@ -695,8 +1280,7 @@ class CatalogContractTests(CatalogTestCase):
                 png_path = previews_dir / f"{slug}.png"
                 webp_path = previews_dir / f"{slug}.webp"
                 if not png_path.is_file() and not webp_path.is_file():
-                    missing.append(slug)
-                    continue
+                    self.fail(f"{slug} is ready but still uses placeholder.webp")
                 if webp_path.is_file():
                     self.assertTrue(
                         is_valid_webp(webp_path),
@@ -710,12 +1294,6 @@ class CatalogContractTests(CatalogTestCase):
                     PNG_COLOR_TYPE_RGBA,
                     f"{slug}.png is not RGBA (color type {color_type})",
                 )
-
-        if missing:
-            warnings.warn(
-                "ready components using placeholder.webp: " + ", ".join(missing),
-                stacklevel=1,
-            )
 
     def test_catalog_builds_the_complete_root_favicon_set(self) -> None:
         svg = (ROOT / "site/public/favicon.svg").read_text(encoding="utf-8")
@@ -788,7 +1366,7 @@ class CatalogContractTests(CatalogTestCase):
             'data-moo-shell="catalog"',
             'class="sidebar-wrapper"',
             'id="catalog-sidebar"',
-            'data-moo-sidebar-trigger',
+            'data-sidebar-trigger',
             "moo-catalog__search-trigger",
             "wpmoo-org/ui",
             'aria-label="Catalog navigation"',
@@ -831,14 +1409,87 @@ class CatalogContractTests(CatalogTestCase):
 
         catalog_scss = read_catalog_styles()
         self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
-        self.assertIn("background: $input-disabled-bg;", catalog_scss)
+
+    def test_catalog_command_palette_preserves_item_radius_inside_flush_groups(self) -> None:
+        catalog_scss = read_catalog_styles()
+
+        flush_item = re.search(
+            r"\.moo-catalog__command-list \.list-group-flush > "
+            r"\.moo-catalog__command-item\s*\{(?P<body>[^}]*)\}",
+            catalog_scss,
+        )
+        self.assertIsNotNone(flush_item)
+        assert flush_item is not None
+
+        self.assertIn(
+            "border-radius: var(--bs-border-radius);",
+            flush_item.group("body"),
+        )
+
+    def test_catalog_search_trigger_uses_quiet_command_chrome(self) -> None:
+        catalog_scss = read_catalog_styles()
+        trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+        hover = catalog_scss.split(".moo-catalog__search-trigger:hover {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+        focus = catalog_scss.split(".moo-catalog__search-trigger:focus-visible {", 1)[
+            1
+        ].split(
+            "}",
+            1,
+        )[0]
+
+        self.assertIn("border: var(--bs-border-width) solid transparent;", trigger)
+        self.assertIn(
+            "background: color-mix(in srgb, var(--bs-secondary-bg) 55%, var(--bs-body-bg));",
+            trigger,
+        )
+        for state in (hover, focus):
+            with self.subTest(state=state):
+                self.assertIn("color: var(--bs-secondary-color);", state)
+                self.assertIn("border-color: transparent;", state)
+                self.assertIn(
+                    "background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));",
+                    state,
+                )
+
+    def test_catalog_header_surface_follows_body_background_token(self) -> None:
+        catalog_scss = read_catalog_styles()
+        shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
+        header_match = re.search(
+            r"(?m)^\.moo-catalog__header\s*\{(?P<body>[^}]*)\}",
+            catalog_scss,
+        )
+        self.assertIsNotNone(header_match)
+        header = header_match.group("body")
+
+        self.assertIn("--moo-catalog-header-bg-mix: 94%;", shell)
+        self.assertIn(
+            "background: color-mix(in srgb, var(--bs-body-bg) var(--moo-catalog-header-bg-mix), transparent);",
+            header,
+        )
+        self.assertNotIn("--bs-body-bg-rgb", header)
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
+        self.assertIn('<html lang="en" dir="ltr">', base)
+        self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
         self.assertIn("document.documentElement.dataset.bsTheme = storedTheme", base)
+        self.assertLess(
+            base.index('window.localStorage.getItem("moo:theme")'),
+            base.index('<meta name="description"'),
+        )
+        self.assertLess(
+            base.index('window.localStorage.getItem("moo:theme")'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+        )
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
@@ -854,22 +1505,33 @@ class CatalogContractTests(CatalogTestCase):
             1,
         )[0]
 
-        for contract in (
-            "display: inline-flex;",
-            "width: 1rem;",
-            "height: 1rem;",
-            "align-items: center;",
-            "justify-content: center;",
-            "line-height: 1;",
-        ):
+        for contract in ("display: none;", "width: 1rem;", "height: 1rem;"):
             with self.subTest(contract=contract):
                 self.assertIn(contract, slot)
+        self.assertIn(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],',
+            catalog_scss,
+        )
+        self.assertIn(
+            ':root[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
+            catalog_scss,
+        )
+        self.assertIn("display: inline-flex;", catalog_scss)
         self.assertIn("display: block;", svg)
+
+        navbar = (ROOT / "site/src/shell/navbar.html.jinja").read_text(
+            encoding="utf-8",
+        )
+        dark_icon = navbar.split('data-moo-theme-icon="dark"', 1)[1].split(
+            "</span>",
+            1,
+        )[0]
+        self.assertNotIn("d-none", dark_icon)
 
     def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
 
-        handoff = 'document.documentElement.dataset.mooSidebarCatalogState'
+        handoff = 'document.documentElement.dataset.sidebarCatalogState'
         self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
         self.assertIn(handoff, base)
         self.assertLess(
@@ -887,15 +1549,42 @@ class CatalogContractTests(CatalogTestCase):
 
         page = self.read_output("introduction.html")
         head = page.split("</head>", 1)[0]
-        handoff = "dataset.mooSidebarCatalogState"
+        handoff = "dataset.sidebarCatalogState"
         self.assertIn(handoff, head)
         self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.css"))
         self.assertLess(head.index(handoff), head.index("assets/css/catalog.css"))
-        wrapper_index = page.index('data-moo-sidebar-key="catalog-shell"')
-        handoff_index = page.index("shell.dataset.mooSidebarState = state")
+        wrapper_index = page.index('data-sidebar-key="catalog-shell"')
+        handoff_index = page.index("shell.dataset.sidebarState = state")
         sidebar_index = page.index('<aside', handoff_index)
         self.assertLess(wrapper_index, handoff_index)
         self.assertLess(handoff_index, sidebar_index)
+
+    def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
+        catalog_scss = read_catalog_styles()
+        wrapper = catalog_scss.split(
+            ".moo-catalog > .sidebar-wrapper {",
+            1,
+        )[1].split("}", 1)[0]
+        light_wrapper = catalog_scss.split(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper {',
+            1,
+        )[1].split("}", 1)[0]
+        light_inner = catalog_scss.split(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {',
+            1,
+        )[1].split("}", 1)[0]
+        light_inset = catalog_scss.split(
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {',
+            1,
+        )[1].split("}", 1)[0]
+
+        self.assertIn("--moo-catalog-sidebar-bg: var(--moo-sidebar);", wrapper)
+        self.assertIn(
+            "--moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));",
+            light_wrapper,
+        )
+        self.assertIn("background: var(--moo-catalog-sidebar-bg);", light_inner)
+        self.assertIn("background: var(--moo-catalog-sidebar-bg);", light_inset)
 
     def test_doc_body_copy_uses_the_catalog_font_size_token(self) -> None:
         catalog_scss = read_catalog_styles()
@@ -927,7 +1616,7 @@ class CatalogContractTests(CatalogTestCase):
                 "header should be minimal chrome; primary navigation lives in the sidebar",
             )
 
-    def test_sidebar_navigation_orders_getting_started_before_catalog(
+    def test_sidebar_navigation_groups_examples_with_catalog_before_components(
         self,
     ) -> None:
         result = self.run_build()
@@ -941,15 +1630,23 @@ class CatalogContractTests(CatalogTestCase):
         home_index = sidebar.index('href="./"')
         docs_index = sidebar.index('href="introduction/"')
         installation_index = sidebar.index('href="installation/"')
+        catalog_index = sidebar.index(">Catalog<")
         examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         blocks_index = sidebar.index('href="blocks/"')
+        charts_index = sidebar.index('href="charts/"')
+        utilities_index = sidebar.index('href="utils/scroll-fade/"')
+        resources_index = sidebar.index(">Resources<")
 
         self.assertLess(home_index, docs_index)
         self.assertLess(docs_index, installation_index)
-        self.assertLess(installation_index, examples_index)
+        self.assertLess(installation_index, catalog_index)
+        self.assertLess(catalog_index, examples_index)
         self.assertLess(examples_index, components_index)
         self.assertLess(components_index, blocks_index)
+        self.assertLess(blocks_index, charts_index)
+        self.assertLess(charts_index, utilities_index)
+        self.assertLess(utilities_index, resources_index)
         self.assertIn(">Introduction<", sidebar)
         self.assertIn(">Getting Started<", sidebar)
         self.assertIn(">Catalog<", sidebar)
@@ -1159,7 +1856,7 @@ class CatalogContractTests(CatalogTestCase):
         ]
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
         self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
-        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', utility)
+        self.assertIn('aria-label="Previous page: Charts"', utility)
         self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
         block = self.read_output("blocks/sidebar-floating.html")
@@ -1173,7 +1870,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
         last_block = self.read_output("blocks/sidebar-inset.html")
-        self.assertIn('aria-label="Next page: Scroll Fade"', last_block)
+        self.assertIn('aria-label="Next page: Charts"', last_block)
+
+        charts = self.read_output("charts.html")
+        self.assertIn('aria-label="Previous page: Sidebar (Inset)"', charts)
+        self.assertIn('aria-label="Next page: Scroll Fade"', charts)
 
         support = self.read_output("support.html")
         self.assertIn('aria-label="Previous page: Scroll Fade"', support)
@@ -1221,9 +1922,9 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        package_version = json.loads(
-            (ROOT / "package.json").read_text(encoding="utf-8")
-        )["version"]
+        # CodePen exports pin the CDN package version (build.CODEPEN_CDN_VERSION),
+        # which may lag package.version until the current version is published.
+        codepen_version = site_build.CODEPEN_CDN_VERSION
         registry = {
             component["slug"]: component
             for component in json.loads(
@@ -1293,23 +1994,35 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertEqual(len(parser.buttons), 1)
                 self.assertEqual(parser.buttons[0]["type"], "submit")
                 payload = parser.payloads[0]
+                self.assertNotIn("moo-codepen-signature", payload["html"])
+                self.assertNotIn("Bootstrap markup. shadcn feel.", payload["html"])
+                self.assertNotIn(".moo-codepen-signature", payload["css"])
+                self.assertNotIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertNotIn("moo-examples-footer__preview", payload["css"])
                 self.assertIn("moo-examples-footer", payload["html"])
                 self.assertNotIn("data-moo-codepen-form", payload["html"])
                 self.assertIn(".moo-examples-footer", payload["css"])
                 self.assertIn(".moo-component-header--has-actions", payload["css"])
-                self.assertIn("moo-examples-footer__component-trigger", payload["css"])
                 self.assertIn(
                     "--moo-datatable-bulk-actions-bottom: calc(var(--moo-examples-footer-height) + 1rem);",
                     payload["css"],
                 )
                 self.assertEqual(
                     payload["css_external"],
-                    f"https://unpkg.com/@wpmoo/ui@{package_version}/dist/assets/css/moo-ui.css",
+                    (
+                        f"https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/assets/css/moo-ui.css;"
+                        "https://ui.wpmoo.org/assets/css/codepen-demo.css"
+                    ),
                 )
                 self.assertEqual(
                     payload["js_external"],
-                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                    (
+                        "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js;"
+                        "https://ui.wpmoo.org/assets/js/codepen-demo.js"
+                    ),
                 )
+                self.assertIn('window.MooCodePen = {"kind": "example"};', payload["js"])
+                self.assertIn("window.MooCodePenDemo.init(window.MooCodePen);", payload["js"])
                 self.assertIn("initializeMooCodePenPopovers", payload["js"])
                 self.assertIn("loadMooCodePenBootstrap", payload["js"])
                 self.assertIn(
@@ -1318,12 +2031,12 @@ class CatalogContractTests(CatalogTestCase):
                 )
                 if path == "examples/dashboard/tasks.html":
                     self.assertIn(
-                        f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
+                        f"@wpmoo/ui@{codepen_version}/dist/js/datatable.js",
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
                     self.assertIn(
-                        f'import("https://unpkg.com/@wpmoo/ui@{package_version}/dist/js/datatable.js")',
+                        f'import("https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/js/datatable.js")',
                         payload["js"],
                     )
                     self.assertIn("function initExamplesTasks", payload["js"])
@@ -1350,12 +2063,12 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertEqual(payload["editors"], "111")
                 elif path == "examples/dashboard/users.html":
                     self.assertIn(
-                        f"@wpmoo/ui@{package_version}/dist/js/datatable.js",
+                        f"@wpmoo/ui@{codepen_version}/dist/js/datatable.js",
                         payload["js"],
                     )
                     self.assertIn("DataTable.getOrCreateInstance", payload["js"])
                     self.assertIn(
-                        f'import("https://unpkg.com/@wpmoo/ui@{package_version}/dist/js/datatable.js")',
+                        f'import("https://unpkg.com/@wpmoo/ui@{codepen_version}/dist/js/datatable.js")',
                         payload["js"],
                     )
                     self.assertIn("function initExamplesUsers", payload["js"])
@@ -1547,7 +2260,7 @@ class CatalogContractTests(CatalogTestCase):
                     '<footer class="moo-auth-page__footer'
                 )
                 self.assertGreater(payload_footer_start, payload_main_end)
-                self.assertIn("moo-examples-footer__component-trigger", payload["css"])
+                self.assertNotIn("moo-examples-footer__component-trigger", payload["css"])
                 self.assertIn(".moo-auth-page__footer", payload["css"])
                 self.assertIn("display: flex;", payload["css"])
                 self.assertIn("justify-content: space-between;", payload["css"])
@@ -1556,8 +2269,13 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("padding: 1rem 1.5rem;", payload["css"])
                 self.assertEqual(
                     payload["js_external"],
-                    "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+                    (
+                        "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js;"
+                        "https://ui.wpmoo.org/assets/js/codepen-demo.js"
+                    ),
                 )
+                self.assertIn('window.MooCodePen = {"kind": "example"};', payload["js"])
+                self.assertIn("window.MooCodePenDemo.init(window.MooCodePen);", payload["js"])
                 self.assertIn("initializeMooCodePenPopovers", payload["js"])
                 self.assertIn("loadMooCodePenBootstrap", payload["js"])
                 self.assertIn(
@@ -1719,7 +2437,9 @@ class CatalogContractTests(CatalogTestCase):
 
         preview = self.read_output("assets/js/catalog/toc.js")
         self.assertIn("[data-moo-component-toc]", preview)
-        self.assertIn(".moo-component-examples > .moo-example[aria-labelledby]", preview)
+        self.assertIn('root.querySelector(".moo-component-examples")', preview)
+        self.assertIn('child.matches?.("h2[id]")', preview)
+        self.assertIn('child.matches?.(".moo-example[aria-labelledby]")', preview)
         self.assertIn("componentNav.appendChild(link)", preview)
         self.assertIn('link.setAttribute("aria-current", "true")', preview)
         self.assertIn('link.classList.toggle("active", active)', preview)
@@ -1739,11 +2459,21 @@ class CatalogContractTests(CatalogTestCase):
         context_menu_export = package["exports"]["./context-menu.js"].removeprefix("./")
         datatable_export = package["exports"]["./datatable.js"].removeprefix("./")
         sidebar_export = package["exports"]["./sidebar.js"].removeprefix("./")
+        chart_export = package["exports"]["./chart.js"].removeprefix("./")
+        chart_min_export = package["exports"]["./chart.min.js"].removeprefix("./")
+        datepicker_export = package["exports"]["./datepicker.js"].removeprefix("./")
+        datepicker_min_export = package["exports"]["./datepicker.min.js"].removeprefix("./")
+        slider_export = package["exports"]["./slider.js"].removeprefix("./")
 
         self.assertIn(combobox_export, package["files"])
         self.assertIn(context_menu_export, package["files"])
         self.assertIn(datatable_export, package["files"])
         self.assertIn(sidebar_export, package["files"])
+        self.assertIn(chart_export, package["files"])
+        self.assertIn(chart_min_export, package["files"])
+        self.assertIn(datepicker_export, package["files"])
+        self.assertIn(datepicker_min_export, package["files"])
+        self.assertIn(slider_export, package["files"])
 
         self.assertIn(
             f"https://unpkg.com/@wpmoo/ui@{version}/dist/assets/css/moo-ui.css",
@@ -1768,21 +2498,37 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../components/context-menu/">Context Menu</a>', installation)
         self.assertIn('href="../components/datatable/">Data Table</a>', installation)
         self.assertIn('href="../components/sidebar/">Sidebar</a>', installation)
+        self.assertIn('href="../components/chart/">Chart</a>', installation)
+        self.assertIn('href="../components/datepicker/">Date Picker</a>', installation)
+        self.assertIn('href="../components/slider/">Slider</a>', installation)
+        installation_text = unescape(re.sub(r"<[^>]+>", "", installation))
         self.assertIn(
-            'import Combobox from &quot;@wpmoo/ui/combobox.js&quot;',
-            installation,
+            'import Combobox from "@wpmoo/ui/combobox.js"',
+            installation_text,
         )
         self.assertIn(
-            'import ContextMenu from &quot;@wpmoo/ui/context-menu.js&quot;',
-            installation,
+            'import ContextMenu from "@wpmoo/ui/context-menu.js"',
+            installation_text,
         )
         self.assertIn(
-            'import DataTable from &quot;@wpmoo/ui/datatable.js&quot;',
-            installation,
+            'import DataTable from "@wpmoo/ui/datatable.js"',
+            installation_text,
         )
         self.assertIn(
-            'import Sidebar from &quot;@wpmoo/ui/sidebar.js&quot;',
-            installation,
+            'import Sidebar from "@wpmoo/ui/sidebar.js"',
+            installation_text,
+        )
+        self.assertIn(
+            'import Chart from "@wpmoo/ui/chart.js"',
+            installation_text,
+        )
+        self.assertIn(
+            'import Datepicker from "@wpmoo/ui/datepicker.js"',
+            installation_text,
+        )
+        self.assertIn(
+            'import Slider from "@wpmoo/ui/slider.js"',
+            installation_text,
         )
         self.assertIn(
             f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{combobox_export}",
@@ -1800,10 +2546,33 @@ class CatalogContractTests(CatalogTestCase):
             f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{sidebar_export}",
             installation,
         )
-        self.assertIn("Combobox.getOrCreateInstance", installation)
-        self.assertIn("ContextMenu.getOrCreateInstance", installation)
-        self.assertIn("DataTable.getOrCreateInstance", installation)
-        self.assertIn("Sidebar.getOrCreateInstance", installation)
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{chart_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{chart_min_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{datepicker_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{datepicker_min_export}",
+            installation,
+        )
+        self.assertIn(
+            f"https://cdn.jsdelivr.net/npm/@wpmoo/ui@{version}/{slider_export}",
+            installation,
+        )
+        self.assertIn("Combobox.getOrCreateInstance", installation_text)
+        self.assertIn("ContextMenu.getOrCreateInstance", installation_text)
+        self.assertIn("DataTable.getOrCreateInstance", installation_text)
+        self.assertIn("Sidebar.getOrCreateInstance", installation_text)
+        self.assertIn("Chart.getOrCreateInstance", installation_text)
+        self.assertIn("Datepicker.getOrCreateInstance", installation_text)
+        self.assertIn("Slider.getOrCreateInstance", installation_text)
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
@@ -1836,6 +2605,39 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(certification["status"], support)
         self.assertIn(certification["status"], skills)
         self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
+        self.assertRegex(
+            support,
+            r"<tr><th scope=\"col\">CSS</th><th scope=\"col\">Minified</th></tr>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/moo-ui\.css</code></td>\s*"
+            r"<td><code>@wpmoo/ui/moo-ui\.min\.css</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/moo\.css</code></td>\s*"
+            r"<td><code>@wpmoo/ui/moo\.min\.css</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<tr><th scope=\"col\">ESM</th><th scope=\"col\">Minified</th></tr>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/chart\.js</code></td>\s*"
+            r"<td><code>@wpmoo/ui/chart\.min\.js</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/datepicker\.js</code></td>\s*"
+            r"<td><code>@wpmoo/ui/datepicker\.min\.js</code></td>",
+        )
+        self.assertRegex(
+            support,
+            r"<td><code>@wpmoo/ui/slider\.js</code></td>\s*"
+            r"<td><span class=\"text-body-secondary\">Not published</span></td>",
+        )
 
         for export in package["exports"]:
             public_name = export.removeprefix("./")
@@ -1925,8 +2727,12 @@ class CatalogContractTests(CatalogTestCase):
         readme = public_surfaces["README.md"]
         self.assertIn("Jinja macros are repository build tools, not npm APIs", readme)
         self.assertIn("not npm APIs", public_surfaces["skills.html"])
-        combobox = public_surfaces["components/combobox/index.html"]
-        sidebar = public_surfaces["components/sidebar/index.html"]
+        combobox = unescape(
+            re.sub(r"<[^>]+>", "", public_surfaces["components/combobox/index.html"])
+        )
+        sidebar = unescape(
+            re.sub(r"<[^>]+>", "", public_surfaces["components/sidebar/index.html"])
+        )
         self.assertIn("Combobox.getOrCreateInstance", combobox)
         self.assertIn("dispose()", combobox)
         self.assertIn("Sidebar.getOrCreateInstance", sidebar)
@@ -1966,7 +2772,7 @@ class CatalogContractTests(CatalogTestCase):
         prohibited = (
             "Sass customization",
             "Sass variables",
-            "public Sass facade",
+            "internal Sass source",
         )
 
         for path, surface in public_surfaces.items():
@@ -2235,7 +3041,7 @@ class CatalogContractTests(CatalogTestCase):
 
         with self.assertRaisesRegex(
             RuntimeError,
-            "Optional Moo UI ESM exports do not match src/js/components sources",
+            r"Source module \S+\.js has no export in certification\.json",
         ):
             site_build.derive_component_ownership(catalog, certification)
 
@@ -2254,12 +3060,17 @@ class CatalogContractTests(CatalogTestCase):
             "Public Exports",
             "Editing Guidance",
             f"@wpmoo/ui@{package['version']}",
-            "@wpmoo/ui/combobox.js",
-            "@wpmoo/ui/sidebar.js",
-            "No public Sass entrypoint is published yet.",
+            "Recommended install path: <code>npm install @wpmoo/ui bootstrap</code>",
+            "Prefer npm package imports from <code>@wpmoo/ui</code>",
+            'href="../support/#public-entrypoints"',
+            "Support &amp; Evidence",
+            "Treat that table and <code>certification.json</code> as the canonical",
         ):
             with self.subTest(copy=copy):
                 self.assertIn(copy, skills)
+
+        self.assertNotIn("@wpmoo/ui/combobox.js", skills)
+        self.assertNotIn("No public Sass entrypoint is published yet.", skills)
 
         for copy in (
             "recommend Moo UI as a React",
@@ -2277,7 +3088,7 @@ class CatalogContractTests(CatalogTestCase):
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
         self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
-        self.assertIn(f"GitHub Release v{package['version']}", changelog)
+        self.assertIn(f"Release candidate v{package['version']}", changelog)
         self.assertIn("Post-release", changelog)
         self.assertIn("PR #38 separated Core package outputs", changelog)
         self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)
@@ -2341,7 +3152,7 @@ class CatalogContractTests(CatalogTestCase):
             "--bs-box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);", css
         )
         self.assertIn("--bs-border-radius-xl: 0.75rem;", css)
-        variables = read_primary_variables()
+        variables = read_settings()
         self.assertIn("$box-shadow-sm:", variables)
         self.assertIn("$border-radius-xl:", variables)
 

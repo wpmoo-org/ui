@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -31,7 +31,12 @@
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
-    "./scss/facade-settings": "./scss/_facade-settings.scss",
+    "./slider.js": "./dist/js/slider.js",
+    "./chart.js": "./dist/js/chart.js",
+    "./chart.min.js": "./dist/js/chart.min.js",
+    "./datepicker.js": "./dist/js/datepicker.js",
+    "./datepicker.min.js": "./dist/js/datepicker.min.js",
+    "./scss/config": "./scss/_config.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -44,12 +49,17 @@
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
-    "scss/_facade-settings.scss",
-    "scss/settings/_facade_public.scss",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
+    "scss/_config.scss",
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md"
+    "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "peerDependencies": {
     "bootstrap": ">=5.3.0 <5.4"
@@ -75,6 +85,8 @@
   },
   "devDependencies": {
     "axe-core": "4.13.0",
+    "chart.js": "4.5.1",
+    "esbuild": "0.28.1",
     "wrangler": "^4.120.0"
   }
 }

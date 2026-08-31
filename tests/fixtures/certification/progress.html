@@ -63,30 +63,48 @@
 
       <section aria-labelledby="progress-bounds-title">
         <h2 id="progress-bounds-title" class="h5">Bounds</h2>
-        <div>
+        <div class="d-grid gap-2" data-certification-progress-bounds>
           <div
-            class="progress"
-            role="progressbar"
-            aria-label="Empty backup"
-            aria-valuenow="0"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            id="certification-progress-empty"
+            class="d-grid gap-1"
+            id="certification-progress-empty-bound"
+            data-certification-progress-bound
           >
-            <div class="progress-bar" style="width: 0%"></div>
+            <span
+              class="small text-body-secondary"
+              id="certification-progress-empty-label"
+            >0% empty</span>
+            <div
+              class="progress"
+              role="progressbar"
+              aria-label="Empty backup"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              id="certification-progress-empty"
+            >
+              <div class="progress-bar" style="width: 0%"></div>
+            </div>
           </div>
-        </div>
-        <div>
           <div
-            class="progress"
-            role="progressbar"
-            aria-label="Complete backup"
-            aria-valuenow="100"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            id="certification-progress-complete"
+            class="d-grid gap-1"
+            id="certification-progress-complete-bound"
+            data-certification-progress-bound
           >
-            <div class="progress-bar" style="width: 100%"></div>
+            <span
+              class="small text-body-secondary"
+              id="certification-progress-complete-label"
+            >100% complete</span>
+            <div
+              class="progress"
+              role="progressbar"
+              aria-label="Complete backup"
+              aria-valuenow="100"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              id="certification-progress-complete"
+            >
+              <div class="progress-bar" style="width: 100%"></div>
+            </div>
           </div>
         </div>
       </section>

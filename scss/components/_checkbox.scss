@@ -1,16 +1,3 @@
-// Bootstrap bakes the checked state's fill color and checkmark glyph into
-// literal, non-inverting values at compile time (background-color:
-// $primary directly, plus a white checkmark stroke baked into an SVG data
-// URI) — the same non-inverting $primary issue already fixed for Progress,
-// but here the glyph itself is compiled in too, not just the fill, so a
-// --moo-foreground swap alone would leave a white check on a near-white
-// dark-mode fill. A theme-scoped filter invert flips the black fill and
-// white glyph together for checkbox/radio controls; Switch owns its
-// checked track and thumb separately.
-[data-bs-theme="dark"] .form-check-input:is(:checked, :indeterminate):not([role="switch"]) {
-  filter: invert(1);
-}
-
 // Bootstrap's margin-top (0.25rem = 4px) was computed for the old 1em
 // checkbox (14px at the catalog's 0.875rem body font). The override to
 // 1rem (16px) shifted the geometric center by 1px; tightening the top
@@ -18,6 +5,41 @@
 // .form-check min-height so it aligns with the label text.
 .form-check-input {
   margin-top: 0.125rem;
+}
+
+// Bootstrap's checkbox/radio glyphs are SVG data URIs whose stroke/fill color
+// is fixed at compile time. Draw the checkbox mark as an overlay so it follows
+// the runtime primary foreground when Theme color changes.
+.form-check-input[type="checkbox"]:checked:not([role="switch"]) {
+  --#{$prefix}form-check-bg-image: none;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.form-check-input[type="checkbox"]:checked:not([role="switch"])::after {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 0.32em;
+  height: 0.58em;
+  border-color: var(--moo-primary-foreground);
+  border-style: solid;
+  border-width: $moo-form-checkmark-border-width;
+  content: "";
+  transform: translate(-50%, -55%) rotate(45deg);
+  transform-origin: center;
+}
+
+.form-check-input[type="checkbox"]:indeterminate:not([role="switch"]) {
+  --#{$prefix}form-check-bg-image: linear-gradient(var(--moo-primary-foreground), var(--moo-primary-foreground));
+
+  background-size: $moo-form-check-indeterminate-bg-size;
+  background-position: $moo-form-check-indeterminate-bg-position;
+}
+
+.form-check-input[type="radio"]:checked {
+  --#{$prefix}form-check-bg-image: radial-gradient(circle at center, var(--moo-primary-foreground) 0 34%, transparent 36%);
 }
 
 // Covers checkbox, switch (also type="checkbox"), and radio alike so
@@ -88,6 +110,6 @@
 .form-check-input:is([type="checkbox"], [type="radio"]):not([role="switch"]).is-invalid:checked,
 .form-check-input:is([type="checkbox"], [type="radio"]):not([role="switch"]).is-invalid:checked:focus:active,
 .form-check-input:is([type="checkbox"], [type="radio"]):not([role="switch"]).is-invalid:checked:focus:not(:focus-visible) {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
+  border-color: var(--moo-primary);
+  background-color: var(--moo-primary);
 }

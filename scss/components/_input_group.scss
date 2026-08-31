@@ -6,6 +6,13 @@
 .input-group:not(:has(> .form-control[type="file"])) {
   border: $input-border-width solid $input-border-color;
   border-radius: var(--moo-input-group-border-radius);
+  background-color: var(--moo-input-bg, transparent);
+}
+
+// Keep compound surfaces clipped, but let a directly attached menu escape so
+// Bootstrap's positioned dropdown remains visible outside the input row.
+.input-group:not(:has(> .form-control[type="file"])):not(:has(> .dropdown-menu)) {
+  overflow: hidden;
 }
 
 .input-group.rounded-pill:not(:has(> .form-control[type="file"])) {
@@ -108,11 +115,11 @@
 }
 
 .input-group > .btn-ghost[aria-pressed="true"] {
-  color: var(--bs-primary);
+  color: var(--bs-btn-active-color);
 }
 
 .input-group > .btn-ghost[aria-pressed="true"]::before {
-  opacity: 0;
+  opacity: 1;
 }
 
 .input-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
@@ -127,7 +134,8 @@
 
 .input-group > .input-group-text {
   color: var(--bs-secondary-color);
-  background-color: transparent;
+  // bg intentionally omitted — Bootstrap's addon token consumes the same
+  // --moo-input-bg surface as the parent compound input.
 }
 
 .input-group > .input-group-text:first-child {

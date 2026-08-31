@@ -1,7 +1,50 @@
-@import "primary_variables";
-@import "../vendor/bootstrap/scss/bootstrap";
+@import "settings";
+
+@import "../vendor/bootstrap/scss/mixins/banner";
+@include bsBanner("");
+
+// Bootstrap configuration
+@import "../vendor/bootstrap/scss/functions";
+@import "../vendor/bootstrap/scss/variables";
+@import "../vendor/bootstrap/scss/variables-dark";
+@import "../vendor/bootstrap/scss/maps";
+@import "../vendor/bootstrap/scss/mixins";
+@import "../vendor/bootstrap/scss/utilities";
+
+// Bootstrap layout and standalone-only components
+@import "../vendor/bootstrap/scss/root";
+@import "../vendor/bootstrap/scss/reboot";
+@import "../vendor/bootstrap/scss/type";
+@import "../vendor/bootstrap/scss/images";
+@import "../vendor/bootstrap/scss/containers";
+@import "../vendor/bootstrap/scss/grid";
+@import "../vendor/bootstrap/scss/forms/form-range";
+@import "../vendor/bootstrap/scss/forms/floating-labels";
+@import "../vendor/bootstrap/scss/transitions";
+@import "../vendor/bootstrap/scss/navbar";
+@import "../vendor/bootstrap/scss/progress";
+@import "../vendor/bootstrap/scss/list-group";
+@import "../vendor/bootstrap/scss/carousel";
+@import "../vendor/bootstrap/scss/spinners";
+@import "../vendor/bootstrap/scss/placeholders";
+
+// Bootstrap helpers
+@import "../vendor/bootstrap/scss/helpers/clearfix";
+@import "../vendor/bootstrap/scss/helpers/colored-links";
+@import "../vendor/bootstrap/scss/helpers/focus-ring";
+@import "../vendor/bootstrap/scss/helpers/icon-link";
+@import "../vendor/bootstrap/scss/helpers/ratio";
+@import "../vendor/bootstrap/scss/helpers/position";
+@import "../vendor/bootstrap/scss/helpers/stacks";
+@import "../vendor/bootstrap/scss/helpers/visually-hidden";
+@import "../vendor/bootstrap/scss/helpers/stretched-link";
+@import "../vendor/bootstrap/scss/helpers/text-truncation";
+@import "../vendor/bootstrap/scss/helpers/vr";
+
+// Bootstrap utilities
+@import "../vendor/bootstrap/scss/utilities/api";
+
 @import "themes/standalone_root";
-@import "foundations/focus";
 @import "utilities/scroll_fade_primitives";
-@import "component_layer";
+@import "components";
 @import "foundations/overlay_backdrop";

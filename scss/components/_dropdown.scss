@@ -189,7 +189,7 @@
 }
 
 @include media-breakpoint-up(lg) {
-  [data-slot="sidebar-header"] [data-moo-sidebar-dropdown-positioned] > .dropdown-menu {
+  [data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu {
     position: fixed !important;
     z-index: $zindex-dropdown;
     inset-block-start: var(--moo-sidebar-dropdown-block-start) !important;

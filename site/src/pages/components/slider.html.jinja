@@ -1,0 +1,239 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/slider.html.jinja" import slider, slider_range %}
+{% from "components/table.html.jinja" import table %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/code-snippet.html.jinja" import render_code_snippet %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Slider - Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Slider",
+    "Select single values and ranges with native range input semantics and a shadcn-like track, fill, and thumb."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set intro %}
+      {{ slider(
+        id="slider-intro",
+        label="Volume",
+        name="volume",
+        value=60
+      ) }}
+    {% endset %}
+    {% set usage %}
+      <p>Use <code>[data-slider]</code> around one or two native <code>input[type="range"].form-range</code> controls. Bootstrap keeps the real form control semantics, keyboard behavior, disabled state, and Sass customization path; Moo UI adds the shadcn-like filled track, value output synchronization, and public lifecycle wrapper.</p>
+      <p>The optional Slider ESM is small and self-contained. Import <code>@wpmoo/ui/slider.js</code>, initialize only the root your page owns, and call <code>dispose()</code> before removing that root in a partial-page or SPA update. Importing the module never scans the document.</p>
+    {% endset %}
+    {{ render_component_intro(
+      intro,
+      usage,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set default %}
+      {{ slider(
+        id="slider-default",
+        label="Volume",
+        name="volume",
+        value=50
+      ) }}
+    {% endset %}
+    {{ render_component_example("slider", "Slider",
+      "slider-default",
+      "Default",
+      "A single native range input drives the filled track and output text.",
+      default,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set range_example %}
+      {{ slider_range(
+        id="slider-range",
+        label="Price range",
+        start_name="price_min",
+        end_name="price_max",
+        start_value=25,
+        end_value=75,
+        step=5
+      ) }}
+    {% endset %}
+    {{ render_component_example("slider", "Slider",
+      "slider-range",
+      "Range",
+      "Two coordinated native range inputs preserve form submission while sharing one filled track.",
+      range_example,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set steps %}
+      {{ slider(
+        id="slider-steps",
+        label="Rating",
+        name="rating",
+        min=0,
+        max=5,
+        step=0.5,
+        value=3.5
+      ) }}
+    {% endset %}
+    {{ render_component_example("slider", "Slider",
+      "slider-steps",
+      "Steps",
+      "Use the native <code>min</code>, <code>max</code>, and <code>step</code> attributes for snapping and form values.",
+      steps,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set vertical %}
+      {{ slider(
+        id="slider-vertical",
+        label="Gain",
+        name="gain",
+        value=70,
+        orientation="vertical"
+      ) }}
+    {% endset %}
+    {{ render_component_example("slider", "Slider",
+      "slider-vertical",
+      "Vertical",
+      "Set <code>orientation=&quot;vertical&quot;</code> when the value control belongs beside a compact visual scale.",
+      vertical,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set disabled %}
+      {{ slider(
+        id="slider-disabled",
+        label="Disabled volume",
+        name="disabled_volume",
+        value=40,
+        disabled=true
+      ) }}
+    {% endset %}
+    {{ render_component_example("slider", "Slider",
+      "slider-disabled",
+      "Disabled",
+      "The disabled state stays on the native input, so it cannot be focused, changed, or submitted.",
+      disabled,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+
+    {% set rtl_arabic %}
+      <div dir="rtl" class="w-100">
+        {{ slider(
+          id="slider-rtl-arabic",
+          aria_label="مستوى الصوت",
+          name="rtl_arabic_volume",
+          value=60
+        ) }}
+      </div>
+    {% endset %}
+    {% set rtl_hebrew %}
+      <div dir="rtl" class="w-100">
+        {{ slider(
+          id="slider-rtl-hebrew",
+          aria_label="עוצמת קול",
+          name="rtl_hebrew_volume",
+          value=60
+        ) }}
+      </div>
+    {% endset %}
+    {% set rtl_english %}
+      <div dir="ltr" class="w-100">
+        {{ slider(
+          id="slider-rtl-english",
+          aria_label="Volume",
+          name="rtl_english_volume",
+          value=60
+        ) }}
+      </div>
+    {% endset %}
+    {{ render_rtl_example(
+      "slider-rtl",
+      "The filled track uses logical inset properties, so it follows the surrounding text direction while the input keeps native range semantics.",
+      rtl_arabic,
+      rtl_hebrew,
+      rtl_english,
+      preview_class="moo-example__preview--narrow"
+    ) }}
+  </div>
+
+  <section class="moo-doc-section mt-5" aria-labelledby="slider-html-anatomy">
+    {{ typography("HTML Anatomy", variant="section-title", id="slider-html-anatomy") }}
+    {% set slider_parts = [
+      {"id": "slider-root", "selector": "<code>[data-slider]</code>", "summary": "Slider root and lifecycle target. It owns fill state and optional output synchronization."},
+      {"id": "slider-track", "selector": "<code>[data-slider-track]</code>", "summary": "Visual track wrapper. It receives pointer clicks and positions the filled range."},
+      {"id": "slider-fill", "selector": "<code>[data-slider-range]</code>", "summary": "Decorative fill element. It is not a progressbar and has no ARIA role."},
+      {"id": "slider-input", "selector": '<span class="moo-doc-selector-stack"><code>input[type="range"]</code><code>.form-range</code><code>[data-slider-input]</code></span>', "summary": "Native range input. It owns keyboard behavior, form serialization, disabled state, and accessible slider semantics."},
+      {"id": "slider-output", "selector": "<code>[data-slider-output]</code>", "summary": "Optional output element synchronized from the current native input value or value range."}
+    ] %}
+    {% set slider_part_rows = namespace(by_id={}) %}
+    {% for part in slider_parts %}
+      {% set _ = slider_part_rows.by_id.update({part["id"]: [part["selector"], part["summary"]]}) %}
+    {% endfor %}
+    {% set slider_row_groups = [
+      {
+        "heading_id": "slider-anatomy-root",
+        "title": "Root",
+        "rows": [slider_part_rows.by_id["slider-root"]],
+        "row_ids": ["slider-root"]
+      },
+      {
+        "heading_id": "slider-anatomy-track",
+        "title": "Track",
+        "rows": [slider_part_rows.by_id["slider-track"], slider_part_rows.by_id["slider-fill"], slider_part_rows.by_id["slider-input"]],
+        "row_ids": ["slider-track", "slider-fill", "slider-input"]
+      },
+      {
+        "heading_id": "slider-anatomy-output",
+        "title": "Output",
+        "rows": [slider_part_rows.by_id["slider-output"]],
+        "row_ids": ["slider-output"]
+      }
+    ] %}
+    {{ table(
+      ["Selector", "Purpose"],
+      [],
+      row_groups=slider_row_groups,
+      row_header=true,
+      extra_class="align-middle moo-doc-anatomy-table moo-doc-anatomy-table--grouped",
+      responsive_class="scroll-fade-x no-scrollbar"
+    ) }}
+  </section>
+
+  <section class="moo-doc-section mt-5" aria-labelledby="slider-javascript">
+    {{ typography("JavaScript", variant="section-title", id="slider-javascript") }}
+    <p>
+      The module is explicit and idempotent. It does not replace the native range
+      control with a custom ARIA widget; it only synchronizes fill and output state
+      around real inputs.
+    </p>
+    {% set slider_import_example %}
+    import Slider from "@wpmoo/ui/slider.js";
+
+    const element = document.querySelector("[data-slider]");
+
+    if (element) {
+      const slider = Slider.getOrCreateInstance(element);
+
+      // getOrCreateInstance is idempotent: the same instance is returned.
+      const again = Slider.getOrCreateInstance(element);
+      console.assert(slider === again);
+
+      // Later, release event listeners before removing the root.
+      slider.dispose();
+    }
+    {% endset %}
+    {{ render_code_snippet("slider-javascript-import", slider_import_example, "js") }}
+  </section>
+
+  {{ render_reference(
+    "For Bootstrap's native range input semantics, disabled state, min/max, step, and Sass variables, see the",
+    "https://getbootstrap.com/docs/5.3/forms/range/",
+    "Bootstrap Range documentation"
+  ) }}
+{% endblock %}

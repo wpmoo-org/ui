@@ -32,6 +32,20 @@ Moo UI vendors `Geist-Variable.woff2` for catalog chrome typography only.
 Geist is licensed under the SIL Open Font License 1.1 (`OFL-1.1`); the bundled
 license is stored at `vendor/geist/LICENSE`.
 
+## Chart.js
+
+Moo UI bundles Chart.js into the published `@wpmoo/ui` ESM outputs at build time.
+
+- **Library:** Chart.js
+- **Version:** 4.5.1
+- **License:** MIT
+- **Source:** <https://github.com/chartjs/Chart.js>
+- **Copyright:** Copyright (c) 2014-2024 Chart.js contributors
+- **Bundled outputs:** `dist/js/chart.js` (canonical), `dist/js/chart.min.js` (minified)
+
+Only the JavaScript runtime is bundled. Chart.js's default CSS is not imported
+or shipped.
+
 ## WPMoo visual assets
 
 WPMoo-generated visual assets, including image assets under `site/static/images/`,

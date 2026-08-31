@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import re
+import subprocess
 import tempfile
 
-from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import ROOT, CatalogTestCase, read_settings
+from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 SCSS = ROOT / "scss"
 SITE_SCSS = ROOT / "site/scss"
@@ -56,6 +59,11 @@ MOO_SHARED_TOKENS = {
     "--moo-sidebar-foreground": "var(--moo-foreground)",
     "--moo-sidebar-accent": "var(--moo-muted-surface)",
     "--moo-sidebar-border": "var(--moo-border)",
+    "--moo-chart-1": "$moo-chart-1",
+    "--moo-chart-2": "$moo-chart-2",
+    "--moo-chart-3": "$moo-chart-3",
+    "--moo-chart-4": "$moo-chart-4",
+    "--moo-chart-5": "$moo-chart-5",
 }
 
 # Component partials must consume shared primitives (Bootstrap Sass/CSS scales
@@ -347,6 +355,47 @@ def catalog_literal_offenders(path: Path) -> list[str]:
 
 
 class DesignGateTests(CatalogTestCase):
+    def test_neutral_chart_defaults_match_theme_builder_schema(self) -> None:
+        palette = (ROOT / "scss/settings/_palette.scss").read_text(encoding="utf-8")
+        sass_values = dict(
+            re.findall(
+                r"\$(moo-chart-[1-5]):\s*(#[0-9a-fA-F]{6})\s*!default;",
+                palette,
+            )
+        )
+        self.assertEqual(len(sass_values), 5)
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { resolveThemeBuilderTokens } from "./site/src/js/catalog/theme-builder-schema.js";
+const tokens = resolveThemeBuilderTokens({ chartColor: "neutral" });
+console.log(JSON.stringify(Object.fromEntries(
+  [1, 2, 3, 4, 5].map((index) => [`moo-chart-${index}`, tokens[`--moo-chart-${index}`]])
+)));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        js_values = json.loads(result.stdout.splitlines()[-1])
+        expected = {
+            key: (
+                f"rgb({int(value[1:3], 16)}, "
+                f"{int(value[3:5], 16)}, "
+                f"{int(value[5:7], 16)})"
+            )
+            for key, value in sass_values.items()
+        }
+        self.assertEqual(js_values, expected)
+
     def test_scss_source_surface_uses_only_owned_layers(self) -> None:
         root_files = {
             path.name for path in SCSS.glob("*.scss")
@@ -354,10 +403,9 @@ class DesignGateTests(CatalogTestCase):
         self.assertEqual(
             root_files,
             {
-                "_bootstrap_component_layer.scss",
-                "_component_layer.scss",
-                "_facade-settings.scss",
-                "_primary_variables.scss",
+                "_components.scss",
+                "_config.scss",
+                "_settings.scss",
                 "moo-core.scss",
                 "moo-ui.scss",
             },
@@ -388,34 +436,36 @@ class DesignGateTests(CatalogTestCase):
             {"_scroll_fade.scss", "_scroll_fade_primitives.scss"},
         )
 
-    def test_primary_variables_import_settings_in_dependency_order(self) -> None:
-        primary_variables = (SCSS / "_primary_variables.scss").read_text(
+    def test_settings_aggregate_imports_partials_in_dependency_order(self) -> None:
+        settings = (SCSS / "_settings.scss").read_text(
             encoding="utf-8"
         )
+        self.assertEqual(
+            active_scss_import_list(settings)[:1],
+            ["config"],
+        )
+
         expected = [
             "settings/palette",
             "settings/forms",
-            "settings/components",
+            "settings/component_variables",
             "settings/bootstrap_overrides",
         ]
         imports = [
             target
-            for target in active_scss_import_list(primary_variables)
+            for target in active_scss_import_list(settings)
             if target.startswith("settings/")
         ]
 
         self.assertEqual(imports, expected)
-        # _facade_public.scss is the narrow public allow-list: it is owned
-        # by _palette.scss's leading import (and by the public facade), not
-        # a direct _primary_variables.scss import.
         self.assertEqual(
             owned_partial_targets(SCSS / "settings"),
-            set(expected) | {"settings/facade_public"},
+            set(expected),
         )
         palette_imports = active_scss_import_list(
             (SCSS / "settings/_palette.scss").read_text(encoding="utf-8")
         )
-        self.assertEqual(palette_imports[:1], ["facade_public"])
+        self.assertEqual(palette_imports, [])
 
     def test_entrypoints_import_theme_and_foundation_layers_in_order(self) -> None:
         entrypoint_imports = {
@@ -428,12 +478,44 @@ class DesignGateTests(CatalogTestCase):
         self.assertEqual(
             entrypoint_imports["moo-ui.scss"],
             [
-                "primary_variables",
-                "../vendor/bootstrap/scss/bootstrap",
+                "settings",
+                "../vendor/bootstrap/scss/mixins/banner",
+                "../vendor/bootstrap/scss/functions",
+                "../vendor/bootstrap/scss/variables",
+                "../vendor/bootstrap/scss/variables-dark",
+                "../vendor/bootstrap/scss/maps",
+                "../vendor/bootstrap/scss/mixins",
+                "../vendor/bootstrap/scss/utilities",
+                "../vendor/bootstrap/scss/root",
+                "../vendor/bootstrap/scss/reboot",
+                "../vendor/bootstrap/scss/type",
+                "../vendor/bootstrap/scss/images",
+                "../vendor/bootstrap/scss/containers",
+                "../vendor/bootstrap/scss/grid",
+                "../vendor/bootstrap/scss/forms/form-range",
+                "../vendor/bootstrap/scss/forms/floating-labels",
+                "../vendor/bootstrap/scss/transitions",
+                "../vendor/bootstrap/scss/navbar",
+                "../vendor/bootstrap/scss/progress",
+                "../vendor/bootstrap/scss/list-group",
+                "../vendor/bootstrap/scss/carousel",
+                "../vendor/bootstrap/scss/spinners",
+                "../vendor/bootstrap/scss/placeholders",
+                "../vendor/bootstrap/scss/helpers/clearfix",
+                "../vendor/bootstrap/scss/helpers/colored-links",
+                "../vendor/bootstrap/scss/helpers/focus-ring",
+                "../vendor/bootstrap/scss/helpers/icon-link",
+                "../vendor/bootstrap/scss/helpers/ratio",
+                "../vendor/bootstrap/scss/helpers/position",
+                "../vendor/bootstrap/scss/helpers/stacks",
+                "../vendor/bootstrap/scss/helpers/visually-hidden",
+                "../vendor/bootstrap/scss/helpers/stretched-link",
+                "../vendor/bootstrap/scss/helpers/text-truncation",
+                "../vendor/bootstrap/scss/helpers/vr",
+                "../vendor/bootstrap/scss/utilities/api",
                 "themes/standalone_root",
-                "foundations/focus",
                 "utilities/scroll_fade_primitives",
-                "component_layer",
+                "components",
                 "foundations/overlay_backdrop",
             ],
         )
@@ -441,7 +523,7 @@ class DesignGateTests(CatalogTestCase):
             entrypoint_imports["moo-core.scss"],
             [
                 "functions",
-                "primary_variables",
+                "settings",
                 "variables",
                 "variables-dark",
                 "maps",
@@ -449,15 +531,16 @@ class DesignGateTests(CatalogTestCase):
                 "utilities",
                 "themes/scoped_core",
                 "foundations/core_global_primitives",
-                "bootstrap_component_layer",
-                "foundations/focus",
-                "component_layer",
+                "components",
                 "foundations/core_state_layer",
                 "foundations/overlay_backdrop",
             ],
         )
 
-        imported = set().union(*entrypoint_imports.values())
+        components_imports = active_scss_import_list(
+            (SCSS / "_components.scss").read_text(encoding="utf-8")
+        )
+        imported = set().union(*entrypoint_imports.values(), components_imports)
         for directory in (SCSS / "themes", SCSS / "foundations"):
             for target in owned_partial_targets(directory):
                 self.assertIn(target, imported, f"{target} is not imported")
@@ -596,30 +679,56 @@ class DesignGateTests(CatalogTestCase):
 
     def test_all_component_partials_are_imported(self) -> None:
         entrypoint = (SCSS / "moo-ui.scss").read_text(encoding="utf-8")
-        component_layer = (SCSS / "_component_layer.scss").read_text(
+        components = (SCSS / "_components.scss").read_text(
             encoding="utf-8"
         )
-        if '@import "component_layer"' in entrypoint:
-            entrypoint += "\n" + component_layer
+        if '@import "components"' in entrypoint:
+            entrypoint += "\n" + components
         imported_components = active_component_imports(entrypoint)
 
-        layer_imports = active_scss_import_list(component_layer)
-        self.assertEqual(layer_imports[0], "utilities/scroll_fade")
+        aggregate_imports = active_scss_import_list(components)
+        self.assertEqual(len(aggregate_imports), len(set(aggregate_imports)))
+        self.assertIn("utilities/scroll_fade", aggregate_imports)
         self.assertTrue(
-            all(target.startswith("components/") for target in layer_imports[1:])
+            all(
+                target.startswith("components/")
+                for target in aggregate_imports
+                if target != "utilities/scroll_fade"
+                and target != "foundations/focus"
+                and not target.startswith("forms/")
+                and target not in {
+                    "tables",
+                    "buttons",
+                    "dropdown",
+                    "button-group",
+                    "nav",
+                    "card",
+                    "accordion",
+                    "breadcrumb",
+                    "pagination",
+                    "badge",
+                    "alert",
+                    "close",
+                    "toasts",
+                    "modal",
+                    "tooltip",
+                    "popover",
+                    "offcanvas",
+                    "helpers/color-bg",
+                }
+            )
         )
-        self.assertEqual(len(layer_imports), len(set(layer_imports)))
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
             component = path.stem.removeprefix("_")
             self.assertIn(component, imported_components)
 
-    def test_core_component_layer_imports_all_component_partials(self) -> None:
-        component_layer = SCSS / "_component_layer.scss"
+    def test_components_aggregate_imports_all_component_partials(self) -> None:
+        components = SCSS / "_components.scss"
 
-        self.assertTrue(component_layer.is_file())
+        self.assertTrue(components.is_file())
         imported_components = active_component_imports(
-            component_layer.read_text(encoding="utf-8")
+            components.read_text(encoding="utf-8")
         )
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
@@ -682,8 +791,8 @@ class DesignGateTests(CatalogTestCase):
         )
 
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:
-        primary_variables = read_primary_variables()
-        primary_lines = primary_variables.splitlines()
+        settings = read_settings()
+        settings_lines = settings.splitlines()
 
         # Bootstrap's native class family is .btn (not .button), so
         # Button's private tokens use --moo-btn-* to stay aligned with
@@ -709,18 +818,18 @@ class DesignGateTests(CatalogTestCase):
             for token in sorted(tokens):
                 knob = f"${token.removeprefix('--')}"
                 self.assertRegex(
-                    primary_variables,
+                    settings,
                     rf"{re.escape(knob)}\s*:[^;]+!default;",
                     f"{token} must have a matching {knob} !default Sass knob",
                 )
                 declaration_line = next(
                     index
-                    for index, line in enumerate(primary_lines)
+                    for index, line in enumerate(settings_lines)
                     if re.search(rf"^\s*{re.escape(knob)}\s*:", line)
                 )
                 rationale = " ".join(
                     line.removeprefix("//").strip().lower()
-                    for line in primary_lines[max(0, declaration_line - 8):declaration_line]
+                    for line in settings_lines[max(0, declaration_line - 8):declaration_line]
                     if line.strip().startswith("//")
                 )
                 self.assertIn(
@@ -747,7 +856,7 @@ class DesignGateTests(CatalogTestCase):
                     )
 
     def test_visual_exception_values_are_configured_by_sass_knobs(self) -> None:
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         component_sources = {
             path.name: path.read_text(encoding="utf-8")
             for path in component_partials()
@@ -761,7 +870,7 @@ class DesignGateTests(CatalogTestCase):
         )
         for knob in expected_knobs:
             with self.subTest(knob=knob):
-                self.assertIn(knob, primary_variables)
+                self.assertIn(knob, settings)
 
         self.assertIn("border-color: $badge-border-color;", component_sources["_badge.scss"])
         self.assertIn(
@@ -782,7 +891,7 @@ class DesignGateTests(CatalogTestCase):
         )
 
     def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
             encoding="utf-8"
         )
@@ -793,9 +902,9 @@ class DesignGateTests(CatalogTestCase):
         for token, variables in MOO_THEME_TOKENS.items():
             for variable in variables:
                 self.assertRegex(
-                    primary_variables,
+                    settings,
                     rf"{re.escape(variable)}\s*:[^;]+!default;",
-                    f"{token} must be backed by {variable} in primary variables",
+                    f"{token} must be backed by {variable} in the settings aggregate",
                 )
 
         for token, (light_variable, dark_variable) in MOO_THEME_TOKENS.items():
@@ -834,7 +943,7 @@ class DesignGateTests(CatalogTestCase):
             )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         for scale_variable in (
             "$box-shadow-sm:",
             "$box-shadow:",
@@ -844,7 +953,7 @@ class DesignGateTests(CatalogTestCase):
             "$btn-font-size-sm:",
             "$btn-font-size-lg:",
         ):
-            self.assertIn(scale_variable, primary_variables)
+            self.assertIn(scale_variable, settings)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

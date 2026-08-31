@@ -2,7 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/popover.html.jinja" import popover_dismiss_trigger %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Popover — Moo UI{% endblock %}
@@ -41,7 +41,7 @@
         popover_content="Approve this request, reassign it, or return it for clarification."
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("popover", "Popover",
       "basic",
       "Basic",
       "Use <code>popover_title</code> and <code>popover_content</code> on a standard button trigger for quick inline context.",
@@ -57,7 +57,7 @@
         {{ button("Left", variant="outline", popover_content="Reserve space on the left for this control-heavy view.", popover_placement="left") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("popover", "Popover",
       "placements",
       "Placement",
       "Set <code>popover_placement</code> to <code>top</code>, <code>right</code>, <code>bottom</code>, or <code>left</code> to position the popover close to the action.",
@@ -74,7 +74,7 @@
         popover_html=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("popover", "Popover",
       "rich-content",
       "Rich content",
       "Set <code>popover_html=true</code> to format body content. Bootstrap still applies its default sanitizer, so stay with allowlisted tags like <code>&lt;strong&gt;</code> and <code>&lt;code&gt;</code>.",
@@ -85,7 +85,7 @@
     {% set dismiss %}
       {{ popover_dismiss_trigger("Dismiss details", "Click anywhere outside this panel to close it.", title="Dismissible note") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("popover", "Popover",
       "dismiss",
       "Dismiss on next click",
       "Bootstrap's focus-triggered dismiss pattern uses an <code>&lt;a&gt;</code> element with <code>tabindex=&quot;0&quot;</code>, <code>data-bs-trigger=&quot;focus&quot;</code>, and the documented popover attributes rather than a button.",
@@ -98,7 +98,7 @@
         {{ button("Archive", variant="outline", disabled=true) }}
       </span>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("popover", "Popover",
       "disabled-trigger",
       "Disabled trigger",
       "A <code>disabled</code> control does not receive pointer or focus events, so attach the popover to a focusable <code>&lt;span&gt;</code> wrapper.",

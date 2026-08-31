@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "components/kbd.html.jinja" import kbd %}
 
 {% block title %}Kbd — Moo UI{% endblock %}
@@ -32,7 +32,7 @@
         {{ kbd("Esc") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("kbd", "Kbd",
       "single-key",
       "Single key",
       "Use one key when the action is immediate and the intent is obvious.",
@@ -52,7 +52,7 @@
         </span>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("kbd", "Kbd",
       "key-combination",
       "Key combination",
       "Render each key segment separately so combinations remain scannable.",
@@ -79,7 +79,7 @@
         <span>to switch to power mode.</span>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("kbd", "Kbd",
       "shortcut-sequence",
       "Shortcut sets",
       "Offer alternate combos for one task so the same workflow remains discoverable.",

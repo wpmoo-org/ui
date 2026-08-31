@@ -2,7 +2,7 @@
 {% from "components/checkbox.html.jinja" import checkbox %}
 {% from "components/field.html.jinja" import field, fieldset, field_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Checkbox — Moo UI{% endblock %}
@@ -38,7 +38,7 @@
         {{ checkbox("checkbox-checked", label="Accept terms and conditions", checked=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "checked-state",
       "Checked State",
       "Unchecked and checked states share the same label contract; the input's <code>checked</code> attribute sets the initial state.",
@@ -49,7 +49,7 @@
     {% set invalid_state %}
       {{ checkbox("checkbox-invalid", label="Accept terms and conditions", invalid=true) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "invalid-state",
       "Invalid State",
       "Set <code>invalid=true</code> to pair with a form's validation state. Unlike other form controls, invalid checkboxes keep the focus ring visible on mouse click so the error stays prominent.",
@@ -60,7 +60,7 @@
     {% set basic %}
       {{ checkbox("checkbox-basic", label="Accept terms and conditions") }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "basic",
       "Basic",
       "Pair the checkbox with a label for proper layout and labeling. The <code>form-check</code> wrapper aligns the input and text on a shared baseline.",
@@ -76,7 +76,7 @@
         checked=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "with-description",
       "Description",
       "Add supporting copy below the label with <code>description</code>. The helper text is linked via <code>aria-describedby</code> for screen readers.",
@@ -90,7 +90,7 @@
         {{ checkbox("checkbox-disabled-checked", label="Enable notifications", checked=true, disabled=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "disabled",
       "Disabled",
       "Disabled checkboxes lower opacity and drop pointer interaction in both states.",
@@ -116,7 +116,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "group",
       "Group",
       "Stack multiple checkboxes with a shared label and description to create a checkbox list.",
@@ -164,7 +164,7 @@
         </table>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("checkbox", "Checkbox",
       "table",
       "Table",
       "Embed checkboxes inside table rows for batch selection. Use <code>label_wrapper</code> with <code>aria_label</code> so the entire cell is the hit target.",

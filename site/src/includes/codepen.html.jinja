@@ -1,44 +1,6 @@
 {% from "components/button.html.jinja" import button %}
 
-{% macro example_component_reference_codepen_css() -%}
-.moo-examples-footer__component-trigger {
-  padding: 0;
-  border: 0;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  vertical-align: baseline;
-  background: transparent;
-}
-
-.moo-examples-footer__component-trigger:hover,
-.moo-examples-footer__component-trigger:focus-visible {
-  color: var(--bs-link-hover-color);
-}
-
-.moo-examples-footer__preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-top-left-radius: var(--bs-popover-border-radius);
-  border-top-right-radius: var(--bs-popover-border-radius);
-  margin: calc(var(--bs-popover-body-padding-y, 0.625rem) * -1) calc(var(--bs-popover-body-padding-x, 0.625rem) * -1) 0.75rem;
-  padding: 0.75rem;
-  background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
-  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
-}
-
-.moo-catalog__showcase-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-[data-bs-theme="dark"] .moo-catalog__showcase-image {
-  filter: invert(1) hue-rotate(180deg);
-}
-{%- endmacro %}
+{% set codepen_current_package_required_slugs = ["chart", "datepicker", "slider"] %}
 
 {#- These two CSS blocks are the small amount of page-layout CSS each
    example category owns on top of the shipped moo-ui.css (see
@@ -102,8 +64,6 @@
 .moo-auth-page__footer > p {
   text-align: left;
 }
-
-{{ example_component_reference_codepen_css() }}
 
 @media (max-width: 576px) {
   .moo-auth-page__footer {
@@ -333,8 +293,6 @@ body {
   pointer-events: none;
 }
 
-{{ example_component_reference_codepen_css() }}
-
 @media (max-width: 576px) {
   body {
     --moo-examples-footer-height: 7rem;
@@ -495,15 +453,110 @@ body {
 {{ tasks_example_js_source() | safe }}
 {%- endmacro %}
 
+{#- Dashboard Overview: stat cards + Moo UI charts. The overview page
+   uses the same .moo-examples-page layout as Tasks/Users, but without
+   DataTable — just stat cards and chart containers. Charts are rendered
+   by the public MooChart component, which bundles Chart.js at build time
+   (no runtime Chart.js CDN load). #}
+{% macro dashboard_codepen_css() -%}
+.moo-examples-page {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  inline-size: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 0;
+}
+
+.moo-examples-page > * {
+  min-width: 0;
+}
+
+.ls-wide {
+  letter-spacing: 0.02em;
+}
+
+.moo-dashboard-chart {
+  height: 17.5rem;
+}
+
+{{ examples_header_codepen_css() }}
+{{ examples_footer_codepen_css() }}
+{%- endmacro %}
+
+{#- Chart initialization for the Dashboard Overview CodePen. CodePen is
+   intentionally isolated from the catalog bundle: the catalog loads
+   MooChart from the site's own remapped module path, but a real CodePen
+   pen cannot `import` from ui.wpmoo.org because that origin sends no
+   Access-Control-Allow-Origin header, so the cross-origin import would be
+   blocked by CORS. unpkg.com serves the published @wpmoo/ui bundle with a
+   CORS header, so this small DOM adapter dynamically imports the
+   version-pinned Moo bundle from there. It never loads Chart.js directly:
+   the published dist/js/chart.js already bundles Chart.js and exposes
+   MooChart as its default export. #}
+{% macro dashboard_codepen_js() -%}
+// This pen includes the copyable dashboard markup and CSS. The Moo Chart
+// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
+// package is published to npm; do not import chart.js from the older pinned
+// CodePen CDN package.
+{%- endmacro %}
+
+{% macro chart_codepen_css() -%}
+body {
+  padding: 2rem;
+}
+
+.chart {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+{%- endmacro %}
+
+{% macro chart_codepen_js() -%}
+// This pen includes the copyable Moo Chart markup and CSS. The Moo Chart
+// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
+// package is published to npm; do not import chart.js from the older pinned
+// CodePen CDN package.
+{%- endmacro %}
+
+{% macro codepen_demo_js(component_slug="", component_label="") -%}
+  {% set ns = namespace(meta={"kind": "example"}, component=None) %}
+  {% for component in catalog %}
+    {% if component.slug == component_slug %}
+      {% set ns.component = component %}
+    {% endif %}
+  {% endfor %}
+  {% if component_slug and component_label %}
+    {% set ns.meta = {
+      "kind": "component",
+      "components": [
+        {
+          "slug": component_slug,
+          "label": component_label,
+          "description": ns.component.description if ns.component else "",
+          "href": canonical_url("components/" ~ component_slug ~ ".html"),
+          "previewSrc": component_preview_absolute_src(component_slug)
+        }
+      ]
+    } %}
+  {% endif %}
+window.MooCodePen = {{ ns.meta | moo_json | safe }};
+if (window.MooCodePenDemo) {
+  window.MooCodePenDemo.init(window.MooCodePen);
+}
+{%- endmacro %}
+
 {#- Submits a CodePen "Pen Definition" prefill POST (https://blog.codepen.io/documentation/prefill/)
-   in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
-   page's own markup (internal links rewritten to absolute ui.wpmoo.org
-   URLs so they still work standalone) plus the shared external
-   moo-ui.css stylesheet, version-locked to the site's own package
-   version so it never drifts from what's actually live. data-moo-codepen-form
-   opts this form out of examples-forms.js's inert-demo-form guard --
-   unlike every other form on an Examples page, this one is meant to
-   really submit.
+    in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
+    page's own markup (internal links rewritten to absolute ui.wpmoo.org
+    URLs so they still work standalone) plus the shared external
+    moo-ui.css stylesheet, pinned to the published CDN package version
+    (product.codepenCdnVersion) so the pen loads a version that actually
+    exists on npm. data-moo-codepen-form
+    opts this form out of examples-forms.js's inert-demo-form guard --
+    unlike every other form on an Examples page, this one is meant to
+    really submit.
 
    Lives in the page's own "demo only / built with X, Y, Z" meta footer,
    not next to the page/card title -- that title row is the simulated
@@ -513,13 +566,28 @@ body {
    clean `html` for the payload below, before this button exists), once
    with this macro's own output passed back in (for the page actually
    shown to a visitor) -- see any Examples page for the pattern. #}
-{% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110") -%}
-  {% set uses_popover = 'data-bs-toggle="popover"' in html %}
+{% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110", label="Open in CodePen", icon="code", extra_class="", component_slug="", component_label="") -%}
+  {% set is_component_codepen = component_slug and component_label %}
+  {% set resolved_html %}
+{{ html | safe }}
+  {% endset %}
+  {% set resolved_css %}
+{{ css | safe }}
+  {% endset %}
+  {% set uses_popover = 'data-bs-toggle="popover"' in resolved_html %}
+  {% set uses_dropdown = 'data-bs-toggle="dropdown"' in resolved_html %}
+  {% set bootstrap_js_external = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js" %}
+  {% set demo_css_external = "https://ui.wpmoo.org/assets/css/codepen-demo.css" %}
+  {% set demo_js_external = "https://ui.wpmoo.org/assets/js/codepen-demo.js" %}
   {% set resolved_js_external = js_external %}
-  {% if uses_popover and not resolved_js_external %}
-    {% set resolved_js_external = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js" %}
+  {% if (is_component_codepen or uses_popover or uses_dropdown) and bootstrap_js_external not in resolved_js_external %}
+    {% set resolved_js_external = (resolved_js_external ~ ";" ~ bootstrap_js_external) if resolved_js_external else bootstrap_js_external %}
   {% endif %}
-  {% set resolved_js = js %}
+  {% if demo_js_external not in resolved_js_external %}
+    {% set resolved_js_external = (resolved_js_external ~ ";" ~ demo_js_external) if resolved_js_external else demo_js_external %}
+  {% endif %}
+  {% set demo_js = codepen_demo_js(component_slug, component_label) | trim %}
+  {% set resolved_js = (demo_js ~ "\n\n" ~ js) | trim %}
   {% if uses_popover and "initializeMooCodePenPopovers" not in resolved_js %}
     {% set popover_js -%}
 function initializeMooCodePenPopovers() {
@@ -560,12 +628,12 @@ if (document.readyState === "loading") {
   {% set payload = {
     "title": title,
     "description": description,
-    "html": html | absolutize_links,
+    "html": resolved_html | absolutize_links,
     "html_pre_processor": "none",
-    "css": css,
+    "css": resolved_css | trim,
     "css_pre_processor": "none",
     "css_starter": "neither",
-    "css_external": "https://unpkg.com/@wpmoo/ui@" ~ product.version ~ "/dist/assets/css/moo-ui.css",
+    "css_external": "https://unpkg.com/@wpmoo/ui@" ~ product.codepenCdnVersion ~ "/dist/assets/css/moo-ui.css;" ~ demo_css_external,
     "js": resolved_js,
     "js_pre_processor": "none",
     "js_external": resolved_js_external,
@@ -573,8 +641,30 @@ if (document.readyState === "loading") {
     "editors": editors,
     "js_module": js_module
   } %}
-  <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen" data-moo-codepen-form>
+  <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen{% if extra_class %} {{ extra_class }}{% endif %}" data-moo-codepen-form>
     <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
-    {{ button("Open in CodePen", type="submit", variant="outline", size="sm", icon_start="code") }}
+    {{ button(label, type="submit", variant="outline", size="sm", icon_start=icon) }}
   </form>
+{%- endmacro %}
+
+{% macro codepen_button_if_available(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110", label="Open in CodePen", icon="code", extra_class="", component_slug="", component_label="") -%}
+  {% set needs_current_package = component_slug in codepen_current_package_required_slugs %}
+  {% if product.codepenCdnVersion == product.version or not needs_current_package %}
+    {{ codepen_button(
+      title,
+      description,
+      html,
+      css,
+      tags,
+      js=js,
+      js_external=js_external,
+      js_module=js_module,
+      editors=editors,
+      label=label,
+      icon=icon,
+      extra_class=extra_class,
+      component_slug=component_slug,
+      component_label=component_label
+    ) }}
+  {% endif %}
 {%- endmacro %}

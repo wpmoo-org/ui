@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/collapsible.html.jinja" import collapsible %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Collapsible — Moo UI{% endblock %}
@@ -40,7 +40,7 @@
         trigger_aria_label="Toggle task details"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("collapsible", "Collapsible",
       "basic",
       "Basic",
       "The trigger line stays fixed while details expand directly below without affecting horizontal measure.",
@@ -56,7 +56,7 @@
         trigger_aria_label="Toggle product details"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("collapsible", "Collapsible",
       "product",
       "Product review details",
       "A compact header plus stacked metadata keeps this section readable even when expanded.",
@@ -73,7 +73,7 @@
         open=true
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("collapsible", "Collapsible",
       "open",
       "Open by default",
       "Start open when the first render should show supporting details immediately.",

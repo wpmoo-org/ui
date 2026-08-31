@@ -1,0 +1,39 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "includes/chart-template.html.jinja" import render_chart_contract_sections, render_chart_intro_preview, render_chart_usage %}
+{% from "includes/documentation-reference.html.jinja" import render_reference with context %}
+{% from "includes/example.html.jinja" import render_component_intro %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+
+{% block title %}Chart — Moo UI{% endblock %}
+
+{% block content %}
+  {{ render_page_header(
+    "Chart",
+    "Render Bootstrap-token-themed charts with Moo's area alias plus Chart.js-native line, bar, pie, doughnut, polar, radar, scatter, and bubble types."
+  ) }}
+
+  <div class="moo-component-examples">
+    {% set usage %}
+      {{ render_chart_usage(root_path=root_path, show_gallery_link=true) }}
+    {% endset %}
+    {{ render_component_intro(
+      render_chart_intro_preview(),
+      usage,
+      preview_class="moo-example__preview--medium"
+    ) }}
+    {{ render_chart_contract_sections() }}
+  </div>
+
+  {{ render_reference(
+    "Rendering and the chart API build on Chart.js; see the",
+    "https://www.chartjs.org/docs/latest/",
+    "Chart.js documentation",
+    extra_references=[
+      {
+        "lead": "For the color tokens the palette reads, see the",
+        "href": "https://getbootstrap.com/docs/5.3/customize/css-variables/",
+        "label": "Bootstrap CSS variables documentation"
+      }
+    ]
+  ) }}
+{% endblock %}

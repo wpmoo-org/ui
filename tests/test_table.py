@@ -7,7 +7,7 @@ from tests.helpers import ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/table.html.jinja"
 PAGE = ROOT / "site/src/pages/components/table.html.jinja"
 STYLES = ROOT / "scss/components/_table.scss"
-COMPONENT_LAYER = ROOT / "scss/_component_layer.scss"
+COMPONENTS_AGGREGATE = ROOT / "scss/_components.scss"
 
 
 class TableTests(CatalogTestCase):
@@ -43,6 +43,28 @@ class TableTests(CatalogTestCase):
         )
         self.assertIn('<tr id="row-x">', output)
         self.assertIn('<th scope="row">x</th>', output)
+
+    def test_table_row_groups_render_section_rows_before_group_rows(self) -> None:
+        output = self.render_table(
+            'table(["Selector", "Purpose"], [], row_groups=['
+            '{"heading_id": "group-root", "title": "Root", '
+            '"rows": [["<code>.root</code>", "Root hook"]], '
+            '"row_ids": ["row-root"]},'
+            '{"heading_id": "group-data", "title": "Data", '
+            '"rows": [["<code>[data-chart]</code>", "Data hook"]], '
+            '"row_ids": ["row-data"]}'
+            "], row_header=true)"
+        )
+
+        self.assertEqual(output.count("<tbody>"), 2)
+        self.assertIn('<tr class="moo-table-section-row" id="group-root">', output)
+        self.assertIn('<th scope="rowgroup" colspan="2">Root</th>', output)
+        self.assertIn('<tr id="row-root">', output)
+        self.assertIn('<th scope="row"><code>.root</code></th>', output)
+        self.assertIn("<td>Root hook</td>", output)
+        self.assertIn('<tr class="moo-table-section-row" id="group-data">', output)
+        self.assertIn('<th scope="rowgroup" colspan="2">Data</th>', output)
+        self.assertIn('<tr id="row-data">', output)
 
     def test_table_caption_renders_when_provided(self) -> None:
         self.assertIn(
@@ -144,7 +166,10 @@ class TableTests(CatalogTestCase):
     ) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 
-        self.assertIn('@import "components/table";', COMPONENT_LAYER.read_text(encoding="utf-8"))
+        self.assertIn(
+            '@import "components/table";',
+            COMPONENTS_AGGREGATE.read_text(encoding="utf-8"),
+        )
         self.assertIn(
             '.table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"])',
             styles,

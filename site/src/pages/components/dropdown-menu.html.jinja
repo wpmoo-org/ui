@@ -3,7 +3,7 @@
 {% from "components/checkbox.html.jinja" import checkbox %}
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Dropdown Menu — Moo UI{% endblock %}
@@ -44,7 +44,7 @@
         {{ dropdown_item("Delete", icon="trash-2", destructive=true) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dropdown-menu", "Dropdown Menu",
       "grouped",
       "Headers and separators",
       "Use headers for workflow groups, then split dense items with a divider before destructive actions.",
@@ -61,7 +61,7 @@
         {{ dropdown_item("Waiting on approval", icon="clock", disabled=true) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dropdown-menu", "Dropdown Menu",
       "shortcuts",
       "Keyboard hints",
       "Expose key equivalents beside actions so power users can run the same flow from keyboard and pointer.",
@@ -78,7 +78,7 @@
         {{ dropdown_item("Invite team", icon="plus", shortcut="⌘I") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dropdown-menu", "Dropdown Menu",
       "icons",
       "Icon-led rows",
       "Leading icons and optional shortcut text keep each command quickly recognizable in compact menus.",
@@ -101,7 +101,7 @@
         {{ dropdown_item("Reset view", icon="undo") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dropdown-menu", "Dropdown Menu",
       "toggles",
       "Checkbox-like actions",
       "Stateful controls can live inside a dropdown for temporary view filters without leaving the current context.",
@@ -124,7 +124,7 @@
         {{ dropdown_item("Reverse order", icon="redo", shortcut="⇧⌘R") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dropdown-menu", "Dropdown Menu",
       "radios",
       "Radio-like choices",
       "Use exclusive choices inside a small open context when one sort mode must be selected before returning to the page.",
@@ -140,7 +140,7 @@
         {{ dropdown_item("Delete project", icon="trash-2", destructive=true, shortcut="⌘⌫") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("dropdown-menu", "Dropdown Menu",
       "destructive",
       "Destructive entry",
       "Keep irreversible actions distinct and use a separate section or separator to reduce mis-clicks.",

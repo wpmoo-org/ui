@@ -2,7 +2,7 @@
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_divider, dropdown_header, dropdown_item %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Avatar — Moo UI{% endblock %}
@@ -65,7 +65,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "basic",
       "Basic",
       "Image avatars keep people recognizable while initials stay ready for missing media.",
@@ -81,7 +81,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "fallback",
       "Fallback initials",
       "Use initials when no image is available. The fallback still needs an accessible name through <code>aria-label</code>.",
@@ -105,7 +105,7 @@
         </div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "badge",
       "Badge",
       "Use a small corner badge for queue status or attention counts without adding another column.",
@@ -123,7 +123,7 @@
         badge_aria_label="Add mascot"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "badge-with-icon",
       "Badge with icon",
       "Use an icon badge when the avatar needs one compact action cue.",
@@ -145,7 +145,7 @@
         {{ dropdown_item("Sign out", icon="log-out") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "dropdown",
       "Dropdown",
       "Use an avatar as the trigger for a compact profile menu when account actions belong to the current user.",
@@ -163,7 +163,7 @@
         <div class="text-body-secondary small">Workspace profiles</div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "group",
       "Avatar group",
       "Stack reviewer avatars to represent team ownership at a glance.",
@@ -181,7 +181,7 @@
         <div class="text-body-secondary small">Three shown, more collaborators off-screen</div>
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "group-count",
       "Avatar group count",
       "Use a grouped count chip when additional teammates are off-screen.",
@@ -195,7 +195,7 @@
         {{ avatar(name="Large avatar", initials="LG", size="lg") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("avatar", "Avatar",
       "sizes",
       "Sizes",
       "Use the smallest avatar that still identifies the subject in the surrounding layout.",

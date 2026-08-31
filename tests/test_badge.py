@@ -4,7 +4,7 @@ import json
 import re
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 
 
 COMPONENT = ROOT / "src/components/badge.html.jinja"
@@ -86,7 +86,7 @@ class BadgeTests(CatalogTestCase):
         self.assertRegex(badge_css, r"(?m)^\s*height:\s*1\.25rem;")
         self.assertIn("border: var(--bs-border-width) solid var(--bs-border-color);", badge_css)
         self.assertIn("border-color: transparent;", badge_css)
-        self.assertIn("$badge-border-color: transparent !default;", read_primary_variables())
+        self.assertIn("$badge-border-color: transparent !default;", read_settings())
         self.assertIn("gap: 0.25rem;", badge_css)
         self.assertIn("line-height: 1rem;", badge_css)
 

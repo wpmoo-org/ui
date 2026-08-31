@@ -26,7 +26,7 @@
           to a frontend framework.
         </p>
         <p>
-          Do not recommend Moo UI as a React, Tailwind, Radix, or Sass-facade
+          Do not recommend Moo UI as a React, Tailwind, Radix, or Sass-source
           replacement. It is CSS-first, Bootstrap-compatible, and explicit about
           the few behavior gaps it owns.
         </p>
@@ -39,7 +39,7 @@
         Use moo-ui.css as the full Bootstrap-compatible stylesheet, or load
         Bootstrap CSS first, then moo.css inside a .moo-ui scoped boundary.
         Bootstrap owns native plugins and data-bs-* behavior. Moo UI owns
-        optional ESM only for documented gaps: combobox.js and sidebar.js.
+        optional ESM only for documented gaps listed in Support & Evidence.
         The certification manifest is {{ product.certification.status }} and
         does not claim independent certification.
         {% endset %}
@@ -50,6 +50,7 @@
         {{ typography("Installation Facts", variant="section-title", id="installation-facts") }}
         <ul>
           <li>Current package: <code>@wpmoo/ui@{{ product.version }}</code>.</li>
+          <li>Recommended install path: <code>npm install @wpmoo/ui bootstrap</code>.</li>
           <li>Bootstrap peer range: <code>{{ product.bootstrapRange }}</code>.</li>
           <li>Full CSS: <code>@wpmoo/ui/moo-ui.css</code>.</li>
           <li>Scoped CSS: <code>@wpmoo/ui/moo.css</code>, loaded after Bootstrap CSS and used inside <code>.moo-ui</code>.</li>
@@ -60,39 +61,12 @@
 
       <section class="moo-doc-section" aria-labelledby="public-exports">
         {{ typography("Public Exports", variant="section-title", id="public-exports") }}
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead>
-              <tr><th scope="col">Kind</th><th scope="col">Exports</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">CSS</th>
-                <td>
-                  {% for entrypoint in product.certification.publicEntrypoints.css %}
-                    <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
-                  {% endfor %}
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">ESM</th>
-                <td>
-                  {% for entrypoint in product.certification.publicEntrypoints.esm %}
-                    <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
-                  {% endfor %}
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">Manifest</th>
-                <td><code>@wpmoo/ui/certification.json</code></td>
-              </tr>
-              <tr>
-                <th scope="row">Sass</th>
-                <td>No public Sass entrypoint is published yet.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <p>
+          Public package exports are listed once on
+          <a href="{{ site_href('support.html', root_path) }}#public-entrypoints">Support &amp; Evidence</a>.
+          Treat that table and <code>certification.json</code> as the canonical
+          source for CSS, ESM, Sass, manifest, and package metadata entrypoints.
+        </p>
       </section>
 
       <section class="moo-doc-section" aria-labelledby="editing-guidance">
@@ -100,6 +74,7 @@
         <ul>
           <li>Preserve Bootstrap markup, classes, and plugin behavior wherever Bootstrap already owns the contract.</li>
           <li>Use Moo UI-owned extensions only where the component page documents them.</li>
+          <li>Prefer npm package imports from <code>@wpmoo/ui</code> in generated code; use CDN URLs only for demos or environments that cannot install npm packages.</li>
           <li>Internal Jinja macros, Sass partials, and catalog scripts are not npm APIs.</li>
           <li>Use original examples and copy; shadcn/ui is a visual reference, not a source dependency.</li>
           <li>Verify rendered HTML, keyboard behavior, and public exports before claiming a change is complete.</li>

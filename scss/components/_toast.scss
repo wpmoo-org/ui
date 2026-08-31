@@ -1,9 +1,6 @@
-// The design reference's own Toast page is deprecated in favor of Sonner,
-// so this partial retunes Bootstrap's own --bs-toast-* custom properties
-// toward Sonner's
-// visual weight (larger radius, quieter border tone, a softer diffuse
-// shadow, fuller padding, a lighter-weight title) while keeping Bootstrap's
-// own header/body composition and the public "Toast" name and API.
+// Bootstrap owns Toast markup, lifecycle classes, placement utilities, and
+// autohide behavior. This partial only retunes the native surface and opts
+// an explicitly indexed bottom-end container into the catalog deck layout.
 .toast {
   --bs-toast-border-radius: var(--bs-border-radius-lg);
   --bs-toast-border-color: var(--moo-border);
@@ -18,8 +15,105 @@
 }
 
 .toast-header strong {
-  // Bootstrap's own toast markup titles with a bare <strong>, which
-  // renders at the browser's default bold (700); Sonner's title sits at a
-  // lighter 500.
   font-weight: $font-weight-medium;
+}
+
+.toast-status-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-inline-end: $moo-toast-status-icon-gap;
+  color: var(--bs-secondary-color);
+}
+
+.toast-status-icon [data-icon] {
+  width: $moo-toast-status-icon-size;
+  height: $moo-toast-status-icon-size;
+}
+
+.toast[data-toast-variant="success"] .toast-status-icon {
+  color: var(--moo-success);
+}
+
+.toast[data-toast-variant="info"] .toast-status-icon {
+  color: var(--moo-info);
+}
+
+.toast[data-toast-variant="warning"] .toast-status-icon {
+  color: var(--moo-warning);
+}
+
+.toast[data-toast-variant="destructive"] .toast-status-icon {
+  color: var(--moo-destructive);
+}
+
+.toast[data-toast-variant="loading"] .toast-status-icon [data-icon] {
+  animation: $moo-spinner-animation-name $spinner-animation-speed linear infinite;
+}
+
+.toast-container--stacked[data-toast-stack="deck"] {
+  --moo-toast-stack-gap: #{$moo-toast-stack-gap};
+  --moo-toast-stack-peek: #{$moo-toast-stack-peek};
+  --moo-toast-stack-scale-step: #{$moo-toast-stack-scale-step};
+  --moo-toast-stack-min-scale: #{$moo-toast-stack-min-scale};
+  --moo-toast-stack-enter-y: #{$moo-toast-stack-enter-y};
+}
+
+// Without runtime indexes, the container remains readable Bootstrap flow.
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] {
+  bottom: 1rem !important;
+  inset-inline-end: 1rem !important;
+  height: 0;
+  max-width: calc(100vw - 2rem);
+  padding: 0 !important;
+  width: unquote("min(24rem, calc(100vw - 2rem))");
+}
+
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-index] {
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  max-width: none;
+  margin-bottom: 0;
+  position: absolute;
+  width: 100%;
+  transform: translateY(var(--moo-toast-stack-collapsed-y, 0px))
+    scale(var(--moo-toast-stack-scale, 1));
+  transform-origin: bottom center;
+  z-index: var(--moo-toast-stack-z, 1);
+  transition:
+    transform $moo-toast-stack-transition-duration $moo-toast-stack-transition-timing-function,
+    opacity $moo-toast-stack-transition-duration ease,
+    height $moo-toast-stack-height-transition-duration ease;
+}
+
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-entering] {
+  transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
+    scale(var(--moo-toast-stack-scale, 1));
+}
+
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-limited] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:hover > .toast[data-toast-stack-index],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:focus-within > .toast[data-toast-stack-index],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active][data-toast-stack-hovering] > .toast[data-toast-stack-index] {
+  transform: translateY(var(--moo-toast-stack-expanded-y, 0px)) scale(1);
+}
+
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:hover > .toast[data-toast-stack-entering],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active]:focus-within > .toast[data-toast-stack-entering],
+.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active][data-toast-stack-hovering] > .toast[data-toast-stack-entering] {
+  transform: translateY(calc(var(--moo-toast-stack-collapsed-y, 0px) + var(--moo-toast-stack-enter-y, 150%)))
+    scale(var(--moo-toast-stack-scale, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast[data-toast-variant="loading"] .toast-status-icon [data-icon] {
+    animation: none;
+  }
+
+  .toast-container--stacked[data-toast-stack="deck"][data-toast-stack-active] > .toast[data-toast-stack-index] {
+    transition: none;
+  }
 }

@@ -7,7 +7,7 @@
 {% from "components/select.html.jinja" import select %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 
 {% block title %}Button Group — Moo UI{% endblock %}
 
@@ -57,7 +57,7 @@
         {{ button("Next", variant="outline-primary") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "outlined-styles",
       "Outlined styles",
       "Use the same <code>btn-outline-*</code> variant across a group when the controls should share one quiet visual weight.",
@@ -71,7 +71,7 @@
         {{ button("", variant="outline", size="icon", aria_label="Next item", icon_start="chevron-right") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "icon-only-group",
       "Icon-only group",
       "Give every icon-only button a square <code>size=\"icon\"</code> shape and an <code>aria-label</code>; the icon alone is not an accessible name.",
@@ -100,7 +100,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "size-groups",
       "Size",
       "<code>btn-group-sm</code> and <code>btn-group-lg</code> apply one density to every button in the group, keeping joined edges aligned.",
@@ -113,7 +113,7 @@
         {{ button("", variant="outline", size="icon", aria_label="Decrease value", icon_start="minus") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "vertical-group",
       "Orientation",
       "Use <code>btn-group-vertical</code> when related controls belong in a narrow rail or stacked tool palette.",
@@ -136,7 +136,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "toolbar-groups",
       "Toolbar",
       "Use <code>btn-toolbar</code> for separate action clusters; <code>gap-2</code> spaces the clusters while each inner group stays joined.",
@@ -152,7 +152,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "nested-groups",
       "Nested groups",
       "Use Bootstrap input grouping when buttons and fields need one connected surface.",
@@ -171,7 +171,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "dropdown-button",
       "Dropdown menu",
       "Pair a primary action with a Dropdown Menu trigger for related variants. The chevron trigger carries an accessible name without Bootstrap's caret.",
@@ -187,10 +187,10 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("button-group", "Button Group",
       "select-group",
-      "Select",
-      "Pair with a <code>Select</code> component.",
+      "Native select",
+      "Pair with the native <a href=\"/components/select/\">Native Select</a> component when the control should keep browser and mobile selection behavior.",
       select_group
     ) }}
 

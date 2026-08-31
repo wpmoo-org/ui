@@ -3,7 +3,7 @@
 {% from "components/dialog.html.jinja" import dialog_footer %}
 {% from "components/button.html.jinja" import button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Alert Dialog — Moo UI{% endblock %}
@@ -25,7 +25,7 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Continue", dismiss="modal") }}
+          {{ button("Continue", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
@@ -49,11 +49,11 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Discard", dismiss="modal") }}
+          {{ button("Discard", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert-dialog", "Alert Dialog",
       "basic",
       "Basic",
       "A title, description, and Cancel/Continue-style actions; the backdrop and Escape key are both disabled.",
@@ -70,11 +70,11 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}
-          {{ button("Leave", dismiss="modal") }}
+          {{ button("Leave", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert-dialog", "Alert Dialog",
       "small",
       "Small",
       "size=\"sm\" reuses Dialog's existing modal-sm class for compact confirmations.",
@@ -92,11 +92,11 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Keep running", variant="outline", dismiss="modal") }}
-          {{ button("Stop import", dismiss="modal") }}
+          {{ button("Stop import", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert-dialog", "Alert Dialog",
       "small-media",
       "Small with media",
       "Use the compact size with a small icon when a short confirmation needs extra signal.",
@@ -114,11 +114,11 @@
         ) }}
         {% call dialog_footer() %}
           {{ button("Keep running", variant="outline", dismiss="modal") }}
-          {{ button("Pause sync", dismiss="modal") }}
+          {{ button("Pause sync", variant="secondary", dismiss="modal") }}
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert-dialog", "Alert Dialog",
       "media",
       "Media",
       "Add a small decorative icon beside the confirmation title when the action benefits from an extra visual cue.",
@@ -139,7 +139,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("alert-dialog", "Alert Dialog",
       "destructive",
       "Destructive action",
       "Pair the outline Cancel button with a destructive-variant action for irreversible operations.",

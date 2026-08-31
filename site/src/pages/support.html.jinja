@@ -60,25 +60,50 @@
         <div class="table-responsive">
           <table class="table align-middle">
             <thead>
+              <tr><th scope="col">CSS</th><th scope="col">Minified</th></tr>
+            </thead>
+            <tbody>
+              {% for entrypoint, minified in [
+                ("@wpmoo/ui/moo-ui.css", "@wpmoo/ui/moo-ui.min.css"),
+                ("@wpmoo/ui/moo.css", "@wpmoo/ui/moo.min.css")
+              ] %}
+                <tr>
+                  <td><code>{{ entrypoint }}</code></td>
+                  <td><code>{{ minified }}</code></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr><th scope="col">ESM</th><th scope="col">Minified</th></tr>
+            </thead>
+            <tbody>
+              {% for entrypoint, minified in [
+                ("@wpmoo/ui/combobox.js", ""),
+                ("@wpmoo/ui/sidebar.js", ""),
+                ("@wpmoo/ui/context-menu.js", ""),
+                ("@wpmoo/ui/datatable.js", ""),
+                ("@wpmoo/ui/slider.js", ""),
+                ("@wpmoo/ui/chart.js", "@wpmoo/ui/chart.min.js"),
+                ("@wpmoo/ui/datepicker.js", "@wpmoo/ui/datepicker.min.js")
+              ] %}
+                <tr>
+                  <td><code>{{ entrypoint }}</code></td>
+                  <td>{% if minified %}<code>{{ minified }}</code>{% else %}<span class="text-body-secondary">Not published</span>{% endif %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
               <tr><th scope="col">Kind</th><th scope="col">Exports</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">CSS</th>
-                <td>
-                  {% for entrypoint in product.certification.publicEntrypoints.css %}
-                    <code>{{ entrypoint }}</code>{% if not loop.last %}, {% endif %}
-                  {% endfor %}
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">ESM</th>
-                <td>
-                  {% for entrypoint in product.certification.publicEntrypoints.esm %}
-                    <code>{{ entrypoint }}</code>{% if not loop.last %}, {% endif %}
-                  {% endfor %}
-                </td>
-              </tr>
               <tr>
                 <th scope="row">Sass</th>
                 <td>
@@ -179,7 +204,7 @@
           <li>The certification manifest is currently <code>{{ product.certification.status }}</code>.</li>
           <li>Generic host-conformance evidence remains pending in the source evidence inventory.</li>
           <li>Bootstrap 6 is outside the current compatibility contract.</li>
-          <li>Sass source is not a public package entrypoint. Only the documented facade (<code>scss/facade-settings</code>) is published.</li>
+          <li>Sass source is not a public package entrypoint. Only the documented public config (<code>scss/config</code>) is published.</li>
         </ul>
       </section>
 

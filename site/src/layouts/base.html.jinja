@@ -1,8 +1,35 @@
 <!doctype html>
-<html lang="en" dir="ltr" data-bs-theme="light">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+      (() => {
+        let storedTheme = null;
+        try {
+          storedTheme = window.localStorage.getItem("moo:theme");
+        } catch (_) {
+          /* Storage can be unavailable in restricted browsing contexts. */
+        }
+        if (storedTheme === "dark" || storedTheme === "light") {
+          document.documentElement.dataset.bsTheme = storedTheme;
+        } else {
+          // Unset or "system" means follow the OS preference; resolved even
+          // when storage access failed, so the System default still applies.
+          const dark = window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
+        }
+        try {
+          const storedDirection = window.localStorage.getItem("moo:direction");
+          if (storedDirection === "rtl") {
+            document.documentElement.dir = "rtl";
+          }
+        } catch (_) {
+          /* Storage can be unavailable in restricted browsing contexts. */
+        }
+      })();
+    </script>
     <meta name="description" content="{{ page_meta.description }}">
     <meta property="og:site_name" content="{{ page_meta.site_name }}">
     <meta property="og:type" content="{{ page_meta.type }}">
@@ -23,47 +50,90 @@
     <link rel="manifest" href="{{ root_path }}site.webmanifest">
     <script>
       (() => {
-        let storedTheme = null;
-        try {
-          storedTheme = window.localStorage.getItem("moo:theme");
-        } catch (_) {
-          /* Storage can be unavailable in restricted browsing contexts. */
-        }
-        if (storedTheme === "dark" || storedTheme === "light") {
-          document.documentElement.dataset.bsTheme = storedTheme;
-        } else {
-          // Unset or "system" means follow the OS preference; resolved even
-          // when storage access failed, so the System default still applies.
-          const dark = window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches;
-          document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
-        }
-        // Phase 7: restore a saved reading direction before first paint so an
-        // RTL choice never flashes back to LTR.
-        try {
-          const storedDirection = window.localStorage.getItem("moo:direction");
-          if (storedDirection === "rtl") {
-            document.documentElement.dir = "rtl";
-          }
-        } catch (_) {
-          /* Storage can be unavailable in restricted browsing contexts. */
-        }
         try {
           const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
           if (sidebar === "collapsed" || sidebar === "expanded") {
-            document.documentElement.dataset.mooSidebarCatalogState = sidebar;
+            document.documentElement.dataset.sidebarCatalogState = sidebar;
             window.setTimeout(() => {
               const shell = document.querySelector(
-                '[data-slot="sidebar-wrapper"][data-moo-sidebar-key="catalog-shell"]'
+                '[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]'
               );
-              if (shell && !shell.hasAttribute("data-moo-sidebar-ready")) {
-                shell.dataset.mooSidebarState = "expanded";
-                delete document.documentElement.dataset.mooSidebarCatalogState;
+              if (shell && !shell.hasAttribute("data-sidebar-ready")) {
+                shell.dataset.sidebarState = "expanded";
+                delete document.documentElement.dataset.sidebarCatalogState;
               }
             }, 1500);
           }
         } catch (_) {
           /* localStorage can be unavailable in restricted browsing contexts. */
+        }
+        try {
+          const themeBuilderFirstPaint = {{ theme_builder_first_paint | tojson }};
+          const rawBuilder = window.localStorage.getItem("moo:theme-builder");
+          const source = rawBuilder ? JSON.parse(rawBuilder) : null;
+          if (source && typeof source === "object" && !Array.isArray(source)) {
+            const applyTokens = (tokens) => {
+              Object.entries(tokens).forEach(([token, value]) => {
+                document.documentElement.style.setProperty(token, value);
+              });
+            };
+            const hasOwn = (object, key) =>
+              Object.prototype.hasOwnProperty.call(object, key);
+            // Keep this in sync with normalizeThemeBuilderState().
+            const enumValue = (key, candidate) => {
+              const aliases =
+                key === "baseColor"
+                  ? themeBuilderFirstPaint.aliases.baseColor
+                  : key === "themeColor" || key === "chartColor"
+                    ? themeBuilderFirstPaint.aliases.actionColor
+                    : {};
+              const value = hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
+              return (themeBuilderFirstPaint.options[key] || []).includes(value)
+                ? value
+                : themeBuilderFirstPaint.defaults[key];
+            };
+            const legacyThemeColor =
+              source.themeColor === undefined &&
+              themeBuilderFirstPaint.legacyActionBaseColors.includes(source.baseColor)
+                ? source.baseColor
+                : undefined;
+            const state = {
+              schemaVersion: themeBuilderFirstPaint.schemaVersion,
+              baseColor: enumValue("baseColor", source.baseColor),
+              themeColor: enumValue("themeColor", source.themeColor ?? legacyThemeColor),
+              chartColor: enumValue("chartColor", source.chartColor ?? source.chartPalette),
+              headingFont: enumValue("headingFont", source.headingFont),
+              bodyFont: enumValue("bodyFont", source.bodyFont),
+              radius: enumValue("radius", source.radius)
+            };
+            const builderMode =
+              document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
+            const tokenGroups = themeBuilderFirstPaint.tokens;
+            const tokens = Object.assign(
+              {},
+              tokenGroups.baseColor[state.baseColor]?.[builderMode],
+              tokenGroups.themeColor[state.themeColor],
+              tokenGroups.chartColor[state.chartColor],
+              tokenGroups.radius[state.radius],
+              tokenGroups.headingFont[state.headingFont],
+              tokenGroups.bodyFont[state.bodyFont],
+              state.themeColor !== themeBuilderFirstPaint.defaults.themeColor
+                ? tokenGroups.sidebarAccent[builderMode]
+                : {}
+            );
+
+            applyTokens(tokens);
+            Object.entries({
+              baseColor: "mooCatalogThemeBuilderBaseColor",
+              themeColor: "mooCatalogThemeBuilderThemeColor"
+            }).forEach(([key, datasetKey]) => {
+              if (state[key] !== themeBuilderFirstPaint.defaults[key]) {
+                document.documentElement.dataset[datasetKey] = state[key];
+              }
+            });
+          }
+        } catch (_) {
+          /* Theme Builder storage is best-effort and never blocks paint. */
         }
       })();
     </script>

@@ -805,6 +805,12 @@ def check_overlay_close_restore(state, params):
             "fail",
             reason="Escape did not hide the overlay",
         )
+    try:
+        state.page.wait_for_function(
+            ACTIVE_IS_TRIGGER_JS, arg=trigger, timeout=SCENARIO_TIMEOUT_MS
+        )
+    except PlaywrightTimeoutError:
+        pass
     restored = state.page.evaluate(ACTIVE_IS_TRIGGER_JS, trigger)
     status = "pass" if restored else "fail"
     return Outcome(
@@ -1210,12 +1216,19 @@ def main(argv=None):
     contract = json.loads(contract_path.read_text(encoding="utf-8"))
     csp_policy = find_csp_policy(contract)
 
+    close_warning = None
+    report = None
     with sync_playwright() as playwright:
         browser = launch_browser(playwright)
         try:
             report = run_contract(browser, args.base_url, contract, csp_policy)
         finally:
-            browser.close()
+            try:
+                browser.close()
+            except Exception as error:
+                if report is None:
+                    raise
+                close_warning = error
 
     text = json.dumps(report, indent=2) + "\n"
     if args.report_out:
@@ -1230,6 +1243,8 @@ def main(argv=None):
         f"skipped={summary['assertionsSkipped']}",
         file=sys.stderr,
     )
+    if close_warning is not None:
+        print(f"warning: browser close failed: {close_warning}", file=sys.stderr)
     return 0 if summary["result"] == "pass" else 1
 
 

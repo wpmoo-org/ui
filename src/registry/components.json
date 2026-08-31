@@ -49,7 +49,7 @@
   },
   {
     "slug": "select",
-    "label": "Select",
+    "label": "Native Select",
     "status": "ready",
     "description": "Choose one value from native option menus in admin forms."
   },
@@ -124,6 +124,12 @@
     "label": "Progress",
     "status": "ready",
     "description": "Show the completion progress of a task using Bootstrap's native progress bar."
+  },
+  {
+    "slug": "slider",
+    "label": "Slider",
+    "status": "ready",
+    "description": "Select single values and ranges with native range input semantics, shadcn-like track/thumb styling, and optional value output."
   },
   {
     "slug": "table",
@@ -207,7 +213,7 @@
     "slug": "field",
     "label": "Field",
     "status": "ready",
-    "description": "Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch controls into accessible, label-first fields using Bootstrap-native validation and semantic grouping."
+    "description": "Compose the ready Input, Textarea, Native Select, Checkbox, Radio Group, and Switch controls into accessible, label-first fields using Bootstrap-native validation and semantic grouping."
   },
   {
     "slug": "form",
@@ -249,6 +255,18 @@
     "slug": "datatable",
     "label": "Data Table",
     "status": "ready",
-    "description": "Review release work with a server-rendered table that adds search, facets, sorting, selection, bulk actions, column visibility, and pagination."
+    "description": "Build live server-rendered work queues with search, facets, sorting, selection, bulk actions, column visibility, pagination, and responsive card views."
+  },
+  {
+    "slug": "chart",
+    "label": "Chart",
+    "status": "ready",
+    "description": "Render Bootstrap-token-themed charts with Chart.js-native area, line, bar, pie, doughnut, polar, radar, scatter, and bubble types."
+  },
+  {
+    "slug": "datepicker",
+    "label": "Date Picker",
+    "status": "ready",
+    "description": "Select single dates and ranges with a button trigger, popover, and keyboardable calendar."
   }
 ]

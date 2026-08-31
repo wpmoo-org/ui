@@ -77,6 +77,11 @@
   background: var(--moo-sidebar-accent);
 }
 
+.sidebar-content:has(.sidebar-menu:is(:hover, :focus-within)) .sidebar-menu-button[aria-current="page"]:not(:hover):not(:focus-visible),
+.sidebar-content:has(.sidebar-menu-button:not([aria-current="page"]):is(:hover, :focus-visible)) .sidebar-menu-button[aria-current="page"]:not(:hover):not(:focus-visible) {
+  background: transparent;
+}
+
 .sidebar-menu-button--lg {
   height: $spacer * 3;
   padding: $spacer * 0.5;

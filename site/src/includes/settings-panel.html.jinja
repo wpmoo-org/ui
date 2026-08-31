@@ -1,134 +1,272 @@
+{% from "components/dropdown_menu.html.jinja" import dropdown_menu %}
+{% from "components/field.html.jinja" import field, field_group, fieldset, form %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/sheet.html.jinja" import sheet, sheet_body, sheet_header %}
-{% from "components/typography.html.jinja" import typography %}
 
-{#- The global settings panel (Phase 6): a Sheet on every catalog page with
-   an appearance section. It is strictly opt-in and additive -- a first-time
-   visitor's rendering is unchanged until they open the panel and pick a
-   preference, which is persisted under the same moo:theme key theme.js and
-   the base-layout inline restore script already use. settings-panel.js
-   wires the System/Light/Dark radios and the Reset affordance. #}
+{% macro settings_dropdown_row(label, id, hook, options, selected="default", swatch_group="") -%}
+  {% set current = namespace(label=selected) %}
+  {% for option in options %}
+    {% if option.value == selected %}
+      {% set current.label = option.label %}
+    {% endif %}
+  {% endfor %}
+  {% set current_swatch = (swatch_group ~ "-" ~ selected) if swatch_group else "" %}
+  {% call field(extra_class="moo-settings-panel__dropdown-field") %}
+    <span class="form-label" id="{{ id }}-label">{{ label }}</span>
+    <div class="dropdown moo-settings-panel__dropdown" {{ hook }}>
+      <button
+        class="btn btn-outline-secondary btn-sm moo-settings-panel__dropdown-trigger"
+        type="button"
+        id="{{ id }}"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        aria-labelledby="{{ id }}-label {{ id }}-value"
+        data-moo-catalog-theme-builder-trigger
+      >
+        <span id="{{ id }}-value" data-moo-catalog-theme-builder-value>{{ current.label }}</span>
+        {% if current_swatch %}
+          <span
+            class="moo-settings-panel__dropdown-trigger-swatch"
+            data-moo-catalog-theme-builder-trigger-swatch="{{ current_swatch }}"
+            aria-hidden="true"
+          ></span>
+        {% endif %}
+        {{ render_icon("chevron-down", "inline-end") }}
+      </button>
+      {% call dropdown_menu(align="end", extra_class="moo-settings-panel__dropdown-menu") %}
+        {% for option in options %}
+          {% set is_selected = option.value == selected %}
+          {% set swatch = (swatch_group ~ "-" ~ option.value) if swatch_group else "" %}
+          <li>
+            <button
+              class="dropdown-item dropdown-item-check moo-settings-panel__dropdown-item{% if is_selected %} active{% endif %}"
+              type="button"
+              data-moo-catalog-theme-builder-option="{{ option.value }}"
+              {% if swatch %}data-moo-catalog-theme-builder-swatch="{{ swatch }}"{% endif %}
+              aria-pressed="{{ 'true' if is_selected else 'false' }}"
+            >
+              <span class="dropdown-item-check__indicator" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+              <span data-moo-catalog-theme-builder-option-label>{{ option.label }}</span>
+            </button>
+          </li>
+        {% endfor %}
+      {% endcall %}
+    </div>
+  {% endcall %}
+{%- endmacro %}
+
+{#- The global settings panel is a Sheet on every catalog page. It keeps the
+   long-lived Theme, Sidebar, and Direction controls as local catalog settings,
+   while the Theme Builder section is intentionally scoped to catalog preview
+   tokens rather than a public component data API. #}
 {% macro settings_panel() -%}
-  {% call sheet("catalog-settings", aria_label="Settings") %}
+  {% call sheet("catalog-settings", backdrop=false, scroll=true, aria_label="Settings") %}
     {{ sheet_header("catalog-settings", "Settings") }}
-    {% call sheet_body(extra_class="d-grid gap-4 align-content-start") %}
-      <div>
-        {{ typography("Appearance", variant="section-title") }}
-        <p class="text-body-secondary small mb-0">
-          Choose how Moo UI looks on this device. Your choice is saved in
-          this browser.
-        </p>
-      </div>
+    {% call sheet_body() %}
+      {% call form(extra_class="moo-settings-panel__form") %}
+        {% call fieldset("Theme", description="Choose how Moo UI looks on this device.") %}
+          {% call field_group() %}
+            <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Theme">
+              {% for option in [
+                {"value": "system", "label": "System", "icon": "monitor"},
+                {"value": "light", "label": "Light", "icon": "sun"},
+                {"value": "dark", "label": "Dark", "icon": "moon-star"}
+              ] %}
+                <label class="moo-settings-panel__theme-option">
+                  <input type="radio" class="btn-check" name="moo-settings-theme" value="{{ option.value }}" data-moo-settings-theme autocomplete="off">
+                  <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+                  <span class="moo-settings-panel__theme-thumb moo-settings-panel__theme-thumb--{{ option.value }}" aria-hidden="true">
+                    <span class="moo-settings-panel__theme-thumb-bar"></span>
+                    <span class="moo-settings-panel__theme-thumb-body">
+                      <span class="moo-settings-panel__theme-thumb-line"></span>
+                      <span class="moo-settings-panel__theme-thumb-line is-short"></span>
+                      <span class="moo-settings-panel__theme-thumb-line is-tiny"></span>
+                    </span>
+                  </span>
+                  <span class="moo-settings-panel__theme-label">
+                    {{ render_icon(option.icon, "inline-start") }}
+                    {{ option.label }}
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+          {% endcall %}
+        {% endcall %}
 
-      <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Theme">
-        {% for option in [
-          {"value": "system", "label": "System", "icon": "monitor"},
-          {"value": "light", "label": "Light", "icon": "sun"},
-          {"value": "dark", "label": "Dark", "icon": "moon-star"}
-        ] %}
-          <label class="moo-settings-panel__theme-option">
-            <input type="radio" class="btn-check" name="moo-settings-theme" value="{{ option.value }}" data-moo-settings-theme autocomplete="off">
-            <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
-            <span class="moo-settings-panel__theme-thumb moo-settings-panel__theme-thumb--{{ option.value }}" aria-hidden="true">
-              <span class="moo-settings-panel__theme-thumb-bar"></span>
-              <span class="moo-settings-panel__theme-thumb-body">
-                <span class="moo-settings-panel__theme-thumb-line"></span>
-                <span class="moo-settings-panel__theme-thumb-line is-short"></span>
-                <span class="moo-settings-panel__theme-thumb-line is-tiny"></span>
-              </span>
-            </span>
-            <span class="moo-settings-panel__theme-label">
-              {{ render_icon(option.icon, "inline-start") }}
-              {{ option.label }}
-            </span>
-          </label>
-        {% endfor %}
-      </div>
+        {% call fieldset("Sidebar", description="Choose how the sidebar sits on the page.") %}
+          {% call field_group() %}
+            <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Sidebar">
+              {% for option in [
+                {"value": "sidebar", "label": "Sidebar", "icon": "panel-left"},
+                {"value": "inset", "label": "Inset", "icon": "panel-left"},
+                {"value": "floating", "label": "Floating", "icon": "panel-left"}
+              ] %}
+                <label class="moo-settings-panel__theme-option">
+                  <input type="radio" class="btn-check" name="moo-settings-sidebar" value="{{ option.value }}" data-moo-settings-sidebar autocomplete="off">
+                  <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+                  <span class="moo-settings-panel__theme-thumb moo-settings-panel__sidebar-thumb moo-settings-panel__sidebar-thumb--{{ option.value }}" aria-hidden="true">
+                    <span class="moo-settings-panel__sidebar-thumb-rail">
+                      <span class="moo-settings-panel__sidebar-thumb-nav is-wide"></span>
+                      <span class="moo-settings-panel__sidebar-thumb-nav"></span>
+                      <span class="moo-settings-panel__sidebar-thumb-nav is-short"></span>
+                      <span class="moo-settings-panel__sidebar-thumb-nav is-tiny"></span>
+                    </span>
+                    <span class="moo-settings-panel__sidebar-thumb-panel">
+                      <span class="moo-settings-panel__theme-thumb-bar"></span>
+                      <span class="moo-settings-panel__theme-thumb-body">
+                        <span class="moo-settings-panel__theme-thumb-line"></span>
+                        <span class="moo-settings-panel__theme-thumb-line is-short"></span>
+                      </span>
+                    </span>
+                  </span>
+                  <span class="moo-settings-panel__theme-label">
+                    {{ render_icon(option.icon, "inline-start") }}
+                    {{ option.label }}
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+          {% endcall %}
+        {% endcall %}
 
-      <div>
-        {{ typography("Sidebar", variant="section-title") }}
-        <p class="text-body-secondary small mb-0">
-          Choose how the sidebar sits on the page.
-        </p>
-      </div>
+        {% call fieldset("Theme Builder", description="Tune catalog tokens and chart colors for this browser.") %}
+          {% call field_group(extra_class="moo-settings-panel__builder-group") %}
+            {{ settings_dropdown_row(
+              "Base color",
+              "moo-theme-builder-base-color",
+              "data-moo-catalog-theme-builder-base-color",
+              [
+                {"value": "neutral", "label": "Neutral"},
+                {"value": "stone", "label": "Stone"},
+                {"value": "zinc", "label": "Zinc"},
+                {"value": "mauve", "label": "Mauve"},
+                {"value": "olive", "label": "Olive"},
+                {"value": "mist", "label": "Mist"},
+                {"value": "taupe", "label": "Taupe"}
+              ],
+              selected="neutral",
+              swatch_group="base-color"
+            ) }}
+            {{ settings_dropdown_row(
+              "Theme color",
+              "moo-theme-builder-theme-color",
+              "data-moo-catalog-theme-builder-theme-color",
+              [
+                {"value": "neutral", "label": "Neutral"},
+                {"value": "blue", "label": "Blue"},
+                {"value": "azure", "label": "Azure"},
+                {"value": "indigo", "label": "Indigo"},
+                {"value": "purple", "label": "Purple"},
+                {"value": "orange", "label": "Orange"},
+                {"value": "pink", "label": "Pink"},
+                {"value": "red", "label": "Red"},
+                {"value": "yellow", "label": "Yellow"},
+                {"value": "lime", "label": "Lime"},
+                {"value": "green", "label": "Green"},
+                {"value": "teal", "label": "Teal"},
+                {"value": "cyan", "label": "Cyan"}
+              ],
+              selected="neutral",
+              swatch_group="theme-color"
+            ) }}
+            {{ settings_dropdown_row(
+              "Chart color",
+              "moo-theme-builder-chart-color",
+              "data-moo-catalog-theme-builder-chart-color",
+              [
+                {"value": "neutral", "label": "Neutral"},
+                {"value": "blue", "label": "Blue"},
+                {"value": "azure", "label": "Azure"},
+                {"value": "indigo", "label": "Indigo"},
+                {"value": "purple", "label": "Purple"},
+                {"value": "orange", "label": "Orange"},
+                {"value": "pink", "label": "Pink"},
+                {"value": "red", "label": "Red"},
+                {"value": "yellow", "label": "Yellow"},
+                {"value": "lime", "label": "Lime"},
+                {"value": "green", "label": "Green"},
+                {"value": "teal", "label": "Teal"},
+                {"value": "cyan", "label": "Cyan"}
+              ],
+              selected="neutral",
+              swatch_group="chart-color"
+            ) }}
+            {{ settings_dropdown_row(
+              "Heading font",
+              "moo-theme-builder-heading-font",
+              "data-moo-catalog-theme-builder-heading-font",
+              [
+                {"value": "default", "label": "Default"},
+                {"value": "geist", "label": "Geist"},
+                {"value": "system", "label": "System"}
+              ]
+            ) }}
+            {{ settings_dropdown_row(
+              "Body font",
+              "moo-theme-builder-body-font",
+              "data-moo-catalog-theme-builder-body-font",
+              [
+                {"value": "default", "label": "Default"},
+                {"value": "geist", "label": "Geist"},
+                {"value": "system", "label": "System"}
+              ]
+            ) }}
+            {{ settings_dropdown_row(
+              "Radius",
+              "moo-theme-builder-radius",
+              "data-moo-catalog-theme-builder-radius",
+              [
+                {"value": "default", "label": "Default"},
+                {"value": "compact", "label": "Compact"},
+                {"value": "large", "label": "Large"}
+              ]
+            ) }}
+          {% endcall %}
+        {% endcall %}
 
-      <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Sidebar">
-        {% for option in [
-          {"value": "sidebar", "label": "Sidebar", "icon": "panel-left"},
-          {"value": "inset", "label": "Inset", "icon": "panel-left"},
-          {"value": "floating", "label": "Floating", "icon": "panel-left"}
-        ] %}
-          <label class="moo-settings-panel__theme-option">
-            <input type="radio" class="btn-check" name="moo-settings-sidebar" value="{{ option.value }}" data-moo-settings-sidebar autocomplete="off">
-            <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
-            <span class="moo-settings-panel__theme-thumb moo-settings-panel__sidebar-thumb moo-settings-panel__sidebar-thumb--{{ option.value }}" aria-hidden="true">
-              <span class="moo-settings-panel__sidebar-thumb-rail">
-                <span class="moo-settings-panel__sidebar-thumb-nav is-wide"></span>
-                <span class="moo-settings-panel__sidebar-thumb-nav"></span>
-                <span class="moo-settings-panel__sidebar-thumb-nav is-short"></span>
-                <span class="moo-settings-panel__sidebar-thumb-nav is-tiny"></span>
-              </span>
-              <span class="moo-settings-panel__sidebar-thumb-panel">
-                <span class="moo-settings-panel__theme-thumb-bar"></span>
-                <span class="moo-settings-panel__theme-thumb-body">
-                  <span class="moo-settings-panel__theme-thumb-line"></span>
-                  <span class="moo-settings-panel__theme-thumb-line is-short"></span>
-                </span>
-              </span>
-            </span>
-            <span class="moo-settings-panel__theme-label">
-              {{ render_icon(option.icon, "inline-start") }}
-              {{ option.label }}
-            </span>
-          </label>
-        {% endfor %}
-      </div>
+        {% call fieldset("Direction", description="Choose the reading direction. RTL flips the layout live.") %}
+          {% call field_group() %}
+            <div class="moo-settings-panel__theme-group moo-settings-panel__theme-group--compact" role="radiogroup" aria-label="Direction">
+              {% for option in [
+                {"value": "ltr", "label": "LTR", "icon": "arrow-left-to-line"},
+                {"value": "rtl", "label": "RTL", "icon": "arrow-right-to-line"}
+              ] %}
+                <label class="moo-settings-panel__theme-option">
+                  <input type="radio" class="btn-check" name="moo-settings-direction" value="{{ option.value }}" data-moo-settings-direction autocomplete="off">
+                  <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
+                  <span class="moo-settings-panel__theme-thumb moo-settings-panel__direction-thumb moo-settings-panel__direction-thumb--{{ option.value }}" aria-hidden="true">
+                    <span class="moo-settings-panel__theme-thumb-bar">{{ render_icon(option.icon, "inline-end") }}</span>
+                    <span class="moo-settings-panel__theme-thumb-body">
+                      <span class="moo-settings-panel__theme-thumb-line"></span>
+                      <span class="moo-settings-panel__theme-thumb-line is-short"></span>
+                      <span class="moo-settings-panel__theme-thumb-line is-tiny"></span>
+                    </span>
+                  </span>
+                  <span class="moo-settings-panel__theme-label">{{ option.label }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          {% endcall %}
+        {% endcall %}
 
-      <div>
-        {{ typography("Direction", variant="section-title") }}
-        <p class="text-body-secondary small mb-0">
-          Choose the reading direction. RTL flips the layout live.
-        </p>
-      </div>
+        {{ separator() }}
 
-      <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Direction">
-        {% for option in [
-          {"value": "ltr", "label": "LTR", "icon": "arrow-left-to-line"},
-          {"value": "rtl", "label": "RTL", "icon": "arrow-right-to-line"}
-        ] %}
-          <label class="moo-settings-panel__theme-option">
-            <input type="radio" class="btn-check" name="moo-settings-direction" value="{{ option.value }}" data-moo-settings-direction autocomplete="off">
-            <span class="moo-settings-panel__theme-check" aria-hidden="true">{{ render_icon("check", "inline-start") }}</span>
-            <span class="moo-settings-panel__theme-thumb moo-settings-panel__direction-thumb moo-settings-panel__direction-thumb--{{ option.value }}" aria-hidden="true">
-              <span class="moo-settings-panel__theme-thumb-bar">{{ render_icon(option.icon, "inline-end") }}</span>
-              <span class="moo-settings-panel__theme-thumb-body">
-                <span class="moo-settings-panel__theme-thumb-line"></span>
-                <span class="moo-settings-panel__theme-thumb-line is-short"></span>
-                <span class="moo-settings-panel__theme-thumb-line is-tiny"></span>
-              </span>
-            </span>
-            <span class="moo-settings-panel__theme-label">{{ option.label }}</span>
-          </label>
-        {% endfor %}
-      </div>
-
-      {{ separator() }}
-
-      <div class="d-flex justify-content-between align-items-center gap-3">
-        <div>
-          <div class="fw-medium">Reset</div>
-          <p class="text-body-secondary small mb-0">
-            Restore the default appearance.
-          </p>
+        <div class="d-flex justify-content-between align-items-center gap-3">
+          <div>
+            <div class="fw-medium">Reset</div>
+            <p class="text-body-secondary small mb-0">
+              Restore the default appearance.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm moo-settings-panel__reset"
+            data-moo-settings-reset
+          >
+            Reset
+          </button>
         </div>
-        <button
-          type="button"
-          class="btn btn-outline-secondary btn-sm moo-settings-panel__reset"
-          data-moo-settings-reset
-        >
-          Reset
-        </button>
-      </div>
+      {% endcall %}
     {% endcall %}
   {% endcall %}
 {%- endmacro %}

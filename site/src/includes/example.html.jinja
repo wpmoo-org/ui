@@ -1,24 +1,65 @@
 {% from "components/typography.html.jinja" import typography %}
 {% from "components/tabs.html.jinja" import tabs %}
+{% from "includes/codepen.html.jinja" import codepen_button_if_available with context %}
+{% from "includes/component-icons.html.jinja" import component_icons %}
 
-{% macro render_example(id, title, description, content, preview_class="", show_header=true, portal_content="") %}
+{% macro render_example(
+  id,
+  title,
+  description,
+  content,
+  preview_class="",
+  show_header=true,
+  portal_content="",
+  source_content="",
+  extra_class="",
+  surface_class="",
+  toolbar_label="",
+  toolbar_icon="",
+  toolbar_action="",
+  header_inside_surface=false,
+  source_class=""
+) %}
   {% set rendered = content | dedent_html %}
   {% set rendered_portal = portal_content | dedent_html %}
-  {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
+  {% if source_content %}
+    {% set source = source_content | dedent_html %}
+  {% else %}
+    {% set source = (rendered ~ ("\n" if rendered_portal else "") ~ rendered_portal) | format_html %}
+  {% endif %}
   {% set title_slug = title | slugify %}
-  <section class="moo-example" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
-    {% if show_header %}
+  <section class="moo-example{% if extra_class %} {{ extra_class }}{% endif %}" data-example="{{ id }}"{% if show_header %} aria-labelledby="{{ title_slug }}"{% else %} aria-label="{{ title }}"{% endif %}>
+    {% if show_header and not header_inside_surface %}
       <div class="moo-example__header">
         {{ typography(title, variant="example-title", id=title_slug) }}
         <p class="text-body-secondary mb-0">{{ description | safe }}</p>
       </div>
     {% endif %}
-    <div class="moo-example__surface">
+    {% if toolbar_label or toolbar_action %}
+      <div class="moo-example__toolbar">
+        {% if toolbar_label %}
+          <span class="moo-example__label">
+            {% if toolbar_icon %}{{ render_icon(toolbar_icon, "inline-start") }}{% endif %}
+            {{ toolbar_label }}
+          </span>
+        {% endif %}
+        {% if toolbar_action %}
+          <div class="moo-example__actions">{{ toolbar_action | safe }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+    <div class="moo-example__surface{% if surface_class %} {{ surface_class }}{% endif %}">
+      {% if show_header and header_inside_surface %}
+        <div class="moo-example__header moo-example__header--in-surface">
+          {{ typography(title, variant="example-title", id=title_slug) }}
+          <p class="text-body-secondary mb-0">{{ description | safe }}</p>
+        </div>
+      {% endif %}
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {{ rendered | safe }}
       </div>
-      <div class="moo-example__source" data-moo-code-panel data-expanded="false">
-        <pre class="moo-code scroll-fade-x no-scrollbar" id="{{ id }}-code"><span class="moo-code__lines" aria-hidden="true"></span><code class="language-html">{{ source | highlight_html }}</code></pre>
+      <div class="moo-example__source{% if source_class %} {{ source_class }}{% endif %}" data-moo-code-panel data-expanded="false">
+        <pre class="moo-code scroll-fade-x no-scrollbar" id="{{ id }}-code" tabindex="0"><span class="moo-code__lines" aria-hidden="true"></span><code class="language-html">{{ source | highlight_html }}</code></pre>
         <div class="moo-code__reveal">
           <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-code-toggle aria-expanded="false" aria-controls="{{ id }}-code">
             View Code
@@ -51,6 +92,103 @@
       <p>{{ usage | safe }}</p>
     {% endif %}
   </section>
+{% endmacro %}
+
+{% macro render_example_toolbar_actions(
+  code_id,
+  title,
+  description,
+  preview_source,
+  portal_source,
+  component_slug,
+  component_label
+) %}
+  {% set codepen_html %}
+    {{ preview_source | safe }}
+    {% if portal_source %}{{ portal_source | safe }}{% endif %}
+  {% endset %}
+  <div class="moo-example__toolbar-actions" data-moo-code-copy-scope>
+    <button
+      class="btn btn-outline-secondary btn-icon-sm"
+      type="button"
+      data-moo-code-copy-target="#{{ code_id }}"
+      aria-label="Copy code"
+      title="Copy code"
+    >
+      <span data-moo-copy-icon="copy">{{ render_icon("copy", "inline-start") }}</span>
+      <span data-moo-copy-icon="check" hidden>{{ render_icon("check", "inline-start") }}</span>
+    </button>
+    {{ codepen_button_if_available(
+      "Moo UI " ~ component_label ~ " - " ~ title,
+      description | striptags,
+      codepen_html | dedent_html | format_html,
+      "",
+      ["moo-ui", component_slug, "components"],
+      js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
+      label="Try in CodePen",
+      icon="codepen",
+      extra_class="moo-example__codepen",
+      component_slug=component_slug,
+      component_label=component_label
+    ) }}
+    <span class="visually-hidden" data-moo-copy-status role="status"></span>
+  </div>
+{% endmacro %}
+
+{% macro render_component_example(
+  component_slug,
+  component_label,
+  id,
+  title,
+  description,
+  content,
+  preview_class="",
+  show_header=true,
+  portal_content="",
+  source_content="",
+  extra_class="",
+  surface_class="",
+  toolbar_label="",
+  toolbar_icon="",
+  toolbar_action="",
+  header_inside_surface=false,
+  source_class=""
+) %}
+  {% set rendered = content | dedent_html %}
+  {% set rendered_portal = portal_content | dedent_html %}
+  {% if source_content %}
+    {% set display_source = source_content | dedent_html %}
+  {% else %}
+    {% set display_source = "" %}
+  {% endif %}
+  {% set resolved_toolbar_label = toolbar_label or component_label %}
+  {% set resolved_toolbar_icon = toolbar_icon or component_icons.get(component_slug, "component") %}
+  {% set resolved_toolbar_action = toolbar_action or render_example_toolbar_actions(
+    id ~ "-code",
+    title,
+    description,
+    rendered | format_html,
+    rendered_portal | format_html if rendered_portal else "",
+    component_slug,
+    component_label
+  ) %}
+  {{ render_example(
+    id,
+    title,
+    description,
+    rendered,
+    preview_class=preview_class,
+    show_header=show_header,
+    portal_content=rendered_portal,
+    source_content=display_source,
+    extra_class=extra_class,
+    surface_class=surface_class,
+    toolbar_label=resolved_toolbar_label,
+    toolbar_icon=resolved_toolbar_icon,
+    toolbar_action=resolved_toolbar_action,
+    header_inside_surface=header_inside_surface,
+    source_class=source_class
+  ) }}
 {% endmacro %}
 
 {% macro render_rtl_example(

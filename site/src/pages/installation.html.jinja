@@ -20,7 +20,7 @@
 
       {{ alert(
         "CSS-first, not JavaScript-free",
-        "Bootstrap owns its native plugins. Moo UI adds optional, explicitly initialized ESM only for Combobox and Sidebar.",
+        "Bootstrap owns its native plugins. Moo UI adds optional, explicitly initialized ESM only for documented behavior gaps.",
         icon="info",
         extra_class="moo-doc-callout"
       ) }}
@@ -35,7 +35,7 @@
               <tr><td>Gradual migration in an existing Bootstrap app</td><td>Bootstrap CSS, then <code>moo.css</code>, with a <code>.moo-ui</code> boundary.</td></tr>
               <tr><td>Static page without interactive plugins</td><td>CSS only.</td></tr>
               <tr><td>Bootstrap Dropdown, Modal, Offcanvas, Tooltip, Popover, or Toast</td><td>Keep Bootstrap's JavaScript bundle and documented initialization.</td></tr>
-              <tr><td>Combobox or Sidebar</td><td>Add only the corresponding optional Moo UI ESM module.</td></tr>
+              <tr><td>Chart, Combobox, Context Menu, DataTable, Date Picker, Slider, or Sidebar</td><td>Add only the corresponding optional Moo UI ESM module.</td></tr>
             </tbody>
           </table>
         </div>
@@ -111,18 +111,24 @@
       <section class="moo-doc-section" aria-labelledby="optional-esm">
         {{ typography("Optional Moo UI ESM", variant="section-title", id="optional-esm") }}
         <p>
-          Combobox, Context Menu, DataTable, and Sidebar cover behavior gaps
-          Bootstrap does not provide. Their modules are side-effect-free:
-          importing them does not scan the document. Create instances
-          explicitly and dispose them when your host removes the corresponding
-          UI.
+          Chart, Combobox, Context Menu, DataTable, Date Picker, Slider, and
+          Sidebar cover behavior gaps Bootstrap does not provide. Their modules
+          are side-effect-free: importing them does not scan the document.
+          Create instances explicitly and dispose them when your host removes
+          the corresponding UI.
         </p>
         {% set esm_example %}
+        import Chart from "@wpmoo/ui/chart.js";
         import Combobox from "@wpmoo/ui/combobox.js";
         import ContextMenu from "@wpmoo/ui/context-menu.js";
         import DataTable from "@wpmoo/ui/datatable.js";
+        import Datepicker from "@wpmoo/ui/datepicker.js";
         import Sidebar from "@wpmoo/ui/sidebar.js";
+        import Slider from "@wpmoo/ui/slider.js";
 
+        const chart = Chart.getOrCreateInstance(
+          document.querySelector(".chart")
+        );
         const combobox = Combobox.getOrCreateInstance(
           document.querySelector(".combobox")
         );
@@ -132,23 +138,40 @@
         const datatable = DataTable.getOrCreateInstance(
           document.querySelector(".datatable")
         );
+        const datepicker = Datepicker.getOrCreateInstance(
+          document.querySelector("[data-datepicker]")
+        );
         const sidebar = Sidebar.getOrCreateInstance(
           document.querySelector('[data-slot="sidebar-wrapper"]')
         );
+        const slider = Slider.getOrCreateInstance(
+          document.querySelector("[data-slider]")
+        );
 
         // Later, when the host removes the UI:
+        chart.dispose();
         combobox.dispose();
         contextMenu.dispose();
         datatable.dispose();
+        datepicker.dispose();
         sidebar.dispose();
+        slider.dispose();
         {% endset %}
         {{ render_code_snippet("installation-esm", esm_example, "js") }}
         {% set esm_cdn_example %}
         <script type="module">
+          import Chart from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.js"] | replace("./", "") }}";
           import Combobox from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./combobox.js"] | replace("./", "") }}";
           import ContextMenu from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./context-menu.js"] | replace("./", "") }}";
           import DataTable from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./datatable.js"] | replace("./", "") }}";
+          import Datepicker from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./datepicker.js"] | replace("./", "") }}";
           import Sidebar from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./sidebar.js"] | replace("./", "") }}";
+          import Slider from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./slider.js"] | replace("./", "") }}";
+
+          const chartRoot = document.querySelector(".chart");
+          if (chartRoot) {
+            Chart.getOrCreateInstance(chartRoot);
+          }
 
           const comboboxRoot = document.querySelector(".combobox");
           if (comboboxRoot) {
@@ -165,19 +188,39 @@
             DataTable.getOrCreateInstance(datatableRoot);
           }
 
+          const datepickerRoot = document.querySelector("[data-datepicker]");
+          if (datepickerRoot) {
+            Datepicker.getOrCreateInstance(datepickerRoot);
+          }
+
           const sidebarRoot = document.querySelector('[data-slot="sidebar-wrapper"]');
           if (sidebarRoot) {
             Sidebar.getOrCreateInstance(sidebarRoot);
+          }
+
+          const sliderRoot = document.querySelector("[data-slider]");
+          if (sliderRoot) {
+            Slider.getOrCreateInstance(sliderRoot);
           }
         </script>
         {% endset %}
         {{ render_code_snippet("installation-esm-cdn", esm_cdn_example, "html") }}
         <p>
-          Review the <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>,
+          Review the <a href="{{ site_href('components/chart.html', root_path) }}">Chart</a>,
+          <a href="{{ site_href('components/combobox.html', root_path) }}">Combobox</a>,
           <a href="{{ site_href('components/context-menu.html', root_path) }}">Context Menu</a>,
           <a href="{{ site_href('components/datatable.html', root_path) }}">Data Table</a>,
+          <a href="{{ site_href('components/datepicker.html', root_path) }}">Date Picker</a>,
+          <a href="{{ site_href('components/slider.html', root_path) }}">Slider</a>,
           and <a href="{{ site_href('components/sidebar.html', root_path) }}">Sidebar</a>
           pages for their HTML, selectors, lifecycle, and Bootstrap ownership.
+        </p>
+        <p>
+          Minified browser module URLs are also published for Chart and Date
+          Picker at
+          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.min.js"] | replace("./", "") }}</code>
+          and
+          <code>https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./datepicker.min.js"] | replace("./", "") }}</code>.
         </p>
       </section>
 
@@ -191,7 +234,7 @@
           <dt>A Bootstrap control does not open</dt>
           <dd>Load Bootstrap's bundle and follow that plugin's documented initialization requirements.</dd>
           <dt>A Moo UI ESM module does not respond</dt>
-          <dd>Import the matching Moo UI ESM module (Combobox, Context Menu, DataTable, or Sidebar) and initialize the rendered root explicitly; imports never auto-scan.</dd>
+          <dd>Import the matching Moo UI ESM module (Chart, Combobox, Context Menu, DataTable, Date Picker, Slider, or Sidebar) and initialize the rendered root explicitly; imports never auto-scan.</dd>
         </dl>
       </section>
 

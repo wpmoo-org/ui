@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 import tempfile
 import textwrap
 import time
@@ -56,12 +57,24 @@ LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
-CORE_JS_MODULES = ("combobox.js", "sidebar.js", "context-menu.js", "datatable.js")
+CORE_JS_MODULES = (
+    "combobox.js",
+    "sidebar.js",
+    "context-menu.js",
+    "datatable.js",
+    "slider.js",
+)
+BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+PACKAGE_MANIFEST = ROOT / "package.json"
+MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
+MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
+THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
     "phase-2-evidence.json",
     "phase-3-evidence.json",
+    "rc-3-evidence.json",
 )
 ACCEPTED_COMPONENT_EVIDENCE_STATUSES = {
     "preview-passed",
@@ -78,16 +91,19 @@ MOO_MARKUP_EXTENSION_SOURCES = {
     "alert-dialog": "src/components/alert_dialog.html.jinja",
     "avatar": "src/components/avatar.html.jinja",
     "button": "src/components/button.html.jinja",
+    "chart": "src/components/chart.html.jinja",
     "collapsible": "src/components/collapsible.html.jinja",
     "combobox": "src/components/combobox.html.jinja",
     "context-menu": "src/components/context_menu.html.jinja",
     "datatable": "src/components/datatable.html.jinja",
+    "datepicker": "src/components/datepicker.html.jinja",
     "field": "src/components/field.html.jinja",
     "form": "src/components/field.html.jinja",
     "menubar": "src/components/menubar.html.jinja",
     "radio-group": "src/components/radio_group.html.jinja",
     "sheet": "src/components/sheet.html.jinja",
     "sidebar": "src/components/sidebar.html.jinja",
+    "slider": "src/components/slider.html.jinja",
     "skeleton": "src/components/skeleton.html.jinja",
     "toast": "src/components/toast.html.jinja",
     "toggle-group": "src/components/toggle_group.html.jinja",
@@ -126,6 +142,113 @@ HTML_ATTRIBUTE = re.compile(
     r"(?P<space>\s+)(?P<name>[^\s=/>]+)"
     r"(?:(?P<equals>\s*=\s*)(?P<value>\"[^\"]*\"|'[^']*'|[^\s>]+))?"
 )
+JS_TOKEN = re.compile(
+    r"(?P<comment>//[^\n]*|/\*.*?\*/)"
+    r"|(?P<string>\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)"
+    r"|(?P<number>\b\d+(?:\.\d+)?\b)"
+    r"|(?P<word>\b[A-Za-z_$][\w$]*\b)"
+    r"|(?P<operator>=>|===|!==|==|!=|<=|>=|\+\+|--|&&|\|\||[=+\-*/%<>!?:])"
+    r"|(?P<punctuation>[{}[\]();,.])",
+    re.DOTALL,
+)
+JS_KEYWORDS = frozenset(
+    (
+        "as",
+        "async",
+        "await",
+        "break",
+        "case",
+        "catch",
+        "class",
+        "const",
+        "continue",
+        "default",
+        "do",
+        "else",
+        "export",
+        "extends",
+        "finally",
+        "for",
+        "from",
+        "function",
+        "if",
+        "import",
+        "in",
+        "let",
+        "new",
+        "of",
+        "return",
+        "static",
+        "switch",
+        "throw",
+        "try",
+        "var",
+        "while",
+        "yield",
+    )
+)
+JS_CONSTANTS = frozenset(("false", "null", "true", "undefined"))
+CSS_PROPERTY = re.compile(
+    r"(?P<space>\s*)(?P<name>-?[_A-Za-z][\w-]*)(?P<tail>\s*)(?=:)"
+)
+CSS_FUNCTION = re.compile(r"-?[_A-Za-z][\w-]*(?=\()")
+CSS_NUMBER = re.compile(r"-?(?:\d*\.)?\d+(?:[A-Za-z%]+)?")
+CSS_VARIABLE = re.compile(r"--[_A-Za-z][\w-]*")
+CSS_STRING = re.compile(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'", re.DOTALL)
+SHELL_TOKEN = re.compile(
+    r"(?P<comment>#[^\n]*)"
+    r"|(?P<string>\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"
+    r"|(?P<property>(?<!\S)[A-Za-z_][\w]*(?==))"
+    r"|(?P<operator>(?<!\S)--?[\w-]+)"
+    r"|(?P<word>(?<!\S)(?:\.{1,2}/|/|~|\w)[^\s]*)"
+)
+PYTHON_TOKEN = re.compile(
+    r"(?P<comment>#[^\n]*)"
+    r"|(?P<string>\"\"\".*?\"\"\"|'''.*?'''|\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"
+    r"|(?P<number>\b\d+(?:\.\d+)?\b)"
+    r"|(?P<function>\b[A-Za-z_]\w*(?=\s*\())"
+    r"|(?P<word>\b[A-Za-z_]\w*\b)"
+    r"|(?P<operator>==|!=|<=|>=|->|:=|//=|\*\*=|[=+\-*/%<>!&|^~])"
+    r"|(?P<punctuation>[{}[\]();,.:])",
+    re.DOTALL,
+)
+PYTHON_KEYWORDS = frozenset(
+    (
+        "and",
+        "as",
+        "assert",
+        "async",
+        "await",
+        "break",
+        "class",
+        "continue",
+        "def",
+        "del",
+        "elif",
+        "else",
+        "except",
+        "finally",
+        "for",
+        "from",
+        "global",
+        "if",
+        "import",
+        "in",
+        "is",
+        "lambda",
+        "nonlocal",
+        "not",
+        "or",
+        "pass",
+        "raise",
+        "return",
+        "try",
+        "while",
+        "with",
+        "yield",
+    )
+)
+PYTHON_CONSTANTS = frozenset(("False", "None", "True"))
 VOID_ELEMENTS = {
     "area",
     "base",
@@ -341,16 +464,224 @@ def _highlight_html_token(value: str) -> str:
     return _syntax_token("tag", f"{opening}{name}{attributes}{closing}")
 
 
+def _highlight_html_text(value: str, embedded_language: str | None) -> str:
+    if embedded_language == "js":
+        return _highlight_javascript(value)
+    if embedded_language == "css":
+        return _highlight_css(value)
+    return escape(value)
+
+
 def highlight_html(value: object) -> Markup:
     source = str(value)
     highlighted: list[str] = []
     position = 0
+    embedded_language: str | None = None
     for match in HTML_TOKEN.finditer(source):
-        highlighted.append(escape(source[position : match.start()]))
-        highlighted.append(_highlight_html_token(match.group()))
+        highlighted.append(
+            _highlight_html_text(source[position : match.start()], embedded_language)
+        )
+        token = match.group()
+        highlighted.append(_highlight_html_token(token))
+        html_match = HTML_TAG.fullmatch(token)
+        if html_match is not None:
+            tag_name = html_match.group("name").lower()
+            is_closing = html_match.group("open").startswith("</")
+            is_void = html_match.group("close").startswith("/")
+            if tag_name == "script":
+                embedded_language = None if is_closing or is_void else "js"
+            elif tag_name == "style":
+                embedded_language = None if is_closing or is_void else "css"
         position = match.end()
-    highlighted.append(escape(source[position:]))
+    highlighted.append(_highlight_html_text(source[position:], embedded_language))
     return Markup("".join(highlighted))
+
+
+def _highlight_javascript(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    for match in JS_TOKEN.finditer(value):
+        highlighted.append(escape(value[position : match.start()]))
+        kind = match.lastgroup
+        token = match.group()
+        if kind == "word":
+            if token in JS_KEYWORDS:
+                highlighted.append(_syntax_token("keyword", escape(token)))
+            elif token in JS_CONSTANTS:
+                highlighted.append(_syntax_token("constant", escape(token)))
+            else:
+                highlighted.append(escape(token))
+        elif kind in {"comment", "string", "number", "operator", "punctuation"}:
+            highlighted.append(_syntax_token(kind, escape(token)))
+        else:
+            highlighted.append(escape(token))
+        position = match.end()
+    highlighted.append(escape(value[position:]))
+    return "".join(highlighted)
+
+
+def _highlight_css_selector(value: str) -> str:
+    if not value.strip():
+        return escape(value)
+
+    match = re.fullmatch(
+        r"(?P<lead>\s*)(?P<body>.*?)(?P<trail>\s*)",
+        value,
+        re.DOTALL,
+    )
+    if match is None or not match.group("body"):
+        return escape(value)
+
+    return (
+        escape(match.group("lead"))
+        + _syntax_token("selector", escape(match.group("body")))
+        + escape(match.group("trail"))
+    )
+
+
+def _highlight_css(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    in_block = False
+
+    while position < len(value):
+        if value.startswith("/*", position):
+            end = value.find("*/", position + 2)
+            end = len(value) if end == -1 else end + 2
+            highlighted.append(_syntax_token("comment", escape(value[position:end])))
+            position = end
+            continue
+
+        string = CSS_STRING.match(value, position)
+        if string is not None:
+            highlighted.append(_syntax_token("string", escape(string.group())))
+            position = string.end()
+            continue
+
+        character = value[position]
+        if not in_block:
+            next_brace = value.find("{", position)
+            if next_brace == -1:
+                highlighted.append(_highlight_css_selector(value[position:]))
+                break
+            highlighted.append(_highlight_css_selector(value[position:next_brace]))
+            highlighted.append(_syntax_token("punctuation", "{"))
+            position = next_brace + 1
+            in_block = True
+            continue
+
+        if character == "}":
+            highlighted.append(_syntax_token("punctuation", "}"))
+            position += 1
+            in_block = False
+            continue
+
+        property_match = CSS_PROPERTY.match(value, position)
+        if property_match is not None:
+            highlighted.append(escape(property_match.group("space")))
+            highlighted.append(
+                _syntax_token("property", escape(property_match.group("name")))
+            )
+            highlighted.append(escape(property_match.group("tail")))
+            position = property_match.end()
+            continue
+
+        variable = CSS_VARIABLE.match(value, position)
+        if variable is not None:
+            highlighted.append(_syntax_token("variable", escape(variable.group())))
+            position = variable.end()
+            continue
+
+        function = CSS_FUNCTION.match(value, position)
+        if function is not None:
+            highlighted.append(_syntax_token("function", escape(function.group())))
+            position = function.end()
+            continue
+
+        number = CSS_NUMBER.match(value, position)
+        if number is not None:
+            highlighted.append(_syntax_token("number", escape(number.group())))
+            position = number.end()
+            continue
+
+        if character in ":;,()":
+            highlighted.append(_syntax_token("punctuation", escape(character)))
+        else:
+            highlighted.append(escape(character))
+        position += 1
+
+    return "".join(highlighted)
+
+
+def _highlight_shell(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    for match in SHELL_TOKEN.finditer(value):
+        highlighted.append(escape(value[position : match.start()]))
+        kind = match.lastgroup
+        token = match.group()
+        if kind == "word":
+            highlighted.append(_syntax_token("function", escape(token)))
+        elif kind in {"comment", "operator", "property", "string"}:
+            highlighted.append(_syntax_token(kind, escape(token)))
+        else:
+            highlighted.append(escape(token))
+        position = match.end()
+    highlighted.append(escape(value[position:]))
+    return "".join(highlighted)
+
+
+def _highlight_python(value: str) -> str:
+    highlighted: list[str] = []
+    position = 0
+    for match in PYTHON_TOKEN.finditer(value):
+        highlighted.append(escape(value[position : match.start()]))
+        kind = match.lastgroup
+        token = match.group()
+        if kind == "word":
+            if token in PYTHON_KEYWORDS:
+                highlighted.append(_syntax_token("keyword", escape(token)))
+            elif token in PYTHON_CONSTANTS:
+                highlighted.append(_syntax_token("constant", escape(token)))
+            else:
+                highlighted.append(escape(token))
+        elif kind == "function":
+            if token in PYTHON_KEYWORDS:
+                highlighted.append(_syntax_token("keyword", escape(token)))
+            elif token in PYTHON_CONSTANTS:
+                highlighted.append(_syntax_token("constant", escape(token)))
+            else:
+                highlighted.append(_syntax_token("function", escape(token)))
+        elif kind in {"comment", "number", "operator", "punctuation", "string"}:
+            highlighted.append(_syntax_token(kind, escape(token)))
+        else:
+            highlighted.append(escape(token))
+        position = match.end()
+    highlighted.append(escape(value[position:]))
+    return "".join(highlighted)
+
+
+def highlight_code(value: object, language: object = "text") -> Markup:
+    source = str(value)
+    normalized_language = str(language).strip().lower()
+    if normalized_language in {"html", "htm", "xml", "svg"}:
+        return highlight_html(source)
+    if normalized_language in {
+        "js",
+        "javascript",
+        "mjs",
+        "cjs",
+        "ts",
+        "typescript",
+    }:
+        return Markup(_highlight_javascript(source))
+    if normalized_language in {"css", "scss"}:
+        return Markup(_highlight_css(source))
+    if normalized_language in {"bash", "console", "sh", "shell", "zsh"}:
+        return Markup(_highlight_shell(source))
+    if normalized_language in {"py", "python"}:
+        return Markup(_highlight_python(source))
+    return Markup(escape(source))
 
 
 def slugify(value: object) -> str:
@@ -438,12 +769,11 @@ def _example_js_source(module_filename: str, init_call: str) -> str:
     # hand-duplicated here) so the export can't silently drift from
     # what's really shipping; only the relative import needs rewriting
     # to the CDN URL every other codepen_button() call already uses,
-    # matching product.version.
-    version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
+    # matching CODEPEN_CDN_VERSION.
     source = (SITE_SRC / "js/catalog" / module_filename).read_text(encoding="utf-8")
     if EXAMPLE_JS_IMPORT not in source:
         fail(f"{module_filename}'s import line changed; update EXAMPLE_JS_IMPORT")
-    datatable_url = f"https://unpkg.com/@wpmoo/ui@{version}/dist/js/datatable.js"
+    datatable_url = f"https://unpkg.com/@wpmoo/ui@{CODEPEN_CDN_VERSION}/dist/js/datatable.js"
     source = source.replace(EXAMPLE_JS_IMPORT, "let DataTable;")
     source = source.replace("export function ", "function ")
     if re.search(r"^\s*export\b", source, re.MULTILINE):
@@ -649,6 +979,14 @@ def build_site_pages(
     if blocks_page:
         pages.append(blocks_page)
     pages.extend(child_pages(blocks, "blocks", "block"))
+    pages.append(
+        {
+            "slug": "charts",
+            "label": "Charts",
+            "href": "charts/index.html",
+            "kind": "doc",
+        }
+    )
     pages.extend(child_pages(utilities, "utils", "utility"))
 
     for section in sections:
@@ -776,6 +1114,7 @@ def create_environment(icon_renderer=None) -> Environment:
     )
     environment.filters["dedent_html"] = dedent_html
     environment.filters["format_html"] = format_html
+    environment.filters["highlight_code"] = highlight_code
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
     environment.filters["absolutize_links"] = absolutize_links
@@ -804,6 +1143,36 @@ def create_environment(icon_renderer=None) -> Environment:
         icon_renderer = lucide_renderer
     environment.globals["render_icon"] = icon_renderer
     return environment
+
+
+def theme_builder_first_paint_payload() -> dict[str, object]:
+    script = textwrap.dedent(
+        """
+        import { createThemeBuilderFirstPaintPayload } from "./site/src/js/catalog/theme-builder-schema.js";
+        console.log(JSON.stringify(createThemeBuilderFirstPaintPayload()));
+        """
+    )
+    try:
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation timed out "
+            f"after {THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS} seconds"
+        ) from exc
+    if result.returncode != 0:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation failed:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+    return json.loads(result.stdout.splitlines()[-1])
 
 
 def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
@@ -857,6 +1226,14 @@ def load_support_facts() -> dict[str, object]:
     }
 
 
+# CodePen export URLs pin the package version they load from a CDN. The
+# current package version (1.0.0-rc.3) is not published to npm yet, so a
+# pen pinned to it would 404 and render broken. Until RC.3 is published,
+# the export pins the newest published version; flip this back to
+# package.version once the current version is live on npm.
+CODEPEN_CDN_VERSION = "1.0.0-rc.2"
+
+
 def load_product_facts() -> dict[str, object]:
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     certification = json.loads(
@@ -864,6 +1241,7 @@ def load_product_facts() -> dict[str, object]:
     )
     return {
         "version": package["version"],
+        "codepenCdnVersion": CODEPEN_CDN_VERSION,
         "license": package["license"],
         "bootstrapRange": package["peerDependencies"]["bootstrap"],
         "exports": package["exports"],
@@ -993,10 +1371,27 @@ def derive_component_ownership(
         for module in certification.get("publicEntrypoints", {}).get("esm", [])
     }
     source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
-    if exported_moo_modules != source_moo_modules:
-        raise RuntimeError(
-            "Optional Moo UI ESM exports do not match src/js/components sources"
-        )
+
+    # Check that each exported module either matches a source file or is a
+    # minified variant of a source file
+    for exported in exported_moo_modules:
+        if exported.endswith(".min"):
+            canonical = exported.removesuffix(".min")
+            if canonical not in source_moo_modules:
+                raise RuntimeError(
+                    f"Minified export {exported}.js has no canonical source {canonical}.js"
+                )
+        elif exported not in source_moo_modules:
+            raise RuntimeError(
+                f"Exported module {exported}.js has no source in src/js/components/"
+            )
+
+    # Check that each source file has a corresponding export
+    for source in source_moo_modules:
+        if source not in exported_moo_modules:
+            raise RuntimeError(
+                f"Source module {source}.js has no export in certification.json"
+            )
 
     certified = set(certification.get("certifiedComponents", []))
     unknown_certified = certified.difference(entry["slug"] for entry in catalog)
@@ -1231,14 +1626,114 @@ def copy_package_js() -> None:
     package_js_dir = PACKAGE_DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
     for module_name in CORE_JS_MODULES:
-        shutil.copy2(JS_COMPONENTS / module_name, package_js_dir / module_name)
+        target = package_js_dir / module_name
+        shutil.copy2(JS_COMPONENTS / module_name, target)
+        apply_js_license_banner(target, module_name)
+    for module_name in BUNDLED_JS_MODULES:
+        _bundle_module(module_name, minify=False)
+        _bundle_module(module_name, minify=True)
+
+
+def js_license_banner(module_name: str) -> str:
+    package = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))
+    homepage = package.get("homepage", "https://ui.wpmoo.org/")
+    return (
+        "/*!\n"
+        f" * Moo UI {module_name} v{package['version']} ({homepage})\n"
+        f" * Copyright 2026 WPMoo ({MOO_UI_COPYRIGHT_URL})\n"
+        f" * Licensed under {package.get('license', 'MIT')} ({MOO_UI_LICENSE_URL})\n"
+        " */\n"
+    )
+
+
+def apply_js_license_banner(output: Path, module_name: str) -> None:
+    source = output.read_text(encoding="utf-8")
+    banner = js_license_banner(module_name)
+    if source.startswith(banner):
+        return
+    if source.startswith("/*!\n * Moo UI "):
+        marker = "*/"
+        marker_index = source.find(marker)
+        if marker_index != -1:
+            source = source[marker_index + len(marker) :]
+    output.write_text(banner + source.lstrip(), encoding="utf-8")
+
+
+def _bundle_module(module_name: str, *, minify: bool) -> None:
+    """Bundle a module using esbuild with the locked configuration.
+
+    Args:
+        module_name: The module name (e.g., "chart.js")
+        minify: Whether to minify the output
+    """
+    source = JS_COMPONENTS / module_name
+    if not source.is_file():
+        raise FileNotFoundError(f"Bundled module source not found: {source}")
+
+    suffix = ".min.js" if minify else ".js"
+    output_name = module_name.replace(".js", suffix) if minify else module_name
+    output = PACKAGE_DIST / "js" / output_name
+
+    esbuild_cmd = ROOT / "node_modules" / ".bin" / "esbuild"
+    if not esbuild_cmd.is_file():
+        raise RuntimeError(
+            "Locked esbuild binary not found at node_modules/.bin/esbuild; "
+            "run `npm install` to install the locked devDependency"
+        )
+
+    cmd = [
+        str(esbuild_cmd),
+        str(source),
+        f"--outfile={output}",
+        "--bundle=true",
+        "--format=esm",
+        "--platform=browser",
+        "--target=es2020",
+        "--tree-shaking=true",
+        f"--minify={'true' if minify else 'false'}",
+    ]
+
+    result = subprocess.run(
+        cmd,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"esbuild failed for {module_name} (minify={minify}):\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+
+    if not minify:
+        _normalize_esbuild_module_comments(output)
+    apply_js_license_banner(output, output_name)
+
+
+def _normalize_esbuild_module_comments(output: Path) -> None:
+    source = output.read_text(encoding="utf-8")
+    normalized = re.sub(
+        r"(?m)^// .*(node_modules/.+)$",
+        r"// \1",
+        source,
+    )
+    if normalized != source:
+        output.write_text(normalized, encoding="utf-8")
 
 
 def required_core_outputs() -> tuple[Path, ...]:
-    return (
-        *(PACKAGE_DIST / "assets/css" / name for name in CORE_CSS_OUTPUTS),
-        *(PACKAGE_DIST / "js" / name for name in CORE_JS_MODULES),
-    )
+    outputs = []
+    for name in CORE_CSS_OUTPUTS:
+        outputs.append(PACKAGE_DIST / "assets/css" / name)
+    for name in CORE_JS_MODULES:
+        outputs.append(PACKAGE_DIST / "js" / name)
+    for name in BUNDLED_JS_MODULES:
+        outputs.append(PACKAGE_DIST / "js" / name)
+        outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
+    return tuple(outputs)
 
 
 def verify_core_outputs() -> None:
@@ -1269,6 +1764,13 @@ def copy_core_outputs_to_site() -> None:
         package_module = PACKAGE_DIST / "js" / module_name
         shutil.copy2(package_module, components_dir / module_name)
         shutil.copy2(package_module, legacy_js_dir / module_name)
+    for module_name in BUNDLED_JS_MODULES:
+        canonical = PACKAGE_DIST / "js" / module_name
+        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
+        shutil.copy2(canonical, components_dir / module_name)
+        shutil.copy2(canonical, legacy_js_dir / module_name)
+        shutil.copy2(minified, components_dir / minified.name)
+        shutil.copy2(minified, legacy_js_dir / minified.name)
 
 
 def copy_site_assets() -> None:
@@ -1521,6 +2023,7 @@ def render_pages(version: str | None = None) -> None:
         for component in catalog
     ]
     site_pages = build_site_pages(sections, catalog, utilities, blocks, examples)
+    theme_builder_first_paint = theme_builder_first_paint_payload()
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -1564,6 +2067,7 @@ def render_pages(version: str | None = None) -> None:
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
+            theme_builder_first_paint=theme_builder_first_paint,
         )
         output_file.write_text(rendered, encoding="utf-8")
 

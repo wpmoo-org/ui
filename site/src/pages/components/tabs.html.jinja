@@ -2,7 +2,7 @@
 {% from "components/card.html.jinja" import card %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Tabs — Moo UI{% endblock %}
@@ -74,7 +74,7 @@
         ]
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tabs", "Tabs",
       "operational-views",
       "Operational views",
       "Use tab sets when users need to move between related operational surfaces quickly.",
@@ -110,7 +110,7 @@
         ) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tabs", "Tabs",
       "vertical",
       "Vertical",
       "Set <code>orientation=\"vertical\"</code> when the tab triggers should stack beside the active panel.",
@@ -141,7 +141,7 @@
         ]
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("tabs", "Tabs",
       "disabled",
       "Disabled",
       "Set <code>disabled</code> on an item to remove it from keyboard and pointer interaction.",

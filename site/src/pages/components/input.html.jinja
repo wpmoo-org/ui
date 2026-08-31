@@ -1,7 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "components/badge.html.jinja" import badge %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/field.html.jinja" import form, field, field_description, field_group, fieldset %}
@@ -50,7 +50,7 @@
       {{ field_description("input-api-key-help", "Your API key is encrypted and stored securely.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "api-key",
       "API Key",
       "Use a labeled single input with helper text.",
@@ -64,7 +64,7 @@
         placeholder="Enter your text"
       ) }}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "basic",
       "Basic",
       "Use standalone bare inputs when surrounding context already provides the label.",
@@ -83,7 +83,7 @@
       {{ field_description("input-field-email-help", "We'll only use this to send you updates.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "field",
       "Field",
       "Wrap a label and input together in a <code>.field</code> container to keep spacing consistent under Bootstrap form semantics.",
@@ -115,7 +115,7 @@
       {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "group",
       "Field group",
       "Group related fields inside a <code>.field-group</code> to keep rhythm and spacing token-driven.",
@@ -133,7 +133,7 @@
       ) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "readonly",
       "Read-only",
       "Use <code>readonly</code> on a single field to preserve visible context without editing.",
@@ -153,7 +153,7 @@
       {{ field_description("input-disabled-slug-help", "Contact an owner to change the workspace slug.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "disabled",
       "Disabled",
       "Use <code>disabled</code> on a control-level input to block interaction while keeping it readable.",
@@ -173,7 +173,7 @@
       {{ field_description("input-invalid-help", "This field contains validation errors.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "invalid",
       "Invalid",
       "Use <code>aria-invalid=\"true\"</code> to mark a field as invalid alongside descriptive helper text.",
@@ -190,7 +190,7 @@
       ) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "file",
       "File",
       "Use Bootstrap's native custom file input pattern inside an <code>.input-group</code>.",
@@ -208,7 +208,7 @@
         {{ button("Search") }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "inline",
       "Inline",
       "Place a bare input next to a button in a flex row to create a search input with a button.",
@@ -234,7 +234,7 @@
         {% endcall %}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "grid",
       "Grid",
       "Use a flex row of <code>.field.flex-fill</code> containers to place multiple inputs side by side.",
@@ -254,7 +254,7 @@
       {{ field_description("input-required-help", "Used to generate the deployment URL.") }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "required",
       "Required",
       "Use the <code>required</code> attribute to indicate required inputs.",
@@ -272,7 +272,7 @@
       ) }}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "badge",
       "Badge",
       "Add a <code>.badge</code> inside the label to highlight a recommended field.",
@@ -288,7 +288,7 @@
       {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "input-group",
       "Input Group",
       'To add icons or text inside an input, wrap it in a Bootstrap <code>.input-group</code>. See the <a href="' ~ site_href("components/input-group.html", root_path) ~ '">Input Group</a> component for more examples.',
@@ -305,7 +305,7 @@
       {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "button-group",
       "Button Group",
       'Use Bootstrap\'s native <code>.input-group</code> pattern to attach a button to a search input with a shared border. See the <a href="' ~ site_href("components/button-group.html", root_path) ~ '">Button Group</a> component for button-only groups.',
@@ -370,7 +370,7 @@
       </div>
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("input", "Input",
       "form",
       "Form",
       'A full form example composed from a <code>&lt;fieldset&gt;</code>, a <code>.field-group</code>, and labeled fields. See the <a href="' ~ site_href("components/field.html", root_path) ~ '">Fieldset</a> section for the legend/description contract.',

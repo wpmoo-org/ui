@@ -645,14 +645,317 @@
   text-align: center;
 }
 
+[data-moo-catalog-theme-builder-updating] .moo-catalog,
+[data-moo-catalog-theme-builder-updating] .moo-catalog *,
+[data-moo-catalog-theme-builder-updating] .moo-catalog *::before,
+[data-moo-catalog-theme-builder-updating] .moo-catalog *::after {
+  transition: none !important;
+}
+
+.moo-catalog :where(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .offcanvas-title) {
+  font-family: var(--moo-heading-font-family, inherit);
+}
+
 // Global settings panel (Phase 6): the System/Light/Dark theme picker.
 // Each option is a small card with a window-mock preview thumbnail; the
 // checked one gets a primary ring. The radio follows the btn-check pattern
 // (visually hidden, label is the hit target).
+.moo-settings-panel__form {
+  gap: 1.5rem;
+}
+
+#catalog-settings {
+  --moo-settings-panel-option-border: var(--bs-border-color);
+  --moo-settings-panel-option-active-border: var(--bs-border-color);
+  --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg};
+  --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border};
+  --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color};
+  --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg};
+  --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border};
+  --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color};
+}
+
+[data-bs-theme="dark"] #catalog-settings {
+  --bs-offcanvas-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+  --moo-settings-panel-option-border: var(--bs-border-color);
+  --moo-settings-panel-option-active-border: var(--bs-border-color);
+  --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
+  --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
+  --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
+  --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg-dark};
+  --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border-dark};
+  --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color-dark};
+}
+
+#catalog-settings .field-fieldset {
+  min-inline-size: 0;
+}
+
+#catalog-settings .field-legend {
+  font-size: 0.875rem;
+}
+
+#catalog-settings .field-description {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.moo-settings-panel__builder-group {
+  gap: 0.625rem;
+}
+
+.moo-settings-panel__dropdown-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.moo-settings-panel__dropdown-field > .form-label {
+  margin-bottom: 0;
+  color: var(--bs-body-color);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.moo-settings-panel__dropdown,
+.moo-settings-panel__dropdown-trigger {
+  width: 100%;
+}
+
+.moo-settings-panel__dropdown-trigger {
+  gap: 0.5rem;
+  justify-content: space-between;
+  min-inline-size: 8.5rem;
+}
+
+.moo-settings-panel__dropdown-trigger > [data-moo-catalog-theme-builder-value] {
+  min-width: 0;
+  margin-inline-end: auto;
+}
+
+.moo-settings-panel__dropdown-trigger > [data-icon] {
+  flex: 0 0 auto;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.moo-settings-panel__dropdown-trigger-swatch {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+  --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
+  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+  --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: var(--bs-border-width) solid var(--moo-settings-panel-swatch-border);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--moo-settings-panel-swatch-background);
+}
+
+.moo-settings-panel__dropdown-menu {
+  --bs-dropdown-min-width: 100%;
+}
+
+.moo-settings-panel__dropdown-item {
+  gap: 0.5rem;
+}
+
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+  --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
+  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+  --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
+
+  border-color: var(--moo-settings-panel-swatch-border);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--moo-settings-panel-swatch-background);
+}
+
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch].active .dropdown-item-check__indicator {
+  border-color: var(--moo-settings-panel-swatch-border);
+  background: var(--moo-settings-panel-swatch-background);
+  color: var(--moo-settings-panel-swatch-check-color);
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-neutral"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+  --moo-settings-panel-swatch-background: var(--bs-body-bg);
+  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-border) 68%, transparent);
+  --moo-settings-panel-swatch-check-color: var(--bs-body-color);
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-zinc"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-zinc"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-zinc};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-stone"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-stone"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-stone};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-mauve"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-mauve"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-mauve};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-olive"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-olive"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-olive};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-mist"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-mist"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-mist};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-taupe"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-taupe"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-taupe};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-neutral"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-neutral"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-blue"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-blue"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-blue};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-azure"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-azure"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-azure};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-indigo"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-indigo"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-indigo};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-purple"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-purple"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-purple};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-orange"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-orange"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-orange};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-pink"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-pink"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-pink};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-red"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-red"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-red};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-yellow"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-yellow"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-yellow};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-lime"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-lime"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-lime};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-green"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-green"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-green};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-teal"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-teal"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-teal};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="theme-color-cyan"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="theme-color-cyan"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-cyan};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-neutral"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-neutral"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-blue"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-blue"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-blue};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-azure"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-azure"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-azure};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-indigo"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-indigo"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-indigo};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-purple"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-purple"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-purple};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-orange"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-orange"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-orange};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-pink"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-pink"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-pink};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-red"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-red"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-red};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-yellow"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-yellow"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-yellow};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-lime"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-lime"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-lime};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-green"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-green"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-green};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-teal"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-teal"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-teal};
+}
+
+.moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-cyan"],
+.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-cyan"] .dropdown-item-check__indicator {
+  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-cyan};
+}
+
 .moo-settings-panel__theme-group {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+}
+
+.moo-settings-panel__theme-group--compact {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .moo-settings-panel__theme-option {
@@ -680,8 +983,8 @@
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-thumb {
-  border-color: var(--moo-ring);
-  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moo-ring) 40%, transparent);
+  border-color: var(--moo-settings-panel-option-active-border);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--moo-settings-panel-option-active-border) 80%, transparent);
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:focus-visible) .moo-settings-panel__theme-thumb {
@@ -706,9 +1009,9 @@
   width: calc(1.125rem * 1.25);
   height: calc(1.125rem * 1.25);
   border-radius: 999px;
-  border: 2px solid var(--bs-border-color);
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  border: 2px solid var(--moo-settings-panel-option-check-border);
+  background-color: var(--moo-settings-panel-option-check-bg);
+  color: var(--moo-settings-panel-option-check-color);
   transform: translate(50%, -50%);
 }
 
@@ -719,13 +1022,17 @@
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check {
-  border-color: var(--bs-body-bg);
-  background-color: var(--bs-body-color);
-  color: var(--bs-body-bg);
+  border-color: var(--moo-settings-panel-option-active-check-border);
+  background-color: var(--moo-settings-panel-option-active-check-bg);
+  color: var(--moo-settings-panel-option-active-check-color);
 }
 
 .moo-settings-panel__theme-option:has(.btn-check:checked) .moo-settings-panel__theme-check [data-icon] {
   display: inline-flex;
+}
+
+[data-bs-theme="dark"] .moo-settings-panel__theme-option:has(.btn-check[value="system"]:checked) .moo-settings-panel__theme-check {
+  background-color: #{$moo-catalog-settings-system-active-check-bg-dark};
 }
 
 // The check straddles the inline-end corner, and the +50% translate is
@@ -737,32 +1044,58 @@
 }
 
 .moo-settings-panel__theme-thumb {
+  isolation: isolate;
   position: relative;
   display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  border: var(--bs-border-width) solid var(--bs-border-color);
+  border: var(--bs-border-width) solid var(--moo-settings-panel-option-border);
   border-radius: var(--bs-border-radius-sm);
+  background-clip: padding-box;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .moo-settings-panel__theme-thumb--light {
-  background: #{$moo-catalog-settings-thumb-light};
+  background-color: #{$moo-catalog-settings-thumb-light};
 }
 
 .moo-settings-panel__theme-thumb--dark {
-  background: #{$moo-catalog-settings-thumb-dark};
+  background-color: #{$moo-catalog-settings-thumb-dark};
 }
 
 // "System" previews a split between the two palettes so it reads as
 // following the OS rather than forcing either side.
 .moo-settings-panel__theme-thumb--system {
-  background: linear-gradient(
+  background-color: #{$moo-catalog-settings-thumb-dark};
+}
+
+.moo-settings-panel__theme-thumb--system::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: calc(var(--bs-border-radius-sm) - var(--bs-border-width));
+  background-image: linear-gradient(
     90deg,
     #{$moo-catalog-settings-thumb-light} 0 50%,
     #{$moo-catalog-settings-thumb-dark} 50% 100%
   );
+  pointer-events: none;
+}
+
+[data-bs-theme="dark"] .moo-settings-panel__theme-thumb--system::before {
+  background-image: linear-gradient(
+    90deg,
+    #{$moo-catalog-settings-system-thumb-light-dark} 0 50%,
+    #{$moo-catalog-settings-thumb-dark} 50% 100%
+  );
+}
+
+.moo-settings-panel__theme-thumb--system > .moo-settings-panel__theme-thumb-bar,
+.moo-settings-panel__theme-thumb--system > .moo-settings-panel__theme-thumb-body {
+  position: relative;
+  z-index: 1;
 }
 
 .moo-settings-panel__theme-thumb-bar {

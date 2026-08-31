@@ -9,7 +9,7 @@
 {% from "components/switch.html.jinja" import switch %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Field — Moo UI{% endblock %}
@@ -17,7 +17,7 @@
 {% block content %}
 {{ render_page_header(
 "Field",
-"Compose the ready Input, Textarea, Select, Checkbox, Radio Group, and Switch controls into accessible,
+"Compose the ready Input, Textarea, Native Select, Checkbox, Radio Group, and Switch controls into accessible,
 label-first fields using Bootstrap-native validation and semantic grouping."
 ) }}
 
@@ -98,7 +98,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   </div>
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "full",
   "Full example",
   "Build one compact native form from semantic fieldsets and grouped controls. Bootstrap validation uses
@@ -114,7 +114,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ field_description("field-basic-name-description", "Shown across the workspace and on shared links.") }}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "basic",
   "Basic field",
   "Place helper text next to its control and connect their IDs with <code>aria-describedby</code> for assistive relationships.",
@@ -129,7 +129,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ field_error("field-invalid-slug-error", "Slugs can only contain lowercase letters, numbers, and hyphens.") }}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "invalid",
   "Input with validation error",
   "Set <code>data-invalid=&quot;true&quot;</code> on the field, <code>aria-invalid=&quot;true&quot;</code> on the control,
@@ -145,7 +145,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ field_description("field-disabled-project-description", "This value is maintained centrally and can't be edited in this state.") }}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "disabled",
   "Disabled field",
   "Keep the label and helper text visible when a field is temporarily unavailable by using the control's native
@@ -164,7 +164,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endcall %}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "group",
   "Field group",
   "Group related labeled controls with a consistent gap while preserving each control's accessible relationships.",
@@ -179,7 +179,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ field_description("field-textarea-notes-description", "Shown to your team in the changelog.") }}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "textarea",
   "Textarea",
   "Multiline controls retain the same label, spacing, and linked helper-text contract as single-line inputs.",
@@ -197,9 +197,9 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {{ field_description("field-select-timezone-description", "Used to schedule your deploy window.") }}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "select",
-  "Select",
+  "Native Select",
   "Use native select markup with the same visible-label and helper-text flow as other fields.",
   select_field,
   preview_class="moo-example__preview--narrow"
@@ -220,7 +220,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endcall %}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "fieldset",
   "Fieldset",
   "A native <code>&lt;fieldset&gt;</code> with a <code>&lt;legend&gt;</code> and optional description groups related controls semantically.",
@@ -245,7 +245,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endcall %}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "fieldset-group",
   "Fieldset with a nested row",
   "Side-by-side labeled controls can sit inside the same semantic group without changing their individual field contracts.",
@@ -277,7 +277,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endcall %}
   </div>
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "checkbox",
   "Checkbox group",
   "Each checkbox carries its own visible label, so related choices can be grouped directly when no additional helper text is needed.",
@@ -292,7 +292,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {"id": "field-tier-turbo", "label": "Turbo ($0.12/min)", "value": "turbo"}
   ]) }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "radio",
   "Radio group",
   "Radio Group renders a complete native fieldset and can sit beside other labeled field contracts.",
@@ -302,7 +302,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% set switch_field %}
   {{ switch(id="field-2fa", label="Require two-factor sign-in") }}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "switch",
   "Switch",
   "A switch with an inline label and no helper text is a complete compact field contract by itself.",
@@ -321,7 +321,7 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   {% endcall %}
   {% endcall %}
   {% endset %}
-  {{ render_example(
+  {{ render_component_example("field", "Field",
   "separator",
   "Field group with a separator",
   "Use a documented Separator between grouped sections to create a clear transition in long option sets.",

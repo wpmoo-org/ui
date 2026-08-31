@@ -117,11 +117,11 @@
             "static-primitives",
             "forms"
           ],
-          "description": "An in-scope .btn btn-primary computes background-color to Moo UI's foreground token (#18181b, --moo-foreground), not Bootstrap's default blue, proving Moo's layer wins the documented cascade regardless of how the host delivered it. The computed value reflects the later theme-aware button rule in moo.css, which overrides the earlier $primary-derived rule at equal specificity.",
+          "description": "An in-scope .btn btn-primary computes background-color to Moo UI's primary token (#171717, --moo-primary), not Bootstrap's default blue, proving Moo's layer wins the documented cascade regardless of how the host delivered it. The computed value reflects the later theme-aware button rule in moo.css, which overrides the earlier $primary-derived rule at equal specificity.",
           "params": {
             "selector": ".moo-ui .btn.btn-primary",
             "property": "background-color",
-            "expected": "rgb(24, 24, 27)"
+            "expected": "rgb(23, 23, 23)"
           }
         },
         {
@@ -229,7 +229,7 @@
             "property": "background-color",
             "attribute": "data-bs-theme",
             "lightValue": "rgb(255, 255, 255)",
-            "darkValue": "rgb(24, 24, 27)"
+            "darkValue": "rgb(10, 10, 10)"
           }
         }
       ]

@@ -4,7 +4,7 @@
 {% from "components/radio_group.html.jinja" import radio_group %}
 {% from "components/tabs.html.jinja" import tabs %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Menubar — Moo UI{% endblock %}
@@ -65,7 +65,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("menubar", "Menubar",
       "basic",
       "Basic",
       "Each menu keeps documented Bootstrap dropdown trigger and menu markup; the bordered toolbar row is the only additional composition.",
@@ -88,7 +88,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("menubar", "Menubar",
       "with-header",
       "With a header and destructive item",
       "dropdown_header() and dropdown_item(destructive=true) compose the same way they do in a standalone Dropdown Menu.",
@@ -113,7 +113,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("menubar", "Menubar",
       "with-icons",
       "With icons",
       "dropdown_item() already renders a leading icon; the menubar composes it the same way a standalone Dropdown Menu does.",
@@ -133,7 +133,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("menubar", "Menubar",
       "checkbox",
       "Checkbox",
       "Toggleable menu options use Bootstrap's button toggle data-api inside dropdown_item-compatible rows, so Arrow keys, Space, Enter, and auto_close=\"outside\" keep the same Bootstrap contract.",
@@ -161,7 +161,7 @@
         {% endcall %}
       {% endcall %}
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("menubar", "Menubar",
       "radio",
       "Radio",
       "Single-select menu options use a real fieldset and radio inputs. <code>data-bs-auto-close=&quot;outside&quot;</code> keeps the menu open while a profile is picked.",

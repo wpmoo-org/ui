@@ -2,19 +2,19 @@
 
 > Bootstrap markup. shadcn feel.
 
-Moo UI 1.0.0-rc.2 is a Bootstrap 5.3-native component system with a restrained,
+Moo UI 1.0.0-rc.3 is a Bootstrap 5.3-native component system with a restrained,
 shadcn-inspired visual language for server-rendered and Bootstrap-native apps.
 It is CSS-first, not JavaScript-free: Bootstrap owns native plugin behavior,
 while Moo UI adds optional, explicit ESM only for documented gaps.
 
 Use Moo UI when a project already uses Bootstrap or wants server-rendered HTML
 with Bootstrap-compatible classes, variables, and plugin behavior. Do not use
-Moo UI as evidence for a React, Tailwind, Radix, or public Sass-facade
+Moo UI as evidence for a React, Tailwind, Radix, or internal Sass-source
 implementation.
 
 ## Version And Support
 
-- npm package: `@wpmoo/ui@1.0.0-rc.2`
+- npm package: `@wpmoo/ui@1.0.0-rc.3`
 - Bootstrap peer range: `>=5.3.0 <5.4`
 - Tested Bootstrap versions in the manifest: `5.3.0`, `5.3.3`, `5.3.8`
 - License: MIT for source code
@@ -35,17 +35,21 @@ not independent or accredited certification.
 - `@wpmoo/ui/context-menu.js`: optional Context Menu ESM lifecycle
 - `@wpmoo/ui/datatable.js`: optional DataTable ESM lifecycle
 - `@wpmoo/ui/sidebar.js`: optional Sidebar ESM lifecycle
-- `@wpmoo/ui/scss/facade-settings`: public Sass variable allow-list (LibSass `@import`)
+- `@wpmoo/ui/chart.js`: optional Chart ESM lifecycle (Chart.js 4.5.1 bundled)
+- `@wpmoo/ui/chart.min.js`: minified Chart bundle (artifact variant of chart.js)
+- `@wpmoo/ui/datepicker.js`: optional Datepicker ESM lifecycle (self-contained, no third-party runtime)
+- `@wpmoo/ui/datepicker.min.js`: minified Datepicker bundle (artifact variant of datepicker.js)
+- `@wpmoo/ui/slider.js`: optional Slider ESM lifecycle (native range input, no third-party runtime)
+- `@wpmoo/ui/scss/config`: public Sass variable allow-list (LibSass `@import`)
 - `@wpmoo/ui/certification.json`: versioned support and evidence manifest
 - `@wpmoo/ui/package.json`: package metadata
 
 The npm package does not publish catalog templates, preview artwork, catalog
-JavaScript, or internal SCSS partials beyond the facade's required settings
-import.
+JavaScript, or internal SCSS partials beyond the public Sass config.
 
 ## Installation Facts
 
-- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css`
+- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0-rc.3/dist/assets/css/moo-ui.css`
 
 Full replacement:
 
@@ -69,8 +73,8 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 ```
 
 Optional Moo UI ESM is imported only for documented gaps and must be initialized
-explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
-`sidebar.js` does not scan the document.
+explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`,
+`sidebar.js`, `chart.js`, `datepicker.js`, or `slider.js` does not scan the document.
 
 ## Runtime Ownership
 
@@ -83,6 +87,12 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
   optional Moo UI ESM composed with Bootstrap Table and controls
 - Sidebar state and responsive coordination: optional Moo UI ESM composed with
   Bootstrap behavior
+- Chart rendering with light/dark theme toggle: optional Moo UI ESM, self-contained
+  bundle (Chart.js 4.5.1 bundled at build time)
+- Datepicker with shadcn-like trigger/popover/calendar: optional Moo UI ESM,
+  self-contained (no third-party runtime)
+- Slider with native range input semantics: optional Moo UI ESM, no third-party
+  runtime
 
 ## Documentation
 
@@ -108,12 +118,14 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 - [Button](https://ui.wpmoo.org/components/button/)
 - [Button Group](https://ui.wpmoo.org/components/button-group/)
 - [Card](https://ui.wpmoo.org/components/card/)
+- [Chart](https://ui.wpmoo.org/components/chart/)
 - [Checkbox](https://ui.wpmoo.org/components/checkbox/)
 - [Close Button](https://ui.wpmoo.org/components/close-button/)
 - [Collapsible](https://ui.wpmoo.org/components/collapsible/)
 - [Combobox](https://ui.wpmoo.org/components/combobox/)
 - [Context Menu](https://ui.wpmoo.org/components/context-menu/)
 - [Data Table](https://ui.wpmoo.org/components/datatable/)
+- [Date Picker](https://ui.wpmoo.org/components/datepicker/)
 - [Dialog](https://ui.wpmoo.org/components/dialog/)
 - [Dropdown Menu](https://ui.wpmoo.org/components/dropdown-menu/)
 - [Field](https://ui.wpmoo.org/components/field/)
@@ -122,16 +134,17 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 - [Input Group](https://ui.wpmoo.org/components/input-group/)
 - [Kbd](https://ui.wpmoo.org/components/kbd/)
 - [Menubar](https://ui.wpmoo.org/components/menubar/)
+- [Native Select](https://ui.wpmoo.org/components/select/)
 - [Navigation](https://ui.wpmoo.org/components/navigation/)
 - [Pagination](https://ui.wpmoo.org/components/pagination/)
 - [Popover](https://ui.wpmoo.org/components/popover/)
 - [Progress](https://ui.wpmoo.org/components/progress/)
 - [Radio Group](https://ui.wpmoo.org/components/radio-group/)
-- [Select](https://ui.wpmoo.org/components/select/)
 - [Separator](https://ui.wpmoo.org/components/separator/)
 - [Sheet](https://ui.wpmoo.org/components/sheet/)
 - [Sidebar](https://ui.wpmoo.org/components/sidebar/)
 - [Skeleton](https://ui.wpmoo.org/components/skeleton/)
+- [Slider](https://ui.wpmoo.org/components/slider/)
 - [Spinner](https://ui.wpmoo.org/components/spinner/)
 - [Switch](https://ui.wpmoo.org/components/switch/)
 - [Table](https://ui.wpmoo.org/components/table/)
@@ -150,8 +163,8 @@ explicitly. Importing `combobox.js`, `context-menu.js`, `datatable.js`, or
 ## Agent Guidance
 
 - Preserve Bootstrap behavior before adding custom behavior.
-- Use Moo UI ESM only for Combobox, Context Menu, DataTable, and Sidebar unless future
-  documentation adds another public entrypoint.
+- Use Moo UI ESM only for Combobox, Context Menu, DataTable, Sidebar, Chart,
+  Datepicker, and Slider unless future documentation adds another public entrypoint.
 - Do not invent public Sass APIs, aggregate JavaScript entrypoints, or
   certification claims.
 - Treat shadcn/ui as visual direction only; examples and implementation should

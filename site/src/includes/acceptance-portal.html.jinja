@@ -1,0 +1,118 @@
+{% set visual_instruction = "Check the page intro, usage copy, examples, reference table, dark mode, RTL where available, and responsive behavior." %}
+{% set fixture_instruction = "Check the isolated fixture against the shipped Core output: styling, focus, keyboard behavior, state changes, and Bootstrap plugin behavior." %}
+{% set keyboard_instruction = "Use Tab, Shift+Tab, Enter, Space, Escape, and arrow keys where this component expects them. Check focus visibility, focus return, disabled controls, overlays, and native Bootstrap keyboard behavior." %}
+{% set voice_instruction = "Use the platform voice control tool for this device. Check that visible labels are speakable, icon-only controls have usable accessible names, dialogs and menus can be opened or dismissed, and required actions are not pointer-only." %}
+{% set acceptance_devices = [
+  {"slug": "safari", "label": "Safari"},
+  {"slug": "iphone", "label": "iPhone"},
+  {"slug": "android", "label": "Android"}
+] %}
+{% set acceptance_total = catalog | length * ((acceptance_devices | length * 3) + 1) %}
+
+<main class="moo-acceptance" id="main-content" tabindex="-1" data-moo-acceptance-portal data-moo-acceptance-key="{{ acceptance_key }}">
+  <section class="moo-acceptance__panel" aria-labelledby="acceptance-title">
+    <header class="moo-acceptance__header">
+      <div>
+        <p class="moo-acceptance__eyebrow mb-1">{{ acceptance_release }}</p>
+        <h1 class="h4 mb-1" id="acceptance-title">Acceptance Portal</h1>
+        <p class="text-body-secondary mb-0">Check each item on the left, view it on the right.</p>
+      </div>
+      <div class="moo-acceptance__header-actions">
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-moo-acceptance-export>Export Summary</button>
+        <div class="moo-acceptance__count" aria-live="polite" data-moo-acceptance-count>0/{{ acceptance_total }}</div>
+      </div>
+    </header>
+
+    <div class="moo-acceptance__groups">
+      <div class="moo-acceptance__export" hidden data-moo-acceptance-export-panel>
+        <label class="moo-acceptance__group-title" for="acceptance-export-summary">Markdown summary</label>
+        <textarea class="form-control moo-acceptance__export-output" id="acceptance-export-summary" readonly data-moo-acceptance-export-output></textarea>
+        <p class="moo-acceptance__export-status" aria-live="polite" data-moo-acceptance-export-status></p>
+      </div>
+
+      {% for component in catalog %}
+        <section class="moo-acceptance__component" aria-labelledby="acceptance-component-{{ component.slug }}">
+          <div class="moo-acceptance__component-header">
+            <h2 class="moo-acceptance__component-title" id="acceptance-component-{{ component.slug }}">{{ component.label }}</h2>
+            <div class="moo-acceptance__component-actions" aria-label="{{ component.label }} preview links">
+              <button
+                class="btn btn-outline-secondary btn-icon-xs moo-acceptance__component-action moo-acceptance__target"
+                type="button"
+                data-moo-acceptance-target="{{ root_path }}components/{{ component.slug }}/"
+                data-moo-acceptance-title="{{ component.label }}"
+                data-moo-acceptance-instruction="{{ visual_instruction }}"
+                aria-label="Open {{ component.label }} visual page"
+                title="Open visual page"
+              >
+                {{ render_icon("eye", "inline-start") }}
+              </button>
+              <button
+                class="btn btn-outline-secondary btn-icon-xs moo-acceptance__component-action moo-acceptance__target"
+                type="button"
+                data-moo-acceptance-target="{{ root_path }}tests/fixtures/certification/{{ component.slug }}.html"
+                data-moo-acceptance-title="{{ component.label }} fixture"
+                data-moo-acceptance-instruction="{{ fixture_instruction }}"
+                aria-label="Open {{ component.label }} fixture"
+                title="Open fixture"
+              >
+                {{ render_icon("file-code", "inline-start") }}
+              </button>
+            </div>
+          </div>
+          <div class="moo-acceptance__matrix" aria-label="{{ component.label }} acceptance checks">
+            <div class="moo-acceptance__matrix-heading">Device</div>
+            <div class="moo-acceptance__matrix-heading">Visual</div>
+            <div class="moo-acceptance__matrix-heading">Fixture</div>
+            <div class="moo-acceptance__matrix-heading">Voice</div>
+            <div class="moo-acceptance__matrix-heading">Keyboard</div>
+
+            {% for device in acceptance_devices %}
+              <div class="moo-acceptance__matrix-label">{{ device.label }}</div>
+              <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Visual">
+                <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-visual" aria-label="{{ component.label }} {{ device.label }} Visual" data-moo-acceptance-check>
+              </div>
+              <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Fixture">
+                <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-fixture" aria-label="{{ component.label }} {{ device.label }} Fixture" data-moo-acceptance-check>
+              </div>
+              <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Voice">
+                <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-voice" aria-label="{{ component.label }} {{ device.label }} Voice" data-moo-acceptance-check>
+              </div>
+              <div class="moo-acceptance__matrix-check" data-moo-acceptance-item data-moo-acceptance-component="{{ component.label }}" data-moo-acceptance-device="{{ device.label }}" data-moo-acceptance-kind="Keyboard"{% if device.slug != "safari" %} data-moo-acceptance-state="N/A"{% endif %}>
+                {% if device.slug == "safari" %}
+                  <input class="form-check-input" type="checkbox" id="acceptance-{{ component.slug }}-{{ device.slug }}-keyboard" aria-label="{{ component.label }} {{ device.label }} Keyboard" data-moo-acceptance-check>
+                {% else %}
+                  <span class="moo-acceptance__matrix-na" aria-label="Keyboard not applicable on {{ device.label }}">&ndash;</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="moo-acceptance__viewer" aria-labelledby="acceptance-viewer-title">
+    <header class="moo-acceptance__viewer-header">
+      <div>
+        <h2 class="h6 mb-0" id="acceptance-viewer-title" data-moo-acceptance-viewer-title>Typography</h2>
+        <a class="moo-acceptance__viewer-link" href="{{ root_path }}components/typography/" data-moo-acceptance-link>components/typography/</a>
+        <p class="moo-acceptance__viewer-instruction" data-moo-acceptance-instruction-output>
+          Check the page intro, usage copy, examples, reference table, dark mode, RTL where available, and responsive behavior.
+        </p>
+      </div>
+      <div class="btn-group btn-group-sm moo-acceptance__viewports" role="group" aria-label="Preview width">
+        <button class="btn btn-outline-secondary active" type="button" data-moo-acceptance-viewport data-moo-acceptance-viewport-name="desktop" data-moo-acceptance-viewport-width="100%" aria-pressed="true">Desktop</button>
+        <button class="btn btn-outline-secondary" type="button" data-moo-acceptance-viewport data-moo-acceptance-viewport-name="tablet" data-moo-acceptance-viewport-width="768px" aria-pressed="false">Tablet</button>
+        <button class="btn btn-outline-secondary" type="button" data-moo-acceptance-viewport data-moo-acceptance-viewport-name="iphone" data-moo-acceptance-viewport-width="390px" aria-pressed="false">iPhone</button>
+      </div>
+    </header>
+    <div class="moo-acceptance__frame-stage">
+      <iframe
+        class="moo-acceptance__frame"
+        src="{{ root_path }}components/typography/"
+        title="Acceptance preview"
+        data-moo-acceptance-frame
+      ></iframe>
+    </div>
+  </section>
+</main>

@@ -2,7 +2,7 @@
 {% from "components/alert.html.jinja" import alert %}
 {% from "components/close_button.html.jinja" import close_button %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro, render_example, render_rtl_example %}
+{% from "includes/example.html.jinja" import render_component_intro, render_component_example, render_rtl_example with context %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Close Button — Moo UI{% endblock %}
@@ -39,7 +39,7 @@
         {{ close_button() }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("close-button", "Close Button",
       "default",
       "Default",
       "Provide an accessible label; the icon itself carries no visible text.",
@@ -52,7 +52,7 @@
         {{ close_button(disabled=true) }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("close-button", "Close Button",
       "disabled",
       "Disabled",
       "Disabled close buttons lower opacity and drop pointer and hover interaction.",
@@ -69,7 +69,7 @@
         {{ close_button() }}
       </div>
     {% endset %}
-    {{ render_example(
+    {{ render_component_example("close-button", "Close Button",
       "in-context",
       "In context",
       "Pair with a flex row to dismiss a notice, alert, or toast.",

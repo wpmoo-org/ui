@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chart certification fixture</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      main {
+        max-width: 64rem;
+        display: grid;
+        gap: 2rem;
+      }
+
+      .chart-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+      }
+
+      .chart {
+        height: 17.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-labelledby="fixture-title">
+      <h1 id="fixture-title">Chart certification fixture</h1>
+
+      <div class="chart-grid">
+        <section aria-labelledby="chart-line-title">
+          <h2 id="chart-line-title" class="h5 mb-3">Line chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-line"
+            data-certification-chart="line"
+            data-chart="line"
+            data-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun"],"datasets":[{"label":"Revenue","data":[4000,3200,4800,5100,4600,5800]},{"label":"Target","data":[3800,4000,4200,4600,5000,5400]}]}'
+          >
+            <canvas role="img" aria-label="Line chart comparing monthly revenue against target for the first half of the year"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-bar-title">
+          <h2 id="chart-bar-title" class="h5 mb-3">Bar chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-bar"
+            data-certification-chart="bar"
+            data-chart="bar"
+            data-chart-data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"datasets":[{"label":"Visitors","data":[120,190,150,220,180,90,110]}]}'
+          >
+            <canvas role="img" aria-label="Bar chart of daily active visitors across the week"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-area-title">
+          <h2 id="chart-area-title" class="h5 mb-3">Area chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-area"
+            data-certification-chart="area"
+            data-chart="area"
+            data-chart-data='{"labels":["Apr","May","Jun","Jul"],"datasets":[{"label":"Desktop","data":[186,305,237,273]},{"label":"Mobile","data":[80,200,120,190]}]}'
+          >
+            <canvas role="img" aria-label="Area chart comparing desktop and mobile visitors"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-pie-title">
+          <h2 id="chart-pie-title" class="h5 mb-3">Pie chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-pie"
+            data-certification-chart="pie"
+            data-chart="pie"
+            data-chart-data='{"labels":["Direct","Search","Referral","Social"],"datasets":[{"label":"Traffic","data":[42,28,18,12]}]}'
+          >
+            <canvas role="img" aria-label="Pie chart showing traffic share by channel"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-doughnut-title">
+          <h2 id="chart-doughnut-title" class="h5 mb-3">Doughnut chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-doughnut"
+            data-certification-chart="doughnut"
+            data-chart="doughnut"
+            data-chart-data='{"labels":["Basic","Pro","Enterprise"],"datasets":[{"label":"Plans","data":[44,39,17]}]}'
+            data-chart-options='{"cutout":"68%"}'
+          >
+            <canvas role="img" aria-label="Doughnut chart showing plan distribution"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-polar-area-title">
+          <h2 id="chart-polar-area-title" class="h5 mb-3">Polar area chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-polar-area"
+            data-certification-chart="polarArea"
+            data-chart="polarArea"
+            data-chart-data='{"labels":["North","South","East","West"],"datasets":[{"label":"Regions","data":[30,45,28,36]}]}'
+          >
+            <canvas role="img" aria-label="Polar area chart comparing regional volume"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-radar-title">
+          <h2 id="chart-radar-title" class="h5 mb-3">Radar chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-radar"
+            data-certification-chart="radar"
+            data-chart="radar"
+            data-chart-data='{"labels":["Speed","Quality","Support","Reliability","Cost"],"datasets":[{"label":"Current","data":[8,7,9,8,6]}]}'
+          >
+            <canvas role="img" aria-label="Radar chart comparing operational dimensions"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-scatter-title">
+          <h2 id="chart-scatter-title" class="h5 mb-3">Scatter chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-scatter"
+            data-certification-chart="scatter"
+            data-chart="scatter"
+            data-chart-data='{"labels":[],"datasets":[{"label":"Leads","data":[{"x":12,"y":18},{"x":19,"y":26},{"x":28,"y":32},{"x":38,"y":44}]}]}'
+          >
+            <canvas role="img" aria-label="Scatter chart plotting leads by fit and intent scores"></canvas>
+          </div>
+        </section>
+
+        <section aria-labelledby="chart-bubble-title">
+          <h2 id="chart-bubble-title" class="h5 mb-3">Bubble chart</h2>
+          <div
+            class="chart"
+            id="certification-chart-bubble"
+            data-certification-chart="bubble"
+            data-chart="bubble"
+            data-chart-data='{"labels":[],"datasets":[{"label":"Deals","data":[{"x":10,"y":20,"r":6},{"x":18,"y":28,"r":10},{"x":26,"y":35,"r":14},{"x":34,"y":44,"r":9}]}]}'
+          >
+            <canvas role="img" aria-label="Bubble chart plotting deals by fit intent and value radius"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <section aria-labelledby="chart-invalid-title" data-certification-chart-diagnostics>
+        <h2 id="chart-invalid-title" class="h5 mb-3">Invalid JSON diagnostics</h2>
+        <div class="d-grid gap-2" role="status" aria-live="polite" aria-atomic="true">
+          <div
+            class="alert alert-secondary mb-0"
+            id="certification-chart-invalid-message"
+            data-chart-diagnostic-message
+          >
+            Waiting for malformed data diagnostic.
+          </div>
+          <div
+            class="alert alert-secondary mb-0"
+            id="certification-chart-invalid-options-message"
+            data-chart-diagnostic-message
+          >
+            Waiting for malformed options diagnostic.
+          </div>
+        </div>
+        <div
+          class="chart"
+          id="certification-chart-invalid"
+          data-chart="line"
+          data-chart-data='{not valid json'
+          hidden
+        >
+          <canvas role="img" aria-label="Chart with intentionally malformed data used to verify the diagnostic"></canvas>
+        </div>
+        <div
+          class="chart"
+          id="certification-chart-invalid-options"
+          data-chart="line"
+          data-chart-data='{"labels":["Jan"],"datasets":[{"label":"Revenue","data":[1]}]}'
+          data-chart-options='{not valid json'
+          hidden
+        >
+          <canvas role="img" aria-label="Chart with intentionally malformed options used to verify the diagnostic"></canvas>
+        </div>
+      </section>
+    </main>
+    <script type="module">
+      import MooChart from "/dist/js/chart.js";
+
+      const chartIds = [
+        "line",
+        "bar",
+        "area",
+        "pie",
+        "doughnut",
+        "polarArea",
+        "radar",
+        "scatter",
+        "bubble",
+      ];
+
+      window.CertificationChart = MooChart;
+      window.certificationCharts = Object.fromEntries(
+        chartIds.map((name) => [
+          name,
+          MooChart.getOrCreateInstance(
+            document.querySelector(`[data-certification-chart="${name}"]`)
+          ),
+        ])
+      );
+      window.certificationLineChart = window.certificationCharts.line;
+      window.certificationBarChart = window.certificationCharts.bar;
+      const setDiagnostic = (id, message) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        element.textContent = message;
+        element.dataset.chartDiagnostic = "ready";
+      };
+
+      try {
+        MooChart.getOrCreateInstance(
+          document.querySelector("#certification-chart-invalid")
+        );
+      } catch (error) {
+        window.certificationInvalidMessage = error.message;
+        setDiagnostic("certification-chart-invalid-message", error.message);
+      }
+      try {
+        MooChart.getOrCreateInstance(
+          document.querySelector("#certification-chart-invalid-options")
+        );
+      } catch (error) {
+        window.certificationInvalidOptionsMessage = error.message;
+        setDiagnostic("certification-chart-invalid-options-message", error.message);
+      }
+      document.body.dataset.chartReady = "true";
+    </script>
+  </body>
+</html>

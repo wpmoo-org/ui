@@ -27,7 +27,7 @@
 Moo UI preserves Bootstrap markup, variables, and JavaScript plugins wherever
 Bootstrap already provides the contract. For patterns Bootstrap does not
 provide, Moo UI adds small documented extensions, including optional ESM for
-Combobox, Context Menu, DataTable, and Sidebar.
+Combobox, Context Menu, DataTable, Sidebar, Chart, Datepicker, and Slider.
 
 - **CSS-first.** Most components need only the stylesheet and ordinary HTML.
 - **Bootstrap owns native behavior.** Keep using Bootstrap's bundle for its
@@ -61,6 +61,9 @@ instead of another Bootstrap stylesheet, not in addition to one.
 | Context Menu pointer and keyboard invocation | Optional Moo UI ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
 | DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo UI ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
 | Sidebar state and responsive coordination | Optional Moo UI ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
+| Chart rendering with light/dark theme toggle | Optional Moo UI ESM, self-contained bundle (Chart.js 4.5.1 bundled) | `@wpmoo/ui/chart.js`, then explicit initialization |
+| Datepicker with shadcn-like trigger/popover/calendar | Optional Moo UI ESM, self-contained (no third-party runtime) | `@wpmoo/ui/datepicker.js`, then explicit initialization |
+| Slider with native range input semantics | Optional Moo UI ESM, no third-party runtime | `@wpmoo/ui/slider.js`, then explicit initialization |
 
 Moo UI does not replace Bootstrap plugins and does not publish a mandatory
 aggregate JavaScript runtime.
@@ -106,11 +109,17 @@ import Combobox from "@wpmoo/ui/combobox.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
+import Chart from "@wpmoo/ui/chart.js";
+import Datepicker from "@wpmoo/ui/datepicker.js";
+import Slider from "@wpmoo/ui/slider.js";
 
 Combobox.getOrCreateInstance(document.querySelector(".combobox"));
 ContextMenu.getOrCreateInstance(document.querySelector(".context-menu"));
 DataTable.getOrCreateInstance(document.querySelector(".datatable"));
 Sidebar.getOrCreateInstance(document.querySelector('[data-slot="sidebar-wrapper"]'));
+Chart.getOrCreateInstance(document.querySelector(".chart"));
+Datepicker.getOrCreateInstance(document.querySelector("[data-datepicker]"));
+Slider.getOrCreateInstance(document.querySelector("[data-slider]"));
 ```
 
 See the [Installation guide](https://ui.wpmoo.org/installation/) for CDN
@@ -125,6 +134,7 @@ recipes, load order, and troubleshooting.
 | Static page with no interactive plugins | Load CSS only. |
 | Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
 | Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo UI ESM module. |
+| Page using Chart, Datepicker, or Slider | Add only the corresponding optional Moo UI ESM module. Chart bundles its third-party runtime; Datepicker and Slider are self-contained with no third-party dependency. |
 
 ## Public Package Surface
 
@@ -139,15 +149,20 @@ recipes, load order, and troubleshooting.
 | `@wpmoo/ui/combobox.js` | Optional Combobox ESM lifecycle |
 | `@wpmoo/ui/context-menu.js` | Optional Context Menu ESM lifecycle |
 | `@wpmoo/ui/datatable.js` | Optional DataTable ESM lifecycle |
+| `@wpmoo/ui/chart.js` | Optional Chart ESM lifecycle (Chart.js 4.5.1 bundled) |
+| `@wpmoo/ui/chart.min.js` | Minified Chart bundle (artifact variant of chart.js) |
+| `@wpmoo/ui/datepicker.js` | Optional Datepicker ESM lifecycle (self-contained, no third-party runtime) |
+| `@wpmoo/ui/datepicker.min.js` | Minified Datepicker bundle (artifact variant of datepicker.js) |
+| `@wpmoo/ui/slider.js` | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
 | `@wpmoo/ui/sidebar.js` | Optional Sidebar ESM lifecycle |
-| `@wpmoo/ui/scss/facade-settings` | Public Sass variable allow-list (LibSass `@import`) |
+| `@wpmoo/ui/scss/config` | Public Sass variable allow-list (LibSass `@import`) |
 | `@wpmoo/ui/certification.json` | Versioned support/evidence manifest |
 | `@wpmoo/ui/package.json` | Package metadata |
 
-The tarball also contains `README.md`, `LICENSE`, and `ASSET_LICENSE.md`. It
-does not publish catalog templates, preview artwork, catalog JavaScript, or
-internal SCSS partials beyond the facade's required settings import. Internal
-Sass partials and Jinja macros are repository build tools, not npm APIs.
+The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
+THIRD_PARTY_NOTICES.md. It does not publish catalog templates, preview
+artwork, catalog JavaScript, or internal SCSS partials beyond the public Sass
+config. Internal Sass partials and Jinja macros are repository build tools, not npm APIs.
 
 ## Why Bootstrap Teams Try It
 
@@ -175,7 +190,7 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is at the `1.0.0-rc.2` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.2`. The
+Moo UI is at the `1.0.0-rc.3` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.3`. The
 package's certification manifest currently has `preview` status; catalog
 availability is WPMoo-maintained preview evidence, not independent or
 accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
@@ -212,4 +227,4 @@ Moo UI source code is MIT licensed. WPMoo-generated visual assets under
 `site/static/images/` remain separately protected as described in
 `ASSET_LICENSE.md`. Vendored dependencies retain their original licenses; see
 `LICENSE`, `ASSET_LICENSE.md`, and the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.2/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.3/THIRD_PARTY_NOTICES.md).

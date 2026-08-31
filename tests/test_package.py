@@ -22,12 +22,17 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
-    "scss/_facade-settings.scss",
-    "scss/settings/_facade_public.scss",
+    "dist/js/slider.js",
+    "dist/js/chart.js",
+    "dist/js/chart.min.js",
+    "dist/js/datepicker.js",
+    "dist/js/datepicker.min.js",
+    "scss/_config.scss",
     "certification.json",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
+    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
@@ -38,7 +43,12 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
-    "./scss/facade-settings": "./scss/_facade-settings.scss",
+    "./slider.js": "./dist/js/slider.js",
+    "./chart.js": "./dist/js/chart.js",
+    "./chart.min.js": "./dist/js/chart.min.js",
+    "./datepicker.js": "./dist/js/datepicker.js",
+    "./datepicker.min.js": "./dist/js/datepicker.min.js",
+    "./scss/config": "./scss/_config.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
@@ -185,7 +195,15 @@ class PackageMetadataTests(unittest.TestCase):
         }
         self.assertEqual(
             modules,
-            {"combobox.js", "sidebar.js", "context-menu.js", "datatable.js"},
+            {
+                "combobox.js",
+                "sidebar.js",
+                "context-menu.js",
+                "datatable.js",
+                "slider.js",
+                "chart.js",
+                "datepicker.js",
+            },
         )
 
     def test_npm_pack_contains_only_the_approved_files(self) -> None:
@@ -241,6 +259,27 @@ class PackageMetadataTests(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_package_manifest_validator_runs_pack_when_no_stdin(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            bad_cache = Path(temporary_directory) / "not-a-directory"
+            bad_cache.write_text("", encoding="utf-8")
+            env = os.environ.copy()
+            env["npm_config_cache"] = str(bad_cache)
+            result = subprocess.run(
+                [sys.executable, "scripts/verify_package_contents.py"],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            "Package manifest matches the approved package boundary.",
+            result.stdout,
+        )
 
     def test_package_manifest_validator_rejects_missing_dist_output(self) -> None:
         payload = [
@@ -351,12 +390,22 @@ import Combobox from "@wpmoo/ui/combobox.js";
 import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
+import Slider from "@wpmoo/ui/slider.js";
+import Chart from "@wpmoo/ui/chart.js";
+import ChartMinified from "@wpmoo/ui/chart.min.js";
+import Datepicker from "@wpmoo/ui/datepicker.js";
+import DatepickerMinified from "@wpmoo/ui/datepicker.min.js";
 
 if (
   Combobox.name !== "Combobox" ||
   Sidebar.name !== "Sidebar" ||
   ContextMenu.name !== "ContextMenu" ||
-  DataTable.name !== "DataTable"
+  DataTable.name !== "DataTable" ||
+  Slider.name !== "MooSlider" ||
+  typeof Chart.getOrCreateInstance !== "function" ||
+  typeof ChartMinified.getOrCreateInstance !== "function" ||
+  typeof Datepicker.getOrCreateInstance !== "function" ||
+  typeof DatepickerMinified.getOrCreateInstance !== "function"
 ) {
   throw new Error("Unexpected public ESM default export");
 }
@@ -385,8 +434,8 @@ for (const specifier of [
             )
             self.assertEqual(consumer_result.returncode, 0, consumer_result.stderr)
 
-    def test_sass_facade_compiles_from_a_clean_consumer(self) -> None:
-        """Phase 0C discipline: test the facade from a clean consumer
+    def test_sass_config_compiles_from_a_clean_consumer(self) -> None:
+        """Phase 0C discipline: test the config from a clean consumer
         fixture without source-tree shortcuts. Mirrors the tarball-install
         pattern from test_real_tarball_resolves_from_a_clean_consumer."""
         import sass
@@ -430,7 +479,7 @@ for (const specifier of [
             scss_dir = consumer_root / "scss"
             scss_dir.mkdir(exist_ok=True)
             (scss_dir / "defaults.scss").write_text(
-                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                '@import "@wpmoo/ui/scss/config";\n'
                 "@import \"bootstrap/scss/functions\";\n"
                 "@import \"bootstrap/scss/variables\";\n"
                 "@import \"bootstrap/scss/variables-dark\";\n"
@@ -448,7 +497,7 @@ for (const specifier of [
 
             # --- Assertion 2: overriding $primary changes the output ---
             (scss_dir / "override.scss").write_text(
-                '@import "@wpmoo/ui/scss/facade-settings";\n'
+                '@import "@wpmoo/ui/scss/config";\n'
                 "$primary: #3b82f6;\n"
                 '@import "bootstrap/scss/functions";\n'
                 '@import "bootstrap/scss/variables";\n'
@@ -473,16 +522,16 @@ for (const specifier of [
                 self.assertNotIn("_forms", output)
 
             # --- Assertion 4: non-allow-listed variables must not leak ---
-            # The facade may only expose the frozen 15-variable allow-list.
+            # The config may only expose the frozen 15-variable allow-list.
             # Referencing an internal declaration ($white from the palette,
-            # $moo-destructive derived token) after the facade import must
-            # fail with Sass's own undefined-variable error. If the facade
+            # $moo-destructive derived token) after the config import must
+            # fail with Sass's own undefined-variable error. If the config
             # ever re-imports the full internal settings partial, these
             # compilations succeed and this assertion fails for real.
             for leaked_variable in ("$white", "$moo-destructive"):
                 with self.subTest(leaked_variable=leaked_variable):
                     (scss_dir / "leak.scss").write_text(
-                        '@import "@wpmoo/ui/scss/facade-settings";\n'
+                        '@import "@wpmoo/ui/scss/config";\n'
                         f".leak-test {{ color: {leaked_variable}; }}\n",
                         encoding="utf-8",
                     )
@@ -497,19 +546,29 @@ for (const specifier of [
                     )
 
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
-        for module_name in (
+        for module_path in (
             "combobox.js",
             "sidebar.js",
             "context-menu.js",
             "datatable.js",
+            "slider.js",
+            "chart.js",
+            "datepicker.js",
+            "dist/js/chart.min.js",
+            "dist/js/datepicker.min.js",
         ):
-            with self.subTest(module_name=module_name):
+            source_path = (
+                module_path
+                if module_path.startswith("dist/")
+                else f"src/js/components/{module_path}"
+            )
+            with self.subTest(module_path=module_path):
                 result = subprocess.run(
                     [
                         "node",
                         "--input-type=module",
                         "--eval",
-                        f'import("./src/js/components/{module_name}")',
+                        f'import("./{source_path}")',
                     ],
                     cwd=ROOT,
                     check=False,
