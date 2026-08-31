@@ -385,7 +385,7 @@
     ) }}
 
     {% set rtl_arabic %}
-      <div dir="rtl">
+      <div dir="rtl" class="w-100">
         {% call field() %}
         {{ input(
           label="مفتاح API",
@@ -398,7 +398,7 @@
       </div>
     {% endset %}
     {% set rtl_hebrew %}
-      <div dir="rtl">
+      <div dir="rtl" class="w-100">
         {% call field() %}
         {{ input(
           label="מפתח API",
@@ -411,7 +411,7 @@
       </div>
     {% endset %}
     {% set rtl_english %}
-      <div dir="ltr">
+      <div dir="ltr" class="w-100">
         {% call field() %}
         {{ input(
           label="API Key",

@@ -16,6 +16,7 @@ PAGE = ROOT / "site/src/pages/components/combobox.html.jinja"
 REGISTRY = ROOT / "src/registry/components.json"
 COMBOBOX_JS = ROOT / "src/js/components/combobox.js"
 CATALOG_JS = ROOT / "site/src/js/catalog/index.js"
+CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/combobox.html"
 
 
 class ComboboxTests(CatalogTestCase):
@@ -86,7 +87,20 @@ class ComboboxTests(CatalogTestCase):
         self.assertEqual(output.count('class="combobox-option__check"'), 2)
         self.assertIn(".combobox-option__check", scss)
         self.assertIn("visibility: hidden;", scss)
+        option_block = scss.split(".combobox-option {", 1)[1].split("}", 1)[0]
+        check_block = scss.split(".combobox-option__check {", 1)[1].split("}", 1)[0]
+        self.assertIn("display: grid;", option_block)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) $spacer;", option_block)
+        self.assertIn("padding-inline-end: $dropdown-item-padding-x;", option_block)
+        self.assertIn("justify-self: end;", check_block)
         self.assertIn('.combobox-option[aria-selected="true"] .combobox-option__check', scss)
+
+    def test_combobox_certification_fixture_includes_option_check_icons(self) -> None:
+        source = CERTIFICATION_FIXTURE.read_text(encoding="utf-8")
+
+        self.assertEqual(source.count('class="combobox-option__check"'), 3)
+        self.assertEqual(source.count('data-lucide="check"'), 3)
+        self.assertNotIn('<span class="combobox-option__check" aria-hidden="true"></span>', source)
 
     def test_combobox_can_render_open_basic_list(self) -> None:
         output = self.render_combobox(
@@ -287,7 +301,7 @@ class ComboboxTests(CatalogTestCase):
 
         self.assertIn("line-height: var(--moo-combobox-option-line-height);", option_block)
         self.assertNotIn("min-height: $input-height;", option_block)
-        self.assertIn("padding-inline-end: $input-height;", option_block)
+        self.assertNotIn("padding-inline-end: $input-height;", option_block)
         self.assertIn("font-size: var(--moo-combobox-description-font-size);", group_label_block)
         self.assertIn("font-weight: $font-weight-normal;", group_label_block)
         self.assertIn("line-height: $spacer;", group_label_block)

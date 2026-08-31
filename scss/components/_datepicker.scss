@@ -32,9 +32,8 @@
   width: 100%;
 }
 
-.moo-datepicker-time-row .moo-datepicker {
-  flex: 1 1 12rem;
-  width: auto;
+.moo-datepicker-time-row > .field:first-child {
+  min-width: 0;
 }
 
 .moo-datepicker-time {

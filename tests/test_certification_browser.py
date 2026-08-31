@@ -309,6 +309,82 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     "aria-selected",
                     "true",
                 )
+                selected_option = page.locator("#certification-combobox-option-2")
+                hovered_option = page.locator("#certification-combobox-option-1")
+                self.assertFalse(
+                    selected_option.evaluate(
+                        'element => element.classList.contains("active")'
+                    )
+                )
+
+                combobox_input.click()
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-2",
+                )
+                expect(selected_option).to_have_attribute("aria-current", "true")
+                selected_check = selected_option.locator(
+                    '.combobox-option__check [data-lucide="check"]'
+                )
+                expect(selected_check).to_have_count(1)
+                self.assertTrue(
+                    selected_check.evaluate(
+                        """
+                        element => {
+                          const check = element.closest(".combobox-option__check");
+                          const rect = element.getBoundingClientRect();
+                          return getComputedStyle(check).visibility === "visible"
+                            && rect.width > 0
+                            && rect.height > 0;
+                        }
+                        """
+                    )
+                )
+                if not case.has_touch:
+                    selected_background = selected_option.evaluate(
+                        "element => getComputedStyle(element).backgroundColor"
+                    )
+                    self.assertNotEqual(selected_background, "rgba(0, 0, 0, 0)")
+                    hovered_option.hover()
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-1",
+                    )
+                    expect(hovered_option).to_have_attribute("aria-current", "true")
+                    self.assertIsNone(selected_option.get_attribute("aria-current"))
+                    self.assertEqual(
+                        hovered_option.evaluate(
+                            "element => getComputedStyle(element).backgroundColor"
+                        ),
+                        selected_background,
+                    )
+                    self.assertNotEqual(
+                        selected_option.evaluate(
+                            "element => getComputedStyle(element).backgroundColor"
+                        ),
+                        selected_background,
+                    )
+                    page.mouse.move(0, 0)
+                    self.assertEqual(
+                        selected_option.evaluate(
+                            "element => getComputedStyle(element).backgroundColor"
+                        ),
+                        selected_background,
+                    )
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-2",
+                    )
+                    expect(selected_option).to_have_attribute("aria-current", "true")
+                    self.assertIsNone(hovered_option.get_attribute("aria-current"))
+
+                    hovered_option.hover()
+                    hovered_option.click()
+                    expect(combobox_input).to_have_value("Ada Lovelace")
+                    expect(hidden_value).to_have_value("ada")
+                    expect(hovered_option).to_have_attribute("aria-selected", "true")
+                    expect(selected_option).to_have_attribute("aria-selected", "false")
+                    expect(combobox_input).to_have_attribute("aria-expanded", "false")
 
                 combobox_input.focus()
                 combobox_input.fill("not-a-reviewer")

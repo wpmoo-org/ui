@@ -276,6 +276,33 @@ class DatepickerSourceTests(CatalogTestCase):
         self.assertNotIn('"Dark"', source)
         self.assertNotIn("Scoped theme tokens update", source)
 
+    def test_time_picker_example_uses_native_time_entry_without_picker_trigger(self) -> None:
+        source = COMPONENT_PAGE.read_text(encoding="utf-8")
+        match = re.search(
+            r'<input\b[^>]*\bid="datepicker-time-picker-time"[^>]*>',
+            source,
+        )
+
+        self.assertIsNotNone(match)
+        assert match is not None
+        time_input = match.group(0)
+        self.assertIn('type="time"', time_input)
+        self.assertIn('step="1"', time_input)
+        self.assertIn('autocomplete="off"', time_input)
+        self.assertNotIn("inputmode=", time_input)
+
+    def test_time_inputs_hide_native_picker_indicator_but_keep_native_type(self) -> None:
+        source = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
+
+        self.assertIn('.form-control[type="time"] {', source)
+        self.assertIn("appearance: none;", source)
+        self.assertIn(
+            '.form-control[type="time"]::-webkit-calendar-picker-indicator {',
+            source,
+        )
+        self.assertIn("display: none;", source)
+        self.assertIn("-webkit-appearance: none;", source)
+
     def test_certification_fixture_uses_real_datepicker_trigger_icons(self) -> None:
         source = CERTIFICATION_FIXTURE.read_text(encoding="utf-8")
 
@@ -871,6 +898,32 @@ class _DatepickerBrowserMixin:
             self.assertGreaterEqual(metrics["aboveGap"], 4)
             self.assertLessEqual(metrics["aboveGap"], 8)
             self.assertTrue(metrics["withinViewport"])
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_time_input_preserves_native_keyboard_step(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/datepicker/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[0])
+
+            time_input = page.locator("#datepicker-time-picker-time")
+            expect(time_input).to_have_attribute("type", "time")
+            expect(time_input).to_have_attribute("step", "1")
+
+            initial = time_input.input_value()
+            time_input.focus()
+            time_input.press("ArrowUp")
+
+            self.assertNotEqual(time_input.input_value(), initial)
             evidence.assert_clean()
         finally:
             context.close()

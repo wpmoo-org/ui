@@ -498,3 +498,50 @@ class _SliderBrowserMixin:
             evidence.assert_clean()
         finally:
             context.close()
+
+    def test_vertical_slider_track_center_stays_stable_as_output_digits_change(self) -> None:
+        context, page, evidence = self.open_fixture()
+        try:
+            slider = page.locator("#certification-slider-vertical")
+            input_control = page.locator("#certification-slider-vertical-input")
+
+            def measure(value: str) -> dict[str, float | str]:
+                input_control.evaluate(
+                    """
+                    (input, value) => {
+                      input.value = value;
+                      input.dispatchEvent(new Event("input", { bubbles: true }));
+                    }
+                    """,
+                    value,
+                )
+                return slider.evaluate(
+                    """
+                    element => {
+                      const track = element.querySelector("[data-slider-track]");
+                      const output = element.querySelector("[data-slider-output]");
+                      const rootRect = element.getBoundingClientRect();
+                      const trackRect = track.getBoundingClientRect();
+                      const outputRect = output.getBoundingClientRect();
+
+                      return {
+                        output: output.textContent,
+                        outputWidth: outputRect.width,
+                        rootWidth: rootRect.width,
+                        trackCenterX: trackRect.x + trackRect.width / 2,
+                      };
+                    }
+                    """
+                )
+
+            metrics = [measure(value) for value in ("0", "50", "100")]
+            centers = [metric["trackCenterX"] for metric in metrics]
+
+            self.assertLessEqual(max(centers) - min(centers), 0.5, metrics)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+
+class SliderBrowserTests(_SliderBrowserMixin, CatalogTestCase):
+    pass

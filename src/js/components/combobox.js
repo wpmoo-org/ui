@@ -157,7 +157,10 @@ export default class Combobox {
     this._menu.classList.remove("show");
     this._input.setAttribute("aria-expanded", "false");
     this._input.removeAttribute("aria-activedescendant");
-    this._options.forEach((option) => option.removeAttribute("aria-current"));
+    this._options.forEach((option) => {
+      option.removeAttribute("aria-current");
+      option.classList.remove("active");
+    });
     if (wasOpen && emit) {
       this._trigger("hidden");
     }
@@ -287,16 +290,35 @@ export default class Combobox {
     return this._visibleOptions().find((option) => option.id === activeId) || null;
   }
 
-  _activateFirstOptionIfNeeded() {
+  _selectedOption() {
+    if (this._isMultiple) {
+      return null;
+    }
+    return (
+      this._selectedOptions().find(
+        (option) => !option.hidden && !option.disabled && !this._optionGroupIsHidden(option)
+      ) || null
+    );
+  }
+
+  _preferredActiveOption() {
+    return this._selectedOption() || this._visibleOptions()[0] || null;
+  }
+
+  _activatePreferredOptionIfNeeded() {
     if (!this._activeOption()) {
-      this._setActiveOption(this._visibleOptions()[0] || null);
+      this._setActiveOption(this._preferredActiveOption());
     }
   }
 
   _setActiveOption(option) {
     this._options.forEach((candidate) => {
       const active = candidate === option;
-      candidate.toggleAttribute("aria-current", active);
+      if (active) {
+        candidate.setAttribute("aria-current", "true");
+      } else {
+        candidate.removeAttribute("aria-current");
+      }
       candidate.classList.toggle("active", active);
     });
     if (!option) {
@@ -311,6 +333,20 @@ export default class Combobox {
     } else if (optionRect.bottom > menuRect.bottom) {
       this._menu.scrollTop += optionRect.bottom - menuRect.bottom;
     }
+  }
+
+  _activateOptionFromPointer(option, event) {
+    if (event.pointerType === "touch" || option === this._activeOption()) {
+      return;
+    }
+    this._setActiveOption(option);
+  }
+
+  _restoreSelectedActiveOption() {
+    if (!this._menu.classList.contains("show")) {
+      return;
+    }
+    this._setActiveOption(this._preferredActiveOption());
   }
 
   _chooseOption(option) {
@@ -356,7 +392,7 @@ export default class Combobox {
     this._empty.hidden = count !== 0;
     this._liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
     if (activate) {
-      this._activateFirstOptionIfNeeded();
+      this._activatePreferredOptionIfNeeded();
     }
   }
 
@@ -366,7 +402,7 @@ export default class Combobox {
       if (!this._isMultiple && this._input.dataset.comboboxSelected === "true") {
         this._input.select();
       }
-      this._activateFirstOptionIfNeeded();
+      this._activatePreferredOptionIfNeeded();
     });
     this._listen(this._input, "input", () => {
       if (!this._isMultiple) {
@@ -383,11 +419,14 @@ export default class Combobox {
     });
     this._listen(this._input, "click", () => {
       this._openMenu();
-      this._setActiveOption(this._visibleOptions()[0] || null);
+      this._setActiveOption(this._preferredActiveOption());
     });
     this._listen(this._input, "keydown", (event) => this._handleKeydown(event));
     this._options.forEach((option) => {
       this._listen(option, "keydown", (event) => this._handleKeydown(event));
+      this._listen(option, "pointerenter", (event) => {
+        this._activateOptionFromPointer(option, event);
+      });
       this._listen(option, "click", () => {
         this._chooseOption(option);
         if (this._isMultiple) {
@@ -404,6 +443,7 @@ export default class Combobox {
       this._input.focus();
       this._filterOptions();
     });
+    this._listen(this._menu, "pointerleave", () => this._restoreSelectedActiveOption());
     this._listen(this._element, "click", (event) => this._handleRootClick(event));
     this._listen(this._document, "click", (event) => {
       if (event.target instanceof this._window.Node && !this._element.contains(event.target)) {

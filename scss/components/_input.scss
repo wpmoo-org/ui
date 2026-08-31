@@ -8,6 +8,19 @@
   min-height: calc(#{$input-height} + #{$input-border-width} * 2);
 }
 
+.form-control[type="file"]:not(.form-control-sm, .form-control-lg)::file-selector-button {
+  min-height: calc(#{$input-height} - #{$input-border-width} * 2);
+}
+
+.form-control[type="time"] {
+  appearance: none;
+}
+
+.form-control[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
 .form-control:disabled,
 .form-select:disabled {
   opacity: var(--moo-disabled-control-opacity);

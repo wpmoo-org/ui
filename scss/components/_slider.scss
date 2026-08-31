@@ -174,6 +174,13 @@ $slider-thumb-margin-top: ($progress-height - $slider-thumb-size) * 0.5;
   width: max-content;
 }
 
+.slider--vertical [data-slider-output] {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
 .slider--vertical .slider-track {
   justify-content: center;
   justify-self: center;

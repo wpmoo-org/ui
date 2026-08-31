@@ -326,6 +326,40 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
+    def test_form_component_preview_fields_center_on_their_control_width(self) -> None:
+        styles = read_catalog_styles()
+
+        for selector, token in (
+            (
+                ".moo-example__preview--narrow > .field:has(> .combobox)",
+                "$moo-combobox-width",
+            ),
+            (
+                ".moo-example__preview--narrow > .field:has(> .combobox--multiple)",
+                "$moo-combobox-multiple-width",
+            ),
+            (
+                ".moo-example__preview--medium > .field:has(> .moo-datepicker)",
+                "$moo-datepicker-width",
+            ),
+            (
+                ".moo-example__preview--narrow > .field:has(> .slider--vertical)",
+                "max-content",
+            ),
+            (
+                ".moo-example__preview--narrow > .field:has(> .form-switch)",
+                "max-content",
+            ),
+        ):
+            with self.subTest(selector=selector):
+                match = re.search(
+                    rf"{re.escape(selector)}\s*\{{(?P<body>[^}}]*)\}}",
+                    styles,
+                )
+                self.assertIsNotNone(match)
+                assert match is not None
+                self.assertIn(f"max-width: {token};", match.group("body"))
+
     def test_catalog_github_link_stays_neutral_when_base_color_changes(self) -> None:
         styles = read_catalog_styles()
         match = re.search(
@@ -1313,13 +1347,16 @@ class CatalogContractTests(CatalogTestCase):
             source = path.read_text(encoding="utf-8")
 
             with self.subTest(page=path.name, contract="interactive markup"):
-                # Native <input type="time"> is allowed as a composition
-                # example (pairing Date Picker with a native time input).
-                source_no_time_input = re.sub(
-                    r'<input\s+type="time"[^>]*>', '', source
+                # Date Picker's Time Picker example pairs the component with
+                # a native time entry; Moo hides the picker indicator while
+                # keeping keyboard stepping and browser validation.
+                source_no_manual_time_input = re.sub(
+                    r'<input\b(?=[^>]*\bid="datepicker-time-picker-time")(?=[^>]*\btype="time")[^>]*>',
+                    '',
+                    source,
                 )
                 self.assertNotRegex(
-                    source_no_time_input,
+                    source_no_manual_time_input,
                     r"<(?:button|form|input|kbd|select|textarea)\b",
                 )
 
