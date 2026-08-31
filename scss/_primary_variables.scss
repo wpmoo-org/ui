@@ -1,7 +1,0 @@
-// Ordered settings aggregate. These partials emit variables only; preserve this
-// sequence because later component and catalog knobs depend on earlier palette
-// and form values before Bootstrap's own defaults are loaded.
-@import "settings/palette";
-@import "settings/forms";
-@import "settings/component_variables";
-@import "settings/bootstrap_overrides";

@@ -296,7 +296,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             ROOT / "src/js/components/combobox.js",
             ROOT / "src/icons/lucide-icons.json",
             ROOT / "src/registry/components.json",
-            ROOT / "scss/_primary_variables.scss",
+            ROOT / "scss/_settings.scss",
         )
 
         for path in required_paths:

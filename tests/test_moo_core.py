@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from tests.helpers import DIST, ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 from tests.helpers.css_contract import (
     assert_allowed_global_rules,
     assert_animation_closure,
@@ -182,7 +182,7 @@ class MooCoreTests(CatalogTestCase):
 
     def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
         overlay_layer = OVERLAY_BACKDROP_SCSS.read_text(encoding="utf-8")
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
             encoding="utf-8"
         )
@@ -195,7 +195,7 @@ class MooCoreTests(CatalogTestCase):
             "$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;",
             "$moo-overlay-backdrop-filter: blur(8px) !default;",
         ):
-            self.assertIn(knob, primary_variables)
+            self.assertIn(knob, settings)
 
         for token in (
             "--moo-overlay-backdrop-opacity: #{$moo-overlay-backdrop-opacity}",

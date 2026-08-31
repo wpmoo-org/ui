@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import ROOT, CatalogTestCase, read_settings
 
 
 COMPONENT = ROOT / "src/components/toast.html.jinja"
@@ -9,7 +9,6 @@ PAGE = ROOT / "site/src/pages/components/toast.html.jinja"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 TOAST_SCSS = ROOT / "scss/components/_toast.scss"
 COMPONENT_SETTINGS = ROOT / "scss/settings/_component_variables.scss"
-PRIMARY_VARIABLES = ROOT / "scss/_primary_variables.scss"
 FIXTURE = ROOT / "tests/fixtures/certification/toast.html"
 
 
@@ -365,7 +364,7 @@ class ToastTests(CatalogTestCase):
     def test_toast_stack_styles_and_settings_define_runtime_contract(self) -> None:
         styles = TOAST_SCSS.read_text(encoding="utf-8")
         settings = COMPONENT_SETTINGS.read_text(encoding="utf-8")
-        primary = read_primary_variables()
+        settings_aggregate = read_settings()
 
         self.assertIn("toast-container--stacked[data-toast-stack=\"deck\"]", styles)
         self.assertIn("[data-toast-stack-active]", styles)
@@ -415,14 +414,14 @@ class ToastTests(CatalogTestCase):
         self.assertIn("$moo-toast-stack-height-transition-duration", settings)
         self.assertIn("$moo-toast-stack-transition-timing-function", settings)
         self.assertIn("cubic-bezier(.22, 1, .36, 1)", settings)
-        self.assertIn("$moo-toast-stack-gap", primary)
-        self.assertIn("$moo-toast-stack-peek", primary)
-        self.assertIn("$moo-toast-stack-scale-step", primary)
-        self.assertIn("$moo-toast-stack-min-scale", primary)
-        self.assertIn("$moo-toast-stack-enter-y", primary)
-        self.assertIn("$moo-toast-stack-transition-duration", primary)
-        self.assertIn("$moo-toast-stack-height-transition-duration", primary)
-        self.assertIn("$moo-toast-stack-transition-timing-function", primary)
+        self.assertIn("$moo-toast-stack-gap", settings_aggregate)
+        self.assertIn("$moo-toast-stack-peek", settings_aggregate)
+        self.assertIn("$moo-toast-stack-scale-step", settings_aggregate)
+        self.assertIn("$moo-toast-stack-min-scale", settings_aggregate)
+        self.assertIn("$moo-toast-stack-enter-y", settings_aggregate)
+        self.assertIn("$moo-toast-stack-transition-duration", settings_aggregate)
+        self.assertIn("$moo-toast-stack-height-transition-duration", settings_aggregate)
+        self.assertIn("$moo-toast-stack-transition-timing-function", settings_aggregate)
 
     def test_catalog_stack_uses_live_reference_geometry_and_newest_dom_order(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")

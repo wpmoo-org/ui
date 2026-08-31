@@ -4,7 +4,7 @@ import json
 import re
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 
 
 COMPONENT = ROOT / "src/components/input.html.jinja"
@@ -125,7 +125,7 @@ class InputTests(CatalogTestCase):
         self.assertNotIn(" disabled", readonly)
 
     def test_disabled_form_controls_share_disabled_text_token(self) -> None:
-        variables = read_primary_variables()
+        variables = read_settings()
         tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
             encoding="utf-8"
         )
@@ -151,7 +151,7 @@ class InputTests(CatalogTestCase):
         self.assertIn("opacity: var(--moo-disabled-control-opacity);", input_scss)
 
     def test_text_controls_use_compact_reference_line_height(self) -> None:
-        variables = read_primary_variables()
+        variables = read_settings()
 
         self.assertIn("$font-size-base: 0.875rem !default;", variables)
         self.assertIn("$input-line-height: 1.4285714286 !default;", variables)
@@ -171,7 +171,7 @@ class InputTests(CatalogTestCase):
         )
 
     def test_invalid_form_controls_share_destructive_ring(self) -> None:
-        variables = read_primary_variables()
+        variables = read_settings()
         focus = (ROOT / "scss/foundations/_focus.scss").read_text(
             encoding="utf-8"
         )

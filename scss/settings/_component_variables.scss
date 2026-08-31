@@ -145,7 +145,7 @@ $moo-switch-checked-bg-image-dark: url("data:image/svg+xml,<svg xmlns='http://ww
 // underline on hover); Bootstrap's default tints the expanded trigger with
 // $primary-bg-subtle / $primary-text-emphasis. Referencing the resting
 // --bs-accordion-bg/-color custom properties (rather than the Sass
-// variables, which primary_variables.scss loads before Bootstrap defines
+// variables, which settings.scss loads before Bootstrap defines
 // them) matches the trigger's own resting look so expanding an item
 // changes nothing but the chevron and revealed content.
 $accordion-button-active-bg: var(--bs-accordion-bg) !default;
@@ -396,7 +396,7 @@ $moo-datatable-actions-cell-fade-width: 1.25rem !default;
 // Bootstrap has no Data Table frame-header or layout-toggle row primitive, so
 // these scoped knobs align Moo's table/card header controls to Bootstrap inputs.
 $moo-datatable-frame-header-min-height: 2.78125rem !default;
-// Bootstrap's checkbox width variable is not available while primary settings
+// Bootstrap's checkbox width variable is not available while Moo settings
 // are aggregated, so keep Data Table's select inset derived from Moo's compact
 // checkbox box and Bootstrap's default 1px frame border. Now matches the
 // global $form-check-input-width (1rem / 16px) set above.

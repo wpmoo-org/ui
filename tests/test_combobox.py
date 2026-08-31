@@ -7,7 +7,7 @@ from tests.helpers import (
     ROOT,
     CatalogTestCase,
     read_catalog_styles,
-    read_primary_variables,
+    read_settings,
 )
 
 
@@ -257,7 +257,7 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_menus_scroll_with_hidden_scrollbar_when_long(self) -> None:
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        variables = read_primary_variables()
+        variables = read_settings()
 
         self.assertIn(".combobox-menu {", scss)
         menu_source = scss.split(".combobox-menu {", 1)[1]
@@ -274,7 +274,7 @@ class ComboboxTests(CatalogTestCase):
 
     def test_combobox_custom_item_typography_matches_reference_contract(self) -> None:
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        variables = read_primary_variables()
+        variables = read_settings()
 
         self.assertIn("$moo-combobox-option-line-height: 1.25rem !default;", variables)
         self.assertIn("$moo-combobox-description-font-size: 0.75rem !default;", variables)

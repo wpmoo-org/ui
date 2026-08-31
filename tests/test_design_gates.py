@@ -6,7 +6,7 @@ import re
 import subprocess
 import tempfile
 
-from tests.helpers import ROOT, CatalogTestCase, read_primary_variables
+from tests.helpers import ROOT, CatalogTestCase, read_settings
 from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 SCSS = ROOT / "scss"
@@ -405,7 +405,7 @@ console.log(JSON.stringify(Object.fromEntries(
             {
                 "_components.scss",
                 "_facade-settings.scss",
-                "_primary_variables.scss",
+                "_settings.scss",
                 "moo-core.scss",
                 "moo-ui.scss",
             },
@@ -436,8 +436,8 @@ console.log(JSON.stringify(Object.fromEntries(
             {"_scroll_fade.scss", "_scroll_fade_primitives.scss"},
         )
 
-    def test_primary_variables_import_settings_in_dependency_order(self) -> None:
-        primary_variables = (SCSS / "_primary_variables.scss").read_text(
+    def test_settings_aggregate_imports_partials_in_dependency_order(self) -> None:
+        settings = (SCSS / "_settings.scss").read_text(
             encoding="utf-8"
         )
         expected = [
@@ -448,14 +448,14 @@ console.log(JSON.stringify(Object.fromEntries(
         ]
         imports = [
             target
-            for target in active_scss_import_list(primary_variables)
+            for target in active_scss_import_list(settings)
             if target.startswith("settings/")
         ]
 
         self.assertEqual(imports, expected)
         # _facade_public.scss is the narrow public allow-list: it is owned
         # by _palette.scss's leading import (and by the public facade), not
-        # a direct _primary_variables.scss import.
+        # a direct _settings.scss import.
         self.assertEqual(
             owned_partial_targets(SCSS / "settings"),
             set(expected) | {"settings/facade_public"},
@@ -476,7 +476,7 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(
             entrypoint_imports["moo-ui.scss"],
             [
-                "primary_variables",
+                "settings",
                 "../vendor/bootstrap/scss/mixins/banner",
                 "../vendor/bootstrap/scss/functions",
                 "../vendor/bootstrap/scss/variables",
@@ -521,7 +521,7 @@ console.log(JSON.stringify(Object.fromEntries(
             entrypoint_imports["moo-core.scss"],
             [
                 "functions",
-                "primary_variables",
+                "settings",
                 "variables",
                 "variables-dark",
                 "maps",
@@ -789,8 +789,8 @@ console.log(JSON.stringify(Object.fromEntries(
         )
 
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:
-        primary_variables = read_primary_variables()
-        primary_lines = primary_variables.splitlines()
+        settings = read_settings()
+        settings_lines = settings.splitlines()
 
         # Bootstrap's native class family is .btn (not .button), so
         # Button's private tokens use --moo-btn-* to stay aligned with
@@ -816,18 +816,18 @@ console.log(JSON.stringify(Object.fromEntries(
             for token in sorted(tokens):
                 knob = f"${token.removeprefix('--')}"
                 self.assertRegex(
-                    primary_variables,
+                    settings,
                     rf"{re.escape(knob)}\s*:[^;]+!default;",
                     f"{token} must have a matching {knob} !default Sass knob",
                 )
                 declaration_line = next(
                     index
-                    for index, line in enumerate(primary_lines)
+                    for index, line in enumerate(settings_lines)
                     if re.search(rf"^\s*{re.escape(knob)}\s*:", line)
                 )
                 rationale = " ".join(
                     line.removeprefix("//").strip().lower()
-                    for line in primary_lines[max(0, declaration_line - 8):declaration_line]
+                    for line in settings_lines[max(0, declaration_line - 8):declaration_line]
                     if line.strip().startswith("//")
                 )
                 self.assertIn(
@@ -854,7 +854,7 @@ console.log(JSON.stringify(Object.fromEntries(
                     )
 
     def test_visual_exception_values_are_configured_by_sass_knobs(self) -> None:
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         component_sources = {
             path.name: path.read_text(encoding="utf-8")
             for path in component_partials()
@@ -868,7 +868,7 @@ console.log(JSON.stringify(Object.fromEntries(
         )
         for knob in expected_knobs:
             with self.subTest(knob=knob):
-                self.assertIn(knob, primary_variables)
+                self.assertIn(knob, settings)
 
         self.assertIn("border-color: $badge-border-color;", component_sources["_badge.scss"])
         self.assertIn(
@@ -889,7 +889,7 @@ console.log(JSON.stringify(Object.fromEntries(
         )
 
     def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
             encoding="utf-8"
         )
@@ -900,9 +900,9 @@ console.log(JSON.stringify(Object.fromEntries(
         for token, variables in MOO_THEME_TOKENS.items():
             for variable in variables:
                 self.assertRegex(
-                    primary_variables,
+                    settings,
                     rf"{re.escape(variable)}\s*:[^;]+!default;",
-                    f"{token} must be backed by {variable} in primary variables",
+                    f"{token} must be backed by {variable} in the settings aggregate",
                 )
 
         for token, (light_variable, dark_variable) in MOO_THEME_TOKENS.items():
@@ -941,7 +941,7 @@ console.log(JSON.stringify(Object.fromEntries(
             )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:
-        primary_variables = read_primary_variables()
+        settings = read_settings()
         for scale_variable in (
             "$box-shadow-sm:",
             "$box-shadow:",
@@ -951,7 +951,7 @@ console.log(JSON.stringify(Object.fromEntries(
             "$btn-font-size-sm:",
             "$btn-font-size-lg:",
         ):
-            self.assertIn(scale_variable, primary_variables)
+            self.assertIn(scale_variable, settings)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

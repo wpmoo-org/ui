@@ -95,8 +95,8 @@ def read_scss_aggregate(
     return "\n".join(path.read_text(encoding="utf-8") for path in paths)
 
 
-def read_primary_variables() -> str:
-    return read_scss_aggregate(ROOT / "scss/_primary_variables.scss", "settings")
+def read_settings() -> str:
+    return read_scss_aggregate(ROOT / "scss/_settings.scss", "settings")
 
 
 def read_catalog_styles() -> str:
