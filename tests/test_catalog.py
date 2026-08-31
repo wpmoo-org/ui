@@ -2835,6 +2835,44 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("compiled CSS and notices only", readme)
         self.assertNotIn("CSS-only library", readme)
 
+    def test_public_docs_do_not_narrow_optional_esm_to_pre_rc3_modules(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        public_surfaces = {
+            "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+            "SECURITY.md": (ROOT / "SECURITY.md").read_text(encoding="utf-8"),
+            "CONTRIBUTING.md": (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8"),
+            ".github/pull_request_template.md": (
+                ROOT / ".github/pull_request_template.md"
+            ).read_text(encoding="utf-8"),
+            "index.html": self.read_output("index.html"),
+            "introduction.html": self.read_output("introduction.html"),
+            "examples/marketing/faq/index.html": self.read_output(
+                "examples/marketing/faq/index.html"
+            ),
+        }
+        stale_fragments = (
+            "Combobox and Sidebar",
+            "Combobox or Sidebar",
+            "Combobox, Context Menu, DataTable, and Sidebar",
+            "not its internal Sass source",
+        )
+
+        for path, surface in public_surfaces.items():
+            for fragment in stale_fragments:
+                with self.subTest(path=path, fragment=fragment):
+                    self.assertNotIn(fragment, surface)
+
+        introduction_text = unescape(
+            re.sub(r"<[^>]+>", "", public_surfaces["introduction.html"])
+        )
+        self.assertIn(
+            "Chart, Combobox, Context Menu, DataTable, Date Picker, Slider, and Sidebar",
+            introduction_text,
+        )
+        self.assertIn("documented Sass source entrypoints", introduction_text)
+
     def test_public_docs_limit_latest_to_readme_quick_demo(self) -> None:
         # Drift class: only the README quick demo may float; rendered docs and
         # machine handoff files must use versioned installation paths.
