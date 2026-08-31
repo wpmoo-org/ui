@@ -35,7 +35,7 @@ dependency for applying a preset.
   "chartColor": ["neutral", "blue", "azure", "indigo", "purple", "orange", "pink", "red", "yellow", "lime", "green", "teal", "cyan"],
   "headingFont": ["default", "geist", "system"],
   "bodyFont": ["default", "geist", "system"],
-  "radius": ["default", "compact", "large"]
+  "radius": ["default", "none", "small", "medium", "large"]
 }
 ```
 <!-- theme-preset-schema-enums:end -->
