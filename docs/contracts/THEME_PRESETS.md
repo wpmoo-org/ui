@@ -45,9 +45,12 @@ dependency for applying a preset.
 Schema version `1` treats sidecars with `"radius": "compact"` as legacy input
 and normalizes that value to `"small"`. The normalized sidecar preserves
 `"small"`; `"compact"` is not emitted and stays outside the public radius enum.
-This normalization lives in `normalizeThemeBuilderState()` in
-`site/src/js/catalog/theme-builder-schema.js` and is locked by the focused
-normalization and export tests in `tests/test_catalog_js.py`.
+Adapters must apply this `"compact"` -> `"small"` migration before the generic
+unknown-enum fallback, so a legacy `"compact"` resolves to `"small"` and never
+falls through to the default radius. This normalization lives in
+`normalizeThemeBuilderState()` in `site/src/js/catalog/theme-builder-schema.js`
+and is locked by the focused normalization and export tests in
+`tests/test_catalog_js.py`.
 
 ## Public Token Allow-List
 

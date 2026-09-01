@@ -295,6 +295,9 @@ class DatepickerSourceTests(CatalogTestCase):
         self.assertIn('step="1"', time_input)
         self.assertIn('autocomplete="off"', time_input)
         self.assertNotIn("inputmode=", time_input)
+        # Native time entry has no Datepicker picker trigger or calendar hook.
+        self.assertNotIn("data-datepicker", time_input)
+        self.assertNotIn("data-calendar", time_input)
 
     def test_time_inputs_keep_picker_trigger_without_native_indicator(self) -> None:
         source = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")

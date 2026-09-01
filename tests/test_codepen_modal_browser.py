@@ -274,6 +274,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
             )
 
             expect(page.locator('script[data-foreign-bootstrap="true"]')).to_have_count(1)
+            # The Bootstrap bundle fails asynchronously; the toast queue flag is
+            # cleared only after the failure handler runs, so wait for that.
             expect(page.locator("body")).not_to_have_attribute(
                 "data-moo-codepen-toasts-queued"
             )
