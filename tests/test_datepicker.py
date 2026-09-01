@@ -5,11 +5,9 @@ import importlib
 import re
 import subprocess
 import sys
-import unittest
 
 from build import create_environment
 from tests.helpers import (
-    DIST,
     ROOT,
     STATIC,
     CatalogTestCase,
@@ -298,7 +296,7 @@ class DatepickerSourceTests(CatalogTestCase):
         self.assertIn('autocomplete="off"', time_input)
         self.assertNotIn("inputmode=", time_input)
 
-    def test_time_inputs_hide_native_picker_indicator_but_keep_native_type(self) -> None:
+    def test_time_inputs_keep_picker_trigger_without_native_indicator(self) -> None:
         source = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
 
         self.assertIn('.form-control[type="time"] {', source)
@@ -313,8 +311,8 @@ class DatepickerSourceTests(CatalogTestCase):
         )
 
         self.assertRegex(time_block, r"(?<!-)\bappearance: none;")
-        self.assertIn("display: none;", indicator_block)
-        self.assertIn("-webkit-appearance: none;", indicator_block)
+        self.assertIn("opacity: 0;", indicator_block)
+        self.assertIn("cursor: pointer;", indicator_block)
 
     def test_certification_fixture_uses_real_datepicker_trigger_icons(self) -> None:
         source = CERTIFICATION_FIXTURE.read_text(encoding="utf-8")

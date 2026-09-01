@@ -4,7 +4,6 @@ import json
 import importlib
 import subprocess
 import sys
-import unittest
 
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase, scss_rule_body

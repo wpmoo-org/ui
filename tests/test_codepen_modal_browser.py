@@ -274,8 +274,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
             )
 
             expect(page.locator('script[data-foreign-bootstrap="true"]')).to_have_count(1)
-            self.assertIsNone(
-                page.locator("body").get_attribute("data-moo-codepen-toasts-queued")
+            expect(page.locator("body")).not_to_have_attribute(
+                "data-moo-codepen-toasts-queued"
             )
         finally:
             context.close()

@@ -85,11 +85,11 @@ class CardTests(CatalogTestCase):
         )
 
         self.assertIn(
-            "--bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) #{$moo-card-bg-mix}, var(--moo-surface));",
+            "--bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix}, var(--bs-body-bg));",
             source,
         )
         self.assertIn(
-            "--bs-card-border-color: color-mix(in srgb, var(--moo-foreground) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});",
+            "--bs-card-border-color: color-mix(in srgb, var(--bs-body-color) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});",
             source,
         )
         self.assertIn(
@@ -97,7 +97,7 @@ class CardTests(CatalogTestCase):
             source,
         )
         self.assertIn(
-            "--bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) #{$moo-card-bg-mix-dark}, var(--moo-surface));",
+            "--bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix-dark}, var(--bs-body-bg));",
             source,
         )
         for variable in (

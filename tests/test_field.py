@@ -80,7 +80,7 @@ class FieldTests(CatalogTestCase):
         css = self.read_output("assets/css/moo-ui.css")
 
         self.assertNotIn(".form-check-label", field_source)
-        self.assertIn(".form-label,", focus_source)
+        self.assertIn(".form-label", focus_source)
         self.assertIn(".form-check-label", focus_source)
         self.assertIn("user-select: none;", focus_source)
         self.assertNotRegex(

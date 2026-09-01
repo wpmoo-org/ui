@@ -321,6 +321,8 @@ class CodeExampleTests(CatalogTestCase):
         source = (ROOT / "site/static/js/codepen-demo.js").read_text(
             encoding="utf-8"
         )
+        self.assertIn("function initializePopovers", source)
+        self.assertIn("function initializeToasts", source)
         popover_block = source.split("function initializePopovers", 1)[1].split(
             "function initializeToasts",
             1,
