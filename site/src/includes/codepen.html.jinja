@@ -1,6 +1,7 @@
 {% from "components/button.html.jinja" import button %}
 
-{% set codepen_current_package_required_slugs = ["chart", "datepicker", "slider"] %}
+{% set codepen_js_runtime_slugs = ["chart", "combobox", "context-menu", "datatable", "datepicker", "sidebar", "slider"] %}
+{% set codepen_cdn_runtime_slugs = ["chart", "combobox", "context-menu", "datatable", "datepicker", "sidebar", "slider"] %}
 
 {#- These two CSS blocks are the small amount of page-layout CSS each
    example category owns on top of the shipped moo-ui.css (see
@@ -496,10 +497,23 @@ body {
    the published dist/js/chart.js already bundles Chart.js and exposes
    MooChart as its default export. #}
 {% macro dashboard_codepen_js() -%}
-// This pen includes the copyable dashboard markup and CSS. The Moo Chart
-// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
-// package is published to npm; do not import chart.js from the older pinned
-// CodePen CDN package.
+function startMooCodePenCharts() {
+  import("https://unpkg.com/@wpmoo/ui@{{ product.codepenCdnVersion }}/dist/js/chart.js")
+    .then(({ default: MooChart }) => {
+      document.querySelectorAll(".chart").forEach((element) => {
+        MooChart.getOrCreateInstance(element);
+      });
+    })
+    .catch((error) => {
+      console.error("Moo UI Chart failed to load for this CodePen example.", error);
+    });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMooCodePenCharts, { once: true });
+} else {
+  startMooCodePenCharts();
+}
 {%- endmacro %}
 
 {% macro chart_codepen_css() -%}
@@ -510,40 +524,6 @@ body {
 .chart {
   max-width: 42rem;
   margin-inline: auto;
-}
-{%- endmacro %}
-
-{% macro chart_codepen_js() -%}
-// This pen includes the copyable Moo Chart markup and CSS. The Moo Chart
-// runtime is part of @wpmoo/ui 1.0.0-rc.3 and should be wired here after that
-// package is published to npm; do not import chart.js from the older pinned
-// CodePen CDN package.
-{%- endmacro %}
-
-{% macro codepen_demo_js(component_slug="", component_label="") -%}
-  {% set ns = namespace(meta={"kind": "example"}, component=None) %}
-  {% for component in catalog %}
-    {% if component.slug == component_slug %}
-      {% set ns.component = component %}
-    {% endif %}
-  {% endfor %}
-  {% if component_slug and component_label %}
-    {% set ns.meta = {
-      "kind": "component",
-      "components": [
-        {
-          "slug": component_slug,
-          "label": component_label,
-          "description": ns.component.description if ns.component else "",
-          "href": canonical_url("components/" ~ component_slug ~ ".html"),
-          "previewSrc": component_preview_absolute_src(component_slug)
-        }
-      ]
-    } %}
-  {% endif %}
-window.MooCodePen = {{ ns.meta | moo_json | safe }};
-if (window.MooCodePenDemo) {
-  window.MooCodePenDemo.init(window.MooCodePen);
 }
 {%- endmacro %}
 
@@ -586,45 +566,9 @@ if (window.MooCodePenDemo) {
   {% if demo_js_external not in resolved_js_external %}
     {% set resolved_js_external = (resolved_js_external ~ ";" ~ demo_js_external) if resolved_js_external else demo_js_external %}
   {% endif %}
-  {% set demo_js = codepen_demo_js(component_slug, component_label) | trim %}
-  {% set resolved_js = (demo_js ~ "\n\n" ~ js) | trim %}
-  {% if uses_popover and "initializeMooCodePenPopovers" not in resolved_js %}
-    {% set popover_js -%}
-function initializeMooCodePenPopovers() {
-  const Popover = window.bootstrap && window.bootstrap.Popover;
-  if (!Popover) {
-    return;
-  }
-
-  document.querySelectorAll('[data-bs-toggle="popover"]').forEach((element) => {
-    Popover.getOrCreateInstance(element);
-  });
-}
-
-function loadMooCodePenBootstrap(callback) {
-  if (window.bootstrap && window.bootstrap.Popover) {
-    callback();
-    return;
-  }
-
-  const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";
-  script.onload = callback;
-  document.head.appendChild(script);
-}
-
-function startMooCodePenPopovers() {
-  loadMooCodePenBootstrap(initializeMooCodePenPopovers);
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startMooCodePenPopovers, { once: true });
-} else {
-  startMooCodePenPopovers();
-}
-    {%- endset %}
-    {% set resolved_js = (resolved_js ~ "\n\n" ~ popover_js) | trim %}
-  {% endif %}
+  {# Component runtime boot stays in codepen-demo.js so the CodePen JS panel
+     remains focused on user-authored demo logic when callers provide any. #}
+  {% set resolved_js = js | trim %}
   {% set payload = {
     "title": title,
     "description": description,
@@ -642,14 +586,14 @@ if (document.readyState === "loading") {
     "js_module": js_module
   } %}
   <form action="https://codepen.io/pen/define" method="POST" target="_blank" class="moo-examples-footer__codepen{% if extra_class %} {{ extra_class }}{% endif %}" data-moo-codepen-form>
-    <input type="hidden" name="data" value="{{ payload | moo_json | forceescape }}">
+    <textarea name="data" hidden>{{ payload | moo_json | forceescape }}</textarea>
     {{ button(label, type="submit", variant="outline", size="sm", icon_start=icon) }}
   </form>
 {%- endmacro %}
 
 {% macro codepen_button_if_available(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110", label="Open in CodePen", icon="code", extra_class="", component_slug="", component_label="") -%}
-  {% set needs_current_package = component_slug in codepen_current_package_required_slugs %}
-  {% if product.codepenCdnVersion == product.version or not needs_current_package %}
+  {% set needs_cdn_runtime = component_slug and component_slug in codepen_js_runtime_slugs %}
+  {% if not needs_cdn_runtime or component_slug in codepen_cdn_runtime_slugs %}
     {{ codepen_button(
       title,
       description,

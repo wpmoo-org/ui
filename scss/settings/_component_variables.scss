@@ -182,6 +182,21 @@ $card-title-letter-spacing: -0.01em !default;
 $moo-card-spacing: 1rem !default;
 $moo-card-spacing-sm: 0.75rem !default;
 
+// Card surface and border blends: mix the muted surface over the base surface
+// (and foreground over a transparent base) so cards keep a subtle tint that
+// tracks the runtime theme without hardcoding a color.
+$moo-card-bg-mix: 5% !default;
+$moo-card-bg-mix-dark: 30% !default;
+$moo-card-border-mix: 10% !default;
+$moo-card-border-mix-base: transparent !default;
+
+// Bootstrap exposes one card-cap background for both headers and footers, but
+// the reference needs no header fill and a separately tuned footer surface.
+// Keep that scoped gap on Moo card knobs, derived from runtime surface tokens
+// so theme changes still flow through Bootstrap's card variables.
+$moo-card-footer-bg: color-mix(in srgb, var(--bs-secondary-bg) 20%, var(--bs-body-bg)) !default;
+$moo-card-footer-bg-dark: color-mix(in srgb, var(--bs-secondary-bg) 50%, var(--bs-body-bg)) !default;
+
 // Bootstrap's own $table-th-font-weight defaults to null, leaving <th>
 // at the browser's bold UA default; the reference renders both header
 // cells and the emphasized first body column (a <th scope="row">) at a

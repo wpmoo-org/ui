@@ -2,6 +2,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/button_group.html.jinja" import button_group %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_item, dropdown_menu %}
+{% from "components/field.html.jinja" import field %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/input_group.html.jinja" import input_group %}
 {% from "components/select.html.jinja" import select %}
@@ -146,9 +147,11 @@
     {% set nested_groups %}
       <div class="d-flex align-items-center gap-2">
         {{ button("", variant="outline", size="icon", aria_label="Add attachment", icon_start="plus", extra_class="rounded-3") }}
-        {% call input_group(extra_class="flex-grow-1 rounded-3") %}
-          {{ input(aria_label="Message body", placeholder="Send a message...") }}
-          {{ button("", variant="ghost", size="icon", aria_label="Record voice note", icon_start="audio-lines", extra_class="border-0") }}
+        {% call field(extra_class="flex-grow-1") %}
+          {% call input_group(extra_class="rounded-3") %}
+            {{ input(aria_label="Message body", placeholder="Send a message...") }}
+            {{ button("", variant="ghost", size="icon", aria_label="Record voice note", icon_start="audio-lines", extra_class="border-0") }}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}
@@ -180,10 +183,12 @@
 
     {% set select_group %}
       <div class="d-inline-flex align-items-stretch">
-        {% call input_group(extra_class="flex-grow-1 rounded-3") %}
-          {{ select(aria_label="Currency", extra_class="btn-group-select", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}]) }}
-          {{ input(aria_label="Amount", placeholder="10.00") }}
-          {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="arrow-right") }}
+        {% call field(extra_class="flex-grow-1") %}
+          {% call input_group(extra_class="rounded-3") %}
+            {{ select(aria_label="Currency", extra_class="btn-group-select", options=[{"value": "usd", "label": "$ USD"}, {"value": "eur", "label": "€ EUR"}, {"value": "gbp", "label": "£ GBP", "selected": true}]) }}
+            {{ input(aria_label="Amount", placeholder="10.00") }}
+            {{ button("", variant="outline", size="icon", aria_label="Send", icon_start="arrow-right") }}
+          {% endcall %}
         {% endcall %}
       </div>
     {% endset %}

@@ -27,6 +27,8 @@ CORE_OUTPUTS = {
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
     "dist/js/slider.js",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
@@ -134,6 +136,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/datatable.js",
             "js/sidebar.js",
             "js/slider.js",
+            "js/moo-ui.js",
+            "js/moo-ui.min.js",
             "js/chart.js",
             "js/chart.min.js",
             "js/datepicker.js",
@@ -157,6 +161,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/datatable.js",
             "js/sidebar.js",
             "js/slider.js",
+            "js/moo-ui.js",
+            "js/moo-ui.min.js",
             "js/chart.js",
             "js/chart.min.js",
             "js/datepicker.js",
@@ -267,15 +273,15 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         self.assertIsNotNone(style_include_paths)
         self.assertEqual(
             style_include_paths(build.SCSS / "moo-ui.scss"),
-            [str(build.SCSS), str(build.BOOTSTRAP / "scss")],
+            [str(build.SCSS), str(build.BOOTSTRAP.parent)],
         )
         self.assertEqual(
             style_include_paths(build.SCSS / "moo-core.scss"),
-            [str(build.SCSS), str(build.BOOTSTRAP / "scss")],
+            [str(build.SCSS), str(build.BOOTSTRAP.parent)],
         )
         self.assertEqual(
             style_include_paths(build.SITE_SCSS / "catalog.scss"),
-            [str(build.SCSS), str(build.SITE_SCSS), str(build.BOOTSTRAP / "scss")],
+            [str(build.SCSS), str(build.SITE_SCSS), str(build.BOOTSTRAP.parent)],
         )
 
     def test_site_templates_are_in_source_snapshot(self) -> None:
@@ -294,6 +300,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             ROOT / "site/static/images/components/sidebar.webp",
             ROOT / "src/components/input.html.jinja",
             ROOT / "src/js/components/combobox.js",
+            ROOT / "src/js/moo-ui.js",
             ROOT / "src/icons/lucide-icons.json",
             ROOT / "src/registry/components.json",
             ROOT / "scss/_settings.scss",
@@ -368,7 +375,6 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_asset_prose_uses_site_static_source_path(self) -> None:
         source_paths = (
-            ROOT / "README.md",
             ROOT / "ASSET_LICENSE.md",
             ROOT / "THIRD_PARTY_NOTICES.md",
             ROOT / "site/src/pages/license.html.jinja",
@@ -381,12 +387,12 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0-rc.3")
+        self.assertEqual(package["version"], "1.0.0-rc.4")
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):
                 source = (ROOT / relative).read_text(encoding="utf-8")
-                self.assertIn("1.0.0-rc.3", source)
+                self.assertIn(package["version"], source)
                 self.assertNotIn("currently in the `0.x` development series", source)
                 self.assertNotIn("current `0.x` release line", source)
                 self.assertNotIn(

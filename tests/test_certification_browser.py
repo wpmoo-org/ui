@@ -292,6 +292,17 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     "aria-activedescendant",
                     "certification-combobox-option-2",
                 )
+                menu.evaluate(
+                    """
+                    element => element.dispatchEvent(
+                      new PointerEvent("pointerleave", { pointerType: "mouse" })
+                    )
+                    """
+                )
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-2",
+                )
                 self.assertTrue(
                     combobox_input.evaluate("element => document.activeElement === element")
                 )
@@ -309,6 +320,130 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     "aria-selected",
                     "true",
                 )
+                selected_option = page.locator("#certification-combobox-option-2")
+                hovered_option = page.locator("#certification-combobox-option-1")
+                self.assertFalse(
+                    selected_option.evaluate(
+                        'element => element.classList.contains("active")'
+                    )
+                )
+
+                combobox_input.click()
+                expect(combobox_input).to_have_attribute(
+                    "aria-activedescendant",
+                    "certification-combobox-option-2",
+                )
+                expect(selected_option).to_have_attribute("aria-current", "true")
+                selected_check = selected_option.locator(".combobox-option__check")
+                expect(selected_check).to_have_count(1)
+                self.assertTrue(
+                    selected_check.evaluate(
+                        """
+                        element => {
+                          const rect = element.getBoundingClientRect();
+                          return getComputedStyle(element).visibility === "visible"
+                            && rect.width > 0
+                            && rect.height > 0;
+                        }
+                        """
+                    )
+                )
+                if not case.has_touch:
+                    selected_background = selected_option.evaluate(
+                        "element => getComputedStyle(element).backgroundColor"
+                    )
+                    self.assertNotEqual(selected_background, "rgba(0, 0, 0, 0)")
+                    hovered_option.hover()
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-1",
+                    )
+                    expect(hovered_option).to_have_attribute("aria-current", "true")
+                    self.assertIsNone(selected_option.get_attribute("aria-current"))
+                    self.assertEqual(
+                        hovered_option.evaluate(
+                            "element => getComputedStyle(element).backgroundColor"
+                        ),
+                        selected_background,
+                    )
+                    self.assertNotEqual(
+                        selected_option.evaluate(
+                            "element => getComputedStyle(element).backgroundColor"
+                        ),
+                        selected_background,
+                    )
+                    page.mouse.move(0, 0)
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-2",
+                    )
+                    self.assertEqual(
+                        selected_option.evaluate(
+                            "element => getComputedStyle(element).backgroundColor"
+                        ),
+                        selected_background,
+                    )
+                    expect(selected_option).to_have_attribute("aria-current", "true")
+                    self.assertIsNone(hovered_option.get_attribute("aria-current"))
+
+                    hovered_option.hover()
+                    hovered_option.click()
+                    expect(combobox_input).to_have_value("Ada Lovelace")
+                    expect(hidden_value).to_have_value("ada")
+                    expect(hovered_option).to_have_attribute("aria-selected", "true")
+                    expect(selected_option).to_have_attribute("aria-selected", "false")
+                    expect(combobox_input).to_have_attribute("aria-expanded", "false")
+                    combobox_input.focus()
+                    combobox_input.fill("")
+                    expect(combobox_input).to_have_attribute("aria-expanded", "true")
+                    page.mouse.move(0, 0)
+                    menu.evaluate(
+                        """
+                        element => {
+                          element.style.maxHeight = "3rem";
+                          element.style.overflowY = "auto";
+                          element.scrollTop = 24;
+                        }
+                        """
+                    )
+                    hover_scroll_top = menu.evaluate("element => element.scrollTop")
+                    hovered_option.evaluate(
+                        """
+                        element => element.dispatchEvent(
+                          new PointerEvent("pointerenter", { pointerType: "mouse" })
+                        )
+                        """
+                    )
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-1",
+                    )
+                    self.assertEqual(
+                        menu.evaluate("element => element.scrollTop"),
+                        hover_scroll_top,
+                    )
+                    menu.evaluate("element => { element.scrollTop = 0; }")
+                    combobox_input.focus()
+                    hovered_option.evaluate(
+                        """
+                        element => element.dispatchEvent(
+                          new PointerEvent("pointerenter", { pointerType: "mouse" })
+                        )
+                        """
+                    )
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-1",
+                    )
+                    self.assertTrue(
+                        combobox_input.evaluate("element => document.activeElement === element")
+                    )
+                    combobox_input.press("ArrowUp")
+                    expect(combobox_input).to_have_attribute(
+                        "aria-activedescendant",
+                        "certification-combobox-option-3",
+                    )
+                    self.assertGreater(menu.evaluate("element => element.scrollTop"), 0)
 
                 combobox_input.focus()
                 combobox_input.fill("not-a-reviewer")
@@ -354,6 +489,45 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertGreater(len(page.screenshot(full_page=True)), 1000)
                 evidence.assert_clean()
                 context.close()
+
+    def test_combobox_filter_input_re_resolves_active_option_after_clearing_selection(self) -> None:
+        case = CERTIFICATION_CASES[0]
+        context = new_case_context(self.browser, case)
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/tests/fixtures/certification/combobox.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, case)
+
+            combobox_input = page.locator("#certification-combobox-input")
+            selected_option = page.locator("#certification-combobox-option-2")
+
+            combobox_input.focus()
+            combobox_input.press("ArrowDown")
+            combobox_input.press("Enter")
+            expect(combobox_input).to_have_value("Grace Hopper")
+            expect(selected_option).to_have_attribute("aria-selected", "true")
+
+            combobox_input.click()
+            expect(combobox_input).to_have_attribute(
+                "aria-activedescendant",
+                "certification-combobox-option-2",
+            )
+            combobox_input.fill("a")
+
+            expect(combobox_input).to_have_attribute(
+                "aria-activedescendant",
+                "certification-combobox-option-1",
+            )
+            expect(selected_option).to_have_attribute("aria-selected", "false")
+            evidence.assert_clean()
+        finally:
+            context.close()
 
     def test_sidebar_fixture_proves_desktop_mobile_state_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:

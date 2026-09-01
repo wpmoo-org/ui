@@ -8,6 +8,7 @@ from tests.helpers import (
     CatalogTestCase,
     read_catalog_styles,
     read_settings,
+    scss_rule_body,
 )
 
 
@@ -16,6 +17,7 @@ PAGE = ROOT / "site/src/pages/components/combobox.html.jinja"
 REGISTRY = ROOT / "src/registry/components.json"
 COMBOBOX_JS = ROOT / "src/js/components/combobox.js"
 CATALOG_JS = ROOT / "site/src/js/catalog/index.js"
+CERTIFICATION_FIXTURE = ROOT / "tests/fixtures/certification/combobox.html"
 
 
 class ComboboxTests(CatalogTestCase):
@@ -86,7 +88,26 @@ class ComboboxTests(CatalogTestCase):
         self.assertEqual(output.count('class="combobox-option__check"'), 2)
         self.assertIn(".combobox-option__check", scss)
         self.assertIn("visibility: hidden;", scss)
+        option_block = scss_rule_body(scss, ".combobox-option")
+        check_block = scss_rule_body(scss, ".combobox-option__check")
+        self.assertIn("display: grid;", option_block)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) $spacer;", option_block)
+        self.assertIn("padding-inline-end: $dropdown-item-padding-x;", option_block)
+        self.assertIn("justify-self: end;", check_block)
         self.assertIn('.combobox-option[aria-selected="true"] .combobox-option__check', scss)
+        self.assertIn(
+            '.combobox-option[aria-selected="true"]:not(:hover):not([aria-current="true"])',
+            scss,
+        )
+
+    def test_combobox_certification_fixture_includes_option_check_icons(self) -> None:
+        source = CERTIFICATION_FIXTURE.read_text(encoding="utf-8")
+        option_count = source.count('class="dropdown-item combobox-option"')
+
+        self.assertGreater(option_count, 0)
+        self.assertEqual(source.count('class="combobox-option__check"'), option_count)
+        self.assertEqual(source.count('data-lucide="check"'), option_count)
+        self.assertNotIn('<span class="combobox-option__check" aria-hidden="true"></span>', source)
 
     def test_combobox_can_render_open_basic_list(self) -> None:
         output = self.render_combobox(
@@ -260,9 +281,7 @@ class ComboboxTests(CatalogTestCase):
         variables = read_settings()
 
         self.assertIn(".combobox-menu {", scss)
-        menu_source = scss.split(".combobox-menu {", 1)[1]
-        menu_end = "\n}\n\n.combobox--custom-items" if ".combobox--custom-items .combobox-menu" in scss else "\n}\n\n.combobox-option"
-        menu = menu_source.split(menu_end, 1)[0]
+        menu = scss_rule_body(scss, ".combobox-menu")
         self.assertIn("max-height: var(--moo-combobox-menu-max-height);", menu)
         self.assertIn("overflow-y: auto;", menu)
         self.assertIn("overscroll-behavior: contain;", menu)
@@ -281,13 +300,13 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn("--moo-combobox-option-line-height", scss)
         self.assertIn("--moo-combobox-description-font-size", scss)
 
-        option_block = scss.split(".combobox-option {", 1)[1].split("}", 1)[0]
-        description_block = scss.split(".combobox-option__description {", 1)[1].split("}", 1)[0]
-        group_label_block = scss.split(".combobox-group-label {", 1)[1].split("}", 1)[0]
+        option_block = scss_rule_body(scss, ".combobox-option")
+        description_block = scss_rule_body(scss, ".combobox-option__description")
+        group_label_block = scss_rule_body(scss, ".combobox-group-label")
 
         self.assertIn("line-height: var(--moo-combobox-option-line-height);", option_block)
         self.assertNotIn("min-height: $input-height;", option_block)
-        self.assertIn("padding-inline-end: $input-height;", option_block)
+        self.assertNotIn("padding-inline-end: $input-height;", option_block)
         self.assertIn("font-size: var(--moo-combobox-description-font-size);", group_label_block)
         self.assertIn("font-weight: $font-weight-normal;", group_label_block)
         self.assertIn("line-height: $spacer;", group_label_block)
@@ -350,7 +369,7 @@ class ComboboxTests(CatalogTestCase):
     def test_combobox_multiple_chips_surface_focuses_like_input(self) -> None:
         script = COMBOBOX_JS.read_text(encoding="utf-8")
         scss = (ROOT / "scss/components/_combobox.scss").read_text(encoding="utf-8")
-        chips_block = scss.split(".combobox-chips {", 1)[1].split("}", 1)[0]
+        chips_block = scss_rule_body(scss, ".combobox-chips")
 
         self.assertIn("cursor: text;", chips_block)
         self.assertIn('target.closest(".combobox-chips")', script)
@@ -367,7 +386,7 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn("max-width: var(--moo-combobox-width);", catalog_scss)
         self.assertIn(".moo-example__preview--narrow > .combobox--multiple", catalog_scss)
         self.assertIn("max-width: var(--moo-combobox-multiple-width);", catalog_scss)
-        multiple_block = component_scss.split(".combobox--multiple {", 1)[1].split("}", 1)[0]
+        multiple_block = scss_rule_body(component_scss, ".combobox--multiple")
         catalog_multiple_block = catalog_scss.split(
             ".moo-example__preview--narrow > .combobox--multiple {",
             1,

@@ -35,10 +35,24 @@ dependency for applying a preset.
   "chartColor": ["neutral", "blue", "azure", "indigo", "purple", "orange", "pink", "red", "yellow", "lime", "green", "teal", "cyan"],
   "headingFont": ["default", "geist", "system"],
   "bodyFont": ["default", "geist", "system"],
-  "radius": ["default", "compact", "large"]
+  "radius": ["default", "none", "small", "medium", "large"]
 }
 ```
 <!-- theme-preset-schema-enums:end -->
+
+## Schema Decisions
+
+Schema version `1` treats sidecars with `"radius": "compact"` as legacy input
+and normalizes that value to `"small"`. The normalized sidecar preserves
+`"small"`; `"compact"` is not emitted and stays outside the public radius enum.
+Adapters must apply this `"compact"` -> `"small"` migration before the generic
+unknown-enum fallback, so a legacy `"compact"` resolves to `"small"` and never
+falls through to the default radius. This adapter migration takes precedence
+over unknown-enum handling; there is no known drift between the documented
+guidance and committed behavior. This normalization lives in
+`normalizeThemeBuilderState()` in `site/src/js/catalog/theme-builder-schema.js`
+and is locked by the focused normalization and export tests in
+`tests/test_catalog_js.py`.
 
 ## Public Token Allow-List
 
@@ -96,7 +110,7 @@ behavior.
 ## Maturity
 
 The Theme Preset contract and newly public preset tokens are post-1.0.0
-provisional until a later API-freeze contract promotes them. Current RC.3
+provisional until a later API-freeze contract promotes them. Current RC.4
 implementation covers only the schema axes above; surface style, sidebar
 style, chart style, spacing, shadow, contrast, motion, and density remain
 deferred and must not be advertised as shipped preset fields.
@@ -120,7 +134,7 @@ values.
 
 The default chart palette is the neutral Moo chart ramp (`--moo-chart-1`
 through `--moo-chart-5`). Earlier runtime fallback behavior used Bootstrap
-semantic colors when these variables were absent; RC.3 treats the neutral ramp
+semantic colors when these variables were absent; RC.4 treats the neutral ramp
 as the intended default so Theme Builder exports, catalog preview, and package
 CSS agree.
 
@@ -132,7 +146,7 @@ to `ui.wpmoo.org`; exported presets emit only the tokens above under `:root`,
 `[data-bs-theme="light"]`, and `[data-bs-theme="dark"]`.
 
 `--moo-primary-foreground-dark` is retained for compatibility with hosts that
-already distinguish dark-mode action foregrounds. RC.3 action colors are
+already distinguish dark-mode action foregrounds. RC.4 action colors are
 mode-independent, so it intentionally matches `--moo-primary-foreground`.
 
 ## Adapter Guidance

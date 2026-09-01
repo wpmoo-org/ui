@@ -8,6 +8,27 @@
   min-height: calc(#{$input-height} + #{$input-border-width} * 2);
 }
 
+.form-control[type="file"]:not(.form-control-sm, .form-control-lg)::file-selector-button {
+  min-height: calc(#{$input-height} - #{$input-border-width} * 2);
+}
+
+.form-control[type="time"] {
+  appearance: none;
+  position: relative;
+}
+
+// Chromium's clock icon is the primary pointer trigger for the native time
+// picker. Keep the indicator covering the whole control but visually hidden so
+// pointer users retain picker access without the icon showing.
+.form-control[type="time"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .form-control:disabled,
 .form-select:disabled {
   opacity: var(--moo-disabled-control-opacity);

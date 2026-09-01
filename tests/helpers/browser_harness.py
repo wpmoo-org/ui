@@ -1,4 +1,6 @@
+import json
 import os
+import re
 import sys
 import threading
 import unittest
@@ -177,6 +179,77 @@ def prepare_page(
     )
     if normalize_screenshot:
         page.add_style_tag(content=SCREENSHOT_NORMALIZATION_CSS)
+
+
+def remap_codepen_package_imports(script: str, base_url: str) -> str:
+    remapped, count = re.subn(
+        r"https://unpkg\.com/@wpmoo/ui@[^/]+/dist/js/",
+        f"{base_url.rstrip('/')}/dist/js/",
+        script,
+    )
+    if "https://unpkg.com/@wpmoo/ui@" in script and count == 0:
+        raise AssertionError("Expected CodePen package import remap")
+    return remapped
+
+
+def setup_codepen_page(
+    context: BrowserContext,
+    payload: dict[str, object],
+    *,
+    base_url: str,
+    case: BrowserCase = CERTIFICATION_CASES[0],
+    bootstrap_src: str | None = None,
+    include_payload_js: bool = True,
+) -> tuple[Page, BrowserEvidence]:
+    page = context.new_page()
+    evidence = BrowserEvidence(page)
+    response = page.goto(f"{base_url.rstrip('/')}/site-dist/index.html", wait_until="load")
+    if response is None or not response.ok:
+        raise AssertionError("Could not establish CodePen fixture origin")
+    page.set_content(
+        f"""
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+          </head>
+          <body>
+            {payload["html"]}
+          </body>
+        </html>
+        """,
+        wait_until="load",
+    )
+    page.add_style_tag(path=ROOT / "site-dist/assets/css/moo-ui.css")
+    page.add_style_tag(path=ROOT / "site-dist/assets/css/codepen-demo.css")
+    if bootstrap_src is None:
+        page.add_script_tag(path=ROOT / "site-dist/assets/js/bootstrap.bundle.min.js")
+    else:
+        page.evaluate(
+            """
+            (src) => {
+              const script = document.createElement("script");
+              script.src = src;
+              script.dataset.foreignBootstrap = "true";
+              document.head.appendChild(script);
+            }
+            """,
+            bootstrap_src,
+        )
+    page.add_script_tag(
+        content=(
+            "window.MooCodePenRuntimeBaseUrl = "
+            f"{json.dumps(base_url.rstrip('/') + '/')};"
+        )
+    )
+    page.add_script_tag(path=ROOT / "site-dist/assets/js/codepen-demo.js")
+    if include_payload_js:
+        payload_js = remap_codepen_package_imports(str(payload["js"]), base_url)
+        if payload_js.strip():
+            page.add_script_tag(content=payload_js)
+    prepare_page(page, case)
+    return page, evidence
 
 
 def run_axe(page: Page) -> list[dict[str, object]]:

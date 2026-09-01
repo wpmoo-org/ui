@@ -4,7 +4,7 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI is currently in the `1.0.0-rc.3` release-candidate certification phase.
+Moo UI is currently in the `1.0.0-rc.4` release-candidate certification phase.
 Production certification is being introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
 certification.
@@ -20,6 +20,7 @@ Moo UI treats the following documented surfaces as public contracts:
   scoped versus unscoped stylesheet behavior;
 - documented exports, options, lifecycle methods, and events of public ESM
   modules;
+- documented Sass entrypoint exports;
 - variables explicitly listed by the public Sass config
   (`scss/_config.scss`): `$primary`, `$secondary`, `$success`,
   `$info`, `$warning`, `$danger`, `$light`, `$dark`, `$body-color`,
@@ -30,9 +31,9 @@ Moo UI treats the following documented surfaces as public contracts:
 The Jinja macros used to build the catalog are internal build tools and are not
 part of the npm package API. Their documented rendered HTML is public.
 
-Internal SCSS partial paths, undocumented Sass variables, catalog build
-internals, private JavaScript helpers, and test-fixture organization may change
-without notice.
+Internal SCSS partial paths that are not documented package exports,
+undocumented Sass variables, catalog build internals, private JavaScript
+helpers, and test-fixture organization may change without notice.
 
 ## Component Maturity
 
@@ -132,6 +133,7 @@ Examples of breaking changes include:
 - removing a required documented class, selector, `data-*` attribute, or ARIA
   relationship;
 - changing a public ESM lifecycle in an incompatible way;
+- removing or changing a documented Sass entrypoint incompatibly;
 - removing or changing the meaning of a supported Sass variable;
 - narrowing the supported browser or Bootstrap range;
 - changing keyboard, focus, or dismissal behavior incompatibly.

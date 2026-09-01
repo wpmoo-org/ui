@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -64,6 +65,8 @@ class BuildTests(CatalogTestCase):
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "moo-ui.js",
+            "moo-ui.min.js",
             "chart.js",
             "chart.min.js",
             "datepicker.js",
@@ -146,6 +149,8 @@ class BuildTests(CatalogTestCase):
             self.assertTrue((PACKAGE_DIST / "assets/css/moo-ui.css").is_file())
             self.assertTrue((PACKAGE_DIST / "assets/css/moo.css").is_file())
             self.assertTrue((PACKAGE_DIST / "js/combobox.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/moo-ui.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/moo-ui.min.js").is_file())
             self.assertFalse(SITE_DIST.exists())
         finally:
             self.run_build()
@@ -236,7 +241,14 @@ class BuildTests(CatalogTestCase):
         In both cases the shipped output must never contain a bare third-party
         specifier or a CDN runtime URL."""
         self.require_full_build()
-        for module_name in ("chart.js", "chart.min.js", "datepicker.js", "datepicker.min.js"):
+        for module_name in (
+            "moo-ui.js",
+            "moo-ui.min.js",
+            "chart.js",
+            "chart.min.js",
+            "datepicker.js",
+            "datepicker.min.js",
+        ):
             module_path = PACKAGE_DIST / "js" / module_name
             with self.subTest(module=module_name):
                 self.assertTrue(module_path.is_file())
@@ -253,12 +265,16 @@ class BuildTests(CatalogTestCase):
 
     def test_public_npm_js_outputs_carry_moo_ui_license_banner(self) -> None:
         self.require_full_build()
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+
         for module_name in (
             "combobox.js",
             "sidebar.js",
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "moo-ui.js",
+            "moo-ui.min.js",
             "chart.js",
             "chart.min.js",
             "datepicker.js",
@@ -267,7 +283,7 @@ class BuildTests(CatalogTestCase):
             with self.subTest(module=module_name):
                 expected_banner = (
                     "/*!\n"
-                    f" * Moo UI {module_name} v1.0.0-rc.3 (https://ui.wpmoo.org/)\n"
+                    f" * Moo UI {module_name} v{package['version']} (https://ui.wpmoo.org/)\n"
                     " * Copyright 2026 WPMoo (https://wpmoo.org)\n"
                     " * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)\n"
                     " */\n"
@@ -318,7 +334,7 @@ class BuildTests(CatalogTestCase):
         for each pair, ensuring runtime-level equivalence rather than
         regex-based text matching."""
         self.require_full_build()
-        for base_name in ("chart", "datepicker"):
+        for base_name in ("moo-ui", "chart", "datepicker"):
             canonical_path = PACKAGE_DIST / f"js/{base_name}.js"
             minified_path = PACKAGE_DIST / f"js/{base_name}.min.js"
 
@@ -335,6 +351,26 @@ class BuildTests(CatalogTestCase):
                     "  console.error('CANONICAL:', JSON.stringify(ck));"
                     "  console.error('MINIFIED:', JSON.stringify(mk));"
                     "  process.exit(1);"
+                    "}"
+                    f"if ('{base_name}' === 'moo-ui') {{"
+                    "  const lifecycleClasses = ["
+                    "    'Combobox',"
+                    "    'Sidebar',"
+                    "    'ContextMenu',"
+                    "    'DataTable',"
+                    "    'Chart',"
+                    "    'Datepicker',"
+                    "    'Slider'"
+                    "  ];"
+                    "  for (const key of lifecycleClasses) {"
+                    "    if (!c.default || !m.default ||"
+                    "        !c.default[key] || !m.default[key] ||"
+                    "        typeof c.default[key].getOrCreateInstance !== 'function' ||"
+                    "        typeof m.default[key].getOrCreateInstance !== 'function') {"
+                    "      console.error(`Moo UI aggregate default export is missing ${key}`);"
+                    "      process.exit(1);"
+                    "    }"
+                    "  }"
                     "}"
                     "console.log(JSON.stringify(ck));"
                 )

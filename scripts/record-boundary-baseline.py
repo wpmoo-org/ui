@@ -24,6 +24,8 @@ CORE_OUTPUTS = {
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
     "dist/js/slider.js",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",

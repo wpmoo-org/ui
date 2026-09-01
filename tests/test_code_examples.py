@@ -2,14 +2,154 @@ from __future__ import annotations
 
 import json
 import re
-from html import unescape
+from html.parser import HTMLParser
 
 import build
 from build import dedent_html, format_html
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import (
+    ROOT,
+    CatalogTestCase,
+    codepen_payloads_from_html,
+    codepen_payloads_from_output,
+)
+
+
+_CODEPEN_FIELD_WRAPPER_CLASSES = {"field", "field-group", "field-fieldset"}
+_CODEPEN_FORM_SURFACE_CLASSES = {
+    "combobox",
+    "form-check",
+    "form-control",
+    "form-select",
+    "form-range",
+    "input-group",
+    "moo-datepicker",
+    "radio-group",
+    "slider",
+}
+_CODEPEN_FORM_SURFACE_ROOT_CLASSES = {
+    "combobox",
+    "form-check",
+    "input-group",
+    "moo-datepicker",
+    "radio-group",
+    "slider",
+}
+_CODEPEN_FORM_SURFACE_EXEMPT_CLASSES = {"datatable", "dropdown-menu", "menubar"}
+_CODEPEN_FORM_SURFACE_EXEMPT_TAGS = {
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "tr",
+}
+_HTML_VOID_TAGS = {
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+}
+
+
+class _CodePenFormSurfaceParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self._stack: list[dict[str, object]] = []
+        self.violations: list[str] = []
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        attributes = dict(attrs)
+        classes = set((attributes.get("class") or "").split())
+        node: dict[str, object] = {
+            "classes": classes,
+            "id": attributes.get("id") or "",
+            "tag": tag,
+        }
+
+        if (
+            self._is_form_surface(tag, attributes, classes)
+            and not self._is_inside_field_wrapper()
+            and not self._is_inside_exempt_surface()
+            and not self._is_inside_unwrapped_form_surface_root()
+        ):
+            self.violations.append(self._format_node(tag, attributes, classes))
+
+        if tag not in _HTML_VOID_TAGS:
+            self._stack.append(node)
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index]["tag"] == tag:
+                del self._stack[index:]
+                break
+
+    def _is_form_surface(
+        self, tag: str, attributes: dict[str, str | None], classes: set[str]
+    ) -> bool:
+        if tag == "input" and attributes.get("type") == "hidden":
+            return False
+
+        return bool(classes & _CODEPEN_FORM_SURFACE_CLASSES)
+
+    def _is_inside_field_wrapper(self) -> bool:
+        return any(
+            node["classes"] & _CODEPEN_FIELD_WRAPPER_CLASSES
+            for node in self._stack
+        )
+
+    def _is_inside_exempt_surface(self) -> bool:
+        return any(
+            node["tag"] in _CODEPEN_FORM_SURFACE_EXEMPT_TAGS
+            or node["classes"] & _CODEPEN_FORM_SURFACE_EXEMPT_CLASSES
+            for node in self._stack
+        )
+
+    def _is_inside_unwrapped_form_surface_root(self) -> bool:
+        return any(
+            node["classes"] & _CODEPEN_FORM_SURFACE_ROOT_CLASSES
+            for node in self._stack
+        )
+
+    def _format_node(
+        self, tag: str, attributes: dict[str, str | None], classes: set[str]
+    ) -> str:
+        id_marker = f"#{attributes['id']}" if attributes.get("id") else ""
+        class_marker = f".{' '.join(sorted(classes))}" if classes else ""
+
+        return f"{tag}{id_marker} {class_marker}".strip()
 
 
 class CodeExampleTests(CatalogTestCase):
+    def test_codepen_payload_helper_reads_textarea_and_legacy_input_payloads(self) -> None:
+        payloads = codepen_payloads_from_html(
+            '''
+            <form data-moo-codepen-form>
+              <textarea hidden name="data">{"title": "Textarea"}</textarea>
+            </form>
+            <form data-moo-codepen-form>
+              <input value="{&quot;title&quot;: &quot;Input&quot;}" name="data" type="hidden">
+            </form>
+            '''
+        )
+
+        self.assertEqual(
+            [payload["title"] for payload in payloads],
+            ["Textarea", "Input"],
+        )
+
     def test_render_example_owns_one_preview_and_source_surface(self) -> None:
         template = (
             ROOT / "site/src/includes/example.html.jinja"
@@ -69,12 +209,9 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("data-moo-codepen-form", toolbar)
         self.assertNotIn("View Code", toolbar)
 
-        match = re.search(
-            r'<input type="hidden" name="data" value="([^"]+)"',
-            toolbar,
-        )
-        self.assertIsNotNone(match)
-        payload = json.loads(unescape(match.group(1)))
+        payloads = codepen_payloads_from_html(toolbar)
+        self.assertEqual(len(payloads), 1)
+        payload = payloads[0]
 
         self.assertEqual(payload["title"], "Moo UI Button - Primary")
         self.assertEqual(payload["tags"], ["moo-ui", "button", "components"])
@@ -103,7 +240,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(
             payload["css_external"],
             (
-                "https://unpkg.com/@wpmoo/ui@1.0.0-rc.2/dist/assets/css/moo-ui.css;"
+                f"https://unpkg.com/@wpmoo/ui@{build.CODEPEN_CDN_VERSION}/dist/assets/css/moo-ui.css;"
                 "https://ui.wpmoo.org/assets/css/codepen-demo.css"
             ),
         )
@@ -114,28 +251,10 @@ class CodeExampleTests(CatalogTestCase):
                 "https://ui.wpmoo.org/assets/js/codepen-demo.js"
             ),
         )
-        config_match = re.search(
-            r"window\.MooCodePen = (\{[\s\S]*?\});",
-            payload["js"],
-        )
-        self.assertIsNotNone(config_match)
-        config = json.loads(config_match.group(1))
-        self.assertEqual(config["kind"], "component")
-        self.assertEqual(len(config["components"]), 1)
-        component = config["components"][0]
-        self.assertEqual(component["slug"], "button")
-        self.assertEqual(component["label"], "Button")
-        self.assertIn("button", component["description"].lower())
-        self.assertEqual(component["href"], "https://ui.wpmoo.org/components/button/")
-        self.assertEqual(
-            component["previewSrc"],
-            "https://ui.wpmoo.org/assets/images/components/button.webp",
-        )
-        self.assertIn(
-            "window.MooCodePenDemo.init(window.MooCodePen);",
-            payload["js"],
-        )
+        self.assertEqual(payload["js"], "")
+        self.assertNotIn("window.MooCodePen", payload["js"])
         self.assertNotIn("initializeMooCodePenPopovers", payload["js"])
+        self.assertNotIn("getOrCreateInstance", payload["js"])
         self.assertFalse(payload["js_module"])
         self.assertTrue((ROOT / "site-dist/assets/js/codepen-demo.js").is_file())
         self.assertTrue((ROOT / "site-dist/assets/css/codepen-demo.css").is_file())
@@ -160,8 +279,191 @@ class CodeExampleTests(CatalogTestCase):
             encoding="utf-8"
         )
         self.assertIn('document.body.classList.add("moo-codepen-demo")', demo_js)
+        self.assertIn('function inferCodePenConfig(root)', demo_js)
+        self.assertIn('function observeCodePenConfig()', demo_js)
+        self.assertIn('"button"', demo_js)
         self.assertNotIn("ensureStyles", demo_js)
         self.assertNotIn('document.createElement("style")', demo_js)
+
+    def test_component_codepen_form_surfaces_are_field_wrapped(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        violations: list[str] = []
+        inspected_pages = 0
+        inspected_payloads = 0
+
+        for page_path in sorted((ROOT / "site-dist/components").glob("*/index.html")):
+            inspected_pages += 1
+            page_relative = page_path.relative_to(ROOT / "site-dist").as_posix()
+
+            for payload in codepen_payloads_from_output(page_relative):
+                inspected_payloads += 1
+                surface_parser = _CodePenFormSurfaceParser()
+                surface_parser.feed(str(payload.get("html", "")))
+
+                for surface in surface_parser.violations:
+                    violations.append(
+                        f"{page_path.parent.name}: {payload['title']}: {surface}"
+                    )
+
+        self.assertGreater(inspected_pages, 0)
+        self.assertGreater(inspected_payloads, 0)
+        self.assertEqual(
+            [],
+            violations,
+            "CodePen form surfaces must sit inside .field, .field-group, "
+            "or .field-fieldset unless the surface belongs to a table or menu:\n"
+            + "\n".join(violations),
+        )
+
+    def test_codepen_demo_bootstrap_failure_scopes_toast_queue_cleanup(self) -> None:
+        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("function initializePopovers", source)
+        self.assertIn("function initializeToasts", source)
+        popover_block = source.split("function initializePopovers", 1)[1].split(
+            "function initializeToasts",
+            1,
+        )[0]
+        toast_block = source.split("function initializeToasts", 1)[1].split(
+            "function wireToasts",
+            1,
+        )[0]
+
+        self.assertNotIn("mooCodepenToastsQueued", popover_block)
+        self.assertIn("delete root.body.dataset.mooCodepenToastsQueued;", toast_block)
+        self.assertIn(
+            'script.dataset.mooCodepenBootstrapLoading = "true";',
+            source,
+        )
+        self.assertNotIn('document.readyState !== "loading"', source)
+        self.assertNotIn('document.readyState === "complete"', source)
+
+    def test_codepen_demo_reads_package_version_from_all_public_css_exports(self) -> None:
+        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        version_block = source.split("var PACKAGE_STYLESHEET_SELECTORS = [", 1)[
+            1
+        ].split("].join", 1)[0]
+
+        for stylesheet in (
+            "moo-ui.css",
+            "moo-ui.min.css",
+            "moo.css",
+            "moo.min.css",
+        ):
+            with self.subTest(stylesheet=stylesheet):
+                self.assertIn(f"/dist/assets/css/{stylesheet}", version_block)
+        self.assertIn("document.querySelector(PACKAGE_STYLESHEET_SELECTORS)", source)
+
+    def test_codepen_demo_initializes_every_detected_runtime_target(self) -> None:
+        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        runtime_block = source.split(
+            "function initializeComponentRuntimes(config, root)",
+            1,
+        )[1].split("function render(config)", 1)[0]
+
+        self.assertIn("Object.keys(COMPONENT_RUNTIMES)", runtime_block)
+        self.assertIn("hasRuntimeTarget(root, runtime)", runtime_block)
+        self.assertNotIn('config.kind !== "component"', runtime_block)
+        self.assertNotIn("config.components.forEach", runtime_block)
+
+    def test_codepen_detector_prioritizes_form_controls_before_field_fallback(self) -> None:
+        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        detector_block = source.split("var COMPONENT_DETECTORS = [", 1)[1].split(
+            "  ];",
+            1,
+        )[0]
+        field_index = detector_block.index('{ slug: "field"')
+
+        for slug in ("input", "textarea", "select", "checkbox", "radio-group", "switch"):
+            with self.subTest(slug=slug):
+                self.assertLess(detector_block.index(f'{{ slug: "{slug}"'), field_index)
+
+    def test_codepen_component_runtimes_match_package_exports(self) -> None:
+        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        runtime_block = source.split("var COMPONENT_RUNTIMES = {", 1)[1].split(
+            "\n  function loadComponentRuntime",
+            1,
+        )[0]
+        runtime_entrypoints = dict(
+            re.findall(
+                r'"([^"]+)":\s*\{\s*entrypoint:\s*"([^"]+)"',
+                runtime_block,
+                flags=re.DOTALL,
+            )
+        )
+
+        self.assertGreaterEqual(
+            runtime_entrypoints.keys(),
+            {
+                "chart",
+                "combobox",
+                "context-menu",
+                "datatable",
+                "datepicker",
+                "sidebar",
+                "slider",
+            },
+        )
+        for slug, entrypoint in runtime_entrypoints.items():
+            with self.subTest(slug=slug):
+                export_name = entrypoint.rsplit("/", 1)[-1]
+                self.assertEqual(
+                    package["exports"].get(f"./{export_name}"),
+                    f"./{entrypoint}",
+                )
+
+    def test_codepen_demo_resets_layout_classes_between_config_kinds(self) -> None:
+        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
+            encoding="utf-8"
+        )
+        render_block = source.split("function render(config)", 1)[1].split(
+            "initializePopovers(document);",
+            1,
+        )[0]
+
+        self.assertIn("document.body.classList.remove(", render_block)
+        for class_name in (
+            "moo-codepen-component-demo",
+            "moo-codepen-example-demo",
+            "moo-codepen-has-branding",
+        ):
+            with self.subTest(class_name=class_name):
+                self.assertIn(f'"{class_name}"', render_block)
+        self.assertLess(
+            render_block.index("classList.remove"),
+            render_block.index('normalized.kind === "component"'),
+        )
+
+    def test_codepen_demo_theme_toggle_keeps_hidden_icon_slots_hidden(self) -> None:
+        css = (ROOT / "site/static/css/codepen-demo.css").read_text(
+            encoding="utf-8"
+        )
+        slot = css.split(
+            ".moo-codepen-actions__theme-toggle [data-moo-codepen-theme-icon] {",
+            1,
+        )[1].split("}", 1)[0]
+        visible_selector = (
+            ".moo-codepen-actions__theme-toggle "
+            "[data-moo-codepen-theme-icon]:not([hidden]) {"
+        )
+
+        self.assertIn(visible_selector, css)
+        visible_slot = css.split(visible_selector, 1)[1].split("}", 1)[0]
+
+        self.assertIn("display: none;", slot)
+        self.assertIn("display: inline-flex;", visible_slot)
 
     def test_source_formatter_indents_nested_macro_markup(self) -> None:
         source = """
@@ -205,7 +507,37 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(
             format_html(source),
             '<button class="btn btn-ghost" type="button" aria-label="Copy profile URL">\n'
-            '  <i class="lucide lucide-copy" data-icon="inline-start" aria-hidden="true" />\n'
+            '  <i class="lucide lucide-copy" data-icon="inline-start" aria-hidden="true"></i>\n'
+            "</button>",
+        )
+
+    def test_source_formatter_closes_lucide_placeholders_before_visible_text(self) -> None:
+        source = """
+          <button class="btn btn-outline-secondary moo-datepicker__trigger" type="button">
+            <svg
+              data-icon="inline-start"
+              data-lucide="calendar"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 2v4m8-4v4"/>
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M3 10h18"/>
+            </svg>
+            <span data-datepicker-label>Pick a date</span>
+          </button>
+        """
+
+        self.assertEqual(
+            format_html(source),
+            '<button class="btn btn-outline-secondary moo-datepicker__trigger" type="button">\n'
+            '  <i class="lucide lucide-calendar" data-icon="inline-start" aria-hidden="true"></i>\n'
+            "  <span data-datepicker-label>Pick a date</span>\n"
             "</button>",
         )
 
@@ -231,7 +563,10 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('aria-labelledby="usage"', template)
         self.assertIn('<h2 class="h4" id="usage">Usage</h2>', template)
 
-        excluded_component_intro_pages = {"datatable", "sidebar"}
+        # These pages own bespoke intro layouts instead of the shared
+        # render_component_intro surface. Removing an entry means the page
+        # adopted the shared macro.
+        excluded_component_intro_pages = {"chart", "datatable", "sidebar"}
         catalog = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
@@ -464,11 +799,14 @@ class CodeExampleTests(CatalogTestCase):
         cdn_snippet_start = page.index('id="installation-esm-cdn-code"')
         cdn_snippet_end = page.index("</pre>", cdn_snippet_start)
         cdn_snippet = page[cdn_snippet_start:cdn_snippet_end]
+        package_version = json.loads(
+            (ROOT / "package.json").read_text(encoding="utf-8")
+        )["version"]
         self.assertIn('<code class="language-html">', cdn_snippet)
         self.assertIn('<span class="token keyword">import</span>', cdn_snippet)
         self.assertIn(
             '<span class="token string">'
-            '&quot;https://cdn.jsdelivr.net/npm/@wpmoo/ui@1.0.0-rc.3/dist/js/chart.js&quot;'
+            f"&quot;https://cdn.jsdelivr.net/npm/@wpmoo/ui@{package_version}/dist/js/chart.js&quot;"
             "</span>",
             cdn_snippet,
         )

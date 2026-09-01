@@ -1,7 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "includes/chart-template.html.jinja" import render_chart_contract_sections, render_chart_intro_preview, render_chart_usage %}
+{% from "includes/chart-template.html.jinja" import chart_content_example, render_chart_contract_sections, render_chart_intro_preview, render_chart_usage with context %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
-{% from "includes/example.html.jinja" import render_component_intro %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 
 {% block title %}Chart — Moo UI{% endblock %}
@@ -16,11 +15,21 @@
     {% set usage %}
       {{ render_chart_usage(root_path=root_path, show_gallery_link=true) }}
     {% endset %}
-    {{ render_component_intro(
-      render_chart_intro_preview(),
-      usage,
-      preview_class="moo-example__preview--medium"
+    {% set chart_intro_preview %}
+      {{ render_chart_intro_preview() }}
+    {% endset %}
+    {{ chart_content_example(
+      "chart-basic",
+      "Basic",
+      "A token-themed area chart initializes from public .chart markup and serialized JSON.",
+      chart_intro_preview,
+      preview_class="moo-example__preview--medium",
+      category_label="Chart"
     ) }}
+    <section class="moo-example" aria-labelledby="usage">
+      <h2 class="h4" id="usage">Usage</h2>
+      <div class="moo-component-usage">{{ usage | safe }}</div>
+    </section>
     {{ render_chart_contract_sections() }}
   </div>
 

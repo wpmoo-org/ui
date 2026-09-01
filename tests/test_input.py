@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import json
-import re
-
 from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 
@@ -170,6 +167,20 @@ class InputTests(CatalogTestCase):
             input_scss,
         )
 
+    def test_file_selector_button_fills_file_input_inner_height(self) -> None:
+        input_scss = (ROOT / "scss/components/_input.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            '.form-control[type="file"]:not(.form-control-sm, .form-control-lg)::file-selector-button {',
+            input_scss,
+        )
+        self.assertIn(
+            "min-height: calc(#{$input-height} - #{$input-border-width} * 2);",
+            input_scss,
+        )
+
     def test_invalid_form_controls_share_destructive_ring(self) -> None:
         variables = read_settings()
         focus = (ROOT / "scss/foundations/_focus.scss").read_text(
@@ -285,6 +296,27 @@ class InputTests(CatalogTestCase):
         ]
 
         self.assertIn('form(extra_class="needs-validation mx-auto", novalidate=true)', form_block)
+
+    def test_input_rtl_examples_keep_direction_wrapper_full_width(self) -> None:
+        page_source = PAGE.read_text(encoding="utf-8")
+
+        for block_name, direction in (
+            ("rtl_arabic", "rtl"),
+            ("rtl_hebrew", "rtl"),
+            ("rtl_english", "ltr"),
+        ):
+            block_start = "{% set " + block_name + " %}"
+            block = page_source[
+                page_source.index(block_start):
+                page_source.index("{% endset %}", page_source.index(block_start))
+            ]
+
+            with self.subTest(block=block_name):
+                self.assertRegex(
+                    block,
+                    rf'<div\b(?=[^>]*\bdir="{direction}")'
+                    r'(?=[^>]*\bclass="[^"]*\bw-100(?![\w-])[^"]*")[^>]*>',
+                )
 
     def test_input_describedby_links_helper_text(self) -> None:
         output = self.render_input(

@@ -13,6 +13,71 @@ from tests.helpers import npm_env
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIST = ROOT / "dist"
+EXPECTED_SCSS_SOURCE_FILES = {
+    "scss/_components.scss",
+    "scss/_config.scss",
+    "scss/_settings.scss",
+    "scss/components/_accordion.scss",
+    "scss/components/_alert.scss",
+    "scss/components/_avatar.scss",
+    "scss/components/_badge.scss",
+    "scss/components/_breadcrumb.scss",
+    "scss/components/_button.scss",
+    "scss/components/_button_group.scss",
+    "scss/components/_card.scss",
+    "scss/components/_checkbox.scss",
+    "scss/components/_close_button.scss",
+    "scss/components/_collapsible.scss",
+    "scss/components/_combobox.scss",
+    "scss/components/_context-menu.scss",
+    "scss/components/_datatable.scss",
+    "scss/components/_datepicker.scss",
+    "scss/components/_dialog.scss",
+    "scss/components/_dropdown.scss",
+    "scss/components/_field.scss",
+    "scss/components/_input.scss",
+    "scss/components/_input_group.scss",
+    "scss/components/_kbd.scss",
+    "scss/components/_menubar.scss",
+    "scss/components/_navigation.scss",
+    "scss/components/_pagination.scss",
+    "scss/components/_popover.scss",
+    "scss/components/_progress.scss",
+    "scss/components/_radio_group.scss",
+    "scss/components/_select.scss",
+    "scss/components/_separator.scss",
+    "scss/components/_sheet.scss",
+    "scss/components/_sidebar.scss",
+    "scss/components/_skeleton.scss",
+    "scss/components/_slider.scss",
+    "scss/components/_spinner.scss",
+    "scss/components/_switch.scss",
+    "scss/components/_table.scss",
+    "scss/components/_tabs.scss",
+    "scss/components/_textarea.scss",
+    "scss/components/_toast.scss",
+    "scss/components/_toggle_group.scss",
+    "scss/components/_tooltip.scss",
+    "scss/components/sidebar/_collapsed.scss",
+    "scss/components/sidebar/_identity.scss",
+    "scss/components/sidebar/_inset.scss",
+    "scss/components/sidebar/_layout.scss",
+    "scss/components/sidebar/_menus.scss",
+    "scss/foundations/_core_global_primitives.scss",
+    "scss/foundations/_core_state_layer.scss",
+    "scss/foundations/_focus.scss",
+    "scss/foundations/_overlay_backdrop.scss",
+    "scss/moo-core.scss",
+    "scss/moo-ui.scss",
+    "scss/settings/_bootstrap_overrides.scss",
+    "scss/settings/_component_variables.scss",
+    "scss/settings/_forms.scss",
+    "scss/settings/_palette.scss",
+    "scss/themes/_scoped_core.scss",
+    "scss/themes/_standalone_root.scss",
+    "scss/utilities/_scroll_fade.scss",
+    "scss/utilities/_scroll_fade_primitives.scss",
+}
 EXPECTED_PACKAGE_FILES = {
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -23,16 +88,18 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "scss/_config.scss",
+    "scss/*.scss",
+    "scss/**/*.scss",
     "certification.json",
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
@@ -44,17 +111,27 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
+    "./moo-ui.js": "./dist/js/moo-ui.js",
+    "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
     "./chart.js": "./dist/js/chart.js",
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
     "./datepicker.min.js": "./dist/js/datepicker.min.js",
     "./scss/config": "./scss/_config.scss",
+    "./scss/moo-ui": "./scss/moo-ui.scss",
+    "./scss/moo-core": "./scss/moo-core.scss",
+    "./scss/components": "./scss/_components.scss",
+    "./scss/settings": "./scss/_settings.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json",
 }
+EXPECTED_NPM_PACK_FILES = (
+    (EXPECTED_PACKAGE_FILES - {"scss/*.scss", "scss/**/*.scss"})
+    | EXPECTED_SCSS_SOURCE_FILES
+)
 EXPECTED_PACKAGE_OUTPUT_FILES = {
     path
-    for path in EXPECTED_PACKAGE_FILES
+    for path in EXPECTED_NPM_PACK_FILES
     if path.startswith("dist/")
 }
 
@@ -75,6 +152,50 @@ class PackageMetadataTests(unittest.TestCase):
 
     def _read_package(self, relative_path: str = "package.json") -> dict:
         return json.loads((ROOT / relative_path).read_text(encoding="utf-8"))
+
+    def _install_clean_consumer_with_bootstrap_scss(
+        self,
+        temporary_root: Path,
+    ) -> tuple[Path, Path, Path]:
+        pack_result = subprocess.run(
+            ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=npm_env(),
+        )
+        self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+        pack_payload = json.loads(pack_result.stdout)
+        tarball = temporary_root / pack_payload[0]["filename"]
+        self.assertTrue(tarball.is_file())
+
+        unpack_root = temporary_root / "unpacked"
+        with tarfile.open(tarball, mode="r:gz") as archive:
+            self.assertTrue(
+                all(
+                    member.name == "package" or member.name.startswith("package/")
+                    for member in archive.getmembers()
+                )
+            )
+            archive.extractall(unpack_root)
+
+        consumer_root = temporary_root / "consumer"
+        installed_package = consumer_root / "node_modules/@wpmoo/ui"
+        installed_package.parent.mkdir(parents=True)
+        shutil.move(unpack_root / "package", installed_package)
+
+        bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
+        bootstrap_pkg.mkdir(parents=True)
+        vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
+        for item in vendor_bootstrap_scss.iterdir():
+            destination = bootstrap_pkg / item.name
+            if item.is_file():
+                shutil.copy2(item, destination)
+            elif item.is_dir():
+                shutil.copytree(item, destination)
+
+        return consumer_root, installed_package, tarball
 
     def test_root_package_publishes_canonical_wpmoo_scope(self) -> None:
         package = self._read_package()
@@ -104,6 +225,7 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("static", files)
         self.assertNotIn("dist/assets/images", files)
         self.assertNotIn("static/images", files)
+        self.assertNotIn("THIRD_PARTY_NOTICES.md", files)
         self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <5.4")
         self.assertTrue(package["peerDependenciesMeta"]["bootstrap"]["optional"])
         self.assertEqual(
@@ -127,10 +249,14 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["exports"]["./sidebar.js"], "./dist/js/sidebar.js")
         self.assertEqual(package["exports"]["./context-menu.js"], "./dist/js/context-menu.js")
         self.assertEqual(package["exports"]["./datatable.js"], "./dist/js/datatable.js")
+        self.assertEqual(package["exports"]["./moo-ui.js"], "./dist/js/moo-ui.js")
+        self.assertEqual(package["exports"]["./moo-ui.min.js"], "./dist/js/moo-ui.min.js")
         self.assertIn("dist/js/combobox.js", files)
         self.assertIn("dist/js/sidebar.js", files)
         self.assertIn("dist/js/context-menu.js", files)
         self.assertIn("dist/js/datatable.js", files)
+        self.assertIn("dist/js/moo-ui.js", files)
+        self.assertIn("dist/js/moo-ui.min.js", files)
         self.assertEqual(package["sideEffects"], ["dist/assets/css/*.css"])
         self.assertEqual(
             package["exports"]["./certification.json"],
@@ -179,8 +305,9 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(
             set(certification["publicEntrypoints"]["css"])
             | set(certification["publicEntrypoints"]["esm"])
-            | set(certification["publicEntrypoints"]["sass"]),
-            set(package["exports"]) - {"./certification.json", "./package.json"},
+            | set(certification["publicEntrypoints"]["sass"])
+            | set(certification["publicEntrypoints"]["metadata"]),
+            set(package["exports"]),
         )
         self.assertEqual(
             schema["properties"]["status"]["enum"],
@@ -219,10 +346,11 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         packed_files = {entry["path"] for entry in payload[0]["files"]}
-        self.assertEqual(packed_files, EXPECTED_PACKAGE_FILES | {"package.json"})
+        self.assertEqual(packed_files, EXPECTED_NPM_PACK_FILES | {"package.json"})
 
     def test_published_notices_references_are_version_pinned_urls(self) -> None:
         package = self._read_package()
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
         expected_url = (
             f"https://github.com/wpmoo-org/ui/blob/v{package['version']}/"
             "THIRD_PARTY_NOTICES.md"
@@ -239,13 +367,18 @@ class PackageMetadataTests(unittest.TestCase):
                 self.assertIn(expected_url, document)
                 self.assertNotIn("`THIRD_PARTY_NOTICES.md`", document)
                 self.assertNotRegex(document, moving_branch_pattern)
+        self.assertIn("Moo UI source code is MIT licensed.", readme)
+        self.assertNotRegex(
+            readme,
+            r"THIRD_PARTY_NOTICES\.md[^.\n]*(?:does not|doesn't|omits?|excludes?|not shipped|not publish)",
+        )
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [
             {
                 "files": [
                     {"path": path}
-                    for path in sorted(EXPECTED_PACKAGE_FILES | {"package.json"})
+                    for path in sorted(EXPECTED_NPM_PACK_FILES | {"package.json"})
                 ]
             }
         ]
@@ -287,7 +420,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "files": [
                     {"path": path}
                     for path in sorted(
-                        (EXPECTED_PACKAGE_FILES | {"package.json"})
+                        (EXPECTED_NPM_PACK_FILES | {"package.json"})
                         - {"dist/assets/css/moo-ui.css"}
                     )
                 ]
@@ -311,7 +444,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "files": [
                     {"path": path}
                     for path in sorted(
-                        EXPECTED_PACKAGE_FILES
+                        EXPECTED_NPM_PACK_FILES
                         | {"package.json", "site-dist/index.html"}
                     )
                 ]
@@ -331,42 +464,11 @@ class PackageMetadataTests(unittest.TestCase):
 
     def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = Path(temporary_directory)
-            pack_result = subprocess.run(
-                [
-                    "npm",
-                    "pack",
-                    "--json",
-                    "--pack-destination",
-                    str(temporary_root),
-                ],
-                cwd=ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-                env=npm_env(),
-            )
-
-            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
-            pack_payload = json.loads(pack_result.stdout)
-            tarball = temporary_root / pack_payload[0]["filename"]
-            self.assertTrue(tarball.is_file())
-
-            unpack_root = temporary_root / "unpacked"
-            with tarfile.open(tarball, mode="r:gz") as archive:
-                self.assertTrue(
-                    all(
-                        member.name == "package"
-                        or member.name.startswith("package/")
-                        for member in archive.getmembers()
-                    )
+            consumer_root, installed_package, _tarball = (
+                self._install_clean_consumer_with_bootstrap_scss(
+                    Path(temporary_directory)
                 )
-                archive.extractall(unpack_root)
-
-            consumer_root = temporary_root / "consumer"
-            installed_package = consumer_root / "node_modules/@wpmoo/ui"
-            installed_package.parent.mkdir(parents=True)
-            shutil.move(unpack_root / "package", installed_package)
+            )
 
             installed_metadata = json.loads(
                 (installed_package / "package.json").read_text(encoding="utf-8")
@@ -391,6 +493,21 @@ import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Slider from "@wpmoo/ui/slider.js";
+import MooUI, {
+  Chart as AggregateChart,
+  Combobox as AggregateCombobox,
+  ContextMenu as AggregateContextMenu,
+  DataTable as AggregateDataTable,
+  Datepicker as AggregateDatepicker,
+  MooCalendar,
+  MooDateRangePicker,
+  Sidebar as AggregateSidebar,
+  Slider as AggregateSlider,
+} from "@wpmoo/ui/moo-ui.js";
+import MooUIMinified, {
+  Chart as MinifiedAggregateChart,
+  Datepicker as MinifiedAggregateDatepicker,
+} from "@wpmoo/ui/moo-ui.min.js";
 import Chart from "@wpmoo/ui/chart.js";
 import ChartMinified from "@wpmoo/ui/chart.min.js";
 import Datepicker from "@wpmoo/ui/datepicker.js";
@@ -402,6 +519,26 @@ if (
   ContextMenu.name !== "ContextMenu" ||
   DataTable.name !== "DataTable" ||
   Slider.name !== "MooSlider" ||
+  typeof AggregateCombobox.getOrCreateInstance !== "function" ||
+  typeof AggregateSidebar.getOrCreateInstance !== "function" ||
+  typeof AggregateContextMenu.getOrCreateInstance !== "function" ||
+  typeof AggregateDataTable.getOrCreateInstance !== "function" ||
+  typeof AggregateSlider.getOrCreateInstance !== "function" ||
+  typeof AggregateChart.getOrCreateInstance !== "function" ||
+  typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
+  typeof MooCalendar !== "function" ||
+  typeof MooDateRangePicker !== "function" ||
+  MooUI.Combobox !== AggregateCombobox ||
+  MooUI.Sidebar !== AggregateSidebar ||
+  MooUI.ContextMenu !== AggregateContextMenu ||
+  MooUI.DataTable !== AggregateDataTable ||
+  MooUI.Slider !== AggregateSlider ||
+  MooUI.Chart !== AggregateChart ||
+  MooUI.Datepicker !== AggregateDatepicker ||
+  typeof MooUIMinified.Chart.getOrCreateInstance !== "function" ||
+  typeof MooUIMinified.Datepicker.getOrCreateInstance !== "function" ||
+  MooUIMinified.Chart !== MinifiedAggregateChart ||
+  MooUIMinified.Datepicker !== MinifiedAggregateDatepicker ||
   typeof Chart.getOrCreateInstance !== "function" ||
   typeof ChartMinified.getOrCreateInstance !== "function" ||
   typeof Datepicker.getOrCreateInstance !== "function" ||
@@ -415,6 +552,13 @@ for (const specifier of [
   "@wpmoo/ui/moo-ui.min.css",
   "@wpmoo/ui/moo.css",
   "@wpmoo/ui/moo.min.css",
+  "@wpmoo/ui/moo-ui.js",
+  "@wpmoo/ui/moo-ui.min.js",
+  "@wpmoo/ui/scss/config",
+  "@wpmoo/ui/scss/moo-ui",
+  "@wpmoo/ui/scss/moo-core",
+  "@wpmoo/ui/scss/components",
+  "@wpmoo/ui/scss/settings",
   "@wpmoo/ui/certification.json",
 ]) {
   const resolved = import.meta.resolve(specifier);
@@ -441,39 +585,11 @@ for (const specifier of [
         import sass
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = Path(temporary_directory)
-            pack_result = subprocess.run(
-                ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
-                cwd=ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-                env=npm_env(),
+            consumer_root, _installed_package, _tarball = (
+                self._install_clean_consumer_with_bootstrap_scss(
+                    Path(temporary_directory)
+                )
             )
-            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
-            pack_payload = json.loads(pack_result.stdout)
-            tarball = temporary_root / pack_payload[0]["filename"]
-            self.assertTrue(tarball.is_file())
-
-            # Unpack into a consumer node_modules layout
-            unpack_root = temporary_root / "unpacked"
-            with tarfile.open(tarball, mode="r:gz") as archive:
-                archive.extractall(unpack_root)
-            consumer_root = temporary_root / "consumer"
-            installed_package = consumer_root / "node_modules/@wpmoo/ui"
-            installed_package.parent.mkdir(parents=True)
-            shutil.move(unpack_root / "package", installed_package)
-
-            # Install bootstrap@5.3.3 alongside
-            bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
-            bootstrap_pkg.mkdir(parents=True)
-            vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
-            for item in vendor_bootstrap_scss.iterdir():
-                dest = bootstrap_pkg / item.name
-                if item.is_file():
-                    shutil.copy2(item, dest)
-                elif item.is_dir():
-                    shutil.copytree(item, dest)
 
             # --- Assertion 1: zero overrides compiles ---
             scss_dir = consumer_root / "scss"
@@ -545,6 +661,56 @@ for (const specifier of [
                         "Undefined variable", str(leak_context.exception)
                     )
 
+    def test_sass_source_entrypoints_compile_from_a_clean_consumer(self) -> None:
+        """Published Sass source entrypoints must resolve from an npm layout."""
+        import sass
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            consumer_root, _installed_package, _tarball = (
+                self._install_clean_consumer_with_bootstrap_scss(
+                    Path(temporary_directory)
+                )
+            )
+
+            scss_dir = consumer_root / "scss"
+            scss_dir.mkdir(exist_ok=True)
+            cases = (
+                (
+                    "moo-ui.scss",
+                    '@import "@wpmoo/ui/scss/moo-ui";\n',
+                    (":root,", ".btn"),
+                ),
+                (
+                    "moo-core.scss",
+                    '@import "@wpmoo/ui/scss/moo-core";\n',
+                    (".moo-ui", "@scope (.moo-ui)"),
+                ),
+                (
+                    "components.scss",
+                    '@import "bootstrap/scss/functions";\n'
+                    '@import "@wpmoo/ui/scss/settings";\n'
+                    '@import "bootstrap/scss/variables";\n'
+                    '@import "bootstrap/scss/variables-dark";\n'
+                    '@import "bootstrap/scss/maps";\n'
+                    '@import "bootstrap/scss/mixins";\n'
+                    '@import "bootstrap/scss/utilities";\n'
+                    '@import "@wpmoo/ui/scss/components";\n',
+                    (".btn", ".combobox"),
+                ),
+            )
+
+            for filename, source, expected_fragments in cases:
+                with self.subTest(filename=filename):
+                    entrypoint = scss_dir / filename
+                    entrypoint.write_text(source, encoding="utf-8")
+                    compiled = sass.compile(
+                        filename=str(entrypoint),
+                        include_paths=[str(consumer_root / "node_modules")],
+                        output_style="expanded",
+                    )
+                    for fragment in expected_fragments:
+                        self.assertIn(fragment, compiled)
+
     def test_component_module_imports_have_no_document_side_effect(self) -> None:
         for module_path in (
             "combobox.js",
@@ -552,14 +718,16 @@ for (const specifier of [
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "src/js/moo-ui.js",
             "chart.js",
             "datepicker.js",
             "dist/js/chart.min.js",
             "dist/js/datepicker.min.js",
+            "dist/js/moo-ui.min.js",
         ):
             source_path = (
                 module_path
-                if module_path.startswith("dist/")
+                if module_path.startswith(("dist/", "src/"))
                 else f"src/js/components/{module_path}"
             )
             with self.subTest(module_path=module_path):

@@ -30,7 +30,6 @@ from urllib.parse import urlsplit
 
 from playwright.sync_api import (
     Browser,
-    BrowserContext,
     Page,
     Playwright,
     Route,

@@ -55,6 +55,7 @@ BOOTSTRAP = ROOT / "vendor/bootstrap"
 GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
+JS_ROOT = SRC / "js"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
@@ -65,6 +66,8 @@ CORE_JS_MODULES = (
     "slider.js",
 )
 BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+AGGREGATE_JS_MODULES = ("moo-ui.js",)
+PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
@@ -119,6 +122,9 @@ SOURCE_SNAPSHOT_DIRS = (
     CORE_REGISTRY,
     CERTIFICATION_FIXTURES,
     SCSS,
+)
+SOURCE_SNAPSHOT_FILES = (
+    JS_ROOT / "moo-ui.js",
 )
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
@@ -332,9 +338,10 @@ def _inline_element(source: str, match: re.Match[str], tag_name: str, depth: int
     return rendered, match.end() + closing.end()
 
 
-def format_html(value: object) -> str:
+def format_html(value: object, *, compact_lucide_icons: bool = True) -> str:
     source = dedent_html(value)
-    source = _compact_lucide_icons(source)
+    if compact_lucide_icons:
+        source = _compact_lucide_icons(source)
     lines: list[str] = []
     depth = 0
     position = 0
@@ -385,6 +392,11 @@ def format_html(value: object) -> str:
                 inline_until = match.end() + inline_close.end()
                 position = inline_until
                 continue
+            if inline_close:
+                lines.append(f"{prefix}{token}{inline_close.group('close')}")
+                inline_until = match.end() + inline_close.end()
+                position = inline_until
+                continue
 
         lines.extend(f"{prefix}{line}" for line in token.splitlines())
 
@@ -397,6 +409,10 @@ def format_html(value: object) -> str:
         lines.append(f"{'  ' * depth}{text_content}")
 
     return "\n".join(lines)
+
+
+def format_codepen_html(value: object) -> str:
+    return format_html(value, compact_lucide_icons=False)
 
 
 LUCIDE_SVG = re.compile(
@@ -413,7 +429,7 @@ def _compact_lucide_icons(source: str) -> str:
         position = match.group("position")
         return (
             f'<i class="lucide lucide-{icon_name}" '
-            f'data-icon="{position}" aria-hidden="true" />'
+            f'data-icon="{position}" aria-hidden="true"></i>'
         )
 
     return LUCIDE_SVG.sub(replace, source)
@@ -782,35 +798,18 @@ def _example_js_source(module_filename: str, init_call: str) -> str:
         )
     return (
         source.rstrip()
-        + '\n\nfunction loadMooCodePenBootstrapForExample(callback) {\n'
-        + "  if (window.bootstrap && window.bootstrap.Offcanvas && window.bootstrap.Dropdown && window.bootstrap.Modal) {\n"
-        + "    callback();\n"
-        + "    return;\n"
-        + "  }\n\n"
-        + '  const existing = document.querySelector(\'script[src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js"]\');\n'
-        + "  if (existing) {\n"
-        + '    existing.addEventListener("load", callback, { once: true });\n'
-        + "    return;\n"
-        + "  }\n\n"
-        + '  const script = document.createElement("script");\n'
-        + '  script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";\n'
-        + "  script.onload = callback;\n"
-        + "  document.head.appendChild(script);\n"
-        + "}\n\n"
-        + "function startMooExampleDataTable() {\n"
-        + "  loadMooCodePenBootstrapForExample(() => {\n"
-        + f'    import("{datatable_url}")\n'
-        + "      .then((module) => {\n"
-        + "        DataTable = module.default;\n"
-        + '        document.querySelectorAll(".datatable").forEach((element) => {\n'
-        + "          DataTable.getOrCreateInstance(element);\n"
-        + "        });\n"
-        + f"        {init_call}\n"
-        + "      })\n"
-        + "      .catch((error) => {\n"
-        + '        console.error("Moo UI DataTable failed to load for this CodePen example.", error);\n'
+        + "\n\nfunction startMooExampleDataTable() {\n"
+        + f'  import("{datatable_url}")\n'
+        + "    .then((module) => {\n"
+        + "      DataTable = module.default;\n"
+        + '      document.querySelectorAll(".datatable").forEach((element) => {\n'
+        + "        DataTable.getOrCreateInstance(element);\n"
         + "      });\n"
-        + "  });\n"
+        + f"      {init_call}\n"
+        + "    })\n"
+        + "    .catch((error) => {\n"
+        + '      console.error("Moo UI DataTable failed to load for this CodePen example.", error);\n'
+        + "    });\n"
         + "}\n\n"
         + 'if (document.readyState === "loading") {\n'
         + '  document.addEventListener("DOMContentLoaded", startMooExampleDataTable, { once: true });\n'
@@ -1114,14 +1113,15 @@ def create_environment(icon_renderer=None) -> Environment:
     )
     environment.filters["dedent_html"] = dedent_html
     environment.filters["format_html"] = format_html
+    environment.filters["format_codepen_html"] = format_codepen_html
     environment.filters["highlight_code"] = highlight_code
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
     environment.filters["absolutize_links"] = absolutize_links
-    # A plain json.dumps for the CodePen prefill's double-quoted value
-    # attribute, deliberately NOT registered as tojson so Jinja's built-in
-    # (HTML-safe) tojson stays available for script contexts. Callers pair
-    # it with forceescape so the JSON's own quotes survive the attribute.
+    # A plain json.dumps for CodePen prefill payload fields, deliberately
+    # NOT registered as tojson so Jinja's built-in (HTML-safe) tojson stays
+    # available for script contexts. Callers pair it with forceescape so
+    # embedded HTML stays inert until the browser submits the form field.
     environment.filters["moo_json"] = to_json_attr
     environment.globals["pretty_url"] = pretty_url
     environment.globals["site_href"] = site_href
@@ -1226,12 +1226,10 @@ def load_support_facts() -> dict[str, object]:
     }
 
 
-# CodePen export URLs pin the package version they load from a CDN. The
-# current package version (1.0.0-rc.3) is not published to npm yet, so a
-# pen pinned to it would 404 and render broken. Until RC.3 is published,
-# the export pins the newest published version; flip this back to
-# package.version once the current version is live on npm.
-CODEPEN_CDN_VERSION = "1.0.0-rc.2"
+# CodePen export URLs pin the package version they load from a CDN. Keep
+# this on the newest version that is actually published to npm, so example
+# pens never point at an unavailable release candidate.
+CODEPEN_CDN_VERSION = "1.0.0-rc.3"
 
 
 def load_product_facts() -> dict[str, object]:
@@ -1370,11 +1368,12 @@ def derive_component_ownership(
         module.lstrip("./").removesuffix(".js")
         for module in certification.get("publicEntrypoints", {}).get("esm", [])
     }
+    component_moo_modules = exported_moo_modules - PUBLIC_ESM_AGGREGATE_MODULES
     source_moo_modules = {path.stem for path in JS_COMPONENTS.glob("*.js")}
 
     # Check that each exported module either matches a source file or is a
     # minified variant of a source file
-    for exported in exported_moo_modules:
+    for exported in component_moo_modules:
         if exported.endswith(".min"):
             canonical = exported.removesuffix(".min")
             if canonical not in source_moo_modules:
@@ -1388,7 +1387,7 @@ def derive_component_ownership(
 
     # Check that each source file has a corresponding export
     for source in source_moo_modules:
-        if source not in exported_moo_modules:
+        if source not in component_moo_modules:
             raise RuntimeError(
                 f"Source module {source}.js has no export in certification.json"
             )
@@ -1429,7 +1428,7 @@ def derive_component_ownership(
             raise RuntimeError(f"bootstrapEvidence must be a list for {slug}")
         has_bootstrap_js = _has_bootstrap_js_evidence(bootstrap_sources)
         runtime_owner = "native HTML/CSS"
-        if slug in exported_moo_modules:
+        if slug in component_moo_modules:
             runtime_owner = "optional Moo UI ESM"
         elif has_bootstrap_js:
             runtime_owner = "Bootstrap plugin"
@@ -1555,7 +1554,7 @@ def style_include_paths(entrypoint: Path) -> list[str]:
     include_paths = [str(SCSS)]
     if entrypoint.is_relative_to(SITE_SCSS):
         include_paths.append(str(SITE_SCSS))
-    include_paths.append(str(BOOTSTRAP / "scss"))
+    include_paths.append(str(BOOTSTRAP.parent))
     return include_paths
 
 
@@ -1632,6 +1631,9 @@ def copy_package_js() -> None:
     for module_name in BUNDLED_JS_MODULES:
         _bundle_module(module_name, minify=False)
         _bundle_module(module_name, minify=True)
+    for module_name in AGGREGATE_JS_MODULES:
+        _bundle_module(module_name, minify=False)
+        _bundle_module(module_name, minify=True)
 
 
 def js_license_banner(module_name: str) -> str:
@@ -1667,6 +1669,8 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
         minify: Whether to minify the output
     """
     source = JS_COMPONENTS / module_name
+    if module_name in AGGREGATE_JS_MODULES:
+        source = JS_ROOT / module_name
     if not source.is_file():
         raise FileNotFoundError(f"Bundled module source not found: {source}")
 
@@ -1733,6 +1737,9 @@ def required_core_outputs() -> tuple[Path, ...]:
     for name in BUNDLED_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
+    for name in AGGREGATE_JS_MODULES:
+        outputs.append(PACKAGE_DIST / "js" / name)
+        outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
     return tuple(outputs)
 
 
@@ -1765,6 +1772,13 @@ def copy_core_outputs_to_site() -> None:
         shutil.copy2(package_module, components_dir / module_name)
         shutil.copy2(package_module, legacy_js_dir / module_name)
     for module_name in BUNDLED_JS_MODULES:
+        canonical = PACKAGE_DIST / "js" / module_name
+        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
+        shutil.copy2(canonical, components_dir / module_name)
+        shutil.copy2(canonical, legacy_js_dir / module_name)
+        shutil.copy2(minified, components_dir / minified.name)
+        shutil.copy2(minified, legacy_js_dir / minified.name)
+    for module_name in AGGREGATE_JS_MODULES:
         canonical = PACKAGE_DIST / "js" / module_name
         minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
         shutil.copy2(canonical, components_dir / module_name)
@@ -2119,6 +2133,7 @@ def build_site() -> None:
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:
     paths = [ROOT / "build.py"]
+    paths.extend(path for path in SOURCE_SNAPSHOT_FILES if path.exists())
     for folder in SOURCE_SNAPSHOT_DIRS:
         if folder.exists():
             paths.extend(path for path in folder.rglob("*") if path.is_file())

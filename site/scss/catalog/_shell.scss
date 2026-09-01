@@ -36,7 +36,7 @@ body:has(.moo-catalog) {
 // no visible resting border, so it reads as top-bar chrome instead of a form
 // field.
 .moo-catalog__search-trigger {
-  height: 2rem;
+  height: var(--moo-catalog-control-height);
   width: 10rem;
   max-width: 100%;
   flex: 0 1 10rem;
@@ -107,16 +107,17 @@ body:has(.moo-catalog) {
 }
 
 .moo-catalog__github-link {
-  --bs-btn-color: var(--bs-body-color);
-  --bs-btn-bg: var(--bs-secondary-bg);
-  --bs-btn-border-color: var(--bs-border-color);
-  --bs-btn-hover-color: var(--bs-body-color);
-  --bs-btn-hover-bg: var(--bs-tertiary-bg);
-  --bs-btn-hover-border-color: var(--bs-border-color);
-  --bs-btn-active-color: var(--bs-body-color);
-  --bs-btn-active-bg: color-mix(in srgb, var(--bs-tertiary-bg) 88%, var(--bs-body-color));
-  --bs-btn-active-border-color: var(--bs-border-color);
-  min-height: 2rem;
+  --bs-btn-color: var(--bs-body-bg);
+  --bs-btn-bg: color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg));
+  --bs-btn-border-color: var(--bs-btn-bg);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--bs-body-color);
+  --bs-btn-hover-border-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--bs-body-color);
+  --bs-btn-active-border-color: var(--bs-body-color);
+
+  min-height: var(--moo-catalog-control-height);
   padding-inline: 0.75rem;
   color: var(--bs-btn-color);
   font-size: 0.875rem;
@@ -164,6 +165,7 @@ body:has(.moo-catalog) {
 }
 
 .moo-catalog {
+  --moo-catalog-control-height: 2rem;
   --moo-catalog-header-height: 4rem;
   --moo-catalog-header-bg-mix: 94%;
   --moo-catalog-header-backdrop-filter: blur(0.75rem);
@@ -348,6 +350,11 @@ body:has(.moo-catalog) {
   --bs-btn-hover-border-color: var(--moo-border);
   --bs-btn-active-border-color: var(--moo-border);
   box-shadow: var(--bs-box-shadow-sm);
+}
+
+.moo-catalog__sidebar-toggle {
+  width: var(--moo-catalog-control-height);
+  height: var(--moo-catalog-control-height);
 }
 
 [data-bs-theme="dark"] .moo-catalog__sidebar-toggle,

@@ -1,29 +1,29 @@
 // Bootstrap components
-@import "tables";
-@import "forms/labels";
-@import "forms/form-text";
-@import "forms/form-control";
-@import "forms/form-select";
-@import "forms/form-check";
-@import "forms/input-group";
-@import "forms/validation";
-@import "buttons";
-@import "dropdown";
-@import "button-group";
-@import "nav";
-@import "card";
-@import "accordion";
-@import "breadcrumb";
-@import "pagination";
-@import "badge";
-@import "alert";
-@import "close";
-@import "toasts";
-@import "modal";
-@import "tooltip";
-@import "popover";
-@import "offcanvas";
-@import "helpers/color-bg";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms/labels";
+@import "bootstrap/scss/forms/form-text";
+@import "bootstrap/scss/forms/form-control";
+@import "bootstrap/scss/forms/form-select";
+@import "bootstrap/scss/forms/form-check";
+@import "bootstrap/scss/forms/input-group";
+@import "bootstrap/scss/forms/validation";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/accordion";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/toasts";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/offcanvas";
+@import "bootstrap/scss/helpers/color-bg";
 
 // Moo component support
 @import "foundations/focus";
@@ -71,11 +71,3 @@
 @import "components/combobox";
 @import "components/context-menu";
 @import "components/datatable";
-
-// Bootstrap's own .form-label/.form-check-label leave native text selection
-// on; the design reference treats every control label as part of the
-// clickable control surface, not selectable copy.
-.form-label,
-.form-check-label {
-  user-select: none;
-}

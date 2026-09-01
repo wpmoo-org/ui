@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import json
 import re
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase, codepen_payloads_from_output
 
 
 COMPONENT = ROOT / "src/components/input_group.html.jinja"
@@ -17,6 +16,13 @@ class InputGroupTests(CatalogTestCase):
         self.assertTrue(COMPONENT.is_file(), "Input Group macro is not implemented")
         template = create_environment().from_string(source)
         return " ".join(template.render().split())
+
+    def input_group_codepen_payloads(self) -> list[dict[str, object]]:
+        return [
+            payload
+            for payload in codepen_payloads_from_output("components/input-group.html")
+            if str(payload.get("title", "")).startswith("Moo UI Input Group - ")
+        ]
 
     def test_input_group_wraps_native_bootstrap_markup(self) -> None:
         output = self.render_template(
@@ -189,6 +195,43 @@ class InputGroupTests(CatalogTestCase):
         self.assertIn("0/280", body)
         self.assertIn('id="certification-input-group-post"', body)
         self.assertNotIn("With textarea", body)
+
+    def test_catalog_codepen_examples_start_with_field_contracts(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        payloads = self.input_group_codepen_payloads()
+        self.assertGreaterEqual(len(payloads), 10)
+        for payload in payloads:
+            html = str(payload["html"]).lstrip()
+            with self.subTest(title=payload["title"]):
+                self.assertRegex(
+                    html,
+                    r'^<div\b(?=[^>]*\bclass="[^"]*\bfield(?:-group)?(?![\w-]))[^>]*>',
+                )
+                self.assertNotRegex(html, r'^<div class="input-group(?:\s|")')
+                self.assertNotRegex(html, r'^<div class="d-grid gap-3"')
+
+    def test_codepen_component_demo_clamps_field_contract_roots_to_catalog_width(
+        self,
+    ) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        demo_css = (ROOT / "site-dist/assets/css/codepen-demo.css").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertRegex(
+            demo_css,
+            r"body\.moo-codepen-component-demo > :where\(\.field, \.field-group\) \{[^}]*"
+            r"width: min\(100%, [^)]+\);",
+        )
+        self.assertRegex(
+            demo_css,
+            r"body\.moo-codepen-component-demo > :where\(\.field, \.field-group\)\.w-100 \{[^}]*"
+            r"width: min\(100%, [^)]+\) !important;",
+        )
 
     def test_input_group_fails_fast_for_unknown_contracts(self) -> None:
         with self.assertRaisesRegex(

@@ -1,6 +1,6 @@
 {
   "name": "@wpmoo/ui",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "description": "Bootstrap markup. shadcn feel. A frontend-framework-free component system for server-rendered apps.",
   "license": "MIT",
   "author": "WPMoo (https://wpmoo.org)",
@@ -27,6 +27,8 @@
     "./moo-ui.min.css": "./dist/assets/css/moo-ui.min.css",
     "./moo.css": "./dist/assets/css/moo.css",
     "./moo.min.css": "./dist/assets/css/moo.min.css",
+    "./moo-ui.js": "./dist/js/moo-ui.js",
+    "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
     "./combobox.js": "./dist/js/combobox.js",
     "./sidebar.js": "./dist/js/sidebar.js",
     "./context-menu.js": "./dist/js/context-menu.js",
@@ -37,6 +39,10 @@
     "./datepicker.js": "./dist/js/datepicker.js",
     "./datepicker.min.js": "./dist/js/datepicker.min.js",
     "./scss/config": "./scss/_config.scss",
+    "./scss/moo-ui": "./scss/moo-ui.scss",
+    "./scss/moo-core": "./scss/moo-core.scss",
+    "./scss/components": "./scss/_components.scss",
+    "./scss/settings": "./scss/_settings.scss",
     "./certification.json": "./certification.json",
     "./package.json": "./package.json"
   },
@@ -45,6 +51,8 @@
     "dist/assets/css/moo-ui.min.css",
     "dist/assets/css/moo.css",
     "dist/assets/css/moo.min.css",
+    "dist/js/moo-ui.js",
+    "dist/js/moo-ui.min.js",
     "dist/js/combobox.js",
     "dist/js/sidebar.js",
     "dist/js/context-menu.js",
@@ -54,12 +62,12 @@
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "scss/_config.scss",
+    "scss/*.scss",
+    "scss/**/*.scss",
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md"
+    "ASSET_LICENSE.md"
   ],
   "peerDependencies": {
     "bootstrap": ">=5.3.0 <5.4"

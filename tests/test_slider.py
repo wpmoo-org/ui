@@ -4,10 +4,9 @@ import json
 import importlib
 import subprocess
 import sys
-import unittest
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase, scss_rule_body
 from tests.helpers.browser_harness import (
     BrowserEvidence,
     CERTIFICATION_CASES,
@@ -364,6 +363,14 @@ console.log(JSON.stringify({
         self.assertNotIn("border-color: var(--moo-ring);", styles)
         self.assertNotIn("#0", styles)
 
+    def test_vertical_slider_output_reserves_stable_digit_width(self) -> None:
+        scss = SLIDER_SCSS.read_text(encoding="utf-8")
+        output_block = scss_rule_body(scss, ".slider--vertical [data-slider-output]")
+
+        self.assertIn("min-width: 3ch;", output_block)
+        self.assertIn("text-align: end;", output_block)
+        self.assertIn("font-variant-numeric: tabular-nums;", output_block)
+
     def test_slider_catalog_page_and_fixture_are_wired(self) -> None:
         page = PAGE.read_text(encoding="utf-8")
         fixture = FIXTURE.read_text(encoding="utf-8")
@@ -498,3 +505,71 @@ class _SliderBrowserMixin:
             evidence.assert_clean()
         finally:
             context.close()
+
+    def test_vertical_slider_reserves_value_width_as_output_digits_change(self) -> None:
+        context, page, evidence = self.open_fixture()
+        try:
+            expect(page.locator("body")).to_have_attribute("data-slider-ready", "true")
+            slider = page.locator("#certification-slider-vertical")
+            input_control = page.locator("#certification-slider-vertical-input")
+
+            def measure(value: str) -> dict[str, float | str]:
+                input_control.evaluate(
+                    """
+                    (input, value) => {
+                      input.value = value;
+                      input.dispatchEvent(new Event("input", { bubbles: true }));
+                    }
+                    """,
+                    value,
+                )
+                return slider.evaluate(
+                    """
+                    element => {
+                      const track = element.querySelector("[data-slider-track]");
+                      const output = element.querySelector("[data-slider-output]");
+                      const rootRect = element.getBoundingClientRect();
+                      const trackRect = track.getBoundingClientRect();
+                      const outputRect = output.getBoundingClientRect();
+
+                      return {
+                        output: output.textContent,
+                        outputLeft: outputRect.left,
+                        outputRight: outputRect.right,
+                        outputWidth: outputRect.width,
+                        rootLeft: rootRect.left,
+                        rootRight: rootRect.right,
+                        rootWidth: rootRect.width,
+                        trackWidth: trackRect.width,
+                      };
+                    }
+                    """
+                )
+
+            metrics = [measure(value) for value in ("0", "50", "100")]
+
+            self.assertEqual([metric["output"] for metric in metrics], ["0", "50", "100"])
+            output_widths = [metric["outputWidth"] for metric in metrics]
+            track_widths = [metric["trackWidth"] for metric in metrics]
+            self.assertLessEqual(max(output_widths) - min(output_widths), 1, metrics)
+            self.assertLessEqual(max(track_widths) - min(track_widths), 1, metrics)
+            self.assertGreaterEqual(
+                min(metric["rootWidth"] for metric in metrics),
+                max(metric["outputWidth"] for metric in metrics),
+            )
+            self.assertTrue(
+                all(
+                    metric["outputLeft"] >= metric["rootLeft"] - 1
+                    and metric["outputRight"] <= metric["rootRight"] + 1
+                    for metric in metrics
+                ),
+                metrics,
+            )
+            self.assertTrue(all(metric["trackWidth"] > 0 for metric in metrics), metrics)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+
+class SliderBrowserTests(_SliderBrowserMixin, CatalogTestCase):
+    pass

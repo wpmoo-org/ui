@@ -1,3 +1,11 @@
+// Bootstrap form labels and check/radio/switch labels sit inside clickable
+// control surfaces in Moo UI, so keep them from selecting text during pointer
+// interaction without making Field own every label selector.
+.form-label,
+.form-check-label {
+  user-select: none;
+}
+
 // One shared focus-visible recipe for essentially every focusable surface --
 // border swaps to the ring color and a 3px/50%-opacity ring surrounds the
 // control. Matches the reference exactly, which repeats this same

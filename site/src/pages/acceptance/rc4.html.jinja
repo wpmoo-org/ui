@@ -1,0 +1,10 @@
+{% extends "layouts/base.html.jinja" %}
+
+{% set page_title = "RC.4 Acceptance Portal" %}
+{% set page_description = "A focused manual acceptance portal for checking one Moo UI page or fixture at a time." %}
+{% set acceptance_release = "1.0.0-rc.4" %}
+{% set acceptance_key = "rc4-component-matrix" %}
+
+{% block body %}
+  {% include "includes/acceptance-portal.html.jinja" %}
+{% endblock %}

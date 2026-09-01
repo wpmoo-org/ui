@@ -20,7 +20,17 @@ body.moo-codepen-component-demo {
   place-items: center;
 }
 
-body.moo-codepen-component-demo > :where(:not(.moo-codepen-signature, .moo-codepen-footer)) {
+body.moo-codepen-component-demo > :where(
+  :not(
+    .moo-codepen-signature,
+    .moo-codepen-footer,
+    .moo-codepen-actions,
+    .modal,
+    .modal-backdrop,
+    .offcanvas,
+    .offcanvas-backdrop
+  )
+) {
   max-width: min(100%, 48rem);
   margin-block: 0;
 }
@@ -45,6 +55,81 @@ body.moo-codepen-component-demo > :where(
   table
 ) {
   width: min(100%, 48rem);
+}
+
+body.moo-codepen-component-demo > :where(.field, .field-group) {
+  width: min(100%, 24rem);
+}
+
+body.moo-codepen-component-demo > :where(.field, .field-group).w-100 {
+  width: min(100%, 24rem) !important;
+}
+
+.moo-codepen-actions {
+  --moo-codepen-control-height: 2rem;
+
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.moo-codepen-actions .btn {
+  min-height: var(--moo-codepen-control-height);
+  font-size: 0.875rem;
+}
+
+.moo-codepen-actions .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--moo-codepen-control-height);
+  min-width: var(--moo-codepen-control-height);
+  height: var(--moo-codepen-control-height);
+  padding: 0;
+}
+
+.moo-codepen-actions [data-icon] {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+.moo-codepen-actions__theme-toggle {
+  border-radius: 50%;
+}
+
+.moo-codepen-actions__theme-toggle [data-moo-codepen-theme-icon] {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.moo-codepen-actions__theme-toggle [data-moo-codepen-theme-icon]:not([hidden]) {
+  display: inline-flex;
+}
+
+.moo-codepen-actions__github-link {
+  --bs-btn-color: var(--bs-body-bg);
+  --bs-btn-bg: color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg));
+  --bs-btn-border-color: var(--bs-btn-bg);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--bs-body-color);
+  --bs-btn-hover-border-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--bs-body-color);
+  --bs-btn-active-border-color: var(--bs-body-color);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-inline: 0.75rem;
+  color: var(--bs-btn-color);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .moo-codepen-signature {
@@ -241,5 +326,19 @@ body.moo-codepen-component-demo > :where(
 
   .moo-codepen-footer {
     padding: 0.75rem;
+  }
+
+  .moo-codepen-actions {
+    top: 0.75rem;
+    right: 0.75rem;
+    gap: 0.375rem;
+  }
+
+  .moo-codepen-actions__github-link {
+    padding-inline: 0.5rem;
+  }
+
+  .moo-codepen-actions__github-label {
+    display: none;
   }
 }

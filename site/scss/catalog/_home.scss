@@ -154,29 +154,35 @@
 }
 
 .moo-home-entry-card {
-  background: var(--bs-body-bg);
-  transition: border-color 0.15s ease-in-out;
+  --bs-card-bg: transparent;
+  --bs-card-box-shadow: none;
+  --bs-card-border-color: color-mix(in srgb, var(--moo-foreground) 8%, transparent);
+
+  transition:
+    border-color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
 
-.moo-home-entry-card:hover {
-  border-color: var(--bs-secondary-color);
+.moo-home-entry-card:hover,
+.moo-home-entry-card:focus-within {
+  --bs-card-border-color: color-mix(in srgb, var(--moo-foreground) 12%, transparent);
+
+  background-color: color-mix(in srgb, var(--moo-muted-surface) 22%, var(--moo-surface));
+  box-shadow: var(--bs-box-shadow-sm);
 }
 
 .moo-home-entry-card .card-body {
   align-content: start;
 }
 
-.moo-home-entry-card a {
+.moo-home-entry-card a,
+.moo-home-entry-card a:hover,
+.moo-home-entry-card a:focus,
+.moo-home-entry-card a:focus-visible,
+.moo-home-entry-card a:visited {
   color: var(--bs-body-color);
   text-decoration: none;
-}
-
-.moo-home-entry-card a:hover {
-  text-decoration: underline;
-}
-
-.moo-home-proof-card {
-  background: var(--bs-body-bg);
 }
 
 .moo-home-proof-card .card-body {

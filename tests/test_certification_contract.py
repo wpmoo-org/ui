@@ -686,9 +686,9 @@ class CertificationContractTests(unittest.TestCase):
     def test_api_freeze_document_matches_live_package_state(self) -> None:
         """Lock the 0.9.0 API freeze: any undocumented removal from the
         public surfaces must fail CI. Additive exports/files introduced
-        by later release candidates are tolerated, and the RC.3 Sass
+        by later release candidates are tolerated, and the Sass
         config rename is explicitly reconciled below. Exact equality for
-        current exports/files is enforced by the rc.3 freeze test and
+        current exports/files is enforced by the latest freeze test and
         ultimately by the Phase 6 package-surface gate."""
         freeze = self._read_json("src/certification/api-freeze-0.9.0.json")
         package = self._read_json("package.json")
@@ -715,13 +715,15 @@ class CertificationContractTests(unittest.TestCase):
         reconciled_removed_files = {
             "scss/_facade-settings.scss",
             "scss/settings/_facade_public.scss",
+            "scss/_config.scss",
         }
         removed_files = frozen_files - live_files - reconciled_removed_files
         self.assertFalse(
             removed_files,
             f"0.9.0 frozen files were removed from package.json: {removed_files}",
         )
-        self.assertIn("scss/_config.scss", live_files)
+        self.assertIn("scss/*.scss", live_files)
+        self.assertIn("scss/**/*.scss", live_files)
         self.assertTrue(reconciled_removed_files.isdisjoint(live_files))
 
         # Sass config allow-list must match the real public declarations.
@@ -766,16 +768,27 @@ class CertificationContractTests(unittest.TestCase):
             certification["bootstrap"]["testedVersions"],
         )
 
-    def test_rc3_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.3 freeze document structure, metadata,
+    def test_rc4_api_freeze_declaration_is_well_formed(self) -> None:
+        """Validate the 1.0.0-rc.4 freeze document structure, metadata,
         and exact package export/file equality against package.json."""
-        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.3.json")
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.4.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
+        package_surface_decisions = (
+            ROOT / "docs/contracts/PACKAGE_SURFACE_DECISIONS.md"
+        ).read_text(encoding="utf-8")
 
-        # Freeze document must declare version 1.0.0-rc.3
-        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.3")
+        # Freeze document must declare the current package version.
+        self.assertEqual(freeze["freezeVersion"], package["version"])
+        self.assertIn(
+            "docs/contracts/PACKAGE_SURFACE_DECISIONS.md",
+            freeze["description"],
+        )
+        self.assertIn("additive optional properties", package_surface_decisions)
+        self.assertIn("`metadata` entrypoint group is optional", package_surface_decisions)
+        self.assertIn("`./moo-ui.js`", package_surface_decisions)
+        self.assertIn("`./scss/config`", package_surface_decisions)
 
         # Sass config allow-list must match the real public declarations.
         import re
@@ -799,6 +812,20 @@ class CertificationContractTests(unittest.TestCase):
         frozen_required = set(freeze["certificationManifest"]["requiredFields"])
         self.assertEqual(live_required, frozen_required,
             "manifest.schema.json required fields diverged from the freeze document")
+        public_entrypoints = schema["properties"]["publicEntrypoints"]
+        self.assertIn("metadata", public_entrypoints["properties"])
+        self.assertNotIn("metadata", public_entrypoints["required"])
+        metadata_entrypoints = freeze["metadataEntrypoints"]
+        self.assertEqual(
+            [entry["export"] for entry in metadata_entrypoints],
+            certification["publicEntrypoints"]["metadata"],
+        )
+        for entrypoint in metadata_entrypoints:
+            with self.subTest(metadata_entrypoint=entrypoint["export"]):
+                self.assertEqual(entrypoint["scope"], "metadata")
+                self.assertIn(entrypoint["export"], package["exports"])
+                self.assertIn("source", entrypoint)
+                self.assertIn("key", entrypoint)
 
         # Bootstrap support must match certification.json
         self.assertEqual(
@@ -814,44 +841,69 @@ class CertificationContractTests(unittest.TestCase):
             certification["bootstrap"]["testedVersions"],
         )
 
-        # RC.3 metadata fields
-        self.assertEqual(certification["coreVersion"], "1.0.0-rc.3")
+        # Current RC metadata fields
+        self.assertEqual(certification["coreVersion"], package["version"])
         self.assertEqual(certification["status"], "preview")
         self.assertEqual(certification["certifiedComponents"], [])
 
-        # RC.3 ESM module records must be present in the freeze document
+        # Current RC ESM module records must be present in the freeze document
         frozen_modules = {m["module"] for m in freeze["esmModules"]}
         self.assertIn("chart.js", frozen_modules)
         self.assertIn("datepicker.js", frozen_modules)
         self.assertIn("slider.js", frozen_modules)
+        lifecycle_modules = {
+            "combobox.js",
+            "sidebar.js",
+            "context-menu.js",
+            "datatable.js",
+            "chart.js",
+            "datepicker.js",
+            "slider.js",
+        }
+        expected_lifecycle = [
+            "constructor",
+            "getInstance",
+            "getOrCreateInstance",
+            "dispose",
+        ]
+        for module in lifecycle_modules:
+            with self.subTest(module=module):
+                record = next(m for m in freeze["esmModules"] if m["module"] == module)
+                self.assertEqual(record.get("lifecycle"), expected_lifecycle)
 
-        # RC.3 package exports/files must include the three new entrypoints
+        # Current RC package exports/files must include the documented new entrypoints
         frozen_exports = set(freeze["packageExports"])
         self.assertEqual(
             frozen_exports,
             set(package["exports"]),
-            "RC.3 package export freeze diverged from package.json",
+            "Current RC package export freeze diverged from package.json",
         )
         self.assertIn("./chart.js", frozen_exports)
         self.assertIn("./chart.min.js", frozen_exports)
         self.assertIn("./datepicker.js", frozen_exports)
         self.assertIn("./datepicker.min.js", frozen_exports)
         self.assertIn("./slider.js", frozen_exports)
+        self.assertIn("./scss/moo-ui", frozen_exports)
+        self.assertIn("./scss/moo-core", frozen_exports)
+        self.assertIn("./scss/components", frozen_exports)
+        self.assertIn("./scss/settings", frozen_exports)
 
         frozen_files = set(freeze["packageFiles"])
         self.assertEqual(
             frozen_files,
             set(package["files"]),
-            "RC.3 package file freeze diverged from package.json",
+            "Current RC package file freeze diverged from package.json",
         )
         self.assertIn("dist/js/chart.js", frozen_files)
         self.assertIn("dist/js/chart.min.js", frozen_files)
         self.assertIn("dist/js/datepicker.js", frozen_files)
         self.assertIn("dist/js/datepicker.min.js", frozen_files)
         self.assertIn("dist/js/slider.js", frozen_files)
-        self.assertIn("THIRD_PARTY_NOTICES.md", frozen_files)
+        self.assertIn("scss/*.scss", frozen_files)
+        self.assertIn("scss/**/*.scss", frozen_files)
+        self.assertNotIn("THIRD_PARTY_NOTICES.md", frozen_files)
 
-        # RC.3 artifact variants must map minified to canonical
+        # Current RC artifact variants must map minified to canonical
         artifact_variants = freeze.get("artifactVariants", {})
         self.assertIn("chart.min.js", artifact_variants)
         self.assertIn("datepicker.min.js", artifact_variants)
@@ -901,6 +953,11 @@ class CertificationContractTests(unittest.TestCase):
             },
         )
 
+        aggregate_record = next(m for m in freeze["esmModules"] if m["module"] == "moo-ui.js")
+        self.assertEqual(aggregate_record.get("defaultExport"), "MooUI")
+        self.assertEqual(aggregate_record.get("runtime"), "chart.js@4.5.1")
+        self.assertIn("default namespace export", aggregate_record.get("lifecycle", []))
+
         # Chart.js stays bundled with its third-party runtime.
         chart_record = next(m for m in freeze["esmModules"] if m["module"] == "chart.js")
         self.assertTrue(chart_record.get("bundled", False))
@@ -945,8 +1002,8 @@ class CertificationContractTests(unittest.TestCase):
             },
         )
 
-    def test_rc3_freeze_test_docstring_matches_enforced_equality(self) -> None:
-        docstring = self.test_rc3_api_freeze_declaration_is_well_formed.__doc__ or ""
+    def test_rc4_freeze_test_docstring_matches_enforced_equality(self) -> None:
+        docstring = self.test_rc4_api_freeze_declaration_is_well_formed.__doc__ or ""
 
         self.assertIn("exact package export/file equality", docstring)
         self.assertNotIn("deferred", docstring)

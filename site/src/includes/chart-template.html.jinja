@@ -1,7 +1,7 @@
 {% from "components/button.html.jinja" import button %}
 {% from "components/chart.html.jinja" import chart %}
 {% from "components/table.html.jinja" import table %}
-{% from "includes/codepen.html.jinja" import chart_codepen_css, chart_codepen_js, codepen_button_if_available with context %}
+{% from "includes/codepen.html.jinja" import chart_codepen_css, codepen_button_if_available with context %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
 {% from "includes/example.html.jinja" import render_component_intro, render_example %}
 {% from "components/typography.html.jinja" import typography %}
@@ -31,6 +31,7 @@
 {% macro chart_content_example(example_id, title, description, content, preview_class="moo-example__preview--medium", category_label="Chart") %}
   {% set rendered = content | dedent_html %}
   {% set source = rendered | format_html %}
+  {% set codepen_source = rendered | format_codepen_html %}
   {% set code_id = example_id ~ "-code" %}
   {% set chart_actions %}
     <div class="moo-chart-example__actions" data-moo-code-copy-scope>
@@ -47,10 +48,9 @@
       {{ codepen_button_if_available(
         "Moo UI " ~ title,
         description | striptags,
-        source,
+        codepen_source,
         chart_codepen_css(),
         ["moo-ui", "chartjs", "charts"],
-        js=chart_codepen_js(),
         label="Try in CodePen",
         icon="codepen",
         extra_class="moo-chart-example__codepen",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "1.0.0-rc.3",
+  "coreVersion": "1.0.0-rc.4",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -21,6 +21,8 @@
       "./moo.min.css"
     ],
     "esm": [
+      "./moo-ui.js",
+      "./moo-ui.min.js",
       "./combobox.js",
       "./sidebar.js",
       "./context-menu.js",
@@ -31,7 +33,17 @@
       "./datepicker.js",
       "./datepicker.min.js"
     ],
-    "sass": ["./scss/config"]
+    "sass": [
+      "./scss/config",
+      "./scss/moo-ui",
+      "./scss/moo-core",
+      "./scss/components",
+      "./scss/settings"
+    ],
+    "metadata": [
+      "./certification.json",
+      "./package.json"
+    ]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"
 }

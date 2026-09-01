@@ -176,10 +176,11 @@
 }
 
 .combobox-option {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) $spacer;
   align-items: center;
   gap: $spacer * 0.5;
-  padding-inline-end: $input-height;
+  padding-inline-end: $dropdown-item-padding-x;
   line-height: var(--moo-combobox-option-line-height);
 }
 
@@ -190,8 +191,18 @@
   flex-direction: column;
 }
 
+.combobox:not(.combobox--multiple) .combobox-option[aria-selected="true"],
 .combobox-option[aria-current="true"] {
   background-color: var(--bs-dropdown-link-hover-bg);
+}
+
+.combobox:not(.combobox--multiple)
+  .combobox-menu:has(.combobox-option:not([aria-selected="true"]):hover)
+  .combobox-option[aria-selected="true"]:not(:hover):not([aria-current="true"]),
+.combobox:not(.combobox--multiple)
+  .combobox-menu:has(.combobox-option[aria-current="true"]:not([aria-selected="true"]))
+  .combobox-option[aria-selected="true"]:not([aria-current="true"]) {
+  background-color: transparent;
 }
 
 .combobox-option[aria-selected="true"] {
@@ -219,8 +230,7 @@
 
 .combobox-option__check {
   display: inline-flex;
-  flex: 0 0 auto;
-  margin-inline-start: auto;
+  justify-self: end;
   visibility: hidden;
 }
 

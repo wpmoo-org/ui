@@ -61,6 +61,6 @@ Call out any change that affects:
 - package exports and file list;
 - CSS load order or scoped `.moo-ui` behavior;
 - Bootstrap peer range or plugin ownership;
-- optional Combobox or Sidebar ESM lifecycle.
+- optional Moo UI ESM lifecycle.
 
 If a change only improves documentation, say that explicitly.

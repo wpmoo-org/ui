@@ -16,6 +16,43 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-4">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.4</span>
+            <span class="text-body-secondary">Package source and CodePen release alignment</span>
+          </div>
+          <h2 id="release-1-0-0-rc-4">Sass Source and Aggregate JavaScript</h2>
+          <p>
+            Moo UI 1.0.0-rc.4 publishes the documented Sass source entrypoints,
+            the aggregate Moo UI ESM bundle, and the CodePen runtime polish
+            added during the post-rc3 release pass. Certification remains
+            <code>preview</code>.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span><code>@wpmoo/ui/moo-ui.js</code> and <code>@wpmoo/ui/moo-ui.min.js</code> as side-effect-free aggregate ESM entrypoints for the optional Moo UI modules.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>Documented Sass source entrypoints for <code>scss/config</code>, <code>scss/moo-ui</code>, <code>scss/moo-core</code>, <code>scss/components</code>, and <code>scss/settings</code>.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>CodePen exports now load shared demo CSS and runtime setup externally, include the required Moo UI JavaScript for interactive examples, and keep the demo action chrome focused on theme toggle and GitHub access.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Package metadata, API freeze document, generated public metadata, and catalog form-control examples for <code>@wpmoo/ui@1.0.0-rc.4</code>; the certification manifest remains <code>preview</code> and its component list remains empty.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>Release candidate v1.0.0-rc.4</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-3">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.3</span>
@@ -395,6 +432,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0-rc-4", "label": "v1.0.0-rc.4"},
       {"id": "release-1-0-0-rc-3", "label": "v1.0.0-rc.3"},
       {"id": "release-1-0-0-rc-2", "label": "v1.0.0-rc.2"},
       {"id": "release-1-0-0-rc-1", "label": "v1.0.0-rc.1"},

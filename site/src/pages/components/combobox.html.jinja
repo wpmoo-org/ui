@@ -67,13 +67,15 @@
 
 <div class="moo-component-examples">
   {% set intro %}
-    {{ combobox(
-      id="combobox-intro-reviewer",
-      aria_label="Select reviewer",
-      name="intro_reviewer",
-      placeholder="Select a reviewer",
-      items=reviewer_items
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-intro-reviewer",
+        aria_label="Select reviewer",
+        name="intro_reviewer",
+        placeholder="Select a reviewer",
+        items=reviewer_items
+      ) }}
+    {% endcall %}
   {% endset %}
   {% set combobox_usage %}
     <p>Use <code>.combobox</code> when the user needs to search or filter a known list before choosing a value. Keep the text input focusable, give it <code>role="combobox"</code>, connect it to the popup with <code>aria-controls</code>, and expose the suggestion list as a listbox so keyboard and screen reader users can follow the active option.</p>
@@ -87,13 +89,15 @@
   ) }}
 
   {% set basic %}
-    {{ combobox(
-      id="combobox-reviewer",
-      aria_label="Select reviewer",
-      name="reviewer",
-      placeholder="Select a reviewer",
-      items=reviewer_items
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-reviewer",
+        aria_label="Select reviewer",
+        name="reviewer",
+        placeholder="Select a reviewer",
+        items=reviewer_items
+      ) }}
+    {% endcall %}
   {% endset %}
   {{ render_component_example("combobox", "Combobox",
     "basic",
@@ -126,15 +130,17 @@
   ) }}
 
   {% set clear_button %}
-    {{ combobox(
-      id="combobox-clear-reviewer",
-      aria_label="Reviewer with clear button",
-      name="clear_reviewer",
-      placeholder="Select a reviewer",
-      items=reviewer_items,
-      selected="ada",
-      show_clear=true
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-clear-reviewer",
+        aria_label="Reviewer with clear button",
+        name="clear_reviewer",
+        placeholder="Select a reviewer",
+        items=reviewer_items,
+        selected="ada",
+        show_clear=true
+      ) }}
+    {% endcall %}
   {% endset %}
   {{ render_component_example("combobox", "Combobox",
     "clear-button",
@@ -145,13 +151,15 @@
   ) }}
 
   {% set groups %}
-    {{ combobox(
-      id="combobox-timezone",
-      aria_label="Timezone",
-      name="timezone",
-      placeholder="Select a timezone",
-      items=timezone_items
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-timezone",
+        aria_label="Timezone",
+        name="timezone",
+        placeholder="Select a timezone",
+        items=timezone_items
+      ) }}
+    {% endcall %}
   {% endset %}
   {{ render_component_example("combobox", "Combobox",
     "groups",
@@ -162,13 +170,15 @@
   ) }}
 
   {% set custom_items %}
-    {{ combobox(
-      id="combobox-request-type",
-      aria_label="Request type",
-      name="request_type",
-      placeholder="Search request types...",
-      items=request_type_items
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-request-type",
+        aria_label="Request type",
+        name="request_type",
+        placeholder="Search request types...",
+        items=request_type_items
+      ) }}
+    {% endcall %}
   {% endset %}
   {{ render_component_example("combobox", "Combobox",
     "custom-items",
@@ -179,14 +189,16 @@
   ) }}
 
   {% set invalid %}
-    {{ combobox(
-      id="combobox-invalid-reviewer",
-      aria_label="Invalid reviewer",
-      name="invalid_reviewer",
-      placeholder="Select a reviewer",
-      items=reviewer_items,
-      invalid=true
-    ) }}
+    {% call field(extra_class="w-100", invalid=true) %}
+      {{ combobox(
+        id="combobox-invalid-reviewer",
+        aria_label="Invalid reviewer",
+        name="invalid_reviewer",
+        placeholder="Select a reviewer",
+        items=reviewer_items,
+        invalid=true
+      ) }}
+    {% endcall %}
   {% endset %}
   {{ render_component_example("combobox", "Combobox",
     "invalid",
@@ -197,14 +209,16 @@
   ) }}
 
   {% set disabled %}
-    {{ combobox(
-      id="combobox-disabled-reviewer",
-      aria_label="Disabled reviewer",
-      name="disabled_reviewer",
-      placeholder="Select a reviewer",
-      items=reviewer_items,
-      disabled=true
-    ) }}
+    {% call field(extra_class="w-100") %}
+      {{ combobox(
+        id="combobox-disabled-reviewer",
+        aria_label="Disabled reviewer",
+        name="disabled_reviewer",
+        placeholder="Select a reviewer",
+        items=reviewer_items,
+        disabled=true
+      ) }}
+    {% endcall %}
   {% endset %}
   {{ render_component_example("combobox", "Combobox",
     "disabled",

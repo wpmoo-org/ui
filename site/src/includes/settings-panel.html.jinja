@@ -217,7 +217,9 @@
               "data-moo-catalog-theme-builder-radius",
               [
                 {"value": "default", "label": "Default"},
-                {"value": "compact", "label": "Compact"},
+                {"value": "none", "label": "None"},
+                {"value": "small", "label": "Small"},
+                {"value": "medium", "label": "Medium"},
                 {"value": "large", "label": "Large"}
               ]
             ) }}
@@ -226,7 +228,7 @@
 
         {% call fieldset("Direction", description="Choose the reading direction. RTL flips the layout live.") %}
           {% call field_group() %}
-            <div class="moo-settings-panel__theme-group moo-settings-panel__theme-group--compact" role="radiogroup" aria-label="Direction">
+            <div class="moo-settings-panel__theme-group" role="radiogroup" aria-label="Direction">
               {% for option in [
                 {"value": "ltr", "label": "LTR", "icon": "arrow-left-to-line"},
                 {"value": "rtl", "label": "RTL", "icon": "arrow-right-to-line"}

@@ -18,7 +18,7 @@
 - [ ] Package exports or file list changed
 - [ ] CSS load order or scoped `.moo-ui` behavior changed
 - [ ] Bootstrap peer range or plugin ownership changed
-- [ ] Combobox or Sidebar ESM lifecycle changed
+- [ ] Optional Moo UI ESM lifecycle changed
 
 ## Verification
 

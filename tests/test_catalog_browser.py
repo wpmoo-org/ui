@@ -18,6 +18,12 @@ from tests.helpers.browser_harness import (
 HOME_PAGE_PATH = "/site-dist/index.html"
 
 
+def load_home_page(page, base_url: str):
+    response = page.goto(f"{base_url}{HOME_PAGE_PATH}", wait_until="domcontentloaded")
+    expect(page.get_by_role("button", name="Search documentation")).to_be_visible()
+    return response
+
+
 class CatalogBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -41,10 +47,7 @@ class CatalogBrowserTests(unittest.TestCase):
         try:
             page = context.new_page()
             evidence = BrowserEvidence(page)
-            response = page.goto(
-                f"{self.base_url}{HOME_PAGE_PATH}",
-                wait_until="networkidle",
-            )
+            response = load_home_page(page, self.base_url)
             self.assertIsNotNone(response)
             self.assertTrue(response.ok)
             prepare_page(page, CERTIFICATION_CASES[0])
@@ -97,10 +100,7 @@ class CatalogBrowserTests(unittest.TestCase):
         try:
             page = context.new_page()
             evidence = BrowserEvidence(page)
-            response = page.goto(
-                f"{self.base_url}{HOME_PAGE_PATH}",
-                wait_until="networkidle",
-            )
+            response = load_home_page(page, self.base_url)
             self.assertIsNotNone(response)
             self.assertTrue(response.ok)
             prepare_page(page, CERTIFICATION_CASES[0])

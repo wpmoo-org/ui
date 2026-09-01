@@ -1,6 +1,7 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "components/button.html.jinja" import button %}
 {% from "components/dialog.html.jinja" import dialog, dialog_body, dialog_footer, dialog_header %}
+{% from "components/field.html.jinja" import field, field_group %}
 {% from "components/input.html.jinja" import input %}
 {% from "components/textarea.html.jinja" import textarea %}
 {% from "includes/documentation-reference.html.jinja" import render_reference with context %}
@@ -46,10 +47,14 @@
         {{ dialog_header("dialog-basic", "Edit project details") }}
         {% call dialog_body() %}
           <p class="text-body-secondary mb-3" id="dialog-basic-description">Update the public project label and a short note shown to team members.</p>
-          <div class="vstack gap-3">
-            {{ input(label="Project name", id="dialog-basic-name", value="Spring launch") }}
-            {{ textarea(label="Summary", id="dialog-basic-summary", rows=3, value="Prepare the launch checklist before the Friday review.") }}
-          </div>
+          {% call field_group() %}
+            {% call field() %}
+              {{ input(label="Project name", id="dialog-basic-name", value="Spring launch") }}
+            {% endcall %}
+            {% call field() %}
+              {{ textarea(label="Summary", id="dialog-basic-summary", rows=3, value="Prepare the launch checklist before the Friday review.") }}
+            {% endcall %}
+          {% endcall %}
         {% endcall %}
         {% call dialog_footer() %}
           {{ button("Cancel", variant="outline", dismiss="modal") }}

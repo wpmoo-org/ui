@@ -121,7 +121,7 @@
     {{ codepen_button_if_available(
       "Moo UI " ~ component_label ~ " - " ~ title,
       description | striptags,
-      codepen_html | dedent_html | format_html,
+      codepen_html | format_codepen_html,
       "",
       ["moo-ui", component_slug, "components"],
       js_external="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js",
@@ -167,8 +167,8 @@
     id ~ "-code",
     title,
     description,
-    rendered | format_html,
-    rendered_portal | format_html if rendered_portal else "",
+    rendered,
+    rendered_portal,
     component_slug,
     component_label
   ) %}

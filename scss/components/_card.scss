@@ -1,13 +1,13 @@
 // Card: bridge Bootstrap's consumption variables to shared primitives
 // (UI-wide shadow and radius) and runtime theme tokens, then add the minimal
 // structure that gives Bootstrap's native card the reference silhouette.
-// The reference card is a rounded surface with a hairline ring (not a hard
-// border) and a muted footer strip; its geometry is the source of the
-// values chosen here (verified against the live reference page).
+// The reference card is a rounded surface with a hairline ring and a
+// theme-adaptive muted footer tint; its geometry is the source of the values
+// chosen here (verified against the live reference page).
 .card {
-  --bs-card-bg: var(--moo-surface);
+  --bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix}, var(--bs-body-bg));
   --bs-card-color: var(--moo-foreground);
-  --bs-card-border-color: var(--moo-border);
+  --bs-card-border-color: color-mix(in srgb, var(--bs-body-color) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});
   // The reference uses a 14px corner; Bootstrap's shared radius-xl is the
   // closest token and wins the delta (12px here) per the token-first rule.
   --bs-card-border-radius: var(--bs-border-radius-xl);
@@ -17,6 +17,7 @@
   --bs-card-cap-color: var(--moo-foreground);
   --bs-card-title-color: var(--moo-foreground);
   --bs-card-subtitle-color: var(--moo-muted-foreground);
+  --moo-card-footer-bg: #{$moo-card-footer-bg};
   // The reference card lets consumers retune section rhythm and inset in one
   // place; the default matches the 16px step Bootstrap's own spacer scale
   // already carries. Declared on the selector that consumes it, like
@@ -41,11 +42,16 @@
     padding-block-start: 0;
   }
 
-  // The reference renders the hairline as a foreground ring, not a hard
-  // border. Bootstrap has no ring primitive, so a border in the theme's
-  // translucent border token reads as the same hairline on both surfaces.
+  // Keep the Bootstrap border box visible with a soft tokenized color, then
+  // let the shared shadow token supply the subtle card depth.
   border: var(--bs-card-border-width) solid var(--bs-card-border-color);
   box-shadow: var(--bs-card-box-shadow);
+
+  &[data-bs-theme="dark"],
+  :where([data-bs-theme="dark"]) &:not([data-bs-theme="light"]):not([data-bs-theme="light"] *) {
+    --bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix-dark}, var(--bs-body-bg));
+    --moo-card-footer-bg: #{$moo-card-footer-bg-dark};
+  }
 }
 
 .card--sm {
@@ -86,14 +92,15 @@
   padding-inline: var(--moo-card-spacing);
 }
 
-// The reference footer is a muted strip above a hairline divider.
+// Use a separately mixed footer surface so tuning the main card fill does not
+// collapse the footer contrast.
 .card-footer {
   display: flex;
   align-items: center;
   gap: $spacer * 0.5;
   padding: var(--moo-card-spacing);
   border-top: var(--bs-card-border-width) solid var(--bs-card-border-color);
-  background-color: var(--moo-muted-surface);
+  background-color: var(--moo-card-footer-bg);
 }
 
 .card-img-top {

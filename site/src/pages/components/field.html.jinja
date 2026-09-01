@@ -286,11 +286,13 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   ) }}
 
   {% set radio_field %}
+  {% call field() %}
   {{ radio_group("compute-tier", "Compute tier", [
   {"id": "field-tier-standard", "label": "Standard ($0.02/min)", "value": "standard", "checked": true},
   {"id": "field-tier-performance", "label": "Performance ($0.05/min)", "value": "performance"},
   {"id": "field-tier-turbo", "label": "Turbo ($0.12/min)", "value": "turbo"}
   ]) }}
+  {% endcall %}
   {% endset %}
   {{ render_component_example("field", "Field",
   "radio",
@@ -300,7 +302,9 @@ label-first fields using Bootstrap-native validation and semantic grouping."
   ) }}
 
   {% set switch_field %}
+  {% call field() %}
   {{ switch(id="field-2fa", label="Require two-factor sign-in") }}
+  {% endcall %}
   {% endset %}
   {{ render_component_example("field", "Field",
   "switch",

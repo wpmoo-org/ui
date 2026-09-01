@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import json
-import re
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/select.html.jinja"

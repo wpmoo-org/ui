@@ -7,13 +7,13 @@
 $enable-dark-mode: false;
 $moo-spinner-animation-name: moo-spinner-rotate;
 
-@import "functions";
+@import "bootstrap/scss/functions";
 @import "settings";
-@import "variables";
-@import "variables-dark";
-@import "maps";
-@import "mixins";
-@import "utilities";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
 @import "themes/scoped_core";
 @import "foundations/core_global_primitives";
 

@@ -5,10 +5,15 @@ import importlib
 import re
 import subprocess
 import sys
-import unittest
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, STATIC, CatalogTestCase, is_valid_webp
+from tests.helpers import (
+    ROOT,
+    STATIC,
+    CatalogTestCase,
+    is_valid_webp,
+    scss_rule_body,
+)
 from tests.helpers.browser_harness import (
     BrowserEvidence,
     CERTIFICATION_CASES,
@@ -275,6 +280,58 @@ class DatepickerSourceTests(CatalogTestCase):
         self.assertNotIn('id="datepicker-dark"', source)
         self.assertNotIn('"Dark"', source)
         self.assertNotIn("Scoped theme tokens update", source)
+
+    def test_time_picker_example_uses_native_time_entry_without_picker_trigger(self) -> None:
+        source = COMPONENT_PAGE.read_text(encoding="utf-8")
+        block_match = re.search(r"{% set time_picker %}(.*?){% endset %}", source, re.S)
+        field_match = re.search(
+            r'{% call field\(extra_class="moo-datepicker-time"\) %}(.*?){% endcall %}',
+            source,
+            re.S,
+        )
+        match = re.search(
+            r'<input\b[^>]*\bid="datepicker-time-picker-time"[^>]*>',
+            source,
+        )
+
+        self.assertIsNotNone(block_match)
+        self.assertIsNotNone(field_match)
+        self.assertIsNotNone(match)
+        assert block_match is not None
+        assert field_match is not None
+        assert match is not None
+        time_picker_source = block_match.group(1)
+        time_field_source = field_match.group(1)
+        time_input = match.group(0)
+        self.assertIn('type="time"', time_input)
+        self.assertIn('step="1"', time_input)
+        self.assertIn('autocomplete="off"', time_input)
+        self.assertNotIn("inputmode=", time_input)
+        # Native time entry has no Datepicker picker trigger or calendar hook.
+        self.assertNotIn("data-datepicker", time_input)
+        self.assertNotIn("data-calendar", time_input)
+        self.assertNotIn("data-datepicker-trigger", time_field_source)
+        self.assertNotIn("moo-datepicker__trigger", time_field_source)
+        self.assertNotIn('id="datepicker-time-picker-time-trigger"', time_picker_source)
+        self.assertNotIn('aria-controls="datepicker-time-picker-time', time_picker_source)
+
+    def test_time_inputs_keep_picker_trigger_without_native_indicator(self) -> None:
+        source = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
+
+        self.assertIn('.form-control[type="time"] {', source)
+        self.assertIn(
+            '.form-control[type="time"]::-webkit-calendar-picker-indicator {',
+            source,
+        )
+        time_block = scss_rule_body(source, '.form-control[type="time"]')
+        indicator_block = scss_rule_body(
+            source,
+            '.form-control[type="time"]::-webkit-calendar-picker-indicator',
+        )
+
+        self.assertRegex(time_block, r"(?<!-)\bappearance: none;")
+        self.assertIn("opacity: 0;", indicator_block)
+        self.assertIn("cursor: pointer;", indicator_block)
 
     def test_certification_fixture_uses_real_datepicker_trigger_icons(self) -> None:
         source = CERTIFICATION_FIXTURE.read_text(encoding="utf-8")
@@ -871,6 +928,32 @@ class _DatepickerBrowserMixin:
             self.assertGreaterEqual(metrics["aboveGap"], 4)
             self.assertLessEqual(metrics["aboveGap"], 8)
             self.assertTrue(metrics["withinViewport"])
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_time_input_preserves_native_keyboard_step(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/datepicker/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[0])
+
+            time_input = page.locator("#datepicker-time-picker-time")
+            expect(time_input).to_have_attribute("type", "time")
+            expect(time_input).to_have_attribute("step", "1")
+
+            initial = time_input.input_value()
+            time_input.focus()
+            time_input.press("ArrowUp")
+
+            self.assertNotEqual(time_input.input_value(), initial)
             evidence.assert_clean()
         finally:
             context.close()
