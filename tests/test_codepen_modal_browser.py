@@ -265,19 +265,24 @@ class CodePenModalBrowserTests(unittest.TestCase):
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         context.route(bootstrap_cdn, lambda route: route.abort())
         try:
-            page, _evidence = setup_codepen_page(
-                context,
-                payload,
-                base_url=self.base_url,
-                bootstrap_src=bootstrap_cdn,
-                include_payload_js=False,
-            )
+            with context.expect_event(
+                "requestfailed",
+                predicate=lambda request: request.url == bootstrap_cdn,
+            ):
+                page, _evidence = setup_codepen_page(
+                    context,
+                    payload,
+                    base_url=self.base_url,
+                    bootstrap_src=bootstrap_cdn,
+                    include_payload_js=False,
+                )
 
             expect(page.locator('script[data-foreign-bootstrap="true"]')).to_have_count(1)
             # The Bootstrap bundle fails asynchronously; the toast queue flag is
             # cleared only after the failure handler runs, so wait for that.
             expect(page.locator("body")).not_to_have_attribute(
-                "data-moo-codepen-toasts-queued"
+                "data-moo-codepen-toasts-queued",
+                timeout=9000,
             )
         finally:
             context.close()

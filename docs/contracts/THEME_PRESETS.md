@@ -47,7 +47,9 @@ and normalizes that value to `"small"`. The normalized sidecar preserves
 `"small"`; `"compact"` is not emitted and stays outside the public radius enum.
 Adapters must apply this `"compact"` -> `"small"` migration before the generic
 unknown-enum fallback, so a legacy `"compact"` resolves to `"small"` and never
-falls through to the default radius. This normalization lives in
+falls through to the default radius. This adapter migration takes precedence
+over unknown-enum handling; there is no known drift between the documented
+guidance and committed behavior. This normalization lives in
 `normalizeThemeBuilderState()` in `site/src/js/catalog/theme-builder-schema.js`
 and is locked by the focused normalization and export tests in
 `tests/test_catalog_js.py`.

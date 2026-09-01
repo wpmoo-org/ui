@@ -283,13 +283,25 @@ class DatepickerSourceTests(CatalogTestCase):
 
     def test_time_picker_example_uses_native_time_entry_without_picker_trigger(self) -> None:
         source = COMPONENT_PAGE.read_text(encoding="utf-8")
+        block_match = re.search(r"{% set time_picker %}(.*?){% endset %}", source, re.S)
+        field_match = re.search(
+            r'{% call field\(extra_class="moo-datepicker-time"\) %}(.*?){% endcall %}',
+            source,
+            re.S,
+        )
         match = re.search(
             r'<input\b[^>]*\bid="datepicker-time-picker-time"[^>]*>',
             source,
         )
 
+        self.assertIsNotNone(block_match)
+        self.assertIsNotNone(field_match)
         self.assertIsNotNone(match)
+        assert block_match is not None
+        assert field_match is not None
         assert match is not None
+        time_picker_source = block_match.group(1)
+        time_field_source = field_match.group(1)
         time_input = match.group(0)
         self.assertIn('type="time"', time_input)
         self.assertIn('step="1"', time_input)
@@ -298,6 +310,10 @@ class DatepickerSourceTests(CatalogTestCase):
         # Native time entry has no Datepicker picker trigger or calendar hook.
         self.assertNotIn("data-datepicker", time_input)
         self.assertNotIn("data-calendar", time_input)
+        self.assertNotIn("data-datepicker-trigger", time_field_source)
+        self.assertNotIn("moo-datepicker__trigger", time_field_source)
+        self.assertNotIn('id="datepicker-time-picker-time-trigger"', time_picker_source)
+        self.assertNotIn('aria-controls="datepicker-time-picker-time', time_picker_source)
 
     def test_time_inputs_keep_picker_trigger_without_native_indicator(self) -> None:
         source = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
