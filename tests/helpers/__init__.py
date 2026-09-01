@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from html.parser import HTMLParser
 from pathlib import Path
 
 
@@ -62,27 +63,60 @@ def read_scss_aggregate(
     *,
     root_imports: set[str] | None = None,
     source_root: Path | None = None,
+    include_roots: tuple[Path, ...] | None = None,
 ) -> str:
     source = entrypoint.read_text(encoding="utf-8")
     if source_root is None:
         source_root = ROOT / "scss"
+    if include_roots is None:
+        include_roots = (source_root,)
     if root_imports is None:
         root_imports = set()
+
+    def scss_candidates(base: Path, relative: Path) -> list[Path]:
+        stem = relative.stem if relative.suffix == ".scss" else relative.name
+        filename = (
+            relative
+            if relative.suffix == ".scss"
+            else relative.with_suffix(".scss")
+        )
+        return [
+            base / relative.parent / f"_{stem}.scss",
+            base / filename,
+        ]
+
+    def resolve_from_roots(relative: Path, roots: tuple[Path, ...]) -> Path | None:
+        seen_candidates: set[Path] = set()
+        for root in roots:
+            for candidate in scss_candidates(root, relative):
+                if candidate in seen_candidates:
+                    continue
+                seen_candidates.add(candidate)
+                if candidate.is_file():
+                    return candidate
+        return None
 
     def imported_partial(current: Path, target: str) -> Path | None:
         relative = Path(target)
 
         if target in root_imports:
-            return source_root / f"_{target}.scss"
+            return resolve_from_roots(relative, (source_root,) + include_roots) or (
+                source_root / f"_{target}.scss"
+            )
 
         if target.startswith(f"{prefix}/"):
-            return source_root / relative.parent / f"_{relative.name}.scss"
+            return resolve_from_roots(relative, (source_root,)) or (
+                source_root / relative.parent / f"_{relative.name}.scss"
+            )
 
-        candidate = current.parent / relative.parent / f"_{relative.name}.scss"
-        if candidate.is_file():
+        if target.startswith(("@", "bootstrap/")):
+            return None
+
+        candidate = resolve_from_roots(relative, (current.parent,) + include_roots)
+        if candidate is not None:
             return candidate
 
-        return None
+        return scss_candidates(current.parent, relative)[0]
 
     paths = [entrypoint]
     queue: list[Path] = []
@@ -126,7 +160,59 @@ def read_catalog_styles() -> str:
         ROOT / "site/scss/catalog.scss",
         "catalog",
         source_root=ROOT / "site/scss",
+        include_roots=(ROOT / "scss", ROOT / "site/scss"),
     )
+
+
+def scss_rule_body(source: str, selector: str) -> str:
+    marker = f"{selector} {{"
+    start = source.find(marker)
+    if start < 0:
+        raise AssertionError(f"Missing SCSS rule: {selector}")
+
+    body_start = start + len(marker)
+    depth = 1
+    index = body_start
+    quote: str | None = None
+    while index < len(source):
+        character = source[index]
+        next_character = source[index + 1] if index + 1 < len(source) else ""
+
+        if quote:
+            if character == "\\":
+                index += 2
+                continue
+            if character == quote:
+                quote = None
+            index += 1
+            continue
+
+        if character in {'"', "'"}:
+            quote = character
+            index += 1
+            continue
+
+        if character == "/" and next_character == "*":
+            comment_end = source.find("*/", index + 2)
+            if comment_end < 0:
+                raise AssertionError(f"Unclosed SCSS comment while reading {selector}")
+            index = comment_end + 2
+            continue
+
+        if character == "/" and next_character == "/":
+            line_end = source.find("\n", index + 2)
+            index = len(source) if line_end < 0 else line_end + 1
+            continue
+
+        if character == "{":
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            if depth == 0:
+                return source[body_start:index]
+        index += 1
+
+    raise AssertionError(f"Unbalanced SCSS rule: {selector}")
 
 
 def pretty_output_path(relative_path: str) -> Path:
@@ -134,6 +220,63 @@ def pretty_output_path(relative_path: str) -> Path:
     if path.name == "index.html" or path.suffix != ".html":
         return path
     return path.with_suffix("") / "index.html"
+
+
+class CodePenPayloadParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self._current: list[str] = []
+        self._in_payload = False
+        self.payloads: list[dict[str, object]] = []
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        attributes = dict(attrs)
+        if tag == "input" and attributes.get("name") == "data":
+            value = (attributes.get("value") or "").strip()
+            if value:
+                self.payloads.append(json.loads(value))
+            return
+
+        if tag == "textarea" and attributes.get("name") == "data":
+            self._current = []
+            self._in_payload = True
+
+    def handle_data(self, data: str) -> None:
+        if self._in_payload:
+            self._current.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "textarea" and self._in_payload:
+            payload = "".join(self._current).strip()
+            if payload:
+                self.payloads.append(json.loads(payload))
+            self._current = []
+            self._in_payload = False
+
+
+def codepen_payloads_from_html(source: str) -> list[dict[str, object]]:
+    parser = CodePenPayloadParser()
+    parser.feed(source)
+    return parser.payloads
+
+
+def codepen_payloads_from_output(relative_path: str) -> list[dict[str, object]]:
+    source = (SITE_DIST / pretty_output_path(relative_path)).read_text(
+        encoding="utf-8"
+    )
+    return codepen_payloads_from_html(source)
+
+
+def codepen_payload_from_output(
+    relative_path: str,
+    title: str,
+) -> dict[str, object]:
+    for payload in codepen_payloads_from_output(relative_path):
+        if payload.get("title") == title:
+            return payload
+    raise AssertionError(f"CodePen payload not found: {title}")
 
 
 def lucide_body(name: str) -> str:

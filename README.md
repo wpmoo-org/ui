@@ -24,18 +24,25 @@
 
 # Moo UI
 
-Moo UI preserves Bootstrap markup, variables, and JavaScript plugins wherever
-Bootstrap already provides the contract. For patterns Bootstrap does not
-provide, Moo UI adds small documented extensions, including optional ESM for
-Combobox, Context Menu, DataTable, Sidebar, Chart, Datepicker, and Slider.
+Moo UI gives Bootstrap 5.3 applications a calmer, shadcn-inspired product
+surface without asking teams to abandon the markup, variables, and plugin
+contracts they already use.
 
-- **CSS-first.** Most components need only the stylesheet and ordinary HTML.
-- **Bootstrap owns native behavior.** Keep using Bootstrap's bundle for its
-  Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other plugins.
-- **Moo UI extends verified gaps.** Optional Moo UI ESM is explicit and
-  side-effect-free; importing it never scans the document automatically.
-- **Adopt all at once or gradually.** Use the full Bootstrap build or scope the
-  Moo UI component layer to a `.moo-ui` boundary.
+It is built for server-rendered products, admin screens, dashboards, and SaaS
+interfaces where Bootstrap remains the public contract but the default visual
+language needs to feel more current.
+
+- **Bootstrap-native.** Keep familiar classes, form markup, layout utilities,
+  and Bootstrap JavaScript where Bootstrap already owns the behavior.
+- **CSS-first.** Most components need only one stylesheet and ordinary HTML.
+- **Gradual when needed.** Use the full build or scope Moo UI inside a
+  `.moo-ui` boundary while an existing Bootstrap app migrates piece by piece.
+- **Explicit runtime.** Optional Moo UI behavior loads through ESM entrypoints
+  only when a component needs behavior Bootstrap does not provide.
+
+This branch prepares `@wpmoo/ui@1.0.0-rc.4` for release. Until that
+npm tag is published, use npm's current published package or the floating
+quick demo below.
 
 ## Try It in 30 Seconds
 
@@ -50,25 +57,6 @@ The quick demo intentionally follows the floating npm tag:
 
 `moo-ui.css` is a complete Bootstrap CSS build with Moo UI defaults. Use it
 instead of another Bootstrap stylesheet, not in addition to one.
-
-## Runtime Ownership
-
-| Surface | Runtime owner | What to load |
-| --- | --- | --- |
-| Static HTML and CSS components | Browser + Bootstrap markup | `moo-ui.css`, or Bootstrap CSS followed by scoped `moo.css` |
-| Dropdown, Modal, Offcanvas, Tooltip, Popover, Toast, and other Bootstrap plugins | Bootstrap | Bootstrap's JavaScript bundle and documented initialization |
-| All optional Moo UI modules together | Optional Moo UI ESM aggregate | `@wpmoo/ui/moo-ui.js`, then explicit initialization |
-| Combobox | Optional Moo UI ESM | `@wpmoo/ui/combobox.js`, then explicit initialization |
-| Context Menu pointer and keyboard invocation | Optional Moo UI ESM, composed with Bootstrap Dropdown | `@wpmoo/ui/context-menu.js`, then explicit initialization |
-| DataTable sorting, filtering, selection, pagination, and responsive card sync | Optional Moo UI ESM, composed with Bootstrap Table and controls | `@wpmoo/ui/datatable.js`, then explicit initialization |
-| Sidebar state and responsive coordination | Optional Moo UI ESM, composed with Bootstrap plugins | `@wpmoo/ui/sidebar.js`, then explicit initialization |
-| Chart rendering with light/dark theme toggle | Optional Moo UI ESM, self-contained bundle (Chart.js 4.5.1 bundled) | `@wpmoo/ui/chart.js`, then explicit initialization |
-| Datepicker with shadcn-like trigger/popover/calendar | Optional Moo UI ESM, self-contained (no third-party runtime) | `@wpmoo/ui/datepicker.js`, then explicit initialization |
-| Slider with native range input semantics | Optional Moo UI ESM, no third-party runtime | `@wpmoo/ui/slider.js`, then explicit initialization |
-
-Moo UI does not replace Bootstrap plugins. The aggregate module is optional;
-it is a single side-effect-free import for projects that prefer one Moo UI ESM
-entrypoint.
 
 ## Install
 
@@ -102,84 +90,23 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 </div>
 ```
 
-### Optional Moo UI ESM
-
-Initialize only the documented behavior gaps you use:
+### Optional runtime
 
 ```js
-import Combobox from "@wpmoo/ui/combobox.js";
-import ContextMenu from "@wpmoo/ui/context-menu.js";
-import DataTable from "@wpmoo/ui/datatable.js";
-import Sidebar from "@wpmoo/ui/sidebar.js";
-import Chart from "@wpmoo/ui/chart.js";
-import Datepicker from "@wpmoo/ui/datepicker.js";
-import Slider from "@wpmoo/ui/slider.js";
+import MooUI from "@wpmoo/ui/moo-ui.js";
 
-Combobox.getOrCreateInstance(document.querySelector(".combobox"));
-ContextMenu.getOrCreateInstance(document.querySelector(".context-menu"));
-DataTable.getOrCreateInstance(document.querySelector(".datatable"));
-Sidebar.getOrCreateInstance(document.querySelector('[data-slot="sidebar-wrapper"]'));
-Chart.getOrCreateInstance(document.querySelector(".chart"));
-Datepicker.getOrCreateInstance(document.querySelector("[data-datepicker]"));
-Slider.getOrCreateInstance(document.querySelector("[data-slider]"));
+const combobox = document.querySelector(".combobox");
+if (combobox) {
+  MooUI.Combobox.getOrCreateInstance(combobox);
+}
 ```
 
-When a host prefers one Moo UI module request, use the aggregate export:
+The runtime bundle is optional and side-effect-free. Import the aggregate
+`@wpmoo/ui/moo-ui.js` entrypoint, or import only the component module you use.
+See the [Installation guide](https://ui.wpmoo.org/installation/) for npm, CDN,
+Sass, Bootstrap JavaScript, and ESM recipes.
 
-```js
-import MooUI, { Combobox, DataTable } from "@wpmoo/ui/moo-ui.js";
-
-Combobox.getOrCreateInstance(document.querySelector(".combobox"));
-MooUI.DataTable.getOrCreateInstance(document.querySelector(".datatable"));
-```
-
-See the [Installation guide](https://ui.wpmoo.org/installation/) for CDN
-recipes, load order, and troubleshooting.
-
-## Choose an Adoption Path
-
-| Situation | Recommended path |
-| --- | --- |
-| New page or whole application | Replace Bootstrap CSS with `moo-ui.css`. |
-| Existing Bootstrap application | Load `moo.css` after Bootstrap CSS and add `.moo-ui` around migrated regions. |
-| Static page with no interactive plugins | Load CSS only. |
-| Page using Bootstrap plugins | Keep Bootstrap's bundle and its documented initialization. |
-| Page using Combobox, Context Menu, DataTable, or Sidebar | Add only the corresponding optional Moo UI ESM module. |
-| Page using Chart, Datepicker, or Slider | Add only the corresponding optional Moo UI ESM module. Chart bundles its third-party runtime; Datepicker and Slider are self-contained with no third-party dependency. |
-| Page using several Moo UI ESM modules | Use `@wpmoo/ui/moo-ui.js` as the optional aggregate import. |
-
-## Public Package Surface
-
-`@wpmoo/ui` exports exactly these public entrypoints:
-
-| Export | Minified | Description |
-| --- | --- | --- |
-| `@wpmoo/ui/moo-ui.css` | `@wpmoo/ui/moo-ui.min.css` | Full CSS build |
-| `@wpmoo/ui/moo.css` | `@wpmoo/ui/moo.min.css` | Scoped component layer for `.moo-ui` |
-| `@wpmoo/ui/moo-ui.js` | `@wpmoo/ui/moo-ui.min.js` | Optional aggregate ESM lifecycle bundle for all Moo UI modules |
-| `@wpmoo/ui/combobox.js` | Not published | Optional Combobox ESM lifecycle |
-| `@wpmoo/ui/sidebar.js` | Not published | Optional Sidebar ESM lifecycle |
-| `@wpmoo/ui/context-menu.js` | Not published | Optional Context Menu ESM lifecycle |
-| `@wpmoo/ui/datatable.js` | Not published | Optional DataTable ESM lifecycle |
-| `@wpmoo/ui/slider.js` | Not published | Optional Slider ESM lifecycle (native range input, no third-party runtime) |
-| `@wpmoo/ui/chart.js` | `@wpmoo/ui/chart.min.js` | Optional Chart ESM lifecycle (Chart.js 4.5.1 bundled) |
-| `@wpmoo/ui/datepicker.js` | `@wpmoo/ui/datepicker.min.js` | Optional Datepicker ESM lifecycle (self-contained, no third-party runtime) |
-| `@wpmoo/ui/scss/config` | Not published | Public Sass variable allow-list (LibSass `@import`) |
-| `@wpmoo/ui/scss/moo-ui` | Not published | Full Bootstrap-compatible Sass source entrypoint |
-| `@wpmoo/ui/scss/moo-core` | Not published | Scoped `.moo-ui` Sass source entrypoint |
-| `@wpmoo/ui/scss/components` | Not published | Component layer Sass source entrypoint |
-| `@wpmoo/ui/scss/settings` | Not published | Moo UI settings aggregate for Bootstrap variable setup |
-| `@wpmoo/ui/certification.json` | Not published | Versioned support/evidence manifest |
-| `@wpmoo/ui/package.json` | Not published | Package metadata |
-
-The tarball also contains `README.md`, `LICENSE`, `ASSET_LICENSE.md`, and
-THIRD_PARTY_NOTICES.md. It does not publish catalog templates, preview
-artwork, or catalog JavaScript. Sass source files are included so the
-documented Sass entrypoints can compile in consumer builds that also resolve
-Bootstrap's peer Sass files. Undocumented internal partial paths, undocumented
-Sass variables, and Jinja macros are repository build tools, not npm APIs.
-
-## Why Bootstrap Teams Try It
+## Why Teams Try It
 
 - Keep server-rendered HTML, Bootstrap classes, and familiar plugin behavior.
 - Apply a restrained product rhythm to forms, overlays, navigation, data
@@ -187,15 +114,15 @@ Sass variables, and Jinja macros are repository build tools, not npm APIs.
 - Inspect static rendered examples and copy the resulting HTML contracts.
 - Start with one scoped region or replace the full stylesheet after review.
 
-Representative components include Button, Field, Table, DataTable, Dialog,
-Toast, Sheet, Combobox, Context Menu, and Sidebar. Browse the [component catalog](https://ui.wpmoo.org/components/)
-and composed [blocks](https://ui.wpmoo.org/blocks/).
+Browse the [component catalog](https://ui.wpmoo.org/components/), composed
+[blocks](https://ui.wpmoo.org/blocks/), and full
+[examples](https://ui.wpmoo.org/examples/).
 
 ## Designed, Not Just Restyled
 
-The README uses original WPMoo preview artwork stored under
-`site/static/images/`; those files are source assets for the public catalog and
-are not part of the npm package.
+Moo UI is tuned for product interfaces: compact controls, quiet cards,
+predictable overlays, readable forms, and data-heavy screens that still feel
+calm.
 
 <p align="center">
   <a href="https://ui.wpmoo.org/components/button/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://ui.wpmoo.org/assets/images/readme/button-dark.svg"><img src="https://ui.wpmoo.org/assets/images/readme/button-light.svg" alt="Button preview" width="31%"></picture></a>
@@ -205,41 +132,27 @@ are not part of the npm package.
 
 ## Status And Support
 
-Moo UI is at the `1.0.0-rc.4` release candidate. Current package: `@wpmoo/ui@1.0.0-rc.4`. The
-package's certification manifest currently has `preview` status; catalog
-availability is WPMoo-maintained preview evidence, not independent or
-accredited certification. Read [Support & Evidence](https://ui.wpmoo.org/support/)
-for the Bootstrap range, browser policy, maturity definitions, limitations, and
-release evidence. Complete release notes are on
+Moo UI is preparing the `1.0.0-rc.4` release candidate. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
+Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
 
 ## Contributing
 
 Small documentation corrections, reduced reproductions, accessibility checks,
-and bounded component improvements are welcome. Start with
-[`CONTRIBUTING.md`](CONTRIBUTING.md), choose an
-[issue type](https://github.com/wpmoo-org/ui/issues/new/choose), and review the
-[Code of Conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md).
+and bounded component improvements are welcome. The
+[Contributing guide](https://ui.wpmoo.org/contributing/) covers local
+development, project boundaries, workflow, and issue types.
 
 ## Repository Layout And Development
 
-Moo UI Core is published from the repository root. Core source and package
-outputs live outside `site/`; `dist/` is the package build. The `site/` tree
-owns ui.wpmoo.org documentation, catalog chrome, public metadata, and protected
-preview artwork; it builds to `site-dist/`.
-
-```bash
-.venv/bin/python build.py
-.venv/bin/python dev.py
-.venv/bin/python -m unittest discover -s tests -v
-```
-
-Browse the local catalog at `http://localhost:4173/` while `dev.py` runs.
+Development setup and repository boundary notes live in the
+[Contributing guide](https://ui.wpmoo.org/contributing/). Consumer install
+paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 
 ## Licensing
 
-Moo UI source code is MIT licensed. WPMoo-generated visual assets under
-`site/static/images/` remain separately protected as described in
-`ASSET_LICENSE.md`. Vendored dependencies retain their original licenses; see
-`LICENSE`, `ASSET_LICENSE.md`, and the
+Moo UI source code is MIT licensed. License details live in
+[LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
+Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
+live in the
 [version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.4/THIRD_PARTY_NOTICES.md).

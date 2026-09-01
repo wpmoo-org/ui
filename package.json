@@ -67,8 +67,7 @@
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md"
+    "ASSET_LICENSE.md"
   ],
   "peerDependencies": {
     "bootstrap": ">=5.3.0 <5.4"

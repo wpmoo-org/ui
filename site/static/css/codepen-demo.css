@@ -103,6 +103,12 @@ body.moo-codepen-component-demo > :where(.field, .field-group).w-100 {
 }
 
 .moo-codepen-actions__theme-toggle [data-moo-codepen-theme-icon] {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.moo-codepen-actions__theme-toggle [data-moo-codepen-theme-icon]:not([hidden]) {
   display: inline-flex;
 }
 

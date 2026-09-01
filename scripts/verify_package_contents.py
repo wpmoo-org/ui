@@ -12,7 +12,6 @@ from typing import Any
 
 APPROVED_TARBALL_FILES = {
     "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md",
     "LICENSE",
     "README.md",
     "certification.json",

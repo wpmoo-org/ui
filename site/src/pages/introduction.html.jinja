@@ -54,8 +54,9 @@
         </p>
         <p>
           It is not a React, Tailwind, Radix, or design-token runtime. The npm
-          package ships CSS, public metadata, and the documented optional ESM
-          modules listed in the package manifest.
+          package ships CSS, public metadata, documented Sass source entrypoints,
+          and the documented optional ESM modules listed in the package
+          manifest.
         </p>
       </section>
 
@@ -133,7 +134,7 @@
         <ul>
           <li>Moo UI does not replace Bootstrap's JavaScript plugins.</li>
           <li>Moo UI does not promise that every pattern is pure Bootstrap markup; documented gaps are named on their component pages.</li>
-          <li>Moo UI exposes documented Sass source entrypoints, while undocumented internal partial paths and variables remain outside the public API.</li>
+          <li>Moo UI does not treat internal Sass partial paths or variables as public API; only the documented source entrypoints are supported.</li>
           <li>Moo UI does not require a frontend framework runtime.</li>
         </ul>
       </section>

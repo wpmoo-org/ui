@@ -1,7 +1,7 @@
 {
   "freezeVersion": "1.0.0-rc.4",
   "frozenAt": "2026-08-17",
-  "description": "API freeze audit for the 1.0.0-rc.4 public API feature freeze, reconciled after the RC.3 publish. Keeps Chart.js, Datepicker, Slider, the side-effect-free aggregate Moo UI ESM bundle (moo-ui.js, moo-ui.min.js), and documented Sass source entrypoints (scss/config, scss/moo-ui, scss/moo-core, scss/components, scss/settings) as the current package contract. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
+  "description": "API freeze audit for the 1.0.0-rc.4 public API feature freeze, reconciled after the RC.3 publish. Keeps Chart.js, Datepicker, Slider, the side-effect-free aggregate Moo UI ESM bundle (moo-ui.js, moo-ui.min.js), and documented Sass source entrypoints (scss/config, scss/moo-ui, scss/moo-core, scss/components, scss/settings) as the current package contract, approved by docs/contracts/PACKAGE_SURFACE_DECISIONS.md. Every entry is traceable to a specific source file and key. Changes to any enumerated surface require explicit reconciliation with this document.",
 
   "packageExports": [
     "./moo-ui.css",
@@ -49,8 +49,7 @@
     "certification.json",
     "README.md",
     "LICENSE",
-    "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md"
+    "ASSET_LICENSE.md"
   ],
 
   "sassFacadeAllowList": [
@@ -103,11 +102,17 @@
     {
       "module": "moo-ui.js",
       "export": "./moo-ui.js",
-      "lifecycle": ["side-effect-free import", "named lifecycle class exports"],
+      "lifecycle": [
+        "side-effect-free import",
+        "default namespace export",
+        "named lifecycle class exports"
+      ],
       "source": "src/js/moo-ui.js",
       "bundled": true,
       "buildTool": "esbuild",
+      "runtime": "chart.js@4.5.1",
       "note": "Convenience aggregate for all optional Moo UI ESM modules; importing it never scans the document automatically",
+      "defaultExport": "MooUI",
       "namedExports": [
         "Chart",
         "Combobox",
@@ -123,25 +128,25 @@
     {
       "module": "combobox.js",
       "export": "./combobox.js",
-      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
       "source": "src/js/components/combobox.js"
     },
     {
       "module": "sidebar.js",
       "export": "./sidebar.js",
-      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
       "source": "src/js/components/sidebar.js"
     },
     {
       "module": "context-menu.js",
       "export": "./context-menu.js",
-      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
       "source": "src/js/components/context-menu.js"
     },
     {
       "module": "datatable.js",
       "export": "./datatable.js",
-      "lifecycle": ["getOrCreateInstance", "dispose"],
+      "lifecycle": ["constructor", "getInstance", "getOrCreateInstance", "dispose"],
       "source": "src/js/components/datatable.js"
     },
     {
@@ -249,6 +254,23 @@
       "export": "./moo.min.css",
       "purpose": "Scoped minified component layer",
       "scope": "scoped"
+    }
+  ],
+
+  "metadataEntrypoints": [
+    {
+      "export": "./certification.json",
+      "purpose": "Versioned support/evidence manifest",
+      "scope": "metadata",
+      "source": "certification.json",
+      "key": "publicEntrypoints.metadata[0]"
+    },
+    {
+      "export": "./package.json",
+      "purpose": "Package metadata",
+      "scope": "metadata",
+      "source": "package.json",
+      "key": "exports[\"./package.json\"]"
     }
   ],
 

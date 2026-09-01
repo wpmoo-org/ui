@@ -5,8 +5,15 @@
   var DEFAULT_PACKAGE_VERSION = "latest";
   var DEFAULT_RUNTIME_BASE_URL = "https://unpkg.com/@wpmoo/ui@";
   var BOOTSTRAP_BUNDLE_SRC = "https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js";
+  var BOOTSTRAP_LOAD_TIMEOUT = 7000;
   var THEME_STORAGE_KEY = "moo:theme";
   var componentRuntimePromises = {};
+  var PACKAGE_STYLESHEET_SELECTORS = [
+    'link[href*="@wpmoo/ui@"][href*="/dist/assets/css/moo-ui.css"]',
+    'link[href*="@wpmoo/ui@"][href*="/dist/assets/css/moo-ui.min.css"]',
+    'link[href*="@wpmoo/ui@"][href*="/dist/assets/css/moo.css"]',
+    'link[href*="@wpmoo/ui@"][href*="/dist/assets/css/moo.min.css"]'
+  ].join(", ");
   var COMPONENT_LABELS = {
     "accordion": "Accordion",
     "alert": "Alert",
@@ -71,10 +78,14 @@
     { slug: "dialog", selector: ".modal" },
     { slug: "dropdown-menu", selector: ".dropdown-menu" },
     { slug: "form", selector: ".field-form" },
-    { slug: "field", selector: ".field, .field-group, .field-fieldset" },
     { slug: "input-group", selector: ".input-group" },
     { slug: "textarea", selector: "textarea.form-control" },
     { slug: "input", selector: ".form-control" },
+    { slug: "switch", selector: ".form-switch" },
+    { slug: "radio-group", selector: '.form-check-input[type="radio"]' },
+    { slug: "checkbox", selector: '.form-check-input[type="checkbox"]' },
+    { slug: "select", selector: "select.form-select" },
+    { slug: "field", selector: ".field, .field-group, .field-fieldset" },
     { slug: "kbd", selector: "kbd" },
     { slug: "menubar", selector: ".menubar" },
     { slug: "tabs", selector: '.nav-tabs, [data-bs-toggle="tab"]' },
@@ -82,11 +93,7 @@
     { slug: "pagination", selector: ".pagination" },
     { slug: "popover", selector: '[data-bs-toggle="popover"]' },
     { slug: "progress", selector: ".progress" },
-    { slug: "switch", selector: ".form-switch" },
     { slug: "toggle-group", selector: ".toggle-group" },
-    { slug: "radio-group", selector: '.form-check-input[type="radio"]' },
-    { slug: "checkbox", selector: '.form-check-input[type="checkbox"]' },
-    { slug: "select", selector: "select.form-select" },
     { slug: "separator", selector: ".separator, hr" },
     { slug: "sheet", selector: ".offcanvas" },
     { slug: "sidebar", selector: '[data-slot="sidebar-wrapper"]' },
@@ -132,9 +139,7 @@
       return version;
     }
 
-    stylesheet = document.querySelector(
-      'link[href*="@wpmoo/ui@"][href*="/dist/assets/css/moo-ui.css"]'
-    );
+    stylesheet = document.querySelector(PACKAGE_STYLESHEET_SELECTORS);
     match = stylesheet && stylesheet.href.match(/@wpmoo\/ui@([^/]+)\//);
     return match && match[1] ? match[1] : DEFAULT_PACKAGE_VERSION;
   }
@@ -334,7 +339,7 @@
       '<span data-moo-codepen-theme-icon="light">' + iconSvg("sun") + "</span>",
       '<span data-moo-codepen-theme-icon="dark">' + iconSvg("moon") + "</span>",
       "</button>",
-      '<a class="btn btn-primary moo-codepen-actions__github-link" role="button" href="https://github.com/wpmoo-org/ui" target="_blank" rel="noopener noreferrer" aria-label="Open Moo UI on GitHub">',
+      '<a class="btn btn-primary moo-codepen-actions__github-link" href="https://github.com/wpmoo-org/ui" target="_blank" rel="noopener noreferrer" aria-label="wpmoo-org/ui on GitHub">',
       iconSvg("github"),
       '<span class="moo-codepen-actions__github-label">wpmoo-org/ui</span>',
       "</a>"
@@ -451,8 +456,57 @@
     });
   }
 
-  function withBootstrap(names, callback) {
+  function withBootstrap(names, callback, failureCallback) {
     var script;
+    var createdScript = false;
+    var failureNotified = false;
+    var settled = false;
+    var timeout;
+
+    function settle(handler) {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (timeout) {
+        window.clearTimeout(timeout);
+      }
+      handler();
+    }
+
+    function notifyFailure() {
+      if (!failureNotified && failureCallback) {
+        failureNotified = true;
+        failureCallback();
+      }
+    }
+
+    function fail() {
+      notifyFailure();
+      if (script && createdScript) {
+        delete script.dataset.mooCodepenBootstrapLoading;
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      }
+      console.error("Moo UI CodePen demo could not load the Bootstrap bundle.");
+    }
+
+    function handleFailure() {
+      settle(fail);
+    }
+
+    function handleTimeout() {
+      if (settled) {
+        return;
+      }
+      timeout = 0;
+      if (hasBootstrapPlugins(names)) {
+        settle(callback);
+        return;
+      }
+      notifyFailure();
+    }
 
     if (hasBootstrapPlugins(names)) {
       callback();
@@ -463,14 +517,37 @@
     if (!script) {
       script = document.createElement("script");
       script.src = BOOTSTRAP_BUNDLE_SRC;
-      document.head.appendChild(script);
+      script.dataset.mooCodepenBootstrapLoading = "true";
+      createdScript = true;
+    } else if (script.dataset.mooCodepenBootstrapLoaded === "true") {
+      if (hasBootstrapPlugins(names)) {
+        callback();
+      } else {
+        handleFailure();
+      }
+      return;
+    } else if (script.dataset.mooCodepenBootstrapLoading !== "true") {
+      script.dataset.mooCodepenBootstrapLoading = "true";
     }
 
     script.addEventListener("load", function () {
-      if (hasBootstrapPlugins(names)) {
-        callback();
-      }
+      settle(function () {
+        delete script.dataset.mooCodepenBootstrapLoading;
+        script.dataset.mooCodepenBootstrapLoaded = "true";
+        if (hasBootstrapPlugins(names)) {
+          callback();
+        } else {
+          fail();
+        }
+      });
     }, { once: true });
+
+    script.addEventListener("error", handleFailure, { once: true });
+    timeout = window.setTimeout(handleTimeout, BOOTSTRAP_LOAD_TIMEOUT);
+
+    if (createdScript) {
+      document.head.appendChild(script);
+    }
   }
 
   function initializePopovers(root) {
@@ -496,6 +573,10 @@
 
     withBootstrap(["Toast"], function () {
       wireToasts(root);
+    }, function () {
+      if (root.body) {
+        delete root.body.dataset.mooCodepenToastsQueued;
+      }
     });
   }
 
@@ -511,6 +592,7 @@
 
     var toastSequence = 0;
     var toastStackVisibleLimit = 3;
+    var hoveringToastStackContainers = new Set();
     var sharedToastStacks = new Map();
 
     function isStackContainer(element) {
@@ -627,13 +709,18 @@
         var scale = Math.max(minScale, 1 - index * scaleStep);
         var collapsedOffset = -(index * peek + (1 - scale) * stackHeight);
         var limited = index >= toastStackVisibleLimit;
+        var holdsFocus = root.activeElement instanceof window.HTMLElement &&
+          toast.contains(root.activeElement);
 
         toast.dataset.toastStackIndex = String(index);
         if (limited) {
           toast.setAttribute("data-toast-stack-limited", "");
-          toast.setAttribute("inert", "");
         } else {
           toast.removeAttribute("data-toast-stack-limited");
+        }
+        if (limited && !holdsFocus) {
+          toast.setAttribute("inert", "");
+        } else {
           toast.removeAttribute("inert");
         }
 
@@ -674,10 +761,12 @@
       }
 
       container.setAttribute("data-toast-stack-hovering", "");
+      hoveringToastStackContainers.add(container);
       updateToastStack(container);
     }
 
     function releaseToastStackHovering(container) {
+      hoveringToastStackContainers.delete(container);
       if (!isStackContainer(container)) {
         return;
       }
@@ -703,6 +792,13 @@
       }
     }
 
+    function triggerForGeneratedToast(toast) {
+      var targetSelector = toast.dataset.toastSourceTarget || "";
+      return Array.from(root.querySelectorAll("[data-toast-target]")).find(function (trigger) {
+        return trigger.dataset.toastTarget === targetSelector;
+      }) || null;
+    }
+
     root.addEventListener("pointerover", function (event) {
       var toast = event.target instanceof window.Element
         ? event.target.closest(".toast")
@@ -714,18 +810,15 @@
     }, true);
 
     root.addEventListener("pointermove", function (event) {
-      root
-        .querySelectorAll(
-          '.toast-container--stacked[data-toast-stack="deck"][data-toast-stack-hovering]'
-        )
-        .forEach(function (container) {
-          if (
-            isStackContainer(container) &&
-            !isPointerInsideToastStack(container, event)
-          ) {
-            releaseToastStackHovering(container);
-          }
-        });
+      if (!hoveringToastStackContainers.size) {
+        return;
+      }
+
+      Array.from(hoveringToastStackContainers).forEach(function (container) {
+        if (!isPointerInsideToastStack(container, event)) {
+          releaseToastStackHovering(container);
+        }
+      });
     }, true);
 
     root.addEventListener("click", function (event) {
@@ -768,6 +861,7 @@
         sequence = ++toastSequence;
         toast.id = template.id + "-" + sequence;
         toast.setAttribute("data-toast-generated", "true");
+        toast.setAttribute("data-toast-source-target", selector);
         toast.setAttribute("data-toast-stack-sequence", String(sequence));
         toast.setAttribute("data-toast-stack-entering", "");
         container.prepend(toast);
@@ -808,6 +902,8 @@
       var toast = event.target;
       var container;
       var instance;
+      var activeElement = root.activeElement;
+      var restoreFocusTrigger = null;
       if (!(toast instanceof window.HTMLElement) || !toast.classList.contains("toast")) {
         return;
       }
@@ -815,11 +911,19 @@
       container = getStackContainer(toast);
       clearToastStackState(toast);
       if (toast.dataset.toastGenerated === "true") {
+        restoreFocusTrigger = (
+          activeElement instanceof window.HTMLElement &&
+          toast.contains(activeElement) &&
+          activeElement.closest('[data-bs-dismiss="toast"]')
+        ) ? triggerForGeneratedToast(toast) : null;
         instance = Toast.getInstance(toast);
         if (instance) {
           instance.dispose();
         }
         toast.remove();
+        if (restoreFocusTrigger instanceof window.HTMLElement) {
+          restoreFocusTrigger.focus();
+        }
       }
       if (container) {
         updateToastStack(container);
@@ -907,7 +1011,7 @@
     },
     "datepicker": {
       entrypoint: "dist/js/datepicker.js",
-      selector: "[data-datepicker]",
+      selector: ["[data-datepicker]", "[data-datepicker-range]", "[data-calendar]"],
       label: "Date Picker",
       init: function (module, root) {
         var MooCalendar = module.MooCalendar;
@@ -973,21 +1077,28 @@
     var url = runtimeBaseUrl(config) + runtime.entrypoint;
 
     if (!componentRuntimePromises[url]) {
-      componentRuntimePromises[url] = import(url);
+      componentRuntimePromises[url] = import(url).catch(function (error) {
+        delete componentRuntimePromises[url];
+        throw error;
+      });
     }
 
     return componentRuntimePromises[url];
   }
 
+  function hasRuntimeTarget(root, runtime) {
+    var selectors = Array.isArray(runtime.selector) ? runtime.selector : [runtime.selector];
+
+    return selectors.some(function (selector) {
+      return root.querySelector(selector);
+    });
+  }
+
   function initializeComponentRuntimes(config, root) {
-    if (config.kind !== "component") {
-      return;
-    }
+    Object.keys(COMPONENT_RUNTIMES).forEach(function (slug) {
+      var runtime = COMPONENT_RUNTIMES[slug];
 
-    config.components.forEach(function (component) {
-      var runtime = COMPONENT_RUNTIMES[component.slug];
-
-      if (!runtime || !root.querySelector(runtime.selector)) {
+      if (!hasRuntimeTarget(root, runtime)) {
         return;
       }
 
@@ -1012,6 +1123,11 @@
     }
 
     document.body.classList.add("moo-codepen-demo");
+    document.body.classList.remove(
+      "moo-codepen-component-demo",
+      "moo-codepen-example-demo",
+      "moo-codepen-has-branding"
+    );
     createActions();
     createSignature();
 

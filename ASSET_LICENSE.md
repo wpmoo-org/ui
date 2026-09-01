@@ -15,3 +15,5 @@ prior written permission from WPMoo.
 
 Third-party assets remain under their own licenses. See the
 [version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.4/THIRD_PARTY_NOTICES.md).
+Those notices are repository-only and are intentionally not shipped in the npm
+package.

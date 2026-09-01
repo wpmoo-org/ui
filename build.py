@@ -338,7 +338,7 @@ def _inline_element(source: str, match: re.Match[str], tag_name: str, depth: int
     return rendered, match.end() + closing.end()
 
 
-def format_html(value: object, compact_lucide_icons: bool = True) -> str:
+def format_html(value: object, *, compact_lucide_icons: bool = True) -> str:
     source = dedent_html(value)
     if compact_lucide_icons:
         source = _compact_lucide_icons(source)
@@ -1229,7 +1229,7 @@ def load_support_facts() -> dict[str, object]:
 # CodePen export URLs pin the package version they load from a CDN. Keep
 # this on the newest version that is actually published to npm, so example
 # pens never point at an unavailable release candidate.
-CODEPEN_CDN_VERSION = "1.0.0-rc.4"
+CODEPEN_CDN_VERSION = "1.0.0-rc.3"
 
 
 def load_product_facts() -> dict[str, object]:

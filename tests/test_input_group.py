@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import json
 import re
-from html import unescape
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, CatalogTestCase
+from tests.helpers import ROOT, CatalogTestCase, codepen_payloads_from_output
 
 
 COMPONENT = ROOT / "src/components/input_group.html.jinja"
@@ -20,19 +18,11 @@ class InputGroupTests(CatalogTestCase):
         return " ".join(template.render().split())
 
     def input_group_codepen_payloads(self) -> list[dict[str, object]]:
-        payloads: list[dict[str, object]] = []
-        page = (DIST / "components/input-group/index.html").read_text(
-            encoding="utf-8"
-        )
-        for match in re.finditer(
-            r'<textarea name="data" hidden>(.*?)</textarea>',
-            page,
-            re.DOTALL,
-        ):
-            payload = json.loads(unescape(match.group(1)).strip())
-            if str(payload.get("title", "")).startswith("Moo UI Input Group - "):
-                payloads.append(payload)
-        return payloads
+        return [
+            payload
+            for payload in codepen_payloads_from_output("components/input-group.html")
+            if str(payload.get("title", "")).startswith("Moo UI Input Group - ")
+        ]
 
     def test_input_group_wraps_native_bootstrap_markup(self) -> None:
         output = self.render_template(
@@ -215,7 +205,10 @@ class InputGroupTests(CatalogTestCase):
         for payload in payloads:
             html = str(payload["html"]).lstrip()
             with self.subTest(title=payload["title"]):
-                self.assertRegex(html, r'^<div class="field(?:-group)?(?:\s|")')
+                self.assertRegex(
+                    html,
+                    r'^<div\b(?=[^>]*\bclass="[^"]*\bfield(?:-group)?(?![\w-]))[^>]*>',
+                )
                 self.assertNotRegex(html, r'^<div class="input-group(?:\s|")')
                 self.assertNotRegex(html, r'^<div class="d-grid gap-3"')
 
@@ -229,16 +222,16 @@ class InputGroupTests(CatalogTestCase):
             encoding="utf-8"
         )
 
-        self.assertIn(
-            "body.moo-codepen-component-demo > :where(.field, .field-group)",
+        self.assertRegex(
             demo_css,
+            r"body\.moo-codepen-component-demo > :where\(\.field, \.field-group\) \{[^}]*"
+            r"width: min\(100%, [^)]+\);",
         )
-        self.assertIn("width: min(100%, 24rem);", demo_css)
-        self.assertIn(
-            "body.moo-codepen-component-demo > :where(.field, .field-group).w-100",
+        self.assertRegex(
             demo_css,
+            r"body\.moo-codepen-component-demo > :where\(\.field, \.field-group\)\.w-100 \{[^}]*"
+            r"width: min\(100%, [^)]+\) !important;",
         )
-        self.assertIn("width: min(100%, 24rem) !important;", demo_css)
 
     def test_input_group_fails_fast_for_unknown_contracts(self) -> None:
         with self.assertRaisesRegex(

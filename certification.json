@@ -39,6 +39,10 @@
       "./scss/moo-core",
       "./scss/components",
       "./scss/settings"
+    ],
+    "metadata": [
+      "./certification.json",
+      "./package.json"
     ]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"

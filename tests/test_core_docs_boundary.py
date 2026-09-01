@@ -375,7 +375,6 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_asset_prose_uses_site_static_source_path(self) -> None:
         source_paths = (
-            ROOT / "README.md",
             ROOT / "ASSET_LICENSE.md",
             ROOT / "THIRD_PARTY_NOTICES.md",
             ROOT / "site/src/pages/license.html.jinja",

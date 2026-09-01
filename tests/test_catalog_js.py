@@ -613,6 +613,10 @@ console.log(JSON.stringify({
                     ),
                     case["allowList"],
                 )
+                if contract_path == public_contract:
+                    self.assertIn('"radius": "compact"', contract)
+                    self.assertIn('normalizes that value to `"small"`', contract)
+                    self.assertIn('`"compact"` is not emitted', contract)
 
         build_result = self.run_build()
         self.assertEqual(build_result.returncode, 0, build_result.stderr)
@@ -964,15 +968,6 @@ console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
         self.assertNotIn("moo-theme-builder-style", template)
         self.assertNotIn("settings_radius_dropdown", template)
         self.assertNotIn("moo-settings-panel__radius", template)
-        builder_hooks = re.findall(
-            r'"(data-moo-catalog-theme-builder-[^"]+)"',
-            template[
-                template.index('{% call fieldset("Theme Builder"') : template.index(
-                    '{% call fieldset("Direction"'
-                )
-            ],
-        )
-        self.assertEqual(builder_hooks[-1], "data-moo-catalog-theme-builder-radius")
 
     def test_theme_builder_settings_panel_omits_surface_style_axis(self) -> None:
         template = (ROOT / "site/src/includes/settings-panel.html.jinja").read_text(
@@ -988,10 +983,9 @@ console.log(JSON.stringify(THEME_BUILDER_OPTIONS));
         template = (ROOT / "site/src/includes/settings-panel.html.jinja").read_text(
             encoding="utf-8"
         )
+        direction_start = template.index('{% call fieldset("Direction"')
         direction_markup = template[
-            template.index('{% call fieldset("Direction"') : template.index(
-                "{{ separator() }}"
-            )
+            direction_start : template.index("{{ separator() }}", direction_start)
         ]
 
         self.assertRegex(

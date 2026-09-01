@@ -93,10 +93,10 @@
         {{ typography("Sass Source", variant="section-title", id="sass-source") }}
         <p>
           Moo UI ships documented Sass source entrypoints for hosts that compile
-          their own stylesheet. Resolve Bootstrap's peer Sass files from your
-          build, import <code>scss/config</code> before Bootstrap variables when
-          overriding supported tokens, then import the full or scoped Moo UI
-          source entrypoint.
+          their own stylesheet. Import Bootstrap functions first, import Moo UI's
+          <code>scss/config</code> next, place supported token overrides after
+          that config import, then import the full or scoped Moo UI source
+          entrypoint.
         </p>
         {% set sass_source_example %}
         @import "bootstrap/scss/functions";
@@ -182,6 +182,9 @@
           If your host prefers one Moo UI module request, use the
           side-effect-free aggregate instead of importing each module
           separately.
+          Because the aggregate includes the Chart module and its bundled
+          Chart.js runtime, use per-module imports when a page does not need
+          charts.
         </p>
         {% set esm_aggregate_example %}
         import MooUI, { Combobox, DataTable } from "@wpmoo/ui/moo-ui.js";

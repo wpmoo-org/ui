@@ -5,9 +5,9 @@
 // theme-adaptive muted footer tint; its geometry is the source of the values
 // chosen here (verified against the live reference page).
 .card {
-  --bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) 5%, var(--moo-surface));
+  --bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) #{$moo-card-bg-mix}, var(--moo-surface));
   --bs-card-color: var(--moo-foreground);
-  --bs-card-border-color: color-mix(in srgb, var(--moo-foreground) 10%, transparent);
+  --bs-card-border-color: color-mix(in srgb, var(--moo-foreground) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});
   // The reference uses a 14px corner; Bootstrap's shared radius-xl is the
   // closest token and wins the delta (12px here) per the token-first rule.
   --bs-card-border-radius: var(--bs-border-radius-xl);
@@ -47,8 +47,9 @@
   border: var(--bs-card-border-width) solid var(--bs-card-border-color);
   box-shadow: var(--bs-card-box-shadow);
 
-  :where([data-bs-theme="dark"]) & {
-    --bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) 30%, var(--moo-surface));
+  &[data-bs-theme="dark"],
+  :where([data-bs-theme="dark"]) &:not([data-bs-theme="light"]):not([data-bs-theme="light"] *) {
+    --bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) #{$moo-card-bg-mix-dark}, var(--moo-surface));
     --moo-card-footer-bg: #{$moo-card-footer-bg-dark};
   }
 }

@@ -725,11 +725,8 @@ console.log(JSON.stringify(Object.fromEntries(
         for path in component_partials():
             target = partial_import_target(path)
             accepted_targets = {target}
-            try:
-                relative_to_components = path.relative_to(COMPONENTS_SCSS)
-            except ValueError:
-                pass
-            else:
+            relative_to_components = path.relative_to(COMPONENTS_SCSS)
+            if relative_to_components.parent != Path("."):
                 accepted_targets.add(
                     relative_to_components.with_name(
                         relative_to_components.stem.removeprefix("_")

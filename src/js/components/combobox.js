@@ -295,8 +295,8 @@ export default class Combobox {
       return null;
     }
     return (
-      this._selectedOptions().find(
-        (option) => !option.hidden && !option.disabled && !this._optionGroupIsHidden(option)
+      this._visibleOptions().find(
+        (option) => option.getAttribute("aria-selected") === "true"
       ) || null
     );
   }
@@ -311,7 +311,7 @@ export default class Combobox {
     }
   }
 
-  _setActiveOption(option) {
+  _setActiveOption(option, { scroll = true } = {}) {
     this._options.forEach((candidate) => {
       const active = candidate === option;
       if (active) {
@@ -326,27 +326,37 @@ export default class Combobox {
       return;
     }
     this._input.setAttribute("aria-activedescendant", option.id);
-    const optionRect = option.getBoundingClientRect();
-    const menuRect = this._menu.getBoundingClientRect();
-    if (optionRect.top < menuRect.top) {
-      this._menu.scrollTop -= menuRect.top - optionRect.top;
-    } else if (optionRect.bottom > menuRect.bottom) {
-      this._menu.scrollTop += optionRect.bottom - menuRect.bottom;
+    if (scroll) {
+      const optionRect = option.getBoundingClientRect();
+      const menuRect = this._menu.getBoundingClientRect();
+      if (optionRect.top < menuRect.top) {
+        this._menu.scrollTop -= menuRect.top - optionRect.top;
+      } else if (optionRect.bottom > menuRect.bottom) {
+        this._menu.scrollTop += optionRect.bottom - menuRect.bottom;
+      }
     }
   }
 
   _activateOptionFromPointer(option, event) {
-    if (event.pointerType === "touch" || option === this._activeOption()) {
+    if (
+      event.pointerType === "touch" ||
+      option.disabled ||
+      option.getAttribute("aria-disabled") === "true" ||
+      option === this._activeOption()
+    ) {
       return;
     }
-    this._setActiveOption(option);
+    this._setActiveOption(option, { scroll: false });
   }
 
   _restoreSelectedActiveOption() {
     if (!this._menu.classList.contains("show")) {
       return;
     }
-    this._setActiveOption(this._preferredActiveOption());
+    const selected = this._selectedOption();
+    if (selected) {
+      this._setActiveOption(selected, { scroll: false });
+    }
   }
 
   _chooseOption(option) {
@@ -377,7 +387,7 @@ export default class Combobox {
     this._emitChange();
   }
 
-  _filterOptions({ open = true, activate = true } = {}) {
+  _filterOptions({ open = true, activate = true, resetActive = false } = {}) {
     if (open) {
       this._openMenu();
     }
@@ -391,6 +401,9 @@ export default class Combobox {
     this._syncGroupVisibility();
     this._empty.hidden = count !== 0;
     this._liveRegion.textContent = count === 0 ? "No results" : `${count} result${count === 1 ? "" : "s"}`;
+    if (resetActive) {
+      this._setActiveOption(null, { scroll: false });
+    }
     if (activate) {
       this._activatePreferredOptionIfNeeded();
     }
@@ -408,7 +421,7 @@ export default class Combobox {
       if (!this._isMultiple) {
         this._clearSelection();
       }
-      this._filterOptions();
+      this._filterOptions({ resetActive: true });
     });
     this._listen(this._input, "blur", (event) => {
       const nextTarget = event.relatedTarget;
@@ -441,7 +454,7 @@ export default class Combobox {
       this._clearSelection();
       this._input.value = "";
       this._input.focus();
-      this._filterOptions();
+      this._filterOptions({ resetActive: true });
     });
     this._listen(this._menu, "pointerleave", () => this._restoreSelectedActiveOption());
     this._listen(this._element, "click", (event) => this._handleRootClick(event));

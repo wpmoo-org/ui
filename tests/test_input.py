@@ -315,7 +315,11 @@ class InputTests(CatalogTestCase):
             ]
 
             with self.subTest(block=block_name):
-                self.assertIn(f'<div dir="{direction}" class="w-100">', block)
+                self.assertRegex(
+                    block,
+                    rf'<div\b(?=[^>]*\bdir="{direction}")'
+                    r'(?=[^>]*\bclass="[^"]*\bw-100(?![\w-])[^"]*")[^>]*>',
+                )
 
     def test_input_describedby_links_helper_text(self) -> None:
         output = self.render_input(

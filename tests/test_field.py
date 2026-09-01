@@ -8,7 +8,7 @@ COMPONENT = ROOT / "src/components/field.html.jinja"
 PAGE = ROOT / "site/src/pages/components/field.html.jinja"
 FIELD_SCSS = ROOT / "scss/components/_field.scss"
 FOCUS_SCSS = ROOT / "scss/foundations/_focus.scss"
-COMPONENTS_AGGREGATE_SCSS = ROOT / "scss/_components.scss"
+COMPONENTS_SCSS = ROOT / "scss/components"
 COMPONENT_SETTINGS_SCSS = ROOT / "scss/settings/_component_variables.scss"
 BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
@@ -68,17 +68,30 @@ class FieldTests(CatalogTestCase):
         self.assertNotIn(":has(> .is-invalid) > .form-label", source)
 
     def test_foundation_layer_owns_clickable_label_selection_rule(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
         field_source = FIELD_SCSS.read_text(encoding="utf-8")
         focus_source = FOCUS_SCSS.read_text(encoding="utf-8")
-        aggregate_source = COMPONENTS_AGGREGATE_SCSS.read_text(encoding="utf-8")
+        component_sources = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in sorted(COMPONENTS_SCSS.rglob("*.scss"))
+        )
         css = self.read_output("assets/css/moo-ui.css")
 
         self.assertNotIn(".form-check-label", field_source)
         self.assertIn(".form-label,", focus_source)
         self.assertIn(".form-check-label", focus_source)
         self.assertIn("user-select: none;", focus_source)
-        self.assertNotIn("user-select: none;", aggregate_source)
-        self.assertIn(".form-label,\n.form-check-label {\n  user-select: none;", css)
+        self.assertNotRegex(
+            component_sources,
+            r"\.form-(?:check-)?label[^{}]*\{[^}]*user-select:\s*none;",
+        )
+        self.assertRegex(
+            css,
+            r"(?:\.form-label,\s*\.form-check-label|"
+            r"\.form-check-label,\s*\.form-label)\s*\{[^}]*user-select:\s*none;",
+        )
 
     def test_field_description_renders_form_text(self) -> None:
         output = self.render(

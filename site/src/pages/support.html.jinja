@@ -81,19 +81,12 @@
               <tr><th scope="col">ESM</th><th scope="col">Minified</th></tr>
             </thead>
             <tbody>
-              {% for entrypoint, minified in [
-                ("@wpmoo/ui/moo-ui.js", "@wpmoo/ui/moo-ui.min.js"),
-                ("@wpmoo/ui/combobox.js", ""),
-                ("@wpmoo/ui/sidebar.js", ""),
-                ("@wpmoo/ui/context-menu.js", ""),
-                ("@wpmoo/ui/datatable.js", ""),
-                ("@wpmoo/ui/slider.js", ""),
-                ("@wpmoo/ui/chart.js", "@wpmoo/ui/chart.min.js"),
-                ("@wpmoo/ui/datepicker.js", "@wpmoo/ui/datepicker.min.js")
-              ] %}
+              {% set esm_entrypoints = product.certification.publicEntrypoints.esm %}
+              {% for entrypoint in esm_entrypoints if not entrypoint.endswith(".min.js") %}
+                {% set minified_entrypoint = entrypoint[:-3] ~ ".min.js" %}
                 <tr>
-                  <td><code>{{ entrypoint }}</code></td>
-                  <td>{% if minified %}<code>{{ minified }}</code>{% else %}<span class="text-body-secondary">Not published</span>{% endif %}</td>
+                  <td><code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code></td>
+                  <td>{% if minified_entrypoint in esm_entrypoints %}<code>@wpmoo/ui/{{ minified_entrypoint | replace("./", "") }}</code>{% else %}<span class="text-body-secondary">None</span>{% endif %}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -110,10 +103,23 @@
                 <td>
                   {% if product.certification.publicEntrypoints.sass %}
                     {% for entrypoint in product.certification.publicEntrypoints.sass %}
-                      <code>{{ entrypoint }}</code>{% if not loop.last %}, {% endif %}
+                      <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
                     {% endfor %}
                   {% else %}
                     No public Sass entrypoints yet.
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Metadata</th>
+                <td>
+                  {% set metadata_entrypoints = product.certification.publicEntrypoints.metadata | default([]) %}
+                  {% if metadata_entrypoints %}
+                    {% for entrypoint in metadata_entrypoints %}
+                      <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    No public metadata entrypoints yet.
                   {% endif %}
                 </td>
               </tr>

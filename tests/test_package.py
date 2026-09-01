@@ -100,7 +100,6 @@ EXPECTED_PACKAGE_FILES = {
     "README.md",
     "LICENSE",
     "ASSET_LICENSE.md",
-    "THIRD_PARTY_NOTICES.md",
 }
 EXPECTED_PACKAGE_EXPORTS = {
     "./moo-ui.css": "./dist/assets/css/moo-ui.css",
@@ -154,6 +153,50 @@ class PackageMetadataTests(unittest.TestCase):
     def _read_package(self, relative_path: str = "package.json") -> dict:
         return json.loads((ROOT / relative_path).read_text(encoding="utf-8"))
 
+    def _install_clean_consumer_with_bootstrap_scss(
+        self,
+        temporary_root: Path,
+    ) -> tuple[Path, Path, Path]:
+        pack_result = subprocess.run(
+            ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=npm_env(),
+        )
+        self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+        pack_payload = json.loads(pack_result.stdout)
+        tarball = temporary_root / pack_payload[0]["filename"]
+        self.assertTrue(tarball.is_file())
+
+        unpack_root = temporary_root / "unpacked"
+        with tarfile.open(tarball, mode="r:gz") as archive:
+            self.assertTrue(
+                all(
+                    member.name == "package" or member.name.startswith("package/")
+                    for member in archive.getmembers()
+                )
+            )
+            archive.extractall(unpack_root)
+
+        consumer_root = temporary_root / "consumer"
+        installed_package = consumer_root / "node_modules/@wpmoo/ui"
+        installed_package.parent.mkdir(parents=True)
+        shutil.move(unpack_root / "package", installed_package)
+
+        bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
+        bootstrap_pkg.mkdir(parents=True)
+        vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
+        for item in vendor_bootstrap_scss.iterdir():
+            destination = bootstrap_pkg / item.name
+            if item.is_file():
+                shutil.copy2(item, destination)
+            elif item.is_dir():
+                shutil.copytree(item, destination)
+
+        return consumer_root, installed_package, tarball
+
     def test_root_package_publishes_canonical_wpmoo_scope(self) -> None:
         package = self._read_package()
 
@@ -182,6 +225,7 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("static", files)
         self.assertNotIn("dist/assets/images", files)
         self.assertNotIn("static/images", files)
+        self.assertNotIn("THIRD_PARTY_NOTICES.md", files)
         self.assertEqual(package["peerDependencies"]["bootstrap"], ">=5.3.0 <5.4")
         self.assertTrue(package["peerDependenciesMeta"]["bootstrap"]["optional"])
         self.assertEqual(
@@ -261,8 +305,9 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(
             set(certification["publicEntrypoints"]["css"])
             | set(certification["publicEntrypoints"]["esm"])
-            | set(certification["publicEntrypoints"]["sass"]),
-            set(package["exports"]) - {"./certification.json", "./package.json"},
+            | set(certification["publicEntrypoints"]["sass"])
+            | set(certification["publicEntrypoints"]["metadata"]),
+            set(package["exports"]),
         )
         self.assertEqual(
             schema["properties"]["status"]["enum"],
@@ -305,6 +350,7 @@ class PackageMetadataTests(unittest.TestCase):
 
     def test_published_notices_references_are_version_pinned_urls(self) -> None:
         package = self._read_package()
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
         expected_url = (
             f"https://github.com/wpmoo-org/ui/blob/v{package['version']}/"
             "THIRD_PARTY_NOTICES.md"
@@ -321,6 +367,11 @@ class PackageMetadataTests(unittest.TestCase):
                 self.assertIn(expected_url, document)
                 self.assertNotIn("`THIRD_PARTY_NOTICES.md`", document)
                 self.assertNotRegex(document, moving_branch_pattern)
+        self.assertIn("Moo UI source code is MIT licensed.", readme)
+        self.assertNotRegex(
+            readme,
+            r"THIRD_PARTY_NOTICES\.md[^.\n]*(?:does not|doesn't|omits?|excludes?|not shipped|not publish)",
+        )
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [
@@ -413,42 +464,11 @@ class PackageMetadataTests(unittest.TestCase):
 
     def test_real_tarball_resolves_from_a_clean_consumer(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = Path(temporary_directory)
-            pack_result = subprocess.run(
-                [
-                    "npm",
-                    "pack",
-                    "--json",
-                    "--pack-destination",
-                    str(temporary_root),
-                ],
-                cwd=ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-                env=npm_env(),
-            )
-
-            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
-            pack_payload = json.loads(pack_result.stdout)
-            tarball = temporary_root / pack_payload[0]["filename"]
-            self.assertTrue(tarball.is_file())
-
-            unpack_root = temporary_root / "unpacked"
-            with tarfile.open(tarball, mode="r:gz") as archive:
-                self.assertTrue(
-                    all(
-                        member.name == "package"
-                        or member.name.startswith("package/")
-                        for member in archive.getmembers()
-                    )
+            consumer_root, installed_package, _tarball = (
+                self._install_clean_consumer_with_bootstrap_scss(
+                    Path(temporary_directory)
                 )
-                archive.extractall(unpack_root)
-
-            consumer_root = temporary_root / "consumer"
-            installed_package = consumer_root / "node_modules/@wpmoo/ui"
-            installed_package.parent.mkdir(parents=True)
-            shutil.move(unpack_root / "package", installed_package)
+            )
 
             installed_metadata = json.loads(
                 (installed_package / "package.json").read_text(encoding="utf-8")
@@ -565,39 +585,11 @@ for (const specifier of [
         import sass
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = Path(temporary_directory)
-            pack_result = subprocess.run(
-                ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
-                cwd=ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-                env=npm_env(),
+            consumer_root, _installed_package, _tarball = (
+                self._install_clean_consumer_with_bootstrap_scss(
+                    Path(temporary_directory)
+                )
             )
-            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
-            pack_payload = json.loads(pack_result.stdout)
-            tarball = temporary_root / pack_payload[0]["filename"]
-            self.assertTrue(tarball.is_file())
-
-            # Unpack into a consumer node_modules layout
-            unpack_root = temporary_root / "unpacked"
-            with tarfile.open(tarball, mode="r:gz") as archive:
-                archive.extractall(unpack_root)
-            consumer_root = temporary_root / "consumer"
-            installed_package = consumer_root / "node_modules/@wpmoo/ui"
-            installed_package.parent.mkdir(parents=True)
-            shutil.move(unpack_root / "package", installed_package)
-
-            # Install bootstrap@5.3.3 alongside
-            bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
-            bootstrap_pkg.mkdir(parents=True)
-            vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
-            for item in vendor_bootstrap_scss.iterdir():
-                dest = bootstrap_pkg / item.name
-                if item.is_file():
-                    shutil.copy2(item, dest)
-                elif item.is_dir():
-                    shutil.copytree(item, dest)
 
             # --- Assertion 1: zero overrides compiles ---
             scss_dir = consumer_root / "scss"
@@ -674,37 +666,11 @@ for (const specifier of [
         import sass
 
         with tempfile.TemporaryDirectory() as temporary_directory:
-            temporary_root = Path(temporary_directory)
-            pack_result = subprocess.run(
-                ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
-                cwd=ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-                env=npm_env(),
+            consumer_root, _installed_package, _tarball = (
+                self._install_clean_consumer_with_bootstrap_scss(
+                    Path(temporary_directory)
+                )
             )
-            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
-            pack_payload = json.loads(pack_result.stdout)
-            tarball = temporary_root / pack_payload[0]["filename"]
-            self.assertTrue(tarball.is_file())
-
-            unpack_root = temporary_root / "unpacked"
-            with tarfile.open(tarball, mode="r:gz") as archive:
-                archive.extractall(unpack_root)
-            consumer_root = temporary_root / "consumer"
-            installed_package = consumer_root / "node_modules/@wpmoo/ui"
-            installed_package.parent.mkdir(parents=True)
-            shutil.move(unpack_root / "package", installed_package)
-
-            bootstrap_pkg = consumer_root / "node_modules/bootstrap/scss"
-            bootstrap_pkg.mkdir(parents=True)
-            vendor_bootstrap_scss = ROOT / "vendor/bootstrap/scss"
-            for item in vendor_bootstrap_scss.iterdir():
-                dest = bootstrap_pkg / item.name
-                if item.is_file():
-                    shutil.copy2(item, dest)
-                elif item.is_dir():
-                    shutil.copytree(item, dest)
 
             scss_dir = consumer_root / "scss"
             scss_dir.mkdir(exist_ok=True)

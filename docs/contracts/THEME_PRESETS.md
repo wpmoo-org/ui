@@ -40,6 +40,12 @@ dependency for applying a preset.
 ```
 <!-- theme-preset-schema-enums:end -->
 
+## Schema Decisions
+
+Schema version `1` treats sidecars with `"radius": "compact"` as legacy input
+and normalizes that value to `"small"`. The normalized sidecar preserves
+`"small"`; `"compact"` is not emitted and stays outside the public radius enum.
+
 ## Public Token Allow-List
 
 <!-- theme-preset-public-token-allow-list:start -->
@@ -96,7 +102,7 @@ behavior.
 ## Maturity
 
 The Theme Preset contract and newly public preset tokens are post-1.0.0
-provisional until a later API-freeze contract promotes them. Current RC.3
+provisional until a later API-freeze contract promotes them. Current RC.4
 implementation covers only the schema axes above; surface style, sidebar
 style, chart style, spacing, shadow, contrast, motion, and density remain
 deferred and must not be advertised as shipped preset fields.
@@ -120,7 +126,7 @@ values.
 
 The default chart palette is the neutral Moo chart ramp (`--moo-chart-1`
 through `--moo-chart-5`). Earlier runtime fallback behavior used Bootstrap
-semantic colors when these variables were absent; RC.3 treats the neutral ramp
+semantic colors when these variables were absent; RC.4 treats the neutral ramp
 as the intended default so Theme Builder exports, catalog preview, and package
 CSS agree.
 
@@ -132,7 +138,7 @@ to `ui.wpmoo.org`; exported presets emit only the tokens above under `:root`,
 `[data-bs-theme="light"]`, and `[data-bs-theme="dark"]`.
 
 `--moo-primary-foreground-dark` is retained for compatibility with hosts that
-already distinguish dark-mode action foregrounds. RC.3 action colors are
+already distinguish dark-mode action foregrounds. RC.4 action colors are
 mode-independent, so it intentionally matches `--moo-primary-foreground`.
 
 ## Adapter Guidance

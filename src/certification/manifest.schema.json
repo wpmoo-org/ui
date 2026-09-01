@@ -110,6 +110,9 @@
         },
         "sass": {
           "$ref": "#/$defs/packageExports"
+        },
+        "metadata": {
+          "$ref": "#/$defs/packageExports"
         }
       }
     },

@@ -8,7 +8,14 @@ import sys
 import unittest
 
 from build import create_environment
-from tests.helpers import DIST, ROOT, STATIC, CatalogTestCase, is_valid_webp
+from tests.helpers import (
+    DIST,
+    ROOT,
+    STATIC,
+    CatalogTestCase,
+    is_valid_webp,
+    scss_rule_body,
+)
 from tests.helpers.browser_harness import (
     BrowserEvidence,
     CERTIFICATION_CASES,
@@ -295,13 +302,19 @@ class DatepickerSourceTests(CatalogTestCase):
         source = (ROOT / "scss/components/_input.scss").read_text(encoding="utf-8")
 
         self.assertIn('.form-control[type="time"] {', source)
-        self.assertIn("appearance: none;", source)
         self.assertIn(
             '.form-control[type="time"]::-webkit-calendar-picker-indicator {',
             source,
         )
-        self.assertIn("display: none;", source)
-        self.assertIn("-webkit-appearance: none;", source)
+        time_block = scss_rule_body(source, '.form-control[type="time"]')
+        indicator_block = scss_rule_body(
+            source,
+            '.form-control[type="time"]::-webkit-calendar-picker-indicator',
+        )
+
+        self.assertRegex(time_block, r"(?<!-)\bappearance: none;")
+        self.assertIn("display: none;", indicator_block)
+        self.assertIn("-webkit-appearance: none;", indicator_block)
 
     def test_certification_fixture_uses_real_datepicker_trigger_icons(self) -> None:
         source = CERTIFICATION_FIXTURE.read_text(encoding="utf-8")

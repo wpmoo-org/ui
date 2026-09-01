@@ -198,7 +198,7 @@
 
 .combobox:not(.combobox--multiple)
   .combobox-menu:has(.combobox-option:not([aria-selected="true"]):hover)
-  .combobox-option[aria-selected="true"]:not(:hover),
+  .combobox-option[aria-selected="true"]:not(:hover):not([aria-current="true"]),
 .combobox:not(.combobox--multiple)
   .combobox-menu:has(.combobox-option[aria-current="true"]:not([aria-selected="true"]))
   .combobox-option[aria-selected="true"]:not([aria-current="true"]) {

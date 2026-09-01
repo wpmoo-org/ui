@@ -775,9 +775,20 @@ class CertificationContractTests(unittest.TestCase):
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
+        package_surface_decisions = (
+            ROOT / "docs/contracts/PACKAGE_SURFACE_DECISIONS.md"
+        ).read_text(encoding="utf-8")
 
         # Freeze document must declare the current package version.
         self.assertEqual(freeze["freezeVersion"], package["version"])
+        self.assertIn(
+            "docs/contracts/PACKAGE_SURFACE_DECISIONS.md",
+            freeze["description"],
+        )
+        self.assertIn("additive optional properties", package_surface_decisions)
+        self.assertIn("`metadata` entrypoint group is optional", package_surface_decisions)
+        self.assertIn("`./moo-ui.js`", package_surface_decisions)
+        self.assertIn("`./scss/config`", package_surface_decisions)
 
         # Sass config allow-list must match the real public declarations.
         import re
@@ -801,6 +812,20 @@ class CertificationContractTests(unittest.TestCase):
         frozen_required = set(freeze["certificationManifest"]["requiredFields"])
         self.assertEqual(live_required, frozen_required,
             "manifest.schema.json required fields diverged from the freeze document")
+        public_entrypoints = schema["properties"]["publicEntrypoints"]
+        self.assertIn("metadata", public_entrypoints["properties"])
+        self.assertNotIn("metadata", public_entrypoints["required"])
+        metadata_entrypoints = freeze["metadataEntrypoints"]
+        self.assertEqual(
+            [entry["export"] for entry in metadata_entrypoints],
+            certification["publicEntrypoints"]["metadata"],
+        )
+        for entrypoint in metadata_entrypoints:
+            with self.subTest(metadata_entrypoint=entrypoint["export"]):
+                self.assertEqual(entrypoint["scope"], "metadata")
+                self.assertIn(entrypoint["export"], package["exports"])
+                self.assertIn("source", entrypoint)
+                self.assertIn("key", entrypoint)
 
         # Bootstrap support must match certification.json
         self.assertEqual(
@@ -826,6 +851,25 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("chart.js", frozen_modules)
         self.assertIn("datepicker.js", frozen_modules)
         self.assertIn("slider.js", frozen_modules)
+        lifecycle_modules = {
+            "combobox.js",
+            "sidebar.js",
+            "context-menu.js",
+            "datatable.js",
+            "chart.js",
+            "datepicker.js",
+            "slider.js",
+        }
+        expected_lifecycle = [
+            "constructor",
+            "getInstance",
+            "getOrCreateInstance",
+            "dispose",
+        ]
+        for module in lifecycle_modules:
+            with self.subTest(module=module):
+                record = next(m for m in freeze["esmModules"] if m["module"] == module)
+                self.assertEqual(record.get("lifecycle"), expected_lifecycle)
 
         # Current RC package exports/files must include the documented new entrypoints
         frozen_exports = set(freeze["packageExports"])
@@ -857,7 +901,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("dist/js/slider.js", frozen_files)
         self.assertIn("scss/*.scss", frozen_files)
         self.assertIn("scss/**/*.scss", frozen_files)
-        self.assertIn("THIRD_PARTY_NOTICES.md", frozen_files)
+        self.assertNotIn("THIRD_PARTY_NOTICES.md", frozen_files)
 
         # Current RC artifact variants must map minified to canonical
         artifact_variants = freeze.get("artifactVariants", {})
@@ -908,6 +952,11 @@ class CertificationContractTests(unittest.TestCase):
                 ],
             },
         )
+
+        aggregate_record = next(m for m in freeze["esmModules"] if m["module"] == "moo-ui.js")
+        self.assertEqual(aggregate_record.get("defaultExport"), "MooUI")
+        self.assertEqual(aggregate_record.get("runtime"), "chart.js@4.5.1")
+        self.assertIn("default namespace export", aggregate_record.get("lifecycle", []))
 
         # Chart.js stays bundled with its third-party runtime.
         chart_record = next(m for m in freeze["esmModules"] if m["module"] == "chart.js")

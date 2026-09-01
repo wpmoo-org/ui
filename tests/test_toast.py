@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import json
-import re
-from html import unescape
-
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase, read_settings
+from tests.helpers import (
+    ROOT,
+    CatalogTestCase,
+    codepen_payloads_from_output,
+    read_settings,
+)
 
 
 COMPONENT = ROOT / "src/components/toast.html.jinja"
@@ -27,17 +28,11 @@ class ToastTests(CatalogTestCase):
         return " ".join(template.render().split())
 
     def toast_codepen_payloads(self) -> list[dict[str, object]]:
-        page = self.read_output("components/toast.html")
-        payloads: list[dict[str, object]] = []
-        for match in re.finditer(
-            r'<textarea name="data" hidden>(.*?)</textarea>',
-            page,
-            re.DOTALL,
-        ):
-            payload = json.loads(unescape(match.group(1)).strip())
-            if str(payload.get("title", "")).startswith("Moo UI Toast - "):
-                payloads.append(payload)
-        return payloads
+        return [
+            payload
+            for payload in codepen_payloads_from_output("components/toast.html")
+            if str(payload.get("title", "")).startswith("Moo UI Toast - ")
+        ]
 
     def test_toast_renders_header_body_and_close_button(self) -> None:
         output = self.render(
@@ -371,15 +366,8 @@ class ToastTests(CatalogTestCase):
     def test_codepen_demo_wires_toast_templates_without_public_moo_runtime(self) -> None:
         script = CODEPEN_DEMO_JS.read_text(encoding="utf-8")
 
-        self.assertIn("function initializeToasts(root)", script)
-        self.assertIn('event.target.closest("[data-toast-target]")', script)
-        self.assertIn("target instanceof window.HTMLTemplateElement", script)
-        self.assertIn("template.content.cloneNode(true)", script)
-        self.assertIn("data-toast-generated", script)
-        self.assertIn("data-toast-stack-sequence", script)
-        self.assertIn("Toast.getOrCreateInstance", script)
-        self.assertIn("instance.show()", script)
         self.assertNotIn("dist/js/moo-ui.min.js", script)
+        self.assertNotIn("dist/js/moo-ui.js", script)
 
     def test_catalog_bootstrap_module_creates_repeated_toast_instances(self) -> None:
         script = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")

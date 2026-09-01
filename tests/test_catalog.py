@@ -17,6 +17,8 @@ from tests.helpers import (
     ROOT,
     STATIC,
     CatalogTestCase,
+    codepen_payload_from_output,
+    codepen_payloads_from_html,
     is_valid_webp,
     read_catalog_styles,
     read_png_ihdr,
@@ -206,15 +208,12 @@ COMPONENT_SELECTOR_PREFIXES = {
 }
 
 
-class CodePenPayloadParser(HTMLParser):
+class CodePenFormParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
-        self.in_codepen_data = False
         self.in_codepen_form = False
-        self.current_codepen_data: list[str] = []
         self.forms: list[dict[str, str | None]] = []
         self.buttons: list[dict[str, str | None]] = []
-        self.payloads: list[dict[str, object]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
@@ -224,32 +223,8 @@ class CodePenPayloadParser(HTMLParser):
             return
         if self.in_codepen_form and tag == "button":
             self.buttons.append(attributes)
-        if (
-            self.in_codepen_form
-            and tag == "input"
-            and attributes.get("name") == "data"
-            and attributes.get("value")
-        ):
-            self.payloads.append(json.loads(attributes["value"]))
-        if (
-            self.in_codepen_form
-            and tag == "textarea"
-            and attributes.get("name") == "data"
-        ):
-            self.in_codepen_data = True
-            self.current_codepen_data = []
-
-    def handle_data(self, data: str) -> None:
-        if self.in_codepen_data:
-            self.current_codepen_data.append(data)
 
     def handle_endtag(self, tag: str) -> None:
-        if self.in_codepen_data and tag == "textarea":
-            self.in_codepen_data = False
-            payload = "".join(self.current_codepen_data).strip()
-            if payload:
-                self.payloads.append(json.loads(payload))
-            self.current_codepen_data = []
         if tag == "form":
             self.in_codepen_form = False
 
@@ -332,15 +307,15 @@ class CatalogContractTests(CatalogTestCase):
         for selector, token in (
             (
                 ".moo-example__preview--narrow > .field:has(> .combobox)",
-                "$moo-combobox-width",
+                "var(--moo-combobox-width)",
             ),
             (
                 ".moo-example__preview--narrow > .field:has(> .combobox--multiple)",
-                "$moo-combobox-multiple-width",
+                "var(--moo-combobox-multiple-width)",
             ),
             (
                 ".moo-example__preview--medium > .field:has(> .moo-datepicker)",
-                "$moo-datepicker-width",
+                "var(--moo-datepicker-width)",
             ),
             (
                 ".moo-example__preview--narrow > .field:has(> .slider--vertical)",
@@ -864,9 +839,8 @@ class CatalogContractTests(CatalogTestCase):
 
         claim_pattern = re.compile(r"\bcertified\b[^.]{0,160}\bcomponents?\b")
         for path in sorted((ROOT / "site-dist").rglob("*.html")):
-            parser = CodePenPayloadParser()
-            parser.feed(path.read_text(encoding="utf-8"))
-            for index, payload in enumerate(parser.payloads):
+            payloads = codepen_payloads_from_html(path.read_text(encoding="utf-8"))
+            for index, payload in enumerate(payloads):
                 for key in ("title", "description", "html", "css", "js"):
                     text = " ".join(unescape(str(payload.get(key, ""))).lower().split())
                     with self.subTest(
@@ -889,13 +863,12 @@ class CatalogContractTests(CatalogTestCase):
             if file.startswith("dist/js/")
         }
         import_pattern = re.compile(
-            rf"@wpmoo/ui@{re.escape(codepen_version)}/dist/js/(?P<entrypoint>[a-z.-]+\.js)"
+            rf"@wpmoo/ui@{re.escape(codepen_version)}/dist/js/(?P<entrypoint>[\w.-]+\.js)"
         )
 
         for path in sorted((ROOT / "site-dist").rglob("*.html")):
-            parser = CodePenPayloadParser()
-            parser.feed(path.read_text(encoding="utf-8"))
-            for index, payload in enumerate(parser.payloads):
+            payloads = codepen_payloads_from_html(path.read_text(encoding="utf-8"))
+            for index, payload in enumerate(payloads):
                 for match in import_pattern.finditer(str(payload.get("js", ""))):
                     entrypoint = match.group("entrypoint")
                     with self.subTest(
@@ -905,17 +878,14 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIn(entrypoint, published_js_entrypoints)
 
-    def test_codepen_shows_current_interactive_examples_after_current_publish(self) -> None:
+    def test_codepen_shows_interactive_examples_from_published_runtime_loader(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        package_version = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))[
-            "version"
-        ]
-        self.assertEqual(site_build.CODEPEN_CDN_VERSION, package_version)
         demo_js = (ROOT / "site-dist/assets/js/codepen-demo.js").read_text(
             encoding="utf-8"
         )
+        self.assertIn("delete componentRuntimePromises[url];", demo_js)
 
         expected_runtime = {
             "components/chart.html": ("chart", "chart.js", ".chart", "MooChart"),
@@ -934,7 +904,7 @@ class CatalogContractTests(CatalogTestCase):
             "components/datepicker.html": (
                 "datepicker",
                 "datepicker.js",
-                "[data-datepicker]",
+                ["[data-datepicker]", "[data-datepicker-range]", "[data-calendar]"],
                 "MooDatepicker",
             ),
             "components/slider.html": (
@@ -951,10 +921,9 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn("Try in CodePen", page)
                 self.assertIn("data-moo-codepen-form", page)
 
-                parser = CodePenPayloadParser()
-                parser.feed(page)
-                self.assertTrue(parser.payloads, f"{path} has no CodePen payloads")
-                for payload in parser.payloads:
+                payloads = codepen_payloads_from_html(page)
+                self.assertTrue(payloads, f"{path} has no CodePen payloads")
+                for payload in payloads:
                     js = str(payload["js"])
                     self.assertNotIn("window.MooCodePen", js)
                     self.assertNotIn(f"dist/js/{entrypoint}", js)
@@ -963,7 +932,9 @@ class CatalogContractTests(CatalogTestCase):
 
                 self.assertIn(f'"{component_slug}"', demo_js)
                 self.assertIn(f"dist/js/{entrypoint}", demo_js)
-                self.assertIn(selector, demo_js)
+                selectors = selector if isinstance(selector, list) else [selector]
+                for runtime_selector in selectors:
+                    self.assertIn(runtime_selector, demo_js)
                 self.assertIn(symbol, demo_js)
                 self.assertIn("getOrCreateInstance", demo_js)
 
@@ -974,8 +945,7 @@ class CatalogContractTests(CatalogTestCase):
         for path in ("components/chart.html", "components/datepicker.html"):
             with self.subTest(path=path):
                 page = self.read_output(path)
-                parser = CodePenPayloadParser()
-                parser.feed(page)
+                payloads = codepen_payloads_from_html(page)
 
                 self.assertFalse(
                     '<input type="hidden" name="data"' in page,
@@ -985,20 +955,16 @@ class CatalogContractTests(CatalogTestCase):
                     '<textarea name="data" hidden>' in page,
                     f"{path} should submit the CodePen JSON payload as field text",
                 )
-                self.assertEqual(page.count("data-moo-codepen-form"), len(parser.payloads))
-                self.assertTrue(all(payload.get("title") for payload in parser.payloads))
+                self.assertEqual(page.count("data-moo-codepen-form"), len(payloads))
+                self.assertTrue(all(payload.get("title") for payload in payloads))
 
     def test_component_codepen_payloads_keep_inline_icons(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        page = self.read_output("components/datepicker.html")
-        parser = CodePenPayloadParser()
-        parser.feed(page)
-        payload = next(
-            payload
-            for payload in parser.payloads
-            if payload["title"] == "Moo UI Date Picker - Basic"
+        payload = codepen_payload_from_output(
+            "components/datepicker.html",
+            "Moo UI Date Picker - Basic",
         )
         html = str(payload["html"])
 
@@ -1011,7 +977,8 @@ class CatalogContractTests(CatalogTestCase):
             encoding="utf-8"
         )
         self.assertIn("codepen_button_if_available", codepen_source)
-        self.assertIn("codepen_current_package_required_slugs", codepen_source)
+        self.assertIn("codepen_js_runtime_slugs", codepen_source)
+        self.assertIn("codepen_cdn_runtime_slugs", codepen_source)
 
         for template in (
             "site/src/includes/example.html.jinja",
@@ -1021,7 +988,7 @@ class CatalogContractTests(CatalogTestCase):
                 source = (ROOT / template).read_text(encoding="utf-8")
                 self.assertNotIn("product.codepenCdnVersion", source)
                 self.assertNotIn("codepenCurrentPackage", source)
-                self.assertNotIn('"chart", "datepicker", "slider"', source)
+                self.assertNotIn("codepen_cdn_runtime_slugs", source)
 
     def test_public_changelog_does_not_claim_certified_components_before_certification(self) -> None:
         certification = json.loads(
@@ -2173,16 +2140,17 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertEqual(page.count("data-moo-codepen-form"), 1)
                 self.assertIn("Open in CodePen", page[footer_start:])
 
-                parser = CodePenPayloadParser()
-                parser.feed(page)
-                self.assertEqual(len(parser.payloads), 1)
-                self.assertEqual(len(parser.forms), 1)
-                self.assertEqual(parser.forms[0]["action"], "https://codepen.io/pen/define")
-                self.assertEqual(parser.forms[0]["method"], "POST")
-                self.assertEqual(parser.forms[0]["target"], "_blank")
-                self.assertEqual(len(parser.buttons), 1)
-                self.assertEqual(parser.buttons[0]["type"], "submit")
-                payload = parser.payloads[0]
+                form_parser = CodePenFormParser()
+                form_parser.feed(page)
+                payloads = codepen_payloads_from_html(page)
+                self.assertEqual(len(payloads), 1)
+                self.assertEqual(len(form_parser.forms), 1)
+                self.assertEqual(form_parser.forms[0]["action"], "https://codepen.io/pen/define")
+                self.assertEqual(form_parser.forms[0]["method"], "POST")
+                self.assertEqual(form_parser.forms[0]["target"], "_blank")
+                self.assertEqual(len(form_parser.buttons), 1)
+                self.assertEqual(form_parser.buttons[0]["type"], "submit")
+                payload = payloads[0]
                 self.assertNotIn("moo-codepen-signature", payload["html"])
                 self.assertNotIn("Bootstrap markup. shadcn feel.", payload["html"])
                 self.assertNotIn(".moo-codepen-signature", payload["css"])
@@ -2440,10 +2408,9 @@ class CatalogContractTests(CatalogTestCase):
                     '<footer class="moo-auth-page__footer',
                     page[main_start:main_end],
                 )
-                parser = CodePenPayloadParser()
-                parser.feed(page)
-                self.assertEqual(len(parser.payloads), 1)
-                payload = parser.payloads[0]
+                payloads = codepen_payloads_from_html(page)
+                self.assertEqual(len(payloads), 1)
+                payload = payloads[0]
                 payload_main_start = payload["html"].index(
                     '<main class="moo-auth-page__content"'
                 )
@@ -2697,6 +2664,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../components/datepicker/">Date Picker</a>', installation)
         self.assertIn('href="../components/slider/">Slider</a>', installation)
         installation_text = unescape(re.sub(r"<[^>]+>", "", installation))
+        normalized_installation_text = " ".join(installation_text.split())
+        self.assertIn(
+            "Import Bootstrap functions first, import Moo UI's scss/config next, "
+            "place supported token overrides after that config import",
+            normalized_installation_text,
+        )
         self.assertIn(
             'import Combobox from "@wpmoo/ui/combobox.js"',
             installation_text,
@@ -2771,6 +2744,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
+        self.assertIn(
+            "Because the aggregate includes the Chart module and its bundled "
+            "Chart.js runtime",
+            normalized_installation_text,
+        )
         self.assertNotIn("after the release that publishes", installation)
 
     def test_public_docs_track_package_manifest_and_exports(self) -> None:
@@ -2800,19 +2778,32 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(certification["status"], support)
         self.assertIn(certification["status"], skills)
         self.assertIn(f"Certification manifest status: `{certification['status']}`", llms)
-        self.assertIn("| Export | Minified | Description |", readme)
+        self.assertNotIn("## Public Package Surface", readme)
+        self.assertNotIn("| Export | Minified | Description |", readme)
+        self.assertNotIn("The tarball also contains", readme)
+        self.assertIn("Bootstrap markup. shadcn feel.", readme)
         self.assertIn(
-            "| `@wpmoo/ui/moo-ui.css` | `@wpmoo/ui/moo-ui.min.css` | Full CSS build |",
+            f"This branch prepares `@wpmoo/ui@{version}` for release.",
             readme,
         )
         self.assertIn(
-            "| `@wpmoo/ui/chart.js` | `@wpmoo/ui/chart.min.js` | Optional Chart ESM lifecycle",
-            readme,
+            "Until that npm tag is published",
+            " ".join(readme.split()),
         )
+        self.assertIn("Try it in 30 seconds", readme)
+        self.assertIn("Installation guide", readme)
+        self.assertIn("Support & Evidence", readme)
+        self.assertIn("Contributing guide", readme)
+        self.assertIn("Moo UI source code is MIT licensed.", readme)
         self.assertIn(
-            "| `@wpmoo/ui/scss/config` | Not published | Public Sass variable allow-list",
+            "Public exports, package boundaries, browser support, and release "
+            "evidence live in",
             readme,
         )
+        self.assertIn("@wpmoo/ui/moo-ui.css", readme)
+        self.assertIn("@wpmoo/ui/moo.css", readme)
+        self.assertIn("@wpmoo/ui/moo-ui.js", readme)
+        self.assertIn("MooUI.Combobox.getOrCreateInstance(combobox)", readme)
         self.assertRegex(
             support,
             r"<tr><th scope=\"col\">CSS</th><th scope=\"col\">Minified</th></tr>",
@@ -2844,22 +2835,97 @@ class CatalogContractTests(CatalogTestCase):
         self.assertRegex(
             support,
             r"<td><code>@wpmoo/ui/slider\.js</code></td>\s*"
-            r"<td><span class=\"text-body-secondary\">Not published</span></td>",
+            r"<td><span class=\"text-body-secondary\">None</span></td>",
         )
+        for entrypoint in certification["publicEntrypoints"]["sass"]:
+            with self.subTest(sass_entrypoint=entrypoint):
+                self.assertIn(
+                    f"<code>@wpmoo/ui/{entrypoint.removeprefix('./')}</code>",
+                    support,
+                )
+                self.assertNotIn(f"<code>{entrypoint}</code>", support)
+        self.assertRegex(
+            support,
+            r"<th scope=\"row\">Metadata</th>\s*"
+            r"<td>\s*<code>@wpmoo/ui/certification\.json</code>,\s*"
+            r"<code>@wpmoo/ui/package\.json</code>\s*</td>",
+        )
+        self.assertIn("metadata", certification["publicEntrypoints"])
+        for entrypoint in certification["publicEntrypoints"]["metadata"]:
+            with self.subTest(metadata_entrypoint=entrypoint):
+                self.assertIn(
+                    f"<code>@wpmoo/ui/{entrypoint.removeprefix('./')}</code>",
+                    support,
+                )
 
         for export in package["exports"]:
             public_name = export.removeprefix("./")
             if public_name == "package.json":
                 continue
             with self.subTest(export=export):
-                self.assertIn(public_name, readme)
+                self.assertIn(public_name, support)
                 self.assertIn(public_name, llms)
 
-        self.assertIn("@wpmoo/ui/combobox.js", readme)
-        self.assertIn("@wpmoo/ui/sidebar.js", readme)
-        self.assertIn("@wpmoo/ui/certification.json", readme)
         self.assertNotIn("compiled CSS and notices only", readme)
         self.assertNotIn("CSS-only library", readme)
+
+    def test_support_page_handles_manifest_without_optional_metadata_entrypoints(self) -> None:
+        environment = site_build.create_environment()
+        catalog = site_build.load_catalog()
+        sections = site_build.load_entries(site_build.SITE_REGISTRY, "sections.json")
+        utilities = site_build.load_utilities()
+        blocks = site_build.load_blocks()
+        examples = site_build.load_examples()
+        product = json.loads(json.dumps(site_build.load_product_facts()))
+        product["certification"]["publicEntrypoints"].pop("metadata", None)
+        component_ownership = site_build.derive_component_ownership(
+            catalog,
+            product["certification"],
+        )
+        catalog = [
+            {
+                **component,
+                "ownership": component_ownership[component["slug"]],
+            }
+            for component in catalog
+        ]
+        logical_relative = Path("support.html")
+        page = site_build.PAGES / "support.html.jinja"
+        metadata = site_build.page_metadata(
+            page,
+            logical_relative,
+            sections,
+            catalog,
+            utilities,
+            blocks,
+        )
+
+        rendered = environment.get_template("pages/support.html.jinja").render(
+            catalog=catalog,
+            sections=sections,
+            utilities=utilities,
+            blocks=blocks,
+            examples=examples,
+            product=product,
+            component_ownership=component_ownership,
+            site_pages=site_build.build_site_pages(
+                sections,
+                catalog,
+                utilities,
+                blocks,
+                examples,
+            ),
+            current_section="sections",
+            current_slug=metadata["slug"],
+            current_page_kind=metadata["kind"],
+            root_path="",
+            page_meta=metadata,
+            page_canonical_url=metadata["url"],
+            asset_version="test",
+            theme_builder_first_paint=site_build.theme_builder_first_paint_payload(),
+        )
+
+        self.assertIn("No public metadata entrypoints yet", rendered)
 
     def test_public_docs_do_not_narrow_optional_esm_to_pre_rc3_modules(self) -> None:
         result = self.run_build()
@@ -2937,10 +3003,7 @@ class CatalogContractTests(CatalogTestCase):
         ownership = site_build.derive_component_ownership(catalog, certification)
 
         self.assertIn("WPMoo-maintained preview evidence", support)
-        self.assertIn(
-            "not independent or accredited certification",
-            " ".join(readme.split()),
-        )
+        self.assertNotIn("certified components", " ".join(readme.lower().split()))
         self.assertIn("not independent or accredited certification", llms)
         self.assertNotIn(
             "certified",
@@ -2971,7 +3034,12 @@ class CatalogContractTests(CatalogTestCase):
             self.assert_no_internal_public_api_guidance(surface, path)
 
         readme = public_surfaces["README.md"]
-        self.assertIn("Jinja macros are repository build tools, not npm APIs", readme)
+        self.assertNotIn("Jinja macros", readme)
+        contributing_text = " ".join(public_surfaces["contributing.html"].split())
+        self.assertIn(
+            "Internal Jinja macros are repository build tools, not npm APIs",
+            contributing_text,
+        )
         self.assertIn("not npm APIs", public_surfaces["skills.html"])
         combobox = unescape(
             re.sub(r"<[^>]+>", "", public_surfaces["components/combobox/index.html"])

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import re
+
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/card.html.jinja"
 PAGE = ROOT / "site/src/pages/components/card.html.jinja"
@@ -83,7 +85,11 @@ class CardTests(CatalogTestCase):
         )
 
         self.assertIn(
-            "--bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) 5%, var(--moo-surface));",
+            "--bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) #{$moo-card-bg-mix}, var(--moo-surface));",
+            source,
+        )
+        self.assertIn(
+            "--bs-card-border-color: color-mix(in srgb, var(--moo-foreground) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});",
             source,
         )
         self.assertIn(
@@ -91,10 +97,35 @@ class CardTests(CatalogTestCase):
             source,
         )
         self.assertIn(
-            "$moo-card-footer-bg: color-mix(in srgb, var(--moo-muted-surface) 20%, var(--moo-surface)) !default;",
-            settings,
+            "--bs-card-bg: color-mix(in srgb, var(--moo-muted-surface) #{$moo-card-bg-mix-dark}, var(--moo-surface));",
+            source,
+        )
+        for variable in (
+            "$moo-card-spacing",
+            "$moo-card-spacing-sm",
+            "$moo-card-bg-mix",
+            "$moo-card-border-mix",
+            "$moo-card-bg-mix-dark",
+            "$moo-card-footer-bg",
+            "$moo-card-footer-bg-dark",
+        ):
+            with self.subTest(variable=variable):
+                self.assertRegex(
+                    settings,
+                    rf"(?m)^{re.escape(variable)}:\s*[^;]+!default;",
+                    f"{variable} must remain an overridable Sass knob",
+                )
+        self.assertIn("$moo-card-border-mix-base: transparent !default;", settings)
+        self.assertIn(
+            ':where([data-bs-theme="dark"]) &:not([data-bs-theme="light"]):not([data-bs-theme="light"] *)',
+            source,
         )
         self.assertNotIn(
             "--moo-card-footer-bg: color-mix(in srgb, var(--moo-muted-surface) 5%, transparent);",
             source,
         )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+        self.assertIn('.card[data-bs-theme="dark"]', css)
