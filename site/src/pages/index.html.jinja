@@ -206,7 +206,7 @@
                   {% if pass != 1 %}tabindex="-1" aria-hidden="true"{% endif %}
                 >
                   <div class="moo-catalog__showcase-preview">
-                    {{ component_preview(component.slug, root_path, loading="eager") }}
+                    {{ component_preview(component.slug, root_path) }}
                   </div>
                 </div>
               {% endif %}

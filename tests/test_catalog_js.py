@@ -85,6 +85,58 @@ class CatalogJavaScriptTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_theme_init_does_not_rewrite_the_prepainted_theme(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initTheme } from "./site/src/js/catalog/theme.js";
+
+const assignments = [];
+const dataset = new Proxy({ bsTheme: "dark" }, {
+  set(target, key, value) {
+    assignments.push({ key, value });
+    target[key] = value;
+    return true;
+  },
+});
+const button = {
+  addEventListener() {},
+  removeEventListener() {},
+  setAttribute() {},
+};
+const view = {
+  localStorage: { getItem: () => "dark", setItem() {} },
+  matchMedia: () => ({
+    matches: true,
+    addEventListener() {},
+    removeEventListener() {},
+  }),
+};
+const root = {
+  documentElement: { dataset },
+  defaultView: view,
+  querySelector: () => button,
+};
+
+initTheme(root);
+console.log(JSON.stringify({ assignments, theme: dataset.bsTheme }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(report["assignments"], [])
+        self.assertEqual(report["theme"], "dark")
+
     def test_theme_builder_schema_migrates_legacy_state(self) -> None:
         result = subprocess.run(
             [

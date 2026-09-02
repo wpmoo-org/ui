@@ -1229,7 +1229,7 @@ def load_support_facts() -> dict[str, object]:
 # CodePen export URLs pin the package version they load from a CDN. Keep
 # this on the newest version that is actually published to npm, so example
 # pens never point at an unavailable release candidate.
-CODEPEN_CDN_VERSION = "1.0.0-rc.3"
+CODEPEN_CDN_VERSION = "1.0.0-rc.4"
 
 
 def load_product_facts() -> dict[str, object]:

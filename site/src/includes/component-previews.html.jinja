@@ -15,7 +15,10 @@
     class="moo-catalog__showcase-image"
     src="{{ component_preview_src(slug, root_path) }}"
     alt=""
+    width="768"
+    height="512"
     loading="{{ loading }}"
+    decoding="async"
   >
 {%- endmacro %}
 
@@ -24,6 +27,9 @@
     class="moo-catalog__showcase-image"
     src="{{ block_preview_src(slug, root_path) }}"
     alt=""
+    width="768"
+    height="512"
     loading="{{ loading }}"
+    decoding="async"
   >
 {%- endmacro %}
