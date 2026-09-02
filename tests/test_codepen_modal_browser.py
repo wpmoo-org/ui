@@ -417,3 +417,23 @@ class CodePenModalBrowserTests(unittest.TestCase):
             evidence.assert_clean()
         finally:
             context.close()
+
+    def test_component_codepen_footer_component_popover_opens_on_focus(self) -> None:
+        payload = self.codepen_payload("button", "Moo UI Button - Primary")
+        context, page, evidence = self.render_component_codepen(payload)
+        try:
+            trigger = page.locator(".moo-examples-footer__component-trigger").first
+            expect(trigger).to_have_attribute("href", "#!")
+
+            trigger.click()
+
+            popover = page.locator(".popover.show")
+            expect(popover).to_have_count(1)
+            expect(popover).to_be_visible()
+            expect(popover).to_contain_text("Button")
+            self.assertTrue(
+                trigger.evaluate("(element) => document.activeElement === element")
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
