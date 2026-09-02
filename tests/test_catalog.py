@@ -87,7 +87,9 @@ COMPONENT_SELECTOR_PREFIXES = {
     "skeleton": ("skeleton", "placeholder"),
     # Bootstrap's own Collapse plugin toggles the bare .collapsed
     # state class on the trigger; it is not "accordion-" prefixed.
-    "accordion": ("accordion", "collapsed"),
+    # A nested Accordion inherits the Card surface, so its partial legitimately
+    # scopes the native accordion variables to Bootstrap's Card context.
+    "accordion": ("accordion", "collapsed", "card"),
     # Collapsible is a thin Bootstrap Collapse composition whose
     # trigger is still a native .btn inside the component scope.
     "collapsible": ("collapsible", "btn"),

@@ -764,10 +764,15 @@ class CodeExampleTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("components/button.html")
         self.assertIn('<code class="language-html">', page)
-        self.assertIn(
-            '<span class="moo-code__lines" aria-hidden="true">1\n2\n3',
-            page,
+        icon_code_start = page.index('id="icon-code"')
+        icon_code_end = page.index("</pre>", icon_code_start)
+        icon_code = page[icon_code_start:icon_code_end]
+        line_numbers = re.search(
+            r'<span class="moo-code__lines" aria-hidden="true">([^<]*)</span>',
+            icon_code,
         )
+        self.assertIsNotNone(line_numbers)
+        self.assertEqual(line_numbers.group(1), "1\n2\n3")
         self.assertIn('<span class="token tag">', page)
         self.assertIn('<span class="token attr-name">class</span>', page)
         self.assertIn('<span class="token attr-value">', page)
