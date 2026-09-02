@@ -711,7 +711,9 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(ticket_header).to_have_attribute("aria-sort", "none")
 
             ticket_trigger.click()
-            ticket_header.locator('[data-datatable-sort-action="desc"]').click()
+            page.locator("body > .dropdown-menu.show").locator(
+                '[data-datatable-sort-action="desc"]'
+            ).click()
 
             expect(ticket_header).to_have_attribute("aria-sort", "descending")
             expect(rows).to_have_count(3)
@@ -719,14 +721,115 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(rows.nth(2)).to_contain_text("TCK-1")
 
             ticket_trigger.click()
-            ticket_header.locator('[data-datatable-sort-action="asc"]').click()
+            page.locator("body > .dropdown-menu.show").locator(
+                '[data-datatable-sort-action="asc"]'
+            ).click()
 
             expect(ticket_header).to_have_attribute("aria-sort", "ascending")
             expect(rows.nth(0)).to_contain_text("TCK-1")
             expect(rows.nth(2)).to_contain_text("TCK-3")
 
+            status_header = root.locator('th[data-datatable-column="status"]')
+            status_trigger = status_header.locator("[data-datatable-sort-key]")
+            status_trigger.click()
+            page.locator("body > .dropdown-menu.show").locator(
+                '[data-datatable-sort-action="hide"]'
+            ).click()
+            self.assertTrue(
+                status_header.evaluate(
+                    "element => element.classList.contains('datatable-col-hidden')"
+                )
+            )
+
             subject_header = root.locator('th[data-datatable-column="subject"]')
             expect(subject_header).to_have_attribute("aria-sort", "none")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_certification_fixture_sort_menu_escapes_table_frame(self) -> None:
+        context, page, evidence = self.open_certification_fixture()
+        try:
+            root = page.locator("#certification-datatable")
+            ticket_header = root.locator('th[data-datatable-column="ticket"]')
+            ticket_trigger = ticket_header.locator("[data-datatable-sort-key]")
+            menu = page.locator("body > .dropdown-menu.show")
+            frame = root.locator(".datatable-frame")
+
+            # Keep the real overflow boundary, but make the fixture frame
+            # short enough for the sort menu to cross it deterministically.
+            frame.evaluate(
+                "element => { element.style.height = '4rem'; element.style.minHeight = '0'; }"
+            )
+
+            ticket_trigger.click()
+            expect(menu).to_have_count(1)
+            expect(menu).to_be_visible()
+
+            metrics = page.evaluate(
+                """
+                () => {
+                  const menu = document.querySelector("body > .dropdown-menu.show");
+                  const frame = document.querySelector("#certification-datatable .datatable-frame");
+                  const rect = (element) => {
+                    const box = element.getBoundingClientRect();
+                    return {
+                      top: box.top,
+                      right: box.right,
+                      bottom: box.bottom,
+                      left: box.left,
+                    };
+                  };
+                  const allItemsHit = Array.from(
+                    menu.querySelectorAll(".dropdown-item")
+                  ).every((item) => {
+                    const box = item.getBoundingClientRect();
+                    const hit = document.elementFromPoint(
+                      box.left + Math.min(8, box.width / 2),
+                      box.top + box.height / 2
+                    );
+                    return hit && item.contains(hit);
+                  });
+                  return {
+                    menuParentIsBody: menu?.parentElement === document.body,
+                    menuPosition: menu ? getComputedStyle(menu).position : "",
+                    menuExtendsPastFrame:
+                      menu && frame
+                        ? rect(menu).bottom > rect(frame).bottom
+                        : false,
+                    allItemsHit,
+                    frameOverflow: frame
+                      ? getComputedStyle(frame).overflow
+                      : "",
+                  };
+                }
+                """
+            )
+
+            self.assertTrue(metrics["menuParentIsBody"], metrics)
+            self.assertEqual(metrics["menuPosition"], "fixed", metrics)
+            self.assertTrue(metrics["menuExtendsPastFrame"], metrics)
+            self.assertTrue(metrics["allItemsHit"], metrics)
+            self.assertEqual(metrics["frameOverflow"], "hidden", metrics)
+
+            ticket_trigger.press("Escape")
+            expect(ticket_trigger).to_have_attribute("aria-expanded", "false")
+            expect(menu).to_have_count(0)
+            expect(ticket_header.locator(":scope > .dropdown .dropdown-menu")).to_have_count(1)
+            expect(ticket_trigger).to_be_focused()
+
+            ticket_trigger.click()
+            expect(menu).to_be_visible()
+            page.locator("html").click(position={"x": 1, "y": 1})
+            expect(menu).to_have_count(0)
+            expect(ticket_header.locator(":scope > .dropdown .dropdown-menu")).to_have_count(1)
+
+            ticket_trigger.click()
+            expect(menu).to_be_visible()
+            page.evaluate("window.certificationDataTable.dispose()")
+            expect(menu).to_have_count(0)
+            expect(ticket_trigger).to_have_attribute("aria-expanded", "false")
+            expect(ticket_header.locator(":scope > .dropdown .dropdown-menu")).to_have_count(1)
             evidence.assert_clean()
         finally:
             context.close()
