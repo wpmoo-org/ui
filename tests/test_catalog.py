@@ -1873,6 +1873,27 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertRegex(home, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
 
+    def test_home_component_previews_defer_offscreen_images_with_stable_dimensions(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        component_section = home[home.index('id="home-components"') :]
+        previews = re.findall(
+            r'<img\s+class="moo-catalog__showcase-image"(?P<attributes>[^>]*)>',
+            component_section,
+        )
+
+        self.assertEqual(len(previews), 32)
+        for attributes in previews:
+            with self.subTest(attributes=attributes):
+                self.assertIn('width="768"', attributes)
+                self.assertIn('height="512"', attributes)
+                self.assertIn('loading="lazy"', attributes)
+                self.assertIn('decoding="async"', attributes)
+
     def test_sections_navigation_precedes_component_catalog(self) -> None:
         result = self.run_build()
 
