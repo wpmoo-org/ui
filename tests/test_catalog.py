@@ -1672,6 +1672,36 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
+    def test_catalog_dark_neutral_border_tokens_are_stable_before_full_stylesheets(self) -> None:
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+
+        self.assertIn("{% block critical_prepaint_styles %}{% endblock %}", base)
+        self.assertNotIn("data-moo-catalog-prepaint", base)
+        self.assertIn('data-moo-catalog-prepaint', catalog)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("introduction/index.html")
+        style_marker = '<style data-moo-catalog-prepaint>'
+        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css'
+        style_index = page.index(style_marker)
+        stylesheet_index = page.index(stylesheet_marker)
+        self.assertLess(style_index, stylesheet_index)
+        critical = page[style_index : page.index("</style>", style_index)]
+        self.assertIn(
+            'html[data-bs-theme="dark"]:not([data-moo-catalog-theme-builder-base-color])',
+            critical,
+        )
+        for token in (
+            "--moo-border: oklch(1 0 0 / 10%);",
+            "--bs-border-color: var(--moo-border);",
+            "--bs-card-border-color: var(--moo-border);",
+            "--moo-sidebar-border: var(--moo-border);",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, critical)
+
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
         slot = catalog_scss.split(

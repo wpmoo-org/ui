@@ -2,6 +2,18 @@
 {% from "components/sidebar.html.jinja" import sidebar_inset, sidebar_provider %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
+{% block critical_prepaint_styles %}
+    <style data-moo-catalog-prepaint>
+      /* Keep the neutral catalog border stable while the full CSS settles. */
+      html[data-bs-theme="dark"]:not([data-moo-catalog-theme-builder-base-color]) {
+        --moo-border: oklch(1 0 0 / 10%);
+        --bs-border-color: var(--moo-border);
+        --bs-card-border-color: var(--moo-border);
+        --moo-sidebar-border: var(--moo-border);
+      }
+    </style>
+{% endblock %}
+
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
     {% call sidebar_provider(key="catalog-shell") %}
