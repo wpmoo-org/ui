@@ -406,8 +406,10 @@
   }
 
   function createComponentTrigger(component) {
-    var trigger = document.createElement("button");
-    trigger.type = "button";
+    var trigger = document.createElement("a");
+    trigger.setAttribute("href", "#!");
+    trigger.setAttribute("role", "button");
+    trigger.setAttribute("tabindex", "0");
     trigger.className = "btn btn-outline-secondary moo-examples-footer__component-trigger";
     trigger.textContent = component.label;
     trigger.setAttribute("data-bs-toggle", "popover");

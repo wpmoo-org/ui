@@ -878,6 +878,28 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIn(entrypoint, published_js_entrypoints)
 
+    def test_codepen_payloads_use_the_current_published_package_version(self) -> None:
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.4")
+        self.assertEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        for path in sorted((ROOT / "site-dist").rglob("*.html")):
+            for index, payload in enumerate(
+                codepen_payloads_from_html(path.read_text(encoding="utf-8"))
+            ):
+                with self.subTest(
+                    page=path.relative_to(ROOT / "site-dist").as_posix(),
+                    payload=index,
+                ):
+                    self.assertIn(
+                        f"@wpmoo/ui@{site_build.CODEPEN_CDN_VERSION}/",
+                        str(payload.get("css_external", ""))
+                        + str(payload.get("js", "")),
+                    )
+
     def test_codepen_shows_interactive_examples_from_published_runtime_loader(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1851,6 +1873,32 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertRegex(home, r'class="[^"]*\bbtn\b[^"]*\bbtn-outline')
 
+    def test_home_component_previews_defer_offscreen_images_with_stable_dimensions(
+        self,
+    ) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        component_section = home[home.index('id="home-components"') :]
+        preview_tags = re.findall(r"<img\b[^>]*>", component_section)
+        previews = [
+            tag
+            for tag in preview_tags
+            if re.search(
+                r'\bclass="[^\"]*\bmoo-catalog__showcase-image\b[^\"]*"',
+                tag,
+            )
+        ]
+
+        self.assertEqual(len(previews), 32)
+        for attributes in previews:
+            with self.subTest(attributes=attributes):
+                self.assertIn('width="768"', attributes)
+                self.assertIn('height="512"', attributes)
+                self.assertIn('loading="lazy"', attributes)
+                self.assertIn('decoding="async"', attributes)
+
     def test_sections_navigation_precedes_component_catalog(self) -> None:
         result = self.run_build()
 
@@ -2332,7 +2380,7 @@ class CatalogContractTests(CatalogTestCase):
                             in unescape(trigger.get("data-bs-content") or "")
                         )
                         self.assertEqual(trigger.get("__tag"), "a")
-                        self.assertNotIn("href", trigger)
+                        self.assertEqual(trigger.get("href"), "#!")
                         self.assertNotIn("data-bs-title", trigger)
                         self.assertEqual(trigger.get("role"), "button")
                         self.assertEqual(trigger.get("tabindex"), "0")
@@ -2476,7 +2524,7 @@ class CatalogContractTests(CatalogTestCase):
                             in unescape(trigger.get("data-bs-content") or "")
                         )
                         self.assertEqual(trigger.get("__tag"), "a")
-                        self.assertNotIn("href", trigger)
+                        self.assertEqual(trigger.get("href"), "#!")
                         self.assertNotIn("data-bs-title", trigger)
                         self.assertEqual(trigger.get("role"), "button")
                         self.assertEqual(trigger.get("tabindex"), "0")

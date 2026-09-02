@@ -18,7 +18,7 @@
       {{ description }}
       <a href='{{ component_href }}' target='_blank' rel='noopener noreferrer' class='d-block mt-1'>{{ learn_more_label }}</a>
     {%- endset %}
-    {{- popover_dismiss_trigger(label, popover_content | trim, placement=placement, html=true, href=none, container="body", extra_class="moo-examples-footer__component-trigger") -}}
+    {{- popover_dismiss_trigger(label, popover_content | trim, placement=placement, html=true, container="body", extra_class="moo-examples-footer__component-trigger") -}}
   {%- else -%}
     <a href="{{ href }}">{{ label }}</a>
   {%- endif %}

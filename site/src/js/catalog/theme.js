@@ -57,7 +57,10 @@ export function initTheme(root = document) {
   };
 
   const applyPreference = (preference) => {
-    documentElement.dataset.bsTheme = resolveTheme(preference, view);
+    const nextTheme = resolveTheme(preference, view);
+    if (documentElement.dataset.bsTheme !== nextTheme) {
+      documentElement.dataset.bsTheme = nextTheme;
+    }
     updateThemeButton();
   };
 
