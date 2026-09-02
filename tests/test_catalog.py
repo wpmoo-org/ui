@@ -1881,10 +1881,15 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         home = self.read_output("index.html")
         component_section = home[home.index('id="home-components"') :]
-        previews = re.findall(
-            r'<img\s+class="moo-catalog__showcase-image"(?P<attributes>[^>]*)>',
-            component_section,
-        )
+        preview_tags = re.findall(r"<img\b[^>]*>", component_section)
+        previews = [
+            tag
+            for tag in preview_tags
+            if re.search(
+                r'\bclass="[^\"]*\bmoo-catalog__showcase-image\b[^\"]*"',
+                tag,
+            )
+        ]
 
         self.assertEqual(len(previews), 32)
         for attributes in previews:

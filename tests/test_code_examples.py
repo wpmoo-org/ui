@@ -341,22 +341,6 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn('document.readyState !== "loading"', source)
         self.assertNotIn('document.readyState === "complete"', source)
 
-    def test_codepen_component_popover_trigger_is_a_focusable_anchor(self) -> None:
-        source = (ROOT / "site/static/js/codepen-demo.js").read_text(
-            encoding="utf-8"
-        )
-        trigger_block = source.split("function createComponentTrigger", 1)[1].split(
-            "function appendComponentList",
-            1,
-        )[0]
-
-        self.assertIn('document.createElement("a")', trigger_block)
-        self.assertIn('trigger.setAttribute("href", "#!")', trigger_block)
-        self.assertIn('trigger.setAttribute("role", "button")', trigger_block)
-        self.assertIn('trigger.setAttribute("tabindex", "0")', trigger_block)
-        self.assertIn('trigger.setAttribute("data-bs-trigger", "focus")', trigger_block)
-        self.assertNotIn('document.createElement("button")', trigger_block)
-
     def test_codepen_demo_reads_package_version_from_all_public_css_exports(self) -> None:
         source = (ROOT / "site/static/js/codepen-demo.js").read_text(
             encoding="utf-8"

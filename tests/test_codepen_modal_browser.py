@@ -424,8 +424,13 @@ class CodePenModalBrowserTests(unittest.TestCase):
         try:
             trigger = page.locator(".moo-examples-footer__component-trigger").first
             expect(trigger).to_have_attribute("href", "#!")
+            expect(trigger).to_have_attribute("role", "button")
+            expect(trigger).to_have_attribute("tabindex", "0")
+            expect(trigger).to_have_attribute("data-bs-toggle", "popover")
+            expect(trigger).to_have_attribute("data-bs-trigger", "focus")
 
-            trigger.click()
+            trigger.focus()
+            expect(trigger).to_be_focused()
 
             popover = page.locator(".popover.show")
             expect(popover).to_have_count(1)
