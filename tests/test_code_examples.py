@@ -180,7 +180,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn("portal_content=hebrew_portal", template)
         self.assertIn("portal_content=english_portal", template)
         self.assertEqual(render_example_block.count("{{ source | highlight_html }}"), 1)
-        self.assertNotIn("line_numbers", render_example_block)
+        self.assertIn("{{ source | line_numbers }}", render_example_block)
 
     def test_component_examples_render_catalog_toolbar_actions(self) -> None:
         result = self.run_build()
@@ -765,10 +765,9 @@ class CodeExampleTests(CatalogTestCase):
         page = self.read_output("components/button.html")
         self.assertIn('<code class="language-html">', page)
         self.assertIn(
-            '<span class="moo-code__lines" aria-hidden="true"></span>',
+            '<span class="moo-code__lines" aria-hidden="true">1\n2\n3',
             page,
         )
-        self.assertNotRegex(page, r'class="moo-code__lines"[^>]*>\s*1\s*<')
         self.assertIn('<span class="token tag">', page)
         self.assertIn('<span class="token attr-name">class</span>', page)
         self.assertIn('<span class="token attr-value">', page)
@@ -896,6 +895,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertIn('copyButton.dataset.mooCopied = copied ? "true" : "false";', script)
         self.assertIn("renderCodeLineNumbers", script)
         self.assertIn('panel.querySelector(".moo-code__lines")', script)
+        self.assertIn("if (lines.textContent !== lineNumbers)", script)
 
         catalog_css = self.read_output("assets/css/catalog.css")
         copy_button = catalog_css.split(".moo-code__copy {", 1)[1].split("}", 1)[0]
@@ -930,7 +930,14 @@ class CodeExampleTests(CatalogTestCase):
 
         self.assertIn("moo-doc-code-panel", page)
         self.assertIn('data-moo-code-panel data-expanded="true"', page)
-        self.assertNotIn('data-bs-theme="dark"', page)
+        full_cdn_start = page.index('id="installation-full-cdn-code"')
+        full_cdn_end = page.index("</pre>", full_cdn_start)
+        full_cdn_snippet = page[full_cdn_start:full_cdn_end]
+        self.assertIn(
+            '<span class="moo-code__lines" aria-hidden="true">1\n2\n3</span>',
+            full_cdn_snippet,
+        )
+        self.assertNotRegex(page, r'<html\b[^>]*\bdata-bs-theme=')
         self.assertIn('data-moo-code-copy aria-label="Copy code"', page)
         self.assertIn('data-moo-copy-icon="copy"', page)
         self.assertIn('data-moo-copy-icon="check" hidden', page)

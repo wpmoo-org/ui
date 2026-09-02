@@ -168,10 +168,13 @@ export function initCodePreview(root = document) {
       return;
     }
     const count = Math.max(1, code.textContent.split("\n").length);
-    lines.textContent = Array.from(
+    const lineNumbers = Array.from(
       { length: count },
       (_, index) => String(index + 1)
     ).join("\n");
+    if (lines.textContent !== lineNumbers) {
+      lines.textContent = lineNumbers;
+    }
   };
 
   root.querySelectorAll("[data-moo-code-panel]").forEach((panel) => {

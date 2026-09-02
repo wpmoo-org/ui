@@ -304,6 +304,11 @@ def dedent_html(value: object) -> str:
     return re.sub(r"\n(?:[ \t]*\n){2,}", "\n\n", clean_lines)
 
 
+def line_numbers(value: object) -> str:
+    source = str(value)
+    return "\n".join(str(index) for index in range(1, source.count("\n") + 2))
+
+
 def _inline_element(source: str, match: re.Match[str], tag_name: str, depth: int):
     if tag_name not in {"h1", "h2", "h3", "h4", "h5", "h6", "li", "p"}:
         return None
@@ -1112,6 +1117,7 @@ def create_environment(icon_renderer=None) -> Environment:
         lstrip_blocks=True,
     )
     environment.filters["dedent_html"] = dedent_html
+    environment.filters["line_numbers"] = line_numbers
     environment.filters["format_html"] = format_html
     environment.filters["format_codepen_html"] = format_codepen_html
     environment.filters["highlight_code"] = highlight_code
