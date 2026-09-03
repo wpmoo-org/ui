@@ -1825,6 +1825,23 @@ def copy_site_assets() -> None:
     )
     if SITE_STATIC.exists():
         shutil.copytree(SITE_STATIC, SITE_DIST / "assets", dirs_exist_ok=True)
+    codepen_demo = SITE_DIST / "assets/js/codepen-demo.js"
+    if codepen_demo.exists():
+        descriptions = {
+            entry["slug"]: entry.get("description", "")
+            for entry in load_catalog()
+            if entry.get("slug")
+        }
+        source = codepen_demo.read_text(encoding="utf-8")
+        codepen_demo.write_text(
+            source.replace(
+                "var COMPONENT_DESCRIPTIONS = {};",
+                "var COMPONENT_DESCRIPTIONS = "
+                + json.dumps(descriptions, sort_keys=True)
+                + ";",
+            ),
+            encoding="utf-8",
+        )
 
 
 def copy_certification_fixtures_to_site() -> None:

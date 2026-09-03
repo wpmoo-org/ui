@@ -280,6 +280,11 @@ class CodeExampleTests(CatalogTestCase):
         )
         self.assertIn('document.body.classList.add("moo-codepen-demo")', demo_js)
         self.assertIn('function inferCodePenConfig(root)', demo_js)
+        self.assertIn(
+            '"button": "Use Bootstrap button styles for reliable production actions: '
+            'publish, review, and move work forward."',
+            demo_js,
+        )
         self.assertIn('function observeCodePenConfig()', demo_js)
         self.assertIn('"button"', demo_js)
         self.assertNotIn("ensureStyles", demo_js)
