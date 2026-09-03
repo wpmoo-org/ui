@@ -57,3 +57,9 @@
 .accordion-flush .accordion-button {
   font-weight: $font-weight-medium;
 }
+
+// A card owns its own surface, so a nested accordion must let that surface
+// show through instead of painting Bootstrap's body background on top of it.
+.card .accordion {
+  --bs-accordion-bg: #{$moo-accordion-contained-bg};
+}

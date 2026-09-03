@@ -49,6 +49,8 @@ export default class DataTable {
     this._filterMode = element.dataset.datatableFilterMode || "inline";
     this._reparentedRowMenus = new Map();
     this._reparentedRowMenuByTrigger = new WeakMap();
+    this._reparentedSortMenus = new Map();
+    this._reparentedSortMenuByTrigger = new WeakMap();
 
     this._rows = Array.from(this._tbody.querySelectorAll(":scope > tr[data-datatable-row]")).map((tr, index) => ({
       element: tr,
@@ -66,11 +68,14 @@ export default class DataTable {
     this._initBulkTooltips();
     this._initViewToggle();
     this._initRowActionDropdowns();
+    this._initSortDropdowns();
   }
 
   dispose() {
     this._disposeRowActionDropdowns();
+    this._disposeSortDropdowns();
     this._restoreRowActionMenus();
+    this._restoreSortMenus();
     this._listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
@@ -113,28 +118,50 @@ export default class DataTable {
     }
     this._rowActionTriggers().forEach((trigger) => {
       Dropdown.getOrCreateInstance(trigger, {
-        popperConfig: (defaultConfig) => ({
-          ...defaultConfig,
-          strategy: "fixed",
-          modifiers: [
-            ...(defaultConfig.modifiers || []),
-            {
-              name: "flip",
-              options: {
-                fallbackPlacements: ["top-end", "top-start", "bottom-end", "bottom-start"],
-              },
-            },
-            {
-              name: "preventOverflow",
-              options: {
-                boundary: "viewport",
-                padding: 8,
-              },
-            },
-          ],
-        }),
+        popperConfig: (defaultConfig) => this._clippingSafePopperConfig(defaultConfig),
       });
     });
+  }
+
+  _sortTriggers() {
+    return this._element.querySelectorAll(
+      ".datatable-sort [data-bs-toggle=\"dropdown\"]"
+    );
+  }
+
+  _initSortDropdowns() {
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!Dropdown) {
+      return;
+    }
+    this._sortTriggers().forEach((trigger) => {
+      Dropdown.getOrCreateInstance(trigger, {
+        popperConfig: (defaultConfig) => this._clippingSafePopperConfig(defaultConfig),
+      });
+    });
+  }
+
+  _clippingSafePopperConfig(defaultConfig) {
+    return {
+      ...defaultConfig,
+      strategy: "fixed",
+      modifiers: [
+        ...(defaultConfig.modifiers || []),
+        {
+          name: "flip",
+          options: {
+            fallbackPlacements: ["top-end", "top-start", "bottom-end", "bottom-start"],
+          },
+        },
+        {
+          name: "preventOverflow",
+          options: {
+            boundary: "viewport",
+            padding: 8,
+          },
+        },
+      ],
+    };
   }
 
   // dispose() alone leaves any open row-action Dropdown's show/aria-expanded/
@@ -146,6 +173,21 @@ export default class DataTable {
       return;
     }
     this._rowActionTriggers().forEach((trigger) => {
+      const instance = Dropdown.getInstance(trigger);
+      if (!instance) {
+        return;
+      }
+      instance.hide();
+      instance.dispose();
+    });
+  }
+
+  _disposeSortDropdowns() {
+    const Dropdown = this._bootstrap("Dropdown");
+    if (!Dropdown) {
+      return;
+    }
+    this._sortTriggers().forEach((trigger) => {
       const instance = Dropdown.getInstance(trigger);
       if (!instance) {
         return;
@@ -224,6 +266,68 @@ export default class DataTable {
   _restoreRowActionMenus() {
     Array.from(this._reparentedRowMenus.keys()).forEach((menu) => {
       this._restoreRowActionMenu(menu);
+    });
+  }
+
+  _sortMenuForTrigger(trigger) {
+    if (!trigger?.closest?.(".datatable-sort")) {
+      return null;
+    }
+    return (
+      this._reparentedSortMenuByTrigger.get(trigger) ||
+      trigger?.closest?.(".dropdown")?.querySelector(":scope > .dropdown-menu") ||
+      null
+    );
+  }
+
+  // Sort menus are authored inside their table header, but must leave the
+  // overflow frame while open just like row-action menus do.
+  _reparentSortMenu(trigger) {
+    const menu = this._sortMenuForTrigger(trigger);
+    if (!menu || this._reparentedSortMenus.has(menu)) {
+      return;
+    }
+    this._reparentedSortMenus.set(menu, {
+      parent: menu.parentNode,
+      nextSibling: menu.nextSibling,
+      trigger,
+      owner: trigger.closest(".datatable-sort"),
+    });
+    this._reparentedSortMenuByTrigger.set(trigger, menu);
+    this._document.body.appendChild(menu);
+  }
+
+  _restoreSortMenuForTrigger(trigger) {
+    const menu = this._reparentedSortMenuByTrigger.get(trigger) || this._sortMenuForTrigger(trigger);
+    if (menu) {
+      this._restoreSortMenu(menu);
+    }
+  }
+
+  _restoreSortMenu(menu) {
+    const original = this._reparentedSortMenus.get(menu);
+    if (!original) {
+      return;
+    }
+    const { parent, nextSibling, trigger } = original;
+    if (parent?.isConnected) {
+      if (nextSibling?.parentNode === parent) {
+        parent.insertBefore(menu, nextSibling);
+      } else {
+        parent.appendChild(menu);
+      }
+    } else {
+      menu.remove();
+    }
+    if (trigger) {
+      this._reparentedSortMenuByTrigger.delete(trigger);
+    }
+    this._reparentedSortMenus.delete(menu);
+  }
+
+  _restoreSortMenus() {
+    Array.from(this._reparentedSortMenus.keys()).forEach((menu) => {
+      this._restoreSortMenu(menu);
     });
   }
 
@@ -780,9 +884,13 @@ export default class DataTable {
       return;
     }
     const menu = trigger.closest(".dropdown-menu");
-    const key = menu
-      ?.closest(".datatable-sort")
-      ?.querySelector("[data-datatable-sort-key]")?.dataset.datatableSortKey;
+    const sort =
+      menu?.closest(".datatable-sort") ||
+      this._reparentedSortMenus.get(menu)?.owner;
+    if (!sort || !this._element.contains(sort)) {
+      return;
+    }
+    const key = sort.querySelector("[data-datatable-sort-key]")?.dataset.datatableSortKey;
     if (!key) {
       return;
     }
@@ -1170,7 +1278,6 @@ export default class DataTable {
     });
 
     this._listen(this._element, "click", (event) => {
-      this._handleSortAction(event);
       this._handleFilterPickerClick(event);
       this._handleFilterOptionClick(event);
       this._handleFilterToggleClick(event);
@@ -1185,6 +1292,7 @@ export default class DataTable {
         this._handleSelectRow(event);
       }
     });
+    this._listen(this._document, "click", (event) => this._handleSortAction(event));
 
     // Bound to the document, not this._element: a checkbox click does not
     // reliably move focus into the table (WebKit never focuses form
@@ -1208,12 +1316,14 @@ export default class DataTable {
     // re-triggered.
     this._listen(this._element, "show.bs.dropdown", (event) => {
       this._reparentRowActionMenu(event.target);
+      this._reparentSortMenu(event.target);
       const tooltip = this._bootstrap("Tooltip")?.getInstance(event.target);
       tooltip?.hide();
       tooltip?.disable();
     });
     this._listen(this._element, "hidden.bs.dropdown", (event) => {
       this._restoreRowActionMenuForTrigger(event.target);
+      this._restoreSortMenuForTrigger(event.target);
       this._bootstrap("Tooltip")?.getInstance(event.target)?.enable();
       if (event.target.matches("[data-datatable-filter-menu-trigger]")) {
         this._showFilterPickerPanel();

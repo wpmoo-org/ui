@@ -139,6 +139,7 @@
         }
       })();
     </script>
+    {% block critical_prepaint_styles %}{% endblock %}
     {% block font_preload %}
     <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
     {% endblock %}

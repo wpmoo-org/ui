@@ -150,6 +150,10 @@ $moo-switch-checked-bg-image-dark: url("data:image/svg+xml,<svg xmlns='http://ww
 // changes nothing but the chevron and revealed content.
 $accordion-button-active-bg: var(--bs-accordion-bg) !default;
 $accordion-button-active-color: var(--bs-accordion-color) !default;
+
+// A nested accordion inherits its Card surface by default, while remaining
+// configurable for Sass consumers that need a distinct contained surface.
+$moo-accordion-contained-bg: transparent !default;
 // Bootstrap's pills nav has no shared-track concept, so the segmented
 // control's track padding/gap and trigger padding have no Bootstrap
 // variable to override — they are private knobs instead of literals in

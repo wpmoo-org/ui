@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/accordion.html.jinja"
@@ -40,6 +40,21 @@ class AccordionTests(CatalogTestCase):
         )
 
         self.assertIn("w-100", output)
+
+    def test_accordion_inside_card_uses_the_card_surface(self) -> None:
+        settings = (ROOT / "scss/settings/_component_variables.scss").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "$moo-accordion-contained-bg: transparent !default;",
+            settings,
+        )
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+        self.assertIn(".card .accordion {", css)
+        self.assertIn("--bs-accordion-bg: transparent;", css)
 
     def test_accordion_page_includes_reference_parity_examples(self) -> None:
         page = PAGE.read_text()
