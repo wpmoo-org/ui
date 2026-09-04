@@ -786,6 +786,7 @@ const fixtures = [
   {
     label: "invalid enums dark",
     theme: "dark",
+    applies: false,
     state: {
       style: "broken",
       baseColor: "broken",
@@ -795,6 +796,12 @@ const fixtures = [
       bodyFont: "broken",
       radius: "broken",
     },
+  },
+  {
+    label: "stored defaults dark",
+    theme: "dark",
+    applies: false,
+    state: {},
   },
 ];
 
@@ -869,14 +876,21 @@ function runInlineScript(fixture) {
 const reports = fixtures.map((fixture) => {
   const actual = runInlineScript(fixture);
   const state = normalizeThemeBuilderState(fixture.state);
-  const expectedTokens = resolveThemeBuilderTokens(state, {
-    theme: fixture.theme,
-    surface: "catalog",
-  });
+  const expectedTokens =
+    fixture.applies === false
+      ? {}
+      : resolveThemeBuilderTokens(state, {
+          theme: fixture.theme,
+          surface: "catalog",
+        });
+  const expectedData =
+    fixture.applies === false
+      ? { bsTheme: fixture.theme }
+      : expectedDataset(state, fixture.theme);
   return {
     label: fixture.label,
     tokenDiff: diffObject(actual.tokens, expectedTokens),
-    datasetDiff: diffObject(actual.dataset, expectedDataset(state, fixture.theme)),
+    datasetDiff: diffObject(actual.dataset, expectedData),
   };
 });
 const failures = reports.filter(
@@ -909,6 +923,7 @@ console.log(JSON.stringify(reports.map((report) => report.label)));
                 "legacy style ignored",
                 "full modern light",
                 "invalid enums dark",
+                "stored defaults dark",
             ],
         )
 
@@ -1947,7 +1962,7 @@ console.log(JSON.stringify({
         self.assertFalse(case["afterReset"]["styleDataset"])
         self.assertFalse(case["afterReset"]["baseDataset"])
         self.assertFalse(case["afterReset"]["themeDataset"])
-        self.assertEqual(case["afterReset"]["chart1"], "rgb(82, 82, 91)")
+        self.assertEqual(case["afterReset"]["chart1"], "")
         self.assertEqual(case["afterReset"]["bodyBg"], "")
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")
         self.assertEqual(case["afterReset"]["primary"], "")
@@ -1956,6 +1971,84 @@ console.log(JSON.stringify({
         self.assertEqual(case["afterReset"]["selectedTheme"], "neutral")
         self.assertEqual(case["afterReset"]["selectedChart"], "neutral")
         self.assertIsNone(case["afterReset"]["storedBuilder"])
+
+    def test_settings_theme_builder_does_not_write_default_tokens_without_storage(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+
+const writes = [];
+const storage = new Map();
+const localStorage = {
+  getItem: (key) => (storage.has(key) ? storage.get(key) : null),
+  setItem: (key, value) => storage.set(key, String(value)),
+  removeItem: (key) => storage.delete(key),
+};
+
+function makeEmitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => {
+    listeners.set(type, [...(listeners.get(type) || []), handler]);
+  };
+  node.removeEventListener = (type, handler) => {
+    listeners.set(
+      type,
+      (listeners.get(type) || []).filter((candidate) => candidate !== handler)
+    );
+  };
+  return node;
+}
+
+const sheet = makeEmitter({
+  querySelectorAll: () => [],
+  querySelector: () => null,
+});
+const documentElement = {
+  dataset: { bsTheme: "dark" },
+  dir: "ltr",
+  style: {
+    setProperty: (name, value) => writes.push(["set", name, value]),
+    removeProperty: (name) => writes.push(["remove", name]),
+    getPropertyValue: () => "",
+  },
+};
+const root = {
+  documentElement,
+  defaultView: {
+    localStorage,
+    matchMedia: () => ({ matches: true }),
+    requestAnimationFrame: (callback) => callback(),
+    setTimeout: (callback) => callback(),
+  },
+  querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
+};
+
+const dispose = initSettingsPanel(root);
+const report = {
+  writes,
+  dataset: { ...documentElement.dataset },
+  storedBuilder: localStorage.getItem("moo:theme-builder"),
+};
+dispose();
+console.log(JSON.stringify(report));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["writes"], [])
+        self.assertEqual(case["dataset"], {"bsTheme": "dark"})
+        self.assertIsNone(case["storedBuilder"])
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(

@@ -108,6 +108,11 @@
               bodyFont: enumValue("bodyFont", source.bodyFont),
               radius: enumValue("radius", source.radius)
             };
+            const isDefaultState = Object.entries(themeBuilderFirstPaint.defaults)
+              .every(([key, value]) => state[key] === value);
+            if (isDefaultState) {
+              return;
+            }
             const builderMode =
               document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
             const tokenGroups = themeBuilderFirstPaint.tokens;

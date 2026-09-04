@@ -285,7 +285,23 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertIn("certification.json", files)
         self.assertNotIn("src/certification", files)
         self.assertNotIn("./moo-core.css", package["exports"])
+        self.assertNotIn("./moo-ui-prepaint.css", package["exports"])
+        self.assertNotIn("./moo-ui-prepaint.min.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
+
+    def test_full_build_places_moo_theme_bridge_before_reboot_body(self) -> None:
+        css = (PACKAGE_DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+
+        body_index = css.index("body {")
+        for token in (
+            "--moo-surface: #0a0a0a;",
+            "--bs-body-bg: var(--moo-surface);",
+            "--bs-body-color: var(--moo-foreground);",
+            "--bs-border-color: var(--moo-border);",
+            "--moo-sidebar-border: var(--moo-border);",
+        ):
+            with self.subTest(token=token):
+                self.assertLess(css.index(token), body_index)
 
     def test_package_dist_contains_only_published_outputs(self) -> None:
         package_files = {

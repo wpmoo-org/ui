@@ -1674,35 +1674,37 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
-    def test_catalog_dark_neutral_border_tokens_are_stable_before_full_stylesheets(self) -> None:
+    def test_catalog_uses_full_build_first_paint_tokens_without_catalog_prepaint(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
-        self.assertIn("{% block critical_prepaint_styles %}{% endblock %}", base)
-        self.assertNotIn("data-moo-catalog-prepaint", base)
-        self.assertIn('data-moo-catalog-prepaint', catalog)
+        self.assertNotIn("<style data-moo-catalog-prepaint", base)
+        self.assertNotIn("<style data-moo-catalog-prepaint", catalog)
+        self.assertNotIn("moo-ui-prepaint.css", base)
+        self.assertNotIn("moo-ui-prepaint.css", catalog)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("introduction/index.html")
-        style_marker = '<style data-moo-catalog-prepaint>'
-        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css'
-        style_index = page.index(style_marker)
-        stylesheet_index = page.index(stylesheet_marker)
-        self.assertLess(style_index, stylesheet_index)
-        critical = page[style_index : page.index("</style>", style_index)]
-        self.assertIn(
-            'html[data-bs-theme="dark"]:not([data-moo-catalog-theme-builder-base-color])',
-            critical,
-        )
+        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css?v='
+        catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.css?v='
+        self.assertIn(stylesheet_marker, page)
+        self.assertNotIn("moo-ui-prepaint.css", page)
+        self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
+
+        full_build = self.read_output("assets/css/moo-ui.css")
+        body_index = full_build.index("body {")
         for token in (
-            "--moo-border: oklch(1 0 0 / 10%);",
+            "--moo-border: #3f3f46;",
             "--bs-border-color: var(--moo-border);",
             "--bs-card-border-color: var(--moo-border);",
             "--moo-sidebar-border: var(--moo-border);",
+            "--moo-surface: #0a0a0a;",
+            "--bs-body-bg: var(--moo-surface);",
         ):
             with self.subTest(token=token):
-                self.assertIn(token, critical)
+                self.assertLess(full_build.index(token), body_index)
+        self.assertNotIn("moo-catalog__", full_build[:body_index])
 
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
