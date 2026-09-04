@@ -206,6 +206,26 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["repository"]["url"], "git+https://github.com/wpmoo-org/ui.git")
         self.assertEqual(package["scripts"]["build"], ".venv/bin/python build.py")
         self.assertEqual(package["scripts"]["dev"], ".venv/bin/python dev.py")
+        self.assertEqual(
+            package["scripts"]["test"],
+            ".venv/bin/python scripts/run-test-tier.py run release",
+        )
+        self.assertEqual(
+            package["scripts"]["test:quick"],
+            ".venv/bin/python scripts/run-test-tier.py run quick",
+        )
+        self.assertEqual(
+            package["scripts"]["test:browser-smoke"],
+            ".venv/bin/python scripts/run-test-tier.py run browser-smoke",
+        )
+        self.assertEqual(
+            package["scripts"]["test:browser-full"],
+            ".venv/bin/python scripts/run-test-tier.py run browser-full",
+        )
+        self.assertEqual(
+            package["scripts"]["test:release"],
+            ".venv/bin/python scripts/run-test-tier.py run release",
+        )
         self.assertNotIn("workspaces", package)
 
     def test_root_package_exports_built_css_without_protected_images(self) -> None:
@@ -855,19 +875,26 @@ for (const specifier of [
         self.assertIn("      - main", push_block)
         self.assertIn("      - dev", push_block)
 
-    def test_ci_keeps_ui_tests_name_and_verifies_both_output_boundaries(self) -> None:
+    def test_ci_keeps_ui_tests_name_and_runs_selected_tier(self) -> None:
         workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
             encoding="utf-8"
         )
 
         self.assertIn("  ui-tests:\n    name: ui-tests", workflow)
-        self.assertIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
-        self.assertIn('.venv/bin/python build.py', workflow)
-        self.assertIn(
-            'npm pack --dry-run --json | .venv/bin/python '
-            'scripts/verify_package_contents.py',
-            workflow,
+        self.assertIn("Select test tier", workflow)
+        self.assertIn("scripts/run-test-tier.py resolve", workflow)
+        self.assertIn("steps.test-tier.outputs.needs_playwright == 'true'", workflow)
+        self.assertIn("scripts/run-test-tier.py run", workflow)
+        self.assertNotIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
+        self.assertNotIn('.venv/bin/python build.py', workflow)
+
+    def test_publish_workflow_uses_release_test_gate(self) -> None:
+        workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text(
+            encoding="utf-8"
         )
+
+        self.assertIn("Run release test gate", workflow)
+        self.assertIn("python scripts/run-test-tier.py run release", workflow)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:
         self.assertFalse((ROOT / "pnpm-workspace.yaml").exists())

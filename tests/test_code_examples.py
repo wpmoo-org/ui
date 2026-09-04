@@ -60,6 +60,14 @@ _HTML_VOID_TAGS = {
     "track",
     "wbr",
 }
+_CODEPEN_CONFIG_SCRIPT_PATTERN = re.compile(
+    r"\A\s*<script>\s*window\.MooCodePen\s*=\s*\{.*?\};\s*</script>\s*",
+    flags=re.DOTALL,
+)
+
+
+def _codepen_payload_html_without_config(payload: dict[str, object]) -> str:
+    return _CODEPEN_CONFIG_SCRIPT_PATTERN.sub("", str(payload["html"])).strip()
 
 
 class _CodePenFormSurfaceParser(HTMLParser):
@@ -228,7 +236,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn('class="col-12 col-lg-8 d-flex justify-content-center"', payload["html"])
         self.assertNotIn("moo-codepen-example-shell", payload["html"])
         self.assertEqual(
-            payload["html"].strip(),
+            _codepen_payload_html_without_config(payload),
             '<button class="btn btn-primary" type="button">Primary</button>',
         )
         self.assertEqual(payload["css"], "")
@@ -280,15 +288,42 @@ class CodeExampleTests(CatalogTestCase):
         )
         self.assertIn('document.body.classList.add("moo-codepen-demo")', demo_js)
         self.assertIn('function inferCodePenConfig(root)', demo_js)
-        self.assertIn(
-            '"button": "Use Bootstrap button styles for reliable production actions: '
-            'publish, review, and move work forward."',
-            demo_js,
-        )
+        self.assertIn("var COMPONENT_DESCRIPTIONS = {};", demo_js)
         self.assertIn('function observeCodePenConfig()', demo_js)
         self.assertIn('"button"', demo_js)
         self.assertNotIn("ensureStyles", demo_js)
         self.assertNotIn('document.createElement("style")', demo_js)
+
+    def test_component_codepen_payload_carries_registry_description_config(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        registry = {
+            component["slug"]: component
+            for component in json.loads(
+                (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+            )
+        }
+        payload = codepen_payloads_from_output("components/button.html")[0]
+        config_match = re.search(
+            r"<script>\s*window\.MooCodePen\s*=\s*(?P<config>\{.*?\});\s*</script>",
+            str(payload["html"]),
+            flags=re.DOTALL,
+        )
+
+        self.assertIsNotNone(config_match)
+        config = json.loads(config_match.group("config"))
+        self.assertEqual(config["kind"], "component")
+        self.assertEqual(
+            config["components"],
+            [
+                {
+                    "slug": "button",
+                    "label": registry["button"]["label"],
+                    "description": registry["button"]["description"],
+                }
+            ],
+        )
 
     def test_component_codepen_form_surfaces_are_field_wrapped(self) -> None:
         result = self.run_build()

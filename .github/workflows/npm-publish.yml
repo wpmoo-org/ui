@@ -59,11 +59,8 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Run contract tests
-        run: python -m unittest discover -s tests -v
-
-      - name: Build catalog
-        run: python build.py
+      - name: Run release test gate
+        run: python scripts/run-test-tier.py run release
 
       - name: Upgrade npm for OIDC trusted publishing
         run: npm install -g npm@11

@@ -9,6 +9,18 @@ on:
       - main
       - dev
   workflow_dispatch:
+    inputs:
+      tier:
+        description: Test tier to run
+        required: false
+        default: auto
+        type: choice
+        options:
+          - auto
+          - quick
+          - browser-smoke
+          - browser-full
+          - release
 
 permissions:
   contents: read
@@ -30,6 +42,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -53,14 +67,29 @@ jobs:
       - name: Install npm development dependencies
         run: npm ci --ignore-scripts
 
+      - name: Select test tier
+        id: test-tier
+        env:
+          REQUESTED_TIER: ${{ github.event_name == 'workflow_dispatch' && inputs.tier || 'auto' }}
+          DIFF_BASE: ${{ github.event.before || '' }}
+        run: >
+          .venv/bin/python scripts/run-test-tier.py resolve
+          "${REQUESTED_TIER}"
+          --event-name "${GITHUB_EVENT_NAME}"
+          --ref-name "${GITHUB_REF_NAME}"
+          --base "${DIFF_BASE}"
+          --head "${GITHUB_SHA}"
+          --github-output "${GITHUB_OUTPUT}"
+
       - name: Install Playwright Chromium
+        if: steps.test-tier.outputs.needs_playwright == 'true'
         run: .venv/bin/python -m playwright install --with-deps chromium
 
-      - name: Run contract and certification tests
-        run: .venv/bin/python -m unittest discover -s tests -v
-
-      - name: Build package and site outputs
-        run: .venv/bin/python build.py
-
-      - name: Verify npm package contents
-        run: npm pack --dry-run --json | .venv/bin/python scripts/verify_package_contents.py
+      - name: Run selected test tier
+        env:
+          DIFF_BASE: ${{ github.event.before || '' }}
+        run: >
+          .venv/bin/python scripts/run-test-tier.py run
+          "${{ steps.test-tier.outputs.tier }}"
+          --base "${DIFF_BASE}"
+          --head "${GITHUB_SHA}"

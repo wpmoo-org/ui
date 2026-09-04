@@ -17,7 +17,11 @@
   "scripts": {
     "build": ".venv/bin/python build.py",
     "dev": ".venv/bin/python dev.py",
-    "test": ".venv/bin/python -m unittest discover -s tests -v",
+    "test": ".venv/bin/python scripts/run-test-tier.py run release",
+    "test:quick": ".venv/bin/python scripts/run-test-tier.py run quick",
+    "test:browser-smoke": ".venv/bin/python scripts/run-test-tier.py run browser-smoke",
+    "test:browser-full": ".venv/bin/python scripts/run-test-tier.py run browser-full",
+    "test:release": ".venv/bin/python scripts/run-test-tier.py run release",
     "deploy": "wrangler deploy",
     "preview": "wrangler dev"
   },

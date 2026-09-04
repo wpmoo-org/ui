@@ -2665,8 +2665,29 @@ class CatalogContractTests(CatalogTestCase):
 
         component = self.read_output("components/accordion.html")
         self.assertIn('data-moo-component-doc-layout', component)
+        toc = re.search(
+            r'(<aside\b[^>]*data-moo-component-toc[^>]*>)(?P<body>.*?)</aside>',
+            component,
+            re.S,
+        )
+        self.assertIsNotNone(toc)
+        toc_opening_tag = toc.group(1) if toc else ""
+        toc_body = toc.group("body") if toc else ""
+        self.assertNotIn(" hidden", toc_opening_tag)
         self.assertIn('data-moo-component-toc', component)
         self.assertIn('aria-label="Component examples"', component)
+        for target, label in (
+            ("usage", "Usage"),
+            ("basic", "Basic"),
+            ("rtl", "RTL"),
+        ):
+            with self.subTest(target=target):
+                self.assertIn(f'href="#{target}"', toc_body)
+                self.assertIn(f">{label}</a>", toc_body)
+        self.assertRegex(
+            toc_body,
+            r'<a class="nav-link active" href="#usage" aria-current="true">Usage</a>',
+        )
         self.assertIn('class="moo-doc-main"', component)
         self.assertIn('data-example="basic" aria-labelledby="basic"', component)
         self.assertIn('id="basic">Basic</h2>', component)

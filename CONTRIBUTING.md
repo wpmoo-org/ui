@@ -45,9 +45,15 @@ Run the narrowest relevant test first, then expand before asking for review:
 
 ```bash
 .venv/bin/python build.py
-.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python scripts/run-test-tier.py run quick
+.venv/bin/python scripts/run-test-tier.py run browser-smoke  # when browser behavior changed
+.venv/bin/python scripts/run-test-tier.py run release        # before dev -> main, tags, or publish
 git diff --check
 ```
+
+Ordinary `dev` pushes use the changed-files classifier to choose `quick` or a
+browser tier. `main`, release tags, publish workflows, and `dev` -> `main` PRs
+always use the release gate.
 
 For visual or interaction changes, include the browser, device, and viewport you
 used. If a component involves Bootstrap JavaScript or optional Moo ESM, include
