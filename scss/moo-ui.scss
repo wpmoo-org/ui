@@ -13,6 +13,7 @@
 
 // Bootstrap layout and standalone-only components
 @import "bootstrap/scss/root";
+@import "themes/standalone_root";
 @import "bootstrap/scss/reboot";
 @import "bootstrap/scss/type";
 @import "bootstrap/scss/images";
@@ -44,7 +45,6 @@
 // Bootstrap utilities
 @import "bootstrap/scss/utilities/api";
 
-@import "themes/standalone_root";
 @import "utilities/scroll_fade_primitives";
 @import "components";
 @import "foundations/overlay_backdrop";

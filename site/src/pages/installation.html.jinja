@@ -47,6 +47,12 @@
           <code>moo-ui.css</code> is a complete Bootstrap CSS build with Moo UI
           defaults. Do not load another Bootstrap stylesheet beside it.
         </p>
+        <p>
+          It emits Moo UI's root/body theme tokens before Bootstrap's reboot
+          body rules. If the page persists dark mode or resolves the user's
+          system color scheme, set <code>data-bs-theme</code> synchronously in
+          the head before loading this stylesheet.
+        </p>
         {% set full_cdn_example %}
         <link rel="stylesheet" href="https://unpkg.com/@wpmoo/ui@{{ product.version }}/dist/assets/css/moo-ui.css">
 

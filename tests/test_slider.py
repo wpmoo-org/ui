@@ -569,7 +569,3 @@ class _SliderBrowserMixin:
             evidence.assert_clean()
         finally:
             context.close()
-
-
-class SliderBrowserTests(_SliderBrowserMixin, CatalogTestCase):
-    pass

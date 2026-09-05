@@ -23,12 +23,11 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    # Same root cause as ui-ci.yml's ui-tests job: this workflow runs the same
-    # full suite ("Run contract tests") on a cold ubuntu-latest runner, and the
-    # old 10-minute budget was cancelling it mid-suite before publish ever ran
-    # (observed on the v1.0.0-rc.2 tag run: cancelled at "Run contract tests",
-    # every step after it skipped, including "Publish to npm").
-    timeout-minutes: 25
+    # Same release-tier runner as ui-ci.yml: setup, browser install, full
+    # discovery, package verification, and rehearsal can exceed the old
+    # 25-minute budget on a cold hosted runner, so publish must wait for a real
+    # pass/fail gate instead of a timeout.
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository
@@ -59,11 +58,8 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Run contract tests
-        run: python -m unittest discover -s tests -v
-
-      - name: Build catalog
-        run: python build.py
+      - name: Run release test gate
+        run: python scripts/run-test-tier.py run release
 
       - name: Upgrade npm for OIDC trusted publishing
         run: npm install -g npm@11

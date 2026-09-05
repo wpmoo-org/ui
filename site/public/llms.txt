@@ -65,6 +65,10 @@ import "@wpmoo/ui/moo-ui.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are used
 ```
 
+The full stylesheet emits Moo UI root/body theme tokens before Bootstrap's
+reboot body rules; pages that persist dark or system mode should set
+`data-bs-theme` synchronously before loading it.
+
 Scoped adoption:
 
 ```js

@@ -12,6 +12,7 @@ import tempfile
 import textwrap
 import time
 from html import escape
+from html.parser import HTMLParser
 from pathlib import Path
 
 import sass
@@ -710,6 +711,109 @@ def slugify(value: object) -> str:
     return slug or "section"
 
 
+class TocNode:
+    def __init__(
+        self,
+        tag: str,
+        attrs: dict[str, str | None] | None = None,
+        parent: "TocNode | None" = None,
+    ) -> None:
+        self.tag = tag
+        self.attrs = attrs or {}
+        self.parent = parent
+        self.children: list[TocNode] = []
+        self.nodes: list[str | TocNode] = []
+
+    def append_child(self, node: "TocNode") -> None:
+        self.children.append(node)
+        self.nodes.append(node)
+
+    def append_text(self, text: str) -> None:
+        self.nodes.append(text)
+
+    def has_class(self, class_name: str) -> bool:
+        return class_name in (self.attrs.get("class") or "").split()
+
+    def text_content(self) -> str:
+        text = "".join(
+            node if isinstance(node, str) else node.text_content()
+            for node in self.nodes
+        )
+        return re.sub(r"\s+", " ", text).strip()
+
+
+class ComponentTocParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.root = TocNode("root")
+        self.stack = [self.root]
+        self.by_id: dict[str, TocNode] = {}
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        node = TocNode(tag, dict(attrs), self.stack[-1])
+        self.stack[-1].append_child(node)
+        node_id = node.attrs.get("id")
+        if node_id and node_id not in self.by_id:
+            self.by_id[node_id] = node
+        if tag not in VOID_ELEMENTS:
+            self.stack.append(node)
+
+    def handle_startendtag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        node = TocNode(tag, dict(attrs), self.stack[-1])
+        self.stack[-1].append_child(node)
+        node_id = node.attrs.get("id")
+        if node_id and node_id not in self.by_id:
+            self.by_id[node_id] = node
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self.stack) - 1, 0, -1):
+            if self.stack[index].tag == tag:
+                del self.stack[index:]
+                return
+
+    def handle_data(self, data: str) -> None:
+        self.stack[-1].append_text(data)
+
+    def component_examples(self) -> TocNode | None:
+        pending = list(self.root.children)
+        while pending:
+            node = pending.pop(0)
+            if node.tag == "div" and node.has_class("moo-component-examples"):
+                return node
+            pending[0:0] = node.children
+        return None
+
+
+def example_toc_items(value: object) -> list[dict[str, str]]:
+    parser = ComponentTocParser()
+    parser.feed(str(value))
+    examples = parser.component_examples()
+    if examples is None:
+        return []
+
+    items: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for child in examples.children:
+        target_id = None
+        title_node = None
+        if child.tag == "h2":
+            target_id = child.attrs.get("id")
+            title_node = child
+        elif child.has_class("moo-example"):
+            target_id = child.attrs.get("aria-labelledby")
+            title_node = parser.by_id.get(target_id or "")
+
+        label = title_node.text_content() if title_node else ""
+        if target_id and label and target_id not in seen:
+            items.append({"id": target_id, "label": label})
+            seen.add(target_id)
+    return items
+
+
 def pretty_url(path: object) -> str:
     value = str(path).strip()
     if value in {"", "index.html", "./"}:
@@ -1123,6 +1227,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.filters["highlight_code"] = highlight_code
     environment.filters["highlight_html"] = highlight_html
     environment.filters["slugify"] = slugify
+    environment.filters["example_toc_items"] = example_toc_items
     environment.filters["absolutize_links"] = absolutize_links
     # A plain json.dumps for CodePen prefill payload fields, deliberately
     # NOT registered as tojson so Jinja's built-in (HTML-safe) tojson stays
@@ -1614,11 +1719,8 @@ def asset_version() -> str:
     paths = [
         SITE_DIST / "assets/css/moo-ui.css",
         SITE_DIST / "assets/css/catalog.css",
-        *sorted(
-            path
-            for path in (SITE_DIST / "assets/js").rglob("*")
-            if path.is_file()
-        ),
+        SITE_DIST / "assets/js/bootstrap.bundle.min.js",
+        SITE_DIST / "assets/js/catalog/index.js",
     ]
     for path in paths:
         relative = path.relative_to(SITE_DIST).as_posix()

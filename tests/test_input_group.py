@@ -9,6 +9,14 @@ from tests.helpers import ROOT, CatalogTestCase, codepen_payloads_from_output
 COMPONENT = ROOT / "src/components/input_group.html.jinja"
 PAGE = ROOT / "site/src/pages/components/input-group.html.jinja"
 FIXTURE = ROOT / "tests/fixtures/certification/input-group.html"
+CODEPEN_CONFIG_SCRIPT_PATTERN = re.compile(
+    r"\A\s*<script>\s*window\.MooCodePen\s*=\s*\{.*?\};\s*</script>\s*",
+    flags=re.DOTALL,
+)
+
+
+def codepen_payload_html_without_config(payload: dict[str, object]) -> str:
+    return CODEPEN_CONFIG_SCRIPT_PATTERN.sub("", str(payload["html"])).lstrip()
 
 
 class InputGroupTests(CatalogTestCase):
@@ -102,6 +110,17 @@ class InputGroupTests(CatalogTestCase):
 
         self.assertIsNotNone(pressed_rule)
         self.assertIn("color: var(--bs-btn-active-color);", pressed_rule.group("body"))
+
+    def test_ghost_button_hover_surface_uses_single_opacity_transition(self) -> None:
+        source = (ROOT / "scss/components/_input_group.scss").read_text(
+            encoding="utf-8"
+        )
+        core_css = (ROOT / "dist/assets/css/moo.css").read_text(encoding="utf-8")
+
+        self.assertIn("transition: $transition-fade;", source)
+        self.assertNotIn("transition: opacity $transition-fade;", source)
+        self.assertIn("transition: opacity 0.15s linear;", core_css)
+        self.assertNotIn("transition: opacity opacity 0.15s linear;", core_css)
 
     def test_invalid_validation_group_draws_compound_invalid_ring(self) -> None:
         source = (ROOT / "scss/foundations/_focus.scss").read_text(
@@ -203,7 +222,7 @@ class InputGroupTests(CatalogTestCase):
         payloads = self.input_group_codepen_payloads()
         self.assertGreaterEqual(len(payloads), 10)
         for payload in payloads:
-            html = str(payload["html"]).lstrip()
+            html = codepen_payload_html_without_config(payload)
             with self.subTest(title=payload["title"]):
                 self.assertRegex(
                     html,

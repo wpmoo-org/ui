@@ -306,18 +306,18 @@ class CatalogContractTests(CatalogTestCase):
     def test_form_component_preview_fields_center_on_their_control_width(self) -> None:
         styles = read_catalog_styles()
 
-        for selector, token in (
+        for selector, expected_max_width in (
             (
                 ".moo-example__preview--narrow > .field:has(> .combobox)",
-                "var(--moo-combobox-width)",
+                "$moo-combobox-width",
             ),
             (
                 ".moo-example__preview--narrow > .field:has(> .combobox--multiple)",
-                "var(--moo-combobox-multiple-width)",
+                "$moo-combobox-multiple-width",
             ),
             (
                 ".moo-example__preview--medium > .field:has(> .moo-datepicker)",
-                "var(--moo-datepicker-width)",
+                "$moo-datepicker-width",
             ),
             (
                 ".moo-example__preview--narrow > .field:has(> .slider--vertical)",
@@ -335,7 +335,10 @@ class CatalogContractTests(CatalogTestCase):
                 )
                 self.assertIsNotNone(match)
                 assert match is not None
-                self.assertIn(f"max-width: {token};", match.group("body"))
+                self.assertIn(
+                    f"max-width: {expected_max_width};",
+                    match.group("body"),
+                )
 
     def test_catalog_github_link_stays_neutral_when_base_color_changes(self) -> None:
         styles = read_catalog_styles()
@@ -1674,35 +1677,39 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
         self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
 
-    def test_catalog_dark_neutral_border_tokens_are_stable_before_full_stylesheets(self) -> None:
+    def test_catalog_uses_full_build_first_paint_tokens_without_catalog_prepaint(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
-        self.assertIn("{% block critical_prepaint_styles %}{% endblock %}", base)
-        self.assertNotIn("data-moo-catalog-prepaint", base)
-        self.assertIn('data-moo-catalog-prepaint', catalog)
+        self.assertNotIn("<style data-moo-catalog-prepaint", base)
+        self.assertNotIn("<style data-moo-catalog-prepaint", catalog)
+        self.assertNotIn("moo-ui-prepaint.css", base)
+        self.assertNotIn("moo-ui-prepaint.css", catalog)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("introduction/index.html")
-        style_marker = '<style data-moo-catalog-prepaint>'
-        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css'
-        style_index = page.index(style_marker)
-        stylesheet_index = page.index(stylesheet_marker)
-        self.assertLess(style_index, stylesheet_index)
-        critical = page[style_index : page.index("</style>", style_index)]
-        self.assertIn(
-            'html[data-bs-theme="dark"]:not([data-moo-catalog-theme-builder-base-color])',
-            critical,
-        )
+        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css?v='
+        catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.css?v='
+        self.assertIn(stylesheet_marker, page)
+        self.assertNotIn("moo-ui-prepaint.css", page)
+        self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
+
+        full_build = self.read_output("assets/css/moo-ui.css")
+        body_index = full_build.index("body {")
         for token in (
-            "--moo-border: oklch(1 0 0 / 10%);",
+            "--moo-border: #3f3f46;",
             "--bs-border-color: var(--moo-border);",
-            "--bs-card-border-color: var(--moo-border);",
             "--moo-sidebar-border: var(--moo-border);",
+            "--moo-surface: #0a0a0a;",
+            "--bs-body-bg: var(--moo-surface);",
         ):
             with self.subTest(token=token):
-                self.assertIn(token, critical)
+                self.assertLess(full_build.index(token), body_index)
+        self.assertNotIn("moo-catalog__", full_build[:body_index])
+        self.assertNotIn("--bs-card-border-color:", full_build[:body_index])
+        card_rule = full_build[full_build.rindex(".card {") :].split("\n}", 1)[0]
+        self.assertIn("--bs-card-border-color: var(--moo-border);", card_rule)
 
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
@@ -2625,6 +2632,19 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn('class="moo-doc-layout"', page)
                 self.assertIn('class="moo-doc-toc d-none d-xl-block"', page)
                 self.assertIn('aria-label="On this page"', page)
+                toc = re.search(
+                    r'<aside class="moo-doc-toc d-none d-xl-block" '
+                    r'aria-label="On this page">(?P<body>.*?)</aside>',
+                    page,
+                    re.S,
+                )
+                self.assertIsNotNone(toc)
+                toc_parser = LinkParser()
+                toc_parser.feed(toc.group("body") if toc else "")
+                first_link = toc_parser.links[0]
+                self.assertIn("active", (first_link.get("class") or "").split())
+                self.assertEqual(first_link.get("aria-current"), "true")
+                self.assertRegex(first_link.get("href") or "", r"^#[\w-]+$")
                 for target, label in links:
                     self.assertIn(f'href="#{target}"', page)
                     self.assertIn(f">{label}</", page)
@@ -2665,8 +2685,35 @@ class CatalogContractTests(CatalogTestCase):
 
         component = self.read_output("components/accordion.html")
         self.assertIn('data-moo-component-doc-layout', component)
+        toc = re.search(
+            r'(<aside\b[^>]*data-moo-component-toc[^>]*>)(?P<body>.*?)</aside>',
+            component,
+            re.S,
+        )
+        self.assertIsNotNone(toc)
+        toc_opening_tag = toc.group(1) if toc else ""
+        toc_body = toc.group("body") if toc else ""
+        self.assertNotIn(" hidden", toc_opening_tag)
         self.assertIn('data-moo-component-toc', component)
         self.assertIn('aria-label="Component examples"', component)
+        toc_parser = LinkParser()
+        toc_parser.feed(toc_body)
+        for target, label in (
+            ("usage", "Usage"),
+            ("basic", "Basic"),
+            ("rtl", "RTL"),
+        ):
+            with self.subTest(target=target):
+                self.assertIn(f'href="#{target}"', toc_body)
+                self.assertIn(f">{label}</a>", toc_body)
+        usage_link = next(
+            (link for link in toc_parser.links if link.get("href") == "#usage"),
+            None,
+        )
+        self.assertIsNotNone(usage_link)
+        usage_link = usage_link or {}
+        self.assertIn("active", (usage_link.get("class") or "").split())
+        self.assertEqual(usage_link.get("aria-current"), "true")
         self.assertIn('class="moo-doc-main"', component)
         self.assertIn('data-example="basic" aria-labelledby="basic"', component)
         self.assertIn('id="basic">Basic</h2>', component)

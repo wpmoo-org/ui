@@ -57,6 +57,9 @@ The quick demo intentionally follows the floating npm tag:
 
 `moo-ui.css` is a complete Bootstrap CSS build with Moo UI defaults. Use it
 instead of another Bootstrap stylesheet, not in addition to one.
+It emits Moo UI's root/body theme tokens before Bootstrap's reboot body rules;
+if you persist dark or system mode, set `data-bs-theme` synchronously in the
+head before this stylesheet loads.
 
 ## Install
 

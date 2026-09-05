@@ -93,6 +93,48 @@ class BuildTests(CatalogTestCase):
         self.assertTrue((SITE_DIST / "sitemap.xml").is_file())
         self.assertTrue((SITE_DIST / "robots.txt").is_file())
 
+    def test_asset_version_ignores_codepen_only_demo_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            site_dist = Path(tempdir)
+            for relative, contents in (
+                ("assets/css/moo-ui.css", "core css"),
+                ("assets/css/catalog.css", "catalog css"),
+                ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
+                ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/codepen-demo.js", "initial codepen demo"),
+            ):
+                target = site_dist / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(contents, encoding="utf-8")
+
+            original_site_dist = build.SITE_DIST
+            try:
+                build.SITE_DIST = site_dist
+                original_version = build.asset_version()
+                (site_dist / "assets/js/codepen-demo.js").write_text(
+                    "changed codepen demo",
+                    encoding="utf-8",
+                )
+                changed_version = build.asset_version()
+            finally:
+                build.SITE_DIST = original_site_dist
+
+        self.assertEqual(changed_version, original_version)
+
+    def test_example_toc_items_preserve_heading_text_order_with_inline_markup(
+        self,
+    ) -> None:
+        html = """
+        <div class="moo-component-examples">
+          <h2 id="install">Use <code>moo-ui.css</code> First</h2>
+        </div>
+        """
+
+        self.assertEqual(
+            build.example_toc_items(html),
+            [{"id": "install", "label": "Use moo-ui.css First"}],
+        )
+
     def test_build_writes_canonical_sitemap(self) -> None:
         result = self.run_build()
 

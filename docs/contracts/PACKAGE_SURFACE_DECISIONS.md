@@ -24,3 +24,9 @@ as documented source facades. `./scss/config` is the public variable allow-list;
 the other entries let hosts compile the full or scoped Moo UI layer without
 importing private partial paths. `tests/test_package.py` verifies aggregate
 imports, export parity, and package-read side effects for this public surface.
+
+The full `./moo-ui.css` build emits Moo UI's standalone root/body theme bridge
+before Bootstrap's reboot body rules. This keeps the full replacement path
+self-contained for pages that set `data-bs-theme` synchronously before loading
+the stylesheet, without adding a second public CSS entrypoint to the scoped
+`./moo.css` migration contract.
