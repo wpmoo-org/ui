@@ -130,6 +130,71 @@ class CatalogBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_form_preview_field_wrappers_center_token_width_controls(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            evidence = BrowserEvidence(page)
+
+            for path, heading, preview_selector, control_selector in (
+                (
+                    "/site-dist/components/combobox/",
+                    "Combobox",
+                    ".moo-example__preview--narrow",
+                    ".combobox",
+                ),
+                (
+                    "/site-dist/components/datepicker/",
+                    "Date Picker",
+                    ".moo-example__preview--medium",
+                    ".moo-datepicker",
+                ),
+            ):
+                with self.subTest(path=path):
+                    response = page.goto(
+                        f"{self.base_url}{path}",
+                        wait_until="domcontentloaded",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, CERTIFICATION_CASES[0])
+                    expect(page.get_by_role("heading", name=heading, level=1)).to_be_visible()
+
+                    alignment = page.evaluate(
+                        """
+                        ([previewSelector, controlSelector]) => {
+                          const preview = document.querySelector(
+                            `.moo-component-examples > .moo-example__surface ${previewSelector}`
+                          );
+                          const control = preview?.querySelector(controlSelector);
+                          if (!preview || !control) {
+                            return null;
+                          }
+                          const previewRect = preview.getBoundingClientRect();
+                          const controlRect = control.getBoundingClientRect();
+                          const previewCenter = previewRect.left + previewRect.width / 2;
+                          const controlCenter = controlRect.left + controlRect.width / 2;
+                          return {
+                            controlCenter,
+                            controlWidth: controlRect.width,
+                            delta: Math.abs(controlCenter - previewCenter),
+                            previewCenter,
+                            previewWidth: previewRect.width,
+                          };
+                        }
+                        """,
+                        [preview_selector, control_selector],
+                    )
+
+                    self.assertIsNotNone(alignment)
+                    assert alignment is not None
+                    self.assertGreater(alignment["controlWidth"], 0, alignment)
+                    self.assertLessEqual(alignment["delta"], 1, alignment)
+
+            evidence.assert_clean()
+        finally:
+            context.close()
+
 
 if __name__ == "__main__":
     unittest.main()

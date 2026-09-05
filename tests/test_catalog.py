@@ -306,18 +306,18 @@ class CatalogContractTests(CatalogTestCase):
     def test_form_component_preview_fields_center_on_their_control_width(self) -> None:
         styles = read_catalog_styles()
 
-        for selector, token in (
+        for selector, expected_max_width in (
             (
                 ".moo-example__preview--narrow > .field:has(> .combobox)",
-                "var(--moo-combobox-width)",
+                "$moo-combobox-width",
             ),
             (
                 ".moo-example__preview--narrow > .field:has(> .combobox--multiple)",
-                "var(--moo-combobox-multiple-width)",
+                "$moo-combobox-multiple-width",
             ),
             (
                 ".moo-example__preview--medium > .field:has(> .moo-datepicker)",
-                "var(--moo-datepicker-width)",
+                "$moo-datepicker-width",
             ),
             (
                 ".moo-example__preview--narrow > .field:has(> .slider--vertical)",
@@ -335,7 +335,10 @@ class CatalogContractTests(CatalogTestCase):
                 )
                 self.assertIsNotNone(match)
                 assert match is not None
-                self.assertIn(f"max-width: {token};", match.group("body"))
+                self.assertIn(
+                    f"max-width: {expected_max_width};",
+                    match.group("body"),
+                )
 
     def test_catalog_github_link_stays_neutral_when_base_color_changes(self) -> None:
         styles = read_catalog_styles()
