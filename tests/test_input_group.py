@@ -111,6 +111,17 @@ class InputGroupTests(CatalogTestCase):
         self.assertIsNotNone(pressed_rule)
         self.assertIn("color: var(--bs-btn-active-color);", pressed_rule.group("body"))
 
+    def test_ghost_button_hover_surface_uses_single_opacity_transition(self) -> None:
+        source = (ROOT / "scss/components/_input_group.scss").read_text(
+            encoding="utf-8"
+        )
+        core_css = (ROOT / "dist/assets/css/moo.css").read_text(encoding="utf-8")
+
+        self.assertIn("transition: $transition-fade;", source)
+        self.assertNotIn("transition: opacity $transition-fade;", source)
+        self.assertIn("transition: opacity 0.15s linear;", core_css)
+        self.assertNotIn("transition: opacity opacity 0.15s linear;", core_css)
+
     def test_invalid_validation_group_draws_compound_invalid_ring(self) -> None:
         source = (ROOT / "scss/foundations/_focus.scss").read_text(
             encoding="utf-8"

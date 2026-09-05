@@ -309,7 +309,7 @@ $moo-form-focus-ring-color: var(--moo-ring) !default;
 // .offcanvas-backdrop selectors; Moo keeps their visual treatment aligned via
 // one token set instead of per-component backdrop rules.
 $moo-overlay-backdrop-opacity: 1 !default;
-$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;
+$moo-overlay-backdrop-bg: color-mix(in srgb, #0a0a0a 10%, transparent) !default;
 $moo-overlay-backdrop-filter: blur(8px) !default;
 
 // A quieter elevation scale and the extra radius step, applied UI-wide through
