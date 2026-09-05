@@ -63,7 +63,6 @@
   --bs-secondary-bg: var(--moo-muted-surface);
   --bs-secondary-bg-rgb: #{to-rgb($moo-muted-surface)};
   --bs-border-color: var(--moo-border);
-  --bs-card-border-color: var(--moo-border);
   --bs-tertiary-bg: #{$body-tertiary-bg};
   --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
   --bs-tertiary-color: #{$body-tertiary-color};
@@ -111,7 +110,6 @@
   --bs-secondary-bg: var(--moo-muted-surface);
   --bs-secondary-bg-rgb: #{to-rgb($moo-muted-surface-dark)};
   --bs-border-color: var(--moo-border);
-  --bs-card-border-color: var(--moo-border);
   --bs-tertiary-bg: #{$body-tertiary-bg-dark};
   --bs-tertiary-bg-rgb: #{to-rgb($body-tertiary-bg-dark)};
   --bs-tertiary-color: #{$body-tertiary-color-dark};

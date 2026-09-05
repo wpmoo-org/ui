@@ -89,6 +89,10 @@ class CardTests(CatalogTestCase):
             source,
         )
         self.assertIn(
+            "--bs-card-border-color: var(--moo-border);",
+            source,
+        )
+        self.assertNotIn(
             "--bs-card-border-color: color-mix(in srgb, var(--bs-body-color) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});",
             source,
         )
@@ -104,7 +108,6 @@ class CardTests(CatalogTestCase):
             "$moo-card-spacing",
             "$moo-card-spacing-sm",
             "$moo-card-bg-mix",
-            "$moo-card-border-mix",
             "$moo-card-bg-mix-dark",
             "$moo-card-footer-bg",
             "$moo-card-footer-bg-dark",
@@ -115,7 +118,6 @@ class CardTests(CatalogTestCase):
                     rf"(?m)^{re.escape(variable)}:\s*[^;]+!default;",
                     f"{variable} must remain an overridable Sass knob",
                 )
-        self.assertIn("$moo-card-border-mix-base: transparent !default;", settings)
         self.assertIn(
             ':where([data-bs-theme="dark"]) &:not([data-bs-theme="light"]):not([data-bs-theme="light"] *)',
             source,

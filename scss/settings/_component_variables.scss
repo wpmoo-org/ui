@@ -186,13 +186,10 @@ $card-title-letter-spacing: -0.01em !default;
 $moo-card-spacing: 1rem !default;
 $moo-card-spacing-sm: 0.75rem !default;
 
-// Card surface and border blends: mix the muted surface over the base surface
-// (and foreground over a transparent base) so cards keep a subtle tint that
-// tracks the runtime theme without hardcoding a color.
+// Card surface blends mix the muted surface over the base surface so cards keep
+// a subtle tint that tracks the runtime theme without hardcoding a color.
 $moo-card-bg-mix: 5% !default;
 $moo-card-bg-mix-dark: 30% !default;
-$moo-card-border-mix: 10% !default;
-$moo-card-border-mix-base: transparent !default;
 
 // Bootstrap exposes one card-cap background for both headers and footers, but
 // the reference needs no header fill and a separately tuned footer surface.

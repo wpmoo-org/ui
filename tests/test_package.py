@@ -905,6 +905,19 @@ for (const specifier of [
         self.assertNotIn('.venv/bin/python -m unittest discover -s tests -v', workflow)
         self.assertNotIn('.venv/bin/python build.py', workflow)
 
+    def test_ci_checkout_is_pinned_and_drops_persisted_credentials(self) -> None:
+        workflow = (ROOT / ".github/workflows/ui-ci.yml").read_text(
+            encoding="utf-8"
+        )
+        checkout_step = workflow.split(
+            "      - name: Check out repository\n",
+            1,
+        )[1].split("\n\n      - name:", 1)[0]
+
+        self.assertRegex(checkout_step, r"uses: actions/checkout@[0-9a-f]{40}\b")
+        self.assertIn("persist-credentials: false", checkout_step)
+        self.assertIn("fetch-depth: 0", checkout_step)
+
     def test_publish_workflow_uses_release_test_gate(self) -> None:
         workflow = (ROOT / ".github/workflows/npm-publish.yml").read_text(
             encoding="utf-8"

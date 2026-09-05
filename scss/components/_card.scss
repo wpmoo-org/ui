@@ -7,7 +7,7 @@
 .card {
   --bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix}, var(--bs-body-bg));
   --bs-card-color: var(--moo-foreground);
-  --bs-card-border-color: color-mix(in srgb, var(--bs-body-color) #{$moo-card-border-mix}, #{$moo-card-border-mix-base});
+  --bs-card-border-color: var(--moo-border);
   // The reference uses a 14px corner; Bootstrap's shared radius-xl is the
   // closest token and wins the delta (12px here) per the token-first rule.
   --bs-card-border-radius: var(--bs-border-radius-xl);

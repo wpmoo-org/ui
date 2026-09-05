@@ -349,6 +349,10 @@ class TestTierRunnerTests(unittest.TestCase):
             "tests.test_package.PackageMetadataTests.test_ci_keeps_ui_tests_name_and_runs_selected_tier",
             command_text,
         )
+        self.assertIn(
+            "tests.test_package.PackageMetadataTests.test_ci_checkout_is_pinned_and_drops_persisted_credentials",
+            command_text,
+        )
         self.assertIn("tests.test_certification_browser", command_text)
 
     def test_only_browser_and_release_tiers_need_playwright(self) -> None:

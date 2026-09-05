@@ -1700,7 +1700,6 @@ class CatalogContractTests(CatalogTestCase):
         for token in (
             "--moo-border: #3f3f46;",
             "--bs-border-color: var(--moo-border);",
-            "--bs-card-border-color: var(--moo-border);",
             "--moo-sidebar-border: var(--moo-border);",
             "--moo-surface: #0a0a0a;",
             "--bs-body-bg: var(--moo-surface);",
@@ -1708,6 +1707,9 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(token=token):
                 self.assertLess(full_build.index(token), body_index)
         self.assertNotIn("moo-catalog__", full_build[:body_index])
+        self.assertNotIn("--bs-card-border-color:", full_build[:body_index])
+        card_rule = full_build[full_build.rindex(".card {") :].split("\n}", 1)[0]
+        self.assertIn("--bs-card-border-color: var(--moo-border);", card_rule)
 
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()

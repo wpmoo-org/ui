@@ -140,6 +140,10 @@ TARGETED_MODULE_RULES = [
                 "tests.test_package.PackageMetadataTests",
                 "test_ci_keeps_ui_tests_name_and_runs_selected_tier",
             ),
+            test_method(
+                "tests.test_package.PackageMetadataTests",
+                "test_ci_checkout_is_pinned_and_drops_persisted_credentials",
+            ),
         ],
     ),
     (
