@@ -2627,6 +2627,19 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn('class="moo-doc-layout"', page)
                 self.assertIn('class="moo-doc-toc d-none d-xl-block"', page)
                 self.assertIn('aria-label="On this page"', page)
+                toc = re.search(
+                    r'<aside class="moo-doc-toc d-none d-xl-block" '
+                    r'aria-label="On this page">(?P<body>.*?)</aside>',
+                    page,
+                    re.S,
+                )
+                self.assertIsNotNone(toc)
+                toc_parser = LinkParser()
+                toc_parser.feed(toc.group("body") if toc else "")
+                first_link = toc_parser.links[0]
+                self.assertIn("active", (first_link.get("class") or "").split())
+                self.assertEqual(first_link.get("aria-current"), "true")
+                self.assertRegex(first_link.get("href") or "", r"^#[\w-]+$")
                 for target, label in links:
                     self.assertIn(f'href="#{target}"', page)
                     self.assertIn(f">{label}</", page)
