@@ -25,6 +25,13 @@ TIERS = ("quick", "browser-smoke", "browser-full", "release")
 TIER_ORDER = {tier: index for index, tier in enumerate(TIERS)}
 DEV_AUTO_MAX_TIER = "browser-full"
 
+
+def test_method(test_case: str, method: str) -> str:
+    """Return a unittest selector for one method on a test case."""
+
+    return f"{test_case}.{method}"
+
+
 QUICK_BASE_MODULES = [
     "tests.test_build",
     "tests.test_core_docs_boundary",
@@ -53,8 +60,10 @@ BROWSER_FULL_MODULES = [
     "tests.test_certification_browser",
     "tests.test_datatable_browser",
     "tests.test_conformance_runner.ConformanceRunnerTests",
-    "tests.test_conformance_kit_packaging.PackagingTests."
-    "test_extracted_artifact_is_self_sufficient",
+    test_method(
+        "tests.test_conformance_kit_packaging.PackagingTests",
+        "test_extracted_artifact_is_self_sufficient",
+    ),
     "tests.test_host_shell.HostShellTests.test_runner_passes_against_the_host_shell",
 ]
 
@@ -127,25 +136,33 @@ TARGETED_MODULE_RULES = [
         [".github/workflows/ui-ci.yml"],
         [
             "tests.test_package.PackageMetadataTests.test_ci_runs_for_main_and_dev_pushes",
-            "tests.test_package.PackageMetadataTests."
-            "test_ci_keeps_ui_tests_name_and_runs_selected_tier",
+            test_method(
+                "tests.test_package.PackageMetadataTests",
+                "test_ci_keeps_ui_tests_name_and_runs_selected_tier",
+            ),
         ],
     ),
     (
         [".github/workflows/npm-publish.yml"],
         [
-            "tests.test_package.PackageMetadataTests."
-            "test_publish_workflow_requires_a_matching_existing_tag_ref",
-            "tests.test_package.PackageMetadataTests."
-            "test_publish_workflow_never_tags_a_prerelease_as_npm_latest",
+            test_method(
+                "tests.test_package.PackageMetadataTests",
+                "test_publish_workflow_requires_a_matching_existing_tag_ref",
+            ),
+            test_method(
+                "tests.test_package.PackageMetadataTests",
+                "test_publish_workflow_never_tags_a_prerelease_as_npm_latest",
+            ),
             "tests.test_package.PackageMetadataTests.test_publish_workflow_uses_release_test_gate",
         ],
     ),
     (
         [".github/workflows/release-tag.yml"],
         [
-            "tests.test_package.PackageMetadataTests."
-            "test_release_tag_workflow_creates_lightweight_tags",
+            test_method(
+                "tests.test_package.PackageMetadataTests",
+                "test_release_tag_workflow_creates_lightweight_tags",
+            ),
         ],
     ),
     (
