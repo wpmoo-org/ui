@@ -40,6 +40,12 @@ function normalizedBuilderPreference(candidate = {}) {
   return normalizeThemeBuilderState(candidate);
 }
 
+function isDefaultBuilderPreference(preference) {
+  return Object.entries(THEME_BUILDER_DEFAULTS).every(
+    ([key, value]) => preference[key] === value
+  );
+}
+
 function applyTokenSet(style, tokenNames, tokenValues = {}) {
   if (!style) return;
   tokenNames.forEach((token) => {
@@ -98,6 +104,7 @@ export function initSettingsPanel(root = document) {
     const reset = sheet.querySelector("[data-moo-settings-reset]");
     let builderTransitionGeneration = 0;
     let builderPreference = null;
+    let builderPreferenceHasOverrides = false;
     let builderPreview = null;
     const listen = (target, type, handler) => {
       target?.addEventListener(type, handler);
@@ -144,7 +151,10 @@ export function initSettingsPanel(root = document) {
         input.checked = input.value === preference;
       });
       syncThemeButton();
-      applyBuilderPreference(readBuilderPreference(), { persist: false });
+      applyBuilderPreference(readBuilderPreference(), {
+        persist: false,
+        clearDefaultTokens: builderPreferenceHasOverrides,
+      });
     };
 
     themeInputs.forEach((input) => {
@@ -192,12 +202,16 @@ export function initSettingsPanel(root = document) {
       }
       try {
         const raw = view.localStorage.getItem(BUILDER_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : {};
+        const parsed = raw ? JSON.parse(raw) : null;
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
           const normalized = normalizedBuilderPreference(parsed);
-          if (raw && JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+          const hasOverrides = !isDefaultBuilderPreference(normalized);
+          if (hasOverrides && JSON.stringify(parsed) !== JSON.stringify(normalized)) {
             persistBuilderPreference(normalized);
+          } else if (!hasOverrides) {
+            removeBuilderPreferenceStorage();
           }
+          builderPreferenceHasOverrides = hasOverrides;
           builderPreference = normalized;
           return normalized;
         }
@@ -205,6 +219,7 @@ export function initSettingsPanel(root = document) {
         /* Storage can be unavailable or contain stale JSON. */
       }
       builderPreference = normalizedBuilderPreference();
+      builderPreferenceHasOverrides = false;
       return builderPreference;
     };
 
@@ -214,6 +229,14 @@ export function initSettingsPanel(root = document) {
           BUILDER_STORAGE_KEY,
           JSON.stringify(preference)
         );
+      } catch (_) {
+        /* Storage is best-effort. */
+      }
+    };
+
+    const removeBuilderPreferenceStorage = () => {
+      try {
+        view.localStorage.removeItem(BUILDER_STORAGE_KEY);
       } catch (_) {
         /* Storage is best-effort. */
       }
@@ -264,23 +287,39 @@ export function initSettingsPanel(root = document) {
       applyTokenSet(
         documentElement.style,
         PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
-        resolveThemeBuilderTokens(preference, {
-          theme: documentElement.dataset.bsTheme,
-          surface: "catalog",
-        })
+        isDefaultBuilderPreference(preference)
+          ? {}
+          : resolveThemeBuilderTokens(preference, {
+              theme: documentElement.dataset.bsTheme,
+              surface: "catalog",
+            })
       );
     };
 
-    const applyBuilderPreference = (candidate, { persist = true } = {}) => {
+    const applyBuilderPreference = (
+      candidate,
+      { persist = true, clearDefaultTokens = true } = {}
+    ) => {
       const preference = normalizedBuilderPreference(candidate);
+      const hasOverrides = !isDefaultBuilderPreference(preference);
       builderPreview = null;
       builderPreference = preference;
-      withBuilderTransitionSuppressed(() => {
+      builderPreferenceHasOverrides = hasOverrides;
+      const sync = () => {
         applyBuilderTokens(preference);
         syncBuilderControls(preference);
-      });
+      };
+      if (hasOverrides || clearDefaultTokens) {
+        withBuilderTransitionSuppressed(sync);
+      } else {
+        syncBuilderControls(preference);
+      }
       if (persist) {
-        persistBuilderPreference(preference);
+        if (hasOverrides) {
+          persistBuilderPreference(preference);
+        } else {
+          removeBuilderPreferenceStorage();
+        }
       }
       return preference;
     };
@@ -341,7 +380,10 @@ export function initSettingsPanel(root = document) {
       });
     });
 
-    applyBuilderPreference(readBuilderPreference(), { persist: false });
+    applyBuilderPreference(readBuilderPreference(), {
+      persist: false,
+      clearDefaultTokens: builderPreferenceHasOverrides,
+    });
 
     if (typeof view.MutationObserver === "function") {
       const observer = new view.MutationObserver((mutations) => {
@@ -350,7 +392,10 @@ export function initSettingsPanel(root = document) {
             (mutation) => mutation.attributeName === "data-bs-theme"
           )
         ) {
-          applyBuilderPreference(readBuilderPreference(), { persist: false });
+          applyBuilderPreference(readBuilderPreference(), {
+            persist: false,
+            clearDefaultTokens: builderPreferenceHasOverrides,
+          });
           syncThemeButton();
         }
       });

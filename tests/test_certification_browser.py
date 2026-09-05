@@ -2285,6 +2285,30 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertFalse(default.is_checked())
 
                 expect(checked).to_be_checked()
+                checked_mark = checked.evaluate(
+                    """
+                    element => {
+                      const box = getComputedStyle(element);
+                      const mark = getComputedStyle(element, "::after");
+                      return {
+                        bgImage: box.backgroundImage,
+                        content: mark.content,
+                        width: Number.parseFloat(mark.width),
+                        height: Number.parseFloat(mark.height),
+                        borderRightWidth: Number.parseFloat(mark.borderRightWidth),
+                        borderBottomWidth: Number.parseFloat(mark.borderBottomWidth),
+                        borderColor: mark.borderColor,
+                      };
+                    }
+                    """
+                )
+                self.assertEqual(checked_mark["bgImage"], "none")
+                self.assertEqual(checked_mark["content"], '""')
+                self.assertGreater(checked_mark["width"], 0)
+                self.assertGreater(checked_mark["height"], 0)
+                self.assertGreater(checked_mark["borderRightWidth"], 0)
+                self.assertGreater(checked_mark["borderBottomWidth"], 0)
+                self.assertNotEqual(checked_mark["borderColor"], "rgba(0, 0, 0, 0)")
                 checked.focus()
                 expect(checked).to_be_focused()
                 checked.press("Space")

@@ -546,9 +546,38 @@ body {
    clean `html` for the payload below, before this button exists), once
    with this macro's own output passed back in (for the page actually
    shown to a visitor) -- see any Examples page for the pattern. #}
+{% macro component_codepen_config_script(component_slug, component_label) -%}
+  {% set component_config = namespace(found=false, label=component_label, description="") %}
+  {% for component in catalog %}
+    {% if component.slug == component_slug %}
+      {% set component_config.found = true %}
+      {% set component_config.label = component.label %}
+      {% set component_config.description = component.description %}
+    {% endif %}
+  {% endfor %}
+  {% if not component_config.found %}
+    {{ fail("Component CodePen payload is missing registry metadata for " ~ component_slug) }}
+  {% endif %}
+<script>
+window.MooCodePen = {{ {
+  "kind": "component",
+  "components": [
+    {
+      "slug": component_slug,
+      "label": component_config.label,
+      "description": component_config.description,
+    }
+  ],
+} | tojson }};
+</script>
+{%- endmacro %}
+
 {% macro codepen_button(title, description, html, css, tags, js="", js_external="", js_module=false, editors="110", label="Open in CodePen", icon="code", extra_class="", component_slug="", component_label="") -%}
   {% set is_component_codepen = component_slug and component_label %}
   {% set resolved_html %}
+{% if is_component_codepen %}
+{{ component_codepen_config_script(component_slug, component_label) }}
+{% endif %}
 {{ html | safe }}
   {% endset %}
   {% set resolved_css %}

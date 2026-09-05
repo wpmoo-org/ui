@@ -61,6 +61,7 @@
     "tooltip": "Tooltip",
     "typography": "Typography"
   };
+  var COMPONENT_DESCRIPTIONS = {};
   var COMPONENT_DETECTORS = [
     { slug: "accordion", selector: ".accordion" },
     { slug: "alert-dialog", selector: ".modal--alert" },
@@ -194,7 +195,8 @@
   function componentFromSlug(slug) {
     return normalizeComponent({
       slug: slug,
-      label: COMPONENT_LABELS[slug] || labelFromSlug(slug)
+      label: COMPONENT_LABELS[slug] || labelFromSlug(slug),
+      description: COMPONENT_DESCRIPTIONS[slug] || ""
     });
   }
 

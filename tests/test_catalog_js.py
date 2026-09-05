@@ -786,6 +786,7 @@ const fixtures = [
   {
     label: "invalid enums dark",
     theme: "dark",
+    applies: false,
     state: {
       style: "broken",
       baseColor: "broken",
@@ -795,6 +796,12 @@ const fixtures = [
       bodyFont: "broken",
       radius: "broken",
     },
+  },
+  {
+    label: "stored defaults dark",
+    theme: "dark",
+    applies: false,
+    state: {},
   },
 ];
 
@@ -869,14 +876,21 @@ function runInlineScript(fixture) {
 const reports = fixtures.map((fixture) => {
   const actual = runInlineScript(fixture);
   const state = normalizeThemeBuilderState(fixture.state);
-  const expectedTokens = resolveThemeBuilderTokens(state, {
-    theme: fixture.theme,
-    surface: "catalog",
-  });
+  const expectedTokens =
+    fixture.applies === false
+      ? {}
+      : resolveThemeBuilderTokens(state, {
+          theme: fixture.theme,
+          surface: "catalog",
+        });
+  const expectedData =
+    fixture.applies === false
+      ? { bsTheme: fixture.theme }
+      : expectedDataset(state, fixture.theme);
   return {
     label: fixture.label,
     tokenDiff: diffObject(actual.tokens, expectedTokens),
-    datasetDiff: diffObject(actual.dataset, expectedDataset(state, fixture.theme)),
+    datasetDiff: diffObject(actual.dataset, expectedData),
   };
 });
 const failures = reports.filter(
@@ -909,6 +923,7 @@ console.log(JSON.stringify(reports.map((report) => report.label)));
                 "legacy style ignored",
                 "full modern light",
                 "invalid enums dark",
+                "stored defaults dark",
             ],
         )
 
@@ -1273,6 +1288,184 @@ console.log(JSON.stringify({
                 {"href": "#application-shell", "text": "Application shell"},
                 {"href": "#composition", "text": "Composition"},
                 {"href": "#sidebar-html-anatomy", "text": "HTML Anatomy"},
+            ],
+        )
+
+    def test_component_toc_preserves_server_rendered_links_without_duplicates(
+        self,
+    ) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initToc } from "./site/src/js/catalog/toc.js";
+
+const elementsById = new Map();
+let top = 0;
+
+function makeClassList(element) {
+  return {
+    toggle(name, force) {
+      const classes = new Set((element.className || "").split(/\\s+/).filter(Boolean));
+      if (force) classes.add(name);
+      else classes.delete(name);
+      element.className = Array.from(classes).join(" ");
+    },
+  };
+}
+
+function element(tagName, attrs = {}, textContent = "") {
+  const attributes = new Map(Object.entries(attrs));
+  const node = {
+    nodeType: 1,
+    tagName: tagName.toUpperCase(),
+    className: attrs.class || "",
+    textContent,
+    children: [],
+    hidden: false,
+    style: {},
+    classList: null,
+    appendChild(child) {
+      this.children.push(child);
+      child.parentElement = this;
+      return child;
+    },
+    remove() {
+      if (!this.parentElement) return;
+      this.parentElement.children = this.parentElement.children.filter(
+        (child) => child !== this,
+      );
+    },
+    getAttribute(name) {
+      if (name === "class") return this.className;
+      if (name === "href" && this.href) return this.href;
+      return attributes.has(name) ? attributes.get(name) : null;
+    },
+    setAttribute(name, value) {
+      attributes.set(name, String(value));
+      if (name === "class") this.className = String(value);
+      if (name === "href") this.href = String(value);
+    },
+    removeAttribute(name) {
+      attributes.delete(name);
+    },
+    addEventListener() {},
+    removeEventListener() {},
+    matches(selector) {
+      if (selector === "h2[id]") return this.tagName === "H2" && Boolean(this.getAttribute("id"));
+      if (selector === ".moo-example[aria-labelledby]") {
+        return (this.className || "").split(/\\s+/).includes("moo-example")
+          && Boolean(this.getAttribute("aria-labelledby"));
+      }
+      return false;
+    },
+    querySelector(selector) {
+      if (selector === "[data-moo-component-toc-nav]") {
+        return this.children.find((child) => child.getAttribute("data-moo-component-toc-nav") !== null) || null;
+      }
+      return null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+    getBoundingClientRect() {
+      top += 48;
+      return { top, bottom: top + 24, left: 0, right: 160, width: 160, height: 24 };
+    },
+  };
+  node.classList = makeClassList(node);
+  const id = node.getAttribute("id");
+  if (id) elementsById.set(id, node);
+  return node;
+}
+
+const view = {
+  Node: { DOCUMENT_POSITION_FOLLOWING: 4 },
+  location: { hash: "" },
+  history: { pushState() {} },
+  scrollX: 0,
+  scrollY: 0,
+  setTimeout(callback) { callback(); return 1; },
+  clearTimeout() {},
+  requestAnimationFrame(callback) { callback(); return 1; },
+  cancelAnimationFrame() {},
+  getComputedStyle() { return { fontSize: "16px" }; },
+  matchMedia() { return { matches: false }; },
+  scrollTo() {},
+  addEventListener() {},
+  removeEventListener() {},
+};
+
+const componentNav = element("nav", { "data-moo-component-toc-nav": "" });
+const componentToc = element("aside", { "data-moo-component-toc": "" });
+componentToc.hidden = true;
+componentToc.appendChild(componentNav);
+componentNav.appendChild(element("a", { class: "nav-link", href: "#usage" }, "Usage"));
+componentNav.appendChild(element("a", { class: "nav-link", href: "#basic" }, "Basic"));
+
+const usage = element("h2", { id: "usage" }, "Usage");
+const basicTitle = element("h2", { id: "basic" }, "Basic");
+const basic = element(
+  "section",
+  { class: "moo-example", "aria-labelledby": "basic" },
+);
+const componentExamples = element("div", { class: "moo-component-examples" });
+componentExamples.children = [usage, basic];
+
+const main = element("main", { class: "moo-catalog__main" });
+main.scrollTop = 0;
+main.clientHeight = 800;
+main.scrollHeight = 1600;
+main.scrollTo = ({ top: nextTop }) => { main.scrollTop = nextTop; };
+
+const root = {
+  defaultView: view,
+  documentElement: element("html"),
+  createElement: (tagName) => element(tagName),
+  getElementById: (id) => elementsById.get(id) || null,
+  querySelector(selector) {
+    if (selector === "[data-moo-component-toc]") return componentToc;
+    if (selector === ".moo-component-examples") return componentExamples;
+    if (selector === ".moo-catalog__main") return main;
+    if (selector === "[data-moo-chart-template-nav]") return null;
+    return null;
+  },
+  querySelectorAll(selector) {
+    if (selector === ".moo-doc-toc .nav-link") {
+      return componentNav.children;
+    }
+    return [];
+  },
+};
+
+initToc(root);
+
+console.log(JSON.stringify({
+  hidden: componentToc.hidden,
+  links: componentNav.children.map((link) => ({
+    href: link.getAttribute("href"),
+    text: link.textContent,
+  })),
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertFalse(case["hidden"])
+        self.assertEqual(
+            case["links"],
+            [
+                {"href": "#usage", "text": "Usage"},
+                {"href": "#basic", "text": "Basic"},
             ],
         )
 
@@ -1769,7 +1962,7 @@ console.log(JSON.stringify({
         self.assertFalse(case["afterReset"]["styleDataset"])
         self.assertFalse(case["afterReset"]["baseDataset"])
         self.assertFalse(case["afterReset"]["themeDataset"])
-        self.assertEqual(case["afterReset"]["chart1"], "rgb(82, 82, 91)")
+        self.assertEqual(case["afterReset"]["chart1"], "")
         self.assertEqual(case["afterReset"]["bodyBg"], "")
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")
         self.assertEqual(case["afterReset"]["primary"], "")
@@ -1778,6 +1971,84 @@ console.log(JSON.stringify({
         self.assertEqual(case["afterReset"]["selectedTheme"], "neutral")
         self.assertEqual(case["afterReset"]["selectedChart"], "neutral")
         self.assertIsNone(case["afterReset"]["storedBuilder"])
+
+    def test_settings_theme_builder_does_not_write_default_tokens_without_storage(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+
+const writes = [];
+const storage = new Map();
+const localStorage = {
+  getItem: (key) => (storage.has(key) ? storage.get(key) : null),
+  setItem: (key, value) => storage.set(key, String(value)),
+  removeItem: (key) => storage.delete(key),
+};
+
+function makeEmitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => {
+    listeners.set(type, [...(listeners.get(type) || []), handler]);
+  };
+  node.removeEventListener = (type, handler) => {
+    listeners.set(
+      type,
+      (listeners.get(type) || []).filter((candidate) => candidate !== handler)
+    );
+  };
+  return node;
+}
+
+const sheet = makeEmitter({
+  querySelectorAll: () => [],
+  querySelector: () => null,
+});
+const documentElement = {
+  dataset: { bsTheme: "dark" },
+  dir: "ltr",
+  style: {
+    setProperty: (name, value) => writes.push(["set", name, value]),
+    removeProperty: (name) => writes.push(["remove", name]),
+    getPropertyValue: () => "",
+  },
+};
+const root = {
+  documentElement,
+  defaultView: {
+    localStorage,
+    matchMedia: () => ({ matches: true }),
+    requestAnimationFrame: (callback) => callback(),
+    setTimeout: (callback) => callback(),
+  },
+  querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
+};
+
+const dispose = initSettingsPanel(root);
+const report = {
+  writes,
+  dataset: { ...documentElement.dataset },
+  storedBuilder: localStorage.getItem("moo:theme-builder"),
+};
+dispose();
+console.log(JSON.stringify(report));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["writes"], [])
+        self.assertEqual(case["dataset"], {"bsTheme": "dark"})
+        self.assertIsNone(case["storedBuilder"])
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(

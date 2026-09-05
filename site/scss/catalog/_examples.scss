@@ -249,11 +249,11 @@
 }
 
 .moo-example__preview--narrow > .field:has(> .combobox) {
-  max-width: var(--moo-combobox-width);
+  max-width: $moo-combobox-width;
 }
 
 .moo-example__preview--narrow > .field:has(> .combobox--multiple) {
-  max-width: var(--moo-combobox-multiple-width);
+  max-width: $moo-combobox-multiple-width;
 }
 
 .moo-example__preview--narrow > .field:has(> .slider--vertical) {
@@ -269,7 +269,7 @@
 }
 
 .moo-example__preview--medium > .field:has(> .moo-datepicker) {
-  max-width: var(--moo-datepicker-width);
+  max-width: $moo-datepicker-width;
 }
 
 .moo-example__preview-frame {

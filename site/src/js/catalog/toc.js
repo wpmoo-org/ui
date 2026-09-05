@@ -43,18 +43,21 @@ export function initToc(root = document) {
     timers.clear();
   };
 
-  if (componentToc && componentNav && componentSections.length > 0) {
-    componentSections.forEach(({ titleId, title }) => {
-      if (!titleId || !title?.textContent?.trim()) {
-        return;
-      }
-      const link = root.createElement("a");
-      link.className = "nav-link";
-      link.href = `#${titleId}`;
-      link.textContent = title.textContent.trim();
-      componentNav.appendChild(link);
-      generatedLinks.push(link);
-    });
+  if (componentToc && componentNav) {
+    const hasServerRenderedLinks = componentNav.children.length > 0;
+    if (!hasServerRenderedLinks && componentSections.length > 0) {
+      componentSections.forEach(({ titleId, title }) => {
+        if (!titleId || !title?.textContent?.trim()) {
+          return;
+        }
+        const link = root.createElement("a");
+        link.className = "nav-link";
+        link.href = `#${titleId}`;
+        link.textContent = title.textContent.trim();
+        componentNav.appendChild(link);
+        generatedLinks.push(link);
+      });
+    }
     componentToc.hidden = componentNav.children.length === 0;
   }
 

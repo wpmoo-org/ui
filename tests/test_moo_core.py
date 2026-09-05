@@ -192,7 +192,7 @@ class MooCoreTests(CatalogTestCase):
 
         for knob in (
             "$moo-overlay-backdrop-opacity: 1 !default;",
-            "$moo-overlay-backdrop-bg: color-mix(in srgb, var(--bs-black) 10%, transparent) !default;",
+            "$moo-overlay-backdrop-bg: color-mix(in srgb, #0a0a0a 10%, transparent) !default;",
             "$moo-overlay-backdrop-filter: blur(8px) !default;",
         ):
             self.assertIn(knob, settings)
@@ -236,7 +236,11 @@ class MooCoreTests(CatalogTestCase):
             core_css,
         )
         self.assertIn(
-            "background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, var(--bs-black) 10%, transparent))",
+            "background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, #0a0a0a 10%, transparent))",
+            core_css,
+        )
+        self.assertNotIn(
+            "background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, var(--bs-black)",
             core_css,
         )
         self.assertIn(

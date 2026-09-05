@@ -23,8 +23,9 @@
 ## Verification
 
 - [ ] `.venv/bin/python build.py`
-- [ ] focused tests:
-- [ ] `.venv/bin/python -m unittest discover -s tests -v`
+- [ ] focused tier: `.venv/bin/python scripts/run-test-tier.py run quick`
+- [ ] browser tier when relevant: `.venv/bin/python scripts/run-test-tier.py run browser-smoke`
+- [ ] release tier before `dev` -> `main`, tags, or publish: `.venv/bin/python scripts/run-test-tier.py run release`
 - [ ] `git diff --check`
 - [ ] Browser/viewport checked:
 - [ ] Keyboard/focus checked when interaction changed:

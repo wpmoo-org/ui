@@ -436,6 +436,10 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(popover).to_have_count(1)
             expect(popover).to_be_visible()
             expect(popover).to_contain_text("Button")
+            expect(popover).to_contain_text(
+                "Use Bootstrap button styles for reliable production actions: "
+                "publish, review, and move work forward."
+            )
             self.assertTrue(
                 trigger.evaluate("(element) => document.activeElement === element")
             )
