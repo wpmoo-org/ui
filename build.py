@@ -711,24 +711,6 @@ def slugify(value: object) -> str:
     return slug or "section"
 
 
-VOID_HTML_ELEMENTS = {
-    "area",
-    "base",
-    "br",
-    "col",
-    "embed",
-    "hr",
-    "img",
-    "input",
-    "link",
-    "meta",
-    "param",
-    "source",
-    "track",
-    "wbr",
-}
-
-
 class TocNode:
     def __init__(
         self,
@@ -740,14 +722,22 @@ class TocNode:
         self.attrs = attrs or {}
         self.parent = parent
         self.children: list[TocNode] = []
-        self.text_parts: list[str] = []
+        self.nodes: list[str | TocNode] = []
+
+    def append_child(self, node: "TocNode") -> None:
+        self.children.append(node)
+        self.nodes.append(node)
+
+    def append_text(self, text: str) -> None:
+        self.nodes.append(text)
 
     def has_class(self, class_name: str) -> bool:
         return class_name in (self.attrs.get("class") or "").split()
 
     def text_content(self) -> str:
         text = "".join(
-            [*self.text_parts, *(child.text_content() for child in self.children)]
+            node if isinstance(node, str) else node.text_content()
+            for node in self.nodes
         )
         return re.sub(r"\s+", " ", text).strip()
 
@@ -761,11 +751,11 @@ class ComponentTocParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         node = TocNode(tag, dict(attrs), self.stack[-1])
-        self.stack[-1].children.append(node)
+        self.stack[-1].append_child(node)
         node_id = node.attrs.get("id")
         if node_id and node_id not in self.by_id:
             self.by_id[node_id] = node
-        if tag not in VOID_HTML_ELEMENTS:
+        if tag not in VOID_ELEMENTS:
             self.stack.append(node)
 
     def handle_startendtag(
@@ -774,7 +764,7 @@ class ComponentTocParser(HTMLParser):
         attrs: list[tuple[str, str | None]],
     ) -> None:
         node = TocNode(tag, dict(attrs), self.stack[-1])
-        self.stack[-1].children.append(node)
+        self.stack[-1].append_child(node)
         node_id = node.attrs.get("id")
         if node_id and node_id not in self.by_id:
             self.by_id[node_id] = node
@@ -786,7 +776,7 @@ class ComponentTocParser(HTMLParser):
                 return
 
     def handle_data(self, data: str) -> None:
-        self.stack[-1].text_parts.append(data)
+        self.stack[-1].append_text(data)
 
     def component_examples(self) -> TocNode | None:
         pending = list(self.root.children)

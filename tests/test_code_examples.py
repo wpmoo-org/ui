@@ -304,7 +304,17 @@ class CodeExampleTests(CatalogTestCase):
                 (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
             )
         }
-        payload = codepen_payloads_from_output("components/button.html")[0]
+        payloads = codepen_payloads_from_output("components/button.html")
+        payload = next(
+            (
+                payload
+                for payload in payloads
+                if payload["title"] == "Moo UI Button - Primary"
+            ),
+            None,
+        )
+        self.assertIsNotNone(payload)
+        payload = payload or {}
         config_match = re.search(
             r"<script>\s*window\.MooCodePen\s*=\s*(?P<config>\{.*?\});\s*</script>",
             str(payload["html"]),

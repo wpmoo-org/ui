@@ -51,9 +51,10 @@ Run the narrowest relevant test first, then expand before asking for review:
 git diff --check
 ```
 
-Ordinary `dev` pushes use the changed-files classifier to choose `quick` or a
-browser tier. `main`, release tags, publish workflows, and `dev` -> `main` PRs
-always use the release gate.
+Ordinary `dev` pushes use the changed-files classifier to choose `quick`, a
+browser tier, or the release tier. Release-surface paths and any path the
+classifier does not recognize escalate to the release gate. `main`, release
+tags, publish workflows, and `dev` -> `main` PRs always use the release gate.
 
 For visual or interaction changes, include the browser, device, and viewport you
 used. If a component involves Bootstrap JavaScript or optional Moo ESM, include

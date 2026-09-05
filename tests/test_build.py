@@ -121,6 +121,20 @@ class BuildTests(CatalogTestCase):
 
         self.assertEqual(changed_version, original_version)
 
+    def test_example_toc_items_preserve_heading_text_order_with_inline_markup(
+        self,
+    ) -> None:
+        html = """
+        <div class="moo-component-examples">
+          <h2 id="install">Use <code>moo-ui.css</code> First</h2>
+        </div>
+        """
+
+        self.assertEqual(
+            build.example_toc_items(html),
+            [{"id": "install", "label": "Use moo-ui.css First"}],
+        )
+
     def test_build_writes_canonical_sitemap(self) -> None:
         result = self.run_build()
 

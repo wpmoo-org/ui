@@ -257,6 +257,11 @@ def unique(values: Iterable[str]) -> list[str]:
 
 def changed_paths_from_git(base: str | None, head: str | None) -> list[str]:
     if not base or not head or set(base) == {"0"}:
+        print(
+            "warning: no usable git diff range for test-tier path detection; "
+            "falling back to the release tier.",
+            file=sys.stderr,
+        )
         return []
     result = subprocess.run(
         ["git", "diff", "--name-only", f"{base}..{head}"],
@@ -266,6 +271,12 @@ def changed_paths_from_git(base: str | None, head: str | None) -> list[str]:
         text=True,
     )
     if result.returncode != 0:
+        detail = result.stderr.strip() or f"git diff exited with {result.returncode}"
+        print(
+            "warning: git diff failed while detecting changed paths: "
+            f"{detail}; falling back to the release tier.",
+            file=sys.stderr,
+        )
         return []
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
@@ -471,7 +482,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "resolve":
-        paths = args.paths or changed_paths_from_git(args.base, args.head)
+        paths = []
+        if normalize_tier(args.tier) == "auto":
+            paths = args.paths or changed_paths_from_git(args.base, args.head)
         tier = resolve_tier(
             args.tier,
             event_name=args.event_name,
@@ -484,7 +497,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "run":
-        paths = args.paths or changed_paths_from_git(args.base, args.head)
+        paths = args.paths
+        if not paths and args.base and args.head:
+            paths = changed_paths_from_git(args.base, args.head)
         return run_tier(args.tier, dry_run=args.dry_run, changed_paths=paths)
 
     raise AssertionError(args.command)

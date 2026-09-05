@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
 from pathlib import Path
 import unittest
 
@@ -101,6 +103,70 @@ class TestTierRunnerTests(unittest.TestCase):
         for paths, expected in cases:
             with self.subTest(paths=paths):
                 self.assertEqual(self.runner.classify_paths(paths), expected)
+
+    def test_changed_paths_from_git_warns_when_diff_range_is_unusable(self) -> None:
+        stderr = io.StringIO()
+
+        with contextlib.redirect_stderr(stderr):
+            paths = self.runner.changed_paths_from_git(None, "HEAD")
+
+        self.assertEqual(paths, [])
+        warning = stderr.getvalue().lower()
+        self.assertIn("warning", warning)
+        self.assertIn("release", warning)
+
+    def test_changed_paths_from_git_warns_when_git_diff_fails(self) -> None:
+        class FailedDiff:
+            returncode = 128
+            stdout = ""
+            stderr = "fatal: bad revision\n"
+
+        original_run = self.runner.subprocess.run
+
+        def fake_run(*_args, **_kwargs):
+            return FailedDiff()
+
+        stderr = io.StringIO()
+        try:
+            self.runner.subprocess.run = fake_run
+            with contextlib.redirect_stderr(stderr):
+                paths = self.runner.changed_paths_from_git("base", "head")
+        finally:
+            self.runner.subprocess.run = original_run
+
+        self.assertEqual(paths, [])
+        warning = stderr.getvalue().lower()
+        self.assertIn("warning", warning)
+        self.assertIn("git diff", warning)
+        self.assertIn("fatal: bad revision", warning)
+
+    def test_explicit_resolve_does_not_warn_without_diff_range(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with (
+            contextlib.redirect_stdout(stdout),
+            contextlib.redirect_stderr(stderr),
+        ):
+            status = self.runner.main(["resolve", "quick"])
+
+        self.assertEqual(status, 0)
+        self.assertEqual(stdout.getvalue().strip(), "quick")
+        self.assertNotIn("warning", stderr.getvalue().lower())
+
+    def test_explicit_run_does_not_warn_without_diff_range(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with (
+            contextlib.redirect_stdout(stdout),
+            contextlib.redirect_stderr(stderr),
+        ):
+            status = self.runner.main(["run", "quick", "--dry-run"])
+
+        self.assertEqual(status, 0)
+        self.assertIn("unittest", stdout.getvalue())
+        self.assertNotIn("warning", stderr.getvalue().lower())
 
     def test_event_matrix_keeps_dev_pushes_small_and_release_events_full(self) -> None:
         self.assertEqual(

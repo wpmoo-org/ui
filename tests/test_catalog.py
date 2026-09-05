@@ -2691,6 +2691,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn(" hidden", toc_opening_tag)
         self.assertIn('data-moo-component-toc', component)
         self.assertIn('aria-label="Component examples"', component)
+        toc_parser = LinkParser()
+        toc_parser.feed(toc_body)
         for target, label in (
             ("usage", "Usage"),
             ("basic", "Basic"),
@@ -2699,10 +2701,14 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(target=target):
                 self.assertIn(f'href="#{target}"', toc_body)
                 self.assertIn(f">{label}</a>", toc_body)
-        self.assertRegex(
-            toc_body,
-            r'<a class="nav-link active" href="#usage" aria-current="true">Usage</a>',
+        usage_link = next(
+            (link for link in toc_parser.links if link.get("href") == "#usage"),
+            None,
         )
+        self.assertIsNotNone(usage_link)
+        usage_link = usage_link or {}
+        self.assertIn("active", (usage_link.get("class") or "").split())
+        self.assertEqual(usage_link.get("aria-current"), "true")
         self.assertIn('class="moo-doc-main"', component)
         self.assertIn('data-example="basic" aria-labelledby="basic"', component)
         self.assertIn('id="basic">Basic</h2>', component)
