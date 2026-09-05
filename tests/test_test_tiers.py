@@ -62,34 +62,42 @@ class TestTierRunnerTests(unittest.TestCase):
         self.assertEqual(offenders, ["tests.test_slider_browser"])
 
     def test_browser_tiers_include_smoke_and_full_surfaces(self) -> None:
-        self.assertEqual(
-            self.runner.modules_for("browser-smoke"),
-            [
-                "tests.test_catalog_browser",
-                "tests.test_codepen_modal_browser",
-                "tests.test_datepicker_browser",
-                "tests.test_slider_browser",
-                "tests.test_toast_browser",
-                "tests.test_examples_forms_browser",
-            ],
-        )
+        quick_modules = self.runner.modules_for("quick")
+        smoke_modules = self.runner.modules_for("browser-smoke")
+        full_modules = self.runner.modules_for("browser-full")
+
+        self.assertEqual(smoke_modules[: len(quick_modules)], quick_modules)
+        self.assertEqual(full_modules[: len(quick_modules)], quick_modules)
+        for module in [
+            "tests.test_catalog_browser",
+            "tests.test_codepen_modal_browser",
+            "tests.test_datepicker_browser",
+            "tests.test_slider_browser",
+            "tests.test_toast_browser",
+            "tests.test_examples_forms_browser",
+        ]:
+            with self.subTest(module=module):
+                self.assertIn(module, smoke_modules)
+                self.assertIn(module, full_modules)
         self.assertIn(
             "tests.test_certification_browser",
-            self.runner.modules_for("browser-full"),
+            full_modules,
         )
         self.assertIn(
             "tests.test_datatable_browser",
-            self.runner.modules_for("browser-full"),
+            full_modules,
         )
         self.assertIn(
             "tests.test_conformance_runner.ConformanceRunnerTests",
-            self.runner.modules_for("browser-full"),
+            full_modules,
         )
 
     def test_changed_paths_classify_to_smallest_safe_tier(self) -> None:
         cases = [
             (["README.md"], "quick"),
             (["tests/test_core_docs_boundary.py"], "quick"),
+            (["tests/fixtures/boundary-baseline.json"], "quick"),
+            (["scripts/record-boundary-baseline.py"], "quick"),
             (["site/static/js/codepen-demo.js"], "browser-smoke"),
             (["src/js/components/slider.js"], "browser-smoke"),
             (["src/js/components/datatable.js"], "browser-full"),
@@ -113,7 +121,7 @@ class TestTierRunnerTests(unittest.TestCase):
         self.assertEqual(paths, [])
         warning = stderr.getvalue().lower()
         self.assertIn("warning", warning)
-        self.assertIn("release", warning)
+        self.assertIn("safest", warning)
 
     def test_changed_paths_from_git_warns_when_git_diff_fails(self) -> None:
         class FailedDiff:
@@ -181,6 +189,43 @@ class TestTierRunnerTests(unittest.TestCase):
         self.assertEqual(
             self.runner.resolve_tier(
                 "auto",
+                event_name="push",
+                ref_name="dev",
+                changed_paths=["tests/fixtures/boundary-baseline.json"],
+            ),
+            "quick",
+        )
+        self.assertEqual(
+            self.runner.resolve_tier(
+                "auto",
+                event_name="push",
+                ref_name="dev",
+                changed_paths=[
+                    "tests/fixtures/boundary-baseline.json",
+                    "tests/test_certification_browser.py",
+                ],
+            ),
+            "browser-full",
+        )
+        for paths in [
+            ["package.json"],
+            [".github/workflows/ui-ci.yml"],
+            ["unrecognized/generated-output.txt"],
+            [],
+        ]:
+            with self.subTest(dev_paths=paths):
+                self.assertEqual(
+                    self.runner.resolve_tier(
+                        "auto",
+                        event_name="push",
+                        ref_name="dev",
+                        changed_paths=paths,
+                    ),
+                    "browser-full",
+                )
+        self.assertEqual(
+            self.runner.resolve_tier(
+                "auto",
                 event_name="pull_request",
                 ref_name="refs/pull/1/merge",
                 changed_paths=["README.md"],
@@ -205,6 +250,53 @@ class TestTierRunnerTests(unittest.TestCase):
             ),
             "release",
         )
+
+    def test_dev_auto_never_escalates_past_browser_full(self) -> None:
+        for path in [
+            "README.md",
+            "site/static/js/codepen-demo.js",
+            "tests/test_certification_browser.py",
+            "package.json",
+            ".github/workflows/ui-ci.yml",
+            "unrecognized/generated-output.txt",
+        ]:
+            with self.subTest(path=path):
+                tier = self.runner.resolve_tier(
+                    "auto",
+                    event_name="push",
+                    ref_name="dev",
+                    changed_paths=[path],
+                )
+
+                self.assertNotEqual(tier, "release")
+                self.assertLessEqual(
+                    self.runner.TIER_ORDER[tier],
+                    self.runner.TIER_ORDER["browser-full"],
+                )
+
+    def test_quick_adds_targeted_release_contract_modules(self) -> None:
+        modules = self.runner.modules_for(
+            "quick",
+            changed_paths=[
+                ".github/workflows/ui-ci.yml",
+                ".github/workflows/npm-publish.yml",
+                "certification.json",
+                "scripts/rehearse-rc.py",
+            ],
+        )
+
+        self.assertIn("tests.test_test_tiers", modules)
+        self.assertIn(
+            "tests.test_package.PackageMetadataTests.test_ci_keeps_ui_tests_name_and_runs_selected_tier",
+            modules,
+        )
+        self.assertIn(
+            "tests.test_package.PackageMetadataTests.test_publish_workflow_uses_release_test_gate",
+            modules,
+        )
+        self.assertIn("tests.test_certification_contract", modules)
+        self.assertIn("tests.test_certification_manifest", modules)
+        self.assertIn("tests.test_rehearse_rc", modules)
 
     def test_release_commands_keep_full_boundary_and_rehearsal_steps(self) -> None:
         commands = self.runner.commands_for("release")
@@ -240,6 +332,24 @@ class TestTierRunnerTests(unittest.TestCase):
             self.runner.commands_for = original_commands_for
 
         self.assertIn("verify_package_contents.py", str(raised.exception))
+
+    def test_browser_tier_commands_include_quick_and_targeted_contracts(self) -> None:
+        commands = self.runner.commands_for(
+            "browser-full",
+            changed_paths=[
+                "tests/fixtures/boundary-baseline.json",
+                "tests/test_certification_browser.py",
+                ".github/workflows/ui-ci.yml",
+            ],
+        )
+        command_text = " ".join(commands[0])
+
+        self.assertIn("tests.test_core_docs_boundary", command_text)
+        self.assertIn(
+            "tests.test_package.PackageMetadataTests.test_ci_keeps_ui_tests_name_and_runs_selected_tier",
+            command_text,
+        )
+        self.assertIn("tests.test_certification_browser", command_text)
 
     def test_only_browser_and_release_tiers_need_playwright(self) -> None:
         self.assertFalse(self.runner.needs_playwright("quick"))

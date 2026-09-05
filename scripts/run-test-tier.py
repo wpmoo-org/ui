@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 TIERS = ("quick", "browser-smoke", "browser-full", "release")
 TIER_ORDER = {tier: index for index, tier in enumerate(TIERS)}
+DEV_AUTO_MAX_TIER = "browser-full"
 
 QUICK_BASE_MODULES = [
     "tests.test_build",
@@ -110,9 +111,68 @@ QUICK_PATTERNS = [
     "scss/**",
     "build.py",
     "dev.py",
+    "scripts/record-boundary-baseline.py",
+    "tests/fixtures/boundary-baseline.json",
     "tests/helpers/__init__.py",
     "tests/helpers/node_harness.py",
     "tests/test_*.py",
+]
+
+TARGETED_MODULE_RULES = [
+    (
+        [".github/workflows/**"],
+        ["tests.test_test_tiers"],
+    ),
+    (
+        [".github/workflows/ui-ci.yml"],
+        [
+            "tests.test_package.PackageMetadataTests.test_ci_runs_for_main_and_dev_pushes",
+            "tests.test_package.PackageMetadataTests."
+            "test_ci_keeps_ui_tests_name_and_runs_selected_tier",
+        ],
+    ),
+    (
+        [".github/workflows/npm-publish.yml"],
+        [
+            "tests.test_package.PackageMetadataTests."
+            "test_publish_workflow_requires_a_matching_existing_tag_ref",
+            "tests.test_package.PackageMetadataTests."
+            "test_publish_workflow_never_tags_a_prerelease_as_npm_latest",
+            "tests.test_package.PackageMetadataTests.test_publish_workflow_uses_release_test_gate",
+        ],
+    ),
+    (
+        [".github/workflows/release-tag.yml"],
+        [
+            "tests.test_package.PackageMetadataTests."
+            "test_release_tag_workflow_creates_lightweight_tags",
+        ],
+    ),
+    (
+        ["package.json", "package-lock.json", "tests/test_package.py"],
+        ["tests.test_package"],
+    ),
+    (
+        [
+            "certification.json",
+            "scripts/build-certification-*",
+            "tests/test_certification_contract.py",
+            "tests/test_certification_manifest.py",
+        ],
+        ["tests.test_certification_contract", "tests.test_certification_manifest"],
+    ),
+    (
+        ["scripts/rehearse-rc.py", "tests/test_rehearse_rc.py"],
+        ["tests.test_rehearse_rc"],
+    ),
+    (
+        ["scripts/package-conformance-kit.py", "tests/test_conformance_kit_packaging.py"],
+        ["tests.test_conformance_kit_packaging"],
+    ),
+    (
+        ["scripts/verify_package_contents.py"],
+        ["tests.test_package"],
+    ),
 ]
 
 BROWSER_MARKERS = (
@@ -138,12 +198,19 @@ def normalize_tier(value: str | None) -> str:
 
 def modules_for(tier: str, changed_paths: Iterable[str] | None = None) -> list[str]:
     normalized = normalize_tier(tier)
+    paths = list(changed_paths or [])
     if normalized == "quick":
-        return unique([*QUICK_BASE_MODULES, *source_modules_for_paths(changed_paths or [])])
+        return unique(
+            [
+                *QUICK_BASE_MODULES,
+                *source_modules_for_paths(paths),
+                *targeted_modules_for_paths(paths),
+            ]
+        )
     if normalized == "browser-smoke":
-        return list(BROWSER_SMOKE_MODULES)
+        return unique([*modules_for("quick", paths), *BROWSER_SMOKE_MODULES])
     if normalized == "browser-full":
-        return list(BROWSER_FULL_MODULES)
+        return unique([*modules_for("quick", paths), *BROWSER_FULL_MODULES])
     if normalized == "release":
         return []
     raise ValueError(f"tier {tier!r} cannot be expanded without changed paths")
@@ -156,11 +223,29 @@ def commands_for(
     normalized = normalize_tier(tier)
     python = python_executable()
     if normalized == "quick":
-        return [[python, "-m", "unittest", "-v", "-f", *modules_for("quick", changed_paths)]]
+        return [
+            [python, "-m", "unittest", "-v", "-f", *modules_for("quick", changed_paths)]
+        ]
     if normalized == "browser-smoke":
-        return [[python, "-m", "unittest", "-v", *BROWSER_SMOKE_MODULES]]
+        return [
+            [
+                python,
+                "-m",
+                "unittest",
+                "-v",
+                *modules_for("browser-smoke", changed_paths),
+            ]
+        ]
     if normalized == "browser-full":
-        return [[python, "-m", "unittest", "-v", *BROWSER_FULL_MODULES]]
+        return [
+            [
+                python,
+                "-m",
+                "unittest",
+                "-v",
+                *modules_for("browser-full", changed_paths),
+            ]
+        ]
     if normalized == "release":
         return [
             [python, "-m", "unittest", "discover", "-s", "tests", "-v"],
@@ -206,6 +291,16 @@ def source_modules_for_paths(paths: Iterable[str]) -> list[str]:
         module = source_module_for_path(path)
         if module:
             modules.append(module)
+    return unique(modules)
+
+
+def targeted_modules_for_paths(paths: Iterable[str]) -> list[str]:
+    modules: list[str] = []
+    for path in paths:
+        normalized = path.removeprefix("./")
+        for patterns, selectors in TARGETED_MODULE_RULES:
+            if _path_matches(normalized, patterns):
+                modules.extend(selectors)
     return unique(modules)
 
 
@@ -259,7 +354,7 @@ def changed_paths_from_git(base: str | None, head: str | None) -> list[str]:
     if not base or not head or set(base) == {"0"}:
         print(
             "warning: no usable git diff range for test-tier path detection; "
-            "falling back to the release tier.",
+            "falling back to the safest tier for this event.",
             file=sys.stderr,
         )
         return []
@@ -274,11 +369,28 @@ def changed_paths_from_git(base: str | None, head: str | None) -> list[str]:
         detail = result.stderr.strip() or f"git diff exited with {result.returncode}"
         print(
             "warning: git diff failed while detecting changed paths: "
-            f"{detail}; falling back to the release tier.",
+            f"{detail}; falling back to the safest tier for this event.",
             file=sys.stderr,
         )
         return []
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def cap_tier(tier: str, maximum: str) -> str:
+    normalized = normalize_tier(tier)
+    normalized_maximum = normalize_tier(maximum)
+    if normalized not in TIER_ORDER or normalized_maximum not in TIER_ORDER:
+        raise ValueError(f"cannot cap tier {tier!r} at {maximum!r}")
+    if TIER_ORDER[normalized] > TIER_ORDER[normalized_maximum]:
+        return normalized_maximum
+    return normalized
+
+
+def dev_auto_tier_for_paths(paths: Iterable[str]) -> str:
+    changed = [path for path in paths if path]
+    if not changed:
+        return DEV_AUTO_MAX_TIER
+    return cap_tier(classify_paths(changed), DEV_AUTO_MAX_TIER)
 
 
 def resolve_tier(
@@ -291,6 +403,7 @@ def resolve_tier(
     requested = normalize_tier(requested_tier)
     event = event_name or ""
     ref = ref_name or ""
+    paths = list(changed_paths)
 
     if requested != "auto":
         return requested
@@ -299,9 +412,9 @@ def resolve_tier(
     if ref == "main" or ref.startswith("refs/tags/") or ref.startswith("v"):
         return "release"
     if event == "push" and ref == "dev":
-        return classify_paths(changed_paths)
+        return dev_auto_tier_for_paths(paths)
     if event == "workflow_dispatch":
-        return classify_paths(changed_paths)
+        return classify_paths(paths)
     return "release"
 
 

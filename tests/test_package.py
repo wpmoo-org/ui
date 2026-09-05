@@ -897,6 +897,7 @@ for (const specifier of [
         )
 
         self.assertIn("  ui-tests:\n    name: ui-tests", workflow)
+        self.assertIn("timeout-minutes: 45", workflow)
         self.assertIn("Select test tier", workflow)
         self.assertIn("scripts/run-test-tier.py resolve", workflow)
         self.assertIn("steps.test-tier.outputs.needs_playwright == 'true'", workflow)
@@ -910,6 +911,7 @@ for (const specifier of [
         )
 
         self.assertIn("Run release test gate", workflow)
+        self.assertIn("timeout-minutes: 45", workflow)
         self.assertIn("python scripts/run-test-tier.py run release", workflow)
 
     def test_alias_package_is_not_part_of_root_install(self) -> None:

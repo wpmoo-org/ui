@@ -33,11 +33,11 @@ jobs:
   ui-tests:
     name: ui-tests
     runs-on: ubuntu-latest
-    # The full suite alone now runs ~6-9 minutes locally; on a cold ubuntu-latest
-    # runner with setup steps included, the old 10-minute budget was getting cut
-    # off mid-suite (observed: cancelled at 10:14 elapsed, mid "Run contract and
-    # certification tests"), not from a real failure.
-    timeout-minutes: 25
+    # Release-tier runs can exceed 25 minutes on a cold hosted runner once setup,
+    # browser install, full discovery, package verification, and rehearsal are
+    # included. Keep dev pushes capped below release, but give PR/main release
+    # audits enough room to finish with an actual pass/fail result.
+    timeout-minutes: 45
 
     steps:
       - name: Check out repository

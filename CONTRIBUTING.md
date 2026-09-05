@@ -47,14 +47,19 @@ Run the narrowest relevant test first, then expand before asking for review:
 .venv/bin/python build.py
 .venv/bin/python scripts/run-test-tier.py run quick
 .venv/bin/python scripts/run-test-tier.py run browser-smoke  # when browser behavior changed
+.venv/bin/python scripts/run-test-tier.py run browser-full   # when certification/browser harnesses changed
 .venv/bin/python scripts/run-test-tier.py run release        # before dev -> main, tags, or publish
 git diff --check
 ```
 
 Ordinary `dev` pushes use the changed-files classifier to choose `quick`, a
-browser tier, or the release tier. Release-surface paths and any path the
-classifier does not recognize escalate to the release gate. `main`, release
-tags, publish workflows, and `dev` -> `main` PRs always use the release gate.
+browser tier, or a capped `browser-full` fallback. Browser tiers are cumulative:
+they include the quick source and boundary contracts before running the browser
+surface. Release-surface paths and any path the classifier does not recognize
+no longer run the full release gate on `dev`; they use the capped browser-full
+fallback with targeted package/workflow/certification contract tests when
+available. `main`, release tags, publish workflows, manual `release` dispatches,
+and `dev` -> `main` PRs always use the release gate.
 
 For visual or interaction changes, include the browser, device, and viewport you
 used. If a component involves Bootstrap JavaScript or optional Moo ESM, include
