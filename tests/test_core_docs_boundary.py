@@ -155,6 +155,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "sitemap.xml",
             "robots.txt",
             "assets/css/catalog.css",
+            "assets/css/catalog.min.css",
             "assets/js/bootstrap.bundle.min.js",
             "js/combobox.js",
             "js/context-menu.js",
@@ -352,8 +353,8 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_site_pages_load_core_artifacts_from_public_asset_urls(self) -> None:
         assets = (
-            "assets/css/moo-ui.css",
-            "assets/css/catalog.css",
+            "assets/css/moo-ui.min.css",
+            "assets/css/catalog.min.css",
             "assets/js/bootstrap.bundle.min.js",
             "assets/js/catalog/index.js",
         )

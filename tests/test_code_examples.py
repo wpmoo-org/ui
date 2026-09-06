@@ -294,16 +294,10 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn("ensureStyles", demo_js)
         self.assertNotIn('document.createElement("style")', demo_js)
 
-    def test_component_codepen_payload_carries_registry_description_config(self) -> None:
+    def test_component_codepen_payload_keeps_html_free_of_inline_runtime_config(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        registry = {
-            component["slug"]: component
-            for component in json.loads(
-                (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
-            )
-        }
         payloads = codepen_payloads_from_output("components/button.html")
         payload = next(
             (
@@ -315,24 +309,13 @@ class CodeExampleTests(CatalogTestCase):
         )
         self.assertIsNotNone(payload)
         payload = payload or {}
-        config_match = re.search(
-            r"<script>\s*window\.MooCodePen\s*=\s*(?P<config>\{.*?\});\s*</script>",
-            str(payload["html"]),
-            flags=re.DOTALL,
-        )
+        html = str(payload["html"])
 
-        self.assertIsNotNone(config_match)
-        config = json.loads(config_match.group("config"))
-        self.assertEqual(config["kind"], "component")
-        self.assertEqual(
-            config["components"],
-            [
-                {
-                    "slug": "button",
-                    "label": registry["button"]["label"],
-                    "description": registry["button"]["description"],
-                }
-            ],
+        self.assertNotIn("window.MooCodePen", html)
+        self.assertNotIn("MooCodePenDemo.init", html)
+        self.assertIn(
+            '<button class="btn btn-primary" type="button">Primary</button>',
+            html,
         )
 
     def test_component_codepen_form_surfaces_are_field_wrapped(self) -> None:

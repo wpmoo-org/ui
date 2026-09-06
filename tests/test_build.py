@@ -49,8 +49,12 @@ class BuildTests(CatalogTestCase):
                     (PACKAGE_DIST / f"assets/css/{css_name}").read_bytes(),
                     (SITE_DIST / f"assets/css/{css_name}").read_bytes(),
                 )
-        self.assertTrue((SITE_DIST / "assets/css/catalog.css").is_file())
+        for css_name in ("catalog.css", "catalog.min.css"):
+            with self.subTest(css_name=css_name):
+                self.assertTrue((SITE_DIST / f"assets/css/{css_name}").is_file())
+                self.assertFalse((PACKAGE_DIST / f"assets/css/{css_name}").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.css").exists())
+        self.assertFalse((PACKAGE_DIST / "assets/css/catalog.min.css").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/moo-core.css").exists())
         self.assertFalse((SITE_DIST / "assets/css/moo-core.css").exists())
         self.assertTrue(
@@ -97,8 +101,8 @@ class BuildTests(CatalogTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             site_dist = Path(tempdir)
             for relative, contents in (
-                ("assets/css/moo-ui.css", "core css"),
-                ("assets/css/catalog.css", "catalog css"),
+                ("assets/css/moo-ui.min.css", "core css"),
+                ("assets/css/catalog.min.css", "catalog css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),

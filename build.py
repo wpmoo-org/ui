@@ -1712,13 +1712,19 @@ def compile_catalog_styles() -> None:
     css_dir = SITE_DIST / "assets/css"
     css_dir.mkdir(parents=True, exist_ok=True)
     write_compiled_style(css_dir, SITE_SCSS / "catalog.scss", "catalog.css")
+    write_compiled_style(
+        css_dir,
+        SITE_SCSS / "catalog.scss",
+        "catalog.min.css",
+        output_style="compressed",
+    )
 
 
 def asset_version() -> str:
     digest = hashlib.sha256()
     paths = [
-        SITE_DIST / "assets/css/moo-ui.css",
-        SITE_DIST / "assets/css/catalog.css",
+        SITE_DIST / "assets/css/moo-ui.min.css",
+        SITE_DIST / "assets/css/catalog.min.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog/index.js",
     ]
@@ -2036,6 +2042,10 @@ def version_site_module_imports() -> None:
     import_pattern = re.compile(
         r'(?P<prefix>\bfrom\s+)(?P<quote>["\'])(?P<path>\.{1,2}/[^"\']+?\.js)(?P=quote)'
     )
+    dynamic_import_pattern = re.compile(
+        r'(?P<prefix>\bimport\(\s*)(?P<quote>["\'])'
+        r'(?P<path>\.{1,2}/[^"\']+?\.js)(?P=quote)(?P<suffix>\s*\))'
+    )
 
     def import_version(script: Path, import_path: str) -> str | None:
         target = (script.parent / import_path).resolve()
@@ -2060,7 +2070,21 @@ def version_site_module_imports() -> None:
             quote = match.group("quote")
             return f"{match.group('prefix')}{quote}{path}?v={version}{quote}"
 
+        def replace_dynamic_import(match: re.Match[str]) -> str:
+            path = match.group("path")
+            if "?" in path:
+                return match.group(0)
+            version = import_version(script, path)
+            if not version:
+                return match.group(0)
+            quote = match.group("quote")
+            return (
+                f"{match.group('prefix')}{quote}{path}?v={version}{quote}"
+                f"{match.group('suffix')}"
+            )
+
         updated = import_pattern.sub(replace_import, source)
+        updated = dynamic_import_pattern.sub(replace_dynamic_import, updated)
         if updated != source:
             script.write_text(updated, encoding="utf-8")
 

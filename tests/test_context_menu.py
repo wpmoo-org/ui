@@ -200,11 +200,14 @@ class ContextMenuTests(CatalogTestCase):
         self.assertIn('this._trigger("shown")', source)
         self.assertIn('this._trigger("hide", true)', source)
         self.assertIn('this._trigger("hidden")', source)
+        self.assertIn('contextMenu: ".context-menu"', catalog)
         self.assertIn(
-            'import ContextMenu from "../../../../src/js/components/context-menu.js";',
+            'import("../../../../src/js/components/context-menu.js")',
             catalog,
         )
-        self.assertIn("ContextMenu.getOrCreateInstance(element);", catalog)
+        self.assertIn("({ default: ContextMenu })", catalog)
+        self.assertIn("ContextMenu.getOrCreateInstance(element)", catalog)
+        self.assertIn("instances.forEach((instance) => instance.dispose())", catalog)
 
     def test_public_module_import_has_no_document_side_effects(self) -> None:
         result = subprocess.run(

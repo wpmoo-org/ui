@@ -6,7 +6,14 @@
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
 {% from "includes/example-previews.html.jinja" import example_preview %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
-{% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% set catalog_landing_navigation_items = [
+  {"slug": "installation", "label": "Installation", "href": "installation.html"},
+  {"slug": "examples", "label": "Examples", "href": "examples/index.html"},
+  {"slug": "components", "label": "All Components", "href": "components/index.html"},
+  {"slug": "accordion", "label": "Accordion", "href": "components/accordion.html"}
+] %}
 
 {% set example_descriptions = {
   "auth/forgot-password": "Request a password reset link from a full-bleed auth screen.",
@@ -34,7 +41,12 @@
       {{ render_page_header(
         "Examples",
         "Real, multi-page screens built from Moo UI components. Click through them like an app, not a gallery.",
-        id="examples"
+        id="examples",
+        actions=render_section_page_actions(
+          "examples",
+          catalog_landing_navigation_items,
+          root_path
+        )
       ) }}
 
       <section class="moo-catalog__dashboard" data-moo-catalog-view="grid" aria-label="Examples">
@@ -75,7 +87,7 @@
         {% endfor %}
       </section>
 
-      {{ render_section_page_pagination("examples", site_pages, root_path) }}
+      {{ render_section_page_pagination("examples", catalog_landing_navigation_items, root_path) }}
     </article>
 
     {% set toc_categories = namespace(items=[]) %}

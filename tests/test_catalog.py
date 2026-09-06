@@ -31,7 +31,9 @@ COMPONENT_SELECTOR_PREFIXES = {
     # Button Group's compact select override matches Bootstrap's
     # `.input-group > .form-select` specificity, so the partial
     # legitimately references .input-group as an ancestor context.
-    "button_group": ("btn", "input-group"),
+    # Button Group scopes Bootstrap Button's state classes while reducing
+    # mixed-emphasis hover/press seam jitter inside the joined group.
+    "button_group": ("btn", "input-group", "active", "disabled"),
     "card": ("card",),
     # Breadcrumb's collapsed-segment composition wraps Bootstrap's
     # native .dropdown inside its own .breadcrumb-dropdown-item, so
@@ -251,6 +253,15 @@ class LinkParser(HTMLParser):
             self.popover_triggers.append({"__tag": tag, **attributes})
 
 
+class StartTagParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tags: list[dict[str, str | None]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.append({"__tag": tag, **dict(attrs)})
+
+
 class CatalogContractTests(CatalogTestCase):
     INTERNAL_PUBLIC_API_SNIPPETS = (
         "Jinja macro API",
@@ -273,6 +284,20 @@ class CatalogContractTests(CatalogTestCase):
         "field()",
         "form()",
     )
+
+    def assert_page_actions_region(self, html: str) -> None:
+        parser = StartTagParser()
+        parser.feed(html)
+        actions = [
+            tag
+            for tag in parser.tags
+            if tag.get("__tag") == "div"
+            and "moo-doc-page-actions" in (tag.get("class") or "").split()
+        ]
+
+        self.assertTrue(actions, "expected a page actions region")
+        self.assertEqual(actions[0].get("aria-label"), "Page actions")
+
     def assert_no_internal_public_api_guidance(
         self,
         surface: str,
@@ -964,6 +989,57 @@ class CatalogContractTests(CatalogTestCase):
                     self.assertIn(runtime_selector, demo_js)
                 self.assertIn(symbol, demo_js)
                 self.assertIn("getOrCreateInstance", demo_js)
+
+    def test_component_codepen_payload_html_contains_only_example_markup(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        inspected_payloads = 0
+        for path in sorted((ROOT / "site-dist/components").rglob("*.html")):
+            page = path.read_text(encoding="utf-8")
+            payloads = codepen_payloads_from_html(page)
+            if "data-moo-codepen-form" not in page:
+                continue
+
+            self.assertTrue(
+                payloads,
+                f"{path.relative_to(ROOT / 'site-dist').as_posix()} has no CodePen payloads",
+            )
+            for index, payload in enumerate(payloads):
+                html = str(payload.get("html", ""))
+                html_lower = html.lower()
+                with self.subTest(
+                    page=path.relative_to(ROOT / "site-dist").as_posix(),
+                    payload=index,
+                ):
+                    self.assertRegex(
+                        html,
+                        r"<[a-z][^>]*>",
+                        "CodePen payload should include component example markup",
+                    )
+                    self.assertNotIn("window.MooCodePen", html)
+                    self.assertNotIn("MooCodePenDemo.init", html)
+                    self.assertNotIn("<script", html_lower)
+                    for marker in (
+                        "data-moo-codepen-form",
+                        "data-moo-code-panel",
+                        "data-moo-code-toggle",
+                        "data-moo-code-copy",
+                        "moo-examples-footer",
+                        "moo-examples-footer__component-trigger",
+                        "moo-examples-footer__preview",
+                        "moo-example__toolbar",
+                        "moo-example__actions",
+                        "moo-example__codepen",
+                        "moo-example__source",
+                        "moo-code__",
+                        "moo-component-header",
+                        "moo-doc-",
+                        "moo-catalog",
+                    ):
+                        self.assertNotIn(marker, html)
+                    inspected_payloads += 1
+        self.assertGreater(inspected_payloads, 0)
 
     def test_codepen_prefill_payloads_use_browser_safe_form_fields(self) -> None:
         result = self.run_build()
@@ -1671,7 +1747,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertLess(
             base.index('window.localStorage.getItem("moo:theme")'),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
         )
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
@@ -1689,8 +1765,8 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("introduction/index.html")
-        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css?v='
-        catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.css?v='
+        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.min.css?v='
+        catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.min.css?v='
         self.assertIn(stylesheet_marker, page)
         self.assertNotIn("moo-ui-prepaint.css", page)
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
@@ -1753,11 +1829,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(handoff, base)
         self.assertLess(
             base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
         )
         self.assertLess(
             base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'),
         )
 
     def test_built_catalog_sidebar_persisted_state_handoff_is_in_head(self) -> None:
@@ -1768,8 +1844,8 @@ class CatalogContractTests(CatalogTestCase):
         head = page.split("</head>", 1)[0]
         handoff = "dataset.sidebarCatalogState"
         self.assertIn(handoff, head)
-        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.css"))
-        self.assertLess(head.index(handoff), head.index("assets/css/catalog.css"))
+        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.min.css"))
+        self.assertLess(head.index(handoff), head.index("assets/css/catalog.min.css"))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
         handoff_index = page.index("shell.dataset.sidebarState = state")
         sidebar_index = page.index('<aside', handoff_index)
@@ -1895,6 +1971,23 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-showcase__image",
             home,
         )
+        hero_image_match = re.search(
+            r'<img\b[^>]*class="[^"]*\bmoo-home-showcase__image\b[^"]*"[^>]*>',
+            home,
+        )
+        self.assertIsNotNone(hero_image_match)
+        hero_image = hero_image_match.group(0)
+        self.assertIn(
+            'srcset="assets/images/readme-hero-640.webp 640w, '
+            'assets/images/readme-hero-960.webp 960w, '
+            'assets/images/readme-hero.webp 1536w"',
+            hero_image,
+        )
+        self.assertIn('sizes="(min-width: 992px) 612px, 100vw"', hero_image)
+        self.assertIn('fetchpriority="high"', hero_image)
+        self.assertIn('decoding="async"', hero_image)
+        self.assertIn('width="1536"', hero_image)
+        self.assertIn('height="1024"', hero_image)
         self.assertIn(
             "moo-home-proof-card",
             home,
@@ -1938,6 +2031,22 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn('loading="lazy"', attributes)
                 self.assertIn('decoding="async"', attributes)
 
+    def test_home_showcase_cards_do_not_name_generic_divs(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        component_section = home[home.index('id="home-components"') :]
+        cards = re.findall(
+            r'<div\b[^>]*class="[^"]*\bmoo-home-component-card\b[^"]*"[^>]*>',
+            component_section,
+        )
+
+        self.assertTrue(cards)
+        for card in cards:
+            with self.subTest(card=card):
+                self.assertNotIn("aria-label=", card)
+
     def test_sections_navigation_precedes_component_catalog(self) -> None:
         result = self.run_build()
 
@@ -1948,6 +2057,19 @@ class CatalogContractTests(CatalogTestCase):
         # the doc-section entries, starting with Introduction, precede
         # the Components disclosure.
         sidebar = components[components.index('id="catalog-sidebar"'):]
+        sidebar_links = LinkParser()
+        sidebar_links.feed(sidebar)
+        all_components_link = next(
+            (
+                link
+                for link in sidebar_links.links
+                if link.get("href") == "../components/"
+            ),
+            None,
+        )
+        self.assertIsNotNone(all_components_link)
+        self.assertIn("active", (all_components_link.get("class") or "").split())
+        self.assertEqual(all_components_link.get("aria-current"), "page")
         sections_index = sidebar.index(">Introduction<")
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         self.assertLess(sections_index, components_index)
@@ -2029,7 +2151,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         introduction = self.read_output("introduction.html")
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', introduction)
+        self.assert_page_actions_region(introduction)
         self.assertIn("data-moo-copy-page", introduction)
         self.assertIn("Copy Link", introduction)
         self.assertIn("Open in ChatGPT", introduction)
@@ -2048,14 +2170,23 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../examples/"', installation)
 
         examples = self.read_output("examples/index.html")
+        examples_header_start = examples.index('<header class="moo-component-header')
+        examples_header = examples[
+            examples_header_start : examples.index("</header>", examples_header_start)
+        ]
+        self.assert_page_actions_region(examples_header)
+        self.assertIn('aria-label="Next page: All Components"', examples_header)
+        self.assertIn('href="../components/"', examples_header)
         examples_pagination = examples.rsplit(
             '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
             1,
         )[1]
         self.assertIn('href="../installation/"', examples_pagination)
         self.assertIn("Installation", examples_pagination)
-        self.assertIn('href="../examples/settings/account/"', examples_pagination)
-        self.assertIn("Account", examples_pagination)
+        self.assertIn('href="../components/"', examples_pagination)
+        self.assertIn("All Components", examples_pagination)
+        self.assertNotIn('href="../examples/dashboard/users/"', examples_pagination)
+        self.assertNotIn('href="../examples/settings/account/"', examples_pagination)
 
         # Individual Examples pages (Tasks, Settings/*, Auth/*) deliberately
         # carry no Prev/Next pagination -- that's docs-site navigation, and
@@ -2072,8 +2203,23 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("moo-doc-pagination", profile)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Users"', components)
-        self.assertIn('aria-label="Next page: Accordion"', components)
+        components_header_start = components.index('<header class="moo-component-header')
+        components_header = components[
+            components_header_start : components.index("</header>", components_header_start)
+        ]
+        self.assertIn('aria-label="Previous page: Examples"', components_header)
+        self.assertIn('href="../examples/"', components_header)
+        self.assertIn('aria-label="Next page: Accordion"', components_header)
+        self.assertNotIn('aria-label="Previous page: Users"', components_header)
+        components_pagination = components.rsplit(
+            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
+            1,
+        )[1]
+        self.assertIn('href="../examples/"', components_pagination)
+        self.assertIn("Examples", components_pagination)
+        self.assertIn('href="../components/accordion/"', components_pagination)
+        self.assertIn("Accordion", components_pagination)
+        self.assertNotIn("Users", components_pagination)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
         blocks = self.read_output("blocks/index.html")
@@ -2086,8 +2232,8 @@ class CatalogContractTests(CatalogTestCase):
         component_header = component[
             component_header_start : component.index("</header>", component_header_start)
         ]
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', component_header)
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', component)
+        self.assert_page_actions_region(component_header)
+        self.assert_page_actions_region(component)
         self.assertIn('aria-label="Previous page: Spinner"', component)
         self.assertIn('aria-label="Next page: Table"', component)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', component)
@@ -2097,8 +2243,8 @@ class CatalogContractTests(CatalogTestCase):
         utility_header = utility[
             utility_header_start : utility.index("</header>", utility_header_start)
         ]
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
+        self.assert_page_actions_region(utility_header)
+        self.assert_page_actions_region(utility)
         self.assertIn('aria-label="Previous page: Charts"', utility)
         self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
@@ -2107,8 +2253,8 @@ class CatalogContractTests(CatalogTestCase):
         block_header = block[
             block_header_start : block.index("</header>", block_header_start)
         ]
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', block_header)
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', block)
+        self.assert_page_actions_region(block_header)
+        self.assert_page_actions_region(block)
         self.assertIn('aria-label="Previous page: Blocks"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
