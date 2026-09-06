@@ -7,8 +7,6 @@ import subprocess
 import sys
 from datetime import datetime
 
-from playwright.sync_api import BrowserContext, Page
-
 from build import create_environment
 from tests.helpers import (
     ROOT,
@@ -408,7 +406,7 @@ class _DatepickerBrowserMixin:
         case=CERTIFICATION_CASES[0],
         *,
         fixed_time: str | None = None,
-    ) -> tuple[BrowserContext, Page, BrowserEvidence]:
+    ) -> tuple[object, object, BrowserEvidence]:
         context = new_case_context(self.browser, case)
         page = context.new_page()
         evidence = BrowserEvidence(page)
