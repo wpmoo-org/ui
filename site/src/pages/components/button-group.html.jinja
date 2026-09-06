@@ -42,7 +42,7 @@
       {% endcall %}
     {% endset %}
     {% set button_group_usage %}
-      <p>Use <code>.btn-group</code> when several closely related buttons should read as one compact control surface. Keep the buttons visually compatible, and include only actions that share the same context or operate on the same object.</p>
+      <p>Use <code>.btn-group</code> when several closely related buttons should read as one compact control surface. Keep joined buttons in one action family, and include only actions that share the same context or operate on the same object.</p>
       <p>Give every group an explicit accessible label with <code>role="group"</code> plus <code>aria-label</code> or <code>aria-labelledby</code>. When multiple groups share a row, wrap them in a <code>.btn-toolbar</code> with <code>role="toolbar"</code> and let each inner group keep its own label.</p>
       <p>Use grouped checkbox or radio toggles only when the options act like buttons and the selected state needs to stay visible. Preserve normal focus order, keep icon-only buttons labelled, and move unrelated overflow actions into a dropdown rather than stretching the joined edge.</p>
     {% endset %}
@@ -142,6 +142,19 @@
       "Toolbar",
       "Use <code>btn-toolbar</code> for separate action clusters; <code>gap-2</code> spaces the clusters while each inner group stays joined.",
       toolbar_groups
+    ) }}
+
+    {% set mixed_emphasis_group %}
+      {% call button_group("Review actions") %}
+        {{ button("Approve", variant="default") }}
+        {{ button("Archive", variant="outline") }}
+      {% endcall %}
+    {% endset %}
+    {{ render_component_example("button-group", "Button Group",
+      "mixed-emphasis-group",
+      "Mixed emphasis",
+      "Use mixed emphasis only when the actions form one joined decision surface; plain hover keeps the joined edge visually stable.",
+      mixed_emphasis_group
     ) }}
 
     {% set nested_groups %}

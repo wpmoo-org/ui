@@ -12,6 +12,36 @@
   unicode-bidi: plaintext;
 }
 
+// Bootstrap raises hovered, focused, and active group buttons above siblings
+// so the current border wins the shared seam. In a mixed-emphasis group (for
+// example primary + outline) pointer interaction paints one pixel into the
+// neighbor and reads like a width jump. Keep keyboard focus, active classes,
+// and checked inputs stacked, but let plain pointer hover/click use DOM order
+// so the joined edge stays visually stable.
+.btn-group > .btn:hover:not(:focus-visible):not(.active),
+.btn-group > .btn:focus:not(:focus-visible):not(.active),
+.btn-group > .btn:active:not(:focus-visible):not(.active),
+.btn-group-vertical > .btn:hover:not(:focus-visible):not(.active),
+.btn-group-vertical > .btn:focus:not(:focus-visible):not(.active),
+.btn-group-vertical > .btn:active:not(:focus-visible):not(.active) {
+  z-index: auto;
+}
+
+.btn-group > .btn-check:checked + .btn:hover,
+.btn-group > .btn-check:focus + .btn:hover,
+.btn-group-vertical > .btn-check:checked + .btn:hover,
+.btn-group-vertical > .btn-check:focus + .btn:hover {
+  z-index: 1;
+}
+
+// A button group is one compound control surface; pressing one segment should
+// not translate that segment away from its joined border while siblings stay
+// still. The active color change remains as the press affordance.
+.btn-group > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active,
+.btn-group-vertical > .btn:not(:disabled):not(.disabled):not([aria-disabled="true"]):active {
+  transform: none;
+}
+
 // Icon buttons in button groups should stay square, not stretch to fill
 // the group width (Bootstrap's flex: 1 1 auto makes them rectangular).
 .btn-group > .btn-icon,

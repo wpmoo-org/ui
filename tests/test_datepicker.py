@@ -5,6 +5,7 @@ import importlib
 import re
 import subprocess
 import sys
+from datetime import datetime
 
 from build import create_environment
 from tests.helpers import (
@@ -400,10 +401,14 @@ class _DatepickerBrowserMixin:
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
-    def open_fixture(self, case=CERTIFICATION_CASES[0]):
+    def open_fixture(self, case=CERTIFICATION_CASES[0], *, fixed_time: str | None = None):
         context = new_case_context(self.browser, case)
         page = context.new_page()
         evidence = BrowserEvidence(page)
+        if fixed_time is not None:
+            page.clock.set_fixed_time(
+                datetime.fromisoformat(fixed_time.replace("Z", "+00:00"))
+            )
         response = page.goto(
             f"{self.base_url}{CERTIFICATION_FIXTURE_PATH}",
             wait_until="networkidle",
@@ -959,7 +964,10 @@ class _DatepickerBrowserMixin:
             context.close()
 
     def test_fixture_supports_dark_rtl_locale_and_inline_calendar(self) -> None:
-        context, page, evidence = self.open_fixture(CERTIFICATION_CASES[1])
+        context, page, evidence = self.open_fixture(
+            CERTIFICATION_CASES[1],
+            fixed_time="2026-08-18T12:00:00Z",
+        )
         try:
             expect(page.locator("body")).to_have_attribute("data-datepicker-ready", "true")
             expect(page.locator("#certification-datepicker")).to_have_attribute(

@@ -988,6 +988,52 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(symbol, demo_js)
                 self.assertIn("getOrCreateInstance", demo_js)
 
+    def test_component_codepen_payload_html_contains_only_example_markup(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        inspected_payloads = 0
+        for path in sorted((ROOT / "site-dist/components").rglob("*.html")):
+            page = path.read_text(encoding="utf-8")
+            payloads = codepen_payloads_from_html(page)
+            if "data-moo-codepen-form" not in page:
+                continue
+
+            self.assertTrue(
+                payloads,
+                f"{path.relative_to(ROOT / 'site-dist').as_posix()} has no CodePen payloads",
+            )
+            for index, payload in enumerate(payloads):
+                inspected_payloads += 1
+                html = str(payload.get("html", ""))
+                html_lower = html.lower()
+                with self.subTest(
+                    page=path.relative_to(ROOT / "site-dist").as_posix(),
+                    payload=index,
+                ):
+                    self.assertNotIn("window.MooCodePen", html)
+                    self.assertNotIn("MooCodePenDemo.init", html)
+                    self.assertNotIn("<script", html_lower)
+                    for marker in (
+                        "data-moo-codepen-form",
+                        "data-moo-code-panel",
+                        "data-moo-code-toggle",
+                        "data-moo-code-copy",
+                        "moo-examples-footer",
+                        "moo-examples-footer__component-trigger",
+                        "moo-examples-footer__preview",
+                        "moo-example__toolbar",
+                        "moo-example__actions",
+                        "moo-example__codepen",
+                        "moo-example__source",
+                        "moo-code__",
+                        "moo-component-header",
+                        "moo-doc-",
+                        "moo-catalog",
+                    ):
+                        self.assertNotIn(marker, html)
+        self.assertGreater(inspected_payloads, 0)
+
     def test_codepen_prefill_payloads_use_browser_safe_form_fields(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
