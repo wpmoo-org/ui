@@ -31,6 +31,18 @@ MODULES = {
     "theme-builder-export.js": None,
     "theme-builder-schema.js": None,
 }
+LAZY_CATALOG_MODULES = {
+    "examples-chart.js",
+    "examples-tasks.js",
+    "examples-users.js",
+}
+LAZY_COMPONENT_MODULES = (
+    "combobox.js",
+    "context-menu.js",
+    "datatable.js",
+    "datepicker.js",
+    "slider.js",
+)
 
 
 def theme_preset_contract_paths() -> list[Path]:
@@ -1485,6 +1497,27 @@ console.log(JSON.stringify({
         self.assertTrue((DIST / "assets/js/components/chart.js").is_file())
         self.assertNotIn("src/js/components", without_comments(built))
 
+    def test_build_versions_dynamic_catalog_imports(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        built = without_comments(
+            (DIST / "assets/js/catalog/index.js").read_text(encoding="utf-8")
+        )
+        for module_name in LAZY_CATALOG_MODULES:
+            with self.subTest(module_name=module_name):
+                self.assertRegex(
+                    built,
+                    rf'import\("\./{re.escape(module_name)}\?v=[0-9a-f]{{12}}"\)',
+                )
+        for module_name in LAZY_COMPONENT_MODULES:
+            with self.subTest(module_name=module_name):
+                self.assertRegex(
+                    built,
+                    rf'import\("\.\./components/{re.escape(module_name)}\?v=[0-9a-f]{{12}}"\)',
+                )
+        self.assertNotIn("../../../../src/js/components", built)
+
     def test_examples_chart_themeing_moves_with_the_public_component(self) -> None:
         source = without_comments(
             (CATALOG_JS / "examples-chart.js").read_text(encoding="utf-8")
@@ -2058,32 +2091,50 @@ console.log(JSON.stringify(report));
         for module_name, initializer in MODULES.items():
             if initializer is None:
                 continue
-            self.assertRegex(
-                source,
-                rf'import \{{ {initializer} \}} from "\./{re.escape(module_name)}";',
+            static_import = (
+                rf'import \{{ {initializer} \}} from "\./{re.escape(module_name)}";'
             )
+            if module_name in LAZY_CATALOG_MODULES:
+                self.assertNotRegex(source, static_import)
+                self.assertIn(f'import("./{module_name}")', source)
+            else:
+                self.assertRegex(source, static_import)
             self.assertIn(f"{initializer}(root)", source)
 
-        self.assertIn(
-            'import Combobox from "../../../../src/js/components/combobox.js";',
-            source,
-        )
         self.assertIn(
             'import Sidebar from "../../../../src/js/components/sidebar.js";',
             source,
         )
-        self.assertIn(
-            'import ContextMenu from "../../../../src/js/components/context-menu.js";',
-            source,
-        )
-        self.assertIn(
-            'import Slider from "../../../../src/js/components/slider.js";',
-            source,
-        )
+        for module_name in LAZY_COMPONENT_MODULES:
+            with self.subTest(module_name=module_name):
+                self.assertNotIn(
+                    f'from "../../../../src/js/components/{module_name}";',
+                    source,
+                )
+                self.assertIn(
+                    f'import("../../../../src/js/components/{module_name}")',
+                    source,
+                )
         self.assertIn("Combobox.getOrCreateInstance(element)", source)
         self.assertIn("Sidebar.getOrCreateInstance(element)", source)
+        self.assertIn("DataTable.getOrCreateInstance(element)", source)
+        self.assertIn("Datepicker.getOrCreateInstance(element)", source)
+        self.assertIn("MooCalendar.getOrCreateInstance(element)", source)
+        self.assertIn("MooDateRangePicker.getOrCreateInstance(element)", source)
         self.assertIn("ContextMenu.getOrCreateInstance(element)", source)
         self.assertIn("Slider.getOrCreateInstance(element)", source)
+        for selector in (
+            ".chart, [data-chart-live]",
+            "[data-moo-example-tasks]",
+            "[data-moo-example-users]",
+            ".combobox",
+            ".context-menu",
+            ".datatable",
+            "[data-datepicker], [data-datepicker-range], [data-calendar]",
+            "[data-slider]",
+        ):
+            with self.subTest(selector=selector):
+                self.assertIn(f'"{selector}"', source)
         self.assertIn("export function initCatalog(root = document)", source)
         self.assertIn("[...disposers].reverse()", source)
         self.assertNotIn(".combobox-input", source)

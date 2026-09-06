@@ -31,7 +31,9 @@ COMPONENT_SELECTOR_PREFIXES = {
     # Button Group's compact select override matches Bootstrap's
     # `.input-group > .form-select` specificity, so the partial
     # legitimately references .input-group as an ancestor context.
-    "button_group": ("btn", "input-group"),
+    # Button Group scopes Bootstrap Button's state classes while reducing
+    # mixed-emphasis hover/press seam jitter inside the joined group.
+    "button_group": ("btn", "input-group", "active", "disabled"),
     "card": ("card",),
     # Breadcrumb's collapsed-segment composition wraps Bootstrap's
     # native .dropdown inside its own .breadcrumb-dropdown-item, so
@@ -1740,7 +1742,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertLess(
             base.index('window.localStorage.getItem("moo:theme")'),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
         )
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
@@ -1758,8 +1760,8 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("introduction/index.html")
-        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.css?v='
-        catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.css?v='
+        stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.min.css?v='
+        catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.min.css?v='
         self.assertIn(stylesheet_marker, page)
         self.assertNotIn("moo-ui-prepaint.css", page)
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
@@ -1822,11 +1824,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(handoff, base)
         self.assertLess(
             base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.css'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
         )
         self.assertLess(
             base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.css'),
+            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'),
         )
 
     def test_built_catalog_sidebar_persisted_state_handoff_is_in_head(self) -> None:
@@ -1837,8 +1839,8 @@ class CatalogContractTests(CatalogTestCase):
         head = page.split("</head>", 1)[0]
         handoff = "dataset.sidebarCatalogState"
         self.assertIn(handoff, head)
-        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.css"))
-        self.assertLess(head.index(handoff), head.index("assets/css/catalog.css"))
+        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.min.css"))
+        self.assertLess(head.index(handoff), head.index("assets/css/catalog.min.css"))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
         handoff_index = page.index("shell.dataset.sidebarState = state")
         sidebar_index = page.index('<aside', handoff_index)
@@ -1964,6 +1966,23 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-showcase__image",
             home,
         )
+        hero_image_match = re.search(
+            r'<img\b[^>]*class="[^"]*\bmoo-home-showcase__image\b[^"]*"[^>]*>',
+            home,
+        )
+        self.assertIsNotNone(hero_image_match)
+        hero_image = hero_image_match.group(0)
+        self.assertIn(
+            'srcset="assets/images/readme-hero-640.webp 640w, '
+            'assets/images/readme-hero-960.webp 960w, '
+            'assets/images/readme-hero.webp 1536w"',
+            hero_image,
+        )
+        self.assertIn('sizes="(min-width: 992px) 612px, 100vw"', hero_image)
+        self.assertIn('fetchpriority="high"', hero_image)
+        self.assertIn('decoding="async"', hero_image)
+        self.assertIn('width="1536"', hero_image)
+        self.assertIn('height="1024"', hero_image)
         self.assertIn(
             "moo-home-proof-card",
             home,
@@ -2006,6 +2025,22 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn('height="512"', attributes)
                 self.assertIn('loading="lazy"', attributes)
                 self.assertIn('decoding="async"', attributes)
+
+    def test_home_showcase_cards_do_not_name_generic_divs(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        component_section = home[home.index('id="home-components"') :]
+        cards = re.findall(
+            r'<div\b[^>]*class="[^"]*\bmoo-home-component-card\b[^"]*"[^>]*>',
+            component_section,
+        )
+
+        self.assertEqual(len(cards), 32)
+        for card in cards:
+            with self.subTest(card=card):
+                self.assertNotIn("aria-label=", card)
 
     def test_sections_navigation_precedes_component_catalog(self) -> None:
         result = self.run_build()

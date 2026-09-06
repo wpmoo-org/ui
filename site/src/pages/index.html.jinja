@@ -36,9 +36,13 @@
       <img
         class="moo-home-showcase__image"
         src="{{ root_path }}assets/images/readme-hero.webp"
+        srcset="{{ root_path }}assets/images/readme-hero-640.webp 640w, {{ root_path }}assets/images/readme-hero-960.webp 960w, {{ root_path }}assets/images/readme-hero.webp 1536w"
+        sizes="(min-width: 992px) 612px, 100vw"
         alt="A grid of Moo UI components rendered together in the catalog"
-        width="1280"
-        height="800"
+        width="1536"
+        height="1024"
+        decoding="async"
+        fetchpriority="high"
       >
     </div>
   </section>
@@ -202,7 +206,6 @@
               {% if component %}
                 <div
                   class="card moo-catalog__app-card moo-catalog__showcase-card moo-home-component-card"
-                  aria-label="{{ component.label }} component preview"
                   {% if pass != 1 %}tabindex="-1" aria-hidden="true"{% endif %}
                 >
                   <div class="moo-catalog__showcase-preview">

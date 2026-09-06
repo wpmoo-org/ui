@@ -1,8 +1,3 @@
-import Combobox from "../../../../src/js/components/combobox.js";
-import ContextMenu from "../../../../src/js/components/context-menu.js";
-import DataTable from "../../../../src/js/components/datatable.js";
-import Datepicker, { MooCalendar, MooDateRangePicker } from "../../../../src/js/components/datepicker.js";
-import Slider from "../../../../src/js/components/slider.js";
 import Sidebar from "../../../../src/js/components/sidebar.js";
 import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
@@ -12,16 +7,67 @@ import { initCatalogFilter } from "./catalog-filter.js";
 import { initCatalogViewToggle } from "./catalog-view-toggle.js";
 import { initCodePreview } from "./code-preview.js";
 import { initCommand } from "./command.js";
-import { initExamplesChart } from "./examples-chart.js";
 import { initExamplesForms } from "./examples-forms.js";
-import { initExamplesTasks } from "./examples-tasks.js";
-import { initExamplesUsers } from "./examples-users.js";
 import { initHomeMotion } from "./home-motion.js";
 import { initSettingsPanel } from "./settings-panel.js";
 import { initTheme } from "./theme.js";
 import { initToc } from "./toc.js";
 
 const states = new WeakMap();
+const FEATURE_SELECTORS = {
+  chartExamples: ".chart, [data-chart-live]",
+  combobox: ".combobox",
+  contextMenu: ".context-menu",
+  datatable: ".datatable",
+  datepicker: "[data-datepicker], [data-datepicker-range], [data-calendar]",
+  slider: "[data-slider]",
+  tasksExample: "[data-moo-example-tasks]",
+  usersExample: "[data-moo-example-users]",
+};
+
+function hasFeature(root, selector) {
+  return Boolean(root.querySelector?.(selector));
+}
+
+function reportLazyError(error) {
+  setTimeout(() => {
+    throw error;
+  }, 0);
+}
+
+function initLazyFeature(root, selector, loadModule, initialize) {
+  if (!hasFeature(root, selector)) {
+    return null;
+  }
+
+  let released = false;
+  let dispose = null;
+  loadModule()
+    .then((module) => {
+      if (released) {
+        return;
+      }
+      dispose = initialize(module);
+      if (released) {
+        dispose?.();
+        dispose = null;
+      }
+    })
+    .catch(reportLazyError);
+
+  return () => {
+    released = true;
+    dispose?.();
+    dispose = null;
+  };
+}
+
+function pushLazyFeature(disposers, root, selector, loadModule, initialize) {
+  const dispose = initLazyFeature(root, selector, loadModule, initialize);
+  if (dispose) {
+    disposers.push(dispose);
+  }
+}
 
 export function initCatalog(root = document) {
   if (states.has(root)) {
@@ -33,42 +79,81 @@ export function initCatalog(root = document) {
     initCatalogFilter(root),
     initCommand(root),
     initExamplesForms(root),
-    initExamplesTasks(root),
-    initExamplesUsers(root),
-    initExamplesChart(root),
     initCatalogViewToggle(root),
     initSettingsPanel(root),
     initToc(root),
     initAcceptancePortal(root),
   ];
 
-  root.querySelectorAll(".combobox").forEach((element) => {
-    const instance = Combobox.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
-
-  root.querySelectorAll("[data-datepicker]").forEach((element) => {
-    const instance = Datepicker.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
-
-  root.querySelectorAll("[data-datepicker-range]").forEach((element) => {
-    const instance = MooDateRangePicker.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
-
-  root.querySelectorAll("[data-calendar]").forEach((element) => {
-    if (element.closest("[data-datepicker], [data-datepicker-range]")) {
-      return;
-    }
-    const instance = MooCalendar.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
-
-  root.querySelectorAll("[data-slider]").forEach((element) => {
-    const instance = Slider.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.tasksExample,
+    () => import("./examples-tasks.js"),
+    ({ initExamplesTasks }) => initExamplesTasks(root),
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.usersExample,
+    () => import("./examples-users.js"),
+    ({ initExamplesUsers }) => initExamplesUsers(root),
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.chartExamples,
+    () => import("./examples-chart.js"),
+    ({ initExamplesChart }) => initExamplesChart(root),
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.combobox,
+    () => import("../../../../src/js/components/combobox.js"),
+    ({ default: Combobox }) => {
+      const instances = [];
+      root.querySelectorAll(".combobox").forEach((element) => {
+        instances.push(Combobox.getOrCreateInstance(element));
+      });
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.datepicker,
+    () => import("../../../../src/js/components/datepicker.js"),
+    ({ default: Datepicker, MooCalendar, MooDateRangePicker }) => {
+      const instances = [];
+      root.querySelectorAll("[data-datepicker]").forEach((element) => {
+        instances.push(Datepicker.getOrCreateInstance(element));
+      });
+      root.querySelectorAll("[data-datepicker-range]").forEach((element) => {
+        instances.push(MooDateRangePicker.getOrCreateInstance(element));
+      });
+      root.querySelectorAll("[data-calendar]").forEach((element) => {
+        if (element.closest("[data-datepicker], [data-datepicker-range]")) {
+          return;
+        }
+        instances.push(MooCalendar.getOrCreateInstance(element));
+      });
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.slider,
+    () => import("../../../../src/js/components/slider.js"),
+    ({ default: Slider }) => {
+      const instances = [];
+      root.querySelectorAll("[data-slider]").forEach((element) => {
+        instances.push(Slider.getOrCreateInstance(element));
+      });
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
 
   disposers.push(initCodePreview(root));
   disposers.push(initBootstrapPreview(root));
@@ -78,15 +163,32 @@ export function initCatalog(root = document) {
     disposers.push(() => instance.dispose());
   });
 
-  root.querySelectorAll(".context-menu").forEach((element) => {
-    const instance = ContextMenu.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
-
-  root.querySelectorAll(".datatable").forEach((element) => {
-    const instance = DataTable.getOrCreateInstance(element);
-    disposers.push(() => instance.dispose());
-  });
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.contextMenu,
+    () => import("../../../../src/js/components/context-menu.js"),
+    ({ default: ContextMenu }) => {
+      const instances = [];
+      root.querySelectorAll(".context-menu").forEach((element) => {
+        instances.push(ContextMenu.getOrCreateInstance(element));
+      });
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
+  pushLazyFeature(
+    disposers,
+    root,
+    FEATURE_SELECTORS.datatable,
+    () => import("../../../../src/js/components/datatable.js"),
+    ({ default: DataTable }) => {
+      const instances = [];
+      root.querySelectorAll(".datatable").forEach((element) => {
+        instances.push(DataTable.getOrCreateInstance(element));
+      });
+      return () => instances.forEach((instance) => instance.dispose());
+    },
+  );
 
   disposers.push(initHomeMotion(root));
   disposers.push(initBlockFrames(root));
