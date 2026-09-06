@@ -280,8 +280,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(page.locator('script[data-foreign-bootstrap="true"]')).to_have_count(1)
             # The Bootstrap bundle fails asynchronously; the toast queue flag is
             # cleared only after the failure handler runs, so wait for that.
-            expect(page.locator("body")).not_to_have_attribute(
-                "data-moo-codepen-toasts-queued",
+            page.wait_for_function(
+                "() => !document.body.hasAttribute('data-moo-codepen-toasts-queued')",
                 timeout=9000,
             )
         finally:
@@ -436,9 +436,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(popover).to_have_count(1)
             expect(popover).to_be_visible()
             expect(popover).to_contain_text("Button")
-            expect(popover).to_contain_text(
-                "Use Bootstrap button styles for reliable production actions: "
-                "publish, review, and move work forward."
+            expect(popover.get_by_role("link", name="Learn more")).to_have_attribute(
+                "href",
+                "https://ui.wpmoo.org/components/button/",
             )
             self.assertTrue(
                 trigger.evaluate("(element) => document.activeElement === element")

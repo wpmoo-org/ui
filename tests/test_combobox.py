@@ -508,11 +508,14 @@ class ComboboxTests(CatalogTestCase):
         self.assertIn('this._hidden.value = option.dataset.value || ""', source)
         self.assertIn("data-combobox-group", source)
         self.assertNotIn("combobox-popup-trigger", source)
+        self.assertIn('combobox: ".combobox"', catalog)
         self.assertIn(
-            'import Combobox from "../../../../src/js/components/combobox.js";',
+            'import("../../../../src/js/components/combobox.js")',
             catalog,
         )
-        self.assertIn("Combobox.getOrCreateInstance(element);", catalog)
+        self.assertIn("({ default: Combobox })", catalog)
+        self.assertIn("Combobox.getOrCreateInstance(element)", catalog)
+        self.assertIn("instances.forEach((instance) => instance.dispose())", catalog)
         self.assertNotIn(".combobox-input", catalog)
 
     def test_public_module_does_not_scroll_closed_comboboxes_on_initialization(self) -> None:
