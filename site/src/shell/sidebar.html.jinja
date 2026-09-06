@@ -26,7 +26,7 @@
   "label": "All Components",
   "href": "components/index.html",
   "icon": "layout-grid",
-  "active": components_open and current_slug == "index"
+  "active": components_open and current_slug == "components"
 }] %}
 {% for component in catalog | sort(attribute="label") %}
   {% set _ = component_children.append({

@@ -10,6 +10,13 @@
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
+{% set catalog_landing_navigation_items = [
+  {"slug": "installation", "label": "Installation", "href": "installation.html"},
+  {"slug": "examples", "label": "Examples", "href": "examples/index.html"},
+  {"slug": "components", "label": "All Components", "href": "components/index.html"},
+  {"slug": "accordion", "label": "Accordion", "href": "components/accordion.html"}
+] %}
+
 {% block title %}Components — Moo UI{% endblock %}
 
 {% block content %}
@@ -19,7 +26,7 @@
         "Components",
         "Browse the Bootstrap-native primitives and documented Moo UI extensions that make up the public package.",
         id="catalog",
-        actions=render_section_page_actions("components", site_pages, root_path)
+        actions=render_section_page_actions("components", catalog_landing_navigation_items, root_path)
       ) }}
 
       <section class="moo-catalog__dashboard" data-moo-catalog-view="grid" aria-label="Catalog filters">
@@ -89,7 +96,7 @@
         </section>
       </section>
 
-      {{ render_section_page_pagination("components", site_pages, root_path) }}
+      {{ render_section_page_pagination("components", catalog_landing_navigation_items, root_path) }}
     </article>
 
     {{ render_doc_toc([

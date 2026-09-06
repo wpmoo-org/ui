@@ -251,6 +251,15 @@ class LinkParser(HTMLParser):
             self.popover_triggers.append({"__tag": tag, **attributes})
 
 
+class StartTagParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tags: list[dict[str, str | None]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.append({"__tag": tag, **dict(attrs)})
+
+
 class CatalogContractTests(CatalogTestCase):
     INTERNAL_PUBLIC_API_SNIPPETS = (
         "Jinja macro API",
@@ -273,6 +282,20 @@ class CatalogContractTests(CatalogTestCase):
         "field()",
         "form()",
     )
+
+    def assert_page_actions_region(self, html: str) -> None:
+        parser = StartTagParser()
+        parser.feed(html)
+        actions = [
+            tag
+            for tag in parser.tags
+            if tag.get("__tag") == "div"
+            and "moo-doc-page-actions" in (tag.get("class") or "").split()
+        ]
+
+        self.assertTrue(actions, "expected a page actions region")
+        self.assertEqual(actions[0].get("aria-label"), "Page actions")
+
     def assert_no_internal_public_api_guidance(
         self,
         surface: str,
@@ -1948,6 +1971,19 @@ class CatalogContractTests(CatalogTestCase):
         # the doc-section entries, starting with Introduction, precede
         # the Components disclosure.
         sidebar = components[components.index('id="catalog-sidebar"'):]
+        sidebar_links = LinkParser()
+        sidebar_links.feed(sidebar)
+        all_components_link = next(
+            (
+                link
+                for link in sidebar_links.links
+                if link.get("href") == "../components/"
+            ),
+            None,
+        )
+        self.assertIsNotNone(all_components_link)
+        self.assertIn("active", (all_components_link.get("class") or "").split())
+        self.assertEqual(all_components_link.get("aria-current"), "page")
         sections_index = sidebar.index(">Introduction<")
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         self.assertLess(sections_index, components_index)
@@ -2029,7 +2065,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         introduction = self.read_output("introduction.html")
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', introduction)
+        self.assert_page_actions_region(introduction)
         self.assertIn("data-moo-copy-page", introduction)
         self.assertIn("Copy Link", introduction)
         self.assertIn("Open in ChatGPT", introduction)
@@ -2048,14 +2084,23 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../examples/"', installation)
 
         examples = self.read_output("examples/index.html")
+        examples_header_start = examples.index('<header class="moo-component-header')
+        examples_header = examples[
+            examples_header_start : examples.index("</header>", examples_header_start)
+        ]
+        self.assert_page_actions_region(examples_header)
+        self.assertIn('aria-label="Next page: All Components"', examples_header)
+        self.assertIn('href="../components/"', examples_header)
         examples_pagination = examples.rsplit(
             '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
             1,
         )[1]
         self.assertIn('href="../installation/"', examples_pagination)
         self.assertIn("Installation", examples_pagination)
-        self.assertIn('href="../examples/settings/account/"', examples_pagination)
-        self.assertIn("Account", examples_pagination)
+        self.assertIn('href="../components/"', examples_pagination)
+        self.assertIn("All Components", examples_pagination)
+        self.assertNotIn('href="../examples/dashboard/users/"', examples_pagination)
+        self.assertNotIn('href="../examples/settings/account/"', examples_pagination)
 
         # Individual Examples pages (Tasks, Settings/*, Auth/*) deliberately
         # carry no Prev/Next pagination -- that's docs-site navigation, and
@@ -2072,8 +2117,23 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("moo-doc-pagination", profile)
 
         components = self.read_output("components/index.html")
-        self.assertIn('aria-label="Previous page: Users"', components)
-        self.assertIn('aria-label="Next page: Accordion"', components)
+        components_header_start = components.index('<header class="moo-component-header')
+        components_header = components[
+            components_header_start : components.index("</header>", components_header_start)
+        ]
+        self.assertIn('aria-label="Previous page: Examples"', components_header)
+        self.assertIn('href="../examples/"', components_header)
+        self.assertIn('aria-label="Next page: Accordion"', components_header)
+        self.assertNotIn('aria-label="Previous page: Users"', components_header)
+        components_pagination = components.rsplit(
+            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
+            1,
+        )[1]
+        self.assertIn('href="../examples/"', components_pagination)
+        self.assertIn("Examples", components_pagination)
+        self.assertIn('href="../components/accordion/"', components_pagination)
+        self.assertIn("Accordion", components_pagination)
+        self.assertNotIn("Users", components_pagination)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', components)
 
         blocks = self.read_output("blocks/index.html")
@@ -2086,8 +2146,8 @@ class CatalogContractTests(CatalogTestCase):
         component_header = component[
             component_header_start : component.index("</header>", component_header_start)
         ]
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', component_header)
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', component)
+        self.assert_page_actions_region(component_header)
+        self.assert_page_actions_region(component)
         self.assertIn('aria-label="Previous page: Spinner"', component)
         self.assertIn('aria-label="Next page: Table"', component)
         self.assertIn('class="moo-doc-pagination" aria-label="Docs pagination"', component)
@@ -2097,8 +2157,8 @@ class CatalogContractTests(CatalogTestCase):
         utility_header = utility[
             utility_header_start : utility.index("</header>", utility_header_start)
         ]
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility_header)
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', utility)
+        self.assert_page_actions_region(utility_header)
+        self.assert_page_actions_region(utility)
         self.assertIn('aria-label="Previous page: Charts"', utility)
         self.assertIn('aria-label="Next page: Support &amp; Evidence"', utility)
 
@@ -2107,8 +2167,8 @@ class CatalogContractTests(CatalogTestCase):
         block_header = block[
             block_header_start : block.index("</header>", block_header_start)
         ]
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', block_header)
-        self.assertIn('class="moo-doc-page-actions" aria-label="Page actions"', block)
+        self.assert_page_actions_region(block_header)
+        self.assert_page_actions_region(block)
         self.assertIn('aria-label="Previous page: Blocks"', block)
         self.assertIn('aria-label="Next page: Sidebar (Inset)"', block)
 
