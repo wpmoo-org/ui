@@ -7,6 +7,8 @@ import subprocess
 import sys
 from datetime import datetime
 
+from playwright.sync_api import BrowserContext, Page
+
 from build import create_environment
 from tests.helpers import (
     ROOT,
@@ -401,7 +403,12 @@ class _DatepickerBrowserMixin:
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
 
-    def open_fixture(self, case=CERTIFICATION_CASES[0], *, fixed_time: str | None = None):
+    def open_fixture(
+        self,
+        case=CERTIFICATION_CASES[0],
+        *,
+        fixed_time: str | None = None,
+    ) -> tuple[BrowserContext, Page, BrowserEvidence]:
         context = new_case_context(self.browser, case)
         page = context.new_page()
         evidence = BrowserEvidence(page)
@@ -969,6 +976,10 @@ class _DatepickerBrowserMixin:
             fixed_time="2026-08-18T12:00:00Z",
         )
         try:
+            self.assertEqual(
+                page.evaluate("() => new Date().toISOString()"),
+                "2026-08-18T12:00:00.000Z",
+            )
             expect(page.locator("body")).to_have_attribute("data-datepicker-ready", "true")
             expect(page.locator("#certification-datepicker")).to_have_attribute(
                 "data-datepicker-locale",

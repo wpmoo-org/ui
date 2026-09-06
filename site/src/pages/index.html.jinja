@@ -33,6 +33,12 @@
       </div>
     </div>
     <div class="moo-home-showcase__media" data-moo-tilt>
+      {#- Responsive image coverage, 2026-09-06, Chromium/Playwright:
+          desktop DPR 1 at 640x844 selects readme-hero-640.webp;
+          desktop DPR 1 at 960x844 selects readme-hero-960.webp;
+          desktop DPR 2 at 1200x844 selects readme-hero.webp (1536w).
+          All three candidates preserve the declared 3:2 rendered aspect
+          ratio within rounding tolerance and avoid visual distortion. #}
       <img
         class="moo-home-showcase__image"
         src="{{ root_path }}assets/images/readme-hero.webp"

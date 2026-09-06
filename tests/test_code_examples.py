@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from html.parser import HTMLParser
 
 import build
@@ -321,8 +322,66 @@ class CodeExampleTests(CatalogTestCase):
             html,
         )
         self.assertIn("function inferCodePenConfig(root)", demo_js)
-        self.assertIn('{ slug: "button", selector: ".btn" }', demo_js)
-        self.assertIn('"button": "Button"', demo_js)
+
+        instrument_hook = "  window.MooCodePenDemo = {\n    init: function (config) {"
+        self.assertIn(instrument_hook, demo_js)
+        instrumented = demo_js.replace(
+            instrument_hook,
+            (
+                "  window.MooCodePenDemo = {\n"
+                "    inferConfigForTest: function (root) {\n"
+                "      return normalizeConfig(inferCodePenConfig(root));\n"
+                "    },\n"
+                "    init: function (config) {"
+            ),
+            1,
+        )
+        node_script = f"""
+const window = {{}};
+const document = {{
+  readyState: "loading",
+  addEventListener() {{}},
+  querySelector() {{ return null; }}
+}};
+const source = {json.dumps(instrumented)};
+eval(source);
+const root = {{
+  querySelector(selector) {{
+    return selector === ".btn" ? {{}} : null;
+  }}
+}};
+console.log(JSON.stringify(window.MooCodePenDemo.inferConfigForTest(root)));
+"""
+        inference = subprocess.run(
+            ["node", "--input-type=module", "--eval", node_script],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        self.assertEqual(inference.returncode, 0, inference.stderr)
+        self.assertEqual(
+            json.loads(inference.stdout.splitlines()[-1]),
+            {
+                "kind": "component",
+                "packageVersion": "",
+                "runtimeBaseUrl": "",
+                "components": [
+                    {
+                        "slug": "button",
+                        "label": "Button",
+                        "description": "",
+                        "href": "https://ui.wpmoo.org/components/button/",
+                        "previewSrc": (
+                            "https://ui.wpmoo.org/assets/images/components/"
+                            "button.webp"
+                        ),
+                    }
+                ],
+            },
+        )
 
     def test_component_codepen_form_surfaces_are_field_wrapped(self) -> None:
         result = self.run_build()

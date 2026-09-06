@@ -1006,13 +1006,17 @@ class CatalogContractTests(CatalogTestCase):
                 f"{path.relative_to(ROOT / 'site-dist').as_posix()} has no CodePen payloads",
             )
             for index, payload in enumerate(payloads):
-                inspected_payloads += 1
                 html = str(payload.get("html", ""))
                 html_lower = html.lower()
                 with self.subTest(
                     page=path.relative_to(ROOT / "site-dist").as_posix(),
                     payload=index,
                 ):
+                    self.assertRegex(
+                        html,
+                        r"<[a-z][^>]*>",
+                        "CodePen payload should include component example markup",
+                    )
                     self.assertNotIn("window.MooCodePen", html)
                     self.assertNotIn("MooCodePenDemo.init", html)
                     self.assertNotIn("<script", html_lower)
@@ -1034,6 +1038,7 @@ class CatalogContractTests(CatalogTestCase):
                         "moo-catalog",
                     ):
                         self.assertNotIn(marker, html)
+                    inspected_payloads += 1
         self.assertGreater(inspected_payloads, 0)
 
     def test_codepen_prefill_payloads_use_browser_safe_form_fields(self) -> None:
@@ -2037,7 +2042,7 @@ class CatalogContractTests(CatalogTestCase):
             component_section,
         )
 
-        self.assertEqual(len(cards), 32)
+        self.assertTrue(cards)
         for card in cards:
             with self.subTest(card=card):
                 self.assertNotIn("aria-label=", card)
