@@ -420,8 +420,14 @@ class CodePenModalBrowserTests(unittest.TestCase):
 
     def test_component_codepen_footer_component_popover_opens_on_focus(self) -> None:
         payload = self.codepen_payload("button", "Moo UI Button - Primary")
+        html = str(payload["html"])
+        self.assertNotIn("window.MooCodePen", html)
+        self.assertNotIn("MooCodePenDemo.init", html)
         context, page, evidence = self.render_component_codepen(payload)
         try:
+            expect(page.locator(".moo-codepen-footer")).to_contain_text(
+                "Button component."
+            )
             trigger = page.locator(".moo-examples-footer__component-trigger").first
             expect(trigger).to_have_attribute("href", "#!")
             expect(trigger).to_have_attribute("role", "button")
