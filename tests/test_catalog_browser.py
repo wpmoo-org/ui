@@ -130,6 +130,45 @@ class CatalogBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_primary_doc_toc_links_keep_minimum_touch_targets(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            page.set_viewport_size({"width": 1440, "height": 900})
+            evidence = BrowserEvidence(page)
+            response = page.goto(
+                f"{self.base_url}/site-dist/installation/",
+                wait_until="domcontentloaded",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[0])
+            expect(page.get_by_role("heading", name="Installation", level=1)).to_be_visible()
+            expect(page.locator(".moo-doc-toc")).to_be_visible()
+
+            toc_link_sizes = page.locator(".moo-doc-toc .nav-link").evaluate_all(
+                """
+                links => links.map((link) => {
+                  const rect = link.getBoundingClientRect();
+                  return {
+                    text: link.textContent.trim(),
+                    width: rect.width,
+                    height: rect.height,
+                  };
+                })
+                """
+            )
+
+            self.assertGreaterEqual(len(toc_link_sizes), 4)
+            for link in toc_link_sizes:
+                with self.subTest(link=link["text"]):
+                    self.assertGreaterEqual(link["width"], 24, link)
+                    self.assertGreaterEqual(link["height"], 24, link)
+
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_form_preview_field_wrappers_center_token_width_controls(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         try:
