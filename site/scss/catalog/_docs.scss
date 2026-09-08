@@ -414,11 +414,14 @@
 }
 
 .moo-doc-toc .nav {
+  --bs-nav-link-padding-x: 0;
+  --bs-nav-link-padding-y: 0.125rem;
+
   gap: 0.125rem;
 }
 
 .moo-doc-toc .nav-link {
-  padding: 0;
+  padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
   color: var(--bs-secondary-color);
   font-size: 0.8125rem;
   line-height: 1.6;
