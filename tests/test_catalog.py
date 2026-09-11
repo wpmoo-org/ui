@@ -908,10 +908,11 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIn(entrypoint, published_js_entrypoints)
 
-    def test_codepen_payloads_use_the_current_published_package_version(self) -> None:
+    def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.4")
-        self.assertEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
+        self.assertEqual(package["version"], "1.0.0-rc.5")
+        self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1240,6 +1241,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-moo-acceptance-key="rc4-component-matrix"', page)
         self.assertIn("0/450", page)
         self.assertNotIn("rc3-component-matrix", page)
+
+    def test_rc5_acceptance_portal_uses_separate_release_state(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rc5_path = DIST / "acceptance/rc5/index.html"
+        self.assertTrue(rc5_path.exists(), "RC.5 needs its own acceptance route")
+        page = rc5_path.read_text(encoding="utf-8")
+
+        self.assertIn("1.0.0-rc.5", page)
+        self.assertIn('data-moo-acceptance-key="rc5-component-matrix"', page)
+        self.assertIn("0/450", page)
+        self.assertNotIn("rc4-component-matrix", page)
 
     def test_certification_fixtures_get_build_time_pagination(self) -> None:
         source = (

@@ -768,10 +768,10 @@ class CertificationContractTests(unittest.TestCase):
             certification["bootstrap"]["testedVersions"],
         )
 
-    def test_rc4_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.4 freeze document structure, metadata,
+    def test_rc5_api_freeze_declaration_is_well_formed(self) -> None:
+        """Validate the 1.0.0-rc.5 freeze document structure, metadata,
         and exact package export/file equality against package.json."""
-        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.4.json")
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.5.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
@@ -1002,8 +1002,8 @@ class CertificationContractTests(unittest.TestCase):
             },
         )
 
-    def test_rc4_freeze_test_docstring_matches_enforced_equality(self) -> None:
-        docstring = self.test_rc4_api_freeze_declaration_is_well_formed.__doc__ or ""
+    def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:
+        docstring = self.test_rc5_api_freeze_declaration_is_well_formed.__doc__ or ""
 
         self.assertIn("exact package export/file equality", docstring)
         self.assertNotIn("deferred", docstring)

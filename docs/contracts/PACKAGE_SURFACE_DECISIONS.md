@@ -3,6 +3,14 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.5 Entrypoints
+
+RC5 carries forward the RC4 public export and package-file inventory without
+adding or removing an entrypoint. The current API freeze revalidates the CSS,
+ESM, Sass, metadata, and artifact-variant surface against `package.json` and
+`certification.json`; changes to that surface require an explicit freeze
+update.
+
 ## 1.0.0-rc.4 Entrypoints
 
 Schema version `0.1` permits additive optional properties under
