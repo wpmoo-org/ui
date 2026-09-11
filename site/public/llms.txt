@@ -56,7 +56,7 @@ entrypoints; undocumented internal partial paths are not separate public APIs.
 
 ## Installation Facts
 
-- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0-rc.5/dist/assets/css/moo-ui.css`
+- CDN full stylesheet: `https://unpkg.com/@wpmoo/ui@1.0.0-rc.4/dist/assets/css/moo-ui.css`
 
 Full replacement:
 

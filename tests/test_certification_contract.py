@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -1023,6 +1024,73 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("- [x] macOS Safari", record)
         self.assertIn("- [x] iOS Safari", record)
         self.assertIn("- [x] Android Chrome", record)
+
+    def test_rc5_manual_acceptance_export_is_complete_and_bound_to_candidate(self) -> None:
+        record_path = (
+            CERTIFICATION_ROOT
+            / "manual-acceptance/2026-09-11-rc5-manual-acceptance.md"
+        )
+        export_path = (
+            CERTIFICATION_ROOT
+            / "manual-acceptance/exports/2026-09-11-rc5-acceptance-portal-export.md"
+        )
+
+        self.assertTrue(
+            record_path.is_file(),
+            "RC.5 manual acceptance record is missing",
+        )
+        self.assertTrue(export_path.is_file(), "RC.5 acceptance export is missing")
+
+        record = record_path.read_text(encoding="utf-8")
+        export = export_path.read_text(encoding="utf-8")
+        export_sha256 = hashlib.sha256(export_path.read_bytes()).hexdigest()
+
+        self.assertIn(
+            "HTML repository commit at acceptance export review: "
+            "`95c4f15c02da11881ece70c52aa0f6543f72c050`",
+            record,
+        )
+        self.assertIn(
+            "Complete portal export: "
+            "`src/certification/manual-acceptance/exports/"
+            "2026-09-11-rc5-acceptance-portal-export.md`",
+            record,
+        )
+        self.assertIn(f"Acceptance export SHA-256: `{export_sha256}`", record)
+        self.assertEqual(len(re.findall(r"^### .+$", export, re.MULTILINE)), 45)
+        self.assertEqual(
+            len(
+                re.findall(
+                    r"^\| Safari \| Done \| Done \| Done \| Done \|$",
+                    export,
+                    re.MULTILINE,
+                )
+            ),
+            45,
+        )
+        self.assertEqual(
+            len(
+                re.findall(
+                    r"^\| iPhone \| Done \| Done \| Done \| N/A \|$",
+                    export,
+                    re.MULTILINE,
+                )
+            ),
+            45,
+        )
+        self.assertEqual(
+            len(
+                re.findall(
+                    r"^\| Android \| Done \| Done \| Done \| N/A \|$",
+                    export,
+                    re.MULTILINE,
+                )
+            ),
+            45,
+        )
+        self.assertIn("Generated: 2026-09-11T16:37:30.337Z", export)
+        self.assertIn("Result: 450/450", export)
+        self.assertIn("## Unchecked\n\n- none", export)
 
 
 if __name__ == "__main__":

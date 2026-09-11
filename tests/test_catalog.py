@@ -1301,7 +1301,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(component_lines, expected)
 
-    def test_llms_txt_cdn_example_tracks_package_version(self) -> None:
+    def test_llms_txt_cdn_example_tracks_published_package_version(self) -> None:
         package = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )
@@ -1312,7 +1312,8 @@ class CatalogContractTests(CatalogTestCase):
         )
 
         self.assertIsNotNone(match)
-        self.assertEqual(match.group(1), package["version"])
+        self.assertEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
+        self.assertNotEqual(match.group(1), package["version"])
 
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
