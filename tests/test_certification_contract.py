@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -768,10 +769,10 @@ class CertificationContractTests(unittest.TestCase):
             certification["bootstrap"]["testedVersions"],
         )
 
-    def test_rc4_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.4 freeze document structure, metadata,
+    def test_rc5_api_freeze_declaration_is_well_formed(self) -> None:
+        """Validate the 1.0.0-rc.5 freeze document structure, metadata,
         and exact package export/file equality against package.json."""
-        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.4.json")
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.5.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
@@ -1002,8 +1003,8 @@ class CertificationContractTests(unittest.TestCase):
             },
         )
 
-    def test_rc4_freeze_test_docstring_matches_enforced_equality(self) -> None:
-        docstring = self.test_rc4_api_freeze_declaration_is_well_formed.__doc__ or ""
+    def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:
+        docstring = self.test_rc5_api_freeze_declaration_is_well_formed.__doc__ or ""
 
         self.assertIn("exact package export/file equality", docstring)
         self.assertNotIn("deferred", docstring)
@@ -1023,6 +1024,73 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("- [x] macOS Safari", record)
         self.assertIn("- [x] iOS Safari", record)
         self.assertIn("- [x] Android Chrome", record)
+
+    def test_rc5_manual_acceptance_export_is_complete_and_bound_to_candidate(self) -> None:
+        record_path = (
+            CERTIFICATION_ROOT
+            / "manual-acceptance/2026-09-11-rc5-manual-acceptance.md"
+        )
+        export_path = (
+            CERTIFICATION_ROOT
+            / "manual-acceptance/exports/2026-09-11-rc5-acceptance-portal-export.md"
+        )
+
+        self.assertTrue(
+            record_path.is_file(),
+            "RC.5 manual acceptance record is missing",
+        )
+        self.assertTrue(export_path.is_file(), "RC.5 acceptance export is missing")
+
+        record = record_path.read_text(encoding="utf-8")
+        export = export_path.read_text(encoding="utf-8")
+        export_sha256 = hashlib.sha256(export_path.read_bytes()).hexdigest()
+
+        self.assertIn(
+            "HTML repository commit at acceptance export review: "
+            "`95c4f15c02da11881ece70c52aa0f6543f72c050`",
+            record,
+        )
+        self.assertIn(
+            "Complete portal export: "
+            "`src/certification/manual-acceptance/exports/"
+            "2026-09-11-rc5-acceptance-portal-export.md`",
+            record,
+        )
+        self.assertIn(f"Acceptance export SHA-256: `{export_sha256}`", record)
+        self.assertEqual(len(re.findall(r"^### .+$", export, re.MULTILINE)), 45)
+        self.assertEqual(
+            len(
+                re.findall(
+                    r"^\| Safari \| Done \| Done \| Done \| Done \|$",
+                    export,
+                    re.MULTILINE,
+                )
+            ),
+            45,
+        )
+        self.assertEqual(
+            len(
+                re.findall(
+                    r"^\| iPhone \| Done \| Done \| Done \| N/A \|$",
+                    export,
+                    re.MULTILINE,
+                )
+            ),
+            45,
+        )
+        self.assertEqual(
+            len(
+                re.findall(
+                    r"^\| Android \| Done \| Done \| Done \| N/A \|$",
+                    export,
+                    re.MULTILINE,
+                )
+            ),
+            45,
+        )
+        self.assertIn("Generated: 2026-09-11T16:37:30.337Z", export)
+        self.assertIn("Result: 450/450", export)
+        self.assertIn("## Unchecked\n\n- none", export)
 
 
 if __name__ == "__main__":

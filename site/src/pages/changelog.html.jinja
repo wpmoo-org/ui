@@ -16,6 +16,38 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-5">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.5</span>
+            <span class="text-body-secondary">Catalog and release-evidence hardening</span>
+          </div>
+          <h2 id="release-1-0-0-rc-5">Catalog and Release-Evidence Hardening</h2>
+          <p>
+            Moo UI 1.0.0-rc.5 carries the RC4 public package surface forward
+            while refreshing catalog first-paint behavior, component navigation,
+            and release evidence. Certification remains <code>preview</code>.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>Catalog prepaint and theme initialization now keep documentation navigation, borders, and dark-mode component previews stable during first paint.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>Button Group, CodePen export, component landing-page navigation, and form-control examples now follow their documented composition contracts.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>CSS, ESM, Sass, package metadata, boundary baselines, and API-freeze evidence for <code>@wpmoo/ui@1.0.0-rc.5</code>; the catalog CodePen CDN remains pinned to the latest published RC4 package until RC5 is published.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>Release candidate v1.0.0-rc.5</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-4">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.4</span>
@@ -432,6 +464,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0-rc-5", "label": "v1.0.0-rc.5"},
       {"id": "release-1-0-0-rc-4", "label": "v1.0.0-rc.4"},
       {"id": "release-1-0-0-rc-3", "label": "v1.0.0-rc.3"},
       {"id": "release-1-0-0-rc-2", "label": "v1.0.0-rc.2"},
