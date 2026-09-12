@@ -12,7 +12,7 @@
 // visible content changed.
 .datatable {
   --moo-datatable-min-width: #{$moo-datatable-min-width};
-  --moo-datatable-actions-cell-bg: var(--bs-body-bg);
+  --moo-datatable-actions-cell-bg: #{$moo-datatable-actions-cell-bg};
   --moo-datatable-actions-cell-fade-width: #{$moo-datatable-actions-cell-fade-width};
   --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
   --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
