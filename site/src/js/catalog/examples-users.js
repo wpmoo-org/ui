@@ -49,12 +49,19 @@ export function initExamplesUsers(root = document) {
     return states.get(root);
   }
 
+  const documentRoot = root.ownerDocument || root;
+  const windowRoot = documentRoot.defaultView;
   const page = root.querySelector("[data-moo-example-users]");
   const tableRoot = page?.querySelector(".datatable");
   const tbody = tableRoot?.querySelector("tbody");
   const cards = tableRoot?.querySelector("[data-datatable-cards]");
   const skeleton = page?.querySelector("[data-moo-user-skeleton]");
-  const sheet = page?.querySelector("#users-new-sheet");
+  // Catalog bootstrap previews portal sheets to <body> before lazy example
+  // modules resolve; keep the page-scoped lookup for standalone previews but
+  // fall back to the document for the catalog shell.
+  const sheet =
+    page?.querySelector("#users-new-sheet") ??
+    documentRoot.querySelector("#users-new-sheet");
   const form = sheet?.querySelector("form");
   const sheetTitle = sheet?.querySelector(".offcanvas-title");
   const sheetCopy = sheet?.querySelector("[data-moo-user-sheet-copy]");
@@ -89,8 +96,6 @@ export function initExamplesUsers(root = document) {
   let editRow = null;
   let deleteRow = null;
 
-  const documentRoot = root.ownerDocument || root;
-  const windowRoot = documentRoot.defaultView;
   const bootstrap = windowRoot?.bootstrap;
   const reinitTable = () => {
     DataTable.getOrCreateInstance(tableRoot).dispose();

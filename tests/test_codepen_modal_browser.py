@@ -8,9 +8,11 @@ from playwright.sync_api import expect, sync_playwright
 
 from tests.helpers import codepen_payload_from_output
 from tests.helpers.browser_harness import (
+    BrowserEvidence,
     CERTIFICATION_CASES,
     launch_certification_browser,
     new_case_context,
+    prepare_page,
     ROOT,
     setup_codepen_page,
     serve_repository,
@@ -241,6 +243,77 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     )
                     expect(summary).to_have_text("No results")
 
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_dashboard_row_actions_work_after_catalog_sheet_portal(self) -> None:
+        cases = [
+            {
+                "name": "tasks",
+                "path": "/site-dist/examples/dashboard/tasks/index.html",
+                "row": "#tsk-126",
+                "edit": "[data-moo-task-edit]",
+                "sheet": "#tasks-new-sheet",
+                "sheet_title": "Edit task",
+                "delete": "[data-moo-task-delete]",
+                "dialog": "#tasks-delete-dialog",
+                "dialog_title": "Delete this task: TSK-126?",
+            },
+            {
+                "name": "users",
+                "path": "/site-dist/examples/dashboard/users/index.html",
+                "row": "#usr-1",
+                "edit": "[data-moo-user-edit]",
+                "sheet": "#users-new-sheet",
+                "sheet_title": "Edit user",
+                "delete": "[data-moo-user-delete]",
+                "dialog": "#users-delete-dialog",
+                "dialog_title": "Delete this user: Vint Cerf?",
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(example=case["name"]):
+                context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}{case['path']}",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, CERTIFICATION_CASES[0])
+
+                    row = page.locator(case["row"])
+                    trigger = row.locator(".table-row-actions > button")
+                    menu = page.locator("body > .dropdown-menu.show")
+
+                    trigger.click()
+                    expect(menu).to_be_visible()
+                    menu.locator(case["edit"]).click()
+
+                    sheet = page.locator(case["sheet"])
+                    expect(sheet).to_be_visible()
+                    expect(sheet.locator(".offcanvas-title")).to_have_text(
+                        case["sheet_title"]
+                    )
+                    sheet.get_by_role("button", name="Cancel").click()
+                    expect(sheet).to_be_hidden()
+
+                    trigger.click()
+                    expect(menu).to_be_visible()
+                    menu.locator(case["delete"]).click()
+
+                    dialog = page.locator(case["dialog"])
+                    expect(dialog).to_be_visible()
+                    expect(dialog.locator(".modal-title")).to_have_text(
+                        case["dialog_title"]
+                    )
+                    dialog.get_by_role("button", name="Cancel").click()
+                    expect(dialog).to_be_hidden()
                     evidence.assert_clean()
                 finally:
                     context.close()
