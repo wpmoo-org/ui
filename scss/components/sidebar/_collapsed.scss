@@ -37,6 +37,11 @@
     position: relative;
   }
 
+  .sidebar-wrapper:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar {
+    position: relative;
+    z-index: $zindex-dropdown;
+  }
+
   .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
     flex-basis: var(--moo-sidebar-width-icon);
     width: var(--moo-sidebar-width-icon);
