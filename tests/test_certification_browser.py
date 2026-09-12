@@ -730,7 +730,6 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertTrue(response.ok)
                 prepare_page(page, case)
 
-                root = page.locator('[data-slot="sidebar-wrapper"]')
                 sidebar = page.locator('[data-slot="sidebar"]')
                 drawer_trigger = page.locator("#certification-sidebar-trigger")
                 expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
@@ -939,6 +938,52 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         self.assertNotEqual(transition["transform"], "none")
         evidence.assert_clean()
         context.close()
+
+    def test_sidebar_identity_dropdowns_support_keyboard_navigation_and_restore_focus(
+        self,
+    ) -> None:
+        for case in (SIDEBAR_OVERLAY_CASES[0], SIDEBAR_OVERLAY_CASES[3]):
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/sidebar.html"
+                    f"?side={'right' if case.name.startswith('desktop-right') else 'left'}",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                for trigger_id, menu_id in (
+                    (
+                        "#certification-sidebar-workspace",
+                        "#certification-sidebar-workspace-menu",
+                    ),
+                    (
+                        "#certification-sidebar-account",
+                        "#certification-sidebar-account-menu",
+                    ),
+                ):
+                    trigger = page.locator(trigger_id)
+                    menu = page.locator(menu_id)
+                    items = menu.locator(".dropdown-item")
+                    trigger.focus()
+                    trigger.press("ArrowDown")
+                    expect(menu).to_have_class(re.compile(r"\bshow\b"))
+                    expect(trigger).to_have_attribute("aria-expanded", "true")
+                    expect(items.nth(0)).to_be_focused()
+                    page.keyboard.press("ArrowDown")
+                    expect(items.nth(1)).to_be_focused()
+
+                    page.keyboard.press("Escape")
+                    expect(menu).not_to_have_class(re.compile(r"\bshow\b"))
+                    expect(trigger).to_be_focused()
+
+                evidence = BrowserEvidence(page)
+                self.assertEqual(run_axe(page), [])
+                evidence.assert_clean()
+                context.close()
 
     def test_tooltip_fixture_proves_placement_focus_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:

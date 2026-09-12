@@ -400,6 +400,10 @@ $moo-datatable-bulk-actions-backdrop-blur: 8px !default;
 // chrome. Keep the default component position unchanged while giving host
 // surfaces a scoped override hook.
 $moo-datatable-bulk-actions-bottom: 1rem !default;
+// Bootstrap's table surface is opaque by default and has no context-aware
+// Card composition knob, so card-contained tables consume this scoped Sass
+// setting instead of hardcoding their transparent surface in the partial.
+$moo-table-contained-bg: transparent !default;
 // Bootstrap has no Data Table layout/card primitive, so these scoped knobs
 // describe the generated table/card frames without becoming global widths.
 $moo-datatable-min-width: 48rem !default;

@@ -7,6 +7,7 @@ from tests.helpers import DIST, ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/table.html.jinja"
 PAGE = ROOT / "site/src/pages/components/table.html.jinja"
 STYLES = ROOT / "scss/components/_table.scss"
+SETTINGS = ROOT / "scss/settings/_component_variables.scss"
 COMPONENTS_AGGREGATE = ROOT / "scss/_components.scss"
 
 
@@ -183,9 +184,11 @@ class TableTests(CatalogTestCase):
 
     def test_table_inside_card_leaves_surface_to_card(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
+        settings = SETTINGS.read_text(encoding="utf-8")
 
         self.assertIn(".card .table", styles)
-        self.assertIn("--bs-table-bg: transparent;", styles)
+        self.assertIn("$moo-table-contained-bg: transparent !default;", settings)
+        self.assertIn("--bs-table-bg: #{$moo-table-contained-bg};", styles)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

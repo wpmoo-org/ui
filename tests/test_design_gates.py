@@ -97,12 +97,6 @@ ESCAPE_SVG_INTERPOLATION = re.compile(
 )
 APPROVED_CSS_TOKEN = re.compile(r"--(?:(?:bs|moo)-|#\{\$prefix\})")
 
-# Sidebar owns this small Bootstrap dropdown integration selector so an open
-# identity menu can elevate the sidebar column above the inset content. These
-# are state/surface hooks, not a second Moo UI visual namespace.
-SIDEBAR_BOOTSTRAP_CLASSES = {"dropdown-menu", "show"}
-
-
 def token_names(value: str) -> tuple[set[str], set[str]]:
     css_tokens = set(CSS_VAR.findall(value))
     without_css_tokens = CSS_VAR.sub("var(--token", value)
@@ -300,6 +294,34 @@ def sidebar_style_partials() -> tuple[Path, ...]:
         sidebar_directory.rglob("_*.scss") if sidebar_directory.exists() else ()
     )
     return tuple(path for path in paths if path.exists())
+
+
+def sidebar_selector_offenders(source: str) -> list[str]:
+    """Return sidebar selectors that escape the owned class namespace."""
+    offenders: list[str] = []
+    bootstrap_classes = {"dropdown-menu", "show"}
+    scoped_bootstrap_contexts = (
+        '[data-slot="sidebar-header"]',
+        '[data-slot="sidebar-footer"]',
+        "[data-sidebar-dropdown-positioned]",
+    )
+    for raw_selector in re.findall(r"([^{}]+)\{", strip_scss_comments(source)):
+        if raw_selector.lstrip().startswith("@"):
+            continue
+        for selector in raw_selector.split(","):
+            selector = " ".join(selector.split())
+            classes = set(re.findall(r"\.([a-z][a-z0-9_-]*)", selector))
+            if not classes:
+                continue
+            unexpected = {name for name in classes if not name.startswith("sidebar")}
+            if not unexpected:
+                continue
+            if unexpected <= bootstrap_classes and any(
+                context in selector for context in scoped_bootstrap_contexts
+            ):
+                continue
+            offenders.append(selector)
+    return sorted(set(offenders))
 
 
 def sass_var_reference(variable: str) -> str:
@@ -779,15 +801,14 @@ console.log(JSON.stringify(Object.fromEntries(
             for path in sidebar_style_partials()
         )
         selectors = set(re.findall(r"\.([a-z][a-z0-9_-]*)", source))
-        offenders = sorted(
-            selector
-            for selector in selectors
-            if not selector.startswith("sidebar")
-            and selector not in SIDEBAR_BOOTSTRAP_CLASSES
-        )
-
         self.assertTrue(selectors)
-        self.assertEqual(offenders, [])
+        self.assertEqual(sidebar_selector_offenders(source), [])
+        self.assertEqual(
+            sidebar_selector_offenders(
+                ".dropdown-menu { display: block; }\n.show { display: block; }"
+            ),
+            [".dropdown-menu", ".show"],
+        )
 
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:
         settings = read_settings()

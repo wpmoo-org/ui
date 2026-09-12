@@ -733,7 +733,6 @@ class CertificationContractTests(unittest.TestCase):
         # widening of the public surface (e.g. re-importing the full
         # internal settings aggregate into _config.scss) grows the extracted
         # set past the freeze document and fails for real.
-        import re
         config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
         frozen_sass_vars = set(freeze["sassFacadeAllowList"])
         declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', config_source, re.MULTILINE))
