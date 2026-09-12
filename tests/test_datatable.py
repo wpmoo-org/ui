@@ -513,10 +513,38 @@ class DataTableTests(CatalogTestCase):
         source = DATATABLE_SCSS.read_text(encoding="utf-8")
 
         self.assertIn("--moo-datatable-actions-cell-fade-width", source)
+        self.assertIn(
+            "--moo-datatable-actions-cell-bg: #{$moo-datatable-actions-cell-bg};",
+            source,
+        )
+        self.assertIn(".card .datatable", source)
+        self.assertIn(
+            "--moo-datatable-actions-cell-bg: var(--bs-card-bg);",
+            source,
+        )
         self.assertIn(".datatable-frame [data-datatable-column=\"actions\"]", source)
         self.assertIn("linear-gradient(", source)
         self.assertIn("transparent 0", source)
-        self.assertIn("var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)", source)
+        self.assertIn(
+            "var(--moo-datatable-actions-cell-bg) var(--moo-datatable-actions-cell-fade-width)",
+            source,
+        )
+        self.assertNotIn(
+            "var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)",
+            source,
+        )
+        self.assertIn(
+            '.datatable-row-selected > [data-datatable-column="actions"]',
+            source,
+        )
+        self.assertIn(
+            "--moo-datatable-actions-cell-bg: var(--moo-muted-surface);",
+            source,
+        )
+        self.assertIn(
+            "background: var(--moo-muted-surface);",
+            source,
+        )
         self.assertIn('[dir="rtl"] .datatable-frame [data-datatable-column="actions"]', source)
 
     def test_datatable_bulk_actions_bottom_offset_is_consumer_overridable(self) -> None:

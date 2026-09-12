@@ -1,3 +1,9 @@
+.card .table {
+  // Keep the table surface transparent so a table composed inside a card
+  // inherits the card's light/dark surface.
+  --bs-table-bg: #{$moo-table-contained-bg};
+}
+
 .table-responsive:not(.scroll-fade-x):has(.table-row-actions > [aria-expanded="true"]) {
   overflow: visible;
 }

@@ -188,15 +188,55 @@
   }
 }
 
+// The lg Offcanvas breakpoint still renders the sidebar as a drawer on
+// tablets. Keep identity menus inside that drawer until the desktop fixed
+// overlay contract becomes active.
+@include media-breakpoint-between(sm, lg) {
+  [data-slot="sidebar-header"] .dropend > .dropdown-menu,
+  [data-slot="sidebar-footer"] .dropend > .dropdown-menu {
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 100%;
+    margin: 0;
+    transform: none !important;
+  }
+
+  [data-slot="sidebar-header"] .dropend > .dropdown-menu {
+    top: calc(100% + #{$spacer * 0.25}) !important;
+    bottom: auto !important;
+  }
+
+  [data-slot="sidebar-footer"] .dropend > .dropdown-menu {
+    top: auto !important;
+    bottom: calc(100% + #{$spacer * 0.25}) !important;
+  }
+}
+
 @include media-breakpoint-up(lg) {
-  [data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu {
+  [data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu,
+  [data-slot="sidebar-footer"] [data-sidebar-dropdown-positioned] > .dropdown-menu {
     position: fixed !important;
     z-index: $zindex-dropdown;
-    inset-block-start: var(--moo-sidebar-dropdown-block-start) !important;
-    inset-inline-start: var(--moo-sidebar-dropdown-inline-start) !important;
+    inset-inline-start: var(--moo-sidebar-dropdown-inline-start, auto) !important;
+    inset-inline-end: auto !important;
     width: var(--moo-dropdown-sidebar-min-width);
     min-width: var(--moo-dropdown-sidebar-min-width);
     margin: 0;
     transform: none !important;
+  }
+
+  [data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu {
+    inset-block-start: var(--moo-sidebar-dropdown-block-start) !important;
+  }
+
+  [data-slot="sidebar-footer"] [data-sidebar-dropdown-positioned] > .dropdown-menu {
+    inset-block-start: auto !important;
+    inset-block-end: var(--moo-sidebar-dropdown-block-end) !important;
+  }
+
+  [data-slot="sidebar"][data-side="right"] [data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu,
+  [data-slot="sidebar"][data-side="right"] [data-slot="sidebar-footer"] [data-sidebar-dropdown-positioned] > .dropdown-menu {
+    inset-inline-start: auto !important;
+    inset-inline-end: var(--moo-sidebar-dropdown-inline-end, auto) !important;
   }
 }

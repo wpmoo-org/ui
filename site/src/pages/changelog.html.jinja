@@ -16,6 +16,43 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-6">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.6</span>
+            <span class="text-body-secondary">Sidebar and DataTable interaction hardening</span>
+          </div>
+          <h2 id="release-1-0-0-rc-6">Sidebar and DataTable Interaction Hardening</h2>
+          <p>
+            Moo UI 1.0.0-rc.6 carries the RC5 public package surface forward
+            while fixing overlay layering, composed table surfaces, and
+            DataTable search-control interaction states. Certification remains
+            <code>preview</code> during the RC6 acceptance pass.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>Sidebar workspace and profile dropdowns now remain above inset content while rail hover layering stays below open menus.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>Tables composed inside cards inherit the card surface, including selected rows and sticky action cells.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>DataTable search controls contain closed-state border overflow, keep the focused search icon visible, and release overflow for an open filter menu.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>RC6 package metadata, CodePen CDN evidence, API-freeze data, acceptance state, and boundary baselines.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>Release candidate v1.0.0-rc.6</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-5">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.5</span>
@@ -39,7 +76,7 @@
             </div>
             <div class="moo-changelog__change-row">
               <span class="moo-changelog__change-label">Updated</span>
-              <span>CSS, ESM, Sass, package metadata, boundary baselines, and API-freeze evidence for <code>@wpmoo/ui@1.0.0-rc.5</code>; the catalog CodePen CDN remains pinned to the latest published RC4 package until RC5 is published.</span>
+              <span>CSS, ESM, Sass, package metadata, boundary baselines, and API-freeze evidence for <code>@wpmoo/ui@1.0.0-rc.5</code>; catalog CodePen exports now use the published RC5 package.</span>
             </div>
             <div class="moo-changelog__change-row">
               <span class="moo-changelog__change-label">Release</span>
@@ -464,6 +501,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0-rc-6", "label": "v1.0.0-rc.6"},
       {"id": "release-1-0-0-rc-5", "label": "v1.0.0-rc.5"},
       {"id": "release-1-0-0-rc-4", "label": "v1.0.0-rc.4"},
       {"id": "release-1-0-0-rc-3", "label": "v1.0.0-rc.3"},

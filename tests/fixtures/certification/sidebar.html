@@ -18,7 +18,7 @@
   </head>
   <body>
     <div
-      class="sidebar-wrapper"
+      class="sidebar-wrapper vh-100 overflow-hidden"
       data-slot="sidebar-wrapper"
       data-sidebar-state="expanded"
       data-sidebar-key="certification-shell"
@@ -35,11 +35,30 @@
       >
         <div class="sidebar-inner" data-slot="sidebar-inner">
           <div class="sidebar-header" data-slot="sidebar-header">
-            <a class="sidebar-menu-button" href="#overview" data-slot="sidebar-menu-button">
-              <span class="sidebar-menu-button__text">
-                <span class="sidebar-menu-button__title">Moo UI</span>
-              </span>
-            </a>
+            <ul class="sidebar-menu" data-slot="sidebar-menu">
+              <li class="sidebar-menu-item dropend" data-slot="sidebar-menu-item">
+                <button
+                  class="sidebar-menu-button sidebar-menu-button--lg sidebar-menu-button--workspace"
+                  id="certification-sidebar-workspace"
+                  type="button"
+                  data-slot="sidebar-menu-button"
+                  data-bs-toggle="dropdown"
+                  data-bs-offset="0,4"
+                  data-sidebar-tooltip="Workspace"
+                  aria-expanded="false"
+                >
+                  <span class="sidebar-menu-button__text">
+                    <span class="sidebar-menu-button__title">Workspace</span>
+                  </span>
+                </button>
+                <ul class="dropdown-menu" id="certification-sidebar-workspace-menu">
+                  <li><h6 class="dropdown-header">Workspaces</h6></li>
+                  <li><button class="dropdown-item" type="button">Primary workspace</button></li>
+                  <li><button class="dropdown-item" type="button">Review workspace</button></li>
+                  <li><button class="dropdown-item" type="button">Add workspace</button></li>
+                </ul>
+              </li>
+            </ul>
           </div>
           <div class="sidebar-content" data-slot="sidebar-content">
             <div class="sidebar-group" data-slot="sidebar-group">
@@ -82,6 +101,32 @@
               id="certification-sidebar-search"
               type="search"
             >
+            <ul class="sidebar-menu" data-slot="sidebar-menu">
+              <li
+                class="sidebar-menu-item sidebar-menu-item--account dropend"
+                data-slot="sidebar-menu-item"
+              >
+                <button
+                  class="sidebar-menu-button sidebar-menu-button--lg sidebar-menu-button--account"
+                  id="certification-sidebar-account"
+                  type="button"
+                  data-slot="sidebar-menu-button"
+                  data-bs-toggle="dropdown"
+                  data-bs-offset="0,4"
+                  data-sidebar-tooltip="Account"
+                  aria-expanded="false"
+                >
+                  <span class="sidebar-menu-button__text">
+                    <span class="sidebar-menu-button__title">Account</span>
+                  </span>
+                </button>
+                <ul class="dropdown-menu" id="certification-sidebar-account-menu">
+                  <li><button class="dropdown-item" type="button">Profile</button></li>
+                  <li><button class="dropdown-item" type="button">Preferences</button></li>
+                  <li><button class="dropdown-item" type="button">Sign out</button></li>
+                </ul>
+              </li>
+            </ul>
           </div>
         </div>
         <button
@@ -93,8 +138,8 @@
         ></button>
       </aside>
 
-      <div class="sidebar-inset" data-slot="sidebar-inset">
-        <header class="border-bottom p-3">
+      <div class="sidebar-inset overflow-hidden" data-slot="sidebar-inset">
+        <header class="sidebar-inset__header">
           <button
             class="btn btn-ghost btn-icon-sm sidebar-trigger"
             id="certification-sidebar-trigger"
@@ -108,9 +153,18 @@
             Toggle
           </button>
         </header>
-        <main id="overview" tabindex="-1">
+        <main
+          class="sidebar-inset__content overflow-auto scroll-fade-y"
+          data-slot="sidebar-inset-content"
+          id="overview"
+          tabindex="-1"
+        >
           <h1>Sidebar certification fixture</h1>
-          <p id="activity">The main application surface remains independently focusable.</p>
+          <article class="card min-vh-100 p-4">
+            <h2 class="h4">Inset content surface</h2>
+            <p id="activity">The main application surface remains independently focusable.</p>
+            <p>Later content remains below the sidebar identity menus when they are open.</p>
+          </article>
         </main>
       </div>
     </div>
@@ -120,6 +174,10 @@
       import Sidebar from "/dist/js/sidebar.js";
 
       const root = document.querySelector('[data-slot="sidebar-wrapper"]');
+      const sidebar = document.querySelector('[data-slot="sidebar"]');
+      if (new URLSearchParams(window.location.search).get("side") === "right") {
+        sidebar.dataset.side = "right";
+      }
       root.addEventListener("change.moo.sidebar", event => {
         document.body.dataset.sidebarState = event.detail.state;
       });

@@ -47,8 +47,10 @@ COMPONENT_SELECTOR_PREFIXES = {
     "dropdown": ("dropdown", "dropend", "active"),
     "input": ("form-control", "form-select"),
     # Table owns Bootstrap's static table family and the horizontal
-    # scroll-fade helper used beside responsive table wrappers.
-    "table": ("table", "table-responsive", "scroll-fade-x"),
+    # scroll-fade helper used beside responsive table wrappers. The
+    # `.card .table` rule is a deliberate cross-component composition
+    # context: it lets a native table inherit the Card surface.
+    "table": ("table", "table-responsive", "scroll-fade-x", "card"),
     # Bootstrap renders both single-line inputs and textareas through
     # the shared `.form-control` family.
     "textarea": ("form-control",),
@@ -151,6 +153,7 @@ COMPONENT_SELECTOR_PREFIXES = {
     # datatable legitimately references that ancestor context.
     "datatable": (
         "datatable",
+        "card",
         "active",
         "badge",
         "btn",
@@ -910,8 +913,8 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.4")
-        self.assertEqual(package["version"], "1.0.0-rc.5")
+        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.5")
+        self.assertEqual(package["version"], "1.0.0-rc.6")
         self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
@@ -1254,6 +1257,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-moo-acceptance-key="rc5-component-matrix"', page)
         self.assertIn("0/450", page)
         self.assertNotIn("rc4-component-matrix", page)
+
+    def test_rc6_acceptance_portal_uses_separate_release_state(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rc6_path = DIST / "acceptance/rc6/index.html"
+        self.assertTrue(rc6_path.exists(), "RC.6 needs its own acceptance route")
+        page = rc6_path.read_text(encoding="utf-8")
+
+        self.assertIn("1.0.0-rc.6", page)
+        self.assertIn('data-moo-acceptance-key="rc6-component-matrix"', page)
+        self.assertIn("0/450", page)
+        self.assertNotIn("rc5-component-matrix", page)
 
     def test_certification_fixtures_get_build_time_pagination(self) -> None:
         source = (
@@ -3075,7 +3091,7 @@ class CatalogContractTests(CatalogTestCase):
             readme,
         )
         self.assertIn(
-            "Until that npm tag is published",
+            "The published RC5 package remains the CDN baseline",
             " ".join(readme.split()),
         )
         self.assertIn("Try it in 30 seconds", readme)

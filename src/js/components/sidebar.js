@@ -225,7 +225,9 @@ export default class Sidebar {
     }
     delete item.dataset.sidebarDropdownPositioned;
     item.style.removeProperty("--moo-sidebar-dropdown-block-start");
+    item.style.removeProperty("--moo-sidebar-dropdown-block-end");
     item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
+    item.style.removeProperty("--moo-sidebar-dropdown-inline-end");
   }
 
   _closeDropdowns(exceptControl = null) {
@@ -254,7 +256,10 @@ export default class Sidebar {
     const isHeaderWorkspace =
       control?.classList.contains("sidebar-menu-button--workspace") &&
       control.closest('[data-slot="sidebar-header"]');
-    if (!control || !item || !isHeaderWorkspace || !this._isDesktop()) {
+    const isFooterAccount =
+      control?.classList.contains("sidebar-menu-button--account") &&
+      control.closest('[data-slot="sidebar-footer"]');
+    if (!control || !item || !(isHeaderWorkspace || isFooterAccount) || !this._isDesktop()) {
       this._clearDropdownPosition(control);
       return;
     }
@@ -262,18 +267,41 @@ export default class Sidebar {
     this._closeFlyouts();
     const rect = control.getBoundingClientRect();
     const gap = 4;
-    const inlineStart =
-      this._root.dir === "rtl"
+    const sidebar = control.closest('[data-slot="sidebar"]');
+    const side = sidebar?.dataset.side || "left";
+    const isRtl = this._root.dir === "rtl";
+    if (side === "right") {
+      const inlineEnd = isRtl
+        ? rect.right + gap
+        : this._window.innerWidth - rect.left + gap;
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-inline-end",
+        `${Math.round(inlineEnd)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
+    } else {
+      const inlineStart = isRtl
         ? this._window.innerWidth - rect.left + gap
         : rect.right + gap;
-    item.style.setProperty(
-      "--moo-sidebar-dropdown-block-start",
-      `${Math.round(rect.bottom + gap)}px`
-    );
-    item.style.setProperty(
-      "--moo-sidebar-dropdown-inline-start",
-      `${Math.round(inlineStart)}px`
-    );
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-inline-start",
+        `${Math.round(inlineStart)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-inline-end");
+    }
+    if (isHeaderWorkspace) {
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-block-start",
+        `${Math.round(rect.bottom + gap)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-block-end");
+    } else {
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-block-end",
+        `${Math.round(this._window.innerHeight - rect.top + gap)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-block-start");
+    }
     item.dataset.sidebarDropdownPositioned = "";
   }
 

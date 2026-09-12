@@ -733,7 +733,6 @@ class CertificationContractTests(unittest.TestCase):
         # widening of the public surface (e.g. re-importing the full
         # internal settings aggregate into _config.scss) grows the extracted
         # set past the freeze document and fails for real.
-        import re
         config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
         frozen_sass_vars = set(freeze["sassFacadeAllowList"])
         declared_vars = set(re.findall(r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;', config_source, re.MULTILINE))
@@ -780,8 +779,8 @@ class CertificationContractTests(unittest.TestCase):
             ROOT / "docs/contracts/PACKAGE_SURFACE_DECISIONS.md"
         ).read_text(encoding="utf-8")
 
-        # Freeze document must declare the current package version.
-        self.assertEqual(freeze["freezeVersion"], package["version"])
+        # RC5 is historical once RC6 becomes the current package version.
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.5")
         self.assertIn(
             "docs/contracts/PACKAGE_SURFACE_DECISIONS.md",
             freeze["description"],
@@ -1001,6 +1000,45 @@ class CertificationContractTests(unittest.TestCase):
                 "inputAttribute": "data-slider-input",
                 "outputAttribute": "data-slider-output",
             },
+        )
+
+    def test_rc6_api_freeze_declaration_is_well_formed(self) -> None:
+        """Validate the 1.0.0-rc.6 freeze against the live package surface."""
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.6.json")
+        rc5_freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.5.json")
+        package = self._read_json("package.json")
+        certification = self._read_json("certification.json")
+
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.6")
+        self.assertEqual(freeze["freezeVersion"], package["version"])
+        self.assertEqual(freeze["freezeVersion"], certification["coreVersion"])
+        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+
+        import re
+        config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
+        declared_vars = set(
+            re.findall(
+                r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;',
+                config_source,
+                re.MULTILINE,
+            )
+        )
+        self.assertEqual(set(freeze["sassFacadeAllowList"]), declared_vars)
+        self.assertEqual(freeze["bootstrapSupport"], rc5_freeze["bootstrapSupport"])
+        self.assertEqual(freeze["esmModules"], rc5_freeze["esmModules"])
+        self.assertEqual(
+            freeze["metadataEntrypoints"],
+            rc5_freeze["metadataEntrypoints"],
+        )
+        self.assertEqual(freeze["artifactVariants"], rc5_freeze["artifactVariants"])
+        self.assertEqual(
+            freeze["certificationManifest"],
+            rc5_freeze["certificationManifest"],
+        )
+        self.assertIn(
+            "docs/contracts/PACKAGE_SURFACE_DECISIONS.md",
+            freeze["description"],
         )
 
     def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:
