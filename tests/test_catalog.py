@@ -3075,7 +3075,7 @@ class CatalogContractTests(CatalogTestCase):
             readme,
         )
         self.assertIn(
-            "Until that npm tag is published",
+            "The published RC5 package remains the CDN baseline",
             " ".join(readme.split()),
         )
         self.assertIn("Try it in 30 seconds", readme)
