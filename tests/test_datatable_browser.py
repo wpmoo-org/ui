@@ -140,6 +140,79 @@ class DataTableBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_searchbar_clips_closed_control_but_releases_open_filter_menu(self) -> None:
+        context, page, evidence = self.open_preview()
+        try:
+            root = page.locator(f"#{TABLE_ID}")
+            searchbar = root.locator(".datatable-searchbar")
+            filter_button = root.locator("[data-datatable-filter-menu-trigger]")
+            filter_menu = root.locator(".datatable-search-filter-menu")
+
+            self.assertEqual(
+                searchbar.evaluate("element => getComputedStyle(element).overflow"),
+                "hidden",
+            )
+
+            filter_button.click()
+            expect(filter_menu).to_be_visible()
+            self.assertEqual(
+                searchbar.evaluate("element => getComputedStyle(element).overflow"),
+                "visible",
+            )
+
+            filter_button.click()
+            expect(filter_menu).to_be_hidden()
+            self.assertEqual(
+                searchbar.evaluate("element => getComputedStyle(element).overflow"),
+                "hidden",
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_focused_search_keeps_search_icon_above_input_surface(self) -> None:
+        context, page, evidence = self.open_preview()
+        try:
+            root = page.locator(f"#{TABLE_ID}")
+            search = root.locator("input[data-datatable-search]")
+            icon = root.locator(".datatable-search-icon")
+
+            search.click()
+            layering = root.evaluate(
+                """
+                (datatable) => {
+                  const input = datatable.querySelector(
+                    'input[data-datatable-search]'
+                  );
+                  const icon = datatable.querySelector('.datatable-search-icon');
+                  if (!input || !icon) {
+                    return null;
+                  }
+                  const iconStyle = getComputedStyle(icon);
+                  const inputStyle = getComputedStyle(input);
+                  return {
+                    iconZIndex: iconStyle.zIndex,
+                    inputZIndex: inputStyle.zIndex,
+                    iconOpacity: iconStyle.opacity,
+                    iconVisibility: iconStyle.visibility,
+                  };
+                }
+                """
+            )
+
+            self.assertIsNotNone(layering)
+            self.assertGreater(
+                int(layering["iconZIndex"]),
+                int(layering["inputZIndex"]),
+                layering,
+            )
+            self.assertEqual(layering["iconOpacity"], "1", layering)
+            self.assertEqual(layering["iconVisibility"], "visible", layering)
+            expect(icon).to_be_visible()
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_selected_row_action_cell_matches_selected_row_surface(self) -> None:
         context, page, evidence = self.open_preview()
         try:

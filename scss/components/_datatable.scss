@@ -177,6 +177,15 @@
   width: 100%;
 }
 
+// A filter menu is a direct child so Bootstrap can anchor it to the trigger.
+// Clip the joined control while the menu is closed, matching the normal
+// input-group surface; release that clipping only while the menu is open so
+// the positioned dropdown can escape the control without leaking focus or
+// child paint past its rounded border.
+.datatable-searchbar:not(:has(> .dropdown-menu.show)) {
+  overflow: hidden;
+}
+
 .datatable-searchbar .datatable-search {
   flex: 1 1 auto;
   max-width: none;
@@ -189,7 +198,9 @@
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: 0.625rem;
-  z-index: 2;
+  // Bootstrap raises a focused form control to z-index: 5. Keep the
+  // decorative icon above that opaque surface so focus does not hide it.
+  z-index: 6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
