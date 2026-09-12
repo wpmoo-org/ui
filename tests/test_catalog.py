@@ -47,8 +47,10 @@ COMPONENT_SELECTOR_PREFIXES = {
     "dropdown": ("dropdown", "dropend", "active"),
     "input": ("form-control", "form-select"),
     # Table owns Bootstrap's static table family and the horizontal
-    # scroll-fade helper used beside responsive table wrappers.
-    "table": ("table", "table-responsive", "scroll-fade-x"),
+    # scroll-fade helper used beside responsive table wrappers. The
+    # `.card .table` rule is a deliberate cross-component composition
+    # context: it lets a native table inherit the Card surface.
+    "table": ("table", "table-responsive", "scroll-fade-x", "card"),
     # Bootstrap renders both single-line inputs and textareas through
     # the shared `.form-control` family.
     "textarea": ("form-control",),
@@ -151,6 +153,7 @@ COMPONENT_SELECTOR_PREFIXES = {
     # datatable legitimately references that ancestor context.
     "datatable": (
         "datatable",
+        "card",
         "active",
         "badge",
         "btn",
