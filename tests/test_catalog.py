@@ -1255,6 +1255,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("0/450", page)
         self.assertNotIn("rc4-component-matrix", page)
 
+    def test_rc6_acceptance_portal_uses_separate_release_state(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rc6_path = DIST / "acceptance/rc6/index.html"
+        self.assertTrue(rc6_path.exists(), "RC.6 needs its own acceptance route")
+        page = rc6_path.read_text(encoding="utf-8")
+
+        self.assertIn("1.0.0-rc.6", page)
+        self.assertIn('data-moo-acceptance-key="rc6-component-matrix"', page)
+        self.assertIn("0/450", page)
+        self.assertNotIn("rc5-component-matrix", page)
+
     def test_certification_fixtures_get_build_time_pagination(self) -> None:
         source = (
             ROOT / "tests/fixtures/certification/accordion.html"
