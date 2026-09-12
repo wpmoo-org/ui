@@ -291,7 +291,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     trigger = row.locator(".table-row-actions > button")
                     menu = page.locator("body > .dropdown-menu.show")
 
-                    trigger.click()
+                    trigger.focus()
+                    trigger.press("Enter")
                     expect(menu).to_be_visible()
                     menu.locator(case["edit"]).click()
 
@@ -302,8 +303,10 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     )
                     sheet.get_by_role("button", name="Cancel").click()
                     expect(sheet).to_be_hidden()
+                    expect(trigger).to_be_focused()
 
-                    trigger.click()
+                    trigger.focus()
+                    trigger.press("Enter")
                     expect(menu).to_be_visible()
                     menu.locator(case["delete"]).click()
 
@@ -314,6 +317,16 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     )
                     dialog.get_by_role("button", name="Cancel").click()
                     expect(dialog).to_be_hidden()
+                    expect(trigger).to_be_focused()
+
+                    trigger.focus()
+                    trigger.press("Enter")
+                    expect(menu).to_be_visible()
+                    menu.locator(case["delete"]).click()
+                    expect(dialog).to_be_visible()
+                    dialog.get_by_role("button", name="Delete").click()
+                    expect(dialog).to_be_hidden()
+                    expect(page.locator(".datatable-search").first).to_be_focused()
                     evidence.assert_clean()
                 finally:
                     context.close()
