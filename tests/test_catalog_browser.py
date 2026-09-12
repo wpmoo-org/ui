@@ -234,6 +234,65 @@ class CatalogBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_sidebar_rail_hover_does_not_paint_over_identity_dropdown(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            evidence = BrowserEvidence(page)
+            response = page.goto(
+                f"{self.base_url}/site-dist/blocks/previews/sidebar-floating/index.html",
+                wait_until="domcontentloaded",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[0])
+
+            trigger = page.locator(
+                '[data-slot="sidebar-header"] .sidebar-menu-button--workspace'
+            )
+            menu = page.locator(
+                '[data-slot="sidebar-header"] .dropdown-menu.show'
+            )
+            rail = page.locator("[data-sidebar-rail]")
+            trigger.click()
+            expect(menu).to_be_visible()
+
+            rail.hover(force=True)
+            rail_state = page.evaluate(
+                """
+                () => {
+                  const menu = document.querySelector(
+                    '[data-slot="sidebar-header"] .dropdown-menu.show'
+                  );
+                  const rail = document.querySelector('[data-sidebar-rail]');
+                  const menuRect = menu.getBoundingClientRect();
+                  const railRect = rail.getBoundingClientRect();
+                  const point = {
+                    x: railRect.left + railRect.width / 2,
+                    y: menuRect.top + menuRect.height / 2,
+                  };
+                  const hit = document.elementFromPoint(point.x, point.y);
+                  return {
+                    railHovered: rail.matches(':hover'),
+                    railLineInsideMenu: point.x > menuRect.left &&
+                      point.x < menuRect.right &&
+                      point.y > menuRect.top &&
+                      point.y < menuRect.bottom,
+                    topmostMenu: Boolean(hit?.closest(
+                      '[data-slot="sidebar-header"] .dropdown-menu.show'
+                    )),
+                  };
+                }
+                """
+            )
+
+            self.assertTrue(rail_state["railHovered"], rail_state)
+            self.assertTrue(rail_state["railLineInsideMenu"], rail_state)
+            self.assertTrue(rail_state["topmostMenu"], rail_state)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
