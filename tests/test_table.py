@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from build import create_environment
-from tests.helpers import ROOT, CatalogTestCase
+from tests.helpers import DIST, ROOT, CatalogTestCase
 
 
 COMPONENT = ROOT / "src/components/table.html.jinja"
@@ -180,6 +180,18 @@ class TableTests(CatalogTestCase):
             styles,
         )
         self.assertIn("z-index: $zindex-dropdown;", styles)
+
+    def test_table_inside_card_leaves_surface_to_card(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn(".card .table", styles)
+        self.assertIn("--bs-table-bg: transparent;", styles)
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
+        self.assertIn(".card .table", css)
+        self.assertIn("--bs-table-bg: transparent;", css)
 
     def test_page_uses_one_standard_table_preview_width(self) -> None:
         source = PAGE.read_text(encoding="utf-8")
