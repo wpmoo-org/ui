@@ -5,6 +5,7 @@ import unittest
 from playwright.sync_api import expect, sync_playwright
 
 from tests.helpers.browser_harness import (
+    BrowserCase,
     BrowserEvidence,
     CANONICAL_BOOTSTRAP,
     CERTIFICATION_BOOTSTRAP_LANES,
@@ -15,6 +16,48 @@ from tests.helpers.browser_harness import (
     run_axe,
     serve_repository,
     skip_if_browser_launch_is_sandboxed,
+)
+
+
+SIDEBAR_OVERLAY_CASES = (
+    BrowserCase(
+        name="desktop-light-ltr",
+        viewport={"width": 1040, "height": 844},
+        color_scheme="light",
+        direction="ltr",
+    ),
+    BrowserCase(
+        name="desktop-dark-rtl",
+        viewport={"width": 1040, "height": 844},
+        color_scheme="dark",
+        direction="rtl",
+    ),
+    BrowserCase(
+        name="desktop-right-light-ltr",
+        viewport={"width": 1040, "height": 844},
+        color_scheme="light",
+        direction="ltr",
+    ),
+    BrowserCase(
+        name="desktop-right-dark-rtl",
+        viewport={"width": 1040, "height": 844},
+        color_scheme="dark",
+        direction="rtl",
+    ),
+    BrowserCase(
+        name="tablet-light-ltr",
+        viewport={"width": 768, "height": 844},
+        color_scheme="light",
+        direction="ltr",
+    ),
+    BrowserCase(
+        name="mobile-dark-rtl",
+        viewport={"width": 390, "height": 844},
+        color_scheme="dark",
+        direction="rtl",
+        is_mobile=True,
+        has_touch=True,
+    ),
 )
 
 
@@ -649,6 +692,199 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 prepare_page(page, case, normalize_screenshot=True)
                 self.assertGreater(len(page.screenshot(full_page=True)), 1000)
+                evidence.assert_clean()
+                context.close()
+
+    def test_sidebar_identity_dropdowns_paint_above_viewport_inset_content(self) -> None:
+        trigger_menu_pairs = (
+            (
+                "#certification-sidebar-workspace",
+                "#certification-sidebar-workspace-menu",
+                "workspace",
+            ),
+            (
+                "#certification-sidebar-account",
+                "#certification-sidebar-account-menu",
+                "account",
+            ),
+        )
+        desktop_breakpoint = 992
+        position_properties = (
+            "--moo-sidebar-dropdown-block-start",
+            "--moo-sidebar-dropdown-block-end",
+            "--moo-sidebar-dropdown-inline-start",
+            "--moo-sidebar-dropdown-inline-end",
+        )
+
+        for case in SIDEBAR_OVERLAY_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                side_query = "?side=right" if case.name.startswith("desktop-right") else ""
+                response = page.goto(
+                    f"{self.base_url}/tests/fixtures/certification/sidebar.html{side_query}",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+
+                root = page.locator('[data-slot="sidebar-wrapper"]')
+                sidebar = page.locator('[data-slot="sidebar"]')
+                drawer_trigger = page.locator("#certification-sidebar-trigger")
+                expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
+
+                is_desktop = case.viewport["width"] >= desktop_breakpoint
+                if not is_desktop:
+                    drawer_trigger.click()
+                    expect(sidebar).to_have_class(re.compile(r"\bshow\b"))
+                    self.assertEqual(page.locator(".offcanvas-backdrop.show").count(), 1)
+
+                for trigger_selector, menu_selector, kind in trigger_menu_pairs:
+                    trigger = page.locator(trigger_selector)
+                    menu = page.locator(menu_selector)
+                    owner = trigger.locator("xpath=ancestor::li[1]")
+                    trigger.click()
+                    expect(menu).to_have_class(re.compile(r"\bshow\b"))
+
+                    if is_desktop:
+                        expect(owner).to_have_attribute(
+                            "data-sidebar-dropdown-positioned", ""
+                        )
+                        overlay = page.evaluate(
+                            """
+                            ({triggerSelector, menuSelector}) => {
+                              const trigger = document.querySelector(triggerSelector);
+                              const menu = document.querySelector(menuSelector);
+                              const owner = trigger.closest('li');
+                              const content = document.querySelector(
+                                '[data-slot="sidebar-inset-content"]'
+                              );
+                              const menuRect = menu.getBoundingClientRect();
+                              const contentRect = content.getBoundingClientRect();
+                              const intersection = {
+                                left: Math.max(menuRect.left, contentRect.left),
+                                top: Math.max(menuRect.top, contentRect.top),
+                                right: Math.min(menuRect.right, contentRect.right),
+                                bottom: Math.min(menuRect.bottom, contentRect.bottom),
+                              };
+                              const intersectionWidth = intersection.right - intersection.left;
+                              const intersectionHeight = intersection.bottom - intersection.top;
+                              const point = {
+                                x: intersection.left + intersectionWidth / 2,
+                                y: intersection.top + intersectionHeight / 2,
+                              };
+                              const hit = document.elementFromPoint(point.x, point.y);
+                              const style = getComputedStyle(menu);
+                              return {
+                                pointInsideIntersection: intersectionWidth > 0 &&
+                                  intersectionHeight > 0 &&
+                                  point.x > intersection.left &&
+                                  point.x < intersection.right &&
+                                  point.y > intersection.top &&
+                                  point.y < intersection.bottom,
+                                topmost: intersectionWidth > 0 &&
+                                  intersectionHeight > 0 &&
+                                  Boolean(hit?.closest(menuSelector)),
+                                position: style.position,
+                                top: menuRect.top,
+                                left: menuRect.left,
+                                right: menuRect.right,
+                                bottom: menuRect.bottom,
+                                viewportWidth: innerWidth,
+                                viewportHeight: innerHeight,
+                                intersectionWidth: Math.max(0, intersectionWidth),
+                                intersectionHeight: Math.max(0, intersectionHeight),
+                                triggerRect: trigger.getBoundingClientRect().toJSON(),
+                                inlineStart: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-inline-start'
+                                ),
+                                inlineEnd: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-inline-end'
+                                ),
+                                blockStart: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-block-start'
+                                ),
+                                blockEnd: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-block-end'
+                                ),
+                              };
+                            }
+                            """,
+                            {"triggerSelector": trigger_selector, "menuSelector": menu_selector},
+                        )
+                        self.assertTrue(overlay["topmost"])
+                        self.assertEqual(overlay["position"], "fixed")
+                        self.assertTrue(overlay["pointInsideIntersection"])
+                        self.assertGreater(overlay["intersectionWidth"], 0)
+                        self.assertGreater(overlay["intersectionHeight"], 0)
+                        self.assertGreaterEqual(overlay["top"], 0)
+                        self.assertGreaterEqual(overlay["left"], 0)
+                        self.assertLessEqual(overlay["right"], overlay["viewportWidth"])
+                        self.assertLessEqual(overlay["bottom"], overlay["viewportHeight"])
+                        if kind == "workspace":
+                            self.assertTrue(overlay["blockStart"])
+                            self.assertFalse(overlay["blockEnd"])
+                        else:
+                            self.assertTrue(overlay["blockEnd"])
+                            self.assertFalse(overlay["blockStart"])
+                        if case.name.startswith("desktop-right"):
+                            self.assertTrue(overlay["inlineEnd"])
+                            self.assertFalse(overlay["inlineStart"])
+                            if case.direction == "ltr":
+                                self.assertLess(
+                                    overlay["left"], overlay["triggerRect"]["left"]
+                                )
+                            else:
+                                self.assertGreater(
+                                    overlay["right"], overlay["triggerRect"]["right"]
+                                )
+                        else:
+                            self.assertTrue(overlay["inlineStart"])
+                            self.assertFalse(overlay["inlineEnd"])
+                    else:
+                        self.assertIsNone(
+                            owner.get_attribute("data-sidebar-dropdown-positioned")
+                        )
+                        menu_geometry = page.evaluate(
+                            """
+                            ({menuSelector}) => {
+                              const menu = document.querySelector(menuSelector);
+                              const sidebar = document.querySelector('[data-slot="sidebar"]');
+                              const menuRect = menu.getBoundingClientRect();
+                              const sidebarRect = sidebar.getBoundingClientRect();
+                              return {
+                                position: getComputedStyle(menu).position,
+                                menuRect: menuRect.toJSON(),
+                                sidebarRect: sidebarRect.toJSON(),
+                              };
+                            }
+                            """,
+                            {"menuSelector": menu_selector},
+                        )
+                        self.assertNotEqual(menu_geometry["position"], "fixed")
+                        self.assertGreaterEqual(
+                            menu_geometry["menuRect"]["left"],
+                            menu_geometry["sidebarRect"]["left"],
+                        )
+                        self.assertLessEqual(
+                            menu_geometry["menuRect"]["right"],
+                            menu_geometry["sidebarRect"]["right"],
+                        )
+
+                    trigger.click()
+                    expect(menu).not_to_have_class(re.compile(r"\bshow\b"))
+                    self.assertIsNone(owner.get_attribute("data-sidebar-dropdown-positioned"))
+                    owner_style = owner.get_attribute("style") or ""
+                    for property_name in position_properties:
+                        self.assertNotIn(property_name, owner_style)
+
+                if not is_desktop:
+                    page.keyboard.press("Escape")
+                    expect(sidebar).not_to_have_class(re.compile(r"\bshow\b"))
+                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                self.assertEqual(run_axe(page), [])
                 evidence.assert_clean()
                 context.close()
 

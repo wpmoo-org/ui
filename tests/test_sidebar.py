@@ -565,9 +565,14 @@ class SidebarTests(CatalogTestCase):
             styles,
             '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button--workspace:focus-visible',
         )
-        collapsed_header_dropdown = _css_block(
+        collapsed_identity_dropdown = _css_block(
             dropdown_styles,
-            '[data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu',
+            '[data-slot="sidebar-header"] [data-sidebar-dropdown-positioned] > .dropdown-menu,\n'
+            '  [data-slot="sidebar-footer"] [data-sidebar-dropdown-positioned] > .dropdown-menu',
+        )
+        sidebar_overlay = _css_block(
+            styles,
+            '.sidebar-wrapper:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar',
         )
 
         self.assertIn("cursor: default", identity_cursors)
@@ -578,19 +583,33 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("background: transparent", collapsed_workspace_focus)
         self.assertIn("outline: 0", collapsed_workspace_focus)
         self.assertIn("box-shadow: none", collapsed_workspace_focus)
-        self.assertIn("position: fixed !important", collapsed_header_dropdown)
-        self.assertIn("z-index: $zindex-dropdown", collapsed_header_dropdown)
-        self.assertIn("width: var(--moo-dropdown-sidebar-min-width)", collapsed_header_dropdown)
-        self.assertIn("min-width: var(--moo-dropdown-sidebar-min-width)", collapsed_header_dropdown)
+        self.assertIn("position: fixed !important", collapsed_identity_dropdown)
+        self.assertIn("z-index: $zindex-dropdown", collapsed_identity_dropdown)
+        self.assertIn("width: var(--moo-dropdown-sidebar-min-width)", collapsed_identity_dropdown)
+        self.assertIn("min-width: var(--moo-dropdown-sidebar-min-width)", collapsed_identity_dropdown)
         self.assertIn(
-            "inset-inline-start: var(--moo-sidebar-dropdown-inline-start) !important",
-            collapsed_header_dropdown,
+            "inset-inline-start: var(--moo-sidebar-dropdown-inline-start, auto) !important",
+            collapsed_identity_dropdown,
         )
         self.assertIn(
             "inset-block-start: var(--moo-sidebar-dropdown-block-start) !important",
-            collapsed_header_dropdown,
+            dropdown_styles,
         )
-        self.assertIn("transform: none !important", collapsed_header_dropdown)
+        self.assertIn(
+            "inset-block-end: var(--moo-sidebar-dropdown-block-end) !important",
+            dropdown_styles,
+        )
+        self.assertIn("transform: none !important", collapsed_identity_dropdown)
+        self.assertIn("position: relative", sidebar_overlay)
+        self.assertIn(
+            '[data-slot="sidebar-footer"] [data-sidebar-dropdown-positioned] > .dropdown-menu',
+            dropdown_styles,
+        )
+        self.assertIn('[data-slot="sidebar"][data-side="right"]', dropdown_styles)
+        self.assertIn(
+            "inset-inline-end: var(--moo-sidebar-dropdown-inline-end",
+            dropdown_styles,
+        )
 
     def test_sidebar_identity_dropdowns_stack_inside_small_mobile_drawer(self) -> None:
         dropdown_styles = ROOT.joinpath("scss/components/_dropdown.scss").read_text()
@@ -1021,4 +1040,11 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn("[data-sidebar-dropdown-positioned]", script)
         self.assertIn("--moo-sidebar-dropdown-inline-start", script)
         self.assertIn("--moo-sidebar-dropdown-block-start", script)
+        self.assertIn("--moo-sidebar-dropdown-block-end", script)
+        self.assertIn("--moo-sidebar-dropdown-inline-end", script)
+        self.assertIn("sidebar-menu-button--account", script)
+        self.assertIn(
+            'removeProperty("--moo-sidebar-dropdown-inline-end")',
+            script,
+        )
         self.assertIn("rect.bottom + gap", script)

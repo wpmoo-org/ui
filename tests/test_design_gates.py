@@ -97,6 +97,11 @@ ESCAPE_SVG_INTERPOLATION = re.compile(
 )
 APPROVED_CSS_TOKEN = re.compile(r"--(?:(?:bs|moo)-|#\{\$prefix\})")
 
+# Sidebar owns this small Bootstrap dropdown integration selector so an open
+# identity menu can elevate the sidebar column above the inset content. These
+# are state/surface hooks, not a second Moo UI visual namespace.
+SIDEBAR_BOOTSTRAP_CLASSES = {"dropdown-menu", "show"}
+
 
 def token_names(value: str) -> tuple[set[str], set[str]]:
     css_tokens = set(CSS_VAR.findall(value))
@@ -774,12 +779,15 @@ console.log(JSON.stringify(Object.fromEntries(
             for path in sidebar_style_partials()
         )
         selectors = set(re.findall(r"\.([a-z][a-z0-9_-]*)", source))
+        offenders = sorted(
+            selector
+            for selector in selectors
+            if not selector.startswith("sidebar")
+            and selector not in SIDEBAR_BOOTSTRAP_CLASSES
+        )
 
         self.assertTrue(selectors)
-        self.assertTrue(
-            all(selector.startswith("sidebar") for selector in selectors),
-            sorted(selector for selector in selectors if not selector.startswith("sidebar")),
-        )
+        self.assertEqual(offenders, [])
 
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:
         settings = read_settings()
