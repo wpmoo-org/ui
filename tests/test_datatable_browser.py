@@ -140,6 +140,58 @@ class DataTableBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_selected_row_action_cell_matches_selected_row_surface(self) -> None:
+        context, page, evidence = self.open_preview()
+        try:
+            root = page.locator(f"#{TABLE_ID}")
+            row = root.locator("tbody > tr[data-datatable-row]").first
+            row.locator("[data-datatable-select-row]").check()
+
+            surfaces = root.evaluate(
+                """
+                (datatable) => {
+                  const row = datatable.querySelector(
+                    'tbody > tr[data-datatable-row].datatable-row-selected'
+                  );
+                  const action = row?.querySelector(
+                    '[data-datatable-column="actions"]'
+                  );
+                  const regularCell = row?.querySelector(
+                    'td:not([data-datatable-column="actions"])'
+                  );
+                  if (!row || !action || !regularCell) {
+                    return null;
+                  }
+                  const actionStyle = getComputedStyle(action);
+                  const regularCellStyle = getComputedStyle(regularCell);
+                  const normalizeColor = (color) => {
+                    const swatch = document.createElement("span");
+                    swatch.style.backgroundColor = color;
+                    document.body.append(swatch);
+                    const normalized = getComputedStyle(swatch).backgroundColor;
+                    swatch.remove();
+                    return normalized;
+                  };
+                  return {
+                    actionSurface: normalizeColor(
+                      actionStyle.getPropertyValue(
+                        "--moo-datatable-actions-cell-bg"
+                      ).trim()
+                    ),
+                    regularSurface: normalizeColor(regularCellStyle.backgroundColor),
+                    actionBackgroundImage: actionStyle.backgroundImage,
+                  };
+                }
+                """
+            )
+
+            self.assertIsNotNone(surfaces)
+            self.assertEqual(surfaces["actionSurface"], surfaces["regularSurface"])
+            self.assertEqual(surfaces["actionBackgroundImage"], "none")
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_filter_picker_selects_facet_chip_and_reset_restores_rows(self) -> None:
         context, page, evidence = self.open_preview()
         try:

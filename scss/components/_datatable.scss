@@ -12,6 +12,7 @@
 // visible content changed.
 .datatable {
   --moo-datatable-min-width: #{$moo-datatable-min-width};
+  --moo-datatable-actions-cell-bg: var(--bs-body-bg);
   --moo-datatable-actions-cell-fade-width: #{$moo-datatable-actions-cell-fade-width};
   --moo-datatable-card-label-width: #{$moo-datatable-card-label-width};
   --moo-datatable-frame-header-min-height: #{$moo-datatable-frame-header-min-height};
@@ -22,6 +23,10 @@
   --moo-datatable-search-filter-options-menu-width: #{$moo-datatable-search-filter-options-menu-width};
   --moo-datatable-scrollbar-size: #{$moo-datatable-scrollbar-size};
   --moo-datatable-bulk-actions-bottom: #{$moo-datatable-bulk-actions-bottom};
+}
+
+.card .datatable {
+  --moo-datatable-actions-cell-bg: var(--bs-card-bg);
 }
 
 .datatable-table {
@@ -75,7 +80,7 @@
   background: linear-gradient(
     90deg,
     transparent 0,
-    var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)
+    var(--moo-datatable-actions-cell-bg) var(--moo-datatable-actions-cell-fade-width)
   );
 }
 
@@ -84,7 +89,7 @@
   background: linear-gradient(
     270deg,
     transparent 0,
-    var(--bs-body-bg) var(--moo-datatable-actions-cell-fade-width)
+    var(--moo-datatable-actions-cell-bg) var(--moo-datatable-actions-cell-fade-width)
   );
 }
 
@@ -733,6 +738,14 @@
 
 .datatable-row-selected > td {
   background-color: var(--moo-muted-surface);
+}
+
+// Sticky action cells paint a gradient instead of using the row's
+// background-color, so selected rows need the same surface at the opaque end
+// of that fade.
+.datatable-row-selected > [data-datatable-column="actions"] {
+  --moo-datatable-actions-cell-bg: var(--moo-muted-surface);
+  background: var(--moo-muted-surface);
 }
 
 .datatable-card.datatable-row-selected {
