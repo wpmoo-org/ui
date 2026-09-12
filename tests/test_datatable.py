@@ -514,7 +514,7 @@ class DataTableTests(CatalogTestCase):
 
         self.assertIn("--moo-datatable-actions-cell-fade-width", source)
         self.assertIn(
-            "--moo-datatable-actions-cell-bg: var(--bs-body-bg);",
+            "--moo-datatable-actions-cell-bg: #{$moo-datatable-actions-cell-bg};",
             source,
         )
         self.assertIn(".card .datatable", source)
