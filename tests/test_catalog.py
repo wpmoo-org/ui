@@ -910,8 +910,8 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.4")
-        self.assertEqual(package["version"], "1.0.0-rc.5")
+        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.5")
+        self.assertEqual(package["version"], "1.0.0-rc.6")
         self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
