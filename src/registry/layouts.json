@@ -3,7 +3,7 @@
     "slug": "page",
     "label": "Page",
     "status": "preview",
-    "description": "Provide a full-width page surface with native Bootstrap content rails and semantic regions.",
+    "description": "Provide a full-width page surface with semantic header, main, and footer regions, each using one native Bootstrap content rail.",
     "source": "src/layouts/page.html.jinja",
     "parts": [],
     "layoutParts": []

@@ -7,7 +7,9 @@
       "source": "src/layouts/page.html.jinja",
       "componentExports": [],
       "fixtureUrls": [],
-      "tests": [],
+      "tests": [
+        "tests.test_layouts:LayoutMacroTests"
+      ],
       "matrix": {
         "shellModes": [],
         "viewports": [],
