@@ -31,7 +31,9 @@
         "sidebar_footer"
       ],
       "fixtureUrls": [],
-      "tests": [],
+      "tests": [
+        "tests.test_layouts:AppLayoutTests"
+      ],
       "matrix": {
         "shellModes": [],
         "viewports": [],

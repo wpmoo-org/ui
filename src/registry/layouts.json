@@ -12,7 +12,7 @@
     "slug": "app",
     "label": "App",
     "status": "preview",
-    "description": "Compose an application shell with an optional Sidebar and one independent Page surface.",
+    "description": "Compose a direct application shell with an optional Sidebar sibling and one independent Page sibling.",
     "source": "src/layouts/app.html.jinja",
     "parts": ["sidebar"],
     "layoutParts": ["page"]
