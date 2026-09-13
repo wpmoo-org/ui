@@ -12,7 +12,7 @@
 {% block title %}App Layout — Moo UI{% endblock %}
 
 {% block content %}
-  <div class="moo-doc-layout">
+  <div class="moo-doc-layout moo-doc-layout--wide">
     <article class="moo-doc-page">
       {{ render_page_header(
         "App",
@@ -49,10 +49,12 @@
             {% call sidebar_footer() %}Account{% endcall %}
           {% elif slot == "page" %}
             {% call(region) page(width="xl") %}
-              {% if region == "header" %}<p class="text-body-secondary">Workspace</p>
+              {% if region == "header" %}
+                {% call card(size="sm") %}<p class="text-body-secondary mb-0">Workspace</p>{% endcall %}
               {% elif region == "main" %}
                 {% call card() %}Application content{% endcall %}
-              {% elif region == "footer" %}<p class="small text-body-secondary">Footer actions</p>
+              {% elif region == "footer" %}
+                {% call card(size="sm") %}<p class="small text-body-secondary mb-0">Footer actions</p>{% endcall %}
               {% endif %}
             {% endcall %}
           {% endif %}
@@ -69,26 +71,7 @@
         frame_height=720
       ) }}
 
-      {% set app_source %}
-        {% raw %}{% from "layouts/app.html.jinja" import app %}
-        {% from "layouts/page.html.jinja" import page %}
-        {% from "components/sidebar.html.jinja" import sidebar_header, sidebar_content, sidebar_footer, sidebar_trigger, sidebar_menu_button %}
-
-        {% call(slot) app(navigation="sidebar", sidebar_key="workspace-shell", sidebar_id="workspace-sidebar", side="left", variant="floating") %}
-          {% if slot == "sidebar" %}
-            {% call sidebar_header() %}{{ sidebar_trigger(sidebar_id="workspace-sidebar") }}{% endcall %}
-            {% call sidebar_content() %}{{ sidebar_menu_button("Overview", href="/", active=true) }}{% endcall %}
-            {% call sidebar_footer() %}Account{% endcall %}
-          {% elif slot == "page" %}
-            {% call(region) page(width="xl") %}
-              {% if region == "header" %}Workspace header
-              {% elif region == "main" %}Page content
-              {% elif region == "footer" %}Page footer{% endif %}
-            {% endcall %}
-          {% endif %}
-        {% endcall %}{% endraw %}
-      {% endset %}
-      {{ render_code_snippet("app-sidebar-source", app_source, "jinja") }}
+      {{ render_code_snippet("app-sidebar-source", app_example, "html") }}
 
       <section class="moo-example mt-5" aria-labelledby="app-contract">
         <div class="moo-example__header">

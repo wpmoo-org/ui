@@ -10,7 +10,7 @@
 {% block title %}Page Layout — Moo UI{% endblock %}
 
 {% block content %}
-  <div class="moo-doc-layout">
+  <div class="moo-doc-layout moo-doc-layout--wide">
     <article class="moo-doc-page">
       {{ render_page_header(
         "Page",
@@ -31,14 +31,18 @@
       {% set page_example %}
         {% call(region) page(width="xl", id="workspace-page") %}
           {% if region == "header" %}
-            <p class="text-body-secondary mb-0">Workspace / Requests</p>
+            {% call card(size="sm") %}
+              <p class="text-body-secondary mb-0">Workspace / Requests</p>
+            {% endcall %}
           {% elif region == "main" %}
             {% call card() %}
               <h2 class="h4">Request review</h2>
               <p class="mb-0">Main content stays inside the shared container-xl rail.</p>
             {% endcall %}
           {% elif region == "footer" %}
-            <p class="small text-body-secondary mb-0">Last updated just now</p>
+            {% call card(size="sm") %}
+              <p class="small text-body-secondary mb-0">Last updated just now</p>
+            {% endcall %}
           {% endif %}
         {% endcall %}
       {% endset %}
@@ -53,16 +57,7 @@
         frame_height=540
       ) }}
 
-      {% set page_source %}
-        {% raw %}{% from "layouts/page.html.jinja" import page %}
-
-        {% call(region) page(width="xl", id="workspace-page") %}
-          {% if region == "header" %}Page header
-          {% elif region == "main" %}Main content
-          {% elif region == "footer" %}Page footer{% endif %}
-        {% endcall %}{% endraw %}
-      {% endset %}
-      {{ render_code_snippet("page-regions-source", page_source, "jinja") }}
+      {{ render_code_snippet("page-regions-source", page_example, "html") }}
 
       <section class="moo-example mt-5" aria-labelledby="page-widths">
         <div class="moo-example__header">
@@ -71,19 +66,37 @@
         </div>
         <div class="moo-example__surface">
           <div class="moo-example__preview">
-            <p class="mb-2"><code>width="base"</code> uses <code>container</code>.</p>
-            <p class="mb-2"><code>width="xl"</code> uses <code>container-xl</code>.</p>
-            <p class="mb-0"><code>width="fluid"</code> uses <code>container-fluid</code> with Bootstrap's native gutters.</p>
+            {% call card(size="sm", extra_class="mb-2") %}
+              <p class="mb-0"><code>width="base"</code> uses <code>container</code>.</p>
+            {% endcall %}
+            {% call card(size="sm", extra_class="mb-2") %}
+              <p class="mb-0"><code>width="xl"</code> uses <code>container-xl</code>.</p>
+            {% endcall %}
+            {% call card(size="sm") %}
+              <p class="mb-0"><code>width="fluid"</code> uses <code>container-fluid</code> with Bootstrap's native gutters.</p>
+            {% endcall %}
           </div>
         </div>
       </section>
 
       {% set page_width_source %}
-        {% raw %}{% call(region) page(width="base") %}...{% endcall %}
-        {% call(region) page(width="xl") %}...{% endcall %}
-        {% call(region) page(width="fluid") %}...{% endcall %}{% endraw %}
+        {% call(region) page(width="base", id="base-page") %}
+          {% if region == "main" %}
+            {% call card(size="sm") %}Base-width content{% endcall %}
+          {% endif %}
+        {% endcall %}
+        {% call(region) page(width="xl", id="xl-page") %}
+          {% if region == "main" %}
+            {% call card(size="sm") %}XL-width content{% endcall %}
+          {% endif %}
+        {% endcall %}
+        {% call(region) page(width="fluid", id="fluid-page") %}
+          {% if region == "main" %}
+            {% call card(size="sm") %}Fluid-width content{% endcall %}
+          {% endif %}
+        {% endcall %}
       {% endset %}
-      {{ render_code_snippet("page-width-source", page_width_source, "jinja") }}
+      {{ render_code_snippet("page-width-source", page_width_source, "html") }}
 
       {{ render_section_page_pagination("page", site_pages, root_path) }}
     </article>

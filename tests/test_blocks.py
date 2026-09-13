@@ -1,11 +1,61 @@
 from __future__ import annotations
 
 import json
+from html.parser import HTMLParser
 
 from tests.helpers import ROOT, CatalogTestCase
 
 
+class _BlockShellParser(HTMLParser):
+    _VOID_ELEMENTS = {
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    }
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.sidebar_slots = 0
+        self.sidebar_ids: list[str] = []
+        self.wrapper_depth: int | None = None
+        self.direct_children: list[tuple[str, dict[str, str]]] = []
+        self._stack: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = {name: value or "" for name, value in attrs}
+        if attributes.get("data-slot") == "sidebar":
+            self.sidebar_slots += 1
+        if attributes.get("id"):
+            self.sidebar_ids.append(attributes["id"])
+        if attributes.get("data-slot") == "sidebar-wrapper":
+            self.wrapper_depth = len(self._stack) + 1
+        elif self.wrapper_depth is not None and len(self._stack) == self.wrapper_depth:
+            self.direct_children.append((tag, attributes))
+        if tag not in self._VOID_ELEMENTS:
+            self._stack.append(tag)
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index] == tag:
+                del self._stack[index:]
+                return
+
+
 class BlocksTests(CatalogTestCase):
+    def test_block_shell_parser_ignores_unmatched_closing_tags(self) -> None:
+        shell = _BlockShellParser()
+        shell.feed(
+            '<div data-slot="sidebar-wrapper">'
+            '<aside data-slot="sidebar"><div></aside>'
+            '<div data-slot="page"></div>'
+            '</div>'
+        )
+
+        self.assertEqual(shell.sidebar_slots, 1)
+        self.assertEqual(
+            [attrs.get("data-slot") for _, attrs in shell.direct_children],
+            ["sidebar", "page"],
+        )
+
     def test_blocks_json_entries_are_ready(self) -> None:
         blocks = json.loads(
             (ROOT / "site/src/registry/blocks.json").read_text(encoding="utf-8")
@@ -81,7 +131,6 @@ class BlocksTests(CatalogTestCase):
                     self.assertIn('class="sidebar-menu-item dropend"', standalone)
                     self.assertEqual(standalone.count('data-slot="sidebar-menu-action"'), 1)
                     self.assertGreaterEqual(standalone.count('data-slot="sidebar-menu-sub"'), 3)
-                    self.assertIn("moo-sidebar-demo--portal-shell", standalone)
                     self.assertIn(
                         'class="sidebar-menu-item dropend sidebar-menu-item--account"',
                         standalone,
@@ -91,15 +140,21 @@ class BlocksTests(CatalogTestCase):
                     self.assertIn("sidebar-account-menu__item", standalone)
                     self.assertIn("sidebar-account-menu__header", standalone)
                     self.assertGreaterEqual(standalone.count("sidebar-account-menu__item"), 4)
-                    self.assertIn(
-                        "sidebar-inset__content d-flex flex-column gap-3 p-3 pt-0",
-                        standalone,
+                    self.assertIn('data-layout="app"', standalone)
+                    self.assertIn('data-slot="page"', standalone)
+                    shell = _BlockShellParser()
+                    shell.feed(standalone)
+                    self.assertEqual(shell.sidebar_slots, 1)
+                    sidebar_id = f"preview-sidebar-{variant}-demo"
+                    self.assertEqual(shell.sidebar_ids.count(sidebar_id), 1)
+                    self.assertEqual(
+                        [attrs.get("data-slot") for _, attrs in shell.direct_children],
+                        ["sidebar", "page"],
                     )
-                    self.assertIn('style="min-height: 0;"', standalone)
-                    if slug == "sidebar-inset":
-                        self.assertIn("moo-sidebar-demo--flat-inset", standalone)
-                    else:
-                        self.assertNotIn("moo-sidebar-demo--flat-inset", standalone)
+                    self.assertEqual(standalone.count(f'id="{sidebar_id}"'), 1)
+                    self.assertIn('class="container-fluid', standalone)
+                    self.assertNotIn("sidebar-inset__", standalone)
+                    self.assertNotIn("moo-sidebar-demo--", standalone)
 
     def test_blocks_index_page_lists_both_blocks(self) -> None:
         result = self.run_build()
@@ -175,20 +230,17 @@ class BlocksTests(CatalogTestCase):
 
         self.assertIn(".moo-block-preview__viewport", styles)
         self.assertIn(".moo-block-preview__frame", styles)
+        self.assertIn('.moo-catalog > .wrapper[data-layout="app"]', styles)
         self.assertIn(
-            '.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) .sidebar-inset',
-            styles,
-        )
-        self.assertIn("box-shadow: none", styles)
-        self.assertIn(
-            '.moo-sidebar-demo--flat-inset .sidebar[data-side="left"] .sidebar-inner',
+            '.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="left"] .sidebar-inner',
             styles,
         )
         self.assertIn(
-            "border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border)",
+            '.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="right"] .sidebar-inner',
             styles,
         )
-        self.assertIn(".moo-sidebar-demo--portal-shell .sidebar-inset__header", styles)
+        self.assertNotIn("moo-sidebar-demo--flat-inset", styles)
+        self.assertNotIn("sidebar-inset__header", styles)
         self.assertIn("data-moo-block-frame-shell", script)
         self.assertIn("ResizeObserver", script)
 

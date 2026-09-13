@@ -300,15 +300,42 @@ def sidebar_selector_offenders(source: str) -> list[str]:
     """Return sidebar selectors that escape the owned class namespace."""
     offenders: list[str] = []
     bootstrap_classes = {"dropdown-menu", "show"}
+    app_layout_classes = {
+        "wrapper",
+        "container",
+        "container-sm",
+        "container-md",
+        "container-lg",
+        "container-xl",
+        "container-xxl",
+        "container-fluid",
+    }
+    app_layout_context = '[data-layout="app"]'
     scoped_bootstrap_contexts = (
         '[data-slot="sidebar-header"]',
         '[data-slot="sidebar-footer"]',
         "[data-sidebar-dropdown-positioned]",
     )
+
+    def selector_list(raw_selector: str) -> list[str]:
+        selectors: list[str] = []
+        start = 0
+        depth = 0
+        for index, character in enumerate(raw_selector):
+            if character == "(":
+                depth += 1
+            elif character == ")":
+                depth = max(0, depth - 1)
+            elif character == "," and depth == 0:
+                selectors.append(raw_selector[start:index])
+                start = index + 1
+        selectors.append(raw_selector[start:])
+        return selectors
+
     for raw_selector in re.findall(r"([^{}]+)\{", strip_scss_comments(source)):
         if raw_selector.lstrip().startswith("@"):
             continue
-        for selector in raw_selector.split(","):
+        for selector in selector_list(raw_selector):
             selector = " ".join(selector.split())
             classes = set(re.findall(r"\.([a-z][a-z0-9_-]*)", selector))
             if not classes:
@@ -316,6 +343,10 @@ def sidebar_selector_offenders(source: str) -> list[str]:
             unexpected = {name for name in classes if not name.startswith("sidebar")}
             if not unexpected:
                 continue
+            if app_layout_context in selector:
+                unexpected -= app_layout_classes
+                if not unexpected:
+                    continue
             if unexpected <= bootstrap_classes and any(
                 context in selector for context in scoped_bootstrap_contexts
             ):
@@ -808,6 +839,22 @@ console.log(JSON.stringify(Object.fromEntries(
                 ".dropdown-menu { display: block; }\n.show { display: block; }"
             ),
             [".dropdown-menu", ".show"],
+        )
+        self.assertEqual(
+            sidebar_selector_offenders(
+                """
+                .wrapper[data-layout="app"] > [data-slot="page"] { display: flex; }
+                .wrapper[data-layout="app"] > [data-slot="page"] > .container-xl { display: flex; }
+                [dir="rtl"] .wrapper[data-layout="app"] > .sidebar { order: 1; }
+                """
+            ),
+            [],
+        )
+        self.assertEqual(
+            sidebar_selector_offenders(
+                ".wrapper { display: flex; }\n.container-xl { display: block; }"
+            ),
+            [".container-xl", ".wrapper"],
         )
 
     def test_private_tokens_are_prefixed_and_backed_by_sass_knobs(self) -> None:

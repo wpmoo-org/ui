@@ -23,6 +23,7 @@ MODULES = {
     "examples-users.js": "initExamplesUsers",
     "toc.js": "initToc",
     "code-preview.js": "initCodePreview",
+    "scroll-host.js": None,
     "bootstrap-preview.js": "initBootstrapPreview",
     "home-motion.js": "initHomeMotion",
     "block-frame.js": "initBlockFrames",
@@ -58,6 +59,19 @@ def without_comments(source: str) -> str:
 
 
 class CatalogJavaScriptTests(CatalogTestCase):
+    def test_catalog_initializes_every_keyed_sidebar_wrapper(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "index.js").read_text(encoding="utf-8")
+        )
+
+        self.assertIn(
+            "root.querySelectorAll(\n"
+            "    '[data-slot=\"sidebar-wrapper\"][data-sidebar-key]',\n"
+            "  )",
+            source,
+        )
+        self.assertIn("sidebarRoots.forEach", source)
+
     def test_catalog_module_surface_is_explicit(self) -> None:
         discovered = {
             path.relative_to(CATALOG_JS).as_posix()
@@ -1221,7 +1235,9 @@ const view = {
   clearTimeout() {},
   requestAnimationFrame(callback) { callback(); return 1; },
   cancelAnimationFrame() {},
-  getComputedStyle() { return { fontSize: "16px" }; },
+  getComputedStyle(element) {
+    return { fontSize: "16px", overflowY: element === page ? "auto" : "visible" };
+  },
   matchMedia() { return { matches: false }; },
   scrollTo() {},
   addEventListener() {},
@@ -1243,7 +1259,8 @@ const anatomy = element("h2", { id: "sidebar-html-anatomy" }, "HTML Anatomy");
 const componentExamples = element("div", { class: "moo-component-examples" });
 componentExamples.children = [usage, example, composition, anatomy];
 
-const main = element("main", { class: "moo-catalog__main" });
+const page = element("div", { "data-slot": "page" });
+const main = page;
 main.scrollTop = 0;
 main.clientHeight = 800;
 main.scrollHeight = 1600;
@@ -1257,7 +1274,7 @@ const root = {
   querySelector(selector) {
     if (selector === "[data-moo-component-toc]") return componentToc;
     if (selector === ".moo-component-examples") return componentExamples;
-    if (selector === ".moo-catalog__main") return main;
+    if (selector === '[data-slot="page"]') return page;
     if (selector === "[data-moo-chart-template-nav]") return null;
     return null;
   },
@@ -1403,7 +1420,9 @@ const view = {
   clearTimeout() {},
   requestAnimationFrame(callback) { callback(); return 1; },
   cancelAnimationFrame() {},
-  getComputedStyle() { return { fontSize: "16px" }; },
+  getComputedStyle(element) {
+    return { fontSize: "16px", overflowY: element === page ? "auto" : "visible" };
+  },
   matchMedia() { return { matches: false }; },
   scrollTo() {},
   addEventListener() {},
@@ -1426,7 +1445,8 @@ const basic = element(
 const componentExamples = element("div", { class: "moo-component-examples" });
 componentExamples.children = [usage, basic];
 
-const main = element("main", { class: "moo-catalog__main" });
+const page = element("div", { "data-slot": "page" });
+const main = page;
 main.scrollTop = 0;
 main.clientHeight = 800;
 main.scrollHeight = 1600;
@@ -1440,7 +1460,7 @@ const root = {
   querySelector(selector) {
     if (selector === "[data-moo-component-toc]") return componentToc;
     if (selector === ".moo-component-examples") return componentExamples;
-    if (selector === ".moo-catalog__main") return main;
+    if (selector === '[data-slot="page"]') return page;
     if (selector === "[data-moo-chart-template-nav]") return null;
     return null;
   },

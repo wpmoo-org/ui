@@ -11,14 +11,13 @@
         min-height: 100vh;
       }
 
-      .sidebar-inset main {
-        padding: 1.5rem;
-      }
     </style>
   </head>
   <body>
     <div
-      class="sidebar-wrapper vh-100 overflow-hidden"
+      class="wrapper"
+      data-layout="app"
+      data-shell-mode="viewport"
       data-slot="sidebar-wrapper"
       data-sidebar-state="expanded"
       data-sidebar-key="certification-shell"
@@ -138,8 +137,9 @@
         ></button>
       </aside>
 
-      <div class="sidebar-inset overflow-hidden" data-slot="sidebar-inset">
-        <header class="sidebar-inset__header">
+      <div data-slot="page">
+        <header>
+          <div class="container-fluid p-3">
           <button
             class="btn btn-ghost btn-icon-sm sidebar-trigger"
             id="certification-sidebar-trigger"
@@ -152,19 +152,17 @@
           >
             Toggle
           </button>
+          </div>
         </header>
-        <main
-          class="sidebar-inset__content overflow-auto scroll-fade-y"
-          data-slot="sidebar-inset-content"
-          id="overview"
-          tabindex="-1"
-        >
-          <h1>Sidebar certification fixture</h1>
-          <article class="card min-vh-100 p-4">
-            <h2 class="h4">Inset content surface</h2>
-            <p id="activity">The main application surface remains independently focusable.</p>
-            <p>Later content remains below the sidebar identity menus when they are open.</p>
-          </article>
+        <main id="overview" tabindex="-1">
+          <div class="container-fluid p-4">
+            <h1>Sidebar certification fixture</h1>
+            <article class="card min-vh-100 p-4">
+              <h2 class="h4">Inset content surface</h2>
+              <p id="activity">The main application surface remains independently focusable.</p>
+              <p>Later content remains below the sidebar identity menus when they are open.</p>
+            </article>
+          </div>
         </main>
       </div>
     </div>

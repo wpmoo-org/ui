@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from html.parser import HTMLParser
 from pathlib import Path
 from unittest import mock
 
@@ -19,6 +20,108 @@ RUNNER = ROOT / "conformance" / "runner" / "run.py"
 CONTRACT_PATH = ROOT / "conformance" / "contract" / "conformance-contract.json"
 REPORT_SCHEMA_PATH = ROOT / "conformance" / "contract" / "report.schema.json"
 RUN_TIMEOUT_SECONDS = 600
+
+
+class _Element:
+    def __init__(self, tag, attrs):
+        self.tag = tag
+        self.attrs = dict(attrs)
+        self.children = []
+
+    def has_class(self, name):
+        return name in self.attrs.get("class", "").split()
+
+
+class _FixtureParser(HTMLParser):
+    VOID_ELEMENTS = {
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    }
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.root = _Element("#document", [])
+        self.stack = [self.root]
+
+    def handle_starttag(self, tag, attrs):
+        element = _Element(tag, attrs)
+        self.stack[-1].children.append(element)
+        if tag not in self.VOID_ELEMENTS:
+            self.stack.append(element)
+
+    def handle_startendtag(self, tag, attrs):
+        self.stack[-1].children.append(_Element(tag, attrs))
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, 0, -1):
+            if self.stack[index].tag == tag:
+                del self.stack[index:]
+                return
+
+
+def _descendants(element):
+    for child in element.children:
+        yield child
+        yield from _descendants(child)
+
+
+def assert_layout_fixture_contract(testcase, html):
+    parser = _FixtureParser()
+    parser.feed(html)
+    hosts = [
+        element
+        for element in _descendants(parser.root)
+        if element.has_class("moo-ui")
+    ]
+    testcase.assertEqual(len(hosts), 1, "fixture must contain one Moo UI host")
+
+    host = hosts[0]
+    wrappers = [
+        child
+        for child in host.children
+        if child.tag == "div"
+        and child.has_class("wrapper")
+        and child.attrs.get("data-layout") == "app"
+        and child.attrs.get("data-shell-mode") == "viewport"
+    ]
+    testcase.assertEqual(
+        len(wrappers),
+        1,
+        "Moo UI host must contain one viewport app wrapper",
+    )
+
+    wrapper = wrappers[0]
+    sidebar = [
+        child
+        for child in wrapper.children
+        if child.attrs.get("data-slot") == "sidebar"
+    ]
+    pages = [
+        child
+        for child in wrapper.children
+        if child.attrs.get("data-slot") == "page"
+    ]
+    testcase.assertEqual(len(sidebar), 1, "app must have one direct Sidebar slot")
+    testcase.assertEqual(len(pages), 1, "app must have one direct Page slot")
+    testcase.assertEqual(
+        [child.attrs.get("data-slot") for child in wrapper.children],
+        ["sidebar", "page"],
+        "Sidebar and Page must remain direct siblings",
+    )
+
+    page = pages[0]
+    semantic_regions = [child.tag for child in page.children]
+    testcase.assertEqual(
+        semantic_regions,
+        ["header", "main"],
+        "Page must expose direct semantic header and main regions",
+    )
+    main = page.children[1]
+    testcase.assertEqual(main.attrs.get("id"), "fixture-overview")
+    testcase.assertEqual(main.attrs.get("tabindex"), "-1")
+    testcase.assertNotIn("sidebar_provider", html)
+    testcase.assertNotIn("sidebar_inset", html)
+    testcase.assertNotIn("sidebar-inset", html)
 
 
 def load_runner_module():
@@ -173,6 +276,10 @@ class ConformanceRunnerTests(unittest.TestCase):
         self.assertEqual(host["servedBootstrapVersion"], "5.3.3")
         self.assertEqual(host["cssRecipeDetected"], "scoped")
         self.assertEqual(self.report["contractVersion"], self.contract["schemaVersion"])
+
+    def test_moo_esm_fixture_keeps_direct_app_layout_contract(self):
+        fixture = (FIXTURES_DIR / "moo-esm.html").read_text(encoding="utf-8")
+        assert_layout_fixture_contract(self, fixture)
 
     def test_every_contract_assertion_is_reported_for_its_fixtures(self):
         reported = {

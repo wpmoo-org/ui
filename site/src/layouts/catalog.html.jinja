@@ -1,14 +1,30 @@
 {% extends "layouts/base.html.jinja" %}
-{% from "components/sidebar.html.jinja" import sidebar_inset, sidebar_provider %}
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "shell/navbar.html.jinja" import render_catalog_overlays with context %}
+{% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
-    {% call sidebar_provider(key="catalog-shell") %}
+    {% call(slot) app(
+      navigation="sidebar",
+      sidebar_key="catalog-shell",
+      sidebar_id="catalog-sidebar",
+      aria_label="Catalog navigation",
+      shell_mode="viewport"
+    ) %}
+      {% if slot == "sidebar" %}
+        {{ render_catalog_sidebar() }}
+      {% elif slot == "page" %}
+        {% call(region) page(width="fluid") %}
+          {% if region == "header" %}
+            {% include "shell/navbar.html.jinja" %}
+          {% elif region == "main" %}
       <script>
         (() => {
           const state = document.documentElement.dataset.sidebarCatalogState;
-          const shell = document.currentScript.parentElement;
+          const shell = document.querySelector('[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]');
           if (
             (state === "collapsed" || state === "expanded") &&
             shell?.dataset.sidebarKey === "catalog-shell"
@@ -17,7 +33,6 @@
           }
         })();
       </script>
-      {% include "shell/sidebar.html.jinja" %}
       <script>
         (() => {
           // Apply a saved Sidebar variant synchronously, right after the
@@ -40,7 +55,7 @@
         (() => {
           // Match Sidebar's active route positioning before the deferred
           // catalog module loads, so deep menu pages never flash from the top.
-          const shell = document.currentScript.closest('[data-slot="sidebar-wrapper"]');
+          const shell = document.querySelector('[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]');
           const active = shell?.querySelector(
             '[data-slot="sidebar-content"] a[data-slot="sidebar-menu-button"][aria-current="page"], ' +
               '[data-slot="sidebar-content"] a.sidebar-menu-button[aria-current="page"], ' +
@@ -71,9 +86,6 @@
           );
         })();
       </script>
-      {% call sidebar_inset() %}
-        {% include "shell/navbar.html.jinja" %}
-        <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">
           <div class="moo-catalog__content">
             {% set has_example_toc = current_page_kind in ["component", "utility"] %}
             {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
@@ -105,11 +117,14 @@
               </div>
             {% endif %}
           </div>
-        </main>
-        {% block footer %}
-          {% include "shell/footer.html.jinja" %}
-        {% endblock %}
-      {% endcall %}
+          {% elif region == "footer" %}
+            {% block footer %}
+              {% include "shell/footer.html.jinja" %}
+            {% endblock %}
+          {% endif %}
+        {% endcall %}
+      {% endif %}
     {% endcall %}
+    {{ render_catalog_overlays() }}
   </div>
 {% endblock %}

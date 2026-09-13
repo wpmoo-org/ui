@@ -1,3 +1,5 @@
+import { resolveCatalogScrollHost } from "./scroll-host.js";
+
 const states = new WeakMap();
 
 export function initToc(root = document) {
@@ -70,7 +72,8 @@ export function initToc(root = document) {
     })
     .filter(Boolean);
   const targetByHash = new Map(targets.map((item) => [item.link.getAttribute("href"), item]));
-  const main = root.querySelector(".moo-catalog__main");
+  const scrollHost = resolveCatalogScrollHost(root);
+  const main = scrollHost.element;
   let frame = 0;
   let clickUntil = 0;
   let chartFrame = 0;
@@ -249,7 +252,7 @@ export function initToc(root = document) {
       });
     });
     update();
-    listen(main, "scroll", requestUpdate, { passive: true });
+    listen(scrollHost.eventTarget, "scroll", requestUpdate, { passive: true });
     listen(view, "resize", requestUpdate);
   }
 
@@ -265,7 +268,7 @@ export function initToc(root = document) {
       });
     });
     updateChartNav();
-    listen(main, "scroll", requestChartNavUpdate, { passive: true });
+    listen(scrollHost.eventTarget, "scroll", requestChartNavUpdate, { passive: true });
     listen(view, "resize", requestChartNavUpdate);
   }
 

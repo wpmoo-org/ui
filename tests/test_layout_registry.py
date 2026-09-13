@@ -12,7 +12,6 @@ REGISTRY = ROOT / "src/registry/layouts.json"
 COMPONENT_REGISTRY = ROOT / "src/registry/components.json"
 SIDEBAR_SOURCE = ROOT / "src/components/sidebar.html.jinja"
 LAYOUT_SOURCE_ROOT = ROOT / "src/layouts"
-TRANSITION_MACROS = {"sidebar_provider", "sidebar_inset"}
 PUBLIC_LAYOUT_SLUGS = {"page", "app"}
 REQUIRED_FIELDS = {
     "slug",
@@ -29,8 +28,8 @@ MACRO_PATTERN = re.compile(r"{%[-+]?\s*macro\s+(?P<name>[A-Za-z_]\w*)\s*\(")
 # which helper/anatomy macros are owned by each source file. Freeze that
 # recognition rule here so an unregistered layout macro cannot hide in a
 # component or include template. A new component-owned macro must therefore be
-# reviewed together with this finite allowlist; only the two RC6 transition
-# names are allowed outside these component-owned definitions.
+# reviewed together with this finite allowlist; layout macros must remain in
+# the dedicated layout source directory.
 COMPONENT_MACROS_BY_FILE = {
     "accordion.html.jinja": {"accordion"},
     "alert.html.jinja": {"alert"},
@@ -172,8 +171,6 @@ def _unregistered_layout_macro_offenders(root: Path) -> list[str]:
             allowed = PUBLIC_LAYOUT_SLUGS
         elif path.parent == component_root:
             allowed = set(COMPONENT_MACROS_BY_FILE.get(path.name, ()))
-            if path.name == "sidebar.html.jinja":
-                allowed.update(TRANSITION_MACROS)
         elif relative == "src/includes/field.html.jinja":
             allowed = COMPONENT_MACROS_BY_FILE[relative]
         else:
@@ -276,13 +273,8 @@ class LayoutRegistryTests(unittest.TestCase):
             transition_definitions = {
                 match.group("name")
                 for match in MACRO_PATTERN.finditer(path.read_text(encoding="utf-8"))
-            } & TRANSITION_MACROS
-            if transition_definitions:
-                self.assertEqual(
-                    path,
-                    SIDEBAR_SOURCE,
-                    "RC6 transition macros may only remain in the legacy Sidebar source",
-                )
+            } & {"sidebar_provider", "sidebar_inset"}
+            self.assertFalse(transition_definitions)
 
         self.assertEqual(_unregistered_layout_macro_offenders(ROOT), [])
 

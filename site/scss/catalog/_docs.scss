@@ -389,6 +389,16 @@
     gap: 4rem;
   }
 
+  // Layout pages showcase a 1280px shell frame. Give the example column the
+  // available document width while retaining the shared on-page navigation.
+  .moo-doc-layout--wide {
+    grid-template-columns: minmax(0, 1fr) 12rem;
+  }
+
+  .moo-doc-layout--wide > .moo-doc-page {
+    max-width: none;
+  }
+
   .moo-doc-toc {
     position: sticky;
     top: var(--moo-doc-toc-offset);

@@ -25,6 +25,7 @@ from pathlib import Path
 from tests.helpers import ROOT
 from tests.helpers.browser_harness import skip_if_browser_launch_is_sandboxed
 from tests.helpers.host_process import non_venv_interpreter, read_banner_line
+from tests.test_conformance_runner import assert_layout_fixture_contract
 
 SCRIPT = ROOT / "scripts" / "package-conformance-kit.py"
 RUN_TIMEOUT_SECONDS = 240
@@ -139,6 +140,16 @@ class PackagingTests(unittest.TestCase):
             f"{PREFIX}/conformance/host-shell/serve.py",
         ):
             self.assertIn(required, names)
+
+    def test_packaged_moo_esm_fixture_keeps_direct_app_layout_contract(self) -> None:
+        member_name = (
+            f"{PREFIX}/conformance/fixtures/moo-esm.html"
+        )
+        with tarfile.open(fileobj=io.BytesIO(self.archive)) as tar:
+            member = tar.extractfile(member_name)
+            self.assertIsNotNone(member)
+            fixture = member.read().decode("utf-8")
+        assert_layout_fixture_contract(self, fixture)
 
     def test_extracted_artifact_is_self_sufficient(self) -> None:
         skip_if_browser_launch_is_sandboxed()

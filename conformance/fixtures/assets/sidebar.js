@@ -1,5 +1,5 @@
 /*!
- * Moo UI sidebar.js v1.0.0-rc.3 (https://ui.wpmoo.org/)
+ * Moo UI sidebar.js v1.0.0-rc.6 (https://ui.wpmoo.org/)
  * Copyright 2026 WPMoo (https://wpmoo.org)
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  */
@@ -230,7 +230,9 @@ export default class Sidebar {
     }
     delete item.dataset.sidebarDropdownPositioned;
     item.style.removeProperty("--moo-sidebar-dropdown-block-start");
-    item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
+    item.style.removeProperty("--moo-sidebar-dropdown-block-end");
+    item.style.removeProperty("--moo-sidebar-dropdown-left");
+    item.style.removeProperty("--moo-sidebar-dropdown-right");
   }
 
   _closeDropdowns(exceptControl = null) {
@@ -259,7 +261,10 @@ export default class Sidebar {
     const isHeaderWorkspace =
       control?.classList.contains("sidebar-menu-button--workspace") &&
       control.closest('[data-slot="sidebar-header"]');
-    if (!control || !item || !isHeaderWorkspace || !this._isDesktop()) {
+    const isFooterAccount =
+      control?.classList.contains("sidebar-menu-button--account") &&
+      control.closest('[data-slot="sidebar-footer"]');
+    if (!control || !item || !(isHeaderWorkspace || isFooterAccount) || !this._isDesktop()) {
       this._clearDropdownPosition(control);
       return;
     }
@@ -267,18 +272,36 @@ export default class Sidebar {
     this._closeFlyouts();
     const rect = control.getBoundingClientRect();
     const gap = 4;
-    const inlineStart =
-      this._root.dir === "rtl"
-        ? this._window.innerWidth - rect.left + gap
-        : rect.right + gap;
-    item.style.setProperty(
-      "--moo-sidebar-dropdown-block-start",
-      `${Math.round(rect.bottom + gap)}px`
-    );
-    item.style.setProperty(
-      "--moo-sidebar-dropdown-inline-start",
-      `${Math.round(inlineStart)}px`
-    );
+    const sidebar = control.closest('[data-slot="sidebar"]');
+    const side = sidebar?.dataset.side || "left";
+    if (side === "right") {
+      const right = this._window.innerWidth - rect.left + gap;
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-right",
+        `${Math.round(right)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-left");
+    } else {
+      const left = rect.right + gap;
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-left",
+        `${Math.round(left)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-right");
+    }
+    if (isHeaderWorkspace) {
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-block-start",
+        `${Math.round(rect.bottom + gap)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-block-end");
+    } else {
+      item.style.setProperty(
+        "--moo-sidebar-dropdown-block-end",
+        `${Math.round(this._window.innerHeight - rect.top + gap)}px`
+      );
+      item.style.removeProperty("--moo-sidebar-dropdown-block-start");
+    }
     item.dataset.sidebarDropdownPositioned = "";
   }
 
@@ -296,7 +319,7 @@ export default class Sidebar {
     this._element.querySelectorAll(".sidebar-menu-item--flyout-open").forEach((item) => {
       item.classList.remove("sidebar-menu-item--flyout-open");
       item.style.removeProperty("--moo-sidebar-flyout-block-start");
-      item.style.removeProperty("--moo-sidebar-flyout-inline-start");
+      item.style.removeProperty("--moo-sidebar-flyout-left");
       this._resetFlyoutTrigger(item, false);
     });
   }
@@ -314,11 +337,9 @@ export default class Sidebar {
     this._closeDropdowns();
     this._closeFlyouts();
     const rect = item.getBoundingClientRect();
+    const sidebar = item.closest('[data-slot="sidebar"]');
+    const sidebarRect = sidebar?.getBoundingClientRect() || rect;
     const gap = 4;
-    const inlineStart =
-      this._root.dir === "rtl"
-        ? this._window.innerWidth - rect.left + gap
-        : rect.right + gap;
     const flyout = submenu.cloneNode(true);
     flyout.removeAttribute("id");
     flyout.classList.remove("collapse", "show", "collapsing");
@@ -326,12 +347,15 @@ export default class Sidebar {
     flyout.dataset.sidebarFlyout = "";
     flyout.removeAttribute("style");
     flyout.style.setProperty("--moo-sidebar-flyout-block-start", `${Math.round(rect.top)}px`);
-    flyout.style.setProperty(
-      "--moo-sidebar-flyout-inline-start",
-      `${Math.round(inlineStart)}px`
-    );
+    const side = sidebar?.dataset.side || "left";
     const root = this._element.closest(".moo-ui") || this._document.body;
     root.appendChild(flyout);
+    const flyoutWidth = flyout.getBoundingClientRect().width;
+    const left = side === "right"
+      ? sidebarRect.left - flyoutWidth - gap
+      : sidebarRect.right + gap;
+    const boundedLeft = Math.max(0, Math.min(this._window.innerWidth - flyoutWidth, left));
+    flyout.style.setProperty("--moo-sidebar-flyout-left", `${Math.round(boundedLeft)}px`);
     this._flyout = flyout;
     this._flyoutOwner = item;
     item.classList.add("sidebar-menu-item--flyout-open");
@@ -369,7 +393,8 @@ export default class Sidebar {
       return;
     }
     const collapsed = this._isCollapsed();
-    const placement = this._root.dir === "rtl" ? "left" : "right";
+    const side = this._element.querySelector('[data-slot="sidebar"]')?.dataset.side || "left";
+    const placement = side === "right" ? "left" : "right";
     this._element.querySelectorAll("[data-sidebar-tooltip]").forEach((control) => {
       this._disposeTooltip(control);
       if (
@@ -387,6 +412,11 @@ export default class Sidebar {
       new Tooltip(anchor, {
         title: control.getAttribute("data-sidebar-tooltip"),
         placement,
+        // Bootstrap's default tooltip offset is 6px. The icon rail's
+        // boundary calculation still lets the tooltip box overlap the
+        // physical Sidebar edge at that distance, so keep an explicit 8px
+        // separation for both physical placements.
+        offset: [0, 8],
         container: "body",
         trigger: "hover focus",
       });

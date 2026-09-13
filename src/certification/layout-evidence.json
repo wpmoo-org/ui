@@ -1,21 +1,33 @@
 {
   "schemaVersion": 1,
+  "manualReleaseGates": [
+    "manual-browser-zoom-200-required"
+  ],
   "layouts": {
     "page": {
       "contractVersion": 1,
       "status": "preview",
       "source": "src/layouts/page.html.jinja",
       "componentExports": [],
-      "fixtureUrls": [],
+      "fixtureUrls": [
+        "/tests/fixtures/certification/layout-page.html",
+        "/tests/fixtures/certification/layout-page-base.html",
+        "/tests/fixtures/certification/layout-page-sm.html",
+        "/tests/fixtures/certification/layout-page-md.html",
+        "/tests/fixtures/certification/layout-page-lg.html",
+        "/tests/fixtures/certification/layout-page-xxl.html",
+        "/tests/fixtures/certification/layout-page-fluid.html"
+      ],
       "tests": [
-        "tests.test_layouts:LayoutMacroTests"
+        "tests.test_layouts:LayoutMacroTests",
+        "tests.test_layouts_browser:LayoutBrowserTests"
       ],
       "matrix": {
-        "shellModes": [],
-        "viewports": [],
-        "directions": [],
-        "themes": [],
-        "zoom": []
+        "shellModes": ["standalone", "viewport", "contained"],
+        "viewports": ["desktop", "mobile"],
+        "directions": ["ltr", "rtl"],
+        "themes": ["light", "dark"],
+        "zoom": ["100%", "manual-200%"]
       },
       "sourceCommit": null,
       "acceptedAt": null
@@ -30,16 +42,22 @@
         "sidebar_content",
         "sidebar_footer"
       ],
-      "fixtureUrls": [],
+      "fixtureUrls": [
+        "/tests/fixtures/certification/layout-app.html",
+        "/tests/fixtures/certification/layout-app-contained.html",
+        "/tests/fixtures/certification/layout-app-right.html",
+        "/tests/fixtures/certification/layout-app-none.html"
+      ],
       "tests": [
-        "tests.test_layouts:AppLayoutTests"
+        "tests.test_layouts:AppLayoutTests",
+        "tests.test_layouts_browser:LayoutBrowserTests"
       ],
       "matrix": {
-        "shellModes": [],
-        "viewports": [],
-        "directions": [],
-        "themes": [],
-        "zoom": []
+        "shellModes": ["viewport", "contained"],
+        "viewports": ["desktop", "mobile"],
+        "directions": ["ltr", "rtl"],
+        "themes": ["light", "dark"],
+        "zoom": ["100%", "manual-200%"]
       },
       "sourceCommit": null,
       "acceptedAt": null

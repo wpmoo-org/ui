@@ -21,20 +21,6 @@
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 
-{% macro sidebar_provider(default_open=true, contained=false, key="", extra_class="") -%}
-  {% set classes = "sidebar-wrapper" %}
-  {% if contained %}{% set classes = classes ~ " sidebar-wrapper--contained" %}{% endif %}
-  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  <div
-    class="{{ classes }}"
-    data-slot="sidebar-wrapper"
-    data-sidebar-state="{{ 'expanded' if default_open else 'collapsed' }}"
-    {% if key %}data-sidebar-key="{{ key }}"{% endif %}
-  >
-    {{ caller() | trim | safe }}
-  </div>
-{%- endmacro %}
-
 {% macro sidebar(
   side="left",
   variant="sidebar",
@@ -333,10 +319,4 @@
 
 {% macro sidebar_brand_mark(icon, variant="primary") -%}
   <span class="sidebar-brand-mark sidebar-brand-mark--{{ variant }}">{{ render_icon(icon, "inline-start") }}</span>
-{%- endmacro %}
-
-{% macro sidebar_inset(extra_class="") -%}
-  <div class="sidebar-inset{% if extra_class %} {{ extra_class }}{% endif %}" data-slot="sidebar-inset">
-    {{ caller() | trim | safe }}
-  </div>
 {%- endmacro %}

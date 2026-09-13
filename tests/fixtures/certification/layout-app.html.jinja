@@ -1,0 +1,162 @@
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "components/breadcrumb.html.jinja" import breadcrumb %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_menu, dropdown_item %}
+{% from "components/input.html.jinja" import input %}
+{% from "components/sidebar.html.jinja" import sidebar_header, sidebar_content, sidebar_footer, sidebar_trigger, sidebar_group, sidebar_group_label, sidebar_group_content, sidebar_menu, sidebar_menu_item, sidebar_menu_button, sidebar_menu_sub, sidebar_menu_sub_item, sidebar_menu_sub_button %}
+
+{% set fixture_shell_mode = fixture_shell_mode | default("viewport") %}
+{% set fixture_side = fixture_side | default("left") %}
+{% set fixture_direction = fixture_direction | default("ltr") %}
+{% set fixture_navigation = fixture_navigation | default("sidebar") %}
+
+<!doctype html>
+<html lang="en" dir="{{ fixture_direction }}" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Layout certification — App</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body { margin: 0; }
+      .layout-certification-host { min-height: 100svh; }
+      .layout-certification-host[data-shell-mode="contained"] {
+        height: 34rem;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .layout-certification-main { min-height: 120rem; }
+      @media (max-width: 991.98px) {
+        .layout-certification-host[data-shell-mode="contained"] {
+          height: auto;
+          min-height: 0;
+          overflow: visible;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
+    <div
+      id="layout-certification-host"
+      class="layout-certification-host"
+      data-shell-mode="{{ fixture_shell_mode }}"
+    >
+    {% call(slot) app(
+      navigation=fixture_navigation,
+      sidebar_key="layout-certification-shell",
+      default_open=true,
+      sidebar_id="layout-certification-sidebar",
+      side=fixture_side,
+      variant="sidebar",
+      collapsible="icon",
+      rail=true,
+      shell_mode=fixture_shell_mode
+    ) %}
+      {% if slot == "sidebar" and fixture_navigation == "sidebar" %}
+        {% call sidebar_header() %}
+          {{ sidebar_trigger(sidebar_id="layout-certification-sidebar") }}
+          {% call sidebar_menu() %}
+            {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend") %}
+              {{ sidebar_menu_button("Workspace", element="button", dropdown=true, size="lg", icon="layout-dashboard", aria_label="Open workspaces", extra_class="sidebar-menu-button--workspace") }}
+              {% call dropdown_menu() %}
+                {{ dropdown_item("Primary workspace") }}
+                {{ dropdown_item("Review workspace") }}
+                {{ dropdown_item("Add workspace") }}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+        {% call sidebar_content() %}
+          {% call sidebar_group() %}
+            {{ sidebar_group_label("Workspace") }}
+            {% call sidebar_group_content() %}
+                {% call sidebar_menu() %}
+                {% call sidebar_menu_item() %}{{ sidebar_menu_button("Overview", href="#overview", active=true, icon="layout-dashboard") }}{% endcall %}
+                {% call sidebar_menu_item() %}
+                  {{ sidebar_menu_sub_button("Activity", "layout-certification-submenu", icon="activity") }}
+                  {% call sidebar_menu_sub("layout-certification-submenu") %}
+                    {% call sidebar_menu_sub_item() %}{{ sidebar_menu_button("Events", href="#activity") }}{% endcall %}
+                    {% call sidebar_menu_sub_item() %}{{ sidebar_menu_button("History", href="#history") }}{% endcall %}
+                  {% endcall %}
+                {% endcall %}
+                {% call sidebar_menu_item() %}{{ sidebar_menu_button("Settings", href="#settings", icon="settings") }}{% endcall %}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+        {% call sidebar_footer() %}
+          {{ input(aria_label="Search navigation", id="layout-certification-search", type="search") }}
+          {% call sidebar_menu() %}
+            {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend") %}
+              {{ sidebar_menu_button("Account", element="button", dropdown=true, size="lg", icon="circle-user", aria_label="Open account menu") }}
+              {% call dropdown_menu() %}
+                {{ dropdown_item("Profile") }}
+                {{ dropdown_item("Preferences") }}
+                {{ dropdown_item("Sign out", destructive=true) }}
+              {% endcall %}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+      {% elif slot == "page" %}
+        {% call(region) page(width="xl") %}
+          {% if region == "header" %}
+            {% call card(size="sm") %}
+              {{ breadcrumb([
+                {"label": "Workspace", "href": "#workspace"},
+                {"label": "Overview"}
+              ], extra_class="layout-certification-breadcrumb") }}
+            {% endcall %}
+          {% elif region == "main" %}
+            <div id="overview" class="layout-certification-main">
+              {% call card() %}<h1 class="h4">Application shell</h1><p id="activity">Tall page content owns the long document.</p>{% endcall %}
+            </div>
+          {% elif region == "footer" %}
+            {% call card(size="sm") %}Footer actions{% endcall %}
+          {% endif %}
+        {% endcall %}
+      {% endif %}
+    {% endcall %}
+    </div>
+
+    {# Keep the persisted Sidebar state on the keyed root before Bootstrap or
+       the ESM controller gets a chance to paint the first frame. This mirrors
+       the catalog shell's synchronous handoff and deliberately uses the same
+       public storage key as Sidebar. #}
+    <script>
+      (() => {
+        const root = document.querySelector('[data-slot="sidebar-wrapper"]');
+        const storageKey = 'moo-sidebar:layout-certification-shell';
+        if (!root) return;
+        try {
+          const state = localStorage.getItem(storageKey);
+          if (state === 'expanded' || state === 'collapsed') {
+            root.dataset.sidebarState = state;
+          }
+        } catch (error) {
+          // Storage may be unavailable in a restricted browser context; the
+          // server-rendered default remains the safe fallback.
+        }
+      })();
+    </script>
+    <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+      import Sidebar from "/dist/js/sidebar.js";
+
+      const root = document.querySelector('[data-slot="sidebar-wrapper"]');
+      const host = document.querySelector('#layout-certification-host');
+      if (root) {
+        const query = new URLSearchParams(window.location.search);
+        const mode = query.get("mode");
+        if (mode === "contained") root.dataset.shellMode = "contained";
+        if (query.get("side") === "right") root.querySelector('[data-slot="sidebar"]').dataset.side = "right";
+        if (query.get("state") === "collapsed") root.dataset.sidebarState = "collapsed";
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.bsTheme = "dark";
+        window.layoutCertificationSidebar = Sidebar.getOrCreateInstance(root);
+      }
+      if (host && root) host.dataset.shellMode = root.dataset.shellMode;
+      document.body.dataset.layoutReady = "true";
+    </script>
+  </body>
+</html>

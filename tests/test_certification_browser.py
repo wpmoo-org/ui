@@ -695,7 +695,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
-    def test_sidebar_identity_dropdowns_paint_above_viewport_inset_content(self) -> None:
+    def test_sidebar_identity_dropdowns_paint_above_viewport_page_content(self) -> None:
         trigger_menu_pairs = (
             (
                 "#certification-sidebar-workspace",
@@ -712,8 +712,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         position_properties = (
             "--moo-sidebar-dropdown-block-start",
             "--moo-sidebar-dropdown-block-end",
-            "--moo-sidebar-dropdown-inline-start",
-            "--moo-sidebar-dropdown-inline-end",
+            "--moo-sidebar-dropdown-left",
+            "--moo-sidebar-dropdown-right",
         )
 
         for case in SIDEBAR_OVERLAY_CASES:
@@ -758,7 +758,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                               const menu = document.querySelector(menuSelector);
                               const owner = trigger.closest('li');
                               const content = document.querySelector(
-                                '[data-slot="sidebar-inset-content"]'
+                                '[data-slot="page"] > main'
                               );
                               const menuRect = menu.getBoundingClientRect();
                               const contentRect = content.getBoundingClientRect();
@@ -796,11 +796,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                                 intersectionWidth: Math.max(0, intersectionWidth),
                                 intersectionHeight: Math.max(0, intersectionHeight),
                                 triggerRect: trigger.getBoundingClientRect().toJSON(),
-                                inlineStart: owner.style.getPropertyValue(
-                                  '--moo-sidebar-dropdown-inline-start'
+                                leftProp: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-left'
                                 ),
-                                inlineEnd: owner.style.getPropertyValue(
-                                  '--moo-sidebar-dropdown-inline-end'
+                                rightProp: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-right'
                                 ),
                                 blockStart: owner.style.getPropertyValue(
                                   '--moo-sidebar-dropdown-block-start'
@@ -829,19 +829,17 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                             self.assertTrue(overlay["blockEnd"])
                             self.assertFalse(overlay["blockStart"])
                         if case.name.startswith("desktop-right"):
-                            self.assertTrue(overlay["inlineEnd"])
-                            self.assertFalse(overlay["inlineStart"])
-                            if case.direction == "ltr":
-                                self.assertLess(
-                                    overlay["left"], overlay["triggerRect"]["left"]
-                                )
-                            else:
-                                self.assertGreater(
-                                    overlay["right"], overlay["triggerRect"]["right"]
-                                )
+                            self.assertTrue(overlay["rightProp"])
+                            self.assertFalse(overlay["leftProp"])
+                            self.assertLessEqual(
+                                overlay["right"], overlay["triggerRect"]["left"]
+                            )
                         else:
-                            self.assertTrue(overlay["inlineStart"])
-                            self.assertFalse(overlay["inlineEnd"])
+                            self.assertTrue(overlay["leftProp"])
+                            self.assertFalse(overlay["rightProp"])
+                            self.assertGreaterEqual(
+                                overlay["left"], overlay["triggerRect"]["right"]
+                            )
                     else:
                         self.assertIsNone(
                             owner.get_attribute("data-sidebar-dropdown-positioned")

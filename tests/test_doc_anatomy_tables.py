@@ -88,13 +88,11 @@ ANATOMY_GROUPS_BY_PAGE = {
     "components/sidebar.html": (
         (
             "sidebar-anatomy-shell",
-            "Shell",
-            [
-                "sidebar-wrapper-class",
-                "sidebar-wrapper-slot",
+                "Shell",
+                [
                 "sidebar-class",
                 "sidebar-slot",
-            ],
+                ],
         ),
         (
             "sidebar-anatomy-controls",
@@ -106,7 +104,7 @@ ANATOMY_GROUPS_BY_PAGE = {
             "Navigation",
             ["sidebar-content", "sidebar-menu-button", "sidebar-submenu"],
         ),
-        ("sidebar-anatomy-content", "Content", ["sidebar-inset"]),
+        ("sidebar-anatomy-content", "Content", ["sidebar-footer"]),
     ),
     "components/slider.html": (
         ("slider-anatomy-root", "Root", ["slider-root"]),
@@ -338,8 +336,6 @@ class DocAnatomyTableTests(CatalogTestCase):
         page = self.read_output("components/sidebar.html")
 
         expected_selectors = {
-            "sidebar-wrapper-class": "<code>.sidebar-wrapper</code>",
-            "sidebar-wrapper-slot": '<code>[data-slot="sidebar-wrapper"]</code>',
             "sidebar-class": "<code>.sidebar</code>",
             "sidebar-slot": '<code>[data-slot="sidebar"]</code>',
         }

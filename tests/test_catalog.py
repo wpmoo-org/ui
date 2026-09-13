@@ -323,8 +323,13 @@ class CatalogContractTests(CatalogTestCase):
         return path
 
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
-        styles = read_catalog_styles()
-        match = re.search(r"\.moo-catalog__main\s*\{(?P<body>[^}]*)\}", styles)
+        styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+            encoding="utf-8"
+        )
+        match = re.search(
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\]\s*\{(?P<body>[^}]*)\}',
+            styles,
+        )
 
         self.assertIsNotNone(match)
         body = match.group("body")
@@ -1630,7 +1635,7 @@ class CatalogContractTests(CatalogTestCase):
 
         for contract in (
             'data-moo-shell="catalog"',
-            'class="sidebar-wrapper"',
+            'data-layout="app"',
             'id="catalog-sidebar"',
             'data-sidebar-trigger',
             "moo-catalog__search-trigger",
@@ -1751,7 +1756,7 @@ class CatalogContractTests(CatalogTestCase):
         catalog_scss = read_catalog_styles()
         shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
         header_match = re.search(
-            r"(?m)^\.moo-catalog__header\s*\{(?P<body>[^}]*)\}",
+            r"(?m)^\.moo-catalog > \.wrapper\[data-layout=\"app\"\] > \[data-slot=\"page\"\] > header\s*\{(?P<body>[^}]*)\}",
             catalog_scss,
         )
         self.assertIsNotNone(header_match)
@@ -1886,19 +1891,19 @@ class CatalogContractTests(CatalogTestCase):
     def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
         catalog_scss = read_catalog_styles()
         wrapper = catalog_scss.split(
-            ".moo-catalog > .sidebar-wrapper {",
+            '.moo-catalog > .wrapper[data-layout="app"] {',
             1,
         )[1].split("}", 1)[0]
         light_wrapper = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper {',
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] {',
             1,
         )[1].split("}", 1)[0]
         light_inner = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {',
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {',
             1,
         )[1].split("}", 1)[0]
         light_inset = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {',
+            ':root:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {',
             1,
         )[1].split("}", 1)[0]
 
@@ -1924,7 +1929,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         index = self.read_output("index.html")
-        header_start = index.index('<header class="moo-catalog__header">')
+        header_start = index.index("<header")
         header_end = index.index("</header>", header_start)
         header = index[header_start:header_end]
 
@@ -2214,10 +2219,14 @@ class CatalogContractTests(CatalogTestCase):
         self.assert_page_actions_region(examples_header)
         self.assertIn('aria-label="Next page: All Components"', examples_header)
         self.assertIn('href="../components/"', examples_header)
-        examples_pagination = examples.rsplit(
-            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
-            1,
-        )[1]
+        examples_pagination_match = re.search(
+            r'<nav class="moo-doc-pagination" aria-label="Docs pagination">'
+            r'(?P<body>.*?)</nav>',
+            examples,
+            re.S,
+        )
+        self.assertIsNotNone(examples_pagination_match)
+        examples_pagination = examples_pagination_match.group("body")
         self.assertIn('href="../installation/"', examples_pagination)
         self.assertIn("Installation", examples_pagination)
         self.assertIn('href="../components/"', examples_pagination)
@@ -2248,10 +2257,14 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../examples/"', components_header)
         self.assertIn('aria-label="Next page: Accordion"', components_header)
         self.assertNotIn('aria-label="Previous page: Users"', components_header)
-        components_pagination = components.rsplit(
-            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
-            1,
-        )[1]
+        components_pagination_match = re.search(
+            r'<nav class="moo-doc-pagination" aria-label="Docs pagination">'
+            r'(?P<body>.*?)</nav>',
+            components,
+            re.S,
+        )
+        self.assertIsNotNone(components_pagination_match)
+        components_pagination = components_pagination_match.group("body")
         self.assertIn('href="../examples/"', components_pagination)
         self.assertIn("Examples", components_pagination)
         self.assertIn('href="../components/accordion/"', components_pagination)
@@ -2401,6 +2414,8 @@ class CatalogContractTests(CatalogTestCase):
                 content_start = page.index('<div class="moo-catalog__content">')
                 main_end = page.index("</main>", content_start)
                 footer_start = page.index('<footer class="moo-examples-footer')
+                footer_end = page.index("</footer>", footer_start) + len("</footer>")
+                footer_surface = page[footer_start:footer_end]
 
                 self.assertGreater(footer_start, main_end)
                 self.assertNotIn(
@@ -2566,7 +2581,7 @@ class CatalogContractTests(CatalogTestCase):
                 )
 
                 expected_labels = {registry[slug]["label"] for slug in component_slugs}
-                for surface in (page[footer_start:], payload["html"]):
+                for surface in (footer_surface, payload["html"]):
                     link_parser = LinkParser()
                     link_parser.feed(surface)
                     if path == "examples/dashboard/users.html":
@@ -2845,14 +2860,16 @@ class CatalogContractTests(CatalogTestCase):
 
         css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-doc-layout", css)
+        self.assertIn(".moo-doc-layout--wide", css)
         self.assertIn("@media (min-width: 1200px)", css)
         self.assertIn("--moo-doc-toc-offset: calc(2rem + 5px)", css)
         self.assertNotIn("scroll-behavior: smooth", css)
         self.assertIn("@media (prefers-reduced-motion: reduce)", css)
         self.assertRegex(
             css,
-            r"\.moo-catalog__main\s*\{\s*scroll-behavior: auto;",
+            r'\.moo-catalog > \.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*\{',
         )
+        self.assertNotIn(".moo-catalog__main", css)
         self.assertRegex(
             css,
             r"\.moo-doc-toc\s*\{\s*position: sticky;\s*top: var\(--moo-doc-toc-offset\);",
@@ -2994,6 +3011,16 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn(
             'import Sidebar from "@wpmoo/ui/sidebar.js"',
+            installation_text,
+        )
+        self.assertGreaterEqual(
+            installation_text.count(
+                "[data-layout=\"app\"][data-slot=\"sidebar-wrapper\"]"
+            ),
+            2,
+        )
+        self.assertNotIn(
+            "querySelector('[data-slot=\"sidebar-wrapper\"]')",
             installation_text,
         )
         self.assertIn(
@@ -3861,11 +3888,15 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../layouts/app/"', layout_index)
         self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layouts/app/">', app)
         self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layouts/page/">', page)
+        self.assertIn('class="moo-doc-layout moo-doc-layout--wide"', app)
+        self.assertIn('class="moo-doc-layout moo-doc-layout--wide"', page)
         self.assertIn("<iframe", app)
         self.assertIn("<iframe", page)
         self.assertIn('src="../../layouts/previews/app-sidebar/"', app)
         self.assertIn('src="../../layouts/previews/app-none/"', app)
         self.assertIn('src="../../layouts/previews/page/"', page)
+        self.assertNotIn('{%', app)
+        self.assertNotIn('{%', page)
         self.assertIn('data-moo-frame-width="1280"', app)
         self.assertIn('data-moo-frame-height="720"', app)
         self.assertIn('data-moo-frame-width="768"', app)
@@ -3889,8 +3920,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('data-slot="sidebar"', app_preview)
         self.assertIn('data-slot="page"', app_preview)
         self.assertIn('id="layout-preview-sidebar"', app_preview)
-        self.assertIn('data-collapsible="none"', app_preview)
-        self.assertGreaterEqual(app_preview.count('class="skeleton placeholder-glow"'), 8)
+        self.assertIn('data-collapsible="icon"', app_preview)
+        self.assertIn("Moo Portal", app_preview)
+        self.assertIn("Portal Operations", app_preview)
+        self.assertIn('data-slot="sidebar-menu-badge"', app_preview)
+        self.assertIn("sidebar-account-menu", app_preview)
+        self.assertNotIn('class="skeleton placeholder-glow"', app_preview)
         self.assertIn('data-layout="app"', none_preview)
         self.assertIn('class="wrapper"', none_preview)
         self.assertNotIn('class="sidebar-wrapper"', none_preview)
@@ -3929,20 +3964,20 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIsNotNone(doc_page_style)
         self.assertIn("min-width: 0;", doc_page_style.group("body"))
-        layout_preview_style = re.search(
-            r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]\s*\{(?P<body>[^}]*)\}",
+        self.assertNotRegex(
             catalog_styles,
+            r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]",
         )
-        self.assertIsNotNone(layout_preview_style)
-        self.assertIn("display: flex;", layout_preview_style.group("body"))
-        self.assertIn("min-height: 100svh;", layout_preview_style.group("body"))
-        layout_page_style = re.search(
-            r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]\s*>\s*\[data-slot=\"page\"\]\s*\{(?P<body>[^}]*)\}",
-            catalog_styles,
+        sidebar_styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+            encoding="utf-8"
         )
-        self.assertIsNotNone(layout_page_style)
-        self.assertIn("flex: 1 1 auto;", layout_page_style.group("body"))
-        self.assertIn("min-width: 0;", layout_page_style.group("body"))
+        app_root_style = re.search(
+            r"\.wrapper\[data-layout=\"app\"\]\s*\{(?P<body>[^}]*)\}",
+            sidebar_styles,
+        )
+        self.assertIsNotNone(app_root_style)
+        self.assertIn("display: flex;", app_root_style.group("body"))
+        self.assertIn("height: 100svh;", app_root_style.group("body"))
 
         sitemap = (DIST / "sitemap.xml").read_text(encoding="utf-8")
         self.assertIn("https://ui.wpmoo.org/layouts/app/", sitemap)

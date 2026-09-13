@@ -118,6 +118,7 @@ SOURCE_SNAPSHOT_DIRS = (
     SITE_SCSS,
     SITE_STATIC,
     SRC / "components",
+    SRC / "layouts",
     JS_COMPONENTS,
     SRC / "icons",
     CORE_REGISTRY,
@@ -126,6 +127,7 @@ SOURCE_SNAPSHOT_DIRS = (
 )
 SOURCE_SNAPSHOT_FILES = (
     JS_ROOT / "moo-ui.js",
+    CERTIFICATION / "layout-evidence.json",
 )
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
@@ -2038,6 +2040,33 @@ def copy_certification_fixtures_to_site() -> None:
         )
 
 
+def render_layout_certification_fixtures() -> None:
+    """Render authored layout fixtures into the served, ignored site tree."""
+
+    environment = create_environment()
+    fixture_dir = SITE_DIST / "tests/fixtures/certification"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    render_specs = (
+        ("layout-app.html.jinja", "layout-app", {}),
+        ("layout-app.html.jinja", "layout-app-contained", {"fixture_shell_mode": "contained"}),
+        ("layout-app.html.jinja", "layout-app-right", {"fixture_side": "right"}),
+        ("layout-app.html.jinja", "layout-app-none", {"fixture_navigation": "none"}),
+        ("layout-page.html.jinja", "layout-page", {"fixture_width": "xl"}),
+        *(
+            ("layout-page.html.jinja", f"layout-page-{width}", {"fixture_width": width})
+            for width in ("base", "sm", "md", "lg", "xxl", "fluid")
+        ),
+    )
+    for source_name, output_stem, context in render_specs:
+        source = CERTIFICATION_FIXTURES / source_name
+        if not source.is_file():
+            raise RuntimeError(f"Missing layout certification fixture: {source}")
+        rendered = environment.from_string(
+            source.read_text(encoding="utf-8")
+        ).render(**context)
+        output = fixture_dir / f"{output_stem}.html"
+        output.write_text(rendered + "\n", encoding="utf-8")
+
 def add_certification_fixture_pagination(
     source: str,
     entries: list[dict[str, str]],
@@ -2349,6 +2378,7 @@ def build_site() -> None:
     compile_catalog_styles()
     copy_site_assets()
     copy_certification_fixtures_to_site()
+    render_layout_certification_fixtures()
     copy_site_metadata()
     version_site_module_imports()
     version = asset_version()

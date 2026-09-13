@@ -4,22 +4,10 @@
   max-width: 100%;
 }
 
-// Layout docs use the public app/page macros before the shared app-shell CSS
-// migration. Keep only the standalone preview host geometry here; the public
-// layout contract remains responsible for its own future shell selectors.
+// Layout previews use the public app/page macros directly; shell geometry
+// belongs to the public layout contract, not the catalog wrapper.
 .moo-layout-preview {
   min-height: 100vh;
-}
-
-.moo-layout-preview > [data-layout="app"] {
-  display: flex;
-  width: 100%;
-  min-height: 100svh;
-}
-
-.moo-layout-preview > [data-layout="app"] > [data-slot="page"] {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 .moo-block-preview__toolbar {
@@ -138,10 +126,6 @@
   min-height: 100vh;
   background: var(--bs-body-bg);
   font-family: var(--bs-body-font-family);
-}
-
-.moo-block-standalone>.sidebar-wrapper {
-  min-height: 100vh;
 }
 
 .moo-field {

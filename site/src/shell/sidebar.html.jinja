@@ -98,7 +98,7 @@
   {% endcall %}
 {%- endmacro %}
 
-{% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
+{% macro render_catalog_sidebar() -%}
   {% call sidebar_header() %}
     {% call sidebar_menu() %}
       {% call sidebar_menu_item() %}
@@ -125,4 +125,4 @@
       {% endcall %}
     {% endfor %}
   {% endcall %}
-{% endcall %}
+{%- endmacro %}

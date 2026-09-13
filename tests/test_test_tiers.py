@@ -112,6 +112,34 @@ class TestTierRunnerTests(unittest.TestCase):
             with self.subTest(paths=paths):
                 self.assertEqual(self.runner.classify_paths(paths), expected)
 
+    def test_layout_changes_select_browser_full_and_targeted_layout_contracts(self) -> None:
+        layout_paths = [
+            "src/layouts/app.html.jinja",
+            "src/certification/layout-evidence.json",
+            "tests/fixtures/certification/layout-app.html.jinja",
+            "tests/test_layouts_browser.py",
+            "site/src/pages/layouts/page.html.jinja",
+            "site/src/blocks/sidebar_shell.html.jinja",
+            "scss/components/sidebar/_layout.scss",
+            "scss/components/sidebar/_inset.scss",
+            "scss/components/_dropdown.scss",
+            "src/js/components/sidebar.js",
+        ]
+
+        for path in layout_paths:
+            with self.subTest(path=path):
+                self.assertEqual(
+                    self.runner.classify_paths([path]),
+                    "browser-full",
+                )
+                modules = self.runner.modules_for("quick", [path])
+                self.assertIn("tests.test_layouts", modules)
+                self.assertIn("tests.test_layouts_browser", modules)
+
+        full = self.runner.modules_for("browser-full", layout_paths)
+        self.assertIn("tests.test_layouts", full)
+        self.assertIn("tests.test_layouts_browser", full)
+
     def test_changed_paths_from_git_warns_when_diff_range_is_unusable(self) -> None:
         stderr = io.StringIO()
 

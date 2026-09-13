@@ -1,4 +1,4 @@
-.moo-catalog__main:has(.moo-home-hero) {
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main:has(.moo-home-hero) {
   --scroll-fade-size: min(12%, 5rem);
   --scroll-fade-reveal: 10rem;
 }
@@ -398,7 +398,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moo-catalog__main {
+  .moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main {
     scroll-behavior: auto;
   }
 

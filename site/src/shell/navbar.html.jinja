@@ -21,10 +21,8 @@
    now -- Home, Docs, Components, Blocks, Examples. The navbar is header
    chrome only: sidebar toggle, search, theme, GitHub, matching the
    reference admin shell's minimal top bar. #}
-<header class="moo-catalog__header">
-  <nav class="navbar moo-catalog__navbar" aria-label="Catalog controls">
-    <div class="container-fluid moo-catalog__navbar-inner">
-      <div class="moo-catalog__header-start">
+<nav class="navbar moo-catalog__navbar d-flex align-items-center gap-2" aria-label="Catalog controls">
+      <div class="d-flex align-items-center gap-2 flex-grow-1">
         {{ sidebar_trigger(sidebar_id="catalog-sidebar", extra_class="moo-catalog__sidebar-toggle") }}
         {#- Always visible (label included, icon-only nowhere) rather than
            d-none, so search/the command palette stays reachable at every
@@ -49,7 +47,7 @@
         ) }}
       </div>
 
-      <div class="moo-catalog__header-actions">
+      <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
         <button
           class="btn btn-ghost btn-icon moo-catalog__settings-toggle"
           type="button"
@@ -82,11 +80,9 @@
           </svg>
           <span class="moo-catalog__github-label d-none d-lg-inline">wpmoo-org/ui</span>
         </a>
-      </div>
-    </div>
-  </nav>
-</header>
+</nav>
 
+{% macro render_catalog_overlays() -%}
 <div
   class="modal fade moo-catalog__command"
   id="catalog-command"
@@ -137,3 +133,4 @@
 </div>
 
 {{ settings_panel() }}
+{%- endmacro %}

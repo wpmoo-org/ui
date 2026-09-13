@@ -593,6 +593,28 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertIn('layouts/" ~ layout.slug ~ ".html"', index)
         self.assertIn('href="{{ site_href', index)
 
+    def test_rc7_removes_legacy_shell_macros_and_structural_hooks(self) -> None:
+        active_sources = (
+            ROOT / "src/components/sidebar.html.jinja",
+            ROOT / "scss/components/sidebar/_layout.scss",
+            ROOT / "scss/components/sidebar/_inset.scss",
+            ROOT / "scss/components/sidebar/_collapsed.scss",
+            ROOT / "site/src/layouts/catalog.html.jinja",
+            ROOT / "site/src/blocks/sidebar_shell.html.jinja",
+            ROOT / "site/src/pages/components/sidebar.html.jinja",
+            ROOT / "site/src/pages/blocks/sidebar-inset.html.jinja",
+            ROOT / "site/src/pages/blocks/previews/sidebar-inset.html.jinja",
+            ROOT / "tests/fixtures/certification/sidebar.html",
+            ROOT / "conformance/fixtures/moo-esm.html",
+        )
+        forbidden = re.compile(
+            r"sidebar_provider|sidebar_inset|sidebar-inset__|"
+            r"data-slot=[\"']sidebar-inset|class=[\"'][^\"']*sidebar-inset"
+        )
+        for path in active_sources:
+            with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                self.assertFalse(forbidden.search(path.read_text(encoding="utf-8")))
+
     def test_layout_registry_is_canonical_and_stays_outside_components(self) -> None:
         layouts = json.loads(
             (ROOT / "src/registry/layouts.json").read_text(encoding="utf-8")
@@ -634,15 +656,20 @@ class LayoutCatalogTests(unittest.TestCase):
         app_sidebar_preview = self.read_page("previews/app-sidebar.html.jinja")
         app_none_preview = self.read_page("previews/app-none.html.jinja")
         skeleton_import = '{% from "components/skeleton.html.jinja" import skeleton %}'
-        self.assertIn(skeleton_import, app_sidebar_preview)
         self.assertIn(skeleton_import, app_none_preview)
+        self.assertIn(
+            '{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}',
+            app_sidebar_preview,
+        )
+        self.assertIn("render_sidebar_shell(", app_sidebar_preview)
+        self.assertIn('demo_copy="portal"', app_sidebar_preview)
         card_import = '{% from "components/card.html.jinja" import card %}'
-        self.assertIn(card_import, app_sidebar_preview)
         self.assertIn(card_import, app_none_preview)
-        self.assertGreaterEqual(app_sidebar_preview.count('{% call card('), 2)
         self.assertGreaterEqual(app_none_preview.count('{% call card('), 2)
-        self.assertIn('collapsible="none"', app_sidebar_preview)
-        self.assertIn("sidebar_menu_button", app_sidebar_preview)
+        self.assertIn('title="Page-only workspace"', app_none_preview)
+        self.assertIn('New request', app_none_preview)
+        self.assertIn('title="Footer actions"', app_none_preview)
+        self.assertIn('flex-grow-1', app_none_preview)
         self.assertIn('frame_width=1280', app)
         self.assertEqual(app.count('frame_width=1280'), 1)
         self.assertEqual(app.count('frame_height=720'), 1)

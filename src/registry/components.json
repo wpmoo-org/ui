@@ -93,7 +93,7 @@
     "slug": "sidebar",
     "label": "Sidebar",
     "status": "ready",
-    "description": "Compose an application shell with Bootstrap-native sidebar primitives: provider, regions, menus, and inset content."
+    "description": "Compose a Sidebar surface from Bootstrap-native header, content, footer, menu, disclosure, action, badge, and loading-row primitives."
   },
   {
     "slug": "close-button",

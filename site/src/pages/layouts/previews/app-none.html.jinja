@@ -1,6 +1,8 @@
 {% extends "layouts/base.html.jinja" %}
 {% from "layouts/app.html.jinja" import app %}
 {% from "layouts/page.html.jinja" import page %}
+{% from "components/badge.html.jinja" import badge %}
+{% from "components/button.html.jinja" import button %}
 {% from "components/card.html.jinja" import card %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 
@@ -12,9 +14,18 @@
       {% if slot == "page" %}
         {% call(region) page(width="fluid", id="layout-preview-page") %}
           {% if region == "header" %}
-            <p class="text-body-secondary mb-0">Page-only workspace</p>
+            {% call card(
+              title="Page-only workspace",
+              subtitle="Review the current workspace without navigation.",
+              action=button("New request", variant="outline", size="sm")
+            ) %}
+              <div class="d-flex align-items-center gap-2">
+                {{ badge("Ready", variant="success", pill=true) }}
+                <span class="small text-body-secondary">All changes are synced</span>
+              </div>
+            {% endcall %}
           {% elif region == "main" %}
-            <div class="d-grid gap-4">
+            <div class="d-grid flex-grow-1 gap-4">
               <div class="row g-3">
                 {% for label_width, value_width in [("5rem", "7rem"), ("6rem", "8rem"), ("5.5rem", "6.5rem")] %}
                   <div class="col-12 col-md-4">
@@ -26,16 +37,25 @@
                   </div>
                 {% endfor %}
               </div>
-              {% call card() %}
+              {% call card(extra_class="flex-grow-1", body_class="d-flex flex-column") %}
                 <div class="d-flex justify-content-between gap-3 mb-3">
                   {{ skeleton(width="8rem", height="1rem") }}
                   {{ skeleton(width="5rem", height=".75rem") }}
                 </div>
-                {{ skeleton(width="100%", height="10rem") }}
+                {{ skeleton(width="100%", height="100%", extra_class="flex-grow-1") }}
               {% endcall %}
             </div>
           {% elif region == "footer" %}
-            <p class="small text-body-secondary mb-0">Footer actions</p>
+            {% call card(
+              title="Footer actions",
+              subtitle="Keep the workspace ready for the next step.",
+              action=button("Save view", variant="secondary", size="sm")
+            ) %}
+              <div class="d-flex align-items-center gap-2">
+                {{ button("Cancel", variant="ghost", size="sm") }}
+                <span class="small text-body-secondary">Last updated just now</span>
+              </div>
+            {% endcall %}
           {% endif %}
         {% endcall %}
       {% endif %}

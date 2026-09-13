@@ -168,7 +168,7 @@
           document.querySelector("[data-datepicker]")
         );
         const sidebar = Sidebar.getOrCreateInstance(
-          document.querySelector('[data-slot="sidebar-wrapper"]')
+          document.querySelector('[data-layout="app"][data-slot="sidebar-wrapper"]')
         );
         const slider = Slider.getOrCreateInstance(
           document.querySelector("[data-slider]")
@@ -234,7 +234,7 @@
             Datepicker.getOrCreateInstance(datepickerRoot);
           }
 
-          const sidebarRoot = document.querySelector('[data-slot="sidebar-wrapper"]');
+          const sidebarRoot = document.querySelector('[data-layout="app"][data-slot="sidebar-wrapper"]');
           if (sidebarRoot) {
             Sidebar.getOrCreateInstance(sidebarRoot);
           }

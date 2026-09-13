@@ -3,15 +3,15 @@
 // Geometry rides the $moo-sidebar-* Sass knobs; every color consumes a
 // runtime --moo-* token.
 
-.sidebar-wrapper {
-  --moo-sidebar-width: #{$moo-sidebar-width};
-  --moo-sidebar-width-icon: #{$moo-sidebar-width-icon};
+.wrapper[data-layout="app"] {
   display: flex;
   width: 100%;
-  min-height: 100svh;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.sidebar-wrapper--contained {
+.wrapper[data-layout="app"][data-shell-mode="contained"] {
   min-height: 0;
   height: 34rem;
   overflow: hidden;
@@ -21,6 +21,8 @@
 
 // Sidebar column ---------------------------------------------------------
 .sidebar {
+  --moo-sidebar-width: #{$moo-sidebar-width};
+  --moo-sidebar-width-icon: #{$moo-sidebar-width-icon};
   --bs-offcanvas-width: var(--moo-sidebar-width);
   flex: 0 0 var(--moo-sidebar-width);
   width: var(--moo-sidebar-width);
@@ -33,6 +35,17 @@
 
 .sidebar[data-side="right"] {
   order: 1;
+}
+
+// `side` is a physical placement contract. The inherited document direction
+// must not make a right Sidebar jump to the left merely because the flex row
+// is rendered in RTL.
+[dir="rtl"] .wrapper[data-layout="app"] > .sidebar[data-side="left"] {
+  order: 1;
+}
+
+[dir="rtl"] .wrapper[data-layout="app"] > .sidebar[data-side="right"] {
+  order: 0;
 }
 
 .sidebar[data-side="right"] .sidebar-inner {
@@ -58,7 +71,7 @@
     box-shadow: var(--bs-box-shadow-sm);
   }
 
-  .sidebar-wrapper--contained .sidebar[data-variant="floating"] .sidebar-inner {
+  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar[data-variant="floating"] .sidebar-inner {
     height: calc(100% - #{$spacer});
     max-height: calc(100% - #{$spacer});
   }
@@ -69,13 +82,19 @@
   // (still a shared token, no new value) and widen the column by the same
   // margin the card's sides consume, so the icon rail itself keeps its full
   // width instead of shrinking.
-  .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] {
+  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] {
     flex-basis: calc(var(--moo-sidebar-width-icon) + #{$spacer});
     width: calc(var(--moo-sidebar-width-icon) + #{$spacer});
   }
 
-  .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] .sidebar-inner {
+  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] .sidebar[data-variant="floating"][data-collapsible="icon"] .sidebar-inner {
     box-shadow: var(--bs-box-shadow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
   }
 }
 
@@ -90,10 +109,64 @@
   background: var(--moo-sidebar);
 }
 
-.sidebar-wrapper--contained .sidebar-inner {
+.wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
   position: relative;
   height: 100%;
   max-height: 100%;
+}
+
+.wrapper[data-layout="app"] > [data-slot="page"] {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.wrapper[data-layout="app"] > [data-slot="page"] > header,
+.wrapper[data-layout="app"] > [data-slot="page"] > main,
+.wrapper[data-layout="app"] > [data-slot="page"] > footer {
+  flex: 0 0 auto;
+}
+
+// The page main region owns the space between the optional header and footer.
+// Keep the Bootstrap rail as the flex column too, so app previews and real
+// shells can give their caller content a full-height surface without adding
+// layout-specific height values.
+.wrapper[data-layout="app"] > [data-slot="page"] > main {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.wrapper[data-layout="app"] > [data-slot="page"] > main > :is(
+  .container,
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-xxl,
+  .container-fluid
+) {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+@include media-breakpoint-down(lg) {
+  .wrapper[data-layout="app"][data-shell-mode="contained"] {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .wrapper[data-layout="app"][data-shell-mode="contained"] > [data-slot="page"] {
+    overflow: visible;
+  }
 }
 
 .sidebar-header,
