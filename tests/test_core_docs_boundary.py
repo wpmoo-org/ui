@@ -17,6 +17,8 @@ from tests.helpers import npm_env
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/boundary-baseline.json"
+LAYOUT_REGISTRY = ROOT / "src/registry/layouts.json"
+LAYOUT_EVIDENCE = ROOT / "src/certification/layout-evidence.json"
 CORE_OUTPUTS = {
     "dist/assets/css/moo-ui.css",
     "dist/assets/css/moo-ui.min.css",
@@ -290,6 +292,36 @@ class CoreDocsBoundaryTests(unittest.TestCase):
         template = ROOT / "site/src/pages/index.html.jinja"
 
         self.assertIn(str(template), snapshot_paths)
+
+    def test_layout_contract_files_stay_outside_component_inventory(self) -> None:
+        self.assertTrue(LAYOUT_REGISTRY.is_file())
+        self.assertTrue(LAYOUT_EVIDENCE.is_file())
+
+        layouts = json.loads(LAYOUT_REGISTRY.read_text(encoding="utf-8"))
+        evidence = json.loads(LAYOUT_EVIDENCE.read_text(encoding="utf-8"))
+        components = json.loads(
+            (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
+        )
+        inventory = json.loads(
+            (ROOT / "src/certification/evidence-inventory.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        layout_slugs = {entry["slug"] for entry in layouts}
+        component_slugs = {entry["slug"] for entry in components}
+        self.assertTrue(layout_slugs.isdisjoint(component_slugs))
+        self.assertEqual(set(evidence["layouts"]), layout_slugs)
+
+        for component in inventory["components"] + inventory["plannedComponents"]:
+            with self.subTest(component=component["slug"]):
+                self.assertNotIn(component["slug"], layout_slugs)
+                self.assertFalse(
+                    any(
+                        reference.startswith("src/layouts/")
+                        for reference in component.get("evidence", [])
+                    )
+                )
 
     def test_source_snapshot_covers_required_dev_server_watch_roots(self) -> None:
         snapshot_paths = {path for path, _ in build.source_snapshot()}

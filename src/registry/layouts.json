@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "page",
+    "label": "Page",
+    "status": "preview",
+    "description": "Provide a full-width page surface with native Bootstrap content rails and semantic regions.",
+    "source": "src/layouts/page.html.jinja",
+    "parts": [],
+    "layoutParts": []
+  },
+  {
+    "slug": "app",
+    "label": "App",
+    "status": "preview",
+    "description": "Compose an application shell with an optional Sidebar and one independent Page surface.",
+    "source": "src/layouts/app.html.jinja",
+    "parts": ["sidebar"],
+    "layoutParts": ["page"]
+  }
+]

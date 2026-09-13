@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "layouts": {
+    "page": {
+      "contractVersion": 1,
+      "status": "preview",
+      "source": "src/layouts/page.html.jinja",
+      "componentExports": [],
+      "fixtureUrls": [],
+      "tests": [],
+      "matrix": {
+        "shellModes": [],
+        "viewports": [],
+        "directions": [],
+        "themes": [],
+        "zoom": []
+      },
+      "sourceCommit": null,
+      "acceptedAt": null
+    },
+    "app": {
+      "contractVersion": 1,
+      "status": "preview",
+      "source": "src/layouts/app.html.jinja",
+      "componentExports": [
+        "sidebar",
+        "sidebar_header",
+        "sidebar_content",
+        "sidebar_footer"
+      ],
+      "fixtureUrls": [],
+      "tests": [],
+      "matrix": {
+        "shellModes": [],
+        "viewports": [],
+        "directions": [],
+        "themes": [],
+        "zoom": []
+      },
+      "sourceCommit": null,
+      "acceptedAt": null
+    }
+  }
+}
