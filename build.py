@@ -1036,6 +1036,7 @@ def build_site_pages(
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
     examples: list[dict[str, str]],
+    layouts: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     def section_page(slug: str) -> dict[str, str] | None:
         section = _find_entry(sections, slug)
@@ -1078,6 +1079,11 @@ def build_site_pages(
         )
         pages.extend(child_pages(examples, "examples", "doc"))
 
+    layouts_page = section_page("layouts")
+    if layouts_page:
+        pages.append(layouts_page)
+    pages.extend(child_pages(layouts, "layouts", "layout"))
+
     components = section_page("components")
     if components:
         pages.append(components)
@@ -1099,7 +1105,13 @@ def build_site_pages(
 
     for section in sections:
         slug = section.get("slug", "")
-        if slug not in {"introduction", "installation", "components", "blocks"}:
+        if slug not in {
+            "introduction",
+            "installation",
+            "components",
+            "blocks",
+            "layouts",
+        }:
             pages.append({**section, "kind": "doc"})
 
     return pages
@@ -1112,6 +1124,7 @@ def page_metadata(
     catalog: list[dict[str, str]],
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
+    layouts: list[dict[str, str]],
 ) -> dict[str, str]:
     path = logical_relative.as_posix()
     slug = logical_relative.stem
@@ -1134,6 +1147,15 @@ def page_metadata(
         kind = "block"
         entry = _find_entry(blocks, slug)
         image = seo_image_src("blocks", slug)
+    elif path.startswith("layouts/previews/"):
+        # Layout previews are rendered standalone for the docs iframe, but
+        # they are not public catalog documents and must not acquire layout
+        # metadata, command-palette entries, or sitemap URLs.
+        kind = "preview"
+    elif path.startswith("layouts/") and path != "layouts/index.html":
+        kind = "layout"
+        entry = _find_entry(layouts, slug)
+        image = seo_image_src("layouts", slug)
     elif path.startswith("examples/") and path != "examples/index.html":
         # Examples pages can nest a category folder (examples/auth/sign-in);
         # keep that folder in the slug so it matches the registry's slug
@@ -1661,6 +1683,48 @@ def load_examples() -> list[dict[str, str]]:
     )
 
 
+def load_layouts(
+    pages_dir: Path | None = None,
+    registry_root: Path | None = None,
+) -> list[dict[str, str]]:
+    """Load layouts only when registry and public source docs have exact parity."""
+    pages_dir = pages_dir or PAGES / "layouts"
+    registry_root = registry_root or CORE_REGISTRY
+    registry_entries = load_entries(registry_root, "layouts.json")
+    registry_slugs = sorted(
+        entry["slug"] for entry in registry_entries if entry.get("slug")
+    )
+
+    discovered_slugs: list[str] = []
+    for page in sorted(pages_dir.rglob("*.html.jinja")):
+        relative = page.relative_to(pages_dir)
+        if page.name == "index.html.jinja" or "previews" in relative.parts:
+            continue
+        discovered_slugs.append(
+            relative.with_suffix("").with_suffix("").as_posix()
+        )
+    discovered_slugs.sort()
+
+    if discovered_slugs != registry_slugs:
+        missing = sorted(set(registry_slugs) - set(discovered_slugs))
+        extra = sorted(set(discovered_slugs) - set(registry_slugs))
+        details: list[str] = []
+        if missing:
+            details.append("missing docs: " + ", ".join(missing))
+        if extra:
+            details.append("extra docs: " + ", ".join(extra))
+        raise ValueError(
+            "Layout registry/source parity mismatch (" + "; ".join(details) + ")"
+        )
+
+    return _load_page_registry(
+        pages_dir,
+        registry_root,
+        "layouts.json",
+        fallback_status="preview",
+    )
+
+
 def style_include_paths(entrypoint: Path) -> list[str]:
     include_paths = [str(SCSS)]
     if entrypoint.is_relative_to(SITE_SCSS):
@@ -2097,25 +2161,35 @@ def copy_site_metadata() -> None:
             shutil.copy2(path, SITE_DIST / path.name)
 
 
-def public_page_paths() -> list[str]:
+def public_page_paths(layouts: list[dict[str, str]] | None = None) -> list[str]:
+    layout_slugs = {
+        entry["slug"] for entry in (layouts if layouts is not None else load_layouts())
+    }
     paths: list[str] = []
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
         if "previews" in relative.parts:
             continue
+        if relative.parts and relative.parts[0] == "layouts":
+            slug = relative.with_suffix("").with_suffix("").as_posix()
+            if (
+                relative.name != "index.html.jinja"
+                and slug.removeprefix("layouts/") not in layout_slugs
+            ):
+                continue
         logical_relative = relative.with_suffix("")
         paths.append(logical_relative.as_posix())
     return paths
 
 
-def public_canonical_urls() -> list[str]:
-    urls = [canonical_url(path) for path in public_page_paths()]
+def public_canonical_urls(layouts: list[dict[str, str]] | None = None) -> list[str]:
+    urls = [canonical_url(path) for path in public_page_paths(layouts)]
     if LLMS_TXT.exists():
         urls.append("https://ui.wpmoo.org/llms.txt")
     return urls
 
 
-def write_sitemap() -> None:
+def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
     urls = "\n".join(
         "\n".join(
             (
@@ -2124,7 +2198,7 @@ def write_sitemap() -> None:
                 "  </url>",
             )
         )
-        for url in public_canonical_urls()
+        for url in public_canonical_urls(layouts)
     )
     sitemap = "\n".join(
         (
@@ -2149,13 +2223,17 @@ def write_sitemap() -> None:
     )
 
 
-def render_pages(version: str | None = None) -> None:
+def render_pages(
+    version: str | None = None,
+    layouts: list[dict[str, str]] | None = None,
+) -> None:
     environment = create_environment()
     catalog = load_catalog()
     sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
     examples = load_examples()
+    layouts = layouts if layouts is not None else load_layouts()
     product = load_product_facts()
     component_ownership = derive_component_ownership(
         catalog,
@@ -2168,7 +2246,14 @@ def render_pages(version: str | None = None) -> None:
         }
         for component in catalog
     ]
-    site_pages = build_site_pages(sections, catalog, utilities, blocks, examples)
+    site_pages = build_site_pages(
+        sections,
+        catalog,
+        utilities,
+        blocks,
+        examples,
+        layouts,
+    )
     theme_builder_first_paint = theme_builder_first_paint_payload()
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
@@ -2186,7 +2271,13 @@ def render_pages(version: str | None = None) -> None:
         # section.
         current_section = logical_relative.parts[0] if len(logical_relative.parts) > 1 else ""
         current_slug = logical_relative.stem
-        if current_section not in {"components", "utils", "blocks", "examples"}:
+        if current_section not in {
+            "components",
+            "utils",
+            "blocks",
+            "examples",
+            "layouts",
+        }:
             current_section = "sections"
         template_name = page.relative_to(SITE_SRC).as_posix()
         metadata = page_metadata(
@@ -2196,6 +2287,7 @@ def render_pages(version: str | None = None) -> None:
             catalog,
             utilities,
             blocks,
+            layouts,
         )
         rendered = environment.get_template(template_name).render(
             catalog=catalog,
@@ -2203,6 +2295,7 @@ def render_pages(version: str | None = None) -> None:
             utilities=utilities,
             blocks=blocks,
             examples=examples,
+            layouts=layouts,
             product=product,
             component_ownership=component_ownership,
             site_pages=site_pages,
@@ -2259,8 +2352,9 @@ def build_site() -> None:
     copy_site_metadata()
     version_site_module_imports()
     version = asset_version()
-    render_pages(version)
-    write_sitemap()
+    layouts = load_layouts()
+    render_pages(version, layouts)
+    write_sitemap(layouts)
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:

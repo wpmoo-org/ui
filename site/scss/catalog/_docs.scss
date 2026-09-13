@@ -367,6 +367,7 @@
 .moo-doc-page {
   display: grid;
   gap: 3rem;
+  min-width: 0;
   max-width: 52rem;
   font-size: var(--moo-doc-body-font-size);
 }

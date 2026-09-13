@@ -1957,6 +1957,7 @@ class CatalogContractTests(CatalogTestCase):
         catalog_index = sidebar.index(">Catalog<")
         examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
+        layouts_index = sidebar.index('href="layouts/"')
         blocks_index = sidebar.index('href="blocks/"')
         charts_index = sidebar.index('href="charts/"')
         utilities_index = sidebar.index('href="utils/scroll-fade/"')
@@ -1967,7 +1968,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertLess(installation_index, catalog_index)
         self.assertLess(catalog_index, examples_index)
         self.assertLess(examples_index, components_index)
-        self.assertLess(components_index, blocks_index)
+        self.assertLess(components_index, layouts_index)
+        self.assertLess(layouts_index, blocks_index)
         self.assertLess(blocks_index, charts_index)
         self.assertLess(charts_index, utilities_index)
         self.assertLess(utilities_index, resources_index)
@@ -1975,6 +1977,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(">Getting Started<", sidebar)
         self.assertIn(">Catalog<", sidebar)
         self.assertIn(">Resources<", sidebar)
+        catalog_group = sidebar[catalog_index:resources_index]
+        resource_group = sidebar[resources_index:]
+        self.assertIn('href="layouts/"', catalog_group)
+        self.assertNotIn('href="layouts/"', resource_group)
 
     def test_home_page_introduces_the_product_and_links_to_components(
         self,
@@ -3180,6 +3186,7 @@ class CatalogContractTests(CatalogTestCase):
         utilities = site_build.load_utilities()
         blocks = site_build.load_blocks()
         examples = site_build.load_examples()
+        layouts = site_build.load_layouts()
         product = json.loads(json.dumps(site_build.load_product_facts()))
         product["certification"]["publicEntrypoints"].pop("metadata", None)
         component_ownership = site_build.derive_component_ownership(
@@ -3202,6 +3209,7 @@ class CatalogContractTests(CatalogTestCase):
             catalog,
             utilities,
             blocks,
+            layouts,
         )
 
         rendered = environment.get_template("pages/support.html.jinja").render(
@@ -3218,6 +3226,7 @@ class CatalogContractTests(CatalogTestCase):
                 utilities,
                 blocks,
                 examples,
+                layouts,
             ),
             current_section="sections",
             current_slug=metadata["slug"],
@@ -3776,11 +3785,169 @@ class CatalogContractTests(CatalogTestCase):
             "installation/",
             "components/",
             "blocks/",
+            "layouts/",
             "skills/",
             "changelog/",
         ):
             with self.subTest(href=href):
                 self.assertIn(f'href="{href}"', home)
+
+    def test_layout_catalog_is_public_and_separate_from_components(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layouts = site_build.load_layouts()
+        catalog = site_build.load_catalog()
+        sections = site_build.load_entries(site_build.SITE_REGISTRY, "sections.json")
+        utilities = site_build.load_utilities()
+        blocks = site_build.load_blocks()
+        examples = site_build.load_examples()
+        site_pages = site_build.build_site_pages(
+            sections,
+            catalog,
+            utilities,
+            blocks,
+            examples,
+            layouts,
+        )
+
+        self.assertEqual({entry["slug"] for entry in layouts}, {"app", "page"})
+        self.assertNotIn("app", {entry["slug"] for entry in catalog})
+        self.assertNotIn("page", {entry["slug"] for entry in catalog})
+        layout_pages = {
+            entry["slug"]: entry
+            for entry in site_pages
+            if entry.get("kind") == "layout"
+        }
+        self.assertEqual(set(layout_pages), {"app", "page"})
+        self.assertEqual(
+            {entry["href"] for entry in layout_pages.values()},
+            {"layouts/app/", "layouts/page/"},
+        )
+
+        metadata = site_build.page_metadata(
+            ROOT / "site/src/pages/layouts/app.html.jinja",
+            Path("layouts/app.html"),
+            sections,
+            catalog,
+            utilities,
+            blocks,
+            layouts,
+        )
+        self.assertEqual(metadata["kind"], "layout")
+        self.assertEqual(metadata["url"], "https://ui.wpmoo.org/layouts/app/")
+
+        public_paths = site_build.public_page_paths(layouts)
+        public_urls = site_build.public_canonical_urls(layouts)
+        self.assertIn("layouts/app.html", public_paths)
+        self.assertIn("layouts/page.html", public_paths)
+        self.assertIn("https://ui.wpmoo.org/layouts/app/", public_urls)
+        self.assertIn("https://ui.wpmoo.org/layouts/page/", public_urls)
+        self.assertNotIn("layouts/previews/app-sidebar.html", public_paths)
+        self.assertNotIn("layouts/previews/app-none.html", public_paths)
+        self.assertNotIn("layouts/previews/page.html", public_paths)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/previews/", public_urls)
+
+        home = self.read_output("index.html")
+        layout_index = self.read_output("layouts/index.html")
+        app = self.read_output("layouts/app.html")
+        page = self.read_output("layouts/page.html")
+        for surface in (home, layout_index, app, page):
+            self.assertIn('href="', surface)
+            self.assertIn("Layouts", surface)
+        self.assertIn('href="layouts/"', home)
+        self.assertIn('id="catalog-command-layout"', home)
+        self.assertIn('Layouts</div>', home)
+        self.assertIn('href="../layouts/app/"', layout_index)
+        self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layouts/app/">', app)
+        self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layouts/page/">', page)
+        self.assertIn("<iframe", app)
+        self.assertIn("<iframe", page)
+        self.assertIn('src="../../layouts/previews/app-sidebar/"', app)
+        self.assertIn('src="../../layouts/previews/app-none/"', app)
+        self.assertIn('src="../../layouts/previews/page/"', page)
+        self.assertIn('data-moo-frame-width="1280"', app)
+        self.assertIn('data-moo-frame-height="720"', app)
+        self.assertIn('data-moo-frame-width="768"', app)
+        self.assertIn('data-moo-frame-height="540"', app)
+        self.assertIn('data-moo-frame-width="768"', page)
+        self.assertIn('data-moo-frame-height="540"', page)
+        self.assertEqual(app.count("<main"), 1)
+        self.assertEqual(page.count("<main"), 1)
+
+        preview_outputs = {
+            "app-sidebar": self.read_output("layouts/previews/app-sidebar.html"),
+            "app-none": self.read_output("layouts/previews/app-none.html"),
+            "page": self.read_output("layouts/previews/page.html"),
+        }
+        app_preview = preview_outputs["app-sidebar"]
+        none_preview = preview_outputs["app-none"]
+        page_preview = preview_outputs["page"]
+        self.assertIn('data-layout="app"', app_preview)
+        self.assertIn('class="wrapper"', app_preview)
+        self.assertNotIn('class="sidebar-wrapper"', app_preview)
+        self.assertIn('data-slot="sidebar"', app_preview)
+        self.assertIn('data-slot="page"', app_preview)
+        self.assertIn('id="layout-preview-sidebar"', app_preview)
+        self.assertIn('data-collapsible="none"', app_preview)
+        self.assertGreaterEqual(app_preview.count('class="skeleton placeholder-glow"'), 8)
+        self.assertIn('data-layout="app"', none_preview)
+        self.assertIn('class="wrapper"', none_preview)
+        self.assertNotIn('class="sidebar-wrapper"', none_preview)
+        self.assertIn('data-slot="page"', none_preview)
+        self.assertNotIn('data-slot="sidebar"', none_preview)
+        self.assertGreaterEqual(none_preview.count('class="skeleton placeholder-glow"'), 8)
+        self.assertIn('data-slot="page"', page_preview)
+        for name, preview in preview_outputs.items():
+            with self.subTest(preview=name):
+                self.assertEqual(preview.count("<main"), 1)
+                self.assertEqual(preview.count('id="main-content"'), 1)
+                self.assertNotIn("sidebar_provider", preview)
+                self.assertNotIn("sidebar_inset", preview)
+                self.assertIn('class="moo-layout-preview"', preview)
+
+        preview_metadata = site_build.page_metadata(
+            ROOT / "site/src/pages/layouts/previews/page.html.jinja",
+            Path("layouts/previews/page.html"),
+            sections,
+            catalog,
+            utilities,
+            blocks,
+            layouts,
+        )
+        self.assertEqual(preview_metadata["kind"], "preview")
+
+        catalog_styles = read_catalog_styles()
+        block_preview_style = re.search(
+            r"\.moo-block-preview\s*\{(?P<body>[^}]*)\}", catalog_styles
+        )
+        self.assertIsNotNone(block_preview_style)
+        self.assertIn("min-width: 0;", block_preview_style.group("body"))
+        self.assertIn("max-width: 100%;", block_preview_style.group("body"))
+        doc_page_style = re.search(
+            r"\.moo-doc-page\s*\{(?P<body>[^}]*)\}", catalog_styles
+        )
+        self.assertIsNotNone(doc_page_style)
+        self.assertIn("min-width: 0;", doc_page_style.group("body"))
+        layout_preview_style = re.search(
+            r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]\s*\{(?P<body>[^}]*)\}",
+            catalog_styles,
+        )
+        self.assertIsNotNone(layout_preview_style)
+        self.assertIn("display: flex;", layout_preview_style.group("body"))
+        self.assertIn("min-height: 100svh;", layout_preview_style.group("body"))
+        layout_page_style = re.search(
+            r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]\s*>\s*\[data-slot=\"page\"\]\s*\{(?P<body>[^}]*)\}",
+            catalog_styles,
+        )
+        self.assertIsNotNone(layout_page_style)
+        self.assertIn("flex: 1 1 auto;", layout_page_style.group("body"))
+        self.assertIn("min-width: 0;", layout_page_style.group("body"))
+
+        sitemap = (DIST / "sitemap.xml").read_text(encoding="utf-8")
+        self.assertIn("https://ui.wpmoo.org/layouts/app/", sitemap)
+        self.assertIn("https://ui.wpmoo.org/layouts/page/", sitemap)
+        self.assertNotIn("layouts/previews/", sitemap)
 
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()

@@ -1,0 +1,44 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/skeleton.html.jinja" import skeleton %}
+
+{% block title %}App Without Navigation Preview — Moo UI{% endblock %}
+
+{% block body %}
+  <div class="moo-layout-preview">
+    {% call(slot) app(navigation="none") %}
+      {% if slot == "page" %}
+        {% call(region) page(width="fluid", id="layout-preview-page") %}
+          {% if region == "header" %}
+            <p class="text-body-secondary mb-0">Page-only workspace</p>
+          {% elif region == "main" %}
+            <div class="d-grid gap-4">
+              <div class="row g-3">
+                {% for label_width, value_width in [("5rem", "7rem"), ("6rem", "8rem"), ("5.5rem", "6.5rem")] %}
+                  <div class="col-12 col-md-4">
+                    {% call card(extra_class="h-100", body_class="d-grid gap-3") %}
+                      {{ skeleton(width=label_width, height=".75rem") }}
+                      {{ skeleton(width=value_width, height="2rem") }}
+                      {{ skeleton(width="4.5rem", height=".75rem") }}
+                    {% endcall %}
+                  </div>
+                {% endfor %}
+              </div>
+              {% call card() %}
+                <div class="d-flex justify-content-between gap-3 mb-3">
+                  {{ skeleton(width="8rem", height="1rem") }}
+                  {{ skeleton(width="5rem", height=".75rem") }}
+                </div>
+                {{ skeleton(width="100%", height="10rem") }}
+              {% endcall %}
+            </div>
+          {% elif region == "footer" %}
+            <p class="small text-body-secondary mb-0">Footer actions</p>
+          {% endif %}
+        {% endcall %}
+      {% endif %}
+    {% endcall %}
+  </div>
+{% endblock %}

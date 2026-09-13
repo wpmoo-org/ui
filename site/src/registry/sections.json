@@ -36,6 +36,12 @@
     "icon": "blocks"
   },
   {
+    "slug": "layouts",
+    "label": "Layouts",
+    "href": "layouts/",
+    "icon": "layout-dashboard"
+  },
+  {
     "slug": "skills",
     "label": "AI Usage",
     "href": "skills/",

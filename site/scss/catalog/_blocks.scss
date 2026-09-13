@@ -1,5 +1,25 @@
 .moo-block-preview {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// Layout docs use the public app/page macros before the shared app-shell CSS
+// migration. Keep only the standalone preview host geometry here; the public
+// layout contract remains responsible for its own future shell selectors.
+.moo-layout-preview {
+  min-height: 100vh;
+}
+
+.moo-layout-preview > [data-layout="app"] {
+  display: flex;
+  width: 100%;
+  min-height: 100svh;
+}
+
+.moo-layout-preview > [data-layout="app"] > [data-slot="page"] {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .moo-block-preview__toolbar {

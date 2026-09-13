@@ -91,6 +91,13 @@
   margin-top: 3rem;
 }
 
+// Some examples contain fixed-size preview frames. Let the catalog article
+// shrink around those frames so the frame remains the scrollable surface
+// instead of widening the document grid at narrow viewports.
+.moo-example {
+  min-width: 0;
+}
+
 // Portal content (toast containers, etc.) rendered between sections breaks
 // the .moo-example+.moo-example adjacency. Restore spacing when a single
 // portal element sits between two examples.
