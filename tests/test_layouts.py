@@ -528,19 +528,6 @@ class LayoutCatalogTests(unittest.TestCase):
     PAGES = ROOT / "site/src/pages/layouts"
     GUIDE = ROOT / "site/src/pages/layout.html.jinja"
 
-    LAYOUT_GUIDE_SECTIONS = (
-        ("app", "App", "layout-app-example"),
-        ("page", "Page", "layout-page-example"),
-        ("breakpoints", "Breakpoints", "layout-breakpoints-example"),
-        ("containers", "Containers", "layout-containers-example"),
-        ("grid", "Grid", "layout-grid-example"),
-        ("columns", "Columns", "layout-columns-example"),
-        ("gutters", "Gutters", "layout-gutters-example"),
-        ("utilities", "Utilities", "layout-utilities-example"),
-        ("z-index", "Z-index", "layout-z-index-example"),
-        ("css-grid", "CSS Grid", "layout-css-grid-example"),
-    )
-
     def read_page(self, name: str) -> str:
         return (self.PAGES / name).read_text(encoding="utf-8")
 
@@ -559,8 +546,8 @@ class LayoutCatalogTests(unittest.TestCase):
     def test_layout_guide_is_the_only_public_layout_document(self) -> None:
         guide = self.GUIDE.read_text(encoding="utf-8")
         self.assertIn('{% extends "layouts/catalog.html.jinja" %}', guide)
-        self.assertIn('from "components/card.html.jinja" import card', guide)
-        self.assertNotIn("render_block_example(", guide)
+        self.assertIn('from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell', guide)
+        self.assertIn("render_block_example(", guide)
         self.assertNotIn("render_code_snippet(", guide)
         self.assertNotIn('{% from "layouts/', guide)
         for name in ("index.html.jinja", "app.html.jinja", "page.html.jinja"):
@@ -570,53 +557,37 @@ class LayoutCatalogTests(unittest.TestCase):
     def test_layout_guide_is_canonical_without_legacy_routes(self) -> None:
         guide = self.GUIDE.read_text(encoding="utf-8")
         self.assertIn('{% extends "layouts/catalog.html.jinja" %}', guide)
-        for anchor in ("app", "page", "app-topology", "page-regions", "widths", "shell-mode"):
-            with self.subTest(anchor=anchor):
-                self.assertIn(f'id="{anchor}"', guide)
-        for copy in (
-            "Application shell",
-            "Page surface",
-            "Sidebar",
-            "header",
-            "main",
-            "footer",
-            "container-xl",
-            "viewport",
-            "contained",
-            "Viewport shell",
-            "Contained shell",
-        ):
-            with self.subTest(copy=copy):
-                self.assertIn(copy, guide)
+        self.assertIn('id="layout"', guide)
+        self.assertIn("A focused space for Moo UI layout examples.", guide)
+        self.assertIn('id="app"', guide)
+        self.assertNotIn('id="page"', guide)
+        self.assertNotIn("data-example=", guide)
         self.assertNotIn("render_code_snippet(", guide)
-        self.assertNotIn("render_block_example(", guide)
-        self.assertNotIn('navigation="sidebar"', guide)
-        self.assertNotIn('navigation="none"', guide)
-        self.assertNotIn('shell_mode="viewport"', guide)
-        self.assertNotIn('shell_mode="contained"', guide)
+        self.assertIn("render_block_example(", guide)
         self.assertFalse((ROOT / "site/public/_redirects").exists())
 
-    def test_layout_guide_has_one_native_example_and_source_per_section(self) -> None:
+    def test_layout_guide_starts_with_the_app_example_for_collaborative_work(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("layout/index.html")
         self.assertIn('class="moo-doc-layout"', page)
+        self.assertIn('<h1 class="fw-semibold" id="layout">Layout</h1>', page)
+        self.assertIn("A focused space for Moo UI layout examples.", page)
         self.assertIn('aria-label="On this page"', page)
-        for slug, label, example_id in self.LAYOUT_GUIDE_SECTIONS:
-            with self.subTest(slug=slug):
-                self.assertIn(f'href="#{slug}"', page)
-                self.assertIn(f'id="{slug}"', page)
-                self.assertIn(f'>{label}</a>', page)
-                self.assertEqual(page.count(f'data-example="{example_id}"'), 1)
-                self.assertIn(f'id="{example_id}-code"', page)
-        for native_class in (
-            "container", "container-fluid", "row", "col", "gx-4", "gy-3",
-            "d-flex", "z-1", "z-3", "grid", "g-col-6",
-        ):
-            self.assertIn(native_class, page)
-        self.assertNotIn("Bootstrap comes with", page)
-        self.assertNotIn('href="/layout/breakpoints/"', page)
-        self.assertNotIn('href="layout/breakpoints/"', page)
+        self.assertEqual(page.count('data-example="layout-app-example"'), 1)
+        self.assertIn('id="layout-app-example-code"', page)
+        self.assertIn('href="#app"', page)
+        self.assertIn('>App</a>', page)
+        self.assertIn('Floating sidebar', page)
+        self.assertNotIn('data-example="layout-page-example"', page)
+        self.assertNotIn('href="#breakpoints"', page)
+        self.assertNotIn('href="#containers"', page)
+        self.assertNotIn('href="#grid"', page)
+        self.assertNotIn('href="#columns"', page)
+        self.assertNotIn('href="#gutters"', page)
+        self.assertNotIn('href="#utilities"', page)
+        self.assertNotIn('href="#z-index"', page)
+        self.assertNotIn('href="#css-grid"', page)
 
     def test_rc7_removes_legacy_shell_macros_and_structural_hooks(self) -> None:
         active_sources = (
@@ -662,9 +633,7 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertNotIn("zero-gutter", guide)
         self.assertNotIn("region-specific", guide)
         self.assertNotIn("bleed support", guide)
-        self.assertIn("Application shell", guide)
-        self.assertIn("Page surface", guide)
-        self.assertIn("container-xl", guide)
+        self.assertNotIn("data-example=", guide)
         self.assertNotIn("render_code_snippet(", guide)
 
         for name in (

@@ -1,8 +1,8 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "components/card.html.jinja" import card %}
+{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
 {% from "components/typography.html.jinja" import typography %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
-{% from "includes/example.html.jinja" import render_example %}
 {% from "includes/page-header.html.jinja" import render_page_header with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
 
@@ -13,286 +13,34 @@
     <article class="moo-doc-page">
       {{ render_page_header(
         "Layout",
-        "Choose the application shell and page surface that fit the current route.",
+        "A focused space for Moo UI layout examples.",
         id="layout",
         actions=render_section_page_actions("layout", site_pages, root_path)
       ) }}
 
       <section class="mt-5" aria-labelledby="app">
-        {{ typography("App — Application shell", variant="section-title", id="app") }}
+        {{ typography("App", variant="section-title", id="app") }}
         <p>
-          Choose an application shell when a route owns its navigation and
-          viewport behavior. A shell can include an independent Sidebar and
-          Page, or it can contain the Page alone.
+          Start with the application shell when a route owns navigation and
+          viewport behavior. This first example keeps the Sidebar detached
+          from the edge while the Page remains its own surface.
         </p>
-        {% call card(title="Choose a shell when", subtitle="The route owns shell-level navigation and viewport behavior.") %}
-          <ul class="mb-0">
-            <li>Sidebar navigation must remain independent from page content.</li>
-            <li>The screen has a clear relationship between navigation and page content.</li>
-            <li>Viewport or contained shell behavior belongs to the shell design.</li>
-          </ul>
-        {% endcall %}
-        {% set app_example %}
-        <div class="border rounded overflow-hidden">
-          <div class="d-flex flex-column flex-md-row">
-            <aside class="border-bottom border-md-end p-3 flex-shrink-0" aria-label="Example navigation"><strong class="small">Sidebar</strong><div class="small text-body-secondary mt-2">Owns route navigation</div></aside>
-            <main class="flex-grow-1 p-3"><strong class="small">Page</strong><div class="small text-body-secondary mt-2">Owns the current screen</div></main>
-          </div>
-        </div>
+        {% set app_screen %}
+          {{ render_sidebar_shell(
+            key="layout-app-floating",
+            sidebar_id="layout-app-floating-demo",
+            variant="floating",
+            demo_copy="portal"
+          ) }}
         {% endset %}
-        {{ render_example("layout-app-example", "App topology", "Keep Sidebar and Page as direct App siblings when the route owns navigation.", app_example) }}
-      </section>
-
-      <section class="mt-5" aria-labelledby="app-topology">
-        {{ typography("App topology", variant="section-title", id="app-topology") }}
-        <p>
-          A navigation-enabled shell keeps the Sidebar and Page as direct siblings;
-          Sidebar content uses the existing Sidebar family components.
-        </p>
-        {% call card(title="Navigation choices", subtitle="Choose the shell that matches the route.") %}
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <h3 class="h6">With navigation</h3>
-              <p class="text-body-secondary mb-0">
-                A Sidebar and a Page sit beside one another. The Sidebar owns
-                navigation, while the Page owns the current screen.
-              </p>
-            </div>
-            <div class="col-12 col-md-6">
-              <h3 class="h6">Without navigation</h3>
-              <p class="text-body-secondary mb-0">
-                The shell contains only the Page. Use this for focused flows,
-                landing screens, or routes that provide navigation elsewhere.
-              </p>
-            </div>
-          </div>
-        {% endcall %}
-      </section>
-
-      <section class="mt-5" aria-labelledby="page">
-        {{ typography("Page — Page surface", variant="section-title", id="page") }}
-        <p>
-          A page surface gives the current screen semantic
-          <code>header</code>, <code>main</code>, and optional
-          <code>footer</code> regions. Each region receives one native
-          Bootstrap content rail. The semantic region remains a full-width
-          outer surface, while its content aligns inside the shared rail.
-        </p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="page-regions">
-        {{ typography("Page region contract", variant="section-title", id="page-regions") }}
-        {% call card(title="Header, main, and footer", subtitle="Semantic regions are screen-owned content areas.") %}
-          <div class="row g-3">
-            <div class="col-12 col-md-4">
-              <h3 class="h6">Header</h3>
-              <p class="text-body-secondary mb-0">Screen identity, breadcrumbs, or actions.</p>
-            </div>
-            <div class="col-12 col-md-4">
-              <h3 class="h6">Main</h3>
-              <p class="text-body-secondary mb-0">The primary page content in normal flow; the Page, not main, owns bounded scrolling.</p>
-            </div>
-            <div class="col-12 col-md-4">
-              <h3 class="h6">Footer</h3>
-              <p class="text-body-secondary mb-0">Optional status, actions, or supporting navigation.</p>
-            </div>
-          </div>
-        {% endcall %}
-        {% set page_example %}
-        <div class="border rounded overflow-hidden">
-          <header class="border-bottom p-3">Page header</header>
-          <main class="p-3"><div class="container-xl px-0">Page content rail</div></main>
-          <footer class="border-top p-3">Optional page footer</footer>
-        </div>
-        {% endset %}
-        {{ render_example("layout-page-example", "Page regions", "Semantic regions stay full width while content aligns to one native container rail.", page_example) }}
-      </section>
-
-      <section class="mt-5" aria-labelledby="widths">
-        {{ typography("Width and container choices", variant="section-title", id="widths") }}
-        <p>Page width values map directly to native Bootstrap containers.</p>
-        {% call card(title="Native Bootstrap rails") %}
-          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-            {% for width, container in [("base", "container"), ("sm", "container-sm"), ("md", "container-md"), ("lg", "container-lg"), ("xl", "container-xl"), ("xxl", "container-xxl"), ("fluid", "container-fluid")] %}
-              <div class="col">
-                <div class="border rounded p-3 h-100">
-                  <code>{{ width }}</code>
-                  <div class="small text-body-secondary mt-1">{{ container }}</div>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% endcall %}
-      </section>
-
-      <section class="mt-5" aria-labelledby="shell-mode">
-        {{ typography("Shell mode and scroll ownership", variant="section-title", id="shell-mode") }}
-        {% call card(title="Shell boundaries", subtitle="Choose the shell boundary explicitly.") %}
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <h3 class="h6">Viewport shell</h3>
-              <p class="text-body-secondary mb-0">The app fills the viewport; the page owns its internal document scroll.</p>
-            </div>
-            <div class="col-12 col-md-6">
-              <h3 class="h6">Contained shell</h3>
-              <p class="text-body-secondary mb-0">On desktop the Page owns bounded scrolling. Below the large breakpoint, the shell returns to document flow and the document scrolls.</p>
-            </div>
-          </div>
-        {% endcall %}
-      </section>
-
-      <section class="mt-5" aria-labelledby="breakpoints">
-        {{ typography("Breakpoints", variant="section-title", id="breakpoints") }}
-        <p>
-          Choose mobile-first Bootstrap infixes for Moo responsive changes;
-          keep the breakpoint decision close to the component that changes.
-        </p>
-        {% set breakpoints_example %}
-        <div class="table-responsive">
-          <table class="table table-sm align-middle mb-0">
-            <thead>
-              <tr><th scope="col">Moo tier</th><th scope="col">Native infix</th><th scope="col">Live rule</th></tr>
-            </thead>
-            <tbody>
-              <tr><th scope="row">Base</th><td>none</td><td><span class="d-inline d-sm-none">visible below sm</span><span class="d-none d-sm-inline">hidden from sm</span></td></tr>
-              <tr><th scope="row">Medium</th><td>md</td><td><span class="d-inline d-md-none">visible below md</span><span class="d-none d-md-inline">visible from md</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        {% endset %}
-        {{ render_example("layout-breakpoints-example", "Responsive tiers", "Choose mobile-first Bootstrap infixes for Moo responsive changes.", breakpoints_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/breakpoints/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s breakpoint reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="containers">
-        {{ typography("Containers", variant="section-title", id="containers") }}
-        <p>
-          Use the Bootstrap container that matches the Page width contract;
-          the rail should be chosen once and shared by the screen’s regions.
-        </p>
-        {% set containers_example %}
-        <div class="vstack gap-3">
-          <div class="container border rounded p-3">.container — responsive max-width</div>
-          <div class="container-md border rounded p-3">.container-md — full width until md</div>
-          <div class="container-fluid border rounded p-3">.container-fluid — full width</div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-containers-example", "Native rails", "Use the Bootstrap container that matches the Page width contract.", containers_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/containers/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s container reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="grid">
-        {{ typography("Grid", variant="section-title", id="grid") }}
-        <p>
-          Compose page content with Bootstrap’s native container, row, and
-          column primitives so the same markup can move to a Bootstrap host.
-        </p>
-        {% set grid_example %}
-        <div class="container text-center">
-          <div class="row g-3">
-            <div class="col"><div class="border rounded p-3">Column</div></div>
-            <div class="col"><div class="border rounded p-3">Column</div></div>
-            <div class="col"><div class="border rounded p-3">Column</div></div>
-          </div>
-          <div class="row g-3 mt-1">
-            <div class="col-12 col-md-8"><div class="border rounded p-3">8 columns from md</div></div>
-            <div class="col-12 col-md-4"><div class="border rounded p-3">4 columns from md</div></div>
-          </div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-grid-example", "Container, row, and columns", "Compose page content with Bootstrap’s native grid primitives.", grid_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/grid/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s grid reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="columns">
-        {{ typography("Columns", variant="section-title", id="columns") }}
-        <p>
-          Use explicit spans, flexible columns, and auto-width actions in one
-          native row; let the breakpoint express when a layout can expand.
-        </p>
-        {% set columns_example %}
-        <div class="container text-center">
-          <div class="row g-2 align-items-center">
-            <div class="col-12 col-md-3"><div class="border rounded p-3">col-md-3</div></div>
-            <div class="col"><div class="border rounded p-3">col</div></div>
-            <div class="col-auto"><div class="border rounded p-3">auto</div></div>
-          </div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-columns-example", "Column sizing", "Use explicit spans, flexible columns, and auto-width actions in one native row.", columns_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/columns/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s columns reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="gutters">
-        {{ typography("Gutters", variant="section-title", id="gutters") }}
-        <p>
-          Keep horizontal and vertical spacing on the native row so card edges
-          and content rails stay aligned across screen sizes.
-        </p>
-        {% set gutters_example %}
-        <div class="container overflow-hidden">
-          <div class="row gx-4 gy-3">
-            <div class="col-6"><div class="border rounded p-3">gx-4 / gy-3</div></div>
-            <div class="col-6"><div class="border rounded p-3">gx-4 / gy-3</div></div>
-            <div class="col-6"><div class="border rounded p-3">gx-4 / gy-3</div></div>
-            <div class="col-6"><div class="border rounded p-3">gx-4 / gy-3</div></div>
-          </div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-gutters-example", "Gutter rhythm", "Keep horizontal and vertical spacing on the native row.", gutters_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/gutters/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s gutter reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="utilities">
-        {{ typography("Utilities", variant="section-title", id="utilities") }}
-        <p>
-          Prefer Bootstrap display, flex, spacing, and sizing utilities for
-          local adjustments; reserve a component stylesheet for real behavior.
-        </p>
-        {% set utilities_example %}
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-3 border rounded">
-          <div><strong>Responsive utility composition</strong><div class="text-body-secondary small">Stacks on mobile and aligns inline from md.</div></div>
-          <div class="d-flex gap-2"><button class="btn btn-primary btn-sm" type="button">Primary</button><button class="btn btn-outline-secondary btn-sm" type="button">Secondary</button></div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-utilities-example", "Utility composition", "Prefer Bootstrap display, flex, spacing, and sizing utilities for local adjustments.", utilities_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/utilities/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s utility reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="z-index">
-        {{ typography("Z-index", variant="section-title", id="z-index") }}
-        <p>
-          Use native z-index utilities only for a documented stacking
-          relationship, and pair them with positioned surfaces that establish
-          the context.
-        </p>
-        {% set z_index_example %}
-        <div class="position-relative p-5 border rounded">
-          <div class="position-absolute top-0 start-0 p-3 bg-secondary-subtle border rounded z-1">Base surface</div>
-          <div class="position-absolute top-50 start-50 translate-middle p-3 bg-primary text-white border rounded z-3">Raised surface</div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-z-index-example", "Layered surfaces", "Use native z-index utilities only for a documented stacking relationship.", z_index_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/z-index/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s z-index reference</a></p>
-      </section>
-
-      <section class="mt-5" aria-labelledby="css-grid">
-        {{ typography("CSS Grid", variant="section-title", id="css-grid") }}
-        <p>
-          Use Bootstrap’s CSS Grid utility layer when explicit placement is
-          clearer than flex rows, while keeping the placement contract local
-          to the example or component.
-        </p>
-        {% set css_grid_example %}
-        <div class="grid gap-3">
-          <div class="g-col-6 border rounded p-3">g-col-6</div>
-          <div class="g-col-6 border rounded p-3">g-col-6</div>
-          <div class="g-col-6 g-col-md-4 border rounded p-3">g-col-6 g-col-md-4</div>
-          <div class="g-col-6 g-col-md-8 border rounded p-3">g-col-6 g-col-md-8</div>
-        </div>
-        {% endset %}
-        {{ render_example("layout-css-grid-example", "CSS Grid utilities", "Use Bootstrap’s CSS Grid utility layer when explicit placement is clearer than flex rows.", css_grid_example) }}
-        <p class="small mt-3 mb-0"><a href="https://getbootstrap.com/docs/5.3/layout/css-grid/" target="_blank" rel="noopener noreferrer">Read Bootstrap’s CSS Grid reference</a></p>
+        {{ render_block_example(
+          "layout-app-example",
+          "Floating sidebar",
+          "The App shell detaches the Sidebar from the edge as a bordered, elevated card while the Page owns the current screen.",
+          app_screen,
+          preview_class="moo-example__preview--shell",
+          frame_src=site_href("blocks/previews/sidebar-floating.html", root_path)
+        ) }}
       </section>
 
       {{ render_section_page_pagination("layout", site_pages, root_path) }}
@@ -300,20 +48,7 @@
 
     {{ render_doc_toc([
       {"id": "layout", "label": "Layout"},
-      {"id": "app", "label": "App"},
-      {"id": "app-topology", "label": "App topology"},
-      {"id": "page", "label": "Page"},
-      {"id": "page-regions", "label": "Page regions"},
-      {"id": "widths", "label": "Width choices"},
-      {"id": "shell-mode", "label": "Shell mode"},
-      {"id": "breakpoints", "label": "Breakpoints"},
-      {"id": "containers", "label": "Containers"},
-      {"id": "grid", "label": "Grid"},
-      {"id": "columns", "label": "Columns"},
-      {"id": "gutters", "label": "Gutters"},
-      {"id": "utilities", "label": "Utilities"},
-      {"id": "z-index", "label": "Z-index"},
-      {"id": "css-grid", "label": "CSS Grid"}
+      {"id": "app", "label": "App"}
     ]) }}
   </div>
 {% endblock %}

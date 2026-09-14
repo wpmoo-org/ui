@@ -293,6 +293,50 @@ class CatalogBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_layout_page_starts_with_the_app_example_at_desktop_and_mobile(self) -> None:
+        for viewport in ((1280, 900), (390, 844)):
+            with self.subTest(viewport=viewport):
+                context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    failed_responses: list[str] = []
+                    page.on(
+                        "response",
+                        lambda response: failed_responses.append(
+                            f"{response.status} {response.url}"
+                        )
+                        if response.status >= 400
+                        else None,
+                    )
+                    page.set_viewport_size(
+                        {"width": viewport[0], "height": viewport[1]}
+                    )
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/layout/",
+                        wait_until="domcontentloaded",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, CERTIFICATION_CASES[0])
+                    expect(
+                        page.get_by_role("heading", name="Layout", level=1)
+                    ).to_be_visible()
+                    self.assertLessEqual(
+                        page.evaluate("document.documentElement.scrollWidth"),
+                        page.evaluate("document.documentElement.clientWidth"),
+                    )
+                    app_example = page.locator('[data-example="layout-app-example"]')
+                    expect(app_example).to_have_count(1)
+                    expect(app_example.locator(".moo-example__preview")).to_be_visible()
+                    expect(app_example.locator(".moo-example__source")).to_have_count(1)
+                    expect(page.locator('[data-example^="layout-"]')).to_have_count(1)
+                    expect(page.locator('.moo-doc-toc')).to_have_count(1)
+                    self.assertEqual(failed_responses, [])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
