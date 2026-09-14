@@ -900,11 +900,16 @@ class CodeExampleTests(CatalogTestCase):
 
         catalog_css = self.read_output("assets/css/catalog.css")
         selector = catalog_css.split(
-            ".moo-catalog__content :where(p, li, dd, dt, td, th) code {", 1
+            '.moo-catalog [data-slot="page"] > main > .container :where(p, li, dd, dt, td, th) code {',
+            1,
         )[1].split("}", 1)[0]
         self.assertIn("color: var(--bs-secondary-text-emphasis);", selector)
         self.assertIn("background: var(--moo-muted-surface);", selector)
         self.assertIn("border-radius:", selector)
+
+        usage = catalog_css.split(".moo-component-usage p {", 1)[1].split("}", 1)[0]
+        self.assertIn("font-size: var(--moo-doc-body-font-size);", usage)
+        self.assertIn("line-height: var(--moo-doc-body-line-height);", usage)
 
     def test_code_panel_expands_and_copies_only_code_text(self) -> None:
         result = self.run_build()

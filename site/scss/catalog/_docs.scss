@@ -418,6 +418,7 @@
   display: grid;
   align-items: start;
   gap: 3rem;
+  padding-block: 3rem 5rem;
 }
 
 @include media-breakpoint-up(xl) {

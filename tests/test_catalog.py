@@ -2061,6 +2061,16 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-component-row moo-home-component-row--1",
             home,
         )
+        self.assertIn(
+            'class="moo-home-component-row moo-home-component-row--2"',
+            home,
+        )
+        self.assertIn('class="moo-home-hero pt-5 px-4"', home)
+        self.assertRegex(
+            home,
+            r'<main id="main-content"[^>]*>\s*<div class="container">',
+        )
+        self.assertNotIn("moo-catalog__content", home)
         self.assertIn('href="installation/"', home)
         self.assertIn('href="components/"', home)
         self.assertIn('href="components/button/"', home)
@@ -2202,7 +2212,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("moo-catalog__intro", page)
 
         home = self.read_output("index.html")
-        self.assertIn('<section class="moo-home-hero"', home)
+        self.assertIn('<section class="moo-home-hero pt-5 px-4"', home)
         self.assertIn('<h1 class="moo-home-hero__title" id="home">Moo UI</h1>', home)
         self.assertNotIn("moo-doc-hero", home)
         self.assertNotIn("moo-catalog__intro", home)
@@ -2440,8 +2450,8 @@ class CatalogContractTests(CatalogTestCase):
         for path, component_slugs in expected_footer_components.items():
             with self.subTest(path=path):
                 page = self.read_output(path)
-                content_start = page.index('<div class="moo-catalog__content">')
-                main_end = page.index("</main>", content_start)
+                main_start = page.index('<main id="main-content"')
+                main_end = page.index("</main>", main_start)
                 footer_start = page.index('<footer class="moo-examples-footer')
                 footer_end = page.index("</footer>", footer_start) + len("</footer>")
                 footer_surface = page[footer_start:footer_end]
@@ -2449,7 +2459,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertGreater(footer_start, main_end)
                 self.assertNotIn(
                     '<footer class="moo-examples-footer',
-                    page[content_start:main_end],
+                    page[main_start:main_end],
                 )
                 self.assertEqual(page.count("data-moo-codepen-form"), 1)
                 self.assertIn("Open in CodePen", page[footer_start:])
@@ -2890,6 +2900,7 @@ class CatalogContractTests(CatalogTestCase):
         css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-doc-layout", css)
         self.assertIn(".moo-doc-layout--wide", css)
+        self.assertIn("padding-block: 3rem 5rem;", css)
         self.assertIn("@media (min-width: 1200px)", css)
         self.assertIn("--moo-doc-toc-offset: calc(2rem + 5px)", css)
         self.assertNotIn("scroll-behavior: smooth", css)
@@ -4008,10 +4019,9 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(">Layout<", sidebar)
         self.assertNotIn('href="layouts/"', sidebar)
         self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layout/">', guide)
-        self.assertIn('id="app-topology"', guide)
-        self.assertIn('id="page-regions"', guide)
-        self.assertIn('id="widths"', guide)
-        self.assertIn('id="shell-mode"', guide)
+        for anchor in ("app", "sidebar", "page", "breakpoints", "containers"):
+            with self.subTest(anchor=anchor):
+                self.assertIn(f'id="{anchor}"', guide)
         for legacy in (
             DIST / "layouts/index.html",
             DIST / "layouts/app/index.html",

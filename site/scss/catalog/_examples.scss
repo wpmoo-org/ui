@@ -130,7 +130,8 @@
   line-height: var(--moo-doc-body-line-height);
 }
 
-.moo-component-examples > p {
+.moo-component-examples > p,
+.moo-component-usage p {
   max-width: 44rem;
   font-size: var(--moo-doc-body-font-size);
   line-height: var(--moo-doc-body-line-height);

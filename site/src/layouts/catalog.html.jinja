@@ -17,7 +17,7 @@
       {% if slot == "sidebar" %}
         {{ render_catalog_sidebar() }}
       {% elif slot == "page" %}
-        {% call(region) page(width="fluid") %}
+        {% call(region) page(width="base") %}
           {% if region == "header" %}
             {% include "shell/navbar.html.jinja" %}
           {% elif region == "main" %}
@@ -86,7 +86,6 @@
           );
         })();
       </script>
-          <div class="moo-catalog__content">
             {% set has_example_toc = current_page_kind in ["component", "utility"] %}
             {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
             {% set child_page_navigation_items = site_pages %}
@@ -116,7 +115,6 @@
                 {% endif %}
               </div>
             {% endif %}
-          </div>
           {% elif region == "footer" %}
             {% block footer %}
               {% include "shell/footer.html.jinja" %}
