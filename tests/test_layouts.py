@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from html.parser import HTMLParser
@@ -526,8 +528,33 @@ class LayoutCatalogTests(unittest.TestCase):
     PAGES = ROOT / "site/src/pages/layouts"
     GUIDE = ROOT / "site/src/pages/layout.html.jinja"
 
+    LAYOUT_GUIDE_SECTIONS = (
+        ("app", "App", "layout-app-example"),
+        ("page", "Page", "layout-page-example"),
+        ("breakpoints", "Breakpoints", "layout-breakpoints-example"),
+        ("containers", "Containers", "layout-containers-example"),
+        ("grid", "Grid", "layout-grid-example"),
+        ("columns", "Columns", "layout-columns-example"),
+        ("gutters", "Gutters", "layout-gutters-example"),
+        ("utilities", "Utilities", "layout-utilities-example"),
+        ("z-index", "Z-index", "layout-z-index-example"),
+        ("css-grid", "CSS Grid", "layout-css-grid-example"),
+    )
+
     def read_page(self, name: str) -> str:
         return (self.PAGES / name).read_text(encoding="utf-8")
+
+    def run_build(self) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, "build.py"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+    def read_output(self, relative_path: str) -> str:
+        return (ROOT / "site-dist" / relative_path).read_text(encoding="utf-8")
 
     def test_layout_guide_is_the_only_public_layout_document(self) -> None:
         guide = self.GUIDE.read_text(encoding="utf-8")
@@ -568,6 +595,28 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertNotIn('shell_mode="viewport"', guide)
         self.assertNotIn('shell_mode="contained"', guide)
         self.assertFalse((ROOT / "site/public/_redirects").exists())
+
+    def test_layout_guide_has_one_native_example_and_source_per_section(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("layout/index.html")
+        self.assertIn('class="moo-doc-layout"', page)
+        self.assertIn('aria-label="On this page"', page)
+        for slug, label, example_id in self.LAYOUT_GUIDE_SECTIONS:
+            with self.subTest(slug=slug):
+                self.assertIn(f'href="#{slug}"', page)
+                self.assertIn(f'id="{slug}"', page)
+                self.assertIn(f'>{label}</a>', page)
+                self.assertEqual(page.count(f'data-example="{example_id}"'), 1)
+                self.assertIn(f'id="{example_id}-code"', page)
+        for native_class in (
+            "container", "container-fluid", "row", "col", "gx-4", "gy-3",
+            "d-flex", "z-1", "z-3", "grid", "g-col-6",
+        ):
+            self.assertIn(native_class, page)
+        self.assertNotIn("Bootstrap comes with", page)
+        self.assertNotIn('href="/layout/breakpoints/"', page)
+        self.assertNotIn('href="layout/breakpoints/"', page)
 
     def test_rc7_removes_legacy_shell_macros_and_structural_hooks(self) -> None:
         active_sources = (
