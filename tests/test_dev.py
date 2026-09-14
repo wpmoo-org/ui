@@ -3,9 +3,14 @@ from __future__ import annotations
 import importlib.util
 import subprocess
 import sys
+import tempfile
+import threading
 import unittest
 from functools import partial
-from http.server import SimpleHTTPRequestHandler
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from pathlib import Path
+from urllib.error import HTTPError
+from urllib.request import urlopen
 
 from tests.helpers import ROOT, SITE_DIST
 
@@ -63,6 +68,32 @@ class DevRunnerTests(unittest.TestCase):
         # subclass so rebuilds are never masked by heuristic caching.
         self.assertTrue(issubclass(handler.func, SimpleHTTPRequestHandler))
         self.assertEqual(handler.keywords, {"directory": str(SITE_DIST)})
+
+    def test_server_does_not_publish_directory_listings(self) -> None:
+        dev = load_dev_module()
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "layouts/previews").mkdir(parents=True)
+            (root / "layouts/previews/example.html").write_text(
+                "preview\n",
+                encoding="utf-8",
+            )
+            dev.SITE_DIST = root
+            server = HTTPServer(("127.0.0.1", 0), dev.create_handler())
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                with self.assertRaises(HTTPError) as error:
+                    urlopen(
+                        f"http://127.0.0.1:{server.server_port}/layouts/",
+                        timeout=2,
+                    )
+                self.assertEqual(error.exception.code, 404)
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=2)
 
 
 if __name__ == "__main__":

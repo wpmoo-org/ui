@@ -1962,7 +1962,7 @@ class CatalogContractTests(CatalogTestCase):
         catalog_index = sidebar.index(">Catalog<")
         examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
-        layouts_index = sidebar.index('href="layouts/"')
+        layout_index = sidebar.index('href="layout/"')
         blocks_index = sidebar.index('href="blocks/"')
         charts_index = sidebar.index('href="charts/"')
         utilities_index = sidebar.index('href="utils/scroll-fade/"')
@@ -1970,11 +1970,11 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertLess(home_index, docs_index)
         self.assertLess(docs_index, installation_index)
-        self.assertLess(installation_index, catalog_index)
+        self.assertLess(installation_index, layout_index)
+        self.assertLess(layout_index, catalog_index)
         self.assertLess(catalog_index, examples_index)
         self.assertLess(examples_index, components_index)
-        self.assertLess(components_index, layouts_index)
-        self.assertLess(layouts_index, blocks_index)
+        self.assertLess(components_index, layout_index)
         self.assertLess(blocks_index, charts_index)
         self.assertLess(charts_index, utilities_index)
         self.assertLess(utilities_index, resources_index)
@@ -1982,9 +1982,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(">Getting Started<", sidebar)
         self.assertIn(">Catalog<", sidebar)
         self.assertIn(">Resources<", sidebar)
+        getting_started_group = sidebar[installation_index:catalog_index]
         catalog_group = sidebar[catalog_index:resources_index]
         resource_group = sidebar[resources_index:]
-        self.assertIn('href="layouts/"', catalog_group)
+        self.assertIn('href="layout/"', getting_started_group)
+        self.assertNotIn('href="layout/"', catalog_group)
         self.assertNotIn('href="layouts/"', resource_group)
 
     def test_home_page_introduces_the_product_and_links_to_components(
@@ -2208,8 +2210,14 @@ class CatalogContractTests(CatalogTestCase):
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
-        self.assertIn('aria-label="Next page: Examples"', installation)
-        self.assertIn('href="../examples/"', installation)
+        self.assertIn('aria-label="Next page: Layout"', installation)
+        self.assertIn('href="../layout/"', installation)
+
+        layout = self.read_output("layout/index.html")
+        self.assertIn('aria-label="Previous page: Installation"', layout)
+        self.assertIn('aria-label="Next page: Examples"', layout)
+        self.assertIn('href="../installation/"', layout)
+        self.assertIn('href="../examples/"', layout)
 
         examples = self.read_output("examples/index.html")
         examples_header_start = examples.index('<header class="moo-component-header')
@@ -2227,8 +2235,8 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIsNotNone(examples_pagination_match)
         examples_pagination = examples_pagination_match.group("body")
-        self.assertIn('href="../installation/"', examples_pagination)
-        self.assertIn("Installation", examples_pagination)
+        self.assertIn('href="../layout/"', examples_pagination)
+        self.assertIn("Layout", examples_pagination)
         self.assertIn('href="../components/"', examples_pagination)
         self.assertIn("All Components", examples_pagination)
         self.assertNotIn('href="../examples/dashboard/users/"', examples_pagination)
@@ -3812,7 +3820,7 @@ class CatalogContractTests(CatalogTestCase):
             "installation/",
             "components/",
             "blocks/",
-            "layouts/",
+            "layout/",
             "skills/",
             "changelog/",
         ):
@@ -3846,65 +3854,41 @@ class CatalogContractTests(CatalogTestCase):
             for entry in site_pages
             if entry.get("kind") == "layout"
         }
-        self.assertEqual(set(layout_pages), {"app", "page"})
-        self.assertEqual(
-            {entry["href"] for entry in layout_pages.values()},
-            {"layouts/app/", "layouts/page/"},
+        self.assertEqual(layout_pages, {})
+        self.assertIn(
+            {"slug": "layout", "label": "Layout", "href": "layout/", "kind": "doc", "icon": "layout-dashboard"},
+            site_pages,
         )
-
-        metadata = site_build.page_metadata(
-            ROOT / "site/src/pages/layouts/app.html.jinja",
-            Path("layouts/app.html"),
-            sections,
-            catalog,
-            utilities,
-            blocks,
-            layouts,
-        )
-        self.assertEqual(metadata["kind"], "layout")
-        self.assertEqual(metadata["url"], "https://ui.wpmoo.org/layouts/app/")
 
         public_paths = site_build.public_page_paths(layouts)
         public_urls = site_build.public_canonical_urls(layouts)
-        self.assertIn("layouts/app.html", public_paths)
-        self.assertIn("layouts/page.html", public_paths)
-        self.assertIn("https://ui.wpmoo.org/layouts/app/", public_urls)
-        self.assertIn("https://ui.wpmoo.org/layouts/page/", public_urls)
+        self.assertIn("layout.html", public_paths)
+        self.assertNotIn("layouts/index.html", public_paths)
+        self.assertNotIn("layouts/app.html", public_paths)
+        self.assertNotIn("layouts/page.html", public_paths)
+        self.assertIn("https://ui.wpmoo.org/layout/", public_urls)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/", public_urls)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/app/", public_urls)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/page/", public_urls)
         self.assertNotIn("layouts/previews/app-sidebar.html", public_paths)
         self.assertNotIn("layouts/previews/app-none.html", public_paths)
         self.assertNotIn("layouts/previews/page.html", public_paths)
         self.assertNotIn("https://ui.wpmoo.org/layouts/previews/", public_urls)
 
         home = self.read_output("index.html")
-        layout_index = self.read_output("layouts/index.html")
-        app = self.read_output("layouts/app.html")
-        page = self.read_output("layouts/page.html")
-        for surface in (home, layout_index, app, page):
-            self.assertIn('href="', surface)
-            self.assertIn("Layouts", surface)
-        self.assertIn('href="layouts/"', home)
-        self.assertIn('id="catalog-command-layout"', home)
-        self.assertIn('Layouts</div>', home)
-        self.assertIn('href="../layouts/app/"', layout_index)
-        self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layouts/app/">', app)
-        self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layouts/page/">', page)
-        self.assertIn('class="moo-doc-layout moo-doc-layout--wide"', app)
-        self.assertIn('class="moo-doc-layout moo-doc-layout--wide"', page)
-        self.assertIn("<iframe", app)
-        self.assertIn("<iframe", page)
-        self.assertIn('src="../../layouts/previews/app-sidebar/"', app)
-        self.assertIn('src="../../layouts/previews/app-none/"', app)
-        self.assertIn('src="../../layouts/previews/page/"', page)
-        self.assertNotIn('{%', app)
-        self.assertNotIn('{%', page)
-        self.assertIn('data-moo-frame-width="1280"', app)
-        self.assertIn('data-moo-frame-height="720"', app)
-        self.assertIn('data-moo-frame-width="768"', app)
-        self.assertIn('data-moo-frame-height="540"', app)
-        self.assertIn('data-moo-frame-width="768"', page)
-        self.assertIn('data-moo-frame-height="540"', page)
-        self.assertEqual(app.count("<main"), 1)
-        self.assertEqual(page.count("<main"), 1)
+        self.assertIn('href="layout/"', home)
+        command_start = home.index('id="catalog-command"')
+        command_end = home.index('</div>\n        <p class="moo-catalog__command-empty"', command_start)
+        command_palette = home[command_start:command_end]
+        self.assertIn('href="layout/"', command_palette)
+        self.assertNotIn('href="layouts/', command_palette)
+        for legacy in (
+            DIST / "layouts/index.html",
+            DIST / "layouts/app/index.html",
+            DIST / "layouts/page/index.html",
+        ):
+            with self.subTest(removed_route=legacy.relative_to(DIST)):
+                self.assertFalse(legacy.exists())
 
         preview_outputs = {
             "app-sidebar": self.read_output("layouts/previews/app-sidebar.html"),
@@ -3980,9 +3964,40 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("height: 100svh;", app_root_style.group("body"))
 
         sitemap = (DIST / "sitemap.xml").read_text(encoding="utf-8")
-        self.assertIn("https://ui.wpmoo.org/layouts/app/", sitemap)
-        self.assertIn("https://ui.wpmoo.org/layouts/page/", sitemap)
-        self.assertNotIn("layouts/previews/", sitemap)
+        self.assertIn("https://ui.wpmoo.org/layout/", sitemap)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/", sitemap)
+
+        self.assertFalse((DIST / "_redirects").exists())
+
+    def test_layout_guide_is_the_single_catalog_entry_without_legacy_routes(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        guide = self.read_output("layout/index.html")
+        sidebar_start = home.index('id="catalog-sidebar"')
+        sidebar_end = home.index("</aside>", sidebar_start)
+        sidebar = home[sidebar_start:sidebar_end]
+
+        self.assertIn('href="layout/"', sidebar)
+        self.assertIn(">Layout<", sidebar)
+        self.assertNotIn('href="layouts/"', sidebar)
+        self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layout/">', guide)
+        self.assertIn('id="app-topology"', guide)
+        self.assertIn('id="page-regions"', guide)
+        self.assertIn('id="widths"', guide)
+        self.assertIn('id="shell-mode"', guide)
+        for legacy in (
+            DIST / "layouts/index.html",
+            DIST / "layouts/app/index.html",
+            DIST / "layouts/page/index.html",
+        ):
+            with self.subTest(removed_route=legacy.relative_to(DIST)):
+                self.assertFalse(legacy.exists())
+        self.assertIn('aria-label="Previous page: Installation"', guide)
+        self.assertIn('aria-label="Next page: Examples"', guide)
+        self.assertIn('href="../installation/"', guide)
+        self.assertIn('href="../examples/"', guide)
 
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()

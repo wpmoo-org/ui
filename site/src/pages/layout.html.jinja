@@ -1,0 +1,139 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "components/card.html.jinja" import card %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block title %}Layout — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Layout",
+        "Choose the application shell and page surface that fit the current route.",
+        id="layout",
+        actions=render_section_page_actions("layout", site_pages, root_path)
+      ) }}
+
+      <section class="mt-5" aria-labelledby="app">
+        {{ typography("Application shell", variant="section-title", id="app") }}
+        <p>
+          Choose an application shell when a route owns its navigation and
+          viewport behavior. A shell can include an independent Sidebar and
+          Page, or it can contain the Page alone.
+        </p>
+        {% call card(title="Choose a shell when", subtitle="The route owns shell-level navigation and viewport behavior.") %}
+          <ul class="mb-0">
+            <li>Sidebar navigation must remain independent from page content.</li>
+            <li>The screen has a clear relationship between navigation and page content.</li>
+            <li>Viewport or contained shell behavior belongs to the shell design.</li>
+          </ul>
+        {% endcall %}
+      </section>
+
+      <section class="mt-5" aria-labelledby="app-topology">
+        {{ typography("App topology", variant="section-title", id="app-topology") }}
+        <p>
+          A navigation-enabled shell keeps the Sidebar and Page as direct siblings;
+          Sidebar content uses the existing Sidebar family components.
+        </p>
+        {% call card(title="Navigation choices", subtitle="Choose the shell that matches the route.") %}
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <h3 class="h6">With navigation</h3>
+              <p class="text-body-secondary mb-0">
+                A Sidebar and a Page sit beside one another. The Sidebar owns
+                navigation, while the Page owns the current screen.
+              </p>
+            </div>
+            <div class="col-12 col-md-6">
+              <h3 class="h6">Without navigation</h3>
+              <p class="text-body-secondary mb-0">
+                The shell contains only the Page. Use this for focused flows,
+                landing screens, or routes that provide navigation elsewhere.
+              </p>
+            </div>
+          </div>
+        {% endcall %}
+      </section>
+
+      <section class="mt-5" aria-labelledby="page">
+        {{ typography("Page surface", variant="section-title", id="page") }}
+        <p>
+          A page surface gives the current screen semantic
+          <code>header</code>, <code>main</code>, and optional
+          <code>footer</code> regions. Each region receives one native
+          Bootstrap content rail. The semantic region remains a full-width
+          outer surface, while its content aligns inside the shared rail.
+        </p>
+      </section>
+
+      <section class="mt-5" aria-labelledby="page-regions">
+        {{ typography("Page region contract", variant="section-title", id="page-regions") }}
+        {% call card(title="Header, main, and footer", subtitle="Semantic regions are screen-owned content areas.") %}
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <h3 class="h6">Header</h3>
+              <p class="text-body-secondary mb-0">Screen identity, breadcrumbs, or actions.</p>
+            </div>
+            <div class="col-12 col-md-4">
+              <h3 class="h6">Main</h3>
+              <p class="text-body-secondary mb-0">The primary page content in normal flow; the Page, not main, owns bounded scrolling.</p>
+            </div>
+            <div class="col-12 col-md-4">
+              <h3 class="h6">Footer</h3>
+              <p class="text-body-secondary mb-0">Optional status, actions, or supporting navigation.</p>
+            </div>
+          </div>
+        {% endcall %}
+      </section>
+
+      <section class="mt-5" aria-labelledby="widths">
+        {{ typography("Width and container choices", variant="section-title", id="widths") }}
+        <p>Page width values map directly to native Bootstrap containers.</p>
+        {% call card(title="Native Bootstrap rails") %}
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+            {% for width, container in [("base", "container"), ("sm", "container-sm"), ("md", "container-md"), ("lg", "container-lg"), ("xl", "container-xl"), ("xxl", "container-xxl"), ("fluid", "container-fluid")] %}
+              <div class="col">
+                <div class="border rounded p-3 h-100">
+                  <code>{{ width }}</code>
+                  <div class="small text-body-secondary mt-1">{{ container }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endcall %}
+      </section>
+
+      <section class="mt-5" aria-labelledby="shell-mode">
+        {{ typography("Shell mode and scroll ownership", variant="section-title", id="shell-mode") }}
+        {% call card(title="Shell boundaries", subtitle="Choose the shell boundary explicitly.") %}
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <h3 class="h6">Viewport shell</h3>
+              <p class="text-body-secondary mb-0">The app fills the viewport; the page owns its internal document scroll.</p>
+            </div>
+            <div class="col-12 col-md-6">
+              <h3 class="h6">Contained shell</h3>
+              <p class="text-body-secondary mb-0">On desktop the Page owns bounded scrolling. Below the large breakpoint, the shell returns to document flow and the document scrolls.</p>
+            </div>
+          </div>
+        {% endcall %}
+      </section>
+
+      {{ render_section_page_pagination("layout", site_pages, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "layout", "label": "Layout"},
+      {"id": "app", "label": "Application shell"},
+      {"id": "app-topology", "label": "App topology"},
+      {"id": "page", "label": "Page surface"},
+      {"id": "page-regions", "label": "Page regions"},
+      {"id": "widths", "label": "Width choices"},
+      {"id": "shell-mode", "label": "Shell mode"}
+    ]) }}
+  </div>
+{% endblock %}

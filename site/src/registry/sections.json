@@ -36,9 +36,9 @@
     "icon": "blocks"
   },
   {
-    "slug": "layouts",
-    "label": "Layouts",
-    "href": "layouts/",
+    "slug": "layout",
+    "label": "Layout",
+    "href": "layout/",
     "icon": "layout-dashboard"
   },
   {

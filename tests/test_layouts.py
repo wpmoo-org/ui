@@ -524,74 +524,50 @@ class AppLayoutTests(LayoutMacroTests):
 
 class LayoutCatalogTests(unittest.TestCase):
     PAGES = ROOT / "site/src/pages/layouts"
-    APP_PAGE = PAGES / "app.html.jinja"
-    PAGE_PAGE = PAGES / "page.html.jinja"
-    INDEX_PAGE = PAGES / "index.html.jinja"
+    GUIDE = ROOT / "site/src/pages/layout.html.jinja"
 
     def read_page(self, name: str) -> str:
         return (self.PAGES / name).read_text(encoding="utf-8")
 
-    def test_layout_document_pages_are_source_bound_and_use_shared_renderers(self) -> None:
+    def test_layout_guide_is_the_only_public_layout_document(self) -> None:
+        guide = self.GUIDE.read_text(encoding="utf-8")
+        self.assertIn('{% extends "layouts/catalog.html.jinja" %}', guide)
+        self.assertIn('from "components/card.html.jinja" import card', guide)
+        self.assertNotIn("render_block_example(", guide)
+        self.assertNotIn("render_code_snippet(", guide)
+        self.assertNotIn('{% from "layouts/', guide)
         for name in ("index.html.jinja", "app.html.jinja", "page.html.jinja"):
-            with self.subTest(name=name):
-                self.assertTrue((self.PAGES / name).is_file())
+            with self.subTest(removed_document=name):
+                self.assertFalse((self.PAGES / name).exists())
 
-        app = self.read_page("app.html.jinja")
-        page = self.read_page("page.html.jinja")
-        index = self.read_page("index.html.jinja")
-
-        for source in (app, page):
-            self.assertIn('{% extends "layouts/catalog.html.jinja" %}', source)
-            self.assertIn(
-                'from "includes/block-example.html.jinja" import render_block_example',
-                source,
-            )
-            self.assertIn(
-                'from "includes/code-snippet.html.jinja" import render_code_snippet',
-                source,
-            )
-            self.assertIn("render_block_example(", source)
-            self.assertIn("render_code_snippet(", source)
-            for tag in ("button", "input", "select", "textarea", "svg"):
-                self.assertNotRegex(source, rf"<\s*{tag}(?:\s|>)")
-            for forbidden in (
-                "sidebar_provider",
-                "sidebar_inset",
-                "sidebar-inset__",
-                "moo-layout__",
-                "style=",
-            ):
-                self.assertNotIn(forbidden, source)
-
-        self.assertIn('from "layouts/app.html.jinja" import app', app)
-        self.assertIn('from "layouts/page.html.jinja" import page', app)
-        for contract in (
-            'navigation="sidebar"',
-            'navigation="none"',
-            'variant="sidebar"',
-            'variant="floating"',
-            'variant="inset"',
-            'side="left"',
-            'side="right"',
-            'slot == "sidebar"',
-            'slot == "page"',
-            'region == "header"',
-            'region == "main"',
-            'region == "footer"',
+    def test_layout_guide_is_canonical_without_legacy_routes(self) -> None:
+        guide = self.GUIDE.read_text(encoding="utf-8")
+        self.assertIn('{% extends "layouts/catalog.html.jinja" %}', guide)
+        for anchor in ("app", "page", "app-topology", "page-regions", "widths", "shell-mode"):
+            with self.subTest(anchor=anchor):
+                self.assertIn(f'id="{anchor}"', guide)
+        for copy in (
+            "Application shell",
+            "Page surface",
+            "Sidebar",
+            "header",
+            "main",
+            "footer",
+            "container-xl",
+            "viewport",
+            "contained",
+            "Viewport shell",
+            "Contained shell",
         ):
-            with self.subTest(contract=contract):
-                self.assertIn(contract, app)
-
-        self.assertIn('from "layouts/page.html.jinja" import page', page)
-        for width in ('width="base"', 'width="xl"', 'width="fluid"'):
-            self.assertIn(width, page)
-        for region in ('region == "header"', 'region == "main"', 'region == "footer"'):
-            self.assertIn(region, page)
-        self.assertIn("container-xl", page)
-        self.assertIn("full-width", page.lower())
-
-        self.assertIn('layouts/" ~ layout.slug ~ ".html"', index)
-        self.assertIn('href="{{ site_href', index)
+            with self.subTest(copy=copy):
+                self.assertIn(copy, guide)
+        self.assertNotIn("render_code_snippet(", guide)
+        self.assertNotIn("render_block_example(", guide)
+        self.assertNotIn('navigation="sidebar"', guide)
+        self.assertNotIn('navigation="none"', guide)
+        self.assertNotIn('shell_mode="viewport"', guide)
+        self.assertNotIn('shell_mode="contained"', guide)
+        self.assertFalse((ROOT / "site/public/_redirects").exists())
 
     def test_rc7_removes_legacy_shell_macros_and_structural_hooks(self) -> None:
         active_sources = (
@@ -631,15 +607,16 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertNotIn("page", {entry["slug"] for entry in components})
 
     def test_layout_docs_use_the_public_app_page_contract(self) -> None:
-        app = self.read_page("app.html.jinja")
-        page = self.read_page("page.html.jinja")
-        self.assertNotIn("sidebar_provider", app + page)
-        self.assertNotIn("sidebar_inset", app + page)
-        self.assertNotIn("zero-gutter", app + page)
-        self.assertNotIn("region-specific", app + page)
-        self.assertNotIn("bleed support", app + page)
-        self.assertIn("frame_src=site_href", app)
-        self.assertIn("frame_src=site_href", page)
+        guide = self.GUIDE.read_text(encoding="utf-8")
+        self.assertNotIn("sidebar_provider", guide)
+        self.assertNotIn("sidebar_inset", guide)
+        self.assertNotIn("zero-gutter", guide)
+        self.assertNotIn("region-specific", guide)
+        self.assertNotIn("bleed support", guide)
+        self.assertIn("Application shell", guide)
+        self.assertIn("Page surface", guide)
+        self.assertIn("container-xl", guide)
+        self.assertNotIn("render_code_snippet(", guide)
 
         for name in (
             "previews/app-sidebar.html.jinja",
@@ -670,33 +647,23 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertIn('New request', app_none_preview)
         self.assertIn('title="Footer actions"', app_none_preview)
         self.assertIn('flex-grow-1', app_none_preview)
-        self.assertIn('frame_width=1280', app)
-        self.assertEqual(app.count('frame_width=1280'), 1)
-        self.assertEqual(app.count('frame_height=720'), 1)
-        self.assertEqual(app.count('frame_width=768'), 1)
-        self.assertIn('frame_width=768', page)
 
-    def test_layout_registry_requires_exact_public_source_parity(self) -> None:
+    def test_layout_registry_requires_exact_runtime_source_parity(self) -> None:
         def make_fixture(
             root: Path,
             registry_slugs: tuple[str, ...],
             doc_slugs: tuple[str, ...],
         ) -> tuple[Path, Path]:
-            pages = root / "pages"
+            layouts_dir = root / "src" / "layouts"
             registry = root / "registry"
-            pages.mkdir(parents=True)
+            layouts_dir.mkdir(parents=True)
             registry.mkdir(parents=True)
             for slug in doc_slugs:
-                document = pages / f"{slug}.html.jinja"
-                document.parent.mkdir(parents=True, exist_ok=True)
-                document.write_text(
-                    '{% block title %}Layout — Moo UI{% endblock %}\n',
+                source = layouts_dir / f"{slug}.html.jinja"
+                source.write_text(
+                    f'{{% macro {slug}() %}}{{% endmacro %}}\n',
                     encoding="utf-8",
                 )
-            (pages / "previews").mkdir()
-            (pages / "previews" / "ignored.html.jinja").write_text(
-                "preview\n", encoding="utf-8"
-            )
             (registry / "layouts.json").write_text(
                 json.dumps(
                     [
@@ -711,21 +678,21 @@ class LayoutCatalogTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            return pages, registry
+            return layouts_dir, registry
 
         with tempfile.TemporaryDirectory() as temporary:
-            pages, registry = make_fixture(
+            layouts_dir, registry = make_fixture(
                 Path(temporary) / "missing", ("app", "page"), ("app",)
             )
-            with self.assertRaisesRegex(ValueError, r"missing docs: page"):
-                site_build.load_layouts(pages, registry)
+            with self.assertRaisesRegex(ValueError, r"missing sources: page"):
+                site_build.load_layouts(layouts_dir, registry)
 
         with tempfile.TemporaryDirectory() as temporary:
-            pages, registry = make_fixture(
+            layouts_dir, registry = make_fixture(
                 Path(temporary) / "extra", ("app",), ("app", "page")
             )
-            with self.assertRaisesRegex(ValueError, r"extra docs: page"):
-                site_build.load_layouts(pages, registry)
+            with self.assertRaisesRegex(ValueError, r"extra sources: page"):
+                site_build.load_layouts(layouts_dir, registry)
 
 
 if __name__ == "__main__":

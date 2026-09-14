@@ -1063,7 +1063,7 @@ def build_site_pages(
         {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
     ]
 
-    for slug in ("introduction", "installation"):
+    for slug in ("introduction", "installation", "layout"):
         page = section_page(slug)
         if page:
             pages.append(page)
@@ -1080,11 +1080,6 @@ def build_site_pages(
             }
         )
         pages.extend(child_pages(examples, "examples", "doc"))
-
-    layouts_page = section_page("layouts")
-    if layouts_page:
-        pages.append(layouts_page)
-    pages.extend(child_pages(layouts, "layouts", "layout"))
 
     components = section_page("components")
     if components:
@@ -1113,6 +1108,7 @@ def build_site_pages(
             "components",
             "blocks",
             "layouts",
+            "layout",
         }:
             pages.append({**section, "kind": "doc"})
 
@@ -1133,6 +1129,7 @@ def page_metadata(
     kind = "doc"
     entry: dict[str, str] | None = None
     image = seo_image_src()
+    canonical_path = path
 
     if path == "index.html":
         slug = "index"
@@ -1188,7 +1185,7 @@ def page_metadata(
         "site_name": SITE_NAME,
         "title": title,
         "description": description,
-        "url": canonical_url(path),
+        "url": canonical_url(canonical_path),
         "image": image,
         "image_alt": image_alt,
         "type": "website" if kind == "doc" else "article",
@@ -1686,11 +1683,11 @@ def load_examples() -> list[dict[str, str]]:
 
 
 def load_layouts(
-    pages_dir: Path | None = None,
+    layouts_dir: Path | None = None,
     registry_root: Path | None = None,
 ) -> list[dict[str, str]]:
-    """Load layouts only when registry and public source docs have exact parity."""
-    pages_dir = pages_dir or PAGES / "layouts"
+    """Load layouts only when registry and runtime sources have exact parity."""
+    layouts_dir = layouts_dir or ROOT / "src/layouts"
     registry_root = registry_root or CORE_REGISTRY
     registry_entries = load_entries(registry_root, "layouts.json")
     registry_slugs = sorted(
@@ -1698,10 +1695,8 @@ def load_layouts(
     )
 
     discovered_slugs: list[str] = []
-    for page in sorted(pages_dir.rglob("*.html.jinja")):
-        relative = page.relative_to(pages_dir)
-        if page.name == "index.html.jinja" or "previews" in relative.parts:
-            continue
+    for page in sorted(layouts_dir.rglob("*.html.jinja")):
+        relative = page.relative_to(layouts_dir)
         discovered_slugs.append(
             relative.with_suffix("").with_suffix("").as_posix()
         )
@@ -1712,19 +1707,14 @@ def load_layouts(
         extra = sorted(set(discovered_slugs) - set(registry_slugs))
         details: list[str] = []
         if missing:
-            details.append("missing docs: " + ", ".join(missing))
+            details.append("missing sources: " + ", ".join(missing))
         if extra:
-            details.append("extra docs: " + ", ".join(extra))
+            details.append("extra sources: " + ", ".join(extra))
         raise ValueError(
             "Layout registry/source parity mismatch (" + "; ".join(details) + ")"
         )
 
-    return _load_page_registry(
-        pages_dir,
-        registry_root,
-        "layouts.json",
-        fallback_status="preview",
-    )
+    return sorted(registry_entries, key=lambda entry: entry["label"].lower())
 
 
 def style_include_paths(entrypoint: Path) -> list[str]:
@@ -2191,21 +2181,11 @@ def copy_site_metadata() -> None:
 
 
 def public_page_paths(layouts: list[dict[str, str]] | None = None) -> list[str]:
-    layout_slugs = {
-        entry["slug"] for entry in (layouts if layouts is not None else load_layouts())
-    }
     paths: list[str] = []
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
         if "previews" in relative.parts:
             continue
-        if relative.parts and relative.parts[0] == "layouts":
-            slug = relative.with_suffix("").with_suffix("").as_posix()
-            if (
-                relative.name != "index.html.jinja"
-                and slug.removeprefix("layouts/") not in layout_slugs
-            ):
-                continue
         logical_relative = relative.with_suffix("")
         paths.append(logical_relative.as_posix())
     return paths

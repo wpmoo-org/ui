@@ -7,6 +7,7 @@ import threading
 import webbrowser
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http import HTTPStatus
 from pathlib import Path
 
 
@@ -55,6 +56,10 @@ def create_handler():
         def end_headers(self) -> None:
             self.send_header("Cache-Control", "no-store")
             super().end_headers()
+
+        def list_directory(self, path: str):
+            self.send_error(HTTPStatus.NOT_FOUND, "File not found")
+            return None
 
     return partial(
         NoCacheRequestHandler,

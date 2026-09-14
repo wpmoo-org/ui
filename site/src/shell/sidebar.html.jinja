@@ -15,9 +15,9 @@
     as a top nav instead, without duplicating which pages belong where. #}
 {% set introduction = (sections | selectattr("slug", "equalto", "introduction") | list)[0] %}
 {% set installation = (sections | selectattr("slug", "equalto", "installation") | list)[0] %}
-{% set layouts_page = (sections | selectattr("slug", "equalto", "layouts") | list)[0] %}
+{% set layout_page = (sections | selectattr("slug", "equalto", "layout") | list)[0] %}
 {% set blocks_page = (sections | selectattr("slug", "equalto", "blocks") | list)[0] %}
-{% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "components", "layouts", "blocks"]) | list %}
+{% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "layout", "components", "layouts", "blocks"]) | list %}
 {% set components_open = current_section == "components" %}
 {% set examples_open = current_section == "examples" %}
 {% set charts_active = current_section == "sections" and current_slug == "charts" %}
@@ -41,7 +41,6 @@
 {% set catalog_items = [
   {"kind": "link", "label": "Examples", "href": "examples/index.html", "icon": "list-todo", "active": examples_open},
   {"kind": "submenu", "id": "shell-components-menu", "label": "Components", "icon": "component", "open": components_open, "active": components_open, "children": component_children},
-  {"kind": "link", "label": layouts_page.label, "href": layouts_page.href, "icon": layouts_page.icon, "active": current_section == "layouts"},
   {"kind": "link", "label": blocks_page.label, "href": blocks_page.href, "icon": blocks_page.icon, "active": current_section == "blocks"},
   {"kind": "link", "label": "Charts", "href": "charts/index.html", "icon": "chart-area", "active": charts_active}
 ] %}
@@ -74,7 +73,8 @@
     "entries": [
       {"kind": "link", "label": "Home", "href": "index.html", "icon": "house", "active": home_active},
       {"kind": "link", "label": introduction.label, "href": introduction.href, "icon": introduction.icon, "active": current_section == "sections" and current_slug == introduction.slug},
-      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug}
+      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug},
+      {"kind": "link", "label": layout_page.label, "href": layout_page.href, "icon": layout_page.icon, "active": current_section == "sections" and current_slug == layout_page.slug}
     ]
   },
   {"label": "Catalog", "entries": catalog_items},
