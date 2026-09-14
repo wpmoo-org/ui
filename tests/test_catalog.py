@@ -1995,6 +1995,21 @@ class CatalogContractTests(CatalogTestCase):
         self.assertEqual(layout_group.count('href="layout/"'), 1)
         self.assertNotIn('href="layouts/"', resource_group)
 
+    def test_catalog_examples_keep_bootstrap_native_layout_classes(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        examples_index = self.read_output("examples/index.html")
+        sign_in = self.read_output("examples/auth/sign-in/index.html")
+        profile = self.read_output("examples/settings/profile/index.html")
+
+        self.assertIn("d-grid gap-4", examples_index)
+        self.assertIn('class="d-flex align-items-center justify-content-between"', sign_in)
+        self.assertIn("d-grid gap-4", sign_in)
+        self.assertIn("d-grid gap-4", profile)
+        self.assertNotIn("bootstrap-grid", examples_index)
+        self.assertNotIn("moo-grid", examples_index)
+
     def test_home_page_introduces_the_product_and_links_to_components(
         self,
     ) -> None:
