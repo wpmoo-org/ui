@@ -372,6 +372,14 @@
   font-size: var(--moo-doc-body-font-size);
 }
 
+// A documentation article is a grid so fixed-size previews can sit beside
+// headings and pagination. Keep every implicit grid item shrinkable; otherwise
+// a preview iframe's intrinsic width can widen the article and create a page
+// level horizontal scrollbar at narrow viewports.
+.moo-doc-page > * {
+  min-width: 0;
+}
+
 .moo-doc-main {
   min-width: 0;
   max-width: 52rem;

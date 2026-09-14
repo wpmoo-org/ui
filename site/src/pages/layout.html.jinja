@@ -33,13 +33,24 @@
             demo_copy="portal"
           ) }}
         {% endset %}
+        {% set app_source %}
+          <div class="wrapper" data-layout="app" data-shell-mode="viewport">
+            <aside class="sidebar" aria-label="Sidebar">
+              Sidebar navigation
+            </aside>
+            <main class="page">
+              Page content
+            </main>
+          </div>
+        {% endset %}
         {{ render_block_example(
           "layout-app-example",
           "Floating sidebar",
           "The App shell detaches the Sidebar from the edge as a bordered, elevated card while the Page owns the current screen.",
           app_screen,
           preview_class="moo-example__preview--shell",
-          frame_src=site_href("blocks/previews/sidebar-floating.html", root_path)
+          frame_src=site_href("blocks/previews/sidebar-floating.html", root_path),
+          source_content=app_source
         ) }}
       </section>
 
