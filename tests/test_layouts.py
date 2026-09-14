@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -581,7 +582,11 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertIn('Floating sidebar', page)
         source_start = page.index('id="layout-app-example-code"')
         source_end = page.index("</pre>", source_start)
-        self.assertNotIn("data-slot=", page[source_start:source_end])
+        source = page[source_start:source_end]
+        visible_source = unescape(re.sub(r"<[^>]+>", "", source))
+        self.assertNotIn("data-slot=", source)
+        self.assertNotIn("data-sidebar-key=", source)
+        self.assertIn('data-sidebar="floating"', visible_source)
         self.assertNotIn('data-example="layout-page-example"', page)
         self.assertNotIn('href="#breakpoints"', page)
         self.assertNotIn('href="#containers"', page)
