@@ -624,12 +624,56 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertNotIn('data-example="layout-page-example"', page)
         self.assertIn('href="#breakpoints"', page)
         self.assertIn('href="#containers"', page)
-        self.assertNotIn('href="#grid"', page)
-        self.assertNotIn('href="#columns"', page)
+        self.assertIn('href="#grid"', page)
+        self.assertIn('href="#columns"', page)
         self.assertNotIn('href="#gutters"', page)
         self.assertNotIn('href="#utilities"', page)
         self.assertNotIn('href="#z-index"', page)
         self.assertNotIn('href="#css-grid"', page)
+
+    def test_layout_grid_and_columns_examples_keep_visual_preview_and_simple_source(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("layout/index.html")
+
+        grid_start = page.index('id="grid"')
+        grid_example_start = page.index('data-example="layout-grid-example"', grid_start)
+        grid_options_start = page.index("Grid options", grid_example_start)
+        columns_start = page.index('id="columns"', grid_options_start)
+        columns_example_start = page.index('data-example="layout-columns-example"', columns_start)
+        self.assertLess(grid_start, grid_example_start)
+        self.assertLess(grid_example_start, grid_options_start)
+        self.assertLess(grid_options_start, columns_start)
+        self.assertLess(columns_start, columns_example_start)
+
+        grid_section = page[grid_example_start:columns_start]
+        columns_section = page[columns_example_start:]
+        self.assertIn('class="row row-cols-1 row-cols-md-3 g-3"', grid_section)
+        self.assertIn('class="p-3 border rounded bg-body-tertiary"', grid_section)
+        self.assertIn('class="row mb-3"', columns_section)
+        self.assertIn('class="p-3 border rounded bg-body-tertiary"', columns_section)
+        self.assertNotIn('class="moo-example__header"', grid_section)
+        self.assertNotIn('class="moo-example__header"', columns_section)
+
+        for example_id, expected_source, forbidden_source in (
+            (
+                "layout-grid-example",
+                'class="row row-cols-1 row-cols-md-3 g-3"',
+                'p-3 border rounded bg-body-tertiary',
+            ),
+            (
+                "layout-columns-example",
+                'class="container text-center"',
+                'row mb-3',
+            ),
+        ):
+            with self.subTest(example=example_id):
+                source_start = page.index(f'id="{example_id}-code"')
+                source_end = page.index("</pre>", source_start)
+                source = page[source_start:source_end]
+                visible_source = unescape(re.sub(r"<[^>]+>", "", source))
+                self.assertIn(expected_source, visible_source)
+                self.assertNotIn(forbidden_source, visible_source)
 
     def test_rc7_removes_legacy_shell_macros_and_structural_hooks(self) -> None:
         active_sources = (

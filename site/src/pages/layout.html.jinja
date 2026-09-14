@@ -114,7 +114,7 @@
       <section aria-labelledby="breakpoints">
         {{ typography("Breakpoints", variant="section-title", id="breakpoints") }}
         <p>
-          Breakpoints are the mobile-first width thresholds where a Moo layout
+          Breakpoints are the mobile-first width thresholds where a Moo UI layout
           can change its composition. Use the class infix to apply a grid,
           display, or spacing change from that minimum width upward.
         </p>
@@ -182,6 +182,15 @@
           a twelve-column row, breakpoint-specific column classes, and gutters
           so a layout can stack on small screens and spread across wider ones.
         </p>
+        {% set grid_source %}
+          <div class="container py-4">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">Column 1</div>
+              <div class="col">Column 2</div>
+              <div class="col">Column 3</div>
+            </div>
+          </div>
+        {% endset %}
         {% set grid_example %}
           <div class="container py-4">
             <div class="row row-cols-1 row-cols-md-3 g-3">
@@ -202,7 +211,8 @@
           "Grid example",
           "",
           grid_example,
-          show_header=false
+          show_header=false,
+          source_content=grid_source
         ) }}
         <h3 class="h4 mt-5 mb-3">Grid options</h3>
         <p class="mb-4">
@@ -237,6 +247,49 @@
         ) }}
       </section>
 
+      <section aria-labelledby="columns">
+        {{ typography("Columns", variant="section-title", id="columns") }}
+        <p>
+          Columns divide a Bootstrap row into equal-width areas. Use
+          <code>.row</code> for each line and <code>.col</code> to share the
+          available width evenly.
+        </p>
+        {% set columns_source %}
+          <div class="container text-center">
+            <div class="row">
+              <div class="col">1 of 2</div>
+              <div class="col">2 of 2</div>
+            </div>
+            <div class="row">
+              <div class="col">1 of 3</div>
+              <div class="col">2 of 3</div>
+              <div class="col">3 of 3</div>
+            </div>
+          </div>
+        {% endset %}
+        {% set columns_example %}
+          <div class="container text-center">
+            <div class="row mb-3">
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">1 of 2</div></div>
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">2 of 2</div></div>
+            </div>
+            <div class="row">
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">1 of 3</div></div>
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">2 of 3</div></div>
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">3 of 3</div></div>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-columns-example",
+          "Columns example",
+          "",
+          columns_example,
+          show_header=false,
+          source_content=columns_source
+        ) }}
+      </section>
+
       {{ render_section_page_pagination("layout", site_pages, root_path) }}
     </article>
 
@@ -246,7 +299,8 @@
       {"id": "page", "label": "Page"},
       {"id": "breakpoints", "label": "Breakpoints"},
       {"id": "containers", "label": "Containers"},
-      {"id": "grid", "label": "Grid"}
+      {"id": "grid", "label": "Grid"},
+      {"id": "columns", "label": "Columns"}
     ]) }}
   </div>
 {% endblock %}
