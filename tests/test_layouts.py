@@ -76,6 +76,26 @@ class LayoutMacroTests(unittest.TestCase):
         self.assertNotIn("sidebar_inset", output)
         self.assertNotIn("sidebar-inset__", output)
 
+    def test_page_main_class_applies_only_to_the_main_container(self) -> None:
+        output = self.render_page(
+            """
+            {% call(region) page(width="xl", main_class="px-md-5") %}
+              {% if region == "header" %}Header
+              {% elif region == "main" %}Main
+              {% elif region == "footer" %}Footer
+              {% endif %}
+            {% endcall %}
+            """
+        )
+
+        self.assertEqual(output.count('class="container-xl"'), 2)
+        self.assertEqual(output.count('class="container-xl px-md-5"'), 1)
+        self.assertRegex(
+            output,
+            r'<main id="main-content" tabindex="-1">\s*'
+            r'<div class="container-xl px-md-5">',
+        )
+
     def test_page_widths_map_to_one_native_container_per_region(self) -> None:
         for width, container_class in CONTAINER_CLASSES.items():
             with self.subTest(width=width):

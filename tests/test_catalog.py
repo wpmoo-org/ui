@@ -2065,10 +2065,10 @@ class CatalogContractTests(CatalogTestCase):
             'class="moo-home-component-row moo-home-component-row--2"',
             home,
         )
-        self.assertIn('class="moo-home-hero pt-5 px-4"', home)
+        self.assertIn('class="moo-home-hero"', home)
         self.assertRegex(
             home,
-            r'<main id="main-content"[^>]*>\s*<div class="container">',
+            r'<main id="main-content"[^>]*>\s*<div class="container-xl px-md-5">',
         )
         self.assertNotIn("moo-catalog__content", home)
         self.assertIn('href="installation/"', home)
@@ -2212,13 +2212,36 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("moo-catalog__intro", page)
 
         home = self.read_output("index.html")
-        self.assertIn('<section class="moo-home-hero pt-5 px-4"', home)
+        self.assertIn('<section class="moo-home-hero"', home)
         self.assertIn('<h1 class="moo-home-hero__title" id="home">Moo UI</h1>', home)
         self.assertNotIn("moo-doc-hero", home)
         self.assertNotIn("moo-catalog__intro", home)
 
         introduction = self.read_output("introduction.html")
         self.assertIn("moo-component-header__actions", introduction)
+
+    def test_catalog_pages_share_the_native_xl_container_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        for path in (
+            "index.html",
+            "introduction.html",
+            "installation.html",
+            "support.html",
+            "components/index.html",
+            "components/accordion.html",
+            "blocks/index.html",
+            "examples/index.html",
+        ):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                self.assertRegex(
+                    page,
+                    r'<main id="main-content"[^>]*>\s*'
+                    r'<div class="container-xl px-md-5">',
+                )
 
     def test_section_pages_render_page_actions_and_pagination(self) -> None:
         result = self.run_build()
@@ -4022,6 +4045,11 @@ class CatalogContractTests(CatalogTestCase):
         for anchor in ("app", "sidebar", "page", "breakpoints", "containers"):
             with self.subTest(anchor=anchor):
                 self.assertIn(f'id="{anchor}"', guide)
+        self.assertNotRegex(
+            guide,
+            r'<section[^>]*class="[^"\n]*\bmt-5\b',
+            "Layout guide sections should rely on the shared document-grid gap",
+        )
         for legacy in (
             DIST / "layouts/index.html",
             DIST / "layouts/app/index.html",

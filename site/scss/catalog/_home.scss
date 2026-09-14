@@ -3,7 +3,7 @@
   --scroll-fade-reveal: 10rem;
 }
 
-.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main:has(.moo-home-hero) > .container {
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main:has(.moo-home-hero) > .container-xl {
   flex-shrink: 0;
 }
 
