@@ -56,14 +56,6 @@
   }) %}
 {% endfor %}
 
-{% set layout_items = [{
-  "kind": "link",
-  "label": layout_page.label,
-  "href": layout_page.href,
-  "icon": layout_page.icon,
-  "active": current_section == "sections" and current_slug == layout_page.slug
-}] %}
-
 {% set resource_items = [] %}
 {% for page in resource_pages %}
   {% set _ = resource_items.append({
@@ -81,11 +73,11 @@
     "entries": [
       {"kind": "link", "label": "Home", "href": "index.html", "icon": "house", "active": home_active},
       {"kind": "link", "label": introduction.label, "href": introduction.href, "icon": introduction.icon, "active": current_section == "sections" and current_slug == introduction.slug},
-      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug}
+      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug},
+      {"kind": "link", "label": layout_page.label, "href": layout_page.href, "icon": layout_page.icon, "active": current_section == "sections" and current_slug == layout_page.slug}
     ]
   },
   {"label": "Catalog", "entries": catalog_items},
-  {"label": "Layout", "entries": layout_items},
   {"label": "Resources", "entries": resource_items}
 ] %}
 

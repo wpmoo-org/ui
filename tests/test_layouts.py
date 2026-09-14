@@ -626,10 +626,65 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertIn('href="#containers"', page)
         self.assertIn('href="#grid"', page)
         self.assertIn('href="#columns"', page)
-        self.assertNotIn('href="#gutters"', page)
-        self.assertNotIn('href="#utilities"', page)
-        self.assertNotIn('href="#z-index"', page)
-        self.assertNotIn('href="#css-grid"', page)
+        self.assertIn('href="#gutters"', page)
+        self.assertIn('href="#utilities"', page)
+        self.assertIn('href="#z-index"', page)
+        self.assertIn('href="#css-grid"', page)
+
+    def test_layout_guide_documents_native_utility_sections_and_css_grid(self) -> None:
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        page = self.read_output("layout/index.html")
+
+        section_starts = {
+            slug: page.index(f'id="{slug}"')
+            for slug in ("gutters", "utilities", "z-index", "css-grid")
+        }
+        self.assertLess(section_starts["gutters"], section_starts["utilities"])
+        self.assertLess(section_starts["utilities"], section_starts["z-index"])
+        self.assertLess(section_starts["z-index"], section_starts["css-grid"])
+
+        for slug, label in (
+            ("gutters", "Gutters"),
+            ("utilities", "Utilities"),
+            ("z-index", "Z-index"),
+            ("css-grid", "CSS Grid"),
+        ):
+            with self.subTest(slug=slug):
+                self.assertIn(f'href="#{slug}"', page)
+                self.assertIn(f'>{label}</a>', page)
+
+        gutters_start = section_starts["gutters"]
+        utilities_start = section_starts["utilities"]
+        gutters_section = page[gutters_start:utilities_start]
+        self.assertEqual(gutters_section.count('data-example="layout-gutters-example"'), 1)
+        self.assertIn('class="row gx-5"', gutters_section)
+        self.assertIn('href="https://getbootstrap.com/docs/5.3/layout/gutters/"', gutters_section)
+
+        z_index_start = section_starts["z-index"]
+        css_grid_start = section_starts["css-grid"]
+        z_index_section = page[z_index_start:css_grid_start]
+        for token, value in (
+            ("$zindex-dropdown", "1000"),
+            ("$zindex-modal", "1055"),
+            ("$zindex-toast", "1090"),
+        ):
+            with self.subTest(token=token):
+                self.assertIn(f'<code>{token}</code>', z_index_section)
+                self.assertIn(f'>{value}</td>', z_index_section)
+        self.assertIn('href="https://getbootstrap.com/docs/5.3/layout/z-index/"', z_index_section)
+
+        css_grid_section = page[css_grid_start:]
+        self.assertEqual(css_grid_section.count('data-example="layout-css-grid-example"'), 1)
+        self.assertIn('class="grid gap-3"', css_grid_section)
+        self.assertIn('class="g-col-6 g-col-md-4 p-3 border rounded bg-body-tertiary"', css_grid_section)
+        self.assertIn('href="https://getbootstrap.com/docs/5.3/layout/css-grid/"', css_grid_section)
+        source_start = page.index('id="layout-css-grid-example-code"', css_grid_start)
+        source_end = page.index("</pre>", source_start)
+        source = unescape(re.sub(r"<[^>]+>", "", page[source_start:source_end]))
+        self.assertIn('class="grid gap-3"', source)
+        self.assertIn('class="g-col-6 g-col-md-8"', source)
+        self.assertNotIn("p-3 border rounded bg-body-tertiary", source)
 
     def test_layout_grid_and_columns_examples_keep_visual_preview_and_simple_source(self) -> None:
         result = self.run_build()

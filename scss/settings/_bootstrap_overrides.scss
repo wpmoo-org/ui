@@ -4,6 +4,10 @@ $btn-box-shadow: none !default;
 $btn-focus-box-shadow: none !default;
 $btn-active-box-shadow: none !default;
 
+// Keep Bootstrap's CSS Grid utility layer available alongside the Flexbox
+// grid so native .grid and .g-col-* markup works in Moo UI hosts.
+$enable-cssgrid: true !default;
+
 // Bootstrap validation icons are background images injected by the native
 // validation mixin. Reference-style invalid fields use border/ring + error text
 // without a trailing status glyph, so disable the Bootstrap icon branch at the

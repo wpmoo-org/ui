@@ -290,6 +290,159 @@
         ) }}
       </section>
 
+      <section aria-labelledby="gutters">
+        {{ typography("Gutters", variant="section-title", id="gutters") }}
+        <p>
+          Gutters are the space between columns and rows. Use
+          <code>gx-*</code> for horizontal gutters, <code>gy-*</code> for
+          vertical gutters, or <code>g-0</code> to remove gutters altogether.
+        </p>
+        {% set gutters_source %}
+          <div class="container px-4 text-center">
+            <div class="row gx-5">
+              <div class="col">
+                <div class="p-3">Custom column padding</div>
+              </div>
+              <div class="col">
+                <div class="p-3">Custom column padding</div>
+              </div>
+            </div>
+          </div>
+        {% endset %}
+        {% set gutters_example %}
+          <div class="container px-4 text-center">
+            <div class="row gx-5">
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Custom column padding</div>
+              </div>
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Custom column padding</div>
+              </div>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-gutters-example",
+          "Gutters example",
+          "",
+          gutters_example,
+          show_header=false,
+          source_content=gutters_source
+        ) }}
+        <p class="mt-4 mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/gutters/" target="_blank" rel="noopener noreferrer">Bootstrap gutters documentation</a>
+          for responsive gutter variants and the complete utility API.
+        </p>
+      </section>
+
+      <section aria-labelledby="utilities">
+        {{ typography("Utilities", variant="section-title", id="utilities") }}
+        <p>
+          Bootstrap utilities are small, composable helpers for display, flex,
+          spacing, sizing, and positioning. Add a responsive infix such as
+          <code>d-md-flex</code> or <code>mt-lg-4</code> when a utility should
+          change at a breakpoint.
+        </p>
+        <p>
+          Compose utilities directly on the element they affect and keep the
+          smallest useful set of classes. Start with the base utility, then
+          add a breakpoint variant only when the layout needs to change.
+        </p>
+        <p class="mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/utilities/" target="_blank" rel="noopener noreferrer">Bootstrap utilities documentation</a>
+          for the complete API.
+        </p>
+      </section>
+
+      <section aria-labelledby="z-index">
+        {{ typography("Z-index", variant="section-title", id="z-index") }}
+        <p>
+          The <code>z-index</code> property controls the stacking order of
+          overlapping surfaces. Moo UI follows Bootstrap's reserved scale:
+          dropdowns start at <code>1000</code>, fixed surfaces at
+          <code>1030</code>, modals at <code>1050</code>, popovers at
+          <code>1070</code>, tooltips at <code>1080</code>, and toasts at
+          <code>1090</code>.
+        </p>
+        <p>
+          Use low local values such as <code>1</code>, <code>2</code>, or
+          <code>3</code> for small sibling overlaps. Avoid arbitrary high
+          values so shared overlays keep their predictable order.
+        </p>
+        {% set z_index_caption = "Bootstrap's reserved stacking scale for Moo UI overlays." %}
+        {{ table(
+          ["Bootstrap token", "Value"],
+          [
+            ["<code>$zindex-dropdown</code>", "1000"],
+            ["<code>$zindex-sticky</code>", "1020"],
+            ["<code>$zindex-fixed</code>", "1030"],
+            ["<code>$zindex-offcanvas-backdrop</code>", "1040"],
+            ["<code>$zindex-offcanvas</code>", "1045"],
+            ["<code>$zindex-modal-backdrop</code>", "1050"],
+            ["<code>$zindex-modal</code>", "1055"],
+            ["<code>$zindex-popover</code>", "1070"],
+            ["<code>$zindex-tooltip</code>", "1080"],
+            ["<code>$zindex-toast</code>", "1090"]
+          ],
+          caption=z_index_caption,
+          row_header=true,
+          extra_class="align-middle moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+        <p class="mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/z-index/" target="_blank" rel="noopener noreferrer">Bootstrap z-index documentation</a>
+          for the complete API.
+        </p>
+      </section>
+
+      <section aria-labelledby="css-grid">
+        {{ typography("CSS Grid", variant="section-title", id="css-grid") }}
+        <p>
+          Bootstrap's CSS Grid utilities use native CSS Grid through
+          <code>.grid</code> and <code>.g-col-*</code> classes. Unlike the
+          Flexbox-based <code>.row</code>/<code>.col</code> grid, CSS Grid
+          places items on a two-dimensional track system and lets each item
+          span an explicit number of columns.
+        </p>
+        <p>
+          Use <code>.g-col-6</code> for half-width tracks, then add a
+          responsive span such as <code>.g-col-md-4</code> when the layout
+          should change at a breakpoint.
+        </p>
+        {% set css_grid_source %}
+          <div class="grid gap-3">
+            <div class="g-col-6">g-col-6</div>
+            <div class="g-col-6">g-col-6</div>
+            <div class="g-col-6 g-col-md-4">g-col-6 g-col-md-4</div>
+            <div class="g-col-6 g-col-md-8">g-col-6 g-col-md-8</div>
+          </div>
+        {% endset %}
+        {% set css_grid_example %}
+          <div class="grid gap-3">
+            <div class="g-col-6 p-3 border rounded bg-body-tertiary">g-col-6</div>
+            <div class="g-col-6 p-3 border rounded bg-body-tertiary">g-col-6</div>
+            <div class="g-col-6 g-col-md-4 p-3 border rounded bg-body-tertiary">g-col-6 g-col-md-4</div>
+            <div class="g-col-6 g-col-md-8 p-3 border rounded bg-body-tertiary">g-col-6 g-col-md-8</div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-css-grid-example",
+          "CSS Grid example",
+          "",
+          css_grid_example,
+          show_header=false,
+          source_content=css_grid_source
+        ) }}
+        <p class="mt-4 mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/css-grid/" target="_blank" rel="noopener noreferrer">Bootstrap CSS Grid documentation</a>
+          for custom tracks, nesting, and the complete utility API.
+        </p>
+      </section>
+
       {{ render_section_page_pagination("layout", site_pages, root_path) }}
     </article>
 
@@ -300,7 +453,11 @@
       {"id": "breakpoints", "label": "Breakpoints"},
       {"id": "containers", "label": "Containers"},
       {"id": "grid", "label": "Grid"},
-      {"id": "columns", "label": "Columns"}
+      {"id": "columns", "label": "Columns"},
+      {"id": "gutters", "label": "Gutters"},
+      {"id": "utilities", "label": "Utilities"},
+      {"id": "z-index", "label": "Z-index"},
+      {"id": "css-grid", "label": "CSS Grid"}
     ]) }}
   </div>
 {% endblock %}

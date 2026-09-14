@@ -1959,40 +1959,35 @@ class CatalogContractTests(CatalogTestCase):
         home_index = sidebar.index('href="./"')
         docs_index = sidebar.index('href="introduction/"')
         installation_index = sidebar.index('href="installation/"')
+        layout_index = sidebar.index('href="layout/"')
         catalog_index = sidebar.index(">Catalog<")
-        layout_group_index = sidebar.index(">Layout<")
         resources_index = sidebar.index(">Resources<")
         examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         blocks_index = sidebar.index('href="blocks/"')
         charts_index = sidebar.index('href="charts/"')
         utilities_index = sidebar.index('href="utils/scroll-fade/"')
-        layout_index = sidebar.index('href="layout/"')
 
         self.assertLess(home_index, docs_index)
         self.assertLess(docs_index, installation_index)
-        self.assertLess(installation_index, catalog_index)
+        self.assertLess(installation_index, layout_index)
+        self.assertLess(layout_index, catalog_index)
         self.assertLess(catalog_index, examples_index)
         self.assertLess(examples_index, components_index)
         self.assertLess(blocks_index, charts_index)
         self.assertLess(charts_index, utilities_index)
-        self.assertLess(catalog_index, layout_group_index)
-        self.assertLess(layout_group_index, resources_index)
-        self.assertLess(layout_group_index, layout_index)
         self.assertLess(utilities_index, resources_index)
         self.assertIn(">Introduction<", sidebar)
         self.assertIn(">Getting Started<", sidebar)
         self.assertIn(">Catalog<", sidebar)
-        self.assertIn(">Layout<", sidebar)
+        self.assertNotIn('sidebar-group-label" data-slot="sidebar-group-label">Layout<', sidebar)
         self.assertIn(">Resources<", sidebar)
-        getting_started_group = sidebar[installation_index:catalog_index]
-        catalog_group = sidebar[catalog_index:layout_group_index]
-        layout_group = sidebar[layout_group_index:resources_index]
+        getting_started_group = sidebar[:catalog_index]
+        catalog_group = sidebar[catalog_index:resources_index]
         resource_group = sidebar[resources_index:]
-        self.assertNotIn('href="layout/"', getting_started_group)
+        self.assertIn('href="layout/"', getting_started_group)
+        self.assertEqual(getting_started_group.count('href="layout/"'), 1)
         self.assertNotIn('href="layout/"', catalog_group)
-        self.assertIn('href="layout/"', layout_group)
-        self.assertEqual(layout_group.count('href="layout/"'), 1)
         self.assertNotIn('href="layouts/"', resource_group)
 
     def test_catalog_examples_keep_bootstrap_native_layout_classes(self) -> None:
