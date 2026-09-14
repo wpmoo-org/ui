@@ -175,6 +175,68 @@
         ) }}
       </section>
 
+      <section aria-labelledby="grid">
+        {{ typography("Grid", variant="section-title", id="grid") }}
+        <p>
+          The Bootstrap grid arranges content into responsive columns. It uses
+          a twelve-column row, breakpoint-specific column classes, and gutters
+          so a layout can stack on small screens and spread across wider ones.
+        </p>
+        {% set grid_example %}
+          <div class="container py-4">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Column 1</div>
+              </div>
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Column 2</div>
+              </div>
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Column 3</div>
+              </div>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-grid-example",
+          "Grid example",
+          "",
+          grid_example,
+          show_header=false
+        ) }}
+        <h3 class="h4 mt-5 mb-3">Grid options</h3>
+        <p class="mb-4">
+          The table summarizes the breakpoint widths, class prefixes, and
+          column features available in the Bootstrap grid.
+        </p>
+        {% set grid_caption = '<a href="https://getbootstrap.com/docs/5.3/layout/grid/" target="_blank" rel="noopener noreferrer">Bootstrap grid defaults</a> used by Moo UI responsive layout utilities.' | safe %}
+        {% set grid_headers = [
+          "Grid option",
+          "<span class=\"fw-bold\">xs</span><br><span class=\"fw-normal\">&lt;576px</span>" | safe,
+          "<span class=\"fw-bold\">sm</span><br><span class=\"fw-normal\">≥576px</span>" | safe,
+          "<span class=\"fw-bold\">md</span><br><span class=\"fw-normal\">≥768px</span>" | safe,
+          "<span class=\"fw-bold\">lg</span><br><span class=\"fw-normal\">≥992px</span>" | safe,
+          "<span class=\"fw-bold\">xl</span><br><span class=\"fw-normal\">≥1200px</span>" | safe,
+          "<span class=\"fw-bold\">xxl</span><br><span class=\"fw-normal\">≥1400px</span>" | safe
+        ] %}
+        {{ table(
+          grid_headers,
+          [
+            ["Container <span class=\"text-body-secondary\">max-width</span>", "None (auto)", "540px", "720px", "960px", "1140px", "1320px"],
+            ["Class prefix", "<code>.col-</code>", "<code>.col-sm-</code>", "<code>.col-md-</code>", "<code>.col-lg-</code>", "<code>.col-xl-</code>", "<code>.col-xxl-</code>"],
+            ["# of columns", "12", "", "", "", "", ""],
+            ["Gutter width", "1.5rem <span class=\"text-body-secondary\">(.75rem on left and right)</span>", "", "", "", "", ""],
+            ["Custom gutters", "Yes", "", "", "", "", ""],
+            ["Nestable", "Yes", "", "", "", "", ""],
+            ["Column ordering", "Yes", "", "", "", "", ""]
+          ],
+          caption=grid_caption,
+          row_header=true,
+          extra_class="align-middle moo-layout-table moo-grid-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
       {{ render_section_page_pagination("layout", site_pages, root_path) }}
     </article>
 
@@ -183,7 +245,8 @@
       {"id": "sidebar", "label": "Sidebar"},
       {"id": "page", "label": "Page"},
       {"id": "breakpoints", "label": "Breakpoints"},
-      {"id": "containers", "label": "Containers"}
+      {"id": "containers", "label": "Containers"},
+      {"id": "grid", "label": "Grid"}
     ]) }}
   </div>
 {% endblock %}
