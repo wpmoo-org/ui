@@ -4050,6 +4050,11 @@ class CatalogContractTests(CatalogTestCase):
             r'<section[^>]*class="[^"\n]*\bmt-5\b',
             "Layout guide sections should rely on the shared document-grid gap",
         )
+        self.assertNotRegex(
+            guide,
+            r'<table[^>]*class="[^"\n]*\bmb-4\b',
+            "Layout guide tables should not add a trailing Bootstrap margin",
+        )
         for legacy in (
             DIST / "layouts/index.html",
             DIST / "layouts/app/index.html",
