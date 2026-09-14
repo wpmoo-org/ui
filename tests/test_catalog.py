@@ -3212,10 +3212,14 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn(f"<code>{entrypoint}</code>", support)
         self.assertRegex(
             support,
-            r"<th scope=\"row\">Metadata</th>\s*"
-            r"<td>\s*<code>@wpmoo/ui/certification\.json</code>,\s*"
-            r"<code>@wpmoo/ui/package\.json</code>\s*</td>",
+            r"<tr><th scope=\"col\">SASS</th></tr>",
         )
+        self.assertNotIn('<th scope="row">Sass</th>', support)
+        self.assertRegex(
+            support,
+            r"<tr><th scope=\"col\">METADATA</th></tr>",
+        )
+        self.assertNotIn('<th scope="row">Metadata</th>', support)
         self.assertIn("metadata", certification["publicEntrypoints"])
         for entrypoint in certification["publicEntrypoints"]["metadata"]:
             with self.subTest(metadata_entrypoint=entrypoint):

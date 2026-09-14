@@ -380,6 +380,35 @@
   min-width: 0;
 }
 
+// Layout contract tables stay readable at narrow viewports. Let their
+// responsive wrapper scroll instead of allowing the table columns to collapse
+// into cramped, multi-line labels.
+.moo-doc-page .moo-layout-table {
+  min-width: 36rem;
+}
+
+.moo-doc-page .moo-layout-table :is(th, td):first-child {
+  white-space: nowrap;
+}
+
+.moo-doc-page .moo-layout-table thead th {
+  background-color: color-mix(in srgb, var(--bs-body-color) 6%, var(--bs-body-bg));
+}
+
+.moo-doc-page .moo-container-table {
+  min-width: 48rem;
+}
+
+// Support facts and entrypoint tables use the same scroll surface so package
+// values stay readable instead of collapsing into narrow mobile columns.
+.moo-doc-page .moo-support-table {
+  min-width: 36rem;
+}
+
+.moo-doc-page .moo-support-table :is(th, td):first-child {
+  white-space: nowrap;
+}
+
 .moo-doc-main {
   min-width: 0;
   max-width: 52rem;

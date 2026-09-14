@@ -27,63 +27,163 @@
           Page surface; choose the Sidebar variant to set their spatial
           relationship.
         </p>
-        <section class="mt-4" aria-labelledby="sidebar">
-          {{ typography("Sidebar", variant="subsection-title", id="sidebar") }}
-          <p>
-            Sidebar is the App's navigation surface. Its variant changes the
-            surface geometry without changing the Sidebar's regions, controls,
-            or Bootstrap behavior.
-          </p>
-          {{ table(
-            ["Variant", "How it behaves"],
-            [
-              ["<code>sidebar</code>", "Keeps the navigation surface attached to the App edge; this is the default."],
-              ["<code>floating</code>", "Detaches the navigation surface with a border, radius, and shadow."],
-              ["<code>inset</code>", "Keeps the Sidebar at the edge and gives the Page an inset, elevated surface."]
-            ],
-            caption="Sidebar variants supported by the App shell.",
-            row_header=true,
-            small=true,
-            extra_class="align-middle mb-4",
-            responsive_class="scroll-fade-x no-scrollbar"
+        {% set app_screen %}
+          {{ render_sidebar_shell(
+            key="layout-app-sidebar",
+            sidebar_id="layout-app-sidebar-demo",
+            variant="floating",
+            demo_copy="portal"
           ) }}
-          {% set app_screen %}
-            {{ render_sidebar_shell(
-              key="layout-app-sidebar",
-              sidebar_id="layout-app-sidebar-demo",
-              variant="floating",
-              demo_copy="portal"
-            ) }}
-          {% endset %}
-          {% set app_source %}
-            <div class="wrapper" data-layout="app" data-shell-mode="viewport" data-sidebar="floating">
-              <aside class="sidebar" aria-label="Sidebar">
-                Sidebar navigation
-              </aside>
-              <main class="page">
-                Page content
-              </main>
-            </div>
-          {% endset %}
-          {{ render_block_example(
-            "layout-app-example",
-            "Floating variant",
-            "The floating Sidebar variant detaches the navigation surface from the edge while the Page owns the current screen.",
-            app_screen,
-            preview_class="moo-example__preview--shell",
-            frame_src=site_href("blocks/previews/sidebar-floating.html", root_path),
-            source_content=app_source
-          ) }}
-        </section>
+        {% endset %}
+        {% set app_source %}
+          <div class="wrapper" data-layout="app" data-shell-mode="viewport" data-sidebar="floating">
+            <aside class="sidebar" aria-label="Sidebar">
+              Sidebar navigation
+            </aside>
+            <main>
+              Page content
+            </main>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-app-example",
+          "Sidebar preview",
+          "",
+          app_screen,
+          preview_class="moo-example__preview--shell",
+          frame_src=site_href("blocks/previews/sidebar-floating.html", root_path),
+          show_header=false,
+          source_content=app_source
+        ) }}
+      </section>
+
+      <section class="mt-5" aria-labelledby="sidebar">
+        {{ typography("Sidebar", variant="section-title", id="sidebar") }}
+        <p>
+          Sidebar is the App's navigation surface. Its variant changes the
+          surface geometry without changing the Sidebar's regions, controls,
+          or Bootstrap behavior.
+        </p>
+        {{ table(
+          ["Variant", "How it behaves"],
+          [
+            ["<code>sidebar</code>", "Keeps the navigation surface attached to the App edge; this is the default."],
+            ["<code>floating</code>", "Detaches the navigation surface with a border, radius, and shadow."],
+            ["<code>inset</code>", "Keeps the Sidebar at the edge and gives the Page an inset, elevated surface."]
+          ],
+          caption="Sidebar variants supported by the App shell.",
+          row_header=true,
+          extra_class="align-middle mb-4 moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section class="mt-5" aria-labelledby="page">
+        {{ typography("Page", variant="section-title", id="page") }}
+        <p>
+          Page is the content surface inside an App. It is the direct content
+          sibling of Sidebar and owns the screen's content flow and scrolling.
+          It can contain semantic <code>header</code>, <code>main</code>, and
+          <code>footer</code> regions while keeping the screen content on one
+          shared rail.
+        </p>
+        <p>
+          The Page wrapper uses <code>data-slot="page"</code> as a structural
+          hook so App and Catalog can coordinate layout and scroll behavior;
+          it is not a styling requirement.
+        </p>
+        <p>
+          The <code>.page</code> class is optional. Semantic regions and the
+          Page's position as the App's content sibling define the contract;
+          add a class only when a styling hook is useful.
+        </p>
+        {{ table(
+          ["Key point", "Contract"],
+          [
+            ["<code>header</code>", "Optional; holds page-level context or actions."],
+            ["<code>main</code>", "Required; contains the primary screen content."],
+            ["<code>footer</code>", "Optional; holds trailing actions or status."]
+          ],
+          caption="Page regions and semantic contract.",
+          row_header=true,
+          extra_class="align-middle mb-4 moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section class="mt-5" aria-labelledby="breakpoints">
+        {{ typography("Breakpoints", variant="section-title", id="breakpoints") }}
+        <p>
+          Breakpoints are the mobile-first width thresholds where a Moo layout
+          can change its composition. Use the class infix to apply a grid,
+          display, or spacing change from that minimum width upward.
+        </p>
+        <p>
+          Start with the smallest useful layout, then add a breakpoint only
+          when the content needs a different arrangement.
+        </p>
+        {% set breakpoints_caption = '<a href="https://getbootstrap.com/docs/5.3/layout/breakpoints/" target="_blank" rel="noopener noreferrer">Bootstrap breakpoints</a> used by Moo UI responsive layout utilities.' | safe %}
+        {{ table(
+          ["Breakpoint", "Class infix", "Dimensions"],
+          [
+            ["Extra small", "<em>None</em>", "&lt;576px"],
+            ["Small", "<code>sm</code>", "≥576px"],
+            ["Medium", "<code>md</code>", "≥768px"],
+            ["Large", "<code>lg</code>", "≥992px"],
+            ["Extra large", "<code>xl</code>", "≥1200px"],
+            ["Extra extra large", "<code>xxl</code>", "≥1400px"]
+          ],
+          caption=breakpoints_caption,
+          row_header=true,
+          extra_class="align-middle mb-4 moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section class="mt-5" aria-labelledby="containers">
+        {{ typography("Containers", variant="section-title", id="containers") }}
+        <p>
+          Containers keep layout content on a readable rail and apply a
+          responsive max-width at each breakpoint. Use the fluid variant when
+          a surface should span the available viewport width.
+        </p>
+        {% set containers_caption = '<a href="https://getbootstrap.com/docs/5.3/layout/containers/" target="_blank" rel="noopener noreferrer">Bootstrap container widths</a> used by Moo UI responsive layout utilities.' | safe %}
+        {% set containers_headers = [
+          "Container",
+          "<span class=\"fw-bold\">Extra small</span><br><span class=\"fw-normal\">&lt;576px</span>" | safe,
+          "<span class=\"fw-bold\">Small</span><br><span class=\"fw-normal\">≥576px</span>" | safe,
+          "<span class=\"fw-bold\">Medium</span><br><span class=\"fw-normal\">≥768px</span>" | safe,
+          "<span class=\"fw-bold\">Large</span><br><span class=\"fw-normal\">≥992px</span>" | safe,
+          "<span class=\"fw-bold\">X-Large</span><br><span class=\"fw-normal\">≥1200px</span>" | safe,
+          "<span class=\"fw-bold\">XX-Large</span><br><span class=\"fw-normal\">≥1400px</span>" | safe
+        ] %}
+        {{ table(
+          containers_headers,
+          [
+            ["<code>.container</code>", "100%", "540px", "720px", "960px", "1140px", "1320px"],
+            ["<code>.container-sm</code>", "100%", "540px", "720px", "960px", "1140px", "1320px"],
+            ["<code>.container-md</code>", "100%", "100%", "720px", "960px", "1140px", "1320px"],
+            ["<code>.container-lg</code>", "100%", "100%", "100%", "960px", "1140px", "1320px"],
+            ["<code>.container-xl</code>", "100%", "100%", "100%", "100%", "1140px", "1320px"],
+            ["<code>.container-xxl</code>", "100%", "100%", "100%", "100%", "100%", "1320px"],
+            ["<code>.container-fluid</code>", "100%", "100%", "100%", "100%", "100%", "100%"]
+          ],
+          caption=containers_caption,
+          row_header=true,
+          extra_class="align-middle mb-4 moo-layout-table moo-container-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
       </section>
 
       {{ render_section_page_pagination("layout", site_pages, root_path) }}
     </article>
 
     {{ render_doc_toc([
-      {"id": "layout", "label": "Layout"},
       {"id": "app", "label": "App"},
-      {"id": "sidebar", "label": "Sidebar"}
+      {"id": "sidebar", "label": "Sidebar"},
+      {"id": "page", "label": "Page"},
+      {"id": "breakpoints", "label": "Breakpoints"},
+      {"id": "containers", "label": "Containers"}
     ]) }}
   </div>
 {% endblock %}
