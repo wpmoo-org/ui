@@ -548,6 +548,7 @@ class LayoutCatalogTests(unittest.TestCase):
         guide = self.GUIDE.read_text(encoding="utf-8")
         self.assertIn('{% extends "layouts/catalog.html.jinja" %}', guide)
         self.assertIn('from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell', guide)
+        self.assertIn('from "components/table.html.jinja" import table', guide)
         self.assertIn("render_block_example(", guide)
         self.assertNotIn("render_code_snippet(", guide)
         self.assertNotIn('{% from "layouts/', guide)
@@ -579,7 +580,16 @@ class LayoutCatalogTests(unittest.TestCase):
         self.assertIn('id="layout-app-example-code"', page)
         self.assertIn('href="#app"', page)
         self.assertIn('>App</a>', page)
-        self.assertIn('Floating sidebar', page)
+        self.assertIn('<h3 class="h6" id="sidebar">Sidebar</h3>', page)
+        self.assertIn('href="#sidebar"', page)
+        self.assertIn('>Sidebar</a>', page)
+        self.assertIn('Floating variant', page)
+        app_start = page.index('id="app"')
+        app_end = page.index('aria-label="Docs pagination"', app_start)
+        app_section = page[app_start:app_end]
+        for variant in ("sidebar", "floating", "inset"):
+            with self.subTest(variant=variant):
+                self.assertIn(f">{variant}<", app_section)
         source_start = page.index('id="layout-app-example-code"')
         source_end = page.index("</pre>", source_start)
         source = page[source_start:source_end]

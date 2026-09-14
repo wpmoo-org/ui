@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
 {% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
+{% from "components/table.html.jinja" import table %}
 {% from "components/typography.html.jinja" import typography %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/doc-toc.html.jinja" import render_doc_toc %}
@@ -22,36 +23,58 @@
         {{ typography("App", variant="section-title", id="app") }}
         <p>
           Start with the application shell when a route owns navigation and
-          viewport behavior. This first example keeps the Sidebar detached
-          from the edge while the Page remains its own surface.
+          viewport behavior. App composes a Sidebar navigation surface with a
+          Page surface; choose the Sidebar variant to set their spatial
+          relationship.
         </p>
-        {% set app_screen %}
-          {{ render_sidebar_shell(
-            key="layout-app-floating",
-            sidebar_id="layout-app-floating-demo",
-            variant="floating",
-            demo_copy="portal"
+        <section class="mt-4" aria-labelledby="sidebar">
+          {{ typography("Sidebar", variant="subsection-title", id="sidebar") }}
+          <p>
+            Sidebar is the App's navigation surface. Its variant changes the
+            surface geometry without changing the Sidebar's regions, controls,
+            or Bootstrap behavior.
+          </p>
+          {{ table(
+            ["Variant", "How it behaves"],
+            [
+              ["<code>sidebar</code>", "Keeps the navigation surface attached to the App edge; this is the default."],
+              ["<code>floating</code>", "Detaches the navigation surface with a border, radius, and shadow."],
+              ["<code>inset</code>", "Keeps the Sidebar at the edge and gives the Page an inset, elevated surface."]
+            ],
+            caption="Sidebar variants supported by the App shell.",
+            row_header=true,
+            small=true,
+            extra_class="align-middle mb-4",
+            responsive_class="scroll-fade-x no-scrollbar"
           ) }}
-        {% endset %}
-        {% set app_source %}
-          <div class="wrapper" data-layout="app" data-shell-mode="viewport" data-sidebar="floating">
-            <aside class="sidebar" aria-label="Sidebar">
-              Sidebar navigation
-            </aside>
-            <main class="page">
-              Page content
-            </main>
-          </div>
-        {% endset %}
-        {{ render_block_example(
-          "layout-app-example",
-          "Floating sidebar",
-          "The App shell detaches the Sidebar from the edge as a bordered, elevated card while the Page owns the current screen.",
-          app_screen,
-          preview_class="moo-example__preview--shell",
-          frame_src=site_href("blocks/previews/sidebar-floating.html", root_path),
-          source_content=app_source
-        ) }}
+          {% set app_screen %}
+            {{ render_sidebar_shell(
+              key="layout-app-sidebar",
+              sidebar_id="layout-app-sidebar-demo",
+              variant="floating",
+              demo_copy="portal"
+            ) }}
+          {% endset %}
+          {% set app_source %}
+            <div class="wrapper" data-layout="app" data-shell-mode="viewport" data-sidebar="floating">
+              <aside class="sidebar" aria-label="Sidebar">
+                Sidebar navigation
+              </aside>
+              <main class="page">
+                Page content
+              </main>
+            </div>
+          {% endset %}
+          {{ render_block_example(
+            "layout-app-example",
+            "Floating variant",
+            "The floating Sidebar variant detaches the navigation surface from the edge while the Page owns the current screen.",
+            app_screen,
+            preview_class="moo-example__preview--shell",
+            frame_src=site_href("blocks/previews/sidebar-floating.html", root_path),
+            source_content=app_source
+          ) }}
+        </section>
       </section>
 
       {{ render_section_page_pagination("layout", site_pages, root_path) }}
@@ -59,7 +82,8 @@
 
     {{ render_doc_toc([
       {"id": "layout", "label": "Layout"},
-      {"id": "app", "label": "App"}
+      {"id": "app", "label": "App"},
+      {"id": "sidebar", "label": "Sidebar"}
     ]) }}
   </div>
 {% endblock %}
