@@ -955,12 +955,16 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
         prepaint = ROOT / "site/static/js/catalog-prepaint.js"
+        prepaint_source = prepaint.read_text(encoding="utf-8")
+        catalog_index = CATALOG_JS.read_text(encoding="utf-8")
 
         restore_index = source.index("this._restoreState();")
         ready_index = source.index('setAttribute("data-sidebar-ready", "")')
         self.assertLess(restore_index, ready_index)
         self.assertNotIn("requestAnimationFrame", source[restore_index:ready_index])
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertNotIn("sidebarCatalogState", base)
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint_source)
         self.assertTrue(prepaint.is_file())
         self.assertIn(
             '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
@@ -985,6 +989,8 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
             layout.index("catalog-prepaint.js"),
         )
         self.assertIn('removeAttribute("data-sidebar-ready")', source)
+        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint_source)
+        self.assertIn('element.removeAttribute("data-sidebar-prepaint-ready")', catalog_index)
         self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
         self.assertRegex(
             styles,
@@ -1005,6 +1011,8 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
         self.assertIn("data-moo-sidebar-active-prepaint", prepaint)
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
+        self.assertIn('data-sidebar-prepaint-ready', prepaint)
         self.assertIn(
             '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
             layout,

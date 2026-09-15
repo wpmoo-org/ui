@@ -51,23 +51,6 @@
     <script>
       (() => {
         try {
-          const sidebar = window.localStorage.getItem("moo-sidebar:catalog-shell");
-          if (sidebar === "collapsed" || sidebar === "expanded") {
-            document.documentElement.dataset.sidebarCatalogState = sidebar;
-            window.setTimeout(() => {
-              const shell = document.querySelector(
-                '[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]'
-              );
-              if (shell && !shell.hasAttribute("data-sidebar-ready")) {
-                shell.dataset.sidebarState = "expanded";
-                delete document.documentElement.dataset.sidebarCatalogState;
-              }
-            }, 1500);
-          }
-        } catch (_) {
-          /* localStorage can be unavailable in restricted browsing contexts. */
-        }
-        try {
           const themeBuilderFirstPaint = {{ theme_builder_first_paint | tojson }};
           const rawBuilder = window.localStorage.getItem("moo:theme-builder");
           const source = rawBuilder ? JSON.parse(rawBuilder) : null;

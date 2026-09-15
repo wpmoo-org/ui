@@ -1857,20 +1857,17 @@ class CatalogContractTests(CatalogTestCase):
         )[0]
         self.assertNotIn("d-none", dark_icon)
 
-    def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
+    def test_catalog_sidebar_persisted_state_handoff_runs_after_markup(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+            encoding="utf-8",
+        )
 
         handoff = 'document.documentElement.dataset.sidebarCatalogState'
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
-        self.assertIn(handoff, base)
-        self.assertLess(
-            base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
-        )
-        self.assertLess(
-            base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'),
-        )
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertNotIn(handoff, base)
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
+        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint)
 
     def test_built_catalog_prepaint_script_runs_after_catalog_markup(self) -> None:
         result = self.run_build()
@@ -1879,9 +1876,9 @@ class CatalogContractTests(CatalogTestCase):
         page = self.read_output("introduction.html")
         head = page.split("</head>", 1)[0]
         handoff = "dataset.sidebarCatalogState"
-        self.assertIn(handoff, head)
-        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.min.css"))
-        self.assertLess(head.index(handoff), head.index("assets/css/catalog.min.css"))
+        self.assertNotIn(handoff, head)
+        self.assertNotIn('moo-sidebar:catalog-shell', head)
+        self.assertLess(page.index("</html>"), len(page))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
         settings_index = page.index('id="catalog-settings"')
         prepaint_index = page.index('assets/js/catalog-prepaint.js?')
@@ -1896,6 +1893,17 @@ class CatalogContractTests(CatalogTestCase):
             '<script src="../assets/js/catalog-prepaint.js?',
             page,
         )
+
+    def test_catalog_prepaint_script_is_not_inlined_in_catalog_markup(self) -> None:
+        catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(
+            encoding="utf-8",
+        )
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            catalog,
+        )
+        self.assertNotIn("dataset.sidebarCatalogState", catalog)
+        self.assertNotIn("window.localStorage", catalog)
 
     def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
         catalog_scss = read_catalog_styles()

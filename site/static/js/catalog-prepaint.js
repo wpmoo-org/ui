@@ -5,10 +5,15 @@
 (function () {
   "use strict";
 
-  const state = document.documentElement.dataset.sidebarCatalogState;
   const shell = document.querySelector(
     '[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]'
   );
+  let state = null;
+  try {
+    state = window.localStorage.getItem("moo-sidebar:catalog-shell");
+  } catch (_) {
+    /* localStorage can be unavailable in restricted browsing contexts. */
+  }
   if (
     (state === "collapsed" || state === "expanded") &&
     shell?.dataset.sidebarKey === "catalog-shell"
@@ -41,26 +46,23 @@
       '[data-slot="sidebar-content"] a.sidebar-menu-button.active'
   );
   const content = active?.closest('[data-slot="sidebar-content"]');
-  if (!active || !content || content.clientHeight <= 0) {
-    return;
-  }
-  const maxScrollTop = content.scrollHeight - content.clientHeight;
-  if (maxScrollTop <= 0) {
-    return;
+  if (active && content && content.clientHeight > 0) {
+    const maxScrollTop = content.scrollHeight - content.clientHeight;
+    if (maxScrollTop > 0) {
+      const contentRect = content.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      if (contentRect.height > 0 && activeRect.height > 0) {
+        const targetScrollTop =
+          content.scrollTop +
+          activeRect.top -
+          contentRect.top -
+          (content.clientHeight - activeRect.height) / 2;
+        content.scrollTop = Math.round(
+          Math.min(Math.max(targetScrollTop, 0), maxScrollTop)
+        );
+      }
+    }
   }
 
-  const contentRect = content.getBoundingClientRect();
-  const activeRect = active.getBoundingClientRect();
-  if (contentRect.height <= 0 || activeRect.height <= 0) {
-    return;
-  }
-
-  const targetScrollTop =
-    content.scrollTop +
-    activeRect.top -
-    contentRect.top -
-    (content.clientHeight - activeRect.height) / 2;
-  content.scrollTop = Math.round(
-    Math.min(Math.max(targetScrollTop, 0), maxScrollTop)
-  );
+  shell?.setAttribute("data-sidebar-prepaint-ready", "");
 })();

@@ -163,6 +163,7 @@ export function initCatalog(root = document) {
   );
   sidebarRoots.forEach((element) => {
     const instance = Sidebar.getOrCreateInstance(element);
+    element.removeAttribute("data-sidebar-prepaint-ready");
     disposers.push(() => instance.dispose());
   });
 
