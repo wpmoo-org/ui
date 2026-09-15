@@ -1,6 +1,6 @@
 # Moo UI Layout Native Sections Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Execute this plan task-by-task and keep each step's verification evidence with the change. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Expand the single canonical `/layout/` document with Moo-specific App/Page guidance and one Bootstrap-native preview/source example for every layout topic, while placing Layout after Catalog in the sidebar.
 
@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python/Jinja site builder, Bootstrap 5.3 layout/utility classes, existing Moo catalog Sass/ESM, Python `unittest`, Playwright browser harness, and generated `site-dist` verification output. Release baselines are owned by the parent layout plan's Task 8.
 
-**Spec:** `docs/superpowers/specs/2026-09-14-moo-layout-native-sections-design.md`
+**Architecture note:** `docs/architectures/2026-09-14-moo-layout-native-sections-design.md`
 
 ## Global Constraints
 
