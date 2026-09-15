@@ -882,7 +882,7 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
-    def test_right_sidebar_and_rtl_keep_logical_page_placement(self) -> None:
+    def test_right_sidebar_and_rtl_keep_physical_page_placement(self) -> None:
         for side in ("left", "right"):
             for direction in ("ltr", "rtl"):
                 case = BrowserCase(
@@ -906,12 +906,18 @@ class LayoutBrowserTests(unittest.TestCase):
                               const pageRect = pageHost.getBoundingClientRect();
                               const rootRect = root.getBoundingClientRect();
                               const mainRect = main.getBoundingClientRect();
+                              const inner = sidebar.querySelector('.sidebar-inner');
+                              const innerStyle = getComputedStyle(inner);
                               const breadcrumb = pageHost.querySelector('.layout-certification-breadcrumb');
                               return {dir: document.documentElement.dir, sidebarSide: sidebar.dataset.side,
                                 sidebarLeft: sidebarRect.left, sidebarRight: sidebarRect.right,
                                 pageLeft: pageRect.left, pageRight: pageRect.right,
                                 rootLeft: rootRect.left, rootRight: rootRect.right,
                                 mainLeft: mainRect.left, mainRight: mainRect.right,
+                                borderLeft: innerStyle.borderLeftWidth,
+                                borderRight: innerStyle.borderRightWidth,
+                                accountItemCount: sidebar.querySelectorAll('.sidebar-menu-item--account').length,
+                                accountTriggerCount: sidebar.querySelectorAll('.sidebar-menu-button--account').length,
                                 viewportWidth: window.innerWidth,
                                 breadcrumbDirection: breadcrumb ? getComputedStyle(breadcrumb).direction : null,
                                 breadcrumbOrder: breadcrumb ? [...breadcrumb.querySelectorAll('.breadcrumb-item')].map(item => item.textContent.trim()) : [],
@@ -921,6 +927,14 @@ class LayoutBrowserTests(unittest.TestCase):
                         )
                         self.assertEqual(placement["sidebarSide"], side)
                         self.assertEqual(placement["dir"], direction)
+                        self.assertEqual(placement["accountItemCount"], 1)
+                        self.assertEqual(placement["accountTriggerCount"], 1)
+                        if side == "left":
+                            self.assertEqual(placement["borderLeft"], "0px")
+                            self.assertEqual(placement["borderRight"], "1px")
+                        else:
+                            self.assertEqual(placement["borderLeft"], "1px")
+                            self.assertEqual(placement["borderRight"], "0px")
                         tolerance = 1
                         self.assertGreaterEqual(placement["sidebarLeft"], -tolerance)
                         self.assertLessEqual(

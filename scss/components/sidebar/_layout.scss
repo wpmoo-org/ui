@@ -30,7 +30,9 @@
 }
 
 .sidebar[data-side="left"] .sidebar-inner {
-  border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border);
+  // `side` is a physical placement contract. Keep the divider on the
+  // Sidebar/Page boundary when the document direction is RTL as well.
+  border-right: var(--bs-border-width) solid var(--moo-sidebar-border);
 }
 
 .sidebar[data-side="right"] {
@@ -49,7 +51,7 @@
 }
 
 .sidebar[data-side="right"] .sidebar-inner {
-  border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
+  border-left: var(--bs-border-width) solid var(--moo-sidebar-border);
 }
 
 // Floating variant: the surface detaches from the viewport edge with a

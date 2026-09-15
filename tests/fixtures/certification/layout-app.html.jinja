@@ -89,8 +89,8 @@
         {% call sidebar_footer() %}
           {{ input(aria_label="Search navigation", id="layout-certification-search", type="search") }}
           {% call sidebar_menu() %}
-            {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend") %}
-              {{ sidebar_menu_button("Account", element="button", dropdown=true, size="lg", icon="circle-user", aria_label="Open account menu") }}
+            {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend", extra_class="sidebar-menu-item--account") %}
+              {{ sidebar_menu_button("Account", element="button", dropdown=true, size="lg", icon="circle-user", aria_label="Open account menu", extra_class="sidebar-menu-button--account") }}
               {% call dropdown_menu() %}
                 {{ dropdown_item("Profile") }}
                 {{ dropdown_item("Preferences") }}

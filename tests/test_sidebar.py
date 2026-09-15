@@ -106,6 +106,36 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('aria-controls="projects-sub"', output)
         self.assertIn('aria-expanded="true"', output)
 
+    def test_sidebar_account_hooks_and_physical_edge_rules_are_explicit(self) -> None:
+        output = self.render_sidebar(
+            """
+            {% call sidebar(id="catalog-sidebar") %}
+              {% call sidebar_menu_item(dropdown=true, extra_class="sidebar-menu-item--account") %}
+                {{ sidebar_menu_button(
+                  "Account",
+                  element="button",
+                  dropdown=true,
+                  extra_class="sidebar-menu-button--account"
+                ) }}
+              {% endcall %}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn("sidebar-menu-item--account", output)
+        self.assertIn("sidebar-menu-button--account", output)
+        styles = read_sidebar_styles()
+        self.assertRegex(
+            styles,
+            r'\.sidebar\[data-side="left"\] \.sidebar-inner\s*\{[^}]*border-right:',
+        )
+        self.assertRegex(
+            styles,
+            r'\.sidebar\[data-side="right"\] \.sidebar-inner\s*\{[^}]*border-left:',
+        )
+        self.assertIn("margin-left:", styles)
+        self.assertIn("margin-right:", styles)
+
     def test_sidebar_menu_action_uses_bootstrap_dropdown_and_aria_contract(self) -> None:
         output = self.render_sidebar(
             """
@@ -674,11 +704,11 @@ class SidebarTests(CatalogTestCase):
             styles, '.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"]) > [data-slot="page"]'
         )
         self.assertIn("margin: $spacer * 0.5", inset_content)
-        self.assertIn("margin-inline-start: 0", inset_content)
+        self.assertIn("margin-left: 0", inset_content)
         self.assertIn("border-radius:", inset_content)
         self.assertIn("box-shadow:", inset_content)
         self.assertIn(
-            "margin-inline-start: $spacer * 0.5",
+            "margin-left: $spacer * 0.5",
             _css_block(
                 styles,
                 '.wrapper[data-layout="app"][data-sidebar-state="collapsed"]:has(> .sidebar[data-variant="inset"]) > [data-slot="page"]',
@@ -696,10 +726,10 @@ class SidebarTests(CatalogTestCase):
             styles,
             '.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"][data-side="right"]) > [data-slot="page"]',
         )
-        self.assertIn("margin-inline-end: 0", right_inset)
-        self.assertIn("margin-inline-start: $spacer * 0.5", right_inset)
+        self.assertIn("margin-right: 0", right_inset)
+        self.assertIn("margin-left: $spacer * 0.5", right_inset)
         self.assertIn(
-            "margin-inline-end: $spacer * 0.5",
+            "margin-right: $spacer * 0.5",
             _css_block(
                 styles,
                 '.wrapper[data-layout="app"][data-sidebar-state="collapsed"]:has(> .sidebar[data-variant="inset"][data-side="right"]) > [data-slot="page"]',

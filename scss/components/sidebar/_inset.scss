@@ -8,22 +8,22 @@
 
   .wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"]) > [data-slot="page"] {
     margin: $spacer * 0.5;
-    margin-inline-start: 0;
+    margin-left: 0;
     border-radius: var(--bs-border-radius-xl);
     box-shadow: var(--bs-box-shadow-sm);
     background: var(--bs-body-bg);
   }
 
   .wrapper[data-layout="app"][data-sidebar-state="collapsed"]:has(> .sidebar[data-variant="inset"]) > [data-slot="page"] {
-    margin-inline-start: $spacer * 0.5;
+    margin-left: $spacer * 0.5;
   }
 
   .wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"][data-side="right"]) > [data-slot="page"] {
-    margin-inline-start: $spacer * 0.5;
-    margin-inline-end: 0;
+    margin-left: $spacer * 0.5;
+    margin-right: 0;
   }
 
   .wrapper[data-layout="app"][data-sidebar-state="collapsed"]:has(> .sidebar[data-variant="inset"][data-side="right"]) > [data-slot="page"] {
-    margin-inline-end: $spacer * 0.5;
+    margin-right: $spacer * 0.5;
   }
 }

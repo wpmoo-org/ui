@@ -217,11 +217,11 @@ body:has(.moo-catalog) {
 }
 
 .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="left"] .sidebar-inner {
-  border-inline-end: 0;
+  border-right: 0;
 }
 
 .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="right"] .sidebar-inner {
-  border-inline-start: 0;
+  border-left: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
