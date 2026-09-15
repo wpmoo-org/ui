@@ -11,12 +11,9 @@
 {% set page_identifier_first_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
 {% set page_identifier_characters = page_identifier_first_characters ~ "0123456789_-" %}
 
-{% macro page(width="xl", id="", main_class="") -%}
+{% macro page(width="xl", id="") -%}
   {% if width not in page_container_classes %}
     {{ fail("Unknown page width: " ~ width) }}
-  {% endif %}
-  {% if main_class is not string %}
-    {{ fail("Invalid page main class") }}
   {% endif %}
   {% if id is not string %}
     {{ fail("Invalid page id") }}
@@ -55,7 +52,7 @@
       </header>
     {% endif %}
     <main id="main-content" tabindex="-1">
-      <div class="{{ page_container_classes[width] }}{% if main_class %} {{ main_class }}{% endif %}">{{ main_content | safe }}</div>
+      <div class="{{ page_container_classes[width] }}">{{ main_content | safe }}</div>
     </main>
     {% if footer_content %}
       <footer>

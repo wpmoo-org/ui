@@ -19,18 +19,20 @@
 - Do not reproduce the Bootstrap Layout documentation locally.
 - Do not add separate `/layout/<topic>/` public routes.
 - Do not restore or redirect legacy `/layouts/...` routes without a new explicit approval.
-- The native-section work in this plan does not change
-  `src/layouts/app.html.jinja`, package entrypoints, or public runtime
-  contracts. A separate completed-lane review fix may remove the undocumented
-  `page(main_class)` parameter; do not duplicate that change in these native
-  section tasks.
+- The native-section work in this plan does not change package entrypoints or
+  public runtime contracts. The completed-lane review fix removes the
+  undocumented `page(main_class)` parameter and keeps catalog gutter ownership
+  in the catalog layout; native section work must consume that contract rather
+  than reintroduce a visual escape hatch.
 - Do not add Tabler references or aliases that hide Bootstrap classes.
 - Use `apply_patch`, run focused tests after each logical change, and stage only task files around pre-existing worktree edits.
 
 ## File Map
 
 - Modify `site/src/shell/sidebar.html.jinja`: move Layout out of Getting Started and add a dedicated group after Catalog.
+- Modify `src/layouts/page.html.jinja`: keep the public page macro limited to its documented width and id arguments.
 - Modify `site/src/pages/layout.html.jinja`: retain App/Page guidance and add the eight native integration sections.
+- Modify `site/src/layouts/catalog.html.jinja`: keep catalog-owned responsive gutters inside the page region.
 - Modify `tests/test_catalog.py`: lock sidebar ordering, the single Layout link, and the Catalog native-class boundary.
 - Modify `tests/test_layouts.py`: lock all Layout anchors, previews, source panels, and single-page routing.
 - Modify `tests/test_catalog_browser.py` or `tests/test_layouts_browser.py`: verify responsive public-page behavior.

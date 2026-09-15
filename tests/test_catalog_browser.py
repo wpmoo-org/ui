@@ -332,6 +332,29 @@ class CatalogBrowserTests(unittest.TestCase):
                     expect(app_example.locator(".moo-example__source")).to_have_count(1)
                     expect(page.locator('[data-example^="layout-"]')).to_have_count(1)
                     expect(page.locator('.moo-doc-toc')).to_have_count(1)
+                    section_widths = page.locator(".moo-doc-page > section").evaluate_all(
+                        "sections => sections.map(section => section.getBoundingClientRect().width)"
+                    )
+                    self.assertTrue(section_widths)
+                    self.assertLessEqual(
+                        max(section_widths) - min(section_widths),
+                        1,
+                        section_widths,
+                    )
+                    app_source = app_example.locator(
+                        ".moo-example__source"
+                    ).text_content() or ""
+                    for hook in (
+                        'data-slot="sidebar-wrapper"',
+                        'data-sidebar-key="app-shell"',
+                        'data-slot="sidebar"',
+                        'data-variant="floating"',
+                        'class="sidebar-inner"',
+                        'data-slot="page"',
+                        'id="main-content"',
+                    ):
+                        with self.subTest(viewport=viewport, hook=hook):
+                            self.assertIn(hook, app_source)
                     self.assertEqual(failed_responses, [])
                     evidence.assert_clean()
                 finally:

@@ -2080,7 +2080,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('class="moo-home-hero"', home)
         self.assertRegex(
             home,
-            r'<main id="main-content"[^>]*>\s*<div class="container-xl px-md-5">',
+            r'<main id="main-content"[^>]*>\s*'
+            r'<div class="container-xl">\s*'
+            r'<div class="row gx-0">\s*'
+            r'<div class="col px-md-5">',
         )
         self.assertNotIn("moo-catalog__content", home)
         self.assertIn('href="installation/"', home)
@@ -2252,7 +2255,9 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertRegex(
                     page,
                     r'<main id="main-content"[^>]*>\s*'
-                    r'<div class="container-xl px-md-5">',
+                    r'<div class="container-xl">\s*'
+                    r'<div class="row gx-0">\s*'
+                    r'<div class="col px-md-5">',
                 )
 
     def test_section_pages_render_page_actions_and_pagination(self) -> None:

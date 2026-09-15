@@ -76,25 +76,15 @@ class LayoutMacroTests(unittest.TestCase):
         self.assertNotIn("sidebar_inset", output)
         self.assertNotIn("sidebar-inset__", output)
 
-    def test_page_main_class_applies_only_to_the_main_container(self) -> None:
-        output = self.render_page(
-            """
-            {% call(region) page(width="xl", main_class="px-md-5") %}
-              {% if region == "header" %}Header
-              {% elif region == "main" %}Main
-              {% elif region == "footer" %}Footer
-              {% endif %}
-            {% endcall %}
-            """
-        )
-
-        self.assertEqual(output.count('class="container-xl"'), 2)
-        self.assertEqual(output.count('class="container-xl px-md-5"'), 1)
-        self.assertRegex(
-            output,
-            r'<main id="main-content" tabindex="-1">\s*'
-            r'<div class="container-xl px-md-5">',
-        )
+    def test_page_rejects_undocumented_main_class(self) -> None:
+        with self.assertRaises(TypeError):
+            self.render_page(
+                """
+                {% call(region) page(width="xl", main_class="px-md-5") %}
+                  {% if region == "main" %}Main{% endif %}
+                {% endcall %}
+                """
+            )
 
     def test_page_widths_map_to_one_native_container_per_region(self) -> None:
         for width, container_class in CONTAINER_CLASSES.items():
@@ -167,7 +157,13 @@ class LayoutMacroTests(unittest.TestCase):
                     self.render_page(source)
 
     def test_page_signature_does_not_accept_visual_escape_hatches(self) -> None:
-        for argument in ("extra_class", "header_width", "footer_width", "bleed"):
+        for argument in (
+            "extra_class",
+            "header_width",
+            "footer_width",
+            "bleed",
+            "main_class",
+        ):
             with self.subTest(argument=argument):
                 with self.assertRaises(TypeError):
                     self.render_page(
@@ -618,9 +614,18 @@ class LayoutCatalogTests(unittest.TestCase):
         source_end = page.index("</pre>", source_start)
         source = page[source_start:source_end]
         visible_source = unescape(re.sub(r"<[^>]+>", "", source))
-        self.assertNotIn("data-slot=", source)
-        self.assertNotIn("data-sidebar-key=", source)
-        self.assertIn('data-sidebar="floating"', visible_source)
+        for hook in (
+            'data-slot="sidebar-wrapper"',
+            'data-sidebar-key="app-shell"',
+            'data-slot="sidebar"',
+            'data-variant="floating"',
+            'class="sidebar-inner"',
+            'data-slot="page"',
+            'id="main-content"',
+        ):
+            with self.subTest(hook=hook):
+                self.assertIn(hook, visible_source)
+        self.assertNotIn('data-sidebar="floating"', visible_source)
         self.assertNotIn('data-example="layout-page-example"', page)
         self.assertIn('href="#breakpoints"', page)
         self.assertIn('href="#containers"', page)

@@ -36,13 +36,39 @@
           ) }}
         {% endset %}
         {% set app_source %}
-          <div class="wrapper" data-layout="app" data-shell-mode="viewport" data-sidebar="floating">
-            <aside class="sidebar" aria-label="Sidebar">
-              Sidebar navigation
+          <div class="wrapper" data-layout="app" data-shell-mode="viewport"
+            data-slot="sidebar-wrapper" data-sidebar-key="app-shell"
+            data-sidebar-state="expanded">
+            <aside id="app-sidebar" class="sidebar offcanvas-lg offcanvas-start"
+              tabindex="-1" data-slot="sidebar" data-side="left"
+              data-variant="floating" data-collapsible="icon"
+              aria-label="Sidebar">
+              <div class="sidebar-inner" data-slot="sidebar-inner">
+                <div class="sidebar-header" data-slot="sidebar-header">
+                  Sidebar navigation
+                </div>
+                <div class="sidebar-content" data-slot="sidebar-content">
+                  <a class="sidebar-menu-button" href="#"
+                    data-slot="sidebar-menu-button">Overview</a>
+                </div>
+              </div>
+              <button class="sidebar-rail" type="button"
+                data-sidebar-rail aria-label="Toggle sidebar" tabindex="-1"></button>
             </aside>
-            <main>
-              Page content
-            </main>
+            <div data-slot="page">
+              <header>
+                <div class="container-fluid">
+                  <button class="sidebar-trigger" type="button"
+                    data-sidebar-trigger data-bs-target="#app-sidebar"
+                    aria-controls="app-sidebar" aria-expanded="true">
+                    Toggle sidebar
+                  </button>
+                </div>
+              </header>
+              <main id="main-content" tabindex="-1">
+                <div class="container-fluid">Page content</div>
+              </main>
+            </div>
           </div>
         {% endset %}
         {{ render_block_example(
@@ -362,7 +388,9 @@
           The <code>z-index</code> property controls the stacking order of
           overlapping surfaces. Moo UI follows Bootstrap's reserved scale:
           dropdowns start at <code>1000</code>, fixed surfaces at
-          <code>1030</code>, modals at <code>1050</code>, popovers at
+          <code>1030</code>, offcanvas backdrops at <code>1040</code>,
+          offcanvas surfaces at <code>1045</code>, modal backdrops at
+          <code>1050</code>, modals at <code>1055</code>, popovers at
           <code>1070</code>, tooltips at <code>1080</code>, and toasts at
           <code>1090</code>.
         </p>
