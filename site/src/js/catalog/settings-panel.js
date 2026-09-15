@@ -46,14 +46,14 @@ function isDefaultBuilderPreference(preference) {
   );
 }
 
-function applyTokenSet(style, tokenNames, tokenValues = {}) {
+function applyTokenStyle(style, tokenNames, tokenValues = {}) {
   if (!style) return;
-  tokenNames.forEach((token) => {
-    style.removeProperty(token);
-  });
-  Object.entries(tokenValues).forEach(([token, value]) => {
-    style.setProperty(token, value);
-  });
+  const allowedTokens = new Set(tokenNames);
+  const declarations = Object.entries(tokenValues)
+    .filter(([token]) => allowedTokens.has(token))
+    .map(([token, value]) => `  ${token}: ${value};`)
+    .join("\n");
+  style.textContent = declarations ? `:root {\n${declarations}\n}` : "";
 }
 
 // Global settings panel (Phase 6): wires the System/Light/Dark theme radios
@@ -74,6 +74,7 @@ export function initSettingsPanel(root = document) {
   if (sheet) {
     const documentElement = root.documentElement || root.ownerDocument?.documentElement;
     const view = root.defaultView || root.ownerDocument?.defaultView;
+    const themeBuilderTokenStyle = root.querySelector("#moo-theme-builder-tokens");
     const themeInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-theme]")
     );
@@ -284,8 +285,8 @@ export function initSettingsPanel(root = document) {
           documentElement.dataset[datasetKey] = preference[key];
         }
       });
-      applyTokenSet(
-        documentElement.style,
+      applyTokenStyle(
+        themeBuilderTokenStyle,
         PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
         isDefaultBuilderPreference(preference)
           ? {}

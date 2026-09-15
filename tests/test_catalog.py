@@ -1878,6 +1878,29 @@ class CatalogContractTests(CatalogTestCase):
         card_rule = full_build[full_build.rindex(".card {") :].split("\n}", 1)[0]
         self.assertIn("--bs-card-border-color: var(--moo-border);", card_rule)
 
+    def test_theme_builder_tokens_use_a_head_style_block(self) -> None:
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        settings = (ROOT / "site/src/js/catalog/settings-panel.js").read_text(
+            encoding="utf-8"
+        )
+
+        style_marker = '<style id="moo-theme-builder-tokens"'
+        self.assertIn(style_marker, base)
+        style_index = base.index(style_marker)
+        moo_css_index = base.index(
+            '<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'
+        )
+        catalog_css_index = base.index(
+            '<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'
+        )
+        script_index = base.index("const themeBuilderFirstPaint")
+        self.assertGreater(style_index, catalog_css_index)
+        self.assertGreater(script_index, style_index)
+        self.assertNotIn("document.documentElement.style.setProperty", base)
+
+        self.assertIn('root.querySelector("#moo-theme-builder-tokens")', settings)
+        self.assertNotIn("applyTokenSet(\n        documentElement.style", settings)
+
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
         slot = catalog_scss.split(

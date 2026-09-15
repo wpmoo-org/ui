@@ -48,18 +48,21 @@
     <link rel="icon" href="{{ root_path }}favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="{{ root_path }}apple-touch-icon.png">
     <link rel="manifest" href="{{ root_path }}site.webmanifest">
+    {% block critical_prepaint_styles %}{% endblock %}
+    {% block font_preload %}
+    <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+    {% endblock %}
+    <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css?v={{ asset_version }}">
+    <style id="moo-theme-builder-tokens" data-moo-theme-builder-tokens></style>
     <script>
       (() => {
         try {
           const themeBuilderFirstPaint = {{ theme_builder_first_paint | tojson }};
           const rawBuilder = window.localStorage.getItem("moo:theme-builder");
           const source = rawBuilder ? JSON.parse(rawBuilder) : null;
+          const tokenStyle = document.getElementById("moo-theme-builder-tokens");
           if (source && typeof source === "object" && !Array.isArray(source)) {
-            const applyTokens = (tokens) => {
-              Object.entries(tokens).forEach(([token, value]) => {
-                document.documentElement.style.setProperty(token, value);
-              });
-            };
             const hasOwn = (object, key) =>
               Object.prototype.hasOwnProperty.call(object, key);
             // Keep this in sync with normalizeThemeBuilderState().
@@ -93,7 +96,7 @@
             };
             const isDefaultState = Object.entries(themeBuilderFirstPaint.defaults)
               .every(([key, value]) => state[key] === value);
-            if (isDefaultState) {
+            if (isDefaultState || !tokenStyle) {
               return;
             }
             const builderMode =
@@ -112,7 +115,9 @@
                 : {}
             );
 
-            applyTokens(tokens);
+            tokenStyle.textContent = `:root {\n${Object.entries(tokens)
+              .map(([token, value]) => `  ${token}: ${value};`)
+              .join("\n")}\n}`;
             Object.entries({
               baseColor: "mooCatalogThemeBuilderBaseColor",
               themeColor: "mooCatalogThemeBuilderThemeColor"
@@ -127,12 +132,6 @@
         }
       })();
     </script>
-    {% block critical_prepaint_styles %}{% endblock %}
-    {% block font_preload %}
-    <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
-    {% endblock %}
-    <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css?v={{ asset_version }}">
   </head>
   <body>
     <a class="visually-hidden-focusable" href="#main-content">

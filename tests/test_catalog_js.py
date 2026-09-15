@@ -833,10 +833,20 @@ const fixtures = [
 
 function makeStyle() {
   const values = {};
+  let textContent = "";
   return {
     values,
-    setProperty(name, value) {
-      values[name] = value;
+    get textContent() {
+      return textContent;
+    },
+    set textContent(value) {
+      textContent = String(value);
+      Object.keys(values).forEach((name) => delete values[name]);
+      const body = textContent.match(/:root\s*\{([\s\S]*)\}/)?.[1] || "";
+      body.split(";").forEach((declaration) => {
+        const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
+        if (match) values[match[1]] = match[2];
+      });
     },
   };
 }
@@ -872,14 +882,13 @@ function diffObject(actual, expected) {
 }
 
 function runInlineScript(fixture) {
-  const style = makeStyle();
+  const tokenStyle = makeStyle();
   const documentElement = {
     // The real document runs the theme-restoration inline script before the
     // Theme Builder first-paint script. Seed the same state here so dark
     // fixtures exercise the catalog-surface token branch.
     dataset: { bsTheme: fixture.theme },
     dir: "ltr",
-    style,
   };
   globalThis.window = {
     localStorage: makeStorage(fixture),
@@ -888,6 +897,8 @@ function runInlineScript(fixture) {
   };
   globalThis.document = {
     documentElement,
+    getElementById: (id) =>
+      id === "moo-theme-builder-tokens" ? tokenStyle : null,
     querySelector: () => null,
   };
 
@@ -895,7 +906,8 @@ function runInlineScript(fixture) {
 
   return {
     dataset: { ...documentElement.dataset },
-    tokens: style.values,
+    tokens: tokenStyle.values,
+    tokenStyle: tokenStyle.textContent,
   };
 }
 
@@ -1735,9 +1747,20 @@ function makeEmitter(node = {}) {
 
 function makeStyle() {
   const values = new Map();
+  let textContent = "";
   return {
-    setProperty: (name, value) => values.set(name, value),
-    removeProperty: (name) => values.delete(name),
+    get textContent() {
+      return textContent;
+    },
+    set textContent(value) {
+      textContent = String(value);
+      values.clear();
+      const body = textContent.match(/:root\s*\{([\s\S]*)\}/)?.[1] || "";
+      body.split(";").forEach((declaration) => {
+        const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
+        if (match) values.set(match[1], match[2]);
+      });
+    },
     getPropertyValue: (name) => values.get(name) || "",
   };
 }
@@ -1823,12 +1846,17 @@ const sheet = makeEmitter({
 const documentElement = {
   dataset: { bsTheme: "light" },
   dir: "ltr",
-  style: makeStyle(),
 };
+const themeBuilderTokenStyle = makeStyle();
 const root = {
   documentElement,
   defaultView: { localStorage, matchMedia: () => ({ matches: false }) },
-  querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
+  querySelector: (selector) =>
+    selector === "#catalog-settings"
+      ? sheet
+      : selector === "#moo-theme-builder-tokens"
+        ? themeBuilderTokenStyle
+        : null,
 };
 
 localStorage.setItem(
@@ -1867,16 +1895,16 @@ const initial = {
   themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor,
   broadStyleDataset: Object.hasOwn(documentElement.dataset, "mooThemeStyle"),
   broadBaseDataset: Object.hasOwn(documentElement.dataset, "mooBaseColor"),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
-  primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
-  foreground: documentElement.style.getPropertyValue("--moo-primary-foreground"),
-  chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
-  mutedSurface: documentElement.style.getPropertyValue("--moo-muted-surface"),
-  secondaryBg: documentElement.style.getPropertyValue("--bs-secondary-bg"),
-  cardBg: documentElement.style.getPropertyValue("--bs-card-bg"),
-  heading: documentElement.style.getPropertyValue("--moo-heading-font-family"),
-  body: documentElement.style.getPropertyValue("--bs-body-font-family"),
-  radius: documentElement.style.getPropertyValue("--bs-border-radius"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
+  primaryRgb: themeBuilderTokenStyle.getPropertyValue("--bs-primary-rgb"),
+  foreground: themeBuilderTokenStyle.getPropertyValue("--moo-primary-foreground"),
+  chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
+  mutedSurface: themeBuilderTokenStyle.getPropertyValue("--moo-muted-surface"),
+  secondaryBg: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-bg"),
+  cardBg: themeBuilderTokenStyle.getPropertyValue("--bs-card-bg"),
+  heading: themeBuilderTokenStyle.getPropertyValue("--moo-heading-font-family"),
+  body: themeBuilderTokenStyle.getPropertyValue("--bs-body-font-family"),
+  radius: themeBuilderTokenStyle.getPropertyValue("--bs-border-radius"),
   selectedBase: selectedValue("baseColor"),
   selectedTheme: selectedValue("themeColor"),
   selectedChart: selectedValue("chartColor"),
@@ -1886,7 +1914,7 @@ const initial = {
 optionFor("baseColor", "zinc").dispatch("pointerenter");
 const afterBasePreview = {
   baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor || null,
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
 };
@@ -1896,7 +1924,7 @@ const afterBasePreviewHiddenClear = {
     documentElement.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
 };
@@ -1907,7 +1935,7 @@ const afterBasePreviewClear = {
     documentElement.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
 };
@@ -1918,14 +1946,14 @@ const afterThemePreview = {
     documentElement.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   selectedTheme: selectedValue("themeColor"),
   persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
 };
 optionFor("themeColor", "neutral").dispatch("pointerleave");
 const afterThemePreviewClear = {
   themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor || null,
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   selectedTheme: selectedValue("themeColor"),
   persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
 };
@@ -1933,16 +1961,16 @@ const afterThemePreviewClear = {
 optionFor("baseColor", "zinc").click();
 const afterBaseLight = {
   baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
-  foreground: documentElement.style.getPropertyValue("--moo-foreground"),
-  mutedForeground: documentElement.style.getPropertyValue("--moo-muted-foreground"),
-  sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
-  sidebarForeground: documentElement.style.getPropertyValue("--moo-sidebar-foreground"),
-  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
-  bodyColor: documentElement.style.getPropertyValue("--bs-body-color"),
-  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
-  secondaryBg: documentElement.style.getPropertyValue("--bs-secondary-bg"),
-  secondaryColor: documentElement.style.getPropertyValue("--bs-secondary-color"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
+  foreground: themeBuilderTokenStyle.getPropertyValue("--moo-foreground"),
+  mutedForeground: themeBuilderTokenStyle.getPropertyValue("--moo-muted-foreground"),
+  sidebar: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar"),
+  sidebarForeground: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar-foreground"),
+  bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
+  bodyColor: themeBuilderTokenStyle.getPropertyValue("--bs-body-color"),
+  bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
+  secondaryBg: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-bg"),
+  secondaryColor: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-color"),
 };
 
 const darkInput = themeInputs.find((input) => input.value === "dark");
@@ -1950,28 +1978,28 @@ darkInput.checked = true;
 darkInput.dispatch("change");
 const afterThemeDark = {
   theme: documentElement.dataset.bsTheme,
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
-  foreground: documentElement.style.getPropertyValue("--moo-foreground"),
-  mutedForeground: documentElement.style.getPropertyValue("--moo-muted-foreground"),
-  sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
-  sidebarForeground: documentElement.style.getPropertyValue("--moo-sidebar-foreground"),
-  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
-  bodyColor: documentElement.style.getPropertyValue("--bs-body-color"),
-  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
-  secondaryColor: documentElement.style.getPropertyValue("--bs-secondary-color"),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
+  foreground: themeBuilderTokenStyle.getPropertyValue("--moo-foreground"),
+  mutedForeground: themeBuilderTokenStyle.getPropertyValue("--moo-muted-foreground"),
+  sidebar: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar"),
+  sidebarForeground: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar-foreground"),
+  bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
+  bodyColor: themeBuilderTokenStyle.getPropertyValue("--bs-body-color"),
+  bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
+  secondaryColor: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-color"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   darkChecked: darkInput.checked,
 };
 
 optionFor("chartColor", "teal").dispatch("focusin");
 const afterChartPreview = {
-  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  chart5: themeBuilderTokenStyle.getPropertyValue("--moo-chart-5"),
   selectedChart: selectedValue("chartColor"),
   persistedChart: JSON.parse(localStorage.getItem("moo:theme-builder")).chartColor,
 };
 optionFor("chartColor", "teal").dispatch("focusout");
 const afterChartPreviewClear = {
-  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  chart5: themeBuilderTokenStyle.getPropertyValue("--moo-chart-5"),
   selectedChart: selectedValue("chartColor"),
   persistedChart: JSON.parse(localStorage.getItem("moo:theme-builder")).chartColor,
 };
@@ -1979,7 +2007,7 @@ const afterChartPreviewClear = {
 optionFor("chartColor", "teal").click();
 const persisted = JSON.parse(localStorage.getItem("moo:theme-builder"));
 const afterClick = {
-  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  chart5: themeBuilderTokenStyle.getPropertyValue("--moo-chart-5"),
   selectedChart: selectedValue("chartColor"),
   persistedChart: persisted.chartColor,
 };
@@ -1998,11 +2026,11 @@ const afterReset = {
     documentElement.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
-  chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
-  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
-  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
-  primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
+  chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
+  bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
+  bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
+  primaryRgb: themeBuilderTokenStyle.getPropertyValue("--bs-primary-rgb"),
   selectedBase: selectedValue("baseColor"),
   selectedTheme: selectedValue("themeColor"),
   selectedChart: selectedValue("chartColor"),
