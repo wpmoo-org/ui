@@ -288,8 +288,10 @@
 // dark mode flips black ink to light strokes without a second asset;
 // hue-rotate cancels the hue shift invert() alone would introduce, keeping
 // grays neutral instead of tinted.
-[data-bs-theme="dark"] .moo-catalog__showcase-image {
-  filter: invert(1) hue-rotate(180deg);
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog__showcase-image {
+    filter: invert(1) hue-rotate(180deg);
+  }
 }
 
 .moo-catalog__showcase-preview>* {
@@ -727,16 +729,18 @@
   --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color};
 }
 
-[data-bs-theme="dark"] #catalog-settings {
-  --bs-offcanvas-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
-  --moo-settings-panel-option-border: var(--bs-border-color);
-  --moo-settings-panel-option-active-border: var(--bs-border-color);
-  --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
-  --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
-  --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
-  --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg-dark};
-  --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border-dark};
-  --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color-dark};
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope #catalog-settings {
+    --bs-offcanvas-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+    --moo-settings-panel-option-border: var(--bs-border-color);
+    --moo-settings-panel-option-active-border: var(--bs-border-color);
+    --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
+    --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
+    --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
+    --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg-dark};
+    --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border-dark};
+    --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color-dark};
+  }
 }
 
 #catalog-settings .field-fieldset {
@@ -1083,8 +1087,10 @@
   display: inline-flex;
 }
 
-[data-bs-theme="dark"] .moo-settings-panel__theme-option:has(.btn-check[value="system"]:checked) .moo-settings-panel__theme-check {
-  background-color: #{$moo-catalog-settings-system-active-check-bg-dark};
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-settings-panel__theme-option:has(.btn-check[value="system"]:checked) .moo-settings-panel__theme-check {
+    background-color: #{$moo-catalog-settings-system-active-check-bg-dark};
+  }
 }
 
 // The check straddles the inline-end corner, and the +50% translate is
@@ -1136,12 +1142,14 @@
   pointer-events: none;
 }
 
-[data-bs-theme="dark"] .moo-settings-panel__theme-thumb--system::before {
-  background-image: linear-gradient(
-    90deg,
-    #{$moo-catalog-settings-system-thumb-light-dark} 0 50%,
-    #{$moo-catalog-settings-thumb-dark} 50% 100%
-  );
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-settings-panel__theme-thumb--system::before {
+    background-image: linear-gradient(
+      90deg,
+      #{$moo-catalog-settings-system-thumb-light-dark} 0 50%,
+      #{$moo-catalog-settings-thumb-dark} 50% 100%
+    );
+  }
 }
 
 .moo-settings-panel__theme-thumb--system > .moo-settings-panel__theme-thumb-bar,

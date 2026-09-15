@@ -452,6 +452,16 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("var(--moo-primary", body)
         self.assertNotIn("var(--bs-primary", body)
 
+    def test_catalog_dark_rules_are_bounded_by_resolved_owners(self) -> None:
+        styles = read_catalog_styles()
+        dark_scope = (
+            '@scope (.moo-ui[data-bs-theme="dark"]) '
+            'to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {'
+        )
+
+        self.assertIn(dark_scope, styles)
+        self.assertNotRegex(styles, r'(?m)^\[data-bs-theme="dark"\]')
+
     def test_settings_mode_picker_chrome_is_not_theme_builder_tinted(self) -> None:
         styles = read_catalog_styles()
 
@@ -549,8 +559,11 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(value, system_thumb_layer_body)
 
         dark_system_thumb_layer = re.search(
-            r'(?ms)^\[data-bs-theme="dark"\] \.moo-settings-panel__theme-thumb--system::before\s*'
-            r"\{(?P<body>.*?)^\}",
+            r'(?ms)^@scope \(\.moo-ui\[data-bs-theme="dark"\]\) '
+            r'to \(:where\(\.moo-ui\[data-bs-theme="light"\], '
+            r'\.moo-ui\[data-bs-theme="dark"\]\)\) \{\s+'
+            r':scope \.moo-settings-panel__theme-thumb--system::before\s*'
+            r"\{(?P<body>.*?)^  \}",
             styles,
         )
         self.assertIsNotNone(dark_system_thumb_layer)
@@ -631,9 +644,11 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(value, checked_check_body)
 
         dark_system_checked_check = re.search(
-            r'(?ms)^\[data-bs-theme="dark"\] '
-            r'\.moo-settings-panel__theme-option:has\(\.btn-check\[value="system"\]:checked\) '
-            r"\.moo-settings-panel__theme-check\s*\{(?P<body>.*?)^\}",
+            r'(?ms)^@scope \(\.moo-ui\[data-bs-theme="dark"\]\) '
+            r'to \(:where\(\.moo-ui\[data-bs-theme="light"\], '
+            r'\.moo-ui\[data-bs-theme="dark"\]\)\) \{\s+'
+            r':scope \.moo-settings-panel__theme-option:has\(\.btn-check\[value="system"\]:checked\) '
+            r"\.moo-settings-panel__theme-check\s*\{(?P<body>.*?)^  \}",
             styles,
         )
         self.assertIsNotNone(dark_system_checked_check)
@@ -1826,23 +1841,27 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('<html lang="en" dir="ltr">', base)
         self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
-        self.assertIn('window.localStorage.getItem("moo:theme")', base)
-        self.assertIn("body.dataset.bsTheme =", base)
-        self.assertNotIn("document.documentElement.dataset.bsTheme", base)
-        self.assertIn("body.dataset[datasetKey] = state[key]", base)
-        self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
-        self.assertGreater(base.index("const themeBuilderFirstPaint"), base.index("<body>"))
-        self.assertLess(
-            base.index('window.localStorage.getItem("moo:theme")'),
-            base.index("{% block body %}"),
+        self.assertIn("<body>", base)
+        self.assertIn('<div class="moo-ui" data-bs-theme="{{ resolved_theme }}">', base)
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/theme-prepaint.js?v={{ asset_version }}"></script>',
+            base,
         )
-        self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
-        self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
-        self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+        self.assertLess(
+            base.index('data-bs-theme="{{ resolved_theme }}"'),
+            base.index('assets/js/theme-prepaint.js?v={{ asset_version }}'),
+        )
+        self.assertLess(
+            base.index('assets/js/theme-prepaint.js?v={{ asset_version }}'),
+            base.index('href="#main-content"'),
+        )
+        self.assertNotIn("body.dataset.bsTheme", base)
+        self.assertNotIn("document.documentElement.dataset.bsTheme", base)
+        self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
+        self.assertNotIn("themeBuilderFirstPaint", base)
 
     def test_catalog_uses_full_build_first_paint_tokens_without_catalog_prepaint(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
@@ -1863,43 +1882,25 @@ class CatalogContractTests(CatalogTestCase):
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
 
         full_build = self.read_output("assets/css/moo-ui.css")
-        body_index = full_build.index("body {")
-        for token in (
-            "--moo-border: #3f3f46;",
-            "--bs-border-color: var(--moo-border);",
-            "--moo-sidebar-border: var(--moo-border);",
-            "--moo-surface: #0a0a0a;",
-            "--bs-body-bg: var(--moo-surface);",
-        ):
-            with self.subTest(token=token):
-                self.assertLess(full_build.index(token), body_index)
-        self.assertNotIn("moo-catalog__", full_build[:body_index])
-        self.assertNotIn("--bs-card-border-color:", full_build[:body_index])
-        card_rule = full_build[full_build.rindex(".card {") :].split("\n}", 1)[0]
-        self.assertIn("--bs-card-border-color: var(--moo-border);", card_rule)
-
-    def test_theme_builder_tokens_use_a_head_style_block(self) -> None:
-        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        settings = (ROOT / "site/src/js/catalog/settings-panel.js").read_text(
-            encoding="utf-8"
+        self.assertIn(".moo-ui[data-bs-theme] {", full_build)
+        self.assertIn('.moo-ui[data-bs-theme="dark"] {', full_build)
+        self.assertIn("body > .moo-ui[data-bs-theme] {", full_build)
+        self.assertNotIn("body[data-bs-theme]", full_build)
+        self.assertNotIn(":where(html, body)[data-bs-theme]", full_build)
+        self.assertNotIn("moo-catalog__", full_build)
+        self.assertIn(
+            '@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {',
+            full_build,
         )
+        self.assertIn(":scope[data-bs-theme=\"dark\"] .card {", full_build)
+
+    def test_base_defers_theme_builder_runtime_to_the_owner(self) -> None:
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
 
         style_marker = '<style id="moo-theme-builder-tokens"'
-        self.assertIn(style_marker, base)
-        style_index = base.index(style_marker)
-        moo_css_index = base.index(
-            '<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'
-        )
-        catalog_css_index = base.index(
-            '<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'
-        )
-        script_index = base.index("const themeBuilderFirstPaint")
-        self.assertGreater(style_index, catalog_css_index)
-        self.assertGreater(script_index, style_index)
+        self.assertNotIn(style_marker, base)
+        self.assertNotIn("themeBuilderFirstPaint", base)
         self.assertNotIn("document.documentElement.style.setProperty", base)
-
-        self.assertIn('root.querySelector("#moo-theme-builder-tokens")', settings)
-        self.assertNotIn("applyTokenSet(\n        documentElement.style", settings)
 
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
@@ -1915,12 +1916,21 @@ class CatalogContractTests(CatalogTestCase):
         for contract in ("display: none;", "width: 1rem;", "height: 1rem;"):
             with self.subTest(contract=contract):
                 self.assertIn(contract, slot)
+        self.assertNotIn("body[data-bs-theme]", catalog_scss)
         self.assertIn(
-            'body:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],',
+            '@scope (.moo-ui[data-bs-theme="light"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {',
             catalog_scss,
         )
         self.assertIn(
-            'body[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
+            ':scope .moo-catalog__theme-toggle [data-moo-theme-icon="light"]',
+            catalog_scss,
+        )
+        self.assertIn(
+            '@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {',
+            catalog_scss,
+        )
+        self.assertIn(
+            ':scope .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
             catalog_scss,
         )
         self.assertIn("display: inline-flex;", catalog_scss)
@@ -1989,20 +1999,34 @@ class CatalogContractTests(CatalogTestCase):
             '.moo-catalog > .wrapper[data-layout="app"] {',
             1,
         )[1].split("}", 1)[0]
-        light_wrapper = catalog_scss.split(
-            'body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] {',
-            1,
-        )[1].split("}", 1)[0]
-        light_inner = catalog_scss.split(
-            'body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {',
-            1,
-        )[1].split("}", 1)[0]
-        light_inset = catalog_scss.split(
-            'body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {',
-            1,
-        )[1].split("}", 1)[0]
+        light_scope = (
+            '@scope (.moo-ui[data-bs-theme="light"]) '
+            'to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {'
+        )
+        sidebar_scope_start = catalog_scss.rindex(light_scope)
+
+        def scoped_rule(selector: str) -> str:
+            match = re.search(
+                rf"{re.escape(selector)}\s*\{{(?P<body>[^}}]*)\}}",
+                catalog_scss[sidebar_scope_start:],
+            )
+            self.assertIsNotNone(match, selector)
+            assert match is not None
+            return match.group("body")
+
+        light_wrapper = scoped_rule(
+            ':scope .moo-catalog > .wrapper[data-layout="app"]'
+        )
+        light_inner = scoped_rule(
+            ':scope .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner'
+        )
+        light_inset = scoped_rule(
+            ':scope .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"])'
+        )
 
         self.assertIn("--moo-catalog-sidebar-bg: var(--moo-sidebar);", wrapper)
+        self.assertNotIn("body:not([data-bs-theme=\"dark\"])", catalog_scss)
+        self.assertGreater(catalog_scss.index(light_scope), 0)
         self.assertIn(
             "--moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));",
             light_wrapper,

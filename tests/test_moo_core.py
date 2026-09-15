@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import re
 
+from playwright.sync_api import sync_playwright
+
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
+from tests.helpers.browser_harness import (
+    launch_certification_browser,
+    serve_repository,
+    skip_if_browser_launch_is_sandboxed,
+)
 from tests.helpers.css_contract import (
     assert_allowed_global_rules,
     assert_animation_closure,
+    assert_owner_scoped_token_bridges,
     assert_safe_assets,
     assert_single_moo_scope,
 )
@@ -13,6 +21,7 @@ from tests.test_design_gates import active_component_imports
 
 
 CORE_CSS = DIST / "assets/css/moo.css"
+FULL_CSS = DIST / "assets/css/moo-ui.css"
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
 OVERLAY_BACKDROP_SCSS = SCSS / "foundations/_overlay_backdrop.scss"
@@ -71,10 +80,10 @@ REQUIRED_TOPOLOGY_FRAGMENTS = (
     ".btn-group > .btn-check:checked + .btn",
     ".dropup .dropdown-toggle::after",
     ".is-invalid ~ .invalid-feedback",
-    ':where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme])',
+    ".moo-ui[data-bs-theme]",
     '.moo-ui[data-bs-theme="light"]',
     '.moo-ui[data-bs-theme="dark"]',
-    '.moo-ui[dir="rtl"]',
+    '.moo-ui[data-bs-theme][dir="rtl"]',
 )
 
 
@@ -111,6 +120,21 @@ class MooCoreTests(CatalogTestCase):
 
     def test_core_css_allows_only_explicit_global_rules(self) -> None:
         assert_allowed_global_rules(self, self._build_and_read_core())
+
+    def test_artifacts_use_resolved_owners_instead_of_document_theme_bridges(self) -> None:
+        core_css = self._build_and_read_core()
+        full_css = self.read_output("assets/css/moo-ui.css")
+
+        assert_owner_scoped_token_bridges(self, core_css, scoped=True)
+        assert_owner_scoped_token_bridges(self, full_css, scoped=False)
+
+        state_layer = (SCSS / "foundations/_core_state_layer.scss").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn(":where(html, body)", state_layer)
+        self.assertNotIn("body[data-bs-theme]", state_layer)
+        self.assertIn(':scope[data-bs-theme="light"]', state_layer)
+        self.assertIn(':scope[data-bs-theme="dark"]', state_layer)
 
     def test_core_css_closes_animation_references(self) -> None:
         assert_animation_closure(self, self._build_and_read_core())
@@ -202,8 +226,9 @@ class MooCoreTests(CatalogTestCase):
             "--moo-overlay-backdrop-bg: #{$moo-overlay-backdrop-bg}",
             "--moo-overlay-backdrop-filter: #{$moo-overlay-backdrop-filter}",
         ):
-            self.assertIn(token, tokens_root)
             self.assertIn(token, core_theme)
+
+        self.assertIn("@include moo-core-shared;", tokens_root)
 
         self.assertIn(".modal-backdrop", overlay_layer)
         self.assertIn(".offcanvas-backdrop", overlay_layer)
@@ -258,20 +283,89 @@ class MooCoreTests(CatalogTestCase):
         self.assertNotIn("offcanvas.sheet:is(.showing, .show)", core_css)
         self.assertNotIn("offcanvas.sheet.hiding", core_css)
 
-    def test_standalone_sidebar_tokens_follow_body_theme_scope(self) -> None:
+    def test_standalone_sidebar_tokens_follow_resolved_owner_scope(self) -> None:
         tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn("body[data-bs-theme] {", tokens_root)
-        body_tokens = tokens_root.split("body[data-bs-theme] {", 1)[1].split(
+        self.assertNotIn("body[data-bs-theme]", tokens_root)
+        self.assertNotIn(":root", tokens_root)
+        self.assertIn(".moo-ui[data-bs-theme] {", tokens_root)
+        owner_tokens = tokens_root.split(".moo-ui[data-bs-theme] {", 1)[1].split(
             "}",
             1,
         )[0]
-        for token, source in (
-            ("--moo-sidebar-foreground", "--moo-foreground"),
-            ("--moo-sidebar-accent", "--moo-muted-surface"),
-            ("--moo-sidebar-border", "--moo-border"),
-        ):
-            with self.subTest(token=token):
-                self.assertIn(f"{token}: var({source});", body_tokens)
+        self.assertIn("@include moo-core-scales;", owner_tokens)
+        self.assertIn("@include moo-core-shared;", owner_tokens)
+
+
+class MooOwnerIsolationBrowserTests(CatalogTestCase):
+    def test_nested_resolved_owners_isolate_state_but_class_only_portals_inherit(self) -> None:
+        skip_if_browser_launch_is_sandboxed()
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        with serve_repository() as base_url, sync_playwright() as playwright:
+            browser = launch_certification_browser(playwright)
+            self.addCleanup(browser.close)
+            page = browser.new_page()
+            response = page.goto(
+                f"{base_url}/tests/fixtures/owner-isolation.html",
+                wait_until="load",
+            )
+            self.assertIsNotNone(response)
+            assert response is not None
+            self.assertTrue(response.ok)
+
+            colors = page.evaluate(
+                """
+                () => {
+                  const read = (id) => {
+                    const root = document.getElementById(id);
+                    const select = root.querySelector('[data-owner-probe="select"]');
+                    const toggle = root.querySelector('[data-owner-probe="switch"]');
+                    const close = root.querySelector('[data-owner-probe="close"]');
+                    const card = root.querySelector('[data-owner-probe="card"]');
+                    const rootStyle = getComputedStyle(root);
+                    const selectStyle = getComputedStyle(select);
+                    const toggleStyle = getComputedStyle(toggle);
+                    const closeStyle = getComputedStyle(close);
+                    const cardStyle = getComputedStyle(card);
+                    return {
+                      colorScheme: rootStyle.colorScheme,
+                      selectIndicator: selectStyle.getPropertyValue('--bs-form-select-bg-img'),
+                      switchIndicator: toggleStyle.getPropertyValue('--bs-form-switch-bg'),
+                      closeColor: closeStyle.color,
+                      closeFilter: closeStyle.filter,
+                      cardBackground: cardStyle.backgroundColor,
+                      cardSpacing: cardStyle.getPropertyValue('--moo-card-spacing'),
+                    };
+                  };
+                  const host = document.getElementById('host-probe');
+                  return {
+                    hostCardSpacing: getComputedStyle(host).getPropertyValue('--moo-card-spacing'),
+                    outer: read('outer-owner'),
+                    portal: read('class-only-portal'),
+                    inner: read('inner-owner'),
+                  };
+                }
+                """
+            )
+
+        self.assertEqual(colors["hostCardSpacing"].strip(), "")
+        self.assertEqual(colors["outer"]["colorScheme"], "dark")
+        self.assertEqual(colors["portal"]["colorScheme"], "dark")
+        self.assertEqual(colors["inner"]["colorScheme"], "light")
+        self.assertIn("dee2e6", colors["outer"]["selectIndicator"])
+        self.assertIn("dee2e6", colors["portal"]["selectIndicator"])
+        self.assertIn("343a40", colors["inner"]["selectIndicator"])
+        self.assertIn("255", colors["outer"]["switchIndicator"])
+        self.assertIn("255", colors["portal"]["switchIndicator"])
+        self.assertIn("10", colors["inner"]["switchIndicator"])
+        self.assertEqual(colors["outer"]["closeFilter"], "none")
+        self.assertEqual(colors["portal"]["closeFilter"], "none")
+        self.assertEqual(colors["inner"]["closeFilter"], "none")
+        self.assertEqual(colors["outer"]["closeColor"], colors["portal"]["closeColor"])
+        self.assertNotEqual(colors["outer"]["closeColor"], colors["inner"]["closeColor"])
+        self.assertEqual(colors["outer"]["cardBackground"], colors["portal"]["cardBackground"])
+        self.assertNotEqual(colors["outer"]["cardBackground"], colors["inner"]["cardBackground"])

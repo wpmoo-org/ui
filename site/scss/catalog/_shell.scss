@@ -1,5 +1,5 @@
-body {
-  min-height: 100vh;
+.moo-ui:has(.moo-catalog) {
+  min-block-size: 100dvh;
   // Matches the package's own surface token instead of Bootstrap's
   // unrelated tertiary-bg: elevated "muted surface" chips (e.g. Kbd) are
   // tuned for contrast against --moo-surface, and read as barely distinct
@@ -153,9 +153,16 @@ body:has(.moo-catalog) {
   line-height: 1;
 }
 
-body:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],
-body[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"] {
-  display: inline-flex;
+@scope (.moo-ui[data-bs-theme="light"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog__theme-toggle [data-moo-theme-icon="light"] {
+    display: inline-flex;
+  }
+}
+
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog__theme-toggle [data-moo-theme-icon="dark"] {
+    display: inline-flex;
+  }
 }
 
 .moo-catalog__theme-toggle svg {
@@ -189,31 +196,35 @@ body[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark
   font-family: var(--moo-catalog-font-family, #{$moo-catalog-font-family}), var(--bs-body-font-family);
 }
 
-[data-bs-theme=dark] .moo-catalog {
-  --moo-code-muted: #{$moo-catalog-code-muted-dark};
-  --moo-code-keyword: #{$moo-catalog-code-keyword-dark};
-  --moo-code-selector: #{$moo-catalog-code-selector-dark};
-  --moo-code-tag: #{$moo-catalog-code-tag-dark};
-  --moo-code-property: #{$moo-catalog-code-property-dark};
-  --moo-code-function: #{$moo-catalog-code-function-dark};
-  --moo-code-string: #{$moo-catalog-code-string-dark};
-  --moo-code-constant: #{$moo-catalog-code-constant-dark};
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog {
+    --moo-code-muted: #{$moo-catalog-code-muted-dark};
+    --moo-code-keyword: #{$moo-catalog-code-keyword-dark};
+    --moo-code-selector: #{$moo-catalog-code-selector-dark};
+    --moo-code-tag: #{$moo-catalog-code-tag-dark};
+    --moo-code-property: #{$moo-catalog-code-property-dark};
+    --moo-code-function: #{$moo-catalog-code-function-dark};
+    --moo-code-string: #{$moo-catalog-code-string-dark};
+    --moo-code-constant: #{$moo-catalog-code-constant-dark};
+  }
 }
 
 .moo-catalog > .wrapper[data-layout="app"] {
   --moo-catalog-sidebar-bg: var(--moo-sidebar);
 }
 
-body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] {
-  --moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
-}
+@scope (.moo-ui[data-bs-theme="light"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog > .wrapper[data-layout="app"] {
+    --moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
+  }
 
-body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {
-  background: var(--moo-catalog-sidebar-bg);
-}
+  :scope .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {
+    background: var(--moo-catalog-sidebar-bg);
+  }
 
-body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {
-  background: var(--moo-catalog-sidebar-bg);
+  :scope .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {
+    background: var(--moo-catalog-sidebar-bg);
+  }
 }
 
 .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="left"] .sidebar-inner {
@@ -321,11 +332,13 @@ body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"]:has(
   height: var(--moo-catalog-control-height);
 }
 
-[data-bs-theme="dark"] .moo-catalog__sidebar-toggle,
-[data-bs-theme="dark"] .moo-catalog__nav-menu-trigger {
-  --bs-btn-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 85%, transparent);
-  --bs-btn-active-border-color: var(--moo-border);
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog__sidebar-toggle,
+  :scope .moo-catalog__nav-menu-trigger {
+    --bs-btn-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 85%, transparent);
+    --bs-btn-active-border-color: var(--moo-border);
+  }
 }
 
 .moo-catalog__nav-dropdown .dropdown-menu {

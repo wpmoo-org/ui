@@ -6,14 +6,14 @@ from typing import Iterable
 import tinycss2
 
 
-MOO_SCOPE = "(.moo-ui)"
+MOO_SCOPE = (
+    '(.moo-ui)to(:where(.moo-ui[data-bs-theme="light"],'
+    '.moo-ui[data-bs-theme="dark"]))'
+)
 GLOBAL_SELECTOR_FORBIDDEN = re.compile(
     r"(^|[,{]\s*)(?::root|html|body)\b|"
     r"\.moo-catalog\b|"
     r"\.(?:container|row|col(?:-\w+)?)\b"
-)
-ROOT_DARK_OWNER = re.compile(
-    r'^:where\(\.\.\.\)\[data-bs-theme=(?:"dark"|dark)\]\s+\.moo-ui'
 )
 DETACHED_OVERLAY_BACKDROP_OWNER = re.compile(
     r"^\.(?:modal|offcanvas)-backdrop(?:\.show)?$"
@@ -68,7 +68,7 @@ def _is_allowed_state_selector(selector: str) -> bool:
         return True
     if DETACHED_OVERLAY_BACKDROP_OWNER.match(selector) is not None:
         return True
-    return ROOT_DARK_OWNER.match(selector) is not None
+    return False
 
 
 def _at_keyword(rule: object) -> str:
@@ -121,7 +121,34 @@ def assert_single_moo_scope(test_case, css: str) -> None:
     scopes = _scope_rules(css)
     test_case.assertEqual(len(scopes), 1, "moo.css must emit one @scope")
     prelude = _serialized(scopes[0].prelude).replace(" ", "")
-    test_case.assertEqual(prelude, MOO_SCOPE, "@scope must target .moo-ui")
+    test_case.assertEqual(
+        prelude,
+        MOO_SCOPE,
+        "@scope must stop at another resolved Moo owner",
+    )
+
+
+def assert_owner_scoped_token_bridges(test_case, css: str, *, scoped: bool) -> None:
+    """Reject legacy document-theme bridges from Moo-owned CSS output."""
+    for selector in (
+        ":where(html, body)[data-bs-theme",
+        "body[data-bs-theme",
+    ):
+        test_case.assertNotIn(selector, css)
+
+    if not scoped:
+        return
+
+    for rule in _walk_rules(parse_stylesheet(css)):
+        if getattr(rule, "type", None) != "qualified-rule":
+            continue
+        selector = _serialized(rule.prelude)
+        for part in _selector_parts(selector):
+            test_case.assertNotRegex(
+                part,
+                r"(^|[^-\w])(?::root|html|body)\b",
+                f"scoped Moo CSS must not bridge through a document selector: {part}",
+            )
 
 
 def assert_allowed_global_rules(test_case, css: str) -> None:

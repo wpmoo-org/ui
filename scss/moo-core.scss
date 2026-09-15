@@ -17,14 +17,9 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 @import "themes/scoped_core";
 @import "foundations/core_global_primitives";
 
-.moo-ui {
+.moo-ui[data-bs-theme] {
   @include moo-core-scales;
   @include moo-core-shared;
-  @include moo-core-light;
-}
-
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) {
-  @include moo-core-dark;
 }
 
 .moo-ui[data-bs-theme="light"] {
@@ -35,13 +30,13 @@ $moo-spinner-animation-name: moo-spinner-rotate;
   @include moo-core-dark;
 }
 
-.moo-ui[dir="rtl"] {
+.moo-ui[data-bs-theme][dir="rtl"] {
   direction: rtl;
 }
 
-@scope (.moo-ui) {
+@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
   @import "components";
+  @import "foundations/core_state_layer";
 }
 
-@import "foundations/core_state_layer";
 @import "foundations/overlay_backdrop";

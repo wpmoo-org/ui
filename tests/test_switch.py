@@ -234,7 +234,7 @@ class SwitchTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         css = self.read_output("assets/css/moo-ui.css")
         selector = (
-            r":where\(\[data-bs-theme=\"dark\"\]\) "
+            r":scope\[data-bs-theme=\"dark\"\] "
             r"\.form-switch \.form-check-input:focus:not"
             r"\(:focus-visible\):not\(:checked\)"
         )

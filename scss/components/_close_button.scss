@@ -31,8 +31,11 @@
 
 // Bootstrap's dark rule filters the whole element to recolor its background
 // image. The glyph above uses currentColor through a mask, so filtering would
-// incorrectly invert the token-driven hover surface as well.
-[data-bs-theme="dark"] .btn-close {
+// incorrectly invert the token-driven hover surface as well. Both resolved
+// owner modes override it so an outer dark owner cannot affect an inner light
+// owner through Bootstrap's global descendant selector.
+:scope[data-bs-theme="light"] .btn-close,
+:scope[data-bs-theme="dark"] .btn-close {
   filter: none;
 }
 

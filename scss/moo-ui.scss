@@ -10,6 +10,7 @@
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
+@import "themes/scoped_core";
 
 // Bootstrap layout and standalone-only components
 @import "bootstrap/scss/root";
@@ -46,5 +47,8 @@
 @import "bootstrap/scss/utilities/api";
 
 @import "utilities/scroll_fade_primitives";
-@import "components";
+@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  @import "components";
+  @import "foundations/core_state_layer";
+}
 @import "foundations/overlay_backdrop";
