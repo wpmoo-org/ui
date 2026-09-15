@@ -6,7 +6,7 @@
 
 **Architecture:** Keep `/layout/` as the only public Layout route. Move its link into a dedicated sidebar group after Catalog, then add stable anchor sections to the existing Jinja page. Reuse the component-document `render_example` macro so each section has one rendered preview and one expandable, copyable source block; no Core runtime API or legacy route is added.
 
-**Tech Stack:** Python/Jinja site builder, Bootstrap 5.3 layout/utility classes, existing Moo catalog Sass/ESM, Python `unittest`, Playwright browser harness, generated `site-dist` boundary baseline.
+**Tech Stack:** Python/Jinja site builder, Bootstrap 5.3 layout/utility classes, existing Moo catalog Sass/ESM, Python `unittest`, Playwright browser harness, and generated `site-dist` verification output. Release baselines are owned by the parent layout plan's Task 8.
 
 **Spec:** `docs/superpowers/specs/2026-09-14-moo-layout-native-sections-design.md`
 
@@ -19,7 +19,11 @@
 - Do not reproduce the Bootstrap Layout documentation locally.
 - Do not add separate `/layout/<topic>/` public routes.
 - Do not restore or redirect legacy `/layouts/...` routes without a new explicit approval.
-- Do not change `src/layouts/app.html.jinja`, `src/layouts/page.html.jinja`, package entrypoints, or public runtime contracts.
+- The native-section work in this plan does not change
+  `src/layouts/app.html.jinja`, package entrypoints, or public runtime
+  contracts. A separate completed-lane review fix may remove the undocumented
+  `page(main_class)` parameter; do not duplicate that change in these native
+  section tasks.
 - Do not add Tabler references or aliases that hide Bootstrap classes.
 - Use `apply_patch`, run focused tests after each logical change, and stage only task files around pre-existing worktree edits.
 
@@ -30,7 +34,7 @@
 - Modify `tests/test_catalog.py`: lock sidebar ordering, the single Layout link, and the Catalog native-class boundary.
 - Modify `tests/test_layouts.py`: lock all Layout anchors, previews, source panels, and single-page routing.
 - Modify `tests/test_catalog_browser.py` or `tests/test_layouts_browser.py`: verify responsive public-page behavior.
-- Update `tests/fixtures/boundary-baseline.json` only after reviewing generated site-only changes.
+- Do not update `tests/fixtures/boundary-baseline.json` in this child plan; review generated site-only changes and defer baseline/hash refresh to the parent layout plan's Task 8.
 - Do not modify `site/src/registry/sections.json` or `site/src/shell/navbar.html.jinja` unless a focused test proves it is required; the canonical section and navbar metadata already exist.
 
 ---
@@ -110,7 +114,8 @@ def test_layout_guide_has_one_native_example_and_source_per_section(self) -> Non
 - [ ] **Step 3: Run only these tests and confirm intentional failures.**
 
 ```bash
-python3 -m unittest \
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 -m unittest \
   tests.test_catalog.CatalogContractTests.test_sidebar_navigation_groups_examples_with_catalog_before_components \
   tests.test_layouts.LayoutCatalogTests.test_layout_guide_has_one_native_example_and_source_per_section \
   -v
@@ -123,6 +128,7 @@ failures are observed.
 - [ ] **Step 4: Commit only the red tests.**
 
 ```bash
+cd /Users/cng/wpmoo/workspace/projects/ui/html
 git add tests/test_catalog.py tests/test_layouts.py
 git commit -m "test: define Moo layout native section contracts"
 ```
@@ -163,7 +169,8 @@ entry order, component submenu IDs, and active-state expressions unchanged.
 - [ ] **Step 2: Run the sidebar and pagination contracts.**
 
 ```bash
-python3 -m unittest \
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 -m unittest \
   tests.test_catalog.CatalogContractTests.test_sidebar_navigation_groups_examples_with_catalog_before_components \
   tests.test_catalog.CatalogContractTests.test_section_pages_render_page_actions_and_pagination \
   -v
@@ -175,6 +182,7 @@ Examples, and no legacy path is emitted.
 - [ ] **Step 3: Commit the sidebar change selectively.**
 
 ```bash
+cd /Users/cng/wpmoo/workspace/projects/ui/html
 git add site/src/shell/sidebar.html.jinja tests/test_catalog.py
 git commit -m "docs: place Layout after Catalog in sidebar"
 ```
@@ -287,7 +295,8 @@ Pass this exact ordered list to `render_doc_toc`:
 - [ ] **Step 4: Run the Layout contracts and commit the page.**
 
 ```bash
-python3 -m unittest \
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 -m unittest \
   tests.test_layouts.LayoutCatalogTests \
   tests.test_catalog.CatalogContractTests.test_section_pages_render_page_actions_and_pagination \
   -v
@@ -327,7 +336,8 @@ def test_catalog_examples_keep_bootstrap_native_layout_classes(self) -> None:
 - [ ] **Step 2: Run and commit the boundary test.**
 
 ```bash
-python3 -m unittest \
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 -m unittest \
   tests.test_catalog.CatalogContractTests.test_catalog_examples_keep_bootstrap_native_layout_classes \
   -v
 git add tests/test_catalog.py
@@ -336,11 +346,11 @@ git commit -m "test: preserve Bootstrap-native Catalog examples"
 
 Expected: PASS with no changes to the example page markup.
 
-### Task 5: Verify public rendering and the intentional site baseline
+### Task 5: Verify public rendering without owning release baselines
 
 **Files:**
 - Modify: `tests/test_catalog_browser.py` or `tests/test_layouts_browser.py`
-- Update: `tests/fixtures/boundary-baseline.json` after review
+- Read-only: generated `site-dist/` output and the parent-plan baseline status
 
 **Interfaces:**
 - Consumes: `serve_repository`, `new_case_context`, `prepare_page`, generated `/site-dist/layout/`, and Tasks 1–4 contracts.
@@ -385,7 +395,8 @@ for viewport in ((1280, 900), (390, 844)):
 - [ ] **Step 2: Run the browser test at both viewports.**
 
 ```bash
-python3 -m unittest \
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 -m unittest \
   tests.test_catalog_browser.CatalogBrowserTests.test_layout_guide_native_sections_render_at_desktop_and_mobile \
   -v
 ```
@@ -397,8 +408,9 @@ native responsive utility to that example.
 - [ ] **Step 3: Build and assert the public path boundary.**
 
 ```bash
-python3 build.py --core
-python3 build.py --site
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 build.py --core
+.venv/bin/python3 build.py --site
 git diff --check
 test -f site-dist/layout/index.html
 test ! -e site-dist/layout/breakpoints/index.html
@@ -409,49 +421,47 @@ test ! -e site-dist/layouts/app/index.html
 test ! -e site-dist/layouts/page/index.html
 ```
 
-- [ ] **Step 4: Record and review the generated boundary baseline.**
+- [ ] **Step 4: Review generated output without writing a baseline.**
 
 ```bash
-python3 scripts/record-boundary-baseline.py --write
-git diff -- tests/fixtures/boundary-baseline.json
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+git diff -- site-dist tests/fixtures/boundary-baseline.json
 ```
 
-Accept only intentional site HTML/asset changes; Core output hashes and the
-package file list must remain unchanged.
+Accept only intentional site HTML/asset changes. Do not run
+`scripts/record-boundary-baseline.py --write` and do not modify any baseline or
+hash file here; the parent layout plan's Task 8 owns that release decision.
 
-- [ ] **Step 5: Commit browser coverage and the reviewed baseline.**
+- [ ] **Step 5: Commit browser coverage only.**
 
 ```bash
-git add tests/test_catalog_browser.py tests/fixtures/boundary-baseline.json
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+git add tests/test_catalog_browser.py
 git commit -m "test: verify responsive Moo layout guide"
 ```
 
-### Task 6: Run the focused quick tier and final boundary review
+### Task 6: Run completed-lane checks and defer release gates
 
 **Files:**
 - Read-only review: all files changed by Tasks 1–5 plus `src/layouts/app.html.jinja` and `src/layouts/page.html.jinja`
 
-- [ ] **Step 1: Run the path-driven quick tier.**
+- [ ] **Step 1: Run completed-lane checks without the release tier.**
 
 ```bash
-python3 scripts/run-test-tier.py run quick \
-  --path build.py \
-  --path site/src/pages/layout.html.jinja \
-  --path site/src/pages/examples/index.html.jinja \
-  --path site/src/shell/sidebar.html.jinja \
-  --path tests/test_catalog.py \
-  --path tests/test_catalog_browser.py \
-  --path tests/test_layouts.py \
-  --path tests/test_layouts_browser.py \
-  --path tests/test_core_docs_boundary.py \
-  --path tests/fixtures/boundary-baseline.json
+cd /Users/cng/wpmoo/workspace/projects/ui/html
+.venv/bin/python3 -m unittest \
+  tests.test_catalog tests.test_layouts tests.test_layouts_browser -v
 ```
 
-Expected: the quick tier reports success with only its documented skips.
+Expected: the completed Layout/catalog contracts pass. The parent layout
+plan's Task 8 remains the owner of `run-test-tier.py`,
+`tests.test_core_docs_boundary`, dependency/release gates, and boundary hashes;
+do not invoke the quick/release tier here while those baselines are deferred.
 
 - [ ] **Step 2: Verify immutable runtime and legacy boundaries.**
 
 ```bash
+cd /Users/cng/wpmoo/workspace/projects/ui/html
 git diff --name-only -- src/layouts/app.html.jinja src/layouts/page.html.jinja
 git diff --name-only -- site/src/pages/layouts site/public/_redirects
 rg -n "Tabler|bootstrap-grid|moo-grid" site/src/pages/layout.html.jinja site/src/shell/sidebar.html.jinja site/src/pages/examples || true
@@ -459,10 +469,12 @@ rg -n "Tabler|bootstrap-grid|moo-grid" site/src/pages/layout.html.jinja site/src
 
 Expected: no runtime/legacy paths and no forbidden reference; `/layout/` is the
 only public Layout document and `/layouts/` remains a 404 in the dev handler.
+These checks do not refresh a release baseline.
 
 - [ ] **Step 3: Review status and diff before any optional review tool.**
 
 ```bash
+cd /Users/cng/wpmoo/workspace/projects/ui/html
 git status --short
 git diff --stat
 git diff --check
