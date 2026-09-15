@@ -292,6 +292,7 @@ export function initExamplesTasks(root = document) {
   // which drops it to <body>. Remember the row-action toggle so we can
   // return focus to it once the sheet/modal closes.
   let returnFocusTo = null;
+  let deleteFocusPending = false;
   const rememberTrigger = (target) => {
     returnFocusTo =
       target.closest(".table-row-actions")?.querySelector('[data-bs-toggle="dropdown"]') ??
@@ -340,6 +341,7 @@ export function initExamplesTasks(root = document) {
       // Destructive actions confirm first: the Alert Dialog names the row
       // it will remove; only its Delete button deletes.
       deleteRow = row;
+      deleteFocusPending = false;
       const ref = row.id.toUpperCase();
       const title = row.querySelector("[data-datatable-column=\"task\"] .text-truncate")?.textContent.trim() || ref;
       if (deleteDialogTitle) {
@@ -395,12 +397,19 @@ export function initExamplesTasks(root = document) {
     }
     reinitTable();
     // The deleted row removed its own trigger; move focus to the table's
-    // search control instead of leaving it on <body>.
+    // search control after the modal finishes closing. Focusing outside an
+    // open modal lets Bootstrap's focus trap pull focus back into the dialog.
+    deleteFocusPending = true;
     returnFocusTo = null;
-    tableRoot.querySelector(".datatable-search")?.focus();
   };
   const onDeleteDialogHidden = () => {
     deleteRow = null;
+    if (deleteFocusPending) {
+      deleteFocusPending = false;
+      returnFocusTo = null;
+      tableRoot.querySelector(".datatable-search")?.focus();
+      return;
+    }
     restoreFocus();
   };
 
