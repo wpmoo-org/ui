@@ -257,3 +257,21 @@ class MooCoreTests(CatalogTestCase):
         self.assertNotIn("body:has(.modal.show) > .modal-backdrop", core_css)
         self.assertNotIn("offcanvas.sheet:is(.showing, .show)", core_css)
         self.assertNotIn("offcanvas.sheet.hiding", core_css)
+
+    def test_standalone_sidebar_tokens_follow_body_theme_scope(self) -> None:
+        tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("body[data-bs-theme] {", tokens_root)
+        body_tokens = tokens_root.split("body[data-bs-theme] {", 1)[1].split(
+            "}",
+            1,
+        )[0]
+        for token, source in (
+            ("--moo-sidebar-foreground", "--moo-foreground"),
+            ("--moo-sidebar-accent", "--moo-muted-surface"),
+            ("--moo-sidebar-border", "--moo-border"),
+        ):
+            with self.subTest(token=token):
+                self.assertIn(f"{token}: var({source});", body_tokens)

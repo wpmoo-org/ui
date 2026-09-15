@@ -257,6 +257,7 @@ function datepickerContains(instance, target) {
 function syncPortaledPopoverContext(instance) {
   const theme =
     instance._element.closest("[data-bs-theme]")?.getAttribute("data-bs-theme") ||
+    instance._document.body?.getAttribute("data-bs-theme") ||
     instance._document.documentElement.getAttribute("data-bs-theme");
   const direction = getComputedStyle(instance._trigger).direction;
 

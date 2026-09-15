@@ -21,7 +21,8 @@ export default class Sidebar {
     this._element = element;
     this._document = element.ownerDocument;
     this._window = this._document.defaultView;
-    this._root = this._document.documentElement;
+    this._documentElement = this._document.documentElement;
+    this._root = this._document.body || this._documentElement;
     this._sidebar = element.querySelector('[data-slot="sidebar"]');
     this._config = {
       breakpoint: "(min-width: 992px)",
@@ -102,7 +103,7 @@ export default class Sidebar {
       this._closeFlyouts();
       this._syncTooltips();
     });
-    this._directionObserver.observe(this._root, {
+    this._directionObserver.observe(this._documentElement, {
       attributes: true,
       attributeFilter: ["dir"],
     });

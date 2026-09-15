@@ -110,11 +110,13 @@ function readThemeColors(themeElement, window) {
 }
 
 function resolveThemeElement(element) {
-  return (
-    element?.closest?.("[data-bs-theme]") ||
-    element?.ownerDocument?.documentElement ||
-    null
-  );
+  const scoped = element?.closest?.("[data-bs-theme]");
+  if (scoped) return scoped;
+  const documentBody = element?.ownerDocument?.body;
+  if (documentBody?.hasAttribute?.("data-bs-theme")) {
+    return documentBody;
+  }
+  return element?.ownerDocument?.documentElement || null;
 }
 
 function themeElementIsDark(element) {

@@ -842,7 +842,7 @@ function makeStyle() {
     set textContent(value) {
       textContent = String(value);
       Object.keys(values).forEach((name) => delete values[name]);
-      const body = textContent.match(/:root\s*\{([\s\S]*)\}/)?.[1] || "";
+      const body = textContent.match(/body\[data-bs-theme\]\s*\{([\s\S]*)\}/)?.[1] || "";
       body.split(";").forEach((declaration) => {
         const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
         if (match) values[match[1]] = match[2];
@@ -883,11 +883,11 @@ function diffObject(actual, expected) {
 
 function runInlineScript(fixture) {
   const tokenStyle = makeStyle();
+  const body = {
+    dataset: {},
+  };
   const documentElement = {
-    // The real document runs the theme-restoration inline script before the
-    // Theme Builder first-paint script. Seed the same state here so dark
-    // fixtures exercise the catalog-surface token branch.
-    dataset: { bsTheme: fixture.theme },
+    dataset: {},
     dir: "ltr",
   };
   globalThis.window = {
@@ -896,6 +896,7 @@ function runInlineScript(fixture) {
     setTimeout: () => 0,
   };
   globalThis.document = {
+    body,
     documentElement,
     getElementById: (id) =>
       id === "moo-theme-builder-tokens" ? tokenStyle : null,
@@ -905,7 +906,7 @@ function runInlineScript(fixture) {
   eval(inlineScript);
 
   return {
-    dataset: { ...documentElement.dataset },
+    dataset: { ...body.dataset },
     tokens: tokenStyle.values,
     tokenStyle: tokenStyle.textContent,
   };
@@ -1755,7 +1756,7 @@ function makeStyle() {
     set textContent(value) {
       textContent = String(value);
       values.clear();
-      const body = textContent.match(/:root\s*\{([\s\S]*)\}/)?.[1] || "";
+      const body = textContent.match(/body\[data-bs-theme\]\s*\{([\s\S]*)\}/)?.[1] || "";
       body.split(";").forEach((declaration) => {
         const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
         if (match) values.set(match[1], match[2]);
@@ -1844,11 +1845,15 @@ const sheet = makeEmitter({
       : fieldRoots[selector] || null,
 });
 const documentElement = {
-  dataset: { bsTheme: "light" },
+  dataset: {},
   dir: "ltr",
+};
+const body = {
+  dataset: { bsTheme: "light" },
 };
 const themeBuilderTokenStyle = makeStyle();
 const root = {
+  body,
   documentElement,
   defaultView: { localStorage, matchMedia: () => ({ matches: false }) },
   querySelector: (selector) =>
@@ -1888,13 +1893,13 @@ function optionFor(key, value) {
 
 const initial = {
   styleDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderStyle"
   ),
-  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
-  themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor,
-  broadStyleDataset: Object.hasOwn(documentElement.dataset, "mooThemeStyle"),
-  broadBaseDataset: Object.hasOwn(documentElement.dataset, "mooBaseColor"),
+  baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor,
+  themeDataset: body.dataset.mooCatalogThemeBuilderThemeColor,
+  broadStyleDataset: Object.hasOwn(body.dataset, "mooThemeStyle"),
+  broadBaseDataset: Object.hasOwn(body.dataset, "mooBaseColor"),
   primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   primaryRgb: themeBuilderTokenStyle.getPropertyValue("--bs-primary-rgb"),
   foreground: themeBuilderTokenStyle.getPropertyValue("--moo-primary-foreground"),
@@ -1913,7 +1918,7 @@ const initial = {
 
 optionFor("baseColor", "zinc").dispatch("pointerenter");
 const afterBasePreview = {
-  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor || null,
+  baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor || null,
   surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
@@ -1921,7 +1926,7 @@ const afterBasePreview = {
 controls.baseColor.root.dispatch("hidden.bs.dropdown");
 const afterBasePreviewHiddenClear = {
   baseDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
   surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
@@ -1932,7 +1937,7 @@ optionFor("baseColor", "zinc").dispatch("pointerenter");
 optionFor("baseColor", "zinc").dispatch("pointerleave");
 const afterBasePreviewClear = {
   baseDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
   surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
@@ -1943,7 +1948,7 @@ const afterBasePreviewClear = {
 optionFor("themeColor", "neutral").dispatch("pointerenter");
 const afterThemePreview = {
   themeDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
   primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
@@ -1952,7 +1957,7 @@ const afterThemePreview = {
 };
 optionFor("themeColor", "neutral").dispatch("pointerleave");
 const afterThemePreviewClear = {
-  themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor || null,
+  themeDataset: body.dataset.mooCatalogThemeBuilderThemeColor || null,
   primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   selectedTheme: selectedValue("themeColor"),
   persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
@@ -1960,7 +1965,7 @@ const afterThemePreviewClear = {
 
 optionFor("baseColor", "zinc").click();
 const afterBaseLight = {
-  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
+  baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor,
   surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   foreground: themeBuilderTokenStyle.getPropertyValue("--moo-foreground"),
   mutedForeground: themeBuilderTokenStyle.getPropertyValue("--moo-muted-foreground"),
@@ -1977,7 +1982,7 @@ const darkInput = themeInputs.find((input) => input.value === "dark");
 darkInput.checked = true;
 darkInput.dispatch("change");
 const afterThemeDark = {
-  theme: documentElement.dataset.bsTheme,
+  theme: body.dataset.bsTheme,
   surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   foreground: themeBuilderTokenStyle.getPropertyValue("--moo-foreground"),
   mutedForeground: themeBuilderTokenStyle.getPropertyValue("--moo-muted-foreground"),
@@ -2015,15 +2020,15 @@ const afterClick = {
 reset.click();
 const afterReset = {
   styleDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderStyle"
   ),
   baseDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
   themeDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
   chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
@@ -2201,7 +2206,7 @@ const sheet = makeEmitter({
   querySelector: () => null,
 });
 const documentElement = {
-  dataset: { bsTheme: "dark" },
+  dataset: {},
   dir: "ltr",
   style: {
     setProperty: (name, value) => writes.push(["set", name, value]),
@@ -2209,7 +2214,9 @@ const documentElement = {
     getPropertyValue: () => "",
   },
 };
+const body = { dataset: { bsTheme: "dark" } };
 const root = {
+  body,
   documentElement,
   defaultView: {
     localStorage,
@@ -2223,7 +2230,7 @@ const root = {
 const dispose = initSettingsPanel(root);
 const report = {
   writes,
-  dataset: { ...documentElement.dataset },
+  dataset: { ...body.dataset },
   storedBuilder: localStorage.getItem("moo:theme-builder"),
 };
 dispose();

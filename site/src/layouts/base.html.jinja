@@ -5,21 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script>
       (() => {
-        let storedTheme = null;
-        try {
-          storedTheme = window.localStorage.getItem("moo:theme");
-        } catch (_) {
-          /* Storage can be unavailable in restricted browsing contexts. */
-        }
-        if (storedTheme === "dark" || storedTheme === "light") {
-          document.documentElement.dataset.bsTheme = storedTheme;
-        } else {
-          // Unset or "system" means follow the OS preference; resolved even
-          // when storage access failed, so the System default still applies.
-          const dark = window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches;
-          document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
-        }
         try {
           const storedDirection = window.localStorage.getItem("moo:direction");
           if (storedDirection === "rtl") {
@@ -55,8 +40,27 @@
     <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css?v={{ asset_version }}">
     <style id="moo-theme-builder-tokens" data-moo-theme-builder-tokens></style>
+  </head>
+  <body>
     <script>
       (() => {
+        const body = document.body;
+        if (!body) return;
+        let storedTheme = null;
+        try {
+          storedTheme = window.localStorage.getItem("moo:theme");
+        } catch (_) {
+          /* Storage can be unavailable in restricted browsing contexts. */
+        }
+        const dark = window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        body.dataset.bsTheme =
+          storedTheme === "dark" || storedTheme === "light"
+            ? storedTheme
+            : dark
+              ? "dark"
+              : "light";
+
         try {
           const themeBuilderFirstPaint = {{ theme_builder_first_paint | tojson }};
           const rawBuilder = window.localStorage.getItem("moo:theme-builder");
@@ -99,8 +103,7 @@
             if (isDefaultState || !tokenStyle) {
               return;
             }
-            const builderMode =
-              document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
+            const builderMode = body.dataset.bsTheme === "dark" ? "dark" : "light";
             const tokenGroups = themeBuilderFirstPaint.tokens;
             const tokens = Object.assign(
               {},
@@ -115,7 +118,7 @@
                 : {}
             );
 
-            tokenStyle.textContent = `:root {\n${Object.entries(tokens)
+            tokenStyle.textContent = `body[data-bs-theme] {\n${Object.entries(tokens)
               .map(([token, value]) => `  ${token}: ${value};`)
               .join("\n")}\n}`;
             Object.entries({
@@ -123,7 +126,7 @@
               themeColor: "mooCatalogThemeBuilderThemeColor"
             }).forEach(([key, datasetKey]) => {
               if (state[key] !== themeBuilderFirstPaint.defaults[key]) {
-                document.documentElement.dataset[datasetKey] = state[key];
+                body.dataset[datasetKey] = state[key];
               }
             });
           }
@@ -132,8 +135,6 @@
         }
       })();
     </script>
-  </head>
-  <body>
     <a class="visually-hidden-focusable" href="#main-content">
       Skip to component content
     </a>

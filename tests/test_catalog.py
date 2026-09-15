@@ -1831,14 +1831,14 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('<html lang="en" dir="ltr">', base)
         self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
         self.assertIn('window.localStorage.getItem("moo:theme")', base)
-        self.assertIn("document.documentElement.dataset.bsTheme = storedTheme", base)
+        self.assertIn("body.dataset.bsTheme =", base)
+        self.assertNotIn("document.documentElement.dataset.bsTheme", base)
+        self.assertIn("body.dataset[datasetKey] = state[key]", base)
+        self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
+        self.assertGreater(base.index("const themeBuilderFirstPaint"), base.index("<body>"))
         self.assertLess(
             base.index('window.localStorage.getItem("moo:theme")'),
-            base.index('<meta name="description"'),
-        )
-        self.assertLess(
-            base.index('window.localStorage.getItem("moo:theme")'),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
+            base.index("{% block body %}"),
         )
         self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
         self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
@@ -1916,11 +1916,11 @@ class CatalogContractTests(CatalogTestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, slot)
         self.assertIn(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],',
+            'body:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],',
             catalog_scss,
         )
         self.assertIn(
-            ':root[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
+            'body[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
             catalog_scss,
         )
         self.assertIn("display: inline-flex;", catalog_scss)
@@ -1990,15 +1990,15 @@ class CatalogContractTests(CatalogTestCase):
             1,
         )[1].split("}", 1)[0]
         light_wrapper = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] {',
+            'body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] {',
             1,
         )[1].split("}", 1)[0]
         light_inner = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {',
+            'body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {',
             1,
         )[1].split("}", 1)[0]
         light_inset = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {',
+            'body:not([data-bs-theme="dark"]) .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {',
             1,
         )[1].split("}", 1)[0]
 

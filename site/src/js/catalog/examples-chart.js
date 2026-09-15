@@ -27,7 +27,9 @@ function writeThemeValue(element, theme) {
 
 function ensureScopedTheme(container, ownerDocument) {
   const theme = normalizeTheme(
-    readThemeValue(container) || readThemeValue(ownerDocument?.documentElement),
+    readThemeValue(container) ||
+      readThemeValue(ownerDocument?.body) ||
+      readThemeValue(ownerDocument?.documentElement),
   );
   writeThemeValue(container, theme);
   return theme;

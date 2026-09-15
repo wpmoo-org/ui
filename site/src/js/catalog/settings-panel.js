@@ -53,7 +53,9 @@ function applyTokenStyle(style, tokenNames, tokenValues = {}) {
     .filter(([token]) => allowedTokens.has(token))
     .map(([token, value]) => `  ${token}: ${value};`)
     .join("\n");
-  style.textContent = declarations ? `:root {\n${declarations}\n}` : "";
+  style.textContent = declarations
+    ? `body[data-bs-theme] {\n${declarations}\n}`
+    : "";
 }
 
 // Global settings panel (Phase 6): wires the System/Light/Dark theme radios
@@ -73,6 +75,7 @@ export function initSettingsPanel(root = document) {
 
   if (sheet) {
     const documentElement = root.documentElement || root.ownerDocument?.documentElement;
+    const themeElement = root.body || root.ownerDocument?.body || documentElement;
     const view = root.defaultView || root.ownerDocument?.defaultView;
     const themeBuilderTokenStyle = root.querySelector("#moo-theme-builder-tokens");
     const themeInputs = Array.from(
@@ -121,7 +124,7 @@ export function initSettingsPanel(root = document) {
       const button = root.querySelector(
         "[data-moo-theme], .moo-catalog__theme-toggle"
       );
-      const theme = documentElement.dataset.bsTheme || "light";
+      const theme = themeElement.dataset.bsTheme || "light";
       button?.setAttribute(
         "aria-label",
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -142,7 +145,7 @@ export function initSettingsPanel(root = document) {
     };
 
     const applyPreference = (preference) => {
-      documentElement.dataset.bsTheme = effectiveTheme(preference, view);
+      themeElement.dataset.bsTheme = effectiveTheme(preference, view);
       try {
         view.localStorage.setItem(THEME_STORAGE_KEY, preference);
       } catch (_) {
@@ -244,12 +247,12 @@ export function initSettingsPanel(root = document) {
     };
 
     const withBuilderTransitionSuppressed = (work) => {
-      documentElement.dataset.mooCatalogThemeBuilderUpdating = "true";
+      themeElement.dataset.mooCatalogThemeBuilderUpdating = "true";
       builderTransitionGeneration += 1;
       const generation = builderTransitionGeneration;
       const clear = () => {
         if (generation === builderTransitionGeneration) {
-          delete documentElement.dataset.mooCatalogThemeBuilderUpdating;
+          delete themeElement.dataset.mooCatalogThemeBuilderUpdating;
         }
       };
       const afterPaint =
@@ -280,9 +283,9 @@ export function initSettingsPanel(root = document) {
     const applyBuilderTokens = (preference) => {
       Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
         if (preference[key] === THEME_BUILDER_DEFAULTS[key]) {
-          delete documentElement.dataset[datasetKey];
+          delete themeElement.dataset[datasetKey];
         } else {
-          documentElement.dataset[datasetKey] = preference[key];
+          themeElement.dataset[datasetKey] = preference[key];
         }
       });
       applyTokenStyle(
@@ -291,7 +294,7 @@ export function initSettingsPanel(root = document) {
         isDefaultBuilderPreference(preference)
           ? {}
           : resolveThemeBuilderTokens(preference, {
-              theme: documentElement.dataset.bsTheme,
+              theme: themeElement.dataset.bsTheme,
               surface: "catalog",
             })
       );
@@ -400,7 +403,7 @@ export function initSettingsPanel(root = document) {
           syncThemeButton();
         }
       });
-      observer.observe(documentElement, {
+      observer.observe(themeElement, {
         attributes: true,
         attributeFilter: ["data-bs-theme"],
       });
@@ -483,7 +486,7 @@ export function initSettingsPanel(root = document) {
       } catch (_) {
         /* Storage is best-effort. */
       }
-      documentElement.dataset.bsTheme = effectiveTheme("system", view);
+      themeElement.dataset.bsTheme = effectiveTheme("system", view);
       documentElement.dir = "ltr";
       themeInputs.forEach((input) => {
         input.checked = input.value === "system";

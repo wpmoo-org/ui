@@ -14,6 +14,16 @@
   --moo-chart-5: #{$moo-chart-5};
 }
 
+// Keep sidebar aliases scoped to the element that owns the theme attribute.
+// Catalog pages persist data-bs-theme on <body>; declaring these aliases on
+// :root would resolve them once against the light root palette and leave
+// sidebar text/accent/border stale when the body switches to dark mode.
+body[data-bs-theme] {
+  --moo-sidebar-foreground: var(--moo-foreground);
+  --moo-sidebar-accent: var(--moo-muted-surface);
+  --moo-sidebar-border: var(--moo-border);
+}
+
 :root,
 [data-bs-theme="light"] {
   --moo-surface: #{$moo-surface};

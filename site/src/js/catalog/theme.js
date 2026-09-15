@@ -18,6 +18,7 @@ export function initTheme(root = document) {
   }
 
   const documentElement = root.documentElement || root.ownerDocument?.documentElement;
+  const themeElement = root.body || root.ownerDocument?.body || documentElement;
   const view = root.defaultView || root.ownerDocument?.defaultView;
   const themeButton = root.querySelector(
     "[data-moo-theme], .moo-catalog__theme-toggle"
@@ -49,7 +50,7 @@ export function initTheme(root = document) {
   };
 
   const updateThemeButton = () => {
-    const theme = documentElement.dataset.bsTheme || "light";
+    const theme = themeElement.dataset.bsTheme || "light";
     themeButton?.setAttribute(
       "aria-label",
       theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -58,8 +59,8 @@ export function initTheme(root = document) {
 
   const applyPreference = (preference) => {
     const nextTheme = resolveTheme(preference, view);
-    if (documentElement.dataset.bsTheme !== nextTheme) {
-      documentElement.dataset.bsTheme = nextTheme;
+    if (themeElement.dataset.bsTheme !== nextTheme) {
+      themeElement.dataset.bsTheme = nextTheme;
     }
     updateThemeButton();
   };
@@ -69,14 +70,14 @@ export function initTheme(root = document) {
   const media = view.matchMedia ? view.matchMedia("(prefers-color-scheme: dark)") : null;
   listen(media, "change", () => {
     if (readPreference() === "system") {
-      documentElement.dataset.bsTheme = resolveTheme("system", view);
+      themeElement.dataset.bsTheme = resolveTheme("system", view);
       updateThemeButton();
     }
   });
 
   listen(themeButton, "click", () => {
-    const theme = documentElement.dataset.bsTheme === "dark" ? "light" : "dark";
-    documentElement.dataset.bsTheme = theme;
+    const theme = themeElement.dataset.bsTheme === "dark" ? "light" : "dark";
+    themeElement.dataset.bsTheme = theme;
     try {
       view.localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch (_) {
