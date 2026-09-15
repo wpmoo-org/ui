@@ -3,18 +3,6 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script>
-      (() => {
-        try {
-          const storedDirection = window.localStorage.getItem("moo:direction");
-          if (storedDirection === "rtl") {
-            document.documentElement.dir = "rtl";
-          }
-        } catch (_) {
-          /* Storage can be unavailable in restricted browsing contexts. */
-        }
-      })();
-    </script>
     <meta name="description" content="{{ page_meta.description }}">
     <meta property="og:site_name" content="{{ page_meta.site_name }}">
     <meta property="og:type" content="{{ page_meta.type }}">
@@ -39,106 +27,17 @@
     {% endblock %}
     <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css?v={{ asset_version }}">
-    <style id="moo-theme-builder-tokens" data-moo-theme-builder-tokens></style>
   </head>
+  {% set resolved_theme = resolved_theme | default("light", true) %}
+  {% set resolved_theme = resolved_theme if resolved_theme in ["light", "dark"] else "light" %}
   <body>
-    <script>
-      (() => {
-        const body = document.body;
-        if (!body) return;
-        let storedTheme = null;
-        try {
-          storedTheme = window.localStorage.getItem("moo:theme");
-        } catch (_) {
-          /* Storage can be unavailable in restricted browsing contexts. */
-        }
-        const dark = window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches;
-        body.dataset.bsTheme =
-          storedTheme === "dark" || storedTheme === "light"
-            ? storedTheme
-            : dark
-              ? "dark"
-              : "light";
-
-        try {
-          const themeBuilderFirstPaint = {{ theme_builder_first_paint | tojson }};
-          const rawBuilder = window.localStorage.getItem("moo:theme-builder");
-          const source = rawBuilder ? JSON.parse(rawBuilder) : null;
-          const tokenStyle = document.getElementById("moo-theme-builder-tokens");
-          if (source && typeof source === "object" && !Array.isArray(source)) {
-            const hasOwn = (object, key) =>
-              Object.prototype.hasOwnProperty.call(object, key);
-            // Keep this in sync with normalizeThemeBuilderState().
-            const enumValue = (key, candidate) => {
-              const aliases =
-                key === "baseColor"
-                  ? themeBuilderFirstPaint.aliases.baseColor
-                  : key === "themeColor" || key === "chartColor"
-                    ? themeBuilderFirstPaint.aliases.actionColor
-                    : key === "radius"
-                      ? themeBuilderFirstPaint.aliases.radius
-                    : {};
-              const value = hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
-              return (themeBuilderFirstPaint.options[key] || []).includes(value)
-                ? value
-                : themeBuilderFirstPaint.defaults[key];
-            };
-            const legacyThemeColor =
-              source.themeColor === undefined &&
-              themeBuilderFirstPaint.legacyActionBaseColors.includes(source.baseColor)
-                ? source.baseColor
-                : undefined;
-            const state = {
-              schemaVersion: themeBuilderFirstPaint.schemaVersion,
-              baseColor: enumValue("baseColor", source.baseColor),
-              themeColor: enumValue("themeColor", source.themeColor ?? legacyThemeColor),
-              chartColor: enumValue("chartColor", source.chartColor ?? source.chartPalette),
-              headingFont: enumValue("headingFont", source.headingFont),
-              bodyFont: enumValue("bodyFont", source.bodyFont),
-              radius: enumValue("radius", source.radius)
-            };
-            const isDefaultState = Object.entries(themeBuilderFirstPaint.defaults)
-              .every(([key, value]) => state[key] === value);
-            if (isDefaultState || !tokenStyle) {
-              return;
-            }
-            const builderMode = body.dataset.bsTheme === "dark" ? "dark" : "light";
-            const tokenGroups = themeBuilderFirstPaint.tokens;
-            const tokens = Object.assign(
-              {},
-              tokenGroups.baseColor[state.baseColor]?.[builderMode],
-              tokenGroups.themeColor[state.themeColor],
-              tokenGroups.chartColor[state.chartColor],
-              tokenGroups.radius[state.radius],
-              tokenGroups.headingFont[state.headingFont],
-              tokenGroups.bodyFont[state.bodyFont],
-              state.themeColor !== themeBuilderFirstPaint.defaults.themeColor
-                ? tokenGroups.sidebarAccent[builderMode]
-                : {}
-            );
-
-            tokenStyle.textContent = `body[data-bs-theme] {\n${Object.entries(tokens)
-              .map(([token, value]) => `  ${token}: ${value};`)
-              .join("\n")}\n}`;
-            Object.entries({
-              baseColor: "mooCatalogThemeBuilderBaseColor",
-              themeColor: "mooCatalogThemeBuilderThemeColor"
-            }).forEach(([key, datasetKey]) => {
-              if (state[key] !== themeBuilderFirstPaint.defaults[key]) {
-                body.dataset[datasetKey] = state[key];
-              }
-            });
-          }
-        } catch (_) {
-          /* Theme Builder storage is best-effort and never blocks paint. */
-        }
-      })();
-    </script>
-    <a class="visually-hidden-focusable" href="#main-content">
-      Skip to component content
-    </a>
-    {% block body %}{% endblock %}
+    <div class="moo-ui" data-bs-theme="{{ resolved_theme }}">
+      <script src="{{ root_path }}assets/js/theme-prepaint.js?v={{ asset_version }}"></script>
+      <a class="visually-hidden-focusable" href="#main-content">
+        Skip to component content
+      </a>
+      {% block body %}{% endblock %}
+    </div>
     <script defer src="{{ root_path }}assets/js/bootstrap.bundle.min.js?v={{ asset_version }}"></script>
     <script type="module" src="{{ root_path }}assets/js/catalog/index.js?v={{ asset_version }}"></script>
   </body>

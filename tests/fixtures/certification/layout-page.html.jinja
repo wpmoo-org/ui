@@ -6,7 +6,7 @@
 {% set fixture_direction = fixture_direction | default("ltr") %}
 
 <!doctype html>
-<html lang="en" dir="{{ fixture_direction }}" data-bs-theme="light">
+<html lang="en" dir="{{ fixture_direction }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,6 +18,7 @@
     </style>
   </head>
   <body>
+    <div class="moo-ui" data-bs-theme="light">
     <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
     {% call(region) page(width=fixture_width) %}
       {% if region == "header" %}
@@ -33,5 +34,6 @@
         {% call card(size="sm") %}Page footer{% endcall %}
       {% endif %}
     {% endcall %}
+    </div>
   </body>
 </html>

@@ -12,7 +12,7 @@
 {% set fixture_navigation = fixture_navigation | default("sidebar") %}
 
 <!doctype html>
-<html lang="en" dir="{{ fixture_direction }}" data-bs-theme="light">
+<html lang="en" dir="{{ fixture_direction }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,6 +37,7 @@
     </style>
   </head>
   <body>
+    <div class="moo-ui" data-bs-theme="light">
     <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
     <div
       id="layout-certification-host"
@@ -119,6 +120,7 @@
       {% endif %}
     {% endcall %}
     </div>
+    </div>
 
     {# Keep the persisted Sidebar state on the keyed root before Bootstrap or
        the ESM controller gets a chance to paint the first frame. This mirrors
@@ -152,7 +154,9 @@
         if (mode === "contained") root.dataset.shellMode = "contained";
         if (query.get("side") === "right") root.querySelector('[data-slot="sidebar"]').dataset.side = "right";
         if (query.get("state") === "collapsed") root.dataset.sidebarState = "collapsed";
-        if (window.matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.bsTheme = "dark";
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.querySelector('.moo-ui[data-bs-theme]')?.setAttribute("data-bs-theme", "dark");
+        }
         window.layoutCertificationSidebar = Sidebar.getOrCreateInstance(root);
       }
       if (host && root) host.dataset.shellMode = root.dataset.shellMode;
