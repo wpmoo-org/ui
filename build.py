@@ -61,12 +61,21 @@ JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
     "combobox.js",
-    "sidebar.js",
     "context-menu.js",
-    "datatable.js",
     "slider.js",
 )
-BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+BUNDLED_JS_MODULES = (
+    "chart.js",
+    "datepicker.js",
+    "sidebar.js",
+    "datatable.js",
+)
+# Keep the published package inventory stable: only component entrypoints that
+# already publish minified variants produce them in dist/js. Sidebar and
+# DataTable are bundled so their internal imports resolve, but retain their
+# existing unminified public filenames.
+MINIFIED_BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+PRESERVE_BUNDLED_CONSTRUCTOR_NAMES = {"sidebar.js", "datatable.js"}
 AGGREGATE_JS_MODULES = ("moo-ui.js",)
 PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
@@ -127,6 +136,7 @@ SOURCE_SNAPSHOT_DIRS = (
 )
 SOURCE_SNAPSHOT_FILES = (
     JS_ROOT / "moo-ui.js",
+    JS_ROOT / "theme-owner.js",
     CERTIFICATION / "layout-evidence.json",
 )
 BUILD_LOCK = (
@@ -1783,6 +1793,8 @@ def asset_version() -> str:
         SITE_DIST / "assets/css/catalog.min.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog-prepaint.js",
+        SITE_DIST / "assets/js/theme-prepaint.js",
+        SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
     ]
     for path in paths:
@@ -1800,7 +1812,12 @@ def copy_package_js() -> None:
         shutil.copy2(JS_COMPONENTS / module_name, target)
         apply_js_license_banner(target, module_name)
     for module_name in BUNDLED_JS_MODULES:
-        _bundle_module(module_name, minify=False)
+        _bundle_module(
+            module_name,
+            minify=False,
+            keep_names=module_name in PRESERVE_BUNDLED_CONSTRUCTOR_NAMES,
+        )
+    for module_name in MINIFIED_BUNDLED_JS_MODULES:
         _bundle_module(module_name, minify=True)
     for module_name in AGGREGATE_JS_MODULES:
         _bundle_module(module_name, minify=False)
@@ -1832,7 +1849,7 @@ def apply_js_license_banner(output: Path, module_name: str) -> None:
     output.write_text(banner + source.lstrip(), encoding="utf-8")
 
 
-def _bundle_module(module_name: str, *, minify: bool) -> None:
+def _bundle_module(module_name: str, *, minify: bool, keep_names: bool = False) -> None:
     """Bundle a module using esbuild with the locked configuration.
 
     Args:
@@ -1867,6 +1884,8 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
         "--tree-shaking=true",
         f"--minify={'true' if minify else 'false'}",
     ]
+    if keep_names:
+        cmd.append("--keep-names")
 
     result = subprocess.run(
         cmd,
@@ -1907,6 +1926,7 @@ def required_core_outputs() -> tuple[Path, ...]:
         outputs.append(PACKAGE_DIST / "js" / name)
     for name in BUNDLED_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
+    for name in MINIFIED_BUNDLED_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
     for name in AGGREGATE_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
@@ -1944,9 +1964,10 @@ def copy_core_outputs_to_site() -> None:
         shutil.copy2(package_module, legacy_js_dir / module_name)
     for module_name in BUNDLED_JS_MODULES:
         canonical = PACKAGE_DIST / "js" / module_name
-        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
         shutil.copy2(canonical, components_dir / module_name)
         shutil.copy2(canonical, legacy_js_dir / module_name)
+    for module_name in MINIFIED_BUNDLED_JS_MODULES:
+        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
         shutil.copy2(minified, components_dir / minified.name)
         shutil.copy2(minified, legacy_js_dir / minified.name)
     for module_name in AGGREGATE_JS_MODULES:
@@ -1969,6 +1990,7 @@ def copy_site_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
+    shutil.copy2(JS_ROOT / "theme-owner.js", js_dir / "theme-owner.js")
     if JS_CATALOG.exists():
         shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
         # Source catalog modules import package ESM via repo-relative
@@ -1979,6 +2001,9 @@ def copy_site_assets() -> None:
                 catalog_script.read_text(encoding="utf-8").replace(
                     "../../../../src/js/components/",
                     "../components/",
+                ).replace(
+                    "../../../../src/js/theme-owner.js",
+                    "../theme-owner.js",
                 ),
                 encoding="utf-8",
             )

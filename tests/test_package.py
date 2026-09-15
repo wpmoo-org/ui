@@ -288,6 +288,8 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("./moo-ui-prepaint.css", package["exports"])
         self.assertNotIn("./moo-ui-prepaint.min.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
+        self.assertNotIn("dist/js/theme-owner.js", files)
+        self.assertNotIn("./theme-owner.js", package["exports"])
 
     def test_full_build_places_moo_theme_bridge_before_reboot_body(self) -> None:
         css = (PACKAGE_DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")

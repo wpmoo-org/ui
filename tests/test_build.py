@@ -66,6 +66,13 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (SITE_DIST / "assets/js/catalog-prepaint.js").is_file()
         )
+        self.assertTrue(
+            (SITE_DIST / "assets/js/theme-prepaint.js").is_file()
+        )
+        self.assertTrue(
+            (SITE_DIST / "assets/js/theme-owner.js").is_file()
+        )
+        self.assertFalse((PACKAGE_DIST / "js/theme-owner.js").exists())
         for module_name in (
             "combobox.js",
             "sidebar.js",
@@ -109,6 +116,8 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
+                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/theme-owner.js", "theme owner js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
             ):
                 target = site_dist / relative
@@ -138,6 +147,8 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-prepaint.js", "initial prepaint js"),
+                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/theme-owner.js", "theme owner js"),
             ):
                 target = site_dist / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -156,6 +167,67 @@ class BuildTests(CatalogTestCase):
                 build.SITE_DIST = original_site_dist
 
         self.assertNotEqual(changed_version, original_version)
+
+    def test_asset_version_includes_owner_bootstrap_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            site_dist = Path(tempdir)
+            for relative, contents in (
+                ("assets/css/moo-ui.min.css", "core css"),
+                ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
+                ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
+                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/theme-owner.js", "theme owner js"),
+            ):
+                target = site_dist / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(contents, encoding="utf-8")
+
+            original_site_dist = build.SITE_DIST
+            try:
+                build.SITE_DIST = site_dist
+                original_version = build.asset_version()
+                for relative in (
+                    "assets/js/theme-prepaint.js",
+                    "assets/js/theme-owner.js",
+                ):
+                    target = site_dist / relative
+                    target.write_text(
+                        f"changed {relative}", encoding="utf-8"
+                    )
+                    changed_version = build.asset_version()
+                    self.assertNotEqual(changed_version, original_version)
+            finally:
+                build.SITE_DIST = original_site_dist
+
+    def test_source_snapshot_tracks_the_internal_theme_owner_helper(self) -> None:
+        paths = {Path(path) for path, _ in build.source_snapshot()}
+        self.assertIn(build.JS_ROOT / "theme-owner.js", paths)
+
+    def test_bundled_component_entrypoints_keep_public_constructor_names(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import Sidebar from "./dist/js/sidebar.js";
+import DataTable from "./dist/js/datatable.js";
+console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {"sidebar": "Sidebar", "datatable": "DataTable"},
+        )
 
     def test_example_toc_items_preserve_heading_text_order_with_inline_markup(
         self,
