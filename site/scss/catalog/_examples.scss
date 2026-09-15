@@ -524,6 +524,7 @@
 
   display: grid;
   gap: 3rem;
+  padding-block: 3rem 5rem;
 }
 
 .moo-examples-page .datatable {
@@ -809,7 +810,14 @@
 // footer block, not inside the example page's own content. That matches the
 // Auth examples' page-shell footer: content scrolls above it, while the demo
 // disclaimer and CodePen action stay in the fixed bottom band.
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > footer:has(> .container-xl > .moo-examples-footer) > .container-xl {
+  max-width: none;
+  padding-inline: 0;
+}
+
 .moo-examples-footer {
+  position: relative;
+  z-index: $zindex-fixed;
   display: flex;
   flex: 0 0 auto;
   align-items: center;

@@ -68,7 +68,12 @@ class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
         self.assertIn('data-slot="page"', output)
         self.assertIn('id="workspace-page"', output)
         self.assertEqual(output.count('<header>'), 1)
-        self.assertEqual(output.count('<main id="main-content" tabindex="-1">'), 1)
+        self.assertEqual(
+            output.count(
+                '<main id="main-content" tabindex="-1" class="scroll-fade-y no-scrollbar">'
+            ),
+            1,
+        )
         self.assertEqual(output.count('<footer>'), 1)
         self.assertEqual(output.count('class="container-xl"'), 3)
         self.assertLess(output.index("Header"), output.index("Main"))
@@ -143,7 +148,12 @@ class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
         )
 
         self.assertNotIn("<header>", output)
-        self.assertEqual(output.count('<main id="main-content" tabindex="-1">'), 1)
+        self.assertEqual(
+            output.count(
+                '<main id="main-content" tabindex="-1" class="scroll-fade-y no-scrollbar">'
+            ),
+            1,
+        )
         self.assertNotIn("<footer>", output)
         self.assertIn('data-calls="1-1-1"', output)
 

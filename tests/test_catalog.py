@@ -336,6 +336,61 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
+    def test_catalog_main_keeps_vertical_scroll_fade_below_header(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        introduction = self.read_output("introduction/index.html")
+        page_root = re.search(r'<div data-slot="page"[^>]*>', introduction)
+        main = re.search(
+            r'<main id="main-content" tabindex="-1"[^>]*>', introduction
+        )
+
+        self.assertIsNotNone(page_root)
+        self.assertIsNotNone(main)
+        assert page_root is not None
+        assert main is not None
+        self.assertNotIn('class="scroll-fade-y no-scrollbar"', page_root.group(0))
+        self.assertIn('class="scroll-fade-y no-scrollbar"', main.group(0))
+
+        styles = read_catalog_styles()
+        catalog_main = re.search(
+            r'\.moo-catalog > \.wrapper\[data-layout="app"\] > '
+            r'\[data-slot="page"\] > main\s*\{(?P<body>[^}]*)\}',
+            styles,
+        )
+        self.assertIsNotNone(catalog_main)
+        assert catalog_main is not None
+        self.assertIn("overflow-y: auto;", catalog_main.group("body"))
+
+    def test_examples_keep_document_vertical_rhythm(self) -> None:
+        styles = read_catalog_styles()
+        examples_page = re.search(
+            r"\.moo-examples-page\s*\{(?P<body>[^}]*)\}", styles
+        )
+
+        self.assertIsNotNone(examples_page)
+        assert examples_page is not None
+        self.assertIn("gap: 3rem;", examples_page.group("body"))
+        self.assertIn("padding-block: 3rem 5rem;", examples_page.group("body"))
+
+        footer_shell = re.search(
+            r'\.moo-catalog > \.wrapper\[data-layout="app"\] > '
+            r'\[data-slot="page"\] > footer:has\(> \.container-xl > '
+            r'\.moo-examples-footer\) > \.container-xl\s*\{(?P<body>[^}]*)\}',
+            styles,
+        )
+        self.assertIsNotNone(footer_shell)
+        assert footer_shell is not None
+        self.assertIn("max-width: none;", footer_shell.group("body"))
+        self.assertIn("padding-inline: 0;", footer_shell.group("body"))
+
+        footer = re.search(r"\.moo-examples-footer\s*\{(?P<body>[^}]*)\}", styles)
+        self.assertIsNotNone(footer)
+        assert footer is not None
+        self.assertIn("position: relative;", footer.group("body"))
+        self.assertIn("z-index: $zindex-fixed;", footer.group("body"))
+
     def test_form_component_preview_fields_center_on_their_control_width(self) -> None:
         styles = read_catalog_styles()
 

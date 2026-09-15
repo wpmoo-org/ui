@@ -357,7 +357,7 @@ class CatalogBrowserTests(unittest.TestCase):
                 finally:
                     context.close()
 
-    def test_doc_toc_hash_scrolls_catalog_page_host_without_window_reset(self) -> None:
+    def test_doc_toc_hash_scrolls_catalog_main_below_header_without_window_reset(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         try:
             page = context.new_page()
@@ -377,20 +377,25 @@ class CatalogBrowserTests(unittest.TestCase):
                 """
                 () => {
                   const pageRoot = document.querySelector('[data-slot="page"]');
+                  const main = document.querySelector('#main-content');
                   const target = document.getElementById('grid');
                   return {
                     windowScrollY: window.scrollY,
                     pageScrollTop: pageRoot?.scrollTop ?? null,
+                    mainScrollTop: main?.scrollTop ?? null,
                     targetTop: target?.getBoundingClientRect().top ?? null,
                     pageOverflowY: pageRoot ? getComputedStyle(pageRoot).overflowY : null,
+                    mainOverflowY: main ? getComputedStyle(main).overflowY : null,
                   };
                 }
                 """
             )
 
             self.assertEqual(scroll_state["windowScrollY"], 0, scroll_state)
-            self.assertGreater(scroll_state["pageScrollTop"], 0, scroll_state)
+            self.assertEqual(scroll_state["pageScrollTop"], 0, scroll_state)
+            self.assertGreater(scroll_state["mainScrollTop"], 0, scroll_state)
             self.assertEqual(scroll_state["pageOverflowY"], "auto", scroll_state)
+            self.assertEqual(scroll_state["mainOverflowY"], "auto", scroll_state)
             self.assertLessEqual(abs(scroll_state["targetTop"]), 2, scroll_state)
             evidence.assert_clean()
         finally:

@@ -379,4 +379,5 @@ body:has(.moo-catalog) {
 .moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main {
   --scroll-fade-size: min(6%, 2rem);
   --scroll-fade-reveal: 4rem;
+  overflow-y: auto;
 }
