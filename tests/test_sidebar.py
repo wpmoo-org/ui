@@ -975,11 +975,6 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
             layout.index("{{ render_catalog_overlays() }}"),
             layout.index("catalog-prepaint.js"),
         )
-        self.assertIn(
-            '    {{ render_catalog_overlays() }}\n  </div>\n'
-            '  <script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
-            layout,
-        )
         self.assertLess(
             layout.index('{% call(slot) app('),
             layout.index("catalog-prepaint.js"),

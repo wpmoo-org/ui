@@ -47,15 +47,12 @@ class LayoutBrowserTests(unittest.TestCase):
         skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
+        cls.addClassCleanup(cls.server.__exit__, None, None, None)
         cls.playwright_manager = sync_playwright()
         cls.playwright = cls.playwright_manager.__enter__()
+        cls.addClassCleanup(cls.playwright_manager.__exit__, None, None, None)
         cls.browser = launch_certification_browser(cls.playwright)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.browser.close()
-        cls.playwright_manager.__exit__(None, None, None)
-        cls.server.__exit__(None, None, None)
+        cls.addClassCleanup(cls.browser.close)
 
     def _open(
         self,
@@ -671,10 +668,10 @@ class LayoutBrowserTests(unittest.TestCase):
                   const pageStyle = getComputedStyle(pageHost);
                   const rootRect = root.getBoundingClientRect();
                   return {
-                    rootHeight: rootStyle.height,
-                    rootMinHeight: rootStyle.minHeight,
+                    rootStyleHeight: rootStyle.height,
+                    rootStyleMinHeight: rootStyle.minHeight,
                     rootMinHeightPixels: parseFloat(rootStyle.minHeight),
-                    rootHeight: rootRect.height,
+                    rootRectHeight: rootRect.height,
                     viewportHeight: window.innerHeight,
                     rootOverflow: rootStyle.overflow,
                     rootOverflowY: rootStyle.overflowY,
@@ -691,8 +688,15 @@ class LayoutBrowserTests(unittest.TestCase):
                 """
             )
             self.assertEqual(styles["rootMinHeightPixels"], 0)
-            self.assertTrue(styles["rootHeight"])
-            self.assertAlmostEqual(styles["rootHeight"], styles["viewportHeight"], delta=1)
+            self.assertTrue(styles["rootStyleHeight"])
+            self.assertAlmostEqual(
+                float(styles["rootStyleHeight"].removesuffix("px")),
+                styles["viewportHeight"],
+                delta=1,
+            )
+            self.assertAlmostEqual(
+                styles["rootRectHeight"], styles["viewportHeight"], delta=1
+            )
             self.assertIn(styles["rootOverflow"], ("hidden", "clip"))
             self.assertNotIn(styles["rootOverflowY"], ("auto", "scroll"))
             self.assertNotIn(styles["bodyOverflowY"], ("auto", "scroll"))

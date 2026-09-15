@@ -30,15 +30,12 @@ class CatalogBrowserTests(unittest.TestCase):
         skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
+        cls.addClassCleanup(cls.server.__exit__, None, None, None)
         cls.playwright_manager = sync_playwright()
         cls.playwright = cls.playwright_manager.__enter__()
+        cls.addClassCleanup(cls.playwright_manager.__exit__, None, None, None)
         cls.browser = launch_certification_browser(cls.playwright)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.browser.close()
-        cls.playwright_manager.__exit__(None, None, None)
-        cls.server.__exit__(None, None, None)
+        cls.addClassCleanup(cls.browser.close)
 
     def test_command_palette_keyboard_navigation_keeps_active_item_clear_of_scroll_edges(
         self,

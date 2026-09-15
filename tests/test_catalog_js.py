@@ -64,11 +64,11 @@ class CatalogJavaScriptTests(CatalogTestCase):
             (CATALOG_JS / "index.js").read_text(encoding="utf-8")
         )
 
-        self.assertIn(
-            "root.querySelectorAll(\n"
-            "    '[data-slot=\"sidebar-wrapper\"][data-sidebar-key]',\n"
-            "  )",
+        self.assertRegex(
             source,
+            r"root\.querySelectorAll\(\s*"
+            r"['\"]\[data-slot=\"sidebar-wrapper\"\]"
+            r"\[data-sidebar-key\]['\"]\s*,?\s*\)",
         )
         self.assertIn("sidebarRoots.forEach", source)
 

@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
-import sys
 import tempfile
 import unittest
 from html import unescape
@@ -13,6 +11,7 @@ from pathlib import Path
 import build as site_build
 
 from build import create_environment
+from tests.helpers import CatalogTestCase
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +27,7 @@ CONTAINER_CLASSES = {
 }
 
 
-class LayoutMacroTests(unittest.TestCase):
+class LayoutRenderMixin:
     def render_page(self, source: str, **context: object) -> str:
         self.assertTrue(PAGE.is_file(), "Page layout macro is not implemented")
         template = create_environment().from_string(
@@ -61,6 +60,8 @@ class LayoutMacroTests(unittest.TestCase):
             footer=footer,
         )
 
+
+class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
     def test_page_container_contract(self) -> None:
         output = self.render_regions(page_id="workspace-page")
 
@@ -178,7 +179,7 @@ class LayoutMacroTests(unittest.TestCase):
         self.assertNotRegex(source, re.compile(r"sidebar_(?:provider|inset)"))
 
 
-class AppLayoutTests(LayoutMacroTests):
+class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
     APP = ROOT / "src/layouts/app.html.jinja"
 
     class _Element:
@@ -541,24 +542,12 @@ class AppLayoutTests(LayoutMacroTests):
             )
 
 
-class LayoutCatalogTests(unittest.TestCase):
+class LayoutCatalogTests(CatalogTestCase):
     PAGES = ROOT / "site/src/pages/layouts"
     GUIDE = ROOT / "site/src/pages/layout.html.jinja"
 
     def read_page(self, name: str) -> str:
         return (self.PAGES / name).read_text(encoding="utf-8")
-
-    def run_build(self) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            [sys.executable, "build.py"],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-
-    def read_output(self, relative_path: str) -> str:
-        return (ROOT / "site-dist" / relative_path).read_text(encoding="utf-8")
 
     def test_layout_guide_is_the_only_public_layout_document(self) -> None:
         guide = self.GUIDE.read_text(encoding="utf-8")
