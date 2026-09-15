@@ -1501,6 +1501,118 @@ console.log(JSON.stringify({
             ],
         )
 
+    def test_toc_scrolls_the_document_or_nested_page_without_cross_host_reset(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initToc } from "./site/src/js/catalog/toc.js";
+
+function makeCase(nested) {
+  const windowScrolls = [];
+  const elementScrolls = [];
+  const view = {
+    Node: { DOCUMENT_POSITION_FOLLOWING: 4 },
+    location: { hash: "#target" },
+    history: { pushState() {} },
+    scrollX: 0,
+    scrollY: 240,
+    setTimeout() { return 1; },
+    clearTimeout() {},
+    requestAnimationFrame(callback) { callback(); return 1; },
+    cancelAnimationFrame() {},
+    getComputedStyle(element) {
+      return { fontSize: "16px", overflowY: element === page ? "auto" : "visible" };
+    },
+    matchMedia() { return { matches: false }; },
+    scrollTo(options) { windowScrolls.push(options); },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const documentElement = {
+    nodeType: 1,
+    scrollTop: 0,
+    clientHeight: 400,
+    scrollHeight: 1200,
+    getBoundingClientRect: () => ({ top: 0, bottom: 400, left: 0, right: 800 }),
+    scrollTo(options) { elementScrolls.push(options); this.scrollTop = options.top; },
+  };
+  const documentNode = {
+    nodeType: 9,
+    defaultView: view,
+    scrollingElement: documentElement,
+    documentElement,
+  };
+  const page = {
+    nodeType: 1,
+    ownerDocument: documentNode,
+    scrollTop: 0,
+    clientHeight: 400,
+    scrollHeight: 1200,
+    getBoundingClientRect: () => ({ top: 10, bottom: 410, left: 0, right: 800 }),
+    scrollTo(options) { elementScrolls.push(options); this.scrollTop = options.top; },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const target = {
+    getBoundingClientRect: () => ({ top: 260, bottom: 300, left: 0, right: 200 }),
+  };
+  const link = {
+    getAttribute(name) { return name === "href" ? "#target" : null; },
+    classList: { toggle() {} },
+    setAttribute() {},
+    removeAttribute() {},
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const root = nested
+    ? {
+        nodeType: 1,
+        ownerDocument: documentNode,
+        defaultView: view,
+        documentElement,
+        querySelector(selector) {
+          return selector === '[data-slot="page"]' ? page : null;
+        },
+        querySelectorAll(selector) {
+          return selector === ".moo-doc-toc .nav-link" ? [link] : [];
+        },
+        getElementById(id) { return id === "target" ? target : null; },
+      }
+    : {
+        nodeType: 9,
+        defaultView: view,
+        documentElement,
+        scrollingElement: documentElement,
+        querySelector() { return null; },
+        querySelectorAll(selector) {
+          return selector === ".moo-doc-toc .nav-link" ? [link] : [];
+        },
+        getElementById(id) { return id === "target" ? target : null; },
+      };
+  initToc(root);
+  return { windowScrolls, elementScrolls };
+}
+
+console.log(JSON.stringify({ document: makeCase(false), nested: makeCase(true) }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["document"]["windowScrolls"], [])
+        self.assertTrue(case["document"]["elementScrolls"])
+        self.assertTrue(case["nested"]["windowScrolls"])
+        self.assertTrue(case["nested"]["elementScrolls"])
+
     def test_examples_chart_import_resolves_to_the_canonical_bundle(
         self,
     ) -> None:

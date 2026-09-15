@@ -74,6 +74,10 @@ export function initToc(root = document) {
   const targetByHash = new Map(targets.map((item) => [item.link.getAttribute("href"), item]));
   const scrollHost = resolveCatalogScrollHost(root);
   const main = scrollHost.element;
+  const documentNode = root.nodeType === 9 ? root : root.ownerDocument;
+  const documentScroller =
+    documentNode?.scrollingElement || documentNode?.documentElement;
+  const ownsDocumentScroll = main === documentScroller;
   let frame = 0;
   let clickUntil = 0;
   let chartFrame = 0;
@@ -151,7 +155,9 @@ export function initToc(root = document) {
     }
   };
   const alignTargetInMain = (target, behavior = "smooth") => {
-    resetWindowScroll();
+    if (!ownsDocumentScroll) {
+      resetWindowScroll();
+    }
     const mainRect = main.getBoundingClientRect();
     const targetTop = target.getBoundingClientRect().top - mainRect.top + main.scrollTop;
     const reduceMotion = view.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -159,8 +165,10 @@ export function initToc(root = document) {
       top: Math.max(0, targetTop - chartNavOffsetFor(target)),
       behavior: reduceMotion ? "auto" : behavior,
     });
-    resetWindowScroll();
-    view.requestAnimationFrame(resetWindowScroll);
+    if (!ownsDocumentScroll) {
+      resetWindowScroll();
+      view.requestAnimationFrame(resetWindowScroll);
+    }
   };
   const chartNavOffsetFor = (target) => {
     if (!chartNav || !target) {
@@ -275,7 +283,9 @@ export function initToc(root = document) {
   if (targets.length > 0 || chartTargets.length > 0) {
     listen(view, "hashchange", () => {
       if (!navigateCurrentHash("auto")) {
-        resetWindowScroll();
+        if (!ownsDocumentScroll) {
+          resetWindowScroll();
+        }
         requestUpdate();
         requestChartNavUpdate();
       }

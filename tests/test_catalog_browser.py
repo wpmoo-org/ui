@@ -337,6 +337,45 @@ class CatalogBrowserTests(unittest.TestCase):
                 finally:
                     context.close()
 
+    def test_doc_toc_hash_scrolls_catalog_page_host_without_window_reset(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            page.set_viewport_size({"width": 1280, "height": 900})
+            evidence = BrowserEvidence(page)
+            response = page.goto(
+                f"{self.base_url}/site-dist/layout/#grid",
+                wait_until="domcontentloaded",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[0])
+            expect(page.get_by_role("heading", name="Grid", level=2)).to_be_visible()
+            page.wait_for_timeout(100)
+
+            scroll_state = page.evaluate(
+                """
+                () => {
+                  const pageRoot = document.querySelector('[data-slot="page"]');
+                  const target = document.getElementById('grid');
+                  return {
+                    windowScrollY: window.scrollY,
+                    pageScrollTop: pageRoot?.scrollTop ?? null,
+                    targetTop: target?.getBoundingClientRect().top ?? null,
+                    pageOverflowY: pageRoot ? getComputedStyle(pageRoot).overflowY : null,
+                  };
+                }
+                """
+            )
+
+            self.assertEqual(scroll_state["windowScrollY"], 0, scroll_state)
+            self.assertGreater(scroll_state["pageScrollTop"], 0, scroll_state)
+            self.assertEqual(scroll_state["pageOverflowY"], "auto", scroll_state)
+            self.assertLessEqual(abs(scroll_state["targetTop"]), 2, scroll_state)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
 
 if __name__ == "__main__":
     unittest.main()
