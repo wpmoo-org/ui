@@ -159,6 +159,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "assets/css/catalog.css",
             "assets/css/catalog.min.css",
             "assets/js/bootstrap.bundle.min.js",
+            "assets/js/catalog-prepaint.js",
             "js/combobox.js",
             "js/context-menu.js",
             "js/datatable.js",

@@ -916,7 +916,7 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
 
         self.assertEqual(case["scrollTop"], 656)
 
-    def test_catalog_hands_off_persisted_state_before_sidebar_content(self) -> None:
+    def test_catalog_loads_external_prepaint_script_after_sidebar_markup(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_sidebar_styles()
         catalog_styles = (ROOT / "site/scss/catalog/_shell.scss").read_text(
@@ -924,19 +924,35 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         )
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+        prepaint = ROOT / "site/static/js/catalog-prepaint.js"
 
         restore_index = source.index("this._restoreState();")
         ready_index = source.index('setAttribute("data-sidebar-ready", "")')
         self.assertLess(restore_index, ready_index)
         self.assertNotIn("requestAnimationFrame", source[restore_index:ready_index])
         self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertTrue(prepaint.is_file())
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            layout,
+        )
+        self.assertNotIn("shell.dataset.sidebarState = state", layout)
+        self.assertLess(
+            layout.index("{{ render_catalog_overlays() }}"),
+            layout.index("catalog-prepaint.js"),
+        )
+        self.assertIn(
+            '    {{ render_catalog_overlays() }}\n  </div>\n'
+            '  <script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            layout,
+        )
         self.assertLess(
             layout.index('{% call(slot) app('),
-            layout.index("shell.dataset.sidebarState = state"),
+            layout.index("catalog-prepaint.js"),
         )
         self.assertLess(
             layout.index("{{ render_catalog_sidebar() }}"),
-            layout.index("shell.dataset.sidebarState = state"),
+            layout.index("catalog-prepaint.js"),
         )
         self.assertIn('removeAttribute("data-sidebar-ready")', source)
         self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
@@ -952,16 +968,24 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
             r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
         )
 
-    def test_catalog_prepositions_active_sidebar_item_before_inset_content(self) -> None:
+    def test_catalog_prepaint_positions_active_sidebar_item_before_inset_content(self) -> None:
+        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+            encoding="utf-8",
+        )
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
-        self.assertIn("data-moo-sidebar-active-prepaint", layout)
-        sidebar_index = layout.index('{{ render_catalog_sidebar() }}')
-        active_scroll_index = layout.index("data-moo-sidebar-active-prepaint")
+        self.assertIn("data-moo-sidebar-active-prepaint", prepaint)
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            layout,
+        )
         self.assertIn('{% elif slot == "page" %}', layout)
-        self.assertLess(sidebar_index, active_scroll_index)
-        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', layout)
-        self.assertIn("content.scrollTop = Math.round", layout)
+        self.assertLess(
+            layout.index("{{ render_catalog_overlays() }}"),
+            layout.index("catalog-prepaint.js"),
+        )
+        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', prepaint)
+        self.assertIn("content.scrollTop = Math.round", prepaint)
 
     def test_sidebar_shortcut_ignores_editable_targets(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")

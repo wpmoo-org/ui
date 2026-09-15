@@ -210,6 +210,13 @@ class SheetTests(CatalogTestCase):
             'root.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalSheet)',
             script,
         )
-        self.assertIn("root.body.appendChild(sheet)", script)
+        self.assertIn(
+            'const firstBodyScript = [...root.body.children].find(\n'
+            '      (child) => child.tagName === "SCRIPT",\n'
+            '    );\n'
+            '    root.body.insertBefore(sheet, firstBodyScript || null)',
+            script,
+        )
+        self.assertNotIn("root.body.appendChild(sheet)", script)
         self.assertNotIn("moo-sheet-placeholder", script)
         self.assertNotIn("catalogSheetPlaceholders", script)

@@ -21,71 +21,6 @@
           {% if region == "header" %}
             {% include "shell/navbar.html.jinja" %}
           {% elif region == "main" %}
-      <script>
-        (() => {
-          const state = document.documentElement.dataset.sidebarCatalogState;
-          const shell = document.querySelector('[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]');
-          if (
-            (state === "collapsed" || state === "expanded") &&
-            shell?.dataset.sidebarKey === "catalog-shell"
-          ) {
-            shell.dataset.sidebarState = state;
-          }
-        })();
-      </script>
-      <script>
-        (() => {
-          // Apply a saved Sidebar variant synchronously, right after the
-          // sidebar renders and before the rest of the page paints, so a
-          // non-default choice never flashes the default layout first.
-          var sidebar = document.getElementById("catalog-sidebar");
-          if (!sidebar) return;
-          var stored;
-          try {
-            stored = window.localStorage.getItem("moo:sidebar-variant");
-          } catch (_) {
-            return;
-          }
-          if (stored === "sidebar" || stored === "inset" || stored === "floating") {
-            sidebar.dataset.variant = stored;
-          }
-        })();
-      </script>
-      <script data-moo-sidebar-active-prepaint>
-        (() => {
-          // Match Sidebar's active route positioning before the deferred
-          // catalog module loads, so deep menu pages never flash from the top.
-          const shell = document.querySelector('[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]');
-          const active = shell?.querySelector(
-            '[data-slot="sidebar-content"] a[data-slot="sidebar-menu-button"][aria-current="page"], ' +
-              '[data-slot="sidebar-content"] a.sidebar-menu-button[aria-current="page"], ' +
-              '[data-slot="sidebar-content"] a.sidebar-menu-button.active'
-          );
-          const content = active?.closest('[data-slot="sidebar-content"]');
-          if (!active || !content || content.clientHeight <= 0) {
-            return;
-          }
-          const maxScrollTop = content.scrollHeight - content.clientHeight;
-          if (maxScrollTop <= 0) {
-            return;
-          }
-
-          const contentRect = content.getBoundingClientRect();
-          const activeRect = active.getBoundingClientRect();
-          if (contentRect.height <= 0 || activeRect.height <= 0) {
-            return;
-          }
-
-          const targetScrollTop =
-            content.scrollTop +
-            activeRect.top -
-            contentRect.top -
-            (content.clientHeight - activeRect.height) / 2;
-          content.scrollTop = Math.round(
-            Math.min(Math.max(targetScrollTop, 0), maxScrollTop)
-          );
-        })();
-      </script>
             {% set has_example_toc = current_page_kind in ["component", "utility"] %}
             {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
             {% set child_page_navigation_items = site_pages %}
@@ -125,4 +60,5 @@
     {% endcall %}
     {{ render_catalog_overlays() }}
   </div>
+  <script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>
 {% endblock %}

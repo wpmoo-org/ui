@@ -71,7 +71,10 @@ export function initBootstrapPreview(root = document) {
       return;
     }
     sheet.dataset.mooCatalogSheet = "true";
-    root.body.appendChild(sheet);
+    const firstBodyScript = [...root.body.children].find(
+      (child) => child.tagName === "SCRIPT",
+    );
+    root.body.insertBefore(sheet, firstBodyScript || null);
   };
   listen(root, "click", (event) => {
     const target = event.target instanceof view.Element

@@ -1872,7 +1872,7 @@ class CatalogContractTests(CatalogTestCase):
             base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'),
         )
 
-    def test_built_catalog_sidebar_persisted_state_handoff_is_in_head(self) -> None:
+    def test_built_catalog_prepaint_script_runs_after_catalog_markup(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -1883,10 +1883,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.min.css"))
         self.assertLess(head.index(handoff), head.index("assets/css/catalog.min.css"))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
-        handoff_index = page.index("shell.dataset.sidebarState = state")
-        sidebar_index = page.index('<aside', handoff_index)
-        self.assertLess(wrapper_index, handoff_index)
-        self.assertLess(handoff_index, sidebar_index)
+        settings_index = page.index('id="catalog-settings"')
+        prepaint_index = page.index('assets/js/catalog-prepaint.js?')
+        bootstrap_index = page.index('assets/js/bootstrap.bundle.min.js?')
+        catalog_module_index = page.index('assets/js/catalog/index.js?')
+        self.assertLess(wrapper_index, prepaint_index)
+        self.assertLess(settings_index, prepaint_index)
+        self.assertLess(prepaint_index, bootstrap_index)
+        self.assertLess(prepaint_index, catalog_module_index)
+        self.assertNotIn("shell.dataset.sidebarState = state", page)
+        self.assertIn(
+            '<script src="../assets/js/catalog-prepaint.js?',
+            page,
+        )
 
     def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
         catalog_scss = read_catalog_styles()

@@ -63,6 +63,9 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (SITE_DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
+        self.assertTrue(
+            (SITE_DIST / "assets/js/catalog-prepaint.js").is_file()
+        )
         for module_name in (
             "combobox.js",
             "sidebar.js",
@@ -105,6 +108,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/css/catalog.min.css", "catalog css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
             ):
                 target = site_dist / relative
@@ -124,6 +128,34 @@ class BuildTests(CatalogTestCase):
                 build.SITE_DIST = original_site_dist
 
         self.assertEqual(changed_version, original_version)
+
+    def test_asset_version_includes_catalog_prepaint_script(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            site_dist = Path(tempdir)
+            for relative, contents in (
+                ("assets/css/moo-ui.min.css", "core css"),
+                ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
+                ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/catalog-prepaint.js", "initial prepaint js"),
+            ):
+                target = site_dist / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(contents, encoding="utf-8")
+
+            original_site_dist = build.SITE_DIST
+            try:
+                build.SITE_DIST = site_dist
+                original_version = build.asset_version()
+                (site_dist / "assets/js/catalog-prepaint.js").write_text(
+                    "changed prepaint js",
+                    encoding="utf-8",
+                )
+                changed_version = build.asset_version()
+            finally:
+                build.SITE_DIST = original_site_dist
+
+        self.assertNotEqual(changed_version, original_version)
 
     def test_example_toc_items_preserve_heading_text_order_with_inline_markup(
         self,

@@ -124,6 +124,58 @@ function themeElementIsDark(element) {
   return theme === "dark";
 }
 
+function clampColorChannel(value) {
+  return Math.min(255, Math.max(0, Math.round(value)));
+}
+
+function normalizeColorComponent(value) {
+  const component = String(value).trim();
+  if (component.endsWith("%")) {
+    const percentage = Number.parseFloat(component.slice(0, -1));
+    return Number.isFinite(percentage)
+      ? clampColorChannel((percentage / 100) * 255)
+      : null;
+  }
+  const normalized = Number.parseFloat(component);
+  return Number.isFinite(normalized)
+    ? clampColorChannel(normalized * 255)
+    : null;
+}
+
+function normalizeColorAlpha(value) {
+  if (value === undefined) return 1;
+  const alpha = String(value).trim();
+  if (alpha.endsWith("%")) {
+    const percentage = Number.parseFloat(alpha.slice(0, -1));
+    return Number.isFinite(percentage)
+      ? Math.min(1, Math.max(0, percentage / 100))
+      : null;
+  }
+  const numeric = Number.parseFloat(alpha);
+  return Number.isFinite(numeric)
+    ? Math.min(1, Math.max(0, numeric))
+    : null;
+}
+
+function normalizeCanvasColor(value) {
+  if (typeof value !== "string") return null;
+  const color = value.trim();
+  const match = color.match(
+    /^color\(\s*srgb\s+([^\s/]+)\s+([^\s/]+)\s+([^\s/]+)(?:\s*\/\s*([^\s)]+))?\s*\)$/i,
+  );
+  if (!match) return color || null;
+
+  const channels = match.slice(1, 4).map(normalizeColorComponent);
+  const alpha = normalizeColorAlpha(match[4]);
+  if (channels.some((channel) => channel === null) || alpha === null) {
+    return null;
+  }
+  if (alpha >= 1) {
+    return `rgb(${channels.join(", ")})`;
+  }
+  return `rgba(${channels.join(", ")}, ${Number(alpha.toFixed(3))})`;
+}
+
 function resolveCanvasColor(document, window, value, fallback, themeElement) {
   const createElement = document?.createElement;
   const getComputedStyle = window?.getComputedStyle;
@@ -138,7 +190,7 @@ function resolveCanvasColor(document, window, value, fallback, themeElement) {
   parent.appendChild(probe);
   try {
     const resolved = getComputedStyle.call(window, probe).color;
-    return resolved || fallback;
+    return normalizeCanvasColor(resolved) || fallback;
   } finally {
     probe.remove();
   }
@@ -464,7 +516,10 @@ function applyThemeToChart(chart, theme, metadata, explicitColorFields = []) {
     chart.options.plugins.tooltip.borderColor = theme.borderColor;
   }
 
-  chart.update("none");
+  // Use Chart.js' regular update mode so controllers with shared element
+  // options (notably bars) receive the new color values instead of reusing
+  // their previous frame's options.
+  chart.update();
 }
 
 function themedGrid(theme) {
@@ -840,9 +895,16 @@ export default class MooChart {
           }
         });
       });
-      this._observer.observe(this._themeElement, {
+      const observerOptions = {
         attributes: true,
         attributeFilter: ["data-bs-theme", "style"],
+      };
+      const observerTargets = [
+        this._themeElement,
+        this._document?.documentElement,
+      ].filter((target, index, targets) => target && targets.indexOf(target) === index);
+      observerTargets.forEach((target) => {
+        this._observer.observe(target, observerOptions);
       });
     }
 

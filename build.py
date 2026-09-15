@@ -1782,6 +1782,7 @@ def asset_version() -> str:
         SITE_DIST / "assets/css/moo-ui.min.css",
         SITE_DIST / "assets/css/catalog.min.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
+        SITE_DIST / "assets/js/catalog-prepaint.js",
         SITE_DIST / "assets/js/catalog/index.js",
     ]
     for path in paths:
