@@ -116,7 +116,13 @@ class BlocksTests(CatalogTestCase):
             standalone = self.read_output(f"blocks/previews/{slug}.html")
             with self.subTest(slug=slug, contract="standalone preview"):
                 self.assertNotIn('data-moo-shell="catalog"', standalone)
-                self.assertIn('class="moo-block-standalone moo-ui"', standalone)
+                self.assertIn(
+                    '<div class="moo-ui" data-bs-theme="light">', standalone
+                )
+                self.assertIn('class="moo-block-standalone"', standalone)
+                self.assertNotIn(
+                    'class="moo-block-standalone moo-ui"', standalone
+                )
                 self.assertIn('data-slot="sidebar-wrapper"', standalone)
                 self.assertIn(f'data-variant="{variant}"', standalone)
                 self.assertNotIn("moo-example__source", standalone)
