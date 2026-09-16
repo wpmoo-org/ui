@@ -222,6 +222,19 @@ class ConformanceRunnerCliTests(unittest.TestCase):
 
 
 class OwnerConformanceFixtureTests(unittest.TestCase):
+    def test_committed_fixture_runtime_assets_match_current_core_outputs(self):
+        expected_assets = {
+            "moo.css": ROOT / "dist" / "assets" / "css" / "moo.css",
+            "sidebar.js": ROOT / "dist" / "js" / "sidebar.js",
+        }
+
+        for fixture_name, source_path in expected_assets.items():
+            with self.subTest(fixture_name=fixture_name):
+                self.assertEqual(
+                    (FIXTURES_DIR / "assets" / fixture_name).read_bytes(),
+                    source_path.read_bytes(),
+                )
+
     def test_nested_owner_fixture_declares_explicit_keys_and_external_runtime(self):
         fixture = (FIXTURES_DIR / "nested-owners.html").read_text(encoding="utf-8")
         initializer = (

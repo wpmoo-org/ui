@@ -122,7 +122,7 @@ THEME_TOGGLE_JS = """
   const read = () => {
     return getComputedStyle(element).getPropertyValue(args.property);
   };
-  root.removeAttribute(args.attribute);
+  root.setAttribute(args.attribute, "light");
   const light = read();
   root.setAttribute(args.attribute, "dark");
   const dark = read();
