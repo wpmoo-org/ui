@@ -39,8 +39,15 @@ PRIVATE_OWNER_FIXTURE_HOOKS = {
     "data-moo-overlay-portal-host",
     "data-moo-theme-key",
 }
-ACTIVE_RC3_PLAN_DOCS = (
-    PROJECT_DOCS_ROOT / "plans/2026-08-17-chart-datepicker-slider-1-0-0-rc3.md",
+ACTIVE_COMPONENT_PLAN_DOCS = tuple(
+    sorted(
+        (
+            path
+            for path in (PROJECT_DOCS_ROOT / "plans").glob("*.md")
+            if path.name != "PLAN.md"
+        ),
+        key=lambda path: path.name,
+    )
 )
 
 
@@ -73,7 +80,21 @@ class CertificationContractTests(unittest.TestCase):
             "Public component hooks must use component-owned data-* contracts.",
         )
 
-    def test_active_rc3_plan_docs_match_current_public_component_contracts(self) -> None:
+    def test_active_component_plan_docs_are_live_root_documents(self) -> None:
+        if not PROJECT_DOCS_ROOT.is_dir():
+            self.skipTest("UI project docs are not mounted in this checkout")
+
+        active_plans_root = PROJECT_DOCS_ROOT / "plans"
+        self.assertTrue(ACTIVE_COMPONENT_PLAN_DOCS)
+        self.assertTrue(
+            all(
+                path.is_file() and path.parent == active_plans_root
+                for path in ACTIVE_COMPONENT_PLAN_DOCS
+            ),
+            "Only live root plan documents may be checked as active contracts.",
+        )
+
+    def test_active_plan_docs_match_current_public_component_contracts(self) -> None:
         if not PROJECT_DOCS_ROOT.is_dir():
             self.skipTest("UI project docs are not mounted in this checkout")
 
@@ -83,7 +104,7 @@ class CertificationContractTests(unittest.TestCase):
             "data-moo-slider",
             "vanillajs-datepicker",
         )
-        for path in ACTIVE_RC3_PLAN_DOCS:
+        for path in ACTIVE_COMPONENT_PLAN_DOCS:
             source = path.read_text(encoding="utf-8")
             relative = path.relative_to(PROJECT_DOCS_ROOT).as_posix()
             for pattern in banned_patterns:
@@ -93,7 +114,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(
             stale_claims,
             [],
-            "Active RC.3 plan docs must match the current public component contracts.",
+            "Active plan docs must match the current public component contracts.",
         )
 
     def test_toast_public_wiring_hooks_are_recorded_in_component_contract(self) -> None:
