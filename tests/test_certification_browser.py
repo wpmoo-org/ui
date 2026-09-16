@@ -4198,10 +4198,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         outerGap: direction === "rtl"
                           ? buttonRect.left - alertRect.left
                           : alertRect.right - buttonRect.right,
-                        verticalCenterDelta: Math.abs(
-                          (buttonRect.top + buttonRect.height / 2)
-                          - (alertRect.top + alertRect.height / 2)
+                        blockStart: buttonRect.top - alertRect.top,
+                        insetBlockStart: parseFloat(
+                          getComputedStyle(button).insetBlockStart,
                         ),
+                        transform: getComputedStyle(button).transform,
                       };
                     }
                     """
@@ -4209,7 +4210,12 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(alert_body).to_be_visible()
                 self.assertGreaterEqual(close_spacing["inlineGap"], 6)
                 self.assertGreaterEqual(close_spacing["outerGap"], 8)
-                self.assertLessEqual(close_spacing["verticalCenterDelta"], 1)
+                self.assertAlmostEqual(
+                    close_spacing["blockStart"],
+                    close_spacing["insetBlockStart"],
+                    delta=1.5,
+                )
+                self.assertEqual(close_spacing["transform"], "none")
                 page.evaluate(
                     """
                     () => new Promise(resolve => {

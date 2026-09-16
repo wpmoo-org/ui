@@ -1481,6 +1481,19 @@ class CatalogContractTests(CatalogTestCase):
                             source.replace(".alert-dismissible .btn-close", ""),
                         )
                         continue
+                    if component == "dialog" and class_name == "btn-close":
+                        self.assertIn(".modal-header:has(> .btn-close)", source)
+                        self.assertIn(
+                            ".modal-header:has(> .btn-close) > .btn-close",
+                            source,
+                        )
+                        dialog_close_rules = source.replace(
+                            ".modal-header:has(> .btn-close) > .btn-close", ""
+                        ).replace(
+                            ".modal-header:has(> .btn-close)", ""
+                        )
+                        self.assertNotIn(".btn-close", dialog_close_rules)
+                        continue
                     self.assertTrue(
                         any(
                             class_name == prefix
