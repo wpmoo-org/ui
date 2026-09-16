@@ -70,6 +70,85 @@
   }
 }
 
+@keyframes moo-overlay-backdrop-enter {
+  from {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: var(--moo-overlay-backdrop-opacity, 1);
+    -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, blur(6px));
+    backdrop-filter: var(--moo-overlay-backdrop-filter, blur(6px));
+  }
+}
+
+@keyframes moo-overlay-backdrop-exit {
+  from {
+    opacity: var(--moo-overlay-backdrop-opacity, 1);
+    -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, blur(6px));
+    backdrop-filter: var(--moo-overlay-backdrop-filter, blur(6px));
+  }
+  to {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
+.modal-backdrop,
+.offcanvas-backdrop {
+  --bs-backdrop-opacity: var(--moo-overlay-backdrop-opacity, 1);
+  opacity: 1;
+  color: transparent;
+  background-color: transparent;
+}
+
+.modal-backdrop.fade, .modal-backdrop.fade:not(.show),
+.offcanvas-backdrop.fade,
+.offcanvas-backdrop.fade:not(.show) {
+  opacity: 1;
+}
+
+.modal-backdrop.show,
+.offcanvas-backdrop.show {
+  transition: none;
+}
+
+.modal-backdrop.fade:not(.show),
+.offcanvas-backdrop.fade:not(.show) {
+  color: var(--bs-body-color, currentcolor);
+  transition: color var(--moo-overlay-motion-duration, 0.3s) ease-out;
+}
+
+.modal-backdrop::before,
+.offcanvas-backdrop::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0;
+  background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, #0a0a0a 10%, transparent));
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  animation: moo-overlay-backdrop-exit var(--moo-overlay-motion-duration, 0.3s) ease-out both;
+}
+
+.modal-backdrop.show::before,
+.offcanvas-backdrop.show::before {
+  animation: moo-overlay-backdrop-enter var(--moo-overlay-motion-duration, 0.3s) ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+.offcanvas-backdrop {
+    transition: none;
+  }
+  .modal-backdrop::before,
+.offcanvas-backdrop::before {
+    animation: none;
+  }
+}
+
 .moo-ui[data-bs-theme] {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;
@@ -136,9 +215,10 @@
   --bs-focus-ring-width: 2px;
   --bs-focus-ring-opacity: 0.25;
   --bs-focus-ring-color: var(--moo-ring);
+  --moo-overlay-motion-duration: 0.3s;
   --moo-overlay-backdrop-opacity: 1;
   --moo-overlay-backdrop-bg: color-mix(in srgb, #0a0a0a 10%, transparent);
-  --moo-overlay-backdrop-filter: blur(8px);
+  --moo-overlay-backdrop-filter: blur(6px);
   --moo-input-group-border-radius: var(--bs-border-radius-lg);
   --moo-disabled-control-opacity: 0.5;
   --moo-sidebar-foreground: var(--moo-foreground);
@@ -2676,7 +2756,7 @@
     pointer-events: none;
   }
   .modal.fade .modal-dialog {
-    transition: transform 0.3s ease-out;
+    transition: transform var(--moo-overlay-motion-duration, 0.3s) ease-out;
     transform: translate(0, -50px);
   }
   @media (prefers-reduced-motion: reduce) {
@@ -3182,7 +3262,7 @@
     --bs-offcanvas-border-width: var(--bs-border-width);
     --bs-offcanvas-border-color: var(--bs-border-color-translucent);
     --bs-offcanvas-box-shadow: var(--bs-box-shadow-sm);
-    --bs-offcanvas-transition: transform 0.3s ease-in-out;
+    --bs-offcanvas-transition: transform var(--moo-overlay-motion-duration, 0.3s) ease-in-out;
     --bs-offcanvas-title-line-height: 1.5;
   }
   @media (max-width: 575.98px) {
@@ -4282,7 +4362,7 @@ label.btn {
     border-width: var(--bs-border-width);
     border-style: var(--bs-border-style);
     border-color: transparent;
-    border-radius: var(--bs-border-radius-xl);
+    border-radius: var(--bs-border-radius-pill);
     color: var(--bs-btn-close-color);
     background-image: none;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -5431,10 +5511,9 @@ label.btn {
   .alert-dismissible .btn-close {
     top: auto;
     right: auto;
-    inset-block-start: 50%;
+    inset-block-start: var(--bs-alert-padding-y);
     inset-inline-end: var(--bs-alert-padding-x);
     padding: 0.34375rem 0.34375rem;
-    transform: translateY(-50%);
   }
   .alert-danger {
     --bs-alert-bg: transparent;
@@ -6221,6 +6300,16 @@ label.btn {
   }
   .modal-header {
     gap: calc(var(--bs-modal-padding) * 0.75);
+  }
+  .modal-header:has(> .btn-close) {
+    position: relative;
+    padding-inline-end: calc( var(--bs-modal-padding) + 0.75rem + 0.6875rem + 0.5rem);
+  }
+  .modal-header:has(> .btn-close) > .btn-close {
+    position: absolute;
+    inset-block-start: 0.5rem;
+    inset-inline-end: 0.5rem;
+    margin: 0;
   }
   .modal--alert {
     --bs-modal-width: 24rem;
@@ -7722,17 +7811,40 @@ label.btn {
   :scope[data-bs-theme="dark"] .form-switch .form-check-input:not(:checked):not(:focus) {
     --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 0.25%29'/%3e%3c/svg%3e");
   }
-}
-
-.modal-backdrop,
+  .modal-backdrop,
 .offcanvas-backdrop {
-  --bs-backdrop-opacity: var(--moo-overlay-backdrop-opacity, 1);
-  background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, #0a0a0a 10%, transparent));
-  -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, blur(8px));
-  backdrop-filter: var(--moo-overlay-backdrop-filter, blur(8px));
-}
-
-.modal-backdrop.show,
+    --bs-backdrop-opacity: var(--moo-overlay-backdrop-opacity, 1);
+    opacity: 1;
+    color: transparent;
+    background-color: transparent;
+  }
+  .modal-backdrop.fade, .modal-backdrop.fade:not(.show),
+.offcanvas-backdrop.fade,
+.offcanvas-backdrop.fade:not(.show) {
+    opacity: 1;
+  }
+  .modal-backdrop.show,
 .offcanvas-backdrop.show {
-  opacity: var(--moo-overlay-backdrop-opacity, 1);
+    transition: none;
+  }
+  .modal-backdrop.fade:not(.show),
+.offcanvas-backdrop.fade:not(.show) {
+    color: var(--bs-body-color, currentcolor);
+    transition: color var(--moo-overlay-motion-duration, 0.3s) ease-out;
+  }
+  .modal-backdrop::before,
+.offcanvas-backdrop::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    opacity: 0;
+    background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, #0a0a0a 10%, transparent));
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+    animation: moo-overlay-backdrop-exit var(--moo-overlay-motion-duration, 0.3s) ease-out both;
+  }
+  .modal-backdrop.show::before,
+.offcanvas-backdrop.show::before {
+    animation: moo-overlay-backdrop-enter var(--moo-overlay-motion-duration, 0.3s) ease-out both;
+  }
 }

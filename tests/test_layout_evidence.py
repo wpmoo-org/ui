@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "src/registry/layouts.json"
 EVIDENCE = ROOT / "src/certification/layout-evidence.json"
-REQUIRED_ROOT_KEYS = {"schemaVersion", "layouts"}
+REQUIRED_ROOT_KEYS = {"schemaVersion", "manualReleaseGates", "layouts"}
 REQUIRED_LAYOUT_KEYS = {
     "contractVersion",
     "status",
@@ -26,6 +26,17 @@ REQUIRED_LAYOUT_KEYS = {
     "acceptedAt",
 }
 REQUIRED_MATRIX_KEYS = {"shellModes", "viewports", "directions", "themes", "zoom"}
+GENERATED_FIXTURE_STEMS = {
+    "layout-page-base": "layout-page",
+    "layout-page-sm": "layout-page",
+    "layout-page-md": "layout-page",
+    "layout-page-lg": "layout-page",
+    "layout-page-xxl": "layout-page",
+    "layout-page-fluid": "layout-page",
+    "layout-app-contained": "layout-app",
+    "layout-app-right": "layout-app",
+    "layout-app-none": "layout-app",
+}
 STATUS_VALUES = {"preview", "ready"}
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 RFC3339_PATTERN = re.compile(
@@ -47,9 +58,13 @@ def _fixture_source(url: str) -> Path | None:
     prefix = "tests/fixtures/certification/"
     if not path.startswith(prefix):
         return None
-    name = Path(path.removeprefix(prefix)).name
+    relative_path = path.removeprefix(prefix)
+    name = Path(relative_path).name
     if name == "index.html":
-        name = Path(path.removeprefix(prefix)).parent.name
+        name = Path(relative_path).parent.name
+    elif name.endswith(".html"):
+        name = name.removesuffix(".html")
+    name = GENERATED_FIXTURE_STEMS.get(name, name)
     return ROOT / prefix / f"{name}.html.jinja"
 
 
@@ -114,9 +129,16 @@ def evidence_errors(payload: object, registry: list[dict[str, object]]) -> list[
     if not isinstance(payload, dict):
         return ["evidence root must be an object"]
     if set(payload) != REQUIRED_ROOT_KEYS:
-        errors.append("evidence root keys must be exactly schemaVersion and layouts")
+        errors.append(
+            "evidence root keys must be exactly schemaVersion, manualReleaseGates, and layouts"
+        )
     if payload.get("schemaVersion") != 1:
         errors.append("schemaVersion must be 1")
+    manual_release_gates = payload.get("manualReleaseGates")
+    if not isinstance(manual_release_gates, list) or not all(
+        isinstance(value, str) for value in manual_release_gates
+    ):
+        errors.append("manualReleaseGates must be a string array")
     layouts = payload.get("layouts")
     if not isinstance(layouts, dict):
         return errors + ["layouts must be an object"]
@@ -228,7 +250,11 @@ class LayoutEvidenceTests(unittest.TestCase):
 
     def test_ready_status_requires_complete_immutable_evidence(self) -> None:
         invalid = copy.deepcopy(self.evidence)
-        invalid["layouts"]["page"]["status"] = "ready"
+        page = invalid["layouts"]["page"]
+        page["status"] = "ready"
+        page["fixtureUrls"] = []
+        page["tests"] = []
+        page["matrix"] = {field: [] for field in REQUIRED_MATRIX_KEYS}
 
         errors = evidence_errors(invalid, self.registry)
         self.assertTrue(any("ready evidence requires fixture URLs and tests" in error for error in errors))
