@@ -35,8 +35,10 @@ export function initBootstrapPreview(root = document) {
   listen(view, "resize", clampHorizontalScroll, { passive: true });
   clampHorizontalScroll();
 
+  const ownerPortalFor = (trigger) =>
+    ownerPortalRoot(findThemeOwner(trigger));
   const portalFor = (trigger) => (
-    ownerPortalRoot(findThemeOwner(trigger)) ||
+    ownerPortalFor(trigger) ||
     root.body ||
     root.documentElement ||
     null
@@ -62,7 +64,8 @@ export function initBootstrapPreview(root = document) {
 
   const onModalShow = (event) => {
     const modal = event.target;
-    const portal = portalFor(modal);
+    const trigger = event.relatedTarget || modal;
+    const portal = ownerPortalFor(trigger) || portalFor(modal);
     if (
       !(modal instanceof view.HTMLElement) ||
       !modal.classList.contains("modal") ||
@@ -177,12 +180,12 @@ export function initBootstrapPreview(root = document) {
       );
       return isStackContainer(container) ? container : null;
     };
-    const getSharedToastStack = (sourceContainer) => {
+    const getSharedToastStack = (sourceContainer, trigger) => {
       if (!isStackContainer(sourceContainer)) {
         return sourceContainer;
       }
 
-      const portal = portalFor(sourceContainer);
+      const portal = ownerPortalFor(trigger) || portalFor(sourceContainer);
       if (!portal) {
         return sourceContainer;
       }
@@ -412,7 +415,7 @@ export function initBootstrapPreview(root = document) {
         ) {
           return;
         }
-        const container = getSharedToastStack(sourceContainer);
+        const container = getSharedToastStack(sourceContainer, trigger);
         const sequence = ++toastSequence;
         toast.id = `${template.id}-${sequence}`;
         toast.setAttribute("data-toast-generated", "true");
