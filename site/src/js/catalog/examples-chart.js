@@ -83,8 +83,10 @@ export function initExamplesChart(root = document) {
   try {
     const liveContainers = Array.from(root.querySelectorAll("[data-chart-live]"));
     liveContainers.forEach((container) => {
-      const themeScope = createLiveThemeOwner(container);
-      liveThemeScopes.set(container, themeScope);
+      if (container.querySelector("[data-chart-theme]")) {
+        const themeScope = createLiveThemeOwner(container);
+        liveThemeScopes.set(container, themeScope);
+      }
     });
 
     root.querySelectorAll(".chart").forEach((element) => {

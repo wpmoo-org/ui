@@ -1399,6 +1399,86 @@ report("scoped-lifecycle-theme", {{
         self.assertIsNone(case["containerTheme"])
         self.assertEqual(case["statusMessage"], "Example theme: light")
 
+    def test_catalog_adapter_leaves_no_toggle_preview_in_its_inherited_owner(
+        self,
+    ) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                NODE_PREAMBLE.replace(
+                    'import MooChart from "./src/js/components/chart.js";',
+                    'import MooChart from "./src/js/components/chart.js";\n'
+                    'import { initExamplesChart } from "./site/src/js/catalog/examples-chart.js";',
+                )
+                + f"""
+const pageOwner = {{
+  dataset: {{ bsTheme: "dark" }},
+  ownerDocument,
+  matches: (selector) => selector.includes(".moo-ui"),
+}};
+const classNames = new Set();
+const previewScope = {{
+  dataset: {{}},
+  ownerDocument,
+  classList: {{ add(name) {{ classNames.add(name); }} }},
+}};
+const chartRoot = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+}});
+const container = {{
+  dataset: {{}},
+  ownerDocument,
+  querySelector: (selector) => {{
+    if (selector === ".chart") return chartRoot;
+    return null;
+  }},
+  closest: (selector) =>
+    selector === ".moo-example__preview"
+      ? previewScope
+      : selector.includes(".moo-ui")
+        ? pageOwner
+        : null,
+}};
+chartRoot.closest = (selector) =>
+  selector === "[data-bs-theme]" ? pageOwner : null;
+const root = {{
+  querySelectorAll: (selector) => {{
+    if (selector === "[data-chart-live]") return [container];
+    if (selector === ".chart") return [chartRoot];
+    return [];
+  }},
+}};
+const release = initExamplesChart(root);
+report("inherited-no-toggle-theme", {{
+  previewBecameOwner: classNames.has("moo-ui"),
+  previewTheme: previewScope.dataset.bsTheme || null,
+  pageTheme: pageOwner.dataset.bsTheme,
+}});
+release();
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(
+            case,
+            {
+                "name": "inherited-no-toggle-theme",
+                "ok": True,
+                "previewBecameOwner": False,
+                "previewTheme": None,
+                "pageTheme": "dark",
+            },
+        )
+
     def test_catalog_adapter_uses_one_stateful_lifecycle_button(self) -> None:
         result = subprocess.run(
             [
