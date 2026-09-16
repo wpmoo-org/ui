@@ -1,0 +1,5 @@
+@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  @import "../components";
+  @import "../themes/forms";
+  @include moo-overlay-backdrop-scoped;
+}

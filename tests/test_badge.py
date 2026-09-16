@@ -95,10 +95,10 @@ class BadgeTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
         source = (ROOT / "scss/settings/_palette.scss").read_text(encoding="utf-8")
-        tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
+        tokens_root = (ROOT / "scss/themes/_root.scss").read_text(
             encoding="utf-8"
         )
-        core_theme = (ROOT / "scss/themes/_scoped_core.scss").read_text(
+        core_theme = (ROOT / "scss/themes/_theme.scss").read_text(
             encoding="utf-8"
         )
 

@@ -1,0 +1,5 @@
+// A complete document places its resolved owner directly inside body. The
+// owner, rather than body, supplies the viewport-sized foreground surface.
+body > .moo-ui[data-bs-theme] {
+  min-block-size: 100dvh;
+}

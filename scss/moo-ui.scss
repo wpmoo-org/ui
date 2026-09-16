@@ -1,7 +1,5 @@
 @import "settings";
-
-@import "bootstrap/scss/mixins/banner";
-@include bsBanner("");
+@import "mixins/banner";
 
 // Bootstrap configuration
 @import "bootstrap/scss/functions";
@@ -10,11 +8,12 @@
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
-@import "themes/scoped_core";
+@import "themes/theme";
 
 // Bootstrap layout and standalone-only components
 @import "bootstrap/scss/root";
-@import "themes/standalone_root";
+@import "themes/root";
+@import "themes/standalone";
 @import "bootstrap/scss/reboot";
 @import "bootstrap/scss/type";
 @import "bootstrap/scss/images";
@@ -47,9 +46,5 @@
 @import "bootstrap/scss/utilities/api";
 
 @import "utilities/scroll_fade_primitives";
-@import "foundations/overlay_backdrop";
-@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
-  @import "components";
-  @import "foundations/core_state_layer";
-  @include moo-overlay-backdrop-scoped;
-}
+@import "foundations/backdrop";
+@import "foundations/scope";

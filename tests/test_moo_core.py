@@ -17,7 +17,7 @@ CORE_CSS = DIST / "assets/css/moo.css"
 FULL_CSS = DIST / "assets/css/moo-ui.css"
 SCSS = ROOT / "scss"
 COMPONENTS_SCSS = SCSS / "components"
-OVERLAY_BACKDROP_SCSS = SCSS / "foundations/_overlay_backdrop.scss"
+OVERLAY_BACKDROP_SCSS = SCSS / "foundations/_backdrop.scss"
 UTILITIES_SCSS = SCSS / "utilities"
 
 REQUIRED_BOOTSTRAP_IMPORTS = [
@@ -121,7 +121,7 @@ class MooCoreTests(CatalogTestCase):
         assert_owner_scoped_token_bridges(self, core_css, scoped=True)
         assert_owner_scoped_token_bridges(self, full_css, scoped=False)
 
-        state_layer = (SCSS / "foundations/_core_state_layer.scss").read_text(
+        state_layer = (SCSS / "themes/_forms.scss").read_text(
             encoding="utf-8"
         )
         self.assertNotIn(":where(html, body)", state_layer)
@@ -200,10 +200,10 @@ class MooCoreTests(CatalogTestCase):
     def test_overlay_backdrop_uses_bootstrap_native_modal_and_offcanvas_tokens(self) -> None:
         overlay_layer = OVERLAY_BACKDROP_SCSS.read_text(encoding="utf-8")
         settings = read_settings()
-        tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
+        tokens_root = (SCSS / "themes/_root.scss").read_text(
             encoding="utf-8"
         )
-        core_theme = (SCSS / "themes/_scoped_core.scss").read_text(
+        core_theme = (SCSS / "themes/_theme.scss").read_text(
             encoding="utf-8"
         )
 
@@ -253,7 +253,7 @@ class MooCoreTests(CatalogTestCase):
         self.assertNotIn("body:has(.modal.show)", overlay_layer)
         self.assertNotIn("offcanvas.sheet.show", overlay_layer)
 
-        state_layer = (SCSS / "foundations/_core_state_layer.scss").read_text(
+        state_layer = (SCSS / "themes/_forms.scss").read_text(
             encoding="utf-8"
         )
         self.assertNotIn(".modal-backdrop", state_layer)
@@ -308,8 +308,8 @@ class MooCoreTests(CatalogTestCase):
         self.assertNotIn("offcanvas.sheet:is(.showing, .show)", core_css)
         self.assertNotIn("offcanvas.sheet.hiding", core_css)
 
-    def test_standalone_sidebar_tokens_follow_resolved_owner_scope(self) -> None:
-        tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
+    def test_root_theme_tokens_follow_resolved_owner_scope(self) -> None:
+        tokens_root = (SCSS / "themes/_root.scss").read_text(
             encoding="utf-8"
         )
 
@@ -322,3 +322,24 @@ class MooCoreTests(CatalogTestCase):
         )[0]
         self.assertIn("@include moo-core-scales;", owner_tokens)
         self.assertIn("@include moo-core-shared;", owner_tokens)
+
+    def test_scope_layer_owns_component_and_form_imports(self) -> None:
+        scope_layer = (SCSS / "foundations/_scope.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(
+            active_scss_imports(scope_layer),
+            ["../components", "../themes/forms"],
+        )
+        self.assertIn("@scope (.moo-ui)", scope_layer)
+        self.assertIn("@include moo-overlay-backdrop-scoped;", scope_layer)
+
+    def test_standalone_layer_only_owns_standalone_minimum_size(self) -> None:
+        standalone = (SCSS / "themes/_standalone.scss").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("body > .moo-ui[data-bs-theme] {", standalone)
+        self.assertIn("min-block-size: 100dvh;", standalone)
+        self.assertNotIn("@include", standalone)

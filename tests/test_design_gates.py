@@ -13,8 +13,8 @@ SCSS = ROOT / "scss"
 SITE_SCSS = ROOT / "site/scss"
 COMPONENTS_SCSS = SCSS / "components"
 ROOT_THEME_CONSUMER_SCSS = (
-    SCSS / "themes/_standalone_root.scss",
-    SCSS / "themes/_scoped_core.scss",
+    SCSS / "themes/_root.scss",
+    SCSS / "themes/_theme.scss",
 )
 MOO_THEME_TOKENS = {
     "--moo-surface": ("$moo-surface", "$moo-surface-dark"),
@@ -239,6 +239,14 @@ def active_scss_import_list(source: str) -> list[str]:
 
 def active_scss_imports(source: str) -> set[str]:
     return set(active_scss_import_list(source))
+
+
+def non_import_scss_statements(source: str) -> list[str]:
+    return [
+        line.strip()
+        for line in strip_scss_comments(source).splitlines()
+        if line.strip() and not line.strip().startswith("@import ")
+    ]
 
 
 def partial_import_target(path: Path) -> str:
@@ -473,8 +481,15 @@ console.log(JSON.stringify(Object.fromEntries(
             path.name for path in SCSS.iterdir() if path.is_dir()
         }
         self.assertEqual(
-            directories,
-            {"components", "foundations", "settings", "themes", "utilities"},
+        directories,
+            {
+                "components",
+                "foundations",
+                "mixins",
+                "settings",
+                "themes",
+                "utilities",
+            },
         )
         site_root_files = {
             path.name for path in SITE_SCSS.glob("*.scss")
@@ -493,6 +508,10 @@ console.log(JSON.stringify(Object.fromEntries(
                 for path in (SCSS / "utilities").rglob("*.scss")
             },
             {"_scroll_fade.scss", "_scroll_fade_primitives.scss"},
+        )
+        self.assertEqual(
+            owned_partial_targets(SCSS / "mixins"),
+            {"mixins/banner"},
         )
 
     def test_settings_aggregate_imports_partials_in_dependency_order(self) -> None:
@@ -519,7 +538,7 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(imports, expected)
         self.assertEqual(
             owned_partial_targets(SCSS / "settings"),
-            set(expected),
+            {*expected, "settings/options"},
         )
         palette_imports = active_scss_import_list(
             (SCSS / "settings/_palette.scss").read_text(encoding="utf-8")
@@ -538,16 +557,17 @@ console.log(JSON.stringify(Object.fromEntries(
             entrypoint_imports["moo-ui.scss"],
             [
                 "settings",
-                "bootstrap/scss/mixins/banner",
+                "mixins/banner",
                 "bootstrap/scss/functions",
                 "bootstrap/scss/variables",
                 "bootstrap/scss/variables-dark",
                 "bootstrap/scss/maps",
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
-                "themes/scoped_core",
+                "themes/theme",
                 "bootstrap/scss/root",
-                "themes/standalone_root",
+                "themes/root",
+                "themes/standalone",
                 "bootstrap/scss/reboot",
                 "bootstrap/scss/type",
                 "bootstrap/scss/images",
@@ -575,14 +595,14 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/helpers/vr",
                 "bootstrap/scss/utilities/api",
                 "utilities/scroll_fade_primitives",
-                "foundations/overlay_backdrop",
-                "components",
-                "foundations/core_state_layer",
+                "foundations/backdrop",
+                "foundations/scope",
             ],
         )
         self.assertEqual(
             entrypoint_imports["moo-core.scss"],
             [
+                "settings/options",
                 "bootstrap/scss/functions",
                 "settings",
                 "bootstrap/scss/variables",
@@ -590,21 +610,48 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/maps",
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
-                "themes/scoped_core",
-                "foundations/core_global_primitives",
-                "foundations/overlay_backdrop",
-                "components",
-                "foundations/core_state_layer",
+                "themes/theme",
+                "foundations/globals",
+                "foundations/backdrop",
+                "themes/root",
+                "foundations/scope",
             ],
         )
 
         components_imports = active_scss_import_list(
             (SCSS / "_components.scss").read_text(encoding="utf-8")
         )
-        imported = set().union(*entrypoint_imports.values(), components_imports)
-        for directory in (SCSS / "themes", SCSS / "foundations"):
-            for target in owned_partial_targets(directory):
-                self.assertIn(target, imported, f"{target} is not imported")
+        self.assertIn("foundations/focus", components_imports)
+        self.assertEqual(
+            owned_partial_targets(SCSS / "themes"),
+            {
+                "themes/forms",
+                "themes/root",
+                "themes/standalone",
+                "themes/theme",
+            },
+        )
+        self.assertEqual(
+            owned_partial_targets(SCSS / "foundations"),
+            {
+                "foundations/backdrop",
+                "foundations/focus",
+                "foundations/globals",
+                "foundations/scope",
+            },
+        )
+        self.assertEqual(
+            active_scss_import_list(
+                (SCSS / "foundations/_scope.scss").read_text(encoding="utf-8")
+            ),
+            ["../components", "../themes/forms"],
+        )
+
+    def test_public_scss_entrypoints_are_import_only_facades(self) -> None:
+        for entrypoint in ("moo-core.scss", "moo-ui.scss"):
+            with self.subTest(entrypoint=entrypoint):
+                source = (SCSS / entrypoint).read_text(encoding="utf-8")
+                self.assertEqual(non_import_scss_statements(source), [])
 
     def test_sidebar_aggregate_imports_ownership_layers_in_order(self) -> None:
         sidebar = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
@@ -743,9 +790,12 @@ console.log(JSON.stringify(Object.fromEntries(
         components = (SCSS / "_components.scss").read_text(
             encoding="utf-8"
         )
-        if '@import "components"' in entrypoint:
-            entrypoint += "\n" + components
-        imported_components = active_component_imports(entrypoint)
+        scope = (SCSS / "foundations/_scope.scss").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("foundations/scope", active_scss_import_list(entrypoint))
+        self.assertIn("../components", active_scss_import_list(scope))
+        imported_components = active_component_imports(components)
 
         aggregate_imports = active_scss_import_list(components)
         self.assertEqual(len(aggregate_imports), len(set(aggregate_imports)))
@@ -823,7 +873,7 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(offenders, [])
 
     def test_scoped_theme_rgb_values_derive_from_sass_colors(self) -> None:
-        core_theme = (SCSS / "themes/_scoped_core.scss").read_text(
+        core_theme = (SCSS / "themes/_theme.scss").read_text(
             encoding="utf-8"
         )
 
@@ -962,10 +1012,10 @@ console.log(JSON.stringify(Object.fromEntries(
 
     def test_root_and_core_theme_tokens_share_sass_sources(self) -> None:
         settings = read_settings()
-        tokens_root = (SCSS / "themes/_standalone_root.scss").read_text(
+        tokens_root = (SCSS / "themes/_root.scss").read_text(
             encoding="utf-8"
         )
-        core_theme = (SCSS / "themes/_scoped_core.scss").read_text(
+        core_theme = (SCSS / "themes/_theme.scss").read_text(
             encoding="utf-8"
         )
 
@@ -989,7 +1039,7 @@ console.log(JSON.stringify(Object.fromEntries(
                     sass_var_reference(light_variable),
                     sass_var_reference(dark_variable),
                 },
-                f"{token} must use shared Sass variables in themes/_scoped_core.scss",
+                f"{token} must use shared Sass variables in themes/_theme.scss",
             )
 
         for token, variable in MOO_SHARED_TOKENS.items():
@@ -1001,7 +1051,7 @@ console.log(JSON.stringify(Object.fromEntries(
             self.assertEqual(
                 declaration_values_for(core_theme).get(token),
                 [expected],
-                f"{token} must be emitted once in themes/_scoped_core.scss",
+                f"{token} must be emitted once in themes/_theme.scss",
             )
 
     def test_shared_primitives_live_on_bootstrap_scales(self) -> None:
