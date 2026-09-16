@@ -75,11 +75,15 @@ class SkeletonTests(CatalogTestCase):
 
     def test_skeleton_component_partial_is_imported_into_main_bundle(self) -> None:
         styles = (ROOT / "scss/moo-ui.scss").read_text(encoding="utf-8")
+        scope = (ROOT / "scss/foundations/_scope.scss").read_text(
+            encoding="utf-8"
+        )
         components = (ROOT / "scss/_components.scss").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn('@import "components";', styles)
+        self.assertIn('@import "foundations/scope";', styles)
+        self.assertIn('@import "../components";', scope)
         self.assertIn('@import "components/skeleton";', components)
 
     def test_skeleton_is_ready_in_catalog_and_pages_build(self) -> None:
