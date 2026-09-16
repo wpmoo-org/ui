@@ -163,6 +163,67 @@ console.log(JSON.stringify({ assignments, theme: dataset.bsTheme }));
         self.assertEqual(report["assignments"], [])
         self.assertEqual(report["theme"], "dark")
 
+    def test_theme_init_survives_an_unavailable_match_media(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import assert from "node:assert/strict";
+import { initTheme } from "./site/src/js/catalog/theme.js";
+
+const documentElement = { dir: "ltr" };
+const body = { children: [], firstElementChild: null };
+const view = {
+  localStorage: { getItem: () => "system", setItem() {} },
+  matchMedia() { throw new Error("unavailable"); },
+};
+const root = {
+  nodeType: 9,
+  body,
+  documentElement,
+  defaultView: view,
+  querySelectorAll() { return []; },
+};
+const owner = {
+  nodeType: 1,
+  dataset: { bsTheme: "light" },
+  ownerDocument: root,
+  parentElement: body,
+  children: [],
+  matches(selector) {
+    return selector.includes(".moo-ui") && this.dataset.bsTheme === "light";
+  },
+  querySelectorAll() { return []; },
+};
+body.children = [owner];
+body.firstElementChild = owner;
+body.querySelectorAll = () => [owner];
+
+const dispose = initTheme(root);
+assert.equal(typeof dispose, "function");
+assert.equal(owner.dataset.bsTheme, "light");
+dispose();
+console.log(JSON.stringify({
+  initialized: true,
+  theme: owner.dataset.bsTheme,
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout.splitlines()[-1]),
+            {"initialized": True, "theme": "light"},
+        )
+
     def test_theme_init_scopes_preferences_to_resolved_owners(self) -> None:
         result = subprocess.run(
             [

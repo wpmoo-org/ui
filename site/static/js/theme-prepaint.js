@@ -12,6 +12,18 @@
     owner.parentElement === document.body &&
     owner === document.body.firstElementChild &&
     topLevelOwners.length === 1;
+  const normalizeDirection = (value) =>
+    value === 'ltr' || value === 'rtl' ? value : null;
+  const ownerDirection = normalizeDirection(
+    owner.getAttribute?.('dir') || owner.dir,
+  );
+  const documentDirection = normalizeDirection(
+    document.documentElement?.getAttribute?.('dir') || document.documentElement?.dir,
+  );
+  owner.__mooPrepaintBaseline = {
+    theme: owner.dataset.bsTheme === 'dark' ? 'dark' : 'light',
+    direction: documentOwner ? documentDirection || 'ltr' : ownerDirection,
+  };
   const readPreference = (axis, allowed) => {
     const dataKey = axis === 'theme' ? 'mooThemeKey' : 'mooDirectionKey';
     const explicit = owner.dataset?.[dataKey]?.trim();
@@ -25,14 +37,29 @@
       return null;
     }
   };
+  const colorSchemeMedia = () => {
+    try {
+      const matchMedia = window.matchMedia;
+      return typeof matchMedia === 'function'
+        ? matchMedia.call(window, '(prefers-color-scheme: dark)')
+        : null;
+    } catch (_) {
+      return null;
+    }
+  };
+  const prefersDark = () => {
+    try {
+      return Boolean(colorSchemeMedia()?.matches);
+    } catch (_) {
+      return false;
+    }
+  };
 
   try {
     const storedTheme = readPreference('theme', ['light', 'dark', 'system']);
-    const prefersDark =
-      storedTheme === 'system' &&
-      Boolean(window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+    const systemPrefersDark = storedTheme === 'system' && prefersDark();
     const resolvedTheme =
-      storedTheme === 'dark' || prefersDark
+      storedTheme === 'dark' || systemPrefersDark
         ? 'dark'
         : storedTheme === 'light'
           ? 'light'

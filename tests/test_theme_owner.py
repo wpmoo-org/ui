@@ -251,6 +251,10 @@ assert.equal(documentOwner.dataset.bsTheme, "dark");
 assert.equal(documentOwner.dataset.mooPrepaint, "ready");
 assert.equal(documentElement.dir, "rtl");
 assert.equal(documentElement.dataset.bsTheme, undefined);
+assert.deepEqual(documentOwner.__mooPrepaintBaseline, {
+  theme: "light",
+  direction: "ltr",
+});
 
 const embedded = owner({
   theme: "dark",
@@ -267,6 +271,10 @@ assert.equal(embedded.dataset.bsTheme, "dark");
 assert.equal(embedded.dataset.mooPrepaint, "ready");
 assert.equal(embedded.dir, "rtl");
 assert.equal(documentElement.dir, "ltr");
+assert.deepEqual(embedded.__mooPrepaintBaseline, {
+  theme: "dark",
+  direction: null,
+});
 
 const classOnlyHost = {
   dataset: {},
@@ -277,11 +285,26 @@ document.currentScript = { parentElement: classOnlyHost };
 await import("./site/static/js/theme-prepaint.js?class-only-host");
 assert.equal(classOnlyHost.dataset.mooPrepaint, undefined);
 
+const throwingSystemOwner = owner({ theme: "light" });
+throwingSystemOwner.parentElement = body;
+body.children = [throwingSystemOwner];
+documentElement.dir = "ltr";
+window.matchMedia = () => { throw new Error("unavailable"); };
+document.currentScript = { parentElement: throwingSystemOwner };
+await import("./site/static/js/theme-prepaint.js?match-media-throws");
+assert.equal(throwingSystemOwner.dataset.bsTheme, "light");
+assert.equal(throwingSystemOwner.dataset.mooPrepaint, "ready");
+assert.deepEqual(throwingSystemOwner.__mooPrepaintBaseline, {
+  theme: "light",
+  direction: "ltr",
+});
+
 console.log(JSON.stringify({
   name: "owner-prepaint-contract",
   ok: true,
   documentTheme: documentOwner.dataset.bsTheme,
   embeddedDirection: embedded.dir,
+  fallbackTheme: throwingSystemOwner.dataset.bsTheme,
 }));
 """
         )
@@ -293,5 +316,91 @@ console.log(JSON.stringify({
                 "ok": True,
                 "documentTheme": "dark",
                 "embeddedDirection": "rtl",
+                "fallbackTheme": "light",
+            },
+        )
+
+    def test_owner_baseline_direction_and_system_theme_recovery_are_safe(self) -> None:
+        case = self.run_case(
+            """
+import assert from "node:assert/strict";
+import {
+  effectiveOwnerDirection,
+  ownerPrepaintBaseline,
+  resolveOwnerTheme,
+  restoreOwnerDirection,
+  safeColorSchemeMedia,
+} from "./src/js/theme-owner.js";
+
+function element({ classes = [], dataset = {}, dir = null } = {}) {
+  const classSet = new Set(classes);
+  const attributes = dir ? { dir } : {};
+  return {
+    nodeType: 1,
+    dataset: { ...dataset },
+    children: [],
+    parentElement: null,
+    ownerDocument: null,
+    get dir() { return attributes.dir || ""; },
+    set dir(value) {
+      if (value) attributes.dir = value;
+      else delete attributes.dir;
+    },
+    getAttribute(name) { return attributes[name] ?? null; },
+    setAttribute(name, value) { attributes[name] = String(value); },
+    removeAttribute(name) { delete attributes[name]; },
+    matches(selector) {
+      return selector.includes(".moo-ui") &&
+        classSet.has("moo-ui") &&
+        ["light", "dark"].includes(this.dataset.bsTheme);
+    },
+  };
+}
+
+const html = element({ dir: "rtl" });
+const body = element();
+body.parentElement = html;
+const sibling = element({ classes: ["moo-ui"], dataset: { bsTheme: "light" } });
+const embedded = element({ classes: ["moo-ui"], dataset: { bsTheme: "dark" } });
+sibling.parentElement = body;
+embedded.parentElement = body;
+body.children = [sibling, embedded];
+body.firstElementChild = sibling;
+const ownerDocument = { nodeType: 9, body, documentElement: html, defaultView: {} };
+[html, body, sibling, embedded].forEach((node) => { node.ownerDocument = ownerDocument; });
+
+embedded.__mooPrepaintBaseline = { theme: "light", direction: null };
+assert.deepEqual(ownerPrepaintBaseline(embedded), {
+  theme: "light",
+  direction: null,
+});
+assert.equal(effectiveOwnerDirection(embedded), "rtl");
+embedded.dir = "ltr";
+restoreOwnerDirection(embedded, null);
+assert.equal(embedded.getAttribute("dir"), null);
+assert.equal(effectiveOwnerDirection(embedded), "rtl");
+
+const throwingView = {
+  get matchMedia() { throw new Error("unavailable"); },
+};
+assert.equal(safeColorSchemeMedia(throwingView), null);
+assert.equal(resolveOwnerTheme(embedded, "system", throwingView), "light");
+
+console.log(JSON.stringify({
+  name: "owner-baseline-and-safe-media",
+  ok: true,
+  effectiveDirection: effectiveOwnerDirection(embedded),
+  resolvedSystemTheme: resolveOwnerTheme(embedded, "system", throwingView),
+}));
+"""
+        )
+
+        self.assertEqual(
+            case,
+            {
+                "name": "owner-baseline-and-safe-media",
+                "ok": True,
+                "effectiveDirection": "rtl",
+                "resolvedSystemTheme": "light",
             },
         )

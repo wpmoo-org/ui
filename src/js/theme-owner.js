@@ -35,7 +35,15 @@ function ownerRootFor(node) {
 
 function explicitDirection(owner) {
   const value = owner?.getAttribute?.('dir') || owner?.dir;
+  return normalizeDirection(value);
+}
+
+function normalizeDirection(value) {
   return value === 'ltr' || value === 'rtl' ? value : null;
+}
+
+function normalizeTheme(value) {
+  return value === 'dark' ? 'dark' : 'light';
 }
 
 export function findThemeOwner(node = typeof document === 'undefined' ? null : document) {
@@ -104,12 +112,54 @@ export function readOwnerPreference(owner, axis) {
   }
 }
 
+export function safeColorSchemeMedia(view) {
+  try {
+    const matchMedia = view?.matchMedia;
+    return typeof matchMedia === 'function'
+      ? matchMedia.call(view, '(prefers-color-scheme: dark)')
+      : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+export function ownerPrepaintBaseline(owner) {
+  const baseline = owner?.__mooPrepaintBaseline;
+  const hasBaselineDirection = Object.hasOwn(baseline || {}, 'direction');
+  const fallbackDirection = isDocumentOwner(owner)
+    ? explicitDirection(documentFor(owner)?.documentElement) || 'ltr'
+    : explicitDirection(owner);
+
+  return {
+    theme: normalizeTheme(baseline?.theme || owner?.dataset?.bsTheme),
+    direction: hasBaselineDirection
+      ? normalizeDirection(baseline.direction)
+      : fallbackDirection,
+  };
+}
+
+export function effectiveOwnerDirection(owner) {
+  const visited = new Set();
+  let node = owner;
+
+  while (node && !visited.has(node)) {
+    visited.add(node);
+    const direction = explicitDirection(node);
+    if (direction) return direction;
+    node = node.parentElement;
+  }
+
+  return explicitDirection(documentFor(owner)?.documentElement) || 'ltr';
+}
+
 export function resolveOwnerTheme(owner, preference, view) {
   if (preference === 'light' || preference === 'dark') return preference;
   if (preference === 'system') {
-    return view?.matchMedia?.('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    try {
+      return safeColorSchemeMedia(view)?.matches ? 'dark' : 'light';
+    } catch (_) {
+      return 'light';
+    }
   }
   return owner?.dataset?.bsTheme === 'dark' ? 'dark' : 'light';
 }
@@ -135,4 +185,20 @@ export function setOwnerDirection(owner, direction) {
     return;
   }
   owner.dir = direction;
+}
+
+export function restoreOwnerDirection(owner, direction) {
+  if (!owner) return;
+  const normalized = normalizeDirection(direction);
+
+  if (isDocumentOwner(owner)) {
+    setOwnerDirection(owner, normalized || 'ltr');
+    return;
+  }
+
+  if (normalized) {
+    setOwnerDirection(owner, normalized);
+    return;
+  }
+  owner.removeAttribute?.('dir');
 }

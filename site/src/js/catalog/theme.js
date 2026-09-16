@@ -5,6 +5,7 @@ import {
   readOwnerPreference,
   resolveOwnerDirection,
   resolveOwnerTheme,
+  safeColorSchemeMedia,
   setOwnerDirection,
   setOwnerTheme,
 } from "../../../../src/js/theme-owner.js";
@@ -84,7 +85,7 @@ export function initTheme(root = document) {
       setOwnerDirection(owner, direction);
     }
 
-    const media = view?.matchMedia?.("(prefers-color-scheme: dark)");
+    const media = safeColorSchemeMedia(view);
     listen(media, "change", () => {
       if (readOwnerPreference(owner, "theme") === "system") {
         applyPreference("system");
