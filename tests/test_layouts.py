@@ -39,6 +39,7 @@ class LayoutRenderMixin:
         self,
         *,
         width: str = "xl",
+        header_width: str | None = None,
         page_id: str = "",
         header: str = "Header",
         main: str = "Main",
@@ -46,14 +47,24 @@ class LayoutRenderMixin:
     ) -> str:
         return self.render_page(
             """
-            {% call(region) page(width=width, id=page_id) %}
-              {% if region == "header" %}{{ header }}
-              {% elif region == "main" %}{{ main }}
-              {% elif region == "footer" %}{{ footer }}
-              {% endif %}
-            {% endcall %}
+            {% if header_width is none %}
+              {% call(region) page(width=width, id=page_id) %}
+                {% if region == "header" %}{{ header }}
+                {% elif region == "main" %}{{ main }}
+                {% elif region == "footer" %}{{ footer }}
+                {% endif %}
+              {% endcall %}
+            {% else %}
+              {% call(region) page(width=width, id=page_id, header_width=header_width) %}
+                {% if region == "header" %}{{ header }}
+                {% elif region == "main" %}{{ main }}
+                {% elif region == "footer" %}{{ footer }}
+                {% endif %}
+              {% endcall %}
+            {% endif %}
             """,
             width=width,
+            header_width=header_width,
             page_id=page_id,
             header=header,
             main=main,
@@ -82,6 +93,20 @@ class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
         self.assertNotIn("sidebar_inset", output)
         self.assertNotIn("sidebar-inset__", output)
 
+    def test_page_accepts_a_validated_header_width_without_changing_other_regions(
+        self,
+    ) -> None:
+        output = self.render_regions(width="xl", header_width="fluid")
+
+        header = output[output.index("<header>") : output.index("</header>")]
+        main = output[output.index("<main") : output.index("</main>")]
+        footer = output[output.index("<footer>") : output.index("</footer>")]
+
+        self.assertIn('class="container-fluid"', header)
+        self.assertNotIn('class="container-xl"', header)
+        self.assertIn('class="container-xl"', main)
+        self.assertIn('class="container-xl"', footer)
+
     def test_page_rejects_undocumented_main_class(self) -> None:
         with self.assertRaises(TypeError):
             self.render_page(
@@ -104,6 +129,10 @@ class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
     def test_page_rejects_unknown_width(self) -> None:
         with self.assertRaisesRegex(ValueError, "Unknown page width: narrow"):
             self.render_regions(width="narrow")
+
+    def test_page_rejects_unknown_header_width(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unknown page header width: narrow"):
+            self.render_regions(header_width="narrow")
 
     def test_page_validates_root_id_before_escaping(self) -> None:
         invalid_ids = (" ", "9-page", "page.name", "main-content", "page ")
@@ -170,7 +199,6 @@ class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
     def test_page_signature_does_not_accept_visual_escape_hatches(self) -> None:
         for argument in (
             "extra_class",
-            "header_width",
             "footer_width",
             "bleed",
             "main_class",

@@ -2064,6 +2064,12 @@ class CatalogContractTests(CatalogTestCase):
         header_end = index.index("</header>", header_start)
         header = index[header_start:header_end]
 
+        self.assertRegex(
+            header,
+            r'<header>\s*<div class="container-fluid">\s*'
+            r'<nav class="navbar moo-catalog__navbar',
+        )
+
         for href in (
             'href="introduction/"',
             'href="components/"',

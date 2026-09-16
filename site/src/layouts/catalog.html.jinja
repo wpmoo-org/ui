@@ -18,7 +18,7 @@
       {% if slot == "sidebar" %}
         {{ render_catalog_sidebar() }}
       {% elif slot == "page" %}
-        {% call(region) page(width="xl") %}
+        {% call(region) page(width="xl", header_width="fluid") %}
           {% if region == "header" %}
             {% include "shell/navbar.html.jinja" %}
           {% elif region == "main" %}

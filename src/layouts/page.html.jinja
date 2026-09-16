@@ -11,10 +11,14 @@
 {% set page_identifier_first_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
 {% set page_identifier_characters = page_identifier_first_characters ~ "0123456789_-" %}
 
-{% macro page(width="xl", id="") -%}
+{% macro page(width="xl", id="", header_width=none) -%}
   {% if width not in page_container_classes %}
     {{ fail("Unknown page width: " ~ width) }}
   {% endif %}
+  {% if header_width is not none and header_width not in page_container_classes %}
+    {{ fail("Unknown page header width: " ~ header_width) }}
+  {% endif %}
+  {% set resolved_header_width = header_width if header_width is not none else width %}
   {% if id is not string %}
     {{ fail("Invalid page id") }}
   {% elif id %}
@@ -48,7 +52,7 @@
   <div data-slot="page"{% if id %} id="{{ id }}"{% endif %}>
     {% if header_content %}
       <header>
-        <div class="{{ page_container_classes[width] }}">{{ header_content | safe }}</div>
+        <div class="{{ page_container_classes[resolved_header_width] }}">{{ header_content | safe }}</div>
       </header>
     {% endif %}
     <main id="main-content" tabindex="-1" class="scroll-fade-y no-scrollbar">
