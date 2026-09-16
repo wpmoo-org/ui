@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo UI conformance fixture: nested owners</title>
+    <link rel="stylesheet" href="../../dist/assets/css/moo-ui.css">
+  </head>
+  <body>
+    <section data-conformance-host data-nested-owner-host>
+      <h1>Host content</h1>
+      <p data-nested-owner-host-probe>
+        This content belongs to the embedding host, not either Moo UI owner.
+      </p>
+    </section>
+
+    <section
+      class="moo-ui p-4"
+      data-bs-theme="dark"
+      data-moo-theme-key="nested-owner-outer-theme"
+      data-moo-direction-key="nested-owner-outer-direction"
+      id="nested-owner-outer"
+    >
+      <script src="../../site/static/js/theme-prepaint.js"></script>
+      <div class="moo-ui" data-moo-overlay-portal-host id="nested-owner-outer-portal"></div>
+
+      <header class="d-flex flex-wrap gap-2 align-items-center mb-4">
+        <h2 class="h4 mb-0">Outer owner</h2>
+        <button class="btn btn-outline-secondary" data-nested-theme-toggle="outer" type="button">
+          Toggle outer theme
+        </button>
+        <button class="btn btn-outline-secondary" data-nested-direction-toggle="outer" type="button">
+          Toggle outer direction
+        </button>
+      </header>
+
+      <div
+        class="wrapper"
+        data-layout="app"
+        data-slot="sidebar-wrapper"
+        data-sidebar-key="nested-owner-sidebar"
+        data-sidebar-state="collapsed"
+        id="nested-owner-sidebar"
+      >
+        <aside
+          class="sidebar offcanvas-lg offcanvas-start"
+          data-collapsible="icon"
+          data-side="left"
+          data-slot="sidebar"
+          data-variant="sidebar"
+          id="nested-owner-sidebar-panel"
+          tabindex="-1"
+        >
+          <div class="sidebar-inner" data-slot="sidebar-inner">
+            <div class="sidebar-content" data-slot="sidebar-content">
+              <ul class="sidebar-menu" data-slot="sidebar-menu">
+                <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
+                  <button
+                    class="sidebar-menu-button sidebar-menu-sub-trigger"
+                    id="nested-owner-sidebar-submenu-trigger"
+                    type="button"
+                  >
+                    Reports
+                  </button>
+                  <div class="sidebar-menu-sub collapse">
+                    <a class="sidebar-menu-button" href="#nested-owner-report">Monthly report</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <button class="sidebar-rail" data-sidebar-rail type="button">Toggle sidebar</button>
+        </aside>
+        <div data-slot="page">
+          <main class="p-3" id="nested-owner-report" tabindex="-1">
+            <div class="moo-datepicker" data-datepicker id="nested-owner-datepicker">
+              <label class="form-label" for="nested-owner-datepicker-trigger">Deploy date</label>
+              <button
+                class="btn btn-outline-secondary moo-datepicker__trigger"
+                data-datepicker-trigger
+                id="nested-owner-datepicker-trigger"
+                type="button"
+              >
+                <span data-datepicker-label>Pick a date</span>
+              </button>
+              <input data-datepicker-input name="nested-owner-date" type="hidden" value="">
+              <div
+                aria-label="Deploy date calendar"
+                class="moo-datepicker__popover"
+                data-datepicker-popover
+                hidden
+                id="nested-owner-datepicker-popover"
+                role="dialog"
+              >
+                <div data-calendar data-calendar-locale="en" id="nested-owner-datepicker-calendar"></div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <button
+                class="btn btn-outline-secondary"
+                data-bs-target="#nested-owner-modal"
+                data-bs-toggle="modal"
+                id="nested-owner-modal-trigger"
+                type="button"
+              >
+                Open outer modal
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                data-bs-target="#nested-owner-offcanvas"
+                data-bs-toggle="offcanvas"
+                id="nested-owner-offcanvas-trigger"
+                type="button"
+              >
+                Open outer sheet
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                data-nested-toast-trigger
+                id="nested-owner-toast-trigger"
+                type="button"
+              >
+                Show outer toast
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                data-bs-title="Outer owner tooltip"
+                data-bs-toggle="tooltip"
+                id="nested-owner-tooltip-trigger"
+                type="button"
+              >
+                Outer tooltip
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                data-bs-content="Outer owner popover"
+                data-bs-title="Outer owner"
+                data-bs-toggle="popover"
+                id="nested-owner-popover-trigger"
+                type="button"
+              >
+                Outer popover
+              </button>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <div
+        aria-hidden="true"
+        class="modal fade"
+        id="nested-owner-modal"
+        tabindex="-1"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="modal-title fs-5">Outer modal</h2>
+              <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="offcanvas offcanvas-end sheet" id="nested-owner-offcanvas" tabindex="-1">
+        <div class="offcanvas-header">
+          <h2 class="offcanvas-title fs-5">Outer sheet</h2>
+          <button aria-label="Close" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+        </div>
+      </div>
+
+      <section
+        class="moo-ui border rounded p-3 mt-4"
+        data-bs-theme="light"
+        data-moo-direction-key="nested-owner-inner-direction"
+        data-moo-theme-key="nested-owner-inner-theme"
+        dir="rtl"
+        id="nested-owner-inner"
+      >
+        <script src="../../site/static/js/theme-prepaint.js"></script>
+        <div class="moo-ui" data-moo-overlay-portal-host id="nested-owner-inner-portal"></div>
+
+        <header class="d-flex flex-wrap gap-2 align-items-center mb-3">
+          <h2 class="h5 mb-0">Inner owner</h2>
+          <button class="btn btn-outline-secondary" data-nested-theme-toggle="inner" type="button">
+            Toggle inner theme
+          </button>
+          <button class="btn btn-outline-secondary" data-nested-direction-toggle="inner" type="button">
+            Toggle inner direction
+          </button>
+        </header>
+
+        <div class="datatable" data-datatable-page-size="10" id="nested-owner-datatable">
+          <div class="table-responsive">
+            <table class="datatable-table table">
+              <thead>
+                <tr>
+                  <th data-datatable-column="subject" scope="col">Subject</th>
+                  <th data-datatable-column="actions" scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-datatable-row data-datatable-search="Owner portal" id="nested-owner-datatable-row">
+                  <td data-datatable-column="subject">Owner portal</td>
+                  <td data-datatable-column="actions">
+                    <div class="dropdown table-row-actions">
+                      <button
+                        aria-expanded="false"
+                        class="btn btn-outline-secondary btn-sm"
+                        data-bs-toggle="dropdown"
+                        id="nested-owner-datatable-action"
+                        type="button"
+                      >
+                        Actions
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><button class="dropdown-item" type="button">Inspect</button></li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div
+          class="chart mt-4"
+          data-chart="bar"
+          data-chart-data='{"labels":["One"],"datasets":[{"label":"Inner","data":[1]}]}'
+          id="nested-owner-chart"
+        >
+          <canvas aria-label="Inner owner chart" role="img"></canvas>
+        </div>
+      </section>
+    </section>
+
+    <script src="assets/bootstrap.bundle.min.js"></script>
+    <script type="module" src="assets/init-nested-owners.js"></script>
+  </body>
+</html>

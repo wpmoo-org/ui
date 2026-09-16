@@ -213,8 +213,8 @@
     {
       "id": "theme",
       "title": "Theme",
-      "description": "The documented Bootstrap theme attribute switches Moo components between light and dark values inside the scope.",
-      "mechanism": "The runner sets data-bs-theme on the document element and re-reads computed styles of an in-scope themed surface; light and dark readings must differ and the dark reading must match Moo UI's documented dark surface token.",
+      "description": "The documented Bootstrap theme attribute switches Moo components between light and dark values inside their resolved Moo UI owner.",
+      "mechanism": "The runner resolves the themed surface's nearest Moo UI owner, sets data-bs-theme on that owner, and re-reads the surface. The dark reading must match Moo UI's documented dark surface token without changing host document state.",
       "assertions": [
         {
           "id": "dark-theme-surface",
@@ -223,9 +223,10 @@
             "static-primitives",
             "overlays"
           ],
-          "description": "Setting data-bs-theme=\"dark\" changes the computed background-color of the in-scope themed surface from the documented light value to the documented dark value, and removing it restores the light value.",
+          "description": "Setting data-bs-theme=\"dark\" on the resolved owner changes that owner surface from the documented light value to the documented dark value, and restoring the owner restores the light value.",
           "params": {
-            "selector": ".moo-ui [data-conformance-themed]",
+            "selector": ".moo-ui[data-conformance-themed][data-bs-theme]",
+            "ownerSelector": ".moo-ui[data-bs-theme=\"light\"], .moo-ui[data-bs-theme=\"dark\"]",
             "property": "background-color",
             "attribute": "data-bs-theme",
             "lightValue": "rgb(255, 255, 255)",

@@ -221,6 +221,53 @@ class ConformanceRunnerCliTests(unittest.TestCase):
             )
 
 
+class OwnerConformanceFixtureTests(unittest.TestCase):
+    def test_nested_owner_fixture_declares_explicit_keys_and_external_runtime(self):
+        fixture = (FIXTURES_DIR / "nested-owners.html").read_text(encoding="utf-8")
+        initializer = (
+            FIXTURES_DIR / "assets" / "init-nested-owners.js"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('id="nested-owner-outer"', fixture)
+        self.assertIn('id="nested-owner-inner"', fixture)
+        self.assertIn('data-moo-theme-key="nested-owner-outer-theme"', fixture)
+        self.assertIn('data-moo-direction-key="nested-owner-outer-direction"', fixture)
+        self.assertIn('data-moo-theme-key="nested-owner-inner-theme"', fixture)
+        self.assertIn('data-moo-direction-key="nested-owner-inner-direction"', fixture)
+        self.assertIn('data-moo-overlay-portal-host', fixture)
+        self.assertIn('src="assets/init-nested-owners.js"', fixture)
+        self.assertEqual(
+            fixture.count('<script src="../../site/static/js/theme-prepaint.js"></script>'),
+            2,
+        )
+        self.assertNotIn('defer src="../../site/static/js/theme-prepaint.js"', fixture)
+        self.assertNotIn("<style", fixture)
+        self.assertNotIn(" style=", fixture)
+        self.assertNotRegex(fixture, r"<script(?![^>]*\bsrc=)")
+        self.assertNotIn("document.body.append", initializer)
+        self.assertIn("ownerPortalRoot(owner)", initializer)
+        self.assertIn("container: portal", initializer)
+
+        for stylesheet in ("moo.css", "moo-ui.css"):
+            source = (ROOT / "dist" / "assets" / "css" / stylesheet).read_text(
+                encoding="utf-8"
+            )
+            self.assertNotIn(":where(html, body)[data-bs-theme", source)
+            self.assertNotIn("body[data-bs-theme", source)
+
+    def test_conformance_tooltip_and_popover_initializers_use_an_owner_portal(self):
+        fixture = (FIXTURES_DIR / "overlays.html").read_text(encoding="utf-8")
+        initializer = (FIXTURES_DIR / "assets" / "init-overlays.js").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("data-moo-overlay-portal-host", fixture)
+        self.assertIn("ownerPortalRoot", initializer)
+        self.assertIn("container: portal", initializer)
+        self.assertNotIn("Tooltip.getOrCreateInstance(element));", initializer)
+        self.assertNotIn("Popover.getOrCreateInstance(element));", initializer)
+
+
 class ConformanceRunnerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

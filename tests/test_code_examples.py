@@ -372,12 +372,16 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn("mooCodepenToastsQueued", popover_block)
         self.assertNotIn('data-bs-container", "body"', source)
         self.assertIn(
-            "Popover.getOrCreateInstance(element, { container: owner });",
+            "var portal = ownerPortalRoot(owner);",
+            popover_block,
+        )
+        self.assertIn(
+            "Popover.getOrCreateInstance(element, { container: portal });",
             popover_block,
         )
         self.assertNotIn("root.body", toast_block)
         self.assertIn("owner.dataset.mooCodepenToastsQueued", toast_block)
-        self.assertIn("owner.appendChild(container);", source)
+        self.assertIn("portal.appendChild(container);", source)
         self.assertIn(
             'script.dataset.mooCodepenBootstrapLoading = "true";',
             source,

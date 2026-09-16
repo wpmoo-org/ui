@@ -88,6 +88,10 @@ class TestTierRunnerTests(unittest.TestCase):
             full_modules,
         )
         self.assertIn(
+            "tests.test_moo_core_browser",
+            full_modules,
+        )
+        self.assertIn(
             "tests.test_conformance_runner.ConformanceRunnerTests",
             full_modules,
         )

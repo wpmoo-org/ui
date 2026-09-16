@@ -93,6 +93,13 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(backdrop).to_have_count(1)
             expect(modal).to_be_visible()
             expect(backdrop).to_be_visible()
+            self.assertEqual(
+                backdrop.evaluate(
+                    "element => element.parentElement.hasAttribute('data-moo-overlay-portal-host')"
+                ),
+                True,
+            )
+            self.assertEqual(page.locator("body > .modal-backdrop").count(), 0)
 
             self.assertFalse(
                 page.evaluate(
@@ -289,11 +296,14 @@ class CodePenModalBrowserTests(unittest.TestCase):
 
                     row = page.locator(case["row"])
                     trigger = row.locator(".table-row-actions > button")
-                    menu = page.locator("body > .dropdown-menu.show")
+                    menu = page.locator(
+                        '.moo-ui[data-bs-theme] > .dropdown-menu.show'
+                    )
 
                     trigger.focus()
                     trigger.press("Enter")
                     expect(menu).to_be_visible()
+                    self.assertEqual(page.locator("body > .dropdown-menu.show").count(), 0)
                     menu.locator(case["edit"]).click()
 
                     sheet = page.locator(case["sheet"])
@@ -485,6 +495,15 @@ class CodePenModalBrowserTests(unittest.TestCase):
                 return github.evaluate(
                     """
                     (element) => {
+                      const toPixels = (color) => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        const context = canvas.getContext("2d", { willReadFrequently: true });
+                        context.fillStyle = color;
+                        context.fillRect(0, 0, 1, 1);
+                        return Array.from(context.getImageData(0, 0, 1, 1).data).join(",");
+                      };
                       const probe = document.createElement("span");
                       const button = window.getComputedStyle(element);
                       const owner = element.closest(".moo-ui[data-bs-theme]");
@@ -497,10 +516,11 @@ class CodePenModalBrowserTests(unittest.TestCase):
                       probe.remove();
                       return {
                         background: button.backgroundColor,
+                        backgroundPixels: toPixels(button.backgroundColor),
                         color: button.color,
                         bodyBackground: ownerStyle.backgroundColor,
                         bodyColor: ownerStyle.color,
-                        mixedBodyColor: expected,
+                        mixedBodyColorPixels: toPixels(expected),
                       };
                     }
                     """
@@ -508,8 +528,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
 
             normal_colors = github_colors()
             self.assertEqual(
-                normal_colors["background"],
-                normal_colors["mixedBodyColor"],
+                normal_colors["backgroundPixels"],
+                normal_colors["mixedBodyColorPixels"],
+                normal_colors,
             )
             self.assertEqual(normal_colors["color"], normal_colors["bodyBackground"])
             github.hover()
@@ -525,8 +546,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
 
             normal_colors = github_colors()
             self.assertEqual(
-                normal_colors["background"],
-                normal_colors["mixedBodyColor"],
+                normal_colors["backgroundPixels"],
+                normal_colors["mixedBodyColorPixels"],
+                normal_colors,
             )
             self.assertEqual(normal_colors["color"], normal_colors["bodyBackground"])
             github.hover()

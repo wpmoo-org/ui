@@ -12,7 +12,9 @@
   cursor: pointer;
 }
 
-[dir="rtl"] .sidebar-rail {
+// Read the Sidebar's computed direction so this remains valid inside the
+// resolved-owner @scope as well as under a full-document html[dir] owner.
+.sidebar:dir(rtl) .sidebar-rail {
   transform: translateX(-50%);
 }
 

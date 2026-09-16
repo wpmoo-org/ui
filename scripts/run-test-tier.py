@@ -60,6 +60,7 @@ BROWSER_FULL_MODULES = [
     "tests.test_certification_browser",
     "tests.test_layouts_browser",
     "tests.test_datatable_browser",
+    "tests.test_moo_core_browser",
     "tests.test_conformance_runner.ConformanceRunnerTests",
     test_method(
         "tests.test_conformance_kit_packaging.PackagingTests",

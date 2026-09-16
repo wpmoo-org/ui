@@ -39,14 +39,14 @@
   order: 1;
 }
 
-// `side` is a physical placement contract. The inherited document direction
-// must not make a right Sidebar jump to the left merely because the flex row
-// is rendered in RTL.
-[dir="rtl"] .wrapper[data-layout="app"] > .sidebar[data-side="left"] {
+// `side` is a physical placement contract. `:dir()` reads the wrapper's
+// computed direction inside the owner scope, whether it comes from html for a
+// document owner or from an embedded owner's own dir attribute.
+.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="left"] {
   order: 1;
 }
 
-[dir="rtl"] .wrapper[data-layout="app"] > .sidebar[data-side="right"] {
+.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="right"] {
   order: 0;
 }
 

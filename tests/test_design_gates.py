@@ -544,6 +544,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/maps",
                 "bootstrap/scss/mixins",
                 "bootstrap/scss/utilities",
+                "themes/scoped_core",
                 "bootstrap/scss/root",
                 "themes/standalone_root",
                 "bootstrap/scss/reboot",
@@ -574,6 +575,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/utilities/api",
                 "utilities/scroll_fade_primitives",
                 "components",
+                "foundations/core_state_layer",
                 "foundations/overlay_backdrop",
             ],
         )
@@ -974,15 +976,12 @@ console.log(JSON.stringify(Object.fromEntries(
                     f"{token} must be backed by {variable} in the settings aggregate",
                 )
 
+        self.assertIn("@include moo-core-scales;", tokens_root)
+        self.assertIn("@include moo-core-shared;", tokens_root)
+        self.assertIn("@include moo-core-light;", tokens_root)
+        self.assertIn("@include moo-core-dark;", tokens_root)
+
         for token, (light_variable, dark_variable) in MOO_THEME_TOKENS.items():
-            self.assertEqual(
-                declarations_for(tokens_root).get(token),
-                {
-                    sass_var_reference(light_variable),
-                    sass_var_reference(dark_variable),
-                },
-                f"{token} must use shared Sass variables in themes/_standalone_root.scss",
-            )
             self.assertEqual(
                 declarations_for(core_theme).get(token),
                 {
@@ -997,11 +996,6 @@ console.log(JSON.stringify(Object.fromEntries(
                 sass_var_reference(variable)
                 if variable.startswith("$")
                 else variable
-            )
-            self.assertEqual(
-                declaration_values_for(tokens_root).get(token),
-                [expected],
-                f"{token} must be emitted once in themes/_standalone_root.scss",
             )
             self.assertEqual(
                 declaration_values_for(core_theme).get(token),

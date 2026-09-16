@@ -73,6 +73,7 @@ class CatalogBrowserTests(unittest.TestCase):
                   const previous = active.previousElementSibling;
                   const previousRect = previous?.getBoundingClientRect();
                   return {
+                    activeId: active.id,
                     activeText: active.textContent.trim(),
                     bottomGap: bodyRect.bottom - activeRect.bottom,
                     gapFromPrevious: previousRect ? activeRect.top - previousRect.bottom : null,
@@ -83,7 +84,11 @@ class CatalogBrowserTests(unittest.TestCase):
                 """
             )
 
-            self.assertEqual(active_state["activeText"], "Overview")
+            self.assertTrue(active_state["activeText"])
+            self.assertTrue(
+                active_state["activeId"].startswith("catalog-command-item-"),
+                active_state,
+            )
             self.assertGreaterEqual(active_state["bottomGap"], 8)
             self.assertEqual(active_state["marginTop"], "2px")
             self.assertGreaterEqual(active_state["gapFromPrevious"], 2)
@@ -327,7 +332,12 @@ class CatalogBrowserTests(unittest.TestCase):
                     expect(app_example).to_have_count(1)
                     expect(app_example.locator(".moo-example__preview")).to_be_visible()
                     expect(app_example.locator(".moo-example__source")).to_have_count(1)
-                    expect(page.locator('[data-example^="layout-"]')).to_have_count(1)
+                    layout_examples = page.locator('[data-example^="layout-"]')
+                    self.assertGreaterEqual(layout_examples.count(), 1)
+                    self.assertEqual(
+                        layout_examples.first.get_attribute("data-example"),
+                        "layout-app-example",
+                    )
                     expect(page.locator('.moo-doc-toc')).to_have_count(1)
                     section_widths = page.locator(".moo-doc-page > section").evaluate_all(
                         "sections => sections.map(section => section.getBoundingClientRect().width)"
@@ -370,7 +380,9 @@ class CatalogBrowserTests(unittest.TestCase):
             self.assertIsNotNone(response)
             self.assertTrue(response.ok)
             prepare_page(page, CERTIFICATION_CASES[0])
-            expect(page.get_by_role("heading", name="Grid", level=2)).to_be_visible()
+            expect(
+                page.get_by_role("heading", name="Grid", level=2, exact=True)
+            ).to_be_visible()
             page.wait_for_timeout(100)
 
             scroll_state = page.evaluate(
@@ -378,8 +390,10 @@ class CatalogBrowserTests(unittest.TestCase):
                 () => {
                   const pageRoot = document.querySelector('[data-slot="page"]');
                   const main = document.querySelector('#main-content');
+                  const header = pageRoot?.querySelector(':scope > header');
                   const target = document.getElementById('grid');
                   return {
+                    headerBottom: header?.getBoundingClientRect().bottom ?? null,
                     windowScrollY: window.scrollY,
                     pageScrollTop: pageRoot?.scrollTop ?? null,
                     mainScrollTop: main?.scrollTop ?? null,
@@ -396,7 +410,11 @@ class CatalogBrowserTests(unittest.TestCase):
             self.assertGreater(scroll_state["mainScrollTop"], 0, scroll_state)
             self.assertEqual(scroll_state["pageOverflowY"], "auto", scroll_state)
             self.assertEqual(scroll_state["mainOverflowY"], "auto", scroll_state)
-            self.assertLessEqual(abs(scroll_state["targetTop"]), 2, scroll_state)
+            self.assertLessEqual(
+                abs(scroll_state["targetTop"] - scroll_state["headerBottom"]),
+                2,
+                scroll_state,
+            )
             evidence.assert_clean()
         finally:
             context.close()

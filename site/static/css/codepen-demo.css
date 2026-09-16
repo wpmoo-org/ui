@@ -35,6 +35,10 @@
   margin-block: 0;
 }
 
+.moo-ui.moo-codepen-component-demo > [data-moo-overlay-portal-host] {
+  display: contents;
+}
+
 .moo-ui.moo-codepen-component-demo > :where(
   .w-100,
   .accordion,
@@ -112,24 +116,26 @@
   display: inline-flex;
 }
 
-.moo-codepen-actions__github-link {
-  --bs-btn-color: var(--bs-body-bg);
-  --bs-btn-bg: color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg));
-  --bs-btn-border-color: var(--bs-btn-bg);
-  --bs-btn-hover-color: var(--bs-body-bg);
-  --bs-btn-hover-bg: var(--bs-body-color);
-  --bs-btn-hover-border-color: var(--bs-body-color);
-  --bs-btn-active-color: var(--bs-body-bg);
-  --bs-btn-active-bg: var(--bs-body-color);
-  --bs-btn-active-border-color: var(--bs-body-color);
+@scope (.moo-ui.moo-codepen-demo) {
+  :scope .moo-codepen-actions__github-link {
+    --bs-btn-color: var(--bs-body-bg);
+    --bs-btn-bg: color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg));
+    --bs-btn-border-color: var(--bs-btn-bg);
+    --bs-btn-hover-color: var(--bs-body-bg);
+    --bs-btn-hover-bg: var(--bs-body-color);
+    --bs-btn-hover-border-color: var(--bs-body-color);
+    --bs-btn-active-color: var(--bs-body-bg);
+    --bs-btn-active-bg: var(--bs-body-color);
+    --bs-btn-active-border-color: var(--bs-body-color);
 
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding-inline: 0.75rem;
-  color: var(--bs-btn-color);
-  font-weight: 500;
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-inline: 0.75rem;
+    color: var(--bs-btn-color);
+    font-weight: 500;
+    white-space: nowrap;
+  }
 }
 
 .moo-codepen-signature {

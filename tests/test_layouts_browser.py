@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import re
+import time
 import unittest
+from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -39,6 +41,9 @@ LAYOUT_CASES = (
         has_touch=True,
     ),
 )
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class LayoutBrowserTests(unittest.TestCase):
@@ -84,6 +89,122 @@ class LayoutBrowserTests(unittest.TestCase):
         self.assertTrue(response.ok)
         prepare_page(page, case)
         return context, page, evidence
+
+    def test_document_owner_prepaint_keeps_server_markup_valid_and_isolates_body(self) -> None:
+        prepaint_source = (ROOT / "site/static/js/theme-prepaint.js").read_text(
+            encoding="utf-8"
+        )
+
+        def open_catalog(*, theme: str, direction: str):
+            context = new_case_context(self.browser, LAYOUT_CASES[0])
+            context.add_init_script(
+                "\n".join(
+                    (
+                        f"localStorage.setItem('moo:theme', {json.dumps(theme)});",
+                        f"localStorage.setItem('moo:direction', {json.dumps(direction)});",
+                    )
+                )
+            )
+
+            def delayed_prepaint(route) -> None:
+                time.sleep(0.05)
+                route.fulfill(
+                    status=200,
+                    content_type="application/javascript",
+                    body="""
+                    window.__themePrepaintServerMarkup = (() => {
+                      const owner = document.currentScript?.parentElement;
+                      return {
+                        bodyTheme: document.body?.getAttribute("data-bs-theme"),
+                        firstApplicationOwner: document.body?.firstElementChild === owner,
+                        htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
+                        ownerTheme: owner?.getAttribute("data-bs-theme"),
+                      };
+                    })();
+                    """
+                    + prepaint_source,
+                )
+
+            context.route(
+                re.compile(r".*/assets/js/theme-prepaint\.js(?:\?.*)?$"),
+                delayed_prepaint,
+            )
+            page = context.new_page()
+            evidence = BrowserEvidence(page)
+            response = page.goto(
+                f"{self.base_url}/site-dist/introduction/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            return context, page, evidence
+
+        context, page, evidence = open_catalog(theme="dark", direction="rtl")
+        try:
+            server_markup = page.evaluate("() => window.__themePrepaintServerMarkup")
+            self.assertEqual(
+                server_markup,
+                {
+                    "bodyTheme": None,
+                    "firstApplicationOwner": True,
+                    "htmlTheme": None,
+                    "ownerTheme": "light",
+                },
+            )
+
+            surface = page.evaluate(
+                """
+                () => {
+                  const owner = document.body.firstElementChild;
+                  const rect = owner.getBoundingClientRect();
+                  const points = [
+                    [1, 1],
+                    [window.innerWidth - 2, 1],
+                    [1, window.innerHeight - 2],
+                    [window.innerWidth - 2, window.innerHeight - 2],
+                  ];
+                  return {
+                    bodyTheme: document.body.getAttribute("data-bs-theme"),
+                    htmlLang: document.documentElement.lang,
+                    htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
+                    htmlDirection: document.documentElement.dir,
+                    ownerTheme: owner.getAttribute("data-bs-theme"),
+                    prepaint: owner.dataset.mooPrepaint,
+                    coversViewport: rect.width >= window.innerWidth && rect.height >= window.innerHeight,
+                    noBodyStrip: points.every(([x, y]) => owner.contains(document.elementFromPoint(x, y))),
+                  };
+                }
+                """
+            )
+            self.assertEqual(surface["htmlLang"], "en")
+            self.assertEqual(surface["htmlDirection"], "rtl")
+            self.assertIsNone(surface["htmlTheme"])
+            self.assertIsNone(surface["bodyTheme"])
+            self.assertEqual(surface["ownerTheme"], "dark")
+            self.assertEqual(surface["prepaint"], "ready")
+            self.assertTrue(surface["coversViewport"])
+            self.assertTrue(surface["noBodyStrip"])
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+        context, page, evidence = open_catalog(theme="not-a-theme", direction="sideways")
+        try:
+            surface = page.evaluate(
+                """
+                () => ({
+                  direction: document.documentElement.dir,
+                  ownerTheme: document.body.firstElementChild?.getAttribute("data-bs-theme"),
+                  prepaint: document.body.firstElementChild?.dataset.mooPrepaint,
+                })
+                """
+            )
+            self.assertEqual(surface["direction"], "ltr")
+            self.assertEqual(surface["ownerTheme"], "light")
+            self.assertEqual(surface["prepaint"], "ready")
+            evidence.assert_clean()
+        finally:
+            context.close()
 
     def test_layout_fixtures_are_served_with_assets_and_runtime_setup(self) -> None:
         for case in LAYOUT_CASES:

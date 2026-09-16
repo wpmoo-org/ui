@@ -204,27 +204,27 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["license"], "MIT")
         self.assertFalse(package.get("private", True))
         self.assertEqual(package["repository"]["url"], "git+https://github.com/wpmoo-org/ui.git")
-        self.assertEqual(package["scripts"]["build"], ".venv/bin/python build.py")
-        self.assertEqual(package["scripts"]["dev"], ".venv/bin/python dev.py")
+        self.assertEqual(package["scripts"]["build"], ".venv/bin/python3 build.py")
+        self.assertEqual(package["scripts"]["dev"], ".venv/bin/python3 dev.py")
         self.assertEqual(
             package["scripts"]["test"],
-            ".venv/bin/python scripts/run-test-tier.py run release",
+            ".venv/bin/python3 scripts/run-test-tier.py run release",
         )
         self.assertEqual(
             package["scripts"]["test:quick"],
-            ".venv/bin/python scripts/run-test-tier.py run quick",
+            ".venv/bin/python3 scripts/run-test-tier.py run quick",
         )
         self.assertEqual(
             package["scripts"]["test:browser-smoke"],
-            ".venv/bin/python scripts/run-test-tier.py run browser-smoke",
+            ".venv/bin/python3 scripts/run-test-tier.py run browser-smoke",
         )
         self.assertEqual(
             package["scripts"]["test:browser-full"],
-            ".venv/bin/python scripts/run-test-tier.py run browser-full",
+            ".venv/bin/python3 scripts/run-test-tier.py run browser-full",
         )
         self.assertEqual(
             package["scripts"]["test:release"],
-            ".venv/bin/python scripts/run-test-tier.py run release",
+            ".venv/bin/python3 scripts/run-test-tier.py run release",
         )
         self.assertNotIn("workspaces", package)
 

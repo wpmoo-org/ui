@@ -136,6 +136,28 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("margin-left:", styles)
         self.assertIn("margin-right:", styles)
 
+    def test_sidebar_rtl_physical_rules_follow_the_inherited_owner_direction(self) -> None:
+        styles = read_sidebar_styles()
+
+        self.assertIn(
+            "order: 1",
+            _css_block(
+                styles,
+                '.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="left"]',
+            ),
+        )
+        self.assertIn(
+            "order: 0",
+            _css_block(
+                styles,
+                '.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="right"]',
+            ),
+        )
+        self.assertIn(
+            "transform: translateX(-50%)",
+            _css_block(styles, ".sidebar:dir(rtl) .sidebar-rail"),
+        )
+
     def test_sidebar_menu_action_uses_bootstrap_dropdown_and_aria_contract(self) -> None:
         output = self.render_sidebar(
             """

@@ -61,6 +61,79 @@ SIDEBAR_OVERLAY_CASES = (
 )
 
 
+class _PreparedLocator:
+    def __init__(self, page, selector: str) -> None:
+        self._page = page
+        self._selector = selector
+
+    @property
+    def first(self):
+        return self
+
+    def evaluate(self, script: str, values: dict[str, str]) -> None:
+        self._page.calls.append((self._selector, script, values))
+
+
+class _PreparedPage:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str, dict[str, str]]] = []
+        self.styles: list[str] = []
+
+    def locator(self, selector: str) -> _PreparedLocator:
+        return _PreparedLocator(self, selector)
+
+    def add_style_tag(self, *, content: str) -> None:
+        self.styles.append(content)
+
+
+class PreparePageContractTests(unittest.TestCase):
+    def test_full_document_preparation_sets_direction_on_html_and_theme_on_owner(self) -> None:
+        page = _PreparedPage()
+        case = BrowserCase(
+            name="full-document-dark-rtl",
+            viewport={"width": 1040, "height": 844},
+            color_scheme="dark",
+            direction="rtl",
+        )
+
+        prepare_page(page, case)
+
+        self.assertEqual([selector for selector, _script, _values in page.calls], [
+            "html",
+            '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]',
+        ])
+        html_script = page.calls[0][1]
+        owner_script = page.calls[1][1]
+        self.assertIn('setAttribute("dir", values.direction)', html_script)
+        self.assertNotIn("data-bs-theme", html_script)
+        self.assertIn('setAttribute("data-bs-theme", values.colorScheme)', owner_script)
+        self.assertNotIn("setAttribute(\"dir\"", owner_script)
+
+    def test_embedded_preparation_scopes_both_axes_to_the_selected_owner(self) -> None:
+        page = _PreparedPage()
+        case = BrowserCase(
+            name="embedded-dark-rtl",
+            viewport={"width": 1040, "height": 844},
+            color_scheme="dark",
+            direction="rtl",
+        )
+
+        prepare_page(page, case, embedded=True, owner_selector="#embedded-owner")
+
+        self.assertEqual([selector for selector, _script, _values in page.calls], [
+            "#embedded-owner",
+        ])
+        owner_script = page.calls[0][1]
+        self.assertIn('setAttribute("dir", values.direction)', owner_script)
+        self.assertIn('setAttribute("data-bs-theme", values.colorScheme)', owner_script)
+
+
+def theme_owner(page):
+    return page.locator(
+        '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+    ).first
+
+
 class CertificationBrowserHarnessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -76,6 +149,228 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         cls.browser.close()
         cls.playwright_manager.__exit__(None, None, None)
         cls.server.__exit__(None, None, None)
+
+    def test_nested_owners_keep_theme_direction_and_content_portals_local(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script(
+            """
+            if (localStorage.getItem("nested-owner-outer-theme") === null) {
+              localStorage.setItem("nested-owner-outer-theme", "dark");
+            }
+            if (localStorage.getItem("nested-owner-outer-direction") === null) {
+              localStorage.setItem("nested-owner-outer-direction", "ltr");
+            }
+            if (localStorage.getItem("nested-owner-inner-theme") === null) {
+              localStorage.setItem("nested-owner-inner-theme", "light");
+            }
+            if (localStorage.getItem("nested-owner-inner-direction") === null) {
+              localStorage.setItem("nested-owner-inner-direction", "rtl");
+            }
+            """
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/conformance/fixtures/nested-owners.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            expect(page.locator("body")).to_have_attribute(
+                "data-nested-owners-ready", "true"
+            )
+
+            initial = page.evaluate(
+                """
+                () => {
+                  const outer = document.querySelector("#nested-owner-outer");
+                  const inner = document.querySelector("#nested-owner-inner");
+                  const host = document.querySelector("[data-nested-owner-host-probe]");
+                  const chart = window.__nestedOwners.chart;
+                  return {
+                    bodyTheme: document.body.getAttribute("data-bs-theme"),
+                    chartBackground: chart._theme.backgroundColor,
+                    chartOwner: chart._themeElement.id,
+                    htmlDirection: document.documentElement.dir,
+                    htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
+                    hostColor: getComputedStyle(host).color,
+                    hostBackground: getComputedStyle(host).backgroundColor,
+                    innerBackground: getComputedStyle(inner).getPropertyValue("--bs-body-bg").trim(),
+                    innerDirection: inner.dir,
+                    innerTheme: inner.getAttribute("data-bs-theme"),
+                    outerBackground: getComputedStyle(outer).getPropertyValue("--bs-body-bg").trim(),
+                    outerDirection: outer.dir,
+                    outerTheme: outer.getAttribute("data-bs-theme"),
+                    outerReady: outer.dataset.mooPrepaint,
+                    innerReady: inner.dataset.mooPrepaint,
+                  };
+                }
+                """
+            )
+            self.assertIsNone(initial["htmlTheme"])
+            self.assertIsNone(initial["bodyTheme"])
+            self.assertEqual(initial["htmlDirection"], "ltr")
+            self.assertEqual(initial["outerTheme"], "dark")
+            self.assertEqual(initial["outerDirection"], "ltr")
+            self.assertEqual(initial["innerTheme"], "light")
+            self.assertEqual(initial["innerDirection"], "rtl")
+            self.assertEqual(initial["outerReady"], "ready")
+            self.assertEqual(initial["innerReady"], "ready")
+            self.assertEqual(initial["chartOwner"], "nested-owner-inner")
+            self.assertEqual(initial["chartBackground"], initial["innerBackground"])
+            self.assertNotEqual(initial["chartBackground"], initial["outerBackground"])
+
+            page.locator('[data-nested-theme-toggle="inner"]').click()
+            page.locator('[data-nested-theme-toggle="outer"]').click()
+            page.locator('[data-nested-direction-toggle="outer"]').click()
+            page.locator('[data-nested-direction-toggle="inner"]').click()
+            toggled = page.evaluate(
+                """
+                () => {
+                  const outer = document.querySelector("#nested-owner-outer");
+                  const inner = document.querySelector("#nested-owner-inner");
+                  const host = document.querySelector("[data-nested-owner-host-probe]");
+                  return {
+                    hostColor: getComputedStyle(host).color,
+                    hostBackground: getComputedStyle(host).backgroundColor,
+                    htmlDirection: document.documentElement.dir,
+                    innerDirection: inner.dir,
+                    innerTheme: inner.getAttribute("data-bs-theme"),
+                    outerDirection: outer.dir,
+                    outerTheme: outer.getAttribute("data-bs-theme"),
+                  };
+                }
+                """
+            )
+            self.assertEqual(toggled["outerTheme"], "light")
+            self.assertEqual(toggled["innerTheme"], "dark")
+            self.assertEqual(toggled["htmlDirection"], "ltr")
+            self.assertEqual(toggled["outerDirection"], "rtl")
+            self.assertEqual(toggled["innerDirection"], "ltr")
+            self.assertEqual(toggled["hostColor"], initial["hostColor"])
+            self.assertEqual(toggled["hostBackground"], initial["hostBackground"])
+
+            page.reload(wait_until="networkidle")
+            expect(page.locator("body")).to_have_attribute(
+                "data-nested-owners-ready", "true"
+            )
+            self.assertEqual(page.locator("#nested-owner-outer").get_attribute("dir"), "rtl")
+            self.assertEqual(page.locator("#nested-owner-inner").get_attribute("dir"), "ltr")
+            self.assertEqual(page.locator("html").get_attribute("dir"), "ltr")
+
+            page.locator("#nested-owner-sidebar-submenu-trigger").click()
+            flyout = page.locator(
+                "#nested-owner-outer-portal > .sidebar-menu-flyout"
+            )
+            expect(flyout).to_be_visible()
+            sidebar_geometry = page.evaluate(
+                """
+                () => {
+                  const flyout = document.querySelector("#nested-owner-outer-portal > .sidebar-menu-flyout");
+                  const sidebar = document.querySelector("#nested-owner-sidebar-panel");
+                  const flyoutRect = flyout.getBoundingClientRect();
+                  const sidebarRect = sidebar.getBoundingClientRect();
+                  return {
+                    parentId: flyout.parentElement.id,
+                    side: sidebar.dataset.side,
+                    flyoutLeft: flyoutRect.left,
+                    sidebarRight: sidebarRect.right,
+                  };
+                }
+                """
+            )
+            self.assertEqual(sidebar_geometry["parentId"], "nested-owner-outer-portal")
+            self.assertEqual(sidebar_geometry["side"], "left")
+            self.assertGreaterEqual(
+                sidebar_geometry["flyoutLeft"], sidebar_geometry["sidebarRight"] - 1
+            )
+
+            page.locator("#nested-owner-datepicker-trigger").click()
+            datepicker = page.locator("#nested-owner-datepicker-popover")
+            expect(datepicker).to_be_visible()
+            self.assertEqual(
+                datepicker.evaluate("element => element.parentElement.id"),
+                "nested-owner-outer-portal",
+            )
+
+            page.locator("#nested-owner-datatable-action").click()
+            menu = page.locator("#nested-owner-inner-portal > .dropdown-menu.show")
+            expect(menu).to_be_visible()
+            self.assertEqual(
+                menu.get_attribute("data-datatable-row-action-owner"),
+                "nested-owner-datatable-row",
+            )
+            page.keyboard.press("Escape")
+
+            page.locator("#nested-owner-modal-trigger").click()
+            modal = page.locator("#nested-owner-modal")
+            expect(modal).to_have_class(re.compile(r"\bshow\b"))
+            self.assertEqual(
+                modal.evaluate("element => element.parentElement.id"),
+                "nested-owner-outer-portal",
+            )
+            self.assertEqual(page.locator("body > .modal-backdrop").count(), 1)
+            page.keyboard.press("Escape")
+            expect(modal).not_to_have_class(re.compile(r"\bshow\b"))
+            page.wait_for_function(
+                """
+                () => document.querySelector("#nested-owner-modal")?.parentElement?.id ===
+                  "nested-owner-outer"
+                """
+            )
+
+            page.locator("#nested-owner-offcanvas-trigger").click()
+            offcanvas = page.locator("#nested-owner-offcanvas")
+            expect(offcanvas).to_have_class(re.compile(r"\bshow\b"))
+            self.assertEqual(
+                offcanvas.evaluate("element => element.parentElement.id"),
+                "nested-owner-outer-portal",
+            )
+            offcanvas_backdrop = page.evaluate(
+                """
+                () => {
+                  const backdrop = document.querySelector(".offcanvas-backdrop");
+                  return {
+                    bodyDirect: backdrop?.parentElement === document.body,
+                    ownerId: backdrop?.closest(
+                      '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+                    )?.id || null,
+                  };
+                }
+                """
+            )
+            self.assertEqual(offcanvas_backdrop["ownerId"], "nested-owner-outer")
+            self.assertFalse(offcanvas_backdrop["bodyDirect"])
+            page.keyboard.press("Escape")
+            expect(offcanvas).not_to_have_class(re.compile(r"\bshow\b"))
+            page.wait_for_function(
+                """
+                () => document.querySelector("#nested-owner-offcanvas")?.parentElement?.id ===
+                  "nested-owner-outer"
+                """
+            )
+
+            page.locator("#nested-owner-toast-trigger").click()
+            toast = page.locator("#nested-owner-outer-portal > [data-nested-toast]")
+            expect(toast).to_be_visible()
+
+            page.locator("#nested-owner-tooltip-trigger").hover()
+            tooltip = page.locator("#nested-owner-outer-portal > .tooltip.show")
+            expect(tooltip).to_be_visible()
+
+            page.locator("#nested-owner-popover-trigger").click()
+            popover = page.locator("#nested-owner-outer-portal > .popover.show")
+            expect(popover).to_be_visible()
+            self.assertEqual(
+                page.locator(
+                    "body > .tooltip, body > .popover, body > .dropdown-menu, body > .toast"
+                ).count(),
+                0,
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
 
     def test_chart_fixture_proves_built_bundle_rendering_and_diagnostics(self) -> None:
         for case in CERTIFICATION_CASES:
@@ -910,9 +1205,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             """
             element => {
               element.setAttribute("dir", "ltr");
-              element.setAttribute("data-bs-theme", "light");
             }
             """
+        )
+        theme_owner(page).evaluate(
+            'element => element.setAttribute("data-bs-theme", "light")'
         )
         expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
 
@@ -2086,7 +2383,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2197,7 +2494,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2282,7 +2579,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2391,7 +2688,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2500,7 +2797,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2641,7 +2938,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2756,7 +3053,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2859,7 +3156,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2965,7 +3262,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3064,7 +3361,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3132,7 +3429,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3195,7 +3492,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3254,7 +3551,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3315,7 +3612,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3358,7 +3655,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3422,7 +3719,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3483,7 +3780,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3531,7 +3828,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3576,7 +3873,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3685,7 +3982,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3748,7 +4045,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3855,7 +4152,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3931,7 +4228,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3989,7 +4286,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4031,7 +4328,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4117,7 +4414,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4257,7 +4554,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4310,7 +4607,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4381,7 +4678,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4469,7 +4766,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4537,7 +4834,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4702,7 +4999,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(

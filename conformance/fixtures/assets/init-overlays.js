@@ -9,14 +9,29 @@
   "use strict";
 
   const { Tooltip, Popover } = window.bootstrap;
+  const ownerSelector =
+    '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]';
+  const ownerPortalRoot = (owner) => (
+    Array.from(owner?.children || []).find((child) =>
+      child.matches("[data-moo-overlay-portal-host]"),
+    ) || owner
+  );
 
   document
     .querySelectorAll('[data-bs-toggle="tooltip"]')
-    .forEach((element) => Tooltip.getOrCreateInstance(element));
+    .forEach((element) => {
+      const owner = element.closest(ownerSelector);
+      const portal = ownerPortalRoot(owner);
+      Tooltip.getOrCreateInstance(element, { container: portal });
+    });
 
   document
     .querySelectorAll('[data-bs-toggle="popover"]')
-    .forEach((element) => Popover.getOrCreateInstance(element));
+    .forEach((element) => {
+      const owner = element.closest(ownerSelector);
+      const portal = ownerPortalRoot(owner);
+      Popover.getOrCreateInstance(element, { container: portal });
+    });
 
   document.body.dataset.overlaysReady = "true";
 })();

@@ -318,6 +318,114 @@
     return owner;
   }
 
+  function ownerPortalRoot(owner) {
+    var portal;
+
+    if (!owner) {
+      return null;
+    }
+
+    portal = Array.from(owner.children).find(function (child) {
+      return child.matches && child.matches("[data-moo-overlay-portal-host]");
+    });
+    if (portal) {
+      return portal;
+    }
+
+    portal = document.createElement("div");
+    portal.className = "moo-ui";
+    portal.setAttribute("data-moo-overlay-portal-host", "");
+    owner.appendChild(portal);
+    return portal;
+  }
+
+  function initializeNativeOverlays(owner) {
+    var originalParents;
+
+    if (!owner || owner.dataset.mooCodepenOverlaysReady === "true") {
+      return;
+    }
+
+    originalParents = new WeakMap();
+
+    function portalOverlay(overlay) {
+      var portal = ownerPortalRoot(owner);
+
+      if (!overlay || !portal || overlay.parentElement === portal) {
+        return;
+      }
+
+      originalParents.set(overlay, {
+        nextSibling: overlay.nextSibling,
+        parent: overlay.parentNode
+      });
+      portal.appendChild(overlay);
+    }
+
+    function restoreOverlay(overlay) {
+      var original = originalParents.get(overlay);
+
+      if (!original || !original.parent || !original.parent.isConnected) {
+        return;
+      }
+
+      if (original.nextSibling && original.nextSibling.parentNode === original.parent) {
+        original.parent.insertBefore(overlay, original.nextSibling);
+      } else {
+        original.parent.appendChild(overlay);
+      }
+      originalParents.delete(overlay);
+    }
+
+    function portalBackdrop(overlay, className) {
+      var backdrops = Array.from(document.body.children).filter(function (child) {
+        return child.classList && child.classList.contains(className);
+      });
+      var backdrop = backdrops[backdrops.length - 1];
+      var portal = ownerPortalRoot(owner);
+
+      if (overlay && portal && backdrop) {
+        portal.appendChild(backdrop);
+      }
+    }
+
+    owner.addEventListener("click", function (event) {
+      var target = event.target instanceof window.Element
+        ? event.target.closest('[data-bs-toggle="modal"], [data-bs-toggle="offcanvas"]')
+        : null;
+      var selector;
+      var overlay;
+
+      if (!target || !owner.contains(target)) {
+        return;
+      }
+
+      selector = target.getAttribute("data-bs-target");
+      if (!selector || selector.charAt(0) !== "#") {
+        return;
+      }
+
+      overlay = document.querySelector(selector);
+      if (overlay && owner.contains(overlay)) {
+        portalOverlay(overlay);
+      }
+    }, true);
+
+    owner.addEventListener("shown.bs.modal", function (event) {
+      portalBackdrop(event.target, "modal-backdrop");
+    });
+    owner.addEventListener("hidden.bs.modal", function (event) {
+      restoreOverlay(event.target);
+    });
+    owner.addEventListener("shown.bs.offcanvas", function (event) {
+      portalBackdrop(event.target, "offcanvas-backdrop");
+    });
+    owner.addEventListener("hidden.bs.offcanvas", function (event) {
+      restoreOverlay(event.target);
+    });
+    owner.dataset.mooCodepenOverlaysReady = "true";
+  }
+
   function currentTheme(owner) {
     var theme = owner && owner.getAttribute("data-bs-theme");
     return theme === "dark" ? "dark" : "light";
@@ -577,9 +685,10 @@
   function initializePopovers(owner) {
     withBootstrap(["Popover"], function () {
       var Popover = window.bootstrap && window.bootstrap.Popover;
+      var portal = ownerPortalRoot(owner);
 
       owner.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (element) {
-        Popover.getOrCreateInstance(element, { container: owner });
+        Popover.getOrCreateInstance(element, { container: portal });
       });
     });
   }
@@ -596,7 +705,7 @@
     owner.dataset.mooCodepenToastsQueued = "true";
 
     withBootstrap(["Toast"], function () {
-      wireToasts(root, owner);
+      wireToasts(root, owner, ownerPortalRoot(owner));
     }, function () {
       if (owner) {
         delete owner.dataset.mooCodepenToastsQueued;
@@ -604,7 +713,7 @@
     });
   }
 
-  function wireToasts(root, owner) {
+  function wireToasts(root, owner, portal) {
     var Toast = window.bootstrap && window.bootstrap.Toast;
 
     if (!Toast || !owner) {
@@ -646,7 +755,7 @@
       container.className = sourceContainer.className;
       container.dataset.toastStack = key;
       container.dataset.mooCodepenToastStack = "shared";
-      owner.appendChild(container);
+      portal.appendChild(container);
       sharedToastStacks.set(key, container);
       return container;
     }
@@ -1163,6 +1272,7 @@
       owner.classList.add("moo-codepen-example-demo");
     }
 
+    initializeNativeOverlays(owner);
     initializePopovers(owner);
     initializeToasts(document, owner);
     initializeComponentRuntimes(normalized, owner);
