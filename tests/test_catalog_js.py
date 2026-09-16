@@ -1909,6 +1909,182 @@ console.log(JSON.stringify({ document: makeCase(false), nested: makeCase(true) }
             styles,
         )
 
+    def test_settings_reset_restores_owner_server_baselines(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import assert from "node:assert/strict";
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+import { effectiveOwnerDirection } from "./src/js/theme-owner.js";
+
+function emitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => {
+    listeners.set(type, [...(listeners.get(type) || []), handler]);
+  };
+  node.removeEventListener = (type, handler) => {
+    listeners.set(type, (listeners.get(type) || []).filter((candidate) => candidate !== handler));
+  };
+  node.click = () => {
+    (listeners.get("click") || []).forEach((handler) => handler({ target: node }));
+  };
+  return node;
+}
+
+function directionNode(node, initial = null) {
+  const attributes = initial ? { dir: initial } : {};
+  Object.defineProperty(node, "dir", {
+    get() { return attributes.dir || ""; },
+    set(value) {
+      if (value) attributes.dir = value;
+      else delete attributes.dir;
+    },
+  });
+  node.getAttribute = (name) => attributes[name] ?? null;
+  node.removeAttribute = (name) => { delete attributes[name]; };
+  return node;
+}
+
+function radio(value) {
+  return emitter({ value, checked: false });
+}
+
+function runScenario({ baselineTheme, currentTheme, embedded = false }) {
+  const storage = new Map([
+    [embedded ? "embedded:theme" : "moo:theme", currentTheme],
+    [embedded ? "embedded:direction" : "moo:direction", "ltr"],
+  ]);
+  const view = {
+    localStorage: {
+      getItem: (key) => storage.get(key) ?? null,
+      setItem: (key, value) => storage.set(key, String(value)),
+      removeItem: (key) => storage.delete(key),
+    },
+    matchMedia: () => ({ matches: false }),
+    requestAnimationFrame: (callback) => callback(),
+  };
+  const documentElement = directionNode({}, "rtl");
+  const documentBody = { children: [], firstElementChild: null };
+  const root = {
+    nodeType: 9,
+    body: documentBody,
+    documentElement,
+    defaultView: view,
+    querySelectorAll: () => [],
+  };
+  const reset = emitter();
+  const themeInputs = [radio("system"), radio("light"), radio("dark")];
+  const directionInputs = [radio("ltr"), radio("rtl")];
+  const sheet = emitter({
+    querySelectorAll(selector) {
+      if (selector === "[data-moo-settings-theme]") return themeInputs;
+      if (selector === "[data-moo-settings-direction]") return directionInputs;
+      return [];
+    },
+    querySelector(selector) {
+      return selector === "[data-moo-settings-reset]" ? reset : null;
+    },
+  });
+  const owner = directionNode({
+    nodeType: 1,
+    dataset: {
+      bsTheme: currentTheme,
+      ...(embedded ? {
+        mooThemeKey: "embedded:theme",
+        mooDirectionKey: "embedded:direction",
+      } : {}),
+    },
+    children: [],
+    ownerDocument: root,
+    parentElement: null,
+    matches(selector) {
+      return selector.includes(".moo-ui") && ["light", "dark"].includes(this.dataset.bsTheme);
+    },
+    querySelectorAll: () => [],
+  }, embedded ? "ltr" : null);
+  owner.__mooPrepaintBaseline = {
+    theme: baselineTheme,
+    direction: embedded ? null : "rtl",
+  };
+  sheet.ownerDocument = root;
+  sheet.closest = () => owner;
+  root.querySelector = (selector) =>
+    selector === "#catalog-settings" ? sheet : null;
+
+  if (embedded) {
+    const outer = directionNode({ children: [owner], parentElement: documentBody }, "rtl");
+    owner.parentElement = outer;
+    documentBody.children = [outer];
+    documentBody.firstElementChild = outer;
+  } else {
+    owner.parentElement = documentBody;
+    documentBody.children = [owner];
+    documentBody.firstElementChild = owner;
+  }
+
+  const dispose = initSettingsPanel(root);
+  reset.click();
+  const result = {
+    theme: owner.dataset.bsTheme,
+    selectedTheme: themeInputs.find((input) => input.checked)?.value ?? null,
+    selectedDirection: directionInputs.find((input) => input.checked)?.value ?? null,
+    localDirection: owner.getAttribute("dir"),
+    effectiveDirection: effectiveOwnerDirection(owner),
+    storedTheme: storage.get(embedded ? "embedded:theme" : "moo:theme") ?? null,
+    storedDirection: storage.get(embedded ? "embedded:direction" : "moo:direction") ?? null,
+  };
+  dispose();
+  return result;
+}
+
+const report = {
+  serverLight: runScenario({ baselineTheme: "light", currentTheme: "dark" }),
+  serverDark: runScenario({ baselineTheme: "dark", currentTheme: "light" }),
+  inheritedRtl: runScenario({ baselineTheme: "light", currentTheme: "dark", embedded: true }),
+};
+
+assert.deepEqual(report.serverLight, {
+  theme: "light",
+  selectedTheme: "light",
+  selectedDirection: "rtl",
+  localDirection: null,
+  effectiveDirection: "rtl",
+  storedTheme: null,
+  storedDirection: null,
+});
+assert.deepEqual(report.serverDark, {
+  theme: "dark",
+  selectedTheme: "dark",
+  selectedDirection: "rtl",
+  localDirection: null,
+  effectiveDirection: "rtl",
+  storedTheme: null,
+  storedDirection: null,
+});
+assert.deepEqual(report.inheritedRtl, {
+  theme: "light",
+  selectedTheme: "light",
+  selectedDirection: "rtl",
+  localDirection: null,
+  effectiveDirection: "rtl",
+  storedTheme: null,
+  storedDirection: null,
+});
+console.log(JSON.stringify(report));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_settings_theme_builder_applies_tokens_persistence_and_reset(self) -> None:
         result = subprocess.run(
             [

@@ -6,11 +6,13 @@ import {
 } from "./theme-builder-schema.js";
 import {
   findThemeOwner,
+  effectiveOwnerDirection,
   isDocumentOwner,
+  ownerPrepaintBaseline,
   ownerStorageKey,
   readOwnerPreference,
-  resolveOwnerDirection,
   resolveOwnerTheme,
+  restoreOwnerDirection,
   setOwnerDirection,
   setOwnerTheme,
 } from "../../../../src/js/theme-owner.js";
@@ -150,8 +152,7 @@ export function initSettingsPanel(root = document) {
     const builderStorageKey = isDocumentOwner(owner)
       ? BUILDER_STORAGE_KEY
       : null;
-    const serverTheme = owner.dataset.bsTheme;
-    const serverDirection = resolveOwnerDirection(owner, null) || "ltr";
+    const serverBaseline = ownerPrepaintBaseline(owner);
     const themeInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-theme]")
     );
@@ -210,7 +211,8 @@ export function initSettingsPanel(root = document) {
         });
     };
 
-    const readPreference = () => readOwnerPreference(owner, "theme") || "system";
+    const readPreference = () =>
+      readOwnerPreference(owner, "theme") || serverBaseline.theme;
 
     const applyPreference = (preference) => {
       setOwnerTheme(owner, resolveOwnerTheme(owner, preference, view));
@@ -486,8 +488,7 @@ export function initSettingsPanel(root = document) {
     // own dir attribute through the shared resolver contract.
     const readDirection = () =>
       readOwnerPreference(owner, "direction") ||
-      resolveOwnerDirection(owner, null) ||
-      "ltr";
+      effectiveOwnerDirection(owner);
     const applyDirection = (direction) => {
       setOwnerDirection(owner, direction);
       writeOwnerPreference(owner, "direction", direction, view);
@@ -547,13 +548,15 @@ export function initSettingsPanel(root = document) {
       } catch (_) {
         /* Storage is best-effort. */
       }
-      setOwnerTheme(owner, serverTheme === "dark" ? "dark" : "light");
-      setOwnerDirection(owner, serverDirection);
+      setOwnerTheme(owner, serverBaseline.theme);
+      restoreOwnerDirection(owner, serverBaseline.direction);
+      const restoredTheme = owner.dataset.bsTheme === "dark" ? "dark" : "light";
+      const restoredDirection = effectiveOwnerDirection(owner);
       themeInputs.forEach((input) => {
-        input.checked = input.value === "system";
+        input.checked = input.value === restoredTheme;
       });
       directionInputs.forEach((input) => {
-        input.checked = input.value === serverDirection;
+        input.checked = input.value === restoredDirection;
       });
       if (sidebar) {
         sidebar.dataset.variant = "sidebar";
