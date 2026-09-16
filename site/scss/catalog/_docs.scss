@@ -847,6 +847,7 @@
 // the scoped neutral swatch default wins the cascade and every trigger stays
 // gray even though its label and preview tokens changed.
 @scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+:scope {
 .moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"],
 .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-neutral"] .dropdown-item-check__indicator {
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
@@ -1013,6 +1014,7 @@
 .moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="chart-color-cyan"],
 .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-cyan"] .dropdown-item-check__indicator {
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-cyan};
+}
 }
 }
 

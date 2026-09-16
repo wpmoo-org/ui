@@ -14,7 +14,9 @@
   border-width: var(--bs-border-width);
   border-style: var(--bs-border-style);
   border-color: $moo-close-button-border-color;
-  border-radius: var(--bs-border-radius-xl);
+  // Keep the square hit area visually circular in every context, including
+  // modal and offcanvas headers.
+  border-radius: var(--bs-border-radius-pill);
   color: var(--bs-btn-close-color);
   background-image: none;
   transition: $btn-transition;

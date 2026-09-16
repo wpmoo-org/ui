@@ -469,6 +469,42 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_catalog_settings_uses_normal_sheet_backdrop_and_outside_dismissal(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script("localStorage.clear()")
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/close-button/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            panel = page.locator("#catalog-settings")
+            page.locator("[data-bs-target='#catalog-settings']").click()
+            expect(panel).to_have_class(re.compile(r"\bshow\b"))
+
+            backdrop = page.locator(".offcanvas-backdrop.show")
+            expect(backdrop).to_have_count(1)
+            blur = page.evaluate(
+                """
+                () => getComputedStyle(
+                  document.querySelector(".offcanvas-backdrop"),
+                  "::before",
+                ).backdropFilter
+                """
+            )
+            self.assertIn("blur(", blur)
+
+            backdrop.click()
+            expect(panel).not_to_have_class(re.compile(r"\bshow\b"))
+            expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_catalog_theme_builder_selection_overrides_scoped_theme_tokens(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])
         context.add_init_script("localStorage.clear()")

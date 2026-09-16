@@ -159,7 +159,7 @@ class AlertDialogTests(CatalogTestCase):
         self.assertNotIn("{% call dialog(", source)
         self.assertNotIn("static=true", source)
 
-    def test_page_alert_dialog_actions_do_not_render_primary_buttons(self) -> None:
+    def test_page_alert_dialog_actions_use_primary_or_destructive_variants(self) -> None:
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -168,13 +168,34 @@ class AlertDialogTests(CatalogTestCase):
         parser.feed(page)
 
         self.assertGreaterEqual(len(parser.footer_button_classes), 2)
+        primary_buttons = [
+            classes
+            for classes in parser.footer_button_classes
+            if "btn-primary" in classes.split()
+        ]
+        destructive_buttons = [
+            classes
+            for classes in parser.footer_button_classes
+            if "btn-danger" in classes.split()
+        ]
+        secondary_buttons = [
+            classes
+            for classes in parser.footer_button_classes
+            if "btn-secondary" in classes.split()
+        ]
+        self.assertGreaterEqual(
+            len(primary_buttons),
+            5,
+            "Non-destructive Alert Dialog confirmations should use the primary action style.",
+        )
+        self.assertGreaterEqual(
+            len(destructive_buttons),
+            4,
+            "Destructive Alert Dialog confirmations should retain the destructive action style.",
+        )
         self.assertFalse(
-            [
-                classes
-                for classes in parser.footer_button_classes
-                if "btn-primary" in classes.split()
-            ],
-            "Alert Dialog examples should not inherit the base-color primary action style.",
+            secondary_buttons,
+            "Alert Dialog confirmation actions should not use the muted secondary style.",
         )
 
     def test_page_includes_small_media_and_tabbed_rtl_examples(self) -> None:

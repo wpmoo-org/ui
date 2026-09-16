@@ -24,10 +24,9 @@ $moo-alert-dismissible-close-space: $btn-close-width + ($btn-close-padding-x * 2
 .alert-dismissible .btn-close {
   top: auto;
   right: auto;
-  inset-block-start: 50%;
+  inset-block-start: var(--bs-alert-padding-y);
   inset-inline-end: var(--bs-alert-padding-x);
   padding: $btn-close-padding-y $btn-close-padding-x;
-  transform: translateY(-50%);
 }
 
 // The reference's destructive alert keeps the same neutral surface and

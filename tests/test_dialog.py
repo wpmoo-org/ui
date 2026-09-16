@@ -213,6 +213,17 @@ class DialogTests(CatalogTestCase):
         self.assertIn(".modal[tabindex]:focus-visible", styles)
         self.assertIn("outline: none", styles)
 
+    def test_dialog_header_close_button_is_pinned_to_top_end(self) -> None:
+        styles = STYLES.read_text(encoding="utf-8")
+
+        self.assertIn(".modal-header:has(> .btn-close) {", styles)
+        self.assertIn("position: relative;", styles)
+        self.assertIn(".modal-header:has(> .btn-close) > .btn-close {", styles)
+        self.assertIn("position: absolute;", styles)
+        self.assertIn("inset-block-start: 0.5rem;", styles)
+        self.assertIn("inset-inline-end: 0.5rem;", styles)
+        self.assertIn("margin: 0;", styles)
+
     def test_dialog_does_not_own_global_backdrop_blur(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
 

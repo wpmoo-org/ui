@@ -667,7 +667,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn(mutable_token, theme_check_body)
                 self.assertNotIn(mutable_token, checked_check_body)
 
-    def test_settings_panel_keeps_page_context_visible_without_backdrop(self) -> None:
+    def test_settings_panel_uses_default_sheet_backdrop_and_scroll_behavior(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -677,8 +677,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIsNotNone(match, "catalog settings panel root not found")
         settings_root = match.group(0)
         self.assertIn('class="offcanvas offcanvas-end sheet"', settings_root)
-        self.assertIn('data-bs-backdrop="false"', settings_root)
-        self.assertIn('data-bs-scroll="true"', settings_root)
+        self.assertNotIn("data-bs-backdrop", settings_root)
+        self.assertNotIn("data-bs-scroll", settings_root)
 
     def test_settings_builder_color_dropdowns_render_swatch_indicators(self) -> None:
         result = self.run_build()
@@ -763,6 +763,18 @@ class CatalogContractTests(CatalogTestCase):
             ".dropdown-item-check__indicator",
             styles,
         )
+        variant_styles = styles.split(
+            "// These selected-color variants must share the owner scope above.",
+            1,
+        )[1].split(".moo-settings-panel__theme-group", 1)[0]
+        self.assertIn(":scope {", variant_styles)
+        for swatch in ("base-color-stone", "theme-color-blue", "chart-color-blue"):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'[data-moo-catalog-theme-builder-swatch="{swatch}"] '
+                    ".dropdown-item-check__indicator",
+                    variant_styles,
+                )
         self.assertIn(
             'data-moo-catalog-theme-builder-swatch="theme-color-blue"',
             styles,
