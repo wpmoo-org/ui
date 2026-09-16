@@ -2,6 +2,8 @@
 // UI, date math, keyboard handling, locale, and selection behavior are all
 // owned by Moo UI and require no third-party runtime.
 
+import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
+
 const datepickerInstances = new WeakMap();
 const calendarInstances = new WeakMap();
 const rangePickerInstances = new WeakMap();
@@ -255,40 +257,52 @@ function datepickerContains(instance, target) {
 }
 
 function syncPortaledPopoverContext(instance) {
-  const theme =
-    instance._element.closest("[data-bs-theme]")?.getAttribute("data-bs-theme") ||
-    instance._document.body?.getAttribute("data-bs-theme") ||
-    instance._document.documentElement.getAttribute("data-bs-theme");
-  const direction = getComputedStyle(instance._trigger).direction;
+  const owner = findThemeOwner(instance._trigger);
+  const theme = owner?.getAttribute("data-bs-theme") || null;
+  const direction = instance._document.defaultView?.getComputedStyle(
+    instance._trigger,
+  ).direction;
 
   if (theme) {
     instance._popover.setAttribute("data-bs-theme", theme);
+  } else {
+    instance._popover.removeAttribute("data-bs-theme");
   }
-  if (direction === "rtl") {
-    instance._popover.setAttribute("dir", "rtl");
+  if (direction === "ltr" || direction === "rtl") {
+    instance._popover.setAttribute("dir", direction);
+  } else {
+    instance._popover.removeAttribute("dir");
   }
 }
 
 function portalDatepickerPopover(instance) {
   const popover = instance._popover;
-  if (instance._popoverPortal?.host?.parentElement === instance._document.body) {
+  const owner = findThemeOwner(instance._trigger);
+  const portalRoot = ownerPortalRoot(owner) ||
+    instance._document.body ||
+    instance._document.documentElement;
+  if (!portalRoot) {
+    return;
+  }
+  if (
+    instance._popoverPortal?.portal === portalRoot &&
+    popover.parentElement === portalRoot
+  ) {
     syncPortaledPopoverContext(instance);
     return;
   }
-  const host = instance._document.createElement("div");
-  host.className = "moo-ui";
-  host.dataset.datepickerPortalHost = "";
+  restoreDatepickerPopover(instance);
   instance._popoverPortal = {
     parent: popover.parentNode,
     nextSibling: popover.nextSibling,
-    host,
+    owner,
+    portal: portalRoot,
     hadTheme: popover.hasAttribute("data-bs-theme"),
     theme: popover.getAttribute("data-bs-theme"),
     hadDirection: popover.hasAttribute("dir"),
     direction: popover.getAttribute("dir"),
   };
-  host.appendChild(popover);
-  instance._document.body.appendChild(host);
+  portalRoot.appendChild(popover);
   syncPortaledPopoverContext(instance);
 }
 
@@ -297,7 +311,9 @@ function restoreDatepickerPopover(instance) {
   if (!portal) return;
 
   const popover = instance._popover;
-  if (portal.parent?.isConnected) {
+  if (portal.owner?.isConnected === false) {
+    popover.remove();
+  } else if (portal.parent?.isConnected) {
     if (portal.nextSibling?.parentNode === portal.parent) {
       portal.parent.insertBefore(popover, portal.nextSibling);
     } else {
@@ -306,8 +322,6 @@ function restoreDatepickerPopover(instance) {
   } else {
     popover.remove();
   }
-  portal.host?.remove();
-
   if (portal.hadTheme) {
     popover.setAttribute("data-bs-theme", portal.theme);
   } else {

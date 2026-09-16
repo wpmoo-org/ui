@@ -427,20 +427,30 @@ class DataTableTests(CatalogTestCase):
             encoding="utf-8"
         )
 
+        self.assertIn('from "../theme-owner.js"', source)
         self.assertIn("this._reparentedRowMenus = new Map();", source)
         self.assertIn("this._reparentedRowMenuByTrigger = new WeakMap();", source)
         self.assertIn('trigger?.closest?.(".table-row-actions")', source)
         self.assertIn("this._reparentedRowMenuByTrigger.set(trigger, menu);", source)
         self.assertIn("this._reparentedRowMenuByTrigger.get(trigger)", source)
         self.assertIn("this._reparentedRowMenuByTrigger.delete(trigger);", source)
-        self.assertIn("this._document.body.appendChild(menu);", source)
+        self.assertIn("this._portalRoot(trigger).appendChild(menu);", source)
+        self.assertNotIn("this._document.body.appendChild(menu);", source)
         self.assertIn("this._restoreRowActionMenuForTrigger(event.target);", source)
         self.assertIn("this._restoreRowActionMenus();", source)
-        self.assertIn('page.locator("body > .dropdown-menu.show")', browser_source)
+        self.assertIn('page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")', browser_source)
         self.assertNotIn(
             'root.locator(".datatable-card .dropdown-menu.show")',
             browser_source,
         )
+
+    def test_bulk_tooltips_use_the_same_owner_portal_as_action_and_sort_menus(self) -> None:
+        source = DATATABLE_JS.read_text(encoding="utf-8")
+
+        self.assertIn("_portalRoot(trigger = this._element)", source)
+        self.assertIn("ownerPortalRoot(findThemeOwner(trigger))", source)
+        self.assertIn("container: this._portalRoot(trigger)", source)
+        self.assertIn("this._portalRoot(trigger).appendChild(menu);", source)
 
     def test_row_action_dropdowns_export_owner_metadata_when_reparented(self) -> None:
         source = DATATABLE_JS.read_text(encoding="utf-8")

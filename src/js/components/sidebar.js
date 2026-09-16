@@ -1,3 +1,5 @@
+import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
+
 const instances = new WeakMap();
 
 export default class Sidebar {
@@ -22,7 +24,7 @@ export default class Sidebar {
     this._document = element.ownerDocument;
     this._window = this._document.defaultView;
     this._documentElement = this._document.documentElement;
-    this._root = this._document.body || this._documentElement;
+    this._root = findThemeOwner(element) || this._document.body || this._documentElement;
     this._sidebar = element.querySelector('[data-slot="sidebar"]');
     this._config = {
       breakpoint: "(min-width: 992px)",
@@ -74,6 +76,12 @@ export default class Sidebar {
 
   _bootstrap(name) {
     return this._window.bootstrap?.[name] || null;
+  }
+
+  _portalRoot(trigger = this._element) {
+    return ownerPortalRoot(findThemeOwner(trigger)) ||
+      this._document.body ||
+      this._documentElement;
   }
 
   _isDesktop() {
@@ -344,8 +352,7 @@ export default class Sidebar {
     flyout.removeAttribute("style");
     flyout.style.setProperty("--moo-sidebar-flyout-block-start", `${Math.round(rect.top)}px`);
     const side = sidebar?.dataset.side || "left";
-    const root = this._element.closest(".moo-ui") || this._document.body;
-    root.appendChild(flyout);
+    this._portalRoot(item).appendChild(flyout);
     const flyoutWidth = flyout.getBoundingClientRect().width;
     const left = side === "right"
       ? sidebarRect.left - flyoutWidth - gap
@@ -413,7 +420,7 @@ export default class Sidebar {
         // physical Sidebar edge at that distance, so keep an explicit 8px
         // separation for both physical placements.
         offset: [0, 8],
-        container: "body",
+        container: this._portalRoot(control),
         trigger: "hover focus",
       });
       this._tooltipAnchors.add(anchor);

@@ -1047,6 +1047,16 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn('hidden.bs.dropdown', script)
         self.assertIn('[data-bs-toggle="dropdown"][data-sidebar-tooltip]', script)
 
+    def test_sidebar_flyouts_and_rail_tooltips_use_the_trigger_owner_portal(self) -> None:
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
+
+        self.assertIn('from "../theme-owner.js"', script)
+        self.assertIn("_portalRoot(trigger = this._element)", script)
+        self.assertIn("ownerPortalRoot(findThemeOwner(trigger))", script)
+        self.assertIn("this._portalRoot(item).appendChild(flyout);", script)
+        self.assertIn("container: this._portalRoot(control)", script)
+        self.assertNotIn('container: "body"', script)
+
     def test_sidebar_identity_triggers_skip_collapsed_tooltips(self) -> None:
         script = SIDEBAR_JS.read_text(encoding="utf-8")
 

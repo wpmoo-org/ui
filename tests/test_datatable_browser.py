@@ -409,14 +409,14 @@ class DataTableBrowserTests(unittest.TestCase):
                 ".datatable-card:visible .table-row-actions > button"
             ).first
             action.click()
-            menu = page.locator("body > .dropdown-menu.show")
+            menu = page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")
             expect(menu).to_have_count(1)
             expect(menu).to_be_visible()
 
             result = page.evaluate(
                 """
                 () => {
-                  const menu = document.querySelector("body > .dropdown-menu.show");
+                  const menu = document.querySelector(".moo-ui[data-bs-theme] > .dropdown-menu.show");
                   const trigger = document.querySelector(
                     "#standalone-datatable-release-reviews .datatable-card "
                       + ".table-row-actions > [aria-expanded='true']"
@@ -444,7 +444,7 @@ class DataTableBrowserTests(unittest.TestCase):
                     return hit && item.contains(hit);
                   });
                   return {
-                    menuParentIsBody: menu?.parentElement === document.body,
+                    menuParentIsOwner: menu?.parentElement?.matches(".moo-ui[data-bs-theme]"),
                     menuExtendsPastCard: rect(menu).bottom > rect(card).bottom,
                     allItemsHit,
                   };
@@ -452,12 +452,12 @@ class DataTableBrowserTests(unittest.TestCase):
                 """
             )
 
-            self.assertTrue(result["menuParentIsBody"])
+            self.assertTrue(result["menuParentIsOwner"])
             self.assertTrue(result["menuExtendsPastCard"])
             self.assertTrue(result["allItemsHit"])
             action.press("Escape")
             expect(action).to_have_attribute("aria-expanded", "false")
-            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")).to_have_count(0)
             self.assertTrue(
                 action.evaluate(
                     "element => element.parentElement.querySelector(':scope > .dropdown-menu') !== null"
@@ -731,17 +731,17 @@ class DataTableBrowserTests(unittest.TestCase):
             )
 
             trigger = first_card.locator(".table-row-actions > button")
-            menu = page.locator("body > .dropdown-menu.show")
+            menu = page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")
             trigger.click()
             expect(trigger).to_have_attribute("aria-expanded", "true")
             expect(menu).to_have_count(1)
             expect(menu).to_be_visible()
             expect(menu).to_contain_text("Open ticket")
-            self.assertTrue(menu.evaluate("element => element.parentElement === document.body"))
+            self.assertTrue(menu.evaluate("element => element.parentElement.matches('.moo-ui[data-bs-theme]')"))
 
             trigger.press("Escape")
             expect(trigger).to_have_attribute("aria-expanded", "false")
-            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")).to_have_count(0)
             expect(first_card.locator(".table-row-actions .dropdown-menu")).to_have_count(1)
             expect(trigger).to_be_focused()
             evidence.assert_clean()
@@ -792,7 +792,7 @@ class DataTableBrowserTests(unittest.TestCase):
             root = page.locator("#certification-datatable")
             first_row = root.locator("#cert-row-1")
             trigger = first_row.locator(".table-row-actions > button")
-            menu = page.locator("body > .dropdown-menu.show")
+            menu = page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")
 
             expect(trigger).to_have_attribute("aria-expanded", "false")
             trigger.click()
@@ -802,7 +802,7 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(menu).to_contain_text("Open ticket")
             expect(menu).to_contain_text("Assign owner")
             expect(menu).to_contain_text("Copy link")
-            self.assertTrue(menu.evaluate("element => element.parentElement === document.body"))
+            self.assertTrue(menu.evaluate("element => element.parentElement.matches('.moo-ui[data-bs-theme]')"))
             self.assertEqual(
                 root.locator(".datatable-frame").evaluate(
                     "element => getComputedStyle(element).overflowY"
@@ -816,7 +816,7 @@ class DataTableBrowserTests(unittest.TestCase):
 
             trigger.press("Escape")
             expect(trigger).to_have_attribute("aria-expanded", "false")
-            expect(page.locator("body > .dropdown-menu.show")).to_have_count(0)
+            expect(page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")).to_have_count(0)
             expect(first_row.locator(".table-row-actions .dropdown-menu")).to_have_count(1)
             expect(trigger).to_be_focused()
             evidence.assert_clean()
@@ -836,7 +836,7 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(ticket_header).to_have_attribute("aria-sort", "none")
 
             ticket_trigger.click()
-            page.locator("body > .dropdown-menu.show").locator(
+            page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show").locator(
                 '[data-datatable-sort-action="desc"]'
             ).click()
 
@@ -846,7 +846,7 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(rows.nth(2)).to_contain_text("TCK-1")
 
             ticket_trigger.click()
-            page.locator("body > .dropdown-menu.show").locator(
+            page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show").locator(
                 '[data-datatable-sort-action="asc"]'
             ).click()
 
@@ -857,7 +857,7 @@ class DataTableBrowserTests(unittest.TestCase):
             status_header = root.locator('th[data-datatable-column="status"]')
             status_trigger = status_header.locator("[data-datatable-sort-key]")
             status_trigger.click()
-            page.locator("body > .dropdown-menu.show").locator(
+            page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show").locator(
                 '[data-datatable-sort-action="hide"]'
             ).click()
             self.assertTrue(
@@ -878,7 +878,7 @@ class DataTableBrowserTests(unittest.TestCase):
             root = page.locator("#certification-datatable")
             ticket_header = root.locator('th[data-datatable-column="ticket"]')
             ticket_trigger = ticket_header.locator("[data-datatable-sort-key]")
-            menu = page.locator("body > .dropdown-menu.show")
+            menu = page.locator(".moo-ui[data-bs-theme] > .dropdown-menu.show")
             frame = root.locator(".datatable-frame")
 
             # Keep the real overflow boundary, but make the fixture frame
@@ -894,7 +894,7 @@ class DataTableBrowserTests(unittest.TestCase):
             metrics = page.evaluate(
                 """
                 () => {
-                  const menu = document.querySelector("body > .dropdown-menu.show");
+                  const menu = document.querySelector(".moo-ui[data-bs-theme] > .dropdown-menu.show");
                   const frame = document.querySelector("#certification-datatable .datatable-frame");
                   const rect = (element) => {
                     const box = element.getBoundingClientRect();
@@ -916,7 +916,7 @@ class DataTableBrowserTests(unittest.TestCase):
                     return hit && item.contains(hit);
                   });
                   return {
-                    menuParentIsBody: menu?.parentElement === document.body,
+                    menuParentIsOwner: menu?.parentElement?.matches(".moo-ui[data-bs-theme]"),
                     menuPosition: menu ? getComputedStyle(menu).position : "",
                     menuExtendsPastFrame:
                       menu && frame
@@ -931,7 +931,7 @@ class DataTableBrowserTests(unittest.TestCase):
                 """
             )
 
-            self.assertTrue(metrics["menuParentIsBody"], metrics)
+            self.assertTrue(metrics["menuParentIsOwner"], metrics)
             self.assertEqual(metrics["menuPosition"], "fixed", metrics)
             self.assertTrue(metrics["menuExtendsPastFrame"], metrics)
             self.assertTrue(metrics["allItemsHit"], metrics)

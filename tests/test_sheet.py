@@ -207,16 +207,13 @@ class SheetTests(CatalogTestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn(
-            'root.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalSheet)',
+            'root.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach((sheet) => {',
             script,
         )
-        self.assertIn(
-            'const firstBodyScript = [...root.body.children].find(\n'
-            '      (child) => child.tagName === "SCRIPT",\n'
-            '    );\n'
-            '    root.body.insertBefore(sheet, firstBodyScript || null)',
-            script,
-        )
+        self.assertIn("const portal = portalFor(trigger) || portalFor(sheet);", script)
+        self.assertIn("portal.appendChild(sheet)", script)
+        self.assertIn("sheetPortals", script)
+        self.assertIn('listen(root, "hidden.bs.offcanvas"', script)
         self.assertNotIn("root.body.appendChild(sheet)", script)
+        self.assertNotIn("root.body.insertBefore(sheet", script)
         self.assertNotIn("moo-sheet-placeholder", script)
-        self.assertNotIn("catalogSheetPlaceholders", script)
