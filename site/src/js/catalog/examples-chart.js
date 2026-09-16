@@ -6,37 +6,26 @@
 // initCatalog's dispose chain.
 
 import MooChart from "../../../../src/js/components/chart.js";
+import {
+  findThemeOwner,
+  resolveOwnerTheme,
+  setOwnerTheme,
+} from "../../../../src/js/theme-owner.js";
 
 const states = new WeakMap();
 
-function readThemeValue(element) {
-  return element?.dataset?.bsTheme || element?.getAttribute?.("data-bs-theme");
-}
-
-function normalizeTheme(value) {
-  return value === "dark" ? "dark" : "light";
-}
-
-function writeThemeValue(element, theme) {
-  if (element?.dataset) {
-    element.dataset.bsTheme = theme;
-  } else {
-    element?.setAttribute?.("data-bs-theme", theme);
-  }
-}
-
-function ensureScopedTheme(container, ownerDocument) {
-  const theme = normalizeTheme(
-    readThemeValue(container) ||
-      readThemeValue(ownerDocument?.body) ||
-      readThemeValue(ownerDocument?.documentElement),
-  );
-  writeThemeValue(container, theme);
-  return theme;
-}
-
 function resolveLiveThemeScope(container) {
   return container.closest?.(".moo-example__preview") || container;
+}
+
+function createLiveThemeOwner(container) {
+  const scope = resolveLiveThemeScope(container);
+  const inheritedOwner = findThemeOwner(container);
+  const view = container.ownerDocument?.defaultView;
+  const inheritedTheme = resolveOwnerTheme(inheritedOwner, null, view);
+  scope.classList?.add("moo-ui");
+  setOwnerTheme(scope, inheritedTheme);
+  return scope;
 }
 
 function setElementHidden(element, hidden) {
@@ -94,9 +83,7 @@ export function initExamplesChart(root = document) {
   try {
     const liveContainers = Array.from(root.querySelectorAll("[data-chart-live]"));
     liveContainers.forEach((container) => {
-      const ownerDocument = container.ownerDocument || document;
-      const themeScope = resolveLiveThemeScope(container);
-      ensureScopedTheme(themeScope, ownerDocument);
+      const themeScope = createLiveThemeOwner(container);
       liveThemeScopes.set(container, themeScope);
     });
 
@@ -121,8 +108,8 @@ export function initExamplesChart(root = document) {
       setLifecycleButtonState(lifecycleButton, false);
 
       const onTheme = () => {
-        const nextTheme = readThemeValue(themeScope) === "dark" ? "light" : "dark";
-        writeThemeValue(themeScope, nextTheme);
+        const nextTheme = themeScope.dataset?.bsTheme === "dark" ? "light" : "dark";
+        setOwnerTheme(themeScope, nextTheme);
         setStatus(`Example theme: ${nextTheme}`);
       };
       const onLifecycle = () => {

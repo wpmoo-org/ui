@@ -230,7 +230,7 @@
    deliberately below Bootstrap's own backdrop/offcanvas/modal tiers
    (1040+) so an open Sheet or Dialog dims the footer along with the
    rest of the page, same as real content. #}
-body {
+.moo-ui {
   --moo-examples-footer-height: 3rem;
   min-height: 100vh;
   display: flex;
@@ -295,7 +295,7 @@ body {
 }
 
 @media (max-width: 576px) {
-  body {
+  .moo-ui {
     --moo-examples-footer-height: 7rem;
   }
 
@@ -517,7 +517,7 @@ if (document.readyState === "loading") {
 {%- endmacro %}
 
 {% macro chart_codepen_css() -%}
-body {
+.moo-ui {
   padding: 2rem;
 }
 
@@ -551,6 +551,19 @@ body {
   {% set resolved_html %}
 {{ html | safe }}
   {% endset %}
+  {# CodePen is an embedded host. Give every generated demo exactly one
+     resolved Moo owner unless its caller already supplied one, so theme
+     tokens and the demo runtime never need an html/body theme mirror. #}
+  {% set has_resolved_moo_owner = "moo-ui" in resolved_html and "data-bs-theme" in resolved_html %}
+  {% set owner_html %}
+    {% if has_resolved_moo_owner %}
+{{ resolved_html | trim }}
+    {% else %}
+<div class="moo-ui" data-bs-theme="light">
+{{ resolved_html | trim }}
+</div>
+    {% endif %}
+  {% endset %}
   {% set resolved_css %}
 {{ css | safe }}
   {% endset %}
@@ -572,7 +585,7 @@ body {
   {% set payload = {
     "title": title,
     "description": description,
-    "html": resolved_html | absolutize_links,
+    "html": owner_html | trim | absolutize_links,
     "html_pre_processor": "none",
     "css": resolved_css | trim,
     "css_pre_processor": "none",

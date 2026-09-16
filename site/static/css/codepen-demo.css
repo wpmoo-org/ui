@@ -1,17 +1,17 @@
-body.moo-codepen-demo {
+.moo-ui.moo-codepen-demo {
   min-height: 100vh;
   margin: 0;
   color: var(--bs-body-color);
   background: var(--bs-body-bg);
 }
 
-body.moo-codepen-has-branding {
+.moo-ui.moo-codepen-has-branding {
   --moo-codepen-footer-height: 3rem;
 
   padding-bottom: calc(var(--moo-codepen-footer-height) + 2rem);
 }
 
-body.moo-codepen-component-demo {
+.moo-ui.moo-codepen-component-demo {
   display: grid;
   gap: 1rem;
   align-content: center;
@@ -20,7 +20,7 @@ body.moo-codepen-component-demo {
   place-items: center;
 }
 
-body.moo-codepen-component-demo > :where(
+.moo-ui.moo-codepen-component-demo > :where(
   :not(
     .moo-codepen-signature,
     .moo-codepen-footer,
@@ -35,7 +35,7 @@ body.moo-codepen-component-demo > :where(
   margin-block: 0;
 }
 
-body.moo-codepen-component-demo > :where(
+.moo-ui.moo-codepen-component-demo > :where(
   .w-100,
   .accordion,
   .alert,
@@ -57,11 +57,11 @@ body.moo-codepen-component-demo > :where(
   width: min(100%, 48rem);
 }
 
-body.moo-codepen-component-demo > :where(.field, .field-group) {
+.moo-ui.moo-codepen-component-demo > :where(.field, .field-group) {
   width: min(100%, 24rem);
 }
 
-body.moo-codepen-component-demo > :where(.field, .field-group).w-100 {
+.moo-ui.moo-codepen-component-demo > :where(.field, .field-group).w-100 {
   width: min(100%, 24rem) !important;
 }
 
@@ -294,16 +294,16 @@ body.moo-codepen-component-demo > :where(.field, .field-group).w-100 {
   object-fit: contain;
 }
 
-[data-bs-theme="dark"] .moo-catalog__showcase-image {
+.moo-ui[data-bs-theme="dark"] .moo-catalog__showcase-image {
   filter: invert(1) hue-rotate(180deg);
 }
 
 @media (max-width: 575.98px) {
-  body.moo-codepen-component-demo {
+  .moo-ui.moo-codepen-component-demo {
     padding: 1rem;
   }
 
-  body.moo-codepen-has-branding {
+  .moo-ui.moo-codepen-has-branding {
     --moo-codepen-footer-height: 5rem;
 
     padding-bottom: calc(var(--moo-codepen-footer-height) + 1rem);

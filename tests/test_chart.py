@@ -1331,9 +1331,15 @@ function makeButton() {{
 }}
 const themeButton = makeButton();
 const status = {{ textContent: "" }};
+const pageOwner = {{
+  dataset: {{ bsTheme: "dark" }},
+  ownerDocument,
+  matches: (selector) => selector.includes(".moo-ui"),
+}};
 const previewScope = {{
   dataset: {{}},
   ownerDocument,
+  classList: {{ add() {{}} }},
 }};
 const chartRoot = makeRoot({{
   "data-chart": "line",
@@ -1348,7 +1354,12 @@ const container = {{
     if (selector === "[data-chart-theme]") return themeButton;
     return null;
   }},
-  closest: (selector) => (selector === ".moo-example__preview" ? previewScope : null),
+  closest: (selector) =>
+    selector === ".moo-example__preview"
+      ? previewScope
+      : selector.includes(".moo-ui")
+        ? pageOwner
+        : null,
 }};
 chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope : null);
 documentElement.dataset.bsTheme = "dark";

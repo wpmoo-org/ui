@@ -365,6 +365,15 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(page.locator(".toast.show .toast-body")).to_contain_text(
                 "Sunday, December 3 at 9:00 AM"
             )
+            self.assertTrue(
+                page.locator(".toast.show").evaluate(
+                    """
+                    element => Boolean(
+                      element.closest('.moo-ui[data-bs-theme]')
+                    )
+                    """
+                )
+            )
             evidence.assert_clean()
         finally:
             context.close()
@@ -391,7 +400,11 @@ class CodePenModalBrowserTests(unittest.TestCase):
             # The Bootstrap bundle fails asynchronously; the toast queue flag is
             # cleared only after the failure handler runs, so wait for that.
             page.wait_for_function(
-                "() => !document.body.hasAttribute('data-moo-codepen-toasts-queued')",
+                """
+                () => !document
+                  .querySelector('.moo-ui[data-bs-theme]')
+                  ?.hasAttribute('data-moo-codepen-toasts-queued')
+                """,
                 timeout=9000,
             )
         finally:
@@ -439,7 +452,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
                 (element) => {
                   const rect = element.getBoundingClientRect();
                   const styles = window.getComputedStyle(element);
-                  const demoContent = Array.from(document.body.children).find((child) => {
+                  const owner = document.querySelector(".moo-ui[data-bs-theme]");
+                  const demoContent = Array.from(owner.children).find((child) => {
                     return !child.matches(
                       ".moo-codepen-actions, .moo-codepen-signature, .moo-codepen-footer, script, style"
                     );
@@ -473,18 +487,19 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     (element) => {
                       const probe = document.createElement("span");
                       const button = window.getComputedStyle(element);
-                      const body = window.getComputedStyle(document.body);
+                      const owner = element.closest(".moo-ui[data-bs-theme]");
+                      const ownerStyle = window.getComputedStyle(owner);
                       probe.style.position = "fixed";
                       probe.style.inset = "auto";
                       probe.style.backgroundColor = "color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg))";
-                      document.body.appendChild(probe);
+                      owner.appendChild(probe);
                       const expected = window.getComputedStyle(probe).backgroundColor;
                       probe.remove();
                       return {
                         background: button.backgroundColor,
                         color: button.color,
-                        bodyBackground: body.backgroundColor,
-                        bodyColor: body.color,
+                        bodyBackground: ownerStyle.backgroundColor,
+                        bodyColor: ownerStyle.color,
                         mixedBodyColor: expected,
                       };
                     }
@@ -504,7 +519,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
             self.assertEqual(hover_colors["color"], normal_colors["bodyBackground"])
 
             theme.click()
-            expect(page.locator("html")).to_have_attribute("data-bs-theme", "dark")
+            expect(page.locator(".moo-ui[data-bs-theme]")).to_have_attribute("data-bs-theme", "dark")
             expect(theme).to_have_attribute("aria-label", "Switch to light mode")
             page.mouse.move(0, 0)
 
@@ -521,7 +536,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
             self.assertEqual(hover_colors["color"], normal_colors["bodyBackground"])
 
             theme.click()
-            expect(page.locator("html")).to_have_attribute("data-bs-theme", "light")
+            expect(page.locator(".moo-ui[data-bs-theme]")).to_have_attribute("data-bs-theme", "light")
             expect(theme).to_have_attribute("aria-label", "Switch to dark mode")
 
             evidence.assert_clean()
@@ -552,6 +567,15 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(popover).to_have_count(1)
             expect(popover).to_be_visible()
             expect(popover).to_contain_text("Button")
+            self.assertTrue(
+                popover.evaluate(
+                    """
+                    element => Boolean(
+                      element.closest('.moo-ui[data-bs-theme]')
+                    )
+                    """
+                )
+            )
             expect(popover.get_by_role("link", name="Learn more")).to_have_attribute(
                 "href",
                 "https://ui.wpmoo.org/components/button/",

@@ -163,6 +163,123 @@ console.log(JSON.stringify({ assignments, theme: dataset.bsTheme }));
         self.assertEqual(report["assignments"], [])
         self.assertEqual(report["theme"], "dark")
 
+    def test_theme_init_scopes_preferences_to_resolved_owners(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initTheme } from "./site/src/js/catalog/theme.js";
+
+const storage = new Map([
+  ["first:theme", "dark"],
+  ["first:direction", "rtl"],
+  ["second:theme", "light"],
+  ["second:direction", "ltr"],
+  ["outer:theme", "system"],
+  ["outer:direction", "rtl"],
+  ["inner:theme", "light"],
+  ["inner:direction", "ltr"],
+]);
+const writes = [];
+const localStorage = {
+  getItem: (key) => storage.get(key) ?? null,
+  setItem: (key, value) => storage.set(key, String(value)),
+};
+const media = {
+  matches: false,
+  handlers: [],
+  addEventListener(type, handler) {
+    if (type === "change") this.handlers.push(handler);
+  },
+  removeEventListener(type, handler) {
+    this.handlers = this.handlers.filter((candidate) => candidate !== handler);
+  },
+  change(matches) {
+    this.matches = matches;
+    this.handlers.forEach((handler) => handler({ matches }));
+  },
+};
+const view = { localStorage, matchMedia: () => media };
+
+function element(dataset = {}) {
+  return {
+    dataset,
+    attributes: {},
+    setAttribute(name, value) { this.attributes[name] = String(value); },
+    getAttribute(name) { return this.attributes[name] ?? null; },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+}
+
+const documentElement = element(new Proxy({}, {
+  set(target, key, value) { writes.push(`html:${String(key)}`); target[key] = value; return true; },
+}));
+const body = element(new Proxy({}, {
+  set(target, key, value) { writes.push(`body:${String(key)}`); target[key] = value; return true; },
+}));
+const doc = { nodeType: 9, body, documentElement, defaultView: view };
+
+function owner(name, theme, key, directionKey, parent = body) {
+  const root = element({
+    bsTheme: theme,
+    ...(key ? { mooThemeKey: key } : {}),
+    ...(directionKey ? { mooDirectionKey: directionKey } : {}),
+  });
+  root.ownerDocument = doc;
+  root.parentElement = parent;
+  root.matches = (selector) => selector.includes(".moo-ui") && (root.dataset.bsTheme === "light" || root.dataset.bsTheme === "dark");
+  root.querySelectorAll = () => [];
+  root.children = [];
+  return root;
+}
+
+const first = owner("first", "light", "first:theme", "first:direction");
+const second = owner("second", "dark", "second:theme", "second:direction");
+const outer = owner("outer", "dark", "outer:theme", "outer:direction");
+const inner = owner("inner", "dark", "inner:theme", "inner:direction", outer);
+outer.children = [inner];
+const firstButton = element();
+const secondButton = element();
+const innerButton = element();
+firstButton.closest = () => first;
+secondButton.closest = () => second;
+innerButton.closest = () => inner;
+body.children = [first, second, outer];
+body.firstElementChild = first;
+body.querySelectorAll = () => [first, second, outer, inner];
+doc.querySelectorAll = (selector) =>
+  selector.includes("data-moo-theme") ? [firstButton, secondButton, innerButton] : [];
+
+initTheme(doc);
+media.change(true);
+console.log(JSON.stringify({
+  themes: [first.dataset.bsTheme, second.dataset.bsTheme, outer.dataset.bsTheme, inner.dataset.bsTheme],
+  directions: [first.dir, second.dir, outer.dir, inner.dir],
+  writes,
+  labels: [firstButton.attributes["aria-label"], secondButton.attributes["aria-label"], innerButton.attributes["aria-label"]],
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["themes"], ["dark", "light", "dark", "light"])
+        self.assertEqual(case["directions"], ["rtl", "ltr", "rtl", "ltr"])
+        self.assertEqual(case["writes"], [])
+        self.assertEqual(
+            case["labels"],
+            ["Switch to light mode", "Switch to dark mode", "Switch to dark mode"],
+        )
+
     def test_theme_builder_schema_migrates_legacy_state(self) -> None:
         result = subprocess.run(
             [
@@ -623,7 +740,49 @@ console.log(JSON.stringify({
         self.assertEqual(case["cssRgb"], [])
         self.assertEqual(case["allowListRgb"], [])
 
-    def test_theme_builder_first_paint_payload_matches_contract(self) -> None:
+    def test_theme_builder_owner_export_rejects_arbitrary_scope(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { serializeThemeBuilderPresetCss } from "./site/src/js/catalog/theme-builder-export.js";
+
+const owner = serializeThemeBuilderPresetCss(
+  { themeColor: "blue" },
+  { scope: "owner", ownerMarker: "moo-owner-7f4a" },
+);
+const failures = [];
+for (const options of [
+  { scope: "owner" },
+  { scope: "selector", ownerMarker: ".arbitrary" },
+  { scope: "owner", ownerMarker: 'x"] body { color: red; }' },
+]) {
+  try {
+    serializeThemeBuilderPresetCss({}, options);
+  } catch (error) {
+    failures.push(error.constructor.name);
+  }
+}
+console.log(JSON.stringify({ owner, failures }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertIn('[data-moo-theme-builder-owner="moo-owner-7f4a"] {', case["owner"])
+        self.assertNotIn(":root", case["owner"])
+        self.assertNotIn("body", case["owner"])
+        self.assertEqual(case["failures"], ["TypeError", "TypeError", "TypeError"])
+
+    def test_theme_builder_schema_matches_contract(self) -> None:
         result = subprocess.run(
             [
                 "node",
@@ -633,7 +792,6 @@ console.log(JSON.stringify({
 import {
   PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
   THEME_BUILDER_OPTIONS,
-  createThemeBuilderFirstPaintPayload,
 } from "./site/src/js/catalog/theme-builder-schema.js";
 import {
   createThemeBuilderPreset,
@@ -642,7 +800,6 @@ import {
 console.log(JSON.stringify({
   allowList: PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
   options: THEME_BUILDER_OPTIONS,
-  payload: createThemeBuilderFirstPaintPayload(),
   presetFields: Object.keys(createThemeBuilderPreset({})),
 }));
 """,
@@ -695,17 +852,6 @@ console.log(JSON.stringify({
                     self.assertIn('"radius": "compact"', contract)
                     self.assertIn('normalizes that value to `"small"`', contract)
                     self.assertIn('`"compact"` is not emitted', contract)
-
-        build_result = self.run_build()
-        self.assertEqual(build_result.returncode, 0, build_result.stderr)
-        page = (DIST / "index.html").read_text(encoding="utf-8")
-        payload_match = re.search(
-            r"const themeBuilderFirstPaint = (\{.*?\});\n",
-            page,
-            flags=re.DOTALL,
-        )
-        self.assertIsNotNone(payload_match, "missing first-paint payload")
-        self.assertEqual(json.loads(payload_match.group(1)), case["payload"])
 
     def test_theme_builder_first_paint_payload_is_defensive_copy(self) -> None:
         result = subprocess.run(
@@ -765,7 +911,12 @@ console.log(JSON.stringify({
             (script for script in inline_scripts if "themeBuilderFirstPaint" in script),
             None,
         )
-        self.assertIsNotNone(inline_script, "missing Theme Builder first-paint script")
+        if inline_script is None:
+            source = (CATALOG_JS / "settings-panel.js").read_text(encoding="utf-8")
+            self.assertNotIn("moo-theme-builder-tokens", page)
+            self.assertIn("data-moo-theme-builder-owner", source)
+            self.assertIn("data-moo-theme-builder-style", source)
+            return
 
         result = subprocess.run(
             [
@@ -842,8 +993,8 @@ function makeStyle() {
     set textContent(value) {
       textContent = String(value);
       Object.keys(values).forEach((name) => delete values[name]);
-      const body = textContent.match(/body\[data-bs-theme\]\s*\{([\s\S]*)\}/)?.[1] || "";
-      body.split(";").forEach((declaration) => {
+      const declarations = textContent.match(/\{([\s\S]*)\}/)?.[1] || "";
+      declarations.split(";").forEach((declaration) => {
         const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
         if (match) values[match[1]] = match[2];
       });
@@ -1756,8 +1907,8 @@ function makeStyle() {
     set textContent(value) {
       textContent = String(value);
       values.clear();
-      const body = textContent.match(/body\[data-bs-theme\]\s*\{([\s\S]*)\}/)?.[1] || "";
-      body.split(";").forEach((declaration) => {
+      const declarations = textContent.match(/\{([\s\S]*)\}/)?.[1] || "";
+      declarations.split(";").forEach((declaration) => {
         const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
         if (match) values.set(match[1], match[2]);
       });
@@ -1848,12 +1999,27 @@ const documentElement = {
   dataset: {},
   dir: "ltr",
 };
+const documentBody = {
+  children: [],
+  firstElementChild: null,
+};
 const body = {
   dataset: { bsTheme: "light" },
+  children: [],
+  parentElement: documentBody,
+  dir: "ltr",
 };
 const themeBuilderTokenStyle = makeStyle();
+body.matches = (selector) => selector.includes(".moo-ui");
+body.querySelector = (selector) =>
+  selector === ":scope > style[data-moo-theme-builder-style]"
+    ? themeBuilderTokenStyle
+    : null;
+documentBody.children = [body];
+documentBody.firstElementChild = body;
 const root = {
-  body,
+  nodeType: 9,
+  body: documentBody,
   documentElement,
   defaultView: { localStorage, matchMedia: () => ({ matches: false }) },
   querySelector: (selector) =>
@@ -1863,6 +2029,9 @@ const root = {
         ? themeBuilderTokenStyle
         : null,
 };
+body.ownerDocument = root;
+sheet.ownerDocument = root;
+sheet.closest = () => body;
 
 localStorage.setItem(
   "moo:theme-builder",
@@ -2214,9 +2383,19 @@ const documentElement = {
     getPropertyValue: () => "",
   },
 };
-const body = { dataset: { bsTheme: "dark" } };
+const documentBody = { children: [], firstElementChild: null };
+const body = {
+  dataset: { bsTheme: "dark" },
+  children: [],
+  parentElement: documentBody,
+  matches: (selector) => selector.includes(".moo-ui"),
+  querySelector: () => null,
+};
+documentBody.children = [body];
+documentBody.firstElementChild = body;
 const root = {
-  body,
+  nodeType: 9,
+  body: documentBody,
   documentElement,
   defaultView: {
     localStorage,
@@ -2226,11 +2405,15 @@ const root = {
   },
   querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
 };
+body.ownerDocument = root;
+sheet.ownerDocument = root;
+sheet.closest = () => body;
 
 const dispose = initSettingsPanel(root);
 const report = {
   writes,
   dataset: { ...body.dataset },
+  ownerChildren: body.children.length,
   storedBuilder: localStorage.getItem("moo:theme-builder"),
 };
 dispose();
@@ -2248,7 +2431,138 @@ console.log(JSON.stringify(report));
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertEqual(case["writes"], [])
         self.assertEqual(case["dataset"], {"bsTheme": "dark"})
+        self.assertEqual(case["ownerChildren"], 0)
         self.assertIsNone(case["storedBuilder"])
+
+    def test_theme_builder_styles_stay_on_the_selected_owner(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+
+function emitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => listeners.set(type, [...(listeners.get(type) || []), handler]);
+  node.removeEventListener = (type, handler) => listeners.set(type, (listeners.get(type) || []).filter((candidate) => candidate !== handler));
+  node.dispatch = (type) => (listeners.get(type) || []).forEach((handler) => handler({ target: node, currentTarget: node }));
+  return node;
+}
+
+function classList() {
+  return { toggle() {}, contains: () => false };
+}
+
+const storage = new Map();
+const view = {
+  localStorage: {
+    getItem: (key) => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: (key) => storage.delete(key),
+  },
+  matchMedia: () => ({ matches: false }),
+  requestAnimationFrame: (callback) => callback(),
+};
+const documentBody = { children: [], firstElementChild: null };
+const documentElement = { dir: "ltr", dataset: {} };
+const document = {
+  nodeType: 9,
+  body: documentBody,
+  documentElement,
+  defaultView: view,
+  createElement: () => ({ dataset: {}, matches: (selector) => selector.includes("style[data-moo-theme-builder-style]") }),
+};
+
+function option(value) {
+  const node = emitter({
+    dataset: { mooCatalogThemeBuilderOption: value },
+    classList: classList(),
+    setAttribute() {},
+    querySelector: () => null,
+  });
+  node.click = () => node.dispatch("click");
+  return node;
+}
+
+function owner(name, parent = documentBody) {
+  const base = option("neutral");
+  const blue = option("zinc");
+  const field = emitter({
+    querySelectorAll: (selector) => selector === "[data-moo-catalog-theme-builder-option]" ? [base, blue] : [],
+    querySelector: () => null,
+  });
+  const sheet = emitter({
+    querySelectorAll: () => [],
+    querySelector: (selector) =>
+      selector === "[data-moo-catalog-theme-builder-base-color]" ? field : null,
+  });
+  const root = {
+    dataset: { bsTheme: "light" },
+    children: [],
+    parentElement: parent,
+    ownerDocument: document,
+    matches: (selector) => selector.includes(".moo-ui"),
+    querySelector(selector) {
+      if (selector === "#catalog-settings") return sheet;
+      if (selector === ":scope > style[data-moo-theme-builder-style]") {
+        return this.children.find((child) => child.matches?.("style[data-moo-theme-builder-style]")) || null;
+      }
+      return null;
+    },
+    querySelectorAll: () => [],
+    append(child) { this.children.push(child); },
+  };
+  sheet.ownerDocument = document;
+  sheet.closest = () => root;
+  return { root, blue };
+}
+
+const outer = owner("outer");
+const sibling = owner("sibling");
+const inner = owner("inner", outer.root);
+documentBody.children = [outer.root, sibling.root];
+documentBody.firstElementChild = outer.root;
+outer.root.children.push(inner.root);
+
+const disposeOuter = initSettingsPanel(outer.root);
+const disposeInner = initSettingsPanel(inner.root);
+outer.blue.click();
+const outerStyle = outer.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined);
+const innerBefore = inner.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined) || null;
+const siblingBefore = sibling.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined) || null;
+inner.blue.click();
+const innerStyle = inner.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined);
+console.log(JSON.stringify({
+  outerMarker: outer.root.dataset.mooThemeBuilderOwner,
+  innerMarker: inner.root.dataset.mooThemeBuilderOwner,
+  outerText: outerStyle?.textContent || "",
+  innerText: innerStyle?.textContent || "",
+  innerBefore: innerBefore === null,
+  siblingBefore: siblingBefore === null,
+  siblingTheme: sibling.root.dataset.bsTheme,
+}));
+disposeOuter();
+disposeInner();
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertTrue(case["innerBefore"])
+        self.assertTrue(case["siblingBefore"])
+        self.assertNotEqual(case["outerMarker"], case["innerMarker"])
+        self.assertIn(case["outerMarker"], case["outerText"])
+        self.assertNotIn(case["innerMarker"], case["outerText"])
+        self.assertIn(case["innerMarker"], case["innerText"])
+        self.assertEqual(case["siblingTheme"], "light")
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(

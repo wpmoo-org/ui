@@ -297,14 +297,35 @@
     }
   }
 
-  function currentTheme() {
-    var theme = document.documentElement.getAttribute("data-bs-theme");
+  function ensureDemoOwner() {
+    var owner = document.querySelector('.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]');
+    var children;
+
+    if (owner) {
+      return owner;
+    }
+
+    owner = document.createElement("div");
+    owner.className = "moo-ui";
+    owner.setAttribute("data-bs-theme", "light");
+    children = Array.from(document.body.childNodes);
+    document.body.appendChild(owner);
+    children.forEach(function (child) {
+      if (child !== owner) {
+        owner.appendChild(child);
+      }
+    });
+    return owner;
+  }
+
+  function currentTheme(owner) {
+    var theme = owner && owner.getAttribute("data-bs-theme");
     return theme === "dark" ? "dark" : "light";
   }
 
-  function syncThemeToggle() {
-    var theme = currentTheme();
-    document.querySelectorAll("[data-moo-codepen-theme-toggle]").forEach(function (toggle) {
+  function syncThemeToggle(owner) {
+    var theme = currentTheme(owner);
+    owner.querySelectorAll("[data-moo-codepen-theme-toggle]").forEach(function (toggle) {
       toggle.setAttribute(
         "aria-label",
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -315,20 +336,20 @@
     });
   }
 
-  function setTheme(theme) {
+  function setTheme(owner, theme) {
     var normalized = theme === "dark" ? "dark" : "light";
-    document.documentElement.setAttribute("data-bs-theme", normalized);
+    owner.setAttribute("data-bs-theme", normalized);
     storageSet(THEME_STORAGE_KEY, normalized);
-    syncThemeToggle();
+    syncThemeToggle(owner);
   }
 
-  function createActions() {
+  function createActions(owner) {
     var actions;
     var themeToggle;
     var storedTheme;
 
-    if (document.querySelector(".moo-codepen-actions")) {
-      syncThemeToggle();
+    if (owner.querySelector(".moo-codepen-actions")) {
+      syncThemeToggle(owner);
       return;
     }
 
@@ -347,25 +368,25 @@
       "</a>"
     ].join("\n");
 
-    document.body.appendChild(actions);
+    owner.appendChild(actions);
     themeToggle = actions.querySelector("[data-moo-codepen-theme-toggle]");
     if (themeToggle) {
       themeToggle.addEventListener("click", function () {
-        setTheme(currentTheme() === "dark" ? "light" : "dark");
+        setTheme(owner, currentTheme(owner) === "dark" ? "light" : "dark");
       });
     }
 
     storedTheme = storageGet(THEME_STORAGE_KEY);
     if (storedTheme === "dark" || storedTheme === "light") {
-      setTheme(storedTheme);
+      setTheme(owner, storedTheme);
       return;
     }
 
-    syncThemeToggle();
+    syncThemeToggle(owner);
   }
 
-  function createSignature() {
-    if (document.querySelector(".moo-codepen-signature")) {
+  function createSignature(owner) {
+    if (owner.querySelector(".moo-codepen-signature")) {
       return;
     }
 
@@ -388,7 +409,7 @@
       "</p>"
     ].join("\n");
 
-    document.body.appendChild(signature);
+    owner.appendChild(signature);
   }
 
   function componentPopoverContent(component) {
@@ -416,7 +437,6 @@
     trigger.textContent = component.label;
     trigger.setAttribute("data-bs-toggle", "popover");
     trigger.setAttribute("data-bs-trigger", "focus");
-    trigger.setAttribute("data-bs-container", "body");
     trigger.setAttribute("data-bs-placement", "top");
     trigger.setAttribute("data-bs-html", "true");
     trigger.setAttribute("data-bs-content", componentPopoverContent(component));
@@ -437,8 +457,8 @@
     });
   }
 
-  function createFooter(components) {
-    if (!components.length || document.querySelector(".moo-codepen-footer")) {
+  function createFooter(owner, components) {
+    if (!components.length || owner.querySelector(".moo-codepen-footer")) {
       return;
     }
 
@@ -450,7 +470,7 @@
     appendComponentList(text, components);
     text.appendChild(document.createTextNode(components.length === 1 ? " component." : " components."));
     footer.appendChild(text);
-    document.body.appendChild(footer);
+    owner.appendChild(footer);
   }
 
   function hasBootstrapPlugins(names) {
@@ -554,45 +574,45 @@
     }
   }
 
-  function initializePopovers(root) {
+  function initializePopovers(owner) {
     withBootstrap(["Popover"], function () {
       var Popover = window.bootstrap && window.bootstrap.Popover;
 
-      root.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (element) {
-        Popover.getOrCreateInstance(element);
+      owner.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (element) {
+        Popover.getOrCreateInstance(element, { container: owner });
       });
     });
   }
 
-  function initializeToasts(root) {
+  function initializeToasts(root, owner) {
     if (
-      !root.body ||
-      root.body.dataset.mooCodepenToastsReady === "true" ||
-      root.body.dataset.mooCodepenToastsQueued === "true"
+      !owner ||
+      owner.dataset.mooCodepenToastsReady === "true" ||
+      owner.dataset.mooCodepenToastsQueued === "true"
     ) {
       return;
     }
 
-    root.body.dataset.mooCodepenToastsQueued = "true";
+    owner.dataset.mooCodepenToastsQueued = "true";
 
     withBootstrap(["Toast"], function () {
-      wireToasts(root);
+      wireToasts(root, owner);
     }, function () {
-      if (root.body) {
-        delete root.body.dataset.mooCodepenToastsQueued;
+      if (owner) {
+        delete owner.dataset.mooCodepenToastsQueued;
       }
     });
   }
 
-  function wireToasts(root) {
+  function wireToasts(root, owner) {
     var Toast = window.bootstrap && window.bootstrap.Toast;
 
-    if (!Toast || !root.body) {
+    if (!Toast || !owner) {
       return;
     }
 
-    delete root.body.dataset.mooCodepenToastsQueued;
-    root.body.dataset.mooCodepenToastsReady = "true";
+    delete owner.dataset.mooCodepenToastsQueued;
+    owner.dataset.mooCodepenToastsReady = "true";
 
     var toastSequence = 0;
     var toastStackVisibleLimit = 3;
@@ -626,7 +646,7 @@
       container.className = sourceContainer.className;
       container.dataset.toastStack = key;
       container.dataset.mooCodepenToastStack = "shared";
-      root.body.appendChild(container);
+      owner.appendChild(container);
       sharedToastStacks.set(key, container);
       return container;
     }
@@ -1120,31 +1140,32 @@
   }
 
   function render(config) {
-    var normalized = normalizeConfig(config || inferCodePenConfig(document));
+    var owner = ensureDemoOwner();
+    var normalized = normalizeConfig(config || inferCodePenConfig(owner));
 
     if (normalized.kind !== "component" && normalized.kind !== "example") {
       return;
     }
 
-    document.body.classList.add("moo-codepen-demo");
-    document.body.classList.remove(
+    owner.classList.add("moo-codepen-demo");
+    owner.classList.remove(
       "moo-codepen-component-demo",
       "moo-codepen-example-demo",
       "moo-codepen-has-branding"
     );
-    createActions();
-    createSignature();
+    createActions(owner);
+    createSignature(owner);
 
     if (normalized.kind === "component") {
-      document.body.classList.add("moo-codepen-component-demo", "moo-codepen-has-branding");
-      createFooter(normalized.components);
+      owner.classList.add("moo-codepen-component-demo", "moo-codepen-has-branding");
+      createFooter(owner, normalized.components);
     } else {
-      document.body.classList.add("moo-codepen-example-demo");
+      owner.classList.add("moo-codepen-example-demo");
     }
 
-    initializePopovers(document);
-    initializeToasts(document);
-    initializeComponentRuntimes(normalized, document);
+    initializePopovers(owner);
+    initializeToasts(document, owner);
+    initializeComponentRuntimes(normalized, owner);
   }
 
   window.MooCodePenDemo = {

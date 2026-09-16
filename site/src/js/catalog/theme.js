@@ -1,95 +1,108 @@
+import {
+  findThemeOwner,
+  findThemeOwners,
+  ownerStorageKey,
+  readOwnerPreference,
+  resolveOwnerDirection,
+  resolveOwnerTheme,
+  setOwnerDirection,
+  setOwnerTheme,
+} from "../../../../src/js/theme-owner.js";
+
 const states = new WeakMap();
-const THEME_STORAGE_KEY = "moo:theme";
 
-function prefersDark(view) {
-  return Boolean(view.matchMedia?.("(prefers-color-scheme: dark)").matches);
+function ownerView(owner, root) {
+  return (
+    owner?.ownerDocument?.defaultView ||
+    root?.defaultView ||
+    root?.ownerDocument?.defaultView
+  );
 }
 
-function resolveTheme(preference, view) {
-  if (preference === "system") {
-    return prefersDark(view) ? "dark" : "light";
+function writeOwnerPreference(owner, axis, value, view) {
+  const key = ownerStorageKey(owner, axis);
+  if (!key) return;
+
+  try {
+    view?.localStorage?.setItem(key, value);
+  } catch (_) {
+    /* Storage can be unavailable in restricted browsing contexts. */
   }
-  return preference === "dark" ? "dark" : "light";
 }
 
+function ownerButtons(root, owner) {
+  return Array.from(
+    root?.querySelectorAll?.("[data-moo-theme], .moo-catalog__theme-toggle") || []
+  ).filter((button) => findThemeOwner(button) === owner);
+}
+
+function updateThemeButtons(buttons, theme) {
+  buttons.forEach((button) => {
+    button.setAttribute?.(
+      "aria-label",
+      theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+    );
+  });
+}
+
+function applyOwnerTheme(owner, theme) {
+  if (owner?.dataset?.bsTheme !== theme) {
+    setOwnerTheme(owner, theme);
+  }
+}
+
+// Theme preference lives on the resolved .moo-ui owner, never on html or body.
+// A full document owner may use the legacy default key; embedded owners must
+// opt into their own key, so unrelated host fragments never share a preference.
 export function initTheme(root = document) {
   if (states.has(root)) {
     return states.get(root);
   }
 
-  const documentElement = root.documentElement || root.ownerDocument?.documentElement;
-  const themeElement = root.body || root.ownerDocument?.body || documentElement;
-  const view = root.defaultView || root.ownerDocument?.defaultView;
-  const themeButton = root.querySelector(
-    "[data-moo-theme], .moo-catalog__theme-toggle"
-  );
   const listeners = [];
   const listen = (target, type, handler) => {
-    target?.addEventListener(type, handler);
-    if (target) {
-      listeners.push({ target, type, handler });
-    }
+    target?.addEventListener?.(type, handler);
+    if (target) listeners.push({ target, type, handler });
   };
 
-  // The stored preference is the single source of truth (the settings panel
-  // writes the same key), so the OS-color listener re-reads it each time
-  // instead of tracking its own copy -- both surfaces stay in sync without
-  // shared state.
-  const readPreference = () => {
-    try {
-      const stored = view.localStorage.getItem(THEME_STORAGE_KEY);
-      if (stored === "dark" || stored === "light" || stored === "system") {
-        return stored;
-      }
-    } catch (_) {
-      /* Storage can be unavailable in restricted browsing contexts. */
-    }
-    // The default is System: follow the OS preference until the visitor
-    // chooses an explicit theme.
-    return "system";
-  };
+  for (const owner of findThemeOwners(root)) {
+    const view = ownerView(owner, root);
+    const buttons = ownerButtons(root, owner);
+    const applyPreference = (preference) => {
+      const theme = resolveOwnerTheme(owner, preference, view);
+      applyOwnerTheme(owner, theme);
+      updateThemeButtons(buttons, theme);
+      return theme;
+    };
 
-  const updateThemeButton = () => {
-    const theme = themeElement.dataset.bsTheme || "light";
-    themeButton?.setAttribute(
-      "aria-label",
-      theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+    applyPreference(readOwnerPreference(owner, "theme"));
+    const direction = resolveOwnerDirection(
+      owner,
+      readOwnerPreference(owner, "direction")
     );
-  };
-
-  const applyPreference = (preference) => {
-    const nextTheme = resolveTheme(preference, view);
-    if (themeElement.dataset.bsTheme !== nextTheme) {
-      themeElement.dataset.bsTheme = nextTheme;
+    if (direction) {
+      setOwnerDirection(owner, direction);
     }
-    updateThemeButton();
-  };
 
-  applyPreference(readPreference());
+    const media = view?.matchMedia?.("(prefers-color-scheme: dark)");
+    listen(media, "change", () => {
+      if (readOwnerPreference(owner, "theme") === "system") {
+        applyPreference("system");
+      }
+    });
 
-  const media = view.matchMedia ? view.matchMedia("(prefers-color-scheme: dark)") : null;
-  listen(media, "change", () => {
-    if (readPreference() === "system") {
-      themeElement.dataset.bsTheme = resolveTheme("system", view);
-      updateThemeButton();
-    }
-  });
+    buttons.forEach((button) => {
+      listen(button, "click", () => {
+        const nextTheme = owner.dataset?.bsTheme === "dark" ? "light" : "dark";
+        writeOwnerPreference(owner, "theme", nextTheme, view);
+        applyPreference(nextTheme);
+      });
+    });
+  }
 
-  listen(themeButton, "click", () => {
-    const theme = themeElement.dataset.bsTheme === "dark" ? "light" : "dark";
-    themeElement.dataset.bsTheme = theme;
-    try {
-      view.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch (_) {
-      /* Storage is best-effort. */
-    }
-    updateThemeButton();
-  });
-
-  updateThemeButton();
   const dispose = () => {
     listeners.forEach(({ target, type, handler }) => {
-      target.removeEventListener(type, handler);
+      target.removeEventListener?.(type, handler);
     });
     states.delete(root);
   };

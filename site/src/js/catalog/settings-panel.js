@@ -4,12 +4,21 @@ import {
   normalizeThemeBuilderState,
   resolveThemeBuilderTokens,
 } from "./theme-builder-schema.js";
+import {
+  findThemeOwner,
+  isDocumentOwner,
+  ownerStorageKey,
+  readOwnerPreference,
+  resolveOwnerDirection,
+  resolveOwnerTheme,
+  setOwnerDirection,
+  setOwnerTheme,
+} from "../../../../src/js/theme-owner.js";
 
 const states = new WeakMap();
-const THEME_STORAGE_KEY = "moo:theme";
-const DIRECTION_STORAGE_KEY = "moo:direction";
 const SIDEBAR_STORAGE_KEY = "moo:sidebar-variant";
 const BUILDER_STORAGE_KEY = "moo:theme-builder";
+let themeBuilderOwnerSequence = 0;
 
 const BUILDER_SELECTORS = {
   baseColor: "[data-moo-catalog-theme-builder-base-color]",
@@ -29,13 +38,6 @@ const BUILDER_OPTION_SELECTOR = "[data-moo-catalog-theme-builder-option]";
 const BUILDER_VALUE_SELECTOR = "[data-moo-catalog-theme-builder-value]";
 const BUILDER_PREVIEW_KEYS = new Set(["baseColor", "themeColor", "chartColor"]);
 
-function effectiveTheme(preference, view) {
-  if (preference === "system") {
-    return view.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  return preference === "dark" ? "dark" : "light";
-}
-
 function normalizedBuilderPreference(candidate = {}) {
   return normalizeThemeBuilderState(candidate);
 }
@@ -46,16 +48,81 @@ function isDefaultBuilderPreference(preference) {
   );
 }
 
-function applyTokenStyle(style, tokenNames, tokenValues = {}) {
-  if (!style) return;
+function generatedOwnerMarker(owner, view) {
+  const existing = owner?.dataset?.mooThemeBuilderOwner;
+  if (existing) return existing;
+
+  const identifier =
+    view?.crypto?.randomUUID?.() ||
+    globalThis.crypto?.randomUUID?.() ||
+    `local-${++themeBuilderOwnerSequence}`;
+  const marker = `moo-owner-${identifier}`;
+  owner.dataset.mooThemeBuilderOwner = marker;
+  return marker;
+}
+
+function findThemeBuilderStyle(owner) {
+  let style = owner?.querySelector?.(
+    ":scope > style[data-moo-theme-builder-style]"
+  );
+  if (!style) {
+    style = Array.from(owner?.children || []).find((child) =>
+      child.matches?.("style[data-moo-theme-builder-style]")
+    );
+  }
+  return style || null;
+}
+
+function ensureThemeBuilderStyle(owner) {
+  let style = findThemeBuilderStyle(owner);
+  if (style || !owner?.ownerDocument?.createElement) return style || null;
+
+  style = owner.ownerDocument.createElement("style");
+  style.dataset.mooThemeBuilderStyle = "";
+  owner.append(style);
+  return style;
+}
+
+function applyTokenStyle(owner, view, tokenNames, tokenValues = {}) {
   const allowedTokens = new Set(tokenNames);
   const declarations = Object.entries(tokenValues)
     .filter(([token]) => allowedTokens.has(token))
     .map(([token, value]) => `  ${token}: ${value};`)
     .join("\n");
-  style.textContent = declarations
-    ? `body[data-bs-theme] {\n${declarations}\n}`
-    : "";
+  if (!declarations) {
+    const existing = findThemeBuilderStyle(owner);
+    if (existing) existing.textContent = "";
+    return;
+  }
+
+  const style = ensureThemeBuilderStyle(owner);
+  if (!style) return;
+
+  const marker = generatedOwnerMarker(owner, view);
+  const escape = view?.CSS?.escape || globalThis.CSS?.escape;
+  const escapedMarker = escape ? escape(marker) : marker;
+  style.textContent =
+    `[data-moo-theme-builder-owner="${escapedMarker}"] {\n${declarations}\n}`;
+}
+
+function writeOwnerPreference(owner, axis, value, view) {
+  const key = ownerStorageKey(owner, axis);
+  if (!key) return;
+  try {
+    view?.localStorage?.setItem(key, value);
+  } catch (_) {
+    /* Storage can be unavailable in restricted browsing contexts. */
+  }
+}
+
+function removeOwnerPreference(owner, axis, view) {
+  const key = ownerStorageKey(owner, axis);
+  if (!key) return;
+  try {
+    view?.localStorage?.removeItem(key);
+  } catch (_) {
+    /* Storage can be unavailable in restricted browsing contexts. */
+  }
 }
 
 // Global settings panel (Phase 6): wires the System/Light/Dark theme radios
@@ -73,11 +140,18 @@ export function initSettingsPanel(root = document) {
   const listeners = [];
   const cleanups = [];
 
-  if (sheet) {
-    const documentElement = root.documentElement || root.ownerDocument?.documentElement;
-    const themeElement = root.body || root.ownerDocument?.body || documentElement;
-    const view = root.defaultView || root.ownerDocument?.defaultView;
-    const themeBuilderTokenStyle = root.querySelector("#moo-theme-builder-tokens");
+  const owner = sheet && findThemeOwner(sheet);
+
+  if (sheet && owner) {
+    const view =
+      owner.ownerDocument?.defaultView ||
+      root.defaultView ||
+      root.ownerDocument?.defaultView;
+    const builderStorageKey = isDocumentOwner(owner)
+      ? BUILDER_STORAGE_KEY
+      : null;
+    const serverTheme = owner.dataset.bsTheme;
+    const serverDirection = resolveOwnerDirection(owner, null) || "ltr";
     const themeInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-theme]")
     );
@@ -121,36 +195,26 @@ export function initSettingsPanel(root = document) {
     // and aria-label in step with the effective theme (which resolves
     // "system" to the OS preference) when the panel changes it.
     const syncThemeButton = () => {
-      const button = root.querySelector(
-        "[data-moo-theme], .moo-catalog__theme-toggle"
-      );
-      const theme = themeElement.dataset.bsTheme || "light";
-      button?.setAttribute(
-        "aria-label",
-        theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-      );
+      const theme = owner.dataset.bsTheme || "light";
+      Array.from(
+        root.querySelectorAll?.(
+          "[data-moo-theme], .moo-catalog__theme-toggle"
+        ) || []
+      )
+        .filter((button) => findThemeOwner(button) === owner)
+        .forEach((button) => {
+          button.setAttribute?.(
+            "aria-label",
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          );
+        });
     };
 
-    const readPreference = () => {
-      try {
-        const stored = view.localStorage.getItem(THEME_STORAGE_KEY);
-        if (stored === "dark" || stored === "light" || stored === "system") {
-          return stored;
-        }
-      } catch (_) {
-        /* Storage can be unavailable in restricted browsing contexts. */
-      }
-      // The default is System: follow the OS preference.
-      return "system";
-    };
+    const readPreference = () => readOwnerPreference(owner, "theme") || "system";
 
     const applyPreference = (preference) => {
-      themeElement.dataset.bsTheme = effectiveTheme(preference, view);
-      try {
-        view.localStorage.setItem(THEME_STORAGE_KEY, preference);
-      } catch (_) {
-        /* Storage is best-effort. */
-      }
+      setOwnerTheme(owner, resolveOwnerTheme(owner, preference, view));
+      writeOwnerPreference(owner, "theme", preference, view);
       themeInputs.forEach((input) => {
         input.checked = input.value === preference;
       });
@@ -204,8 +268,13 @@ export function initSettingsPanel(root = document) {
       if (builderPreference) {
         return builderPreference;
       }
+      if (!builderStorageKey) {
+        builderPreference = normalizedBuilderPreference();
+        builderPreferenceHasOverrides = false;
+        return builderPreference;
+      }
       try {
-        const raw = view.localStorage.getItem(BUILDER_STORAGE_KEY);
+        const raw = view.localStorage.getItem(builderStorageKey);
         const parsed = raw ? JSON.parse(raw) : null;
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
           const normalized = normalizedBuilderPreference(parsed);
@@ -228,9 +297,10 @@ export function initSettingsPanel(root = document) {
     };
 
     const persistBuilderPreference = (preference) => {
+      if (!builderStorageKey) return;
       try {
         view.localStorage.setItem(
-          BUILDER_STORAGE_KEY,
+          builderStorageKey,
           JSON.stringify(preference)
         );
       } catch (_) {
@@ -239,20 +309,21 @@ export function initSettingsPanel(root = document) {
     };
 
     const removeBuilderPreferenceStorage = () => {
+      if (!builderStorageKey) return;
       try {
-        view.localStorage.removeItem(BUILDER_STORAGE_KEY);
+        view.localStorage.removeItem(builderStorageKey);
       } catch (_) {
         /* Storage is best-effort. */
       }
     };
 
     const withBuilderTransitionSuppressed = (work) => {
-      themeElement.dataset.mooCatalogThemeBuilderUpdating = "true";
+      owner.dataset.mooCatalogThemeBuilderUpdating = "true";
       builderTransitionGeneration += 1;
       const generation = builderTransitionGeneration;
       const clear = () => {
         if (generation === builderTransitionGeneration) {
-          delete themeElement.dataset.mooCatalogThemeBuilderUpdating;
+          delete owner.dataset.mooCatalogThemeBuilderUpdating;
         }
       };
       const afterPaint =
@@ -283,18 +354,19 @@ export function initSettingsPanel(root = document) {
     const applyBuilderTokens = (preference) => {
       Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
         if (preference[key] === THEME_BUILDER_DEFAULTS[key]) {
-          delete themeElement.dataset[datasetKey];
+          delete owner.dataset[datasetKey];
         } else {
-          themeElement.dataset[datasetKey] = preference[key];
+          owner.dataset[datasetKey] = preference[key];
         }
       });
       applyTokenStyle(
-        themeBuilderTokenStyle,
+        owner,
+        view,
         PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
         isDefaultBuilderPreference(preference)
           ? {}
           : resolveThemeBuilderTokens(preference, {
-              theme: themeElement.dataset.bsTheme,
+              theme: owner.dataset.bsTheme,
               surface: "catalog",
             })
       );
@@ -403,33 +475,22 @@ export function initSettingsPanel(root = document) {
           syncThemeButton();
         }
       });
-      observer.observe(themeElement, {
+      observer.observe(owner, {
         attributes: true,
         attributeFilter: ["data-bs-theme"],
       });
       cleanups.push(() => observer.disconnect());
     }
 
-    // Phase 7: the LTR/RTL picker flips the document direction live and
-    // persists it under moo:direction so it survives navigation.
-    const readDirection = () => {
-      try {
-        const stored = view.localStorage.getItem(DIRECTION_STORAGE_KEY);
-        if (stored === "ltr" || stored === "rtl") {
-          return stored;
-        }
-      } catch (_) {
-        /* Storage can be unavailable in restricted browsing contexts. */
-      }
-      return "ltr";
-    };
+    // The document owner writes html[dir]; embedded owners write only their
+    // own dir attribute through the shared resolver contract.
+    const readDirection = () =>
+      readOwnerPreference(owner, "direction") ||
+      resolveOwnerDirection(owner, null) ||
+      "ltr";
     const applyDirection = (direction) => {
-      documentElement.dir = direction;
-      try {
-        view.localStorage.setItem(DIRECTION_STORAGE_KEY, direction);
-      } catch (_) {
-        /* Storage is best-effort. */
-      }
+      setOwnerDirection(owner, direction);
+      writeOwnerPreference(owner, "direction", direction, view);
       directionInputs.forEach((input) => {
         input.checked = input.value === direction;
       });
@@ -478,21 +539,21 @@ export function initSettingsPanel(root = document) {
     });
 
     listen(reset, "click", () => {
+      removeOwnerPreference(owner, "theme", view);
+      removeOwnerPreference(owner, "direction", view);
       try {
-        view.localStorage.removeItem(THEME_STORAGE_KEY);
-        view.localStorage.removeItem(DIRECTION_STORAGE_KEY);
         view.localStorage.removeItem(SIDEBAR_STORAGE_KEY);
-        view.localStorage.removeItem(BUILDER_STORAGE_KEY);
+        if (builderStorageKey) view.localStorage.removeItem(builderStorageKey);
       } catch (_) {
         /* Storage is best-effort. */
       }
-      themeElement.dataset.bsTheme = effectiveTheme("system", view);
-      documentElement.dir = "ltr";
+      setOwnerTheme(owner, serverTheme === "dark" ? "dark" : "light");
+      setOwnerDirection(owner, serverDirection);
       themeInputs.forEach((input) => {
         input.checked = input.value === "system";
       });
       directionInputs.forEach((input) => {
-        input.checked = input.value === "ltr";
+        input.checked = input.value === serverDirection;
       });
       if (sidebar) {
         sidebar.dataset.variant = "sidebar";
