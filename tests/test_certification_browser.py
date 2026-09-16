@@ -134,6 +134,53 @@ def theme_owner(page):
     ).first
 
 
+def observe_modal_opening(page, dialog_selector: str, trigger_selector: str):
+    """Capture Modal state well before its shared 300ms visual motion ends."""
+    return page.evaluate(
+        """
+        ({ dialogSelector, triggerSelector }) => new Promise(resolve => {
+          const dialog = document.querySelector(dialogSelector);
+          const trigger = document.querySelector(triggerSelector);
+          let firstFrame = null;
+          let shown = false;
+          const finish = () => {
+            if (shown && firstFrame) {
+              resolve(firstFrame);
+            }
+          };
+
+          dialog.addEventListener("shown.bs.modal", () => {
+            shown = true;
+            finish();
+          }, { once: true });
+          trigger.click();
+          // This budget is comfortably below the shared .3s motion token but
+          // avoids depending on the browser's requestAnimationFrame cadence.
+          setTimeout(() => {
+            const backdrop = document.querySelector(".modal-backdrop");
+            const visual = backdrop
+              ? getComputedStyle(backdrop, "::before")
+              : null;
+            firstFrame = {
+              dialogShown: dialog.classList.contains("show"),
+              backdropShown: Boolean(backdrop?.classList.contains("show")),
+              backdropTransition: backdrop
+                ? getComputedStyle(backdrop).transition
+                : null,
+              visualAnimationName: visual?.animationName ?? null,
+              visualAnimationDuration: visual?.animationDuration ?? null,
+            };
+            finish();
+          }, 80);
+        })
+        """,
+        {
+            "dialogSelector": dialog_selector,
+            "triggerSelector": trigger_selector,
+        },
+    )
+
+
 class CertificationBrowserHarnessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -368,6 +415,110 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 ).count(),
                 0,
             )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_theme_builder_keeps_compact_horizontal_control_rows(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script("localStorage.clear()")
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/alert-dialog/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            page.locator("[data-bs-target='#catalog-settings']").click()
+            panel = page.locator("#catalog-settings")
+            expect(panel).to_have_class(re.compile(r"\bshow\b"))
+
+            row = page.locator(
+                "[data-moo-catalog-theme-builder-base-color]"
+            ).locator("..")
+            geometry = row.evaluate(
+                """
+                (field) => {
+                  const label = field.querySelector(".form-label");
+                  const trigger = field.querySelector(
+                    ".moo-settings-panel__dropdown-trigger"
+                  );
+                  const fieldRect = field.getBoundingClientRect();
+                  const labelRect = label.getBoundingClientRect();
+                  const triggerRect = trigger.getBoundingClientRect();
+                  return {
+                    display: getComputedStyle(field).display,
+                    fieldWidth: fieldRect.width,
+                    labelCenterY: labelRect.top + labelRect.height / 2,
+                    triggerCenterY: triggerRect.top + triggerRect.height / 2,
+                    triggerWidth: triggerRect.width,
+                  };
+                }
+                """
+            )
+
+            self.assertEqual(geometry["display"], "grid")
+            self.assertAlmostEqual(
+                geometry["labelCenterY"], geometry["triggerCenterY"], delta=2
+            )
+            self.assertLess(geometry["triggerWidth"], geometry["fieldWidth"] - 24)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_theme_builder_selection_overrides_scoped_theme_tokens(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script("localStorage.clear()")
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/alert-dialog/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            page.locator("[data-bs-target='#catalog-settings']").click()
+            expect(page.locator("#catalog-settings")).to_have_class(
+                re.compile(r"\bshow\b")
+            )
+            page.locator("#moo-theme-builder-theme-color").click()
+            page.locator(
+                "[data-moo-catalog-theme-builder-theme-color] "
+                "[data-moo-catalog-theme-builder-option='blue']"
+            ).click()
+
+            tokens = page.evaluate(
+                """
+                () => {
+                  const owner = document.querySelector(
+                    '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+                  );
+                  const style = owner.querySelector(
+                    ':scope > style[data-moo-theme-builder-style]'
+                  );
+                  const triggerSwatch = document.querySelector(
+                    '#moo-theme-builder-theme-color '
+                    + '.moo-settings-panel__dropdown-trigger-swatch'
+                  );
+                  return {
+                    primary: getComputedStyle(owner)
+                      .getPropertyValue("--bs-primary")
+                      .trim(),
+                    styleText: style?.textContent || "",
+                    triggerSwatchColor: getComputedStyle(triggerSwatch).backgroundColor,
+                  };
+                }
+                """
+            )
+
+            self.assertEqual(tokens["primary"], "rgb(6, 111, 209)")
+            self.assertEqual(tokens["triggerSwatchColor"], "rgb(6, 111, 209)")
+            self.assertIn("--bs-primary: rgb(6, 111, 209);", tokens["styleText"])
             evidence.assert_clean()
         finally:
             context.close()
@@ -2050,7 +2201,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 page.keyboard.press("Escape")
                 expect(page.locator("body")).to_have_attribute("data-sheet-hidden", "true")
                 expect(trigger).to_be_focused()
-                self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
 
                 page.evaluate(
                     """
@@ -2343,6 +2494,63 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 )
                 evidence.assert_clean()
                 context.close()
+
+    def test_modal_visual_backdrop_starts_without_delaying_native_panels(self) -> None:
+        motion_case = BrowserCase(
+            name="motion-light-ltr",
+            viewport={"width": 1040, "height": 844},
+            color_scheme="light",
+            direction="ltr",
+        )
+        fixtures = (
+            (
+                "dialog",
+                "#certification-dialog",
+                "#open-certification-dialog",
+            ),
+            (
+                "alert-dialog",
+                "#certification-alert-dialog",
+                "#open-certification-alert-dialog",
+            ),
+        )
+
+        for fixture, dialog_selector, trigger_selector in fixtures:
+            with self.subTest(fixture=fixture):
+                context = self.browser.new_context(
+                    viewport=motion_case.viewport,
+                    color_scheme=motion_case.color_scheme,
+                    reduced_motion="no-preference",
+                    locale="en-US",
+                )
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/{fixture}.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, motion_case)
+
+                    opening = observe_modal_opening(
+                        page,
+                        dialog_selector,
+                        trigger_selector,
+                    )
+
+                    self.assertTrue(opening["dialogShown"], opening)
+                    self.assertTrue(opening["backdropShown"], opening)
+                    self.assertEqual(opening["backdropTransition"], "none")
+                    self.assertEqual(
+                        opening["visualAnimationName"],
+                        "moo-overlay-backdrop-enter",
+                    )
+                    self.assertEqual(opening["visualAnimationDuration"], "0.3s")
+                    evidence.assert_clean()
+                finally:
+                    context.close()
 
     def test_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
         expected_version = os.environ.get(

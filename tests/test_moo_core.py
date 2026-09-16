@@ -208,13 +208,15 @@ class MooCoreTests(CatalogTestCase):
         )
 
         for knob in (
+            "$moo-overlay-motion-duration: .3s !default;",
             "$moo-overlay-backdrop-opacity: 1 !default;",
             "$moo-overlay-backdrop-bg: color-mix(in srgb, #0a0a0a 10%, transparent) !default;",
-            "$moo-overlay-backdrop-filter: blur(8px) !default;",
+            "$moo-overlay-backdrop-filter: blur(6px) !default;",
         ):
             self.assertIn(knob, settings)
 
         for token in (
+            "--moo-overlay-motion-duration: #{$moo-overlay-motion-duration}",
             "--moo-overlay-backdrop-opacity: #{$moo-overlay-backdrop-opacity}",
             "--moo-overlay-backdrop-bg: #{$moo-overlay-backdrop-bg}",
             "--moo-overlay-backdrop-filter: #{$moo-overlay-backdrop-filter}",
@@ -225,16 +227,29 @@ class MooCoreTests(CatalogTestCase):
 
         self.assertIn(".modal-backdrop", overlay_layer)
         self.assertIn(".offcanvas-backdrop", overlay_layer)
+        self.assertIn("@mixin moo-overlay-backdrop-appearance", overlay_layer)
         self.assertIn("--#{$prefix}backdrop-opacity: var(", overlay_layer)
         self.assertIn("--moo-overlay-backdrop-opacity", overlay_layer)
-        self.assertIn("background-color: var(", overlay_layer)
+        self.assertIn("color: transparent;", overlay_layer)
+        self.assertIn("background-color: transparent;", overlay_layer)
         self.assertIn("--moo-overlay-backdrop-bg", overlay_layer)
-        self.assertIn("-webkit-backdrop-filter: var(", overlay_layer)
-        self.assertIn("backdrop-filter: var(", overlay_layer)
+        self.assertIn("&::before", overlay_layer)
+        self.assertIn("-webkit-backdrop-filter: blur(0);", overlay_layer)
+        self.assertIn("backdrop-filter: blur(0);", overlay_layer)
         self.assertIn("--moo-overlay-backdrop-filter", overlay_layer)
         self.assertIn(".modal-backdrop.show", overlay_layer)
         self.assertIn(".offcanvas-backdrop.show", overlay_layer)
+        self.assertIn("transition: none;", overlay_layer)
+        self.assertIn(
+            "transition: color var(--moo-overlay-motion-duration",
+            overlay_layer,
+        )
+        self.assertIn("animation: moo-overlay-backdrop-enter var(", overlay_layer)
+        self.assertIn("animation: moo-overlay-backdrop-exit var(", overlay_layer)
+        self.assertIn("@keyframes moo-overlay-backdrop-enter", overlay_layer)
+        self.assertIn("@keyframes moo-overlay-backdrop-exit", overlay_layer)
         self.assertIn("opacity: var(--moo-overlay-backdrop-opacity", overlay_layer)
+        self.assertIn("@mixin moo-overlay-backdrop-reduced-motion", overlay_layer)
         self.assertNotIn("body:has(.modal.show)", overlay_layer)
         self.assertNotIn("offcanvas.sheet.show", overlay_layer)
 
@@ -245,16 +260,17 @@ class MooCoreTests(CatalogTestCase):
         self.assertNotIn(".offcanvas-backdrop", state_layer)
         self.assertNotIn("backdrop-filter", state_layer)
 
-        core_css = CORE_CSS.read_text(encoding="utf-8")
+        core_css = self._build_and_read_core()
         self.assertIn(".modal-backdrop", core_css)
         self.assertIn(".offcanvas-backdrop", core_css)
-        self.assertIn("--moo-overlay-backdrop-filter: blur(8px)", core_css)
+        self.assertIn("--moo-overlay-motion-duration: 0.3s", core_css)
+        self.assertIn("--moo-overlay-backdrop-filter: blur(6px)", core_css)
         self.assertIn(
             "--bs-backdrop-opacity: var(--moo-overlay-backdrop-opacity, 1)",
             core_css,
         )
         self.assertIn(
-            "background-color: var(--moo-overlay-backdrop-bg, color-mix(in srgb, #0a0a0a 10%, transparent))",
+            "background-color: transparent;",
             core_css,
         )
         self.assertNotIn(
@@ -262,11 +278,27 @@ class MooCoreTests(CatalogTestCase):
             core_css,
         )
         self.assertIn(
-            "backdrop-filter: var(--moo-overlay-backdrop-filter, blur(8px))",
+            "backdrop-filter: var(--moo-overlay-backdrop-filter, blur(6px))",
             core_css,
         )
+        self.assertIn(".modal-backdrop::before", core_css)
+        self.assertIn(".offcanvas-backdrop::before", core_css)
         self.assertIn(".modal-backdrop.show", core_css)
         self.assertIn(".offcanvas-backdrop.show", core_css)
+        self.assertIn(
+            ".modal-backdrop.show,\n.offcanvas-backdrop.show {\n  transition: none;",
+            core_css,
+        )
+        self.assertIn(
+            "transition: color var(--moo-overlay-motion-duration, 0.3s) ease-out",
+            core_css,
+        )
+        self.assertIn(
+            "animation: moo-overlay-backdrop-enter var(--moo-overlay-motion-duration, 0.3s) ease-out both;",
+            core_css,
+        )
+        self.assertIn("@keyframes moo-overlay-backdrop-enter", core_css)
+        self.assertIn("@keyframes moo-overlay-backdrop-exit", core_css)
         self.assertIn(
             "opacity: var(--moo-overlay-backdrop-opacity, 1)",
             core_css,

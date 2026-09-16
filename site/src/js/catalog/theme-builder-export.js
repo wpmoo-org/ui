@@ -54,7 +54,7 @@ function ownerSelector(ownerMarker) {
       "Owner-scoped Theme Builder CSS requires a generated owner marker."
     );
   }
-  return `[data-moo-theme-builder-owner="${ownerMarker}"]`;
+  return `.moo-ui[data-moo-theme-builder-owner="${ownerMarker}"]`;
 }
 
 export function serializeThemeBuilderPresetCss(

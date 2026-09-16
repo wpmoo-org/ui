@@ -16,6 +16,7 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 @import "bootstrap/scss/utilities";
 @import "themes/scoped_core";
 @import "foundations/core_global_primitives";
+@import "foundations/overlay_backdrop";
 
 .moo-ui[data-bs-theme] {
   @include moo-core-scales;
@@ -37,6 +38,5 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 @scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
   @import "components";
   @import "foundations/core_state_layer";
+  @include moo-overlay-backdrop-scoped;
 }
-
-@import "foundations/overlay_backdrop";

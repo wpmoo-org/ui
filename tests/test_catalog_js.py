@@ -838,7 +838,10 @@ console.log(JSON.stringify({ owner, failures }));
 
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
-        self.assertIn('[data-moo-theme-builder-owner="moo-owner-7f4a"] {', case["owner"])
+        self.assertIn(
+            '.moo-ui[data-moo-theme-builder-owner="moo-owner-7f4a"] {',
+            case["owner"],
+        )
         self.assertNotIn(":root", case["owner"])
         self.assertNotIn("body", case["owner"])
         self.assertEqual(case["failures"], ["TypeError", "TypeError", "TypeError"])

@@ -384,7 +384,10 @@ class ToastTests(CatalogTestCase):
         self.assertIn("toastStackVisibleLimit", script)
         self.assertIn("sharedToastStacks", script)
         self.assertIn("container.dataset.mooCatalogToastStack = \"shared\"", script)
-        self.assertIn("const portal = portalFor(sourceContainer);", script)
+        self.assertIn(
+            "const portal = ownerPortalFor(trigger) || portalFor(sourceContainer);",
+            script,
+        )
         self.assertIn("portal.appendChild(container)", script)
         self.assertNotIn("root.body.appendChild(container)", script)
         self.assertIn("data-toast-stack-active", script)

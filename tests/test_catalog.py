@@ -1805,7 +1805,7 @@ class CatalogContractTests(CatalogTestCase):
             1
         ].split("}", 1)[0]
         sidebar_toggle_match = re.search(
-            r"(?m)^\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
+            r"(?m)^(?:\.moo-catalog\s+)?\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
             catalog_scss,
         )
         self.assertIsNotNone(sidebar_toggle_match)
@@ -1905,10 +1905,10 @@ class CatalogContractTests(CatalogTestCase):
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
         slot = catalog_scss.split(
-            ".moo-catalog__theme-toggle [data-moo-theme-icon] {",
+            ".moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon] {",
             1,
         )[1].split("}", 1)[0]
-        svg = catalog_scss.split(".moo-catalog__theme-toggle svg {", 1)[1].split(
+        svg = catalog_scss.split(".moo-catalog .moo-catalog__theme-toggle svg {", 1)[1].split(
             "}",
             1,
         )[0]
@@ -1922,7 +1922,7 @@ class CatalogContractTests(CatalogTestCase):
             catalog_scss,
         )
         self.assertIn(
-            ':scope .moo-catalog__theme-toggle [data-moo-theme-icon="light"]',
+            ':scope .moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon="light"]',
             catalog_scss,
         )
         self.assertIn(
@@ -1930,7 +1930,7 @@ class CatalogContractTests(CatalogTestCase):
             catalog_scss,
         )
         self.assertIn(
-            ':scope .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
+            ':scope .moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
             catalog_scss,
         )
         self.assertIn("display: inline-flex;", catalog_scss)

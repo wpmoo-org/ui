@@ -11,21 +11,44 @@ import {
   resolveOwnerTheme,
   setOwnerTheme,
 } from "../../../../src/js/theme-owner.js";
+import { THEME_BUILDER_TOKEN_CHANGE_EVENT } from "./theme-builder-schema.js";
 
 const states = new WeakMap();
+const CHART_COLOR_TOKENS = [
+  "--moo-chart-1",
+  "--moo-chart-2",
+  "--moo-chart-3",
+  "--moo-chart-4",
+  "--moo-chart-5",
+];
 
 function resolveLiveThemeScope(container) {
   return container.closest?.(".moo-example__preview") || container;
 }
 
-function createLiveThemeOwner(container) {
+function createLiveThemeOwner(container, inheritedOwner = findThemeOwner(container)) {
   const scope = resolveLiveThemeScope(container);
-  const inheritedOwner = findThemeOwner(container);
   const view = container.ownerDocument?.defaultView;
   const inheritedTheme = resolveOwnerTheme(inheritedOwner, null, view);
   scope.classList?.add("moo-ui");
   setOwnerTheme(scope, inheritedTheme);
   return scope;
+}
+
+// The lifecycle preview deliberately owns only its light/dark switch. Its
+// palette remains an explicit catalog-demo bridge from the page's Theme
+// Builder, rather than changing the general nested-owner isolation contract.
+function syncLiveChartPalette(themeScope, sourceOwner, view) {
+  const sourceStyle = view?.getComputedStyle?.(sourceOwner);
+  const targetStyle = themeScope?.style;
+  if (!sourceStyle || !targetStyle?.setProperty) return;
+
+  CHART_COLOR_TOKENS.forEach((token) => {
+    const value = sourceStyle.getPropertyValue(token).trim();
+    if (value && targetStyle.getPropertyValue?.(token)?.trim() !== value) {
+      targetStyle.setProperty(token, value);
+    }
+  });
 }
 
 function setElementHidden(element, hidden) {
@@ -80,13 +103,28 @@ export function initExamplesChart(root = document) {
   const instances = [];
   const cleanups = [];
   const liveThemeScopes = new WeakMap();
+  const livePaletteSources = new Map();
   try {
     const liveContainers = Array.from(root.querySelectorAll("[data-chart-live]"));
     liveContainers.forEach((container) => {
       if (container.querySelector("[data-chart-theme]")) {
-        const themeScope = createLiveThemeOwner(container);
+        const sourceOwner = findThemeOwner(container);
+        const themeScope = createLiveThemeOwner(container, sourceOwner);
         liveThemeScopes.set(container, themeScope);
+        if (sourceOwner) {
+          syncLiveChartPalette(themeScope, sourceOwner, container.ownerDocument?.defaultView);
+          livePaletteSources.set(themeScope, sourceOwner);
+        }
       }
+    });
+
+    livePaletteSources.forEach((sourceOwner, themeScope) => {
+      const view = themeScope.ownerDocument?.defaultView;
+      const sync = () => syncLiveChartPalette(themeScope, sourceOwner, view);
+      sourceOwner.addEventListener?.(THEME_BUILDER_TOKEN_CHANGE_EVENT, sync);
+      cleanups.push(() =>
+        sourceOwner.removeEventListener?.(THEME_BUILDER_TOKEN_CHANGE_EVENT, sync)
+      );
     });
 
     root.querySelectorAll(".chart").forEach((element) => {

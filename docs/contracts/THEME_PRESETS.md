@@ -75,8 +75,9 @@ private implementation plumbing, not a preset selector or public root option.
 `serializeThemeBuilderPresetCss()` accepts only two scopes:
 
 - `owner` requires a runtime-generated `data-moo-theme-builder-owner` marker
-  and emits rules only for that marker and its dark-mode variant. It rejects
-  arbitrary selector input and a missing or invalid marker.
+  on a resolved `.moo-ui` owner and emits rules only for that owner and its
+  dark-mode variant. It rejects arbitrary selector input and a missing or
+  invalid marker.
 - `standalone` is the portable export profile. It emits the explicit
   `:root`/`[data-bs-theme="light"]` and `[data-bs-theme="dark"]` compatibility
   selectors for a host that deliberately owns its whole document theme.
@@ -194,7 +195,8 @@ Catalog settings may use `data-moo-catalog-*` attributes to hold preview state
 and suppress transitions while a choice changes. Those attributes are private
 to `ui.wpmoo.org`. A standalone export emits only the allow-listed tokens under
 `:root`, `[data-bs-theme="light"]`, and `[data-bs-theme="dark"]`; an
-owner-scoped preview instead targets only its generated private owner marker.
+owner-scoped preview instead targets only its generated private marker on a
+resolved `.moo-ui` owner.
 Neither profile emits catalog selectors or an inline style attribute on a host
 document element.
 

@@ -16,7 +16,9 @@ GLOBAL_SELECTOR_FORBIDDEN = re.compile(
     r"\.(?:container|row|col(?:-\w+)?)\b"
 )
 DETACHED_OVERLAY_BACKDROP_OWNER = re.compile(
-    r"^\.(?:modal|offcanvas)-backdrop(?:\.show)?$"
+    r"^\.(?:modal|offcanvas)-backdrop"
+    r"(?:\.[A-Za-z0-9_-]+)*"
+    r"(?:::{0,1}[A-Za-z0-9_-]+(?:\([^)]*\))?)*$"
 )
 URL_PATTERN = re.compile(r"url\((.*?)\)", re.IGNORECASE | re.DOTALL)
 REMOTE_PATTERN = re.compile(r"https?://", re.IGNORECASE)
@@ -69,6 +71,24 @@ def _is_allowed_state_selector(selector: str) -> bool:
     if DETACHED_OVERLAY_BACKDROP_OWNER.match(selector) is not None:
         return True
     return False
+
+
+def _assert_detached_overlay_media(test_case, rule: object) -> None:
+    """Allow only backdrop state rules inside a global media wrapper."""
+    for nested in _walk_rules(_nested_rules(rule)):
+        nested_type = getattr(nested, "type", None)
+        if nested_type == "qualified-rule":
+            selector = _serialized(nested.prelude)
+            for part in _selector_parts(selector):
+                test_case.assertIsNotNone(
+                    DETACHED_OVERLAY_BACKDROP_OWNER.match(part),
+                    f"global media selector must target a detached overlay backdrop: {part}",
+                )
+        elif nested_type == "at-rule":
+            test_case.fail(
+                "global media wrapper must not contain nested at-rules: "
+                f"{_at_keyword(nested)}"
+            )
 
 
 def _at_keyword(rule: object) -> str:
@@ -179,6 +199,9 @@ def assert_allowed_global_rules(test_case, css: str) -> None:
                     descriptors,
                     f"@property {prelude} is missing required descriptors",
                 )
+                continue
+            if keyword == "media":
+                _assert_detached_overlay_media(test_case, rule)
                 continue
             test_case.fail(f"unexpected global @{keyword} rule: {prelude}")
 

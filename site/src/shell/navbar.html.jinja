@@ -22,7 +22,7 @@
    chrome only: sidebar toggle, search, theme, GitHub, matching the
    reference admin shell's minimal top bar. #}
 <nav class="navbar moo-catalog__navbar d-flex align-items-center gap-2" aria-label="Catalog controls">
-      <div class="d-flex align-items-center gap-2 flex-grow-1">
+      <div class="d-flex align-items-center gap-3 flex-grow-1">
         {{ sidebar_trigger(sidebar_id="catalog-sidebar", extra_class="moo-catalog__sidebar-toggle") }}
         {#- Always visible (label included, icon-only nowhere) rather than
            d-none, so search/the command palette stays reachable at every
@@ -47,7 +47,7 @@
         ) }}
       </div>
 
-      <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
+      <div class="d-flex align-items-center gap-3 flex-shrink-0 ms-auto">
         <button
           class="btn btn-ghost btn-icon moo-catalog__settings-toggle"
           type="button"

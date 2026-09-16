@@ -1,5 +1,6 @@
 import {
   PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
+  THEME_BUILDER_TOKEN_CHANGE_EVENT,
   THEME_BUILDER_DEFAULTS,
   normalizeThemeBuilderState,
   resolveThemeBuilderTokens,
@@ -104,7 +105,13 @@ function applyTokenStyle(owner, view, tokenNames, tokenValues = {}) {
   const escape = view?.CSS?.escape || globalThis.CSS?.escape;
   const escapedMarker = escape ? escape(marker) : marker;
   style.textContent =
-    `[data-moo-theme-builder-owner="${escapedMarker}"] {\n${declarations}\n}`;
+    `.moo-ui[data-moo-theme-builder-owner="${escapedMarker}"] {\n${declarations}\n}`;
+}
+
+function notifyThemeBuilderTokenChange(owner, view) {
+  const Event = view?.CustomEvent || view?.Event;
+  if (typeof Event !== "function" || !owner?.dispatchEvent) return;
+  owner.dispatchEvent(new Event(THEME_BUILDER_TOKEN_CHANGE_EVENT));
 }
 
 function writeOwnerPreference(owner, axis, value, view) {
@@ -372,6 +379,7 @@ export function initSettingsPanel(root = document) {
               surface: "catalog",
             })
       );
+      notifyThemeBuilderTokenChange(owner, view);
     };
 
     const applyBuilderPreference = (

@@ -51,6 +51,7 @@ MOO_THEME_TOKENS = {
     "--moo-sidebar": ("$moo-sidebar", "$moo-sidebar-dark"),
 }
 MOO_SHARED_TOKENS = {
+    "--moo-overlay-motion-duration": "$moo-overlay-motion-duration",
     "--moo-overlay-backdrop-opacity": "$moo-overlay-backdrop-opacity",
     "--moo-overlay-backdrop-bg": "$moo-overlay-backdrop-bg",
     "--moo-overlay-backdrop-filter": "$moo-overlay-backdrop-filter",
@@ -574,9 +575,9 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/helpers/vr",
                 "bootstrap/scss/utilities/api",
                 "utilities/scroll_fade_primitives",
+                "foundations/overlay_backdrop",
                 "components",
                 "foundations/core_state_layer",
-                "foundations/overlay_backdrop",
             ],
         )
         self.assertEqual(
@@ -591,9 +592,9 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/utilities",
                 "themes/scoped_core",
                 "foundations/core_global_primitives",
+                "foundations/overlay_backdrop",
                 "components",
                 "foundations/core_state_layer",
-                "foundations/overlay_backdrop",
             ],
         )
 

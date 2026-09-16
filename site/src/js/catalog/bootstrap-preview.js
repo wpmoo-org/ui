@@ -62,6 +62,37 @@ export function initBootstrapPreview(root = document) {
     element.remove();
   };
 
+  const bodyBackdrops = (className) => Array.from(root.body?.children || []).filter((child) =>
+    child instanceof view.HTMLElement && child.classList.contains(className)
+  );
+
+  // Bootstrap creates Modal/Offcanvas backdrops as direct body children. Keep
+  // the detached node in the same owner portal as its surface so the scoped
+  // Bootstrap structure and Moo theme tokens both apply to it.
+  const portalBackdrop = (overlay, className, existingBackdrops = new Set()) => {
+    const portal = ownerPortalFor(overlay) || portalFor(overlay);
+    const backdrops = bodyBackdrops(className).filter(
+      (backdrop) => !existingBackdrops.has(backdrop),
+    );
+    const backdrop = backdrops[backdrops.length - 1];
+
+    if (overlay && portal && backdrop && backdrop.parentElement !== portal) {
+      portal.appendChild(backdrop);
+    }
+  };
+  const queueBackdropPortal = (overlay, className) => {
+    const existingBackdrops = new Set(bodyBackdrops(className));
+    const portal = () => portalBackdrop(overlay, className, existingBackdrops);
+
+    // Bootstrap appends its backdrop synchronously after `show.bs.*` returns.
+    // A microtask runs after that append, yet before the first opening paint.
+    if (typeof view.queueMicrotask === "function") {
+      view.queueMicrotask(portal);
+    } else {
+      Promise.resolve().then(portal);
+    }
+  };
+
   const onModalShow = (event) => {
     const modal = event.target;
     const trigger = event.relatedTarget || modal;
@@ -70,17 +101,19 @@ export function initBootstrapPreview(root = document) {
       !(modal instanceof view.HTMLElement) ||
       !modal.classList.contains("modal") ||
       !modal.closest(".moo-catalog") ||
-      !portal ||
-      modal.parentElement === portal
+      !portal
     ) {
       return;
     }
-    modalPortals.set(modal, {
-      parent: modal.parentNode,
-      nextSibling: modal.nextSibling,
-      owner: findThemeOwner(modal),
-    });
-    portal.appendChild(modal);
+    if (modal.parentElement !== portal) {
+      modalPortals.set(modal, {
+        parent: modal.parentNode,
+        nextSibling: modal.nextSibling,
+        owner: findThemeOwner(modal),
+      });
+      portal.appendChild(modal);
+    }
+    queueBackdropPortal(modal, "modal-backdrop");
   };
   const onModalHidden = (event) => {
     const modal = event.target;
@@ -128,6 +161,7 @@ export function initBootstrapPreview(root = document) {
       sheet.dataset.mooCatalogSheet === "true"
     ) {
       portalSheet(sheet);
+      queueBackdropPortal(sheet, "offcanvas-backdrop");
     }
   }, true);
   listen(root, "hidden.bs.offcanvas", (event) => {

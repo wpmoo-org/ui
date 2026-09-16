@@ -229,7 +229,11 @@ class DialogTests(CatalogTestCase):
         self.assertIn('listen(root, "show.bs.modal"', script)
         self.assertIn('listen(root, "hidden.bs.modal"', script)
         self.assertIn('modal.closest(".moo-catalog")', script)
-        self.assertIn("const portal = portalFor(modal);", script)
+        self.assertIn(
+            "const portal = ownerPortalFor(trigger) || portalFor(modal);",
+            script,
+        )
+        self.assertIn("queueBackdropPortal(modal, \"modal-backdrop\")", script)
         self.assertIn("portal.appendChild(modal)", script)
         self.assertIn("modalPortals", script)
         self.assertIn("restorePortaledElement(modal, modalPortals.get(modal));", script)

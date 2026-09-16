@@ -2,18 +2,127 @@
 // Sheet (Offcanvas). Moo only retunes the native backdrop appearance through a
 // shared token primitive, so every opening surface gets the same treatment
 // without component-specific backdrop selectors.
+//
+// Modal waits for the real `.modal-backdrop` transition before it starts the
+// dialog panel. Keep that lifecycle element visually inert and animate a
+// pseudo-element instead: the panel and visible blur/dim can then start from
+// the same Bootstrap motion token, while the native backdrop is still retained
+// long enough to fade the visual layer out on close. Use keyframe animation
+// rather than a pseudo-element transition: transitionend events from a pseudo
+// element bubble to its originating backdrop and would make Bootstrap wait for
+// the visual layer before showing the panel.
+@mixin moo-overlay-backdrop-appearance {
+  --#{$prefix}backdrop-opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
+  opacity: 1;
+  color: transparent;
+  background-color: transparent;
+
+  &.fade,
+  &.fade:not(.show) {
+    opacity: 1;
+  }
+
+  // Bootstrap reads this duration to decide when to reveal a Modal panel.
+  // Keep entry instant; the visual transition below belongs to ::before.
+  &.show {
+    transition: none;
+  }
+
+  // On close, Bootstrap keeps the lifecycle layer in the DOM for this token
+  // duration while ::before fades out. Color has no visible effect on the
+  // empty backdrop but supplies Bootstrap's native transition lifecycle
+  // without multiplying the pseudo-element's visual fade.
+  &.fade:not(.show) {
+    color: var(--bs-body-color, currentcolor);
+    transition: color var(--moo-overlay-motion-duration, #{$moo-overlay-motion-duration}) ease-out;
+  }
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    opacity: 0;
+    background-color: var(--moo-overlay-backdrop-bg, #{$moo-overlay-backdrop-bg});
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+    animation: moo-overlay-backdrop-exit var(--moo-overlay-motion-duration, #{$moo-overlay-motion-duration}) ease-out both;
+  }
+}
+
+@mixin moo-overlay-backdrop-shown {
+  // Bootstrap Modal routes opacity through --bs-backdrop-opacity, but
+  // Offcanvas 5.3 compiles the same state to a literal .5. Restate the shared
+  // token on both native show selectors so Dialog and Sheet dim equally.
+  &::before {
+    animation: moo-overlay-backdrop-enter var(--moo-overlay-motion-duration, #{$moo-overlay-motion-duration}) ease-out both;
+  }
+}
+
+@mixin moo-overlay-backdrop-reduced-motion {
+  transition: none;
+
+  &::before {
+    animation: none;
+  }
+}
+
+@keyframes moo-overlay-backdrop-enter {
+  from {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+
+  to {
+    opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
+    -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+    backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+  }
+}
+
+@keyframes moo-overlay-backdrop-exit {
+  from {
+    opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
+    -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+    backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+  }
+
+  to {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
 .modal-backdrop,
 .offcanvas-backdrop {
-  --#{$prefix}backdrop-opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
-  background-color: var(--moo-overlay-backdrop-bg, #{$moo-overlay-backdrop-bg});
-  -webkit-backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
-  backdrop-filter: var(--moo-overlay-backdrop-filter, #{$moo-overlay-backdrop-filter});
+  @include moo-overlay-backdrop-appearance;
 }
 
 .modal-backdrop.show,
 .offcanvas-backdrop.show {
-  // Bootstrap Modal routes opacity through --bs-backdrop-opacity, but
-  // Offcanvas 5.3 compiles the same state to a literal .5. Restate the shared
-  // token on both native show selectors so Dialog and Sheet dim equally.
-  opacity: var(--moo-overlay-backdrop-opacity, #{$moo-overlay-backdrop-opacity});
+  @include moo-overlay-backdrop-shown;
+}
+
+// Backdrops that are portaled into a resolved owner still need to outrank
+// Bootstrap's scoped `.fade` and `.show` rules. Entry points include this
+// mixin inside their single native Moo scope; the global rules above remain
+// available for hosts that intentionally keep Bootstrap's body-level portal.
+@mixin moo-overlay-backdrop-scoped {
+  .modal-backdrop,
+  .offcanvas-backdrop {
+    @include moo-overlay-backdrop-appearance;
+  }
+
+  .modal-backdrop.show,
+  .offcanvas-backdrop.show {
+    @include moo-overlay-backdrop-shown;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .offcanvas-backdrop {
+    @include moo-overlay-backdrop-reduced-motion;
+  }
 }
