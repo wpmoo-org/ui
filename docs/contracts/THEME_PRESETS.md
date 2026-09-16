@@ -8,6 +8,10 @@ The JSON sidecar stores the normalized choices that produced the CSS. It is a
 portable handoff format for future adapters and tooling, not a runtime
 dependency for applying a preset.
 
+Presets complement a resolved Moo UI owner; they do not create a second theme
+source on `html` or `body`, and they never replace Bootstrap's
+`data-bs-theme="light|dark"` attribute.
+
 ## Schema Fields
 
 <!-- theme-preset-schema-fields:start -->
@@ -53,6 +57,52 @@ guidance and committed behavior. This normalization lives in
 `normalizeThemeBuilderState()` in `site/src/js/catalog/theme-builder-schema.js`
 and is locked by the focused normalization and export tests in
 `tests/test_catalog_js.py`.
+
+## Owner Boundary And Export Scopes
+
+A resolved owner is exactly
+`.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]`. For a full
+document, one such owner is the first application element in `body`; `lang`
+and the document default `dir` stay on `html`. An embedded host may put the
+same owner at its fragment boundary and may use `dir` on that owner for a
+subtree override. Nested resolved owners are independent token contexts.
+
+A class-only `.moo-ui`, including a direct child carrying the private
+`data-moo-overlay-portal-host` marker, is not a resolved owner. It inherits
+the nearest resolved owner's tokens and direction. The generic portal host is
+private implementation plumbing, not a preset selector or public root option.
+
+`serializeThemeBuilderPresetCss()` accepts only two scopes:
+
+- `owner` requires a runtime-generated `data-moo-theme-builder-owner` marker
+  and emits rules only for that marker and its dark-mode variant. It rejects
+  arbitrary selector input and a missing or invalid marker.
+- `standalone` is the portable export profile. It emits the explicit
+  `:root`/`[data-bs-theme="light"]` and `[data-bs-theme="dark"]` compatibility
+  selectors for a host that deliberately owns its whole document theme.
+
+Owner-scoped preview styles are appended beneath the resolved owner and must
+not alter sibling or nested owners. Standalone preset CSS belongs after
+`moo-ui.css`; a host must choose the profile that matches its ownership
+boundary rather than applying a standalone export indiscriminately inside an
+embedded page.
+
+## First Paint And Persistence
+
+The server should emit the resolved `data-bs-theme` value on the owner. When a
+stored browser preference is needed before visible content paints, the
+canonical path is the external, parser-blocking, non-deferred
+`theme-prepaint.js` script as the owner's first child. It applies
+`stored > server > fallback`, resolves a stored `system` preference before it
+writes the owner attribute, and finishes with `data-moo-prepaint="ready"` on
+that owner. The default shared `moo:theme`/`moo:direction` keys are valid only
+for a document with one top-level owner; independent nested or sibling owners
+need explicit `data-moo-theme-key` and `data-moo-direction-key` values.
+
+The prepaint asset is CSP-friendly because it is external and parser-blocking;
+it does not require an inline theme script or inline theme style. It updates
+`html[dir]` only for the complete-document owner, keeps theme state off
+`html`/`body`, and uses an owner `dir` only for embedded subtree overrides.
 
 ## Public Token Allow-List
 
@@ -142,8 +192,11 @@ CSS agree.
 
 Catalog settings may use `data-moo-catalog-*` attributes to hold preview state
 and suppress transitions while a choice changes. Those attributes are private
-to `ui.wpmoo.org`; exported presets emit only the tokens above under `:root`,
-`[data-bs-theme="light"]`, and `[data-bs-theme="dark"]`.
+to `ui.wpmoo.org`. A standalone export emits only the allow-listed tokens under
+`:root`, `[data-bs-theme="light"]`, and `[data-bs-theme="dark"]`; an
+owner-scoped preview instead targets only its generated private owner marker.
+Neither profile emits catalog selectors or an inline style attribute on a host
+document element.
 
 `--moo-primary-foreground-dark` is retained for compatibility with hosts that
 already distinguish dark-mode action foregrounds. RC.4 action colors are
@@ -153,5 +206,8 @@ mode-independent, so it intentionally matches `--moo-primary-foreground`.
 
 Adapters should store the JSON sidecar fields exactly as documented, normalize
 unknown enum values to defaults, and render CSS from the public token allow-list
-only. Odoo and other hosts should load generated preset CSS after `moo-ui.css`
-and should not depend on catalog JavaScript or `data-moo-catalog-*` attributes.
+only. They keep `lang` and a full-document default `dir` on `html`, place a
+resolved `.moo-ui[data-bs-theme]` owner at the full-page or embedded-fragment
+boundary, and keep triggered overlays in that owner's direct private portal.
+Odoo and other hosts should load generated preset CSS after `moo-ui.css` and
+must not depend on catalog JavaScript or `data-moo-catalog-*` attributes.
