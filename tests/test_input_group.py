@@ -215,7 +215,7 @@ class InputGroupTests(CatalogTestCase):
         self.assertIn('id="certification-input-group-post"', body)
         self.assertNotIn("With textarea", body)
 
-    def test_catalog_codepen_examples_start_with_field_contracts(self) -> None:
+    def test_catalog_codepen_examples_wrap_field_contracts_in_a_resolved_owner(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -226,10 +226,19 @@ class InputGroupTests(CatalogTestCase):
             with self.subTest(title=payload["title"]):
                 self.assertRegex(
                     html,
-                    r'^<div\b(?=[^>]*\bclass="[^"]*\bfield(?:-group)?(?![\w-]))[^>]*>',
+                    r'^<div class="moo-ui" data-bs-theme="light">\s*'
+                    r'<div\b(?=[^>]*\bclass="[^"]*\bfield(?:-group)?(?![\w-]))[^>]*>',
                 )
-                self.assertNotRegex(html, r'^<div class="input-group(?:\s|")')
-                self.assertNotRegex(html, r'^<div class="d-grid gap-3"')
+                self.assertNotRegex(
+                    html,
+                    r'^<div class="moo-ui" data-bs-theme="light">\s*'
+                    r'<div class="input-group(?:\s|")',
+                )
+                self.assertNotRegex(
+                    html,
+                    r'^<div class="moo-ui" data-bs-theme="light">\s*'
+                    r'<div class="d-grid gap-3"',
+                )
 
     def test_codepen_component_demo_clamps_field_contract_roots_to_catalog_width(
         self,
@@ -243,12 +252,12 @@ class InputGroupTests(CatalogTestCase):
 
         self.assertRegex(
             demo_css,
-            r"body\.moo-codepen-component-demo > :where\(\.field, \.field-group\) \{[^}]*"
+            r"\.moo-ui\.moo-codepen-component-demo > :where\(\.field, \.field-group\) \{[^}]*"
             r"width: min\(100%, [^)]+\);",
         )
         self.assertRegex(
             demo_css,
-            r"body\.moo-codepen-component-demo > :where\(\.field, \.field-group\)\.w-100 \{[^}]*"
+            r"\.moo-ui\.moo-codepen-component-demo > :where\(\.field, \.field-group\)\.w-100 \{[^}]*"
             r"width: min\(100%, [^)]+\) !important;",
         )
 

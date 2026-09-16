@@ -139,9 +139,12 @@ class InputTests(CatalogTestCase):
         self.assertIn("$input-disabled-color: var(--moo-disabled-foreground) !default;", variables)
         self.assertIn("$form-select-disabled-color: $input-disabled-color !default;", variables)
         self.assertIn("$moo-disabled-control-opacity: 0.5 !default;", variables)
-        self.assertIn("--moo-disabled-foreground: #{$moo-disabled-foreground};", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="light"] {', tokens_root)
+        self.assertIn("@include moo-core-light;", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="dark"] {', tokens_root)
+        self.assertIn("@include moo-core-dark;", tokens_root)
+        self.assertNotIn(":root", tokens_root)
         self.assertIn("--moo-disabled-foreground: #{$moo-disabled-foreground};", core_theme)
-        self.assertIn("--moo-disabled-control-opacity: #{$moo-disabled-control-opacity};", tokens_root)
         self.assertIn("--moo-disabled-control-opacity: #{$moo-disabled-control-opacity};", core_theme)
         self.assertIn(".form-control:disabled,", input_scss)
         self.assertIn(".form-select:disabled", input_scss)
@@ -212,14 +215,10 @@ class InputTests(CatalogTestCase):
             "$moo-form-invalid-ring-color-dark: color-mix(in srgb, $moo-destructive-dark 40%, transparent) !default;",
             variables,
         )
-        self.assertIn(
-            "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};",
-            tokens_root,
-        )
-        self.assertIn(
-            "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};",
-            tokens_root,
-        )
+        self.assertIn('.moo-ui[data-bs-theme="light"] {', tokens_root)
+        self.assertIn("@include moo-core-light;", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="dark"] {', tokens_root)
+        self.assertIn("@include moo-core-dark;", tokens_root)
         self.assertIn(
             "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color};",
             core_theme,
@@ -228,18 +227,9 @@ class InputTests(CatalogTestCase):
             "--moo-form-invalid-ring-color: #{$moo-form-invalid-ring-color-dark};",
             core_theme,
         )
-        self.assertIn("--bs-form-invalid-color: var(--moo-destructive);", tokens_root)
         self.assertIn(
             "--#{$prefix}form-invalid-color: var(--moo-destructive);",
             core_theme,
-        )
-        self.assertIn(
-            "--bs-form-invalid-border-color: #{$moo-form-invalid-border-color};",
-            tokens_root,
-        )
-        self.assertIn(
-            "--bs-form-invalid-border-color: #{$moo-form-invalid-border-color-dark};",
-            tokens_root,
         )
         self.assertIn(
             "--#{$prefix}form-invalid-border-color: #{$moo-form-invalid-border-color};",

@@ -34,6 +34,11 @@ PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST = {
         "data-moo-catalog-view",
     },
 }
+PRIVATE_OWNER_FIXTURE_HOOKS = {
+    "data-moo-direction-key",
+    "data-moo-overlay-portal-host",
+    "data-moo-theme-key",
+}
 ACTIVE_RC3_PLAN_DOCS = (
     PROJECT_DOCS_ROOT / "plans/2026-08-17-chart-datepicker-slider-1-0-0-rc3.md",
 )
@@ -53,7 +58,9 @@ class CertificationContractTests(unittest.TestCase):
                     continue
                 source = path.read_text(encoding="utf-8")
                 relative = path.relative_to(ROOT).as_posix()
-                allowed = PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST.get(relative, set())
+                allowed = set(PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST.get(relative, set()))
+                if relative.startswith("conformance/fixtures/"):
+                    allowed.update(PRIVATE_OWNER_FIXTURE_HOOKS)
                 matches = sorted(
                     set(BANNED_PUBLIC_MOO_COMPONENT_HOOK.findall(source)) - allowed
                 )

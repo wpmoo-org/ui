@@ -110,8 +110,11 @@ class BadgeTests(CatalogTestCase):
             "$moo-destructive-surface-dark: color-mix(in srgb, $moo-destructive-dark 20%, transparent) !default;",
             source,
         )
-        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface};", tokens_root)
-        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface-dark};", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="light"] {', tokens_root)
+        self.assertIn("@include moo-core-light;", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="dark"] {', tokens_root)
+        self.assertIn("@include moo-core-dark;", tokens_root)
+        self.assertNotIn(":root", tokens_root)
         self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface};", core_theme)
         self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface-dark};", core_theme)
 

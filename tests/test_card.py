@@ -118,10 +118,7 @@ class CardTests(CatalogTestCase):
                     rf"(?m)^{re.escape(variable)}:\s*[^;]+!default;",
                     f"{variable} must remain an overridable Sass knob",
                 )
-        self.assertIn(
-            ':where([data-bs-theme="dark"]) &:not([data-bs-theme="light"]):not([data-bs-theme="light"] *)',
-            source,
-        )
+        self.assertIn(':scope[data-bs-theme="dark"] .card {', source)
         self.assertNotIn(
             "--moo-card-footer-bg: color-mix(in srgb, var(--moo-muted-surface) 5%, transparent);",
             source,
@@ -130,4 +127,5 @@ class CardTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
-        self.assertIn('.card[data-bs-theme="dark"]', css)
+        self.assertIn(':scope[data-bs-theme="dark"] .card {', css)
+        self.assertNotIn('.card[data-bs-theme="dark"]', css)
