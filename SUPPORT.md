@@ -87,6 +87,11 @@ Static CSS components should remain usable when JavaScript is unavailable.
 Components that require Bootstrap's plugins or Moo's optional ESM modules use
 progressive enhancement within their documented behavior boundary.
 
+The scoped owner stylesheet relies on native CSS `@scope`. Moo UI does not
+provide a containment fallback for browsers that lack this feature; a host that
+targets such browsers must choose a compatible integration strategy rather than
+assuming the scoped profile applies.
+
 ## Accessibility
 
 Certification combines automated and manual evidence appropriate to component

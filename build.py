@@ -81,7 +81,6 @@ PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
-THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
@@ -1287,36 +1286,6 @@ def create_environment(icon_renderer=None) -> Environment:
     return environment
 
 
-def theme_builder_first_paint_payload() -> dict[str, object]:
-    script = textwrap.dedent(
-        """
-        import { createThemeBuilderFirstPaintPayload } from "./site/src/js/catalog/theme-builder-schema.js";
-        console.log(JSON.stringify(createThemeBuilderFirstPaintPayload()));
-        """
-    )
-    try:
-        result = subprocess.run(
-            ["node", "--input-type=module", "--eval", script],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError(
-            "Theme Builder first-paint payload generation timed out "
-            f"after {THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS} seconds"
-        ) from exc
-    if result.returncode != 0:
-        raise RuntimeError(
-            "Theme Builder first-paint payload generation failed:\n"
-            f"stdout: {result.stdout}\n"
-            f"stderr: {result.stderr}"
-        )
-    return json.loads(result.stdout.splitlines()[-1])
-
-
 def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
     source_file = registry_root / filename
     if not source_file.exists():
@@ -2289,7 +2258,6 @@ def render_pages(
         examples,
         layouts,
     )
-    theme_builder_first_paint = theme_builder_first_paint_payload()
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2341,7 +2309,6 @@ def render_pages(
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
-            theme_builder_first_paint=theme_builder_first_paint,
         )
         output_file.write_text(rendered, encoding="utf-8")
 

@@ -17,24 +17,30 @@ class BuildTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_theme_builder_first_paint_payload_times_out_cleanly(self) -> None:
-        original_run = build.subprocess.run
-
-        def fake_run(*args, **kwargs):
-            raise subprocess.TimeoutExpired(
-                cmd=args[0] if args else kwargs.get("args"),
-                timeout=kwargs.get("timeout"),
-            )
-
-        try:
-            build.subprocess.run = fake_run
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "Theme Builder first-paint payload generation timed out",
+    def test_render_pages_does_not_spawn_a_theme_builder_first_paint_process(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            with (
+                mock.patch.object(build, "SITE_DIST", Path(tempdir)),
+                mock.patch.object(
+                    build.subprocess,
+                    "run",
+                    side_effect=AssertionError(
+                        "render_pages must not spawn a Theme Builder process"
+                    ),
+                ),
             ):
-                build.theme_builder_first_paint_payload()
-        finally:
-            build.subprocess.run = original_run
+                build.render_pages(version="test")
+
+    def test_support_policy_requires_native_css_scope(self) -> None:
+        support = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
+
+        self.assertIn("native CSS `@scope`", support)
+        self.assertRegex(
+            support,
+            r"Moo UI does\s+not\s+provide a containment fallback",
+        )
 
     def test_build_creates_static_entrypoints(self) -> None:
         result = self.run_build()

@@ -3448,7 +3448,6 @@ class CatalogContractTests(CatalogTestCase):
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version="test",
-            theme_builder_first_paint=site_build.theme_builder_first_paint_payload(),
         )
 
         self.assertIn("No public metadata entrypoints yet", rendered)
