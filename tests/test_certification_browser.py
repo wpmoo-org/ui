@@ -1118,7 +1118,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     expect(page.locator("body")).to_have_attribute("data-sidebar-hidden", "true")
                     expect(trigger).to_have_attribute("aria-expanded", "false")
                     expect(trigger).to_be_focused()
-                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                    expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
                 else:
                     expect(root).to_have_attribute("data-sidebar-state", "expanded")
                     expect(trigger).to_have_attribute("aria-expanded", "true")
@@ -1362,7 +1362,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 if not is_desktop:
                     page.keyboard.press("Escape")
                     expect(sidebar).not_to_have_class(re.compile(r"\bshow\b"))
-                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                    expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
                 self.assertEqual(run_axe(page), [])
                 evidence.assert_clean()
                 context.close()
