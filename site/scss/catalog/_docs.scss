@@ -288,8 +288,10 @@
 // dark mode flips black ink to light strokes without a second asset;
 // hue-rotate cancels the hue shift invert() alone would introduce, keeping
 // grays neutral instead of tinted.
-[data-bs-theme="dark"] .moo-catalog__showcase-image {
-  filter: invert(1) hue-rotate(180deg);
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog__showcase-image {
+    filter: invert(1) hue-rotate(180deg);
+  }
 }
 
 .moo-catalog__showcase-preview>* {
@@ -367,8 +369,46 @@
 .moo-doc-page {
   display: grid;
   gap: 3rem;
+  min-width: 0;
   max-width: 52rem;
   font-size: var(--moo-doc-body-font-size);
+}
+
+// A documentation article is a grid so fixed-size previews can sit beside
+// headings and pagination. Keep every implicit grid item shrinkable; otherwise
+// a preview iframe's intrinsic width can widen the article and create a page
+// level horizontal scrollbar at narrow viewports.
+.moo-doc-page > * {
+  min-width: 0;
+}
+
+// Layout contract tables stay readable at narrow viewports. Let their
+// responsive wrapper scroll instead of allowing the table columns to collapse
+// into cramped, multi-line labels.
+.moo-doc-page .moo-layout-table {
+  min-width: 36rem;
+}
+
+.moo-doc-page .moo-layout-table :is(th, td):first-child {
+  white-space: nowrap;
+}
+
+.moo-doc-page .moo-layout-table thead th {
+  background-color: color-mix(in srgb, var(--bs-body-color) 6%, var(--bs-body-bg));
+}
+
+.moo-doc-page .moo-container-table {
+  min-width: 48rem;
+}
+
+// Support facts and entrypoint tables use the same scroll surface so package
+// values stay readable instead of collapsing into narrow mobile columns.
+.moo-doc-page .moo-support-table {
+  min-width: 36rem;
+}
+
+.moo-doc-page .moo-support-table :is(th, td):first-child {
+  white-space: nowrap;
 }
 
 .moo-doc-main {
@@ -380,12 +420,23 @@
   display: grid;
   align-items: start;
   gap: 3rem;
+  padding-block: 3rem 5rem;
 }
 
 @include media-breakpoint-up(xl) {
   .moo-doc-layout {
     grid-template-columns: minmax(0, 52rem) 12rem;
     gap: 4rem;
+  }
+
+  // Layout pages showcase a 1280px shell frame. Give the example column the
+  // available document width while retaining the shared on-page navigation.
+  .moo-doc-layout--wide {
+    grid-template-columns: minmax(0, 1fr) 12rem;
+  }
+
+  .moo-doc-layout--wide > .moo-doc-page {
+    max-width: none;
   }
 
   .moo-doc-toc {
@@ -663,9 +714,6 @@
 // Each option is a small card with a window-mock preview thumbnail; the
 // checked one gets a primary ring. The radio follows the btn-check pattern
 // (visually hidden, label is the hit target).
-.moo-settings-panel__form {
-  gap: 1.5rem;
-}
 
 #catalog-settings {
   --moo-settings-panel-option-border: var(--bs-border-color);
@@ -678,16 +726,18 @@
   --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color};
 }
 
-[data-bs-theme="dark"] #catalog-settings {
-  --bs-offcanvas-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
-  --moo-settings-panel-option-border: var(--bs-border-color);
-  --moo-settings-panel-option-active-border: var(--bs-border-color);
-  --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
-  --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
-  --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
-  --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg-dark};
-  --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border-dark};
-  --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color-dark};
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope #catalog-settings {
+    --bs-offcanvas-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+    --moo-settings-panel-option-border: var(--bs-border-color);
+    --moo-settings-panel-option-active-border: var(--bs-border-color);
+    --moo-settings-panel-option-check-bg: #{$moo-catalog-settings-option-check-bg-dark};
+    --moo-settings-panel-option-check-border: #{$moo-catalog-settings-option-check-border-dark};
+    --moo-settings-panel-option-check-color: #{$moo-catalog-settings-option-check-color-dark};
+    --moo-settings-panel-option-active-check-bg: #{$moo-catalog-settings-option-active-check-bg-dark};
+    --moo-settings-panel-option-active-check-border: #{$moo-catalog-settings-option-active-check-border-dark};
+    --moo-settings-panel-option-active-check-color: #{$moo-catalog-settings-option-active-check-color-dark};
+  }
 }
 
 #catalog-settings .field-fieldset {
@@ -703,86 +753,101 @@
   line-height: 1.45;
 }
 
-.moo-settings-panel__builder-group {
-  gap: 0.625rem;
+// The component primitives live in the same owner scope. Keep catalog
+// exceptions there as well: an unscoped rule loses the cascade tie to the
+// scoped Field and Button primitives, which silently turns these rows back
+// into full-width vertical controls.
+@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-settings-panel__form {
+    gap: 1.5rem;
+  }
+
+  :scope .moo-settings-panel__builder-group {
+    gap: 0.625rem;
+  }
+
+  :scope .moo-settings-panel__dropdown-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto);
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  :scope .moo-settings-panel__dropdown-field > .form-label {
+    margin-bottom: 0;
+    color: var(--bs-body-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  :scope .moo-settings-panel__dropdown,
+  :scope .moo-settings-panel__dropdown-trigger {
+    width: 100%;
+  }
+
+  :scope .moo-settings-panel__dropdown-trigger {
+    gap: 0.5rem;
+    justify-content: space-between;
+    min-inline-size: 8.5rem;
+  }
+
+  :scope .moo-settings-panel__dropdown-trigger > [data-moo-catalog-theme-builder-value] {
+    min-width: 0;
+    margin-inline-end: auto;
+  }
+
+  :scope .moo-settings-panel__dropdown-trigger > [data-icon] {
+    flex: 0 0 auto;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  :scope .moo-settings-panel__dropdown-trigger-swatch {
+    --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+    --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
+    --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+    --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
+
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: var(--bs-border-width) solid var(--moo-settings-panel-swatch-border);
+    border-radius: var(--bs-border-radius-pill);
+    background: var(--moo-settings-panel-swatch-background);
+  }
+
+  :scope .moo-settings-panel__dropdown-menu {
+    --bs-dropdown-min-width: 100%;
+  }
+
+  :scope .moo-settings-panel__dropdown-item {
+    gap: 0.5rem;
+  }
+
+  :scope .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch] .dropdown-item-check__indicator {
+    --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
+    --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
+    --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
+    --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
+
+    border-color: var(--moo-settings-panel-swatch-border);
+    border-radius: var(--bs-border-radius-pill);
+    background: var(--moo-settings-panel-swatch-background);
+  }
+
+  :scope .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch].active .dropdown-item-check__indicator {
+    border-color: var(--moo-settings-panel-swatch-border);
+    background: var(--moo-settings-panel-swatch-background);
+    color: var(--moo-settings-panel-swatch-check-color);
+  }
 }
 
-.moo-settings-panel__dropdown-field {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto);
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.moo-settings-panel__dropdown-field > .form-label {
-  margin-bottom: 0;
-  color: var(--bs-body-color);
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-.moo-settings-panel__dropdown,
-.moo-settings-panel__dropdown-trigger {
-  width: 100%;
-}
-
-.moo-settings-panel__dropdown-trigger {
-  gap: 0.5rem;
-  justify-content: space-between;
-  min-inline-size: 8.5rem;
-}
-
-.moo-settings-panel__dropdown-trigger > [data-moo-catalog-theme-builder-value] {
-  min-width: 0;
-  margin-inline-end: auto;
-}
-
-.moo-settings-panel__dropdown-trigger > [data-icon] {
-  flex: 0 0 auto;
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-.moo-settings-panel__dropdown-trigger-swatch {
-  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
-  --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
-  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
-  --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
-
-  display: inline-flex;
-  flex: 0 0 auto;
-  width: 0.875rem;
-  height: 0.875rem;
-  border: var(--bs-border-width) solid var(--moo-settings-panel-swatch-border);
-  border-radius: var(--bs-border-radius-pill);
-  background: var(--moo-settings-panel-swatch-background);
-}
-
-.moo-settings-panel__dropdown-menu {
-  --bs-dropdown-min-width: 100%;
-}
-
-.moo-settings-panel__dropdown-item {
-  gap: 0.5rem;
-}
-
-.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch] .dropdown-item-check__indicator {
-  --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
-  --moo-settings-panel-swatch-background: var(--moo-settings-panel-swatch-color);
-  --moo-settings-panel-swatch-border: color-mix(in srgb, var(--moo-settings-panel-swatch-color) 68%, var(--bs-border-color));
-  --moo-settings-panel-swatch-check-color: #{$moo-catalog-settings-swatch-check};
-
-  border-color: var(--moo-settings-panel-swatch-border);
-  border-radius: var(--bs-border-radius-pill);
-  background: var(--moo-settings-panel-swatch-background);
-}
-
-.moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch].active .dropdown-item-check__indicator {
-  border-color: var(--moo-settings-panel-swatch-border);
-  background: var(--moo-settings-panel-swatch-background);
-  color: var(--moo-settings-panel-swatch-check-color);
-}
-
+// These selected-color variants must share the owner scope above. Otherwise
+// the scoped neutral swatch default wins the cascade and every trigger stays
+// gray even though its label and preview tokens changed.
+@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+:scope {
 .moo-settings-panel__dropdown-trigger-swatch[data-moo-catalog-theme-builder-trigger-swatch="base-color-neutral"],
 .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="base-color-neutral"] .dropdown-item-check__indicator {
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-neutral};
@@ -950,6 +1015,8 @@
 .moo-settings-panel__dropdown-item[data-moo-catalog-theme-builder-swatch="chart-color-cyan"] .dropdown-item-check__indicator {
   --moo-settings-panel-swatch-color: #{$moo-catalog-settings-swatch-cyan};
 }
+}
+}
 
 .moo-settings-panel__theme-group {
   display: grid;
@@ -1034,8 +1101,10 @@
   display: inline-flex;
 }
 
-[data-bs-theme="dark"] .moo-settings-panel__theme-option:has(.btn-check[value="system"]:checked) .moo-settings-panel__theme-check {
-  background-color: #{$moo-catalog-settings-system-active-check-bg-dark};
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-settings-panel__theme-option:has(.btn-check[value="system"]:checked) .moo-settings-panel__theme-check {
+    background-color: #{$moo-catalog-settings-system-active-check-bg-dark};
+  }
 }
 
 // The check straddles the inline-end corner, and the +50% translate is
@@ -1087,12 +1156,14 @@
   pointer-events: none;
 }
 
-[data-bs-theme="dark"] .moo-settings-panel__theme-thumb--system::before {
-  background-image: linear-gradient(
-    90deg,
-    #{$moo-catalog-settings-system-thumb-light-dark} 0 50%,
-    #{$moo-catalog-settings-thumb-dark} 50% 100%
-  );
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-settings-panel__theme-thumb--system::before {
+    background-image: linear-gradient(
+      90deg,
+      #{$moo-catalog-settings-system-thumb-light-dark} 0 50%,
+      #{$moo-catalog-settings-thumb-dark} 50% 100%
+    );
+  }
 }
 
 .moo-settings-panel__theme-thumb--system > .moo-settings-panel__theme-thumb-bar,

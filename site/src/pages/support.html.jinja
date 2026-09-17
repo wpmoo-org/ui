@@ -20,8 +20,8 @@
 
       <section class="moo-doc-section" aria-labelledby="current-status">
         {{ typography("Current Status", variant="section-title", id="current-status") }}
-        <div class="table-responsive">
-          <table class="table align-middle">
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
             <tbody>
               <tr>
                 <th scope="row">Core package</th>
@@ -57,8 +57,8 @@
 
       <section class="moo-doc-section" aria-labelledby="public-entrypoints">
         {{ typography("Public Entrypoints", variant="section-title", id="public-entrypoints") }}
-        <div class="table-responsive">
-          <table class="table align-middle">
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
             <thead>
               <tr><th scope="col">CSS</th><th scope="col">Minified</th></tr>
             </thead>
@@ -75,8 +75,8 @@
             </tbody>
           </table>
         </div>
-        <div class="table-responsive">
-          <table class="table align-middle">
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
             <thead>
               <tr><th scope="col">ESM</th><th scope="col">Minified</th></tr>
             </thead>
@@ -92,37 +92,41 @@
             </tbody>
           </table>
         </div>
-        <div class="table-responsive">
-          <table class="table align-middle">
+        {% set sass_entrypoints = product.certification.publicEntrypoints.sass | default([]) %}
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
             <thead>
-              <tr><th scope="col">Kind</th><th scope="col">Exports</th></tr>
+              <tr><th scope="col">SASS</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">Sass</th>
-                <td>
-                  {% if product.certification.publicEntrypoints.sass %}
-                    {% for entrypoint in product.certification.publicEntrypoints.sass %}
-                      <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                  {% else %}
-                    No public Sass entrypoints yet.
-                  {% endif %}
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">Metadata</th>
-                <td>
-                  {% set metadata_entrypoints = product.certification.publicEntrypoints.metadata | default([]) %}
-                  {% if metadata_entrypoints %}
-                    {% for entrypoint in metadata_entrypoints %}
-                      <code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code>{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                  {% else %}
-                    No public metadata entrypoints yet.
-                  {% endif %}
-                </td>
-              </tr>
+              {% if sass_entrypoints %}
+                {% for entrypoint in sass_entrypoints %}
+                  <tr>
+                    <td><code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code></td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td>No public Sass entrypoints yet.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        {% set metadata_entrypoints = product.certification.publicEntrypoints.metadata | default([]) %}
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
+            <thead>
+              <tr><th scope="col">METADATA</th></tr>
+            </thead>
+            <tbody>
+              {% if metadata_entrypoints %}
+                {% for entrypoint in metadata_entrypoints %}
+                  <tr>
+                    <td><code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code></td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td>No public metadata entrypoints yet.</td></tr>
+              {% endif %}
             </tbody>
           </table>
         </div>
@@ -130,8 +134,8 @@
 
       <section class="moo-doc-section" aria-labelledby="bootstrap-compatibility">
         {{ typography("Bootstrap Compatibility", variant="section-title", id="bootstrap-compatibility") }}
-        <div class="table-responsive">
-          <table class="table align-middle">
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
             <tbody>
               <tr>
                 <th scope="row">Canonical build version</th>
@@ -168,8 +172,8 @@
 
       <section class="moo-doc-section" aria-labelledby="maturity">
         {{ typography("Maturity", variant="section-title", id="maturity") }}
-        <div class="table-responsive">
-          <table class="table align-middle">
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
             <thead>
               <tr><th scope="col">State</th><th scope="col">Definition</th></tr>
             </thead>

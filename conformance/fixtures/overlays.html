@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" dir="ltr" data-bs-theme="light">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,8 @@
       <button data-conformance-probe type="button">Host action</button>
     </section>
 
-    <div class="moo-ui p-4">
+    <div class="moo-ui p-4" data-bs-theme="light" data-conformance-themed>
+      <div class="moo-ui" data-moo-overlay-portal-host></div>
       <h2>Overlays</h2>
       <p class="text-body-secondary">Dialog, Tooltip, and Popover owned by Bootstrap's plugins.</p>
 
@@ -41,7 +42,7 @@
         <button class="btn btn-outline-secondary" type="button" data-bs-toggle="popover" data-bs-title="Routing review" data-bs-content="Approve this request, reassign it, or return it for clarification." data-bs-placement="bottom">Review update</button>
       </div>
 
-      <div class="card" data-conformance-themed>
+      <div class="card">
         <div class="card-body">Themed surface: this card tracks the active data-bs-theme value.</div>
       </div>
 

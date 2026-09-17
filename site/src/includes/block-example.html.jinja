@@ -1,8 +1,12 @@
 {% from "components/typography.html.jinja" import typography %}
 
-{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720, frame_variants=[], frame_viewports=[], show_header=true) %}
+{% macro render_block_example(id, title, description, content, preview_class="", frame_src="", frame_width=1280, frame_height=720, frame_variants=[], frame_viewports=[], show_header=true, source_content="") %}
   {% set rendered = content | dedent_html %}
-  {% set source = rendered | format_html %}
+  {% if source_content %}
+    {% set source = source_content | dedent_html | format_html %}
+  {% else %}
+    {% set source = rendered | format_html %}
+  {% endif %}
   {% set title_slug = title | slugify %}
   {% set frame_state = namespace(src=frame_src, width=frame_width, height=frame_height, variant_label="") %}
   {% if frame_variants %}

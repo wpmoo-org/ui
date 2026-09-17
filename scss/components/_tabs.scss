@@ -21,7 +21,7 @@
   // minimum for normal text (axe caught this in the certification fixture).
   // var(--bs-secondary-color) is not a usable substitute here -- Moo UI's
   // own theme sets --bs-secondary-color: var(--moo-muted-foreground)
-  // (scss/themes/_standalone_root.scss), so it resolves to the exact same
+  // (scss/themes/_root.scss), so it resolves to the exact same
   // failing color. var(--bs-secondary-text-emphasis) is a different,
   // untouched Bootstrap token (Moo UI does not override it) built for
   // accessible colored text against a tinted "subtle" surface -- the same

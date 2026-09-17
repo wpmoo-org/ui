@@ -54,12 +54,19 @@ export function initExamplesTasks(root = document) {
     return states.get(root);
   }
 
+  const documentRoot = root.ownerDocument || root;
+  const windowRoot = documentRoot.defaultView;
   const page = root.querySelector("[data-moo-example-tasks]");
   const tableRoot = page?.querySelector(".datatable");
   const tbody = tableRoot?.querySelector("tbody");
   const cards = tableRoot?.querySelector("[data-datatable-cards]");
   const skeleton = page?.querySelector("[data-moo-task-skeleton]");
-  const sheet = page?.querySelector("#tasks-new-sheet");
+  // Catalog bootstrap previews portal sheets to <body> before lazy example
+  // modules resolve; keep the page-scoped lookup for standalone previews but
+  // fall back to the document for the catalog shell.
+  const sheet =
+    page?.querySelector("#tasks-new-sheet") ??
+    documentRoot.querySelector("#tasks-new-sheet");
   const form = sheet?.querySelector("form");
   const sheetTitle = sheet?.querySelector(".offcanvas-title");
   const sheetCopy = sheet?.querySelector("[data-moo-task-sheet-copy]");
@@ -89,8 +96,6 @@ export function initExamplesTasks(root = document) {
   let editRow = null;
   let deleteRow = null;
 
-  const documentRoot = root.ownerDocument || root;
-  const windowRoot = documentRoot.defaultView;
   const bootstrap = windowRoot?.bootstrap;
   const reinitTable = () => {
     DataTable.getOrCreateInstance(tableRoot).dispose();
@@ -282,6 +287,25 @@ export function initExamplesTasks(root = document) {
     bootstrap?.Dropdown.getInstance(toggle)?.hide();
   };
 
+  // A row action opens the sheet/modal from inside a dropdown that then
+  // hides; Bootstrap returns focus to that (now unfocusable) item on hide,
+  // which drops it to <body>. Remember the row-action toggle so we can
+  // return focus to it once the sheet/modal closes.
+  let returnFocusTo = null;
+  let deleteFocusPending = false;
+  const rememberTrigger = (target) => {
+    returnFocusTo =
+      target.closest(".table-row-actions")?.querySelector('[data-bs-toggle="dropdown"]') ??
+      documentRoot.activeElement;
+  };
+  const restoreFocus = () => {
+    const element = returnFocusTo;
+    returnFocusTo = null;
+    if (element?.isConnected) {
+      element.focus();
+    }
+  };
+
   const openEditSheet = (row) => {
     const values = {
       title: row.querySelector("[data-datatable-column=\"task\"] .text-truncate")?.textContent.trim() ?? "",
@@ -312,10 +336,12 @@ export function initExamplesTasks(root = document) {
       if (!row) {
         return;
       }
+      rememberTrigger(target);
       closeRowMenu(target);
       // Destructive actions confirm first: the Alert Dialog names the row
       // it will remove; only its Delete button deletes.
       deleteRow = row;
+      deleteFocusPending = false;
       const ref = row.id.toUpperCase();
       const title = row.querySelector("[data-datatable-column=\"task\"] .text-truncate")?.textContent.trim() || ref;
       if (deleteDialogTitle) {
@@ -332,6 +358,7 @@ export function initExamplesTasks(root = document) {
       if (!row) {
         return;
       }
+      rememberTrigger(target);
       closeRowMenu(target);
       openEditSheet(row);
       return;
@@ -355,6 +382,7 @@ export function initExamplesTasks(root = document) {
   };
   const onSheetHidden = () => {
     editRow = null;
+    restoreFocus();
   };
   const onDeleteConfirm = () => {
     const row = deleteRow;
@@ -368,9 +396,21 @@ export function initExamplesTasks(root = document) {
       editRow = null;
     }
     reinitTable();
+    // The deleted row removed its own trigger; move focus to the table's
+    // search control after the modal finishes closing. Focusing outside an
+    // open modal lets Bootstrap's focus trap pull focus back into the dialog.
+    deleteFocusPending = true;
+    returnFocusTo = null;
   };
   const onDeleteDialogHidden = () => {
     deleteRow = null;
+    if (deleteFocusPending) {
+      deleteFocusPending = false;
+      returnFocusTo = null;
+      tableRoot.querySelector(".datatable-search")?.focus();
+      return;
+    }
+    restoreFocus();
   };
 
   form.addEventListener("submit", onSubmit);

@@ -158,8 +158,12 @@ export function initCatalog(root = document) {
   disposers.push(initCodePreview(root));
   disposers.push(initBootstrapPreview(root));
 
-  root.querySelectorAll('[data-slot="sidebar-wrapper"]').forEach((element) => {
+  const sidebarRoots = root.querySelectorAll(
+    '[data-slot="sidebar-wrapper"][data-sidebar-key]',
+  );
+  sidebarRoots.forEach((element) => {
     const instance = Sidebar.getOrCreateInstance(element);
+    element.removeAttribute("data-sidebar-prepaint-ready");
     disposers.push(() => instance.dispose());
   });
 

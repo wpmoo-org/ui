@@ -1,0 +1,26 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "components/card.html.jinja" import card %}
+
+{% block title %}Page Layout Preview — Moo UI{% endblock %}
+
+{% block body %}
+  <div class="moo-layout-preview">
+    {% call(region) page(width="xl", id="layout-preview-page") %}
+      {% if region == "header" %}
+        {% call card(size="sm") %}
+          Workspace / Requests
+        {% endcall %}
+      {% elif region == "main" %}
+        {% call card() %}
+          <h1 class="h4">Request review</h1>
+          <p class="mb-0">Main content stays inside the native container-xl rail.</p>
+        {% endcall %}
+      {% elif region == "footer" %}
+        {% call card(size="sm") %}
+          Last updated just now
+        {% endcall %}
+      {% endif %}
+    {% endcall %}
+  </div>
+{% endblock %}

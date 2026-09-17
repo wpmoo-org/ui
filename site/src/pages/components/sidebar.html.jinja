@@ -1,5 +1,6 @@
 {% extends "layouts/catalog.html.jinja" %}
-{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_content, sidebar_menu, sidebar_menu_item, sidebar_menu_button %}
+{% from "components/card.html.jinja" import card %}
 {% from "components/table.html.jinja" import table %}
 {% from "includes/block-example.html.jinja" import render_block_example %}
 {% from "includes/code-snippet.html.jinja" import render_code_snippet %}
@@ -11,16 +12,17 @@
 {% block content %}
   {{ render_page_header(
     "Sidebar",
-    "Compose an application shell with Bootstrap-native sidebar primitives: provider, regions, menus, and inset content."
+      "Compose an application shell with Bootstrap-native Sidebar primitives: surface, regions, menus, and actions."
   ) }}
 
   <div class="moo-component-examples">
     <h2 id="usage" class="h4 mb-3">Usage</h2>
     <p class="mb-4">
-      Use <code>.sidebar-wrapper</code>, <code>.sidebar</code>, and <code>.sidebar-inset</code> for application shells where navigation, workspace metadata,
-      and page content need stable regions. Render a <code>.sidebar-wrapper</code>
-      with one <code>.sidebar</code> region and one <code>.sidebar-inset</code>
-      content region so the shell remains inspectable as ordinary HTML.
+      Use the <code>app</code> layout when a route owns an application shell.
+      Its navigation-enabled form emits one public <code>.sidebar</code> region
+      beside one independent <code>page</code> region. The Sidebar component
+      owns navigation content; the Page layout owns semantic header, main, and
+      footer regions.
     </p>
     <p class="mb-4">
       Compose the sidebar from public component contracts: Button for triggers,
@@ -37,12 +39,9 @@
     </p>
 
     {% set app_shell %}
-      {{ render_sidebar_shell(
-        key="components-sidebar-floating",
-        sidebar_id="components-sidebar-floating-demo",
-        variant="floating",
-        demo_copy="portal"
-      ) }}
+      {% call card(title="Application shell preview", extra_class="h-100") %}
+        The complete Sidebar and Page composition is shown in the standalone preview.
+      {% endcall %}
     {% endset %}
     {{ render_block_example(
       "app-shell",
@@ -76,8 +75,6 @@
     </p>
 
     {% set sidebar_parts = [
-      {"id": "sidebar-wrapper-class", "selector": '<code>.sidebar-wrapper</code>', "summary": "Shell layout class. Wraps the sidebar and inset surfaces."},
-      {"id": "sidebar-wrapper-slot", "selector": '<code>[data-slot="sidebar-wrapper"]</code>', "summary": "Sidebar JavaScript root hook; the same element stores <code>data-sidebar-state</code>."},
       {"id": "sidebar-class", "selector": '<code>.sidebar</code>', "summary": "Navigation region class. Carries the sidebar surface and Bootstrap Offcanvas classes."},
       {"id": "sidebar-slot", "selector": '<code>[data-slot="sidebar"]</code>', "summary": "Sidebar JavaScript region hook inside the wrapper."},
       {"id": "sidebar-trigger", "selector": '<code>[data-sidebar-trigger]</code>', "summary": "Button that toggles the target sidebar and mirrors <code>aria-expanded</code>."},
@@ -85,7 +82,7 @@
       {"id": "sidebar-content", "selector": '<code>[data-slot="sidebar-content"]</code>', "summary": "Scrollable navigation content."},
       {"id": "sidebar-menu-button", "selector": '<code>[data-slot="sidebar-menu-button"]</code>', "summary": "Link, button, collapse trigger, or dropdown trigger row."},
       {"id": "sidebar-submenu", "selector": '<code>.sidebar-menu-sub.collapse</code>', "summary": "Bootstrap Collapse-backed nested list."},
-      {"id": "sidebar-inset", "selector": '<code>.sidebar-inset</code>', "summary": "Page content surface next to the sidebar."}
+      {"id": "sidebar-footer", "selector": '<code>[data-slot="sidebar-footer"]</code>', "summary": "Optional Sidebar footer region for account or utility actions."}
     ] %}
 
     {% set sidebar_part_rows = namespace(by_id={}) %}
@@ -96,8 +93,8 @@
     {
       "heading_id": "sidebar-anatomy-shell",
       "title": "Shell",
-      "rows": [sidebar_part_rows.by_id["sidebar-wrapper-class"], sidebar_part_rows.by_id["sidebar-wrapper-slot"], sidebar_part_rows.by_id["sidebar-class"], sidebar_part_rows.by_id["sidebar-slot"]],
-      "row_ids": ["sidebar-wrapper-class", "sidebar-wrapper-slot", "sidebar-class", "sidebar-slot"]
+      "rows": [sidebar_part_rows.by_id["sidebar-class"], sidebar_part_rows.by_id["sidebar-slot"]],
+      "row_ids": ["sidebar-class", "sidebar-slot"]
     },
     {
       "heading_id": "sidebar-anatomy-controls",
@@ -114,8 +111,8 @@
     {
       "heading_id": "sidebar-anatomy-content",
       "title": "Content",
-      "rows": [sidebar_part_rows.by_id["sidebar-inset"]],
-      "row_ids": ["sidebar-inset"]
+      "rows": [sidebar_part_rows.by_id["sidebar-footer"]],
+      "row_ids": ["sidebar-footer"]
     }
   ] %}
   {{ table(
@@ -127,25 +124,16 @@
     responsive_class="scroll-fade-x no-scrollbar"
   ) }}
 
-    {% set sidebar_aside_class = "sidebar offcanvas-lg offcanvas-start" %}
     {% set sidebar_markup_example %}
-    <div class="sidebar-wrapper" data-slot="sidebar-wrapper" data-sidebar-state="expanded">
-      <aside id="workspace-sidebar" class="{{ sidebar_aside_class }}" tabindex="-1" data-slot="sidebar">
-        <div class="sidebar-inner" data-slot="sidebar-inner">
-          <div class="sidebar-content" data-slot="sidebar-content">
-            <ul class="sidebar-menu" data-slot="sidebar-menu">
-              <li class="sidebar-menu-item" data-slot="sidebar-menu-item">
-                <a class="sidebar-menu-button active" href="/projects" data-slot="sidebar-menu-button" aria-current="page">
-                  Projects
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </aside>
-
-      <main class="sidebar-inset">...</main>
-    </div>
+      {% call sidebar(id="workspace-sidebar", aria_label="Workspace navigation") %}
+        {% call sidebar_content() %}
+          {% call sidebar_menu() %}
+            {% call sidebar_menu_item() %}
+              {{ sidebar_menu_button("Projects", href="/projects", active=true) }}
+            {% endcall %}
+          {% endcall %}
+        {% endcall %}
+      {% endcall %}
     {% endset %}
     {{ render_code_snippet("sidebar-html-anatomy-example", sidebar_markup_example, "html") }}
 
@@ -158,7 +146,7 @@
     </p>
     <p>
       Importing the module never scans the document. Initialize only a
-      <code>[data-slot="sidebar-wrapper"]</code> root your application owns; repeated
+      <code>[data-slot="sidebar-wrapper"]</code> root emitted by <code>app</code>; repeated
       initialization returns the same instance, and <code>dispose()</code>
       releases listeners, generated flyouts, positioning, tooltips, and the
       mobile Offcanvas instance owned by Sidebar.

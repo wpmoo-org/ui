@@ -45,10 +45,40 @@ export function serializeThemeBuilderPresetJson(candidate = {}, options = {}) {
   return `${JSON.stringify(createThemeBuilderPreset(candidate, options), null, 2)}\n`;
 }
 
-export function serializeThemeBuilderPresetCss(candidate = {}) {
+function ownerSelector(ownerMarker) {
+  if (
+    typeof ownerMarker !== "string" ||
+    !/^[A-Za-z][A-Za-z0-9_-]{0,127}$/.test(ownerMarker)
+  ) {
+    throw new TypeError(
+      "Owner-scoped Theme Builder CSS requires a generated owner marker."
+    );
+  }
+  return `.moo-ui[data-moo-theme-builder-owner="${ownerMarker}"]`;
+}
+
+export function serializeThemeBuilderPresetCss(
+  candidate = {},
+  { scope = "standalone", ownerMarker } = {}
+) {
+  if (scope !== "owner" && scope !== "standalone") {
+    throw new TypeError("Theme Builder CSS scope must be owner or standalone.");
+  }
+
   const state = normalizeThemeBuilderState(candidate);
   const lightTokens = resolveThemeBuilderTokens(state, { theme: "light" });
   const darkTokens = resolveThemeBuilderTokens(state, { theme: "dark" });
+  if (scope === "owner") {
+    const selector = ownerSelector(ownerMarker);
+    return [
+      cssBlock(selector, lightTokens),
+      cssBlock(`${selector}[data-bs-theme="dark"]`, darkTokens),
+    ]
+      .filter(Boolean)
+      .join("\n\n")
+      .concat("\n");
+  }
+
   return [
     cssBlock(':root,\n[data-bs-theme="light"]', lightTokens),
     cssBlock('[data-bs-theme="dark"]', darkTokens),

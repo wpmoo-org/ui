@@ -103,7 +103,16 @@ MARKER_VISIBLE_JS = """
 
 THEME_TOGGLE_JS = """
 (args) => {
-  const root = document.documentElement;
+  const element = document.querySelector(args.selector);
+  const root = element?.closest(args.ownerSelector);
+  if (!element || !root) {
+    return {
+      present: false,
+      light: null,
+      dark: null,
+      restored: null,
+    };
+  }
   const hadAttribute = root.hasAttribute(args.attribute);
   const original = root.getAttribute(args.attribute);
   const restore = () => {
@@ -111,17 +120,16 @@ THEME_TOGGLE_JS = """
     else root.removeAttribute(args.attribute);
   };
   const read = () => {
-    const element = document.querySelector(args.selector);
-    return element ? getComputedStyle(element).getPropertyValue(args.property) : null;
+    return getComputedStyle(element).getPropertyValue(args.property);
   };
-  root.removeAttribute(args.attribute);
+  root.setAttribute(args.attribute, "light");
   const light = read();
   root.setAttribute(args.attribute, "dark");
   const dark = read();
   restore();
   const restored = read();
   return {
-    present: document.querySelector(args.selector) !== null,
+    present: true,
     light,
     dark,
     restored,

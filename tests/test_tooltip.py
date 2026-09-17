@@ -9,6 +9,7 @@ from tests.helpers import ROOT, CatalogTestCase
 COMPONENT = ROOT / "src/components/tooltip.html.jinja"
 PAGE = ROOT / "site/src/pages/components/tooltip.html.jinja"
 STYLES = ROOT / "scss/components/_tooltip.scss"
+BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
 # Bootstrap's Tooltip runs data-bs-html content through its own default
 # sanitizer allowlist before it ever reaches the page (see
@@ -87,6 +88,13 @@ class TooltipTests(CatalogTestCase):
         )
 
         self.assertIn('data-bs-placement="right"', output)
+
+    def test_catalog_tooltips_have_an_explicit_nearest_owner_container(self) -> None:
+        source = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
+
+        self.assertIn("const portal = portalFor(trigger);", source)
+        self.assertIn("Tooltip.getOrCreateInstance(trigger, {", source)
+        self.assertIn("container: portal", source)
 
     def test_tooltip_trigger_rejects_unknown_placement(self) -> None:
         with self.assertRaisesRegex(

@@ -4,9 +4,7 @@
  * Includes Bootstrap 5.3.3 component output
  * SPDX-License-Identifier: MIT
  */
-$enable-dark-mode: false;
-$moo-spinner-animation-name: moo-spinner-rotate;
-
+@import "settings/options";
 @import "bootstrap/scss/functions";
 @import "settings";
 @import "bootstrap/scss/variables";
@@ -14,34 +12,8 @@ $moo-spinner-animation-name: moo-spinner-rotate;
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
-@import "themes/scoped_core";
-@import "foundations/core_global_primitives";
-
-.moo-ui {
-  @include moo-core-scales;
-  @include moo-core-shared;
-  @include moo-core-light;
-}
-
-:where(html, body)[data-bs-theme="dark"] .moo-ui:not([data-bs-theme]) {
-  @include moo-core-dark;
-}
-
-.moo-ui[data-bs-theme="light"] {
-  @include moo-core-light;
-}
-
-.moo-ui[data-bs-theme="dark"] {
-  @include moo-core-dark;
-}
-
-.moo-ui[dir="rtl"] {
-  direction: rtl;
-}
-
-@scope (.moo-ui) {
-  @import "components";
-}
-
-@import "foundations/core_state_layer";
-@import "foundations/overlay_backdrop";
+@import "themes/theme";
+@import "foundations/globals";
+@import "foundations/backdrop";
+@import "themes/root";
+@import "foundations/scope";

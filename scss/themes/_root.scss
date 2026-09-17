@@ -1,0 +1,16 @@
+.moo-ui[data-bs-theme] {
+  @include moo-core-scales;
+  @include moo-core-shared;
+}
+
+.moo-ui[data-bs-theme="light"] {
+  @include moo-core-light;
+}
+
+.moo-ui[data-bs-theme="dark"] {
+  @include moo-core-dark;
+}
+
+.moo-ui[data-bs-theme][dir="rtl"] {
+  direction: rtl;
+}

@@ -1,5 +1,5 @@
-body {
-  min-height: 100vh;
+.moo-ui:has(.moo-catalog) {
+  min-block-size: 100dvh;
   // Matches the package's own surface token instead of Bootstrap's
   // unrelated tertiary-bg: elevated "muted surface" chips (e.g. Kbd) are
   // tuned for contrast against --moo-surface, and read as barely distinct
@@ -35,7 +35,7 @@ body:has(.moo-catalog) {
 // Header search follows the reference command trigger: a quiet filled control with
 // no visible resting border, so it reads as top-bar chrome instead of a form
 // field.
-.moo-catalog__search-trigger {
+.moo-catalog .moo-catalog__search-trigger {
   height: var(--moo-catalog-control-height);
   width: 10rem;
   max-width: 100%;
@@ -52,61 +52,61 @@ body:has(.moo-catalog) {
   box-shadow: none;
 }
 
-.moo-catalog__search-trigger:hover {
+.moo-catalog .moo-catalog__search-trigger:hover {
   color: var(--bs-secondary-color);
   border-color: transparent;
   background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));
 }
 
-.moo-catalog__search-trigger:focus-visible {
+.moo-catalog .moo-catalog__search-trigger:focus-visible {
   color: var(--bs-secondary-color);
   border-color: transparent;
   background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));
 }
 
-.moo-catalog__search-trigger-lead {
+.moo-catalog .moo-catalog__search-trigger-lead {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
 }
 
-.moo-catalog__search-trigger-shortcut {
+.moo-catalog .moo-catalog__search-trigger-shortcut {
   align-items: center;
   gap: 0.25rem;
 }
 
 @include media-breakpoint-up(lg) {
-  .moo-catalog__search-trigger {
+  .moo-catalog .moo-catalog__search-trigger {
     width: 13rem;
     flex-basis: 13rem;
   }
 }
 
 @include media-breakpoint-up(xxl) {
-  .moo-catalog__search-trigger {
+  .moo-catalog .moo-catalog__search-trigger {
     width: 16rem;
     flex-basis: 16rem;
   }
 }
 
-.moo-catalog__search-trigger svg {
+.moo-catalog .moo-catalog__search-trigger svg {
   width: 1rem;
   height: 1rem;
   color: var(--bs-secondary-color);
 }
 
-.moo-catalog__header-divider--leading {
+.moo-catalog .moo-catalog__header-divider--leading {
   margin-inline-start: 0.5rem;
 }
 
-.moo-catalog__header-divider {
+.moo-catalog .moo-catalog__header-divider {
   height: 1rem;
   align-self: center;
   background-color: var(--bs-border-color);
 }
 
-.moo-catalog__github-link {
+.moo-catalog .moo-catalog__github-link {
   --bs-btn-color: var(--bs-body-bg);
   --bs-btn-bg: color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg));
   --bs-btn-border-color: var(--bs-btn-bg);
@@ -125,7 +125,7 @@ body:has(.moo-catalog) {
   white-space: nowrap;
 }
 
-.moo-catalog__github-link svg {
+.moo-catalog .moo-catalog__github-link svg {
   width: 1rem;
   height: 1rem;
   color: currentColor;
@@ -135,16 +135,16 @@ body:has(.moo-catalog) {
 // restore symmetric padding so the mark sits optically centered (the core
 // inline-start rule assumes a visible label next to the icon).
 @media (max-width: 991.98px) {
-  .btn.moo-catalog__github-link:has(> [data-icon="inline-start"]) {
+  .moo-catalog .btn.moo-catalog__github-link:has(> [data-icon="inline-start"]) {
     padding-inline: 0.5rem;
   }
 }
 
-.moo-catalog__theme-toggle {
+.moo-catalog .moo-catalog__theme-toggle {
   border-radius: 50%;
 }
 
-.moo-catalog__theme-toggle [data-moo-theme-icon] {
+.moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon] {
   display: none;
   width: 1rem;
   height: 1rem;
@@ -153,12 +153,19 @@ body:has(.moo-catalog) {
   line-height: 1;
 }
 
-:root:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],
-:root[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"] {
-  display: inline-flex;
+@scope (.moo-ui[data-bs-theme="light"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon="light"] {
+    display: inline-flex;
+  }
 }
 
-.moo-catalog__theme-toggle svg {
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon="dark"] {
+    display: inline-flex;
+  }
+}
+
+.moo-catalog .moo-catalog__theme-toggle svg {
   display: block;
   width: 1rem;
   height: 1rem;
@@ -189,60 +196,43 @@ body:has(.moo-catalog) {
   font-family: var(--moo-catalog-font-family, #{$moo-catalog-font-family}), var(--bs-body-font-family);
 }
 
-[data-bs-theme=dark] .moo-catalog {
-  --moo-code-muted: #{$moo-catalog-code-muted-dark};
-  --moo-code-keyword: #{$moo-catalog-code-keyword-dark};
-  --moo-code-selector: #{$moo-catalog-code-selector-dark};
-  --moo-code-tag: #{$moo-catalog-code-tag-dark};
-  --moo-code-property: #{$moo-catalog-code-property-dark};
-  --moo-code-function: #{$moo-catalog-code-function-dark};
-  --moo-code-string: #{$moo-catalog-code-string-dark};
-  --moo-code-constant: #{$moo-catalog-code-constant-dark};
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog {
+    --moo-code-muted: #{$moo-catalog-code-muted-dark};
+    --moo-code-keyword: #{$moo-catalog-code-keyword-dark};
+    --moo-code-selector: #{$moo-catalog-code-selector-dark};
+    --moo-code-tag: #{$moo-catalog-code-tag-dark};
+    --moo-code-property: #{$moo-catalog-code-property-dark};
+    --moo-code-function: #{$moo-catalog-code-function-dark};
+    --moo-code-string: #{$moo-catalog-code-string-dark};
+    --moo-code-constant: #{$moo-catalog-code-constant-dark};
+  }
 }
 
-.moo-catalog > .sidebar-wrapper {
+.moo-catalog > .wrapper[data-layout="app"] {
   --moo-catalog-sidebar-bg: var(--moo-sidebar);
-
-  height: 100svh;
-  overflow: hidden;
 }
 
-:root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper {
-  --moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
+@scope (.moo-ui[data-bs-theme="light"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog > .wrapper[data-layout="app"] {
+    --moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));
+  }
+
+  :scope .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner {
+    background: var(--moo-catalog-sidebar-bg);
+  }
+
+  :scope .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) {
+    background: var(--moo-catalog-sidebar-bg);
+  }
 }
 
-:root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {
-  background: var(--moo-catalog-sidebar-bg);
+.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="left"] .sidebar-inner {
+  border-right: 0;
 }
 
-:root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {
-  background: var(--moo-catalog-sidebar-bg);
-}
-
-// Inset variant: the content card is rounded but doesn't clip its children
-// (the main scrolls), so the direct children that reach the card's corners
-// -- the top bar and the trailing footer/main -- get the same radius,
-// otherwise square corners poke past the card's rounded ones.
-.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .moo-catalog__header {
-  border-top-left-radius: var(--bs-border-radius-xl);
-  border-top-right-radius: var(--bs-border-radius-xl);
-}
-
-.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .moo-catalog__main:last-child,
-.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .moo-catalog__footer:last-child {
-  border-bottom-left-radius: var(--bs-border-radius-xl);
-  border-bottom-right-radius: var(--bs-border-radius-xl);
-}
-
-// Inset: the content card floats with a gap on every side instead of
-// touching the sidebar, and the sidebar's edge border goes away -- the
-// separation between the page and the card is the gap, not a border.
-.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inset {
-  margin-inline-start: 0.5rem;
-}
-
-.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inner {
-  border-inline-end: 0;
+.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="right"] .sidebar-inner {
+  border-left: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -251,7 +241,7 @@ body:has(.moo-catalog) {
   }
 }
 
-.moo-catalog__header {
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > header {
   position: sticky;
   z-index: $zindex-fixed;
   top: 0;
@@ -260,20 +250,13 @@ body:has(.moo-catalog) {
   backdrop-filter: var(--moo-catalog-header-backdrop-filter);
 }
 
-.moo-catalog__navbar {
+.moo-catalog .moo-catalog__navbar {
   min-height: var(--moo-catalog-header-height);
 }
 
-.moo-catalog__content,
 .moo-catalog__footer-inner {
   width: 100%;
-  max-width: 72rem;
   margin-inline: auto;
-}
-
-.moo-catalog__navbar-inner {
-  width: 100%;
-  gap: 1rem;
 }
 
 .moo-catalog__brand,
@@ -335,16 +318,8 @@ body:has(.moo-catalog) {
   white-space: nowrap;
 }
 
-.moo-catalog__header-start {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  min-width: 0;
-  flex: 1 1 0;
-}
-
-.moo-catalog__sidebar-toggle,
-.moo-catalog__nav-menu-trigger {
+.moo-catalog .moo-catalog__sidebar-toggle,
+.moo-catalog .moo-catalog__nav-menu-trigger {
   --bs-btn-bg: var(--bs-body-bg);
   --bs-btn-border-color: var(--moo-border);
   --bs-btn-hover-border-color: var(--moo-border);
@@ -352,29 +327,31 @@ body:has(.moo-catalog) {
   box-shadow: var(--bs-box-shadow-sm);
 }
 
-.moo-catalog__sidebar-toggle {
+.moo-catalog .moo-catalog__sidebar-toggle {
   width: var(--moo-catalog-control-height);
   height: var(--moo-catalog-control-height);
 }
 
-[data-bs-theme="dark"] .moo-catalog__sidebar-toggle,
-[data-bs-theme="dark"] .moo-catalog__nav-menu-trigger {
-  --bs-btn-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 85%, transparent);
-  --bs-btn-active-border-color: var(--moo-border);
+@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
+  :scope .moo-catalog .moo-catalog__sidebar-toggle,
+  :scope .moo-catalog .moo-catalog__nav-menu-trigger {
+    --bs-btn-border-color: color-mix(in srgb, var(--moo-border) 70%, transparent);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--moo-border) 85%, transparent);
+    --bs-btn-active-border-color: var(--moo-border);
+  }
 }
 
-.moo-catalog__nav-dropdown .dropdown-menu {
+.moo-catalog .moo-catalog__nav-dropdown .dropdown-menu {
   min-width: 10rem;
 }
 
-.moo-catalog__header-nav,
-.moo-catalog__header-nav .nav {
+.moo-catalog .moo-catalog__header-nav,
+.moo-catalog .moo-catalog__header-nav .nav {
   align-items: center;
   gap: 1rem;
 }
 
-.moo-catalog__header-nav .nav-link {
+.moo-catalog .moo-catalog__header-nav .nav-link {
   min-height: 1.25rem;
   padding: 0;
   color: var(--bs-secondary-color);
@@ -383,13 +360,13 @@ body:has(.moo-catalog) {
   text-decoration: none;
 }
 
-.moo-catalog__header-nav .nav-link:hover,
-.moo-catalog__header-nav .nav-link.active {
+.moo-catalog .moo-catalog__header-nav .nav-link:hover,
+.moo-catalog .moo-catalog__header-nav .nav-link.active {
   color: var(--bs-body-color);
   background: transparent;
 }
 
-.moo-catalog__header-nav .nav:has(.nav-link:hover) .nav-link.active:not(:hover) {
+.moo-catalog .moo-catalog__header-nav .nav:has(.nav-link:hover) .nav-link.active:not(:hover) {
   color: var(--bs-secondary-color);
   background: transparent;
 }
@@ -397,7 +374,7 @@ body:has(.moo-catalog) {
 // The Components dropdown trigger reads like the plain nav links around
 // it: same type and color, zeroed button padding. is-current marks the
 // dropdown while any Components/Utilities page is open.
-.moo-catalog__header-nav .moo-catalog__header-nav-trigger {
+.moo-catalog .moo-catalog__header-nav .moo-catalog__header-nav-trigger {
   min-height: 1.25rem;
   padding: 0;
   color: var(--bs-secondary-color);
@@ -405,26 +382,15 @@ body:has(.moo-catalog) {
   font-weight: 500;
 }
 
-.moo-catalog__header-nav .moo-catalog__header-nav-trigger:hover,
-.moo-catalog__header-nav .moo-catalog__header-nav-trigger.show,
-.moo-catalog__header-nav-dropdown.is-current .moo-catalog__header-nav-trigger {
+.moo-catalog .moo-catalog__header-nav .moo-catalog__header-nav-trigger:hover,
+.moo-catalog .moo-catalog__header-nav .moo-catalog__header-nav-trigger.show,
+.moo-catalog .moo-catalog__header-nav-dropdown.is-current .moo-catalog__header-nav-trigger {
   color: var(--bs-body-color);
   background: transparent;
 }
 
-.moo-catalog__header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 0 0 auto;
-  min-width: 0;
-  margin-left: auto;
-}
-
-.moo-catalog__main {
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main {
   --scroll-fade-size: min(6%, 2rem);
   --scroll-fade-reveal: 4rem;
-  min-width: 0;
-  flex: 1;
   overflow-y: auto;
 }

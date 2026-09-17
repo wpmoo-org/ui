@@ -23,6 +23,7 @@ MODULES = {
     "examples-users.js": "initExamplesUsers",
     "toc.js": "initToc",
     "code-preview.js": "initCodePreview",
+    "scroll-host.js": None,
     "bootstrap-preview.js": "initBootstrapPreview",
     "home-motion.js": "initHomeMotion",
     "block-frame.js": "initBlockFrames",
@@ -58,6 +59,19 @@ def without_comments(source: str) -> str:
 
 
 class CatalogJavaScriptTests(CatalogTestCase):
+    def test_catalog_initializes_every_keyed_sidebar_wrapper(self) -> None:
+        source = without_comments(
+            (CATALOG_JS / "index.js").read_text(encoding="utf-8")
+        )
+
+        self.assertRegex(
+            source,
+            r"root\.querySelectorAll\(\s*"
+            r"['\"]\[data-slot=\"sidebar-wrapper\"\]"
+            r"\[data-sidebar-key\]['\"]\s*,?\s*\)",
+        )
+        self.assertIn("sidebarRoots.forEach", source)
+
     def test_catalog_module_surface_is_explicit(self) -> None:
         discovered = {
             path.relative_to(CATALOG_JS).as_posix()
@@ -148,6 +162,184 @@ console.log(JSON.stringify({ assignments, theme: dataset.bsTheme }));
         report = json.loads(result.stdout.splitlines()[-1])
         self.assertEqual(report["assignments"], [])
         self.assertEqual(report["theme"], "dark")
+
+    def test_theme_init_survives_an_unavailable_match_media(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import assert from "node:assert/strict";
+import { initTheme } from "./site/src/js/catalog/theme.js";
+
+const documentElement = { dir: "ltr" };
+const body = { children: [], firstElementChild: null };
+const view = {
+  localStorage: { getItem: () => "system", setItem() {} },
+  matchMedia() { throw new Error("unavailable"); },
+};
+const root = {
+  nodeType: 9,
+  body,
+  documentElement,
+  defaultView: view,
+  querySelectorAll() { return []; },
+};
+const owner = {
+  nodeType: 1,
+  dataset: { bsTheme: "light" },
+  ownerDocument: root,
+  parentElement: body,
+  children: [],
+  matches(selector) {
+    return selector.includes(".moo-ui") && this.dataset.bsTheme === "light";
+  },
+  querySelectorAll() { return []; },
+};
+body.children = [owner];
+body.firstElementChild = owner;
+body.querySelectorAll = () => [owner];
+
+const dispose = initTheme(root);
+assert.equal(typeof dispose, "function");
+assert.equal(owner.dataset.bsTheme, "light");
+dispose();
+console.log(JSON.stringify({
+  initialized: true,
+  theme: owner.dataset.bsTheme,
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout.splitlines()[-1]),
+            {"initialized": True, "theme": "light"},
+        )
+
+    def test_theme_init_scopes_preferences_to_resolved_owners(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initTheme } from "./site/src/js/catalog/theme.js";
+
+const storage = new Map([
+  ["first:theme", "dark"],
+  ["first:direction", "rtl"],
+  ["second:theme", "light"],
+  ["second:direction", "ltr"],
+  ["outer:theme", "system"],
+  ["outer:direction", "rtl"],
+  ["inner:theme", "light"],
+  ["inner:direction", "ltr"],
+]);
+const writes = [];
+const localStorage = {
+  getItem: (key) => storage.get(key) ?? null,
+  setItem: (key, value) => storage.set(key, String(value)),
+};
+const media = {
+  matches: false,
+  handlers: [],
+  addEventListener(type, handler) {
+    if (type === "change") this.handlers.push(handler);
+  },
+  removeEventListener(type, handler) {
+    this.handlers = this.handlers.filter((candidate) => candidate !== handler);
+  },
+  change(matches) {
+    this.matches = matches;
+    this.handlers.forEach((handler) => handler({ matches }));
+  },
+};
+const view = { localStorage, matchMedia: () => media };
+
+function element(dataset = {}) {
+  return {
+    dataset,
+    attributes: {},
+    setAttribute(name, value) { this.attributes[name] = String(value); },
+    getAttribute(name) { return this.attributes[name] ?? null; },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+}
+
+const documentElement = element(new Proxy({}, {
+  set(target, key, value) { writes.push(`html:${String(key)}`); target[key] = value; return true; },
+}));
+const body = element(new Proxy({}, {
+  set(target, key, value) { writes.push(`body:${String(key)}`); target[key] = value; return true; },
+}));
+const doc = { nodeType: 9, body, documentElement, defaultView: view };
+
+function owner(name, theme, key, directionKey, parent = body) {
+  const root = element({
+    bsTheme: theme,
+    ...(key ? { mooThemeKey: key } : {}),
+    ...(directionKey ? { mooDirectionKey: directionKey } : {}),
+  });
+  root.ownerDocument = doc;
+  root.parentElement = parent;
+  root.matches = (selector) => selector.includes(".moo-ui") && (root.dataset.bsTheme === "light" || root.dataset.bsTheme === "dark");
+  root.querySelectorAll = () => [];
+  root.children = [];
+  return root;
+}
+
+const first = owner("first", "light", "first:theme", "first:direction");
+const second = owner("second", "dark", "second:theme", "second:direction");
+const outer = owner("outer", "dark", "outer:theme", "outer:direction");
+const inner = owner("inner", "dark", "inner:theme", "inner:direction", outer);
+outer.children = [inner];
+const firstButton = element();
+const secondButton = element();
+const innerButton = element();
+firstButton.closest = () => first;
+secondButton.closest = () => second;
+innerButton.closest = () => inner;
+body.children = [first, second, outer];
+body.firstElementChild = first;
+body.querySelectorAll = () => [first, second, outer, inner];
+doc.querySelectorAll = (selector) =>
+  selector.includes("data-moo-theme") ? [firstButton, secondButton, innerButton] : [];
+
+initTheme(doc);
+media.change(true);
+console.log(JSON.stringify({
+  themes: [first.dataset.bsTheme, second.dataset.bsTheme, outer.dataset.bsTheme, inner.dataset.bsTheme],
+  directions: [first.dir, second.dir, outer.dir, inner.dir],
+  writes,
+  labels: [firstButton.attributes["aria-label"], secondButton.attributes["aria-label"], innerButton.attributes["aria-label"]],
+}));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["themes"], ["dark", "light", "dark", "light"])
+        self.assertEqual(case["directions"], ["rtl", "ltr", "rtl", "ltr"])
+        self.assertEqual(case["writes"], [])
+        self.assertEqual(
+            case["labels"],
+            ["Switch to light mode", "Switch to dark mode", "Switch to dark mode"],
+        )
 
     def test_theme_builder_schema_migrates_legacy_state(self) -> None:
         result = subprocess.run(
@@ -609,7 +801,52 @@ console.log(JSON.stringify({
         self.assertEqual(case["cssRgb"], [])
         self.assertEqual(case["allowListRgb"], [])
 
-    def test_theme_builder_first_paint_payload_matches_contract(self) -> None:
+    def test_theme_builder_owner_export_rejects_arbitrary_scope(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { serializeThemeBuilderPresetCss } from "./site/src/js/catalog/theme-builder-export.js";
+
+const owner = serializeThemeBuilderPresetCss(
+  { themeColor: "blue" },
+  { scope: "owner", ownerMarker: "moo-owner-7f4a" },
+);
+const failures = [];
+for (const options of [
+  { scope: "owner" },
+  { scope: "selector", ownerMarker: ".arbitrary" },
+  { scope: "owner", ownerMarker: 'x"] body { color: red; }' },
+]) {
+  try {
+    serializeThemeBuilderPresetCss({}, options);
+  } catch (error) {
+    failures.push(error.constructor.name);
+  }
+}
+console.log(JSON.stringify({ owner, failures }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertIn(
+            '.moo-ui[data-moo-theme-builder-owner="moo-owner-7f4a"] {',
+            case["owner"],
+        )
+        self.assertNotIn(":root", case["owner"])
+        self.assertNotIn("body", case["owner"])
+        self.assertEqual(case["failures"], ["TypeError", "TypeError", "TypeError"])
+
+    def test_theme_builder_schema_matches_contract(self) -> None:
         result = subprocess.run(
             [
                 "node",
@@ -619,7 +856,6 @@ console.log(JSON.stringify({
 import {
   PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
   THEME_BUILDER_OPTIONS,
-  createThemeBuilderFirstPaintPayload,
 } from "./site/src/js/catalog/theme-builder-schema.js";
 import {
   createThemeBuilderPreset,
@@ -628,7 +864,6 @@ import {
 console.log(JSON.stringify({
   allowList: PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
   options: THEME_BUILDER_OPTIONS,
-  payload: createThemeBuilderFirstPaintPayload(),
   presetFields: Object.keys(createThemeBuilderPreset({})),
 }));
 """,
@@ -681,17 +916,6 @@ console.log(JSON.stringify({
                     self.assertIn('"radius": "compact"', contract)
                     self.assertIn('normalizes that value to `"small"`', contract)
                     self.assertIn('`"compact"` is not emitted', contract)
-
-        build_result = self.run_build()
-        self.assertEqual(build_result.returncode, 0, build_result.stderr)
-        page = (DIST / "index.html").read_text(encoding="utf-8")
-        payload_match = re.search(
-            r"const themeBuilderFirstPaint = (\{.*?\});\n",
-            page,
-            flags=re.DOTALL,
-        )
-        self.assertIsNotNone(payload_match, "missing first-paint payload")
-        self.assertEqual(json.loads(payload_match.group(1)), case["payload"])
 
     def test_theme_builder_first_paint_payload_is_defensive_copy(self) -> None:
         result = subprocess.run(
@@ -751,7 +975,12 @@ console.log(JSON.stringify({
             (script for script in inline_scripts if "themeBuilderFirstPaint" in script),
             None,
         )
-        self.assertIsNotNone(inline_script, "missing Theme Builder first-paint script")
+        if inline_script is None:
+            source = (CATALOG_JS / "settings-panel.js").read_text(encoding="utf-8")
+            self.assertNotIn("moo-theme-builder-tokens", page)
+            self.assertIn("data-moo-theme-builder-owner", source)
+            self.assertIn("data-moo-theme-builder-style", source)
+            return
 
         result = subprocess.run(
             [
@@ -819,10 +1048,20 @@ const fixtures = [
 
 function makeStyle() {
   const values = {};
+  let textContent = "";
   return {
     values,
-    setProperty(name, value) {
-      values[name] = value;
+    get textContent() {
+      return textContent;
+    },
+    set textContent(value) {
+      textContent = String(value);
+      Object.keys(values).forEach((name) => delete values[name]);
+      const declarations = textContent.match(/\{([\s\S]*)\}/)?.[1] || "";
+      declarations.split(";").forEach((declaration) => {
+        const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
+        if (match) values[match[1]] = match[2];
+      });
     },
   };
 }
@@ -858,14 +1097,13 @@ function diffObject(actual, expected) {
 }
 
 function runInlineScript(fixture) {
-  const style = makeStyle();
+  const tokenStyle = makeStyle();
+  const body = {
+    dataset: {},
+  };
   const documentElement = {
-    // The real document runs the theme-restoration inline script before the
-    // Theme Builder first-paint script. Seed the same state here so dark
-    // fixtures exercise the catalog-surface token branch.
-    dataset: { bsTheme: fixture.theme },
+    dataset: {},
     dir: "ltr",
-    style,
   };
   globalThis.window = {
     localStorage: makeStorage(fixture),
@@ -873,15 +1111,19 @@ function runInlineScript(fixture) {
     setTimeout: () => 0,
   };
   globalThis.document = {
+    body,
     documentElement,
+    getElementById: (id) =>
+      id === "moo-theme-builder-tokens" ? tokenStyle : null,
     querySelector: () => null,
   };
 
   eval(inlineScript);
 
   return {
-    dataset: { ...documentElement.dataset },
-    tokens: style.values,
+    dataset: { ...body.dataset },
+    tokens: tokenStyle.values,
+    tokenStyle: tokenStyle.textContent,
   };
 }
 
@@ -1221,7 +1463,9 @@ const view = {
   clearTimeout() {},
   requestAnimationFrame(callback) { callback(); return 1; },
   cancelAnimationFrame() {},
-  getComputedStyle() { return { fontSize: "16px" }; },
+  getComputedStyle(element) {
+    return { fontSize: "16px", overflowY: element === page ? "auto" : "visible" };
+  },
   matchMedia() { return { matches: false }; },
   scrollTo() {},
   addEventListener() {},
@@ -1243,7 +1487,8 @@ const anatomy = element("h2", { id: "sidebar-html-anatomy" }, "HTML Anatomy");
 const componentExamples = element("div", { class: "moo-component-examples" });
 componentExamples.children = [usage, example, composition, anatomy];
 
-const main = element("main", { class: "moo-catalog__main" });
+const page = element("div", { "data-slot": "page" });
+const main = page;
 main.scrollTop = 0;
 main.clientHeight = 800;
 main.scrollHeight = 1600;
@@ -1257,7 +1502,7 @@ const root = {
   querySelector(selector) {
     if (selector === "[data-moo-component-toc]") return componentToc;
     if (selector === ".moo-component-examples") return componentExamples;
-    if (selector === ".moo-catalog__main") return main;
+    if (selector === '[data-slot="page"]') return page;
     if (selector === "[data-moo-chart-template-nav]") return null;
     return null;
   },
@@ -1403,7 +1648,9 @@ const view = {
   clearTimeout() {},
   requestAnimationFrame(callback) { callback(); return 1; },
   cancelAnimationFrame() {},
-  getComputedStyle() { return { fontSize: "16px" }; },
+  getComputedStyle(element) {
+    return { fontSize: "16px", overflowY: element === page ? "auto" : "visible" };
+  },
   matchMedia() { return { matches: false }; },
   scrollTo() {},
   addEventListener() {},
@@ -1426,7 +1673,8 @@ const basic = element(
 const componentExamples = element("div", { class: "moo-component-examples" });
 componentExamples.children = [usage, basic];
 
-const main = element("main", { class: "moo-catalog__main" });
+const page = element("div", { "data-slot": "page" });
+const main = page;
 main.scrollTop = 0;
 main.clientHeight = 800;
 main.scrollHeight = 1600;
@@ -1440,7 +1688,7 @@ const root = {
   querySelector(selector) {
     if (selector === "[data-moo-component-toc]") return componentToc;
     if (selector === ".moo-component-examples") return componentExamples;
-    if (selector === ".moo-catalog__main") return main;
+    if (selector === '[data-slot="page"]') return page;
     if (selector === "[data-moo-chart-template-nav]") return null;
     return null;
   },
@@ -1480,6 +1728,118 @@ console.log(JSON.stringify({
                 {"href": "#basic", "text": "Basic"},
             ],
         )
+
+    def test_toc_scrolls_the_document_or_nested_page_without_cross_host_reset(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initToc } from "./site/src/js/catalog/toc.js";
+
+function makeCase(nested) {
+  const windowScrolls = [];
+  const elementScrolls = [];
+  const view = {
+    Node: { DOCUMENT_POSITION_FOLLOWING: 4 },
+    location: { hash: "#target" },
+    history: { pushState() {} },
+    scrollX: 0,
+    scrollY: 240,
+    setTimeout() { return 1; },
+    clearTimeout() {},
+    requestAnimationFrame(callback) { callback(); return 1; },
+    cancelAnimationFrame() {},
+    getComputedStyle(element) {
+      return { fontSize: "16px", overflowY: element === page ? "auto" : "visible" };
+    },
+    matchMedia() { return { matches: false }; },
+    scrollTo(options) { windowScrolls.push(options); },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const documentElement = {
+    nodeType: 1,
+    scrollTop: 0,
+    clientHeight: 400,
+    scrollHeight: 1200,
+    getBoundingClientRect: () => ({ top: 0, bottom: 400, left: 0, right: 800 }),
+    scrollTo(options) { elementScrolls.push(options); this.scrollTop = options.top; },
+  };
+  const documentNode = {
+    nodeType: 9,
+    defaultView: view,
+    scrollingElement: documentElement,
+    documentElement,
+  };
+  const page = {
+    nodeType: 1,
+    ownerDocument: documentNode,
+    scrollTop: 0,
+    clientHeight: 400,
+    scrollHeight: 1200,
+    getBoundingClientRect: () => ({ top: 10, bottom: 410, left: 0, right: 800 }),
+    scrollTo(options) { elementScrolls.push(options); this.scrollTop = options.top; },
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const target = {
+    getBoundingClientRect: () => ({ top: 260, bottom: 300, left: 0, right: 200 }),
+  };
+  const link = {
+    getAttribute(name) { return name === "href" ? "#target" : null; },
+    classList: { toggle() {} },
+    setAttribute() {},
+    removeAttribute() {},
+    addEventListener() {},
+    removeEventListener() {},
+  };
+  const root = nested
+    ? {
+        nodeType: 1,
+        ownerDocument: documentNode,
+        defaultView: view,
+        documentElement,
+        querySelector(selector) {
+          return selector === '[data-slot="page"]' ? page : null;
+        },
+        querySelectorAll(selector) {
+          return selector === ".moo-doc-toc .nav-link" ? [link] : [];
+        },
+        getElementById(id) { return id === "target" ? target : null; },
+      }
+    : {
+        nodeType: 9,
+        defaultView: view,
+        documentElement,
+        scrollingElement: documentElement,
+        querySelector() { return null; },
+        querySelectorAll(selector) {
+          return selector === ".moo-doc-toc .nav-link" ? [link] : [];
+        },
+        getElementById(id) { return id === "target" ? target : null; },
+      };
+  initToc(root);
+  return { windowScrolls, elementScrolls };
+}
+
+console.log(JSON.stringify({ document: makeCase(false), nested: makeCase(true) }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(case["document"]["windowScrolls"], [])
+        self.assertTrue(case["document"]["elementScrolls"])
+        self.assertTrue(case["nested"]["windowScrolls"])
+        self.assertTrue(case["nested"]["elementScrolls"])
 
     def test_examples_chart_import_resolves_to_the_canonical_bundle(
         self,
@@ -1544,13 +1904,199 @@ console.log(JSON.stringify({
         self.assertNotIn("data-moo-theme-style", styles)
         self.assertNotIn("data-moo-base-color", styles)
         self.assertNotIn("mooCatalogThemeBuilderStyle", source)
-        self.assertIn("mooCatalogThemeBuilderBaseColor", source)
+        for dataset in (
+            "mooCatalogThemeBuilderBaseColor",
+            "mooCatalogThemeBuilderThemeColor",
+            "mooCatalogThemeBuilderChartColor",
+            "mooCatalogThemeBuilderHeadingFont",
+            "mooCatalogThemeBuilderBodyFont",
+            "mooCatalogThemeBuilderRadius",
+            "mooCatalogThemeBuilderPrepaint",
+        ):
+            with self.subTest(dataset=dataset):
+                self.assertIn(dataset, source)
         self.assertIn("data-moo-catalog-theme-builder-updating", styles)
         self.assertNotIn("data-moo-catalog-theme-builder-style=", styles)
         self.assertNotIn(
             "[data-moo-catalog-theme-builder-theme-color] .moo-catalog",
             styles,
         )
+
+    def test_settings_reset_restores_owner_server_baselines(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import assert from "node:assert/strict";
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+import { effectiveOwnerDirection } from "./src/js/theme-owner.js";
+
+function emitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => {
+    listeners.set(type, [...(listeners.get(type) || []), handler]);
+  };
+  node.removeEventListener = (type, handler) => {
+    listeners.set(type, (listeners.get(type) || []).filter((candidate) => candidate !== handler));
+  };
+  node.click = () => {
+    (listeners.get("click") || []).forEach((handler) => handler({ target: node }));
+  };
+  return node;
+}
+
+function directionNode(node, initial = null) {
+  const attributes = initial ? { dir: initial } : {};
+  Object.defineProperty(node, "dir", {
+    get() { return attributes.dir || ""; },
+    set(value) {
+      if (value) attributes.dir = value;
+      else delete attributes.dir;
+    },
+  });
+  node.getAttribute = (name) => attributes[name] ?? null;
+  node.removeAttribute = (name) => { delete attributes[name]; };
+  return node;
+}
+
+function radio(value) {
+  return emitter({ value, checked: false });
+}
+
+function runScenario({ baselineTheme, currentTheme, embedded = false }) {
+  const storage = new Map([
+    [embedded ? "embedded:theme" : "moo:theme", currentTheme],
+    [embedded ? "embedded:direction" : "moo:direction", "ltr"],
+  ]);
+  const view = {
+    localStorage: {
+      getItem: (key) => storage.get(key) ?? null,
+      setItem: (key, value) => storage.set(key, String(value)),
+      removeItem: (key) => storage.delete(key),
+    },
+    matchMedia: () => ({ matches: false }),
+    requestAnimationFrame: (callback) => callback(),
+  };
+  const documentElement = directionNode({}, "rtl");
+  const documentBody = { children: [], firstElementChild: null };
+  const root = {
+    nodeType: 9,
+    body: documentBody,
+    documentElement,
+    defaultView: view,
+    querySelectorAll: () => [],
+  };
+  const reset = emitter();
+  const themeInputs = [radio("system"), radio("light"), radio("dark")];
+  const directionInputs = [radio("ltr"), radio("rtl")];
+  const sheet = emitter({
+    querySelectorAll(selector) {
+      if (selector === "[data-moo-settings-theme]") return themeInputs;
+      if (selector === "[data-moo-settings-direction]") return directionInputs;
+      return [];
+    },
+    querySelector(selector) {
+      return selector === "[data-moo-settings-reset]" ? reset : null;
+    },
+  });
+  const owner = directionNode({
+    nodeType: 1,
+    dataset: {
+      bsTheme: currentTheme,
+      ...(embedded ? {
+        mooThemeKey: "embedded:theme",
+        mooDirectionKey: "embedded:direction",
+      } : {}),
+    },
+    children: [],
+    ownerDocument: root,
+    parentElement: null,
+    matches(selector) {
+      return selector.includes(".moo-ui") && ["light", "dark"].includes(this.dataset.bsTheme);
+    },
+    querySelectorAll: () => [],
+  }, embedded ? "ltr" : null);
+  owner.__mooPrepaintBaseline = {
+    theme: baselineTheme,
+    direction: embedded ? null : "rtl",
+  };
+  sheet.ownerDocument = root;
+  sheet.closest = () => owner;
+  root.querySelector = (selector) =>
+    selector === "#catalog-settings" ? sheet : null;
+
+  if (embedded) {
+    const outer = directionNode({ children: [owner], parentElement: documentBody }, "rtl");
+    owner.parentElement = outer;
+    documentBody.children = [outer];
+    documentBody.firstElementChild = outer;
+  } else {
+    owner.parentElement = documentBody;
+    documentBody.children = [owner];
+    documentBody.firstElementChild = owner;
+  }
+
+  const dispose = initSettingsPanel(root);
+  reset.click();
+  const result = {
+    theme: owner.dataset.bsTheme,
+    selectedTheme: themeInputs.find((input) => input.checked)?.value ?? null,
+    selectedDirection: directionInputs.find((input) => input.checked)?.value ?? null,
+    localDirection: owner.getAttribute("dir"),
+    effectiveDirection: effectiveOwnerDirection(owner),
+    storedTheme: storage.get(embedded ? "embedded:theme" : "moo:theme") ?? null,
+    storedDirection: storage.get(embedded ? "embedded:direction" : "moo:direction") ?? null,
+  };
+  dispose();
+  return result;
+}
+
+const report = {
+  serverLight: runScenario({ baselineTheme: "light", currentTheme: "dark" }),
+  serverDark: runScenario({ baselineTheme: "dark", currentTheme: "light" }),
+  inheritedRtl: runScenario({ baselineTheme: "light", currentTheme: "dark", embedded: true }),
+};
+
+assert.deepEqual(report.serverLight, {
+  theme: "light",
+  selectedTheme: "light",
+  selectedDirection: "rtl",
+  localDirection: null,
+  effectiveDirection: "rtl",
+  storedTheme: null,
+  storedDirection: null,
+});
+assert.deepEqual(report.serverDark, {
+  theme: "dark",
+  selectedTheme: "dark",
+  selectedDirection: "rtl",
+  localDirection: null,
+  effectiveDirection: "rtl",
+  storedTheme: null,
+  storedDirection: null,
+});
+assert.deepEqual(report.inheritedRtl, {
+  theme: "light",
+  selectedTheme: "light",
+  selectedDirection: "rtl",
+  localDirection: null,
+  effectiveDirection: "rtl",
+  storedTheme: null,
+  storedDirection: null,
+});
+console.log(JSON.stringify(report));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_settings_theme_builder_applies_tokens_persistence_and_reset(self) -> None:
         result = subprocess.run(
@@ -1603,9 +2149,20 @@ function makeEmitter(node = {}) {
 
 function makeStyle() {
   const values = new Map();
+  let textContent = "";
   return {
-    setProperty: (name, value) => values.set(name, value),
-    removeProperty: (name) => values.delete(name),
+    get textContent() {
+      return textContent;
+    },
+    set textContent(value) {
+      textContent = String(value);
+      values.clear();
+      const declarations = textContent.match(/\{([\s\S]*)\}/)?.[1] || "";
+      declarations.split(";").forEach((declaration) => {
+        const match = declaration.match(/\s*(--[^:]+):\s*(.*?)\s*$/);
+        if (match) values.set(match[1], match[2]);
+      });
+    },
     getPropertyValue: (name) => values.get(name) || "",
   };
 }
@@ -1689,15 +2246,42 @@ const sheet = makeEmitter({
       : fieldRoots[selector] || null,
 });
 const documentElement = {
-  dataset: { bsTheme: "light" },
+  dataset: {},
   dir: "ltr",
-  style: makeStyle(),
 };
+const documentBody = {
+  children: [],
+  firstElementChild: null,
+};
+const body = {
+  dataset: { bsTheme: "light" },
+  children: [],
+  parentElement: documentBody,
+  dir: "ltr",
+};
+const themeBuilderTokenStyle = makeStyle();
+body.matches = (selector) => selector.includes(".moo-ui");
+body.querySelector = (selector) =>
+  selector === ":scope > style[data-moo-theme-builder-style]"
+    ? themeBuilderTokenStyle
+    : null;
+documentBody.children = [body];
+documentBody.firstElementChild = body;
 const root = {
+  nodeType: 9,
+  body: documentBody,
   documentElement,
   defaultView: { localStorage, matchMedia: () => ({ matches: false }) },
-  querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
+  querySelector: (selector) =>
+    selector === "#catalog-settings"
+      ? sheet
+      : selector === "#moo-theme-builder-tokens"
+        ? themeBuilderTokenStyle
+        : null,
 };
+body.ownerDocument = root;
+sheet.ownerDocument = root;
+sheet.closest = () => body;
 
 localStorage.setItem(
   "moo:theme-builder",
@@ -1728,23 +2312,28 @@ function optionFor(key, value) {
 
 const initial = {
   styleDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderStyle"
   ),
-  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
-  themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor,
-  broadStyleDataset: Object.hasOwn(documentElement.dataset, "mooThemeStyle"),
-  broadBaseDataset: Object.hasOwn(documentElement.dataset, "mooBaseColor"),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
-  primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
-  foreground: documentElement.style.getPropertyValue("--moo-primary-foreground"),
-  chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
-  mutedSurface: documentElement.style.getPropertyValue("--moo-muted-surface"),
-  secondaryBg: documentElement.style.getPropertyValue("--bs-secondary-bg"),
-  cardBg: documentElement.style.getPropertyValue("--bs-card-bg"),
-  heading: documentElement.style.getPropertyValue("--moo-heading-font-family"),
-  body: documentElement.style.getPropertyValue("--bs-body-font-family"),
-  radius: documentElement.style.getPropertyValue("--bs-border-radius"),
+  baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor,
+  themeDataset: body.dataset.mooCatalogThemeBuilderThemeColor,
+  chartDataset: body.dataset.mooCatalogThemeBuilderChartColor,
+  headingDataset: body.dataset.mooCatalogThemeBuilderHeadingFont,
+  bodyDataset: body.dataset.mooCatalogThemeBuilderBodyFont,
+  radiusDataset: body.dataset.mooCatalogThemeBuilderRadius,
+  prepaintDataset: body.dataset.mooCatalogThemeBuilderPrepaint,
+  broadStyleDataset: Object.hasOwn(body.dataset, "mooThemeStyle"),
+  broadBaseDataset: Object.hasOwn(body.dataset, "mooBaseColor"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
+  primaryRgb: themeBuilderTokenStyle.getPropertyValue("--bs-primary-rgb"),
+  foreground: themeBuilderTokenStyle.getPropertyValue("--moo-primary-foreground"),
+  chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
+  mutedSurface: themeBuilderTokenStyle.getPropertyValue("--moo-muted-surface"),
+  secondaryBg: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-bg"),
+  cardBg: themeBuilderTokenStyle.getPropertyValue("--bs-card-bg"),
+  heading: themeBuilderTokenStyle.getPropertyValue("--moo-heading-font-family"),
+  body: themeBuilderTokenStyle.getPropertyValue("--bs-body-font-family"),
+  radius: themeBuilderTokenStyle.getPropertyValue("--bs-border-radius"),
   selectedBase: selectedValue("baseColor"),
   selectedTheme: selectedValue("themeColor"),
   selectedChart: selectedValue("chartColor"),
@@ -1753,18 +2342,18 @@ const initial = {
 
 optionFor("baseColor", "zinc").dispatch("pointerenter");
 const afterBasePreview = {
-  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor || null,
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor || null,
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
 };
 controls.baseColor.root.dispatch("hidden.bs.dropdown");
 const afterBasePreviewHiddenClear = {
   baseDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
 };
@@ -1772,10 +2361,10 @@ optionFor("baseColor", "zinc").dispatch("pointerenter");
 optionFor("baseColor", "zinc").dispatch("pointerleave");
 const afterBasePreviewClear = {
   baseDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
   selectedBase: selectedValue("baseColor"),
   persistedBase: JSON.parse(localStorage.getItem("moo:theme-builder")).baseColor,
 };
@@ -1783,63 +2372,63 @@ const afterBasePreviewClear = {
 optionFor("themeColor", "neutral").dispatch("pointerenter");
 const afterThemePreview = {
   themeDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   selectedTheme: selectedValue("themeColor"),
   persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
 };
 optionFor("themeColor", "neutral").dispatch("pointerleave");
 const afterThemePreviewClear = {
-  themeDataset: documentElement.dataset.mooCatalogThemeBuilderThemeColor || null,
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  themeDataset: body.dataset.mooCatalogThemeBuilderThemeColor || null,
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   selectedTheme: selectedValue("themeColor"),
   persistedTheme: JSON.parse(localStorage.getItem("moo:theme-builder")).themeColor,
 };
 
 optionFor("baseColor", "zinc").click();
 const afterBaseLight = {
-  baseDataset: documentElement.dataset.mooCatalogThemeBuilderBaseColor,
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
-  foreground: documentElement.style.getPropertyValue("--moo-foreground"),
-  mutedForeground: documentElement.style.getPropertyValue("--moo-muted-foreground"),
-  sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
-  sidebarForeground: documentElement.style.getPropertyValue("--moo-sidebar-foreground"),
-  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
-  bodyColor: documentElement.style.getPropertyValue("--bs-body-color"),
-  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
-  secondaryBg: documentElement.style.getPropertyValue("--bs-secondary-bg"),
-  secondaryColor: documentElement.style.getPropertyValue("--bs-secondary-color"),
+  baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor,
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
+  foreground: themeBuilderTokenStyle.getPropertyValue("--moo-foreground"),
+  mutedForeground: themeBuilderTokenStyle.getPropertyValue("--moo-muted-foreground"),
+  sidebar: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar"),
+  sidebarForeground: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar-foreground"),
+  bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
+  bodyColor: themeBuilderTokenStyle.getPropertyValue("--bs-body-color"),
+  bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
+  secondaryBg: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-bg"),
+  secondaryColor: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-color"),
 };
 
 const darkInput = themeInputs.find((input) => input.value === "dark");
 darkInput.checked = true;
 darkInput.dispatch("change");
 const afterThemeDark = {
-  theme: documentElement.dataset.bsTheme,
-  surface: documentElement.style.getPropertyValue("--moo-surface"),
-  foreground: documentElement.style.getPropertyValue("--moo-foreground"),
-  mutedForeground: documentElement.style.getPropertyValue("--moo-muted-foreground"),
-  sidebar: documentElement.style.getPropertyValue("--moo-sidebar"),
-  sidebarForeground: documentElement.style.getPropertyValue("--moo-sidebar-foreground"),
-  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
-  bodyColor: documentElement.style.getPropertyValue("--bs-body-color"),
-  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
-  secondaryColor: documentElement.style.getPropertyValue("--bs-secondary-color"),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
+  theme: body.dataset.bsTheme,
+  surface: themeBuilderTokenStyle.getPropertyValue("--moo-surface"),
+  foreground: themeBuilderTokenStyle.getPropertyValue("--moo-foreground"),
+  mutedForeground: themeBuilderTokenStyle.getPropertyValue("--moo-muted-foreground"),
+  sidebar: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar"),
+  sidebarForeground: themeBuilderTokenStyle.getPropertyValue("--moo-sidebar-foreground"),
+  bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
+  bodyColor: themeBuilderTokenStyle.getPropertyValue("--bs-body-color"),
+  bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
+  secondaryColor: themeBuilderTokenStyle.getPropertyValue("--bs-secondary-color"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
   darkChecked: darkInput.checked,
 };
 
 optionFor("chartColor", "teal").dispatch("focusin");
 const afterChartPreview = {
-  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  chart5: themeBuilderTokenStyle.getPropertyValue("--moo-chart-5"),
   selectedChart: selectedValue("chartColor"),
   persistedChart: JSON.parse(localStorage.getItem("moo:theme-builder")).chartColor,
 };
 optionFor("chartColor", "teal").dispatch("focusout");
 const afterChartPreviewClear = {
-  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  chart5: themeBuilderTokenStyle.getPropertyValue("--moo-chart-5"),
   selectedChart: selectedValue("chartColor"),
   persistedChart: JSON.parse(localStorage.getItem("moo:theme-builder")).chartColor,
 };
@@ -1847,7 +2436,7 @@ const afterChartPreviewClear = {
 optionFor("chartColor", "teal").click();
 const persisted = JSON.parse(localStorage.getItem("moo:theme-builder"));
 const afterClick = {
-  chart5: documentElement.style.getPropertyValue("--moo-chart-5"),
+  chart5: themeBuilderTokenStyle.getPropertyValue("--moo-chart-5"),
   selectedChart: selectedValue("chartColor"),
   persistedChart: persisted.chartColor,
 };
@@ -1855,22 +2444,42 @@ const afterClick = {
 reset.click();
 const afterReset = {
   styleDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderStyle"
   ),
   baseDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderBaseColor"
   ),
   themeDataset: Object.hasOwn(
-    documentElement.dataset,
+    body.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
-  chart1: documentElement.style.getPropertyValue("--moo-chart-1"),
-  bodyBg: documentElement.style.getPropertyValue("--bs-body-bg"),
-  bodyBgRgb: documentElement.style.getPropertyValue("--bs-body-bg-rgb"),
-  primary: documentElement.style.getPropertyValue("--bs-primary"),
-  primaryRgb: documentElement.style.getPropertyValue("--bs-primary-rgb"),
+  chartDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderChartColor"
+  ),
+  headingDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderHeadingFont"
+  ),
+  bodyDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderBodyFont"
+  ),
+  radiusDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderRadius"
+  ),
+  prepaintDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderPrepaint"
+  ),
+  chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
+  bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
+  bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
+  primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
+  primaryRgb: themeBuilderTokenStyle.getPropertyValue("--bs-primary-rgb"),
   selectedBase: selectedValue("baseColor"),
   selectedTheme: selectedValue("themeColor"),
   selectedChart: selectedValue("chartColor"),
@@ -1904,8 +2513,13 @@ console.log(JSON.stringify({
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertFalse(case["initial"]["styleDataset"])
-        self.assertIsNone(case["initial"].get("baseDataset"))
+        self.assertEqual(case["initial"]["baseDataset"], "neutral")
         self.assertEqual(case["initial"]["themeDataset"], "blue")
+        self.assertEqual(case["initial"]["chartDataset"], "neutral")
+        self.assertEqual(case["initial"]["headingDataset"], "system")
+        self.assertEqual(case["initial"]["bodyDataset"], "geist")
+        self.assertEqual(case["initial"]["radiusDataset"], "small")
+        self.assertEqual(case["initial"]["prepaintDataset"], "true")
         self.assertFalse(case["initial"]["broadStyleDataset"])
         self.assertFalse(case["initial"]["broadBaseDataset"])
         self.assertEqual(case["initial"]["primary"], "rgb(6, 111, 209)")
@@ -1941,15 +2555,15 @@ console.log(JSON.stringify({
         self.assertEqual(case["afterBasePreview"]["surface"], "oklch(1 0 0)")
         self.assertEqual(case["afterBasePreview"]["selectedBase"], "neutral")
         self.assertEqual(case["afterBasePreview"]["persistedBase"], "neutral")
-        self.assertFalse(case["afterBasePreviewHiddenClear"]["baseDataset"])
+        self.assertTrue(case["afterBasePreviewHiddenClear"]["baseDataset"])
         self.assertEqual(case["afterBasePreviewHiddenClear"]["surface"], "")
         self.assertEqual(case["afterBasePreviewHiddenClear"]["selectedBase"], "neutral")
         self.assertEqual(case["afterBasePreviewHiddenClear"]["persistedBase"], "neutral")
-        self.assertFalse(case["afterBasePreviewClear"]["baseDataset"])
+        self.assertTrue(case["afterBasePreviewClear"]["baseDataset"])
         self.assertEqual(case["afterBasePreviewClear"]["surface"], "")
         self.assertEqual(case["afterBasePreviewClear"]["selectedBase"], "neutral")
         self.assertEqual(case["afterBasePreviewClear"]["persistedBase"], "neutral")
-        self.assertFalse(case["afterThemePreview"]["themeDataset"])
+        self.assertTrue(case["afterThemePreview"]["themeDataset"])
         self.assertEqual(case["afterThemePreview"]["primary"], "")
         self.assertEqual(case["afterThemePreview"]["selectedTheme"], "blue")
         self.assertEqual(case["afterThemePreview"]["persistedTheme"], "blue")
@@ -1995,6 +2609,11 @@ console.log(JSON.stringify({
         self.assertFalse(case["afterReset"]["styleDataset"])
         self.assertFalse(case["afterReset"]["baseDataset"])
         self.assertFalse(case["afterReset"]["themeDataset"])
+        self.assertFalse(case["afterReset"]["chartDataset"])
+        self.assertFalse(case["afterReset"]["headingDataset"])
+        self.assertFalse(case["afterReset"]["bodyDataset"])
+        self.assertFalse(case["afterReset"]["radiusDataset"])
+        self.assertFalse(case["afterReset"]["prepaintDataset"])
         self.assertEqual(case["afterReset"]["chart1"], "")
         self.assertEqual(case["afterReset"]["bodyBg"], "")
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")
@@ -2041,7 +2660,7 @@ const sheet = makeEmitter({
   querySelector: () => null,
 });
 const documentElement = {
-  dataset: { bsTheme: "dark" },
+  dataset: {},
   dir: "ltr",
   style: {
     setProperty: (name, value) => writes.push(["set", name, value]),
@@ -2049,7 +2668,19 @@ const documentElement = {
     getPropertyValue: () => "",
   },
 };
+const documentBody = { children: [], firstElementChild: null };
+const body = {
+  dataset: { bsTheme: "dark" },
+  children: [],
+  parentElement: documentBody,
+  matches: (selector) => selector.includes(".moo-ui"),
+  querySelector: () => null,
+};
+documentBody.children = [body];
+documentBody.firstElementChild = body;
 const root = {
+  nodeType: 9,
+  body: documentBody,
   documentElement,
   defaultView: {
     localStorage,
@@ -2059,11 +2690,15 @@ const root = {
   },
   querySelector: (selector) => (selector === "#catalog-settings" ? sheet : null),
 };
+body.ownerDocument = root;
+sheet.ownerDocument = root;
+sheet.closest = () => body;
 
 const dispose = initSettingsPanel(root);
 const report = {
   writes,
-  dataset: { ...documentElement.dataset },
+  dataset: { ...body.dataset },
+  ownerChildren: body.children.length,
   storedBuilder: localStorage.getItem("moo:theme-builder"),
 };
 dispose();
@@ -2081,7 +2716,138 @@ console.log(JSON.stringify(report));
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertEqual(case["writes"], [])
         self.assertEqual(case["dataset"], {"bsTheme": "dark"})
+        self.assertEqual(case["ownerChildren"], 0)
         self.assertIsNone(case["storedBuilder"])
+
+    def test_theme_builder_styles_stay_on_the_selected_owner(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import { initSettingsPanel } from "./site/src/js/catalog/settings-panel.js";
+
+function emitter(node = {}) {
+  const listeners = new Map();
+  node.addEventListener = (type, handler) => listeners.set(type, [...(listeners.get(type) || []), handler]);
+  node.removeEventListener = (type, handler) => listeners.set(type, (listeners.get(type) || []).filter((candidate) => candidate !== handler));
+  node.dispatch = (type) => (listeners.get(type) || []).forEach((handler) => handler({ target: node, currentTarget: node }));
+  return node;
+}
+
+function classList() {
+  return { toggle() {}, contains: () => false };
+}
+
+const storage = new Map();
+const view = {
+  localStorage: {
+    getItem: (key) => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: (key) => storage.delete(key),
+  },
+  matchMedia: () => ({ matches: false }),
+  requestAnimationFrame: (callback) => callback(),
+};
+const documentBody = { children: [], firstElementChild: null };
+const documentElement = { dir: "ltr", dataset: {} };
+const document = {
+  nodeType: 9,
+  body: documentBody,
+  documentElement,
+  defaultView: view,
+  createElement: () => ({ dataset: {}, matches: (selector) => selector.includes("style[data-moo-theme-builder-style]") }),
+};
+
+function option(value) {
+  const node = emitter({
+    dataset: { mooCatalogThemeBuilderOption: value },
+    classList: classList(),
+    setAttribute() {},
+    querySelector: () => null,
+  });
+  node.click = () => node.dispatch("click");
+  return node;
+}
+
+function owner(name, parent = documentBody) {
+  const base = option("neutral");
+  const blue = option("zinc");
+  const field = emitter({
+    querySelectorAll: (selector) => selector === "[data-moo-catalog-theme-builder-option]" ? [base, blue] : [],
+    querySelector: () => null,
+  });
+  const sheet = emitter({
+    querySelectorAll: () => [],
+    querySelector: (selector) =>
+      selector === "[data-moo-catalog-theme-builder-base-color]" ? field : null,
+  });
+  const root = {
+    dataset: { bsTheme: "light" },
+    children: [],
+    parentElement: parent,
+    ownerDocument: document,
+    matches: (selector) => selector.includes(".moo-ui"),
+    querySelector(selector) {
+      if (selector === "#catalog-settings") return sheet;
+      if (selector === ":scope > style[data-moo-theme-builder-style]") {
+        return this.children.find((child) => child.matches?.("style[data-moo-theme-builder-style]")) || null;
+      }
+      return null;
+    },
+    querySelectorAll: () => [],
+    append(child) { this.children.push(child); },
+  };
+  sheet.ownerDocument = document;
+  sheet.closest = () => root;
+  return { root, blue };
+}
+
+const outer = owner("outer");
+const sibling = owner("sibling");
+const inner = owner("inner", outer.root);
+documentBody.children = [outer.root, sibling.root];
+documentBody.firstElementChild = outer.root;
+outer.root.children.push(inner.root);
+
+const disposeOuter = initSettingsPanel(outer.root);
+const disposeInner = initSettingsPanel(inner.root);
+outer.blue.click();
+const outerStyle = outer.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined);
+const innerBefore = inner.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined) || null;
+const siblingBefore = sibling.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined) || null;
+inner.blue.click();
+const innerStyle = inner.root.children.find((child) => child.dataset.mooThemeBuilderStyle !== undefined);
+console.log(JSON.stringify({
+  outerMarker: outer.root.dataset.mooThemeBuilderOwner,
+  innerMarker: inner.root.dataset.mooThemeBuilderOwner,
+  outerText: outerStyle?.textContent || "",
+  innerText: innerStyle?.textContent || "",
+  innerBefore: innerBefore === null,
+  siblingBefore: siblingBefore === null,
+  siblingTheme: sibling.root.dataset.bsTheme,
+}));
+disposeOuter();
+disposeInner();
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertTrue(case["innerBefore"])
+        self.assertTrue(case["siblingBefore"])
+        self.assertNotEqual(case["outerMarker"], case["innerMarker"])
+        self.assertIn(case["outerMarker"], case["outerText"])
+        self.assertNotIn(case["innerMarker"], case["outerText"])
+        self.assertIn(case["innerMarker"], case["innerText"])
+        self.assertEqual(case["siblingTheme"], "light")
 
     def test_catalog_entrypoint_only_orchestrates_public_components(self) -> None:
         source = without_comments(

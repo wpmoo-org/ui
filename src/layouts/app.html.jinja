@@ -1,0 +1,149 @@
+{% from "components/sidebar.html.jinja" import sidebar %}
+
+{% set app_navigation_values = ["sidebar", "none"] %}
+{% set app_shell_modes = ["viewport", "contained"] %}
+{% set app_sidebar_sides = ["left", "right"] %}
+{% set app_sidebar_variants = ["sidebar", "floating", "inset"] %}
+{% set app_sidebar_collapsible = ["icon", "offcanvas", "none"] %}
+{% set app_identifier_first_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+{% set app_identifier_characters = app_identifier_first_characters ~ "0123456789_-" %}
+
+{% macro app(
+  navigation="sidebar",
+  sidebar_key="",
+  default_open=true,
+  sidebar_id="",
+  side="left",
+  variant="sidebar",
+  collapsible="icon",
+  rail=true,
+  aria_label="Sidebar",
+  aria_labelled_by="",
+  shell_mode="viewport",
+  id=""
+) -%}
+  {% if navigation not in app_navigation_values %}
+    {{ fail("Unknown app navigation: " ~ navigation) }}
+  {% endif %}
+  {% if shell_mode not in app_shell_modes %}
+    {{ fail("Unknown app shell mode: " ~ shell_mode) }}
+  {% endif %}
+  {% if side not in app_sidebar_sides %}
+    {{ fail("Unknown app sidebar side: " ~ side) }}
+  {% endif %}
+  {% if variant not in app_sidebar_variants %}
+    {{ fail("Unknown app sidebar variant: " ~ variant) }}
+  {% endif %}
+  {% if collapsible not in app_sidebar_collapsible %}
+    {{ fail("Unknown app sidebar collapsible mode: " ~ collapsible) }}
+  {% endif %}
+  {% if default_open is not boolean %}
+    {{ fail("App default_open must be boolean") }}
+  {% endif %}
+  {% if rail is not boolean %}
+    {{ fail("App rail must be boolean") }}
+  {% endif %}
+  {% if aria_label is not string or aria_labelled_by is not string %}
+    {{ fail("App accessibility labels must be strings") }}
+  {% endif %}
+
+  {% if id is not string %}
+    {{ fail("Invalid app id") }}
+  {% elif id %}
+    {% set app_identifier = namespace(valid=true) %}
+    {% if id != id | trim or id == "main-content" %}
+      {% set app_identifier.valid = false %}
+    {% elif id[0] not in app_identifier_first_characters %}
+      {% set app_identifier.valid = false %}
+    {% else %}
+      {% for character in id[1:] %}
+        {% if character not in app_identifier_characters %}
+          {% set app_identifier.valid = false %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if not app_identifier.valid %}
+      {{ fail("Invalid app id") }}
+    {% endif %}
+  {% endif %}
+
+  {% if navigation == "sidebar" %}
+    {% if sidebar_id is not string or not sidebar_id or sidebar_id != sidebar_id | trim %}
+      {{ fail("Invalid app sidebar id") }}
+    {% endif %}
+    {% if sidebar_key is not string or not sidebar_key or sidebar_key != sidebar_key | trim %}
+      {{ fail("Invalid app sidebar key") }}
+    {% endif %}
+
+    {% set sidebar_identifier = namespace(valid=true) %}
+    {% if sidebar_id == "main-content" or sidebar_id[0] not in app_identifier_first_characters %}
+      {% set sidebar_identifier.valid = false %}
+    {% else %}
+      {% for character in sidebar_id[1:] %}
+        {% if character not in app_identifier_characters %}
+          {% set sidebar_identifier.valid = false %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if not sidebar_identifier.valid %}
+      {{ fail("Invalid app sidebar id") }}
+    {% endif %}
+
+    {% set sidebar_key_identifier = namespace(valid=true) %}
+    {% if sidebar_key[0] not in app_identifier_first_characters %}
+      {% set sidebar_key_identifier.valid = false %}
+    {% else %}
+      {% for character in sidebar_key[1:] %}
+        {% if character not in app_identifier_characters %}
+          {% set sidebar_key_identifier.valid = false %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if not sidebar_key_identifier.valid %}
+      {{ fail("Invalid app sidebar key") }}
+    {% endif %}
+    {% if id and id == sidebar_id %}
+      {{ fail("App id and sidebar id must differ") }}
+    {% endif %}
+  {% endif %}
+
+  {% if caller is not defined %}
+    {{ fail("App requires named sidebar and page callers") }}
+  {% endif %}
+  {% set sidebar_content = caller("sidebar") | trim %}
+  {% set page_content = caller("page") | trim %}
+  {% if not page_content %}
+    {{ fail("App page slot is required") }}
+  {% endif %}
+  {% if navigation == "sidebar" and not sidebar_content %}
+    {{ fail("App sidebar slot is required") }}
+  {% endif %}
+  {% if navigation == "none" and sidebar_content %}
+    {{ fail("App sidebar slot must be empty when navigation is none") }}
+  {% endif %}
+
+  <div
+    class="wrapper"
+    data-layout="app"
+    data-shell-mode="{{ shell_mode }}"
+    {% if id %}id="{{ id }}"{% endif %}
+    {% if navigation == "sidebar" %}
+      data-slot="sidebar-wrapper"
+      data-sidebar-state="{{ 'expanded' if default_open else 'collapsed' }}"
+      data-sidebar-key="{{ sidebar_key }}"
+    {% endif %}
+  >
+    {% if navigation == "sidebar" %}
+      {% call sidebar(
+        side=side,
+        variant=variant,
+        collapsible=collapsible,
+        rail=rail,
+        id=sidebar_id,
+        aria_label=aria_label,
+        aria_labelled_by=aria_labelled_by
+      ) %}{{ sidebar_content | safe }}{% endcall %}
+    {% endif %}
+    {{ page_content | safe }}
+  </div>
+{%- endmacro %}

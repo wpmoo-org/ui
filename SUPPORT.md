@@ -4,7 +4,7 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI is currently in the `1.0.0-rc.6` release-candidate certification phase.
+Moo UI is currently in the `1.0.0-rc.7` release-candidate certification phase.
 Production certification is being introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
 certification.
@@ -86,6 +86,11 @@ preview, embedded, or discontinued browser versions.
 Static CSS components should remain usable when JavaScript is unavailable.
 Components that require Bootstrap's plugins or Moo's optional ESM modules use
 progressive enhancement within their documented behavior boundary.
+
+The scoped owner stylesheet relies on native CSS `@scope`. Moo UI does not
+provide a containment fallback for browsers that lack this feature; a host that
+targets such browsers must choose a compatible integration strategy rather than
+assuming the scoped profile applies.
 
 ## Accessibility
 

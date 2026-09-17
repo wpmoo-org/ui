@@ -61,7 +61,8 @@ class ToastBrowserTests(unittest.TestCase):
                 base_url=self.base_url,
             )
 
-            expect(page.locator("body")).to_have_attribute(
+            owner = page.locator('.moo-ui[data-bs-theme]').first
+            expect(owner).to_have_attribute(
                 "data-moo-codepen-toasts-ready",
                 "true",
             )
@@ -105,7 +106,8 @@ class ToastBrowserTests(unittest.TestCase):
                 base_url=self.base_url,
                 include_payload_js=False,
             )
-            expect(page.locator("body")).to_have_attribute(
+            owner = page.locator('.moo-ui[data-bs-theme]').first
+            expect(owner).to_have_attribute(
                 "data-moo-codepen-toasts-ready",
                 "true",
             )
@@ -139,7 +141,8 @@ class ToastBrowserTests(unittest.TestCase):
                 base_url=self.base_url,
                 include_payload_js=False,
             )
-            expect(page.locator("body")).to_have_attribute(
+            owner = page.locator('.moo-ui[data-bs-theme]').first
+            expect(owner).to_have_attribute(
                 "data-moo-codepen-toasts-ready",
                 "true",
             )
@@ -205,7 +208,11 @@ class ToastBrowserTests(unittest.TestCase):
                   ));
                   return {
                     parentCount: parents.length,
-                    parentIsBodyChild: parents[0]?.parentElement === document.body,
+                    parentInsideOwner: Boolean(
+                      parents[0]?.closest(
+                        '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+                      )
+                    ),
                     parentInsidePreview: Boolean(
                       parents[0]?.closest('.moo-example__preview')
                     ),
@@ -216,7 +223,7 @@ class ToastBrowserTests(unittest.TestCase):
             )
 
             self.assertEqual(stack_state["parentCount"], 1)
-            self.assertTrue(stack_state["parentIsBodyChild"])
+            self.assertTrue(stack_state["parentInsideOwner"])
             self.assertFalse(stack_state["parentInsidePreview"])
             self.assertEqual(stack_state["indexes"], ["0", "1"])
             evidence.assert_clean()

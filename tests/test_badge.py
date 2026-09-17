@@ -95,10 +95,10 @@ class BadgeTests(CatalogTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         css = (DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")
         source = (ROOT / "scss/settings/_palette.scss").read_text(encoding="utf-8")
-        tokens_root = (ROOT / "scss/themes/_standalone_root.scss").read_text(
+        tokens_root = (ROOT / "scss/themes/_root.scss").read_text(
             encoding="utf-8"
         )
-        core_theme = (ROOT / "scss/themes/_scoped_core.scss").read_text(
+        core_theme = (ROOT / "scss/themes/_theme.scss").read_text(
             encoding="utf-8"
         )
 
@@ -110,8 +110,11 @@ class BadgeTests(CatalogTestCase):
             "$moo-destructive-surface-dark: color-mix(in srgb, $moo-destructive-dark 20%, transparent) !default;",
             source,
         )
-        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface};", tokens_root)
-        self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface-dark};", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="light"] {', tokens_root)
+        self.assertIn("@include moo-core-light;", tokens_root)
+        self.assertIn('.moo-ui[data-bs-theme="dark"] {', tokens_root)
+        self.assertIn("@include moo-core-dark;", tokens_root)
+        self.assertNotIn(":root", tokens_root)
         self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface};", core_theme)
         self.assertIn("--moo-destructive-surface: #{$moo-destructive-surface-dark};", core_theme)
 

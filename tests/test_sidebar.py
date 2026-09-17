@@ -59,28 +59,24 @@ class SidebarTests(CatalogTestCase):
             'sidebar_menu_button, sidebar_menu_item, '
             'sidebar_group_action, sidebar_group_content, sidebar_menu_action, '
             'sidebar_menu_badge, sidebar_menu_skeleton, sidebar_menu_sub, '
-            'sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_separator, sidebar_provider, '
+            'sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_separator, '
             'sidebar_trigger %}'
             + source
         )
         return " ".join(template.render().split())
 
-    def test_sidebar_provider_and_trigger_emit_accessible_shell_contract(self) -> None:
+    def test_sidebar_and_trigger_emit_accessible_contract(self) -> None:
         output = self.render_sidebar(
             """
-            {% call sidebar_provider(key="catalog-shell") %}
-              {{ sidebar_trigger(sidebar_id="catalog-sidebar") }}
-              {% call sidebar(aria_label="Catalog navigation") %}
-                {% call sidebar_content() %}
-                  {{ sidebar_group_label("Components") }}
-                {% endcall %}
+            {{ sidebar_trigger(sidebar_id="catalog-sidebar") }}
+            {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
+              {% call sidebar_content() %}
+                {{ sidebar_group_label("Components") }}
               {% endcall %}
             {% endcall %}
             """
         )
 
-        self.assertIn('class="sidebar-wrapper"', output)
-        self.assertIn('data-sidebar-key="catalog-shell"', output)
         self.assertIn('id="catalog-sidebar"', output)
         self.assertIn('aria-label="Catalog navigation"', output)
         self.assertIn('data-sidebar-trigger', output)
@@ -109,6 +105,58 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('data-bs-target="#projects-sub"', output)
         self.assertIn('aria-controls="projects-sub"', output)
         self.assertIn('aria-expanded="true"', output)
+
+    def test_sidebar_account_hooks_and_physical_edge_rules_are_explicit(self) -> None:
+        output = self.render_sidebar(
+            """
+            {% call sidebar(id="catalog-sidebar") %}
+              {% call sidebar_menu_item(dropdown=true, extra_class="sidebar-menu-item--account") %}
+                {{ sidebar_menu_button(
+                  "Account",
+                  element="button",
+                  dropdown=true,
+                  extra_class="sidebar-menu-button--account"
+                ) }}
+              {% endcall %}
+            {% endcall %}
+            """
+        )
+
+        self.assertIn("sidebar-menu-item--account", output)
+        self.assertIn("sidebar-menu-button--account", output)
+        styles = read_sidebar_styles()
+        self.assertRegex(
+            styles,
+            r'\.sidebar\[data-side="left"\] \.sidebar-inner\s*\{[^}]*border-right:',
+        )
+        self.assertRegex(
+            styles,
+            r'\.sidebar\[data-side="right"\] \.sidebar-inner\s*\{[^}]*border-left:',
+        )
+        self.assertIn("margin-left:", styles)
+        self.assertIn("margin-right:", styles)
+
+    def test_sidebar_rtl_physical_rules_follow_the_inherited_owner_direction(self) -> None:
+        styles = read_sidebar_styles()
+
+        self.assertIn(
+            "order: 1",
+            _css_block(
+                styles,
+                '.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="left"]',
+            ),
+        )
+        self.assertIn(
+            "order: 0",
+            _css_block(
+                styles,
+                '.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="right"]',
+            ),
+        )
+        self.assertIn(
+            "transform: translateX(-50%)",
+            _css_block(styles, ".sidebar:dir(rtl) .sidebar-rail"),
+        )
 
     def test_sidebar_menu_action_uses_bootstrap_dropdown_and_aria_contract(self) -> None:
         output = self.render_sidebar(
@@ -346,9 +394,9 @@ class SidebarTests(CatalogTestCase):
             styles,
             ".sidebar-menu-flyout",
         )
-        collapsed_inset = _css_block(
+        page_host = _css_block(
             styles,
-            '.sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar-inset',
+            '.wrapper[data-layout="app"] > [data-slot="page"]',
         )
         flyout_layer = _css_block(
             styles,
@@ -365,10 +413,10 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("position: fixed", flyout)
         self.assertIn("z-index: $zindex-dropdown", flyout)
-        self.assertIn("position: relative", collapsed_inset)
-        self.assertIn("z-index: 0", collapsed_inset)
-        self.assertIn("z-index: $zindex-dropdown", flyout_layer)
-        self.assertIn("inset-inline-start: var(--moo-sidebar-flyout-inline-start)", flyout)
+        self.assertIn("overflow-y: auto", page_host)
+        self.assertIn("flex: 1 1 auto", page_host)
+        self.assertIn("z-index: $zindex-fixed + 1", flyout_layer)
+        self.assertIn("left: var(--moo-sidebar-flyout-left)", flyout)
         self.assertIn("inset-block-start: var(--moo-sidebar-flyout-block-start)", flyout)
         self.assertIn("min-width: $spacer * 10", flyout)
         self.assertIn("list-style: none", flyout)
@@ -572,7 +620,7 @@ class SidebarTests(CatalogTestCase):
         )
         sidebar_overlay = _css_block(
             styles,
-            '.sidebar-wrapper:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar',
+            '.wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar',
         )
 
         self.assertIn("cursor: default", identity_cursors)
@@ -588,7 +636,11 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("width: var(--moo-dropdown-sidebar-min-width)", collapsed_identity_dropdown)
         self.assertIn("min-width: var(--moo-dropdown-sidebar-min-width)", collapsed_identity_dropdown)
         self.assertIn(
-            "inset-inline-start: var(--moo-sidebar-dropdown-inline-start, auto) !important",
+            "left: var(--moo-sidebar-dropdown-left, auto) !important",
+            collapsed_identity_dropdown,
+        )
+        self.assertIn(
+            "right: var(--moo-sidebar-dropdown-right, auto) !important",
             collapsed_identity_dropdown,
         )
         self.assertIn(
@@ -601,13 +653,9 @@ class SidebarTests(CatalogTestCase):
         )
         self.assertIn("transform: none !important", collapsed_identity_dropdown)
         self.assertIn("position: relative", sidebar_overlay)
+        self.assertIn("z-index: $zindex-fixed + 1", sidebar_overlay)
         self.assertIn(
             '[data-slot="sidebar-footer"] [data-sidebar-dropdown-positioned] > .dropdown-menu',
-            dropdown_styles,
-        )
-        self.assertIn('[data-slot="sidebar"][data-side="right"]', dropdown_styles)
-        self.assertIn(
-            "inset-inline-end: var(--moo-sidebar-dropdown-inline-end",
             dropdown_styles,
         )
 
@@ -652,7 +700,7 @@ class SidebarTests(CatalogTestCase):
             "height: calc(100%",
             _css_block(
                 styles,
-                '.sidebar-wrapper--contained .sidebar[data-variant="floating"] .sidebar-inner',
+                '.wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar[data-variant="floating"] .sidebar-inner',
             ),
         )
 
@@ -672,20 +720,20 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn(
             "background: var(--moo-sidebar)",
-            _css_block(styles, '.sidebar-wrapper:has(.sidebar[data-variant="inset"])'),
+            _css_block(styles, '.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"])'),
         )
         inset_content = _css_block(
-            styles, '.sidebar-wrapper:has(.sidebar[data-variant="inset"]) .sidebar-inset'
+            styles, '.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"]) > [data-slot="page"]'
         )
         self.assertIn("margin: $spacer * 0.5", inset_content)
-        self.assertIn("margin-inline-start: 0", inset_content)
+        self.assertIn("margin-left: 0", inset_content)
         self.assertIn("border-radius:", inset_content)
         self.assertIn("box-shadow:", inset_content)
         self.assertIn(
-            "margin-inline-start: $spacer * 0.5",
+            "margin-left: $spacer * 0.5",
             _css_block(
                 styles,
-                '.sidebar-wrapper[data-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"]) .sidebar-inset',
+                '.wrapper[data-layout="app"][data-sidebar-state="collapsed"]:has(> .sidebar[data-variant="inset"]) > [data-slot="page"]',
             ),
         )
 
@@ -698,15 +746,15 @@ class SidebarTests(CatalogTestCase):
 
         right_inset = _css_block(
             styles,
-            '.sidebar-wrapper:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset',
+            '.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"][data-side="right"]) > [data-slot="page"]',
         )
-        self.assertIn("margin-inline-end: 0", right_inset)
-        self.assertIn("margin-inline-start: $spacer * 0.5", right_inset)
+        self.assertIn("margin-right: 0", right_inset)
+        self.assertIn("margin-left: $spacer * 0.5", right_inset)
         self.assertIn(
-            "margin-inline-end: $spacer * 0.5",
+            "margin-right: $spacer * 0.5",
             _css_block(
                 styles,
-                '.sidebar-wrapper[data-sidebar-state="collapsed"]:has(.sidebar[data-variant="inset"][data-side="right"]) .sidebar-inset',
+                '.wrapper[data-layout="app"][data-sidebar-state="collapsed"]:has(> .sidebar[data-variant="inset"][data-side="right"]) > [data-slot="page"]',
             ),
         )
 
@@ -721,7 +769,7 @@ class SidebarTests(CatalogTestCase):
         )
         combined = "\n".join(up_lg_blocks)
         self.assertIn('.sidebar[data-variant="floating"] .sidebar-inner', combined)
-        self.assertIn('.sidebar-wrapper:has(.sidebar[data-variant="inset"])', combined)
+        self.assertIn('.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"])', combined)
 
     def test_sidebar_catalog_page_uses_distinct_demo_target(self) -> None:
         result = self.run_build()
@@ -732,7 +780,9 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('data-moo-block-frame-shell', page)
         self.assertIn('src="../../blocks/previews/sidebar-floating/"', page)
         self.assertIn('title="Application shell preview"', page)
-        self.assertIn("components-sidebar-floating-demo", page)
+        # The live example is rendered in the isolated block preview frame;
+        # the catalog page itself must not invent a second sidebar root.
+        self.assertNotIn("components-sidebar-floating-demo", page)
         # Sidebar documents one full application-shell example; RTL is not part of this component contract.
         self.assertEqual(page.count('class="moo-example"'), 1)
 
@@ -767,14 +817,13 @@ class SidebarTests(CatalogTestCase):
         )
         example_source = source + shell_source
         public_hooks = (
-            ".sidebar-wrapper",
             ".sidebar",
             "[data-sidebar-trigger]",
             "[data-sidebar-rail]",
             "[data-slot=\"sidebar-content\"]",
             "[data-slot=\"sidebar-menu-button\"]",
             ".sidebar-menu-sub.collapse",
-            ".sidebar-inset",
+            '[data-slot="sidebar-footer"]',
         )
 
         for hook in public_hooks:
@@ -782,7 +831,7 @@ class SidebarTests(CatalogTestCase):
                 self.assertIn(hook, source)
 
         self.assertNotIn("SidebarBrandMark", source)
-        self.assertNotIn("sidebar_provider()", source)
+        self.assertNotIn("sidebar_provider", source)
         self.assertNotIn("sidebar_header()", source)
         self.assertNotIn("sidebar_menu_button()", source)
         self.assertIn("sidebar_brand_mark", example_source)
@@ -919,7 +968,7 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
 
         self.assertEqual(case["scrollTop"], 656)
 
-    def test_catalog_hands_off_persisted_state_before_sidebar_content(self) -> None:
+    def test_catalog_loads_external_prepaint_script_after_sidebar_markup(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_sidebar_styles()
         catalog_styles = (ROOT / "site/scss/catalog/_shell.scss").read_text(
@@ -927,21 +976,38 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         )
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+        prepaint = ROOT / "site/static/js/catalog-prepaint.js"
+        prepaint_source = prepaint.read_text(encoding="utf-8")
+        catalog_index = CATALOG_JS.read_text(encoding="utf-8")
 
         restore_index = source.index("this._restoreState();")
         ready_index = source.index('setAttribute("data-sidebar-ready", "")')
         self.assertLess(restore_index, ready_index)
         self.assertNotIn("requestAnimationFrame", source[restore_index:ready_index])
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertNotIn("sidebarCatalogState", base)
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint_source)
+        self.assertTrue(prepaint.is_file())
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            layout,
+        )
+        self.assertNotIn("shell.dataset.sidebarState = state", layout)
         self.assertLess(
-            layout.index('{% call sidebar_provider(key="catalog-shell") %}'),
-            layout.index("shell.dataset.sidebarState = state"),
+            layout.index("{{ render_catalog_overlays() }}"),
+            layout.index("catalog-prepaint.js"),
         )
         self.assertLess(
-            layout.index("shell.dataset.sidebarState = state"),
-            layout.index('{% include "shell/sidebar.html.jinja" %}'),
+            layout.index('{% call(slot) app('),
+            layout.index("catalog-prepaint.js"),
+        )
+        self.assertLess(
+            layout.index("{{ render_catalog_sidebar() }}"),
+            layout.index("catalog-prepaint.js"),
         )
         self.assertIn('removeAttribute("data-sidebar-ready")', source)
+        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint_source)
+        self.assertIn('element.removeAttribute("data-sidebar-prepaint-ready")', catalog_index)
         self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
         self.assertRegex(
             styles,
@@ -955,18 +1021,26 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
             r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
         )
 
-    def test_catalog_prepositions_active_sidebar_item_before_inset_content(self) -> None:
+    def test_catalog_prepaint_positions_active_sidebar_item_before_inset_content(self) -> None:
+        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+            encoding="utf-8",
+        )
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
-        self.assertIn("data-moo-sidebar-active-prepaint", layout)
-        sidebar_index = layout.index('{% include "shell/sidebar.html.jinja" %}')
-        active_scroll_index = layout.index("data-moo-sidebar-active-prepaint")
-        inset_index = layout.index("{% call sidebar_inset() %}")
-
-        self.assertLess(sidebar_index, active_scroll_index)
-        self.assertLess(active_scroll_index, inset_index)
-        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', layout)
-        self.assertIn("content.scrollTop = Math.round", layout)
+        self.assertIn("data-moo-sidebar-active-prepaint", prepaint)
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
+        self.assertIn('data-sidebar-prepaint-ready', prepaint)
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            layout,
+        )
+        self.assertIn('{% elif slot == "page" %}', layout)
+        self.assertLess(
+            layout.index("{{ render_catalog_overlays() }}"),
+            layout.index("catalog-prepaint.js"),
+        )
+        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', prepaint)
+        self.assertIn("content.scrollTop = Math.round", prepaint)
 
     def test_sidebar_shortcut_ignores_editable_targets(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
@@ -995,11 +1069,22 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn('hidden.bs.dropdown', script)
         self.assertIn('[data-bs-toggle="dropdown"][data-sidebar-tooltip]', script)
 
+    def test_sidebar_flyouts_and_rail_tooltips_use_the_trigger_owner_portal(self) -> None:
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
+
+        self.assertIn('from "../theme-owner.js"', script)
+        self.assertIn("_portalRoot(trigger = this._element)", script)
+        self.assertIn("ownerPortalRoot(findThemeOwner(trigger))", script)
+        self.assertIn("this._portalRoot(item).appendChild(flyout);", script)
+        self.assertIn("container: this._portalRoot(control)", script)
+        self.assertNotIn('container: "body"', script)
+
     def test_sidebar_identity_triggers_skip_collapsed_tooltips(self) -> None:
         script = SIDEBAR_JS.read_text(encoding="utf-8")
 
         self.assertIn('closest(".sidebar-menu-item--account")', script)
         self.assertIn('classList.contains("sidebar-menu-button--workspace")', script)
+        self.assertIn("offset: [0, 8]", script)
         self.assertIn("return;", script)
 
     def test_sidebar_disclosure_triggers_use_collapsed_flyout_instead_of_tooltip(self) -> None:
@@ -1038,13 +1123,13 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn("_clearDropdownPosition", script)
         self.assertIn("sidebarDropdownPositioned", script)
         self.assertIn("[data-sidebar-dropdown-positioned]", script)
-        self.assertIn("--moo-sidebar-dropdown-inline-start", script)
+        self.assertIn("--moo-sidebar-dropdown-left", script)
         self.assertIn("--moo-sidebar-dropdown-block-start", script)
         self.assertIn("--moo-sidebar-dropdown-block-end", script)
-        self.assertIn("--moo-sidebar-dropdown-inline-end", script)
+        self.assertIn("--moo-sidebar-dropdown-right", script)
         self.assertIn("sidebar-menu-button--account", script)
         self.assertIn(
-            'removeProperty("--moo-sidebar-dropdown-inline-end")',
+            'removeProperty("--moo-sidebar-dropdown-right")',
             script,
         )
         self.assertIn("rect.bottom + gap", script)

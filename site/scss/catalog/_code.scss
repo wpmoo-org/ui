@@ -114,13 +114,13 @@
 // (see $moo-code-* in settings/_components.scss for the gap citation and
 // why this doesn't just reuse <kbd>'s own knobs). Scoped to prose so it
 // never touches the syntax-highlighted code panel's own <code> rule above.
-// Uses .moo-catalog__content (present on every catalog page) rather than
-// .moo-doc-main (only rendered for component/utility/block pages) so
-// Sections-type pages get the same treatment instead of falling back to
-// Bootstrap's unstyled reboot <code>. The selector includes prose cells and
+// The Page macro already supplies the outer Bootstrap container. The catalog
+// keeps its caller content directly inside the container, so this rule scopes
+// prose code to the Page main region rather than introducing a catalog-only
+// content class. The selector includes prose cells and
 // description-list bodies because Installation, Support, and Data Table
 // document contracts in those surfaces too.
-.moo-catalog__content :where(p, li, dd, dt, td, th) code {
+.moo-catalog [data-slot="page"] > main > .container :where(p, li, dd, dt, td, th) code {
   padding: $moo-code-padding-y $moo-code-padding-x;
   color: $moo-code-color;
   background: $moo-code-bg;
@@ -130,32 +130,6 @@
 .moo-sidebar-demo__placeholder {
   // The design reference uses bg-muted/50 for these preview surfaces.
   background: color-mix(in srgb, var(--moo-muted-surface) 50%, transparent);
-}
-
-.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) {
-  background: var(--bs-body-bg);
-}
-
-.moo-sidebar-demo--flat-inset:has(.sidebar[data-variant="inset"]) .sidebar-inset {
-  margin: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.moo-sidebar-demo--flat-inset .sidebar[data-side="left"] .sidebar-inner {
-  border-inline-end: var(--bs-border-width) solid var(--moo-sidebar-border);
-}
-
-.moo-sidebar-demo--flat-inset .sidebar[data-side="right"] .sidebar-inner {
-  border-inline-start: var(--bs-border-width) solid var(--moo-sidebar-border);
-}
-
-.moo-sidebar-demo--portal-shell .sidebar-inset__header {
-  border-bottom: 0;
-}
-
-.moo-sidebar-demo--portal-shell .sidebar-inset__header>.vr {
-  display: none;
 }
 
 .token.comment {

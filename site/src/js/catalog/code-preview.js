@@ -1,3 +1,5 @@
+import { resolveCatalogScrollHost } from "./scroll-host.js";
+
 const states = new WeakMap();
 
 export function initCodePreview(root = document) {
@@ -108,7 +110,7 @@ export function initCodePreview(root = document) {
     });
   });
 
-  const main = root.querySelector(".moo-catalog__main");
+  const main = resolveCatalogScrollHost(root).element;
   let pendingScrollTop = null;
   const captureTabScroll = () => {
     if (main) {

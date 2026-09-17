@@ -8,9 +8,11 @@ from playwright.sync_api import expect, sync_playwright
 
 from tests.helpers import codepen_payload_from_output
 from tests.helpers.browser_harness import (
+    BrowserEvidence,
     CERTIFICATION_CASES,
     launch_certification_browser,
     new_case_context,
+    prepare_page,
     ROOT,
     setup_codepen_page,
     serve_repository,
@@ -91,6 +93,13 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(backdrop).to_have_count(1)
             expect(modal).to_be_visible()
             expect(backdrop).to_be_visible()
+            self.assertEqual(
+                backdrop.evaluate(
+                    "element => element.parentElement.hasAttribute('data-moo-overlay-portal-host')"
+                ),
+                True,
+            )
+            self.assertEqual(page.locator("body > .modal-backdrop").count(), 0)
 
             self.assertFalse(
                 page.evaluate(
@@ -245,6 +254,94 @@ class CodePenModalBrowserTests(unittest.TestCase):
                 finally:
                     context.close()
 
+    def test_dashboard_row_actions_work_after_catalog_sheet_portal(self) -> None:
+        cases = [
+            {
+                "name": "tasks",
+                "path": "/site-dist/examples/dashboard/tasks/index.html",
+                "row": "#tsk-126",
+                "edit": "[data-moo-task-edit]",
+                "sheet": "#tasks-new-sheet",
+                "sheet_title": "Edit task",
+                "delete": "[data-moo-task-delete]",
+                "dialog": "#tasks-delete-dialog",
+                "dialog_title": "Delete this task: TSK-126?",
+            },
+            {
+                "name": "users",
+                "path": "/site-dist/examples/dashboard/users/index.html",
+                "row": "#usr-1",
+                "edit": "[data-moo-user-edit]",
+                "sheet": "#users-new-sheet",
+                "sheet_title": "Edit user",
+                "delete": "[data-moo-user-delete]",
+                "dialog": "#users-delete-dialog",
+                "dialog_title": "Delete this user: Vint Cerf?",
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(example=case["name"]):
+                context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}{case['path']}",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, CERTIFICATION_CASES[0])
+
+                    row = page.locator(case["row"])
+                    trigger = row.locator(".table-row-actions > button")
+                    menu = page.locator(
+                        '.moo-ui[data-bs-theme] > .dropdown-menu.show'
+                    )
+
+                    trigger.focus()
+                    trigger.press("Enter")
+                    expect(menu).to_be_visible()
+                    self.assertEqual(page.locator("body > .dropdown-menu.show").count(), 0)
+                    menu.locator(case["edit"]).click()
+
+                    sheet = page.locator(case["sheet"])
+                    expect(sheet).to_be_visible()
+                    expect(sheet.locator(".offcanvas-title")).to_have_text(
+                        case["sheet_title"]
+                    )
+                    sheet.get_by_role("button", name="Cancel").click()
+                    expect(sheet).to_be_hidden()
+                    expect(trigger).to_be_focused()
+
+                    trigger.focus()
+                    trigger.press("Enter")
+                    expect(menu).to_be_visible()
+                    menu.locator(case["delete"]).click()
+
+                    dialog = page.locator(case["dialog"])
+                    expect(dialog).to_be_visible()
+                    expect(dialog.locator(".modal-title")).to_have_text(
+                        case["dialog_title"]
+                    )
+                    dialog.get_by_role("button", name="Cancel").click()
+                    expect(dialog).to_be_hidden()
+                    expect(trigger).to_be_focused()
+
+                    trigger.focus()
+                    trigger.press("Enter")
+                    expect(menu).to_be_visible()
+                    menu.locator(case["delete"]).click()
+                    expect(dialog).to_be_visible()
+
+                    dialog.get_by_role("button", name="Delete").click()
+                    expect(dialog).to_be_hidden()
+                    expect(page.locator(".datatable-search").first).to_be_focused()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_toast_codepen_demo_button_shows_toast(self) -> None:
         payload = self.codepen_payload("toast", "Moo UI Toast - Basic")
         context, page, evidence = self.render_component_codepen(payload)
@@ -254,6 +351,15 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(page.locator(".toast.show")).to_have_count(1)
             expect(page.locator(".toast.show .toast-body")).to_contain_text(
                 "Sunday, December 3 at 9:00 AM"
+            )
+            self.assertTrue(
+                page.locator(".toast.show").evaluate(
+                    """
+                    element => Boolean(
+                      element.closest('.moo-ui[data-bs-theme]')
+                    )
+                    """
+                )
             )
             evidence.assert_clean()
         finally:
@@ -281,7 +387,11 @@ class CodePenModalBrowserTests(unittest.TestCase):
             # The Bootstrap bundle fails asynchronously; the toast queue flag is
             # cleared only after the failure handler runs, so wait for that.
             page.wait_for_function(
-                "() => !document.body.hasAttribute('data-moo-codepen-toasts-queued')",
+                """
+                () => !document
+                  .querySelector('.moo-ui[data-bs-theme]')
+                  ?.hasAttribute('data-moo-codepen-toasts-queued')
+                """,
                 timeout=9000,
             )
         finally:
@@ -329,7 +439,8 @@ class CodePenModalBrowserTests(unittest.TestCase):
                 (element) => {
                   const rect = element.getBoundingClientRect();
                   const styles = window.getComputedStyle(element);
-                  const demoContent = Array.from(document.body.children).find((child) => {
+                  const owner = document.querySelector(".moo-ui[data-bs-theme]");
+                  const demoContent = Array.from(owner.children).find((child) => {
                     return !child.matches(
                       ".moo-codepen-actions, .moo-codepen-signature, .moo-codepen-footer, script, style"
                     );
@@ -361,21 +472,32 @@ class CodePenModalBrowserTests(unittest.TestCase):
                 return github.evaluate(
                     """
                     (element) => {
+                      const toPixels = (color) => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        const context = canvas.getContext("2d", { willReadFrequently: true });
+                        context.fillStyle = color;
+                        context.fillRect(0, 0, 1, 1);
+                        return Array.from(context.getImageData(0, 0, 1, 1).data).join(",");
+                      };
                       const probe = document.createElement("span");
                       const button = window.getComputedStyle(element);
-                      const body = window.getComputedStyle(document.body);
+                      const owner = element.closest(".moo-ui[data-bs-theme]");
+                      const ownerStyle = window.getComputedStyle(owner);
                       probe.style.position = "fixed";
                       probe.style.inset = "auto";
                       probe.style.backgroundColor = "color-mix(in srgb, var(--bs-body-color) 88%, var(--bs-body-bg))";
-                      document.body.appendChild(probe);
+                      owner.appendChild(probe);
                       const expected = window.getComputedStyle(probe).backgroundColor;
                       probe.remove();
                       return {
                         background: button.backgroundColor,
+                        backgroundPixels: toPixels(button.backgroundColor),
                         color: button.color,
-                        bodyBackground: body.backgroundColor,
-                        bodyColor: body.color,
-                        mixedBodyColor: expected,
+                        bodyBackground: ownerStyle.backgroundColor,
+                        bodyColor: ownerStyle.color,
+                        mixedBodyColorPixels: toPixels(expected),
                       };
                     }
                     """
@@ -383,8 +505,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
 
             normal_colors = github_colors()
             self.assertEqual(
-                normal_colors["background"],
-                normal_colors["mixedBodyColor"],
+                normal_colors["backgroundPixels"],
+                normal_colors["mixedBodyColorPixels"],
+                normal_colors,
             )
             self.assertEqual(normal_colors["color"], normal_colors["bodyBackground"])
             github.hover()
@@ -394,14 +517,15 @@ class CodePenModalBrowserTests(unittest.TestCase):
             self.assertEqual(hover_colors["color"], normal_colors["bodyBackground"])
 
             theme.click()
-            expect(page.locator("html")).to_have_attribute("data-bs-theme", "dark")
+            expect(page.locator(".moo-ui[data-bs-theme]")).to_have_attribute("data-bs-theme", "dark")
             expect(theme).to_have_attribute("aria-label", "Switch to light mode")
             page.mouse.move(0, 0)
 
             normal_colors = github_colors()
             self.assertEqual(
-                normal_colors["background"],
-                normal_colors["mixedBodyColor"],
+                normal_colors["backgroundPixels"],
+                normal_colors["mixedBodyColorPixels"],
+                normal_colors,
             )
             self.assertEqual(normal_colors["color"], normal_colors["bodyBackground"])
             github.hover()
@@ -411,7 +535,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
             self.assertEqual(hover_colors["color"], normal_colors["bodyBackground"])
 
             theme.click()
-            expect(page.locator("html")).to_have_attribute("data-bs-theme", "light")
+            expect(page.locator(".moo-ui[data-bs-theme]")).to_have_attribute("data-bs-theme", "light")
             expect(theme).to_have_attribute("aria-label", "Switch to dark mode")
 
             evidence.assert_clean()
@@ -442,6 +566,15 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(popover).to_have_count(1)
             expect(popover).to_be_visible()
             expect(popover).to_contain_text("Button")
+            self.assertTrue(
+                popover.evaluate(
+                    """
+                    element => Boolean(
+                      element.closest('.moo-ui[data-bs-theme]')
+                    )
+                    """
+                )
+            )
             expect(popover.get_by_role("link", name="Learn more")).to_have_attribute(
                 "href",
                 "https://ui.wpmoo.org/components/button/",

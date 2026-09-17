@@ -34,6 +34,22 @@
   gap: calc(var(--bs-modal-padding) * 0.75);
 }
 
+.modal-header:has(> .btn-close) {
+  // Keep the dismiss control in a stable top/end corner, like the reference
+  // dialog surface, while reserving room so long titles cannot run beneath it.
+  position: relative;
+  padding-inline-end: calc(
+    var(--bs-modal-padding) + #{$btn-close-width} + #{$btn-close-padding-x * 2} + 0.5rem
+  );
+}
+
+.modal-header:has(> .btn-close) > .btn-close {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+  margin: 0;
+}
+
 .modal--alert {
   --bs-modal-width: 24rem;
   --bs-modal-padding: 1rem;

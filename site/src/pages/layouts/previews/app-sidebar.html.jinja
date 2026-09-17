@@ -1,0 +1,15 @@
+{% extends "layouts/base.html.jinja" %}
+{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
+
+{% block title %}App Sidebar Layout Preview — Moo UI{% endblock %}
+
+{% block body %}
+  <div class="moo-layout-preview">
+    {{ render_sidebar_shell(
+      key="layout-preview-shell",
+      sidebar_id="layout-preview-sidebar",
+      variant="floating",
+      demo_copy="portal"
+    ) }}
+  </div>
+{% endblock %}

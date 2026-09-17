@@ -1,5 +1,13 @@
 .moo-block-preview {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+// Layout previews use the public app/page macros directly; shell geometry
+// belongs to the public layout contract, not the catalog wrapper.
+.moo-layout-preview {
+  min-height: 100vh;
 }
 
 .moo-block-preview__toolbar {
@@ -118,10 +126,6 @@
   min-height: 100vh;
   background: var(--bs-body-bg);
   font-family: var(--bs-body-font-family);
-}
-
-.moo-block-standalone>.sidebar-wrapper {
-  min-height: 100vh;
 }
 
 .moo-field {

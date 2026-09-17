@@ -1,0 +1,491 @@
+{% extends "layouts/catalog.html.jinja" %}
+{% from "blocks/sidebar_shell.html.jinja" import render_sidebar_shell %}
+{% from "components/table.html.jinja" import table %}
+{% from "components/typography.html.jinja" import typography %}
+{% from "includes/block-example.html.jinja" import render_block_example %}
+{% from "includes/doc-toc.html.jinja" import render_doc_toc %}
+{% from "includes/page-header.html.jinja" import render_page_header with context %}
+{% from "includes/page-navigation.html.jinja" import render_section_page_actions, render_section_page_pagination %}
+
+{% block title %}Layout — Moo UI{% endblock %}
+
+{% block content %}
+  <div class="moo-doc-layout">
+    <article class="moo-doc-page">
+      {{ render_page_header(
+        "Layout",
+        "A focused space for Moo UI layout examples.",
+        id="layout",
+        actions=render_section_page_actions("layout", site_pages, root_path)
+      ) }}
+
+      <section aria-labelledby="app">
+        {{ typography("App", variant="section-title", id="app") }}
+        <p>
+          Start with the application shell when a route owns navigation and
+          viewport behavior. App composes a Sidebar navigation surface with a
+          Page surface; choose the Sidebar variant to set their spatial
+          relationship.
+        </p>
+        {% set app_screen %}
+          {{ render_sidebar_shell(
+            key="layout-app-sidebar",
+            sidebar_id="layout-app-sidebar-demo",
+            variant="floating",
+            demo_copy="portal"
+          ) }}
+        {% endset %}
+        {% set app_source %}
+          <div class="wrapper" data-layout="app" data-shell-mode="viewport"
+            data-slot="sidebar-wrapper" data-sidebar-key="app-shell"
+            data-sidebar-state="expanded">
+            <aside id="app-sidebar" class="sidebar offcanvas-lg offcanvas-start"
+              tabindex="-1" data-slot="sidebar" data-side="left"
+              data-variant="floating" data-collapsible="icon"
+              aria-label="Sidebar">
+              <div class="sidebar-inner" data-slot="sidebar-inner">
+                <div class="sidebar-header" data-slot="sidebar-header">
+                  Sidebar navigation
+                </div>
+                <div class="sidebar-content" data-slot="sidebar-content">
+                  <a class="sidebar-menu-button" href="#"
+                    data-slot="sidebar-menu-button">Overview</a>
+                </div>
+              </div>
+              <button class="sidebar-rail" type="button"
+                data-sidebar-rail aria-label="Toggle sidebar" tabindex="-1"></button>
+            </aside>
+            <div data-slot="page">
+              <header>
+                <div class="container-fluid">
+                  <button class="sidebar-trigger" type="button"
+                    data-sidebar-trigger data-bs-target="#app-sidebar"
+                    aria-controls="app-sidebar" aria-expanded="true">
+                    Toggle sidebar
+                  </button>
+                </div>
+              </header>
+              <main id="main-content" tabindex="-1">
+                <div class="container-fluid">Page content</div>
+              </main>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-app-example",
+          "Sidebar preview",
+          "",
+          app_screen,
+          preview_class="moo-example__preview--shell",
+          frame_src=site_href("blocks/previews/sidebar-floating.html", root_path),
+          show_header=false,
+          source_content=app_source
+        ) }}
+      </section>
+
+      <section aria-labelledby="sidebar">
+        {{ typography("Sidebar", variant="section-title", id="sidebar") }}
+        <p>
+          Sidebar is the App's navigation surface. Its variant changes the
+          surface geometry without changing the Sidebar's regions, controls,
+          or Bootstrap behavior.
+        </p>
+        {{ table(
+          ["Variant", "How it behaves"],
+          [
+            ["<code>sidebar</code>", "Keeps the navigation surface attached to the App edge; this is the default."],
+            ["<code>floating</code>", "Detaches the navigation surface with a border, radius, and shadow."],
+            ["<code>inset</code>", "Keeps the Sidebar at the edge and gives the Page an inset, elevated surface."]
+          ],
+          caption="Sidebar variants supported by the App shell.",
+          row_header=true,
+          extra_class="align-middle moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section aria-labelledby="page">
+        {{ typography("Page", variant="section-title", id="page") }}
+        <p>
+          Page is the content surface inside an App. It is the direct content
+          sibling of Sidebar and owns the screen's content flow and scrolling.
+          It can contain semantic <code>header</code>, <code>main</code>, and
+          <code>footer</code> regions while keeping the screen content on one
+          shared rail.
+        </p>
+        <p>
+          The Page wrapper uses <code>data-slot="page"</code> as a structural
+          hook so App and Catalog can coordinate layout and scroll behavior;
+          it is not a styling requirement.
+        </p>
+        <p>
+          The <code>.page</code> class is optional. Semantic regions and the
+          Page's position as the App's content sibling define the contract;
+          add a class only when a styling hook is useful.
+        </p>
+        {{ table(
+          ["Key point", "Contract"],
+          [
+            ["<code>header</code>", "Optional; holds page-level context or actions."],
+            ["<code>main</code>", "Required; contains the primary screen content."],
+            ["<code>footer</code>", "Optional; holds trailing actions or status."]
+          ],
+          caption="Page regions and semantic contract.",
+          row_header=true,
+          extra_class="align-middle moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section aria-labelledby="breakpoints">
+        {{ typography("Breakpoints", variant="section-title", id="breakpoints") }}
+        <p>
+          Breakpoints are the mobile-first width thresholds where a Moo UI layout
+          can change its composition. Use the class infix to apply a grid,
+          display, or spacing change from that minimum width upward.
+        </p>
+        <p>
+          Start with the smallest useful layout, then add a breakpoint only
+          when the content needs a different arrangement.
+        </p>
+        {% set breakpoints_caption = '<a href="https://getbootstrap.com/docs/5.3/layout/breakpoints/" target="_blank" rel="noopener noreferrer">Bootstrap breakpoints</a> used by Moo UI responsive layout utilities.' | safe %}
+        {{ table(
+          ["Breakpoint", "Class infix", "Dimensions"],
+          [
+            ["Extra small", "<em>None</em>", "&lt;576px"],
+            ["Small", "<code>sm</code>", "≥576px"],
+            ["Medium", "<code>md</code>", "≥768px"],
+            ["Large", "<code>lg</code>", "≥992px"],
+            ["Extra large", "<code>xl</code>", "≥1200px"],
+            ["Extra extra large", "<code>xxl</code>", "≥1400px"]
+          ],
+          caption=breakpoints_caption,
+          row_header=true,
+          extra_class="align-middle moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section aria-labelledby="containers">
+        {{ typography("Containers", variant="section-title", id="containers") }}
+        <p>
+          Containers keep layout content on a readable rail and apply a
+          responsive max-width at each breakpoint. Use the fluid variant when
+          a surface should span the available viewport width.
+        </p>
+        {% set containers_caption = '<a href="https://getbootstrap.com/docs/5.3/layout/containers/" target="_blank" rel="noopener noreferrer">Bootstrap container widths</a> used by Moo UI responsive layout utilities.' | safe %}
+        {% set containers_headers = [
+          "Container",
+          "<span class=\"fw-bold\">Extra small</span><br><span class=\"fw-normal\">&lt;576px</span>" | safe,
+          "<span class=\"fw-bold\">Small</span><br><span class=\"fw-normal\">≥576px</span>" | safe,
+          "<span class=\"fw-bold\">Medium</span><br><span class=\"fw-normal\">≥768px</span>" | safe,
+          "<span class=\"fw-bold\">Large</span><br><span class=\"fw-normal\">≥992px</span>" | safe,
+          "<span class=\"fw-bold\">X-Large</span><br><span class=\"fw-normal\">≥1200px</span>" | safe,
+          "<span class=\"fw-bold\">XX-Large</span><br><span class=\"fw-normal\">≥1400px</span>" | safe
+        ] %}
+        {{ table(
+          containers_headers,
+          [
+            ["<code>.container</code>", "100%", "540px", "720px", "960px", "1140px", "1320px"],
+            ["<code>.container-sm</code>", "100%", "540px", "720px", "960px", "1140px", "1320px"],
+            ["<code>.container-md</code>", "100%", "100%", "720px", "960px", "1140px", "1320px"],
+            ["<code>.container-lg</code>", "100%", "100%", "100%", "960px", "1140px", "1320px"],
+            ["<code>.container-xl</code>", "100%", "100%", "100%", "100%", "1140px", "1320px"],
+            ["<code>.container-xxl</code>", "100%", "100%", "100%", "100%", "100%", "1320px"],
+            ["<code>.container-fluid</code>", "100%", "100%", "100%", "100%", "100%", "100%"]
+          ],
+          caption=containers_caption,
+          row_header=true,
+          extra_class="align-middle moo-layout-table moo-container-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section aria-labelledby="grid">
+        {{ typography("Grid", variant="section-title", id="grid") }}
+        <p>
+          The Bootstrap grid arranges content into responsive columns. It uses
+          a twelve-column row, breakpoint-specific column classes, and gutters
+          so a layout can stack on small screens and spread across wider ones.
+        </p>
+        {% set grid_source %}
+          <div class="container py-4">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">Column 1</div>
+              <div class="col">Column 2</div>
+              <div class="col">Column 3</div>
+            </div>
+          </div>
+        {% endset %}
+        {% set grid_example %}
+          <div class="container py-4">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Column 1</div>
+              </div>
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Column 2</div>
+              </div>
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Column 3</div>
+              </div>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-grid-example",
+          "Grid example",
+          "",
+          grid_example,
+          show_header=false,
+          source_content=grid_source
+        ) }}
+        <h3 class="h4 mt-5 mb-3">Grid options</h3>
+        <p class="mb-4">
+          The table summarizes the breakpoint widths, class prefixes, and
+          column features available in the Bootstrap grid.
+        </p>
+        {% set grid_caption = '<a href="https://getbootstrap.com/docs/5.3/layout/grid/" target="_blank" rel="noopener noreferrer">Bootstrap grid defaults</a> used by Moo UI responsive layout utilities.' | safe %}
+        {% set grid_headers = [
+          "Grid option",
+          "<span class=\"fw-bold\">xs</span><br><span class=\"fw-normal\">&lt;576px</span>" | safe,
+          "<span class=\"fw-bold\">sm</span><br><span class=\"fw-normal\">≥576px</span>" | safe,
+          "<span class=\"fw-bold\">md</span><br><span class=\"fw-normal\">≥768px</span>" | safe,
+          "<span class=\"fw-bold\">lg</span><br><span class=\"fw-normal\">≥992px</span>" | safe,
+          "<span class=\"fw-bold\">xl</span><br><span class=\"fw-normal\">≥1200px</span>" | safe,
+          "<span class=\"fw-bold\">xxl</span><br><span class=\"fw-normal\">≥1400px</span>" | safe
+        ] %}
+        {{ table(
+          grid_headers,
+          [
+            ["Container <span class=\"text-body-secondary\">max-width</span>", "None (auto)", "540px", "720px", "960px", "1140px", "1320px"],
+            ["Class prefix", "<code>.col-</code>", "<code>.col-sm-</code>", "<code>.col-md-</code>", "<code>.col-lg-</code>", "<code>.col-xl-</code>", "<code>.col-xxl-</code>"],
+            ["# of columns", "12", "", "", "", "", ""],
+            ["Gutter width", "1.5rem <span class=\"text-body-secondary\">(.75rem on left and right)</span>", "", "", "", "", ""],
+            ["Custom gutters", "Yes", "", "", "", "", ""],
+            ["Nestable", "Yes", "", "", "", "", ""],
+            ["Column ordering", "Yes", "", "", "", "", ""]
+          ],
+          caption=grid_caption,
+          row_header=true,
+          extra_class="align-middle moo-layout-table moo-grid-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+      </section>
+
+      <section aria-labelledby="columns">
+        {{ typography("Columns", variant="section-title", id="columns") }}
+        <p>
+          Columns divide a Bootstrap row into equal-width areas. Use
+          <code>.row</code> for each line and <code>.col</code> to share the
+          available width evenly.
+        </p>
+        {% set columns_source %}
+          <div class="container text-center">
+            <div class="row">
+              <div class="col">1 of 2</div>
+              <div class="col">2 of 2</div>
+            </div>
+            <div class="row">
+              <div class="col">1 of 3</div>
+              <div class="col">2 of 3</div>
+              <div class="col">3 of 3</div>
+            </div>
+          </div>
+        {% endset %}
+        {% set columns_example %}
+          <div class="container text-center">
+            <div class="row mb-3">
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">1 of 2</div></div>
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">2 of 2</div></div>
+            </div>
+            <div class="row">
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">1 of 3</div></div>
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">2 of 3</div></div>
+              <div class="col"><div class="p-3 border rounded bg-body-tertiary">3 of 3</div></div>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-columns-example",
+          "Columns example",
+          "",
+          columns_example,
+          show_header=false,
+          source_content=columns_source
+        ) }}
+      </section>
+
+      <section aria-labelledby="gutters">
+        {{ typography("Gutters", variant="section-title", id="gutters") }}
+        <p>
+          Gutters are the space between columns and rows. Use
+          <code>gx-*</code> for horizontal gutters, <code>gy-*</code> for
+          vertical gutters, or <code>g-0</code> to remove gutters altogether.
+        </p>
+        {% set gutters_source %}
+          <div class="container px-4 text-center">
+            <div class="row gx-5">
+              <div class="col">
+                <div class="p-3">Custom column padding</div>
+              </div>
+              <div class="col">
+                <div class="p-3">Custom column padding</div>
+              </div>
+            </div>
+          </div>
+        {% endset %}
+        {% set gutters_example %}
+          <div class="container px-4 text-center">
+            <div class="row gx-5">
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Custom column padding</div>
+              </div>
+              <div class="col">
+                <div class="p-3 border rounded bg-body-tertiary">Custom column padding</div>
+              </div>
+            </div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-gutters-example",
+          "Gutters example",
+          "",
+          gutters_example,
+          show_header=false,
+          source_content=gutters_source
+        ) }}
+        <p class="mt-4 mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/gutters/" target="_blank" rel="noopener noreferrer">Bootstrap gutters documentation</a>
+          for responsive gutter variants and the complete utility API.
+        </p>
+      </section>
+
+      <section aria-labelledby="utilities">
+        {{ typography("Utilities", variant="section-title", id="utilities") }}
+        <p>
+          Bootstrap utilities are small, composable helpers for display, flex,
+          spacing, sizing, and positioning. Add a responsive infix such as
+          <code>d-md-flex</code> or <code>mt-lg-4</code> when a utility should
+          change at a breakpoint.
+        </p>
+        <p>
+          Compose utilities directly on the element they affect and keep the
+          smallest useful set of classes. Start with the base utility, then
+          add a breakpoint variant only when the layout needs to change.
+        </p>
+        <p class="mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/utilities/" target="_blank" rel="noopener noreferrer">Bootstrap utilities documentation</a>
+          for the complete API.
+        </p>
+      </section>
+
+      <section aria-labelledby="z-index">
+        {{ typography("Z-index", variant="section-title", id="z-index") }}
+        <p>
+          The <code>z-index</code> property controls the stacking order of
+          overlapping surfaces. Moo UI follows Bootstrap's reserved scale:
+          dropdowns start at <code>1000</code>, fixed surfaces at
+          <code>1030</code>, offcanvas backdrops at <code>1040</code>,
+          offcanvas surfaces at <code>1045</code>, modal backdrops at
+          <code>1050</code>, modals at <code>1055</code>, popovers at
+          <code>1070</code>, tooltips at <code>1080</code>, and toasts at
+          <code>1090</code>.
+        </p>
+        <p>
+          Use low local values such as <code>1</code>, <code>2</code>, or
+          <code>3</code> for small sibling overlaps. Avoid arbitrary high
+          values so shared overlays keep their predictable order.
+        </p>
+        {% set z_index_caption = "Bootstrap's reserved stacking scale for Moo UI overlays." %}
+        {{ table(
+          ["Bootstrap token", "Value"],
+          [
+            ["<code>$zindex-dropdown</code>", "1000"],
+            ["<code>$zindex-sticky</code>", "1020"],
+            ["<code>$zindex-fixed</code>", "1030"],
+            ["<code>$zindex-offcanvas-backdrop</code>", "1040"],
+            ["<code>$zindex-offcanvas</code>", "1045"],
+            ["<code>$zindex-modal-backdrop</code>", "1050"],
+            ["<code>$zindex-modal</code>", "1055"],
+            ["<code>$zindex-popover</code>", "1070"],
+            ["<code>$zindex-tooltip</code>", "1080"],
+            ["<code>$zindex-toast</code>", "1090"]
+          ],
+          caption=z_index_caption,
+          row_header=true,
+          extra_class="align-middle moo-layout-table small",
+          responsive_class="scroll-fade-x no-scrollbar"
+        ) }}
+        <p class="mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/z-index/" target="_blank" rel="noopener noreferrer">Bootstrap z-index documentation</a>
+          for the complete API.
+        </p>
+      </section>
+
+      <section aria-labelledby="css-grid">
+        {{ typography("CSS Grid", variant="section-title", id="css-grid") }}
+        <p>
+          Bootstrap's CSS Grid utilities use native CSS Grid through
+          <code>.grid</code> and <code>.g-col-*</code> classes. Unlike the
+          Flexbox-based <code>.row</code>/<code>.col</code> grid, CSS Grid
+          places items on a two-dimensional track system and lets each item
+          span an explicit number of columns.
+        </p>
+        <p>
+          Use <code>.g-col-6</code> for half-width tracks, then add a
+          responsive span such as <code>.g-col-md-4</code> when the layout
+          should change at a breakpoint.
+        </p>
+        {% set css_grid_source %}
+          <div class="grid gap-3">
+            <div class="g-col-6">g-col-6</div>
+            <div class="g-col-6">g-col-6</div>
+            <div class="g-col-6 g-col-md-4">g-col-6 g-col-md-4</div>
+            <div class="g-col-6 g-col-md-8">g-col-6 g-col-md-8</div>
+          </div>
+        {% endset %}
+        {% set css_grid_example %}
+          <div class="grid gap-3">
+            <div class="g-col-6 p-3 border rounded bg-body-tertiary">g-col-6</div>
+            <div class="g-col-6 p-3 border rounded bg-body-tertiary">g-col-6</div>
+            <div class="g-col-6 g-col-md-4 p-3 border rounded bg-body-tertiary">g-col-6 g-col-md-4</div>
+            <div class="g-col-6 g-col-md-8 p-3 border rounded bg-body-tertiary">g-col-6 g-col-md-8</div>
+          </div>
+        {% endset %}
+        {{ render_block_example(
+          "layout-css-grid-example",
+          "CSS Grid example",
+          "",
+          css_grid_example,
+          show_header=false,
+          source_content=css_grid_source
+        ) }}
+        <p class="mt-4 mb-0">
+          See the
+          <a href="https://getbootstrap.com/docs/5.3/layout/css-grid/" target="_blank" rel="noopener noreferrer">Bootstrap CSS Grid documentation</a>
+          for custom tracks, nesting, and the complete utility API.
+        </p>
+      </section>
+
+      {{ render_section_page_pagination("layout", site_pages, root_path) }}
+    </article>
+
+    {{ render_doc_toc([
+      {"id": "app", "label": "App"},
+      {"id": "sidebar", "label": "Sidebar"},
+      {"id": "page", "label": "Page"},
+      {"id": "breakpoints", "label": "Breakpoints"},
+      {"id": "containers", "label": "Containers"},
+      {"id": "grid", "label": "Grid"},
+      {"id": "columns", "label": "Columns"},
+      {"id": "gutters", "label": "Gutters"},
+      {"id": "utilities", "label": "Utilities"},
+      {"id": "z-index", "label": "Z-index"},
+      {"id": "css-grid", "label": "CSS Grid"}
+    ]) }}
+  </div>
+{% endblock %}

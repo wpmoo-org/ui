@@ -1,5 +1,10 @@
 export const THEME_BUILDER_SCHEMA_VERSION = 1;
 
+// Catalog-only notification for preview surfaces that deliberately mirror a
+// subset of the document owner's resolved tokens.
+export const THEME_BUILDER_TOKEN_CHANGE_EVENT =
+  "moo:catalog-theme-builder-tokens-change";
+
 export const THEME_BUILDER_DEFAULTS = {
   schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
   baseColor: "neutral",
@@ -666,6 +671,7 @@ export function createThemeBuilderFirstPaintPayload() {
   return cloneJson({
     schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
     defaults: THEME_BUILDER_DEFAULTS,
+    allowList: PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
     options: THEME_BUILDER_OPTIONS,
     aliases: {
       baseColor: BASE_COLOR_ALIASES,

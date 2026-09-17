@@ -237,7 +237,9 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn("moo-codepen-example-shell", payload["html"])
         self.assertEqual(
             _codepen_payload_html_without_config(payload),
-            '<button class="btn btn-primary" type="button">Primary</button>',
+            '<div class="moo-ui" data-bs-theme="light">\n'
+            '<button class="btn btn-primary" type="button">Primary</button>\n'
+            "</div>",
         )
         self.assertEqual(payload["css"], "")
         self.assertNotIn(".moo-codepen-signature", payload["css"])
@@ -269,15 +271,15 @@ class CodeExampleTests(CatalogTestCase):
         demo_css = (ROOT / "site-dist/assets/css/codepen-demo.css").read_text(
             encoding="utf-8"
         )
-        self.assertIn("body.moo-codepen-demo", demo_css)
-        self.assertIn("body.moo-codepen-component-demo", demo_css)
+        self.assertIn(".moo-ui.moo-codepen-demo", demo_css)
+        self.assertIn(".moo-ui.moo-codepen-component-demo", demo_css)
         component_body_css = demo_css.split(
-            "body.moo-codepen-component-demo {", 1
+            ".moo-ui.moo-codepen-component-demo {", 1
         )[1].split("}", 1)[0]
         self.assertIn("display: grid;", component_body_css)
         self.assertIn("place-items: center;", component_body_css)
         self.assertIn("padding: 2rem;", component_body_css)
-        self.assertIn("body.moo-codepen-component-demo > :where(", demo_css)
+        self.assertIn(".moo-ui.moo-codepen-component-demo > :where(", demo_css)
         self.assertNotIn('.container > .row > [class*="col"]', demo_css)
         self.assertIn(".moo-codepen-signature", demo_css)
         self.assertIn(".moo-codepen-footer", demo_css)
@@ -286,7 +288,9 @@ class CodeExampleTests(CatalogTestCase):
         demo_js = (ROOT / "site-dist/assets/js/codepen-demo.js").read_text(
             encoding="utf-8"
         )
-        self.assertIn('document.body.classList.add("moo-codepen-demo")', demo_js)
+        self.assertIn('owner.classList.add("moo-codepen-demo")', demo_js)
+        self.assertIn("function ensureDemoOwner()", demo_js)
+        self.assertNotIn('document.documentElement.setAttribute("data-bs-theme"', demo_js)
         self.assertIn('function inferCodePenConfig(root)', demo_js)
         self.assertIn("var COMPONENT_DESCRIPTIONS = {};", demo_js)
         self.assertIn('function observeCodePenConfig()', demo_js)
@@ -350,7 +354,7 @@ class CodeExampleTests(CatalogTestCase):
             + "\n".join(violations),
         )
 
-    def test_codepen_demo_bootstrap_failure_scopes_toast_queue_cleanup(self) -> None:
+    def test_codepen_demo_keeps_popovers_and_toast_state_under_its_owner(self) -> None:
         source = (ROOT / "site/static/js/codepen-demo.js").read_text(
             encoding="utf-8"
         )
@@ -366,7 +370,18 @@ class CodeExampleTests(CatalogTestCase):
         )[0]
 
         self.assertNotIn("mooCodepenToastsQueued", popover_block)
-        self.assertIn("delete root.body.dataset.mooCodepenToastsQueued;", toast_block)
+        self.assertNotIn('data-bs-container", "body"', source)
+        self.assertIn(
+            "var portal = ownerPortalRoot(owner);",
+            popover_block,
+        )
+        self.assertIn(
+            "Popover.getOrCreateInstance(element, { container: portal });",
+            popover_block,
+        )
+        self.assertNotIn("root.body", toast_block)
+        self.assertIn("owner.dataset.mooCodepenToastsQueued", toast_block)
+        self.assertIn("portal.appendChild(container);", source)
         self.assertIn(
             'script.dataset.mooCodepenBootstrapLoading = "true";',
             source,
@@ -466,7 +481,7 @@ class CodeExampleTests(CatalogTestCase):
             1,
         )[0]
 
-        self.assertIn("document.body.classList.remove(", render_block)
+        self.assertIn("owner.classList.remove(", render_block)
         for class_name in (
             "moo-codepen-component-demo",
             "moo-codepen-example-demo",
@@ -752,9 +767,15 @@ class CodeExampleTests(CatalogTestCase):
             with self.subTest(token=token):
                 self.assertIn(token, catalog_tokens)
 
-        dark_selector = '[data-bs-theme=dark] .moo-catalog {'
-        self.assertIn(dark_selector, css)
-        dark_catalog = css.split(dark_selector, 1)[1].split("}", 1)[0]
+        dark_scope = (
+            '@scope (.moo-ui[data-bs-theme="dark"]) '
+            'to (:where(.moo-ui[data-bs-theme="light"], '
+            '.moo-ui[data-bs-theme="dark"])) {'
+        )
+        self.assertIn(dark_scope, css)
+        dark_catalog = css.split(dark_scope, 1)[1].split(
+            ":scope .moo-catalog {", 1
+        )[1].split("}", 1)[0]
         self.assertIn("--moo-code-keyword:", dark_catalog)
         self.assertIn("--moo-code-string:", dark_catalog)
 
@@ -900,11 +921,16 @@ class CodeExampleTests(CatalogTestCase):
 
         catalog_css = self.read_output("assets/css/catalog.css")
         selector = catalog_css.split(
-            ".moo-catalog__content :where(p, li, dd, dt, td, th) code {", 1
+            '.moo-catalog [data-slot="page"] > main > .container :where(p, li, dd, dt, td, th) code {',
+            1,
         )[1].split("}", 1)[0]
         self.assertIn("color: var(--bs-secondary-text-emphasis);", selector)
         self.assertIn("background: var(--moo-muted-surface);", selector)
         self.assertIn("border-radius:", selector)
+
+        usage = catalog_css.split(".moo-component-usage p {", 1)[1].split("}", 1)[0]
+        self.assertIn("font-size: var(--moo-doc-body-font-size);", usage)
+        self.assertIn("line-height: var(--moo-doc-body-line-height);", usage)
 
     def test_code_panel_expands_and_copies_only_code_text(self) -> None:
         result = self.run_build()

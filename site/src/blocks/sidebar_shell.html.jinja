@@ -1,7 +1,9 @@
 {% from "components/avatar.html.jinja" import avatar %}
 {% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
-{% from "components/sidebar.html.jinja" import sidebar, sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_inset, sidebar_menu, sidebar_menu_action, sidebar_menu_badge, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_provider, sidebar_trigger %}
+{% from "components/sidebar.html.jinja" import sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_action, sidebar_menu_badge, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_trigger %}
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
 
 {% macro render_sidebar_shell(key, sidebar_id, variant="sidebar", contained=false, sidebar_open=true, demo_copy="default") -%}
   {% set portal_copy = demo_copy == "portal" %}
@@ -55,12 +57,15 @@
     {% set breadcrumb_parent = "Building Your Application" %}
     {% set breadcrumb_current = "Data Fetching" %}
   {% endif %}
-  {% set provider_extra_class = "moo-sidebar-demo--portal-shell" if portal_copy else "" %}
-  {% if portal_copy and variant == "inset" %}
-    {% set provider_extra_class = provider_extra_class ~ " moo-sidebar-demo--flat-inset" %}
-  {% endif %}
-  {% call sidebar_provider(contained=contained, key=key, default_open=sidebar_open, extra_class=provider_extra_class) %}
-    {% call sidebar(id=sidebar_id, variant=variant, aria_label="Sidebar block navigation") %}
+  {% call(slot) app(
+    navigation="sidebar",
+    sidebar_key=key,
+    default_open=sidebar_open,
+    sidebar_id=sidebar_id,
+    variant=variant,
+    shell_mode="contained" if contained else "viewport"
+  ) %}
+    {% if slot == "sidebar" %}
       {% call sidebar_header() %}
         {% call sidebar_menu() %}
           {% call sidebar_menu_item(dropdown=true, dropdown_direction="dropend") %}
@@ -241,34 +246,35 @@
           {% endcall %}
         {% endcall %}
       {% endcall %}
-    {% endcall %}
-
-    {% call sidebar_inset() %}
-      <header class="sidebar-inset__header">
-        {{ sidebar_trigger(sidebar_id=sidebar_id, expanded=sidebar_open) }}
-        {{ separator(orientation="vertical") }}
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="#">{{ breadcrumb_parent }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_current }}</li>
-          </ol>
-        </nav>
-      </header>
+    {% elif slot == "page" %}
+      {% call(region) page(width="fluid") %}
+        {% if region == "header" %}
+          <div class="d-flex align-items-center gap-2 p-3">
+            {{ sidebar_trigger(sidebar_id=sidebar_id, expanded=sidebar_open) }}
+            {{ separator(orientation="vertical") }}
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="#">{{ breadcrumb_parent }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_current }}</li>
+              </ol>
+            </nav>
+          </div>
+        {% elif region == "main" %}
       {% if portal_copy %}
-        {% set content_classes = "sidebar-inset__content d-flex flex-column gap-3 p-3 pt-0" %}
-        {% set detail_placeholder_style = "min-height: 0;" %}
+        {% set content_classes = "d-flex flex-grow-1 flex-column gap-3 p-3 pt-0" %}
       {% else %}
-        {% set content_classes = "sidebar-inset__content d-grid gap-3 p-3" %}
-        {% set detail_placeholder_style = "min-height: 12rem;" %}
+        {% set content_classes = "d-grid flex-grow-1 gap-3 p-3" %}
       {% endif %}
       <div class="{{ content_classes }}">
-        <div class="d-grid gap-3" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
-          <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
-          <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
-          <div class="moo-sidebar-demo__placeholder rounded-3" style="aspect-ratio: 16 / 9;"></div>
+        <div class="row g-3">
+          <div class="col-12 col-md-4"><div class="card ratio ratio-16x9"></div></div>
+          <div class="col-12 col-md-4"><div class="card ratio ratio-16x9"></div></div>
+          <div class="col-12 col-md-4"><div class="card ratio ratio-16x9"></div></div>
         </div>
-        <div class="moo-sidebar-demo__placeholder rounded-3 flex-grow-1" style="{{ detail_placeholder_style }}"></div>
+        <div class="card flex-grow-1 h-100{% if not portal_copy %} min-vh-25{% endif %}"></div>
       </div>
-    {% endcall %}
+        {% endif %}
+      {% endcall %}
+    {% endif %}
   {% endcall %}
 {%- endmacro %}

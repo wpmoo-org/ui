@@ -1,18 +1,15 @@
-.moo-catalog__main:has(.moo-home-hero) {
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main:has(.moo-home-hero) {
   --scroll-fade-size: min(12%, 5rem);
   --scroll-fade-reveal: 10rem;
 }
 
-.moo-catalog__content {
-  padding: 3rem 1.5rem 5rem;
-}
-
-.moo-catalog__content:has(.moo-home-hero) {
-  padding-bottom: 0;
+.moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main:has(.moo-home-hero) > .container-xl {
+  flex-shrink: 0;
 }
 
 .moo-home-hero {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: minmax(18rem, 0.78fr) minmax(0, 1.35fr);
   align-items: center;
   gap: unquote("clamp(2rem, 6vw, 5.5rem)");
@@ -63,7 +60,6 @@
 .moo-home-intro {
   display: grid;
   gap: 2rem;
-  max-width: 72rem;
   margin-top: 4rem;
 }
 
@@ -398,7 +394,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moo-catalog__main {
+  .moo-catalog > .wrapper[data-layout="app"] > [data-slot="page"] > main {
     scroll-behavior: auto;
   }
 

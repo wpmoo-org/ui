@@ -648,6 +648,104 @@ report("unset-colors-retheme", {{
         self.assertEqual(case["after"]["borderColor"], "rgb(174, 62, 201)")
         self.assertEqual(case["after"]["hoverBackgroundColor"], "rgb(174, 62, 201)")
 
+    def test_color_mix_results_are_normalized_for_chartjs(self) -> None:
+        chart_data = {
+            "labels": ["Mon", "Tue"],
+            "datasets": [{"label": "Visitors", "data": [120, 190]}],
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(json.dumps(chart_data))},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--moo-chart-1", "rgb(103, 169, 232)"],
+]);
+const probe = {{
+  style: {{}},
+  hidden: false,
+  remove() {{}},
+}};
+ownerDocument.createElement = () => probe;
+documentElement.appendChild = () => probe;
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  return {{
+    color: element.style.color.includes("92%")
+      ? "color(srgb 0.403922 0.662745 0.909804 / 0.92)"
+      : "color(srgb 0.403922 0.662745 0.909804 / 0.78)",
+    getPropertyValue: () => "",
+  }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const dataset = instance.chart.data.datasets[0];
+report("normalized-color-mix", {{
+  backgroundColor: dataset.backgroundColor,
+  borderColor: dataset.borderColor,
+}});
+"""
+        )
+        self.assertEqual(case["backgroundColor"], "rgba(103, 169, 232, 0.78)")
+        self.assertEqual(case["borderColor"], "rgba(103, 169, 232, 0.92)")
+
+    def test_bar_retheme_refreshes_shared_element_options(self) -> None:
+        chart_data = {
+            "labels": ["Mon", "Tue"],
+            "datasets": [{"label": "Visitors", "data": [120, 190]}],
+        }
+        case = self.run_chart_case(
+            f"""
+const root = makeRoot({{
+  "data-chart": "bar",
+  "data-chart-data": {json.dumps(json.dumps(chart_data))},
+}});
+const tokenColors = new Map([
+  ["--bs-body-color", "rgb(33, 37, 41)"],
+  ["--bs-body-bg", "rgb(255, 255, 255)"],
+  ["--bs-secondary-color", "rgb(108, 117, 125)"],
+  ["--bs-border-color", "rgb(222, 226, 230)"],
+  ["--moo-chart-1", "rgb(103, 169, 232)"],
+]);
+const probe = {{
+  style: {{}},
+  hidden: false,
+  remove() {{}},
+}};
+ownerDocument.createElement = () => probe;
+documentElement.appendChild = () => probe;
+window.getComputedStyle = (element) => {{
+  if (element === documentElement) {{
+    return {{ getPropertyValue: (token) => tokenColors.get(token) || "" }};
+  }}
+  const purple = element.style.color.includes("174, 62, 201");
+  return {{
+    color: purple
+      ? "color(srgb 0.682353 0.243137 0.788235 / 0.78)"
+      : "color(srgb 0.403922 0.662745 0.909804 / 0.78)",
+    getPropertyValue: () => "",
+  }};
+}};
+const instance = MooChart.getOrCreateInstance(root);
+const observer = observerLog.at(-1);
+const controller = instance.chart.getDatasetMeta(0).controller;
+const before = controller._cachedMeta.data[0].options.backgroundColor;
+tokenColors.set("--moo-chart-1", "rgb(174, 62, 201)");
+observer.callback([{{ attributeName: "style" }}]);
+await new Promise((resolve) => setTimeout(resolve, 800));
+const after = controller._cachedMeta.data[0].options.backgroundColor;
+report("bar-retheme-options", {{ before, after }});
+"""
+        )
+        self.assertEqual(case["before"], "rgba(103, 169, 232, 0.78)")
+        self.assertEqual(case["after"], "rgba(174, 62, 201, 0.78)")
+
     def test_unsupported_chart_type_is_rejected(self) -> None:
         case = self.run_chart_case(
             """
@@ -1132,14 +1230,17 @@ window.getComputedStyle = (element) => {{
 const instance = MooChart.getOrCreateInstance(root);
 const observer = observerLog.at(-1);
 const observation = observer.observed[0];
+const observedTargets = observer.observed.map((entry) => entry.target);
 const dataset = instance.chart.data.datasets[0];
 report("scoped-theme-observer", {{
   observedScopedTheme: observation.target === scopedTheme,
+  observedDocumentElement: observedTargets.includes(documentElement),
   pointBackgroundColor: dataset.pointBackgroundColor,
 }});
 """
         )
         self.assertTrue(case["observedScopedTheme"])
+        self.assertTrue(case["observedDocumentElement"])
         self.assertEqual(case["pointBackgroundColor"], "rgb(110, 223, 246)")
 
     def test_catalog_adapter_initializes_and_disposes_chart_roots(self) -> None:
@@ -1230,9 +1331,15 @@ function makeButton() {{
 }}
 const themeButton = makeButton();
 const status = {{ textContent: "" }};
+const pageOwner = {{
+  dataset: {{ bsTheme: "dark" }},
+  ownerDocument,
+  matches: (selector) => selector.includes(".moo-ui"),
+}};
 const previewScope = {{
   dataset: {{}},
   ownerDocument,
+  classList: {{ add() {{}} }},
 }};
 const chartRoot = makeRoot({{
   "data-chart": "line",
@@ -1247,7 +1354,12 @@ const container = {{
     if (selector === "[data-chart-theme]") return themeButton;
     return null;
   }},
-  closest: (selector) => (selector === ".moo-example__preview" ? previewScope : null),
+  closest: (selector) =>
+    selector === ".moo-example__preview"
+      ? previewScope
+      : selector.includes(".moo-ui")
+        ? pageOwner
+        : null,
 }};
 chartRoot.closest = (selector) => (selector === "[data-bs-theme]" ? previewScope : null);
 documentElement.dataset.bsTheme = "dark";
@@ -1286,6 +1398,86 @@ report("scoped-lifecycle-theme", {{
         self.assertEqual(case.get("afterToggleDocumentTheme"), "dark")
         self.assertIsNone(case["containerTheme"])
         self.assertEqual(case["statusMessage"], "Example theme: light")
+
+    def test_catalog_adapter_leaves_no_toggle_preview_in_its_inherited_owner(
+        self,
+    ) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                NODE_PREAMBLE.replace(
+                    'import MooChart from "./src/js/components/chart.js";',
+                    'import MooChart from "./src/js/components/chart.js";\n'
+                    'import { initExamplesChart } from "./site/src/js/catalog/examples-chart.js";',
+                )
+                + f"""
+const pageOwner = {{
+  dataset: {{ bsTheme: "dark" }},
+  ownerDocument,
+  matches: (selector) => selector.includes(".moo-ui"),
+}};
+const classNames = new Set();
+const previewScope = {{
+  dataset: {{}},
+  ownerDocument,
+  classList: {{ add(name) {{ classNames.add(name); }} }},
+}};
+const chartRoot = makeRoot({{
+  "data-chart": "line",
+  "data-chart-data": {json.dumps(VALID_DATA)},
+}});
+const container = {{
+  dataset: {{}},
+  ownerDocument,
+  querySelector: (selector) => {{
+    if (selector === ".chart") return chartRoot;
+    return null;
+  }},
+  closest: (selector) =>
+    selector === ".moo-example__preview"
+      ? previewScope
+      : selector.includes(".moo-ui")
+        ? pageOwner
+        : null,
+}};
+chartRoot.closest = (selector) =>
+  selector === "[data-bs-theme]" ? pageOwner : null;
+const root = {{
+  querySelectorAll: (selector) => {{
+    if (selector === "[data-chart-live]") return [container];
+    if (selector === ".chart") return [chartRoot];
+    return [];
+  }},
+}};
+const release = initExamplesChart(root);
+report("inherited-no-toggle-theme", {{
+  previewBecameOwner: classNames.has("moo-ui"),
+  previewTheme: previewScope.dataset.bsTheme || null,
+  pageTheme: pageOwner.dataset.bsTheme,
+}});
+release();
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=NODE_TEST_TIMEOUT,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        case = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(
+            case,
+            {
+                "name": "inherited-no-toggle-theme",
+                "ok": True,
+                "previewBecameOwner": False,
+                "previewTheme": None,
+                "pageTheme": "dark",
+            },
+        )
 
     def test_catalog_adapter_uses_one_stateful_lifecycle_button(self) -> None:
         result = subprocess.run(

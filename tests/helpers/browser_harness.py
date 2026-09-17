@@ -168,17 +168,42 @@ def prepare_page(
     page: Page,
     case: BrowserCase,
     *,
+    embedded: bool = False,
+    owner_selector: str = (
+        '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+    ),
     normalize_screenshot: bool = False,
 ) -> None:
-    page.locator("html").evaluate(
-        """
-        (element, values) => {
-          element.setAttribute("dir", values.direction);
-          element.setAttribute("data-bs-theme", values.colorScheme);
-        }
-        """,
-        {"direction": case.direction, "colorScheme": case.color_scheme},
-    )
+    if not embedded:
+        page.locator("html").evaluate(
+            """
+            (element, values) => {
+              element.setAttribute("dir", values.direction);
+            }
+            """,
+            {"direction": case.direction, "colorScheme": case.color_scheme},
+        )
+
+    owner = page.locator(owner_selector).first
+    if embedded:
+        owner.evaluate(
+            """
+            (element, values) => {
+              element.setAttribute("data-bs-theme", values.colorScheme);
+              element.setAttribute("dir", values.direction);
+            }
+            """,
+            {"direction": case.direction, "colorScheme": case.color_scheme},
+        )
+    else:
+        owner.evaluate(
+            """
+            (element, values) => {
+              element.setAttribute("data-bs-theme", values.colorScheme);
+            }
+            """,
+            {"direction": case.direction, "colorScheme": case.color_scheme},
+        )
     if normalize_screenshot:
         page.add_style_tag(content=SCREENSHOT_NORMALIZATION_CSS)
 

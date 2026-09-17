@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "page",
+    "label": "Page",
+    "status": "preview",
+    "description": "Provide a full-width page surface with semantic header, main, and footer regions, each using one native Bootstrap content rail.",
+    "source": "src/layouts/page.html.jinja",
+    "parts": [],
+    "layoutParts": []
+  },
+  {
+    "slug": "app",
+    "label": "App",
+    "status": "preview",
+    "description": "Compose a direct application shell with an optional Sidebar sibling and one independent Page sibling.",
+    "source": "src/layouts/app.html.jinja",
+    "parts": ["sidebar"],
+    "layoutParts": ["page"]
+  }
+]

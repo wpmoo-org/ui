@@ -1,0 +1,67 @@
+{% set page_container_classes = {
+  "base": "container",
+  "sm": "container-sm",
+  "md": "container-md",
+  "lg": "container-lg",
+  "xl": "container-xl",
+  "xxl": "container-xxl",
+  "fluid": "container-fluid"
+} %}
+
+{% set page_identifier_first_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+{% set page_identifier_characters = page_identifier_first_characters ~ "0123456789_-" %}
+
+{% macro page(width="xl", id="", header_width=none) -%}
+  {% if width not in page_container_classes %}
+    {{ fail("Unknown page width: " ~ width) }}
+  {% endif %}
+  {% if header_width is not none and header_width not in page_container_classes %}
+    {{ fail("Unknown page header width: " ~ header_width) }}
+  {% endif %}
+  {% set resolved_header_width = header_width if header_width is not none else width %}
+  {% if id is not string %}
+    {{ fail("Invalid page id") }}
+  {% elif id %}
+    {% set identifier = namespace(valid=true) %}
+    {% if id != id | trim or id == "main-content" %}
+      {% set identifier.valid = false %}
+    {% elif id[0] not in page_identifier_first_characters %}
+      {% set identifier.valid = false %}
+    {% else %}
+      {% for character in id[1:] %}
+        {% if character not in page_identifier_characters %}
+          {% set identifier.valid = false %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if not identifier.valid %}
+      {{ fail("Invalid page id") }}
+    {% endif %}
+  {% endif %}
+  {% if caller is not defined %}
+    {{ fail("Page requires a named region caller") }}
+  {% endif %}
+
+  {% set header_content = caller("header") | trim %}
+  {% set main_content = caller("main") | trim %}
+  {% set footer_content = caller("footer") | trim %}
+  {% if not main_content %}
+    {{ fail("Page main region is required") }}
+  {% endif %}
+
+  <div data-slot="page"{% if id %} id="{{ id }}"{% endif %}>
+    {% if header_content %}
+      <header>
+        <div class="{{ page_container_classes[resolved_header_width] }}">{{ header_content | safe }}</div>
+      </header>
+    {% endif %}
+    <main id="main-content" tabindex="-1" class="scroll-fade-y no-scrollbar">
+      <div class="{{ page_container_classes[width] }}">{{ main_content | safe }}</div>
+    </main>
+    {% if footer_content %}
+      <footer>
+        <div class="{{ page_container_classes[width] }}">{{ footer_content | safe }}</div>
+      </footer>
+    {% endif %}
+  </div>
+{%- endmacro %}

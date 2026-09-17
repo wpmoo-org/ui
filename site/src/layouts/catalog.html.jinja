@@ -1,115 +1,73 @@
 {% extends "layouts/base.html.jinja" %}
-{% from "components/sidebar.html.jinja" import sidebar_inset, sidebar_provider %}
+{% from "layouts/app.html.jinja" import app %}
+{% from "layouts/page.html.jinja" import page %}
+{% from "shell/navbar.html.jinja" import render_catalog_overlays with context %}
+{% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
+
+{% block owner_prepaint %}
+  {% include "includes/catalog-theme-prepaint.html.jinja" %}
+{% endblock %}
 
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
-    {% call sidebar_provider(key="catalog-shell") %}
-      <script>
-        (() => {
-          const state = document.documentElement.dataset.sidebarCatalogState;
-          const shell = document.currentScript.parentElement;
-          if (
-            (state === "collapsed" || state === "expanded") &&
-            shell?.dataset.sidebarKey === "catalog-shell"
-          ) {
-            shell.dataset.sidebarState = state;
-          }
-        })();
-      </script>
-      {% include "shell/sidebar.html.jinja" %}
-      <script>
-        (() => {
-          // Apply a saved Sidebar variant synchronously, right after the
-          // sidebar renders and before the rest of the page paints, so a
-          // non-default choice never flashes the default layout first.
-          var sidebar = document.getElementById("catalog-sidebar");
-          if (!sidebar) return;
-          var stored;
-          try {
-            stored = window.localStorage.getItem("moo:sidebar-variant");
-          } catch (_) {
-            return;
-          }
-          if (stored === "sidebar" || stored === "inset" || stored === "floating") {
-            sidebar.dataset.variant = stored;
-          }
-        })();
-      </script>
-      <script data-moo-sidebar-active-prepaint>
-        (() => {
-          // Match Sidebar's active route positioning before the deferred
-          // catalog module loads, so deep menu pages never flash from the top.
-          const shell = document.currentScript.closest('[data-slot="sidebar-wrapper"]');
-          const active = shell?.querySelector(
-            '[data-slot="sidebar-content"] a[data-slot="sidebar-menu-button"][aria-current="page"], ' +
-              '[data-slot="sidebar-content"] a.sidebar-menu-button[aria-current="page"], ' +
-              '[data-slot="sidebar-content"] a.sidebar-menu-button.active'
-          );
-          const content = active?.closest('[data-slot="sidebar-content"]');
-          if (!active || !content || content.clientHeight <= 0) {
-            return;
-          }
-          const maxScrollTop = content.scrollHeight - content.clientHeight;
-          if (maxScrollTop <= 0) {
-            return;
-          }
-
-          const contentRect = content.getBoundingClientRect();
-          const activeRect = active.getBoundingClientRect();
-          if (contentRect.height <= 0 || activeRect.height <= 0) {
-            return;
-          }
-
-          const targetScrollTop =
-            content.scrollTop +
-            activeRect.top -
-            contentRect.top -
-            (content.clientHeight - activeRect.height) / 2;
-          content.scrollTop = Math.round(
-            Math.min(Math.max(targetScrollTop, 0), maxScrollTop)
-          );
-        })();
-      </script>
-      {% call sidebar_inset() %}
-        {% include "shell/navbar.html.jinja" %}
-        <main class="moo-catalog__main sidebar-inset__content scroll-fade-y no-scrollbar" id="main-content" tabindex="-1">
-          <div class="moo-catalog__content">
-            {% set has_example_toc = current_page_kind in ["component", "utility"] %}
-            {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
-            {% set child_page_navigation_items = site_pages %}
-            {% set content_html %}{% block content %}{% endblock %}{% endset %}
-            {% set example_toc_items = content_html | example_toc_items if has_example_toc else [] %}
-            {% if has_example_toc or has_child_page_navigation %}
-              <div class="moo-doc-layout" data-moo-component-doc-layout>
-                <div class="moo-doc-main">
-            {% endif %}
-            {{ content_html | safe }}
-            {% if has_child_page_navigation %}
-              {{ render_section_page_pagination(current_slug, child_page_navigation_items, root_path) }}
-            {% endif %}
-            {% if has_example_toc or has_child_page_navigation %}
-                </div>
-                {% if has_example_toc %}
-                  <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc{% if example_toc_items | length == 0 %} hidden{% endif %}>
-                  <div class="moo-doc-toc__inner">
-                    <div class="moo-doc-toc__label">On this page</div>
-                    <nav class="nav flex-column" aria-label="{% if current_section == 'utils' %}Utility examples{% else %}Component examples{% endif %}" data-moo-component-toc-nav>
-                      {% for item in example_toc_items %}
-                        <a class="nav-link{% if loop.first %} active{% endif %}" href="#{{ item.id }}"{% if loop.first %} aria-current="true"{% endif %}>{{ item.label }}</a>
-                      {% endfor %}
-                    </nav>
+    {% call(slot) app(
+      navigation="sidebar",
+      sidebar_key="catalog-shell",
+      sidebar_id="catalog-sidebar",
+      variant="sidebar",
+      aria_label="Catalog navigation",
+      shell_mode="viewport"
+    ) %}
+      {% if slot == "sidebar" %}
+        {{ render_catalog_sidebar() }}
+      {% elif slot == "page" %}
+        {% call(region) page(width="xl", header_width="fluid") %}
+          {% if region == "header" %}
+            {% include "shell/navbar.html.jinja" %}
+          {% elif region == "main" %}
+            <div class="row gx-0">
+              <div class="col px-md-5">
+                {% set has_example_toc = current_page_kind in ["component", "utility"] %}
+                {% set has_child_page_navigation = current_page_kind in ["component", "utility", "block"] %}
+                {% set child_page_navigation_items = site_pages %}
+                {% set content_html %}{% block content %}{% endblock %}{% endset %}
+                {% set example_toc_items = content_html | example_toc_items if has_example_toc else [] %}
+                {% if has_example_toc or has_child_page_navigation %}
+                  <div class="moo-doc-layout" data-moo-component-doc-layout>
+                    <div class="moo-doc-main">
+                {% endif %}
+                {{ content_html | safe }}
+                {% if has_child_page_navigation %}
+                  {{ render_section_page_pagination(current_slug, child_page_navigation_items, root_path) }}
+                {% endif %}
+                {% if has_example_toc or has_child_page_navigation %}
+                    </div>
+                    {% if has_example_toc %}
+                      <aside class="moo-doc-toc d-none d-xl-block" aria-label="On this page" data-moo-component-toc{% if example_toc_items | length == 0 %} hidden{% endif %}>
+                      <div class="moo-doc-toc__inner">
+                        <div class="moo-doc-toc__label">On this page</div>
+                        <nav class="nav flex-column" aria-label="{% if current_section == 'utils' %}Utility examples{% else %}Component examples{% endif %}" data-moo-component-toc-nav>
+                          {% for item in example_toc_items %}
+                            <a class="nav-link{% if loop.first %} active{% endif %}" href="#{{ item.id }}"{% if loop.first %} aria-current="true"{% endif %}>{{ item.label }}</a>
+                          {% endfor %}
+                        </nav>
+                      </div>
+                      </aside>
+                    {% endif %}
                   </div>
-                  </aside>
                 {% endif %}
               </div>
-            {% endif %}
-          </div>
-        </main>
-        {% block footer %}
-          {% include "shell/footer.html.jinja" %}
-        {% endblock %}
-      {% endcall %}
+            </div>
+          {% elif region == "footer" %}
+            {% block footer %}
+              {% include "shell/footer.html.jinja" %}
+            {% endblock %}
+          {% endif %}
+        {% endcall %}
+      {% endif %}
     {% endcall %}
+    {{ render_catalog_overlays() }}
   </div>
+  <script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>
 {% endblock %}

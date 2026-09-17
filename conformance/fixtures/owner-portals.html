@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo UI conformance fixture: owner portals</title>
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/moo.css">
+  </head>
+  <body>
+    <section class="p-3" data-conformance-host data-owner-portals-host>
+      <h1>Host content</h1>
+      <p>This host content is deliberately outside every Moo UI owner.</p>
+    </section>
+
+    <div class="moo-ui p-4" data-bs-theme="dark" id="owner-portals-outer">
+      <div class="moo-ui" data-moo-overlay-portal-host id="owner-portals-outer-portal"></div>
+      <h2>Outer owner</h2>
+      <button
+        class="btn btn-outline-light"
+        type="button"
+        data-bs-toggle="tooltip"
+        data-bs-title="Outer owner tooltip"
+      >
+        Outer tooltip
+      </button>
+
+      <div class="moo-ui border rounded p-3 mt-3" data-bs-theme="light" id="owner-portals-inner">
+        <div class="moo-ui" data-moo-overlay-portal-host id="owner-portals-inner-portal"></div>
+        <h2>Inner owner</h2>
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          data-bs-toggle="tooltip"
+          data-bs-title="Inner owner tooltip"
+        >
+          Inner tooltip
+        </button>
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          data-bs-toggle="popover"
+          data-bs-title="Inner owner popover"
+          data-bs-content="This popover remains in the inner owner portal."
+        >
+          Inner popover
+        </button>
+      </div>
+    </div>
+
+    <script src="assets/bootstrap.bundle.min.js"></script>
+    <script src="assets/init-owner-portals.js"></script>
+  </body>
+</html>

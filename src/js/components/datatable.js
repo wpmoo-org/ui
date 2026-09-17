@@ -1,3 +1,5 @@
+import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
+
 const instances = new WeakMap();
 
 function normalize(value) {
@@ -98,7 +100,8 @@ export default class DataTable {
   }
 
   // Row menus are authored next to their trigger so the public HTML stays
-  // inspectable, but when opened they are temporarily moved under body.
+  // inspectable, but when opened they are temporarily moved to their nearest
+  // Moo owner portal.
   // That keeps the menu out of the scroll wrapper's layout math, so Safari
   // cannot clip it at the rounded frame edge or shift the visible table
   // slice while Popper positions it against the viewport.
@@ -228,9 +231,10 @@ export default class DataTable {
       parent: menu.parentNode,
       nextSibling: menu.nextSibling,
       trigger,
+      owner: findThemeOwner(trigger),
     });
     this._reparentedRowMenuByTrigger.set(trigger, menu);
-    this._document.body.appendChild(menu);
+    this._portalRoot(trigger).appendChild(menu);
   }
 
   _restoreRowActionMenuForTrigger(trigger) {
@@ -245,8 +249,10 @@ export default class DataTable {
     if (!original) {
       return;
     }
-    const { parent, nextSibling, trigger } = original;
-    if (parent?.isConnected) {
+    const { parent, nextSibling, trigger, owner } = original;
+    if (owner?.isConnected === false) {
+      menu.remove();
+    } else if (parent?.isConnected) {
       if (nextSibling?.parentNode === parent) {
         parent.insertBefore(menu, nextSibling);
       } else {
@@ -292,9 +298,10 @@ export default class DataTable {
       nextSibling: menu.nextSibling,
       trigger,
       owner: trigger.closest(".datatable-sort"),
+      themeOwner: findThemeOwner(trigger),
     });
     this._reparentedSortMenuByTrigger.set(trigger, menu);
-    this._document.body.appendChild(menu);
+    this._portalRoot(trigger).appendChild(menu);
   }
 
   _restoreSortMenuForTrigger(trigger) {
@@ -309,8 +316,10 @@ export default class DataTable {
     if (!original) {
       return;
     }
-    const { parent, nextSibling, trigger } = original;
-    if (parent?.isConnected) {
+    const { parent, nextSibling, trigger, themeOwner } = original;
+    if (themeOwner?.isConnected === false) {
+      menu.remove();
+    } else if (parent?.isConnected) {
       if (nextSibling?.parentNode === parent) {
         parent.insertBefore(menu, nextSibling);
       } else {
@@ -333,6 +342,12 @@ export default class DataTable {
 
   _bootstrap(name) {
     return this._window.bootstrap?.[name] || null;
+  }
+
+  _portalRoot(trigger = this._element) {
+    return ownerPortalRoot(findThemeOwner(trigger)) ||
+      this._document.body ||
+      this._document.documentElement;
   }
 
   // The bulk-actions bar's icon-only buttons carry data-bs-title instead of
@@ -362,7 +377,10 @@ export default class DataTable {
     this._element
       .querySelectorAll("[data-datatable-bulk-actions] [data-bs-title]:not([data-bs-toggle=\"dropdown\"])")
       .forEach((trigger) => {
-        this._tooltips.push(Tooltip.getOrCreateInstance(trigger, { animation: false }));
+        this._tooltips.push(Tooltip.getOrCreateInstance(trigger, {
+          animation: false,
+          container: this._portalRoot(trigger),
+        }));
       });
   }
 

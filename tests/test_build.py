@@ -17,24 +17,103 @@ class BuildTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_theme_builder_first_paint_payload_times_out_cleanly(self) -> None:
-        original_run = build.subprocess.run
-
-        def fake_run(*args, **kwargs):
-            raise subprocess.TimeoutExpired(
-                cmd=args[0] if args else kwargs.get("args"),
-                timeout=kwargs.get("timeout"),
-            )
-
-        try:
-            build.subprocess.run = fake_run
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "Theme Builder first-paint payload generation timed out",
+    def test_render_pages_accepts_precomputed_theme_builder_prepaint(
+        self,
+    ) -> None:
+        prepaint = {
+            "schemaVersion": 1,
+            "defaults": {
+                "schemaVersion": 1,
+                "baseColor": "neutral",
+                "themeColor": "neutral",
+                "chartColor": "neutral",
+                "headingFont": "default",
+                "bodyFont": "default",
+                "radius": "default",
+            },
+            "options": {
+                "baseColor": ["neutral"],
+                "themeColor": ["neutral"],
+                "chartColor": ["neutral"],
+                "headingFont": ["default"],
+                "bodyFont": ["default"],
+                "radius": ["default"],
+            },
+            "aliases": {"baseColor": {}, "actionColor": {}, "radius": {}},
+            "legacyActionBaseColors": [],
+        }
+        with tempfile.TemporaryDirectory() as tempdir:
+            with (
+                mock.patch.object(build, "SITE_DIST", Path(tempdir)),
+                mock.patch.object(
+                    build.subprocess,
+                    "run",
+                    side_effect=AssertionError(
+                        "render_pages must not spawn a Theme Builder process"
+                    ),
+                ),
             ):
-                build.theme_builder_first_paint_payload()
-        finally:
-            build.subprocess.run = original_run
+                build.render_pages(version="test", theme_builder_prepaint=prepaint)
+
+    def test_catalog_prepaint_css_is_owner_scoped_and_allowlisted(self) -> None:
+        payload = {
+            "allowList": ["--bs-primary", "--moo-surface"],
+            "defaults": {
+                "baseColor": "neutral",
+                "themeColor": "neutral",
+                "chartColor": "neutral",
+                "headingFont": "default",
+                "bodyFont": "default",
+                "radius": "default",
+            },
+            "options": {
+                "baseColor": ["neutral", "mist"],
+                "themeColor": ["neutral", "blue"],
+                "chartColor": ["neutral"],
+                "headingFont": ["default"],
+                "bodyFont": ["default"],
+                "radius": ["default"],
+            },
+            "tokens": {
+                "baseColor": {
+                    "neutral": {"light": {}, "dark": {}},
+                    "mist": {
+                        "light": {"--moo-surface": "white", "--ignored": "no"},
+                        "dark": {"--moo-surface": "black"},
+                    },
+                },
+                "themeColor": {
+                    "neutral": {},
+                    "blue": {"--bs-primary": "rgb(6, 111, 209)"},
+                },
+                "chartColor": {"neutral": {}},
+                "headingFont": {"default": {}},
+                "bodyFont": {"default": {}},
+                "radius": {"default": {}},
+                "sidebarAccent": {"light": {}, "dark": {}},
+            },
+        }
+
+        css = build.catalog_prepaint_css(payload)
+
+        self.assertIn(
+            '.moo-ui[data-bs-theme="dark"]:where([data-moo-catalog-theme-builder-prepaint][data-moo-catalog-theme-builder-base-color="mist"])',
+            css,
+        )
+        self.assertIn("--moo-surface: black;", css)
+        self.assertIn("--bs-primary: rgb(6, 111, 209);", css)
+        self.assertNotIn("--ignored", css)
+        self.assertNotIn(":root", css)
+        self.assertNotIn("body", css)
+
+    def test_support_policy_requires_native_css_scope(self) -> None:
+        support = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
+
+        self.assertIn("native CSS `@scope`", support)
+        self.assertRegex(
+            support,
+            r"Moo UI does\s+not\s+provide a containment fallback",
+        )
 
     def test_build_creates_static_entrypoints(self) -> None:
         result = self.run_build()
@@ -53,6 +132,10 @@ class BuildTests(CatalogTestCase):
             with self.subTest(css_name=css_name):
                 self.assertTrue((SITE_DIST / f"assets/css/{css_name}").is_file())
                 self.assertFalse((PACKAGE_DIST / f"assets/css/{css_name}").exists())
+        self.assertTrue((SITE_DIST / "assets/css/catalog-prepaint.css").is_file())
+        self.assertFalse(
+            (PACKAGE_DIST / "assets/css/catalog-prepaint.css").exists()
+        )
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.css").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.min.css").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/moo-core.css").exists())
@@ -63,6 +146,16 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (SITE_DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
+        self.assertTrue(
+            (SITE_DIST / "assets/js/catalog-prepaint.js").is_file()
+        )
+        self.assertTrue(
+            (SITE_DIST / "assets/js/theme-prepaint.js").is_file()
+        )
+        self.assertTrue(
+            (SITE_DIST / "assets/js/theme-owner.js").is_file()
+        )
+        self.assertFalse((PACKAGE_DIST / "js/theme-owner.js").exists())
         for module_name in (
             "combobox.js",
             "sidebar.js",
@@ -103,8 +196,12 @@ class BuildTests(CatalogTestCase):
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
+                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/theme-owner.js", "theme owner js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
             ):
                 target = site_dist / relative
@@ -124,6 +221,99 @@ class BuildTests(CatalogTestCase):
                 build.SITE_DIST = original_site_dist
 
         self.assertEqual(changed_version, original_version)
+
+    def test_asset_version_includes_catalog_prepaint_script(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            site_dist = Path(tempdir)
+            for relative, contents in (
+                ("assets/css/moo-ui.min.css", "core css"),
+                ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
+                ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
+                ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/catalog-prepaint.js", "initial prepaint js"),
+                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/theme-owner.js", "theme owner js"),
+            ):
+                target = site_dist / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(contents, encoding="utf-8")
+
+            original_site_dist = build.SITE_DIST
+            try:
+                build.SITE_DIST = site_dist
+                original_version = build.asset_version()
+                (site_dist / "assets/js/catalog-prepaint.js").write_text(
+                    "changed prepaint js",
+                    encoding="utf-8",
+                )
+                changed_version = build.asset_version()
+            finally:
+                build.SITE_DIST = original_site_dist
+
+        self.assertNotEqual(changed_version, original_version)
+
+    def test_asset_version_includes_owner_bootstrap_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            site_dist = Path(tempdir)
+            for relative, contents in (
+                ("assets/css/moo-ui.min.css", "core css"),
+                ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
+                ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
+                ("assets/js/catalog/index.js", "catalog js"),
+                ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
+                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/theme-owner.js", "theme owner js"),
+            ):
+                target = site_dist / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(contents, encoding="utf-8")
+
+            original_site_dist = build.SITE_DIST
+            try:
+                build.SITE_DIST = site_dist
+                original_version = build.asset_version()
+                for relative in (
+                    "assets/js/theme-prepaint.js",
+                    "assets/js/theme-owner.js",
+                ):
+                    target = site_dist / relative
+                    target.write_text(
+                        f"changed {relative}", encoding="utf-8"
+                    )
+                    changed_version = build.asset_version()
+                    self.assertNotEqual(changed_version, original_version)
+            finally:
+                build.SITE_DIST = original_site_dist
+
+    def test_source_snapshot_tracks_the_internal_theme_owner_helper(self) -> None:
+        paths = {Path(path) for path, _ in build.source_snapshot()}
+        self.assertIn(build.JS_ROOT / "theme-owner.js", paths)
+
+    def test_bundled_component_entrypoints_keep_public_constructor_names(self) -> None:
+        result = subprocess.run(
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                """
+import Sidebar from "./dist/js/sidebar.js";
+import DataTable from "./dist/js/datatable.js";
+console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name }));
+""",
+            ],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {"sidebar": "Sidebar", "datatable": "DataTable"},
+        )
 
     def test_example_toc_items_preserve_heading_text_order_with_inline_markup(
         self,

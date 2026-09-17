@@ -63,18 +63,22 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/components/sidebar/_inset.scss",
     "scss/components/sidebar/_layout.scss",
     "scss/components/sidebar/_menus.scss",
-    "scss/foundations/_core_global_primitives.scss",
-    "scss/foundations/_core_state_layer.scss",
+    "scss/foundations/_backdrop.scss",
     "scss/foundations/_focus.scss",
-    "scss/foundations/_overlay_backdrop.scss",
+    "scss/foundations/_globals.scss",
+    "scss/foundations/_scope.scss",
+    "scss/mixins/_banner.scss",
     "scss/moo-core.scss",
     "scss/moo-ui.scss",
     "scss/settings/_bootstrap_overrides.scss",
     "scss/settings/_component_variables.scss",
     "scss/settings/_forms.scss",
+    "scss/settings/_options.scss",
     "scss/settings/_palette.scss",
-    "scss/themes/_scoped_core.scss",
-    "scss/themes/_standalone_root.scss",
+    "scss/themes/_forms.scss",
+    "scss/themes/_root.scss",
+    "scss/themes/_standalone.scss",
+    "scss/themes/_theme.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
 }
@@ -204,27 +208,27 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(package["license"], "MIT")
         self.assertFalse(package.get("private", True))
         self.assertEqual(package["repository"]["url"], "git+https://github.com/wpmoo-org/ui.git")
-        self.assertEqual(package["scripts"]["build"], ".venv/bin/python build.py")
-        self.assertEqual(package["scripts"]["dev"], ".venv/bin/python dev.py")
+        self.assertEqual(package["scripts"]["build"], ".venv/bin/python3 build.py")
+        self.assertEqual(package["scripts"]["dev"], ".venv/bin/python3 dev.py")
         self.assertEqual(
             package["scripts"]["test"],
-            ".venv/bin/python scripts/run-test-tier.py run release",
+            ".venv/bin/python3 scripts/run-test-tier.py run release",
         )
         self.assertEqual(
             package["scripts"]["test:quick"],
-            ".venv/bin/python scripts/run-test-tier.py run quick",
+            ".venv/bin/python3 scripts/run-test-tier.py run quick",
         )
         self.assertEqual(
             package["scripts"]["test:browser-smoke"],
-            ".venv/bin/python scripts/run-test-tier.py run browser-smoke",
+            ".venv/bin/python3 scripts/run-test-tier.py run browser-smoke",
         )
         self.assertEqual(
             package["scripts"]["test:browser-full"],
-            ".venv/bin/python scripts/run-test-tier.py run browser-full",
+            ".venv/bin/python3 scripts/run-test-tier.py run browser-full",
         )
         self.assertEqual(
             package["scripts"]["test:release"],
-            ".venv/bin/python scripts/run-test-tier.py run release",
+            ".venv/bin/python3 scripts/run-test-tier.py run release",
         )
         self.assertNotIn("workspaces", package)
 
@@ -288,6 +292,8 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertNotIn("./moo-ui-prepaint.css", package["exports"])
         self.assertNotIn("./moo-ui-prepaint.min.css", package["exports"])
         self.assertNotIn("./bootstrap.bundle.min.js", package["exports"])
+        self.assertNotIn("dist/js/theme-owner.js", files)
+        self.assertNotIn("./theme-owner.js", package["exports"])
 
     def test_full_build_places_moo_theme_bridge_before_reboot_body(self) -> None:
         css = (PACKAGE_DIST / "assets/css/moo-ui.css").read_text(encoding="utf-8")

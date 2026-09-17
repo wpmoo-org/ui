@@ -15,8 +15,9 @@
     as a top nav instead, without duplicating which pages belong where. #}
 {% set introduction = (sections | selectattr("slug", "equalto", "introduction") | list)[0] %}
 {% set installation = (sections | selectattr("slug", "equalto", "installation") | list)[0] %}
+{% set layout_page = (sections | selectattr("slug", "equalto", "layout") | list)[0] %}
 {% set blocks_page = (sections | selectattr("slug", "equalto", "blocks") | list)[0] %}
-{% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "components", "blocks"]) | list %}
+{% set resource_pages = sections | rejectattr("slug", "in", ["introduction", "installation", "layout", "components", "layouts", "blocks"]) | list %}
 {% set components_open = current_section == "components" %}
 {% set examples_open = current_section == "examples" %}
 {% set charts_active = current_section == "sections" and current_slug == "charts" %}
@@ -72,7 +73,8 @@
     "entries": [
       {"kind": "link", "label": "Home", "href": "index.html", "icon": "house", "active": home_active},
       {"kind": "link", "label": introduction.label, "href": introduction.href, "icon": introduction.icon, "active": current_section == "sections" and current_slug == introduction.slug},
-      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug}
+      {"kind": "link", "label": installation.label, "href": installation.href, "icon": installation.icon, "active": current_section == "sections" and current_slug == installation.slug},
+      {"kind": "link", "label": layout_page.label, "href": layout_page.href, "icon": layout_page.icon, "active": current_section == "sections" and current_slug == layout_page.slug}
     ]
   },
   {"label": "Catalog", "entries": catalog_items},
@@ -96,7 +98,7 @@
   {% endcall %}
 {%- endmacro %}
 
-{% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
+{% macro render_catalog_sidebar() -%}
   {% call sidebar_header() %}
     {% call sidebar_menu() %}
       {% call sidebar_menu_item() %}
@@ -123,4 +125,4 @@
       {% endcall %}
     {% endfor %}
   {% endcall %}
-{% endcall %}
+{%- endmacro %}

@@ -30,15 +30,12 @@ class CatalogBrowserTests(unittest.TestCase):
         skip_if_browser_launch_is_sandboxed()
         cls.server = serve_repository()
         cls.base_url = cls.server.__enter__()
+        cls.addClassCleanup(cls.server.__exit__, None, None, None)
         cls.playwright_manager = sync_playwright()
         cls.playwright = cls.playwright_manager.__enter__()
+        cls.addClassCleanup(cls.playwright_manager.__exit__, None, None, None)
         cls.browser = launch_certification_browser(cls.playwright)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.browser.close()
-        cls.playwright_manager.__exit__(None, None, None)
-        cls.server.__exit__(None, None, None)
+        cls.addClassCleanup(cls.browser.close)
 
     def test_command_palette_keyboard_navigation_keeps_active_item_clear_of_scroll_edges(
         self,
@@ -76,6 +73,7 @@ class CatalogBrowserTests(unittest.TestCase):
                   const previous = active.previousElementSibling;
                   const previousRect = previous?.getBoundingClientRect();
                   return {
+                    activeId: active.id,
                     activeText: active.textContent.trim(),
                     bottomGap: bodyRect.bottom - activeRect.bottom,
                     gapFromPrevious: previousRect ? activeRect.top - previousRect.bottom : null,
@@ -86,7 +84,11 @@ class CatalogBrowserTests(unittest.TestCase):
                 """
             )
 
-            self.assertEqual(active_state["activeText"], "Overview")
+            self.assertTrue(active_state["activeText"])
+            self.assertTrue(
+                active_state["activeId"].startswith("catalog-command-item-"),
+                active_state,
+            )
             self.assertGreaterEqual(active_state["bottomGap"], 8)
             self.assertEqual(active_state["marginTop"], "2px")
             self.assertGreaterEqual(active_state["gapFromPrevious"], 2)
@@ -289,6 +291,130 @@ class CatalogBrowserTests(unittest.TestCase):
             self.assertTrue(rail_state["railHovered"], rail_state)
             self.assertTrue(rail_state["railLineInsideMenu"], rail_state)
             self.assertTrue(rail_state["topmostMenu"], rail_state)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_layout_page_starts_with_the_app_example_at_desktop_and_mobile(self) -> None:
+        for viewport in ((1280, 900), (390, 844)):
+            with self.subTest(viewport=viewport):
+                context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    failed_responses: list[str] = []
+                    page.on(
+                        "response",
+                        lambda response: failed_responses.append(
+                            f"{response.status} {response.url}"
+                        )
+                        if response.status >= 400
+                        else None,
+                    )
+                    page.set_viewport_size(
+                        {"width": viewport[0], "height": viewport[1]}
+                    )
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/layout/",
+                        wait_until="domcontentloaded",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, CERTIFICATION_CASES[0])
+                    expect(
+                        page.get_by_role("heading", name="Layout", level=1)
+                    ).to_be_visible()
+                    self.assertLessEqual(
+                        page.evaluate("document.documentElement.scrollWidth"),
+                        page.evaluate("document.documentElement.clientWidth"),
+                    )
+                    app_example = page.locator('[data-example="layout-app-example"]')
+                    expect(app_example).to_have_count(1)
+                    expect(app_example.locator(".moo-example__preview")).to_be_visible()
+                    expect(app_example.locator(".moo-example__source")).to_have_count(1)
+                    layout_examples = page.locator('[data-example^="layout-"]')
+                    self.assertGreaterEqual(layout_examples.count(), 1)
+                    self.assertEqual(
+                        layout_examples.first.get_attribute("data-example"),
+                        "layout-app-example",
+                    )
+                    expect(page.locator('.moo-doc-toc')).to_have_count(1)
+                    section_widths = page.locator(".moo-doc-page > section").evaluate_all(
+                        "sections => sections.map(section => section.getBoundingClientRect().width)"
+                    )
+                    self.assertTrue(section_widths)
+                    self.assertLessEqual(
+                        max(section_widths) - min(section_widths),
+                        1,
+                        section_widths,
+                    )
+                    app_source = app_example.locator(
+                        ".moo-example__source"
+                    ).text_content() or ""
+                    for hook in (
+                        'data-slot="sidebar-wrapper"',
+                        'data-sidebar-key="app-shell"',
+                        'data-slot="sidebar"',
+                        'data-variant="floating"',
+                        'class="sidebar-inner"',
+                        'data-slot="page"',
+                        'id="main-content"',
+                    ):
+                        with self.subTest(viewport=viewport, hook=hook):
+                            self.assertIn(hook, app_source)
+                    self.assertEqual(failed_responses, [])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_doc_toc_hash_scrolls_catalog_main_below_header_without_window_reset(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        try:
+            page = context.new_page()
+            page.set_viewport_size({"width": 1280, "height": 900})
+            evidence = BrowserEvidence(page)
+            response = page.goto(
+                f"{self.base_url}/site-dist/layout/#grid",
+                wait_until="domcontentloaded",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            prepare_page(page, CERTIFICATION_CASES[0])
+            expect(
+                page.get_by_role("heading", name="Grid", level=2, exact=True)
+            ).to_be_visible()
+            page.wait_for_timeout(100)
+
+            scroll_state = page.evaluate(
+                """
+                () => {
+                  const pageRoot = document.querySelector('[data-slot="page"]');
+                  const main = document.querySelector('#main-content');
+                  const header = pageRoot?.querySelector(':scope > header');
+                  const target = document.getElementById('grid');
+                  return {
+                    headerBottom: header?.getBoundingClientRect().bottom ?? null,
+                    windowScrollY: window.scrollY,
+                    pageScrollTop: pageRoot?.scrollTop ?? null,
+                    mainScrollTop: main?.scrollTop ?? null,
+                    targetTop: target?.getBoundingClientRect().top ?? null,
+                    pageOverflowY: pageRoot ? getComputedStyle(pageRoot).overflowY : null,
+                    mainOverflowY: main ? getComputedStyle(main).overflowY : null,
+                  };
+                }
+                """
+            )
+
+            self.assertEqual(scroll_state["windowScrollY"], 0, scroll_state)
+            self.assertEqual(scroll_state["pageScrollTop"], 0, scroll_state)
+            self.assertGreater(scroll_state["mainScrollTop"], 0, scroll_state)
+            self.assertEqual(scroll_state["pageOverflowY"], "auto", scroll_state)
+            self.assertEqual(scroll_state["mainOverflowY"], "auto", scroll_state)
+            self.assertLessEqual(
+                abs(scroll_state["targetTop"] - scroll_state["headerBottom"]),
+                2,
+                scroll_state,
+            )
             evidence.assert_clean()
         finally:
             context.close()

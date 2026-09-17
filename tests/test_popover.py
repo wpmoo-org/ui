@@ -8,6 +8,7 @@ from tests.helpers import ROOT, CatalogTestCase
 
 COMPONENT = ROOT / "src/components/popover.html.jinja"
 PAGE = ROOT / "site/src/pages/components/popover.html.jinja"
+BOOTSTRAP_PREVIEW_JS = ROOT / "site/src/js/catalog/bootstrap-preview.js"
 
 # Bootstrap's Popover shares Tooltip's sanitizer contract: data-bs-html
 # content is run through the same default allowlist (see
@@ -78,6 +79,12 @@ class PopoverTests(CatalogTestCase):
         )
 
         self.assertIn('data-bs-container="body"', output)
+
+    def test_catalog_popovers_have_an_explicit_nearest_owner_container(self) -> None:
+        source = BOOTSTRAP_PREVIEW_JS.read_text(encoding="utf-8")
+
+        self.assertIn("const portal = portalFor(trigger);", source)
+        self.assertIn("Popover.getOrCreateInstance(trigger, { container: portal })", source)
 
     def test_popover_dismiss_trigger_rejects_unknown_placement(self) -> None:
         with self.assertRaisesRegex(ValueError, "Unknown popover placement: huge"):

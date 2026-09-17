@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from build import create_environment
 from tests.helpers import DIST, ROOT, CatalogTestCase
 
@@ -48,6 +50,21 @@ class CloseButtonTests(CatalogTestCase):
             ' data-bs-dismiss="alert"></button>',
             self.render_close_button('close_button(dismiss="alert")'),
         )
+
+    def test_alert_dismiss_button_stays_at_the_top_end_of_the_alert(self) -> None:
+        styles = (ROOT / "scss/components/_alert.scss").read_text(encoding="utf-8")
+        match = re.search(
+            r"(?m)^\.alert-dismissible \.btn-close\s*\{(?P<body>[^}]*)\}",
+            styles,
+        )
+        self.assertIsNotNone(match)
+        assert match is not None
+        body = match.group("body")
+
+        self.assertIn("inset-block-start: var(--bs-alert-padding-y);", body)
+        self.assertIn("inset-inline-end: var(--bs-alert-padding-x);", body)
+        self.assertNotIn("inset-block-start: 50%;", body)
+        self.assertNotIn("transform: translateY(-50%);", body)
 
     def test_certification_fixture_uses_alert_body_for_dismissible_context(
         self,
@@ -101,7 +118,7 @@ class CloseButtonTests(CatalogTestCase):
         self.assertIn("$btn-close-padding-x: 0.34375rem !default;", settings)
         self.assertIn("$btn-close-opacity: 1 !default;", settings)
         self.assertIn("$btn-close-disabled-opacity: $moo-disabled-control-opacity !default;", settings)
-        self.assertIn("border-radius: var(--bs-border-radius-xl);", source)
+        self.assertIn("border-radius: var(--bs-border-radius-pill);", source)
         self.assertIn("--bs-btn-hover-bg: var(--moo-muted-surface);", source)
         self.assertIn("Lucide", source)
         self.assertNotIn("[data-icon]", source)

@@ -47,11 +47,11 @@
   border: var(--bs-card-border-width) solid var(--bs-card-border-color);
   box-shadow: var(--bs-card-box-shadow);
 
-  &[data-bs-theme="dark"],
-  :where([data-bs-theme="dark"]) &:not([data-bs-theme="light"]):not([data-bs-theme="light"] *) {
-    --bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix-dark}, var(--bs-body-bg));
-    --moo-card-footer-bg: #{$moo-card-footer-bg-dark};
-  }
+}
+
+:scope[data-bs-theme="dark"] .card {
+  --bs-card-bg: color-mix(in srgb, var(--bs-secondary-bg) #{$moo-card-bg-mix-dark}, var(--bs-body-bg));
+  --moo-card-footer-bg: #{$moo-card-footer-bg-dark};
 }
 
 .card--sm {

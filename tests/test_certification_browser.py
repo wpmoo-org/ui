@@ -61,6 +61,126 @@ SIDEBAR_OVERLAY_CASES = (
 )
 
 
+class _PreparedLocator:
+    def __init__(self, page, selector: str) -> None:
+        self._page = page
+        self._selector = selector
+
+    @property
+    def first(self):
+        return self
+
+    def evaluate(self, script: str, values: dict[str, str]) -> None:
+        self._page.calls.append((self._selector, script, values))
+
+
+class _PreparedPage:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str, dict[str, str]]] = []
+        self.styles: list[str] = []
+
+    def locator(self, selector: str) -> _PreparedLocator:
+        return _PreparedLocator(self, selector)
+
+    def add_style_tag(self, *, content: str) -> None:
+        self.styles.append(content)
+
+
+class PreparePageContractTests(unittest.TestCase):
+    def test_full_document_preparation_sets_direction_on_html_and_theme_on_owner(self) -> None:
+        page = _PreparedPage()
+        case = BrowserCase(
+            name="full-document-dark-rtl",
+            viewport={"width": 1040, "height": 844},
+            color_scheme="dark",
+            direction="rtl",
+        )
+
+        prepare_page(page, case)
+
+        self.assertEqual([selector for selector, _script, _values in page.calls], [
+            "html",
+            '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]',
+        ])
+        html_script = page.calls[0][1]
+        owner_script = page.calls[1][1]
+        self.assertIn('setAttribute("dir", values.direction)', html_script)
+        self.assertNotIn("data-bs-theme", html_script)
+        self.assertIn('setAttribute("data-bs-theme", values.colorScheme)', owner_script)
+        self.assertNotIn("setAttribute(\"dir\"", owner_script)
+
+    def test_embedded_preparation_scopes_both_axes_to_the_selected_owner(self) -> None:
+        page = _PreparedPage()
+        case = BrowserCase(
+            name="embedded-dark-rtl",
+            viewport={"width": 1040, "height": 844},
+            color_scheme="dark",
+            direction="rtl",
+        )
+
+        prepare_page(page, case, embedded=True, owner_selector="#embedded-owner")
+
+        self.assertEqual([selector for selector, _script, _values in page.calls], [
+            "#embedded-owner",
+        ])
+        owner_script = page.calls[0][1]
+        self.assertIn('setAttribute("dir", values.direction)', owner_script)
+        self.assertIn('setAttribute("data-bs-theme", values.colorScheme)', owner_script)
+
+
+def theme_owner(page):
+    return page.locator(
+        '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+    ).first
+
+
+def observe_modal_opening(page, dialog_selector: str, trigger_selector: str):
+    """Capture Modal state well before its shared 300ms visual motion ends."""
+    return page.evaluate(
+        """
+        ({ dialogSelector, triggerSelector }) => new Promise(resolve => {
+          const dialog = document.querySelector(dialogSelector);
+          const trigger = document.querySelector(triggerSelector);
+          let firstFrame = null;
+          let shown = false;
+          const finish = () => {
+            if (shown && firstFrame) {
+              resolve(firstFrame);
+            }
+          };
+
+          dialog.addEventListener("shown.bs.modal", () => {
+            shown = true;
+            finish();
+          }, { once: true });
+          trigger.click();
+          // This budget is comfortably below the shared .3s motion token but
+          // avoids depending on the browser's requestAnimationFrame cadence.
+          setTimeout(() => {
+            const backdrop = document.querySelector(".modal-backdrop");
+            const visual = backdrop
+              ? getComputedStyle(backdrop, "::before")
+              : null;
+            firstFrame = {
+              dialogShown: dialog.classList.contains("show"),
+              backdropShown: Boolean(backdrop?.classList.contains("show")),
+              backdropTransition: backdrop
+                ? getComputedStyle(backdrop).transition
+                : null,
+              visualAnimationName: visual?.animationName ?? null,
+              visualAnimationDuration: visual?.animationDuration ?? null,
+            };
+            finish();
+          }, 80);
+        })
+        """,
+        {
+            "dialogSelector": dialog_selector,
+            "triggerSelector": trigger_selector,
+        },
+    )
+
+
 class CertificationBrowserHarnessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -76,6 +196,368 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         cls.browser.close()
         cls.playwright_manager.__exit__(None, None, None)
         cls.server.__exit__(None, None, None)
+
+    def test_nested_owners_keep_theme_direction_and_content_portals_local(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script(
+            """
+            if (localStorage.getItem("nested-owner-outer-theme") === null) {
+              localStorage.setItem("nested-owner-outer-theme", "dark");
+            }
+            if (localStorage.getItem("nested-owner-outer-direction") === null) {
+              localStorage.setItem("nested-owner-outer-direction", "ltr");
+            }
+            if (localStorage.getItem("nested-owner-inner-theme") === null) {
+              localStorage.setItem("nested-owner-inner-theme", "light");
+            }
+            if (localStorage.getItem("nested-owner-inner-direction") === null) {
+              localStorage.setItem("nested-owner-inner-direction", "rtl");
+            }
+            """
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/conformance/fixtures/nested-owners.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            expect(page.locator("body")).to_have_attribute(
+                "data-nested-owners-ready", "true"
+            )
+
+            initial = page.evaluate(
+                """
+                () => {
+                  const outer = document.querySelector("#nested-owner-outer");
+                  const inner = document.querySelector("#nested-owner-inner");
+                  const host = document.querySelector("[data-nested-owner-host-probe]");
+                  const chart = window.__nestedOwners.chart;
+                  return {
+                    bodyTheme: document.body.getAttribute("data-bs-theme"),
+                    chartBackground: chart._theme.backgroundColor,
+                    chartOwner: chart._themeElement.id,
+                    htmlDirection: document.documentElement.dir,
+                    htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
+                    hostColor: getComputedStyle(host).color,
+                    hostBackground: getComputedStyle(host).backgroundColor,
+                    innerBackground: getComputedStyle(inner).getPropertyValue("--bs-body-bg").trim(),
+                    innerDirection: inner.dir,
+                    innerTheme: inner.getAttribute("data-bs-theme"),
+                    outerBackground: getComputedStyle(outer).getPropertyValue("--bs-body-bg").trim(),
+                    outerDirection: outer.dir,
+                    outerTheme: outer.getAttribute("data-bs-theme"),
+                    outerReady: outer.dataset.mooPrepaint,
+                    innerReady: inner.dataset.mooPrepaint,
+                  };
+                }
+                """
+            )
+            self.assertIsNone(initial["htmlTheme"])
+            self.assertIsNone(initial["bodyTheme"])
+            self.assertEqual(initial["htmlDirection"], "ltr")
+            self.assertEqual(initial["outerTheme"], "dark")
+            self.assertEqual(initial["outerDirection"], "ltr")
+            self.assertEqual(initial["innerTheme"], "light")
+            self.assertEqual(initial["innerDirection"], "rtl")
+            self.assertEqual(initial["outerReady"], "ready")
+            self.assertEqual(initial["innerReady"], "ready")
+            self.assertEqual(initial["chartOwner"], "nested-owner-inner")
+            self.assertEqual(initial["chartBackground"], initial["innerBackground"])
+            self.assertNotEqual(initial["chartBackground"], initial["outerBackground"])
+
+            page.locator('[data-nested-theme-toggle="inner"]').click()
+            page.locator('[data-nested-theme-toggle="outer"]').click()
+            page.locator('[data-nested-direction-toggle="outer"]').click()
+            page.locator('[data-nested-direction-toggle="inner"]').click()
+            toggled = page.evaluate(
+                """
+                () => {
+                  const outer = document.querySelector("#nested-owner-outer");
+                  const inner = document.querySelector("#nested-owner-inner");
+                  const host = document.querySelector("[data-nested-owner-host-probe]");
+                  return {
+                    hostColor: getComputedStyle(host).color,
+                    hostBackground: getComputedStyle(host).backgroundColor,
+                    htmlDirection: document.documentElement.dir,
+                    innerDirection: inner.dir,
+                    innerTheme: inner.getAttribute("data-bs-theme"),
+                    outerDirection: outer.dir,
+                    outerTheme: outer.getAttribute("data-bs-theme"),
+                  };
+                }
+                """
+            )
+            self.assertEqual(toggled["outerTheme"], "light")
+            self.assertEqual(toggled["innerTheme"], "dark")
+            self.assertEqual(toggled["htmlDirection"], "ltr")
+            self.assertEqual(toggled["outerDirection"], "rtl")
+            self.assertEqual(toggled["innerDirection"], "ltr")
+            self.assertEqual(toggled["hostColor"], initial["hostColor"])
+            self.assertEqual(toggled["hostBackground"], initial["hostBackground"])
+
+            page.reload(wait_until="networkidle")
+            expect(page.locator("body")).to_have_attribute(
+                "data-nested-owners-ready", "true"
+            )
+            self.assertEqual(page.locator("#nested-owner-outer").get_attribute("dir"), "rtl")
+            self.assertEqual(page.locator("#nested-owner-inner").get_attribute("dir"), "ltr")
+            self.assertEqual(page.locator("html").get_attribute("dir"), "ltr")
+
+            page.locator("#nested-owner-sidebar-submenu-trigger").click()
+            flyout = page.locator(
+                "#nested-owner-outer-portal > .sidebar-menu-flyout"
+            )
+            expect(flyout).to_be_visible()
+            sidebar_geometry = page.evaluate(
+                """
+                () => {
+                  const flyout = document.querySelector("#nested-owner-outer-portal > .sidebar-menu-flyout");
+                  const sidebar = document.querySelector("#nested-owner-sidebar-panel");
+                  const flyoutRect = flyout.getBoundingClientRect();
+                  const sidebarRect = sidebar.getBoundingClientRect();
+                  return {
+                    parentId: flyout.parentElement.id,
+                    side: sidebar.dataset.side,
+                    flyoutLeft: flyoutRect.left,
+                    sidebarRight: sidebarRect.right,
+                  };
+                }
+                """
+            )
+            self.assertEqual(sidebar_geometry["parentId"], "nested-owner-outer-portal")
+            self.assertEqual(sidebar_geometry["side"], "left")
+            self.assertGreaterEqual(
+                sidebar_geometry["flyoutLeft"], sidebar_geometry["sidebarRight"] - 1
+            )
+
+            page.locator("#nested-owner-datepicker-trigger").click()
+            datepicker = page.locator("#nested-owner-datepicker-popover")
+            expect(datepicker).to_be_visible()
+            self.assertEqual(
+                datepicker.evaluate("element => element.parentElement.id"),
+                "nested-owner-outer-portal",
+            )
+
+            page.locator("#nested-owner-datatable-action").click()
+            menu = page.locator("#nested-owner-inner-portal > .dropdown-menu.show")
+            expect(menu).to_be_visible()
+            self.assertEqual(
+                menu.get_attribute("data-datatable-row-action-owner"),
+                "nested-owner-datatable-row",
+            )
+            page.keyboard.press("Escape")
+
+            page.locator("#nested-owner-modal-trigger").click()
+            modal = page.locator("#nested-owner-modal")
+            expect(modal).to_have_class(re.compile(r"\bshow\b"))
+            self.assertEqual(
+                modal.evaluate("element => element.parentElement.id"),
+                "nested-owner-outer-portal",
+            )
+            self.assertEqual(page.locator("body > .modal-backdrop").count(), 1)
+            page.keyboard.press("Escape")
+            expect(modal).not_to_have_class(re.compile(r"\bshow\b"))
+            page.wait_for_function(
+                """
+                () => document.querySelector("#nested-owner-modal")?.parentElement?.id ===
+                  "nested-owner-outer"
+                """
+            )
+
+            page.locator("#nested-owner-offcanvas-trigger").click()
+            offcanvas = page.locator("#nested-owner-offcanvas")
+            expect(offcanvas).to_have_class(re.compile(r"\bshow\b"))
+            self.assertEqual(
+                offcanvas.evaluate("element => element.parentElement.id"),
+                "nested-owner-outer-portal",
+            )
+            offcanvas_backdrop = page.evaluate(
+                """
+                () => {
+                  const backdrop = document.querySelector(".offcanvas-backdrop");
+                  return {
+                    bodyDirect: backdrop?.parentElement === document.body,
+                    ownerId: backdrop?.closest(
+                      '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+                    )?.id || null,
+                  };
+                }
+                """
+            )
+            self.assertEqual(offcanvas_backdrop["ownerId"], "nested-owner-outer")
+            self.assertFalse(offcanvas_backdrop["bodyDirect"])
+            page.keyboard.press("Escape")
+            expect(offcanvas).not_to_have_class(re.compile(r"\bshow\b"))
+            page.wait_for_function(
+                """
+                () => document.querySelector("#nested-owner-offcanvas")?.parentElement?.id ===
+                  "nested-owner-outer"
+                """
+            )
+
+            page.locator("#nested-owner-toast-trigger").click()
+            toast = page.locator("#nested-owner-outer-portal > [data-nested-toast]")
+            expect(toast).to_be_visible()
+
+            page.locator("#nested-owner-tooltip-trigger").hover()
+            tooltip = page.locator("#nested-owner-outer-portal > .tooltip.show")
+            expect(tooltip).to_be_visible()
+
+            page.locator("#nested-owner-popover-trigger").click()
+            popover = page.locator("#nested-owner-outer-portal > .popover.show")
+            expect(popover).to_be_visible()
+            self.assertEqual(
+                page.locator(
+                    "body > .tooltip, body > .popover, body > .dropdown-menu, body > .toast"
+                ).count(),
+                0,
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_theme_builder_keeps_compact_horizontal_control_rows(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script("localStorage.clear()")
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/alert-dialog/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            page.locator("[data-bs-target='#catalog-settings']").click()
+            panel = page.locator("#catalog-settings")
+            expect(panel).to_have_class(re.compile(r"\bshow\b"))
+
+            row = page.locator(
+                "[data-moo-catalog-theme-builder-base-color]"
+            ).locator("..")
+            geometry = row.evaluate(
+                """
+                (field) => {
+                  const label = field.querySelector(".form-label");
+                  const trigger = field.querySelector(
+                    ".moo-settings-panel__dropdown-trigger"
+                  );
+                  const fieldRect = field.getBoundingClientRect();
+                  const labelRect = label.getBoundingClientRect();
+                  const triggerRect = trigger.getBoundingClientRect();
+                  return {
+                    display: getComputedStyle(field).display,
+                    fieldWidth: fieldRect.width,
+                    labelCenterY: labelRect.top + labelRect.height / 2,
+                    triggerCenterY: triggerRect.top + triggerRect.height / 2,
+                    triggerWidth: triggerRect.width,
+                  };
+                }
+                """
+            )
+
+            self.assertEqual(geometry["display"], "grid")
+            self.assertAlmostEqual(
+                geometry["labelCenterY"], geometry["triggerCenterY"], delta=2
+            )
+            self.assertLess(geometry["triggerWidth"], geometry["fieldWidth"] - 24)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_settings_uses_normal_sheet_backdrop_and_outside_dismissal(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script("localStorage.clear()")
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/close-button/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            panel = page.locator("#catalog-settings")
+            page.locator("[data-bs-target='#catalog-settings']").click()
+            expect(panel).to_have_class(re.compile(r"\bshow\b"))
+
+            backdrop = page.locator(".offcanvas-backdrop.show")
+            expect(backdrop).to_have_count(1)
+            blur = page.evaluate(
+                """
+                () => getComputedStyle(
+                  document.querySelector(".offcanvas-backdrop"),
+                  "::before",
+                ).backdropFilter
+                """
+            )
+            self.assertIn("blur(", blur)
+
+            backdrop.click()
+            expect(panel).not_to_have_class(re.compile(r"\bshow\b"))
+            expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_catalog_theme_builder_selection_overrides_scoped_theme_tokens(self) -> None:
+        context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+        context.add_init_script("localStorage.clear()")
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/components/alert-dialog/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+
+            page.locator("[data-bs-target='#catalog-settings']").click()
+            expect(page.locator("#catalog-settings")).to_have_class(
+                re.compile(r"\bshow\b")
+            )
+            page.locator("#moo-theme-builder-theme-color").click()
+            page.locator(
+                "[data-moo-catalog-theme-builder-theme-color] "
+                "[data-moo-catalog-theme-builder-option='blue']"
+            ).click()
+
+            tokens = page.evaluate(
+                """
+                () => {
+                  const owner = document.querySelector(
+                    '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]'
+                  );
+                  const style = owner.querySelector(
+                    ':scope > style[data-moo-theme-builder-style]'
+                  );
+                  const triggerSwatch = document.querySelector(
+                    '#moo-theme-builder-theme-color '
+                    + '.moo-settings-panel__dropdown-trigger-swatch'
+                  );
+                  return {
+                    primary: getComputedStyle(owner)
+                      .getPropertyValue("--bs-primary")
+                      .trim(),
+                    styleText: style?.textContent || "",
+                    triggerSwatchColor: getComputedStyle(triggerSwatch).backgroundColor,
+                  };
+                }
+                """
+            )
+
+            self.assertEqual(tokens["primary"], "rgb(6, 111, 209)")
+            self.assertEqual(tokens["triggerSwatchColor"], "rgb(6, 111, 209)")
+            self.assertIn("--bs-primary: rgb(6, 111, 209);", tokens["styleText"])
+            evidence.assert_clean()
+        finally:
+            context.close()
 
     def test_chart_fixture_proves_built_bundle_rendering_and_diagnostics(self) -> None:
         for case in CERTIFICATION_CASES:
@@ -636,7 +1118,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     expect(page.locator("body")).to_have_attribute("data-sidebar-hidden", "true")
                     expect(trigger).to_have_attribute("aria-expanded", "false")
                     expect(trigger).to_be_focused()
-                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                    expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
                 else:
                     expect(root).to_have_attribute("data-sidebar-state", "expanded")
                     expect(trigger).to_have_attribute("aria-expanded", "true")
@@ -695,7 +1177,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
-    def test_sidebar_identity_dropdowns_paint_above_viewport_inset_content(self) -> None:
+    def test_sidebar_identity_dropdowns_paint_above_viewport_page_content(self) -> None:
         trigger_menu_pairs = (
             (
                 "#certification-sidebar-workspace",
@@ -712,8 +1194,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
         position_properties = (
             "--moo-sidebar-dropdown-block-start",
             "--moo-sidebar-dropdown-block-end",
-            "--moo-sidebar-dropdown-inline-start",
-            "--moo-sidebar-dropdown-inline-end",
+            "--moo-sidebar-dropdown-left",
+            "--moo-sidebar-dropdown-right",
         )
 
         for case in SIDEBAR_OVERLAY_CASES:
@@ -758,7 +1240,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                               const menu = document.querySelector(menuSelector);
                               const owner = trigger.closest('li');
                               const content = document.querySelector(
-                                '[data-slot="sidebar-inset-content"]'
+                                '[data-slot="page"] > main'
                               );
                               const menuRect = menu.getBoundingClientRect();
                               const contentRect = content.getBoundingClientRect();
@@ -796,11 +1278,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                                 intersectionWidth: Math.max(0, intersectionWidth),
                                 intersectionHeight: Math.max(0, intersectionHeight),
                                 triggerRect: trigger.getBoundingClientRect().toJSON(),
-                                inlineStart: owner.style.getPropertyValue(
-                                  '--moo-sidebar-dropdown-inline-start'
+                                leftProp: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-left'
                                 ),
-                                inlineEnd: owner.style.getPropertyValue(
-                                  '--moo-sidebar-dropdown-inline-end'
+                                rightProp: owner.style.getPropertyValue(
+                                  '--moo-sidebar-dropdown-right'
                                 ),
                                 blockStart: owner.style.getPropertyValue(
                                   '--moo-sidebar-dropdown-block-start'
@@ -829,19 +1311,17 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                             self.assertTrue(overlay["blockEnd"])
                             self.assertFalse(overlay["blockStart"])
                         if case.name.startswith("desktop-right"):
-                            self.assertTrue(overlay["inlineEnd"])
-                            self.assertFalse(overlay["inlineStart"])
-                            if case.direction == "ltr":
-                                self.assertLess(
-                                    overlay["left"], overlay["triggerRect"]["left"]
-                                )
-                            else:
-                                self.assertGreater(
-                                    overlay["right"], overlay["triggerRect"]["right"]
-                                )
+                            self.assertTrue(overlay["rightProp"])
+                            self.assertFalse(overlay["leftProp"])
+                            self.assertLessEqual(
+                                overlay["right"], overlay["triggerRect"]["left"]
+                            )
                         else:
-                            self.assertTrue(overlay["inlineStart"])
-                            self.assertFalse(overlay["inlineEnd"])
+                            self.assertTrue(overlay["leftProp"])
+                            self.assertFalse(overlay["rightProp"])
+                            self.assertGreaterEqual(
+                                overlay["left"], overlay["triggerRect"]["right"]
+                            )
                     else:
                         self.assertIsNone(
                             owner.get_attribute("data-sidebar-dropdown-positioned")
@@ -882,7 +1362,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 if not is_desktop:
                     page.keyboard.press("Escape")
                     expect(sidebar).not_to_have_class(re.compile(r"\bshow\b"))
-                    self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                    expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
                 self.assertEqual(run_axe(page), [])
                 evidence.assert_clean()
                 context.close()
@@ -912,9 +1392,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
             """
             element => {
               element.setAttribute("dir", "ltr");
-              element.setAttribute("data-bs-theme", "light");
             }
             """
+        )
+        theme_owner(page).evaluate(
+            'element => element.setAttribute("data-bs-theme", "light")'
         )
         expect(page.locator("body")).to_have_attribute("data-sidebar-ready", "true")
 
@@ -1755,7 +2237,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 page.keyboard.press("Escape")
                 expect(page.locator("body")).to_have_attribute("data-sheet-hidden", "true")
                 expect(trigger).to_be_focused()
-                self.assertEqual(page.locator(".offcanvas-backdrop").count(), 0)
+                expect(page.locator(".offcanvas-backdrop")).to_have_count(0)
 
                 page.evaluate(
                     """
@@ -2049,6 +2531,63 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_modal_visual_backdrop_starts_without_delaying_native_panels(self) -> None:
+        motion_case = BrowserCase(
+            name="motion-light-ltr",
+            viewport={"width": 1040, "height": 844},
+            color_scheme="light",
+            direction="ltr",
+        )
+        fixtures = (
+            (
+                "dialog",
+                "#certification-dialog",
+                "#open-certification-dialog",
+            ),
+            (
+                "alert-dialog",
+                "#certification-alert-dialog",
+                "#open-certification-alert-dialog",
+            ),
+        )
+
+        for fixture, dialog_selector, trigger_selector in fixtures:
+            with self.subTest(fixture=fixture):
+                context = self.browser.new_context(
+                    viewport=motion_case.viewport,
+                    color_scheme=motion_case.color_scheme,
+                    reduced_motion="no-preference",
+                    locale="en-US",
+                )
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/{fixture}.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, motion_case)
+
+                    opening = observe_modal_opening(
+                        page,
+                        dialog_selector,
+                        trigger_selector,
+                    )
+
+                    self.assertTrue(opening["dialogShown"], opening)
+                    self.assertTrue(opening["backdropShown"], opening)
+                    self.assertEqual(opening["backdropTransition"], "none")
+                    self.assertEqual(
+                        opening["visualAnimationName"],
+                        "moo-overlay-backdrop-enter",
+                    )
+                    self.assertEqual(opening["visualAnimationDuration"], "0.3s")
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_bootstrap_lane_resolves_the_real_local_bundle(self) -> None:
         expected_version = os.environ.get(
             "MOO_UI_BOOTSTRAP_EXPECTED_VERSION",
@@ -2088,7 +2627,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2199,7 +2738,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2284,7 +2823,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2393,7 +2932,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2502,7 +3041,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2643,7 +3182,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2758,7 +3297,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2861,7 +3400,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -2967,7 +3506,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3066,7 +3605,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3134,7 +3673,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3197,7 +3736,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3256,7 +3795,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3317,7 +3856,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3360,7 +3899,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3424,7 +3963,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3485,7 +4024,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3533,7 +4072,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3578,7 +4117,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3659,10 +4198,11 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                         outerGap: direction === "rtl"
                           ? buttonRect.left - alertRect.left
                           : alertRect.right - buttonRect.right,
-                        verticalCenterDelta: Math.abs(
-                          (buttonRect.top + buttonRect.height / 2)
-                          - (alertRect.top + alertRect.height / 2)
+                        blockStart: buttonRect.top - alertRect.top,
+                        insetBlockStart: parseFloat(
+                          getComputedStyle(button).insetBlockStart,
                         ),
+                        transform: getComputedStyle(button).transform,
                       };
                     }
                     """
@@ -3670,7 +4210,12 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 expect(alert_body).to_be_visible()
                 self.assertGreaterEqual(close_spacing["inlineGap"], 6)
                 self.assertGreaterEqual(close_spacing["outerGap"], 8)
-                self.assertLessEqual(close_spacing["verticalCenterDelta"], 1)
+                self.assertAlmostEqual(
+                    close_spacing["blockStart"],
+                    close_spacing["insetBlockStart"],
+                    delta=1.5,
+                )
+                self.assertEqual(close_spacing["transform"], "none")
                 page.evaluate(
                     """
                     () => new Promise(resolve => {
@@ -3687,7 +4232,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3750,7 +4295,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3857,7 +4402,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3933,7 +4478,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -3991,7 +4536,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4033,7 +4578,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4119,7 +4664,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4259,7 +4804,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4312,7 +4857,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4383,7 +4928,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4471,7 +5016,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4539,7 +5084,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(
@@ -4704,7 +5249,7 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     case.direction,
                 )
                 self.assertEqual(
-                    page.locator("html").get_attribute("data-bs-theme"),
+                    theme_owner(page).get_attribute("data-bs-theme"),
                     case.color_scheme,
                 )
                 self.assertFalse(

@@ -80,8 +80,16 @@ class AlertTests(CatalogTestCase):
             "#{$moo-alert-dismissible-close-space});",
             source,
         )
-        self.assertIn("inset-block-start: 50%;", source)
-        self.assertIn("transform: translateY(-50%);", source)
+        self.assertIn(
+            "inset-block-start: var(--bs-alert-padding-y);",
+            source,
+        )
+        self.assertIn(
+            "inset-inline-end: var(--bs-alert-padding-x);",
+            source,
+        )
+        self.assertNotIn("inset-block-start: 50%;", source)
+        self.assertNotIn("transform: translateY(-50%);", source)
 
     def test_alert_action_renders_trusted_markup(self) -> None:
         output = self.render_alert('alert("Heads up!", action="<button>Go</button>")')

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moo owner isolation fixture</title>
+    <link rel="stylesheet" href="../../site-dist/assets/css/moo-ui.css">
+  </head>
+  <body>
+    <article id="host-probe" class="card">
+      <div class="card-body">Host card outside Moo UI</div>
+    </article>
+
+    <section id="outer-owner" class="moo-ui" data-bs-theme="dark">
+      <select class="form-select" data-owner-probe="select" aria-label="Outer select">
+        <option>Outer dark</option>
+      </select>
+      <label class="form-check form-switch">
+        <input class="form-check-input" data-owner-probe="switch" type="checkbox" role="switch">
+      </label>
+      <button class="btn-close" data-owner-probe="close" type="button" aria-label="Close outer"></button>
+      <article class="card" data-owner-probe="card"><div class="card-body">Outer dark card</div></article>
+
+      <div id="class-only-portal" class="moo-ui" data-moo-overlay-portal-host>
+        <select class="form-select" data-owner-probe="select" aria-label="Portal select">
+          <option>Portal inherits dark</option>
+        </select>
+        <label class="form-check form-switch">
+          <input class="form-check-input" data-owner-probe="switch" type="checkbox" role="switch">
+        </label>
+        <button class="btn-close" data-owner-probe="close" type="button" aria-label="Close portal"></button>
+        <article class="card" data-owner-probe="card"><div class="card-body">Portal card</div></article>
+      </div>
+
+      <section id="inner-owner" class="moo-ui" data-bs-theme="light">
+        <select class="form-select" data-owner-probe="select" aria-label="Inner select">
+          <option>Inner light</option>
+        </select>
+        <label class="form-check form-switch">
+          <input class="form-check-input" data-owner-probe="switch" type="checkbox" role="switch">
+        </label>
+        <button class="btn-close" data-owner-probe="close" type="button" aria-label="Close inner"></button>
+        <article class="card" data-owner-probe="card"><div class="card-body">Inner light card</div></article>
+      </section>
+    </section>
+  </body>
+</html>

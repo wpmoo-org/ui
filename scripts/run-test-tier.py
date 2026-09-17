@@ -58,7 +58,9 @@ BROWSER_SMOKE_MODULES = [
 BROWSER_FULL_MODULES = [
     *BROWSER_SMOKE_MODULES,
     "tests.test_certification_browser",
+    "tests.test_layouts_browser",
     "tests.test_datatable_browser",
+    "tests.test_moo_core_browser",
     "tests.test_conformance_runner.ConformanceRunnerTests",
     test_method(
         "tests.test_conformance_kit_packaging.PackagingTests",
@@ -85,6 +87,15 @@ RELEASE_PATTERNS = [
 ]
 
 BROWSER_FULL_PATTERNS = [
+    "src/layouts/**",
+    "src/certification/layout-evidence.json",
+    "tests/fixtures/certification/layout-*.html.jinja",
+    "site/src/pages/layout.html.jinja",
+    "site/src/pages/layouts/**",
+    "site/src/blocks/sidebar_shell.html.jinja",
+    "scss/components/sidebar/**",
+    "scss/components/_dropdown.scss",
+    "src/js/components/sidebar.js",
     "src/js/components/datatable.js",
     "tests/test_*_browser.py",
     "tests/test_certification_browser.py",
@@ -128,6 +139,21 @@ QUICK_PATTERNS = [
 ]
 
 TARGETED_MODULE_RULES = [
+    (
+        [
+            "src/layouts/**",
+            "src/certification/layout-evidence.json",
+            "tests/fixtures/certification/layout-*.html.jinja",
+            "site/src/pages/layout.html.jinja",
+            "site/src/pages/layouts/**",
+            "site/src/blocks/sidebar_shell.html.jinja",
+            "tests/test_layouts_browser.py",
+            "scss/components/sidebar/**",
+            "scss/components/_dropdown.scss",
+            "src/js/components/sidebar.js",
+        ],
+        ["tests.test_layouts", "tests.test_layouts_browser"],
+    ),
     (
         [".github/workflows/**"],
         ["tests.test_test_tiers"],

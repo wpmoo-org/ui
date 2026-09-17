@@ -12,7 +12,9 @@
   cursor: pointer;
 }
 
-[dir="rtl"] .sidebar-rail {
+// Read the Sidebar's computed direction so this remains valid inside the
+// resolved-owner @scope as well as under a full-document html[dir] owner.
+.sidebar:dir(rtl) .sidebar-rail {
   transform: translateX(-50%);
 }
 
@@ -37,26 +39,25 @@
     position: relative;
   }
 
-  .sidebar-wrapper:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar {
+  .wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar {
     position: relative;
-    z-index: $zindex-dropdown;
+    // Catalog page headers are sticky at $zindex-fixed. The Sidebar root must
+    // sit above that page-level stacking context while an identity menu is
+    // open, otherwise the workspace menu is painted underneath the header
+    // even though the menu itself is fixed and has dropdown z-index.
+    z-index: $zindex-fixed + 1;
   }
 
   // The sticky inner surface is its own stacking context. Elevate that
   // context while an identity menu is open so the rail's hover indicator
   // remains behind the fixed dropdown instead of painting across it.
-  .sidebar-wrapper:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar > .sidebar-inner {
-    z-index: $zindex-dropdown;
+  .wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar > .sidebar-inner {
+    z-index: $zindex-fixed + 1;
   }
 
-  .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
+  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
     flex-basis: var(--moo-sidebar-width-icon);
     width: var(--moo-sidebar-width-icon);
-  }
-
-  .sidebar-wrapper[data-sidebar-state="collapsed"] .sidebar-inset {
-    position: relative;
-    z-index: 0;
   }
 
   [data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-group-label,
@@ -74,14 +75,18 @@
   }
 
   [data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"]) {
-    z-index: $zindex-dropdown;
+    // Keep the collapsed identity trigger above sticky page chrome too. This
+    // selector is more specific than the app-root rule above and otherwise
+    // would lower the Sidebar back to the dropdown layer.
+    z-index: $zindex-fixed + 1;
   }
 
   .sidebar-menu-flyout {
     position: fixed;
     z-index: $zindex-dropdown;
     inset-block-start: var(--moo-sidebar-flyout-block-start);
-    inset-inline-start: var(--moo-sidebar-flyout-inline-start);
+    left: var(--moo-sidebar-flyout-left);
+    right: auto;
     display: flex;
     flex-direction: column;
     min-width: $spacer * 10;
@@ -174,15 +179,7 @@
     display: none;
   }
 
-  // Contained demos stay inside their preview instead of becoming viewport drawers.
-  .sidebar-wrapper--contained {
-    flex-direction: column;
-    height: auto;
-    min-height: 34rem;
-    overflow: visible;
-  }
-
-  .sidebar-wrapper--contained .sidebar {
+  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar {
     position: relative;
     inset: auto;
     flex: 0 0 auto;
@@ -192,7 +189,7 @@
     transform: none;
   }
 
-  .sidebar-wrapper--contained .sidebar-inner {
+  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
     height: auto;
     max-height: none;
   }

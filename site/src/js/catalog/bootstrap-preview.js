@@ -1,3 +1,5 @@
+import { findThemeOwner, ownerPortalRoot } from "../../../../src/js/theme-owner.js";
+
 const states = new WeakMap();
 
 export function initBootstrapPreview(root = document) {
@@ -7,7 +9,8 @@ export function initBootstrapPreview(root = document) {
 
   const view = root.defaultView || root.ownerDocument?.defaultView;
   const listeners = [];
-  const modalPlaceholders = new Map();
+  const modalPortals = new Map();
+  const sheetPortals = new Map();
   const bootstrapInstances = new Set();
   const sharedToastStacks = new Map();
   const listen = (target, type, handler, options) => {
@@ -32,46 +35,114 @@ export function initBootstrapPreview(root = document) {
   listen(view, "resize", clampHorizontalScroll, { passive: true });
   clampHorizontalScroll();
 
+  const ownerPortalFor = (trigger) =>
+    ownerPortalRoot(findThemeOwner(trigger));
+  const portalFor = (trigger) => (
+    ownerPortalFor(trigger) ||
+    root.body ||
+    root.documentElement ||
+    null
+  );
+  const restorePortaledElement = (element, original) => {
+    if (!original) {
+      return;
+    }
+    if (original.owner?.isConnected === false) {
+      element.remove();
+      return;
+    }
+    if (original.parent?.isConnected) {
+      if (original.nextSibling?.parentNode === original.parent) {
+        original.parent.insertBefore(element, original.nextSibling);
+      } else {
+        original.parent.appendChild(element);
+      }
+      return;
+    }
+    element.remove();
+  };
+
+  const bodyBackdrops = (className) => Array.from(root.body?.children || []).filter((child) =>
+    child instanceof view.HTMLElement && child.classList.contains(className)
+  );
+
+  // Bootstrap creates Modal/Offcanvas backdrops as direct body children. Keep
+  // the detached node in the same owner portal as its surface so the scoped
+  // Bootstrap structure and Moo theme tokens both apply to it.
+  const portalBackdrop = (overlay, className, existingBackdrops = new Set()) => {
+    const portal = ownerPortalFor(overlay) || portalFor(overlay);
+    const backdrops = bodyBackdrops(className).filter(
+      (backdrop) => !existingBackdrops.has(backdrop),
+    );
+    const backdrop = backdrops[backdrops.length - 1];
+
+    if (overlay && portal && backdrop && backdrop.parentElement !== portal) {
+      portal.appendChild(backdrop);
+    }
+  };
+  const queueBackdropPortal = (overlay, className) => {
+    const existingBackdrops = new Set(bodyBackdrops(className));
+    const portal = () => portalBackdrop(overlay, className, existingBackdrops);
+
+    // Bootstrap appends its backdrop synchronously after `show.bs.*` returns.
+    // A microtask runs after that append, yet before the first opening paint.
+    if (typeof view.queueMicrotask === "function") {
+      view.queueMicrotask(portal);
+    } else {
+      Promise.resolve().then(portal);
+    }
+  };
+
   const onModalShow = (event) => {
     const modal = event.target;
+    const trigger = event.relatedTarget || modal;
+    const portal = ownerPortalFor(trigger) || portalFor(modal);
     if (
       !(modal instanceof view.HTMLElement) ||
       !modal.classList.contains("modal") ||
       !modal.closest(".moo-catalog") ||
-      modal.parentElement === root.body
+      !portal
     ) {
       return;
     }
-    const placeholder = root.createComment("moo-modal-placeholder");
-    modal.parentNode?.insertBefore(placeholder, modal);
-    root.body.appendChild(modal);
-    modalPlaceholders.set(modal, placeholder);
+    if (modal.parentElement !== portal) {
+      modalPortals.set(modal, {
+        parent: modal.parentNode,
+        nextSibling: modal.nextSibling,
+        owner: findThemeOwner(modal),
+      });
+      portal.appendChild(modal);
+    }
+    queueBackdropPortal(modal, "modal-backdrop");
   };
   const onModalHidden = (event) => {
     const modal = event.target;
     if (!(modal instanceof view.HTMLElement)) {
       return;
     }
-    const placeholder = modalPlaceholders.get(modal);
-    if (placeholder?.parentNode) {
-      placeholder.parentNode.insertBefore(modal, placeholder);
-      placeholder.remove();
-    }
-    modalPlaceholders.delete(modal);
+    restorePortaledElement(modal, modalPortals.get(modal));
+    modalPortals.delete(modal);
   };
   listen(root, "show.bs.modal", onModalShow, true);
   listen(root, "hidden.bs.modal", onModalHidden, true);
 
-  const portalSheet = (sheet) => {
+  const portalSheet = (sheet, trigger = sheet) => {
+    const portal = portalFor(trigger) || portalFor(sheet);
     if (
       !(sheet instanceof view.HTMLElement) ||
       !sheet.classList.contains("sheet") ||
-      sheet.parentElement === root.body
+      !portal ||
+      sheet.parentElement === portal
     ) {
       return;
     }
     sheet.dataset.mooCatalogSheet = "true";
-    root.body.appendChild(sheet);
+    sheetPortals.set(sheet, {
+      parent: sheet.parentNode,
+      nextSibling: sheet.nextSibling,
+      owner: findThemeOwner(trigger) || findThemeOwner(sheet),
+    });
+    portal.appendChild(sheet);
   };
   listen(root, "click", (event) => {
     const target = event.target instanceof view.Element
@@ -80,7 +151,7 @@ export function initBootstrapPreview(root = document) {
     const trigger = target?.closest?.('[data-bs-toggle="offcanvas"][data-bs-target]');
     const selector = trigger?.getAttribute("data-bs-target");
     if (selector?.startsWith("#")) {
-      portalSheet(root.querySelector(selector));
+      portalSheet(root.querySelector(selector), trigger);
     }
   }, true);
   listen(root, "show.bs.offcanvas", (event) => {
@@ -90,9 +161,19 @@ export function initBootstrapPreview(root = document) {
       sheet.dataset.mooCatalogSheet === "true"
     ) {
       portalSheet(sheet);
+      queueBackdropPortal(sheet, "offcanvas-backdrop");
     }
   }, true);
-  root.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach(portalSheet);
+  listen(root, "hidden.bs.offcanvas", (event) => {
+    const sheet = event.target;
+    if (sheet instanceof view.HTMLElement) {
+      restorePortaledElement(sheet, sheetPortals.get(sheet));
+      sheetPortals.delete(sheet);
+    }
+  }, true);
+  root.querySelectorAll(".moo-catalog .offcanvas.sheet").forEach((sheet) => {
+    portalSheet(sheet);
+  });
 
   const Tooltip = view.bootstrap?.Tooltip;
   if (Tooltip) {
@@ -104,13 +185,18 @@ export function initBootstrapPreview(root = document) {
       ? { allowList: { ...Tooltip.Default.allowList, kbd: [] } }
       : {};
     root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((trigger) => {
-      bootstrapInstances.add(Tooltip.getOrCreateInstance(trigger, tooltipOptions));
+      const portal = portalFor(trigger);
+      bootstrapInstances.add(Tooltip.getOrCreateInstance(trigger, {
+        ...tooltipOptions,
+        container: portal,
+      }));
     });
   }
   const Popover = view.bootstrap?.Popover;
   if (Popover) {
     root.querySelectorAll('[data-bs-toggle="popover"]').forEach((trigger) => {
-      bootstrapInstances.add(Popover.getOrCreateInstance(trigger));
+      const portal = portalFor(trigger);
+      bootstrapInstances.add(Popover.getOrCreateInstance(trigger, { container: portal }));
     });
   }
   const Toast = view.bootstrap?.Toast;
@@ -128,13 +214,22 @@ export function initBootstrapPreview(root = document) {
       );
       return isStackContainer(container) ? container : null;
     };
-    const getSharedToastStack = (sourceContainer) => {
-      if (!isStackContainer(sourceContainer) || !root.body) {
+    const getSharedToastStack = (sourceContainer, trigger) => {
+      if (!isStackContainer(sourceContainer)) {
         return sourceContainer;
       }
 
+      const portal = ownerPortalFor(trigger) || portalFor(sourceContainer);
+      if (!portal) {
+        return sourceContainer;
+      }
       const key = sourceContainer.dataset.toastStack || "deck";
-      const existing = sharedToastStacks.get(key);
+      let stacks = sharedToastStacks.get(portal);
+      if (!stacks) {
+        stacks = new Map();
+        sharedToastStacks.set(portal, stacks);
+      }
+      const existing = stacks.get(key);
       if (existing?.isConnected) {
         return existing;
       }
@@ -143,8 +238,8 @@ export function initBootstrapPreview(root = document) {
       container.className = sourceContainer.className;
       container.dataset.toastStack = key;
       container.dataset.mooCatalogToastStack = "shared";
-      root.body.appendChild(container);
-      sharedToastStacks.set(key, container);
+      portal.appendChild(container);
+      stacks.set(key, container);
       return container;
     };
     const readNumber = (value, fallback) => {
@@ -354,7 +449,7 @@ export function initBootstrapPreview(root = document) {
         ) {
           return;
         }
-        const container = getSharedToastStack(sourceContainer);
+        const container = getSharedToastStack(sourceContainer, trigger);
         const sequence = ++toastSequence;
         toast.id = `${template.id}-${sequence}`;
         toast.setAttribute("data-toast-generated", "true");
@@ -442,13 +537,17 @@ export function initBootstrapPreview(root = document) {
     listeners.forEach(({ target, type, handler, options }) => {
       target.removeEventListener(type, handler, options);
     });
-    modalPlaceholders.forEach((placeholder, modal) => {
-      if (placeholder.parentNode) {
-        placeholder.parentNode.insertBefore(modal, placeholder);
-        placeholder.remove();
-      }
+    modalPortals.forEach((original, modal) => {
+      restorePortaledElement(modal, original);
     });
-    sharedToastStacks.forEach((container) => container.remove());
+    modalPortals.clear();
+    sheetPortals.forEach((original, sheet) => {
+      restorePortaledElement(sheet, original);
+    });
+    sheetPortals.clear();
+    sharedToastStacks.forEach((stacks) => {
+      stacks.forEach((container) => container.remove());
+    });
     sharedToastStacks.clear();
     bootstrapInstances.forEach((instance) => instance.dispose());
     states.delete(root);

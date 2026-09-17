@@ -237,8 +237,10 @@ class DatepickerSourceTests(CatalogTestCase):
         source = DATEPICKER_JS.read_text(encoding="utf-8")
 
         self.assertNotIn("vanillajs-datepicker", source)
-        self.assertNotIn('from "', source)
-        self.assertNotIn("from '", source)
+        self.assertIn('from "../theme-owner.js"', source)
+        self.assertIn("const owner = findThemeOwner(instance._trigger);", source)
+        self.assertIn("const portalRoot = ownerPortalRoot(owner) ||", source)
+        self.assertNotIn("data-datepicker-portal-host", source)
         self.assertNotIn("import(", source)
         self.assertNotIn("window.Datepicker", source)
         self.assertNotIn("bootstrap-datepicker", source)
@@ -501,8 +503,8 @@ class _DatepickerBrowserMixin:
               return {
                 placement: popover.dataset.datepickerPlacement || "",
                 position: getComputedStyle(popover).position,
-                portalHost: popover.parentElement?.matches?.(".moo-ui[data-datepicker-portal-host]") || false,
-                portalHostBodyChild: popover.parentElement?.parentElement === document.body,
+                portalOwner: popover.parentElement?.matches?.(".moo-ui[data-bs-theme]") || false,
+                portalOwnerBodyChild: popover.parentElement?.parentElement === document.body,
                 rootContainsPopover: root ? root.contains(popover) : false,
                 leftDelta: popoverRect.left - triggerRect.left,
                 topGap: popoverRect.top - triggerRect.bottom,
@@ -672,7 +674,7 @@ class _DatepickerBrowserMixin:
                   return {
                     formId: input.form?.id || "",
                     popoverContainsInput: popover.contains(input),
-                    portalHost: popover.parentElement?.matches?.(".moo-ui[data-datepicker-portal-host]") || false,
+                    portalOwner: popover.parentElement?.matches?.(".moo-ui[data-bs-theme]") || false,
                   };
                 }
                 """
@@ -682,7 +684,7 @@ class _DatepickerBrowserMixin:
                 {
                     "formId": "certification-datepicker-reset-form",
                     "popoverContainsInput": False,
-                    "portalHost": True,
+                    "portalOwner": True,
                 },
             )
             page.locator('#certification-reset-datepicker-calendar [data-calendar-day="2026-08-21"]').click()
@@ -889,8 +891,8 @@ class _DatepickerBrowserMixin:
             # clipping card so it is actually visible.
             self.assertIn(metrics["placement"], ("top", "bottom"))
             self.assertEqual(metrics["position"], "fixed")
-            self.assertTrue(metrics["portalHost"])
-            self.assertTrue(metrics["portalHostBodyChild"])
+            self.assertTrue(metrics["portalOwner"])
+            self.assertTrue(metrics["portalOwnerBodyChild"])
             self.assertFalse(metrics["rootContainsPopover"])
             self.assertLessEqual(abs(metrics["leftDelta"]), 1)
             self.assertTrue(metrics["withinViewport"])

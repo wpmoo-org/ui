@@ -1,3 +1,5 @@
+import { findThemeOwner, ownerPortalRoot } from "../theme-owner.js";
+
 const instances = new WeakMap();
 
 export default class Sidebar {
@@ -21,7 +23,8 @@ export default class Sidebar {
     this._element = element;
     this._document = element.ownerDocument;
     this._window = this._document.defaultView;
-    this._root = this._document.documentElement;
+    this._documentElement = this._document.documentElement;
+    this._root = findThemeOwner(element) || this._document.body || this._documentElement;
     this._sidebar = element.querySelector('[data-slot="sidebar"]');
     this._config = {
       breakpoint: "(min-width: 992px)",
@@ -75,6 +78,12 @@ export default class Sidebar {
     return this._window.bootstrap?.[name] || null;
   }
 
+  _portalRoot(trigger = this._element) {
+    return ownerPortalRoot(findThemeOwner(trigger)) ||
+      this._document.body ||
+      this._documentElement;
+  }
+
   _isDesktop() {
     return this._window.matchMedia(this._config.breakpoint).matches;
   }
@@ -102,7 +111,7 @@ export default class Sidebar {
       this._closeFlyouts();
       this._syncTooltips();
     });
-    this._directionObserver.observe(this._root, {
+    this._directionObserver.observe(this._documentElement, {
       attributes: true,
       attributeFilter: ["dir"],
     });
@@ -226,8 +235,8 @@ export default class Sidebar {
     delete item.dataset.sidebarDropdownPositioned;
     item.style.removeProperty("--moo-sidebar-dropdown-block-start");
     item.style.removeProperty("--moo-sidebar-dropdown-block-end");
-    item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
-    item.style.removeProperty("--moo-sidebar-dropdown-inline-end");
+    item.style.removeProperty("--moo-sidebar-dropdown-left");
+    item.style.removeProperty("--moo-sidebar-dropdown-right");
   }
 
   _closeDropdowns(exceptControl = null) {
@@ -269,25 +278,20 @@ export default class Sidebar {
     const gap = 4;
     const sidebar = control.closest('[data-slot="sidebar"]');
     const side = sidebar?.dataset.side || "left";
-    const isRtl = this._root.dir === "rtl";
     if (side === "right") {
-      const inlineEnd = isRtl
-        ? rect.right + gap
-        : this._window.innerWidth - rect.left + gap;
+      const right = this._window.innerWidth - rect.left + gap;
       item.style.setProperty(
-        "--moo-sidebar-dropdown-inline-end",
-        `${Math.round(inlineEnd)}px`
+        "--moo-sidebar-dropdown-right",
+        `${Math.round(right)}px`
       );
-      item.style.removeProperty("--moo-sidebar-dropdown-inline-start");
+      item.style.removeProperty("--moo-sidebar-dropdown-left");
     } else {
-      const inlineStart = isRtl
-        ? this._window.innerWidth - rect.left + gap
-        : rect.right + gap;
+      const left = rect.right + gap;
       item.style.setProperty(
-        "--moo-sidebar-dropdown-inline-start",
-        `${Math.round(inlineStart)}px`
+        "--moo-sidebar-dropdown-left",
+        `${Math.round(left)}px`
       );
-      item.style.removeProperty("--moo-sidebar-dropdown-inline-end");
+      item.style.removeProperty("--moo-sidebar-dropdown-right");
     }
     if (isHeaderWorkspace) {
       item.style.setProperty(
@@ -319,7 +323,7 @@ export default class Sidebar {
     this._element.querySelectorAll(".sidebar-menu-item--flyout-open").forEach((item) => {
       item.classList.remove("sidebar-menu-item--flyout-open");
       item.style.removeProperty("--moo-sidebar-flyout-block-start");
-      item.style.removeProperty("--moo-sidebar-flyout-inline-start");
+      item.style.removeProperty("--moo-sidebar-flyout-left");
       this._resetFlyoutTrigger(item, false);
     });
   }
@@ -337,11 +341,9 @@ export default class Sidebar {
     this._closeDropdowns();
     this._closeFlyouts();
     const rect = item.getBoundingClientRect();
+    const sidebar = this._sidebar;
+    const sidebarRect = sidebar?.getBoundingClientRect() || rect;
     const gap = 4;
-    const inlineStart =
-      this._root.dir === "rtl"
-        ? this._window.innerWidth - rect.left + gap
-        : rect.right + gap;
     const flyout = submenu.cloneNode(true);
     flyout.removeAttribute("id");
     flyout.classList.remove("collapse", "show", "collapsing");
@@ -349,12 +351,14 @@ export default class Sidebar {
     flyout.dataset.sidebarFlyout = "";
     flyout.removeAttribute("style");
     flyout.style.setProperty("--moo-sidebar-flyout-block-start", `${Math.round(rect.top)}px`);
-    flyout.style.setProperty(
-      "--moo-sidebar-flyout-inline-start",
-      `${Math.round(inlineStart)}px`
-    );
-    const root = this._element.closest(".moo-ui") || this._document.body;
-    root.appendChild(flyout);
+    const side = sidebar?.dataset.side || "left";
+    this._portalRoot(item).appendChild(flyout);
+    const flyoutWidth = flyout.getBoundingClientRect().width;
+    const left = side === "right"
+      ? sidebarRect.left - flyoutWidth - gap
+      : sidebarRect.right + gap;
+    const boundedLeft = Math.max(0, Math.min(this._window.innerWidth - flyoutWidth, left));
+    flyout.style.setProperty("--moo-sidebar-flyout-left", `${Math.round(boundedLeft)}px`);
     this._flyout = flyout;
     this._flyoutOwner = item;
     item.classList.add("sidebar-menu-item--flyout-open");
@@ -392,7 +396,8 @@ export default class Sidebar {
       return;
     }
     const collapsed = this._isCollapsed();
-    const placement = this._root.dir === "rtl" ? "left" : "right";
+    const side = this._sidebar?.dataset.side || "left";
+    const placement = side === "right" ? "left" : "right";
     this._element.querySelectorAll("[data-sidebar-tooltip]").forEach((control) => {
       this._disposeTooltip(control);
       if (
@@ -410,7 +415,12 @@ export default class Sidebar {
       new Tooltip(anchor, {
         title: control.getAttribute("data-sidebar-tooltip"),
         placement,
-        container: "body",
+        // Bootstrap's default tooltip offset is 6px. The icon rail's
+        // boundary calculation still lets the tooltip box overlap the
+        // physical Sidebar edge at that distance, so keep an explicit 8px
+        // separation for both physical placements.
+        offset: [0, 8],
+        container: this._portalRoot(control),
         trigger: "hover focus",
       });
       this._tooltipAnchors.add(anchor);

@@ -37,6 +37,9 @@ CERTIFICATION = SRC / "certification"
 CERTIFICATION_FIXTURES = ROOT / "tests/fixtures/certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
+THEME_PREPAINT_SOURCE = Markup(
+    (SITE_STATIC / "js" / "theme-prepaint.js").read_text(encoding="utf-8")
+)
 PACKAGE_DIST = ROOT / "dist"
 SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
@@ -61,12 +64,21 @@ JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
     "combobox.js",
-    "sidebar.js",
     "context-menu.js",
-    "datatable.js",
     "slider.js",
 )
-BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+BUNDLED_JS_MODULES = (
+    "chart.js",
+    "datepicker.js",
+    "sidebar.js",
+    "datatable.js",
+)
+# Keep the published package inventory stable: only component entrypoints that
+# already publish minified variants produce them in dist/js. Sidebar and
+# DataTable are bundled so their internal imports resolve, but retain their
+# existing unminified public filenames.
+MINIFIED_BUNDLED_JS_MODULES = ("chart.js", "datepicker.js")
+PRESERVE_BUNDLED_CONSTRUCTOR_NAMES = {"sidebar.js", "datatable.js"}
 AGGREGATE_JS_MODULES = ("moo-ui.js",)
 PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
@@ -118,6 +130,7 @@ SOURCE_SNAPSHOT_DIRS = (
     SITE_SCSS,
     SITE_STATIC,
     SRC / "components",
+    SRC / "layouts",
     JS_COMPONENTS,
     SRC / "icons",
     CORE_REGISTRY,
@@ -126,6 +139,8 @@ SOURCE_SNAPSHOT_DIRS = (
 )
 SOURCE_SNAPSHOT_FILES = (
     JS_ROOT / "moo-ui.js",
+    JS_ROOT / "theme-owner.js",
+    CERTIFICATION / "layout-evidence.json",
 )
 BUILD_LOCK = (
     Path(tempfile.gettempdir())
@@ -1036,6 +1051,7 @@ def build_site_pages(
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
     examples: list[dict[str, str]],
+    layouts: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     def section_page(slug: str) -> dict[str, str] | None:
         section = _find_entry(sections, slug)
@@ -1060,7 +1076,7 @@ def build_site_pages(
         {"slug": "index", "label": "Home", "href": "index.html", "kind": "doc"}
     ]
 
-    for slug in ("introduction", "installation"):
+    for slug in ("introduction", "installation", "layout"):
         page = section_page(slug)
         if page:
             pages.append(page)
@@ -1099,7 +1115,14 @@ def build_site_pages(
 
     for section in sections:
         slug = section.get("slug", "")
-        if slug not in {"introduction", "installation", "components", "blocks"}:
+        if slug not in {
+            "introduction",
+            "installation",
+            "components",
+            "blocks",
+            "layouts",
+            "layout",
+        }:
             pages.append({**section, "kind": "doc"})
 
     return pages
@@ -1112,12 +1135,14 @@ def page_metadata(
     catalog: list[dict[str, str]],
     utilities: list[dict[str, str]],
     blocks: list[dict[str, str]],
+    layouts: list[dict[str, str]],
 ) -> dict[str, str]:
     path = logical_relative.as_posix()
     slug = logical_relative.stem
     kind = "doc"
     entry: dict[str, str] | None = None
     image = seo_image_src()
+    canonical_path = path
 
     if path == "index.html":
         slug = "index"
@@ -1134,6 +1159,15 @@ def page_metadata(
         kind = "block"
         entry = _find_entry(blocks, slug)
         image = seo_image_src("blocks", slug)
+    elif path.startswith("layouts/previews/"):
+        # Layout previews are rendered standalone for the docs iframe, but
+        # they are not public catalog documents and must not acquire layout
+        # metadata, command-palette entries, or sitemap URLs.
+        kind = "preview"
+    elif path.startswith("layouts/") and path != "layouts/index.html":
+        kind = "layout"
+        entry = _find_entry(layouts, slug)
+        image = seo_image_src("layouts", slug)
     elif path.startswith("examples/") and path != "examples/index.html":
         # Examples pages can nest a category folder (examples/auth/sign-in);
         # keep that folder in the slug so it matches the registry's slug
@@ -1164,7 +1198,7 @@ def page_metadata(
         "site_name": SITE_NAME,
         "title": title,
         "description": description,
-        "url": canonical_url(path),
+        "url": canonical_url(canonical_path),
         "image": image,
         "image_alt": image_alt,
         "type": "website" if kind == "doc" else "article",
@@ -1242,6 +1276,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
+    environment.globals["theme_prepaint_source"] = THEME_PREPAINT_SOURCE
     environment.globals["tasks_example_js_source"] = tasks_example_js_source
     environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
@@ -1283,7 +1318,152 @@ def theme_builder_first_paint_payload() -> dict[str, object]:
             f"stdout: {result.stdout}\n"
             f"stderr: {result.stderr}"
         )
-    return json.loads(result.stdout.splitlines()[-1])
+    try:
+        payload = json.loads(result.stdout.splitlines()[-1])
+    except (IndexError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation returned invalid JSON"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError("Theme Builder first-paint payload must be an object")
+    return payload
+
+
+def _catalog_prepaint_mapping(
+    payload: dict[str, object], key: str
+) -> dict[str, object]:
+    value = payload.get(key)
+    if not isinstance(value, dict):
+        raise RuntimeError(f"Theme Builder first-paint payload is missing {key}")
+    return value
+
+
+def _catalog_prepaint_options(
+    payload: dict[str, object], key: str
+) -> list[str]:
+    options = _catalog_prepaint_mapping(payload, "options").get(key)
+    if not isinstance(options, list) or not all(
+        isinstance(option, str) for option in options
+    ):
+        raise RuntimeError(
+            f"Theme Builder first-paint payload has invalid {key} options"
+        )
+    return options
+
+
+def _catalog_prepaint_selector(
+    *,
+    axis: str,
+    value: str,
+    theme: str | None = None,
+) -> str:
+    root = (
+        f'.moo-ui[data-bs-theme="{theme}"]'
+        if theme is not None
+        else ".moo-ui[data-bs-theme]"
+    )
+    attribute = re.sub(r"(?<!^)([A-Z])", r"-\1", axis).lower()
+    return (
+        f"{root}:where([data-moo-catalog-theme-builder-prepaint]"
+        f'[data-moo-catalog-theme-builder-{attribute}={json.dumps(value)}])'
+    )
+
+
+def _catalog_prepaint_rule(
+    selector: str,
+    tokens: dict[str, object],
+    allow_list: frozenset[str],
+) -> str:
+    declarations = [
+        f"  {token}: {value};"
+        for token, value in tokens.items()
+        if token in allow_list and isinstance(value, str)
+    ]
+    if not declarations:
+        return ""
+    return f"{selector} {{\n" + "\n".join(declarations) + "\n}\n"
+
+
+def catalog_prepaint_css(payload: dict[str, object]) -> str:
+    allow_values = payload.get("allowList")
+    if not isinstance(allow_values, list) or not all(
+        isinstance(token, str) for token in allow_values
+    ):
+        raise RuntimeError("Theme Builder first-paint payload has no allow-list")
+    allow_list = frozenset(allow_values)
+    token_groups = _catalog_prepaint_mapping(payload, "tokens")
+    rules: list[str] = []
+
+    base_tokens = _catalog_prepaint_mapping(token_groups, "baseColor")
+    for base_color in _catalog_prepaint_options(payload, "baseColor"):
+        color_tokens = _catalog_prepaint_mapping(base_tokens, base_color)
+        for theme in ("light", "dark"):
+            tokens = _catalog_prepaint_mapping(color_tokens, theme)
+            rule = _catalog_prepaint_rule(
+                _catalog_prepaint_selector(
+                    axis="baseColor", value=base_color, theme=theme
+                ),
+                tokens,
+                allow_list,
+            )
+            if rule:
+                rules.append(rule)
+
+    for axis in ("themeColor", "chartColor", "radius", "headingFont", "bodyFont"):
+        axis_tokens = _catalog_prepaint_mapping(token_groups, axis)
+        for value in _catalog_prepaint_options(payload, axis):
+            tokens = _catalog_prepaint_mapping(axis_tokens, value)
+            rule = _catalog_prepaint_rule(
+                _catalog_prepaint_selector(axis=axis, value=value),
+                tokens,
+                allow_list,
+            )
+            if rule:
+                rules.append(rule)
+
+    sidebar_tokens = _catalog_prepaint_mapping(token_groups, "sidebarAccent")
+    defaults = _catalog_prepaint_mapping(payload, "defaults")
+    default_theme_color = defaults.get("themeColor")
+    for theme_color in _catalog_prepaint_options(payload, "themeColor"):
+        if theme_color == default_theme_color:
+            continue
+        for theme in ("light", "dark"):
+            rule = _catalog_prepaint_rule(
+                _catalog_prepaint_selector(
+                    axis="themeColor", value=theme_color, theme=theme
+                ),
+                _catalog_prepaint_mapping(sidebar_tokens, theme),
+                allow_list,
+            )
+            if rule:
+                rules.append(rule)
+
+    return "/* Generated from theme-builder-schema.js; catalog-only. */\n" + "\n".join(
+        rules
+    )
+
+
+def catalog_prepaint_config(payload: dict[str, object]) -> dict[str, object]:
+    keys = (
+        "schemaVersion",
+        "defaults",
+        "options",
+        "aliases",
+        "legacyActionBaseColors",
+    )
+    missing = [key for key in keys if key not in payload]
+    if missing:
+        raise RuntimeError(
+            "Theme Builder first-paint payload is missing " + ", ".join(missing)
+        )
+    return {key: payload[key] for key in keys}
+
+
+def write_catalog_prepaint_css(payload: dict[str, object]) -> Path:
+    output = SITE_DIST / "assets/css/catalog-prepaint.css"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(catalog_prepaint_css(payload), encoding="utf-8")
+    return output
 
 
 def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
@@ -1340,7 +1520,7 @@ def load_support_facts() -> dict[str, object]:
 # CodePen export URLs pin the package version they load from a CDN. Keep
 # this on the newest version that is actually published to npm, so example
 # pens never point at an unavailable release candidate.
-CODEPEN_CDN_VERSION = "1.0.0-rc.5"
+CODEPEN_CDN_VERSION = "1.0.0-rc.6"
 
 
 def load_product_facts() -> dict[str, object]:
@@ -1661,6 +1841,41 @@ def load_examples() -> list[dict[str, str]]:
     )
 
 
+def load_layouts(
+    layouts_dir: Path | None = None,
+    registry_root: Path | None = None,
+) -> list[dict[str, str]]:
+    """Load layouts only when registry and runtime sources have exact parity."""
+    layouts_dir = layouts_dir or ROOT / "src/layouts"
+    registry_root = registry_root or CORE_REGISTRY
+    registry_entries = load_entries(registry_root, "layouts.json")
+    registry_slugs = sorted(
+        entry["slug"] for entry in registry_entries if entry.get("slug")
+    )
+
+    discovered_slugs: list[str] = []
+    for page in sorted(layouts_dir.rglob("*.html.jinja")):
+        relative = page.relative_to(layouts_dir)
+        discovered_slugs.append(
+            relative.with_suffix("").with_suffix("").as_posix()
+        )
+    discovered_slugs.sort()
+
+    if discovered_slugs != registry_slugs:
+        missing = sorted(set(registry_slugs) - set(discovered_slugs))
+        extra = sorted(set(discovered_slugs) - set(registry_slugs))
+        details: list[str] = []
+        if missing:
+            details.append("missing sources: " + ", ".join(missing))
+        if extra:
+            details.append("extra sources: " + ", ".join(extra))
+        raise ValueError(
+            "Layout registry/source parity mismatch (" + "; ".join(details) + ")"
+        )
+
+    return sorted(registry_entries, key=lambda entry: entry["label"].lower())
+
+
 def style_include_paths(entrypoint: Path) -> list[str]:
     include_paths = [str(SCSS)]
     if entrypoint.is_relative_to(SITE_SCSS):
@@ -1725,7 +1940,11 @@ def asset_version() -> str:
     paths = [
         SITE_DIST / "assets/css/moo-ui.min.css",
         SITE_DIST / "assets/css/catalog.min.css",
+        SITE_DIST / "assets/css/catalog-prepaint.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
+        SITE_DIST / "assets/js/catalog-prepaint.js",
+        SITE_DIST / "assets/js/theme-prepaint.js",
+        SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
     ]
     for path in paths:
@@ -1743,7 +1962,12 @@ def copy_package_js() -> None:
         shutil.copy2(JS_COMPONENTS / module_name, target)
         apply_js_license_banner(target, module_name)
     for module_name in BUNDLED_JS_MODULES:
-        _bundle_module(module_name, minify=False)
+        _bundle_module(
+            module_name,
+            minify=False,
+            keep_names=module_name in PRESERVE_BUNDLED_CONSTRUCTOR_NAMES,
+        )
+    for module_name in MINIFIED_BUNDLED_JS_MODULES:
         _bundle_module(module_name, minify=True)
     for module_name in AGGREGATE_JS_MODULES:
         _bundle_module(module_name, minify=False)
@@ -1775,7 +1999,7 @@ def apply_js_license_banner(output: Path, module_name: str) -> None:
     output.write_text(banner + source.lstrip(), encoding="utf-8")
 
 
-def _bundle_module(module_name: str, *, minify: bool) -> None:
+def _bundle_module(module_name: str, *, minify: bool, keep_names: bool = False) -> None:
     """Bundle a module using esbuild with the locked configuration.
 
     Args:
@@ -1810,6 +2034,8 @@ def _bundle_module(module_name: str, *, minify: bool) -> None:
         "--tree-shaking=true",
         f"--minify={'true' if minify else 'false'}",
     ]
+    if keep_names:
+        cmd.append("--keep-names")
 
     result = subprocess.run(
         cmd,
@@ -1850,6 +2076,7 @@ def required_core_outputs() -> tuple[Path, ...]:
         outputs.append(PACKAGE_DIST / "js" / name)
     for name in BUNDLED_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
+    for name in MINIFIED_BUNDLED_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
     for name in AGGREGATE_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
@@ -1887,9 +2114,10 @@ def copy_core_outputs_to_site() -> None:
         shutil.copy2(package_module, legacy_js_dir / module_name)
     for module_name in BUNDLED_JS_MODULES:
         canonical = PACKAGE_DIST / "js" / module_name
-        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
         shutil.copy2(canonical, components_dir / module_name)
         shutil.copy2(canonical, legacy_js_dir / module_name)
+    for module_name in MINIFIED_BUNDLED_JS_MODULES:
+        minified = PACKAGE_DIST / "js" / module_name.replace(".js", ".min.js")
         shutil.copy2(minified, components_dir / minified.name)
         shutil.copy2(minified, legacy_js_dir / minified.name)
     for module_name in AGGREGATE_JS_MODULES:
@@ -1912,6 +2140,7 @@ def copy_site_assets() -> None:
         BOOTSTRAP / "dist/js/bootstrap.bundle.min.js.map",
         js_dir / "bootstrap.bundle.min.js.map",
     )
+    shutil.copy2(JS_ROOT / "theme-owner.js", js_dir / "theme-owner.js")
     if JS_CATALOG.exists():
         shutil.copytree(JS_CATALOG, js_dir / "catalog", dirs_exist_ok=True)
         # Source catalog modules import package ESM via repo-relative
@@ -1922,6 +2151,9 @@ def copy_site_assets() -> None:
                 catalog_script.read_text(encoding="utf-8").replace(
                     "../../../../src/js/components/",
                     "../components/",
+                ).replace(
+                    "../../../../src/js/theme-owner.js",
+                    "../theme-owner.js",
                 ),
                 encoding="utf-8",
             )
@@ -1973,6 +2205,33 @@ def copy_certification_fixtures_to_site() -> None:
             public_bootstrap_js / bootstrap_file,
         )
 
+
+def render_layout_certification_fixtures() -> None:
+    """Render authored layout fixtures into the served, ignored site tree."""
+
+    environment = create_environment()
+    fixture_dir = SITE_DIST / "tests/fixtures/certification"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    render_specs = (
+        ("layout-app.html.jinja", "layout-app", {}),
+        ("layout-app.html.jinja", "layout-app-contained", {"fixture_shell_mode": "contained"}),
+        ("layout-app.html.jinja", "layout-app-right", {"fixture_side": "right"}),
+        ("layout-app.html.jinja", "layout-app-none", {"fixture_navigation": "none"}),
+        ("layout-page.html.jinja", "layout-page", {"fixture_width": "xl"}),
+        *(
+            ("layout-page.html.jinja", f"layout-page-{width}", {"fixture_width": width})
+            for width in ("base", "sm", "md", "lg", "xxl", "fluid")
+        ),
+    )
+    for source_name, output_stem, context in render_specs:
+        source = CERTIFICATION_FIXTURES / source_name
+        if not source.is_file():
+            raise RuntimeError(f"Missing layout certification fixture: {source}")
+        rendered = environment.from_string(
+            source.read_text(encoding="utf-8")
+        ).render(**context)
+        output = fixture_dir / f"{output_stem}.html"
+        output.write_text(rendered + "\n", encoding="utf-8")
 
 def add_certification_fixture_pagination(
     source: str,
@@ -2097,7 +2356,7 @@ def copy_site_metadata() -> None:
             shutil.copy2(path, SITE_DIST / path.name)
 
 
-def public_page_paths() -> list[str]:
+def public_page_paths(layouts: list[dict[str, str]] | None = None) -> list[str]:
     paths: list[str] = []
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2108,14 +2367,14 @@ def public_page_paths() -> list[str]:
     return paths
 
 
-def public_canonical_urls() -> list[str]:
-    urls = [canonical_url(path) for path in public_page_paths()]
+def public_canonical_urls(layouts: list[dict[str, str]] | None = None) -> list[str]:
+    urls = [canonical_url(path) for path in public_page_paths(layouts)]
     if LLMS_TXT.exists():
         urls.append("https://ui.wpmoo.org/llms.txt")
     return urls
 
 
-def write_sitemap() -> None:
+def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
     urls = "\n".join(
         "\n".join(
             (
@@ -2124,7 +2383,7 @@ def write_sitemap() -> None:
                 "  </url>",
             )
         )
-        for url in public_canonical_urls()
+        for url in public_canonical_urls(layouts)
     )
     sitemap = "\n".join(
         (
@@ -2149,13 +2408,18 @@ def write_sitemap() -> None:
     )
 
 
-def render_pages(version: str | None = None) -> None:
+def render_pages(
+    version: str | None = None,
+    layouts: list[dict[str, str]] | None = None,
+    theme_builder_prepaint: dict[str, object] | None = None,
+) -> None:
     environment = create_environment()
     catalog = load_catalog()
     sections = load_entries(SITE_REGISTRY, "sections.json")
     utilities = load_utilities()
     blocks = load_blocks()
     examples = load_examples()
+    layouts = layouts if layouts is not None else load_layouts()
     product = load_product_facts()
     component_ownership = derive_component_ownership(
         catalog,
@@ -2168,8 +2432,18 @@ def render_pages(version: str | None = None) -> None:
         }
         for component in catalog
     ]
-    site_pages = build_site_pages(sections, catalog, utilities, blocks, examples)
-    theme_builder_first_paint = theme_builder_first_paint_payload()
+    site_pages = build_site_pages(
+        sections,
+        catalog,
+        utilities,
+        blocks,
+        examples,
+        layouts,
+    )
+    if theme_builder_prepaint is None:
+        theme_builder_prepaint = catalog_prepaint_config(
+            theme_builder_first_paint_payload()
+        )
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2186,7 +2460,13 @@ def render_pages(version: str | None = None) -> None:
         # section.
         current_section = logical_relative.parts[0] if len(logical_relative.parts) > 1 else ""
         current_slug = logical_relative.stem
-        if current_section not in {"components", "utils", "blocks", "examples"}:
+        if current_section not in {
+            "components",
+            "utils",
+            "blocks",
+            "examples",
+            "layouts",
+        }:
             current_section = "sections"
         template_name = page.relative_to(SITE_SRC).as_posix()
         metadata = page_metadata(
@@ -2196,6 +2476,7 @@ def render_pages(version: str | None = None) -> None:
             catalog,
             utilities,
             blocks,
+            layouts,
         )
         rendered = environment.get_template(template_name).render(
             catalog=catalog,
@@ -2203,6 +2484,7 @@ def render_pages(version: str | None = None) -> None:
             utilities=utilities,
             blocks=blocks,
             examples=examples,
+            layouts=layouts,
             product=product,
             component_ownership=component_ownership,
             site_pages=site_pages,
@@ -2213,7 +2495,7 @@ def render_pages(version: str | None = None) -> None:
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
-            theme_builder_first_paint=theme_builder_first_paint,
+            theme_builder_prepaint=theme_builder_prepaint,
         )
         output_file.write_text(rendered, encoding="utf-8")
 
@@ -2255,12 +2537,20 @@ def build_site() -> None:
     copy_core_outputs_to_site()
     compile_catalog_styles()
     copy_site_assets()
+    theme_builder_payload = theme_builder_first_paint_payload()
+    write_catalog_prepaint_css(theme_builder_payload)
     copy_certification_fixtures_to_site()
+    render_layout_certification_fixtures()
     copy_site_metadata()
     version_site_module_imports()
     version = asset_version()
-    render_pages(version)
-    write_sitemap()
+    layouts = load_layouts()
+    render_pages(
+        version,
+        layouts,
+        theme_builder_prepaint=catalog_prepaint_config(theme_builder_payload),
+    )
+    write_sitemap(layouts)
 
 
 def source_snapshot() -> tuple[tuple[str, int], ...]:

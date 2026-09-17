@@ -323,13 +323,73 @@ class CatalogContractTests(CatalogTestCase):
         return path
 
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
-        styles = read_catalog_styles()
-        match = re.search(r"\.moo-catalog__main\s*\{(?P<body>[^}]*)\}", styles)
+        styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+            encoding="utf-8"
+        )
+        match = re.search(
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\]\s*\{(?P<body>[^}]*)\}',
+            styles,
+        )
 
         self.assertIsNotNone(match)
         body = match.group("body")
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
+
+    def test_catalog_main_keeps_vertical_scroll_fade_below_header(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        introduction = self.read_output("introduction/index.html")
+        page_root = re.search(r'<div data-slot="page"[^>]*>', introduction)
+        main = re.search(
+            r'<main id="main-content" tabindex="-1"[^>]*>', introduction
+        )
+
+        self.assertIsNotNone(page_root)
+        self.assertIsNotNone(main)
+        assert page_root is not None
+        assert main is not None
+        self.assertNotIn('class="scroll-fade-y no-scrollbar"', page_root.group(0))
+        self.assertIn('class="scroll-fade-y no-scrollbar"', main.group(0))
+
+        styles = read_catalog_styles()
+        catalog_main = re.search(
+            r'\.moo-catalog > \.wrapper\[data-layout="app"\] > '
+            r'\[data-slot="page"\] > main\s*\{(?P<body>[^}]*)\}',
+            styles,
+        )
+        self.assertIsNotNone(catalog_main)
+        assert catalog_main is not None
+        self.assertIn("overflow-y: auto;", catalog_main.group("body"))
+
+    def test_examples_keep_document_vertical_rhythm(self) -> None:
+        styles = read_catalog_styles()
+        examples_page = re.search(
+            r"\.moo-examples-page\s*\{(?P<body>[^}]*)\}", styles
+        )
+
+        self.assertIsNotNone(examples_page)
+        assert examples_page is not None
+        self.assertIn("gap: 3rem;", examples_page.group("body"))
+        self.assertIn("padding-block: 3rem 5rem;", examples_page.group("body"))
+
+        footer_shell = re.search(
+            r'\.moo-catalog > \.wrapper\[data-layout="app"\] > '
+            r'\[data-slot="page"\] > footer:has\(> \.container-xl > '
+            r'\.moo-examples-footer\) > \.container-xl\s*\{(?P<body>[^}]*)\}',
+            styles,
+        )
+        self.assertIsNotNone(footer_shell)
+        assert footer_shell is not None
+        self.assertIn("max-width: none;", footer_shell.group("body"))
+        self.assertIn("padding-inline: 0;", footer_shell.group("body"))
+
+        footer = re.search(r"\.moo-examples-footer\s*\{(?P<body>[^}]*)\}", styles)
+        self.assertIsNotNone(footer)
+        assert footer is not None
+        self.assertIn("position: relative;", footer.group("body"))
+        self.assertIn("z-index: $zindex-fixed;", footer.group("body"))
 
     def test_form_component_preview_fields_center_on_their_control_width(self) -> None:
         styles = read_catalog_styles()
@@ -391,6 +451,16 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("--bs-btn-active-border-color: var(--bs-body-color);", body)
         self.assertNotIn("var(--moo-primary", body)
         self.assertNotIn("var(--bs-primary", body)
+
+    def test_catalog_dark_rules_are_bounded_by_resolved_owners(self) -> None:
+        styles = read_catalog_styles()
+        dark_scope = (
+            '@scope (.moo-ui[data-bs-theme="dark"]) '
+            'to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {'
+        )
+
+        self.assertIn(dark_scope, styles)
+        self.assertNotRegex(styles, r'(?m)^\[data-bs-theme="dark"\]')
 
     def test_settings_mode_picker_chrome_is_not_theme_builder_tinted(self) -> None:
         styles = read_catalog_styles()
@@ -489,8 +559,11 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(value, system_thumb_layer_body)
 
         dark_system_thumb_layer = re.search(
-            r'(?ms)^\[data-bs-theme="dark"\] \.moo-settings-panel__theme-thumb--system::before\s*'
-            r"\{(?P<body>.*?)^\}",
+            r'(?ms)^@scope \(\.moo-ui\[data-bs-theme="dark"\]\) '
+            r'to \(:where\(\.moo-ui\[data-bs-theme="light"\], '
+            r'\.moo-ui\[data-bs-theme="dark"\]\)\) \{\s+'
+            r':scope \.moo-settings-panel__theme-thumb--system::before\s*'
+            r"\{(?P<body>.*?)^  \}",
             styles,
         )
         self.assertIsNotNone(dark_system_thumb_layer)
@@ -571,9 +644,11 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertIn(value, checked_check_body)
 
         dark_system_checked_check = re.search(
-            r'(?ms)^\[data-bs-theme="dark"\] '
-            r'\.moo-settings-panel__theme-option:has\(\.btn-check\[value="system"\]:checked\) '
-            r"\.moo-settings-panel__theme-check\s*\{(?P<body>.*?)^\}",
+            r'(?ms)^@scope \(\.moo-ui\[data-bs-theme="dark"\]\) '
+            r'to \(:where\(\.moo-ui\[data-bs-theme="light"\], '
+            r'\.moo-ui\[data-bs-theme="dark"\]\)\) \{\s+'
+            r':scope \.moo-settings-panel__theme-option:has\(\.btn-check\[value="system"\]:checked\) '
+            r"\.moo-settings-panel__theme-check\s*\{(?P<body>.*?)^  \}",
             styles,
         )
         self.assertIsNotNone(dark_system_checked_check)
@@ -592,7 +667,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn(mutable_token, theme_check_body)
                 self.assertNotIn(mutable_token, checked_check_body)
 
-    def test_settings_panel_keeps_page_context_visible_without_backdrop(self) -> None:
+    def test_settings_panel_uses_default_sheet_backdrop_and_scroll_behavior(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -602,8 +677,8 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIsNotNone(match, "catalog settings panel root not found")
         settings_root = match.group(0)
         self.assertIn('class="offcanvas offcanvas-end sheet"', settings_root)
-        self.assertIn('data-bs-backdrop="false"', settings_root)
-        self.assertIn('data-bs-scroll="true"', settings_root)
+        self.assertNotIn("data-bs-backdrop", settings_root)
+        self.assertNotIn("data-bs-scroll", settings_root)
 
     def test_settings_builder_color_dropdowns_render_swatch_indicators(self) -> None:
         result = self.run_build()
@@ -688,6 +763,18 @@ class CatalogContractTests(CatalogTestCase):
             ".dropdown-item-check__indicator",
             styles,
         )
+        variant_styles = styles.split(
+            "// These selected-color variants must share the owner scope above.",
+            1,
+        )[1].split(".moo-settings-panel__theme-group", 1)[0]
+        self.assertIn(":scope {", variant_styles)
+        for swatch in ("base-color-stone", "theme-color-blue", "chart-color-blue"):
+            with self.subTest(swatch=swatch):
+                self.assertIn(
+                    f'[data-moo-catalog-theme-builder-swatch="{swatch}"] '
+                    ".dropdown-item-check__indicator",
+                    variant_styles,
+                )
         self.assertIn(
             'data-moo-catalog-theme-builder-swatch="theme-color-blue"',
             styles,
@@ -913,8 +1000,8 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.5")
-        self.assertEqual(package["version"], "1.0.0-rc.6")
+        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.6")
+        self.assertEqual(package["version"], "1.0.0-rc.7")
         self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
@@ -1271,6 +1358,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("0/450", page)
         self.assertNotIn("rc5-component-matrix", page)
 
+    def test_rc7_acceptance_portal_uses_separate_release_state(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rc7_path = DIST / "acceptance/rc7/index.html"
+        self.assertTrue(rc7_path.exists(), "RC.7 needs its own acceptance route")
+        page = rc7_path.read_text(encoding="utf-8")
+
+        self.assertIn("1.0.0-rc.7", page)
+        self.assertIn('data-moo-acceptance-key="rc7-component-matrix"', page)
+        self.assertIn("0/450", page)
+        self.assertNotIn("rc6-component-matrix", page)
+
     def test_certification_fixtures_get_build_time_pagination(self) -> None:
         source = (
             ROOT / "tests/fixtures/certification/accordion.html"
@@ -1393,6 +1493,19 @@ class CatalogContractTests(CatalogTestCase):
                             ".btn-close",
                             source.replace(".alert-dismissible .btn-close", ""),
                         )
+                        continue
+                    if component == "dialog" and class_name == "btn-close":
+                        self.assertIn(".modal-header:has(> .btn-close)", source)
+                        self.assertIn(
+                            ".modal-header:has(> .btn-close) > .btn-close",
+                            source,
+                        )
+                        dialog_close_rules = source.replace(
+                            ".modal-header:has(> .btn-close) > .btn-close", ""
+                        ).replace(
+                            ".modal-header:has(> .btn-close)", ""
+                        )
+                        self.assertNotIn(".btn-close", dialog_close_rules)
                         continue
                     self.assertTrue(
                         any(
@@ -1630,7 +1743,7 @@ class CatalogContractTests(CatalogTestCase):
 
         for contract in (
             'data-moo-shell="catalog"',
-            'class="sidebar-wrapper"',
+            'data-layout="app"',
             'id="catalog-sidebar"',
             'data-sidebar-trigger',
             "moo-catalog__search-trigger",
@@ -1730,7 +1843,7 @@ class CatalogContractTests(CatalogTestCase):
             1
         ].split("}", 1)[0]
         sidebar_toggle_match = re.search(
-            r"(?m)^\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
+            r"(?m)^(?:\.moo-catalog\s+)?\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
             catalog_scss,
         )
         self.assertIsNotNone(sidebar_toggle_match)
@@ -1751,7 +1864,7 @@ class CatalogContractTests(CatalogTestCase):
         catalog_scss = read_catalog_styles()
         shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
         header_match = re.search(
-            r"(?m)^\.moo-catalog__header\s*\{(?P<body>[^}]*)\}",
+            r"(?m)^\.moo-catalog > \.wrapper\[data-layout=\"app\"\] > \[data-slot=\"page\"\] > header\s*\{(?P<body>[^}]*)\}",
             catalog_scss,
         )
         self.assertIsNotNone(header_match)
@@ -1766,65 +1879,88 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_theme_toggle_persists_across_page_navigation(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        preview = (ROOT / "site/src/js/catalog/theme.js").read_text(encoding="utf-8")
 
         self.assertIn('<html lang="en" dir="ltr">', base)
         self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
-        self.assertIn('window.localStorage.getItem("moo:theme")', base)
-        self.assertIn("document.documentElement.dataset.bsTheme = storedTheme", base)
-        self.assertLess(
-            base.index('window.localStorage.getItem("moo:theme")'),
-            base.index('<meta name="description"'),
+        self.assertIn("<body>", base)
+        self.assertIn('<div class="moo-ui" data-bs-theme="{{ resolved_theme }}">', base)
+        self.assertIn(
+            "<script>{{ theme_prepaint_source }}</script>",
+            base,
         )
         self.assertLess(
-            base.index('window.localStorage.getItem("moo:theme")'),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
+            base.index('data-bs-theme="{{ resolved_theme }}"'),
+            base.index("theme_prepaint_source"),
         )
-        self.assertIn('const THEME_STORAGE_KEY = "moo:theme";', preview)
-        self.assertIn("view.localStorage.getItem(THEME_STORAGE_KEY)", preview)
-        self.assertIn("view.localStorage.setItem(THEME_STORAGE_KEY, theme)", preview)
+        self.assertLess(
+            base.index("theme_prepaint_source"),
+            base.index('href="#main-content"'),
+        )
+        self.assertNotIn('assets/js/theme-prepaint.js?', base)
+        self.assertNotIn("body.dataset.bsTheme", base)
+        self.assertNotIn("document.documentElement.dataset.bsTheme", base)
+        self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
+        self.assertNotIn("themeBuilderFirstPaint", base)
 
-    def test_catalog_uses_full_build_first_paint_tokens_without_catalog_prepaint(self) -> None:
+    def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+        include = (ROOT / "site/src/includes/catalog-theme-prepaint.html.jinja").read_text(
+            encoding="utf-8"
+        )
 
         self.assertNotIn("<style data-moo-catalog-prepaint", base)
         self.assertNotIn("<style data-moo-catalog-prepaint", catalog)
         self.assertNotIn("moo-ui-prepaint.css", base)
         self.assertNotIn("moo-ui-prepaint.css", catalog)
+        self.assertIn("catalog-prepaint.css", base)
+        self.assertIn("catalog-theme-prepaint.html.jinja", catalog)
+        self.assertIn("document.currentScript?.parentElement", include)
+        self.assertNotIn("document.documentElement", include)
+        self.assertNotIn("document.body", include)
+        self.assertNotIn("createElement(\"style\")", include)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("introduction/index.html")
         stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.min.css?v='
         catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.min.css?v='
+        prepaint_marker = '<link rel="stylesheet" href="../assets/css/catalog-prepaint.css?v='
         self.assertIn(stylesheet_marker, page)
         self.assertNotIn("moo-ui-prepaint.css", page)
+        self.assertIn(prepaint_marker, page)
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
+        self.assertLess(page.index(catalog_marker), page.index(prepaint_marker))
+        self.assertTrue((DIST / "assets/css/catalog-prepaint.css").is_file())
 
         full_build = self.read_output("assets/css/moo-ui.css")
-        body_index = full_build.index("body {")
-        for token in (
-            "--moo-border: #3f3f46;",
-            "--bs-border-color: var(--moo-border);",
-            "--moo-sidebar-border: var(--moo-border);",
-            "--moo-surface: #0a0a0a;",
-            "--bs-body-bg: var(--moo-surface);",
-        ):
-            with self.subTest(token=token):
-                self.assertLess(full_build.index(token), body_index)
-        self.assertNotIn("moo-catalog__", full_build[:body_index])
-        self.assertNotIn("--bs-card-border-color:", full_build[:body_index])
-        card_rule = full_build[full_build.rindex(".card {") :].split("\n}", 1)[0]
-        self.assertIn("--bs-card-border-color: var(--moo-border);", card_rule)
+        self.assertIn(".moo-ui[data-bs-theme] {", full_build)
+        self.assertIn('.moo-ui[data-bs-theme="dark"] {', full_build)
+        self.assertIn("body > .moo-ui[data-bs-theme] {", full_build)
+        self.assertNotIn("body[data-bs-theme]", full_build)
+        self.assertNotIn(":where(html, body)[data-bs-theme]", full_build)
+        self.assertNotIn("moo-catalog__", full_build)
+        self.assertIn(
+            '@scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {',
+            full_build,
+        )
+        self.assertIn(":scope[data-bs-theme=\"dark\"] .card {", full_build)
+
+    def test_base_defers_theme_builder_runtime_to_the_owner(self) -> None:
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+
+        style_marker = '<style id="moo-theme-builder-tokens"'
+        self.assertNotIn(style_marker, base)
+        self.assertNotIn("themeBuilderFirstPaint", base)
+        self.assertNotIn("document.documentElement.style.setProperty", base)
 
     def test_theme_toggle_icon_slot_centers_svg_inside_round_button(self) -> None:
         catalog_scss = read_catalog_styles()
         slot = catalog_scss.split(
-            ".moo-catalog__theme-toggle [data-moo-theme-icon] {",
+            ".moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon] {",
             1,
         )[1].split("}", 1)[0]
-        svg = catalog_scss.split(".moo-catalog__theme-toggle svg {", 1)[1].split(
+        svg = catalog_scss.split(".moo-catalog .moo-catalog__theme-toggle svg {", 1)[1].split(
             "}",
             1,
         )[0]
@@ -1832,12 +1968,21 @@ class CatalogContractTests(CatalogTestCase):
         for contract in ("display: none;", "width: 1rem;", "height: 1rem;"):
             with self.subTest(contract=contract):
                 self.assertIn(contract, slot)
+        self.assertNotIn("body[data-bs-theme]", catalog_scss)
         self.assertIn(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog__theme-toggle [data-moo-theme-icon="light"],',
+            '@scope (.moo-ui[data-bs-theme="light"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {',
             catalog_scss,
         )
         self.assertIn(
-            ':root[data-bs-theme="dark"] .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
+            ':scope .moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon="light"]',
+            catalog_scss,
+        )
+        self.assertIn(
+            '@scope (.moo-ui[data-bs-theme="dark"]) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {',
+            catalog_scss,
+        )
+        self.assertIn(
+            ':scope .moo-catalog .moo-catalog__theme-toggle [data-moo-theme-icon="dark"]',
             catalog_scss,
         )
         self.assertIn("display: inline-flex;", catalog_scss)
@@ -1852,57 +1997,88 @@ class CatalogContractTests(CatalogTestCase):
         )[0]
         self.assertNotIn("d-none", dark_icon)
 
-    def test_catalog_sidebar_persisted_state_handoff_runs_before_stylesheets(self) -> None:
+    def test_catalog_sidebar_persisted_state_handoff_runs_after_markup(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
+        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+            encoding="utf-8",
+        )
 
         handoff = 'document.documentElement.dataset.sidebarCatalogState'
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
-        self.assertIn(handoff, base)
-        self.assertLess(
-            base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css'),
-        )
-        self.assertLess(
-            base.index(handoff),
-            base.index('<link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css'),
-        )
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
+        self.assertNotIn(handoff, base)
+        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
+        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint)
 
-    def test_built_catalog_sidebar_persisted_state_handoff_is_in_head(self) -> None:
+    def test_built_catalog_prepaint_script_runs_after_catalog_markup(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
         page = self.read_output("introduction.html")
         head = page.split("</head>", 1)[0]
         handoff = "dataset.sidebarCatalogState"
-        self.assertIn(handoff, head)
-        self.assertLess(head.index(handoff), head.index("assets/css/moo-ui.min.css"))
-        self.assertLess(head.index(handoff), head.index("assets/css/catalog.min.css"))
+        self.assertNotIn(handoff, head)
+        self.assertNotIn('moo-sidebar:catalog-shell', head)
+        self.assertLess(page.index("</html>"), len(page))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
-        handoff_index = page.index("shell.dataset.sidebarState = state")
-        sidebar_index = page.index('<aside', handoff_index)
-        self.assertLess(wrapper_index, handoff_index)
-        self.assertLess(handoff_index, sidebar_index)
+        settings_index = page.index('id="catalog-settings"')
+        prepaint_index = page.index('assets/js/catalog-prepaint.js?')
+        bootstrap_index = page.index('assets/js/bootstrap.bundle.min.js?')
+        catalog_module_index = page.index('assets/js/catalog/index.js?')
+        self.assertLess(wrapper_index, prepaint_index)
+        self.assertLess(settings_index, prepaint_index)
+        self.assertLess(prepaint_index, bootstrap_index)
+        self.assertLess(prepaint_index, catalog_module_index)
+        self.assertNotIn("shell.dataset.sidebarState = state", page)
+        self.assertIn(
+            '<script src="../assets/js/catalog-prepaint.js?',
+            page,
+        )
+
+    def test_catalog_prepaint_script_is_not_inlined_in_catalog_markup(self) -> None:
+        catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(
+            encoding="utf-8",
+        )
+        self.assertIn(
+            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            catalog,
+        )
+        self.assertNotIn("dataset.sidebarCatalogState", catalog)
+        self.assertNotIn("window.localStorage", catalog)
 
     def test_catalog_light_sidebar_base_color_reaches_shell_surface(self) -> None:
         catalog_scss = read_catalog_styles()
         wrapper = catalog_scss.split(
-            ".moo-catalog > .sidebar-wrapper {",
+            '.moo-catalog > .wrapper[data-layout="app"] {',
             1,
         )[1].split("}", 1)[0]
-        light_wrapper = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper {',
-            1,
-        )[1].split("}", 1)[0]
-        light_inner = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper .sidebar-inner {',
-            1,
-        )[1].split("}", 1)[0]
-        light_inset = catalog_scss.split(
-            ':root:not([data-bs-theme="dark"]) .moo-catalog > .sidebar-wrapper:has(.sidebar[data-variant="inset"]) {',
-            1,
-        )[1].split("}", 1)[0]
+        light_scope = (
+            '@scope (.moo-ui[data-bs-theme="light"]) '
+            'to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {'
+        )
+        sidebar_scope_start = catalog_scss.rindex(light_scope)
+
+        def scoped_rule(selector: str) -> str:
+            match = re.search(
+                rf"{re.escape(selector)}\s*\{{(?P<body>[^}}]*)\}}",
+                catalog_scss[sidebar_scope_start:],
+            )
+            self.assertIsNotNone(match, selector)
+            assert match is not None
+            return match.group("body")
+
+        light_wrapper = scoped_rule(
+            ':scope .moo-catalog > .wrapper[data-layout="app"]'
+        )
+        light_inner = scoped_rule(
+            ':scope .moo-catalog > .wrapper[data-layout="app"] .sidebar-inner'
+        )
+        light_inset = scoped_rule(
+            ':scope .moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"])'
+        )
 
         self.assertIn("--moo-catalog-sidebar-bg: var(--moo-sidebar);", wrapper)
+        self.assertNotIn("body:not([data-bs-theme=\"dark\"])", catalog_scss)
+        self.assertGreater(catalog_scss.index(light_scope), 0)
         self.assertIn(
             "--moo-catalog-sidebar-bg: color-mix(in srgb, var(--moo-sidebar) 70%, var(--bs-secondary-bg));",
             light_wrapper,
@@ -1924,9 +2100,15 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         index = self.read_output("index.html")
-        header_start = index.index('<header class="moo-catalog__header">')
+        header_start = index.index("<header")
         header_end = index.index("</header>", header_start)
         header = index[header_start:header_end]
+
+        self.assertRegex(
+            header,
+            r'<header>\s*<div class="container-fluid">\s*'
+            r'<nav class="navbar moo-catalog__navbar',
+        )
 
         for href in (
             'href="introduction/"',
@@ -1954,27 +2136,51 @@ class CatalogContractTests(CatalogTestCase):
         home_index = sidebar.index('href="./"')
         docs_index = sidebar.index('href="introduction/"')
         installation_index = sidebar.index('href="installation/"')
+        layout_index = sidebar.index('href="layout/"')
         catalog_index = sidebar.index(">Catalog<")
+        resources_index = sidebar.index(">Resources<")
         examples_index = sidebar.index('href="examples/"')
         components_index = sidebar.index('data-bs-target="#shell-components-menu"')
         blocks_index = sidebar.index('href="blocks/"')
         charts_index = sidebar.index('href="charts/"')
         utilities_index = sidebar.index('href="utils/scroll-fade/"')
-        resources_index = sidebar.index(">Resources<")
 
         self.assertLess(home_index, docs_index)
         self.assertLess(docs_index, installation_index)
-        self.assertLess(installation_index, catalog_index)
+        self.assertLess(installation_index, layout_index)
+        self.assertLess(layout_index, catalog_index)
         self.assertLess(catalog_index, examples_index)
         self.assertLess(examples_index, components_index)
-        self.assertLess(components_index, blocks_index)
         self.assertLess(blocks_index, charts_index)
         self.assertLess(charts_index, utilities_index)
         self.assertLess(utilities_index, resources_index)
         self.assertIn(">Introduction<", sidebar)
         self.assertIn(">Getting Started<", sidebar)
         self.assertIn(">Catalog<", sidebar)
+        self.assertNotIn('sidebar-group-label" data-slot="sidebar-group-label">Layout<', sidebar)
         self.assertIn(">Resources<", sidebar)
+        getting_started_group = sidebar[:catalog_index]
+        catalog_group = sidebar[catalog_index:resources_index]
+        resource_group = sidebar[resources_index:]
+        self.assertIn('href="layout/"', getting_started_group)
+        self.assertEqual(getting_started_group.count('href="layout/"'), 1)
+        self.assertNotIn('href="layout/"', catalog_group)
+        self.assertNotIn('href="layouts/"', resource_group)
+
+    def test_catalog_examples_keep_bootstrap_native_layout_classes(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        examples_index = self.read_output("examples/index.html")
+        sign_in = self.read_output("examples/auth/sign-in/index.html")
+        profile = self.read_output("examples/settings/profile/index.html")
+
+        self.assertIn("d-grid gap-4", examples_index)
+        self.assertIn('class="d-flex align-items-center justify-content-between"', sign_in)
+        self.assertIn("d-grid gap-4", sign_in)
+        self.assertIn("d-grid gap-4", profile)
+        self.assertNotIn("bootstrap-grid", examples_index)
+        self.assertNotIn("moo-grid", examples_index)
 
     def test_home_page_introduces_the_product_and_links_to_components(
         self,
@@ -2027,6 +2233,19 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-component-row moo-home-component-row--1",
             home,
         )
+        self.assertIn(
+            'class="moo-home-component-row moo-home-component-row--2"',
+            home,
+        )
+        self.assertIn('class="moo-home-hero"', home)
+        self.assertRegex(
+            home,
+            r'<main id="main-content"[^>]*>\s*'
+            r'<div class="container-xl">\s*'
+            r'<div class="row gx-0">\s*'
+            r'<div class="col px-md-5">',
+        )
+        self.assertNotIn("moo-catalog__content", home)
         self.assertIn('href="installation/"', home)
         self.assertIn('href="components/"', home)
         self.assertIn('href="components/button/"', home)
@@ -2176,6 +2395,31 @@ class CatalogContractTests(CatalogTestCase):
         introduction = self.read_output("introduction.html")
         self.assertIn("moo-component-header__actions", introduction)
 
+    def test_catalog_pages_share_the_native_xl_container_contract(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        for path in (
+            "index.html",
+            "introduction.html",
+            "installation.html",
+            "support.html",
+            "components/index.html",
+            "components/accordion.html",
+            "blocks/index.html",
+            "examples/index.html",
+        ):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                self.assertRegex(
+                    page,
+                    r'<main id="main-content"[^>]*>\s*'
+                    r'<div class="container-xl">\s*'
+                    r'<div class="row gx-0">\s*'
+                    r'<div class="col px-md-5">',
+                )
+
     def test_section_pages_render_page_actions_and_pagination(self) -> None:
         result = self.run_build()
 
@@ -2197,8 +2441,14 @@ class CatalogContractTests(CatalogTestCase):
 
         installation = self.read_output("installation.html")
         self.assertIn('aria-label="Previous page: Introduction"', installation)
-        self.assertIn('aria-label="Next page: Examples"', installation)
-        self.assertIn('href="../examples/"', installation)
+        self.assertIn('aria-label="Next page: Layout"', installation)
+        self.assertIn('href="../layout/"', installation)
+
+        layout = self.read_output("layout/index.html")
+        self.assertIn('aria-label="Previous page: Installation"', layout)
+        self.assertIn('aria-label="Next page: Examples"', layout)
+        self.assertIn('href="../installation/"', layout)
+        self.assertIn('href="../examples/"', layout)
 
         examples = self.read_output("examples/index.html")
         examples_header_start = examples.index('<header class="moo-component-header')
@@ -2208,12 +2458,16 @@ class CatalogContractTests(CatalogTestCase):
         self.assert_page_actions_region(examples_header)
         self.assertIn('aria-label="Next page: All Components"', examples_header)
         self.assertIn('href="../components/"', examples_header)
-        examples_pagination = examples.rsplit(
-            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
-            1,
-        )[1]
-        self.assertIn('href="../installation/"', examples_pagination)
-        self.assertIn("Installation", examples_pagination)
+        examples_pagination_match = re.search(
+            r'<nav class="moo-doc-pagination" aria-label="Docs pagination">'
+            r'(?P<body>.*?)</nav>',
+            examples,
+            re.S,
+        )
+        self.assertIsNotNone(examples_pagination_match)
+        examples_pagination = examples_pagination_match.group("body")
+        self.assertIn('href="../layout/"', examples_pagination)
+        self.assertIn("Layout", examples_pagination)
         self.assertIn('href="../components/"', examples_pagination)
         self.assertIn("All Components", examples_pagination)
         self.assertNotIn('href="../examples/dashboard/users/"', examples_pagination)
@@ -2242,10 +2496,14 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('href="../examples/"', components_header)
         self.assertIn('aria-label="Next page: Accordion"', components_header)
         self.assertNotIn('aria-label="Previous page: Users"', components_header)
-        components_pagination = components.rsplit(
-            '<nav class="moo-doc-pagination" aria-label="Docs pagination">',
-            1,
-        )[1]
+        components_pagination_match = re.search(
+            r'<nav class="moo-doc-pagination" aria-label="Docs pagination">'
+            r'(?P<body>.*?)</nav>',
+            components,
+            re.S,
+        )
+        self.assertIsNotNone(components_pagination_match)
+        components_pagination = components_pagination_match.group("body")
         self.assertIn('href="../examples/"', components_pagination)
         self.assertIn("Examples", components_pagination)
         self.assertIn('href="../components/accordion/"', components_pagination)
@@ -2392,14 +2650,16 @@ class CatalogContractTests(CatalogTestCase):
         for path, component_slugs in expected_footer_components.items():
             with self.subTest(path=path):
                 page = self.read_output(path)
-                content_start = page.index('<div class="moo-catalog__content">')
-                main_end = page.index("</main>", content_start)
+                main_start = page.index('<main id="main-content"')
+                main_end = page.index("</main>", main_start)
                 footer_start = page.index('<footer class="moo-examples-footer')
+                footer_end = page.index("</footer>", footer_start) + len("</footer>")
+                footer_surface = page[footer_start:footer_end]
 
                 self.assertGreater(footer_start, main_end)
                 self.assertNotIn(
                     '<footer class="moo-examples-footer',
-                    page[content_start:main_end],
+                    page[main_start:main_end],
                 )
                 self.assertEqual(page.count("data-moo-codepen-form"), 1)
                 self.assertIn("Open in CodePen", page[footer_start:])
@@ -2560,7 +2820,7 @@ class CatalogContractTests(CatalogTestCase):
                 )
 
                 expected_labels = {registry[slug]["label"] for slug in component_slugs}
-                for surface in (page[footer_start:], payload["html"]):
+                for surface in (footer_surface, payload["html"]):
                     link_parser = LinkParser()
                     link_parser.feed(surface)
                     if path == "examples/dashboard/users.html":
@@ -2839,14 +3099,17 @@ class CatalogContractTests(CatalogTestCase):
 
         css = self.read_output("assets/css/catalog.css")
         self.assertIn(".moo-doc-layout", css)
+        self.assertIn(".moo-doc-layout--wide", css)
+        self.assertIn("padding-block: 3rem 5rem;", css)
         self.assertIn("@media (min-width: 1200px)", css)
         self.assertIn("--moo-doc-toc-offset: calc(2rem + 5px)", css)
         self.assertNotIn("scroll-behavior: smooth", css)
         self.assertIn("@media (prefers-reduced-motion: reduce)", css)
         self.assertRegex(
             css,
-            r"\.moo-catalog__main\s*\{\s*scroll-behavior: auto;",
+            r'\.moo-catalog > \.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*\{',
         )
+        self.assertNotIn(".moo-catalog__main", css)
         self.assertRegex(
             css,
             r"\.moo-doc-toc\s*\{\s*position: sticky;\s*top: var\(--moo-doc-toc-offset\);",
@@ -2990,6 +3253,16 @@ class CatalogContractTests(CatalogTestCase):
             'import Sidebar from "@wpmoo/ui/sidebar.js"',
             installation_text,
         )
+        self.assertGreaterEqual(
+            installation_text.count(
+                "[data-layout=\"app\"][data-slot=\"sidebar-wrapper\"]"
+            ),
+            2,
+        )
+        self.assertNotIn(
+            "querySelector('[data-slot=\"sidebar-wrapper\"]')",
+            installation_text,
+        )
         self.assertIn(
             'import Chart from "@wpmoo/ui/chart.js"',
             installation_text,
@@ -3091,7 +3364,11 @@ class CatalogContractTests(CatalogTestCase):
             readme,
         )
         self.assertIn(
-            "The published RC5 package remains the CDN baseline",
+            "The published RC6 package remains the CDN baseline",
+            " ".join(readme.split()),
+        )
+        self.assertIn(
+            "until the RC7 npm tag exists",
             " ".join(readme.split()),
         )
         self.assertIn("Try it in 30 seconds", readme)
@@ -3150,10 +3427,14 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn(f"<code>{entrypoint}</code>", support)
         self.assertRegex(
             support,
-            r"<th scope=\"row\">Metadata</th>\s*"
-            r"<td>\s*<code>@wpmoo/ui/certification\.json</code>,\s*"
-            r"<code>@wpmoo/ui/package\.json</code>\s*</td>",
+            r"<tr><th scope=\"col\">SASS</th></tr>",
         )
+        self.assertNotIn('<th scope="row">Sass</th>', support)
+        self.assertRegex(
+            support,
+            r"<tr><th scope=\"col\">METADATA</th></tr>",
+        )
+        self.assertNotIn('<th scope="row">Metadata</th>', support)
         self.assertIn("metadata", certification["publicEntrypoints"])
         for entrypoint in certification["publicEntrypoints"]["metadata"]:
             with self.subTest(metadata_entrypoint=entrypoint):
@@ -3180,6 +3461,7 @@ class CatalogContractTests(CatalogTestCase):
         utilities = site_build.load_utilities()
         blocks = site_build.load_blocks()
         examples = site_build.load_examples()
+        layouts = site_build.load_layouts()
         product = json.loads(json.dumps(site_build.load_product_facts()))
         product["certification"]["publicEntrypoints"].pop("metadata", None)
         component_ownership = site_build.derive_component_ownership(
@@ -3202,6 +3484,7 @@ class CatalogContractTests(CatalogTestCase):
             catalog,
             utilities,
             blocks,
+            layouts,
         )
 
         rendered = environment.get_template("pages/support.html.jinja").render(
@@ -3218,6 +3501,7 @@ class CatalogContractTests(CatalogTestCase):
                 utilities,
                 blocks,
                 examples,
+                layouts,
             ),
             current_section="sections",
             current_slug=metadata["slug"],
@@ -3226,7 +3510,9 @@ class CatalogContractTests(CatalogTestCase):
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version="test",
-            theme_builder_first_paint=site_build.theme_builder_first_paint_payload(),
+            theme_builder_prepaint=site_build.catalog_prepaint_config(
+                site_build.theme_builder_first_paint_payload()
+            ),
         )
 
         self.assertIn("No public metadata entrypoints yet", rendered)
@@ -3776,11 +4062,193 @@ class CatalogContractTests(CatalogTestCase):
             "installation/",
             "components/",
             "blocks/",
+            "layout/",
             "skills/",
             "changelog/",
         ):
             with self.subTest(href=href):
                 self.assertIn(f'href="{href}"', home)
+
+    def test_layout_catalog_is_public_and_separate_from_components(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        layouts = site_build.load_layouts()
+        catalog = site_build.load_catalog()
+        sections = site_build.load_entries(site_build.SITE_REGISTRY, "sections.json")
+        utilities = site_build.load_utilities()
+        blocks = site_build.load_blocks()
+        examples = site_build.load_examples()
+        site_pages = site_build.build_site_pages(
+            sections,
+            catalog,
+            utilities,
+            blocks,
+            examples,
+            layouts,
+        )
+
+        self.assertEqual({entry["slug"] for entry in layouts}, {"app", "page"})
+        self.assertNotIn("app", {entry["slug"] for entry in catalog})
+        self.assertNotIn("page", {entry["slug"] for entry in catalog})
+        layout_pages = {
+            entry["slug"]: entry
+            for entry in site_pages
+            if entry.get("kind") == "layout"
+        }
+        self.assertEqual(layout_pages, {})
+        self.assertIn(
+            {"slug": "layout", "label": "Layout", "href": "layout/", "kind": "doc", "icon": "layout-dashboard"},
+            site_pages,
+        )
+
+        public_paths = site_build.public_page_paths(layouts)
+        public_urls = site_build.public_canonical_urls(layouts)
+        self.assertIn("layout.html", public_paths)
+        self.assertNotIn("layouts/index.html", public_paths)
+        self.assertNotIn("layouts/app.html", public_paths)
+        self.assertNotIn("layouts/page.html", public_paths)
+        self.assertIn("https://ui.wpmoo.org/layout/", public_urls)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/", public_urls)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/app/", public_urls)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/page/", public_urls)
+        self.assertNotIn("layouts/previews/app-sidebar.html", public_paths)
+        self.assertNotIn("layouts/previews/app-none.html", public_paths)
+        self.assertNotIn("layouts/previews/page.html", public_paths)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/previews/", public_urls)
+
+        home = self.read_output("index.html")
+        self.assertIn('href="layout/"', home)
+        command_start = home.index('id="catalog-command"')
+        command_end = home.index('</div>\n        <p class="moo-catalog__command-empty"', command_start)
+        command_palette = home[command_start:command_end]
+        self.assertIn('href="layout/"', command_palette)
+        self.assertNotIn('href="layouts/', command_palette)
+        for legacy in (
+            DIST / "layouts/index.html",
+            DIST / "layouts/app/index.html",
+            DIST / "layouts/page/index.html",
+        ):
+            with self.subTest(removed_route=legacy.relative_to(DIST)):
+                self.assertFalse(legacy.exists())
+
+        preview_outputs = {
+            "app-sidebar": self.read_output("layouts/previews/app-sidebar.html"),
+            "app-none": self.read_output("layouts/previews/app-none.html"),
+            "page": self.read_output("layouts/previews/page.html"),
+        }
+        app_preview = preview_outputs["app-sidebar"]
+        none_preview = preview_outputs["app-none"]
+        page_preview = preview_outputs["page"]
+        self.assertIn('data-layout="app"', app_preview)
+        self.assertIn('class="wrapper"', app_preview)
+        self.assertNotIn('class="sidebar-wrapper"', app_preview)
+        self.assertIn('data-slot="sidebar"', app_preview)
+        self.assertIn('data-slot="page"', app_preview)
+        self.assertIn('id="layout-preview-sidebar"', app_preview)
+        self.assertIn('data-collapsible="icon"', app_preview)
+        self.assertIn("Moo Portal", app_preview)
+        self.assertIn("Portal Operations", app_preview)
+        self.assertIn('data-slot="sidebar-menu-badge"', app_preview)
+        self.assertIn("sidebar-account-menu", app_preview)
+        self.assertNotIn('class="skeleton placeholder-glow"', app_preview)
+        self.assertIn('data-layout="app"', none_preview)
+        self.assertIn('class="wrapper"', none_preview)
+        self.assertNotIn('class="sidebar-wrapper"', none_preview)
+        self.assertIn('data-slot="page"', none_preview)
+        self.assertNotIn('data-slot="sidebar"', none_preview)
+        self.assertGreaterEqual(none_preview.count('class="skeleton placeholder-glow"'), 8)
+        self.assertIn('data-slot="page"', page_preview)
+        for name, preview in preview_outputs.items():
+            with self.subTest(preview=name):
+                self.assertEqual(preview.count("<main"), 1)
+                self.assertEqual(preview.count('id="main-content"'), 1)
+                self.assertNotIn("sidebar_provider", preview)
+                self.assertNotIn("sidebar_inset", preview)
+                self.assertIn('class="moo-layout-preview"', preview)
+
+        preview_metadata = site_build.page_metadata(
+            ROOT / "site/src/pages/layouts/previews/page.html.jinja",
+            Path("layouts/previews/page.html"),
+            sections,
+            catalog,
+            utilities,
+            blocks,
+            layouts,
+        )
+        self.assertEqual(preview_metadata["kind"], "preview")
+
+        catalog_styles = read_catalog_styles()
+        block_preview_style = re.search(
+            r"\.moo-block-preview\s*\{(?P<body>[^}]*)\}", catalog_styles
+        )
+        self.assertIsNotNone(block_preview_style)
+        self.assertIn("min-width: 0;", block_preview_style.group("body"))
+        self.assertIn("max-width: 100%;", block_preview_style.group("body"))
+        doc_page_style = re.search(
+            r"\.moo-doc-page\s*\{(?P<body>[^}]*)\}", catalog_styles
+        )
+        self.assertIsNotNone(doc_page_style)
+        self.assertIn("min-width: 0;", doc_page_style.group("body"))
+        self.assertNotRegex(
+            catalog_styles,
+            r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]",
+        )
+        sidebar_styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+            encoding="utf-8"
+        )
+        app_root_style = re.search(
+            r"\.wrapper\[data-layout=\"app\"\]\s*\{(?P<body>[^}]*)\}",
+            sidebar_styles,
+        )
+        self.assertIsNotNone(app_root_style)
+        self.assertIn("display: flex;", app_root_style.group("body"))
+        self.assertIn("height: 100svh;", app_root_style.group("body"))
+
+        sitemap = (DIST / "sitemap.xml").read_text(encoding="utf-8")
+        self.assertIn("https://ui.wpmoo.org/layout/", sitemap)
+        self.assertNotIn("https://ui.wpmoo.org/layouts/", sitemap)
+
+        self.assertFalse((DIST / "_redirects").exists())
+
+    def test_layout_guide_is_the_single_catalog_entry_without_legacy_routes(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home = self.read_output("index.html")
+        guide = self.read_output("layout/index.html")
+        sidebar_start = home.index('id="catalog-sidebar"')
+        sidebar_end = home.index("</aside>", sidebar_start)
+        sidebar = home[sidebar_start:sidebar_end]
+
+        self.assertIn('href="layout/"', sidebar)
+        self.assertIn(">Layout<", sidebar)
+        self.assertNotIn('href="layouts/"', sidebar)
+        self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layout/">', guide)
+        for anchor in ("app", "sidebar", "page", "breakpoints", "containers"):
+            with self.subTest(anchor=anchor):
+                self.assertIn(f'id="{anchor}"', guide)
+        self.assertNotRegex(
+            guide,
+            r'<section[^>]*class="[^"\n]*\bmt-5\b',
+            "Layout guide sections should rely on the shared document-grid gap",
+        )
+        self.assertNotRegex(
+            guide,
+            r'<table[^>]*class="[^"\n]*\bmb-4\b',
+            "Layout guide tables should not add a trailing Bootstrap margin",
+        )
+        for legacy in (
+            DIST / "layouts/index.html",
+            DIST / "layouts/app/index.html",
+            DIST / "layouts/page/index.html",
+        ):
+            with self.subTest(removed_route=legacy.relative_to(DIST)):
+                self.assertFalse(legacy.exists())
+        self.assertIn('aria-label="Previous page: Installation"', guide)
+        self.assertIn('aria-label="Next page: Examples"', guide)
+        self.assertIn('href="../installation/"', guide)
+        self.assertIn('href="../examples/"', guide)
 
     def test_elevation_and_radius_scales_are_shared_ui_wide(self) -> None:
         result = self.run_build()

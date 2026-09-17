@@ -34,8 +34,20 @@ PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST = {
         "data-moo-catalog-view",
     },
 }
-ACTIVE_RC3_PLAN_DOCS = (
-    PROJECT_DOCS_ROOT / "plans/2026-08-17-chart-datepicker-slider-1-0-0-rc3.md",
+PRIVATE_OWNER_FIXTURE_HOOKS = {
+    "data-moo-direction-key",
+    "data-moo-overlay-portal-host",
+    "data-moo-theme-key",
+}
+ACTIVE_COMPONENT_PLAN_DOCS = tuple(
+    sorted(
+        (
+            path
+            for path in (PROJECT_DOCS_ROOT / "plans").glob("*.md")
+            if path.name != "PLAN.md"
+        ),
+        key=lambda path: path.name,
+    )
 )
 
 
@@ -53,7 +65,9 @@ class CertificationContractTests(unittest.TestCase):
                     continue
                 source = path.read_text(encoding="utf-8")
                 relative = path.relative_to(ROOT).as_posix()
-                allowed = PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST.get(relative, set())
+                allowed = set(PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST.get(relative, set()))
+                if relative.startswith("conformance/fixtures/"):
+                    allowed.update(PRIVATE_OWNER_FIXTURE_HOOKS)
                 matches = sorted(
                     set(BANNED_PUBLIC_MOO_COMPONENT_HOOK.findall(source)) - allowed
                 )
@@ -66,7 +80,21 @@ class CertificationContractTests(unittest.TestCase):
             "Public component hooks must use component-owned data-* contracts.",
         )
 
-    def test_active_rc3_plan_docs_match_current_public_component_contracts(self) -> None:
+    def test_active_component_plan_docs_are_live_root_documents(self) -> None:
+        if not PROJECT_DOCS_ROOT.is_dir():
+            self.skipTest("UI project docs are not mounted in this checkout")
+
+        active_plans_root = PROJECT_DOCS_ROOT / "plans"
+        self.assertTrue(ACTIVE_COMPONENT_PLAN_DOCS)
+        self.assertTrue(
+            all(
+                path.is_file() and path.parent == active_plans_root
+                for path in ACTIVE_COMPONENT_PLAN_DOCS
+            ),
+            "Only live root plan documents may be checked as active contracts.",
+        )
+
+    def test_active_plan_docs_match_current_public_component_contracts(self) -> None:
         if not PROJECT_DOCS_ROOT.is_dir():
             self.skipTest("UI project docs are not mounted in this checkout")
 
@@ -76,7 +104,7 @@ class CertificationContractTests(unittest.TestCase):
             "data-moo-slider",
             "vanillajs-datepicker",
         )
-        for path in ACTIVE_RC3_PLAN_DOCS:
+        for path in ACTIVE_COMPONENT_PLAN_DOCS:
             source = path.read_text(encoding="utf-8")
             relative = path.relative_to(PROJECT_DOCS_ROOT).as_posix()
             for pattern in banned_patterns:
@@ -86,7 +114,7 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(
             stale_claims,
             [],
-            "Active RC.3 plan docs must match the current public component contracts.",
+            "Active plan docs must match the current public component contracts.",
         )
 
     def test_toast_public_wiring_hooks_are_recorded_in_component_contract(self) -> None:
@@ -1003,15 +1031,12 @@ class CertificationContractTests(unittest.TestCase):
         )
 
     def test_rc6_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.6 freeze against the live package surface."""
+        """Validate the historical 1.0.0-rc.6 freeze inventory."""
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.6.json")
         rc5_freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.5.json")
         package = self._read_json("package.json")
-        certification = self._read_json("certification.json")
 
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.6")
-        self.assertEqual(freeze["freezeVersion"], package["version"])
-        self.assertEqual(freeze["freezeVersion"], certification["coreVersion"])
         self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
         self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
 
@@ -1035,6 +1060,45 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(
             freeze["certificationManifest"],
             rc5_freeze["certificationManifest"],
+        )
+        self.assertIn(
+            "docs/contracts/PACKAGE_SURFACE_DECISIONS.md",
+            freeze["description"],
+        )
+
+    def test_rc7_api_freeze_declaration_is_well_formed(self) -> None:
+        """Validate the 1.0.0-rc.7 freeze against the live package surface."""
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.7.json")
+        rc6_freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.6.json")
+        package = self._read_json("package.json")
+        certification = self._read_json("certification.json")
+
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.7")
+        self.assertEqual(freeze["freezeVersion"], package["version"])
+        self.assertEqual(freeze["freezeVersion"], certification["coreVersion"])
+        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+
+        import re
+        config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
+        declared_vars = set(
+            re.findall(
+                r'^(\$[\w-]+)\s*:\s*[^;]*!default\s*;',
+                config_source,
+                re.MULTILINE,
+            )
+        )
+        self.assertEqual(set(freeze["sassFacadeAllowList"]), declared_vars)
+        self.assertEqual(freeze["bootstrapSupport"], rc6_freeze["bootstrapSupport"])
+        self.assertEqual(freeze["esmModules"], rc6_freeze["esmModules"])
+        self.assertEqual(
+            freeze["metadataEntrypoints"],
+            rc6_freeze["metadataEntrypoints"],
+        )
+        self.assertEqual(freeze["artifactVariants"], rc6_freeze["artifactVariants"])
+        self.assertEqual(
+            freeze["certificationManifest"],
+            rc6_freeze["certificationManifest"],
         )
         self.assertIn(
             "docs/contracts/PACKAGE_SURFACE_DECISIONS.md",

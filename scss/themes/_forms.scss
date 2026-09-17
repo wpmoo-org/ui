@@ -1,0 +1,15 @@
+:scope[data-bs-theme="light"] .form-select {
+  --#{$prefix}form-select-bg-img: #{escape-svg($form-select-indicator)};
+}
+
+:scope[data-bs-theme="dark"] .form-select {
+  --#{$prefix}form-select-bg-img: #{escape-svg($form-select-indicator-dark)};
+}
+
+:scope[data-bs-theme="light"] .form-switch .form-check-input:not(:checked):not(:focus) {
+  --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image)};
+}
+
+:scope[data-bs-theme="dark"] .form-switch .form-check-input:not(:checked):not(:focus) {
+  --#{$prefix}form-switch-bg: #{escape-svg($form-switch-bg-image-dark)};
+}
