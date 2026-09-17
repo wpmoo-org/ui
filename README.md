@@ -40,9 +40,8 @@ language needs to feel more current.
 - **Explicit runtime.** Optional Moo UI behavior loads through ESM entrypoints
   only when a component needs behavior Bootstrap does not provide.
 
-This branch prepares `@wpmoo/ui@1.0.0-rc.7` for release. The published RC6
-package remains the CDN baseline for catalog CodePen exports until the RC7 npm
-tag exists.
+The accepted `@wpmoo/ui@1.0.0-rc.7` package is the CDN baseline for catalog
+CodePen exports.
 
 ## Try It in 30 Seconds
 
