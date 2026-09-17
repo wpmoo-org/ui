@@ -1000,9 +1000,9 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.6")
+        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.7")
         self.assertEqual(package["version"], "1.0.0-rc.7")
-        self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
+        self.assertEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1429,7 +1429,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertIsNotNone(match)
         self.assertEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
-        self.assertNotEqual(match.group(1), package["version"])
+        self.assertEqual(match.group(1), package["version"])
 
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
@@ -3346,9 +3346,11 @@ class CatalogContractTests(CatalogTestCase):
         changelog = self.read_output("changelog.html")
 
         version = package["version"]
-        for surface in (readme, installation, support, skills, llms):
+        for surface in (installation, support, skills, llms):
             with self.subTest(surface=surface[:24]):
                 self.assertIn(f"@wpmoo/ui@{version}", surface)
+
+        self.assertIn(f"`{version}`", readme)
 
         self.assertIn(f"v{version}", changelog)
         self.assertIn(package["peerDependencies"]["bootstrap"], llms)
@@ -3359,18 +3361,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("| Export | Minified | Description |", readme)
         self.assertNotIn("The tarball also contains", readme)
         self.assertIn("Bootstrap markup. shadcn feel.", readme)
-        self.assertIn(
-            f"This branch prepares `@wpmoo/ui@{version}` for release.",
-            readme,
-        )
-        self.assertIn(
-            "The published RC6 package remains the CDN baseline",
-            " ".join(readme.split()),
-        )
-        self.assertIn(
-            "until the RC7 npm tag exists",
-            " ".join(readme.split()),
-        )
+        self.assertNotIn("CodePen exports", " ".join(readme.split()))
         self.assertIn("Try it in 30 seconds", readme)
         self.assertIn("Installation guide", readme)
         self.assertIn("Support & Evidence", readme)
