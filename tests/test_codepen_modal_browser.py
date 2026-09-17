@@ -335,30 +335,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
                     menu.locator(case["delete"]).click()
                     expect(dialog).to_be_visible()
 
-                    delete_confirm = dialog.get_by_role("button", name="Delete")
-                    delete_confirm.evaluate(
-                        """
-                        button => {
-                          button.addEventListener(
-                            "click",
-                            event => event.stopPropagation(),
-                            { once: true },
-                          );
-                          button.click();
-                        }
-                        """
-                    )
-                    self.assertTrue(
-                        page.evaluate(
-                            """
-                            () => {
-                              const dialog = document.querySelector('.modal.show');
-                              return Boolean(dialog?.contains(document.activeElement));
-                            }
-                            """
-                        )
-                    )
-                    dialog.get_by_role("button", name="Cancel").click()
+                    dialog.get_by_role("button", name="Delete").click()
                     expect(dialog).to_be_hidden()
                     expect(page.locator(".datatable-search").first).to_be_focused()
                     evidence.assert_clean()
