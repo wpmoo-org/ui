@@ -3353,7 +3353,10 @@ class CatalogContractTests(CatalogTestCase):
             "The published RC6 package remains the CDN baseline",
             " ".join(readme.split()),
         )
-        self.assertIn("until the RC7 npm tag exists", readme)
+        self.assertIn(
+            "until the RC7 npm tag exists",
+            " ".join(readme.split()),
+        )
         self.assertIn("Try it in 30 seconds", readme)
         self.assertIn("Installation guide", readme)
         self.assertIn("Support & Evidence", readme)
