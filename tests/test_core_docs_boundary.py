@@ -35,6 +35,8 @@ CORE_OUTPUTS = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
+    "dist/js/theme-prepaint.js",
+    "dist/release-manifest.json",
 }
 FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
 CORE_SOURCE_ROOTS = ("src", "scss")
@@ -133,6 +135,14 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             self.fixture["siteOutputs"][catalog_copy],
         )
 
+    def test_release_manifest_distribution_is_recorded_in_boundary_baseline(self) -> None:
+        package_copy = "dist/release-manifest.json"
+        public_copy = "site-dist/dist/release-manifest.json"
+
+        self.assertIn(package_copy, self.fixture["distFiles"])
+        self.assertIn(public_copy, self.fixture["siteDistFiles"])
+        self.assertIn(public_copy, self.fixture["siteOutputs"])
+
     def test_package_and_site_outputs_are_separate(self) -> None:
         package_dist = ROOT / "dist"
         site_dist = ROOT / "site-dist"
@@ -158,6 +168,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/datepicker.js",
             "js/datepicker.min.js",
             "js/theme-prepaint.js",
+            "release-manifest.json",
         }
         expected_site_files = {
             "index.html",
@@ -186,6 +197,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/chart.min.js",
             "js/datepicker.js",
             "js/datepicker.min.js",
+            "dist/release-manifest.json",
             "components/button/index.html",
             "blocks/sidebar-floating/index.html",
             "utils/scroll-fade/index.html",
@@ -436,7 +448,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0-rc.7")
+        self.assertEqual(package["version"], "1.0.0-rc.8")
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):

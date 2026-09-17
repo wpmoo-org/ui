@@ -30,6 +30,8 @@ APPROVED_TARBALL_FILES = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
+    "dist/js/theme-prepaint.js",
+    "dist/release-manifest.json",
     "scss/_components.scss",
     "scss/_config.scss",
     "scss/_settings.scss",

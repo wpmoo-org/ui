@@ -1001,8 +1001,8 @@ class CatalogContractTests(CatalogTestCase):
     def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.7")
-        self.assertEqual(package["version"], "1.0.0-rc.7")
-        self.assertEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
+        self.assertEqual(package["version"], "1.0.0-rc.8")
+        self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1417,7 +1417,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(component_lines, expected)
 
-    def test_llms_txt_cdn_example_tracks_published_package_version(self) -> None:
+    def test_llms_txt_cdn_example_tracks_active_package_version(self) -> None:
         package = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )
@@ -1428,8 +1428,8 @@ class CatalogContractTests(CatalogTestCase):
         )
 
         self.assertIsNotNone(match)
-        self.assertEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
         self.assertEqual(match.group(1), package["version"])
+        self.assertNotEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
 
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()

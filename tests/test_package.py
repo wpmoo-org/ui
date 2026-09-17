@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import shutil
@@ -98,6 +99,8 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
+    "dist/js/theme-prepaint.js",
+    "dist/release-manifest.json",
     "scss/*.scss",
     "scss/**/*.scss",
     "certification.json",
@@ -121,6 +124,8 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
     "./datepicker.min.js": "./dist/js/datepicker.min.js",
+    "./theme-prepaint.js": "./dist/js/theme-prepaint.js",
+    "./release-manifest.json": "./dist/release-manifest.json",
     "./scss/config": "./scss/_config.scss",
     "./scss/moo-ui": "./scss/moo-ui.scss",
     "./scss/moo-core": "./scss/moo-core.scss",
@@ -232,6 +237,21 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertNotIn("workspaces", package)
 
+    def test_rc8_candidate_declares_the_release_artifact_surface(self) -> None:
+        package = self._read_package()
+
+        self.assertEqual(package["version"], "1.0.0-rc.8")
+        self.assertEqual(
+            package["exports"]["./theme-prepaint.js"],
+            "./dist/js/theme-prepaint.js",
+        )
+        self.assertEqual(
+            package["exports"]["./release-manifest.json"],
+            "./dist/release-manifest.json",
+        )
+        self.assertIn("dist/js/theme-prepaint.js", package["files"])
+        self.assertIn("dist/release-manifest.json", package["files"])
+
     def test_root_package_exports_built_css_without_protected_images(self) -> None:
         package = self._read_package()
         files = package["files"]
@@ -318,6 +338,69 @@ class PackageMetadataTests(unittest.TestCase):
 
         self.assertEqual(package_files, EXPECTED_PACKAGE_OUTPUT_FILES)
 
+    def test_release_manifest_declares_exact_package_artifact_hashes(self) -> None:
+        manifest_path = PACKAGE_DIST / "release-manifest.json"
+        self.assertTrue(
+            manifest_path.is_file(),
+            "RC8 must build dist/release-manifest.json",
+        )
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(manifest["schemaVersion"], 1)
+        self.assertEqual(
+            manifest["package"],
+            {"name": "@wpmoo/ui", "version": "1.0.0-rc.8"},
+        )
+        self.assertEqual(
+            [entry["export"] for entry in manifest["artifacts"]],
+            ["./moo.css", "./moo-ui.css", "./theme-prepaint.js"],
+        )
+
+        seen_paths: set[str] = set()
+        for entry in manifest["artifacts"]:
+            relative = entry["path"]
+            with self.subTest(path=relative):
+                self.assertNotIn(relative, seen_paths)
+                seen_paths.add(relative)
+                self.assertFalse(Path(relative).is_absolute())
+                self.assertNotIn("\\", relative)
+                self.assertNotRegex(relative, r"(?:^|/)\.\.?(?:/|$)")
+                artifact = ROOT / relative
+                self.assertTrue(artifact.is_file(), relative)
+                self.assertRegex(entry["sha256"], r"^[0-9a-f]{64}$")
+                self.assertEqual(
+                    hashlib.sha256(artifact.read_bytes()).hexdigest(),
+                    entry["sha256"],
+                )
+
+    def test_release_manifest_hashes_match_raw_packed_member_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            pack_result = subprocess.run(
+                ["npm", "pack", "--json", "--pack-destination", temporary_directory],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=npm_env(),
+            )
+            self.assertEqual(pack_result.returncode, 0, pack_result.stderr)
+            tarball = Path(temporary_directory) / json.loads(pack_result.stdout)[0]["filename"]
+
+            with tarfile.open(tarball, mode="r:gz") as archive:
+                manifest_member = archive.getmember("package/dist/release-manifest.json")
+                manifest = json.loads(
+                    archive.extractfile(manifest_member).read().decode("utf-8")
+                )
+                for entry in manifest["artifacts"]:
+                    member_name = f"package/{entry['path']}"
+                    with self.subTest(member=member_name):
+                        member = archive.getmember(member_name)
+                        payload = archive.extractfile(member).read()
+                        self.assertEqual(
+                            hashlib.sha256(payload).hexdigest(),
+                            entry["sha256"],
+                        )
+
     def test_certification_preview_matches_package_metadata(self) -> None:
         package = self._read_package()
         certification = self._read_package("certification.json")
@@ -342,12 +425,21 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertFalse(
             certification["browserPolicy"]["exactEvidenceInAttestation"]
         )
+        self.assertEqual(
+            certification["publicEntrypoints"]["browser"],
+            ["./theme-prepaint.js"],
+        )
+        self.assertIn(
+            "./release-manifest.json",
+            certification["publicEntrypoints"]["metadata"],
+        )
         self.assertNotIn("sourceCommit", certification)
         self.assertNotIn("attestation", certification)
         self.assertEqual(
             set(certification["publicEntrypoints"]["css"])
             | set(certification["publicEntrypoints"]["esm"])
             | set(certification["publicEntrypoints"]["sass"])
+            | set(certification["publicEntrypoints"].get("browser", []))
             | set(certification["publicEntrypoints"]["metadata"]),
             set(package["exports"]),
         )

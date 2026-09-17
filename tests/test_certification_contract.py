@@ -803,8 +803,11 @@ class CertificationContractTests(unittest.TestCase):
         )
 
     def test_rc5_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.5 freeze document structure, metadata,
-        and exact package export/file equality against package.json."""
+        """Validate the historical 1.0.0-rc.5 freeze document structure.
+
+        Historical freezes remain removal guards while later release
+        candidates may add public exports and package files.
+        """
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.5.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
@@ -849,10 +852,13 @@ class CertificationContractTests(unittest.TestCase):
         public_entrypoints = schema["properties"]["publicEntrypoints"]
         self.assertIn("metadata", public_entrypoints["properties"])
         self.assertNotIn("metadata", public_entrypoints["required"])
+        self.assertIn("browser", public_entrypoints["properties"])
+        self.assertNotIn("browser", public_entrypoints["required"])
         metadata_entrypoints = freeze["metadataEntrypoints"]
-        self.assertEqual(
-            [entry["export"] for entry in metadata_entrypoints],
-            certification["publicEntrypoints"]["metadata"],
+        self.assertTrue(
+            {
+                entry["export"] for entry in metadata_entrypoints
+            }.issubset(set(certification["publicEntrypoints"]["metadata"])),
         )
         for entrypoint in metadata_entrypoints:
             with self.subTest(metadata_entrypoint=entrypoint["export"]):
@@ -905,12 +911,12 @@ class CertificationContractTests(unittest.TestCase):
                 record = next(m for m in freeze["esmModules"] if m["module"] == module)
                 self.assertEqual(record.get("lifecycle"), expected_lifecycle)
 
-        # Current RC package exports/files must include the documented new entrypoints
+        # Historical RC5 package exports/files must not be removed. Later RCs
+        # may add entrypoints while keeping this freeze as a removal guard.
         frozen_exports = set(freeze["packageExports"])
-        self.assertEqual(
-            frozen_exports,
-            set(package["exports"]),
-            "Current RC package export freeze diverged from package.json",
+        self.assertTrue(
+            frozen_exports.issubset(set(package["exports"])),
+            "RC5 frozen package exports were removed from package.json",
         )
         self.assertIn("./chart.js", frozen_exports)
         self.assertIn("./chart.min.js", frozen_exports)
@@ -923,10 +929,9 @@ class CertificationContractTests(unittest.TestCase):
         self.assertIn("./scss/settings", frozen_exports)
 
         frozen_files = set(freeze["packageFiles"])
-        self.assertEqual(
-            frozen_files,
-            set(package["files"]),
-            "Current RC package file freeze diverged from package.json",
+        self.assertTrue(
+            frozen_files.issubset(set(package["files"])),
+            "RC5 frozen package files were removed from package.json",
         )
         self.assertIn("dist/js/chart.js", frozen_files)
         self.assertIn("dist/js/chart.min.js", frozen_files)
@@ -1043,8 +1048,12 @@ class CertificationContractTests(unittest.TestCase):
         package = self._read_json("package.json")
 
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.6")
-        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
-        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        self.assertTrue(
+            set(freeze["packageExports"]).issubset(set(package["exports"]))
+        )
+        self.assertTrue(
+            set(freeze["packageFiles"]).issubset(set(package["files"]))
+        )
 
         import re
         config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
@@ -1073,17 +1082,21 @@ class CertificationContractTests(unittest.TestCase):
         )
 
     def test_rc7_api_freeze_declaration_is_well_formed(self) -> None:
-        """Validate the 1.0.0-rc.7 freeze against the live package surface."""
+        """Validate the historical 1.0.0-rc.7 freeze as a removal guard."""
         freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.7.json")
         rc6_freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.6.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
 
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.7")
-        self.assertEqual(freeze["freezeVersion"], package["version"])
-        self.assertEqual(freeze["freezeVersion"], certification["coreVersion"])
-        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
-        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        self.assertNotEqual(freeze["freezeVersion"], package["version"])
+        self.assertEqual(certification["coreVersion"], package["version"])
+        self.assertTrue(
+            set(freeze["packageExports"]).issubset(set(package["exports"]))
+        )
+        self.assertTrue(
+            set(freeze["packageFiles"]).issubset(set(package["files"]))
+        )
 
         import re
         config_source = (ROOT / "scss/_config.scss").read_text(encoding="utf-8")
@@ -1111,10 +1124,44 @@ class CertificationContractTests(unittest.TestCase):
             freeze["description"],
         )
 
+    def test_rc8_api_freeze_and_public_browser_surface_are_well_formed(self) -> None:
+        freeze_path = CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.8.json"
+        self.assertTrue(freeze_path.is_file(), "RC8 API freeze is missing")
+
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.8.json")
+        package = self._read_json("package.json")
+        certification = self._read_json("certification.json")
+        schema = self._read_json("src/certification/manifest.schema.json")
+        public_entrypoints = schema["properties"]["publicEntrypoints"]
+
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.8")
+        self.assertEqual(package["version"], "1.0.0-rc.8")
+        self.assertEqual(certification["coreVersion"], "1.0.0-rc.8")
+        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        self.assertIn("browser", public_entrypoints["properties"])
+        self.assertNotIn("browser", public_entrypoints["required"])
+        self.assertEqual(
+            certification["publicEntrypoints"]["browser"],
+            ["./theme-prepaint.js"],
+        )
+        self.assertIn(
+            "./release-manifest.json",
+            certification["publicEntrypoints"]["metadata"],
+        )
+        self.assertEqual(
+            [entry["export"] for entry in freeze["browserEntrypoints"]],
+            ["./theme-prepaint.js"],
+        )
+        self.assertEqual(
+            [entry["export"] for entry in freeze["metadataEntrypoints"]][-1],
+            "./release-manifest.json",
+        )
+
     def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:
         docstring = self.test_rc5_api_freeze_declaration_is_well_formed.__doc__ or ""
 
-        self.assertIn("exact package export/file equality", docstring)
+        self.assertIn("Historical freezes remain removal guards", docstring)
         self.assertNotIn("deferred", docstring)
 
     def test_rc3_manual_acceptance_export_is_recorded(self) -> None:

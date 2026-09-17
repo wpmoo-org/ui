@@ -111,6 +111,9 @@
         "sass": {
           "$ref": "#/$defs/packageExports"
         },
+        "browser": {
+          "$ref": "#/$defs/packageExports"
+        },
         "metadata": {
           "$ref": "#/$defs/packageExports"
         }

@@ -157,6 +157,11 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(package_prepaint.is_file())
         self.assertTrue(public_prepaint.is_file())
         self.assertEqual(public_prepaint.read_bytes(), package_prepaint.read_bytes())
+        package_manifest = PACKAGE_DIST / "release-manifest.json"
+        public_manifest = SITE_DIST / "dist/release-manifest.json"
+        self.assertTrue(package_manifest.is_file())
+        self.assertTrue(public_manifest.is_file())
+        self.assertEqual(public_manifest.read_bytes(), package_manifest.read_bytes())
         self.assertTrue(
             (SITE_DIST / "assets/js/theme-owner.js").is_file()
         )
@@ -406,6 +411,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             self.assertTrue((PACKAGE_DIST / "js/combobox.js").is_file())
             self.assertTrue((PACKAGE_DIST / "js/moo-ui.js").is_file())
             self.assertTrue((PACKAGE_DIST / "js/moo-ui.min.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/theme-prepaint.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "release-manifest.json").is_file())
             self.assertFalse(SITE_DIST.exists())
         finally:
             self.run_build()

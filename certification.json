@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "1.0.0-rc.7",
+  "coreVersion": "1.0.0-rc.8",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -40,9 +40,13 @@
       "./scss/components",
       "./scss/settings"
     ],
+    "browser": [
+      "./theme-prepaint.js"
+    ],
     "metadata": [
       "./certification.json",
-      "./package.json"
+      "./package.json",
+      "./release-manifest.json"
     ]
   },
   "supportPolicy": "https://github.com/wpmoo-org/ui/blob/main/SUPPORT.md"

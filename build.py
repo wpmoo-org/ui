@@ -80,6 +80,12 @@ PRESERVE_BUNDLED_CONSTRUCTOR_NAMES = {"sidebar.js", "datatable.js"}
 AGGREGATE_JS_MODULES = ("moo-ui.js",)
 PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
+RELEASE_MANIFEST_PATH = PACKAGE_DIST / "release-manifest.json"
+RELEASE_ARTIFACTS = (
+    ("./moo.css", "dist/assets/css/moo.css"),
+    ("./moo-ui.css", "dist/assets/css/moo-ui.css"),
+    ("./theme-prepaint.js", "dist/js/theme-prepaint.js"),
+)
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
 THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
@@ -1978,6 +1984,40 @@ def copy_package_js() -> None:
         _bundle_module(module_name, minify=True)
 
 
+def write_release_manifest() -> None:
+    """Write hashes for the deliberately small, adapter-facing artifact set."""
+
+    artifacts = []
+    for export, relative_path in RELEASE_ARTIFACTS:
+        path = ROOT / relative_path
+        if not path.is_file():
+            raise MissingCoreOutputsError(
+                "Release artifact is missing before manifest generation: "
+                + relative_path
+            )
+        artifacts.append(
+            {
+                "export": export,
+                "path": relative_path,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+        )
+
+    package = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))
+    payload = {
+        "schemaVersion": 1,
+        "package": {
+            "name": package["name"],
+            "version": package["version"],
+        },
+        "artifacts": artifacts,
+    }
+    RELEASE_MANIFEST_PATH.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def js_license_banner(module_name: str) -> str:
     package = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))
     homepage = package.get("homepage", "https://ui.wpmoo.org/")
@@ -2086,6 +2126,7 @@ def required_core_outputs() -> tuple[Path, ...]:
         outputs.append(PACKAGE_DIST / "js" / name)
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
     outputs.append(PACKAGE_DIST / "js" / "theme-prepaint.js")
+    outputs.append(RELEASE_MANIFEST_PATH)
     return tuple(outputs)
 
 
@@ -2204,6 +2245,7 @@ def copy_certification_fixtures_to_site() -> None:
     public_dist = SITE_DIST / "dist"
     shutil.copytree(PACKAGE_DIST / "assets", public_dist / "assets", dirs_exist_ok=True)
     shutil.copytree(PACKAGE_DIST / "js", public_dist / "js", dirs_exist_ok=True)
+    shutil.copy2(RELEASE_MANIFEST_PATH, public_dist / "release-manifest.json")
 
     public_bootstrap_js = SITE_DIST / "vendor/bootstrap/dist/js"
     public_bootstrap_js.mkdir(parents=True, exist_ok=True)
@@ -2538,6 +2580,7 @@ def build_core() -> None:
     PACKAGE_DIST.mkdir()
     compile_core_styles()
     copy_package_js()
+    write_release_manifest()
 
 
 def build_site() -> None:
