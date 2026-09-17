@@ -3351,6 +3351,14 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
+        self.assertIn("Server-resolved document", installation)
+        self.assertIn('data-moo-document-owner="true"', installation)
+        self.assertIn("Static or strict-CSP fallback", installation)
+        self.assertIn('src="/vendor/@wpmoo/ui/theme-prepaint.js"', installation_text)
+        self.assertIn(
+            "external fetch cannot guarantee zero flash",
+            normalized_installation_text,
+        )
         self.assertIn(
             "Because the aggregate includes the Chart module and its bundled "
             "Chart.js runtime",
@@ -3406,6 +3414,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("@wpmoo/ui/moo.css", readme)
         self.assertIn("@wpmoo/ui/moo-ui.js", readme)
         self.assertIn("MooUI.Combobox.getOrCreateInstance(combobox)", readme)
+        self.assertIn("Server-resolved document", readme)
+        self.assertIn("Static or strict-CSP fallback", readme)
+        self.assertIn("theme-prepaint.js", readme)
+        self.assertIn("external fetch cannot guarantee zero flash", readme)
         self.assertRegex(
             support,
             r"<tr><th scope=\"col\">CSS</th><th scope=\"col\">Minified</th></tr>",

@@ -135,6 +135,8 @@ class PackagingTests(unittest.TestCase):
         for required in (
             f"{PREFIX}/conformance/contract/conformance-contract.json",
             f"{PREFIX}/conformance/contract/report.schema.json",
+            f"{PREFIX}/conformance/fixtures/document-owner-prepaint.html",
+            f"{PREFIX}/conformance/fixtures/assets/theme-prepaint.js",
             f"{PREFIX}/conformance/fixtures/static-primitives.html",
             f"{PREFIX}/conformance/runner/run.py",
             f"{PREFIX}/conformance/host-shell/serve.py",

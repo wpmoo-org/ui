@@ -89,6 +89,41 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js"; // only when plugins are use
 </div>
 ```
 
+### Theme ownership and first paint
+
+Resolve the initial `light` or `dark` value on the server whenever the host
+knows the request or session preference. Put it on the first application owner;
+keep `lang` and the document's default `dir` on `html`:
+
+```html
+<!-- Server-resolved document: no prepaint required. -->
+<html lang="en" dir="ltr">
+  <body>
+    <div class="moo-ui" data-bs-theme="dark" data-moo-document-owner="true">
+      <!-- Moo UI application -->
+    </div>
+  </body>
+</html>
+```
+
+For a static or strict-CSP host without an inline bootstrap, keep the classic
+external asset as the root's first child. An embedded owner uses explicit keys
+when it needs independent browser persistence:
+
+```html
+<!-- Static or strict-CSP fallback: classic script is the root's first child. -->
+<div class="moo-ui" data-bs-theme="light" data-moo-theme-key="portal:theme">
+  <script src="/vendor/@wpmoo/ui/theme-prepaint.js"></script>
+  <!-- embedded Moo UI fragment -->
+</div>
+```
+
+On a first visit, a static host without a known server preference can only
+correct a browser-only preference after the external asset is fetched, so that
+correction may be visible. The server value remains the deterministic fallback;
+an external fetch cannot guarantee zero flash in this profile. The published
+asset is available as `@wpmoo/ui/theme-prepaint.js`.
+
 ### Optional runtime
 
 ```js
