@@ -1904,7 +1904,17 @@ console.log(JSON.stringify({ document: makeCase(false), nested: makeCase(true) }
         self.assertNotIn("data-moo-theme-style", styles)
         self.assertNotIn("data-moo-base-color", styles)
         self.assertNotIn("mooCatalogThemeBuilderStyle", source)
-        self.assertIn("mooCatalogThemeBuilderBaseColor", source)
+        for dataset in (
+            "mooCatalogThemeBuilderBaseColor",
+            "mooCatalogThemeBuilderThemeColor",
+            "mooCatalogThemeBuilderChartColor",
+            "mooCatalogThemeBuilderHeadingFont",
+            "mooCatalogThemeBuilderBodyFont",
+            "mooCatalogThemeBuilderRadius",
+            "mooCatalogThemeBuilderPrepaint",
+        ):
+            with self.subTest(dataset=dataset):
+                self.assertIn(dataset, source)
         self.assertIn("data-moo-catalog-theme-builder-updating", styles)
         self.assertNotIn("data-moo-catalog-theme-builder-style=", styles)
         self.assertNotIn(
@@ -2307,6 +2317,11 @@ const initial = {
   ),
   baseDataset: body.dataset.mooCatalogThemeBuilderBaseColor,
   themeDataset: body.dataset.mooCatalogThemeBuilderThemeColor,
+  chartDataset: body.dataset.mooCatalogThemeBuilderChartColor,
+  headingDataset: body.dataset.mooCatalogThemeBuilderHeadingFont,
+  bodyDataset: body.dataset.mooCatalogThemeBuilderBodyFont,
+  radiusDataset: body.dataset.mooCatalogThemeBuilderRadius,
+  prepaintDataset: body.dataset.mooCatalogThemeBuilderPrepaint,
   broadStyleDataset: Object.hasOwn(body.dataset, "mooThemeStyle"),
   broadBaseDataset: Object.hasOwn(body.dataset, "mooBaseColor"),
   primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
@@ -2440,6 +2455,26 @@ const afterReset = {
     body.dataset,
     "mooCatalogThemeBuilderThemeColor"
   ),
+  chartDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderChartColor"
+  ),
+  headingDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderHeadingFont"
+  ),
+  bodyDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderBodyFont"
+  ),
+  radiusDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderRadius"
+  ),
+  prepaintDataset: Object.hasOwn(
+    body.dataset,
+    "mooCatalogThemeBuilderPrepaint"
+  ),
   chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
   bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
   bodyBgRgb: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg-rgb"),
@@ -2478,8 +2513,13 @@ console.log(JSON.stringify({
         self.assertEqual(result.returncode, 0, result.stderr)
         case = json.loads(result.stdout.splitlines()[-1])
         self.assertFalse(case["initial"]["styleDataset"])
-        self.assertIsNone(case["initial"].get("baseDataset"))
+        self.assertEqual(case["initial"]["baseDataset"], "neutral")
         self.assertEqual(case["initial"]["themeDataset"], "blue")
+        self.assertEqual(case["initial"]["chartDataset"], "neutral")
+        self.assertEqual(case["initial"]["headingDataset"], "system")
+        self.assertEqual(case["initial"]["bodyDataset"], "geist")
+        self.assertEqual(case["initial"]["radiusDataset"], "small")
+        self.assertEqual(case["initial"]["prepaintDataset"], "true")
         self.assertFalse(case["initial"]["broadStyleDataset"])
         self.assertFalse(case["initial"]["broadBaseDataset"])
         self.assertEqual(case["initial"]["primary"], "rgb(6, 111, 209)")
@@ -2515,15 +2555,15 @@ console.log(JSON.stringify({
         self.assertEqual(case["afterBasePreview"]["surface"], "oklch(1 0 0)")
         self.assertEqual(case["afterBasePreview"]["selectedBase"], "neutral")
         self.assertEqual(case["afterBasePreview"]["persistedBase"], "neutral")
-        self.assertFalse(case["afterBasePreviewHiddenClear"]["baseDataset"])
+        self.assertTrue(case["afterBasePreviewHiddenClear"]["baseDataset"])
         self.assertEqual(case["afterBasePreviewHiddenClear"]["surface"], "")
         self.assertEqual(case["afterBasePreviewHiddenClear"]["selectedBase"], "neutral")
         self.assertEqual(case["afterBasePreviewHiddenClear"]["persistedBase"], "neutral")
-        self.assertFalse(case["afterBasePreviewClear"]["baseDataset"])
+        self.assertTrue(case["afterBasePreviewClear"]["baseDataset"])
         self.assertEqual(case["afterBasePreviewClear"]["surface"], "")
         self.assertEqual(case["afterBasePreviewClear"]["selectedBase"], "neutral")
         self.assertEqual(case["afterBasePreviewClear"]["persistedBase"], "neutral")
-        self.assertFalse(case["afterThemePreview"]["themeDataset"])
+        self.assertTrue(case["afterThemePreview"]["themeDataset"])
         self.assertEqual(case["afterThemePreview"]["primary"], "")
         self.assertEqual(case["afterThemePreview"]["selectedTheme"], "blue")
         self.assertEqual(case["afterThemePreview"]["persistedTheme"], "blue")
@@ -2569,6 +2609,11 @@ console.log(JSON.stringify({
         self.assertFalse(case["afterReset"]["styleDataset"])
         self.assertFalse(case["afterReset"]["baseDataset"])
         self.assertFalse(case["afterReset"]["themeDataset"])
+        self.assertFalse(case["afterReset"]["chartDataset"])
+        self.assertFalse(case["afterReset"]["headingDataset"])
+        self.assertFalse(case["afterReset"]["bodyDataset"])
+        self.assertFalse(case["afterReset"]["radiusDataset"])
+        self.assertFalse(case["afterReset"]["prepaintDataset"])
         self.assertEqual(case["afterReset"]["chart1"], "")
         self.assertEqual(case["afterReset"]["bodyBg"], "")
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")

@@ -180,6 +180,74 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
+    def test_catalog_builder_tokens_exist_before_deferred_catalog_runtime(self) -> None:
+        context = new_case_context(self.browser, LAYOUT_CASES[0])
+        context.add_init_script(
+            "\n".join(
+                (
+                    "localStorage.setItem('moo:theme', 'dark');",
+                    "localStorage.setItem('moo:theme-builder', JSON.stringify({",
+                    "  schemaVersion: 1,",
+                    "  baseColor: 'mist',",
+                    "  themeColor: 'blue',",
+                    "  chartColor: 'neutral',",
+                    "  headingFont: 'default',",
+                    "  bodyFont: 'default',",
+                    "  radius: 'default',",
+                    "}));",
+                )
+            )
+        )
+        catalog_prepaint_source = (
+            ROOT / "site/static/js/catalog-prepaint.js"
+        ).read_text(encoding="utf-8")
+
+        def capture_builder_tokens(route) -> None:
+            route.fulfill(
+                status=200,
+                content_type="application/javascript",
+                body="""
+                window.__catalogBuilderBeforeRuntime = (() => {
+                  const owner = document.querySelector('.moo-ui[data-bs-theme]');
+                  const tokens = owner ? getComputedStyle(owner) : null;
+                  return {
+                    baseColor: owner?.dataset.mooCatalogThemeBuilderBaseColor,
+                    themeColor: owner?.dataset.mooCatalogThemeBuilderThemeColor,
+                    primary: tokens?.getPropertyValue("--bs-primary").trim(),
+                    surface: tokens?.getPropertyValue("--moo-surface").trim(),
+                  };
+                })();
+                """
+                + catalog_prepaint_source,
+            )
+
+        context.route(
+            re.compile(r".*/assets/js/catalog-prepaint\.js(?:\?.*)?$"),
+            capture_builder_tokens,
+        )
+        page = context.new_page()
+        evidence = BrowserEvidence(page)
+        try:
+            response = page.goto(
+                f"{self.base_url}/site-dist/introduction/index.html",
+                wait_until="networkidle",
+            )
+            self.assertIsNotNone(response)
+            self.assertTrue(response.ok)
+            builder_before_runtime = page.evaluate(
+                "() => window.__catalogBuilderBeforeRuntime"
+            )
+            self.assertEqual(builder_before_runtime["baseColor"], "mist")
+            self.assertEqual(builder_before_runtime["themeColor"], "blue")
+            self.assertEqual(builder_before_runtime["primary"], "rgb(6, 111, 209)")
+            self.assertEqual(
+                builder_before_runtime["surface"],
+                "oklch(0.148 0.004 228.8)",
+            )
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_layout_fixtures_are_served_with_assets_and_runtime_setup(self) -> None:
         for case in LAYOUT_CASES:
             with self.subTest(case=case.name):

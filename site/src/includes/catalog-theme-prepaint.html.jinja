@@ -1,0 +1,49 @@
+<script>
+  (() => {
+    const owner = document.currentScript?.parentElement;
+    if (!owner?.matches?.('.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]')) return;
+
+    const payload = {{ theme_builder_prepaint | tojson }};
+    const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+    const enumValue = (key, candidate) => {
+      const aliases = key === "baseColor"
+        ? payload.aliases.baseColor
+        : key === "themeColor" || key === "chartColor"
+          ? payload.aliases.actionColor
+          : key === "radius" ? payload.aliases.radius : {};
+      const value = hasOwn(aliases, candidate) ? aliases[candidate] : candidate;
+      return payload.options[key].includes(value) ? value : payload.defaults[key];
+    };
+
+    try {
+      const raw = window.localStorage?.getItem("moo:theme-builder");
+      const source = raw ? JSON.parse(raw) : null;
+      if (!source || typeof source !== "object" || Array.isArray(source)) return;
+
+      const legacyThemeColor = source.themeColor === undefined
+        && payload.legacyActionBaseColors.includes(source.baseColor)
+        ? source.baseColor
+        : undefined;
+      const state = {
+        schemaVersion: payload.schemaVersion,
+        baseColor: enumValue("baseColor", source.baseColor),
+        themeColor: enumValue("themeColor", source.themeColor ?? legacyThemeColor),
+        chartColor: enumValue("chartColor", source.chartColor ?? source.chartPalette),
+        headingFont: enumValue("headingFont", source.headingFont),
+        bodyFont: enumValue("bodyFont", source.bodyFont),
+        radius: enumValue("radius", source.radius),
+      };
+      if (Object.entries(payload.defaults).every(([key, value]) => state[key] === value)) return;
+
+      owner.dataset.mooCatalogThemeBuilderPrepaint = "true";
+      owner.dataset.mooCatalogThemeBuilderBaseColor = state.baseColor;
+      owner.dataset.mooCatalogThemeBuilderThemeColor = state.themeColor;
+      owner.dataset.mooCatalogThemeBuilderChartColor = state.chartColor;
+      owner.dataset.mooCatalogThemeBuilderHeadingFont = state.headingFont;
+      owner.dataset.mooCatalogThemeBuilderBodyFont = state.bodyFont;
+      owner.dataset.mooCatalogThemeBuilderRadius = state.radius;
+    } catch (_) {
+      // Storage can be unavailable or contain malformed legacy data.
+    }
+  })();
+</script>

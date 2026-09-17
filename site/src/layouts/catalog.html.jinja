@@ -5,6 +5,10 @@
 {% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
+{% block owner_prepaint %}
+  {% include "includes/catalog-theme-prepaint.html.jinja" %}
+{% endblock %}
+
 {% block body %}
   <div class="moo-catalog" data-moo-shell="catalog">
     {% call(slot) app(

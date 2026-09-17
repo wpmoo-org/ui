@@ -17,9 +17,31 @@ class BuildTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_render_pages_does_not_spawn_a_theme_builder_first_paint_process(
+    def test_render_pages_accepts_precomputed_theme_builder_prepaint(
         self,
     ) -> None:
+        prepaint = {
+            "schemaVersion": 1,
+            "defaults": {
+                "schemaVersion": 1,
+                "baseColor": "neutral",
+                "themeColor": "neutral",
+                "chartColor": "neutral",
+                "headingFont": "default",
+                "bodyFont": "default",
+                "radius": "default",
+            },
+            "options": {
+                "baseColor": ["neutral"],
+                "themeColor": ["neutral"],
+                "chartColor": ["neutral"],
+                "headingFont": ["default"],
+                "bodyFont": ["default"],
+                "radius": ["default"],
+            },
+            "aliases": {"baseColor": {}, "actionColor": {}, "radius": {}},
+            "legacyActionBaseColors": [],
+        }
         with tempfile.TemporaryDirectory() as tempdir:
             with (
                 mock.patch.object(build, "SITE_DIST", Path(tempdir)),
@@ -31,7 +53,58 @@ class BuildTests(CatalogTestCase):
                     ),
                 ),
             ):
-                build.render_pages(version="test")
+                build.render_pages(version="test", theme_builder_prepaint=prepaint)
+
+    def test_catalog_prepaint_css_is_owner_scoped_and_allowlisted(self) -> None:
+        payload = {
+            "allowList": ["--bs-primary", "--moo-surface"],
+            "defaults": {
+                "baseColor": "neutral",
+                "themeColor": "neutral",
+                "chartColor": "neutral",
+                "headingFont": "default",
+                "bodyFont": "default",
+                "radius": "default",
+            },
+            "options": {
+                "baseColor": ["neutral", "mist"],
+                "themeColor": ["neutral", "blue"],
+                "chartColor": ["neutral"],
+                "headingFont": ["default"],
+                "bodyFont": ["default"],
+                "radius": ["default"],
+            },
+            "tokens": {
+                "baseColor": {
+                    "neutral": {"light": {}, "dark": {}},
+                    "mist": {
+                        "light": {"--moo-surface": "white", "--ignored": "no"},
+                        "dark": {"--moo-surface": "black"},
+                    },
+                },
+                "themeColor": {
+                    "neutral": {},
+                    "blue": {"--bs-primary": "rgb(6, 111, 209)"},
+                },
+                "chartColor": {"neutral": {}},
+                "headingFont": {"default": {}},
+                "bodyFont": {"default": {}},
+                "radius": {"default": {}},
+                "sidebarAccent": {"light": {}, "dark": {}},
+            },
+        }
+
+        css = build.catalog_prepaint_css(payload)
+
+        self.assertIn(
+            '.moo-ui[data-bs-theme="dark"]:where([data-moo-catalog-theme-builder-prepaint][data-moo-catalog-theme-builder-base-color="mist"])',
+            css,
+        )
+        self.assertIn("--moo-surface: black;", css)
+        self.assertIn("--bs-primary: rgb(6, 111, 209);", css)
+        self.assertNotIn("--ignored", css)
+        self.assertNotIn(":root", css)
+        self.assertNotIn("body", css)
 
     def test_support_policy_requires_native_css_scope(self) -> None:
         support = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
@@ -59,6 +132,10 @@ class BuildTests(CatalogTestCase):
             with self.subTest(css_name=css_name):
                 self.assertTrue((SITE_DIST / f"assets/css/{css_name}").is_file())
                 self.assertFalse((PACKAGE_DIST / f"assets/css/{css_name}").exists())
+        self.assertTrue((SITE_DIST / "assets/css/catalog-prepaint.css").is_file())
+        self.assertFalse(
+            (PACKAGE_DIST / "assets/css/catalog-prepaint.css").exists()
+        )
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.css").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.min.css").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/moo-core.css").exists())
@@ -119,6 +196,7 @@ class BuildTests(CatalogTestCase):
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
@@ -150,6 +228,7 @@ class BuildTests(CatalogTestCase):
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-prepaint.js", "initial prepaint js"),
@@ -180,6 +259,7 @@ class BuildTests(CatalogTestCase):
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
+                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-prepaint.js", "catalog prepaint js"),

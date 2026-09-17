@@ -158,6 +158,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "robots.txt",
             "assets/css/catalog.css",
             "assets/css/catalog.min.css",
+            "assets/css/catalog-prepaint.css",
             "assets/js/bootstrap.bundle.min.js",
             "assets/js/catalog-prepaint.js",
             "js/combobox.js",

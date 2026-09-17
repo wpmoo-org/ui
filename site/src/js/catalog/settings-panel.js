@@ -35,6 +35,10 @@ const BUILDER_SELECTORS = {
 const BUILDER_DATASETS = {
   baseColor: "mooCatalogThemeBuilderBaseColor",
   themeColor: "mooCatalogThemeBuilderThemeColor",
+  chartColor: "mooCatalogThemeBuilderChartColor",
+  headingFont: "mooCatalogThemeBuilderHeadingFont",
+  bodyFont: "mooCatalogThemeBuilderBodyFont",
+  radius: "mooCatalogThemeBuilderRadius",
 };
 
 const BUILDER_OPTION_SELECTOR = "[data-moo-catalog-theme-builder-option]";
@@ -361,13 +365,17 @@ export function initSettingsPanel(root = document) {
     };
 
     const applyBuilderTokens = (preference) => {
-      Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
-        if (preference[key] === THEME_BUILDER_DEFAULTS[key]) {
+      if (isDefaultBuilderPreference(preference)) {
+        delete owner.dataset.mooCatalogThemeBuilderPrepaint;
+        Object.values(BUILDER_DATASETS).forEach((datasetKey) => {
           delete owner.dataset[datasetKey];
-        } else {
+        });
+      } else {
+        owner.dataset.mooCatalogThemeBuilderPrepaint = "true";
+        Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
           owner.dataset[datasetKey] = preference[key];
-        }
-      });
+        });
+      }
       applyTokenStyle(
         owner,
         view,

@@ -84,6 +84,7 @@ PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
+THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
 EVIDENCE_FILES = (
     "pilot-evidence.json",
     "phase-1-evidence.json",
@@ -1290,6 +1291,181 @@ def create_environment(icon_renderer=None) -> Environment:
     return environment
 
 
+def theme_builder_first_paint_payload() -> dict[str, object]:
+    script = textwrap.dedent(
+        """
+        import { createThemeBuilderFirstPaintPayload } from "./site/src/js/catalog/theme-builder-schema.js";
+        console.log(JSON.stringify(createThemeBuilderFirstPaintPayload()));
+        """
+    )
+    try:
+        result = subprocess.run(
+            ["node", "--input-type=module", "--eval", script],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation timed out "
+            f"after {THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS} seconds"
+        ) from exc
+    if result.returncode != 0:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation failed:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+    try:
+        payload = json.loads(result.stdout.splitlines()[-1])
+    except (IndexError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            "Theme Builder first-paint payload generation returned invalid JSON"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError("Theme Builder first-paint payload must be an object")
+    return payload
+
+
+def _catalog_prepaint_mapping(
+    payload: dict[str, object], key: str
+) -> dict[str, object]:
+    value = payload.get(key)
+    if not isinstance(value, dict):
+        raise RuntimeError(f"Theme Builder first-paint payload is missing {key}")
+    return value
+
+
+def _catalog_prepaint_options(
+    payload: dict[str, object], key: str
+) -> list[str]:
+    options = _catalog_prepaint_mapping(payload, "options").get(key)
+    if not isinstance(options, list) or not all(
+        isinstance(option, str) for option in options
+    ):
+        raise RuntimeError(
+            f"Theme Builder first-paint payload has invalid {key} options"
+        )
+    return options
+
+
+def _catalog_prepaint_selector(
+    *,
+    axis: str,
+    value: str,
+    theme: str | None = None,
+) -> str:
+    root = (
+        f'.moo-ui[data-bs-theme="{theme}"]'
+        if theme is not None
+        else ".moo-ui[data-bs-theme]"
+    )
+    attribute = re.sub(r"(?<!^)([A-Z])", r"-\1", axis).lower()
+    return (
+        f"{root}:where([data-moo-catalog-theme-builder-prepaint]"
+        f'[data-moo-catalog-theme-builder-{attribute}={json.dumps(value)}])'
+    )
+
+
+def _catalog_prepaint_rule(
+    selector: str,
+    tokens: dict[str, object],
+    allow_list: frozenset[str],
+) -> str:
+    declarations = [
+        f"  {token}: {value};"
+        for token, value in tokens.items()
+        if token in allow_list and isinstance(value, str)
+    ]
+    if not declarations:
+        return ""
+    return f"{selector} {{\n" + "\n".join(declarations) + "\n}\n"
+
+
+def catalog_prepaint_css(payload: dict[str, object]) -> str:
+    allow_values = payload.get("allowList")
+    if not isinstance(allow_values, list) or not all(
+        isinstance(token, str) for token in allow_values
+    ):
+        raise RuntimeError("Theme Builder first-paint payload has no allow-list")
+    allow_list = frozenset(allow_values)
+    token_groups = _catalog_prepaint_mapping(payload, "tokens")
+    rules: list[str] = []
+
+    base_tokens = _catalog_prepaint_mapping(token_groups, "baseColor")
+    for base_color in _catalog_prepaint_options(payload, "baseColor"):
+        color_tokens = _catalog_prepaint_mapping(base_tokens, base_color)
+        for theme in ("light", "dark"):
+            tokens = _catalog_prepaint_mapping(color_tokens, theme)
+            rule = _catalog_prepaint_rule(
+                _catalog_prepaint_selector(
+                    axis="baseColor", value=base_color, theme=theme
+                ),
+                tokens,
+                allow_list,
+            )
+            if rule:
+                rules.append(rule)
+
+    for axis in ("themeColor", "chartColor", "radius", "headingFont", "bodyFont"):
+        axis_tokens = _catalog_prepaint_mapping(token_groups, axis)
+        for value in _catalog_prepaint_options(payload, axis):
+            tokens = _catalog_prepaint_mapping(axis_tokens, value)
+            rule = _catalog_prepaint_rule(
+                _catalog_prepaint_selector(axis=axis, value=value),
+                tokens,
+                allow_list,
+            )
+            if rule:
+                rules.append(rule)
+
+    sidebar_tokens = _catalog_prepaint_mapping(token_groups, "sidebarAccent")
+    defaults = _catalog_prepaint_mapping(payload, "defaults")
+    default_theme_color = defaults.get("themeColor")
+    for theme_color in _catalog_prepaint_options(payload, "themeColor"):
+        if theme_color == default_theme_color:
+            continue
+        for theme in ("light", "dark"):
+            rule = _catalog_prepaint_rule(
+                _catalog_prepaint_selector(
+                    axis="themeColor", value=theme_color, theme=theme
+                ),
+                _catalog_prepaint_mapping(sidebar_tokens, theme),
+                allow_list,
+            )
+            if rule:
+                rules.append(rule)
+
+    return "/* Generated from theme-builder-schema.js; catalog-only. */\n" + "\n".join(
+        rules
+    )
+
+
+def catalog_prepaint_config(payload: dict[str, object]) -> dict[str, object]:
+    keys = (
+        "schemaVersion",
+        "defaults",
+        "options",
+        "aliases",
+        "legacyActionBaseColors",
+    )
+    missing = [key for key in keys if key not in payload]
+    if missing:
+        raise RuntimeError(
+            "Theme Builder first-paint payload is missing " + ", ".join(missing)
+        )
+    return {key: payload[key] for key in keys}
+
+
+def write_catalog_prepaint_css(payload: dict[str, object]) -> Path:
+    output = SITE_DIST / "assets/css/catalog-prepaint.css"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(catalog_prepaint_css(payload), encoding="utf-8")
+    return output
+
+
 def load_entries(registry_root: Path, filename: str) -> list[dict[str, str]]:
     source_file = registry_root / filename
     if not source_file.exists():
@@ -1764,6 +1940,7 @@ def asset_version() -> str:
     paths = [
         SITE_DIST / "assets/css/moo-ui.min.css",
         SITE_DIST / "assets/css/catalog.min.css",
+        SITE_DIST / "assets/css/catalog-prepaint.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog-prepaint.js",
         SITE_DIST / "assets/js/theme-prepaint.js",
@@ -2234,6 +2411,7 @@ def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
 def render_pages(
     version: str | None = None,
     layouts: list[dict[str, str]] | None = None,
+    theme_builder_prepaint: dict[str, object] | None = None,
 ) -> None:
     environment = create_environment()
     catalog = load_catalog()
@@ -2262,6 +2440,10 @@ def render_pages(
         examples,
         layouts,
     )
+    if theme_builder_prepaint is None:
+        theme_builder_prepaint = catalog_prepaint_config(
+            theme_builder_first_paint_payload()
+        )
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2313,6 +2495,7 @@ def render_pages(
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
+            theme_builder_prepaint=theme_builder_prepaint,
         )
         output_file.write_text(rendered, encoding="utf-8")
 
@@ -2354,13 +2537,19 @@ def build_site() -> None:
     copy_core_outputs_to_site()
     compile_catalog_styles()
     copy_site_assets()
+    theme_builder_payload = theme_builder_first_paint_payload()
+    write_catalog_prepaint_css(theme_builder_payload)
     copy_certification_fixtures_to_site()
     render_layout_certification_fixtures()
     copy_site_metadata()
     version_site_module_imports()
     version = asset_version()
     layouts = load_layouts()
-    render_pages(version, layouts)
+    render_pages(
+        version,
+        layouts,
+        theme_builder_prepaint=catalog_prepaint_config(theme_builder_payload),
+    )
     write_sitemap(layouts)
 
 

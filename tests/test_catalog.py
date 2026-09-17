@@ -1902,23 +1902,36 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
 
-    def test_catalog_uses_full_build_first_paint_tokens_without_catalog_prepaint(self) -> None:
+    def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
+        include = (ROOT / "site/src/includes/catalog-theme-prepaint.html.jinja").read_text(
+            encoding="utf-8"
+        )
 
         self.assertNotIn("<style data-moo-catalog-prepaint", base)
         self.assertNotIn("<style data-moo-catalog-prepaint", catalog)
         self.assertNotIn("moo-ui-prepaint.css", base)
         self.assertNotIn("moo-ui-prepaint.css", catalog)
+        self.assertIn("catalog-prepaint.css", base)
+        self.assertIn("catalog-theme-prepaint.html.jinja", catalog)
+        self.assertIn("document.currentScript?.parentElement", include)
+        self.assertNotIn("document.documentElement", include)
+        self.assertNotIn("document.body", include)
+        self.assertNotIn("createElement(\"style\")", include)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
         page = self.read_output("introduction/index.html")
         stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.min.css?v='
         catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.min.css?v='
+        prepaint_marker = '<link rel="stylesheet" href="../assets/css/catalog-prepaint.css?v='
         self.assertIn(stylesheet_marker, page)
         self.assertNotIn("moo-ui-prepaint.css", page)
+        self.assertIn(prepaint_marker, page)
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
+        self.assertLess(page.index(catalog_marker), page.index(prepaint_marker))
+        self.assertTrue((DIST / "assets/css/catalog-prepaint.css").is_file())
 
         full_build = self.read_output("assets/css/moo-ui.css")
         self.assertIn(".moo-ui[data-bs-theme] {", full_build)

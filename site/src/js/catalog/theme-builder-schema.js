@@ -671,6 +671,7 @@ export function createThemeBuilderFirstPaintPayload() {
   return cloneJson({
     schemaVersion: THEME_BUILDER_SCHEMA_VERSION,
     defaults: THEME_BUILDER_DEFAULTS,
+    allowList: PUBLIC_THEME_BUILDER_TOKEN_ALLOW_LIST,
     options: THEME_BUILDER_OPTIONS,
     aliases: {
       baseColor: BASE_COLOR_ALIASES,

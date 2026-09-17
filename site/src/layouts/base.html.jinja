@@ -27,6 +27,7 @@
     {% endblock %}
     <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ root_path }}assets/css/catalog-prepaint.css?v={{ asset_version }}">
   </head>
   {% set resolved_theme = resolved_theme | default("light", true) %}
   {% set resolved_theme = resolved_theme if resolved_theme in ["light", "dark"] else "light" %}
