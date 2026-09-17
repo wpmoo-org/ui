@@ -1885,17 +1885,18 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("<body>", base)
         self.assertIn('<div class="moo-ui" data-bs-theme="{{ resolved_theme }}">', base)
         self.assertIn(
-            '<script src="{{ root_path }}assets/js/theme-prepaint.js?v={{ asset_version }}"></script>',
+            "<script>{{ theme_prepaint_source }}</script>",
             base,
         )
         self.assertLess(
             base.index('data-bs-theme="{{ resolved_theme }}"'),
-            base.index('assets/js/theme-prepaint.js?v={{ asset_version }}'),
+            base.index("theme_prepaint_source"),
         )
         self.assertLess(
-            base.index('assets/js/theme-prepaint.js?v={{ asset_version }}'),
+            base.index("theme_prepaint_source"),
             base.index('href="#main-content"'),
         )
+        self.assertNotIn('assets/js/theme-prepaint.js?', base)
         self.assertNotIn("body.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)

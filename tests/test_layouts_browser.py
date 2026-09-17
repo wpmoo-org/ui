@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-import time
 import unittest
 from pathlib import Path
 
@@ -90,11 +89,7 @@ class LayoutBrowserTests(unittest.TestCase):
         prepare_page(page, case)
         return context, page, evidence
 
-    def test_document_owner_prepaint_keeps_server_markup_valid_and_isolates_body(self) -> None:
-        prepaint_source = (ROOT / "site/static/js/theme-prepaint.js").read_text(
-            encoding="utf-8"
-        )
-
+    def test_document_owner_prepaint_applies_stored_theme_before_external_asset(self) -> None:
         def open_catalog(*, theme: str, direction: str):
             context = new_case_context(self.browser, LAYOUT_CASES[0])
             context.add_init_script(
@@ -105,52 +100,28 @@ class LayoutBrowserTests(unittest.TestCase):
                     )
                 )
             )
-
-            def delayed_prepaint(route) -> None:
-                time.sleep(0.05)
-                route.fulfill(
-                    status=200,
-                    content_type="application/javascript",
-                    body="""
-                    window.__themePrepaintServerMarkup = (() => {
-                      const owner = document.currentScript?.parentElement;
-                      return {
-                        bodyTheme: document.body?.getAttribute("data-bs-theme"),
-                        firstApplicationOwner: document.body?.firstElementChild === owner,
-                        htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
-                        ownerTheme: owner?.getAttribute("data-bs-theme"),
-                      };
-                    })();
-                    """
-                    + prepaint_source,
-                )
-
-            context.route(
-                re.compile(r".*/assets/js/theme-prepaint\.js(?:\?.*)?$"),
-                delayed_prepaint,
-            )
             page = context.new_page()
             evidence = BrowserEvidence(page)
+            prepaint_requests: list[str] = []
+            page.on(
+                "request",
+                lambda request: prepaint_requests.append(request.url)
+                if re.search(r"/assets/js/theme-prepaint\.js(?:\?.*)?$", request.url)
+                else None,
+            )
             response = page.goto(
                 f"{self.base_url}/site-dist/introduction/index.html",
                 wait_until="networkidle",
             )
             self.assertIsNotNone(response)
             self.assertTrue(response.ok)
-            return context, page, evidence
+            return context, page, evidence, prepaint_requests
 
-        context, page, evidence = open_catalog(theme="dark", direction="rtl")
+        context, page, evidence, prepaint_requests = open_catalog(
+            theme="dark", direction="rtl"
+        )
         try:
-            server_markup = page.evaluate("() => window.__themePrepaintServerMarkup")
-            self.assertEqual(
-                server_markup,
-                {
-                    "bodyTheme": None,
-                    "firstApplicationOwner": True,
-                    "htmlTheme": None,
-                    "ownerTheme": "light",
-                },
-            )
+            self.assertEqual(prepaint_requests, [])
 
             surface = page.evaluate(
                 """
@@ -188,8 +159,11 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
-        context, page, evidence = open_catalog(theme="not-a-theme", direction="sideways")
+        context, page, evidence, prepaint_requests = open_catalog(
+            theme="not-a-theme", direction="sideways"
+        )
         try:
+            self.assertEqual(prepaint_requests, [])
             surface = page.evaluate(
                 """
                 () => ({

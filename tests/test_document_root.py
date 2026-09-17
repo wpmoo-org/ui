@@ -117,8 +117,9 @@ class DocumentRootTests(unittest.TestCase):
 
         prepaint = owner.children[0]
         self.assertEqual(prepaint.tag, "script")
-        self.assertIn("assets/js/theme-prepaint.js?", prepaint.attrs.get("src", ""))
+        self.assertNotIn("src", prepaint.attrs)
         self.assertNotIn("defer", prepaint.attrs)
+        self.assertIn("const owner = document.currentScript?.parentElement", source)
 
         skip_links = [
             node

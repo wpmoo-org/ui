@@ -37,6 +37,9 @@ CERTIFICATION = SRC / "certification"
 CERTIFICATION_FIXTURES = ROOT / "tests/fixtures/certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
+THEME_PREPAINT_SOURCE = Markup(
+    (SITE_STATIC / "js" / "theme-prepaint.js").read_text(encoding="utf-8")
+)
 PACKAGE_DIST = ROOT / "dist"
 SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
@@ -1272,6 +1275,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
+    environment.globals["theme_prepaint_source"] = THEME_PREPAINT_SOURCE
     environment.globals["tasks_example_js_source"] = tasks_example_js_source
     environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
