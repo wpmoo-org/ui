@@ -3,6 +3,15 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.7 Entrypoints
+
+RC7 carries forward the RC6 public export and package-file inventory without
+adding or removing an entrypoint. The direct `app`/`page` layout contract is
+documentation-only and introduces no runtime export. The current API freeze
+revalidates the CSS, ESM, Sass, metadata, and artifact-variant surface against
+`package.json` and `certification.json`; changes to that surface require an
+explicit freeze update.
+
 ## 1.0.0-rc.6 Entrypoints
 
 RC6 carries forward the RC5 public export and package-file inventory without

@@ -40,8 +40,8 @@ language needs to feel more current.
 - **Explicit runtime.** Optional Moo UI behavior loads through ESM entrypoints
   only when a component needs behavior Bootstrap does not provide.
 
-This branch prepares `@wpmoo/ui@1.0.0-rc.6` for release. The published RC5
-package remains the CDN baseline for catalog CodePen exports until the RC6 npm
+This branch prepares `@wpmoo/ui@1.0.0-rc.7` for release. The published RC6
+package remains the CDN baseline for catalog CodePen exports until the RC7 npm
 tag exists.
 
 ## Try It in 30 Seconds
@@ -135,7 +135,7 @@ calm.
 
 ## Status And Support
 
-Moo UI is preparing the `1.0.0-rc.6` release candidate. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
+Moo UI is preparing the `1.0.0-rc.7` release candidate. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
 
@@ -158,4 +158,4 @@ Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.6/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.7/THIRD_PARTY_NOTICES.md).
