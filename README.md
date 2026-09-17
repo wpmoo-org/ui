@@ -40,9 +40,6 @@ language needs to feel more current.
 - **Explicit runtime.** Optional Moo UI behavior loads through ESM entrypoints
   only when a component needs behavior Bootstrap does not provide.
 
-The accepted `@wpmoo/ui@1.0.0-rc.7` package is the CDN baseline for catalog
-CodePen exports.
-
 ## Try It in 30 Seconds
 
 The quick demo intentionally follows the floating npm tag:

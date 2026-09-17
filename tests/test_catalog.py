@@ -3346,9 +3346,11 @@ class CatalogContractTests(CatalogTestCase):
         changelog = self.read_output("changelog.html")
 
         version = package["version"]
-        for surface in (readme, installation, support, skills, llms):
+        for surface in (installation, support, skills, llms):
             with self.subTest(surface=surface[:24]):
                 self.assertIn(f"@wpmoo/ui@{version}", surface)
+
+        self.assertIn(f"`{version}`", readme)
 
         self.assertIn(f"v{version}", changelog)
         self.assertIn(package["peerDependencies"]["bootstrap"], llms)
@@ -3359,11 +3361,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("| Export | Minified | Description |", readme)
         self.assertNotIn("The tarball also contains", readme)
         self.assertIn("Bootstrap markup. shadcn feel.", readme)
-        self.assertIn(
-            f"The accepted `@wpmoo/ui@{version}` package is the CDN baseline",
-            " ".join(readme.split()),
-        )
-        self.assertIn("CodePen exports", " ".join(readme.split()))
+        self.assertNotIn("CodePen exports", " ".join(readme.split()))
         self.assertIn("Try it in 30 seconds", readme)
         self.assertIn("Installation guide", readme)
         self.assertIn("Support & Evidence", readme)
