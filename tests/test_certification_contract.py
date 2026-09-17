@@ -39,6 +39,11 @@ PRIVATE_OWNER_FIXTURE_HOOKS = {
     "data-moo-overlay-portal-host",
     "data-moo-theme-key",
 }
+DOCUMENT_OWNER_FIXTURE_HOOKS = {
+    "conformance/fixtures/owner-portals.html": {
+        "data-moo-document-owner",
+    },
+}
 ACTIVE_COMPONENT_PLAN_DOCS = tuple(
     sorted(
         (
@@ -68,6 +73,7 @@ class CertificationContractTests(unittest.TestCase):
                 allowed = set(PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST.get(relative, set()))
                 if relative.startswith("conformance/fixtures/"):
                     allowed.update(PRIVATE_OWNER_FIXTURE_HOOKS)
+                    allowed.update(DOCUMENT_OWNER_FIXTURE_HOOKS.get(relative, set()))
                 matches = sorted(
                     set(BANNED_PUBLIC_MOO_COMPONENT_HOOK.findall(source)) - allowed
                 )

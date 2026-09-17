@@ -37,9 +37,6 @@ CERTIFICATION = SRC / "certification"
 CERTIFICATION_FIXTURES = ROOT / "tests/fixtures/certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
-THEME_PREPAINT_SOURCE = Markup(
-    (SITE_STATIC / "js" / "theme-prepaint.js").read_text(encoding="utf-8")
-)
 PACKAGE_DIST = ROOT / "dist"
 SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
@@ -60,6 +57,7 @@ GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_ROOT = SRC / "js"
+THEME_PREPAINT_PATH = JS_ROOT / "theme-prepaint.js"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
@@ -139,6 +137,7 @@ SOURCE_SNAPSHOT_DIRS = (
 )
 SOURCE_SNAPSHOT_FILES = (
     JS_ROOT / "moo-ui.js",
+    JS_ROOT / "theme-prepaint.js",
     JS_ROOT / "theme-owner.js",
     CERTIFICATION / "layout-evidence.json",
 )
@@ -1246,6 +1245,10 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
     )
 
 
+def theme_prepaint_source() -> Markup:
+    return Markup(THEME_PREPAINT_PATH.read_text(encoding="utf-8"))
+
+
 def create_environment(icon_renderer=None) -> Environment:
     environment = Environment(
         loader=FileSystemLoader((str(SITE_SRC), str(SRC))),
@@ -1276,7 +1279,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
-    environment.globals["theme_prepaint_source"] = THEME_PREPAINT_SOURCE
+    environment.globals["theme_prepaint_source"] = theme_prepaint_source
     environment.globals["tasks_example_js_source"] = tasks_example_js_source
     environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
@@ -1957,6 +1960,7 @@ def asset_version() -> str:
 def copy_package_js() -> None:
     package_js_dir = PACKAGE_DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(THEME_PREPAINT_PATH, package_js_dir / "theme-prepaint.js")
     for module_name in CORE_JS_MODULES:
         target = package_js_dir / module_name
         shutil.copy2(JS_COMPONENTS / module_name, target)
@@ -2081,6 +2085,7 @@ def required_core_outputs() -> tuple[Path, ...]:
     for name in AGGREGATE_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
+    outputs.append(PACKAGE_DIST / "js" / "theme-prepaint.js")
     return tuple(outputs)
 
 
@@ -2106,8 +2111,14 @@ def copy_core_outputs_to_site() -> None:
 
     components_dir = SITE_DIST / "assets/js/components"
     legacy_js_dir = SITE_DIST / "js"
+    owner_js_dir = SITE_DIST / "assets/js"
     components_dir.mkdir(parents=True, exist_ok=True)
     legacy_js_dir.mkdir(parents=True, exist_ok=True)
+    owner_js_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(
+        PACKAGE_DIST / "js/theme-prepaint.js",
+        owner_js_dir / "theme-prepaint.js",
+    )
     for module_name in CORE_JS_MODULES:
         package_module = PACKAGE_DIST / "js" / module_name
         shutil.copy2(package_module, components_dir / module_name)

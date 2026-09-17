@@ -1883,9 +1883,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('<html lang="en" dir="ltr">', base)
         self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
         self.assertIn("<body>", base)
-        self.assertIn('<div class="moo-ui" data-bs-theme="{{ resolved_theme }}">', base)
+        self.assertRegex(
+            base,
+            r'<div\s+class="moo-ui"\s+data-bs-theme="\{\{ resolved_theme \}\}"\s+data-moo-document-owner="true"\s*>',
+        )
         self.assertIn(
-            "<script>{{ theme_prepaint_source }}</script>",
+            "<script>{{ theme_prepaint_source() }}</script>",
             base,
         )
         self.assertLess(
@@ -1901,6 +1904,33 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
+
+    def test_base_layout_inlines_the_canonical_owner_prepaint_source(self) -> None:
+        canonical = (ROOT / "src/js/theme-prepaint.js").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('data-moo-document-owner="true"', base)
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("introduction/index.html")
+        owner_match = re.search(
+            r'<div\s+class="moo-ui"\s+data-bs-theme="(?:light|dark)"\s+data-moo-document-owner="true"\s*>',
+            page,
+        )
+        self.assertIsNotNone(owner_match)
+        assert owner_match is not None
+        owner_start = owner_match.start()
+        first_child_start = page.index("<script>", owner_start)
+        script_end = page.index("</script>", first_child_start)
+        self.assertEqual(
+            page[first_child_start + len("<script>") : script_end],
+            canonical,
+        )
+        self.assertLess(owner_start, first_child_start)
+        self.assertLess(first_child_start, page.index("Skip to component content"))
 
     def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")

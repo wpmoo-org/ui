@@ -70,11 +70,12 @@ export function isDocumentOwner(owner) {
   if (!isResolvedOwner(owner)) return false;
   const ownerDocument = documentFor(owner);
   const body = ownerDocument?.body;
-  if (!body || owner.parentElement !== body || body.firstElementChild !== owner) {
-    return false;
-  }
-  const topLevelOwners = Array.from(body.children || []).filter(isResolvedOwner);
-  return topLevelOwners.length === 1;
+  return Boolean(
+    owner?.dataset?.mooDocumentOwner === 'true' &&
+      body &&
+      owner.parentElement === body &&
+      body.firstElementChild === owner,
+  );
 }
 
 export function resolveThemeElement(node = typeof document === 'undefined' ? null : document) {

@@ -291,6 +291,20 @@ class BuildTests(CatalogTestCase):
         paths = {Path(path) for path, _ in build.source_snapshot()}
         self.assertIn(build.JS_ROOT / "theme-owner.js", paths)
 
+    def test_source_snapshot_tracks_the_canonical_theme_prepaint_source(self) -> None:
+        paths = {Path(path) for path, _ in build.source_snapshot()}
+        self.assertIn(build.JS_ROOT / "theme-prepaint.js", paths)
+
+    def test_theme_prepaint_source_is_read_when_rendered(self) -> None:
+        source_path = build.JS_ROOT / "theme-prepaint.js"
+        original = source_path.read_text(encoding="utf-8")
+        changed = original + "\n// source refresh probe\n"
+        try:
+            source_path.write_text(changed, encoding="utf-8")
+            self.assertEqual(str(build.theme_prepaint_source()), changed)
+        finally:
+            source_path.write_text(original, encoding="utf-8")
+
     def test_bundled_component_entrypoints_keep_public_constructor_names(self) -> None:
         result = subprocess.run(
             [
