@@ -152,6 +152,11 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (SITE_DIST / "assets/js/theme-prepaint.js").is_file()
         )
+        package_prepaint = PACKAGE_DIST / "js/theme-prepaint.js"
+        public_prepaint = SITE_DIST / "dist/js/theme-prepaint.js"
+        self.assertTrue(package_prepaint.is_file())
+        self.assertTrue(public_prepaint.is_file())
+        self.assertEqual(public_prepaint.read_bytes(), package_prepaint.read_bytes())
         self.assertTrue(
             (SITE_DIST / "assets/js/theme-owner.js").is_file()
         )

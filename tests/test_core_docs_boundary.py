@@ -120,6 +120,19 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertTrue(output.is_file(), relative_path)
                 self.assertEqual(sha256(output), expected_hash)
 
+    def test_public_prepaint_distribution_copy_is_recorded_in_boundary_baseline(self) -> None:
+        package_copy = "dist/js/theme-prepaint.js"
+        public_copy = "site-dist/dist/js/theme-prepaint.js"
+        catalog_copy = "site-dist/assets/js/theme-prepaint.js"
+
+        self.assertIn(package_copy, self.fixture["distFiles"])
+        self.assertIn(public_copy, self.fixture["siteDistFiles"])
+        self.assertIn(public_copy, self.fixture["siteOutputs"])
+        self.assertEqual(
+            self.fixture["siteOutputs"][public_copy],
+            self.fixture["siteOutputs"][catalog_copy],
+        )
+
     def test_package_and_site_outputs_are_separate(self) -> None:
         package_dist = ROOT / "dist"
         site_dist = ROOT / "site-dist"
@@ -144,6 +157,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/chart.min.js",
             "js/datepicker.js",
             "js/datepicker.min.js",
+            "js/theme-prepaint.js",
         }
         expected_site_files = {
             "index.html",
