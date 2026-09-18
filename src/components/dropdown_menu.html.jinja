@@ -1,4 +1,5 @@
 {% from "components/button.html.jinja" import button %}
+{% from "components/avatar.html.jinja" import avatar %}
 
 {% set dropdown_alignments = ["", "start", "end"] %}
 
@@ -62,6 +63,21 @@
 {% macro dropdown_header(label) -%}
   {% if not label | trim %}{{ fail("Dropdown header label is required") }}{% endif %}
   <li><h6 class="dropdown-header">{{ label }}</h6></li>
+{%- endmacro %}
+
+{% macro dropdown_identity(name, email="", src="", alt="", initials="", extra_class="") -%}
+  {% if not name | trim %}{{ fail("Dropdown identity name is required") }}{% endif %}
+  {% set identity_name = name | trim %}
+  {% set identity_email = email | trim %}
+  {% set classes = "sidebar-account-menu__header" %}
+  {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
+  <li class="{{ classes }}">
+    {{ avatar(name=identity_name, src=src, alt=alt, initials=initials, extra_class="sidebar-avatar") }}
+    <span class="sidebar-account-menu__identity">
+      <span class="sidebar-account-menu__name">{{ identity_name }}</span>
+      {% if identity_email %}<span class="sidebar-account-menu__email">{{ identity_email }}</span>{% endif %}
+    </span>
+  </li>
 {%- endmacro %}
 
 {% macro dropdown_divider(extra_class="") -%}
