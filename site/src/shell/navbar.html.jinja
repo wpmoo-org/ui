@@ -29,13 +29,11 @@
            width; the shortcut hint remains part of the same control instead
            of introducing a breakpoint jump. #}
         {% set search_trigger_label %}
-          <span class="moo-catalog__search-trigger-lead">
-            {{ render_icon("search", "inline-start") }}
-            <span>Search</span>
-          </span>
+          {{ render_icon("search", "inline-start") }}
+          <span class="search-trigger__label">Search</span>
           {#- Real shortcut, not decoration: Cmd/Ctrl+K opens this same
              command palette through the catalog command module. #}
-          <span class="moo-catalog__search-trigger-shortcut d-inline-flex">{{ kbd("⌘") }}{{ kbd("K") }}</span>
+          <span class="search-trigger__shortcut">{{ kbd("⌘") }}{{ kbd("K") }}</span>
         {% endset %}
         {{ button(
           search_trigger_label | safe,
@@ -43,7 +41,7 @@
           size="default",
           element="button",
           aria_label="Search documentation",
-          extra_class="moo-catalog__search-trigger"
+          extra_class="search-trigger moo-catalog__search-trigger"
         ) }}
       </div>
 

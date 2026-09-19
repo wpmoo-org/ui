@@ -1804,7 +1804,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIn('<span class="search-trigger__label">Search</span>', index)
         self.assertIn(
-            '<span class="search-trigger__shortcut d-inline-flex">',
+            '<span class="search-trigger__shortcut">',
             index,
         )
 
