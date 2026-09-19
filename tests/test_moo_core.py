@@ -180,6 +180,34 @@ class MooCoreTests(CatalogTestCase):
             "Scroll Fade selector partial must be imported exactly once",
         )
 
+    def test_search_trigger_is_a_shared_core_composition(self) -> None:
+        layer = SCSS / "_components.scss"
+        source = layer.read_text(encoding="utf-8")
+
+        self.assertIn('@import "components/search_trigger";', source)
+        self.assertEqual(
+            source.count('@import "components/search_trigger";'),
+            1,
+        )
+
+        core_css = self._build_and_read_core()
+        full_css = self.read_output("assets/css/moo-ui.css")
+        for css in (core_css, full_css):
+            with self.subTest(output="core" if css is core_css else "full"):
+                self.assertIn(".search-trigger", css)
+                self.assertIn(".search-trigger__label", css)
+                self.assertIn(".search-trigger__shortcut", css)
+                self.assertIn("height: 2rem;", css)
+                self.assertIn("width: 10rem;", css)
+                self.assertIn(
+                    "background: color-mix(in srgb, var(--bs-secondary-bg) 55%, var(--bs-body-bg));",
+                    css,
+                )
+                self.assertIn(
+                    "border: var(--bs-border-width) solid transparent;",
+                    css,
+                )
+
     def test_moo_component_and_utility_scss_do_not_reference_assets(self) -> None:
         offenders: list[str] = []
         for directory in (COMPONENTS_SCSS, UTILITIES_SCSS):

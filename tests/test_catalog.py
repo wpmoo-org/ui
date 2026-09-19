@@ -1786,8 +1786,41 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger:focus-visible", core_css)
+
+    def test_catalog_search_trigger_uses_shared_core_composition(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        self.assertRegex(
+            index,
+            r'<button class="btn btn-ghost search-trigger moo-catalog__search-trigger"',
+        )
+        self.assertRegex(
+            index,
+            r'<button[^>]*search-trigger[^>]*>\s*<svg[^>]*data-icon="inline-start"',
+        )
+        self.assertIn('<span class="search-trigger__label">Search</span>', index)
+        self.assertIn(
+            '<span class="search-trigger__shortcut d-inline-flex">',
+            index,
+        )
+
         catalog_scss = read_catalog_styles()
-        self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
+        for selector in (
+            ".moo-catalog__search-trigger {",
+            ".moo-catalog__search-trigger:hover {",
+            ".moo-catalog__search-trigger:focus-visible {",
+            ".moo-catalog__search-trigger-lead",
+            ".moo-catalog__search-trigger-shortcut",
+        ):
+            with self.subTest(selector=selector):
+                self.assertNotIn(selector, catalog_scss)
+
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger", core_css)
 
     def test_catalog_command_palette_preserves_item_radius_inside_flush_groups(self) -> None:
         catalog_scss = read_catalog_styles()
@@ -1806,16 +1839,19 @@ class CatalogContractTests(CatalogTestCase):
         )
 
     def test_catalog_search_trigger_uses_quiet_command_chrome(self) -> None:
-        catalog_scss = read_catalog_styles()
-        trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[1].split(
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger {", core_css)
+        trigger = core_css.split(".search-trigger {", 1)[1].split(
             "}",
             1,
         )[0]
-        hover = catalog_scss.split(".moo-catalog__search-trigger:hover {", 1)[1].split(
+        hover = core_css.split(".search-trigger:hover {", 1)[1].split(
             "}",
             1,
         )[0]
-        focus = catalog_scss.split(".moo-catalog__search-trigger:focus-visible {", 1)[
+        focus = core_css.split(".search-trigger:focus-visible {", 1)[
             1
         ].split(
             "}",
@@ -1839,9 +1875,14 @@ class CatalogContractTests(CatalogTestCase):
     def test_catalog_header_controls_share_height_token(self) -> None:
         catalog_scss = read_catalog_styles()
         shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
-        search_trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[
-            1
-        ].split("}", 1)[0]
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger {", core_css)
+        search_trigger = core_css.split(".search-trigger {", 1)[1].split(
+            "}",
+            1,
+        )[0]
         sidebar_toggle_match = re.search(
             r"(?m)^(?:\.moo-catalog\s+)?\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
             catalog_scss,
@@ -1855,7 +1896,7 @@ class CatalogContractTests(CatalogTestCase):
         )[0]
 
         self.assertIn("--moo-catalog-control-height: 2rem;", shell)
-        self.assertIn("height: var(--moo-catalog-control-height);", search_trigger)
+        self.assertIn("height: 2rem;", search_trigger)
         self.assertIn("width: var(--moo-catalog-control-height);", sidebar_toggle)
         self.assertIn("height: var(--moo-catalog-control-height);", sidebar_toggle)
         self.assertIn("min-height: var(--moo-catalog-control-height);", github_link)
