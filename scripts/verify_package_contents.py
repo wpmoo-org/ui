@@ -63,6 +63,7 @@ APPROVED_TARBALL_FILES = {
     "scss/components/_progress.scss",
     "scss/components/_radio_group.scss",
     "scss/components/_select.scss",
+    "scss/components/_search_trigger.scss",
     "scss/components/_separator.scss",
     "scss/components/_sheet.scss",
     "scss/components/_sidebar.scss",

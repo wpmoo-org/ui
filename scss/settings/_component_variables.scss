@@ -255,6 +255,20 @@ $btn-padding-y-sm: 0.3125rem !default;
 $btn-padding-x-sm: 0.625rem !default;
 $btn-padding-y-lg: 0.4375rem !default;
 $btn-padding-x-lg: 0.625rem !default;
+
+// Bootstrap exposes button padding, but it has no command/search-trigger
+// composition or responsive width scale. Keep this shared control's geometry
+// on private knobs so Catalog and Odoo consume one Core contract instead of
+// copying chrome-specific literals into their own stylesheets.
+$moo-search-trigger-height: 2rem !default;
+$moo-search-trigger-width: 10rem !default;
+$moo-search-trigger-width-lg: 13rem !default;
+$moo-search-trigger-width-xxl: 16rem !default;
+$moo-search-trigger-padding-y: 0.5rem !default;
+$moo-search-trigger-padding-x: 0.75rem !default;
+$moo-search-trigger-border-color: transparent !default;
+$moo-search-trigger-label-gap: 0.5rem !default;
+$moo-search-trigger-shortcut-gap: 0.25rem !default;
 // Icon-only buttons are squares whose side equals the token-driven button
 // height (line-height + 2*padding-y + 2*border), matching sibling text
 // buttons. Bootstrap exposes no single icon-button size knob; the side is a
