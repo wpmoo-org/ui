@@ -806,6 +806,15 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("width: 0", collapsed)
         self.assertIn("visibility: hidden", collapsed)
 
+    def test_contained_app_sidebar_inner_uses_the_contained_shell_height(self) -> None:
+        styles = read_app_styles()
+        self.assertRegex(
+            styles,
+            r'\.wrapper\[data-layout="app"\]\[data-shell-mode="contained"\] '
+            r'\.sidebar-inner\s*\{\s*'
+            r'position: relative;\s*height: 100%;\s*max-height: 100%;',
+        )
+
     def test_sidebar_catalog_page_uses_distinct_demo_target(self) -> None:
         result = self.run_build()
 
