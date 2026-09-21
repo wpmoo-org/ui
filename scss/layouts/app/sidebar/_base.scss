@@ -1,0 +1,111 @@
+// Shared App-owned Sidebar shell geometry. Sidebar's component partials own
+// only the inner surface and navigation anatomy.
+
+.sidebar {
+  --moo-sidebar-width: #{$moo-sidebar-width};
+  --moo-sidebar-width-icon: #{$moo-sidebar-width-icon};
+  --bs-offcanvas-width: var(--moo-sidebar-width);
+  flex: 0 0 var(--moo-sidebar-width);
+  width: var(--moo-sidebar-width);
+  color: var(--moo-sidebar-foreground);
+}
+
+// Rail: a thin toggle strip straddling the Sidebar's inline-end edge.
+.sidebar-rail {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 20;
+  width: $spacer;
+  padding: 0;
+  transform: translateX(50%);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+// Read the Sidebar's computed direction so this remains valid inside the
+// resolved-owner @scope as well as under a full-document html[dir] owner.
+.sidebar:dir(rtl) .sidebar-rail {
+  transform: translateX(-50%);
+}
+
+.sidebar-rail::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  width: var(--bs-border-width);
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.sidebar-rail:hover::after {
+  background: var(--moo-sidebar-border);
+}
+
+// The outer shell owns stacking, collapse width, and the contained-shell
+// geometry. Inner collapsed content remains in components/sidebar/_collapsed.
+@include media-breakpoint-up(lg) {
+  .sidebar {
+    position: relative;
+  }
+
+  // `offcanvas` is a collapsible mode, not a visual Sidebar variant. On
+  // desktop the App keeps the shell in normal flow and uses the shared App
+  // state attribute to collapse the column; below lg Bootstrap's native
+  // Offcanvas plugin continues to own the drawer transition.
+  .sidebar.offcanvas[data-collapsible="offcanvas"] {
+    visibility: visible;
+    transform: none;
+  }
+
+  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] > .sidebar.offcanvas[data-collapsible="offcanvas"] {
+    flex-basis: 0;
+    width: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
+  .wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar {
+    position: relative;
+    // Catalog page headers are sticky at $zindex-fixed. The Sidebar root must
+    // sit above that page-level stacking context while an identity menu is
+    // open, otherwise the workspace menu is painted underneath the header
+    // even though the menu itself is fixed and has dropdown z-index.
+    z-index: $zindex-fixed + 1;
+  }
+
+  // The sticky inner surface is its own stacking context. Elevate that
+  // context while an identity menu is open so the rail's hover indicator
+  // remains behind the fixed dropdown instead of painting across it.
+  .wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar > .sidebar-inner {
+    z-index: $zindex-fixed + 1;
+  }
+
+  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
+    flex-basis: var(--moo-sidebar-width-icon);
+    width: var(--moo-sidebar-width-icon);
+  }
+}
+
+@include media-breakpoint-down(lg) {
+  .sidebar-rail {
+    display: none;
+  }
+
+  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar {
+    position: relative;
+    inset: auto;
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    visibility: visible;
+    transform: none;
+  }
+
+  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
+    height: auto;
+    max-height: none;
+  }
+}

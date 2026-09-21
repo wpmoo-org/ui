@@ -1,6 +1,6 @@
-// Inset Sidebar variant --------------------------------------------------
-// The Sidebar owns the navigation surface; the App root owns the sibling
-// page geometry. This variant only supplies the page-side visual treatment.
+// Inset App variant: the App shell owns the background and makes the Page a
+// sibling inset surface. Sidebar keeps only its inner navigation anatomy.
+
 @include media-breakpoint-up(lg) {
   .wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"]) {
     background: var(--moo-sidebar);

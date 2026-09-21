@@ -162,6 +162,14 @@ class MooCoreTests(CatalogTestCase):
         self.assertFalse(FORBIDDEN_BOOTSTRAP_IMPORTS.intersection(bootstrap_imports))
         self.assertNotIn("@import \"bootstrap_component_layer\";", source)
         self.assertNotIn("@import \"component_layer\";", source)
+        self.assertNotIn('@import "foundations/focus";', source)
+        self.assertNotIn('@import "utilities/scroll_fade";', source)
+        self.assertNotIn('@import "layouts/app";', source)
+
+        scope = (SCSS / "foundations/_scope.scss").read_text(encoding="utf-8")
+        self.assertIn('@import "../foundations/focus";', scope)
+        self.assertIn('@import "../utilities/scroll_fade";', scope)
+        self.assertIn('@import "../layouts/app";', scope)
 
     def test_components_aggregate_imports_every_moo_partial_once(self) -> None:
         layer = SCSS / "_components.scss"
@@ -176,8 +184,8 @@ class MooCoreTests(CatalogTestCase):
         self.assertEqual(imported_components, expected_components)
         self.assertEqual(
             source.count('@import "utilities/scroll_fade"'),
-            1,
-            "Scroll Fade selector partial must be imported exactly once",
+            0,
+            "Scroll Fade selector partial must not be owned by the components aggregate",
         )
 
     def test_search_trigger_is_a_shared_core_composition(self) -> None:
@@ -358,7 +366,13 @@ class MooCoreTests(CatalogTestCase):
 
         self.assertEqual(
             active_scss_imports(scope_layer),
-            ["../components", "../themes/forms"],
+            [
+                "../components",
+                "../foundations/focus",
+                "../utilities/scroll_fade",
+                "../layouts/app",
+                "../themes/forms",
+            ],
         )
         self.assertIn("@scope (.moo-ui)", scope_layer)
         self.assertIn("@include moo-overlay-backdrop-scoped;", scope_layer)

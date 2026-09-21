@@ -13,10 +13,15 @@ from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 SIDEBAR_JS = ROOT / "src/js/components/sidebar.js"
 CATALOG_JS = ROOT / "site/src/js/catalog/index.js"
 SIDEBAR_SCSS = ROOT / "scss/components/_sidebar.scss"
+APP_SCSS = ROOT / "scss/layouts/_app.scss"
 
 
 def read_sidebar_styles() -> str:
     return read_scss_aggregate(SIDEBAR_SCSS, "components/sidebar")
+
+
+def read_app_styles() -> str:
+    return read_scss_aggregate(APP_SCSS, "layouts")
 
 
 def _css_block(styles: str, selector: str) -> str:
@@ -69,7 +74,7 @@ class SidebarTests(CatalogTestCase):
         output = self.render_sidebar(
             """
             {{ sidebar_trigger(sidebar_id="catalog-sidebar") }}
-            {% call sidebar(id="catalog-sidebar", aria_label="Catalog navigation") %}
+            {% call sidebar() %}
               {% call sidebar_content() %}
                 {{ sidebar_group_label("Components") }}
               {% endcall %}
@@ -77,13 +82,29 @@ class SidebarTests(CatalogTestCase):
             """
         )
 
-        self.assertIn('id="catalog-sidebar"', output)
-        self.assertIn('aria-label="Catalog navigation"', output)
+        self.assertIn('class="sidebar-inner"', output)
+        self.assertNotIn("<aside", output)
+        self.assertNotIn('data-variant=', output)
+        self.assertNotIn('data-side=', output)
+        self.assertNotIn('data-collapsible=', output)
         self.assertIn('data-sidebar-trigger', output)
         self.assertIn('data-bs-target="#catalog-sidebar"', output)
         self.assertIn('aria-controls="catalog-sidebar"', output)
         self.assertIn('aria-expanded="true"', output)
         self.assertIn('class="sidebar-content scroll-fade-y no-scrollbar"', output)
+
+    def test_sidebar_macro_rejects_app_shell_props(self) -> None:
+        for call in (
+            'sidebar(side="right")',
+            'sidebar(variant="floating")',
+            'sidebar(collapsible="offcanvas")',
+            'sidebar(id="catalog-sidebar")',
+        ):
+            with self.subTest(call=call):
+                with self.assertRaises(TypeError):
+                    self.render_sidebar(
+                        "{% call " + call + " %}{% endcall %}"
+                    )
 
     def test_sidebar_menu_contracts_emit_active_and_disclosure_state(self) -> None:
         output = self.render_sidebar(
@@ -109,7 +130,7 @@ class SidebarTests(CatalogTestCase):
     def test_sidebar_account_hooks_and_physical_edge_rules_are_explicit(self) -> None:
         output = self.render_sidebar(
             """
-            {% call sidebar(id="catalog-sidebar") %}
+            {% call sidebar() %}
               {% call sidebar_menu_item(dropdown=true, extra_class="sidebar-menu-item--account") %}
                 {{ sidebar_menu_button(
                   "Account",
@@ -124,7 +145,7 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("sidebar-menu-item--account", output)
         self.assertIn("sidebar-menu-button--account", output)
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
         self.assertRegex(
             styles,
             r'\.sidebar\[data-side="left"\] \.sidebar-inner\s*\{[^}]*border-right:',
@@ -133,11 +154,12 @@ class SidebarTests(CatalogTestCase):
             styles,
             r'\.sidebar\[data-side="right"\] \.sidebar-inner\s*\{[^}]*border-left:',
         )
-        self.assertIn("margin-left:", styles)
-        self.assertIn("margin-right:", styles)
+        app_styles = read_app_styles()
+        self.assertIn("margin-left:", app_styles)
+        self.assertIn("margin-right:", app_styles)
 
     def test_sidebar_rtl_physical_rules_follow_the_inherited_owner_direction(self) -> None:
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
 
         self.assertIn(
             "order: 1",
@@ -261,10 +283,6 @@ class SidebarTests(CatalogTestCase):
 
     def test_sidebar_macros_fail_fast_on_invalid_contracts(self) -> None:
         invalid_calls = (
-            ('sidebar(side="top")', "Unknown sidebar side: top"),
-            ('sidebar(variant="card")', "Unknown sidebar variant: card"),
-            ('sidebar(collapsible="rail")', "Unknown sidebar collapsible mode: rail"),
-            ('sidebar(id="")', "Sidebar id is required"),
             ('sidebar_trigger(sidebar_id="")', "Sidebar trigger target id is required"),
             ('sidebar_group_label("")', "Sidebar group label is required"),
             ('sidebar_menu_button("")', "Sidebar menu button title is required"),
@@ -388,7 +406,7 @@ class SidebarTests(CatalogTestCase):
         )
 
     def test_collapsed_sidebar_submenus_render_as_side_flyouts(self) -> None:
-        styles = read_sidebar_styles()
+        styles = f"{read_sidebar_styles()}\n{read_app_styles()}"
 
         flyout = _css_block(
             styles,
@@ -594,7 +612,7 @@ class SidebarTests(CatalogTestCase):
         self.assertNotIn(".sidebar-avatar > .avatar-fallback", styles)
 
     def test_sidebar_workspace_dropdown_uses_identity_trigger_contract(self) -> None:
-        styles = read_sidebar_styles()
+        styles = f"{read_sidebar_styles()}\n{read_app_styles()}"
         dropdown_styles = ROOT.joinpath("scss/components/_dropdown.scss").read_text()
 
         identity_cursors = _css_block(
@@ -689,7 +707,7 @@ class SidebarTests(CatalogTestCase):
     def test_sidebar_floating_variant_detaches_the_surface_with_a_bordered_card(self) -> None:
         # Regression coverage: sidebar(variant="floating") accepted the enum
         # value but produced no visual difference from the default variant.
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
 
         floating = _css_block(styles, '.sidebar[data-variant="floating"] .sidebar-inner')
         self.assertIn("margin: $spacer * 0.5", floating)
@@ -709,14 +727,14 @@ class SidebarTests(CatalogTestCase):
         # adding a margin on top of that (without resetting width) makes the
         # card's border box extend past the fixed-width .sidebar column by
         # the margin amount on each side.
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
         floating = _css_block(styles, '.sidebar[data-variant="floating"] .sidebar-inner')
         self.assertIn("width: auto", floating)
 
     def test_sidebar_inset_variant_turns_main_content_into_a_floating_card(self) -> None:
         # Regression coverage: sidebar(variant="inset") accepted the enum
         # value but produced no visual difference from the default variant.
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
 
         self.assertIn(
             "background: var(--moo-sidebar)",
@@ -742,7 +760,7 @@ class SidebarTests(CatalogTestCase):
         # position, so combining it with variant="inset" must flush the
         # content card against the end side, not the start side the
         # left-sidebar default assumes.
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
 
         right_inset = _css_block(
             styles,
@@ -763,13 +781,30 @@ class SidebarTests(CatalogTestCase):
         # the design reference's own md:-prefixed scoping, so both new
         # blocks must live inside the same desktop-only breakpoint as the
         # icon-collapse rules.
-        styles = read_sidebar_styles()
+        styles = f"{read_sidebar_styles()}\n{read_app_styles()}"
         up_lg_blocks = re.findall(
             r"@include media-breakpoint-up\(lg\)\s*\{(.*?)\n\}", styles, re.DOTALL
         )
         combined = "\n".join(up_lg_blocks)
         self.assertIn('.sidebar[data-variant="floating"] .sidebar-inner', combined)
         self.assertIn('.wrapper[data-layout="app"]:has(> .sidebar[data-variant="inset"])', combined)
+
+    def test_sidebar_offcanvas_mode_collapses_the_app_column_only_on_desktop(self) -> None:
+        styles = read_app_styles()
+
+        expanded = _css_block(
+            styles,
+            '.sidebar.offcanvas[data-collapsible="offcanvas"]',
+        )
+        collapsed = _css_block(
+            styles,
+            '.wrapper[data-layout="app"][data-sidebar-state="collapsed"] > .sidebar.offcanvas[data-collapsible="offcanvas"]',
+        )
+        self.assertIn("visibility: visible", expanded)
+        self.assertIn("transform: none", expanded)
+        self.assertIn("flex-basis: 0", collapsed)
+        self.assertIn("width: 0", collapsed)
+        self.assertIn("visibility: hidden", collapsed)
 
     def test_sidebar_catalog_page_uses_distinct_demo_target(self) -> None:
         result = self.run_build()
@@ -970,7 +1005,7 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
 
     def test_catalog_loads_external_prepaint_script_after_sidebar_markup(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
-        styles = read_sidebar_styles()
+        styles = read_app_styles()
         catalog_styles = (ROOT / "site/scss/catalog/_shell.scss").read_text(
             encoding="utf-8"
         )

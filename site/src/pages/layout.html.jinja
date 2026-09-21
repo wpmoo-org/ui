@@ -73,7 +73,7 @@
         {% endset %}
         {{ render_block_example(
           "layout-app-example",
-          "Sidebar preview",
+          "App preview",
           "",
           app_screen,
           preview_class="moo-example__preview--shell",
@@ -81,14 +81,9 @@
           show_header=false,
           source_content=app_source
         ) }}
-      </section>
-
-      <section aria-labelledby="sidebar">
-        {{ typography("Sidebar", variant="section-title", id="sidebar") }}
         <p>
-          Sidebar is the App's navigation surface. Its variant changes the
-          surface geometry without changing the Sidebar's regions, controls,
-          or Bootstrap behavior.
+          App supports the following Sidebar variants without changing the
+          Sidebar's regions, controls, or Bootstrap behavior.
         </p>
         {{ table(
           ["Variant", "How it behaves"],
@@ -102,6 +97,13 @@
           extra_class="align-middle moo-layout-table small",
           responsive_class="scroll-fade-x no-scrollbar"
         ) }}
+        <p class="mt-3">
+          <code>collapsible="offcanvas"</code> is a behavior mode, not a
+          fourth visual variant: it keeps the same Sidebar anatomy while App
+          controls whether the navigation column is shown or opened as a
+          drawer. The visual variants remain <code>sidebar</code>,
+          <code>floating</code>, and <code>inset</code>.
+        </p>
       </section>
 
       <section aria-labelledby="page">
@@ -476,7 +478,6 @@
 
     {{ render_doc_toc([
       {"id": "app", "label": "App"},
-      {"id": "sidebar", "label": "Sidebar"},
       {"id": "page", "label": "Page"},
       {"id": "breakpoints", "label": "Breakpoints"},
       {"id": "containers", "label": "Containers"},

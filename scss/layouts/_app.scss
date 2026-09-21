@@ -1,0 +1,78 @@
+// Application layout owns the shell and page geometry.
+// It is intentionally separate from component surfaces such as Sidebar.
+
+@import "app/sidebar/base";
+@import "app/sidebar/default";
+@import "app/sidebar/floating";
+@import "app/sidebar/inset";
+
+.wrapper[data-layout="app"] {
+  display: flex;
+  width: 100%;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.wrapper[data-layout="app"][data-shell-mode="contained"] {
+  min-height: 0;
+  height: 34rem;
+  overflow: hidden;
+  border: var(--bs-border-width) solid var(--moo-border);
+  border-radius: var(--bs-border-radius-xl);
+}
+
+.wrapper[data-layout="app"] > [data-slot="page"] {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.wrapper[data-layout="app"] > [data-slot="page"] > header,
+.wrapper[data-layout="app"] > [data-slot="page"] > main,
+.wrapper[data-layout="app"] > [data-slot="page"] > footer {
+  flex: 0 0 auto;
+}
+
+// The page main region owns the space between the optional header and footer.
+// Keep the Bootstrap rail as the flex column too, so app previews and real
+// shells can give their caller content a full-height surface without adding
+// layout-specific height values.
+.wrapper[data-layout="app"] > [data-slot="page"] > main {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.wrapper[data-layout="app"] > [data-slot="page"] > main > :is(
+  .container,
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-xxl,
+  .container-fluid
+) {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+@include media-breakpoint-down(lg) {
+  .wrapper[data-layout="app"][data-shell-mode="contained"] {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .wrapper[data-layout="app"][data-shell-mode="contained"] > [data-slot="page"] {
+    overflow: visible;
+  }
+}

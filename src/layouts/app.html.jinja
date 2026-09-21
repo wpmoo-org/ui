@@ -1,4 +1,4 @@
-{% from "components/sidebar.html.jinja" import sidebar %}
+{% from "components/sidebar.html.jinja" import sidebar, sidebar_rail %}
 
 {% set app_navigation_values = ["sidebar", "none"] %}
 {% set app_shell_modes = ["viewport", "contained"] %}
@@ -134,15 +134,23 @@
     {% endif %}
   >
     {% if navigation == "sidebar" %}
-      {% call sidebar(
-        side=side,
-        variant=variant,
-        collapsible=collapsible,
-        rail=rail,
-        id=sidebar_id,
-        aria_label=aria_label,
-        aria_labelled_by=aria_labelled_by
-      ) %}{{ sidebar_content | safe }}{% endcall %}
+      {% set sidebar_classes = "sidebar" %}
+      {% set sidebar_mode_class = "offcanvas" if collapsible == "offcanvas" else "offcanvas-lg" %}
+      {% set sidebar_side_class = "offcanvas-end" if side == "right" else "offcanvas-start" %}
+      <aside
+        id="{{ sidebar_id }}"
+        class="{{ sidebar_classes }} {{ sidebar_mode_class }} {{ sidebar_side_class }}"
+        tabindex="-1"
+        data-slot="sidebar"
+        aria-label="{{ aria_label }}"
+        {% if aria_labelled_by %}aria-labelledby="{{ aria_labelled_by }}"{% endif %}
+        data-side="{{ side }}"
+        data-variant="{{ variant }}"
+        data-collapsible="{{ collapsible }}"
+      >
+        {% call sidebar() %}{{ sidebar_content | safe }}{% endcall %}
+        {% if rail and collapsible == "icon" %}{{ sidebar_rail() }}{% endif %}
+      </aside>
     {% endif %}
     {{ page_content | safe }}
   </div>

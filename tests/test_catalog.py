@@ -323,7 +323,7 @@ class CatalogContractTests(CatalogTestCase):
         return path
 
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
-        styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+        styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
         match = re.search(
@@ -335,6 +335,107 @@ class CatalogContractTests(CatalogTestCase):
         body = match.group("body")
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
+
+    def test_app_main_owns_vertical_scroll_below_the_page_header(self) -> None:
+        styles = (ROOT / "scss/layouts/_app.scss").read_text(
+            encoding="utf-8"
+        )
+        match = re.search(
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*'
+            r'\{(?P<body>[^}]*)\}',
+            styles,
+        )
+
+        self.assertIsNotNone(match)
+        assert match is not None
+        self.assertIn("overflow-y: auto", match.group("body"))
+
+    def test_app_shell_rules_are_owned_by_the_app_layout_module(self) -> None:
+        app_path = ROOT / "scss/layouts/_app.scss"
+        if not app_path.is_file():
+            self.fail("App shell styles are not owned by layouts/_app.scss")
+        app_styles = app_path.read_text(encoding="utf-8")
+        sidebar_path = ROOT / "scss/components/sidebar/_base.scss"
+        self.assertTrue(sidebar_path.is_file())
+        sidebar_styles = sidebar_path.read_text(encoding="utf-8")
+
+        self.assertIn('.wrapper[data-layout="app"] {', app_styles)
+        self.assertIn(
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main {',
+            app_styles,
+        )
+        self.assertNotIn('.wrapper[data-layout="app"] {', sidebar_styles)
+        self.assertNotIn(
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main {',
+            sidebar_styles,
+        )
+
+    def test_sidebar_variants_have_explicit_style_owners(self) -> None:
+        sidebar_root = ROOT / "scss/components/sidebar"
+        app_sidebar_root = ROOT / "scss/layouts/app/sidebar"
+        missing = [
+            name
+            for name in (
+                "_base.scss",
+                "_menus.scss",
+                "_identity.scss",
+                "_collapsed.scss",
+            )
+            if not (sidebar_root / name).is_file()
+        ]
+        missing.extend(
+            name
+            for name in ("_base.scss", "_default.scss", "_floating.scss", "_inset.scss")
+            if not (app_sidebar_root / name).is_file()
+        )
+        self.assertEqual(missing, [])
+        if missing:
+            return
+        base = (sidebar_root / "_base.scss").read_text(encoding="utf-8")
+        app_base = (app_sidebar_root / "_base.scss").read_text(encoding="utf-8")
+        attached = (app_sidebar_root / "_default.scss").read_text(encoding="utf-8")
+        floating = (app_sidebar_root / "_floating.scss").read_text(encoding="utf-8")
+        inset = (app_sidebar_root / "_inset.scss").read_text(encoding="utf-8")
+
+        self.assertFalse((sidebar_root / "_layout.scss").exists())
+        self.assertFalse((sidebar_root / "_inset.scss").exists())
+        self.assertNotRegex(base, r"(?m)^\.sidebar\s*\{")
+        self.assertIn(".sidebar-inner {", base)
+        self.assertIn(".sidebar {", app_base)
+        self.assertIn("border-right", attached)
+        self.assertIn("border-left", attached)
+        self.assertIn('data-variant="floating"', floating)
+        self.assertIn("prefers-reduced-motion", floating)
+        self.assertIn(':has(> .sidebar[data-variant="inset"])', inset)
+        self.assertNotIn("prefers-reduced-motion", base)
+        self.assertNotIn('data-variant="floating"', base)
+        self.assertNotIn('data-variant="floating"', attached)
+
+    def test_app_owns_sidebar_shell_variants_and_component_owns_inner_surface(self) -> None:
+        component_root = ROOT / "scss/components/sidebar"
+        app_sidebar_root = ROOT / "scss/layouts/app/sidebar"
+        required_app_partials = ("_base.scss", "_default.scss", "_floating.scss", "_inset.scss")
+        missing = [
+            name for name in required_app_partials
+            if not (app_sidebar_root / name).is_file()
+        ]
+        self.assertEqual(missing, [])
+        if missing:
+            return
+
+        component_styles = (component_root / "_base.scss").read_text(encoding="utf-8")
+        app_styles = "\n".join(
+            (app_sidebar_root / name).read_text(encoding="utf-8")
+            for name in required_app_partials
+        )
+
+        self.assertNotRegex(component_styles, r"(?m)^\.sidebar\s*\{")
+        self.assertIn(".sidebar-inner", component_styles)
+        self.assertIn(".sidebar[data-side=\"left\"]", app_styles)
+        self.assertIn('data-variant="floating"', app_styles)
+        self.assertIn('data-variant="inset"', app_styles)
+        self.assertFalse((component_root / "_sidebar.scss").exists())
+        self.assertFalse((component_root / "_floating.scss").exists())
 
     def test_catalog_main_keeps_vertical_scroll_fade_below_header(self) -> None:
         result = self.run_build()
@@ -4268,12 +4369,12 @@ class CatalogContractTests(CatalogTestCase):
             catalog_styles,
             r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]",
         )
-        sidebar_styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+        app_styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
         app_root_style = re.search(
             r"\.wrapper\[data-layout=\"app\"\]\s*\{(?P<body>[^}]*)\}",
-            sidebar_styles,
+            app_styles,
         )
         self.assertIsNotNone(app_root_style)
         self.assertIn("display: flex;", app_root_style.group("body"))

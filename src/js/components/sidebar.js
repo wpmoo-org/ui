@@ -89,7 +89,11 @@ export default class Sidebar {
   }
 
   _isCollapsed() {
-    return this._isDesktop() && this._element.dataset.sidebarState === "collapsed";
+    return (
+      this._isDesktop() &&
+      this._sidebar?.dataset?.collapsible === "icon" &&
+      this._element.dataset.sidebarState === "collapsed"
+    );
   }
 
   _trigger(name, detail = {}) {

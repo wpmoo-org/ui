@@ -194,7 +194,7 @@ class LayoutRegistryTests(unittest.TestCase):
 
         self.assertIsInstance(payload, list)
         entries = payload
-        self.assertEqual([entry["slug"] for entry in entries], ["page", "app"])
+        self.assertEqual([entry["slug"] for entry in entries], ["app", "page"])
         self.assertEqual({entry["slug"] for entry in entries}, PUBLIC_LAYOUT_SLUGS)
 
         for entry in entries:
