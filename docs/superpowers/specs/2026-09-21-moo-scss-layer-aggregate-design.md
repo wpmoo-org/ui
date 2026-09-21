@@ -54,8 +54,23 @@ makes the filename describe neither its ownership nor the layer contract.
 
 ## Verification
 
-- Add a RED ownership test before changing the aggregate.
-- Run the component/layout/foundation contract tests and package tests.
-- Build `moo.css` and `moo-ui.css`; compare selector/content output with the
-  pre-change artifacts and record any intentional ordering-only hash change.
-- Run the UI package verifier and workspace boundary gate.
+The implementation is verified by the component, layout, catalog, package, and
+workspace boundary checks. The final commands and their recorded results are:
+
+- [x] `.venv/bin/python3 -m unittest tests.test_catalog.CatalogContractTests.test_app_main_does_not_own_vertical_scroll_below_the_page_header tests.test_layout_registry tests.test_blocks tests.test_layouts tests.test_sidebar tests.test_style_equivalence` — 99 tests pass (`OK`).
+- [x] `python3 scripts/verify_package_contents.py` — the package manifest matches
+  the approved package boundary.
+- [x] From the workspace root, `python3 .agent/tools/verify_moo_odoo_boundaries.py --workspace-root .` — the workspace Moo/Odoo boundary gate reports
+  `OK`.
+- [x] `git diff --check` — no whitespace errors.
+
+For broader context, `.venv/bin/python3 -m unittest tests.test_catalog` reports
+`Ran 206 tests` with `2 failures` and `1 skipped`: the existing
+`sidebar-account-menu__header` ownership contract and the legacy
+`id="sidebar"` Layout anchor contract. No issue references are attached to
+those failures; they are outside this Sass aggregate change and are not
+included in the focused verification command above.
+
+The public Sass entrypoints remain import-only, and the normalized `moo.css` and
+`moo-ui.css` baselines are recorded in the test fixtures after the intentional
+layer-order refactor.

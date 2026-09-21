@@ -336,7 +336,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
-    def test_app_main_owns_vertical_scroll_below_the_page_header(self) -> None:
+    def test_app_main_does_not_own_vertical_scroll_below_the_page_header(self) -> None:
         styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
@@ -348,7 +348,22 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertIsNotNone(match)
         assert match is not None
-        self.assertIn("overflow-y: auto", match.group("body"))
+        scroll_values = {"auto", "overlay", "scroll"}
+        for property_name, value in re.findall(
+            r"\b(overflow|overflow-y)\s*:\s*([^;}]*)",
+            match.group("body"),
+        ):
+            tokens = value.replace("!important", "").split()
+            if not tokens:
+                continue
+            vertical_value = (
+                tokens[0]
+                if property_name == "overflow-y"
+                else tokens[-1]
+                if len(tokens) > 1
+                else tokens[0]
+            )
+            self.assertNotIn(vertical_value.lower(), scroll_values)
 
     def test_app_shell_rules_are_owned_by_the_app_layout_module(self) -> None:
         app_path = ROOT / "scss/layouts/_app.scss"
