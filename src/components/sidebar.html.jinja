@@ -4,8 +4,8 @@
    `.sidebar*` selector namespace (same precedent as `.avatar`). App owns the
    outer shell, placement, surface variant, and collapse mode; these macros
    own the inner regions, menu anatomy, and controls that compose inside it.
-   Behavior (collapse-to-icon rail, mobile offcanvas, sub-menu disclosure)
-   layers on in later phases using native Bootstrap plugins. #}
+   Behavior (mobile offcanvas and sub-menu disclosure) layers on in later
+   phases using native Bootstrap plugins. #}
 
 {% set sidebar_button_sizes = ["default", "lg"] %}
 {% set sidebar_dropdown_directions = ["dropdown", "dropup", "dropend", "dropstart"] %}
@@ -43,16 +43,6 @@
   >
     {{ render_icon("panel-left", "inline-start") }}
   </button>
-{%- endmacro %}
-
-{% macro sidebar_rail(aria_label="Toggle sidebar") -%}
-  <button
-    class="sidebar-rail"
-    type="button"
-    data-sidebar-rail
-    aria-label="{{ aria_label }}"
-    tabindex="-1"
-  ></button>
 {%- endmacro %}
 
 {% macro sidebar_header(extra_class="") -%}

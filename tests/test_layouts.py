@@ -454,10 +454,21 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         self.assertIn('aria-controls="right-sidebar"', output)
         self.assertNotIn('data-sidebar-rail', output)
 
+    def test_app_layout_owns_the_sidebar_rail_markup(self) -> None:
+        app_source = (ROOT / "src/layouts/app.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        sidebar_source = (ROOT / "src/components/sidebar.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('class="sidebar-rail"', app_source)
+        self.assertNotIn("{% macro sidebar_rail", sidebar_source)
+
     def test_app_offcanvas_mode_uses_the_native_drawer_shell_without_an_icon_rail(self) -> None:
         output = self.render_app_shell(collapsible="offcanvas")
 
-        self.assertIn('class="sidebar offcanvas offcanvas-start"', output)
+        self.assertIn('class="sidebar offcanvas-lg offcanvas-start"', output)
         self.assertIn('data-collapsible="offcanvas"', output)
         self.assertNotIn('data-sidebar-rail', output)
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from html.parser import HTMLParser
+import re
 
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -116,8 +117,9 @@ class BlocksTests(CatalogTestCase):
             standalone = self.read_output(f"blocks/previews/{slug}.html")
             with self.subTest(slug=slug, contract="standalone preview"):
                 self.assertNotIn('data-moo-shell="catalog"', standalone)
-                self.assertIn(
-                    '<div class="moo-ui" data-bs-theme="light">', standalone
+                self.assertRegex(
+                    standalone,
+                    r'<div\s+class="moo-ui"\s+data-bs-theme="light"',
                 )
                 self.assertIn('class="moo-block-standalone"', standalone)
                 self.assertNotIn(

@@ -444,6 +444,15 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("display: grid", flyout_text)
         self.assertIn("display: flex !important", flyout_badge)
 
+    def test_app_main_does_not_create_a_second_vertical_scroll_owner(self) -> None:
+        styles = read_app_styles()
+        main = _css_block(
+            styles,
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main',
+        )
+
+        self.assertNotIn("overflow-y: auto", main)
+
     def test_sidebar_group_action_and_menu_badge_position_without_extra_classes(self) -> None:
         # Regression coverage: sidebar_group_action and sidebar_menu_badge must
         # overlay their trailing slot in their own documented default usage,
@@ -794,11 +803,11 @@ class SidebarTests(CatalogTestCase):
 
         expanded = _css_block(
             styles,
-            '.sidebar.offcanvas[data-collapsible="offcanvas"]',
+            '.sidebar.offcanvas-lg[data-collapsible="offcanvas"]',
         )
         collapsed = _css_block(
             styles,
-            '.wrapper[data-layout="app"][data-sidebar-state="collapsed"] > .sidebar.offcanvas[data-collapsible="offcanvas"]',
+            '.wrapper[data-layout="app"][data-sidebar-state="collapsed"] > .sidebar.offcanvas-lg[data-collapsible="offcanvas"]',
         )
         self.assertIn("visibility: visible", expanded)
         self.assertIn("transform: none", expanded)

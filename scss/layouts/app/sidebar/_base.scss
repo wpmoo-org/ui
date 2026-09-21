@@ -61,12 +61,12 @@
   // desktop the App keeps the shell in normal flow and uses the shared App
   // state attribute to collapse the column; below lg Bootstrap's native
   // Offcanvas plugin continues to own the drawer transition.
-  .sidebar.offcanvas[data-collapsible="offcanvas"] {
+  .sidebar.offcanvas-lg[data-collapsible="offcanvas"] {
     visibility: visible;
     transform: none;
   }
 
-  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] > .sidebar.offcanvas[data-collapsible="offcanvas"] {
+  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] > .sidebar.offcanvas-lg[data-collapsible="offcanvas"] {
     flex-basis: 0;
     width: 0;
     overflow: hidden;
