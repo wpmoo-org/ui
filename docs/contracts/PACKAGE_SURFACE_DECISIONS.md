@@ -12,9 +12,23 @@ the metadata entrypoint that records SHA-256 hashes for the adapter-facing
 `./moo.css`, `./moo-ui.css`, and `./theme-prepaint.js` bytes. The prepaint file
 is not an ESM runtime entrypoint and must be placed before the first themed
 content; hosts must consume the published bytes rather than copying source.
-The package candidate is RC8 while catalog CodePen URLs remain pinned to the
-published RC7 package until RC8 is released. The RC8 API freeze and tarball
-verifier enforce this boundary.
+Catalog CodePen URLs intentionally use the active `package.json` version,
+including the RC8 release candidate. The release flow accepts the brief CDN
+propagation window after the release tag is created; a second synchronization
+merge solely to change CodePen URLs is not required. This is a conscious
+release policy, not an accidental unpublished-package reference. The RC8 API
+freeze and tarball verifier continue to protect the package surface itself.
+
+### CodePen release-policy verification
+
+The catalog contract test
+[`test_codepen_payloads_use_the_active_package_version`](../../tests/test_catalog.py#L1117-L1140)
+rebuilds the generated catalog and asserts that every `@wpmoo/ui@...` token in
+each CodePen CSS/JS payload resolves to the active `package.json` version. The
+same contract runs in the quick tier and is included in the release gate before
+publish ([`npm-publish.yml`](../../.github/workflows/npm-publish.yml#L58-L63)).
+This is the verification record for accepting the short CDN propagation window;
+it does not require a second synchronization merge.
 
 ## 1.0.0-rc.7 Entrypoints
 

@@ -1086,12 +1086,12 @@ class CatalogContractTests(CatalogTestCase):
                     ):
                         self.assertIsNone(claim_pattern.search(text))
 
-    def test_codepen_payloads_do_not_import_unpublished_pinned_package_entrypoints(self) -> None:
+    def test_codepen_payloads_use_package_entrypoints(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-        codepen_version = site_build.CODEPEN_CDN_VERSION
-        published_js_entrypoints = {
+        codepen_version = site_build.PACKAGE_VERSION
+        package_js_entrypoints = {
             file.removeprefix("dist/js/")
             for file in json.loads(
                 (ROOT / "package.json").read_text(encoding="utf-8")
@@ -1112,29 +1112,32 @@ class CatalogContractTests(CatalogTestCase):
                         payload=index,
                         entrypoint=entrypoint,
                     ):
-                        self.assertIn(entrypoint, published_js_entrypoints)
+                        self.assertIn(entrypoint, package_js_entrypoints)
 
-    def test_codepen_payloads_use_the_published_package_version(self) -> None:
+    def test_codepen_payloads_use_the_active_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.7")
-        self.assertEqual(package["version"], "1.0.0-rc.8")
-        self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
+        self.assertEqual(site_build.PACKAGE_VERSION, package["version"])
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
+        package_version_pattern = re.compile(r"@wpmoo/ui@([^/\"';\s]+)")
         for path in sorted((ROOT / "site-dist").rglob("*.html")):
             for index, payload in enumerate(
                 codepen_payloads_from_html(path.read_text(encoding="utf-8"))
             ):
+                package_versions = set()
+                for key in ("css", "css_external", "js", "js_external"):
+                    package_versions.update(
+                        package_version_pattern.findall(str(payload.get(key, "")))
+                    )
                 with self.subTest(
                     page=path.relative_to(ROOT / "site-dist").as_posix(),
                     payload=index,
                 ):
-                    self.assertIn(
-                        f"@wpmoo/ui@{site_build.CODEPEN_CDN_VERSION}/",
-                        str(payload.get("css_external", ""))
-                        + str(payload.get("js", "")),
+                    self.assertEqual(
+                        package_versions,
+                        {site_build.PACKAGE_VERSION},
                     )
 
     def test_codepen_shows_interactive_examples_from_published_runtime_loader(self) -> None:
@@ -1545,7 +1548,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertIsNotNone(match)
         self.assertEqual(match.group(1), package["version"])
-        self.assertNotEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
+        self.assertEqual(match.group(1), site_build.PACKAGE_VERSION)
 
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
@@ -2793,9 +2796,9 @@ class CatalogContractTests(CatalogTestCase):
         result = self.run_build()
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        # CodePen exports pin the CDN package version (build.CODEPEN_CDN_VERSION),
-        # which may lag package.version until the current version is published.
-        codepen_version = site_build.CODEPEN_CDN_VERSION
+        # CodePen exports use the active package version, accepting the brief
+        # CDN propagation window after the release tag is created.
+        codepen_version = site_build.PACKAGE_VERSION
         registry = {
             component["slug"]: component
             for component in json.loads(

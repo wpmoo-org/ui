@@ -531,9 +531,11 @@ if (document.readyState === "loading") {
     in a new tab: the pen's HTML/CSS panels are pre-filled with this exact
     page's own markup (internal links rewritten to absolute ui.wpmoo.org
     URLs so they still work standalone) plus the shared external
-    moo-ui.css stylesheet, pinned to the published CDN package version
-    (product.codepenCdnVersion) so the pen loads a version that actually
-    exists on npm. data-moo-codepen-form
+    moo-ui.css stylesheet, using the active package version
+    (product.codepenCdnVersion) so the pen stays aligned with the release
+    candidate. The release flow accepts the brief CDN propagation window
+    after tagging and does not require a second synchronization merge.
+    data-moo-codepen-form
     opts this form out of examples-forms.js's inert-demo-form guard --
     unlike every other form on an Examples page, this one is meant to
     really submit.
