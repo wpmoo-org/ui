@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 from html.parser import HTMLParser
-import re
 
 from tests.helpers import ROOT, CatalogTestCase
 
