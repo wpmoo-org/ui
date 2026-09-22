@@ -19,6 +19,17 @@ merge solely to change CodePen URLs is not required. This is a conscious
 release policy, not an accidental unpublished-package reference. The RC8 API
 freeze and tarball verifier continue to protect the package surface itself.
 
+### CodePen release-policy verification
+
+The catalog contract test
+[`test_codepen_payloads_use_the_active_package_version`](../../tests/test_catalog.py#L1117-L1140)
+rebuilds the generated catalog and asserts that every `@wpmoo/ui@...` token in
+each CodePen CSS/JS payload resolves to the active `package.json` version. The
+same contract runs in the quick tier and is included in the release gate before
+publish ([`npm-publish.yml`](../../.github/workflows/npm-publish.yml#L58-L63)).
+This is the verification record for accepting the short CDN propagation window;
+it does not require a second synchronization merge.
+
 ## 1.0.0-rc.7 Entrypoints
 
 RC7 carries forward the RC6 public export and package-file inventory without
