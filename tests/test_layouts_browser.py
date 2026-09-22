@@ -863,11 +863,15 @@ class LayoutBrowserTests(unittest.TestCase):
             self.assertIn(styles["rootOverflow"], ("hidden", "clip"))
             self.assertNotIn(styles["rootOverflowY"], ("auto", "scroll"))
             self.assertNotIn(styles["bodyOverflowY"], ("auto", "scroll"))
-            self.assertNotIn(styles["mainOverflowY"], ("auto", "scroll"))
-            self.assertEqual(styles["pageOverflowY"], "auto")
+            self.assertEqual(styles["mainOverflowY"], "auto")
+            self.assertEqual(styles["pageOverflowY"], "visible")
             page.evaluate("() => window.scrollTo(0, 0)")
-            page.evaluate("() => document.querySelector('[data-slot=page]').scrollTo(0, 320)")
+            page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTo(0, 320)")
             self.assertGreater(
+                page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTop"),
+                0,
+            )
+            self.assertEqual(
                 page.evaluate("() => document.querySelector('[data-slot=page]').scrollTop"),
                 0,
             )
@@ -973,6 +977,7 @@ class LayoutBrowserTests(unittest.TestCase):
                         outerOverflow: outerStyle.overflow,
                         innerHeight: window.innerHeight,
                         pageOverflowY: pageStyle.overflowY,
+                        mainOverflowY: getComputedStyle(pageHost.querySelector('main')).overflowY,
                         documentOverflowY: getComputedStyle(document.documentElement).overflowY,
                         documentScrollHeight: document.documentElement.scrollHeight,
                         documentClientHeight: document.documentElement.clientHeight,
@@ -986,6 +991,8 @@ class LayoutBrowserTests(unittest.TestCase):
                         self.assertGreater(styles["outerRectHeight"], styles["innerHeight"])
                         self.assertEqual(styles["rootOverflow"], "visible")
                         self.assertEqual(styles["outerOverflow"], "visible")
+                        self.assertEqual(styles["pageOverflowY"], "visible")
+                        self.assertEqual(styles["mainOverflowY"], "visible")
                         self.assertGreater(
                             styles["documentScrollHeight"], styles["documentClientHeight"]
                         )
@@ -1000,11 +1007,12 @@ class LayoutBrowserTests(unittest.TestCase):
                         self.assertIn(styles["rootOverflow"], ("hidden", "clip"))
                         self.assertAlmostEqual(styles["outerRectHeight"], 544, delta=1)
                         self.assertEqual(styles["innerHeight"], 844)
-                        self.assertEqual(styles["pageOverflowY"], "auto")
+                        self.assertEqual(styles["pageOverflowY"], "visible")
+                        self.assertEqual(styles["mainOverflowY"], "auto")
                         page.evaluate("() => window.scrollTo(0, 0)")
-                        page.evaluate("() => document.querySelector('[data-slot=page]').scrollTo(0, 320)")
+                        page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTo(0, 320)")
                         self.assertGreater(
-                            page.evaluate("() => document.querySelector('[data-slot=page]').scrollTop"),
+                            page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTop"),
                             0,
                         )
                         self.assertEqual(page.evaluate("() => window.scrollY"), 0)

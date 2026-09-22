@@ -416,6 +416,10 @@ class SidebarTests(CatalogTestCase):
             styles,
             '.wrapper[data-layout="app"] > [data-slot="page"]',
         )
+        main_host = _css_block(
+            styles,
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main',
+        )
         flyout_layer = _css_block(
             styles,
             '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"])',
@@ -431,8 +435,10 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("position: fixed", flyout)
         self.assertIn("z-index: $zindex-dropdown", flyout)
-        self.assertIn("overflow-y: auto", page_host)
+        self.assertNotIn("overflow-y: auto", page_host)
         self.assertIn("flex: 1 1 auto", page_host)
+        self.assertIn("overflow-y: auto", main_host)
+        self.assertIn("flex: 1 1 auto", main_host)
         self.assertIn("z-index: $zindex-fixed + 1", flyout_layer)
         self.assertIn("left: var(--moo-sidebar-flyout-left)", flyout)
         self.assertIn("inset-block-start: var(--moo-sidebar-flyout-block-start)", flyout)
@@ -444,14 +450,19 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("display: grid", flyout_text)
         self.assertIn("display: flex !important", flyout_badge)
 
-    def test_app_main_does_not_create_a_second_vertical_scroll_owner(self) -> None:
+    def test_app_main_owns_vertical_scroll(self) -> None:
         styles = read_app_styles()
+        page = _css_block(
+            styles,
+            '.wrapper[data-layout="app"] > [data-slot="page"]',
+        )
         main = _css_block(
             styles,
             '.wrapper[data-layout="app"] > [data-slot="page"] > main',
         )
 
-        self.assertNotIn("overflow-y: auto", main)
+        self.assertNotIn("overflow-y: auto", page)
+        self.assertIn("overflow-y: auto", main)
 
     def test_sidebar_group_action_and_menu_badge_position_without_extra_classes(self) -> None:
         # Regression coverage: sidebar_group_action and sidebar_menu_badge must

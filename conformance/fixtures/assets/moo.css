@@ -7839,7 +7839,6 @@ label.btn {
     min-height: 0;
     flex: 1 1 auto;
     flex-direction: column;
-    overflow-y: auto;
   }
   .wrapper[data-layout="app"] > [data-slot="page"] > header,
 .wrapper[data-layout="app"] > [data-slot="page"] > main,
@@ -7851,6 +7850,7 @@ label.btn {
     min-height: 0;
     flex: 1 1 auto;
     flex-direction: column;
+    overflow-y: auto;
   }
   .wrapper[data-layout="app"] > [data-slot="page"] > main > :is( .container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl, .container-fluid ) {
     display: flex;
@@ -7866,6 +7866,9 @@ label.btn {
       overflow: visible;
     }
     .wrapper[data-layout="app"][data-shell-mode="contained"] > [data-slot="page"] {
+      overflow: visible;
+    }
+    .wrapper[data-layout="app"][data-shell-mode="contained"] > [data-slot="page"] > main {
       overflow: visible;
     }
   }

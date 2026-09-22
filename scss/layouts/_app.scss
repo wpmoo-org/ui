@@ -28,7 +28,6 @@
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .wrapper[data-layout="app"] > [data-slot="page"] > header,
@@ -46,6 +45,7 @@
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .wrapper[data-layout="app"] > [data-slot="page"] > main > :is(
@@ -72,6 +72,10 @@
   }
 
   .wrapper[data-layout="app"][data-shell-mode="contained"] > [data-slot="page"] {
+    overflow: visible;
+  }
+
+  .wrapper[data-layout="app"][data-shell-mode="contained"] > [data-slot="page"] > main {
     overflow: visible;
   }
 }

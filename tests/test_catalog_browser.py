@@ -408,7 +408,7 @@ class CatalogBrowserTests(unittest.TestCase):
             self.assertEqual(scroll_state["windowScrollY"], 0, scroll_state)
             self.assertEqual(scroll_state["pageScrollTop"], 0, scroll_state)
             self.assertGreater(scroll_state["mainScrollTop"], 0, scroll_state)
-            self.assertEqual(scroll_state["pageOverflowY"], "auto", scroll_state)
+            self.assertEqual(scroll_state["pageOverflowY"], "visible", scroll_state)
             self.assertEqual(scroll_state["mainOverflowY"], "auto", scroll_state)
             self.assertLessEqual(
                 abs(scroll_state["targetTop"] - scroll_state["headerBottom"]),

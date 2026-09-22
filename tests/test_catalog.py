@@ -327,7 +327,8 @@ class CatalogContractTests(CatalogTestCase):
             encoding="utf-8"
         )
         match = re.search(
-            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\]\s*\{(?P<body>[^}]*)\}',
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*'
+            r'\{(?P<body>[^}]*)\}',
             styles,
         )
 
@@ -336,34 +337,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
-    def test_app_main_does_not_own_vertical_scroll_below_the_page_header(self) -> None:
+    def test_app_page_does_not_create_a_second_vertical_scroll_owner(self) -> None:
         styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
         match = re.search(
-            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*'
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\]\s*'
             r'\{(?P<body>[^}]*)\}',
             styles,
         )
 
         self.assertIsNotNone(match)
         assert match is not None
-        scroll_values = {"auto", "overlay", "scroll"}
-        for property_name, value in re.findall(
-            r"\b(overflow|overflow-y)\s*:\s*([^;}]*)",
-            match.group("body"),
-        ):
-            tokens = value.replace("!important", "").split()
-            if not tokens:
-                continue
-            vertical_value = (
-                tokens[0]
-                if property_name == "overflow-y"
-                else tokens[-1]
-                if len(tokens) > 1
-                else tokens[0]
-            )
-            self.assertNotIn(vertical_value.lower(), scroll_values)
+        self.assertNotIn("overflow-y: auto", match.group("body"))
 
     def test_app_shell_rules_are_owned_by_the_app_layout_module(self) -> None:
         app_path = ROOT / "scss/layouts/_app.scss"
@@ -477,7 +463,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIsNotNone(catalog_main)
         assert catalog_main is not None
-        self.assertIn("overflow-y: auto;", catalog_main.group("body"))
+        self.assertNotIn("overflow-y: auto;", catalog_main.group("body"))
 
     def test_examples_keep_document_vertical_rhythm(self) -> None:
         styles = read_catalog_styles()
