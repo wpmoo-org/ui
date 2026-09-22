@@ -115,7 +115,7 @@ var _Sidebar = class _Sidebar {
     return this._window.matchMedia(this._config.breakpoint).matches;
   }
   _isCollapsed() {
-    return this._isDesktop() && this._element.dataset.sidebarState === "collapsed";
+    return this._isDesktop() && this._sidebar?.dataset?.collapsible === "icon" && this._element.dataset.sidebarState === "collapsed";
   }
   _trigger(name, detail = {}) {
     return this._element.dispatchEvent(

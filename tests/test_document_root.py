@@ -119,7 +119,10 @@ class DocumentRootTests(unittest.TestCase):
         self.assertEqual(prepaint.tag, "script")
         self.assertNotIn("src", prepaint.attrs)
         self.assertNotIn("defer", prepaint.attrs)
-        self.assertIn("const owner = document.currentScript?.parentElement", source)
+        self.assertIn(
+            "const owner = ownerDocument?.currentScript?.parentElement",
+            source,
+        )
 
         skip_links = [
             node
@@ -206,6 +209,11 @@ class DocumentRootTests(unittest.TestCase):
                 nodes = elements(root)
                 html = next(node for node in nodes if node.tag == "html")
                 body = next(node for node in nodes if node.tag == "body")
+                if fixture_path.name == "document-owner-prepaint.html":
+                    owners = [node for node in body.children if is_resolved_owner(node)]
+                    self.assertEqual(len(owners), 1)
+                    self.assertIs(body.children[0], owners[0])
+                    continue
                 host = next(
                     node for node in nodes if "data-conformance-host" in node.attrs
                 )

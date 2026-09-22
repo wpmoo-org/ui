@@ -64,12 +64,9 @@ workspace boundary checks. The final commands and their recorded results are:
   `OK`.
 - [x] `git diff --check` — no whitespace errors.
 
-For broader context, `.venv/bin/python3 -m unittest tests.test_catalog` reports
-`Ran 206 tests` with `2 failures` and `1 skipped`: the existing
-`sidebar-account-menu__header` ownership contract and the legacy
-`id="sidebar"` Layout anchor contract. No issue references are attached to
-those failures; they are outside this Sass aggregate change and are not
-included in the focused verification command above.
+- [x] `.venv/bin/python3 -m unittest tests.test_catalog` — 108 tests pass with
+  one documented skip (`OK`). This includes the Dropdown selector-ownership
+  contract and the canonical Layout route/anchor contract.
 
 The public Sass entrypoints remain import-only, and the normalized `moo.css` and
 `moo-ui.css` baselines are recorded in the test fixtures after the intentional

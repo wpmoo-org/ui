@@ -171,15 +171,13 @@ class DropdownMenuTests(CatalogTestCase):
     def test_identity_trigger_account_menu_keeps_sidebar_width_in_header(self) -> None:
         styles = (ROOT / "scss/components/_dropdown.scss").read_text(encoding="utf-8")
 
-        selector = (
-            '[data-moo-identity-trigger="1"] + '
-            '.dropdown-menu:has(> .sidebar-account-menu__header)'
-        )
+        selector = '[data-identity-trigger="1"] + .dropdown-menu'
         self.assertIn(selector, styles)
         self.assertIn(
             "min-width: var(--moo-dropdown-sidebar-min-width)",
             styles[styles.index(selector):],
         )
+        self.assertNotIn("sidebar-account-menu__header", styles)
 
     def test_dropdown_item_keeps_positional_state_compatibility(self) -> None:
         output = self.render_template(

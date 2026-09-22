@@ -40,6 +40,9 @@ PRIVATE_OWNER_FIXTURE_HOOKS = {
     "data-moo-theme-key",
 }
 DOCUMENT_OWNER_FIXTURE_HOOKS = {
+    "conformance/fixtures/document-owner-prepaint.html": {
+        "data-moo-document-owner",
+    },
     "conformance/fixtures/owner-portals.html": {
         "data-moo-document-owner",
     },

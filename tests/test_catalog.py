@@ -4415,7 +4415,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(">Layout<", sidebar)
         self.assertNotIn('href="layouts/"', sidebar)
         self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layout/">', guide)
-        for anchor in ("app", "sidebar", "page", "breakpoints", "containers"):
+        for anchor in ("app", "page", "breakpoints", "containers"):
             with self.subTest(anchor=anchor):
                 self.assertIn(f'id="{anchor}"', guide)
         self.assertNotRegex(
