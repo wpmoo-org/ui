@@ -12,9 +12,12 @@ the metadata entrypoint that records SHA-256 hashes for the adapter-facing
 `./moo.css`, `./moo-ui.css`, and `./theme-prepaint.js` bytes. The prepaint file
 is not an ESM runtime entrypoint and must be placed before the first themed
 content; hosts must consume the published bytes rather than copying source.
-The package candidate is RC8 while catalog CodePen URLs remain pinned to the
-published RC7 package until RC8 is released. The RC8 API freeze and tarball
-verifier enforce this boundary.
+Catalog CodePen URLs intentionally use the active `package.json` version,
+including the RC8 release candidate. The release flow accepts the brief CDN
+propagation window after the release tag is created; a second synchronization
+merge solely to change CodePen URLs is not required. This is a conscious
+release policy, not an accidental unpublished-package reference. The RC8 API
+freeze and tarball verifier continue to protect the package surface itself.
 
 ## 1.0.0-rc.7 Entrypoints
 
