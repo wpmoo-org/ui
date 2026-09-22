@@ -298,9 +298,9 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         first_child = owner.children[0]
         self.assertEqual(first_child.tag, "script")
         self.assertEqual(first_child.attrs.get("src"), "assets/theme-prepaint.js")
-        self.assertNotRegex(
-            fixture,
-            r"<script\b[^>]*theme-prepaint\.js[^>]*\b(?:defer|type\s*=\s*[\"']module[\"'])",
+        self.assertNotIn("defer", first_child.attrs)
+        self.assertNotEqual(
+            (first_child.attrs.get("type") or "").strip().lower(), "module"
         )
         self.assertNotIn("../../site/static", fixture)
         self.assertNotRegex(fixture, r"<script(?![^>]*\bsrc=)")

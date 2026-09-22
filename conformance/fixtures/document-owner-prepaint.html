@@ -4,6 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Moo UI conformance fixture: document owner prepaint</title>
+    <!--
+      Hand-authored against the public theme ownership and first-paint
+      contract in README.md#theme-ownership-and-first-paint and
+      docs/contracts/THEME_PRESETS.md. The document owner must remain the
+      first body application element; the host probe is deliberately after it
+      so it remains outside .moo-ui.
+    -->
     <link rel="stylesheet" href="assets/bootstrap.min.css">
     <link rel="stylesheet" href="assets/moo.css">
   </head>
@@ -23,5 +30,9 @@
         <button class="btn btn-primary" type="button">Continue</button>
       </main>
     </div>
+
+    <section class="p-3" data-conformance-host data-document-owner-host>
+      <p data-conformance-probe>Host content remains outside the document owner.</p>
+    </section>
   </body>
 </html>

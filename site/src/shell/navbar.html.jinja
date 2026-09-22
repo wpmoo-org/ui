@@ -29,8 +29,10 @@
            width; the shortcut hint remains part of the same control instead
            of introducing a breakpoint jump. #}
         {% set search_trigger_label %}
-          {{ render_icon("search", "inline-start") }}
-          <span class="search-trigger__label">Search</span>
+          <span class="search-trigger__label">
+            {{ render_icon("search", "inline-start") }}
+            Search
+          </span>
           {#- Real shortcut, not decoration: Cmd/Ctrl+K opens this same
              command palette through the catalog command module. #}
           <span class="search-trigger__shortcut">{{ kbd("⌘") }}{{ kbd("K") }}</span>

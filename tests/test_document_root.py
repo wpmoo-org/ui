@@ -213,6 +213,13 @@ class DocumentRootTests(unittest.TestCase):
                     owners = [node for node in body.children if is_resolved_owner(node)]
                     self.assertEqual(len(owners), 1)
                     self.assertIs(body.children[0], owners[0])
+                    host = next(
+                        node for node in nodes if "data-conformance-host" in node.attrs
+                    )
+                    self.assertIs(host.parent, body)
+                    self.assertGreater(
+                        body.children.index(host), body.children.index(owners[0])
+                    )
                     continue
                 host = next(
                     node for node in nodes if "data-conformance-host" in node.attrs

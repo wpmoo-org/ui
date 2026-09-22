@@ -1916,9 +1916,15 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertRegex(
             index,
-            r'<button[^>]*search-trigger[^>]*>\s*<svg[^>]*data-icon="inline-start"',
+            r'<button[^>]*search-trigger[^>]*>\s*'
+            r'<span class="search-trigger__label">\s*'
+            r'<svg[^>]*data-icon="inline-start"',
         )
-        self.assertIn('<span class="search-trigger__label">Search</span>', index)
+        self.assertRegex(
+            index,
+            r'(?s)<span class="search-trigger__label">\s*'
+            r'<svg[^>]*data-icon="inline-start".*?</svg>\s*Search\s*</span>',
+        )
         self.assertIn(
             '<span class="search-trigger__shortcut">',
             index,
