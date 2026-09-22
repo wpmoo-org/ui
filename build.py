@@ -37,9 +37,6 @@ CERTIFICATION = SRC / "certification"
 CERTIFICATION_FIXTURES = ROOT / "tests/fixtures/certification"
 PAGES = SITE_SRC / "pages"
 SITE_STATIC = SITE / "static"
-THEME_PREPAINT_SOURCE = Markup(
-    (SITE_STATIC / "js" / "theme-prepaint.js").read_text(encoding="utf-8")
-)
 PACKAGE_DIST = ROOT / "dist"
 SITE_DIST = ROOT / "site-dist"
 SITE_PUBLIC = SITE / "public"
@@ -60,6 +57,7 @@ GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_ROOT = SRC / "js"
+THEME_PREPAINT_PATH = JS_ROOT / "theme-prepaint.js"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
@@ -82,6 +80,12 @@ PRESERVE_BUNDLED_CONSTRUCTOR_NAMES = {"sidebar.js", "datatable.js"}
 AGGREGATE_JS_MODULES = ("moo-ui.js",)
 PUBLIC_ESM_AGGREGATE_MODULES = {"moo-ui", "moo-ui.min"}
 PACKAGE_MANIFEST = ROOT / "package.json"
+RELEASE_MANIFEST_PATH = PACKAGE_DIST / "release-manifest.json"
+RELEASE_ARTIFACTS = (
+    ("./moo.css", "dist/assets/css/moo.css"),
+    ("./moo-ui.css", "dist/assets/css/moo-ui.css"),
+    ("./theme-prepaint.js", "dist/js/theme-prepaint.js"),
+)
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
 THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
@@ -139,6 +143,7 @@ SOURCE_SNAPSHOT_DIRS = (
 )
 SOURCE_SNAPSHOT_FILES = (
     JS_ROOT / "moo-ui.js",
+    JS_ROOT / "theme-prepaint.js",
     JS_ROOT / "theme-owner.js",
     CERTIFICATION / "layout-evidence.json",
 )
@@ -1246,6 +1251,10 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
     )
 
 
+def theme_prepaint_source() -> Markup:
+    return Markup(THEME_PREPAINT_PATH.read_text(encoding="utf-8"))
+
+
 def create_environment(icon_renderer=None) -> Environment:
     environment = Environment(
         loader=FileSystemLoader((str(SITE_SRC), str(SRC))),
@@ -1276,7 +1285,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
-    environment.globals["theme_prepaint_source"] = THEME_PREPAINT_SOURCE
+    environment.globals["theme_prepaint_source"] = theme_prepaint_source
     environment.globals["tasks_example_js_source"] = tasks_example_js_source
     environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
@@ -1957,6 +1966,7 @@ def asset_version() -> str:
 def copy_package_js() -> None:
     package_js_dir = PACKAGE_DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(THEME_PREPAINT_PATH, package_js_dir / "theme-prepaint.js")
     for module_name in CORE_JS_MODULES:
         target = package_js_dir / module_name
         shutil.copy2(JS_COMPONENTS / module_name, target)
@@ -1972,6 +1982,40 @@ def copy_package_js() -> None:
     for module_name in AGGREGATE_JS_MODULES:
         _bundle_module(module_name, minify=False)
         _bundle_module(module_name, minify=True)
+
+
+def write_release_manifest() -> None:
+    """Write hashes for the deliberately small, adapter-facing artifact set."""
+
+    artifacts = []
+    for export, relative_path in RELEASE_ARTIFACTS:
+        path = ROOT / relative_path
+        if not path.is_file():
+            raise MissingCoreOutputsError(
+                "Release artifact is missing before manifest generation: "
+                + relative_path
+            )
+        artifacts.append(
+            {
+                "export": export,
+                "path": relative_path,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+        )
+
+    package = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))
+    payload = {
+        "schemaVersion": 1,
+        "package": {
+            "name": package["name"],
+            "version": package["version"],
+        },
+        "artifacts": artifacts,
+    }
+    RELEASE_MANIFEST_PATH.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def js_license_banner(module_name: str) -> str:
@@ -2081,6 +2125,8 @@ def required_core_outputs() -> tuple[Path, ...]:
     for name in AGGREGATE_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
+    outputs.append(PACKAGE_DIST / "js" / "theme-prepaint.js")
+    outputs.append(RELEASE_MANIFEST_PATH)
     return tuple(outputs)
 
 
@@ -2106,8 +2152,14 @@ def copy_core_outputs_to_site() -> None:
 
     components_dir = SITE_DIST / "assets/js/components"
     legacy_js_dir = SITE_DIST / "js"
+    owner_js_dir = SITE_DIST / "assets/js"
     components_dir.mkdir(parents=True, exist_ok=True)
     legacy_js_dir.mkdir(parents=True, exist_ok=True)
+    owner_js_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(
+        PACKAGE_DIST / "js/theme-prepaint.js",
+        owner_js_dir / "theme-prepaint.js",
+    )
     for module_name in CORE_JS_MODULES:
         package_module = PACKAGE_DIST / "js" / module_name
         shutil.copy2(package_module, components_dir / module_name)
@@ -2193,6 +2245,7 @@ def copy_certification_fixtures_to_site() -> None:
     public_dist = SITE_DIST / "dist"
     shutil.copytree(PACKAGE_DIST / "assets", public_dist / "assets", dirs_exist_ok=True)
     shutil.copytree(PACKAGE_DIST / "js", public_dist / "js", dirs_exist_ok=True)
+    shutil.copy2(RELEASE_MANIFEST_PATH, public_dist / "release-manifest.json")
 
     public_bootstrap_js = SITE_DIST / "vendor/bootstrap/dist/js"
     public_bootstrap_js.mkdir(parents=True, exist_ok=True)
@@ -2527,6 +2580,7 @@ def build_core() -> None:
     PACKAGE_DIST.mkdir()
     compile_core_styles()
     copy_package_js()
+    write_release_manifest()
 
 
 def build_site() -> None:

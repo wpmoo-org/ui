@@ -1,16 +1,12 @@
-{# Moo UI Sidebar: a composable app-shell primitive.
+{# Moo UI Sidebar: the inner navigation surface used by the App layout.
 
-   Bootstrap has no native sidebar component, so this family owns the public
-   `.sidebar*` selector namespace (same precedent as `.avatar`). The macros
-   mirror the design reference's composable sidebar API so an app shell is
-   rearranged by editing markup rather than rewriting CSS. Behavior
-   (collapse-to-icon rail,
-   mobile offcanvas, sub-menu disclosure) layers on in later phases using
-   native Bootstrap plugins. #}
+   Bootstrap has no native sidebar, so this family owns the public
+   `.sidebar*` selector namespace (same precedent as `.avatar`). App owns the
+   outer shell, placement, surface variant, and collapse mode; these macros
+   own the inner regions, menu anatomy, and controls that compose inside it.
+   Behavior (mobile offcanvas and sub-menu disclosure) layers on in later
+   phases using native Bootstrap plugins. #}
 
-{% set sidebar_sides = ["left", "right"] %}
-{% set sidebar_variants = ["sidebar", "floating", "inset"] %}
-{% set sidebar_collapsible = ["icon", "offcanvas", "none"] %}
 {% set sidebar_button_sizes = ["default", "lg"] %}
 {% set sidebar_dropdown_directions = ["dropdown", "dropup", "dropend", "dropstart"] %}
 
@@ -21,40 +17,12 @@
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/skeleton.html.jinja" import skeleton %}
 
-{% macro sidebar(
-  side="left",
-  variant="sidebar",
-  collapsible="icon",
-  rail=true,
-  id="catalog-sidebar",
-  aria_label="Sidebar",
-  aria_labelled_by="",
-  extra_class=""
-) -%}
-  {% if side not in sidebar_sides %}{{ fail("Unknown sidebar side: " ~ side) }}{% endif %}
-  {% if variant not in sidebar_variants %}{{ fail("Unknown sidebar variant: " ~ variant) }}{% endif %}
-  {% if collapsible not in sidebar_collapsible %}{{ fail("Unknown sidebar collapsible mode: " ~ collapsible) }}{% endif %}
-  {% if not id | trim %}{{ fail("Sidebar id is required") }}{% endif %}
-  {% set classes = "sidebar" %}
-  {% set side_class = "offcanvas-end" if side == "right" else "offcanvas-start" %}
+{% macro sidebar(extra_class="") -%}
+  {% set classes = "sidebar-inner" %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
-  {% set classes = classes ~ " offcanvas-lg " ~ side_class %}
-  <aside
-    id="{{ id }}"
-    class="{{ classes }}"
-    tabindex="-1"
-    data-slot="sidebar"
-    aria-label="{{ aria_label }}"
-    {% if aria_labelled_by %}aria-labelledby="{{ aria_labelled_by }}"{% endif %}
-    data-side="{{ side }}"
-    data-variant="{{ variant }}"
-    data-collapsible="{{ collapsible }}"
-  >
-    <div class="sidebar-inner" data-slot="sidebar-inner">
-      {{ caller() | trim | safe }}
-    </div>
-    {% if rail and collapsible != "none" %}{{ sidebar_rail() }}{% endif %}
-  </aside>
+  <div class="{{ classes }}" data-slot="sidebar-inner">
+    {{ caller() | trim | safe }}
+  </div>
 {%- endmacro %}
 
 {% macro sidebar_trigger(
@@ -75,16 +43,6 @@
   >
     {{ render_icon("panel-left", "inline-start") }}
   </button>
-{%- endmacro %}
-
-{% macro sidebar_rail(aria_label="Toggle sidebar") -%}
-  <button
-    class="sidebar-rail"
-    type="button"
-    data-sidebar-rail
-    aria-label="{{ aria_label }}"
-    tabindex="-1"
-  ></button>
 {%- endmacro %}
 
 {% macro sidebar_header(extra_class="") -%}

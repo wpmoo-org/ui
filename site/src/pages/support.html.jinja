@@ -130,6 +130,25 @@
             </tbody>
           </table>
         </div>
+        {% set browser_entrypoints = product.certification.publicEntrypoints.browser | default([]) %}
+        <div class="table-responsive scroll-fade-x no-scrollbar">
+          <table class="table align-middle moo-support-table">
+            <thead>
+              <tr><th scope="col">BROWSER</th></tr>
+            </thead>
+            <tbody>
+              {% if browser_entrypoints %}
+                {% for entrypoint in browser_entrypoints %}
+                  <tr>
+                    <td><code>@wpmoo/ui/{{ entrypoint | replace("./", "") }}</code></td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td>No public browser entrypoints yet.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section class="moo-doc-section" aria-labelledby="bootstrap-compatibility">

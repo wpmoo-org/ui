@@ -95,6 +95,52 @@
         {{ render_code_snippet("installation-scoped-import", scoped_import_example, "js") }}
       </section>
 
+      <section class="moo-doc-section" aria-labelledby="theme-ownership">
+        {{ typography("Theme Ownership And First Paint", variant="section-title", id="theme-ownership") }}
+        <p>
+          Resolve the initial <code>light</code> or <code>dark</code> value on
+          the server whenever the host knows the request or session
+          preference. Put that value on the first application owner and keep
+          the document language and default direction on <code>html</code>.
+          A server-resolved document does not need a prepaint bootstrap.
+        </p>
+        {% set server_owner_example %}
+        <!-- Server-resolved document: no prepaint required. -->
+        <html lang="en" dir="ltr">
+          <body>
+            <div class="moo-ui" data-bs-theme="dark" data-moo-document-owner="true">
+              <!-- Moo UI application -->
+            </div>
+          </body>
+        </html>
+        {% endset %}
+        {{ render_code_snippet("installation-server-owner", server_owner_example, "html") }}
+
+        <p>
+          For a static or strict-CSP host without an inline bootstrap, keep the
+          classic external asset as the first child of the resolved owner. An
+          embedded owner uses explicit persistence keys so it does not claim
+          the document's storage or direction.
+        </p>
+        {% set static_owner_example %}
+        <!-- Static or strict-CSP fallback: classic script is the root's first child. -->
+        <div class="moo-ui" data-bs-theme="light" data-moo-theme-key="portal:theme">
+          <script src="/vendor/@wpmoo/ui/theme-prepaint.js"></script>
+          <!-- embedded Moo UI fragment -->
+        </div>
+        {% endset %}
+        {{ render_code_snippet("installation-static-owner", static_owner_example, "html") }}
+
+        <p>
+          On a first visit, a static host without a known server preference can
+          only correct a browser-only preference after the external asset is
+          fetched, so that correction may be visible. The server value remains
+          the deterministic fallback; an external fetch cannot guarantee zero
+          flash in this profile. The published asset is available as
+          <code>@wpmoo/ui/theme-prepaint.js</code>.
+        </p>
+      </section>
+
       <section class="moo-doc-section" aria-labelledby="sass-source">
         {{ typography("Sass Source", variant="section-title", id="sass-source") }}
         <p>
@@ -286,6 +332,7 @@
       {"id": "choose-path", "label": "Choose This Path"},
       {"id": "full-build", "label": "Full Build"},
       {"id": "scoped-build", "label": "Scoped Adoption"},
+      {"id": "theme-ownership", "label": "Theme Ownership"},
       {"id": "sass-source", "label": "Sass Source"},
       {"id": "bootstrap-javascript", "label": "Bootstrap JavaScript"},
       {"id": "optional-esm", "label": "Optional Moo UI ESM"},

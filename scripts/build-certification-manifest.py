@@ -27,8 +27,18 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 import tarfile
 from pathlib import Path
+
+SCRIPTS_ROOT = Path(__file__).resolve().parent
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+
+from verify_release_tarball import (
+    ReleaseTarballError,
+    read_archive_members,
+)
 
 from jsonschema import Draft202012Validator
 
@@ -190,8 +200,16 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_tarball_json(archive: tarfile.TarFile, member_name: str) -> dict:
-    member = archive.getmember(member_name)
+def read_tarball_json(
+    archive: tarfile.TarFile,
+    member_name: str,
+    members: dict[str, tarfile.TarInfo] | None = None,
+) -> dict:
+    if members is None:
+        members = read_archive_members(archive)
+    member = members.get(member_name)
+    if member is None:
+        raise ValueError(f"Tarball member is missing: {member_name}")
     if not member.isfile():
         raise ValueError(f"Tarball member is not a file: {member_name}")
     stream = archive.extractfile(member)
@@ -263,9 +281,17 @@ def build_manifest(args: argparse.Namespace) -> dict:
                 f"{args.expected_package_sha256}, got {package_sha256}"
             )
 
-    with tarfile.open(args.package, mode="r:gz") as archive:
-        package = read_tarball_json(archive, "package/package.json")
-        certification = read_tarball_json(archive, "package/certification.json")
+    try:
+        with tarfile.open(args.package, mode="r:gz") as archive:
+            members = read_archive_members(archive)
+            package = read_tarball_json(archive, "package/package.json", members)
+            certification = read_tarball_json(
+                archive,
+                "package/certification.json",
+                members,
+            )
+    except ReleaseTarballError as error:
+        raise ValueError(f"Tarball member policy violation: {error}") from error
 
     if package.get("name") != "@wpmoo/ui":
         raise ValueError("Tarball is not the canonical @wpmoo/ui package")

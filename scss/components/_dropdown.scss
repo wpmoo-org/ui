@@ -167,6 +167,16 @@
   min-width: #{unquote("max(100%, var(--moo-dropdown-sidebar-min-width))")};
 }
 
+// Header identity menus reuse the Sidebar account-menu body. Keep the same
+// comfortable width when the shared body is hosted by the global navbar
+// instead of a Sidebar slot; ordinary Header dropdowns remain content-sized.
+// The trigger marker is the integration contract, so Dropdown does not reach
+// into Sidebar's private class namespace to identify the menu body.
+[data-identity-trigger="1"] + .dropdown-menu {
+  --moo-dropdown-sidebar-min-width: #{$moo-dropdown-sidebar-min-width};
+  min-width: var(--moo-dropdown-sidebar-min-width);
+}
+
 @include media-breakpoint-down(sm) {
   [data-slot="sidebar-header"] .dropend > .dropdown-menu,
   [data-slot="sidebar-footer"] .dropend > .dropdown-menu {

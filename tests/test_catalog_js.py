@@ -2005,6 +2005,7 @@ function runScenario({ baselineTheme, currentTheme, embedded = false }) {
     nodeType: 1,
     dataset: {
       bsTheme: currentTheme,
+      ...(embedded ? {} : { mooDocumentOwner: "true" }),
       ...(embedded ? {
         mooThemeKey: "embedded:theme",
         mooDirectionKey: "embedded:direction",
@@ -2254,7 +2255,7 @@ const documentBody = {
   firstElementChild: null,
 };
 const body = {
-  dataset: { bsTheme: "light" },
+  dataset: { bsTheme: "light", mooDocumentOwner: "true" },
   children: [],
   parentElement: documentBody,
   dir: "ltr",

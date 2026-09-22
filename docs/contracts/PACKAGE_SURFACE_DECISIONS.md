@@ -3,6 +3,19 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.8 Entrypoints
+
+RC8 carries the RC7 public package surface forward and adds two deliberately
+small release-facing contracts: `./theme-prepaint.js` is the classic,
+placement-dependent browser prepaint script, and `./release-manifest.json` is
+the metadata entrypoint that records SHA-256 hashes for the adapter-facing
+`./moo.css`, `./moo-ui.css`, and `./theme-prepaint.js` bytes. The prepaint file
+is not an ESM runtime entrypoint and must be placed before the first themed
+content; hosts must consume the published bytes rather than copying source.
+The package candidate is RC8 while catalog CodePen URLs remain pinned to the
+published RC7 package until RC8 is released. The RC8 API freeze and tarball
+verifier enforce this boundary.
+
 ## 1.0.0-rc.7 Entrypoints
 
 RC7 carries forward the RC6 public export and package-file inventory without

@@ -111,6 +111,45 @@ class DropdownMenuTests(CatalogTestCase):
             output,
         )
 
+    def test_dropdown_identity_composes_avatar_and_optional_email(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_identity %}'
+            '{{ dropdown_identity("Moo Admin", email="admin@example.com", initials="MA") }}'
+        )
+
+        self.assertIn('<li class="sidebar-account-menu__header">', output)
+        self.assertIn(
+            '<span class="avatar sidebar-avatar" role="img" aria-label="Moo Admin">',
+            output,
+        )
+        self.assertIn('<span class="avatar-fallback">MA</span>', output)
+        self.assertIn('<span class="sidebar-account-menu__identity">', output)
+        self.assertIn('<span class="sidebar-account-menu__name">Moo Admin</span>', output)
+        self.assertIn(
+            '<span class="sidebar-account-menu__email">admin@example.com</span>',
+            output,
+        )
+
+    def test_dropdown_identity_supports_image_and_escapes_identity_copy(self) -> None:
+        output = self.render_template(
+            '{% from "components/dropdown_menu.html.jinja" import dropdown_identity %}'
+            '{{ dropdown_identity("<Admin>", email="admin@example.com & co", '
+            'src="/avatar.webp", alt="Admin photo") }}'
+        )
+
+        self.assertIn('class="avatar avatar--has-image sidebar-avatar"', output)
+        self.assertIn('src="/avatar.webp" alt="Admin photo"', output)
+        self.assertIn('&lt;Admin&gt;', output)
+        self.assertIn('admin@example.com &amp; co', output)
+        self.assertNotIn('aria-label="<Admin>"', output)
+
+    def test_dropdown_identity_fails_fast_for_missing_name(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Dropdown identity name is required"):
+            self.render_template(
+                '{% from "components/dropdown_menu.html.jinja" import dropdown_identity %}'
+                '{{ dropdown_identity("   ", initials="MA") }}'
+            )
+
     def test_dropdown_disabled_items_use_disabled_foreground_token(self) -> None:
         styles = (ROOT / "scss/components/_dropdown.scss").read_text(encoding="utf-8")
 
@@ -128,6 +167,17 @@ class DropdownMenuTests(CatalogTestCase):
             "border-block-start: var(--bs-border-width) solid var(--bs-dropdown-divider-bg);",
             styles,
         )
+
+    def test_identity_trigger_account_menu_keeps_sidebar_width_in_header(self) -> None:
+        styles = (ROOT / "scss/components/_dropdown.scss").read_text(encoding="utf-8")
+
+        selector = '[data-identity-trigger="1"] + .dropdown-menu'
+        self.assertIn(selector, styles)
+        self.assertIn(
+            "min-width: var(--moo-dropdown-sidebar-min-width)",
+            styles[styles.index(selector):],
+        )
+        self.assertNotIn("sidebar-account-menu__header", styles)
 
     def test_dropdown_item_keeps_positional_state_compatibility(self) -> None:
         output = self.render_template(

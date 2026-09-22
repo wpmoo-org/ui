@@ -485,6 +485,7 @@ console.log(JSON.stringify(Object.fromEntries(
             {
                 "components",
                 "foundations",
+                "layouts",
                 "mixins",
                 "settings",
                 "themes",
@@ -621,7 +622,15 @@ console.log(JSON.stringify(Object.fromEntries(
         components_imports = active_scss_import_list(
             (SCSS / "_components.scss").read_text(encoding="utf-8")
         )
-        self.assertIn("foundations/focus", components_imports)
+        self.assertNotIn("foundations/focus", components_imports)
+        self.assertNotIn("utilities/scroll_fade", components_imports)
+        self.assertNotIn("layouts/app", components_imports)
+        scope_imports = active_scss_import_list(
+            (SCSS / "foundations/_scope.scss").read_text(encoding="utf-8")
+        )
+        self.assertIn("../foundations/focus", scope_imports)
+        self.assertIn("../utilities/scroll_fade", scope_imports)
+        self.assertIn("../layouts/app", scope_imports)
         self.assertEqual(
             owned_partial_targets(SCSS / "themes"),
             {
@@ -644,7 +653,13 @@ console.log(JSON.stringify(Object.fromEntries(
             active_scss_import_list(
                 (SCSS / "foundations/_scope.scss").read_text(encoding="utf-8")
             ),
-            ["../components", "../themes/forms"],
+            [
+                "../components",
+                "../foundations/focus",
+                "../utilities/scroll_fade",
+                "../layouts/app",
+                "../themes/forms",
+            ],
         )
 
     def test_public_scss_entrypoints_are_import_only_facades(self) -> None:
@@ -656,10 +671,9 @@ console.log(JSON.stringify(Object.fromEntries(
     def test_sidebar_aggregate_imports_ownership_layers_in_order(self) -> None:
         sidebar = (COMPONENTS_SCSS / "_sidebar.scss").read_text(encoding="utf-8")
         expected = [
-            "sidebar/layout",
+            "sidebar/base",
             "sidebar/menus",
             "sidebar/identity",
-            "sidebar/inset",
             "sidebar/collapsed",
         ]
         imports = active_scss_import_list(sidebar)
@@ -799,16 +813,18 @@ console.log(JSON.stringify(Object.fromEntries(
 
         aggregate_imports = active_scss_import_list(components)
         self.assertEqual(len(aggregate_imports), len(set(aggregate_imports)))
-        self.assertIn("utilities/scroll_fade", aggregate_imports)
         self.assertTrue(
             all(
                 target.startswith("components/")
                 for target in aggregate_imports
-                if target != "utilities/scroll_fade"
-                and target != "foundations/focus"
-                and not target.startswith("bootstrap/scss/")
+                if not target.startswith("bootstrap/scss/")
             )
         )
+
+        scope_imports = active_scss_import_list(scope)
+        self.assertIn("../foundations/focus", scope_imports)
+        self.assertIn("../utilities/scroll_fade", scope_imports)
+        self.assertIn("../layouts/app", scope_imports)
 
         for path in sorted(COMPONENTS_SCSS.glob("_*.scss")):
             component = path.stem.removeprefix("_")

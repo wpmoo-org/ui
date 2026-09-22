@@ -124,7 +124,11 @@ const adopt = (node) => {
 
 const outer = makeElement({
   classes: ["moo-ui"],
-  dataset: { bsTheme: "dark", mooThemeKey: "outer" },
+  dataset: {
+    bsTheme: "dark",
+    mooThemeKey: "outer",
+    mooDocumentOwner: "true",
+  },
 });
 const outerTrigger = makeElement();
 const inner = makeElement({
@@ -160,7 +164,7 @@ assert.equal(findThemeOwner(outerHost), outer);
 assert.equal(findThemeOwner(orphan), null);
 assert.deepEqual(findThemeOwners(documentNode), [outer, inner, sibling]);
 assert.deepEqual(findThemeOwners(outer), [outer, inner]);
-assert.equal(isDocumentOwner(outer), false);
+assert.equal(isDocumentOwner(outer), true);
 assert.equal(ownerPortalRoot(outer), outerHost);
 assert.equal(ownerPortalRoot(inner), innerHost);
 assert.equal(ownerPortalRoot(null), null);
@@ -178,7 +182,6 @@ setOwnerTheme(inner, "dark");
 assert.equal(inner.dataset.bsTheme, "dark");
 body.children = [outer];
 sibling.parentElement = null;
-assert.equal(isDocumentOwner(outer), true);
 assert.equal(ownerStorageKey(outer, "direction"), "moo:direction");
 setOwnerDirection(outer, "rtl");
 assert.equal(html.dir, "rtl");
@@ -207,12 +210,13 @@ console.log(JSON.stringify({
             """
 import assert from "node:assert/strict";
 
-function owner({ theme, themeKey, directionKey } = {}) {
+function owner({ theme, themeKey, directionKey, documentOwner = false } = {}) {
   return {
     dataset: {
       ...(theme ? { bsTheme: theme } : {}),
       ...(themeKey ? { mooThemeKey: themeKey } : {}),
       ...(directionKey ? { mooDirectionKey: directionKey } : {}),
+      ...(documentOwner ? { mooDocumentOwner: "true" } : {}),
     },
     dir: "",
     parentElement: null,
@@ -242,11 +246,11 @@ globalThis.document = {
   currentScript: null,
 };
 
-const documentOwner = owner({ theme: "light" });
+const documentOwner = owner({ theme: "light", documentOwner: true });
 documentOwner.parentElement = body;
 body.children = [documentOwner];
 document.currentScript = { parentElement: documentOwner };
-await import("./site/static/js/theme-prepaint.js?document-owner");
+await import("./src/js/theme-prepaint.js?document-owner");
 assert.equal(documentOwner.dataset.bsTheme, "dark");
 assert.equal(documentOwner.dataset.mooPrepaint, "ready");
 assert.equal(documentElement.dir, "rtl");
@@ -255,6 +259,12 @@ assert.deepEqual(documentOwner.__mooPrepaintBaseline, {
   theme: "light",
   direction: "ltr",
 });
+
+const documentSibling = owner({ theme: "light" });
+documentSibling.parentElement = body;
+body.children = [documentOwner, documentSibling];
+assert.equal(documentElement.dir, "rtl");
+assert.equal(documentOwner.dataset.bsTheme, "dark");
 
 const embedded = owner({
   theme: "dark",
@@ -266,7 +276,7 @@ sibling.parentElement = body;
 body.children = [documentOwner, embedded, sibling];
 documentElement.dir = "ltr";
 document.currentScript = { parentElement: embedded };
-await import("./site/static/js/theme-prepaint.js?embedded-owner");
+await import("./src/js/theme-prepaint.js?embedded-owner");
 assert.equal(embedded.dataset.bsTheme, "dark");
 assert.equal(embedded.dataset.mooPrepaint, "ready");
 assert.equal(embedded.dir, "rtl");
@@ -282,16 +292,29 @@ const classOnlyHost = {
   parentElement: body,
 };
 document.currentScript = { parentElement: classOnlyHost };
-await import("./site/static/js/theme-prepaint.js?class-only-host");
+await import("./src/js/theme-prepaint.js?class-only-host");
 assert.equal(classOnlyHost.dataset.mooPrepaint, undefined);
 
-const throwingSystemOwner = owner({ theme: "light" });
+const unmarkedBodyOwner = owner({
+  theme: "light",
+  directionKey: "embedded-direction",
+});
+unmarkedBodyOwner.parentElement = body;
+body.children = [unmarkedBodyOwner];
+documentElement.dir = "ltr";
+document.currentScript = { parentElement: unmarkedBodyOwner };
+await import("./src/js/theme-prepaint.js?unmarked-body-owner");
+assert.equal(unmarkedBodyOwner.dir, "rtl");
+assert.equal(documentElement.dir, "ltr");
+assert.equal(unmarkedBodyOwner.dataset.mooPrepaint, "ready");
+
+const throwingSystemOwner = owner({ theme: "light", documentOwner: true });
 throwingSystemOwner.parentElement = body;
 body.children = [throwingSystemOwner];
 documentElement.dir = "ltr";
 window.matchMedia = () => { throw new Error("unavailable"); };
 document.currentScript = { parentElement: throwingSystemOwner };
-await import("./site/static/js/theme-prepaint.js?match-media-throws");
+await import("./src/js/theme-prepaint.js?match-media-throws");
 assert.equal(throwingSystemOwner.dataset.bsTheme, "light");
 assert.equal(throwingSystemOwner.dataset.mooPrepaint, "ready");
 assert.deepEqual(throwingSystemOwner.__mooPrepaintBaseline, {
@@ -317,6 +340,77 @@ console.log(JSON.stringify({
                 "documentTheme": "dark",
                 "embeddedDirection": "rtl",
                 "fallbackTheme": "light",
+            },
+        )
+
+    def test_embedded_owner_never_infers_document_scope_from_streamed_siblings(self) -> None:
+        case = self.run_case(
+            """
+import assert from "node:assert/strict";
+
+function owner({ theme = "light", directionKey = "embedded-direction" } = {}) {
+  return {
+    dataset: {
+      bsTheme: theme,
+      mooDirectionKey: directionKey,
+    },
+    dir: "",
+    parentElement: null,
+    matches(selector) {
+      return selector.includes(".moo-ui") &&
+        ["light", "dark"].includes(this.dataset.bsTheme);
+    },
+    getAttribute(name) {
+      return name === "dir" ? this.dir || null : null;
+    },
+  };
+}
+
+const documentElement = { dir: "ltr" };
+const body = {
+  children: [],
+  get firstElementChild() { return this.children[0] || null; },
+};
+const storage = new Map([["embedded-direction", "rtl"]]);
+globalThis.window = {
+  localStorage: { getItem(key) { return storage.get(key) || null; } },
+};
+globalThis.document = {
+  body,
+  documentElement,
+  currentScript: null,
+};
+
+const embedded = owner();
+embedded.parentElement = body;
+body.children = [embedded];
+document.currentScript = { parentElement: embedded };
+await import("./src/js/theme-prepaint.js?streaming-embedded");
+
+const laterSibling = owner({ theme: "dark" });
+laterSibling.parentElement = body;
+body.children = [embedded, laterSibling];
+
+assert.equal(embedded.dir, "rtl");
+assert.equal(documentElement.dir, "ltr");
+assert.equal(embedded.dataset.mooPrepaint, "ready");
+
+console.log(JSON.stringify({
+  name: "streaming-embedded-owner",
+  ok: true,
+  documentDirection: documentElement.dir,
+  ownerDirection: embedded.dir,
+}));
+"""
+        )
+
+        self.assertEqual(
+            case,
+            {
+                "name": "streaming-embedded-owner",
+                "ok": True,
+                "documentDirection": "ltr",
+                "ownerDirection": "rtl",
             },
         )
 

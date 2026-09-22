@@ -1,0 +1,62 @@
+// Shared command/search trigger composition. The host supplies the semantic
+// button markup and behavior; Core owns only the reusable visual contract.
+.search-trigger {
+  width: $moo-search-trigger-width;
+  max-width: 100%;
+  flex: 0 1 $moo-search-trigger-width;
+  min-width: 0;
+  justify-content: space-between;
+  height: $moo-search-trigger-height;
+  padding: $moo-search-trigger-padding-y $moo-search-trigger-padding-x;
+  color: var(--bs-secondary-color);
+  border: var(--bs-border-width) solid $moo-search-trigger-border-color;
+  border-radius: var(--bs-border-radius);
+  background: color-mix(in srgb, var(--bs-secondary-bg) 55%, var(--bs-body-bg));
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  box-shadow: none;
+}
+
+.search-trigger:hover {
+  color: var(--bs-secondary-color);
+  border-color: $moo-search-trigger-border-color;
+  background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));
+}
+
+.search-trigger:focus-visible {
+  color: var(--bs-secondary-color);
+  border-color: $moo-search-trigger-border-color;
+  background: color-mix(in srgb, var(--bs-secondary-bg) 78%, var(--bs-body-bg));
+}
+
+.search-trigger__label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: $moo-search-trigger-label-gap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-trigger__shortcut {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: $moo-search-trigger-shortcut-gap;
+  margin-inline-start: auto;
+}
+
+@include media-breakpoint-up(lg) {
+  .search-trigger {
+    width: $moo-search-trigger-width-lg;
+    flex-basis: $moo-search-trigger-width-lg;
+  }
+}
+
+@include media-breakpoint-up(xxl) {
+  .search-trigger {
+    width: $moo-search-trigger-width-xxl;
+    flex-basis: $moo-search-trigger-width-xxl;
+  }
+}

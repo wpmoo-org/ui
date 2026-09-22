@@ -16,6 +16,35 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-8">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0-rc.8</span>
+            <span class="text-body-secondary">Prepaint distribution and release-integrity contract</span>
+          </div>
+          <h2 id="release-1-0-0-rc-8">Prepaint Distribution and Release Integrity</h2>
+          <p>
+            Moo UI 1.0.0-rc.8 carries the RC7 public package surface forward
+            and publishes the placement-dependent browser prepaint entrypoint
+            together with a byte-verified release manifest. Certification
+            remains <code>preview</code> until the RC8 acceptance pass closes.
+          </p>
+
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Added</span>
+              <span>The package now exports the classic <code>theme-prepaint.js</code> browser entrypoint and the adapter-facing <code>release-manifest.json</code> metadata.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Updated</span>
+              <span>The release manifest records SHA-256 hashes for the public CSS and prepaint bytes; the tarball verifier validates those bytes without extracting the archive.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>Release candidate v1.0.0-rc.8; catalog CodePen exports remain pinned to the published RC7 package.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-7">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.7</span>
@@ -530,6 +559,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0-rc-8", "label": "v1.0.0-rc.8"},
       {"id": "release-1-0-0-rc-7", "label": "v1.0.0-rc.7"},
       {"id": "release-1-0-0-rc-6", "label": "v1.0.0-rc.6"},
       {"id": "release-1-0-0-rc-5", "label": "v1.0.0-rc.5"},

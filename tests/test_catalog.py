@@ -323,7 +323,7 @@ class CatalogContractTests(CatalogTestCase):
         return path
 
     def test_main_scroller_keeps_keyboard_focus_targets_immediately_visible(self) -> None:
-        styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+        styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
         match = re.search(
@@ -335,6 +335,122 @@ class CatalogContractTests(CatalogTestCase):
         body = match.group("body")
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
+
+    def test_app_main_does_not_own_vertical_scroll_below_the_page_header(self) -> None:
+        styles = (ROOT / "scss/layouts/_app.scss").read_text(
+            encoding="utf-8"
+        )
+        match = re.search(
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*'
+            r'\{(?P<body>[^}]*)\}',
+            styles,
+        )
+
+        self.assertIsNotNone(match)
+        assert match is not None
+        scroll_values = {"auto", "overlay", "scroll"}
+        for property_name, value in re.findall(
+            r"\b(overflow|overflow-y)\s*:\s*([^;}]*)",
+            match.group("body"),
+        ):
+            tokens = value.replace("!important", "").split()
+            if not tokens:
+                continue
+            vertical_value = (
+                tokens[0]
+                if property_name == "overflow-y"
+                else tokens[-1]
+                if len(tokens) > 1
+                else tokens[0]
+            )
+            self.assertNotIn(vertical_value.lower(), scroll_values)
+
+    def test_app_shell_rules_are_owned_by_the_app_layout_module(self) -> None:
+        app_path = ROOT / "scss/layouts/_app.scss"
+        if not app_path.is_file():
+            self.fail("App shell styles are not owned by layouts/_app.scss")
+        app_styles = app_path.read_text(encoding="utf-8")
+        sidebar_path = ROOT / "scss/components/sidebar/_base.scss"
+        self.assertTrue(sidebar_path.is_file())
+        sidebar_styles = sidebar_path.read_text(encoding="utf-8")
+
+        self.assertIn('.wrapper[data-layout="app"] {', app_styles)
+        self.assertIn(
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main {',
+            app_styles,
+        )
+        self.assertNotIn('.wrapper[data-layout="app"] {', sidebar_styles)
+        self.assertNotIn(
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main {',
+            sidebar_styles,
+        )
+
+    def test_sidebar_variants_have_explicit_style_owners(self) -> None:
+        sidebar_root = ROOT / "scss/components/sidebar"
+        app_sidebar_root = ROOT / "scss/layouts/app/sidebar"
+        missing = [
+            name
+            for name in (
+                "_base.scss",
+                "_menus.scss",
+                "_identity.scss",
+                "_collapsed.scss",
+            )
+            if not (sidebar_root / name).is_file()
+        ]
+        missing.extend(
+            name
+            for name in ("_base.scss", "_default.scss", "_floating.scss", "_inset.scss")
+            if not (app_sidebar_root / name).is_file()
+        )
+        self.assertEqual(missing, [])
+        if missing:
+            return
+        base = (sidebar_root / "_base.scss").read_text(encoding="utf-8")
+        app_base = (app_sidebar_root / "_base.scss").read_text(encoding="utf-8")
+        attached = (app_sidebar_root / "_default.scss").read_text(encoding="utf-8")
+        floating = (app_sidebar_root / "_floating.scss").read_text(encoding="utf-8")
+        inset = (app_sidebar_root / "_inset.scss").read_text(encoding="utf-8")
+
+        self.assertFalse((sidebar_root / "_layout.scss").exists())
+        self.assertFalse((sidebar_root / "_inset.scss").exists())
+        self.assertNotRegex(base, r"(?m)^\.sidebar\s*\{")
+        self.assertIn(".sidebar-inner {", base)
+        self.assertIn(".sidebar {", app_base)
+        self.assertIn("border-right", attached)
+        self.assertIn("border-left", attached)
+        self.assertIn('data-variant="floating"', floating)
+        self.assertIn("prefers-reduced-motion", floating)
+        self.assertIn(':has(> .sidebar[data-variant="inset"])', inset)
+        self.assertNotIn("prefers-reduced-motion", base)
+        self.assertNotIn('data-variant="floating"', base)
+        self.assertNotIn('data-variant="floating"', attached)
+
+    def test_app_owns_sidebar_shell_variants_and_component_owns_inner_surface(self) -> None:
+        component_root = ROOT / "scss/components/sidebar"
+        app_sidebar_root = ROOT / "scss/layouts/app/sidebar"
+        required_app_partials = ("_base.scss", "_default.scss", "_floating.scss", "_inset.scss")
+        missing = [
+            name for name in required_app_partials
+            if not (app_sidebar_root / name).is_file()
+        ]
+        self.assertEqual(missing, [])
+        if missing:
+            return
+
+        component_styles = (component_root / "_base.scss").read_text(encoding="utf-8")
+        app_styles = "\n".join(
+            (app_sidebar_root / name).read_text(encoding="utf-8")
+            for name in required_app_partials
+        )
+
+        self.assertNotRegex(component_styles, r"(?m)^\.sidebar\s*\{")
+        self.assertIn(".sidebar-inner", component_styles)
+        self.assertIn(".sidebar[data-side=\"left\"]", app_styles)
+        self.assertIn('data-variant="floating"', app_styles)
+        self.assertIn('data-variant="inset"', app_styles)
+        self.assertFalse((component_root / "_sidebar.scss").exists())
+        self.assertFalse((component_root / "_floating.scss").exists())
 
     def test_catalog_main_keeps_vertical_scroll_fade_below_header(self) -> None:
         result = self.run_build()
@@ -1001,8 +1117,8 @@ class CatalogContractTests(CatalogTestCase):
     def test_codepen_payloads_use_the_published_package_version(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
         self.assertEqual(site_build.CODEPEN_CDN_VERSION, "1.0.0-rc.7")
-        self.assertEqual(package["version"], "1.0.0-rc.7")
-        self.assertEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
+        self.assertEqual(package["version"], "1.0.0-rc.8")
+        self.assertNotEqual(package["version"], site_build.CODEPEN_CDN_VERSION)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -1417,7 +1533,7 @@ class CatalogContractTests(CatalogTestCase):
 
         self.assertEqual(component_lines, expected)
 
-    def test_llms_txt_cdn_example_tracks_published_package_version(self) -> None:
+    def test_llms_txt_cdn_example_tracks_active_package_version(self) -> None:
         package = json.loads(
             (ROOT / "package.json").read_text(encoding="utf-8")
         )
@@ -1428,8 +1544,8 @@ class CatalogContractTests(CatalogTestCase):
         )
 
         self.assertIsNotNone(match)
-        self.assertEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
         self.assertEqual(match.group(1), package["version"])
+        self.assertNotEqual(match.group(1), site_build.CODEPEN_CDN_VERSION)
 
     def test_icons_render_from_local_lucide_json_source(self) -> None:
         result = self.run_build()
@@ -1786,8 +1902,47 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("moo-catalog__search-trigger", preview)
         self.assertIn("catalog-command", preview)
 
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger:focus-visible", core_css)
+
+    def test_catalog_search_trigger_uses_shared_core_composition(self) -> None:
+        result = self.run_build()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        index = self.read_output("index.html")
+        self.assertRegex(
+            index,
+            r'<button class="btn btn-ghost search-trigger moo-catalog__search-trigger"',
+        )
+        self.assertRegex(
+            index,
+            r'<button[^>]*search-trigger[^>]*>\s*'
+            r'<span class="search-trigger__label">\s*'
+            r'<svg[^>]*data-icon="inline-start"',
+        )
+        self.assertRegex(
+            index,
+            r'(?s)<span class="search-trigger__label">\s*'
+            r'<svg[^>]*data-icon="inline-start".*?</svg>\s*Search\s*</span>',
+        )
+        self.assertIn(
+            '<span class="search-trigger__shortcut">',
+            index,
+        )
+
         catalog_scss = read_catalog_styles()
-        self.assertIn(".moo-catalog__search-trigger:focus-visible", catalog_scss)
+        for selector in (
+            ".moo-catalog__search-trigger {",
+            ".moo-catalog__search-trigger:hover {",
+            ".moo-catalog__search-trigger:focus-visible {",
+            ".moo-catalog__search-trigger-lead",
+            ".moo-catalog__search-trigger-shortcut",
+        ):
+            with self.subTest(selector=selector):
+                self.assertNotIn(selector, catalog_scss)
+
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger", core_css)
 
     def test_catalog_command_palette_preserves_item_radius_inside_flush_groups(self) -> None:
         catalog_scss = read_catalog_styles()
@@ -1806,16 +1961,19 @@ class CatalogContractTests(CatalogTestCase):
         )
 
     def test_catalog_search_trigger_uses_quiet_command_chrome(self) -> None:
-        catalog_scss = read_catalog_styles()
-        trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[1].split(
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger {", core_css)
+        trigger = core_css.split(".search-trigger {", 1)[1].split(
             "}",
             1,
         )[0]
-        hover = catalog_scss.split(".moo-catalog__search-trigger:hover {", 1)[1].split(
+        hover = core_css.split(".search-trigger:hover {", 1)[1].split(
             "}",
             1,
         )[0]
-        focus = catalog_scss.split(".moo-catalog__search-trigger:focus-visible {", 1)[
+        focus = core_css.split(".search-trigger:focus-visible {", 1)[
             1
         ].split(
             "}",
@@ -1839,9 +1997,14 @@ class CatalogContractTests(CatalogTestCase):
     def test_catalog_header_controls_share_height_token(self) -> None:
         catalog_scss = read_catalog_styles()
         shell = catalog_scss.split(".moo-catalog {", 1)[1].split("}", 1)[0]
-        search_trigger = catalog_scss.split(".moo-catalog__search-trigger {", 1)[
-            1
-        ].split("}", 1)[0]
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        core_css = self.read_output("assets/css/moo-ui.css")
+        self.assertIn(".search-trigger {", core_css)
+        search_trigger = core_css.split(".search-trigger {", 1)[1].split(
+            "}",
+            1,
+        )[0]
         sidebar_toggle_match = re.search(
             r"(?m)^(?:\.moo-catalog\s+)?\.moo-catalog__sidebar-toggle\s*\{(?P<body>[^}]*)\}",
             catalog_scss,
@@ -1855,7 +2018,7 @@ class CatalogContractTests(CatalogTestCase):
         )[0]
 
         self.assertIn("--moo-catalog-control-height: 2rem;", shell)
-        self.assertIn("height: var(--moo-catalog-control-height);", search_trigger)
+        self.assertIn("height: 2rem;", search_trigger)
         self.assertIn("width: var(--moo-catalog-control-height);", sidebar_toggle)
         self.assertIn("height: var(--moo-catalog-control-height);", sidebar_toggle)
         self.assertIn("min-height: var(--moo-catalog-control-height);", github_link)
@@ -1883,9 +2046,12 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn('<html lang="en" dir="ltr">', base)
         self.assertNotIn('data-bs-theme="light"', base.split("<head>", 1)[0])
         self.assertIn("<body>", base)
-        self.assertIn('<div class="moo-ui" data-bs-theme="{{ resolved_theme }}">', base)
+        self.assertRegex(
+            base,
+            r'<div\s+class="moo-ui"\s+data-bs-theme="\{\{ resolved_theme \}\}"\s+data-moo-document-owner="true"\s*>',
+        )
         self.assertIn(
-            "<script>{{ theme_prepaint_source }}</script>",
+            "<script>{{ theme_prepaint_source() }}</script>",
             base,
         )
         self.assertLess(
@@ -1901,6 +2067,33 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
+
+    def test_base_layout_inlines_the_canonical_owner_prepaint_source(self) -> None:
+        canonical = (ROOT / "src/js/theme-prepaint.js").read_text(encoding="utf-8")
+        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('data-moo-document-owner="true"', base)
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        page = self.read_output("introduction/index.html")
+        owner_match = re.search(
+            r'<div\s+class="moo-ui"\s+data-bs-theme="(?:light|dark)"\s+data-moo-document-owner="true"\s*>',
+            page,
+        )
+        self.assertIsNotNone(owner_match)
+        assert owner_match is not None
+        owner_start = owner_match.start()
+        first_child_start = page.index("<script>", owner_start)
+        script_end = page.index("</script>", first_child_start)
+        self.assertEqual(
+            page[first_child_start + len("<script>") : script_end],
+            canonical,
+        )
+        self.assertLess(owner_start, first_child_start)
+        self.assertLess(first_child_start, page.index("Skip to component content"))
 
     def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
@@ -3321,6 +3514,14 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Scoped Gradual Adoption", installation)
         self.assertIn("moo-ui", installation)
         self.assertIn("imports never auto-scan", installation)
+        self.assertIn("Server-resolved document", installation)
+        self.assertIn('data-moo-document-owner="true"', installation)
+        self.assertIn("Static or strict-CSP fallback", installation)
+        self.assertIn('src="/vendor/@wpmoo/ui/theme-prepaint.js"', installation_text)
+        self.assertIn(
+            "external fetch cannot guarantee zero flash",
+            normalized_installation_text,
+        )
         self.assertIn(
             "Because the aggregate includes the Chart module and its bundled "
             "Chart.js runtime",
@@ -3376,6 +3577,10 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("@wpmoo/ui/moo.css", readme)
         self.assertIn("@wpmoo/ui/moo-ui.js", readme)
         self.assertIn("MooUI.Combobox.getOrCreateInstance(combobox)", readme)
+        self.assertIn("Server-resolved document", readme)
+        self.assertIn("Static or strict-CSP fallback", readme)
+        self.assertIn("theme-prepaint.js", readme)
+        self.assertIn("external fetch cannot guarantee zero flash", readme)
         self.assertRegex(
             support,
             r"<tr><th scope=\"col\">CSS</th><th scope=\"col\">Minified</th></tr>",
@@ -4185,12 +4390,12 @@ class CatalogContractTests(CatalogTestCase):
             catalog_styles,
             r"\.moo-layout-preview\s*>\s*\[data-layout=\"app\"\]",
         )
-        sidebar_styles = (ROOT / "scss/components/sidebar/_layout.scss").read_text(
+        app_styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
         app_root_style = re.search(
             r"\.wrapper\[data-layout=\"app\"\]\s*\{(?P<body>[^}]*)\}",
-            sidebar_styles,
+            app_styles,
         )
         self.assertIsNotNone(app_root_style)
         self.assertIn("display: flex;", app_root_style.group("body"))
@@ -4216,7 +4421,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn(">Layout<", sidebar)
         self.assertNotIn('href="layouts/"', sidebar)
         self.assertIn('<link rel="canonical" href="https://ui.wpmoo.org/layout/">', guide)
-        for anchor in ("app", "sidebar", "page", "breakpoints", "containers"):
+        for anchor in ("app", "page", "breakpoints", "containers"):
             with self.subTest(anchor=anchor):
                 self.assertIn(f'id="{anchor}"', guide)
         self.assertNotRegex(

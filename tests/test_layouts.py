@@ -454,6 +454,24 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         self.assertIn('aria-controls="right-sidebar"', output)
         self.assertNotIn('data-sidebar-rail', output)
 
+    def test_app_layout_owns_the_sidebar_rail_markup(self) -> None:
+        app_source = (ROOT / "src/layouts/app.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        sidebar_source = (ROOT / "src/components/sidebar.html.jinja").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('class="sidebar-rail"', app_source)
+        self.assertNotIn("{% macro sidebar_rail", sidebar_source)
+
+    def test_app_offcanvas_mode_uses_the_native_drawer_shell_without_an_icon_rail(self) -> None:
+        output = self.render_app_shell(collapsible="offcanvas")
+
+        self.assertIn('class="sidebar offcanvas-lg offcanvas-start"', output)
+        self.assertIn('data-collapsible="offcanvas"', output)
+        self.assertNotIn('data-sidebar-rail', output)
+
     def test_app_validates_finite_props_and_shared_identifier_grammar(self) -> None:
         invalid_calls = (
             ({"navigation": "auto"}, "Unknown app navigation: auto"),
@@ -623,20 +641,22 @@ class LayoutCatalogTests(CatalogTestCase):
         self.assertIn('id="layout-app-example-code"', page)
         self.assertIn('href="#app"', page)
         self.assertIn('>App</a>', page)
-        self.assertIn('<h2 class="h3" id="sidebar">Sidebar</h2>', page)
-        self.assertIn('href="#sidebar"', page)
-        self.assertIn('>Sidebar</a>', page)
+        self.assertIn('<h2 class="h3" id="page">Page</h2>', page)
+        self.assertIn('href="#page"', page)
+        self.assertNotIn('<h2 class="h3" id="sidebar">Sidebar</h2>', page)
+        self.assertNotIn('href="#sidebar"', page)
         app_start = page.index('id="app"')
         example_start = page.index('data-example="layout-app-example"', app_start)
-        sidebar_start = page.index('id="sidebar"', example_start)
-        app_section = page[app_start:sidebar_start]
+        page_start = page.index('id="page"', example_start)
+        app_section = page[app_start:page_start]
         self.assertLess(app_start, example_start)
+        self.assertLess(example_start, page_start)
         self.assertNotIn('id="floating-variant"', app_section)
         self.assertNotIn("The floating Sidebar variant detaches", app_section)
         self.assertNotIn('class="moo-example__header"', app_section)
         for variant in ("sidebar", "floating", "inset"):
             with self.subTest(variant=variant):
-                self.assertIn(f">{variant}<", page[sidebar_start:])
+                self.assertIn(f"<code>{variant}</code>", app_section)
         source_start = page.index('id="layout-app-example-code"')
         source_end = page.index("</pre>", source_start)
         source = page[source_start:source_end]
@@ -765,8 +785,14 @@ class LayoutCatalogTests(CatalogTestCase):
     def test_rc7_removes_legacy_shell_macros_and_structural_hooks(self) -> None:
         active_sources = (
             ROOT / "src/components/sidebar.html.jinja",
-            ROOT / "scss/components/sidebar/_layout.scss",
-            ROOT / "scss/components/sidebar/_inset.scss",
+            ROOT / "scss/layouts/_app.scss",
+            ROOT / "scss/layouts/app/sidebar/_base.scss",
+            ROOT / "scss/layouts/app/sidebar/_default.scss",
+            ROOT / "scss/layouts/app/sidebar/_floating.scss",
+            ROOT / "scss/layouts/app/sidebar/_inset.scss",
+            ROOT / "scss/components/sidebar/_base.scss",
+            ROOT / "scss/components/sidebar/_menus.scss",
+            ROOT / "scss/components/sidebar/_identity.scss",
             ROOT / "scss/components/sidebar/_collapsed.scss",
             ROOT / "site/src/layouts/catalog.html.jinja",
             ROOT / "site/src/blocks/sidebar_shell.html.jinja",
@@ -791,6 +817,7 @@ class LayoutCatalogTests(CatalogTestCase):
         components = json.loads(
             (ROOT / "src/registry/components.json").read_text(encoding="utf-8")
         )
+        self.assertEqual([entry["slug"] for entry in layouts], ["app", "page"])
         self.assertEqual({entry["slug"] for entry in layouts}, {"app", "page"})
         self.assertEqual(
             {entry["source"] for entry in layouts},

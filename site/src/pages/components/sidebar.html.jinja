@@ -21,8 +21,15 @@
       Use the <code>app</code> layout when a route owns an application shell.
       Its navigation-enabled form emits one public <code>.sidebar</code> region
       beside one independent <code>page</code> region. The Sidebar component
-      owns navigation content; the Page layout owns semantic header, main, and
-      footer regions.
+      owns only the inner navigation surface and its anatomy; App owns the
+      outer shell, side placement, visual variant, and collapse mode. The Page
+      layout owns semantic header, main, and footer regions.
+    </p>
+    <p class="mb-4">
+      Call <code>sidebar()</code> for the inner surface. Do not pass App shell
+      options such as <code>side</code>, <code>variant</code>,
+      <code>collapsible</code>, or <code>id</code> to that component; those
+      belong to <code>app()</code>.
     </p>
     <p class="mb-4">
       Compose the sidebar from public component contracts: Button for triggers,
@@ -125,7 +132,7 @@
   ) }}
 
     {% set sidebar_markup_example %}
-      {% call sidebar(id="workspace-sidebar", aria_label="Workspace navigation") %}
+      {% call sidebar() %}
         {% call sidebar_content() %}
           {% call sidebar_menu() %}
             {% call sidebar_menu_item() %}

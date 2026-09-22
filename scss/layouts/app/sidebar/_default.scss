@@ -1,0 +1,26 @@
+// Default App Sidebar variant: attached to the shell edge with one divider.
+
+.sidebar[data-side="left"] .sidebar-inner {
+  // `side` is a physical placement contract. Keep the divider on the
+  // Sidebar/Page boundary when the document direction is RTL as well.
+  border-right: var(--bs-border-width) solid var(--moo-sidebar-border);
+}
+
+.sidebar[data-side="right"] {
+  order: 1;
+}
+
+// `side` is a physical placement contract. `:dir()` reads the wrapper's
+// computed direction inside the owner scope, whether it comes from html for a
+// document owner or from an embedded owner's own dir attribute.
+.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="left"] {
+  order: 1;
+}
+
+.wrapper[data-layout="app"]:dir(rtl) > .sidebar[data-side="right"] {
+  order: 0;
+}
+
+.sidebar[data-side="right"] .sidebar-inner {
+  border-left: var(--bs-border-width) solid var(--moo-sidebar-border);
+}

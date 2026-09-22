@@ -1,5 +1,5 @@
 {% from "components/avatar.html.jinja" import avatar %}
-{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_item, dropdown_menu %}
+{% from "components/dropdown_menu.html.jinja" import dropdown_divider, dropdown_header, dropdown_identity, dropdown_item, dropdown_menu %}
 {% from "components/separator.html.jinja" import separator %}
 {% from "components/sidebar.html.jinja" import sidebar_brand_mark, sidebar_content, sidebar_footer, sidebar_group, sidebar_group_content, sidebar_group_label, sidebar_header, sidebar_menu, sidebar_menu_action, sidebar_menu_badge, sidebar_menu_button, sidebar_menu_item, sidebar_menu_sub, sidebar_menu_sub_button, sidebar_menu_sub_item, sidebar_trigger %}
 {% from "layouts/app.html.jinja" import app %}
@@ -222,13 +222,7 @@
               extra_class="sidebar-menu-button--account"
             ) }}
             {% call dropdown_menu(extra_class="sidebar-account-menu") %}
-              <li class="sidebar-account-menu__header">
-                {{ avatar(name=footer_name, initials=footer_initials, extra_class="sidebar-avatar") }}
-                <span class="sidebar-account-menu__identity">
-                  <span class="sidebar-account-menu__name">{{ footer_name }}</span>
-                  <span class="sidebar-account-menu__email">{{ footer_subtitle }}</span>
-                </span>
-              </li>
+              {{ dropdown_identity(footer_name, email=footer_subtitle, initials=footer_initials) }}
               {{ dropdown_divider(extra_class="sidebar-account-menu__divider") }}
               {% if portal_copy %}
                 {{ dropdown_item("Upgrade workspace", icon="sparkles", extra_class="sidebar-account-menu__item") }}

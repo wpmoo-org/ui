@@ -32,8 +32,12 @@
   {% set resolved_theme = resolved_theme | default("light", true) %}
   {% set resolved_theme = resolved_theme if resolved_theme in ["light", "dark"] else "light" %}
   <body>
-    <div class="moo-ui" data-bs-theme="{{ resolved_theme }}">
-      <script>{{ theme_prepaint_source }}</script>
+    <div
+      class="moo-ui"
+      data-bs-theme="{{ resolved_theme }}"
+      data-moo-document-owner="true"
+    >
+      <script>{{ theme_prepaint_source() }}</script>
       {% block owner_prepaint %}{% endblock %}
       <a class="visually-hidden-focusable" href="#main-content">
         Skip to component content

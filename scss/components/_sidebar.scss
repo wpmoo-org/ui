@@ -1,7 +1,6 @@
 // Bootstrap has no native sidebar, so this owned selector namespace is split
 // by responsibility while preserving one deterministic emission order.
-@import "sidebar/layout";
+@import "sidebar/base";
 @import "sidebar/menus";
 @import "sidebar/identity";
-@import "sidebar/inset";
 @import "sidebar/collapsed";

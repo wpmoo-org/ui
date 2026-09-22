@@ -76,6 +76,7 @@ COMPONENT_MACROS_BY_FILE = {
         "dropdown_item",
         "dropdown_toggle_item",
         "dropdown_header",
+        "dropdown_identity",
         "dropdown_divider",
     },
     "field.html.jinja": {
@@ -112,7 +113,6 @@ COMPONENT_MACROS_BY_FILE = {
     "sidebar.html.jinja": {
         "sidebar",
         "sidebar_trigger",
-        "sidebar_rail",
         "sidebar_header",
         "sidebar_content",
         "sidebar_input",
@@ -194,7 +194,7 @@ class LayoutRegistryTests(unittest.TestCase):
 
         self.assertIsInstance(payload, list)
         entries = payload
-        self.assertEqual([entry["slug"] for entry in entries], ["page", "app"])
+        self.assertEqual([entry["slug"] for entry in entries], ["app", "page"])
         self.assertEqual({entry["slug"] for entry in entries}, PUBLIC_LAYOUT_SLUGS)
 
         for entry in entries:

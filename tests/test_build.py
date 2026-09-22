@@ -152,6 +152,16 @@ class BuildTests(CatalogTestCase):
         self.assertTrue(
             (SITE_DIST / "assets/js/theme-prepaint.js").is_file()
         )
+        package_prepaint = PACKAGE_DIST / "js/theme-prepaint.js"
+        public_prepaint = SITE_DIST / "dist/js/theme-prepaint.js"
+        self.assertTrue(package_prepaint.is_file())
+        self.assertTrue(public_prepaint.is_file())
+        self.assertEqual(public_prepaint.read_bytes(), package_prepaint.read_bytes())
+        package_manifest = PACKAGE_DIST / "release-manifest.json"
+        public_manifest = SITE_DIST / "dist/release-manifest.json"
+        self.assertTrue(package_manifest.is_file())
+        self.assertTrue(public_manifest.is_file())
+        self.assertEqual(public_manifest.read_bytes(), package_manifest.read_bytes())
         self.assertTrue(
             (SITE_DIST / "assets/js/theme-owner.js").is_file()
         )
@@ -291,6 +301,20 @@ class BuildTests(CatalogTestCase):
         paths = {Path(path) for path, _ in build.source_snapshot()}
         self.assertIn(build.JS_ROOT / "theme-owner.js", paths)
 
+    def test_source_snapshot_tracks_the_canonical_theme_prepaint_source(self) -> None:
+        paths = {Path(path) for path, _ in build.source_snapshot()}
+        self.assertIn(build.JS_ROOT / "theme-prepaint.js", paths)
+
+    def test_theme_prepaint_source_is_read_when_rendered(self) -> None:
+        source_path = build.JS_ROOT / "theme-prepaint.js"
+        original = source_path.read_text(encoding="utf-8")
+        changed = original + "\n// source refresh probe\n"
+        try:
+            source_path.write_text(changed, encoding="utf-8")
+            self.assertEqual(str(build.theme_prepaint_source()), changed)
+        finally:
+            source_path.write_text(original, encoding="utf-8")
+
     def test_bundled_component_entrypoints_keep_public_constructor_names(self) -> None:
         result = subprocess.run(
             [
@@ -387,6 +411,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             self.assertTrue((PACKAGE_DIST / "js/combobox.js").is_file())
             self.assertTrue((PACKAGE_DIST / "js/moo-ui.js").is_file())
             self.assertTrue((PACKAGE_DIST / "js/moo-ui.min.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/theme-prepaint.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "release-manifest.json").is_file())
             self.assertFalse(SITE_DIST.exists())
         finally:
             self.run_build()

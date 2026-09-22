@@ -6,10 +6,20 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 import subprocess
 import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+SCRIPTS_ROOT = Path(__file__).resolve().parent
+if str(SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_ROOT))
+
+from verify_release_tarball import (
+    ReleaseTarballError,
+    read_archive_members,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,8 +89,16 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_tarball_json(archive: tarfile.TarFile, member_name: str) -> tuple[dict, bytes]:
-    member = archive.getmember(member_name)
+def read_tarball_json(
+    archive: tarfile.TarFile,
+    member_name: str,
+    members: dict[str, tarfile.TarInfo] | None = None,
+) -> tuple[dict, bytes]:
+    if members is None:
+        members = read_archive_members(archive)
+    member = members.get(member_name)
+    if member is None:
+        raise ValueError(f"Tarball member is missing: {member_name}")
     if not member.isfile():
         raise ValueError(f"Tarball member is not a file: {member_name}")
     stream = archive.extractfile(member)
@@ -224,12 +242,17 @@ def build_attestation(args: argparse.Namespace) -> dict:
         )
     assert_worktree_is_clean()
 
-    with tarfile.open(args.package, mode="r:gz") as archive:
-        package, _ = read_tarball_json(archive, "package/package.json")
-        manifest, manifest_content = read_tarball_json(
-            archive,
-            "package/certification.json",
-        )
+    try:
+        with tarfile.open(args.package, mode="r:gz") as archive:
+            members = read_archive_members(archive)
+            package, _ = read_tarball_json(archive, "package/package.json", members)
+            manifest, manifest_content = read_tarball_json(
+                archive,
+                "package/certification.json",
+                members,
+            )
+    except ReleaseTarballError as error:
+        raise ValueError(f"Tarball member policy violation: {error}") from error
 
     if package["name"] != "@wpmoo/ui":
         raise ValueError("Tarball is not the canonical @wpmoo/ui package")

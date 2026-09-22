@@ -1,5 +1,5 @@
 /*!
- * Moo UI sidebar.js v1.0.0-rc.7 (https://ui.wpmoo.org/)
+ * Moo UI sidebar.js v1.0.0-rc.8 (https://ui.wpmoo.org/)
  * Copyright 2026 WPMoo (https://wpmoo.org)
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  */
@@ -115,7 +115,7 @@ var _Sidebar = class _Sidebar {
     return this._window.matchMedia(this._config.breakpoint).matches;
   }
   _isCollapsed() {
-    return this._isDesktop() && this._element.dataset.sidebarState === "collapsed";
+    return this._isDesktop() && this._sidebar?.dataset?.collapsible === "icon" && this._element.dataset.sidebarState === "collapsed";
   }
   _trigger(name, detail = {}) {
     return this._element.dispatchEvent(

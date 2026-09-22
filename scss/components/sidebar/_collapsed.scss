@@ -1,65 +1,8 @@
-// Rail: a thin toggle strip straddling the sidebar's inline-end edge.
-.sidebar-rail {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  z-index: 20;
-  width: $spacer;
-  padding: 0;
-  transform: translateX(50%);
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
+// Collapsed-to-icon inner state (desktop). App owns the outer shell width,
+// rail, stacking, and responsive placement; Sidebar owns the inner content
+// visibility and flyout anatomy.
 
-// Read the Sidebar's computed direction so this remains valid inside the
-// resolved-owner @scope as well as under a full-document html[dir] owner.
-.sidebar:dir(rtl) .sidebar-rail {
-  transform: translateX(-50%);
-}
-
-.sidebar-rail::after {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 50%;
-  width: var(--bs-border-width);
-  background: transparent;
-  transition: background 0.15s ease;
-}
-
-.sidebar-rail:hover::after {
-  background: var(--moo-sidebar-border);
-}
-
-// Collapsed-to-icon rail (desktop). Text, labels, and the rail's disclosure
-// chevrons hide; every remaining control centers on its icon.
 @include media-breakpoint-up(lg) {
-  .sidebar {
-    position: relative;
-  }
-
-  .wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar {
-    position: relative;
-    // Catalog page headers are sticky at $zindex-fixed. The Sidebar root must
-    // sit above that page-level stacking context while an identity menu is
-    // open, otherwise the workspace menu is painted underneath the header
-    // even though the menu itself is fixed and has dropdown z-index.
-    z-index: $zindex-fixed + 1;
-  }
-
-  // The sticky inner surface is its own stacking context. Elevate that
-  // context while an identity menu is open so the rail's hover indicator
-  // remains behind the fixed dropdown instead of painting across it.
-  .wrapper[data-layout="app"]:has([data-sidebar-dropdown-positioned] > .dropdown-menu.show) > .sidebar > .sidebar-inner {
-    z-index: $zindex-fixed + 1;
-  }
-
-  .wrapper[data-layout="app"][data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] {
-    flex-basis: var(--moo-sidebar-width-icon);
-    width: var(--moo-sidebar-width-icon);
-  }
-
   [data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-group-label,
   [data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__text,
   [data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-button__subtitle,
@@ -171,26 +114,5 @@
 
   [data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"] .sidebar-menu-skeleton__line {
     display: none;
-  }
-}
-
-@include media-breakpoint-down(lg) {
-  .sidebar-rail {
-    display: none;
-  }
-
-  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar {
-    position: relative;
-    inset: auto;
-    flex: 0 0 auto;
-    width: 100%;
-    height: auto;
-    visibility: visible;
-    transform: none;
-  }
-
-  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
-    height: auto;
-    max-height: none;
   }
 }
