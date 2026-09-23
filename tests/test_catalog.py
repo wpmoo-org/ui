@@ -2411,15 +2411,20 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-proof-card",
             home,
         )
-        self.assertIn(
-            "moo-home-component-row moo-home-component-row--1",
+        for row_number in ("1", "2"):
+            self.assertRegex(
+                home,
+                rf'class="(?=[^"]*\bmoo-home-component-row\b)'
+                rf'(?=[^"]*\bmoo-home-component-row--{row_number}\b)'
+                r'(?=[^"]*\bposition-relative\b)'
+                r'(?=[^"]*\boverflow-hidden\b)[^"]*"',
+            )
+        self.assertRegex(
             home,
+            r'<section\b[^>]*class="(?=[^"]*\bmoo-home-hero\b)'
+            r'(?=[^"]*\bd-grid\b)(?=[^"]*\bflex-shrink-0\b)'
+            r'(?=[^"]*\balign-items-center\b)[^"]*"',
         )
-        self.assertIn(
-            'class="moo-home-component-row moo-home-component-row--2"',
-            home,
-        )
-        self.assertIn('class="moo-home-hero"', home)
         self.assertRegex(
             home,
             r'<main id="main-content"[^>]*>\s*'
@@ -2569,7 +2574,12 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("moo-catalog__intro", page)
 
         home = self.read_output("index.html")
-        self.assertIn('<section class="moo-home-hero"', home)
+        self.assertRegex(
+            home,
+            r'<section\b[^>]*class="(?=[^"]*\bmoo-home-hero\b)'
+            r'(?=[^"]*\bd-grid\b)(?=[^"]*\bflex-shrink-0\b)'
+            r'(?=[^"]*\balign-items-center\b)[^"]*"',
+        )
         self.assertIn('<h1 class="moo-home-hero__title" id="home">Moo UI</h1>', home)
         self.assertNotIn("moo-doc-hero", home)
         self.assertNotIn("moo-catalog__intro", home)
@@ -4305,10 +4315,19 @@ class CatalogContractTests(CatalogTestCase):
         home = self.read_output("index.html")
         self.assertIn('href="layout/"', home)
         command_start = home.index('id="catalog-command"')
-        command_end = home.index('</div>\n        <p class="moo-catalog__command-empty"', command_start)
+        command_empty = re.search(
+            r'<p\s+class="[^"]*\bmoo-catalog__command-empty\b[^"]*"',
+            home[command_start:],
+        )
+        self.assertIsNotNone(command_empty)
+        command_end = command_start + command_empty.start()
         command_palette = home[command_start:command_end]
         self.assertIn('href="layout/"', command_palette)
         self.assertNotIn('href="layouts/', command_palette)
+        self.assertRegex(
+            home,
+            r'class="(?=[^"]*\bmoo-catalog__command-body\b)(?=[^"]*\boverflow-y-auto\b)[^"]*"',
+        )
         for legacy in (
             DIST / "layouts/index.html",
             DIST / "layouts/app/index.html",
@@ -4350,7 +4369,10 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertEqual(preview.count('id="main-content"'), 1)
                 self.assertNotIn("sidebar_provider", preview)
                 self.assertNotIn("sidebar_inset", preview)
-                self.assertIn('class="moo-layout-preview"', preview)
+                self.assertRegex(
+                    preview,
+                    r'class="(?=[^"]*\bmoo-layout-preview\b)(?=[^"]*\bmin-vh-100\b)[^"]*"',
+                )
 
         preview_metadata = site_build.page_metadata(
             ROOT / "site/src/pages/layouts/previews/page.html.jinja",
@@ -4369,7 +4391,11 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIsNotNone(block_preview_style)
         self.assertIn("min-width: 0;", block_preview_style.group("body"))
-        self.assertIn("max-width: 100%;", block_preview_style.group("body"))
+        block_page = self.read_output("blocks/sidebar-floating.html")
+        self.assertRegex(
+            block_page,
+            r'class="(?=[^"]*\bmoo-block-preview\b)(?=[^"]*\bw-100\b)(?=[^"]*\bmw-100\b)[^"]*"',
+        )
         doc_page_style = re.search(
             r"\.moo-doc-page\s*\{(?P<body>[^}]*)\}", catalog_styles
         )

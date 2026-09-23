@@ -9,7 +9,7 @@
 {% block title %}App Without Navigation Preview — Moo UI{% endblock %}
 
 {% block body %}
-  <div class="moo-layout-preview">
+  <div class="moo-layout-preview min-vh-100">
     {% call(slot) app(navigation="none") %}
       {% if slot == "page" %}
         {% call(region) page(width="fluid", id="layout-preview-page") %}

@@ -11,7 +11,7 @@
 
 {% macro example_preview(slug, root_path, loading="lazy") -%}
   <img
-    class="moo-catalog__example-image"
+    class="moo-catalog__example-image w-100 h-100 object-fit-cover"
     src="{{ example_preview_src(slug, root_path) }}"
     alt=""
     loading="{{ loading }}"

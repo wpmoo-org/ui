@@ -120,7 +120,10 @@ class BlocksTests(CatalogTestCase):
                     standalone,
                     r'<div\s+class="moo-ui"\s+data-bs-theme="light"',
                 )
-                self.assertIn('class="moo-block-standalone"', standalone)
+                self.assertRegex(
+                    standalone,
+                    r'<main\s+class="(?=[^"]*\bmoo-block-standalone\b)(?=[^"]*\bmin-vh-100\b)(?=[^"]*\bbg-body\b)[^"]*"',
+                )
                 self.assertNotIn(
                     'class="moo-block-standalone moo-ui"', standalone
                 )

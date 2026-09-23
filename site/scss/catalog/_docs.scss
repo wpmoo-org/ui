@@ -7,7 +7,6 @@
 }
 
 .moo-catalog__toolbar {
-  display: grid;
   gap: 0.75rem;
 }
 
@@ -28,27 +27,17 @@
 // catalog controls) in the actions slot.
 .moo-catalog__toolbar--examples,
 .moo-catalog__toolbar--components {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   gap: 0.75rem;
 }
 
 .moo-catalog__toolbar-query {
-  position: relative;
-  flex: 1 1 auto;
   min-width: 18rem;
   max-width: 100%;
 }
 
 .moo-catalog__searchbar {
   position: relative;
-  display: flex;
-  flex: 1 1 auto;
-  flex-wrap: nowrap;
-  align-items: center;
   min-block-size: 2rem;
-  width: 100%;
 }
 
 .moo-catalog__searchbar .moo-catalog__search {
@@ -64,9 +53,6 @@
   inset-block-start: 50%;
   inset-inline-start: 0.625rem;
   z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   color: var(--bs-secondary-color);
   pointer-events: none;
   transform: translateY(-50%);
@@ -78,16 +64,10 @@
 }
 
 .moo-catalog__filter-trigger {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
   inline-size: 2rem;
   block-size: 2rem;
-  padding: 0;
   margin-inline-end: 0;
   border-radius: var(--bs-border-radius-sm);
-  gap: 0;
 }
 
 .moo-catalog__filter-trigger > [data-icon] {
@@ -103,8 +83,6 @@
 }
 
 .moo-catalog__filter-option {
-  display: flex;
-  align-items: center;
   gap: 0.625rem;
 }
 
@@ -122,10 +100,6 @@
 }
 
 .moo-catalog__toolbar-actions {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.5rem;
   margin-inline-start: auto;
 }
 
@@ -168,9 +142,6 @@
 }
 
 .moo-catalog__view-option {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.375rem;
   min-block-size: 2rem;
   min-width: 2rem;
@@ -195,7 +166,6 @@
 }
 
 .moo-catalog__grid {
-  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
   gap: 1rem;
   margin-top: 1rem;
@@ -220,28 +190,11 @@
   }
 }
 
-.moo-catalog__component-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem;
-  color: var(--bs-body-color);
-  text-decoration: none;
-  border: var(--bs-border-width) solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius-lg);
-  background: var(--bs-body-bg);
-}
-
-.moo-catalog__component-card:hover {
-  border-color: var(--bs-secondary-color);
-}
-
 .moo-catalog__app-card {
   min-height: 12rem;
   // The showcase preview bleeds past card-body's own padding up to the
   // card's rounded corners (below); this clips it back to that shape
   // instead of squaring the corners off.
-  overflow: hidden;
 }
 
 .moo-catalog__app-card .card-body {
@@ -259,12 +212,7 @@
 }
 
 .moo-catalog__showcase-preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   height: 13rem;
-  overflow: hidden;
-  color: var(--bs-body-color);
   border-bottom: var(--bs-border-width) solid var(--moo-border);
   // Bleed past card-body's own horizontal padding and the card's own
   // top padding-block (both var(--bs-card-spacer-x), see _card.scss) so the
@@ -276,12 +224,6 @@
   // other neutral tokens the preview art itself may use, so the panel gets
   // its own faint tint instead — 10% keeps it clearly a panel, not a token.
   background: color-mix(in srgb, var(--bs-body-color) 10%, transparent);
-}
-
-.moo-catalog__showcase-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
 }
 
 // Preview art is drawn once for a light background. Inverting lightness for
@@ -306,14 +248,10 @@
 // 16:9 box (not showcase-preview's fixed 13rem height) so every card
 // crops to the same shape regardless of how tall the underlying page is.
 .moo-catalog__example-preview {
-  height: auto;
   aspect-ratio: 16 / 9;
 }
 
 .moo-catalog__example-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   object-position: top;
 }
 
@@ -676,16 +614,6 @@
     align-items: start;
   }
 
-  .moo-catalog__home-scroll-header {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-  }
-}
-
-@media (min-width: 992px) {
-  .moo-catalog__home-hero-grid {
-    grid-template-columns: minmax(0, 1.08fr) minmax(20rem, 0.92fr);
-  }
 }
 
 .moo-catalog__footer {

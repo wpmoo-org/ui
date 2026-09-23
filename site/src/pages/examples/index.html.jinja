@@ -51,7 +51,7 @@
       ) }}
 
       <section class="moo-catalog__dashboard" data-moo-catalog-view="grid" aria-label="Examples">
-        {% call catalog_search_filter("examples-search", "Filter examples", "Filter examples...", examples | map(attribute="category") | unique | sort, extra_class="moo-catalog__toolbar--examples") %}
+        {% call catalog_search_filter("examples-search", "Filter examples", "Filter examples...", examples | map(attribute="category") | unique | sort, extra_class="moo-catalog__toolbar--examples d-flex flex-wrap align-items-center") %}
           {{ catalog_view_toggle(
             "examples-view",
             "Examples view",
@@ -67,10 +67,10 @@
         {% for category, items in examples | groupby("category") %}
           <section{% if not loop.first %} class="mt-5"{% endif %} aria-labelledby="examples-{{ category | lower }}" data-moo-catalog-section="{{ category | lower }}">
             {{ typography(category, variant="section-title", id="examples-" ~ (category | lower)) }}
-            <div class="moo-catalog__grid moo-catalog__grid--examples">
+            <div class="moo-catalog__grid moo-catalog__grid--examples d-grid">
               {% for example in items %}
-                {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
-                  <div class="moo-catalog__showcase-preview moo-catalog__example-preview">
+                {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card overflow-hidden", body_class="d-grid gap-4") %}
+                  <div class="moo-catalog__showcase-preview moo-catalog__example-preview d-flex align-items-center justify-content-center overflow-hidden text-body h-auto">
                     {{ example_preview(example.slug, root_path) }}
                   </div>
                   <div>

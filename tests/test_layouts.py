@@ -844,7 +844,10 @@ class LayoutCatalogTests(CatalogTestCase):
             with self.subTest(preview=name):
                 preview = self.read_page(name)
                 self.assertIn('{% extends "layouts/base.html.jinja" %}', preview)
-                self.assertIn('class="moo-layout-preview"', preview)
+                self.assertRegex(
+                    preview,
+                    r'class="(?=[^"]*\bmoo-layout-preview\b)(?=[^"]*\bmin-vh-100\b)[^"]*"',
+                )
                 self.assertNotIn("sidebar_provider", preview)
                 self.assertNotIn("sidebar_inset", preview)
                 self.assertNotIn("<main", preview)

@@ -12,7 +12,7 @@
 
 {% macro component_preview(slug, root_path, loading="lazy") -%}
   <img
-    class="moo-catalog__showcase-image"
+    class="moo-catalog__showcase-image mw-100 mh-100 object-fit-contain"
     src="{{ component_preview_src(slug, root_path) }}"
     alt=""
     width="768"
@@ -24,7 +24,7 @@
 
 {% macro block_preview(slug, root_path, loading="lazy") -%}
   <img
-    class="moo-catalog__showcase-image"
+    class="moo-catalog__showcase-image mw-100 mh-100 object-fit-contain"
     src="{{ block_preview_src(slug, root_path) }}"
     alt=""
     width="768"

@@ -38,18 +38,18 @@
       <div class="moo-example__preview{% if preview_class %} {{ preview_class }}{% endif %}">
         {% if frame_state.src %}
           <div
-            class="moo-block-preview"
+            class="moo-block-preview w-100 mw-100"
             data-moo-block-frame-shell
             data-moo-frame-width="{{ frame_state.width }}"
             data-moo-frame-height="{{ frame_state.height }}"
           >
-            <div class="moo-block-preview__toolbar">
-              <div class="moo-block-preview__toolbar-start">
+            <div class="moo-block-preview__toolbar d-flex flex-wrap align-items-center justify-content-between">
+              <div class="moo-block-preview__toolbar-start d-flex flex-wrap align-items-center gap-2">
                 {% if frame_variants %}
-                  <div class="moo-block-preview__control">
+                  <div class="moo-block-preview__control d-flex flex-wrap align-items-center gap-2">
                     <span class="small text-body-secondary">Variant</span>
                     <div class="dropdown">
-                      <button class="btn btn-sm btn-outline-secondary moo-block-preview__variant-trigger" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <button class="btn btn-sm btn-outline-secondary moo-block-preview__variant-trigger justify-content-between" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <span data-moo-frame-variant-label>{{ frame_state.variant_label }}</span>
                         {{ render_icon("chevron-down", "inline-end") }}
                       </button>
@@ -77,7 +77,7 @@
                 {% endif %}
                 <span class="small text-body-secondary" data-moo-frame-size-label>{{ frame_state.width }} x {{ frame_state.height }}</span>
               </div>
-              <div class="moo-block-preview__toolbar-end">
+              <div class="moo-block-preview__toolbar-end d-flex flex-wrap align-items-center gap-2 justify-content-end">
                 {% if frame_viewports %}
                   <div class="btn-group btn-group-sm" role="group" aria-label="Preview viewport">
                     {% for viewport in frame_viewports %}
@@ -104,15 +104,15 @@
                 </a>
               </div>
             </div>
-            <div class="moo-block-preview__viewport" data-moo-block-frame-viewport>
-              <div class="moo-block-preview__loading" data-moo-block-frame-loading aria-hidden="true">
-                <span class="moo-block-preview__loading-indicator">
+            <div class="moo-block-preview__viewport position-relative overflow-hidden w-100 bg-body" data-moo-block-frame-viewport>
+              <div class="moo-block-preview__loading position-absolute top-0 bottom-0 start-0 end-0 z-1 d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary" data-moo-block-frame-loading aria-hidden="true">
+                <span class="moo-block-preview__loading-indicator d-inline-flex align-items-center gap-2">
                   <span class="moo-block-preview__loading-spinner" aria-hidden="true"></span>
                   Loading preview
                 </span>
               </div>
               <iframe
-                class="moo-block-preview__frame"
+                class="moo-block-preview__frame d-block border-0"
                 data-moo-block-frame
                 src="{{ frame_state.src }}"
                 title="{{ title }} preview"
