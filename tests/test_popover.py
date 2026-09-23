@@ -46,6 +46,14 @@ class PopoverTests(CatalogTestCase):
         self.assertIn(">Dismissible popover</a>", output)
         self.assertNotIn("data-bs-html", output)
 
+    def test_popover_dismiss_trigger_supports_a_bootstrap_link_surface(self) -> None:
+        output = self.render_popover(
+            'popover_dismiss_trigger("Avatar", "Component details.", '
+            'variant="link", extra_class="p-0 align-baseline")'
+        )
+
+        self.assertIn('class="btn btn-link p-0 align-baseline"', output)
+
     def test_popover_dismiss_trigger_default_href_does_not_jump_to_page_top(
         self,
     ) -> None:

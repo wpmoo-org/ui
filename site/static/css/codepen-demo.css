@@ -266,21 +266,6 @@
   background: linear-gradient(to bottom, transparent, var(--bs-body-bg));
 }
 
-.moo-examples-footer__component-trigger {
-  padding: 0;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  vertical-align: baseline;
-  background: transparent;
-  border: 0;
-}
-
-.moo-examples-footer__component-trigger:hover,
-.moo-examples-footer__component-trigger:focus-visible {
-  color: var(--bs-link-hover-color);
-}
-
 .moo-examples-footer__preview {
   display: flex;
   align-items: center;

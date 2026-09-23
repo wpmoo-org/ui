@@ -3052,7 +3052,10 @@ class CatalogContractTests(CatalogTestCase):
                         self.assertNotIn("data-bs-title", trigger)
                         self.assertEqual(trigger.get("role"), "button")
                         self.assertEqual(trigger.get("tabindex"), "0")
-                        self.assertIn("moo-examples-footer__component-trigger", trigger.get("class") or "")
+                        self.assertEqual(
+                            set((trigger.get("class") or "").split()),
+                            {"btn", "btn-link", "p-0", "align-baseline"},
+                        )
                         self.assertEqual(trigger.get("data-bs-toggle"), "popover")
                         self.assertEqual(trigger.get("data-bs-trigger"), "focus")
                         self.assertEqual(trigger.get("data-bs-container"), "body")

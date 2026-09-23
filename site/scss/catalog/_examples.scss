@@ -836,21 +836,6 @@
   border-top: var(--bs-border-width) solid var(--bs-border-color);
 }
 
-.moo-examples-footer__component-trigger {
-  padding: 0;
-  border: 0;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  vertical-align: baseline;
-  background: transparent;
-}
-
-.moo-examples-footer__component-trigger:hover,
-.moo-examples-footer__component-trigger:focus-visible {
-  color: var(--bs-link-hover-color);
-}
-
 // Mirrors .moo-catalog__showcase-preview (the same tinted, bled-to-edge
 // panel the Components gallery card uses for its own preview art) --
 // bled to the popover's own edges via its padding tokens instead of the

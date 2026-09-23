@@ -541,7 +541,7 @@
     trigger.setAttribute("href", "#!");
     trigger.setAttribute("role", "button");
     trigger.setAttribute("tabindex", "0");
-    trigger.className = "btn btn-outline-secondary moo-examples-footer__component-trigger";
+    trigger.className = "btn btn-link p-0 align-baseline";
     trigger.textContent = component.label;
     trigger.setAttribute("data-bs-toggle", "popover");
     trigger.setAttribute("data-bs-trigger", "focus");
