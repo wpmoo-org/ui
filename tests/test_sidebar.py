@@ -1073,10 +1073,18 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint_source)
         self.assertIn('element.removeAttribute("data-sidebar-prepaint-ready")', catalog_index)
         self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
-        self.assertRegex(
+        self.assertIn(
+            ':where(.wrapper[data-layout="app"][data-sidebar-ready]) > .sidebar {',
             styles,
-            r"@include media-breakpoint-up\(lg\)\s*\{\s*"
-            r"\.sidebar\s*\{[^}]*transition:\s*flex-basis",
+        )
+        self.assertIn("transition: flex-basis 0.2s ease, width 0.2s ease;", styles)
+        self.assertNotIn(
+            "  .sidebar {\n    transition: flex-basis 0.2s ease, width 0.2s ease;",
+            styles,
+        )
+        self.assertIn(
+            "@media (prefers-reduced-motion: reduce) {\n  .sidebar {\n    transition: none;",
+            styles,
         )
         self.assertNotIn("moo-sidebar-catalog-state", styles)
         self.assertRegex(
@@ -1084,6 +1092,15 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
             r"@media \(prefers-reduced-motion: reduce\)\s*\{\s*"
             r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
         )
+
+    def test_app_sidebar_motion_waits_for_runtime_ready_state(self) -> None:
+        styles = read_app_styles()
+
+        self.assertIn(
+            ':where(.wrapper[data-layout="app"][data-sidebar-ready]) > .sidebar {',
+            styles,
+        )
+        self.assertIn("transition: flex-basis 0.2s ease, width 0.2s ease;", styles)
 
     def test_catalog_prepaint_positions_active_sidebar_item_before_inset_content(self) -> None:
         prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(

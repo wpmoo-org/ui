@@ -7768,7 +7768,7 @@ label.btn {
     border-left: var(--bs-border-width) solid var(--moo-sidebar-border);
   }
   @media (min-width: 992px) {
-    .sidebar {
+    :where(.wrapper[data-layout="app"][data-sidebar-ready]) > .sidebar {
       transition: flex-basis 0.2s ease, width 0.2s ease;
     }
     .sidebar[data-variant="floating"] .sidebar-inner {
