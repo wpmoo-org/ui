@@ -270,7 +270,7 @@ export default class Sidebar {
       control?.classList.contains("sidebar-menu-button--workspace") &&
       control.closest('[data-slot="sidebar-header"]');
     const isFooterAccount =
-      control?.classList.contains("sidebar-menu-button--account") &&
+      control?.closest(".sidebar-menu-item--account") &&
       control.closest('[data-slot="sidebar-footer"]');
     if (!control || !item || !(isHeaderWorkspace || isFooterAccount) || !this._isDesktop()) {
       this._clearDropdownPosition(control);

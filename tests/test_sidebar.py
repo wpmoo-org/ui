@@ -1208,9 +1208,22 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn("--moo-sidebar-dropdown-block-start", script)
         self.assertIn("--moo-sidebar-dropdown-block-end", script)
         self.assertIn("--moo-sidebar-dropdown-right", script)
-        self.assertIn("sidebar-menu-button--account", script)
+        self.assertIn("sidebar-menu-item--account", script)
         self.assertIn(
             'removeProperty("--moo-sidebar-dropdown-right")',
             script,
         )
         self.assertIn("rect.bottom + gap", script)
+
+    def test_sidebar_footer_account_dropdown_uses_account_item_ownership(self) -> None:
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
+        position_start = script.index("  _positionDropdown(control) {")
+        position_end = script.index("  _removeFlyoutPortal() {", position_start)
+        position_dropdown = script[position_start:position_end]
+
+        self.assertRegex(
+            position_dropdown,
+            r"const isFooterAccount =\s*"
+            r'control\?\.closest\("\.sidebar-menu-item--account"\)\s*&&\s*'
+            r"control\.closest\('\[data-slot=\"sidebar-footer\"\]'\);",
+        )

@@ -123,8 +123,10 @@ COMPONENT_SELECTOR_PREFIXES = {
     # Field retunes the spacing of Bootstrap's own shared
     # .form-label/.form-text/.invalid-feedback classes when they sit
     # inside a .field, rather than owning a "field-" prefixed family
-    # of its own for them.
-    "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+    # of its own for them. A caller may compose field_group() with a
+    # Bootstrap .row; its scoped .field-group.row rule preserves the row's
+    # responsive column geometry and native gutters.
+    "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback", "row"),
     # Bootstrap has no native Combobox component. The public
     # namespace is a composition of Bootstrap form-control,
     # validation, and Dropdown pieces.

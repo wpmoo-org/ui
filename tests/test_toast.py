@@ -124,6 +124,15 @@ class ToastTests(CatalogTestCase):
 
         self.assertNotIn("data-bs-delay", output)
 
+    def test_toast_can_request_host_startup_visibility(self) -> None:
+        visible = self.render(
+            '{{ toast("toast-on-load", "Title", "Body", show_on_load=true) }}'
+        )
+        default = self.render('{{ toast("toast-default", "Title", "Body") }}')
+
+        self.assertIn('data-toast-show-on-load="true"', visible)
+        self.assertNotIn("data-toast-show-on-load", default)
+
     def test_toast_container_renders_fixed_position_utilities(self) -> None:
         output = self.render(
             '{% call toast_container(placement="bottom-end") %}Content{% endcall %}'

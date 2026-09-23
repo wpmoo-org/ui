@@ -41,7 +41,7 @@
   </div>
 {%- endmacro %}
 
-{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="", variant="default") -%}
+{% macro toast(id, title, body, timestamp="", autohide=true, delay=5000, dismiss_aria_label="Close", priority="polite", action_label="", action_aria_label="", variant="default", show_on_load=false) -%}
   {% if not id | trim %}{{ fail("Toast id is required") }}{% endif %}
   {% if not title | trim %}{{ fail("Toast title is required") }}{% endif %}
   {% if not body | trim %}{{ fail("Toast body is required") }}{% endif %}
@@ -52,7 +52,7 @@
   {% set semantics = toast_priorities[priority] %}
   {% set status_icon = toast_variant_icons[toast_variant] %}
   <div
-    id="{{ id }}"
+    id="{{ id }}"{{ (' data-toast-show-on-load="true"' if show_on_load else '') | safe }}
     class="toast"
     {% if toast_variant != "default" %}data-toast-variant="{{ toast_variant }}"{% endif %}
     role="{{ semantics.role }}"
