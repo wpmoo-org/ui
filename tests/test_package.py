@@ -69,6 +69,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/foundations/_globals.scss",
     "scss/foundations/_scope.scss",
     "scss/layouts/_app.scss",
+    "scss/layouts/_page_grid.scss",
     "scss/layouts/app/sidebar/_base.scss",
     "scss/layouts/app/sidebar/_default.scss",
     "scss/layouts/app/sidebar/_floating.scss",

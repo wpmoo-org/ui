@@ -87,6 +87,9 @@ class LayoutMacroTests(LayoutRenderMixin, unittest.TestCase):
         )
         self.assertEqual(output.count('<footer>'), 1)
         self.assertEqual(output.count('class="container-xl"'), 3)
+        self.assertEqual(output.count('data-page-container'), 1)
+        main = output[output.index('<main '):output.index('</main>')]
+        self.assertIn('class="container-xl" data-page-container', main)
         self.assertLess(output.index("Header"), output.index("Main"))
         self.assertLess(output.index("Main"), output.index("Footer"))
         self.assertNotIn("sidebar_provider", output)

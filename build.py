@@ -2271,6 +2271,7 @@ def render_layout_certification_fixtures() -> None:
         ("layout-app.html.jinja", "layout-app-right", {"fixture_side": "right"}),
         ("layout-app.html.jinja", "layout-app-none", {"fixture_navigation": "none"}),
         ("layout-page.html.jinja", "layout-page", {"fixture_width": "xl"}),
+        ("layout-page-grid.html.jinja", "layout-page-grid", {}),
         *(
             ("layout-page.html.jinja", f"layout-page-{width}", {"fixture_width": width})
             for width in ("base", "sm", "md", "lg", "xxl", "fluid")

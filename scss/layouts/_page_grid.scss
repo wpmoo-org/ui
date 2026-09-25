@@ -1,0 +1,30 @@
+// Opt-in Bootstrap row geometry keyed to the usable Moo Page rail, not the
+// viewport or the optional Sidebar state. The rail itself is the query owner.
+[data-page-container] {
+  container: moo-page / inline-size;
+}
+
+// Keep the compact branch usable in browsers without container queries.
+[data-page-container] [data-page-show-from] {
+  display: none !important;
+}
+
+@each $breakpoint, $min-width in $grid-breakpoints {
+  @if $breakpoint != xs {
+    @container moo-page (min-width: #{$min-width}) {
+      @for $span from 1 through $grid-columns {
+        [data-page-container] .row[data-layout="page-grid"] > [data-page-col-#{$breakpoint}="#{$span}"] {
+          width: percentage(divide($span, $grid-columns));
+        }
+      }
+
+      [data-page-container] [data-page-show-from="#{$breakpoint}"] {
+        display: block !important;
+      }
+
+      [data-page-container] [data-page-hide-from="#{$breakpoint}"] {
+        display: none !important;
+      }
+    }
+  }
+}

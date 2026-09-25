@@ -2433,7 +2433,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertRegex(
             home,
             r'<main id="main-content"[^>]*>\s*'
-            r'<div class="container-xl">\s*'
+            r'<div class="container-xl" data-page-container>\s*'
             r'<div class="row gx-0">\s*'
             r'<div class="col px-md-5">',
         )
@@ -2612,7 +2612,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertRegex(
                     page,
                     r'<main id="main-content"[^>]*>\s*'
-                    r'<div class="container-xl">\s*'
+                    r'<div class="container-xl" data-page-container>\s*'
                     r'<div class="row gx-0">\s*'
                     r'<div class="col px-md-5">',
                 )

@@ -89,6 +89,60 @@ class LayoutBrowserTests(unittest.TestCase):
         prepare_page(page, case)
         return context, page, evidence
 
+    def test_page_grid_uses_rail_width_without_viewport_resize(self) -> None:
+        case = BrowserCase(
+            name="page-grid-rail",
+            viewport={"width": 1800, "height": 844},
+            color_scheme="light",
+            direction="ltr",
+        )
+        context, page, evidence = self._open("layout-page-grid", case)
+        try:
+            for sidebar_width in (0, 220):
+                for rail_width, expected_nav_span, wide_visible in (
+                    (767, 12, False),
+                    (768, 4, False),
+                    (991, 4, False),
+                    (992, 3, True),
+                    (1199, 3, True),
+                    (1200, 2, True),
+                ):
+                    with self.subTest(sidebar=sidebar_width, rail=rail_width):
+                        report = page.evaluate(
+                            """({railWidth, sidebarWidth}) => {
+                              const shell = document.querySelector('.fixture-shell');
+                              const sidebar = document.querySelector('.fixture-sidebar');
+                              const rail = document.querySelector('[data-page-container]');
+                              const nav = document.querySelector('#fixture-nav');
+                              const body = document.querySelector('#fixture-body');
+                              sidebar.style.flexBasis = `${sidebarWidth}px`;
+                              const style = getComputedStyle(rail);
+                              const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+                              shell.style.width = `${railWidth + sidebarWidth + padding}px`;
+                              const railContentWidth = rail.clientWidth - padding;
+                              return {
+                                railContentWidth,
+                                navSpan: Math.round(nav.getBoundingClientRect().width / body.parentElement.getBoundingClientRect().width * 12),
+                                wideVisible: getComputedStyle(document.querySelector('[data-page-show-from="lg"]')).display !== 'none',
+                                compactVisible: getComputedStyle(document.querySelector('[data-page-hide-from="lg"]')).display !== 'none',
+                                formCount: document.querySelectorAll('form#fixture-single-form').length,
+                                overflow: document.documentElement.scrollWidth > window.innerWidth,
+                                viewport: window.innerWidth,
+                              };
+                            }""",
+                            {"railWidth": rail_width, "sidebarWidth": sidebar_width},
+                        )
+                        self.assertAlmostEqual(report["railContentWidth"], rail_width, delta=1, msg=report)
+                        self.assertEqual(report["navSpan"], expected_nav_span, report)
+                        self.assertEqual(report["wideVisible"], wide_visible, report)
+                        self.assertEqual(report["compactVisible"], not wide_visible, report)
+                        self.assertEqual(report["formCount"], 1, report)
+                        self.assertFalse(report["overflow"], report)
+                        self.assertEqual(report["viewport"], 1800, report)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_direct_overlay_host_does_not_add_a_second_viewport_of_height(self) -> None:
         context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
         try:

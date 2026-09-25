@@ -170,6 +170,7 @@ class MooCoreTests(CatalogTestCase):
         self.assertIn('@import "../foundations/focus";', scope)
         self.assertIn('@import "../utilities/scroll_fade";', scope)
         self.assertIn('@import "../layouts/app";', scope)
+        self.assertIn('@import "../layouts/page_grid";', scope)
 
     def test_components_aggregate_imports_every_moo_partial_once(self) -> None:
         layer = SCSS / "_components.scss"
@@ -371,6 +372,7 @@ class MooCoreTests(CatalogTestCase):
                 "../foundations/focus",
                 "../utilities/scroll_fade",
                 "../layouts/app",
+                "../layouts/page_grid",
                 "../themes/forms",
             ],
         )
