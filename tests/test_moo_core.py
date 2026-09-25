@@ -382,6 +382,10 @@ class MooCoreTests(CatalogTestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("body > .moo-ui[data-bs-theme] {", standalone)
+        self.assertIn(
+            'body > .moo-ui[data-bs-theme]:not([data-moo-overlay-host]) {',
+            standalone,
+        )
+        self.assertNotIn("data-moo-overlay-portal-host", standalone)
         self.assertIn("min-block-size: 100dvh;", standalone)
         self.assertNotIn("@include", standalone)

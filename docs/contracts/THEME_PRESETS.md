@@ -68,7 +68,7 @@ same owner at its fragment boundary and may use `dir` on that owner for a
 subtree override. Nested resolved owners are independent token contexts.
 
 A class-only `.moo-ui`, including a direct child carrying the private
-`data-moo-overlay-portal-host` marker, is not a resolved owner. It inherits
+`data-moo-overlay-host` marker, is not a resolved owner. It inherits
 the nearest resolved owner's tokens and direction. The generic portal host is
 private implementation plumbing, not a preset selector or public root option.
 

@@ -35,7 +35,7 @@
   margin-block: 0;
 }
 
-.moo-ui.moo-codepen-component-demo > [data-moo-overlay-portal-host] {
+.moo-ui.moo-codepen-component-demo > [data-moo-overlay-host] {
   display: contents;
 }
 

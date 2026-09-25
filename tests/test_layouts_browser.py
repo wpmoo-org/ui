@@ -89,6 +89,46 @@ class LayoutBrowserTests(unittest.TestCase):
         prepare_page(page, case)
         return context, page, evidence
 
+    def test_direct_overlay_host_does_not_add_a_second_viewport_of_height(self) -> None:
+        context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
+        try:
+            report = page.evaluate(
+                """async () => {
+                  document.body.replaceChildren();
+                  document.body.style.margin = "0";
+
+                  const owner = document.createElement("div");
+                  owner.className = "moo-ui";
+                  owner.setAttribute("data-bs-theme", "light");
+                  document.body.append(owner);
+                  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                  const heightWithOwner = document.documentElement.scrollHeight;
+
+                  const overlayHost = document.createElement("div");
+                  overlayHost.className = "moo-ui";
+                  overlayHost.setAttribute("data-bs-theme", "light");
+                  overlayHost.setAttribute("data-moo-overlay-host", "");
+                  document.body.append(overlayHost);
+                  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                  return {
+                    heightWithOwner,
+                    heightWithOverlayHost: document.documentElement.scrollHeight,
+                    overlayHostHeight: overlayHost.getBoundingClientRect().height,
+                  };
+                }"""
+            )
+
+            self.assertEqual(
+                report["heightWithOverlayHost"],
+                report["heightWithOwner"],
+                report,
+            )
+            self.assertEqual(report["overlayHostHeight"], 0, report)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
     def test_document_owner_prepaint_applies_stored_theme_before_external_asset(self) -> None:
         def open_catalog(*, theme: str, direction: str):
             context = new_case_context(self.browser, LAYOUT_CASES[0])

@@ -249,7 +249,7 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         self.assertIn('data-moo-direction-key="nested-owner-outer-direction"', fixture)
         self.assertIn('data-moo-theme-key="nested-owner-inner-theme"', fixture)
         self.assertIn('data-moo-direction-key="nested-owner-inner-direction"', fixture)
-        self.assertIn('data-moo-overlay-portal-host', fixture)
+        self.assertIn('data-moo-overlay-host', fixture)
         self.assertIn('src="assets/init-nested-owners.js"', fixture)
         self.assertEqual(
             fixture.count('<script src="assets/theme-prepaint.js"></script>'),
@@ -343,7 +343,7 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("data-moo-overlay-portal-host", fixture)
+        self.assertIn("data-moo-overlay-host", fixture)
         self.assertIn("ownerPortalRoot", initializer)
         self.assertIn("container: portal", initializer)
         self.assertNotIn("Tooltip.getOrCreateInstance(element));", initializer)

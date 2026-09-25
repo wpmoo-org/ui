@@ -14,7 +14,7 @@
   const findThemeOwner = (trigger) => trigger.closest(OWNER_SELECTOR);
   const ownerPortalRoot = (owner) => (
     Array.from(owner.children).find((child) =>
-      child.matches("[data-moo-overlay-portal-host]"),
+      child.matches("[data-moo-overlay-host]"),
     ) || owner
   );
 

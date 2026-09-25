@@ -36,7 +36,7 @@ PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST = {
 }
 PRIVATE_OWNER_FIXTURE_HOOKS = {
     "data-moo-direction-key",
-    "data-moo-overlay-portal-host",
+    "data-moo-overlay-host",
     "data-moo-theme-key",
 }
 DOCUMENT_OWNER_FIXTURE_HOOKS = {

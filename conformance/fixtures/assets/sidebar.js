@@ -8,7 +8,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 
 // src/js/theme-owner.js
 var OWNER_SELECTOR = '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]';
-var PORTAL_SELECTOR = "[data-moo-overlay-portal-host]";
+var PORTAL_SELECTOR = "[data-moo-overlay-host]";
 function documentFor(node) {
   if (node?.nodeType === 9) return node;
   if (node?.ownerDocument) return node.ownerDocument;

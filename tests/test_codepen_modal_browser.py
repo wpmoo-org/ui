@@ -95,7 +95,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(backdrop).to_be_visible()
             self.assertEqual(
                 backdrop.evaluate(
-                    "element => element.parentElement.hasAttribute('data-moo-overlay-portal-host')"
+                    "element => element.parentElement.hasAttribute('data-moo-overlay-host')"
                 ),
                 True,
             )

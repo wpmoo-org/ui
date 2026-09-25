@@ -326,7 +326,7 @@
     }
 
     portal = Array.from(owner.children).find(function (child) {
-      return child.matches && child.matches("[data-moo-overlay-portal-host]");
+      return child.matches && child.matches("[data-moo-overlay-host]");
     });
     if (portal) {
       return portal;
@@ -334,7 +334,7 @@
 
     portal = document.createElement("div");
     portal.className = "moo-ui";
-    portal.setAttribute("data-moo-overlay-portal-host", "");
+    portal.setAttribute("data-moo-overlay-host", "");
     owner.appendChild(portal);
     return portal;
   }

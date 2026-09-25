@@ -2120,7 +2120,10 @@ class CatalogContractTests(CatalogTestCase):
         full_build = self.read_output("assets/css/moo-ui.css")
         self.assertIn(".moo-ui[data-bs-theme] {", full_build)
         self.assertIn('.moo-ui[data-bs-theme="dark"] {', full_build)
-        self.assertIn("body > .moo-ui[data-bs-theme] {", full_build)
+        self.assertIn(
+            "body > .moo-ui[data-bs-theme]:not([data-moo-overlay-host]) {",
+            full_build,
+        )
         self.assertNotIn("body[data-bs-theme]", full_build)
         self.assertNotIn(":where(html, body)[data-bs-theme]", full_build)
         self.assertNotIn("moo-catalog__", full_build)

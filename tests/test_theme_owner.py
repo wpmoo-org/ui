@@ -67,7 +67,7 @@ function makeElement({ classes = [], dataset = {}, dir = "" } = {}) {
       ) {
         return classSet.has("moo-ui") && ["light", "dark"].includes(this.dataset.bsTheme);
       }
-      if (selector.includes("[data-moo-overlay-portal-host]")) {
+      if (selector.includes("[data-moo-overlay-host]")) {
         return Object.hasOwn(this.dataset, "mooOverlayPortalHost");
       }
       return false;
