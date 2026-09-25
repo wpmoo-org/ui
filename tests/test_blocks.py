@@ -241,14 +241,6 @@ class BlocksTests(CatalogTestCase):
         self.assertIn(".moo-block-preview__viewport", styles)
         self.assertIn(".moo-block-preview__frame", styles)
         self.assertIn('.moo-catalog > .wrapper[data-layout="app"]', styles)
-        self.assertIn(
-            '.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="left"] .sidebar-inner',
-            styles,
-        )
-        self.assertIn(
-            '.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="right"] .sidebar-inner',
-            styles,
-        )
         self.assertNotIn("moo-sidebar-demo--flat-inset", styles)
         self.assertNotIn("sidebar-inset__header", styles)
         self.assertIn("data-moo-block-frame-shell", script)

@@ -127,7 +127,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('aria-controls="projects-sub"', output)
         self.assertIn('aria-expanded="true"', output)
 
-    def test_sidebar_account_hooks_and_physical_edge_rules_are_explicit(self) -> None:
+    def test_sidebar_account_hooks_are_explicit(self) -> None:
         output = self.render_sidebar(
             """
             {% call sidebar() %}
@@ -145,18 +145,6 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("sidebar-menu-item--account", output)
         self.assertIn("sidebar-menu-button--account", output)
-        styles = read_app_styles()
-        self.assertRegex(
-            styles,
-            r'\.sidebar\[data-side="left"\] \.sidebar-inner\s*\{[^}]*border-right:',
-        )
-        self.assertRegex(
-            styles,
-            r'\.sidebar\[data-side="right"\] \.sidebar-inner\s*\{[^}]*border-left:',
-        )
-        app_styles = read_app_styles()
-        self.assertIn("margin-left:", app_styles)
-        self.assertIn("margin-right:", app_styles)
 
     def test_sidebar_rtl_physical_rules_follow_the_inherited_owner_direction(self) -> None:
         styles = read_app_styles()

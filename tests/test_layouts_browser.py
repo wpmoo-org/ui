@@ -368,6 +368,106 @@ class LayoutBrowserTests(unittest.TestCase):
             finally:
                 context.close()
 
+    def test_sidebar_variant_dividers_follow_the_public_shell_variant(self) -> None:
+        for case in LAYOUT_CASES[:2]:
+            context = new_case_context(self.browser, case)
+            page = context.new_page()
+            evidence = BrowserEvidence(page)
+            try:
+                response = page.goto(
+                    f"{self.base_url}/site-dist/blocks/previews/sidebar-inset/index.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+                self.assertEqual(page.locator(".moo-catalog").count(), 0)
+
+                sidebar = page.locator('[data-slot="sidebar"]')
+                inner = sidebar.locator('[data-slot="sidebar-inner"]')
+                for side in ("left", "right"):
+                    sidebar.evaluate("(element, side) => element.dataset.side = side", side)
+                    for variant in ("sidebar", "inset", "floating"):
+                        sidebar.evaluate(
+                            "(element, variant) => element.dataset.variant = variant",
+                            variant,
+                        )
+                        borders = inner.evaluate(
+                            """element => {
+                              const style = getComputedStyle(element);
+                              return {
+                                left: parseFloat(style.borderLeftWidth),
+                                right: parseFloat(style.borderRightWidth),
+                              };
+                            }"""
+                        )
+                        with self.subTest(case=case.name, side=side, variant=variant):
+                            if variant == "inset":
+                                self.assertEqual(borders, {"left": 0, "right": 0})
+                            elif variant == "floating":
+                                self.assertGreater(borders["left"], 0)
+                                self.assertGreater(borders["right"], 0)
+                            else:
+                                divider = "right" if side == "left" else "left"
+                                self.assertGreater(borders[divider], 0)
+                evidence.assert_clean()
+            finally:
+                context.close()
+
+    def test_inset_page_header_follows_the_surface_top_corners(self) -> None:
+        for route in ("blocks/previews/sidebar-inset/index.html", "index.html"):
+            for case in LAYOUT_CASES[:2]:
+                context = new_case_context(self.browser, case)
+                if route == "index.html":
+                    context.add_init_script(
+                        "localStorage.setItem('moo:sidebar-variant', 'inset');"
+                    )
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                try:
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/{route}",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    sidebar = page.locator('[data-slot="sidebar"]')
+                    self.assertEqual(sidebar.get_attribute("data-variant"), "inset")
+
+                    for side in ("left", "right"):
+                        sidebar.evaluate(
+                            "(element, value) => element.dataset.side = value", side
+                        )
+                        corners = page.evaluate(
+                            """() => {
+                              const surface = document.querySelector(
+                                '.wrapper[data-layout="app"] > [data-slot="page"]'
+                              );
+                              const header = surface.querySelector(':scope > header');
+                              const pageStyle = getComputedStyle(surface);
+                              const headerStyle = getComputedStyle(header);
+                              return {
+                                pageLeft: pageStyle.borderTopLeftRadius,
+                                pageRight: pageStyle.borderTopRightRadius,
+                                headerLeft: headerStyle.borderTopLeftRadius,
+                                headerRight: headerStyle.borderTopRightRadius,
+                              };
+                            }"""
+                        )
+                        with self.subTest(route=route, case=case.name, side=side):
+                            self.assertGreater(
+                                float(corners["pageLeft"].removesuffix("px")), 0
+                            )
+                            self.assertGreater(
+                                float(corners["pageRight"].removesuffix("px")), 0
+                            )
+                            self.assertEqual(corners["headerLeft"], corners["pageLeft"])
+                            self.assertEqual(corners["headerRight"], corners["pageRight"])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_app_page_topology_and_region_rails(self) -> None:
         context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
         try:
