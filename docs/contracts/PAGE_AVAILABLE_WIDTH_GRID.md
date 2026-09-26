@@ -24,7 +24,9 @@ on one item. Ordinary Bootstrap grids remain viewport-based and unchanged.
 
 Any descendant can use `data-page-show-from="lg"` or
 `data-page-hide-from="lg"` to switch companion navigation at the same rail
-threshold. The compact branch is visible when container queries are not
-supported. Keep forms and IDs in one content body; duplicate only genuinely
-alternate navigation. A capped rail (for example `container-xl`) might never
-reach `xl`/`xxl` page-query thresholds even on a very wide viewport.
+threshold. Put these markers on neutral block wrappers: a visible wrapper is
+set to `display: block`, so keep any needed flex/grid display on a child inside
+it. The compact branch is visible when container queries are not supported.
+Keep forms and IDs in one content body; duplicate only genuinely alternate
+navigation. A capped rail (for example `container-xl`) might never reach
+`xl`/`xxl` page-query thresholds even on a very wide viewport.

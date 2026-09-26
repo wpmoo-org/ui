@@ -125,6 +125,8 @@ class LayoutBrowserTests(unittest.TestCase):
                                 navSpan: Math.round(nav.getBoundingClientRect().width / body.parentElement.getBoundingClientRect().width * 12),
                                 wideVisible: getComputedStyle(document.querySelector('[data-page-show-from="lg"]')).display !== 'none',
                                 compactVisible: getComputedStyle(document.querySelector('[data-page-hide-from="lg"]')).display !== 'none',
+                                wideNavigationDisplay: getComputedStyle(document.querySelector('[data-page-show-from="lg"] nav')).display,
+                                compactNavigationDisplay: getComputedStyle(document.querySelector('[data-page-hide-from="lg"] nav')).display,
                                 formCount: document.querySelectorAll('form#fixture-single-form').length,
                                 overflow: document.documentElement.scrollWidth > window.innerWidth,
                                 viewport: window.innerWidth,
@@ -136,6 +138,8 @@ class LayoutBrowserTests(unittest.TestCase):
                         self.assertEqual(report["navSpan"], expected_nav_span, report)
                         self.assertEqual(report["wideVisible"], wide_visible, report)
                         self.assertEqual(report["compactVisible"], not wide_visible, report)
+                        self.assertEqual(report["wideNavigationDisplay"], "flex", report)
+                        self.assertEqual(report["compactNavigationDisplay"], "flex", report)
                         self.assertEqual(report["formCount"], 1, report)
                         self.assertFalse(report["overflow"], report)
                         self.assertEqual(report["viewport"], 1800, report)
