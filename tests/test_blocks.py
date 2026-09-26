@@ -158,8 +158,8 @@ class BlocksTests(CatalogTestCase):
                     sidebar_id = f"preview-sidebar-{variant}-demo"
                     self.assertEqual(shell.sidebar_ids.count(sidebar_id), 1)
                     self.assertEqual(
-                        [attrs.get("data-slot") for _, attrs in shell.direct_children],
-                        ["sidebar", "page"],
+                        [(tag, attrs.get("data-slot")) for tag, attrs in shell.direct_children],
+                        [("script", None), ("aside", "sidebar"), ("div", "page")],
                     )
                     self.assertEqual(standalone.count(f'id="{sidebar_id}"'), 1)
                     self.assertIn('class="container-fluid', standalone)
