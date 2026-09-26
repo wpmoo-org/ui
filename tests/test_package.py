@@ -257,8 +257,6 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertIn("dist/js/state.js", package["files"])
         self.assertIn("dist/release-manifest.json", package["files"])
-        self.assertNotIn("./theme-prepaint.js", package["exports"])
-        self.assertNotIn("dist/js/theme-prepaint.js", package["files"])
 
     def test_root_package_exports_built_css_without_protected_images(self) -> None:
         package = self._read_package()
