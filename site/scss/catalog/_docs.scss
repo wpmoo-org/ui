@@ -184,7 +184,7 @@
   grid-template-columns: 1fr;
 }
 
-@media (min-width: 768px) {
+@include media-breakpoint-up(md) {
   .moo-catalog__grid--examples {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -298,7 +298,7 @@
 // instead of full-bleed -- widen the thumbnail there so it's actually
 // legible, while narrow viewports keep the smaller default above so it
 // doesn't crowd out the title/description text.
-@media (min-width: 768px) {
+@include media-breakpoint-up(md) {
   [data-moo-catalog-view="list"] .moo-catalog__showcase-preview {
     width: 18rem;
   }
@@ -439,7 +439,7 @@
 }
 
 .moo-doc-section p {
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
   margin-bottom: 0;
   color: var(--bs-secondary-color);
   font-size: var(--moo-doc-body-font-size);
@@ -449,7 +449,7 @@
 .moo-doc-principles {
   display: grid;
   gap: 1.25rem;
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -526,13 +526,13 @@
 }
 
 .moo-doc-note {
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
 }
 
 .moo-changelog {
   display: grid;
   gap: 1.25rem;
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
 }
 
 .moo-changelog__release {
@@ -608,7 +608,7 @@
   height: 1rem;
 }
 
-@media (min-width: 768px) {
+@include media-breakpoint-up(md) {
   .moo-catalog__toolbar {
     grid-template-columns: minmax(16rem, 1fr) 12rem auto;
     align-items: start;
@@ -1006,7 +1006,7 @@
   justify-content: center;
   width: calc(1.125rem * 1.25);
   height: calc(1.125rem * 1.25);
-  border-radius: 999px;
+  border-radius: var(--bs-border-radius-pill);
   border: 2px solid var(--moo-settings-panel-option-check-border);
   background-color: var(--moo-settings-panel-option-check-bg);
   color: var(--moo-settings-panel-option-check-color);
@@ -1114,7 +1114,7 @@
 .moo-settings-panel__theme-thumb-line {
   display: block;
   height: 0.25rem;
-  border-radius: 999px;
+  border-radius: var(--bs-border-radius-pill);
 }
 
 .moo-settings-panel__theme-thumb-line.is-short {
@@ -1221,7 +1221,7 @@
 .moo-settings-panel__sidebar-thumb-nav {
   display: block;
   height: 0.1875rem;
-  border-radius: 999px;
+  border-radius: var(--bs-border-radius-pill);
   background: color-mix(in srgb, var(--bs-body-color) 28%, transparent);
 }
 

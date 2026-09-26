@@ -88,7 +88,7 @@
   transition-duration: 80ms;
 }
 
-@media (max-width: 991.98px) {
+@include media-breakpoint-down(lg) {
   .moo-home-hero {
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
@@ -111,7 +111,7 @@
 .moo-home-proof-list {
   align-content: start;
 
-  @media (min-width: 768px) {
+  @include media-breakpoint-up(md) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -121,7 +121,7 @@
 .moo-home-entries {
   margin-top: $spacer * 1.5;
 
-  @media (min-width: 768px) {
+  @include media-breakpoint-up(md) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -301,13 +301,13 @@
   text-underline-offset: 0.1875em;
 }
 
-@media (max-width: 1199.98px) {
+@include media-breakpoint-down(xl) {
   .moo-home-component-card {
     --moo-home-component-card-size: calc((100vw - 5rem) / 3.5);
   }
 }
 
-@media (max-width: 767.98px) {
+@include media-breakpoint-down(md) {
   .moo-home-component-card {
     --moo-home-component-card-size: calc((100vw - 3rem) / 1.5);
   }

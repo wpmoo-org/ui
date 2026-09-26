@@ -70,7 +70,7 @@ body:has(.moo-catalog) {
 // Below lg the repository label collapses and the link becomes icon-only;
 // restore symmetric padding so the mark sits optically centered (the core
 // inline-start rule assumes a visible label next to the icon).
-@media (max-width: 991.98px) {
+@include media-breakpoint-down(lg) {
   .moo-catalog .btn.moo-catalog__github-link:has(> [data-icon="inline-start"]) {
     padding-inline: 0.5rem;
   }
