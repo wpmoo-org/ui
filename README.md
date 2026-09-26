@@ -121,8 +121,8 @@ when it needs independent browser persistence:
 On a first visit, a static host without a known server preference can only
 correct a browser-only preference after the external asset is fetched, so that
 correction may be visible. The server value remains the deterministic fallback;
-an external fetch cannot guarantee zero flash in this profile. The local RC9
-candidate exposes this asset as `@wpmoo/ui/state.js`.
+an external fetch cannot guarantee zero flash in this profile. RC9 exposes
+this asset as `@wpmoo/ui/state.js`.
 
 ### Optional runtime
 
@@ -166,7 +166,7 @@ calm.
 
 ## Status And Support
 
-Moo UI is preparing the `1.0.0-rc.9` development candidate. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
+The current release candidate is `1.0.0-rc.9`. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
 

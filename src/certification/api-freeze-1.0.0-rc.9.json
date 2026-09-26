@@ -1,7 +1,7 @@
 {
   "freezeVersion": "1.0.0-rc.9",
   "frozenAt": "2026-09-26",
-  "description": "Development candidate API inventory for 1.0.0-rc.9. RC9 replaces the RC8 classic browser prepaint entrypoint with the placement-dependent state bootstrap for Theme, Direction, and Sidebar owners. The release manifest still hashes the adapter-facing CSS and browser script. The export and package-file inventory, Sass allow-list, ESM records, Bootstrap support, and artifact relationships are traceable to this document and docs/contracts/PACKAGE_SURFACE_DECISIONS.md. This candidate is not a published release.",
+  "description": "API inventory for the 1.0.0-rc.9 release candidate. RC9 replaces the RC8 classic browser prepaint entrypoint with the placement-dependent state bootstrap for Theme, Direction, and Sidebar owners. The release manifest hashes the adapter-facing CSS and browser script. The export and package-file inventory, Sass allow-list, ESM records, Bootstrap support, and artifact relationships are traceable to this document and docs/contracts/PACKAGE_SURFACE_DECISIONS.md.",
   "packageExports": [
     "./moo-ui.css",
     "./moo-ui.min.css",
