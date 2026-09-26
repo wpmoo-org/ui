@@ -9,7 +9,7 @@ import {
   findThemeOwner,
   effectiveOwnerDirection,
   isDocumentOwner,
-  ownerPrepaintBaseline,
+  ownerStateBaseline,
   ownerStorageKey,
   readOwnerPreference,
   resolveOwnerTheme,
@@ -163,7 +163,7 @@ export function initSettingsPanel(root = document) {
     const builderStorageKey = isDocumentOwner(owner)
       ? BUILDER_STORAGE_KEY
       : null;
-    const serverBaseline = ownerPrepaintBaseline(owner);
+    const serverBaseline = ownerStateBaseline(owner);
     const themeInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-theme]")
     );

@@ -105,7 +105,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "dist/js/theme-prepaint.js",
+    "dist/js/state.js",
     "dist/release-manifest.json",
     "scss/*.scss",
     "scss/**/*.scss",
@@ -130,7 +130,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./chart.min.js": "./dist/js/chart.min.js",
     "./datepicker.js": "./dist/js/datepicker.js",
     "./datepicker.min.js": "./dist/js/datepicker.min.js",
-    "./theme-prepaint.js": "./dist/js/theme-prepaint.js",
+    "./state.js": "./dist/js/state.js",
     "./release-manifest.json": "./dist/release-manifest.json",
     "./scss/config": "./scss/_config.scss",
     "./scss/moo-ui": "./scss/moo-ui.scss",
@@ -243,20 +243,22 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertNotIn("workspaces", package)
 
-    def test_rc8_candidate_declares_the_release_artifact_surface(self) -> None:
+    def test_rc9_candidate_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.0.0-rc.8")
+        self.assertEqual(package["version"], "1.0.0-rc.9")
         self.assertEqual(
-            package["exports"]["./theme-prepaint.js"],
-            "./dist/js/theme-prepaint.js",
+            package["exports"]["./state.js"],
+            "./dist/js/state.js",
         )
         self.assertEqual(
             package["exports"]["./release-manifest.json"],
             "./dist/release-manifest.json",
         )
-        self.assertIn("dist/js/theme-prepaint.js", package["files"])
+        self.assertIn("dist/js/state.js", package["files"])
         self.assertIn("dist/release-manifest.json", package["files"])
+        self.assertNotIn("./theme-prepaint.js", package["exports"])
+        self.assertNotIn("dist/js/theme-prepaint.js", package["files"])
 
     def test_root_package_exports_built_css_without_protected_images(self) -> None:
         package = self._read_package()
@@ -355,11 +357,11 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(manifest["schemaVersion"], 1)
         self.assertEqual(
             manifest["package"],
-            {"name": "@wpmoo/ui", "version": "1.0.0-rc.8"},
+            {"name": "@wpmoo/ui", "version": "1.0.0-rc.9"},
         )
         self.assertEqual(
             [entry["export"] for entry in manifest["artifacts"]],
-            ["./moo.css", "./moo-ui.css", "./theme-prepaint.js"],
+            ["./moo.css", "./moo-ui.css", "./state.js"],
         )
 
         seen_paths: set[str] = set()
@@ -433,7 +435,7 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertEqual(
             certification["publicEntrypoints"]["browser"],
-            ["./theme-prepaint.js"],
+            ["./state.js"],
         )
         self.assertIn(
             "./release-manifest.json",
@@ -507,6 +509,11 @@ class PackageMetadataTests(unittest.TestCase):
                 self.assertIn(expected_url, document)
                 self.assertNotIn("`THIRD_PARTY_NOTICES.md`", document)
                 self.assertNotRegex(document, moving_branch_pattern)
+        llms = (ROOT / "site/public/llms.txt").read_text(encoding="utf-8")
+        self.assertIn(
+            f"https://unpkg.com/@wpmoo/ui@{package['version']}/dist/assets/css/moo-ui.css",
+            llms,
+        )
         self.assertIn("Moo UI source code is MIT licensed.", readme)
         self.assertNotRegex(
             readme,

@@ -57,7 +57,7 @@ GEIST = ROOT / "vendor/geist"
 LUCIDE_ICONS = SRC / "icons/lucide-icons.json"
 JS_COMPONENTS = SRC / "js/components"
 JS_ROOT = SRC / "js"
-THEME_PREPAINT_PATH = JS_ROOT / "theme-prepaint.js"
+STATE_PATH = JS_ROOT / "state.js"
 JS_CATALOG = SITE_SRC / "js/catalog"
 CORE_CSS_OUTPUTS = ("moo-ui.css", "moo-ui.min.css", "moo.css", "moo.min.css")
 CORE_JS_MODULES = (
@@ -85,7 +85,7 @@ RELEASE_MANIFEST_PATH = PACKAGE_DIST / "release-manifest.json"
 RELEASE_ARTIFACTS = (
     ("./moo.css", "dist/assets/css/moo.css"),
     ("./moo-ui.css", "dist/assets/css/moo-ui.css"),
-    ("./theme-prepaint.js", "dist/js/theme-prepaint.js"),
+    ("./state.js", "dist/js/state.js"),
 )
 MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
@@ -144,7 +144,7 @@ SOURCE_SNAPSHOT_DIRS = (
 )
 SOURCE_SNAPSHOT_FILES = (
     JS_ROOT / "moo-ui.js",
-    JS_ROOT / "theme-prepaint.js",
+    JS_ROOT / "state.js",
     JS_ROOT / "theme-owner.js",
     CERTIFICATION / "layout-evidence.json",
 )
@@ -1252,8 +1252,8 @@ def render_lucide_icon(icon_set: dict[str, object], name: str, position: str) ->
     )
 
 
-def theme_prepaint_source() -> Markup:
-    return Markup(THEME_PREPAINT_PATH.read_text(encoding="utf-8"))
+def state_source() -> Markup:
+    return Markup(STATE_PATH.read_text(encoding="utf-8"))
 
 
 def create_environment(icon_renderer=None) -> Environment:
@@ -1286,7 +1286,7 @@ def create_environment(icon_renderer=None) -> Environment:
     environment.globals["component_preview_absolute_src"] = component_preview_absolute_src
     environment.globals["block_preview_src"] = block_preview_src
     environment.globals["example_preview_src"] = example_preview_src
-    environment.globals["theme_prepaint_source"] = theme_prepaint_source
+    environment.globals["state_source"] = state_source
     environment.globals["tasks_example_js_source"] = tasks_example_js_source
     environment.globals["users_example_js_source"] = users_example_js_source
     icon_set = load_lucide_icons()
@@ -1952,7 +1952,7 @@ def asset_version() -> str:
         SITE_DIST / "assets/css/catalog-prepaint.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog-prepaint.js",
-        SITE_DIST / "assets/js/theme-prepaint.js",
+        SITE_DIST / "assets/js/state.js",
         SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
     ]
@@ -1966,7 +1966,7 @@ def asset_version() -> str:
 def copy_package_js() -> None:
     package_js_dir = PACKAGE_DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(THEME_PREPAINT_PATH, package_js_dir / "theme-prepaint.js")
+    shutil.copy2(STATE_PATH, package_js_dir / "state.js")
     for module_name in CORE_JS_MODULES:
         target = package_js_dir / module_name
         shutil.copy2(JS_COMPONENTS / module_name, target)
@@ -2125,7 +2125,7 @@ def required_core_outputs() -> tuple[Path, ...]:
     for name in AGGREGATE_JS_MODULES:
         outputs.append(PACKAGE_DIST / "js" / name)
         outputs.append(PACKAGE_DIST / "js" / name.replace(".js", ".min.js"))
-    outputs.append(PACKAGE_DIST / "js" / "theme-prepaint.js")
+    outputs.append(PACKAGE_DIST / "js" / "state.js")
     outputs.append(RELEASE_MANIFEST_PATH)
     return tuple(outputs)
 
@@ -2157,8 +2157,8 @@ def copy_core_outputs_to_site() -> None:
     legacy_js_dir.mkdir(parents=True, exist_ok=True)
     owner_js_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(
-        PACKAGE_DIST / "js/theme-prepaint.js",
-        owner_js_dir / "theme-prepaint.js",
+        PACKAGE_DIST / "js/state.js",
+        owner_js_dir / "state.js",
     )
     for module_name in CORE_JS_MODULES:
         package_module = PACKAGE_DIST / "js" / module_name

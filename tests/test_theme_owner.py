@@ -251,7 +251,7 @@ console.log(JSON.stringify({
             },
         )
 
-    def test_prepaint_resolves_owner_preferences_without_html_theme_state(self) -> None:
+    def test_state_resolves_owner_preferences_without_html_theme_state(self) -> None:
         case = self.run_case(
             """
 import assert from "node:assert/strict";
@@ -296,12 +296,12 @@ const documentOwner = owner({ theme: "light", documentOwner: true });
 documentOwner.parentElement = body;
 body.children = [documentOwner];
 document.currentScript = { parentElement: documentOwner };
-await import("./src/js/theme-prepaint.js?document-owner");
+await import("./src/js/state.js?document-owner");
 assert.equal(documentOwner.dataset.bsTheme, "dark");
-assert.equal(documentOwner.dataset.mooPrepaint, "ready");
+assert.equal(documentOwner.dataset.mooState, "ready");
 assert.equal(documentElement.dir, "rtl");
 assert.equal(documentElement.dataset.bsTheme, undefined);
-assert.deepEqual(documentOwner.__mooPrepaintBaseline, {
+assert.deepEqual(documentOwner.__mooStateBaseline, {
   theme: "light",
   direction: "ltr",
 });
@@ -322,12 +322,12 @@ sibling.parentElement = body;
 body.children = [documentOwner, embedded, sibling];
 documentElement.dir = "ltr";
 document.currentScript = { parentElement: embedded };
-await import("./src/js/theme-prepaint.js?embedded-owner");
+await import("./src/js/state.js?embedded-owner");
 assert.equal(embedded.dataset.bsTheme, "dark");
-assert.equal(embedded.dataset.mooPrepaint, "ready");
+assert.equal(embedded.dataset.mooState, "ready");
 assert.equal(embedded.dir, "rtl");
 assert.equal(documentElement.dir, "ltr");
-assert.deepEqual(embedded.__mooPrepaintBaseline, {
+assert.deepEqual(embedded.__mooStateBaseline, {
   theme: "dark",
   direction: null,
 });
@@ -338,8 +338,8 @@ const classOnlyHost = {
   parentElement: body,
 };
 document.currentScript = { parentElement: classOnlyHost };
-await import("./src/js/theme-prepaint.js?class-only-host");
-assert.equal(classOnlyHost.dataset.mooPrepaint, undefined);
+await import("./src/js/state.js?class-only-host");
+assert.equal(classOnlyHost.dataset.mooState, undefined);
 
 const unmarkedBodyOwner = owner({
   theme: "light",
@@ -349,10 +349,10 @@ unmarkedBodyOwner.parentElement = body;
 body.children = [unmarkedBodyOwner];
 documentElement.dir = "ltr";
 document.currentScript = { parentElement: unmarkedBodyOwner };
-await import("./src/js/theme-prepaint.js?unmarked-body-owner");
+await import("./src/js/state.js?unmarked-body-owner");
 assert.equal(unmarkedBodyOwner.dir, "rtl");
 assert.equal(documentElement.dir, "ltr");
-assert.equal(unmarkedBodyOwner.dataset.mooPrepaint, "ready");
+assert.equal(unmarkedBodyOwner.dataset.mooState, "ready");
 
 const throwingSystemOwner = owner({ theme: "light", documentOwner: true });
 throwingSystemOwner.parentElement = body;
@@ -360,16 +360,16 @@ body.children = [throwingSystemOwner];
 documentElement.dir = "ltr";
 window.matchMedia = () => { throw new Error("unavailable"); };
 document.currentScript = { parentElement: throwingSystemOwner };
-await import("./src/js/theme-prepaint.js?match-media-throws");
+await import("./src/js/state.js?match-media-throws");
 assert.equal(throwingSystemOwner.dataset.bsTheme, "light");
-assert.equal(throwingSystemOwner.dataset.mooPrepaint, "ready");
-assert.deepEqual(throwingSystemOwner.__mooPrepaintBaseline, {
+assert.equal(throwingSystemOwner.dataset.mooState, "ready");
+assert.deepEqual(throwingSystemOwner.__mooStateBaseline, {
   theme: "light",
   direction: "ltr",
 });
 
 console.log(JSON.stringify({
-  name: "owner-prepaint-contract",
+  name: "owner-state-contract",
   ok: true,
   documentTheme: documentOwner.dataset.bsTheme,
   embeddedDirection: embedded.dir,
@@ -381,7 +381,7 @@ console.log(JSON.stringify({
         self.assertEqual(
             case,
             {
-                "name": "owner-prepaint-contract",
+                "name": "owner-state-contract",
                 "ok": True,
                 "documentTheme": "dark",
                 "embeddedDirection": "rtl",
@@ -545,7 +545,7 @@ const embedded = owner();
 embedded.parentElement = body;
 body.children = [embedded];
 document.currentScript = { parentElement: embedded };
-await import("./src/js/theme-prepaint.js?streaming-embedded");
+await import("./src/js/state.js?streaming-embedded");
 
 const laterSibling = owner({ theme: "dark" });
 laterSibling.parentElement = body;
@@ -553,7 +553,7 @@ body.children = [embedded, laterSibling];
 
 assert.equal(embedded.dir, "rtl");
 assert.equal(documentElement.dir, "ltr");
-assert.equal(embedded.dataset.mooPrepaint, "ready");
+assert.equal(embedded.dataset.mooState, "ready");
 
 console.log(JSON.stringify({
   name: "streaming-embedded-owner",
@@ -580,7 +580,7 @@ console.log(JSON.stringify({
 import assert from "node:assert/strict";
 import {
   effectiveOwnerDirection,
-  ownerPrepaintBaseline,
+  ownerStateBaseline,
   resolveOwnerTheme,
   restoreOwnerDirection,
   safeColorSchemeMedia,
@@ -623,8 +623,8 @@ body.firstElementChild = sibling;
 const ownerDocument = { nodeType: 9, body, documentElement: html, defaultView: {} };
 [html, body, sibling, embedded].forEach((node) => { node.ownerDocument = ownerDocument; });
 
-embedded.__mooPrepaintBaseline = { theme: "light", direction: null };
-assert.deepEqual(ownerPrepaintBaseline(embedded), {
+embedded.__mooStateBaseline = { theme: "light", direction: null };
+assert.deepEqual(ownerStateBaseline(embedded), {
   theme: "light",
   direction: null,
 });

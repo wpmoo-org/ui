@@ -124,8 +124,8 @@ export function safeColorSchemeMedia(view) {
   }
 }
 
-export function ownerPrepaintBaseline(owner) {
-  const baseline = owner?.__mooPrepaintBaseline;
+export function ownerStateBaseline(owner) {
+  const baseline = owner?.__mooStateBaseline;
   const hasBaselineDirection = Object.hasOwn(baseline || {}, 'direction');
   const fallbackDirection = isDocumentOwner(owner)
     ? explicitDirection(documentFor(owner)?.documentElement) || 'ltr'

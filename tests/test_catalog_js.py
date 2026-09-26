@@ -2019,7 +2019,7 @@ function runScenario({ baselineTheme, currentTheme, embedded = false }) {
     },
     querySelectorAll: () => [],
   }, embedded ? "ltr" : null);
-  owner.__mooPrepaintBaseline = {
+  owner.__mooStateBaseline = {
     theme: baselineTheme,
     direction: embedded ? null : "rtl",
   };

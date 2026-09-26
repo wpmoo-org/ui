@@ -2042,25 +2042,25 @@ class CatalogContractTests(CatalogTestCase):
             r'<div\s+class="moo-ui"\s+data-bs-theme="\{\{ resolved_theme \}\}"\s+data-moo-document-owner="true"\s*>',
         )
         self.assertIn(
-            "<script>{{ theme_prepaint_source() }}</script>",
+            "<script>{{ state_source() }}</script>",
             base,
         )
         self.assertLess(
             base.index('data-bs-theme="{{ resolved_theme }}"'),
-            base.index("theme_prepaint_source"),
+            base.index("state_source"),
         )
         self.assertLess(
-            base.index("theme_prepaint_source"),
+            base.index("state_source"),
             base.index('href="#main-content"'),
         )
-        self.assertNotIn('assets/js/theme-prepaint.js?', base)
+        self.assertNotIn('assets/js/state.js?', base)
         self.assertNotIn("body.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
 
-    def test_base_layout_inlines_the_canonical_owner_prepaint_source(self) -> None:
-        canonical = (ROOT / "src/js/theme-prepaint.js").read_text(encoding="utf-8")
+    def test_base_layout_inlines_the_canonical_owner_state_source(self) -> None:
+        canonical = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(
             encoding="utf-8"
         )
@@ -3524,7 +3524,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Server-resolved document", installation)
         self.assertIn('data-moo-document-owner="true"', installation)
         self.assertIn("Static or strict-CSP fallback", installation)
-        self.assertIn('src="/vendor/@wpmoo/ui/theme-prepaint.js"', installation_text)
+        self.assertIn('src="/vendor/@wpmoo/ui/state.js"', installation_text)
         self.assertIn(
             "external fetch cannot guarantee zero flash",
             normalized_installation_text,
@@ -3586,7 +3586,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("MooUI.Combobox.getOrCreateInstance(combobox)", readme)
         self.assertIn("Server-resolved document", readme)
         self.assertIn("Static or strict-CSP fallback", readme)
-        self.assertIn("theme-prepaint.js", readme)
+        self.assertIn("state.js", readme)
         self.assertIn("external fetch cannot guarantee zero flash", readme)
         self.assertRegex(
             support,

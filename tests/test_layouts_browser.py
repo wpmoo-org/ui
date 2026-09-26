@@ -187,7 +187,7 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
-    def test_document_owner_prepaint_applies_stored_theme_before_external_asset(self) -> None:
+    def test_document_owner_state_applies_stored_theme_before_external_asset(self) -> None:
         def open_catalog(*, theme: str, direction: str):
             context = new_case_context(self.browser, LAYOUT_CASES[0])
             context.add_init_script(
@@ -200,11 +200,11 @@ class LayoutBrowserTests(unittest.TestCase):
             )
             page = context.new_page()
             evidence = BrowserEvidence(page)
-            prepaint_requests: list[str] = []
+            state_requests: list[str] = []
             page.on(
                 "request",
-                lambda request: prepaint_requests.append(request.url)
-                if re.search(r"/assets/js/theme-prepaint\.js(?:\?.*)?$", request.url)
+                lambda request: state_requests.append(request.url)
+                if re.search(r"/assets/js/state\.js(?:\?.*)?$", request.url)
                 else None,
             )
             response = page.goto(
@@ -213,13 +213,13 @@ class LayoutBrowserTests(unittest.TestCase):
             )
             self.assertIsNotNone(response)
             self.assertTrue(response.ok)
-            return context, page, evidence, prepaint_requests
+            return context, page, evidence, state_requests
 
-        context, page, evidence, prepaint_requests = open_catalog(
+        context, page, evidence, state_requests = open_catalog(
             theme="dark", direction="rtl"
         )
         try:
-            self.assertEqual(prepaint_requests, [])
+            self.assertEqual(state_requests, [])
 
             surface = page.evaluate(
                 """
@@ -238,7 +238,7 @@ class LayoutBrowserTests(unittest.TestCase):
                     htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
                     htmlDirection: document.documentElement.dir,
                     ownerTheme: owner.getAttribute("data-bs-theme"),
-                    prepaint: owner.dataset.mooPrepaint,
+                    state: owner.dataset.mooState,
                     coversViewport: rect.width >= window.innerWidth && rect.height >= window.innerHeight,
                     noBodyStrip: points.every(([x, y]) => owner.contains(document.elementFromPoint(x, y))),
                   };
@@ -250,30 +250,30 @@ class LayoutBrowserTests(unittest.TestCase):
             self.assertIsNone(surface["htmlTheme"])
             self.assertIsNone(surface["bodyTheme"])
             self.assertEqual(surface["ownerTheme"], "dark")
-            self.assertEqual(surface["prepaint"], "ready")
+            self.assertEqual(surface["state"], "ready")
             self.assertTrue(surface["coversViewport"])
             self.assertTrue(surface["noBodyStrip"])
             evidence.assert_clean()
         finally:
             context.close()
 
-        context, page, evidence, prepaint_requests = open_catalog(
+        context, page, evidence, state_requests = open_catalog(
             theme="not-a-theme", direction="sideways"
         )
         try:
-            self.assertEqual(prepaint_requests, [])
+            self.assertEqual(state_requests, [])
             surface = page.evaluate(
                 """
                 () => ({
                   direction: document.documentElement.dir,
                   ownerTheme: document.body.firstElementChild?.getAttribute("data-bs-theme"),
-                  prepaint: document.body.firstElementChild?.dataset.mooPrepaint,
+                  state: document.body.firstElementChild?.dataset.mooState,
                 })
                 """
             )
             self.assertEqual(surface["direction"], "ltr")
             self.assertEqual(surface["ownerTheme"], "light")
-            self.assertEqual(surface["prepaint"], "ready")
+            self.assertEqual(surface["state"], "ready")
             evidence.assert_clean()
         finally:
             context.close()

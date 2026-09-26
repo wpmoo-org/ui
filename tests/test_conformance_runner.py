@@ -227,7 +227,7 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         expected_assets = {
             "moo.css": ROOT / "dist" / "assets" / "css" / "moo.css",
             "sidebar.js": ROOT / "dist" / "js" / "sidebar.js",
-            "theme-prepaint.js": ROOT / "dist" / "js" / "theme-prepaint.js",
+            "state.js": ROOT / "dist" / "js" / "state.js",
         }
 
         for fixture_name, source_path in expected_assets.items():
@@ -252,15 +252,15 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         self.assertIn('data-moo-overlay-host', fixture)
         self.assertIn('src="assets/init-nested-owners.js"', fixture)
         self.assertEqual(
-            fixture.count('<script src="assets/theme-prepaint.js"></script>'),
+            fixture.count('<script src="assets/state.js"></script>'),
             2,
         )
         self.assertNotIn("../../site/static", fixture)
-        prepaint_scripts = re.findall(
-            r"<script\b[^>]*theme-prepaint\.js[^>]*></script>", fixture
+        state_scripts = re.findall(
+            r"<script\b[^>]*state\.js[^>]*></script>", fixture
         )
-        self.assertEqual(len(prepaint_scripts), 2)
-        for script in prepaint_scripts:
+        self.assertEqual(len(state_scripts), 2)
+        for script in state_scripts:
             self.assertNotRegex(script, r"\bdefer\b")
             self.assertNotRegex(script, r"\btype\s*=\s*[\"']module[\"']")
         self.assertNotIn("<style", fixture)
@@ -273,8 +273,8 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         self.assertIn("ownerPortalRoot(owner)", initializer)
         self.assertIn("container: portal", initializer)
 
-    def test_document_owner_fixture_uses_public_external_prepaint(self):
-        fixture_path = FIXTURES_DIR / "document-owner-prepaint.html"
+    def test_document_owner_fixture_uses_public_external_state(self):
+        fixture_path = FIXTURES_DIR / "document-owner-state.html"
         fixture = fixture_path.read_text(encoding="utf-8")
         parser = _FixtureParser()
         parser.feed(fixture)
@@ -297,7 +297,7 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
         self.assertGreaterEqual(len(owner.children), 1)
         first_child = owner.children[0]
         self.assertEqual(first_child.tag, "script")
-        self.assertEqual(first_child.attrs.get("src"), "assets/theme-prepaint.js")
+        self.assertEqual(first_child.attrs.get("src"), "assets/state.js")
         self.assertNotIn("defer", first_child.attrs)
         self.assertNotEqual(
             (first_child.attrs.get("type") or "").strip().lower(), "module"
@@ -324,10 +324,10 @@ class OwnerConformanceFixtureTests(unittest.TestCase):
                 self.assertIn("data-moo-direction-key", owner.attrs)
                 self.assertNotIn("data-moo-document-owner", owner.attrs)
 
-    def test_public_prepaint_fixture_asset_matches_dist(self):
+    def test_public_state_fixture_asset_matches_dist(self):
         self.assertEqual(
-            (FIXTURES_DIR / "assets" / "theme-prepaint.js").read_bytes(),
-            (ROOT / "dist" / "js" / "theme-prepaint.js").read_bytes(),
+            (FIXTURES_DIR / "assets" / "state.js").read_bytes(),
+            (ROOT / "dist" / "js" / "state.js").read_bytes(),
         )
 
         for stylesheet in ("moo.css", "moo-ui.css"):

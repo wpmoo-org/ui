@@ -249,8 +249,8 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                     outerBackground: getComputedStyle(outer).getPropertyValue("--bs-body-bg").trim(),
                     outerDirection: outer.dir,
                     outerTheme: outer.getAttribute("data-bs-theme"),
-                    outerReady: outer.dataset.mooPrepaint,
-                    innerReady: inner.dataset.mooPrepaint,
+                    outerReady: outer.dataset.mooState,
+                    innerReady: inner.dataset.mooState,
                   };
                 }
                 """

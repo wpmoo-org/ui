@@ -3,6 +3,20 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.9 Development Candidate
+
+The local RC9 candidate replaces the public classic browser export
+`./theme-prepaint.js` with `./state.js`. The script restores Theme and
+Direction on a resolved Moo owner, or Sidebar state on a keyed Sidebar wrapper,
+when invoked as the first child of that owner. The release manifest hashes the
+new script bytes. This is a breaking export rename; no alias is shipped in the
+candidate. RC8 remains the published registry release, and release-mode adapter
+pins remain on RC8 until RC9 is actually published.
+Release-facing documentation links, including third-party notices and the CDN
+example, point at the active package version before tagging. The release flow
+accepts the short propagation window and requires no second merge to repoint
+those links.
+
 ## 1.0.0-rc.8 Entrypoints
 
 RC8 carries the RC7 public package surface forward and adds two deliberately

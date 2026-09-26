@@ -1,5 +1,5 @@
 /*!
- * Moo UI sidebar.js v1.0.0-rc.8 (https://ui.wpmoo.org/)
+ * Moo UI sidebar.js v1.0.0-rc.9 (https://ui.wpmoo.org/)
  * Copyright 2026 WPMoo (https://wpmoo.org)
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  */
@@ -249,7 +249,7 @@ var _Sidebar = class _Sidebar {
   _positionDropdown(control) {
     const item = control?.closest?.(".sidebar-menu-item");
     const isHeaderWorkspace = control?.classList.contains("sidebar-menu-button--workspace") && control.closest('[data-slot="sidebar-header"]');
-    const isFooterAccount = control?.classList.contains("sidebar-menu-button--account") && control.closest('[data-slot="sidebar-footer"]');
+    const isFooterAccount = control?.closest(".sidebar-menu-item--account") && control.closest('[data-slot="sidebar-footer"]');
     if (!control || !item || !(isHeaderWorkspace || isFooterAccount) || !this._isDesktop()) {
       this._clearDropdownPosition(control);
       return;

@@ -209,7 +209,7 @@ class DocumentRootTests(unittest.TestCase):
                 nodes = elements(root)
                 html = next(node for node in nodes if node.tag == "html")
                 body = next(node for node in nodes if node.tag == "body")
-                if fixture_path.name == "document-owner-prepaint.html":
+                if fixture_path.name == "document-owner-state.html":
                     owners = [node for node in body.children if is_resolved_owner(node)]
                     self.assertEqual(len(owners), 1)
                     self.assertIs(body.children[0], owners[0])

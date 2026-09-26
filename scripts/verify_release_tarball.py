@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the published RC8 package from the bytes in its npm tarball.
+"""Verify the RC9 package candidate from the bytes in its npm tarball.
 
 The verifier deliberately does not extract the archive.  It validates one
 canonical member policy, reads only the required JSON/artifact members, and
@@ -20,7 +20,7 @@ from typing import Any
 
 
 PACKAGE_NAME = "@wpmoo/ui"
-PACKAGE_VERSION = "1.0.0-rc.8"
+PACKAGE_VERSION = "1.0.0-rc.9"
 MANIFEST_MEMBER = "package/dist/release-manifest.json"
 PACKAGE_JSON_MEMBER = "package/package.json"
 MANIFEST_LIMIT = 1 * 1024 * 1024
@@ -30,7 +30,7 @@ SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 EXPECTED_ARTIFACTS = {
     "./moo.css": "dist/assets/css/moo.css",
     "./moo-ui.css": "dist/assets/css/moo-ui.css",
-    "./theme-prepaint.js": "dist/js/theme-prepaint.js",
+    "./state.js": "dist/js/state.js",
 }
 
 
@@ -262,7 +262,7 @@ def verify_tarball(tarball: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Verify a Moo UI RC8 npm tarball.")
+    parser = argparse.ArgumentParser(description="Verify a Moo UI RC9 npm tarball.")
     parser.add_argument("--tarball", required=True, type=Path)
     args = parser.parse_args(argv)
     try:
