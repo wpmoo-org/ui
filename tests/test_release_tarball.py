@@ -26,6 +26,14 @@ BASE_EXPORTS = {
     "dist/assets/css/moo-ui.css": "./moo-ui.css",
     "dist/js/state.js": "./state.js",
 }
+BASE_PACKAGE = {
+    "name": "@wpmoo/ui",
+    "version": "1.0.0-rc.9",
+    "exports": {
+        export: f"./{path}"
+        for path, export in BASE_EXPORTS.items()
+    },
+}
 
 
 class ReleaseTarballTests(unittest.TestCase):
@@ -83,12 +91,12 @@ class ReleaseTarballTests(unittest.TestCase):
         *,
         payloads: dict[str, bytes] | None = None,
         manifest: dict[str, object] | None = None,
-        package: dict[str, str] | None = None,
+        package: dict[str, object] | None = None,
         extra_members: list[dict[str, object]] | None = None,
     ) -> Path:
         payloads = payloads or BASE_PAYLOADS
         manifest = manifest or self._manifest(payloads)
-        package = package or {"name": "@wpmoo/ui", "version": "1.0.0-rc.9"}
+        package = package or BASE_PACKAGE
         tarball = directory / "candidate.tgz"
         with tarfile.open(tarball, mode="w:gz") as archive:
             self._add_member(
@@ -173,6 +181,54 @@ class ReleaseTarballTests(unittest.TestCase):
                 manifest=self._manifest(),
             )
             self._assert_rejected(tarball, r"artifact member is missing")
+
+    def test_rejects_missing_or_misdirected_state_export(self) -> None:
+        for target in (None, "./dist/js/theme-prepaint.js"):
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as directory:
+                exports = dict(BASE_PACKAGE["exports"])
+                if target is None:
+                    del exports["./state.js"]
+                else:
+                    exports["./state.js"] = target
+                tarball = self._write_candidate(
+                    Path(directory),
+                    package={**BASE_PACKAGE, "exports": exports},
+                )
+                self._assert_rejected(tarball, r"state|export")
+
+    def test_rejects_legacy_prepaint_export(self) -> None:
+        exports = {
+            **BASE_PACKAGE["exports"],
+            "./theme-prepaint.js": "./dist/js/theme-prepaint.js",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            tarball = self._write_candidate(
+                Path(directory),
+                package={**BASE_PACKAGE, "exports": exports},
+            )
+            self._assert_rejected(tarball, r"prepaint|export")
+
+    def test_rejects_legacy_prepaint_member(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            tarball = self._write_candidate(
+                Path(directory),
+                extra_members=[{
+                    "name": "package/dist/js/theme-prepaint.js",
+                    "data": b"legacy bootstrap\n",
+                }],
+            )
+            self._assert_rejected(tarball, r"prepaint|member")
+
+    def test_rejects_legacy_prepaint_package_file_entry(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            tarball = self._write_candidate(
+                Path(directory),
+                package={
+                    **BASE_PACKAGE,
+                    "files": ["dist/js/state.js", "dist/js/theme-prepaint.js"],
+                },
+            )
+            self._assert_rejected(tarball, r"prepaint|files")
 
     def test_rejects_package_identity_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

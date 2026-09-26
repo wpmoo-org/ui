@@ -184,6 +184,22 @@ def _verify_manifest(
     if package.get("version") != PACKAGE_VERSION:
         raise ReleaseTarballError(f"package version must be {PACKAGE_VERSION!r}")
 
+    exports = package.get("exports")
+    if not isinstance(exports, dict):
+        raise ReleaseTarballError("package.json exports must be an object")
+    for export, path in EXPECTED_ARTIFACTS.items():
+        if exports.get(export) != f"./{path}":
+            raise ReleaseTarballError(
+                f"package.json export {export!r} must point at './{path}'"
+            )
+    if "./theme-prepaint.js" in exports:
+        raise ReleaseTarballError("RC9 must not export theme-prepaint.js")
+    files = package.get("files")
+    if isinstance(files, list) and "dist/js/theme-prepaint.js" in files:
+        raise ReleaseTarballError("RC9 package files must not include theme-prepaint.js")
+    if "package/dist/js/theme-prepaint.js" in members:
+        raise ReleaseTarballError("RC9 archive must not include theme-prepaint.js")
+
     artifacts = manifest.get("artifacts")
     if not isinstance(artifacts, list):
         raise ReleaseTarballError("release manifest artifacts must be an array")
