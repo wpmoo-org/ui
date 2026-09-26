@@ -3,7 +3,7 @@
     const owner = document.currentScript?.parentElement;
     if (!owner?.matches?.('.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]')) return;
 
-    const payload = {{ theme_builder_prepaint | tojson }};
+    const payload = {{ theme_builder_state | tojson }};
     const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
     const enumValue = (key, candidate) => {
       const aliases = key === "baseColor"
@@ -35,7 +35,7 @@
       };
       if (Object.entries(payload.defaults).every(([key, value]) => state[key] === value)) return;
 
-      owner.dataset.mooCatalogThemeBuilderPrepaint = "true";
+      owner.dataset.mooCatalogThemeBuilderState = "true";
       owner.dataset.mooCatalogThemeBuilderBaseColor = state.baseColor;
       owner.dataset.mooCatalogThemeBuilderThemeColor = state.themeColor;
       owner.dataset.mooCatalogThemeBuilderChartColor = state.chartColor;

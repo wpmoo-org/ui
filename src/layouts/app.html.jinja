@@ -134,6 +134,7 @@
     {% endif %}
   >
     {% if navigation == "sidebar" %}
+      <script>{{ state_source() }}</script>
       {% set sidebar_side_class = "offcanvas-end" if side == "right" else "offcanvas-start" %}
       <aside
         id="{{ sidebar_id }}"

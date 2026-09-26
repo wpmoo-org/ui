@@ -2089,16 +2089,16 @@ class CatalogContractTests(CatalogTestCase):
     def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
-        include = (ROOT / "site/src/includes/catalog-theme-prepaint.html.jinja").read_text(
+        include = (ROOT / "site/src/includes/catalog-theme-state.html.jinja").read_text(
             encoding="utf-8"
         )
 
-        self.assertNotIn("<style data-moo-catalog-prepaint", base)
-        self.assertNotIn("<style data-moo-catalog-prepaint", catalog)
-        self.assertNotIn("moo-ui-prepaint.css", base)
-        self.assertNotIn("moo-ui-prepaint.css", catalog)
-        self.assertIn("catalog-prepaint.css", base)
-        self.assertIn("catalog-theme-prepaint.html.jinja", catalog)
+        self.assertNotIn("<style data-moo-catalog-state", base)
+        self.assertNotIn("<style data-moo-catalog-state", catalog)
+        self.assertNotIn("moo-ui-state.css", base)
+        self.assertNotIn("moo-ui-state.css", catalog)
+        self.assertIn("catalog-state.css", base)
+        self.assertIn("catalog-theme-state.html.jinja", catalog)
         self.assertIn("document.currentScript?.parentElement", include)
         self.assertNotIn("document.documentElement", include)
         self.assertNotIn("document.body", include)
@@ -2109,13 +2109,13 @@ class CatalogContractTests(CatalogTestCase):
         page = self.read_output("introduction/index.html")
         stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.min.css?v='
         catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.min.css?v='
-        prepaint_marker = '<link rel="stylesheet" href="../assets/css/catalog-prepaint.css?v='
+        state_marker = '<link rel="stylesheet" href="../assets/css/catalog-state.css?v='
         self.assertIn(stylesheet_marker, page)
-        self.assertNotIn("moo-ui-prepaint.css", page)
-        self.assertIn(prepaint_marker, page)
+        self.assertNotIn("moo-ui-state.css", page)
+        self.assertIn(state_marker, page)
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
-        self.assertLess(page.index(catalog_marker), page.index(prepaint_marker))
-        self.assertTrue((DIST / "assets/css/catalog-prepaint.css").is_file())
+        self.assertLess(page.index(catalog_marker), page.index(state_marker))
+        self.assertTrue((DIST / "assets/css/catalog-state.css").is_file())
 
         full_build = self.read_output("assets/css/moo-ui.css")
         self.assertIn(".moo-ui[data-bs-theme] {", full_build)
@@ -2186,17 +2186,19 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_catalog_sidebar_persisted_state_handoff_runs_after_markup(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+        catalog_state = (ROOT / "site/static/js/catalog-state.js").read_text(
             encoding="utf-8",
         )
+        owner_state = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
 
         handoff = 'document.documentElement.dataset.sidebarCatalogState'
         self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
         self.assertNotIn(handoff, base)
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
-        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint)
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', catalog_state)
+        self.assertIn('`moo-sidebar:${key}`', owner_state)
+        self.assertIn('owner.dataset.sidebarStateReady = ""', owner_state)
 
-    def test_built_catalog_prepaint_script_runs_after_catalog_markup(self) -> None:
+    def test_built_catalog_state_script_runs_after_catalog_markup(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -2208,25 +2210,25 @@ class CatalogContractTests(CatalogTestCase):
         self.assertLess(page.index("</html>"), len(page))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
         settings_index = page.index('id="catalog-settings"')
-        prepaint_index = page.index('assets/js/catalog-prepaint.js?')
+        state_index = page.index('assets/js/catalog-state.js?')
         bootstrap_index = page.index('assets/js/bootstrap.bundle.min.js?')
         catalog_module_index = page.index('assets/js/catalog/index.js?')
-        self.assertLess(wrapper_index, prepaint_index)
-        self.assertLess(settings_index, prepaint_index)
-        self.assertLess(prepaint_index, bootstrap_index)
-        self.assertLess(prepaint_index, catalog_module_index)
+        self.assertLess(wrapper_index, state_index)
+        self.assertLess(settings_index, state_index)
+        self.assertLess(state_index, bootstrap_index)
+        self.assertLess(state_index, catalog_module_index)
         self.assertNotIn("shell.dataset.sidebarState = state", page)
         self.assertIn(
-            '<script src="../assets/js/catalog-prepaint.js?',
+            '<script src="../assets/js/catalog-state.js?',
             page,
         )
 
-    def test_catalog_prepaint_script_is_not_inlined_in_catalog_markup(self) -> None:
+    def test_catalog_state_script_is_not_inlined_in_catalog_markup(self) -> None:
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(
             encoding="utf-8",
         )
         self.assertIn(
-            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            '<script src="{{ root_path }}assets/js/catalog-state.js?v={{ asset_version }}"></script>',
             catalog,
         )
         self.assertNotIn("dataset.sidebarCatalogState", catalog)
@@ -3713,7 +3715,7 @@ class CatalogContractTests(CatalogTestCase):
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version="test",
-            theme_builder_prepaint=site_build.catalog_prepaint_config(
+            theme_builder_state=site_build.catalog_state_config(
                 site_build.theme_builder_first_paint_payload()
             ),
         )

@@ -115,10 +115,10 @@ class DocumentRootTests(unittest.TestCase):
         self.assertNotIn("dir", owner.attrs)
         self.assertTrue(owner.children)
 
-        prepaint = owner.children[0]
-        self.assertEqual(prepaint.tag, "script")
-        self.assertNotIn("src", prepaint.attrs)
-        self.assertNotIn("defer", prepaint.attrs)
+        state_script = owner.children[0]
+        self.assertEqual(state_script.tag, "script")
+        self.assertNotIn("src", state_script.attrs)
+        self.assertNotIn("defer", state_script.attrs)
         self.assertIn(
             "const owner = ownerDocument?.currentScript?.parentElement",
             source,
@@ -145,21 +145,39 @@ class DocumentRootTests(unittest.TestCase):
         self.assertLess(source.index("</div>"), source.index(runtime_scripts[0].attrs["src"]))
         return body, owner
 
-    def test_catalog_document_places_prepaint_and_state_handoff_inside_owner(self) -> None:
+    def test_catalog_document_places_owner_and_sidebar_state_at_owner_starts(self) -> None:
         source, root = self.parse_page("introduction/index.html")
         body, owner = self.assert_document_owner(source, root)
 
+        canonical = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
+        owner_start = source.index('data-moo-document-owner="true"')
+        owner_script = source.index("<script>", owner_start)
+        owner_end = source.index("</script>", owner_script)
+        self.assertEqual(source[owner_script + len("<script>") : owner_end], canonical)
+
+        wrapper = next(
+            node for node in elements(owner)
+            if node.attrs.get("data-sidebar-key") == "catalog-shell"
+        )
+        self.assertEqual(wrapper.children[0].tag, "script")
+        self.assertNotIn("src", wrapper.children[0].attrs)
+        wrapper_start = source.index('data-sidebar-key="catalog-shell"')
+        wrapper_script = source.index("<script>", wrapper_start)
+        wrapper_end = source.index("</script>", wrapper_script)
+        self.assertEqual(source[wrapper_script + len("<script>") : wrapper_end], canonical)
+        self.assertLess(wrapper_end, source.index('id="catalog-sidebar"'))
+
         catalog = next(node for node in elements(owner) if has_class(node, "moo-catalog"))
-        catalog_prepaint = next(
+        catalog_state = next(
             node
             for node in elements(owner)
             if node.tag == "script"
-            and "assets/js/catalog-prepaint.js?" in node.attrs.get("src", "")
+            and "assets/js/catalog-state.js?" in node.attrs.get("src", "")
         )
-        self.assertIs(catalog_prepaint.parent, owner)
-        self.assertLess(owner.children.index(catalog), owner.children.index(catalog_prepaint))
-        self.assertLess(source.index('id="catalog-settings"'), source.index(catalog_prepaint.attrs["src"]))
-        self.assertLess(source.index(catalog_prepaint.attrs["src"]), source.index('assets/js/bootstrap.bundle.min.js?'))
+        self.assertIs(catalog_state.parent, owner)
+        self.assertLess(owner.children.index(catalog), owner.children.index(catalog_state))
+        self.assertLess(source.index('id="catalog-settings"'), source.index(catalog_state.attrs["src"]))
+        self.assertLess(source.index(catalog_state.attrs["src"]), source.index('assets/js/bootstrap.bundle.min.js?'))
         self.assertIs(body.children[0], owner)
 
     def test_direct_base_page_uses_the_same_single_document_owner(self) -> None:

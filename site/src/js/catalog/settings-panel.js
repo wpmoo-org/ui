@@ -366,12 +366,12 @@ export function initSettingsPanel(root = document) {
 
     const applyBuilderTokens = (preference) => {
       if (isDefaultBuilderPreference(preference)) {
-        delete owner.dataset.mooCatalogThemeBuilderPrepaint;
+        delete owner.dataset.mooCatalogThemeBuilderState;
         Object.values(BUILDER_DATASETS).forEach((datasetKey) => {
           delete owner.dataset[datasetKey];
         });
       } else {
-        owner.dataset.mooCatalogThemeBuilderPrepaint = "true";
+        owner.dataset.mooCatalogThemeBuilderState = "true";
         Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
           owner.dataset[datasetKey] = preference[key];
         });

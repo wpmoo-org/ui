@@ -118,7 +118,7 @@ owner `dir` only for embedded subtree overrides. `blocking="render"` is not a
 portable replacement: it is a head-only render-blocking mechanism and is not
 the owner-local bootstrap contract.
 
-The catalog's persisted Theme Builder prepaint is private site behavior. It
+The catalog's persisted Theme Builder state is private site behavior. It
 normalizes storage into private `data-moo-catalog-theme-builder-*` attributes
 on the owner and applies the generated catalog stylesheet; it is neither a
 package export nor a cross-host theme API.

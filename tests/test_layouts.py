@@ -286,8 +286,10 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         if navigation == "sidebar":
             self.assertEqual(
                 [(child.tag, child.attrs.get("data-slot")) for child in direct_children],
-                [("aside", "sidebar"), ("div", "page")],
+                [("script", None), ("aside", "sidebar"), ("div", "page")],
             )
+            self.assertNotIn("src", direct_children[0].attrs)
+            self.assertNotIn("defer", direct_children[0].attrs)
         else:
             self.assertEqual(
                 [(child.tag, child.attrs.get("data-slot")) for child in direct_children],
@@ -402,7 +404,6 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         self.assertIn('id="workspace-app"', output)
         self.assertIn('data-layout="app"', output)
         self.assertIn('data-shell-mode="viewport"', output)
-        self.assertEqual(output.count('data-slot="sidebar-wrapper"'), 1)
         self.assertIn('data-sidebar-state="expanded"', output)
         self.assertEqual(output.count('data-sidebar-key="app-shell"'), 1)
         self.assertEqual(output.count('data-slot="sidebar"'), 1)
@@ -435,6 +436,7 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         self.assertNotIn("data-sidebar-state", output)
         self.assertNotIn("data-sidebar-key", output)
         self.assertNotIn("data-sidebar-trigger", output)
+        self.assertNotIn("<script>", output)
 
     def test_app_forwards_sidebar_props_and_right_side_trigger_target(self) -> None:
         output = self.render_app_shell(

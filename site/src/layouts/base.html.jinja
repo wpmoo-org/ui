@@ -21,13 +21,13 @@
     <link rel="icon" href="{{ root_path }}favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="{{ root_path }}apple-touch-icon.png">
     <link rel="manifest" href="{{ root_path }}site.webmanifest">
-    {% block critical_prepaint_styles %}{% endblock %}
+    {% block critical_state_styles %}{% endblock %}
     {% block font_preload %}
     <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
     {% endblock %}
     <link rel="stylesheet" href="{{ root_path }}assets/css/moo-ui.min.css?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ root_path }}assets/css/catalog.min.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="{{ root_path }}assets/css/catalog-prepaint.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ root_path }}assets/css/catalog-state.css?v={{ asset_version }}">
   </head>
   {% set resolved_theme = resolved_theme | default("light", true) %}
   {% set resolved_theme = resolved_theme if resolved_theme in ["light", "dark"] else "light" %}
@@ -38,7 +38,7 @@
       data-moo-document-owner="true"
     >
       <script>{{ state_source() }}</script>
-      {% block owner_prepaint %}{% endblock %}
+      {% block owner_state %}{% endblock %}
       <a class="visually-hidden-focusable" href="#main-content">
         Skip to component content
       </a>

@@ -296,8 +296,8 @@ class LayoutBrowserTests(unittest.TestCase):
                 )
             )
         )
-        catalog_prepaint_source = (
-            ROOT / "site/static/js/catalog-prepaint.js"
+        catalog_state_source = (
+            ROOT / "site/static/js/catalog-state.js"
         ).read_text(encoding="utf-8")
 
         def capture_builder_tokens(route) -> None:
@@ -316,11 +316,11 @@ class LayoutBrowserTests(unittest.TestCase):
                   };
                 })();
                 """
-                + catalog_prepaint_source,
+                + catalog_state_source,
             )
 
         context.route(
-            re.compile(r".*/assets/js/catalog-prepaint\.js(?:\?.*)?$"),
+            re.compile(r".*/assets/js/catalog-state\.js(?:\?.*)?$"),
             capture_builder_tokens,
         )
         page = context.new_page()

@@ -1339,7 +1339,7 @@ def theme_builder_first_paint_payload() -> dict[str, object]:
     return payload
 
 
-def _catalog_prepaint_mapping(
+def _catalog_state_mapping(
     payload: dict[str, object], key: str
 ) -> dict[str, object]:
     value = payload.get(key)
@@ -1348,10 +1348,10 @@ def _catalog_prepaint_mapping(
     return value
 
 
-def _catalog_prepaint_options(
+def _catalog_state_options(
     payload: dict[str, object], key: str
 ) -> list[str]:
-    options = _catalog_prepaint_mapping(payload, "options").get(key)
+    options = _catalog_state_mapping(payload, "options").get(key)
     if not isinstance(options, list) or not all(
         isinstance(option, str) for option in options
     ):
@@ -1361,7 +1361,7 @@ def _catalog_prepaint_options(
     return options
 
 
-def _catalog_prepaint_selector(
+def _catalog_state_selector(
     *,
     axis: str,
     value: str,
@@ -1374,12 +1374,12 @@ def _catalog_prepaint_selector(
     )
     attribute = re.sub(r"(?<!^)([A-Z])", r"-\1", axis).lower()
     return (
-        f"{root}:where([data-moo-catalog-theme-builder-prepaint]"
+        f"{root}:where([data-moo-catalog-theme-builder-state]"
         f'[data-moo-catalog-theme-builder-{attribute}={json.dumps(value)}])'
     )
 
 
-def _catalog_prepaint_rule(
+def _catalog_state_rule(
     selector: str,
     tokens: dict[str, object],
     allow_list: frozenset[str],
@@ -1394,23 +1394,23 @@ def _catalog_prepaint_rule(
     return f"{selector} {{\n" + "\n".join(declarations) + "\n}\n"
 
 
-def catalog_prepaint_css(payload: dict[str, object]) -> str:
+def catalog_state_css(payload: dict[str, object]) -> str:
     allow_values = payload.get("allowList")
     if not isinstance(allow_values, list) or not all(
         isinstance(token, str) for token in allow_values
     ):
         raise RuntimeError("Theme Builder first-paint payload has no allow-list")
     allow_list = frozenset(allow_values)
-    token_groups = _catalog_prepaint_mapping(payload, "tokens")
+    token_groups = _catalog_state_mapping(payload, "tokens")
     rules: list[str] = []
 
-    base_tokens = _catalog_prepaint_mapping(token_groups, "baseColor")
-    for base_color in _catalog_prepaint_options(payload, "baseColor"):
-        color_tokens = _catalog_prepaint_mapping(base_tokens, base_color)
+    base_tokens = _catalog_state_mapping(token_groups, "baseColor")
+    for base_color in _catalog_state_options(payload, "baseColor"):
+        color_tokens = _catalog_state_mapping(base_tokens, base_color)
         for theme in ("light", "dark"):
-            tokens = _catalog_prepaint_mapping(color_tokens, theme)
-            rule = _catalog_prepaint_rule(
-                _catalog_prepaint_selector(
+            tokens = _catalog_state_mapping(color_tokens, theme)
+            rule = _catalog_state_rule(
+                _catalog_state_selector(
                     axis="baseColor", value=base_color, theme=theme
                 ),
                 tokens,
@@ -1420,29 +1420,29 @@ def catalog_prepaint_css(payload: dict[str, object]) -> str:
                 rules.append(rule)
 
     for axis in ("themeColor", "chartColor", "radius", "headingFont", "bodyFont"):
-        axis_tokens = _catalog_prepaint_mapping(token_groups, axis)
-        for value in _catalog_prepaint_options(payload, axis):
-            tokens = _catalog_prepaint_mapping(axis_tokens, value)
-            rule = _catalog_prepaint_rule(
-                _catalog_prepaint_selector(axis=axis, value=value),
+        axis_tokens = _catalog_state_mapping(token_groups, axis)
+        for value in _catalog_state_options(payload, axis):
+            tokens = _catalog_state_mapping(axis_tokens, value)
+            rule = _catalog_state_rule(
+                _catalog_state_selector(axis=axis, value=value),
                 tokens,
                 allow_list,
             )
             if rule:
                 rules.append(rule)
 
-    sidebar_tokens = _catalog_prepaint_mapping(token_groups, "sidebarAccent")
-    defaults = _catalog_prepaint_mapping(payload, "defaults")
+    sidebar_tokens = _catalog_state_mapping(token_groups, "sidebarAccent")
+    defaults = _catalog_state_mapping(payload, "defaults")
     default_theme_color = defaults.get("themeColor")
-    for theme_color in _catalog_prepaint_options(payload, "themeColor"):
+    for theme_color in _catalog_state_options(payload, "themeColor"):
         if theme_color == default_theme_color:
             continue
         for theme in ("light", "dark"):
-            rule = _catalog_prepaint_rule(
-                _catalog_prepaint_selector(
+            rule = _catalog_state_rule(
+                _catalog_state_selector(
                     axis="themeColor", value=theme_color, theme=theme
                 ),
-                _catalog_prepaint_mapping(sidebar_tokens, theme),
+                _catalog_state_mapping(sidebar_tokens, theme),
                 allow_list,
             )
             if rule:
@@ -1453,7 +1453,7 @@ def catalog_prepaint_css(payload: dict[str, object]) -> str:
     )
 
 
-def catalog_prepaint_config(payload: dict[str, object]) -> dict[str, object]:
+def catalog_state_config(payload: dict[str, object]) -> dict[str, object]:
     keys = (
         "schemaVersion",
         "defaults",
@@ -1469,10 +1469,10 @@ def catalog_prepaint_config(payload: dict[str, object]) -> dict[str, object]:
     return {key: payload[key] for key in keys}
 
 
-def write_catalog_prepaint_css(payload: dict[str, object]) -> Path:
-    output = SITE_DIST / "assets/css/catalog-prepaint.css"
+def write_catalog_state_css(payload: dict[str, object]) -> Path:
+    output = SITE_DIST / "assets/css/catalog-state.css"
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(catalog_prepaint_css(payload), encoding="utf-8")
+    output.write_text(catalog_state_css(payload), encoding="utf-8")
     return output
 
 
@@ -1949,9 +1949,9 @@ def asset_version() -> str:
     paths = [
         SITE_DIST / "assets/css/moo-ui.min.css",
         SITE_DIST / "assets/css/catalog.min.css",
-        SITE_DIST / "assets/css/catalog-prepaint.css",
+        SITE_DIST / "assets/css/catalog-state.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
-        SITE_DIST / "assets/js/catalog-prepaint.js",
+        SITE_DIST / "assets/js/catalog-state.js",
         SITE_DIST / "assets/js/state.js",
         SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
@@ -2465,7 +2465,7 @@ def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
 def render_pages(
     version: str | None = None,
     layouts: list[dict[str, str]] | None = None,
-    theme_builder_prepaint: dict[str, object] | None = None,
+    theme_builder_state: dict[str, object] | None = None,
 ) -> None:
     environment = create_environment()
     catalog = load_catalog()
@@ -2494,8 +2494,8 @@ def render_pages(
         examples,
         layouts,
     )
-    if theme_builder_prepaint is None:
-        theme_builder_prepaint = catalog_prepaint_config(
+    if theme_builder_state is None:
+        theme_builder_state = catalog_state_config(
             theme_builder_first_paint_payload()
         )
     version = version or asset_version()
@@ -2549,7 +2549,7 @@ def render_pages(
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
-            theme_builder_prepaint=theme_builder_prepaint,
+            theme_builder_state=theme_builder_state,
         )
         output_file.write_text(rendered, encoding="utf-8")
 
@@ -2593,7 +2593,7 @@ def build_site() -> None:
     compile_catalog_styles()
     copy_site_assets()
     theme_builder_payload = theme_builder_first_paint_payload()
-    write_catalog_prepaint_css(theme_builder_payload)
+    write_catalog_state_css(theme_builder_payload)
     copy_certification_fixtures_to_site()
     render_layout_certification_fixtures()
     copy_site_metadata()
@@ -2603,7 +2603,7 @@ def build_site() -> None:
     render_pages(
         version,
         layouts,
-        theme_builder_prepaint=catalog_prepaint_config(theme_builder_payload),
+        theme_builder_state=catalog_state_config(theme_builder_payload),
     )
     write_sitemap(layouts)
 
