@@ -5,7 +5,7 @@
 {% block title %}Page Layout Preview — Moo UI{% endblock %}
 
 {% block body %}
-  <div class="moo-layout-preview">
+  <div class="moo-layout-preview min-vh-100">
     {% call(region) page(width="xl", id="layout-preview-page") %}
       {% if region == "header" %}
         {% call card(size="sm") %}

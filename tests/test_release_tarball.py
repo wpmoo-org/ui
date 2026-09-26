@@ -19,12 +19,20 @@ AGGREGATE_LIMIT = 32 * 1024 * 1024
 BASE_PAYLOADS = {
     "dist/assets/css/moo.css": b"moo css\n",
     "dist/assets/css/moo-ui.css": b"moo ui css\n",
-    "dist/js/theme-prepaint.js": b"(() => {})();\n",
+    "dist/js/state.js": b"(() => {})();\n",
 }
 BASE_EXPORTS = {
     "dist/assets/css/moo.css": "./moo.css",
     "dist/assets/css/moo-ui.css": "./moo-ui.css",
-    "dist/js/theme-prepaint.js": "./theme-prepaint.js",
+    "dist/js/state.js": "./state.js",
+}
+BASE_PACKAGE = {
+    "name": "@wpmoo/ui",
+    "version": "1.0.0-rc.9",
+    "exports": {
+        export: f"./{path}"
+        for path, export in BASE_EXPORTS.items()
+    },
 }
 
 
@@ -48,7 +56,7 @@ class ReleaseTarballTests(unittest.TestCase):
             ]
         manifest: dict[str, object] = {
             "schemaVersion": 1,
-            "package": {"name": "@wpmoo/ui", "version": "1.0.0-rc.8"},
+            "package": {"name": "@wpmoo/ui", "version": "1.0.0-rc.9"},
             "artifacts": artifacts,
         }
         if padding:
@@ -83,12 +91,12 @@ class ReleaseTarballTests(unittest.TestCase):
         *,
         payloads: dict[str, bytes] | None = None,
         manifest: dict[str, object] | None = None,
-        package: dict[str, str] | None = None,
+        package: dict[str, object] | None = None,
         extra_members: list[dict[str, object]] | None = None,
     ) -> Path:
         payloads = payloads or BASE_PAYLOADS
         manifest = manifest or self._manifest(payloads)
-        package = package or {"name": "@wpmoo/ui", "version": "1.0.0-rc.8"}
+        package = package or BASE_PACKAGE
         tarball = directory / "candidate.tgz"
         with tarfile.open(tarball, mode="w:gz") as archive:
             self._add_member(
@@ -142,7 +150,7 @@ class ReleaseTarballTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             tarball = self._write_candidate(
                 Path(temporary_directory),
-                package={"name": "@wpmoo/not-ui", "version": "1.0.0-rc.8"},
+                package={"name": "@wpmoo/not-ui", "version": "1.0.0-rc.9"},
             )
             self._assert_rejected(tarball, r"package|name|identity")
 
@@ -238,12 +246,12 @@ class ReleaseTarballTests(unittest.TestCase):
             "symlink": {
                 "name": "package/link",
                 "member_type": tarfile.SYMTYPE,
-                "linkname": "package/dist/js/theme-prepaint.js",
+                "linkname": "package/dist/js/state.js",
             },
             "hard-link": {
                 "name": "package/hard-link",
                 "member_type": tarfile.LNKTYPE,
-                "linkname": "package/dist/js/theme-prepaint.js",
+                "linkname": "package/dist/js/state.js",
             },
             "fifo": {"name": "package/fifo", "member_type": tarfile.FIFOTYPE},
             "character-device": {
@@ -269,7 +277,7 @@ class ReleaseTarballTests(unittest.TestCase):
             "pax-link": {
                 "name": "package/pax-link",
                 "data": b"x",
-                "pax_headers": {"linkpath": "package/dist/js/theme-prepaint.js"},
+                "pax_headers": {"linkpath": "package/dist/js/state.js"},
             },
             "pax-nul": {
                 "name": "package/pax-nul",

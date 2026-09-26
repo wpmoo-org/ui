@@ -23,10 +23,10 @@
       ) }}
 
       <section class="moo-catalog__dashboard" aria-label="Blocks">
-        <div class="moo-catalog__grid" id="blocks-grid">
+        <div class="moo-catalog__grid d-grid" id="blocks-grid">
           {% for block in blocks %}
-            {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
-              <div class="moo-catalog__showcase-preview">
+            {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card overflow-hidden", body_class="d-grid gap-4") %}
+              <div class="moo-catalog__showcase-preview d-flex align-items-center justify-content-center overflow-hidden text-body">
                 {{ block_preview(block.slug, root_path) }}
               </div>
               <div>

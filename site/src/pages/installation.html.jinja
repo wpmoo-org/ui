@@ -102,10 +102,10 @@
           the server whenever the host knows the request or session
           preference. Put that value on the first application owner and keep
           the document language and default direction on <code>html</code>.
-          A server-resolved document does not need a prepaint bootstrap.
+          A server-resolved document does not need a state bootstrap.
         </p>
         {% set server_owner_example %}
-        <!-- Server-resolved document: no prepaint required. -->
+        <!-- Server-resolved document: no state bootstrap required. -->
         <html lang="en" dir="ltr">
           <body>
             <div class="moo-ui" data-bs-theme="dark" data-moo-document-owner="true">
@@ -125,7 +125,7 @@
         {% set static_owner_example %}
         <!-- Static or strict-CSP fallback: classic script is the root's first child. -->
         <div class="moo-ui" data-bs-theme="light" data-moo-theme-key="portal:theme">
-          <script src="/vendor/@wpmoo/ui/theme-prepaint.js"></script>
+          <script src="/vendor/@wpmoo/ui/state.js"></script>
           <!-- embedded Moo UI fragment -->
         </div>
         {% endset %}
@@ -136,8 +136,7 @@
           only correct a browser-only preference after the external asset is
           fetched, so that correction may be visible. The server value remains
           the deterministic fallback; an external fetch cannot guarantee zero
-          flash in this profile. The published asset is available as
-          <code>@wpmoo/ui/theme-prepaint.js</code>.
+          flash in this profile. RC9 exposes <code>@wpmoo/ui/state.js</code>.
         </p>
       </section>
 

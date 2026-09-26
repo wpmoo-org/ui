@@ -127,7 +127,7 @@ class SidebarTests(CatalogTestCase):
         self.assertIn('aria-controls="projects-sub"', output)
         self.assertIn('aria-expanded="true"', output)
 
-    def test_sidebar_account_hooks_and_physical_edge_rules_are_explicit(self) -> None:
+    def test_sidebar_account_hooks_are_explicit(self) -> None:
         output = self.render_sidebar(
             """
             {% call sidebar() %}
@@ -145,18 +145,6 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("sidebar-menu-item--account", output)
         self.assertIn("sidebar-menu-button--account", output)
-        styles = read_app_styles()
-        self.assertRegex(
-            styles,
-            r'\.sidebar\[data-side="left"\] \.sidebar-inner\s*\{[^}]*border-right:',
-        )
-        self.assertRegex(
-            styles,
-            r'\.sidebar\[data-side="right"\] \.sidebar-inner\s*\{[^}]*border-left:',
-        )
-        app_styles = read_app_styles()
-        self.assertIn("margin-left:", app_styles)
-        self.assertIn("margin-right:", app_styles)
 
     def test_sidebar_rtl_physical_rules_follow_the_inherited_owner_direction(self) -> None:
         styles = read_app_styles()
@@ -416,6 +404,10 @@ class SidebarTests(CatalogTestCase):
             styles,
             '.wrapper[data-layout="app"] > [data-slot="page"]',
         )
+        main_host = _css_block(
+            styles,
+            '.wrapper[data-layout="app"] > [data-slot="page"] > main',
+        )
         flyout_layer = _css_block(
             styles,
             '[data-sidebar-state="collapsed"] .sidebar[data-collapsible="icon"]:has(.sidebar-menu-button[data-bs-toggle="dropdown"][aria-expanded="true"])',
@@ -431,8 +423,10 @@ class SidebarTests(CatalogTestCase):
 
         self.assertIn("position: fixed", flyout)
         self.assertIn("z-index: $zindex-dropdown", flyout)
-        self.assertIn("overflow-y: auto", page_host)
+        self.assertNotIn("overflow-y: auto", page_host)
         self.assertIn("flex: 1 1 auto", page_host)
+        self.assertIn("overflow-y: auto", main_host)
+        self.assertIn("flex: 1 1 auto", main_host)
         self.assertIn("z-index: $zindex-fixed + 1", flyout_layer)
         self.assertIn("left: var(--moo-sidebar-flyout-left)", flyout)
         self.assertIn("inset-block-start: var(--moo-sidebar-flyout-block-start)", flyout)
@@ -444,14 +438,19 @@ class SidebarTests(CatalogTestCase):
         self.assertIn("display: grid", flyout_text)
         self.assertIn("display: flex !important", flyout_badge)
 
-    def test_app_main_does_not_create_a_second_vertical_scroll_owner(self) -> None:
+    def test_app_main_owns_vertical_scroll(self) -> None:
         styles = read_app_styles()
+        page = _css_block(
+            styles,
+            '.wrapper[data-layout="app"] > [data-slot="page"]',
+        )
         main = _css_block(
             styles,
             '.wrapper[data-layout="app"] > [data-slot="page"] > main',
         )
 
-        self.assertNotIn("overflow-y: auto", main)
+        self.assertNotIn("overflow-y: auto", page)
+        self.assertIn("overflow-y: auto", main)
 
     def test_sidebar_group_action_and_menu_badge_position_without_extra_classes(self) -> None:
         # Regression coverage: sidebar_group_action and sidebar_menu_badge must
@@ -1021,7 +1020,7 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
 
         self.assertEqual(case["scrollTop"], 656)
 
-    def test_catalog_loads_external_prepaint_script_after_sidebar_markup(self) -> None:
+    def test_catalog_loads_external_state_script_after_sidebar_markup(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
         styles = read_app_styles()
         catalog_styles = (ROOT / "site/scss/catalog/_shell.scss").read_text(
@@ -1029,8 +1028,8 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         )
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
-        prepaint = ROOT / "site/static/js/catalog-prepaint.js"
-        prepaint_source = prepaint.read_text(encoding="utf-8")
+        state = ROOT / "site/static/js/catalog-state.js"
+        state_source = state.read_text(encoding="utf-8")
         catalog_index = CATALOG_JS.read_text(encoding="utf-8")
 
         restore_index = source.index("this._restoreState();")
@@ -1039,33 +1038,42 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertNotIn("requestAnimationFrame", source[restore_index:ready_index])
         self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
         self.assertNotIn("sidebarCatalogState", base)
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint_source)
-        self.assertTrue(prepaint.is_file())
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', state_source)
+        self.assertIn('window.localStorage.getItem("moo:sidebar-variant")', state_source)
+        self.assertTrue(state.is_file())
         self.assertIn(
-            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            '<script src="{{ root_path }}assets/js/catalog-state.js?v={{ asset_version }}"></script>',
             layout,
         )
         self.assertNotIn("shell.dataset.sidebarState = state", layout)
         self.assertLess(
             layout.index("{{ render_catalog_overlays() }}"),
-            layout.index("catalog-prepaint.js"),
+            layout.index("catalog-state.js"),
         )
         self.assertLess(
             layout.index('{% call(slot) app('),
-            layout.index("catalog-prepaint.js"),
+            layout.index("catalog-state.js"),
         )
         self.assertLess(
             layout.index("{{ render_catalog_sidebar() }}"),
-            layout.index("catalog-prepaint.js"),
+            layout.index("catalog-state.js"),
         )
         self.assertIn('removeAttribute("data-sidebar-ready")', source)
-        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint_source)
-        self.assertIn('element.removeAttribute("data-sidebar-prepaint-ready")', catalog_index)
+        self.assertNotIn('shell?.setAttribute("data-sidebar-state-ready", "")', state_source)
+        self.assertIn('element.removeAttribute("data-sidebar-state-ready")', catalog_index)
         self.assertNotIn("transition:", _css_block(styles, ".sidebar"))
-        self.assertRegex(
+        self.assertIn(
+            ':where(.wrapper[data-layout="app"][data-sidebar-ready]) > .sidebar {',
             styles,
-            r"@include media-breakpoint-up\(lg\)\s*\{\s*"
-            r"\.sidebar\s*\{[^}]*transition:\s*flex-basis",
+        )
+        self.assertIn("transition: flex-basis 0.2s ease, width 0.2s ease;", styles)
+        self.assertNotIn(
+            "  .sidebar {\n    transition: flex-basis 0.2s ease, width 0.2s ease;",
+            styles,
+        )
+        self.assertIn(
+            "@media (prefers-reduced-motion: reduce) {\n  .sidebar {\n    transition: none;",
+            styles,
         )
         self.assertNotIn("moo-sidebar-catalog-state", styles)
         self.assertRegex(
@@ -1074,26 +1082,36 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
             r"\.moo-catalog \.sidebar\s*\{\s*transition:\s*none;",
         )
 
-    def test_catalog_prepaint_positions_active_sidebar_item_before_inset_content(self) -> None:
-        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+    def test_app_sidebar_motion_waits_for_runtime_ready_state(self) -> None:
+        styles = read_app_styles()
+
+        self.assertIn(
+            ':where(.wrapper[data-layout="app"][data-sidebar-ready]) > .sidebar {',
+            styles,
+        )
+        self.assertIn("transition: flex-basis 0.2s ease, width 0.2s ease;", styles)
+
+    def test_catalog_state_positions_active_sidebar_item_before_inset_content(self) -> None:
+        state = (ROOT / "site/static/js/catalog-state.js").read_text(
             encoding="utf-8",
         )
         layout = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
 
-        self.assertIn("data-moo-sidebar-active-prepaint", prepaint)
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
-        self.assertIn('data-sidebar-prepaint-ready', prepaint)
+        self.assertIn("data-moo-sidebar-active-state", state)
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', state)
+        self.assertIn('window.localStorage.getItem("moo:sidebar-variant")', state)
+        self.assertNotIn('data-sidebar-state-ready', state)
         self.assertIn(
-            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            '<script src="{{ root_path }}assets/js/catalog-state.js?v={{ asset_version }}"></script>',
             layout,
         )
         self.assertIn('{% elif slot == "page" %}', layout)
         self.assertLess(
             layout.index("{{ render_catalog_overlays() }}"),
-            layout.index("catalog-prepaint.js"),
+            layout.index("catalog-state.js"),
         )
-        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', prepaint)
-        self.assertIn("content.scrollTop = Math.round", prepaint)
+        self.assertIn('a[data-slot="sidebar-menu-button"][aria-current="page"]', state)
+        self.assertIn("content.scrollTop = Math.round", state)
 
     def test_sidebar_shortcut_ignores_editable_targets(self) -> None:
         source = SIDEBAR_JS.read_text(encoding="utf-8")
@@ -1180,9 +1198,22 @@ console.log(JSON.stringify({ scrollTop: contentScrollTop }));
         self.assertIn("--moo-sidebar-dropdown-block-start", script)
         self.assertIn("--moo-sidebar-dropdown-block-end", script)
         self.assertIn("--moo-sidebar-dropdown-right", script)
-        self.assertIn("sidebar-menu-button--account", script)
+        self.assertIn("sidebar-menu-item--account", script)
         self.assertIn(
             'removeProperty("--moo-sidebar-dropdown-right")',
             script,
         )
         self.assertIn("rect.bottom + gap", script)
+
+    def test_sidebar_footer_account_dropdown_uses_account_item_ownership(self) -> None:
+        script = SIDEBAR_JS.read_text(encoding="utf-8")
+        position_start = script.index("  _positionDropdown(control) {")
+        position_end = script.index("  _removeFlyoutPortal() {", position_start)
+        position_dropdown = script[position_start:position_end]
+
+        self.assertRegex(
+            position_dropdown,
+            r"const isFooterAccount =\s*"
+            r'control\?\.closest\("\.sidebar-menu-item--account"\)\s*&&\s*'
+            r"control\.closest\('\[data-slot=\"sidebar-footer\"\]'\);",
+        )

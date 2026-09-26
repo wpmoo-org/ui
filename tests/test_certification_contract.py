@@ -36,11 +36,11 @@ PUBLIC_MOO_COMPONENT_HOOK_ALLOWLIST = {
 }
 PRIVATE_OWNER_FIXTURE_HOOKS = {
     "data-moo-direction-key",
-    "data-moo-overlay-portal-host",
+    "data-moo-overlay-host",
     "data-moo-theme-key",
 }
 DOCUMENT_OWNER_FIXTURE_HOOKS = {
-    "conformance/fixtures/document-owner-prepaint.html": {
+    "conformance/fixtures/document-owner-state.html": {
         "data-moo-document-owner",
     },
     "conformance/fixtures/owner-portals.html": {
@@ -1127,26 +1127,27 @@ class CertificationContractTests(unittest.TestCase):
             freeze["description"],
         )
 
-    def test_rc8_api_freeze_and_public_browser_surface_are_well_formed(self) -> None:
-        freeze_path = CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.8.json"
-        self.assertTrue(freeze_path.is_file(), "RC8 API freeze is missing")
+    def test_rc9_api_freeze_and_public_browser_surface_are_well_formed(self) -> None:
+        self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.8.json").is_file())
+        freeze_path = CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.9.json"
+        self.assertTrue(freeze_path.is_file(), "RC9 candidate API inventory is missing")
 
-        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.8.json")
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.9.json")
         package = self._read_json("package.json")
         certification = self._read_json("certification.json")
         schema = self._read_json("src/certification/manifest.schema.json")
         public_entrypoints = schema["properties"]["publicEntrypoints"]
 
-        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.8")
-        self.assertEqual(package["version"], "1.0.0-rc.8")
-        self.assertEqual(certification["coreVersion"], "1.0.0-rc.8")
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.9")
+        self.assertEqual(package["version"], "1.0.0-rc.9")
+        self.assertEqual(certification["coreVersion"], "1.0.0-rc.9")
         self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
         self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
         self.assertIn("browser", public_entrypoints["properties"])
         self.assertNotIn("browser", public_entrypoints["required"])
         self.assertEqual(
             certification["publicEntrypoints"]["browser"],
-            ["./theme-prepaint.js"],
+            ["./state.js"],
         )
         self.assertIn(
             "./release-manifest.json",
@@ -1154,7 +1155,7 @@ class CertificationContractTests(unittest.TestCase):
         )
         self.assertEqual(
             [entry["export"] for entry in freeze["browserEntrypoints"]],
-            ["./theme-prepaint.js"],
+            ["./state.js"],
         )
         self.assertEqual(
             [entry["export"] for entry in freeze["metadataEntrypoints"]][-1],

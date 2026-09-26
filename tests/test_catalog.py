@@ -123,8 +123,10 @@ COMPONENT_SELECTOR_PREFIXES = {
     # Field retunes the spacing of Bootstrap's own shared
     # .form-label/.form-text/.invalid-feedback classes when they sit
     # inside a .field, rather than owning a "field-" prefixed family
-    # of its own for them.
-    "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback"),
+    # of its own for them. A caller may compose field_group() with a
+    # Bootstrap .row; its scoped .field-group.row rule preserves the row's
+    # responsive column geometry and native gutters.
+    "field": ("field", "form-label", "form-text", "is-invalid", "invalid-feedback", "row"),
     # Bootstrap has no native Combobox component. The public
     # namespace is a composition of Bootstrap form-control,
     # validation, and Dropdown pieces.
@@ -327,7 +329,8 @@ class CatalogContractTests(CatalogTestCase):
             encoding="utf-8"
         )
         match = re.search(
-            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\]\s*\{(?P<body>[^}]*)\}',
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*'
+            r'\{(?P<body>[^}]*)\}',
             styles,
         )
 
@@ -336,34 +339,19 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("overflow-y: auto", body)
         self.assertNotIn("scroll-behavior: smooth", body)
 
-    def test_app_main_does_not_own_vertical_scroll_below_the_page_header(self) -> None:
+    def test_app_page_does_not_create_a_second_vertical_scroll_owner(self) -> None:
         styles = (ROOT / "scss/layouts/_app.scss").read_text(
             encoding="utf-8"
         )
         match = re.search(
-            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\] > main\s*'
+            r'\.wrapper\[data-layout="app"\] > \[data-slot="page"\]\s*'
             r'\{(?P<body>[^}]*)\}',
             styles,
         )
 
         self.assertIsNotNone(match)
         assert match is not None
-        scroll_values = {"auto", "overlay", "scroll"}
-        for property_name, value in re.findall(
-            r"\b(overflow|overflow-y)\s*:\s*([^;}]*)",
-            match.group("body"),
-        ):
-            tokens = value.replace("!important", "").split()
-            if not tokens:
-                continue
-            vertical_value = (
-                tokens[0]
-                if property_name == "overflow-y"
-                else tokens[-1]
-                if len(tokens) > 1
-                else tokens[0]
-            )
-            self.assertNotIn(vertical_value.lower(), scroll_values)
+        self.assertNotIn("overflow-y: auto", match.group("body"))
 
     def test_app_shell_rules_are_owned_by_the_app_layout_module(self) -> None:
         app_path = ROOT / "scss/layouts/_app.scss"
@@ -477,7 +465,7 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIsNotNone(catalog_main)
         assert catalog_main is not None
-        self.assertIn("overflow-y: auto;", catalog_main.group("body"))
+        self.assertNotIn("overflow-y: auto;", catalog_main.group("body"))
 
     def test_examples_keep_document_vertical_rhythm(self) -> None:
         styles = read_catalog_styles()
@@ -2054,25 +2042,25 @@ class CatalogContractTests(CatalogTestCase):
             r'<div\s+class="moo-ui"\s+data-bs-theme="\{\{ resolved_theme \}\}"\s+data-moo-document-owner="true"\s*>',
         )
         self.assertIn(
-            "<script>{{ theme_prepaint_source() }}</script>",
+            "<script>{{ state_source() }}</script>",
             base,
         )
         self.assertLess(
             base.index('data-bs-theme="{{ resolved_theme }}"'),
-            base.index("theme_prepaint_source"),
+            base.index("state_source"),
         )
         self.assertLess(
-            base.index("theme_prepaint_source"),
+            base.index("state_source"),
             base.index('href="#main-content"'),
         )
-        self.assertNotIn('assets/js/theme-prepaint.js?', base)
+        self.assertNotIn('assets/js/state.js?', base)
         self.assertNotIn("body.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
 
-    def test_base_layout_inlines_the_canonical_owner_prepaint_source(self) -> None:
-        canonical = (ROOT / "src/js/theme-prepaint.js").read_text(encoding="utf-8")
+    def test_base_layout_inlines_the_canonical_owner_state_source(self) -> None:
+        canonical = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(
             encoding="utf-8"
         )
@@ -2101,16 +2089,16 @@ class CatalogContractTests(CatalogTestCase):
     def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
-        include = (ROOT / "site/src/includes/catalog-theme-prepaint.html.jinja").read_text(
+        include = (ROOT / "site/src/includes/catalog-theme-state.html.jinja").read_text(
             encoding="utf-8"
         )
 
-        self.assertNotIn("<style data-moo-catalog-prepaint", base)
-        self.assertNotIn("<style data-moo-catalog-prepaint", catalog)
-        self.assertNotIn("moo-ui-prepaint.css", base)
-        self.assertNotIn("moo-ui-prepaint.css", catalog)
-        self.assertIn("catalog-prepaint.css", base)
-        self.assertIn("catalog-theme-prepaint.html.jinja", catalog)
+        self.assertNotIn("<style data-moo-catalog-state", base)
+        self.assertNotIn("<style data-moo-catalog-state", catalog)
+        self.assertNotIn("moo-ui-state.css", base)
+        self.assertNotIn("moo-ui-state.css", catalog)
+        self.assertIn("catalog-state.css", base)
+        self.assertIn("catalog-theme-state.html.jinja", catalog)
         self.assertIn("document.currentScript?.parentElement", include)
         self.assertNotIn("document.documentElement", include)
         self.assertNotIn("document.body", include)
@@ -2121,18 +2109,21 @@ class CatalogContractTests(CatalogTestCase):
         page = self.read_output("introduction/index.html")
         stylesheet_marker = '<link rel="stylesheet" href="../assets/css/moo-ui.min.css?v='
         catalog_marker = '<link rel="stylesheet" href="../assets/css/catalog.min.css?v='
-        prepaint_marker = '<link rel="stylesheet" href="../assets/css/catalog-prepaint.css?v='
+        state_marker = '<link rel="stylesheet" href="../assets/css/catalog-state.css?v='
         self.assertIn(stylesheet_marker, page)
-        self.assertNotIn("moo-ui-prepaint.css", page)
-        self.assertIn(prepaint_marker, page)
+        self.assertNotIn("moo-ui-state.css", page)
+        self.assertIn(state_marker, page)
         self.assertLess(page.index(stylesheet_marker), page.index(catalog_marker))
-        self.assertLess(page.index(catalog_marker), page.index(prepaint_marker))
-        self.assertTrue((DIST / "assets/css/catalog-prepaint.css").is_file())
+        self.assertLess(page.index(catalog_marker), page.index(state_marker))
+        self.assertTrue((DIST / "assets/css/catalog-state.css").is_file())
 
         full_build = self.read_output("assets/css/moo-ui.css")
         self.assertIn(".moo-ui[data-bs-theme] {", full_build)
         self.assertIn('.moo-ui[data-bs-theme="dark"] {', full_build)
-        self.assertIn("body > .moo-ui[data-bs-theme] {", full_build)
+        self.assertIn(
+            "body > .moo-ui[data-bs-theme]:not([data-moo-overlay-host]) {",
+            full_build,
+        )
         self.assertNotIn("body[data-bs-theme]", full_build)
         self.assertNotIn(":where(html, body)[data-bs-theme]", full_build)
         self.assertNotIn("moo-catalog__", full_build)
@@ -2195,17 +2186,19 @@ class CatalogContractTests(CatalogTestCase):
 
     def test_catalog_sidebar_persisted_state_handoff_runs_after_markup(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
-        prepaint = (ROOT / "site/static/js/catalog-prepaint.js").read_text(
+        catalog_state = (ROOT / "site/static/js/catalog-state.js").read_text(
             encoding="utf-8",
         )
+        owner_state = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
 
         handoff = 'document.documentElement.dataset.sidebarCatalogState'
         self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', base)
         self.assertNotIn(handoff, base)
-        self.assertIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', prepaint)
-        self.assertIn('shell?.setAttribute("data-sidebar-prepaint-ready", "")', prepaint)
+        self.assertNotIn('window.localStorage.getItem("moo-sidebar:catalog-shell")', catalog_state)
+        self.assertIn('`moo-sidebar:${key}`', owner_state)
+        self.assertIn('owner.dataset.sidebarStateReady = ""', owner_state)
 
-    def test_built_catalog_prepaint_script_runs_after_catalog_markup(self) -> None:
+    def test_built_catalog_state_script_runs_after_catalog_markup(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -2217,25 +2210,25 @@ class CatalogContractTests(CatalogTestCase):
         self.assertLess(page.index("</html>"), len(page))
         wrapper_index = page.index('data-sidebar-key="catalog-shell"')
         settings_index = page.index('id="catalog-settings"')
-        prepaint_index = page.index('assets/js/catalog-prepaint.js?')
+        state_index = page.index('assets/js/catalog-state.js?')
         bootstrap_index = page.index('assets/js/bootstrap.bundle.min.js?')
         catalog_module_index = page.index('assets/js/catalog/index.js?')
-        self.assertLess(wrapper_index, prepaint_index)
-        self.assertLess(settings_index, prepaint_index)
-        self.assertLess(prepaint_index, bootstrap_index)
-        self.assertLess(prepaint_index, catalog_module_index)
+        self.assertLess(wrapper_index, state_index)
+        self.assertLess(settings_index, state_index)
+        self.assertLess(state_index, bootstrap_index)
+        self.assertLess(state_index, catalog_module_index)
         self.assertNotIn("shell.dataset.sidebarState = state", page)
         self.assertIn(
-            '<script src="../assets/js/catalog-prepaint.js?',
+            '<script src="../assets/js/catalog-state.js?',
             page,
         )
 
-    def test_catalog_prepaint_script_is_not_inlined_in_catalog_markup(self) -> None:
+    def test_catalog_state_script_is_not_inlined_in_catalog_markup(self) -> None:
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(
             encoding="utf-8",
         )
         self.assertIn(
-            '<script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>',
+            '<script src="{{ root_path }}assets/js/catalog-state.js?v={{ asset_version }}"></script>',
             catalog,
         )
         self.assertNotIn("dataset.sidebarCatalogState", catalog)
@@ -2425,19 +2418,24 @@ class CatalogContractTests(CatalogTestCase):
             "moo-home-proof-card",
             home,
         )
-        self.assertIn(
-            "moo-home-component-row moo-home-component-row--1",
+        for row_number in ("1", "2"):
+            self.assertRegex(
+                home,
+                rf'class="(?=[^"]*\bmoo-home-component-row\b)'
+                rf'(?=[^"]*\bmoo-home-component-row--{row_number}\b)'
+                r'(?=[^"]*\bposition-relative\b)'
+                r'(?=[^"]*\boverflow-hidden\b)[^"]*"',
+            )
+        self.assertRegex(
             home,
+            r'<section\b[^>]*class="(?=[^"]*\bmoo-home-hero\b)'
+            r'(?=[^"]*\bd-grid\b)(?=[^"]*\bflex-shrink-0\b)'
+            r'(?=[^"]*\balign-items-center\b)[^"]*"',
         )
-        self.assertIn(
-            'class="moo-home-component-row moo-home-component-row--2"',
-            home,
-        )
-        self.assertIn('class="moo-home-hero"', home)
         self.assertRegex(
             home,
             r'<main id="main-content"[^>]*>\s*'
-            r'<div class="container-xl">\s*'
+            r'<div class="container-xl" data-page-container>\s*'
             r'<div class="row gx-0">\s*'
             r'<div class="col px-md-5">',
         )
@@ -2583,7 +2581,12 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertNotIn("moo-catalog__intro", page)
 
         home = self.read_output("index.html")
-        self.assertIn('<section class="moo-home-hero"', home)
+        self.assertRegex(
+            home,
+            r'<section\b[^>]*class="(?=[^"]*\bmoo-home-hero\b)'
+            r'(?=[^"]*\bd-grid\b)(?=[^"]*\bflex-shrink-0\b)'
+            r'(?=[^"]*\balign-items-center\b)[^"]*"',
+        )
         self.assertIn('<h1 class="moo-home-hero__title" id="home">Moo UI</h1>', home)
         self.assertNotIn("moo-doc-hero", home)
         self.assertNotIn("moo-catalog__intro", home)
@@ -2611,7 +2614,7 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertRegex(
                     page,
                     r'<main id="main-content"[^>]*>\s*'
-                    r'<div class="container-xl">\s*'
+                    r'<div class="container-xl" data-page-container>\s*'
                     r'<div class="row gx-0">\s*'
                     r'<div class="col px-md-5">',
                 )
@@ -3056,7 +3059,10 @@ class CatalogContractTests(CatalogTestCase):
                         self.assertNotIn("data-bs-title", trigger)
                         self.assertEqual(trigger.get("role"), "button")
                         self.assertEqual(trigger.get("tabindex"), "0")
-                        self.assertIn("moo-examples-footer__component-trigger", trigger.get("class") or "")
+                        self.assertEqual(
+                            set((trigger.get("class") or "").split()),
+                            {"btn", "btn-link", "p-0", "align-baseline"},
+                        )
                         self.assertEqual(trigger.get("data-bs-toggle"), "popover")
                         self.assertEqual(trigger.get("data-bs-trigger"), "focus")
                         self.assertEqual(trigger.get("data-bs-container"), "body")
@@ -3520,7 +3526,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("Server-resolved document", installation)
         self.assertIn('data-moo-document-owner="true"', installation)
         self.assertIn("Static or strict-CSP fallback", installation)
-        self.assertIn('src="/vendor/@wpmoo/ui/theme-prepaint.js"', installation_text)
+        self.assertIn('src="/vendor/@wpmoo/ui/state.js"', installation_text)
         self.assertIn(
             "external fetch cannot guarantee zero flash",
             normalized_installation_text,
@@ -3582,7 +3588,7 @@ class CatalogContractTests(CatalogTestCase):
         self.assertIn("MooUI.Combobox.getOrCreateInstance(combobox)", readme)
         self.assertIn("Server-resolved document", readme)
         self.assertIn("Static or strict-CSP fallback", readme)
-        self.assertIn("theme-prepaint.js", readme)
+        self.assertIn("state.js", readme)
         self.assertIn("external fetch cannot guarantee zero flash", readme)
         self.assertRegex(
             support,
@@ -3709,7 +3715,7 @@ class CatalogContractTests(CatalogTestCase):
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version="test",
-            theme_builder_prepaint=site_build.catalog_prepaint_config(
+            theme_builder_state=site_build.catalog_state_config(
                 site_build.theme_builder_first_paint_payload()
             ),
         )
@@ -4319,10 +4325,19 @@ class CatalogContractTests(CatalogTestCase):
         home = self.read_output("index.html")
         self.assertIn('href="layout/"', home)
         command_start = home.index('id="catalog-command"')
-        command_end = home.index('</div>\n        <p class="moo-catalog__command-empty"', command_start)
+        command_empty = re.search(
+            r'<p\s+class="[^"]*\bmoo-catalog__command-empty\b[^"]*"',
+            home[command_start:],
+        )
+        self.assertIsNotNone(command_empty)
+        command_end = command_start + command_empty.start()
         command_palette = home[command_start:command_end]
         self.assertIn('href="layout/"', command_palette)
         self.assertNotIn('href="layouts/', command_palette)
+        self.assertRegex(
+            home,
+            r'class="(?=[^"]*\bmoo-catalog__command-body\b)(?=[^"]*\boverflow-y-auto\b)[^"]*"',
+        )
         for legacy in (
             DIST / "layouts/index.html",
             DIST / "layouts/app/index.html",
@@ -4364,7 +4379,10 @@ class CatalogContractTests(CatalogTestCase):
                 self.assertEqual(preview.count('id="main-content"'), 1)
                 self.assertNotIn("sidebar_provider", preview)
                 self.assertNotIn("sidebar_inset", preview)
-                self.assertIn('class="moo-layout-preview"', preview)
+                self.assertRegex(
+                    preview,
+                    r'class="(?=[^"]*\bmoo-layout-preview\b)(?=[^"]*\bmin-vh-100\b)[^"]*"',
+                )
 
         preview_metadata = site_build.page_metadata(
             ROOT / "site/src/pages/layouts/previews/page.html.jinja",
@@ -4383,7 +4401,11 @@ class CatalogContractTests(CatalogTestCase):
         )
         self.assertIsNotNone(block_preview_style)
         self.assertIn("min-width: 0;", block_preview_style.group("body"))
-        self.assertIn("max-width: 100%;", block_preview_style.group("body"))
+        block_page = self.read_output("blocks/sidebar-floating.html")
+        self.assertRegex(
+            block_page,
+            r'class="(?=[^"]*\bmoo-block-preview\b)(?=[^"]*\bw-100\b)(?=[^"]*\bmw-100\b)[^"]*"',
+        )
         doc_page_style = re.search(
             r"\.moo-doc-page\s*\{(?P<body>[^}]*)\}", catalog_styles
         )

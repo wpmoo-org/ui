@@ -56,7 +56,7 @@
       </header>
     {% endif %}
     <main id="main-content" tabindex="-1" class="scroll-fade-y no-scrollbar">
-      <div class="{{ page_container_classes[width] }}">{{ main_content | safe }}</div>
+      <div class="{{ page_container_classes[width] }}" data-page-container>{{ main_content | safe }}</div>
     </main>
     {% if footer_content %}
       <footer>

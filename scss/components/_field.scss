@@ -74,6 +74,14 @@
   > hr {
     margin-block: 0;
   }
+
+  // A public Bootstrap .row is an explicit layout request from the consumer.
+  // Preserve its responsive columns and let Bootstrap's gutters own spacing
+  // instead of turning the row back into a vertical, gap-managed field stack.
+  &.row {
+    flex-direction: row;
+    gap: 0;
+  }
 }
 
 .field-form {

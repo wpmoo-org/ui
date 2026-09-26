@@ -68,7 +68,7 @@ same owner at its fragment boundary and may use `dir` on that owner for a
 subtree override. Nested resolved owners are independent token contexts.
 
 A class-only `.moo-ui`, including a direct child carrying the private
-`data-moo-overlay-portal-host` marker, is not a resolved owner. It inherits
+`data-moo-overlay-host` marker, is not a resolved owner. It inherits
 the nearest resolved owner's tokens and direction. The generic portal host is
 private implementation plumbing, not a preset selector or public root option.
 
@@ -93,7 +93,7 @@ embedded page.
 The server always emits a resolved `light` or `dark` `data-bs-theme` value on
 the owner. The public owner bootstrap applies `stored > server > fallback`,
 resolves a stored `system` preference before it writes that owner attribute,
-and finishes with `data-moo-prepaint="ready"` on the owner. The default shared
+and finishes with `data-moo-state="ready"` on the owner. The default shared
 `moo:theme`/`moo:direction` keys are valid only for a document with one
 top-level owner; independent nested or sibling owners need explicit
 `data-moo-theme-key` and `data-moo-direction-key` values.
@@ -101,13 +101,13 @@ top-level owner; independent nested or sibling owners need explicit
 There are two supported first-paint profiles:
 
 - A full static document that must restore browser-only preference without a
-  visible mismatch renders the canonical `theme-prepaint.js` source inline as
+  visible mismatch renders the canonical `state.js` source inline as
   the owner's first child, before visible Moo content. A strict CSP must
   authorize those exact bytes with a nonce or hash. The renderer must use the
   canonical source rather than maintain a second theme resolver.
 - An embedded host, or a full document whose strict CSP disallows inline
   bootstrap, server-resolves the owner attribute and may use the external,
-  non-deferred `theme-prepaint.js` asset as an owner-local fallback. An
+  non-deferred `state.js` asset as an owner-local fallback. An
   external fetch cannot guarantee zero flash when the only differing value is
   in browser storage, so the server value is the deterministic fallback for
   this profile.
@@ -118,7 +118,7 @@ owner `dir` only for embedded subtree overrides. `blocking="render"` is not a
 portable replacement: it is a head-only render-blocking mechanism and is not
 the owner-local bootstrap contract.
 
-The catalog's persisted Theme Builder prepaint is private site behavior. It
+The catalog's persisted Theme Builder state is private site behavior. It
 normalizes storage into private `data-moo-catalog-theme-builder-*` attributes
 on the owner and applies the generated catalog stylesheet; it is neither a
 package export nor a cross-host theme API.

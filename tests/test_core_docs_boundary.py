@@ -35,7 +35,7 @@ CORE_OUTPUTS = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "dist/js/theme-prepaint.js",
+    "dist/js/state.js",
     "dist/release-manifest.json",
 }
 FORBIDDEN_CORE_SITE_REFERENCES = ("site/", "site/src", "site/scss")
@@ -122,10 +122,10 @@ class CoreDocsBoundaryTests(unittest.TestCase):
                 self.assertTrue(output.is_file(), relative_path)
                 self.assertEqual(sha256(output), expected_hash)
 
-    def test_public_prepaint_distribution_copy_is_recorded_in_boundary_baseline(self) -> None:
-        package_copy = "dist/js/theme-prepaint.js"
-        public_copy = "site-dist/dist/js/theme-prepaint.js"
-        catalog_copy = "site-dist/assets/js/theme-prepaint.js"
+    def test_public_state_distribution_copy_is_recorded_in_boundary_baseline(self) -> None:
+        package_copy = "dist/js/state.js"
+        public_copy = "site-dist/dist/js/state.js"
+        catalog_copy = "site-dist/assets/js/state.js"
 
         self.assertIn(package_copy, self.fixture["distFiles"])
         self.assertIn(public_copy, self.fixture["siteDistFiles"])
@@ -167,7 +167,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/chart.min.js",
             "js/datepicker.js",
             "js/datepicker.min.js",
-            "js/theme-prepaint.js",
+            "js/state.js",
             "release-manifest.json",
         }
         expected_site_files = {
@@ -183,9 +183,9 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "robots.txt",
             "assets/css/catalog.css",
             "assets/css/catalog.min.css",
-            "assets/css/catalog-prepaint.css",
+            "assets/css/catalog-state.css",
             "assets/js/bootstrap.bundle.min.js",
-            "assets/js/catalog-prepaint.js",
+            "assets/js/catalog-state.js",
             "js/combobox.js",
             "js/context-menu.js",
             "js/datatable.js",
@@ -448,7 +448,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0-rc.8")
+        self.assertEqual(package["version"], "1.0.0-rc.9")
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):

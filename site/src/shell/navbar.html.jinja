@@ -12,7 +12,7 @@
     data-moo-command-item
     role="option"
   >
-    <span class="moo-catalog__command-arrow" aria-hidden="true">{{ render_icon("arrow-right", "inline-start") }}</span>
+    <span class="moo-catalog__command-arrow d-inline-flex flex-shrink-0" aria-hidden="true">{{ render_icon("arrow-right", "inline-start") }}</span>
     <span class="moo-catalog__command-title">{{ label }}</span>
   </a>
 {%- endmacro %}
@@ -91,15 +91,15 @@
   data-moo-command
 >
   <div class="modal-dialog moo-catalog__command-dialog">
-    <div class="modal-content moo-catalog__command-content">
+    <div class="modal-content moo-catalog__command-content overflow-hidden border-0">
       <div class="modal-header moo-catalog__command-header">
         <h2 class="visually-hidden" id="catalog-command-title">Search documentation</h2>
-        {% call input_group(extra_class="moo-catalog__command-search") %}
+        {% call input_group(extra_class="moo-catalog__command-search w-100") %}
           {{ input_group_text(render_icon("search", "inline-start")) }}
           {{ input(aria_label="Search documentation", type="search", placeholder="Search documentation...") }}
         {% endcall %}
       </div>
-      <div class="modal-body moo-catalog__command-body scroll-fade-y no-scrollbar">
+      <div class="modal-body moo-catalog__command-body scroll-fade-y no-scrollbar overflow-y-auto">
         {% set command_groups = [
           ("Pages", "doc"),
           ("Components", "component"),
@@ -121,9 +121,9 @@
             {% endif %}
           {% endfor %}
         </div>
-        <p class="moo-catalog__command-empty" hidden>No matching pages.</p>
+        <p class="moo-catalog__command-empty m-0 p-4 text-body-secondary text-center" hidden>No matching pages.</p>
       </div>
-      <div class="moo-catalog__command-footer">
+      <div class="moo-catalog__command-footer d-flex align-items-center gap-2">
         {{ kbd("↵") }}
         <span>Go to Page</span>
       </div>

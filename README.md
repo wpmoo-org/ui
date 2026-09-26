@@ -96,7 +96,7 @@ knows the request or session preference. Put it on the first application owner;
 keep `lang` and the document's default `dir` on `html`:
 
 ```html
-<!-- Server-resolved document: no prepaint required. -->
+<!-- Server-resolved document: no state bootstrap required. -->
 <html lang="en" dir="ltr">
   <body>
     <div class="moo-ui" data-bs-theme="dark" data-moo-document-owner="true">
@@ -113,7 +113,7 @@ when it needs independent browser persistence:
 ```html
 <!-- Static or strict-CSP fallback: classic script is the root's first child. -->
 <div class="moo-ui" data-bs-theme="light" data-moo-theme-key="portal:theme">
-  <script src="/vendor/@wpmoo/ui/theme-prepaint.js"></script>
+  <script src="/vendor/@wpmoo/ui/state.js"></script>
   <!-- embedded Moo UI fragment -->
 </div>
 ```
@@ -121,8 +121,8 @@ when it needs independent browser persistence:
 On a first visit, a static host without a known server preference can only
 correct a browser-only preference after the external asset is fetched, so that
 correction may be visible. The server value remains the deterministic fallback;
-an external fetch cannot guarantee zero flash in this profile. The published
-asset is available as `@wpmoo/ui/theme-prepaint.js`.
+an external fetch cannot guarantee zero flash in this profile. RC9 exposes
+this asset as `@wpmoo/ui/state.js`.
 
 ### Optional runtime
 
@@ -166,7 +166,7 @@ calm.
 
 ## Status And Support
 
-Moo UI is preparing the `1.0.0-rc.8` release candidate. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
+The current release candidate is `1.0.0-rc.9`. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
 
@@ -189,4 +189,4 @@ Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.8/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.9/THIRD_PARTY_NOTICES.md).

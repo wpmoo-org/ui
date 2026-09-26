@@ -5,8 +5,8 @@
 {% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
-{% block owner_prepaint %}
-  {% include "includes/catalog-theme-prepaint.html.jinja" %}
+{% block owner_state %}
+  {% include "includes/catalog-theme-state.html.jinja" %}
 {% endblock %}
 
 {% block body %}
@@ -69,5 +69,5 @@
     {% endcall %}
     {{ render_catalog_overlays() }}
   </div>
-  <script src="{{ root_path }}assets/js/catalog-prepaint.js?v={{ asset_version }}"></script>
+  <script src="{{ root_path }}assets/js/catalog-state.js?v={{ asset_version }}"></script>
 {% endblock %}

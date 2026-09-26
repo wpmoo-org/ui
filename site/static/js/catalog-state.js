@@ -1,6 +1,6 @@
 /*
  * Catalog initial state runs synchronously before the deferred catalog module
- * initializes, keeping layout state setup in one external script.
+ * initializes, restoring the catalog-only variant and active item position.
  */
 (function () {
   "use strict";
@@ -8,19 +8,6 @@
   const shell = document.querySelector(
     '[data-slot="sidebar-wrapper"][data-sidebar-key="catalog-shell"]'
   );
-  let state = null;
-  try {
-    state = window.localStorage.getItem("moo-sidebar:catalog-shell");
-  } catch (_) {
-    /* localStorage can be unavailable in restricted browsing contexts. */
-  }
-  if (
-    (state === "collapsed" || state === "expanded") &&
-    shell?.dataset.sidebarKey === "catalog-shell"
-  ) {
-    shell.dataset.sidebarState = state;
-  }
-
   // Apply a saved Sidebar variant synchronously, right after the sidebar
   // renders and before the rest of the page paints, so a non-default choice
   // never flashes the default layout first.
@@ -37,7 +24,7 @@
     }
   }
 
-  // data-moo-sidebar-active-prepaint
+  // data-moo-sidebar-active-state
   // Match Sidebar's active route positioning before the deferred catalog
   // module loads, so deep menu pages never flash from the top.
   const active = shell?.querySelector(
@@ -64,5 +51,4 @@
     }
   }
 
-  shell?.setAttribute("data-sidebar-prepaint-ready", "");
 })();

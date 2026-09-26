@@ -2,7 +2,10 @@
 // the viewport edge with a margin, border, radius, and shadow.
 
 @include media-breakpoint-up(lg) {
-  .sidebar {
+  // Enable shell motion only after Sidebar has restored its initial state.
+  // Hosts that hydrate after first paint must not animate the correction from
+  // their server/default state to the persisted state.
+  :where(.wrapper[data-layout="app"][data-sidebar-ready]) > .sidebar {
     transition: flex-basis 0.2s ease, width 0.2s ease;
   }
 

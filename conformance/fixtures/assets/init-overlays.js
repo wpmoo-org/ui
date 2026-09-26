@@ -13,7 +13,7 @@
     '.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"]';
   const ownerPortalRoot = (owner) => (
     Array.from(owner?.children || []).find((child) =>
-      child.matches("[data-moo-overlay-portal-host]"),
+      child.matches("[data-moo-overlay-host]"),
     ) || owner
   );
 

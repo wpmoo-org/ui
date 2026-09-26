@@ -141,6 +141,22 @@ class FieldTests(CatalogTestCase):
         self.assertIn('class="field-group"', output)
         self.assertIn("<p>Content</p>", output)
 
+    def test_field_group_row_preserves_bootstrap_column_geometry(self) -> None:
+        output = self.render(
+            '{% call field_group(extra_class="row") %}'
+            '<div class="col-6">First</div><div class="col-6">Last</div>'
+            "{% endcall %}"
+        )
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        self.assertIn('class="field-group row"', output)
+        css = self.read_output("assets/css/moo-ui.css")
+        self.assertRegex(
+            css,
+            r"\.field-group\.row\s*\{[^}]*flex-direction:\s*row;[^}]*gap:\s*0;",
+        )
+
     def test_fieldset_renders_legend_and_content(self) -> None:
         output = self.render(
             '{% call fieldset("Notifications") %}<p>Content</p>{% endcall %}'

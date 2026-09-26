@@ -30,7 +30,7 @@ CORE_OUTPUTS = {
     "dist/js/chart.min.js",
     "dist/js/datepicker.js",
     "dist/js/datepicker.min.js",
-    "dist/js/theme-prepaint.js",
+    "dist/js/state.js",
     "dist/release-manifest.json",
 }
 

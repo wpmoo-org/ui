@@ -111,7 +111,7 @@ class CatalogJavaScriptTests(CatalogTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_theme_init_does_not_rewrite_the_prepainted_theme(self) -> None:
+    def test_theme_init_does_not_rewrite_the_restored_theme(self) -> None:
         result = subprocess.run(
             [
                 "node",
@@ -1911,7 +1911,7 @@ console.log(JSON.stringify({ document: makeCase(false), nested: makeCase(true) }
             "mooCatalogThemeBuilderHeadingFont",
             "mooCatalogThemeBuilderBodyFont",
             "mooCatalogThemeBuilderRadius",
-            "mooCatalogThemeBuilderPrepaint",
+            "mooCatalogThemeBuilderState",
         ):
             with self.subTest(dataset=dataset):
                 self.assertIn(dataset, source)
@@ -2019,7 +2019,7 @@ function runScenario({ baselineTheme, currentTheme, embedded = false }) {
     },
     querySelectorAll: () => [],
   }, embedded ? "ltr" : null);
-  owner.__mooPrepaintBaseline = {
+  owner.__mooStateBaseline = {
     theme: baselineTheme,
     direction: embedded ? null : "rtl",
   };
@@ -2322,7 +2322,7 @@ const initial = {
   headingDataset: body.dataset.mooCatalogThemeBuilderHeadingFont,
   bodyDataset: body.dataset.mooCatalogThemeBuilderBodyFont,
   radiusDataset: body.dataset.mooCatalogThemeBuilderRadius,
-  prepaintDataset: body.dataset.mooCatalogThemeBuilderPrepaint,
+  stateDataset: body.dataset.mooCatalogThemeBuilderState,
   broadStyleDataset: Object.hasOwn(body.dataset, "mooThemeStyle"),
   broadBaseDataset: Object.hasOwn(body.dataset, "mooBaseColor"),
   primary: themeBuilderTokenStyle.getPropertyValue("--bs-primary"),
@@ -2472,9 +2472,9 @@ const afterReset = {
     body.dataset,
     "mooCatalogThemeBuilderRadius"
   ),
-  prepaintDataset: Object.hasOwn(
+  stateDataset: Object.hasOwn(
     body.dataset,
-    "mooCatalogThemeBuilderPrepaint"
+    "mooCatalogThemeBuilderState"
   ),
   chart1: themeBuilderTokenStyle.getPropertyValue("--moo-chart-1"),
   bodyBg: themeBuilderTokenStyle.getPropertyValue("--bs-body-bg"),
@@ -2520,7 +2520,7 @@ console.log(JSON.stringify({
         self.assertEqual(case["initial"]["headingDataset"], "system")
         self.assertEqual(case["initial"]["bodyDataset"], "geist")
         self.assertEqual(case["initial"]["radiusDataset"], "small")
-        self.assertEqual(case["initial"]["prepaintDataset"], "true")
+        self.assertEqual(case["initial"]["stateDataset"], "true")
         self.assertFalse(case["initial"]["broadStyleDataset"])
         self.assertFalse(case["initial"]["broadBaseDataset"])
         self.assertEqual(case["initial"]["primary"], "rgb(6, 111, 209)")
@@ -2614,7 +2614,7 @@ console.log(JSON.stringify({
         self.assertFalse(case["afterReset"]["headingDataset"])
         self.assertFalse(case["afterReset"]["bodyDataset"])
         self.assertFalse(case["afterReset"]["radiusDataset"])
-        self.assertFalse(case["afterReset"]["prepaintDataset"])
+        self.assertFalse(case["afterReset"]["stateDataset"])
         self.assertEqual(case["afterReset"]["chart1"], "")
         self.assertEqual(case["afterReset"]["bodyBg"], "")
         self.assertEqual(case["afterReset"]["bodyBgRgb"], "")

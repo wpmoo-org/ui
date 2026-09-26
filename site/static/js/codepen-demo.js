@@ -326,7 +326,7 @@
     }
 
     portal = Array.from(owner.children).find(function (child) {
-      return child.matches && child.matches("[data-moo-overlay-portal-host]");
+      return child.matches && child.matches("[data-moo-overlay-host]");
     });
     if (portal) {
       return portal;
@@ -334,7 +334,7 @@
 
     portal = document.createElement("div");
     portal.className = "moo-ui";
-    portal.setAttribute("data-moo-overlay-portal-host", "");
+    portal.setAttribute("data-moo-overlay-host", "");
     owner.appendChild(portal);
     return portal;
   }
@@ -541,7 +541,7 @@
     trigger.setAttribute("href", "#!");
     trigger.setAttribute("role", "button");
     trigger.setAttribute("tabindex", "0");
-    trigger.className = "btn btn-outline-secondary moo-examples-footer__component-trigger";
+    trigger.className = "btn btn-link p-0 align-baseline";
     trigger.textContent = component.label;
     trigger.setAttribute("data-bs-toggle", "popover");
     trigger.setAttribute("data-bs-trigger", "focus");

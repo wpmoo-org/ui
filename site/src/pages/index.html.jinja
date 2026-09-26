@@ -7,13 +7,13 @@
 {% block title %}Moo UI{% endblock %}
 
 {% block content %}
-  <section class="moo-home-hero" aria-labelledby="home">
-    <div class="moo-home-hero__copy">
+  <section class="moo-home-hero d-grid flex-shrink-0 align-items-center" aria-labelledby="home">
+    <div class="moo-home-hero__copy d-grid">
       <h1 class="moo-home-hero__title" id="home">Moo UI</h1>
       <p class="moo-home-hero__description text-body-secondary mb-0">
         <span>Bootstrap markup. shadcn feel.</span>
       </p>
-      <div class="moo-home-hero__actions">
+      <div class="moo-home-hero__actions d-flex flex-wrap gap-3">
         {{ button(
           "Get started",
           variant="default",
@@ -32,7 +32,7 @@
         ) }}
       </div>
     </div>
-    <div class="moo-home-showcase__media" data-moo-tilt>
+    <div class="moo-home-showcase__media d-flex align-items-center" data-moo-tilt>
       {#- Responsive image coverage, 2026-09-06, Chromium/Playwright:
           desktop DPR 1 at 640x844 selects readme-hero-640.webp;
           desktop DPR 1 at 960x844 selects readme-hero-960.webp;
@@ -40,7 +40,7 @@
           All three candidates preserve the declared 3:2 rendered aspect
           ratio within rounding tolerance and avoid visual distortion. #}
       <img
-        class="moo-home-showcase__image"
+        class="moo-home-showcase__image d-block w-100 h-auto rounded-0 shadow-none"
         src="{{ root_path }}assets/images/readme-hero.webp"
         srcset="{{ root_path }}assets/images/readme-hero-640.webp 640w, {{ root_path }}assets/images/readme-hero-960.webp 960w, {{ root_path }}assets/images/readme-hero.webp 1536w"
         sizes="(min-width: 992px) 612px, 100vw"
@@ -56,9 +56,9 @@
   {#- Entry row under the hero: the three top-level destinations of the
      catalog. Each card is one stretched link, so the whole surface is
      clickable. #}
-  <section class="moo-home-entries" aria-label="Browse Moo UI">
+  <section class="moo-home-entries d-grid gap-3" aria-label="Browse Moo UI">
     {% call card(extra_class="h-100 moo-home-entry-card", body_class="d-grid gap-3") %}
-      <span class="moo-catalog__philosophy-icon">{{ render_icon("component", "inline-start") }}</span>
+      <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("component", "inline-start") }}</span>
       <div>
         <h2 class="h6 mb-2">
           <a class="stretched-link" href="{{ site_href("components/index.html", root_path) }}">Components</a>
@@ -70,7 +70,7 @@
       </div>
     {% endcall %}
     {% call card(extra_class="h-100 moo-home-entry-card", body_class="d-grid gap-3") %}
-      <span class="moo-catalog__philosophy-icon">{{ render_icon("blocks", "inline-start") }}</span>
+      <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("blocks", "inline-start") }}</span>
       <div>
         <h2 class="h6 mb-2">
           <a class="stretched-link" href="{{ site_href("blocks/index.html", root_path) }}">Blocks</a>
@@ -82,7 +82,7 @@
       </div>
     {% endcall %}
     {% call card(extra_class="h-100 moo-home-entry-card", body_class="d-grid gap-3") %}
-      <span class="moo-catalog__philosophy-icon">{{ render_icon("app-window", "inline-start") }}</span>
+      <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("app-window", "inline-start") }}</span>
       <div>
         <h2 class="h6 mb-2">
           <a class="stretched-link" href="{{ site_href("examples/index.html", root_path) }}">Examples</a>
@@ -95,8 +95,8 @@
     {% endcall %}
   </section>
 
-  <section class="moo-home-intro" aria-labelledby="home-intro">
-    <div class="moo-home-intro__copy">
+  <section class="moo-home-intro d-grid" aria-labelledby="home-intro">
+    <div class="moo-home-intro__copy d-grid gap-3">
       <h2 class="h3 mb-0" id="home-intro">A product interface layer for teams that already trust Bootstrap.</h2>
       <p class="moo-home-intro__description text-body-secondary mb-0">
         Moo UI keeps Bootstrap as the public contract: familiar classes,
@@ -105,9 +105,9 @@
       </p>
     </div>
 
-    <div class="moo-home-proof-list" aria-label="What Moo UI keeps">
+    <div class="moo-home-proof-list d-grid gap-3" aria-label="What Moo UI keeps">
       {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
-        <span class="moo-catalog__philosophy-icon">{{ render_icon("box", "inline-start") }}</span>
+        <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("box", "inline-start") }}</span>
         <div>
           <h3 class="h6 mb-2">Bootstrap stays the API</h3>
           <p class="text-body-secondary mb-0">
@@ -117,7 +117,7 @@
         </div>
       {% endcall %}
       {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
-        <span class="moo-catalog__philosophy-icon">{{ render_icon("sparkles", "inline-start") }}</span>
+        <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("sparkles", "inline-start") }}</span>
         <div>
           <h3 class="h6 mb-2">The surface feels calmer</h3>
           <p class="text-body-secondary mb-0">
@@ -127,7 +127,7 @@
         </div>
       {% endcall %}
       {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
-        <span class="moo-catalog__philosophy-icon">{{ render_icon("server", "inline-start") }}</span>
+        <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("server", "inline-start") }}</span>
         <div>
           <h3 class="h6 mb-2">Server-rendered UI stays first-class</h3>
           <p class="text-body-secondary mb-0">
@@ -140,9 +140,9 @@
     </div>
   </section>
 
-  <section class="moo-home-intro" aria-labelledby="home-quick-start">
-    <div class="moo-home-intro__copy">
-      <p class="moo-home-kicker">Quick start</p>
+  <section class="moo-home-intro d-grid" aria-labelledby="home-quick-start">
+    <div class="moo-home-intro__copy d-grid gap-3">
+      <p class="moo-home-kicker mb-0 text-body-secondary">Quick start</p>
       <h2 class="h4 mb-0" id="home-quick-start">Use the full build, or scope Moo UI inside an existing Bootstrap app.</h2>
       <p class="moo-home-intro__description text-body-secondary mb-0">
         Moo UI is CSS-first. Bootstrap owns native JavaScript plugins. Moo UI
@@ -157,9 +157,9 @@
     {% endset %}
     {{ render_code_snippet("home-quick-start", quick_start_example, "html") }}
 
-    <div class="moo-home-proof-list" aria-label="Adoption paths">
+    <div class="moo-home-proof-list d-grid gap-3" aria-label="Adoption paths">
       {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
-        <span class="moo-catalog__philosophy-icon">{{ render_icon("package", "inline-start") }}</span>
+        <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("package", "inline-start") }}</span>
         <div>
           <h3 class="h6 mb-2">Full replacement</h3>
           <p class="text-body-secondary mb-0">
@@ -169,7 +169,7 @@
         </div>
       {% endcall %}
       {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
-        <span class="moo-catalog__philosophy-icon">{{ render_icon("layers", "inline-start") }}</span>
+        <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("layers", "inline-start") }}</span>
         <div>
           <h3 class="h6 mb-2">Scoped adoption</h3>
           <p class="text-body-secondary mb-0">
@@ -179,7 +179,7 @@
         </div>
       {% endcall %}
       {% call card(extra_class="h-100 moo-home-proof-card", body_class="d-grid gap-3") %}
-        <span class="moo-catalog__philosophy-icon">{{ render_icon("plug", "inline-start") }}</span>
+        <span class="moo-catalog__philosophy-icon d-inline-flex flex-shrink-0 align-items-center justify-content-center bg-body-tertiary text-body">{{ render_icon("plug", "inline-start") }}</span>
         <div>
           <h3 class="h6 mb-2">Optional gap modules</h3>
           <p class="text-body-secondary mb-0">
@@ -189,32 +189,32 @@
         </div>
       {% endcall %}
     </div>
-    <div class="moo-home-components__cta">
+    <div class="moo-home-components__cta position-relative z-2 d-flex justify-content-center">
       {{ button("Report an issue", variant="outline", element="a", href="https://github.com/wpmoo-org/ui/issues") }}
       {{ button("Contribute", variant="outline", element="a", href=site_href("contributing.html", root_path)) }}
     </div>
   </section>
 
-  <section class="moo-home-components" aria-labelledby="home-components">
-    <div class="moo-home-components__header">
-      <p class="moo-home-kicker">Ready primitives</p>
+  <section class="moo-home-components position-relative d-grid gap-4 overflow-hidden" aria-labelledby="home-components">
+    <div class="moo-home-components__header d-grid gap-2">
+      <p class="moo-home-kicker mb-0 text-body-secondary">Ready primitives</p>
       <h2 class="h4 mb-0" id="home-components">Browse the system by component.</h2>
     </div>
     {% for row in [
       ["button", "input", "select", "dropdown-menu", "badge", "avatar", "dialog", "toast"],
       ["sheet", "popover", "tooltip", "accordion", "sidebar", "table", "progress", "skeleton"]
     ] %}
-      <div class="moo-home-component-row moo-home-component-row--{{ loop.index }}">
-        <div class="moo-home-component-track">
+      <div class="moo-home-component-row moo-home-component-row--{{ loop.index }} position-relative overflow-hidden">
+        <div class="moo-home-component-track d-flex gap-3">
           {% for pass in [1, 2] %}
             {% for slug in row %}
               {% set component = (catalog | selectattr("slug", "equalto", slug) | list | first) %}
               {% if component %}
                 <div
-                  class="card moo-catalog__app-card moo-catalog__showcase-card moo-home-component-card"
+                  class="card moo-catalog__app-card moo-catalog__showcase-card moo-home-component-card overflow-hidden"
                   {% if pass != 1 %}tabindex="-1" aria-hidden="true"{% endif %}
                 >
-                  <div class="moo-catalog__showcase-preview">
+                  <div class="moo-catalog__showcase-preview d-flex align-items-center justify-content-center overflow-hidden text-body">
                     {{ component_preview(component.slug, root_path) }}
                   </div>
                 </div>
@@ -224,7 +224,7 @@
         </div>
       </div>
     {% endfor %}
-    <div class="moo-home-components__cta">
+    <div class="moo-home-components__cta position-relative z-2 d-flex justify-content-center">
       {{ button(
         "Browse Components",
         variant="default",
@@ -232,7 +232,7 @@
         href=site_href("components/index.html", root_path)
       ) }}
     </div>
-    <p class="moo-home-attribution">
+    <p class="moo-home-attribution position-relative z-2 m-0 text-body-secondary text-center">
       {#- Each sentence stacks on its own line below sm; inline flow above. #}
       <span class="d-block d-sm-inline">Built by <a href="https://wpmoo.org/">WPMoo</a> in Berlin.</span>
       <span class="d-block d-sm-inline">The source code is available on <a href="https://github.com/wpmoo-org/ui">GitHub</a>.</span>

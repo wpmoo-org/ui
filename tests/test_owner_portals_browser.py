@@ -96,9 +96,9 @@ class OwnerPortalTests(unittest.TestCase):
                     async (baseUrl) => {
                       document.body.innerHTML = `
                         <div id="outer-owner" class="moo-ui" data-bs-theme="dark">
-                          <div id="outer-portal" data-moo-overlay-portal-host></div>
+                          <div id="outer-portal" data-moo-overlay-host></div>
                           <section id="inner-owner" class="moo-ui" data-bs-theme="light">
-                            <div id="inner-portal" data-moo-overlay-portal-host></div>
+                            <div id="inner-portal" data-moo-overlay-host></div>
                             <button id="modal-trigger" type="button">Open modal</button>
                             <button id="toast-trigger" type="button" data-toast-target="#toast-template">Show toast</button>
                           </section>
@@ -163,7 +163,7 @@ class OwnerPortalTests(unittest.TestCase):
             fixture,
             r'class="moo-ui[^\"]*" data-bs-theme="light"',
         )
-        self.assertIn('class="moo-ui" data-moo-overlay-portal-host', fixture)
+        self.assertIn('class="moo-ui" data-moo-overlay-host', fixture)
         self.assertIn('<script src="assets/init-owner-portals.js"></script>', fixture)
         self.assertNotIn("<script>", fixture)
 

@@ -283,7 +283,7 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn('.container > .row > [class*="col"]', demo_css)
         self.assertIn(".moo-codepen-signature", demo_css)
         self.assertIn(".moo-codepen-footer", demo_css)
-        self.assertIn(".moo-examples-footer__component-trigger", demo_css)
+        self.assertNotIn(".moo-examples-footer__component-trigger", demo_css)
         self.assertIn(".slider", demo_css)
         demo_js = (ROOT / "site-dist/assets/js/codepen-demo.js").read_text(
             encoding="utf-8"
@@ -293,6 +293,10 @@ class CodeExampleTests(CatalogTestCase):
         self.assertNotIn('document.documentElement.setAttribute("data-bs-theme"', demo_js)
         self.assertIn('function inferCodePenConfig(root)', demo_js)
         self.assertIn("var COMPONENT_DESCRIPTIONS = {};", demo_js)
+        self.assertIn(
+            'trigger.className = "btn btn-link p-0 align-baseline";',
+            demo_js,
+        )
         self.assertIn('function observeCodePenConfig()', demo_js)
         self.assertIn('"button"', demo_js)
         self.assertNotIn("ensureStyles", demo_js)

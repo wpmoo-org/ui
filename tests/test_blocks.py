@@ -120,7 +120,10 @@ class BlocksTests(CatalogTestCase):
                     standalone,
                     r'<div\s+class="moo-ui"\s+data-bs-theme="light"',
                 )
-                self.assertIn('class="moo-block-standalone"', standalone)
+                self.assertRegex(
+                    standalone,
+                    r'<main\s+class="(?=[^"]*\bmoo-block-standalone\b)(?=[^"]*\bmin-vh-100\b)(?=[^"]*\bbg-body\b)[^"]*"',
+                )
                 self.assertNotIn(
                     'class="moo-block-standalone moo-ui"', standalone
                 )
@@ -155,8 +158,8 @@ class BlocksTests(CatalogTestCase):
                     sidebar_id = f"preview-sidebar-{variant}-demo"
                     self.assertEqual(shell.sidebar_ids.count(sidebar_id), 1)
                     self.assertEqual(
-                        [attrs.get("data-slot") for _, attrs in shell.direct_children],
-                        ["sidebar", "page"],
+                        [(tag, attrs.get("data-slot")) for tag, attrs in shell.direct_children],
+                        [("script", None), ("aside", "sidebar"), ("div", "page")],
                     )
                     self.assertEqual(standalone.count(f'id="{sidebar_id}"'), 1)
                     self.assertIn('class="container-fluid', standalone)
@@ -238,14 +241,6 @@ class BlocksTests(CatalogTestCase):
         self.assertIn(".moo-block-preview__viewport", styles)
         self.assertIn(".moo-block-preview__frame", styles)
         self.assertIn('.moo-catalog > .wrapper[data-layout="app"]', styles)
-        self.assertIn(
-            '.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="left"] .sidebar-inner',
-            styles,
-        )
-        self.assertIn(
-            '.moo-catalog > .wrapper[data-layout="app"]:has(.sidebar[data-variant="inset"]) .sidebar[data-side="right"] .sidebar-inner',
-            styles,
-        )
         self.assertNotIn("moo-sidebar-demo--flat-inset", styles)
         self.assertNotIn("sidebar-inset__header", styles)
         self.assertIn("data-moo-block-frame-shell", script)

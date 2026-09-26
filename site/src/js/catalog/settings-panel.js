@@ -9,7 +9,7 @@ import {
   findThemeOwner,
   effectiveOwnerDirection,
   isDocumentOwner,
-  ownerPrepaintBaseline,
+  ownerStateBaseline,
   ownerStorageKey,
   readOwnerPreference,
   resolveOwnerTheme,
@@ -163,7 +163,7 @@ export function initSettingsPanel(root = document) {
     const builderStorageKey = isDocumentOwner(owner)
       ? BUILDER_STORAGE_KEY
       : null;
-    const serverBaseline = ownerPrepaintBaseline(owner);
+    const serverBaseline = ownerStateBaseline(owner);
     const themeInputs = Array.from(
       sheet.querySelectorAll("[data-moo-settings-theme]")
     );
@@ -366,12 +366,12 @@ export function initSettingsPanel(root = document) {
 
     const applyBuilderTokens = (preference) => {
       if (isDefaultBuilderPreference(preference)) {
-        delete owner.dataset.mooCatalogThemeBuilderPrepaint;
+        delete owner.dataset.mooCatalogThemeBuilderState;
         Object.values(BUILDER_DATASETS).forEach((datasetKey) => {
           delete owner.dataset[datasetKey];
         });
       } else {
-        owner.dataset.mooCatalogThemeBuilderPrepaint = "true";
+        owner.dataset.mooCatalogThemeBuilderState = "true";
         Object.entries(BUILDER_DATASETS).forEach(([key, datasetKey]) => {
           owner.dataset[datasetKey] = preference[key];
         });

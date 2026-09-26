@@ -1,6 +1,6 @@
-// Default App Sidebar variant: attached to the shell edge with one divider.
+// Attached Sidebar variants keep a divider at the shell edge; Inset does not.
 
-.sidebar[data-side="left"] .sidebar-inner {
+.sidebar[data-side="left"]:not([data-variant="inset"]) .sidebar-inner {
   // `side` is a physical placement contract. Keep the divider on the
   // Sidebar/Page boundary when the document direction is RTL as well.
   border-right: var(--bs-border-width) solid var(--moo-sidebar-border);
@@ -21,6 +21,6 @@
   order: 0;
 }
 
-.sidebar[data-side="right"] .sidebar-inner {
+.sidebar[data-side="right"]:not([data-variant="inset"]) .sidebar-inner {
   border-left: var(--bs-border-width) solid var(--moo-sidebar-border);
 }

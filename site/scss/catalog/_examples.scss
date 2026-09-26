@@ -1,5 +1,5 @@
 .moo-component-header {
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
 }
 
 .moo-doc-page>.moo-component-header,
@@ -111,7 +111,7 @@
 }
 
 .moo-example__header {
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
   margin-bottom: 1rem;
 }
 
@@ -132,7 +132,7 @@
 
 .moo-component-examples > p,
 .moo-component-usage p {
-  max-width: 44rem;
+  max-width: $moo-catalog-reading-width;
   font-size: var(--moo-doc-body-font-size);
   line-height: var(--moo-doc-body-line-height);
 }
@@ -834,21 +834,6 @@
   padding: 0.75rem 1.5rem;
   background: var(--bs-body-bg);
   border-top: var(--bs-border-width) solid var(--bs-border-color);
-}
-
-.moo-examples-footer__component-trigger {
-  padding: 0;
-  border: 0;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  vertical-align: baseline;
-  background: transparent;
-}
-
-.moo-examples-footer__component-trigger:hover,
-.moo-examples-footer__component-trigger:focus-visible {
-  color: var(--bs-link-hover-color);
 }
 
 // Mirrors .moo-catalog__showcase-preview (the same tinted, bled-to-edge

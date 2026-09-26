@@ -95,7 +95,7 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(backdrop).to_be_visible()
             self.assertEqual(
                 backdrop.evaluate(
-                    "element => element.parentElement.hasAttribute('data-moo-overlay-portal-host')"
+                    "element => element.parentElement.hasAttribute('data-moo-overlay-host')"
                 ),
                 True,
             )
@@ -552,7 +552,9 @@ class CodePenModalBrowserTests(unittest.TestCase):
             expect(page.locator(".moo-codepen-footer")).to_contain_text(
                 "Button component."
             )
-            trigger = page.locator(".moo-examples-footer__component-trigger").first
+            trigger = page.locator(
+                ".moo-codepen-footer .btn.btn-link.p-0.align-baseline"
+            ).first
             expect(trigger).to_have_attribute("href", "#!")
             expect(trigger).to_have_attribute("role", "button")
             expect(trigger).to_have_attribute("tabindex", "0")

@@ -30,7 +30,7 @@
       ) }}
 
       <section class="moo-catalog__dashboard" data-moo-catalog-view="grid" aria-label="Catalog filters">
-        {% call catalog_search_filter("catalog-search", "Filter components", "Filter components...", ["Components", "Utilities"], extra_class="moo-catalog__toolbar--components") %}
+        {% call catalog_search_filter("catalog-search", "Filter components", "Filter components...", ["Components", "Utilities"], extra_class="moo-catalog__toolbar--components d-flex flex-wrap align-items-center") %}
           {{ catalog_view_toggle(
             "catalog-view",
             "Components view",
@@ -45,10 +45,10 @@
 
         <section aria-labelledby="components" data-moo-catalog-section="components">
           {{ typography("Components", variant="section-title", id="components") }}
-          <div class="moo-catalog__grid" id="components-grid">
+          <div class="moo-catalog__grid d-grid" id="components-grid">
             {% for component in catalog | sort(attribute="label") %}
-              {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card", body_class="d-grid gap-4") %}
-                <div class="moo-catalog__showcase-preview">
+              {% call card(extra_class="h-100 moo-catalog__app-card moo-catalog__showcase-card overflow-hidden", body_class="d-grid gap-4") %}
+                <div class="moo-catalog__showcase-preview d-flex align-items-center justify-content-center overflow-hidden text-body">
                   {{ component_preview(component.slug, root_path) }}
                 </div>
               <div>
@@ -66,9 +66,9 @@
 
         <section class="mt-5" aria-labelledby="utilities" data-moo-catalog-section="utilities">
           {{ typography("Utilities", variant="section-title", id="utilities") }}
-          <div class="moo-catalog__grid moo-catalog__grid--compact" id="utilities-grid">
+          <div class="moo-catalog__grid moo-catalog__grid--compact d-grid" id="utilities-grid">
             {% for utility in utilities %}
-              {% call card(extra_class="h-100 moo-catalog__app-card", body_class="d-grid gap-3") %}
+              {% call card(extra_class="h-100 moo-catalog__app-card overflow-hidden", body_class="d-grid gap-3") %}
                 <div class="d-flex align-items-start justify-content-between gap-3">
                   <span class="moo-catalog__app-icon" aria-hidden="true">
                     {{ render_icon("sparkles", "inline-start") }}

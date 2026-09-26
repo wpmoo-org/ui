@@ -1,5 +1,5 @@
-// A complete document places its resolved owner directly inside body. The
-// owner, rather than body, supplies the viewport-sized foreground surface.
-body > .moo-ui[data-bs-theme] {
+// A complete document's resolved owner supplies the viewport-sized surface.
+// Direct-body overlay hosts share its theme but are infrastructure, not roots.
+body > .moo-ui[data-bs-theme]:not([data-moo-overlay-host]) {
   min-block-size: 100dvh;
 }

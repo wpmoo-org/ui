@@ -5,8 +5,6 @@
 }
 
 .moo-catalog__command-content {
-  overflow: hidden;
-  border: 0;
   border-radius: var(--bs-border-radius-xl);
   // The command palette is catalog chrome, not a shipped Bootstrap component.
   // It needs a stronger focus-ring/elevation treatment than the shared
@@ -21,10 +19,6 @@
   border-bottom: 0;
 }
 
-.moo-catalog__command-search {
-  width: 100%;
-}
-
 /* Match the reference command input: keep the border, drop the focus ring. */
 .moo-catalog__command-search:has(> .form-control:focus) {
   border-color: var(--moo-border);
@@ -35,7 +29,6 @@
   max-height: 24rem;
   padding: 0.5rem;
   scroll-padding-block: 0.5rem;
-  overflow-y: auto;
 }
 
 .moo-catalog__command-group + .moo-catalog__command-group {
@@ -76,11 +69,6 @@
   background: var(--moo-muted-surface);
 }
 
-.moo-catalog__command-arrow {
-  display: inline-flex;
-  flex: 0 0 auto;
-}
-
 .moo-catalog__command-arrow svg {
   width: 1rem;
   height: 1rem;
@@ -91,17 +79,7 @@
   font-size: 0.875rem;
 }
 
-.moo-catalog__command-empty {
-  margin: 0;
-  padding: 1.5rem;
-  color: var(--bs-secondary-color);
-  text-align: center;
-}
-
 .moo-catalog__command-footer {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   padding: 0.625rem 0.75rem;
   border-top: var(--bs-border-width) solid var(--bs-border-color);
   color: var(--bs-secondary-color);

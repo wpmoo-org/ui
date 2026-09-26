@@ -17,10 +17,10 @@ class BuildTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_render_pages_accepts_precomputed_theme_builder_prepaint(
+    def test_render_pages_accepts_precomputed_theme_builder_state(
         self,
     ) -> None:
-        prepaint = {
+        state = {
             "schemaVersion": 1,
             "defaults": {
                 "schemaVersion": 1,
@@ -53,9 +53,9 @@ class BuildTests(CatalogTestCase):
                     ),
                 ),
             ):
-                build.render_pages(version="test", theme_builder_prepaint=prepaint)
+                build.render_pages(version="test", theme_builder_state=state)
 
-    def test_catalog_prepaint_css_is_owner_scoped_and_allowlisted(self) -> None:
+    def test_catalog_state_css_is_owner_scoped_and_allowlisted(self) -> None:
         payload = {
             "allowList": ["--bs-primary", "--moo-surface"],
             "defaults": {
@@ -94,10 +94,10 @@ class BuildTests(CatalogTestCase):
             },
         }
 
-        css = build.catalog_prepaint_css(payload)
+        css = build.catalog_state_css(payload)
 
         self.assertIn(
-            '.moo-ui[data-bs-theme="dark"]:where([data-moo-catalog-theme-builder-prepaint][data-moo-catalog-theme-builder-base-color="mist"])',
+            '.moo-ui[data-bs-theme="dark"]:where([data-moo-catalog-theme-builder-state][data-moo-catalog-theme-builder-base-color="mist"])',
             css,
         )
         self.assertIn("--moo-surface: black;", css)
@@ -132,9 +132,9 @@ class BuildTests(CatalogTestCase):
             with self.subTest(css_name=css_name):
                 self.assertTrue((SITE_DIST / f"assets/css/{css_name}").is_file())
                 self.assertFalse((PACKAGE_DIST / f"assets/css/{css_name}").exists())
-        self.assertTrue((SITE_DIST / "assets/css/catalog-prepaint.css").is_file())
+        self.assertTrue((SITE_DIST / "assets/css/catalog-state.css").is_file())
         self.assertFalse(
-            (PACKAGE_DIST / "assets/css/catalog-prepaint.css").exists()
+            (PACKAGE_DIST / "assets/css/catalog-state.css").exists()
         )
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.css").exists())
         self.assertFalse((PACKAGE_DIST / "assets/css/catalog.min.css").exists())
@@ -147,16 +147,16 @@ class BuildTests(CatalogTestCase):
             (SITE_DIST / "assets/js/bootstrap.bundle.min.js.map").is_file()
         )
         self.assertTrue(
-            (SITE_DIST / "assets/js/catalog-prepaint.js").is_file()
+            (SITE_DIST / "assets/js/catalog-state.js").is_file()
         )
         self.assertTrue(
-            (SITE_DIST / "assets/js/theme-prepaint.js").is_file()
+            (SITE_DIST / "assets/js/state.js").is_file()
         )
-        package_prepaint = PACKAGE_DIST / "js/theme-prepaint.js"
-        public_prepaint = SITE_DIST / "dist/js/theme-prepaint.js"
-        self.assertTrue(package_prepaint.is_file())
-        self.assertTrue(public_prepaint.is_file())
-        self.assertEqual(public_prepaint.read_bytes(), package_prepaint.read_bytes())
+        package_state = PACKAGE_DIST / "js/state.js"
+        public_state = SITE_DIST / "dist/js/state.js"
+        self.assertTrue(package_state.is_file())
+        self.assertTrue(public_state.is_file())
+        self.assertEqual(public_state.read_bytes(), package_state.read_bytes())
         package_manifest = PACKAGE_DIST / "release-manifest.json"
         public_manifest = SITE_DIST / "dist/release-manifest.json"
         self.assertTrue(package_manifest.is_file())
@@ -206,11 +206,11 @@ class BuildTests(CatalogTestCase):
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
-                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
+                ("assets/css/catalog-state.css", "catalog state css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
-                ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
-                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/catalog-state.js", "catalog state js"),
+                ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
             ):
@@ -232,17 +232,17 @@ class BuildTests(CatalogTestCase):
 
         self.assertEqual(changed_version, original_version)
 
-    def test_asset_version_includes_catalog_prepaint_script(self) -> None:
+    def test_asset_version_includes_catalog_state_script(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             site_dist = Path(tempdir)
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
-                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
+                ("assets/css/catalog-state.css", "catalog state css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
-                ("assets/js/catalog-prepaint.js", "initial prepaint js"),
-                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/catalog-state.js", "initial state js"),
+                ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
                 target = site_dist / relative
@@ -253,8 +253,8 @@ class BuildTests(CatalogTestCase):
             try:
                 build.SITE_DIST = site_dist
                 original_version = build.asset_version()
-                (site_dist / "assets/js/catalog-prepaint.js").write_text(
-                    "changed prepaint js",
+                (site_dist / "assets/js/catalog-state.js").write_text(
+                    "changed state js",
                     encoding="utf-8",
                 )
                 changed_version = build.asset_version()
@@ -269,11 +269,11 @@ class BuildTests(CatalogTestCase):
             for relative, contents in (
                 ("assets/css/moo-ui.min.css", "core css"),
                 ("assets/css/catalog.min.css", "catalog css"),
-                ("assets/css/catalog-prepaint.css", "catalog prepaint css"),
+                ("assets/css/catalog-state.css", "catalog state css"),
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
-                ("assets/js/catalog-prepaint.js", "catalog prepaint js"),
-                ("assets/js/theme-prepaint.js", "theme prepaint js"),
+                ("assets/js/catalog-state.js", "catalog state js"),
+                ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
                 target = site_dist / relative
@@ -285,7 +285,7 @@ class BuildTests(CatalogTestCase):
                 build.SITE_DIST = site_dist
                 original_version = build.asset_version()
                 for relative in (
-                    "assets/js/theme-prepaint.js",
+                    "assets/js/state.js",
                     "assets/js/theme-owner.js",
                 ):
                     target = site_dist / relative
@@ -301,17 +301,17 @@ class BuildTests(CatalogTestCase):
         paths = {Path(path) for path, _ in build.source_snapshot()}
         self.assertIn(build.JS_ROOT / "theme-owner.js", paths)
 
-    def test_source_snapshot_tracks_the_canonical_theme_prepaint_source(self) -> None:
+    def test_source_snapshot_tracks_the_canonical_state_source(self) -> None:
         paths = {Path(path) for path, _ in build.source_snapshot()}
-        self.assertIn(build.JS_ROOT / "theme-prepaint.js", paths)
+        self.assertIn(build.JS_ROOT / "state.js", paths)
 
-    def test_theme_prepaint_source_is_read_when_rendered(self) -> None:
-        source_path = build.JS_ROOT / "theme-prepaint.js"
+    def test_state_source_is_read_when_rendered(self) -> None:
+        source_path = build.JS_ROOT / "state.js"
         original = source_path.read_text(encoding="utf-8")
         changed = original + "\n// source refresh probe\n"
         try:
             source_path.write_text(changed, encoding="utf-8")
-            self.assertEqual(str(build.theme_prepaint_source()), changed)
+            self.assertEqual(str(build.state_source()), changed)
         finally:
             source_path.write_text(original, encoding="utf-8")
 
@@ -411,7 +411,7 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             self.assertTrue((PACKAGE_DIST / "js/combobox.js").is_file())
             self.assertTrue((PACKAGE_DIST / "js/moo-ui.js").is_file())
             self.assertTrue((PACKAGE_DIST / "js/moo-ui.min.js").is_file())
-            self.assertTrue((PACKAGE_DIST / "js/theme-prepaint.js").is_file())
+            self.assertTrue((PACKAGE_DIST / "js/state.js").is_file())
             self.assertTrue((PACKAGE_DIST / "release-manifest.json").is_file())
             self.assertFalse(SITE_DIST.exists())
         finally:

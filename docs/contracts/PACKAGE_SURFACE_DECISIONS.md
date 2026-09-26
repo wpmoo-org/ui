@@ -3,6 +3,18 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.9 Entrypoints
+
+RC9 replaces the public classic browser export
+`./theme-prepaint.js` with `./state.js`. The script restores Theme and
+Direction on a resolved Moo owner, or Sidebar state on a keyed Sidebar wrapper,
+when invoked as the first child of that owner. The release manifest hashes the
+new script bytes. This is a breaking export rename; no alias is shipped.
+Adapter release pins must be updated after RC9 publication and consumer tests.
+Release-facing documentation links, including third-party notices and the CDN
+example, point at RC9 in the release commit. The release flow accepts the
+short propagation window and requires no second merge to repoint those links.
+
 ## 1.0.0-rc.8 Entrypoints
 
 RC8 carries the RC7 public package surface forward and adds two deliberately

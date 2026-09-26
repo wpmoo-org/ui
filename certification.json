@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.1",
   "status": "preview",
-  "coreVersion": "1.0.0-rc.8",
+  "coreVersion": "1.0.0-rc.9",
   "bootstrap": {
     "canonicalVersion": "5.3.3",
     "targetRange": ">=5.3.0 <5.4",
@@ -41,7 +41,7 @@
       "./scss/settings"
     ],
     "browser": [
-      "./theme-prepaint.js"
+      "./state.js"
     ],
     "metadata": [
       "./certification.json",

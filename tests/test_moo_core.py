@@ -170,6 +170,7 @@ class MooCoreTests(CatalogTestCase):
         self.assertIn('@import "../foundations/focus";', scope)
         self.assertIn('@import "../utilities/scroll_fade";', scope)
         self.assertIn('@import "../layouts/app";', scope)
+        self.assertIn('@import "../layouts/page_grid";', scope)
 
     def test_components_aggregate_imports_every_moo_partial_once(self) -> None:
         layer = SCSS / "_components.scss"
@@ -371,6 +372,7 @@ class MooCoreTests(CatalogTestCase):
                 "../foundations/focus",
                 "../utilities/scroll_fade",
                 "../layouts/app",
+                "../layouts/page_grid",
                 "../themes/forms",
             ],
         )
@@ -382,6 +384,10 @@ class MooCoreTests(CatalogTestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("body > .moo-ui[data-bs-theme] {", standalone)
+        self.assertIn(
+            'body > .moo-ui[data-bs-theme]:not([data-moo-overlay-host]) {',
+            standalone,
+        )
+        self.assertNotIn("data-moo-overlay-portal-host", standalone)
         self.assertIn("min-block-size: 100dvh;", standalone)
         self.assertNotIn("@include", standalone)

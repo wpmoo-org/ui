@@ -1,0 +1,37 @@
+{% from "layouts/page.html.jinja" import page %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Available-width Page grid certification</title>
+    <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+    <style>
+      body { margin: 0; }
+      .fixture-shell { display: flex; min-width: 0; }
+      .fixture-sidebar { flex: 0 0 0; }
+      .fixture-navigation { display: flex; gap: .5rem; }
+      .fixture-shell > [data-slot="page"] { flex: 1 1 auto; min-width: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="moo-ui" data-bs-theme="light">
+      <div class="fixture-shell">
+        <aside class="fixture-sidebar" aria-label="Fixture sidebar"></aside>
+        {% call(region) page(width="fluid") %}
+          {% if region == "main" %}
+            <div class="row" data-layout="page-grid">
+              <div class="col-12" data-page-col-md="4" data-page-col-lg="3" data-page-col-xl="2" id="fixture-nav">
+                <div data-page-show-from="lg"><nav class="fixture-navigation" aria-label="Wide navigation">Wide navigation</nav></div>
+                <div data-page-hide-from="lg"><nav class="fixture-navigation" aria-label="Compact navigation">Compact navigation</nav></div>
+              </div>
+              <div class="col-12" data-page-col-md="8" data-page-col-lg="9" data-page-col-xl="10" id="fixture-body">
+                <form id="fixture-single-form"><label for="fixture-field">One form</label><input id="fixture-field"></form>
+              </div>
+            </div>
+          {% endif %}
+        {% endcall %}
+      </div>
+    </div>
+  </body>
+</html>

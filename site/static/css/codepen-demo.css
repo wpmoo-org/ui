@@ -35,7 +35,7 @@
   margin-block: 0;
 }
 
-.moo-ui.moo-codepen-component-demo > [data-moo-overlay-portal-host] {
+.moo-ui.moo-codepen-component-demo > [data-moo-overlay-host] {
   display: contents;
 }
 
@@ -264,21 +264,6 @@
   pointer-events: none;
   content: "";
   background: linear-gradient(to bottom, transparent, var(--bs-body-bg));
-}
-
-.moo-examples-footer__component-trigger {
-  padding: 0;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  vertical-align: baseline;
-  background: transparent;
-  border: 0;
-}
-
-.moo-examples-footer__component-trigger:hover,
-.moo-examples-footer__component-trigger:focus-visible {
-  color: var(--bs-link-hover-color);
 }
 
 .moo-examples-footer__preview {

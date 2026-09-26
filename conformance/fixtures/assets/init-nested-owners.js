@@ -9,7 +9,7 @@ const OWNER_SELECTOR =
 const findThemeOwner = (node) => node?.closest?.(OWNER_SELECTOR) || null;
 const ownerPortalRoot = (owner) => (
   Array.from(owner?.children || []).find((child) =>
-    child.matches("[data-moo-overlay-portal-host]"),
+    child.matches("[data-moo-overlay-host]"),
   ) || owner
 );
 

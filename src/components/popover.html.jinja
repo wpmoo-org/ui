@@ -1,4 +1,8 @@
 {% set popover_placements = ["top", "right", "bottom", "left"] %}
+{% set popover_trigger_variants = {
+  "outline": "btn-outline-secondary",
+  "link": "btn-link"
+} %}
 
 {# Bootstrap requires an <a>, not a <button>, for the focus-triggered
    "dismiss on next click" pattern to behave consistently across browsers,
@@ -15,18 +19,20 @@
   html=false,
   href="#!",
   container="",
+  variant="outline",
   extra_class=""
 ) -%}
   {% if not label | trim %}{{ fail("Popover trigger label is required") }}{% endif %}
   {% if not content | trim %}{{ fail("Popover content is required") }}{% endif %}
   {% if placement not in popover_placements %}{{ fail("Unknown popover placement: " ~ placement) }}{% endif %}
+  {% if variant not in popover_trigger_variants %}{{ fail("Unknown popover trigger variant: " ~ variant) }}{% endif %}
   <a
     {% if href %}
     href="{{ href }}"
     {% endif %}
     role="button"
     tabindex="0"
-    class="btn btn-outline-secondary{% if extra_class %} {{ extra_class }}{% endif %}"
+    class="btn {{ popover_trigger_variants[variant] }}{% if extra_class %} {{ extra_class }}{% endif %}"
     data-bs-toggle="popover"
     data-bs-trigger="focus"
     {% if container %}data-bs-container="{{ container }}"{% endif %}

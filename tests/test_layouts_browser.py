@@ -89,7 +89,105 @@ class LayoutBrowserTests(unittest.TestCase):
         prepare_page(page, case)
         return context, page, evidence
 
-    def test_document_owner_prepaint_applies_stored_theme_before_external_asset(self) -> None:
+    def test_page_grid_uses_rail_width_without_viewport_resize(self) -> None:
+        case = BrowserCase(
+            name="page-grid-rail",
+            viewport={"width": 1800, "height": 844},
+            color_scheme="light",
+            direction="ltr",
+        )
+        context, page, evidence = self._open("layout-page-grid", case)
+        try:
+            for sidebar_width in (0, 220):
+                for rail_width, expected_nav_span, wide_visible in (
+                    (767, 12, False),
+                    (768, 4, False),
+                    (991, 4, False),
+                    (992, 3, True),
+                    (1199, 3, True),
+                    (1200, 2, True),
+                ):
+                    with self.subTest(sidebar=sidebar_width, rail=rail_width):
+                        report = page.evaluate(
+                            """({railWidth, sidebarWidth}) => {
+                              const shell = document.querySelector('.fixture-shell');
+                              const sidebar = document.querySelector('.fixture-sidebar');
+                              const rail = document.querySelector('[data-page-container]');
+                              const nav = document.querySelector('#fixture-nav');
+                              const body = document.querySelector('#fixture-body');
+                              sidebar.style.flexBasis = `${sidebarWidth}px`;
+                              const style = getComputedStyle(rail);
+                              const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+                              shell.style.width = `${railWidth + sidebarWidth + padding}px`;
+                              const railContentWidth = rail.clientWidth - padding;
+                              return {
+                                railContentWidth,
+                                navSpan: Math.round(nav.getBoundingClientRect().width / body.parentElement.getBoundingClientRect().width * 12),
+                                wideVisible: getComputedStyle(document.querySelector('[data-page-show-from="lg"]')).display !== 'none',
+                                compactVisible: getComputedStyle(document.querySelector('[data-page-hide-from="lg"]')).display !== 'none',
+                                wideNavigationDisplay: getComputedStyle(document.querySelector('[data-page-show-from="lg"] nav')).display,
+                                compactNavigationDisplay: getComputedStyle(document.querySelector('[data-page-hide-from="lg"] nav')).display,
+                                formCount: document.querySelectorAll('form#fixture-single-form').length,
+                                overflow: document.documentElement.scrollWidth > window.innerWidth,
+                                viewport: window.innerWidth,
+                              };
+                            }""",
+                            {"railWidth": rail_width, "sidebarWidth": sidebar_width},
+                        )
+                        self.assertAlmostEqual(report["railContentWidth"], rail_width, delta=1, msg=report)
+                        self.assertEqual(report["navSpan"], expected_nav_span, report)
+                        self.assertEqual(report["wideVisible"], wide_visible, report)
+                        self.assertEqual(report["compactVisible"], not wide_visible, report)
+                        self.assertEqual(report["wideNavigationDisplay"], "flex", report)
+                        self.assertEqual(report["compactNavigationDisplay"], "flex", report)
+                        self.assertEqual(report["formCount"], 1, report)
+                        self.assertFalse(report["overflow"], report)
+                        self.assertEqual(report["viewport"], 1800, report)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_direct_overlay_host_does_not_add_a_second_viewport_of_height(self) -> None:
+        context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
+        try:
+            report = page.evaluate(
+                """async () => {
+                  document.body.replaceChildren();
+                  document.body.style.margin = "0";
+
+                  const owner = document.createElement("div");
+                  owner.className = "moo-ui";
+                  owner.setAttribute("data-bs-theme", "light");
+                  document.body.append(owner);
+                  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                  const heightWithOwner = document.documentElement.scrollHeight;
+
+                  const overlayHost = document.createElement("div");
+                  overlayHost.className = "moo-ui";
+                  overlayHost.setAttribute("data-bs-theme", "light");
+                  overlayHost.setAttribute("data-moo-overlay-host", "");
+                  document.body.append(overlayHost);
+                  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                  return {
+                    heightWithOwner,
+                    heightWithOverlayHost: document.documentElement.scrollHeight,
+                    overlayHostHeight: overlayHost.getBoundingClientRect().height,
+                  };
+                }"""
+            )
+
+            self.assertEqual(
+                report["heightWithOverlayHost"],
+                report["heightWithOwner"],
+                report,
+            )
+            self.assertEqual(report["overlayHostHeight"], 0, report)
+            evidence.assert_clean()
+        finally:
+            context.close()
+
+    def test_document_owner_state_applies_stored_theme_before_external_asset(self) -> None:
         def open_catalog(*, theme: str, direction: str):
             context = new_case_context(self.browser, LAYOUT_CASES[0])
             context.add_init_script(
@@ -102,11 +200,11 @@ class LayoutBrowserTests(unittest.TestCase):
             )
             page = context.new_page()
             evidence = BrowserEvidence(page)
-            prepaint_requests: list[str] = []
+            state_requests: list[str] = []
             page.on(
                 "request",
-                lambda request: prepaint_requests.append(request.url)
-                if re.search(r"/assets/js/theme-prepaint\.js(?:\?.*)?$", request.url)
+                lambda request: state_requests.append(request.url)
+                if re.search(r"/assets/js/state\.js(?:\?.*)?$", request.url)
                 else None,
             )
             response = page.goto(
@@ -115,13 +213,13 @@ class LayoutBrowserTests(unittest.TestCase):
             )
             self.assertIsNotNone(response)
             self.assertTrue(response.ok)
-            return context, page, evidence, prepaint_requests
+            return context, page, evidence, state_requests
 
-        context, page, evidence, prepaint_requests = open_catalog(
+        context, page, evidence, state_requests = open_catalog(
             theme="dark", direction="rtl"
         )
         try:
-            self.assertEqual(prepaint_requests, [])
+            self.assertEqual(state_requests, [])
 
             surface = page.evaluate(
                 """
@@ -140,7 +238,7 @@ class LayoutBrowserTests(unittest.TestCase):
                     htmlTheme: document.documentElement.getAttribute("data-bs-theme"),
                     htmlDirection: document.documentElement.dir,
                     ownerTheme: owner.getAttribute("data-bs-theme"),
-                    prepaint: owner.dataset.mooPrepaint,
+                    state: owner.dataset.mooState,
                     coversViewport: rect.width >= window.innerWidth && rect.height >= window.innerHeight,
                     noBodyStrip: points.every(([x, y]) => owner.contains(document.elementFromPoint(x, y))),
                   };
@@ -152,30 +250,30 @@ class LayoutBrowserTests(unittest.TestCase):
             self.assertIsNone(surface["htmlTheme"])
             self.assertIsNone(surface["bodyTheme"])
             self.assertEqual(surface["ownerTheme"], "dark")
-            self.assertEqual(surface["prepaint"], "ready")
+            self.assertEqual(surface["state"], "ready")
             self.assertTrue(surface["coversViewport"])
             self.assertTrue(surface["noBodyStrip"])
             evidence.assert_clean()
         finally:
             context.close()
 
-        context, page, evidence, prepaint_requests = open_catalog(
+        context, page, evidence, state_requests = open_catalog(
             theme="not-a-theme", direction="sideways"
         )
         try:
-            self.assertEqual(prepaint_requests, [])
+            self.assertEqual(state_requests, [])
             surface = page.evaluate(
                 """
                 () => ({
                   direction: document.documentElement.dir,
                   ownerTheme: document.body.firstElementChild?.getAttribute("data-bs-theme"),
-                  prepaint: document.body.firstElementChild?.dataset.mooPrepaint,
+                  state: document.body.firstElementChild?.dataset.mooState,
                 })
                 """
             )
             self.assertEqual(surface["direction"], "ltr")
             self.assertEqual(surface["ownerTheme"], "light")
-            self.assertEqual(surface["prepaint"], "ready")
+            self.assertEqual(surface["state"], "ready")
             evidence.assert_clean()
         finally:
             context.close()
@@ -198,8 +296,8 @@ class LayoutBrowserTests(unittest.TestCase):
                 )
             )
         )
-        catalog_prepaint_source = (
-            ROOT / "site/static/js/catalog-prepaint.js"
+        catalog_state_source = (
+            ROOT / "site/static/js/catalog-state.js"
         ).read_text(encoding="utf-8")
 
         def capture_builder_tokens(route) -> None:
@@ -218,11 +316,11 @@ class LayoutBrowserTests(unittest.TestCase):
                   };
                 })();
                 """
-                + catalog_prepaint_source,
+                + catalog_state_source,
             )
 
         context.route(
-            re.compile(r".*/assets/js/catalog-prepaint\.js(?:\?.*)?$"),
+            re.compile(r".*/assets/js/catalog-state\.js(?:\?.*)?$"),
             capture_builder_tokens,
         )
         page = context.new_page()
@@ -367,6 +465,106 @@ class LayoutBrowserTests(unittest.TestCase):
                 evidence.assert_clean()
             finally:
                 context.close()
+
+    def test_sidebar_variant_dividers_follow_the_public_shell_variant(self) -> None:
+        for case in LAYOUT_CASES[:2]:
+            context = new_case_context(self.browser, case)
+            page = context.new_page()
+            evidence = BrowserEvidence(page)
+            try:
+                response = page.goto(
+                    f"{self.base_url}/site-dist/blocks/previews/sidebar-inset/index.html",
+                    wait_until="networkidle",
+                )
+                self.assertIsNotNone(response)
+                self.assertTrue(response.ok)
+                prepare_page(page, case)
+                self.assertEqual(page.locator(".moo-catalog").count(), 0)
+
+                sidebar = page.locator('[data-slot="sidebar"]')
+                inner = sidebar.locator('[data-slot="sidebar-inner"]')
+                for side in ("left", "right"):
+                    sidebar.evaluate("(element, side) => element.dataset.side = side", side)
+                    for variant in ("sidebar", "inset", "floating"):
+                        sidebar.evaluate(
+                            "(element, variant) => element.dataset.variant = variant",
+                            variant,
+                        )
+                        borders = inner.evaluate(
+                            """element => {
+                              const style = getComputedStyle(element);
+                              return {
+                                left: parseFloat(style.borderLeftWidth),
+                                right: parseFloat(style.borderRightWidth),
+                              };
+                            }"""
+                        )
+                        with self.subTest(case=case.name, side=side, variant=variant):
+                            if variant == "inset":
+                                self.assertEqual(borders, {"left": 0, "right": 0})
+                            elif variant == "floating":
+                                self.assertGreater(borders["left"], 0)
+                                self.assertGreater(borders["right"], 0)
+                            else:
+                                divider = "right" if side == "left" else "left"
+                                self.assertGreater(borders[divider], 0)
+                evidence.assert_clean()
+            finally:
+                context.close()
+
+    def test_inset_page_header_follows_the_surface_top_corners(self) -> None:
+        for route in ("blocks/previews/sidebar-inset/index.html", "index.html"):
+            for case in LAYOUT_CASES[:2]:
+                context = new_case_context(self.browser, case)
+                if route == "index.html":
+                    context.add_init_script(
+                        "localStorage.setItem('moo:sidebar-variant', 'inset');"
+                    )
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                try:
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/{route}",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    sidebar = page.locator('[data-slot="sidebar"]')
+                    self.assertEqual(sidebar.get_attribute("data-variant"), "inset")
+
+                    for side in ("left", "right"):
+                        sidebar.evaluate(
+                            "(element, value) => element.dataset.side = value", side
+                        )
+                        corners = page.evaluate(
+                            """() => {
+                              const surface = document.querySelector(
+                                '.wrapper[data-layout="app"] > [data-slot="page"]'
+                              );
+                              const header = surface.querySelector(':scope > header');
+                              const pageStyle = getComputedStyle(surface);
+                              const headerStyle = getComputedStyle(header);
+                              return {
+                                pageLeft: pageStyle.borderTopLeftRadius,
+                                pageRight: pageStyle.borderTopRightRadius,
+                                headerLeft: headerStyle.borderTopLeftRadius,
+                                headerRight: headerStyle.borderTopRightRadius,
+                              };
+                            }"""
+                        )
+                        with self.subTest(route=route, case=case.name, side=side):
+                            self.assertGreater(
+                                float(corners["pageLeft"].removesuffix("px")), 0
+                            )
+                            self.assertGreater(
+                                float(corners["pageRight"].removesuffix("px")), 0
+                            )
+                            self.assertEqual(corners["headerLeft"], corners["pageLeft"])
+                            self.assertEqual(corners["headerRight"], corners["pageRight"])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
 
     def test_app_page_topology_and_region_rails(self) -> None:
         context, page, evidence = self._open("layout-app", LAYOUT_CASES[0])
@@ -863,11 +1061,15 @@ class LayoutBrowserTests(unittest.TestCase):
             self.assertIn(styles["rootOverflow"], ("hidden", "clip"))
             self.assertNotIn(styles["rootOverflowY"], ("auto", "scroll"))
             self.assertNotIn(styles["bodyOverflowY"], ("auto", "scroll"))
-            self.assertNotIn(styles["mainOverflowY"], ("auto", "scroll"))
-            self.assertEqual(styles["pageOverflowY"], "auto")
+            self.assertEqual(styles["mainOverflowY"], "auto")
+            self.assertEqual(styles["pageOverflowY"], "visible")
             page.evaluate("() => window.scrollTo(0, 0)")
-            page.evaluate("() => document.querySelector('[data-slot=page]').scrollTo(0, 320)")
+            page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTo(0, 320)")
             self.assertGreater(
+                page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTop"),
+                0,
+            )
+            self.assertEqual(
                 page.evaluate("() => document.querySelector('[data-slot=page]').scrollTop"),
                 0,
             )
@@ -973,6 +1175,7 @@ class LayoutBrowserTests(unittest.TestCase):
                         outerOverflow: outerStyle.overflow,
                         innerHeight: window.innerHeight,
                         pageOverflowY: pageStyle.overflowY,
+                        mainOverflowY: getComputedStyle(pageHost.querySelector('main')).overflowY,
                         documentOverflowY: getComputedStyle(document.documentElement).overflowY,
                         documentScrollHeight: document.documentElement.scrollHeight,
                         documentClientHeight: document.documentElement.clientHeight,
@@ -986,6 +1189,8 @@ class LayoutBrowserTests(unittest.TestCase):
                         self.assertGreater(styles["outerRectHeight"], styles["innerHeight"])
                         self.assertEqual(styles["rootOverflow"], "visible")
                         self.assertEqual(styles["outerOverflow"], "visible")
+                        self.assertEqual(styles["pageOverflowY"], "visible")
+                        self.assertEqual(styles["mainOverflowY"], "visible")
                         self.assertGreater(
                             styles["documentScrollHeight"], styles["documentClientHeight"]
                         )
@@ -1000,11 +1205,12 @@ class LayoutBrowserTests(unittest.TestCase):
                         self.assertIn(styles["rootOverflow"], ("hidden", "clip"))
                         self.assertAlmostEqual(styles["outerRectHeight"], 544, delta=1)
                         self.assertEqual(styles["innerHeight"], 844)
-                        self.assertEqual(styles["pageOverflowY"], "auto")
+                        self.assertEqual(styles["pageOverflowY"], "visible")
+                        self.assertEqual(styles["mainOverflowY"], "auto")
                         page.evaluate("() => window.scrollTo(0, 0)")
-                        page.evaluate("() => document.querySelector('[data-slot=page]').scrollTo(0, 320)")
+                        page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTo(0, 320)")
                         self.assertGreater(
-                            page.evaluate("() => document.querySelector('[data-slot=page]').scrollTop"),
+                            page.evaluate("() => document.querySelector('[data-slot=page] > main').scrollTop"),
                             0,
                         )
                         self.assertEqual(page.evaluate("() => window.scrollY"), 0)

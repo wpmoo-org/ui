@@ -631,6 +631,7 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertIn("../foundations/focus", scope_imports)
         self.assertIn("../utilities/scroll_fade", scope_imports)
         self.assertIn("../layouts/app", scope_imports)
+        self.assertIn("../layouts/page_grid", scope_imports)
         self.assertEqual(
             owned_partial_targets(SCSS / "themes"),
             {
@@ -658,6 +659,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "../foundations/focus",
                 "../utilities/scroll_fade",
                 "../layouts/app",
+                "../layouts/page_grid",
                 "../themes/forms",
             ],
         )
