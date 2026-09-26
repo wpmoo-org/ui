@@ -8,6 +8,52 @@ from tests.helpers import ROOT
 from tests.helpers.node_harness import NODE_TEST_TIMEOUT
 
 
+STATE_HARNESS = """
+import assert from "node:assert/strict";
+
+function makeOwner({ theme = "light", documentOwner = false, directionKey = "", dir = "" } = {}) {
+  return {
+    dataset: {
+      bsTheme: theme,
+      ...(documentOwner ? { mooDocumentOwner: "true" } : {}),
+      ...(directionKey ? { mooDirectionKey: directionKey } : {}),
+    },
+    dir,
+    parentElement: null,
+    matches(selector) {
+      return selector.includes(".moo-ui") && ["light", "dark"].includes(this.dataset.bsTheme);
+    },
+    getAttribute(name) { return name === "dir" ? this.dir || null : null; },
+  };
+}
+
+function makeSidebar({ key = "", state = "expanded" } = {}) {
+  return {
+    dataset: {
+      slot: "sidebar-wrapper",
+      ...(key ? { sidebarKey: key } : {}),
+      sidebarState: state,
+    },
+    matches(selector) {
+      return selector.includes("sidebar-wrapper") && Boolean(this.dataset.sidebarKey);
+    },
+  };
+}
+
+const html = {
+  dir: "ltr",
+  getAttribute(name) { return name === "dir" ? this.dir : null; },
+};
+const body = { firstElementChild: null };
+globalThis.document = {
+  body,
+  documentElement: html,
+  currentScript: null,
+  defaultView: null,
+};
+"""
+
+
 class ThemeOwnerTests(unittest.TestCase):
     def run_case(self, script: str) -> dict[str, object]:
         result = subprocess.run(
@@ -341,6 +387,120 @@ console.log(JSON.stringify({
                 "embeddedDirection": "rtl",
                 "fallbackTheme": "light",
             },
+        )
+
+    def test_state_restores_document_owner_and_keyed_sidebar_independently(self) -> None:
+        case = self.run_case(
+            STATE_HARNESS
+            + """
+const stored = new Map([
+  ["moo:theme", "dark"],
+  ["moo:direction", "rtl"],
+  ["moo-sidebar:catalog-shell", "collapsed"],
+]);
+globalThis.window = {
+  localStorage: { getItem(key) { return stored.get(key) ?? null; } },
+  matchMedia() { return { matches: false }; },
+};
+document.defaultView = window;
+
+const owner = makeOwner({ documentOwner: true });
+owner.parentElement = body;
+body.firstElementChild = owner;
+document.currentScript = { parentElement: owner };
+await import("./src/js/state.js?document-owner");
+
+assert.equal(owner.dataset.bsTheme, "dark");
+assert.equal(owner.dataset.mooState, "ready");
+assert.deepEqual(owner.__mooStateBaseline, { theme: "light", direction: "ltr" });
+assert.equal(html.dir, "rtl");
+
+const sidebar = makeSidebar({ key: "catalog-shell" });
+sidebar.parentElement = owner;
+document.currentScript = { parentElement: sidebar };
+await import("./src/js/state.js?sidebar");
+
+assert.equal(sidebar.dataset.sidebarState, "collapsed");
+assert.equal(sidebar.dataset.sidebarStateReady, "");
+assert.equal(owner.dataset.bsTheme, "dark");
+assert.equal(html.dir, "rtl");
+console.log(JSON.stringify({ owner: owner.dataset.mooState, sidebar: sidebar.dataset.sidebarState }));
+"""
+        )
+        self.assertEqual(case, {"owner": "ready", "sidebar": "collapsed"})
+
+    def test_state_ignores_missing_owner_key_and_invalid_sidebar_value(self) -> None:
+        case = self.run_case(
+            STATE_HARNESS
+            + """
+let reads = 0;
+globalThis.window = {
+  localStorage: { getItem() { reads += 1; return "invalid"; } },
+};
+document.defaultView = window;
+
+document.currentScript = null;
+await import("./src/js/state.js?no-script");
+
+const unkeyed = makeSidebar();
+document.currentScript = { parentElement: unkeyed };
+await import("./src/js/state.js?unkeyed");
+assert.equal(reads, 0);
+assert.equal(unkeyed.dataset.sidebarState, "expanded");
+assert.equal(unkeyed.dataset.sidebarStateReady, undefined);
+
+const keyed = makeSidebar({ key: "portal-sidebar" });
+document.currentScript = { parentElement: keyed };
+await import("./src/js/state.js?invalid-sidebar-value");
+assert.equal(reads, 1);
+assert.equal(keyed.dataset.sidebarState, "expanded");
+assert.equal(keyed.dataset.sidebarStateReady, "");
+console.log(JSON.stringify({ reads, state: keyed.dataset.sidebarState }));
+"""
+        )
+        self.assertEqual(case, {"reads": 1, "state": "expanded"})
+
+    def test_state_falls_back_when_storage_or_media_is_unavailable(self) -> None:
+        case = self.run_case(
+            STATE_HARNESS
+            + """
+const stored = new Map([
+  ["moo:theme", "system"],
+  ["embedded-direction", "rtl"],
+]);
+globalThis.window = {
+  localStorage: { getItem(key) { return stored.get(key) ?? null; } },
+  matchMedia() { throw new Error("media unavailable"); },
+};
+document.defaultView = window;
+
+const owner = makeOwner({ documentOwner: true });
+owner.parentElement = body;
+body.firstElementChild = owner;
+document.currentScript = { parentElement: owner };
+await import("./src/js/state.js?media-throws");
+assert.equal(owner.dataset.bsTheme, "light");
+assert.equal(owner.dataset.mooState, "ready");
+
+const embedded = makeOwner({ theme: "dark", directionKey: "embedded-direction" });
+embedded.parentElement = owner;
+document.currentScript = { parentElement: embedded };
+await import("./src/js/state.js?embedded");
+assert.equal(embedded.dir, "rtl");
+assert.equal(html.dir, "ltr");
+assert.deepEqual(embedded.__mooStateBaseline, { theme: "dark", direction: null });
+
+window.localStorage = { getItem() { throw new Error("storage unavailable"); } };
+const blocked = makeSidebar({ key: "portal-sidebar", state: "collapsed" });
+document.currentScript = { parentElement: blocked };
+await import("./src/js/state.js?storage-throws");
+assert.equal(blocked.dataset.sidebarState, "collapsed");
+assert.equal(blocked.dataset.sidebarStateReady, "");
+console.log(JSON.stringify({ owner: owner.dataset.bsTheme, embedded: embedded.dir, sidebar: blocked.dataset.sidebarState }));
+"""
+        )
+        self.assertEqual(
+            case, {"owner": "light", "embedded": "rtl", "sidebar": "collapsed"}
         )
 
     def test_embedded_owner_never_infers_document_scope_from_streamed_siblings(self) -> None:
