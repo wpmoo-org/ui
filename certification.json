@@ -28,6 +28,7 @@
       "./context-menu.js",
       "./datatable.js",
       "./slider.js",
+      "./sheet.js",
       "./chart.js",
       "./chart.min.js",
       "./datepicker.js",

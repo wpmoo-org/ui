@@ -70,6 +70,7 @@ BUNDLED_JS_MODULES = (
     "datepicker.js",
     "sidebar.js",
     "datatable.js",
+    "sheet.js",
 )
 # Keep the published package inventory stable: only component entrypoints that
 # already publish minified variants produce them in dist/js. Sidebar and

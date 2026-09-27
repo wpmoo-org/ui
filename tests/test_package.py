@@ -99,6 +99,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/sheet.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
@@ -124,6 +125,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
+    "./sheet.js": "./dist/js/sheet.js",
     "./moo-ui.js": "./dist/js/moo-ui.js",
     "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
     "./chart.js": "./dist/js/chart.js",
@@ -468,6 +470,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "context-menu.js",
                 "datatable.js",
                 "slider.js",
+                "sheet.js",
                 "chart.js",
                 "datepicker.js",
             },
@@ -638,6 +641,7 @@ import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Slider from "@wpmoo/ui/slider.js";
+import { initSheets } from "@wpmoo/ui/sheet.js";
 import MooUI, {
   Chart as AggregateChart,
   Combobox as AggregateCombobox,
@@ -648,6 +652,7 @@ import MooUI, {
   MooDateRangePicker,
   Sidebar as AggregateSidebar,
   Slider as AggregateSlider,
+  initSheets as AggregateInitSheets,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
   Chart as MinifiedAggregateChart,
@@ -669,6 +674,9 @@ if (
   typeof AggregateContextMenu.getOrCreateInstance !== "function" ||
   typeof AggregateDataTable.getOrCreateInstance !== "function" ||
   typeof AggregateSlider.getOrCreateInstance !== "function" ||
+  typeof initSheets !== "function" ||
+  typeof AggregateInitSheets !== "function" ||
+  MooUI.initSheets !== AggregateInitSheets ||
   typeof AggregateChart.getOrCreateInstance !== "function" ||
   typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
   typeof MooCalendar !== "function" ||

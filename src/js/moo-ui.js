@@ -8,6 +8,7 @@ import Datepicker, {
 } from "./components/datepicker.js";
 import Sidebar from "./components/sidebar.js";
 import Slider from "./components/slider.js";
+import { initSheets } from "./components/sheet.js";
 
 const MooUI = {
   Chart,
@@ -19,6 +20,7 @@ const MooUI = {
   MooDateRangePicker,
   Sidebar,
   Slider,
+  initSheets,
 };
 
 export {
@@ -31,6 +33,7 @@ export {
   MooDateRangePicker,
   Sidebar,
   Slider,
+  initSheets,
 };
 
 export default MooUI;

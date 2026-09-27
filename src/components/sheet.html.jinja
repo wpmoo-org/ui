@@ -20,7 +20,8 @@
   placement="end",
   backdrop=true,
   scroll=false,
-  aria_label=""
+  aria_label="",
+  open_on_load=false
 ) -%}
   {% if not id | trim %}{{ fail("Sheet id is required") }}{% endif %}
   {% if placement not in sheet_placements %}{{ fail("Unknown sheet placement: " ~ placement) }}{% endif %}
@@ -35,6 +36,7 @@
     {% endif %}
     {% if not backdrop %}data-bs-backdrop="false"{% endif %}
     {% if scroll %}data-bs-scroll="true"{% endif %}
+    {% if open_on_load %}data-sheet-open-on-load="true"{% endif %}
   >
     {{ caller() | trim | safe }}
   </div>
