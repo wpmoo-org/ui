@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 
+import build
+
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 from tests.helpers.css_contract import (
     assert_allowed_global_rules,
@@ -93,6 +95,18 @@ def active_scss_imports(source: str) -> list[str]:
 
 
 class MooCoreTests(CatalogTestCase):
+    def test_body_secondary_utility_follows_the_resolved_base_color(self) -> None:
+        full_css = build.compile_style(SCSS / "moo-ui.scss")
+        utility = re.search(r"\.bg-body-secondary\s*\{([^}]+)\}", full_css)
+
+        self.assertIsNotNone(utility)
+        self.assertIn("--bs-bg-opacity: 1;", utility.group(1))
+        self.assertIn(
+            "background-color: rgb(from var(--bs-secondary-bg) r g b / var(--bs-bg-opacity)) !important;",
+            utility.group(1),
+        )
+        self.assertIn(".bg-opacity-50 {", full_css)
+
     def _build_and_read_core(self) -> str:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

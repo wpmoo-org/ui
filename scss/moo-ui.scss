@@ -43,6 +43,26 @@
 @import "bootstrap/scss/helpers/vr";
 
 // Bootstrap utilities
+// Base color presets replace --bs-secondary-bg without an RGB companion.
+// Keep Bootstrap's opacity utility while resolving the current owner token.
+$moo-bg-color-utility: map-get($utilities, "background-color");
+$moo-bg-color-values: map-get($moo-bg-color-utility, values);
+$utilities: map-merge(
+  $utilities,
+  (
+    "background-color": map-merge(
+      $moo-bg-color-utility,
+      (
+        values: map-merge(
+          $moo-bg-color-values,
+          (
+            "body-secondary": unquote("rgb(from var(--#{$prefix}secondary-bg) r g b / var(--#{$prefix}bg-opacity))"),
+          )
+        ),
+      )
+    ),
+  )
+);
 @import "bootstrap/scss/utilities/api";
 
 @import "utilities/scroll_fade_primitives";
