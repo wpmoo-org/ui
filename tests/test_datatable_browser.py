@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
+from build import create_environment
 from playwright.sync_api import expect, sync_playwright
 
+from tests.helpers import ROOT
 from tests.helpers.browser_harness import (
     BrowserEvidence,
     CERTIFICATION_CASES,
@@ -109,6 +113,97 @@ class DataTableBrowserTests(unittest.TestCase):
         self.assertTrue(response.ok)
         prepare_page(page, CERTIFICATION_CASES[0])
         return context, page, evidence
+
+    def test_leading_sort_trigger_stays_inside_frame_and_aligns_with_body(self) -> None:
+        # Accepted 2026-10-01 on shared Core and the live Olympiad consumer.
+        # Render the public macro so the check covers selectable and plain
+        # tables without adding host-specific padding or copied table markup.
+        template = create_environment().from_string("""
+            <!doctype html><html><head><meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+            <link rel="icon" href="data:,">
+            </head><body><main class="moo-ui" data-bs-theme="light">
+            {% from "components/datatable.html.jinja" import datatable %}
+            {% for selectable in [false, true] %}
+              {% set id = 'leading-select' if selectable else 'leading-plain' %}
+              {{ datatable(id, columns, [
+                {'id': id ~ '-row', 'label': 'Example',
+                 'cells': {'project': 'Example', 'status': 'Ready'}}
+              ], selectable=selectable, page_sizes=[10], default_page_size=10) }}
+            {% endfor %}
+            </main><script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+            <script type="module">
+              import DataTable from '/dist/js/datatable.js';
+              document.querySelectorAll('.datatable').forEach(
+                root => DataTable.getOrCreateInstance(root)
+              );
+              document.body.dataset.datatableReady = 'true';
+            </script></body></html>
+        """)
+        columns = [{"key": "project", "label": "Project"},
+                   {"key": "status", "label": "Status"}]
+        geometry = """
+            root => {
+              const table = root.querySelector('.datatable-table');
+              const visible = cell => getComputedStyle(cell).display !== 'none';
+              const header = [...table.querySelectorAll('thead .datatable-col')].find(visible);
+              const cell = [...table.querySelectorAll('tbody .datatable-col')].find(visible);
+              const trigger = header.querySelector('.datatable-sort-trigger');
+              const label = trigger.querySelector('span');
+              const range = document.createRange();
+              range.selectNodeContents(cell);
+              const rtl = getComputedStyle(table).direction === 'rtl';
+              const start = rect => rtl ? -rect.right : rect.left;
+              return {
+                column: header.dataset.datatableColumn,
+                triggerInset: start(trigger.getBoundingClientRect()) - start(table.getBoundingClientRect()),
+                labelStart: start(label.getBoundingClientRect()),
+                bodyStart: start(range.getBoundingClientRect()),
+                triggerBorder: parseFloat(getComputedStyle(trigger).borderInlineStartWidth),
+                padding: getComputedStyle(header).paddingInlineStart,
+                bodyPadding: getComputedStyle(cell).paddingInlineStart,
+                followingPadding: getComputedStyle(table.querySelector('thead [data-datatable-column="status"]')).paddingInlineStart,
+              };
+            }
+        """
+        with tempfile.TemporaryDirectory(prefix="datatable-leading-", dir=ROOT / "site-dist") as temporary:
+            fixture = Path(temporary) / "index.html"
+            fixture.write_text(template.render(columns=columns), encoding="utf-8")
+            path = fixture.relative_to(ROOT).as_posix()
+            for case in CERTIFICATION_CASES:
+                with self.subTest(case=case.name):
+                    context = new_case_context(self.browser, case)
+                    try:
+                        page = context.new_page()
+                        evidence = BrowserEvidence(page)
+                        page.goto(f"{self.base_url}/{path}", wait_until="networkidle")
+                        prepare_page(page, case)
+                        expect(page.locator('body')).to_have_attribute('data-datatable-ready', 'true')
+                        for selectable in (False, True):
+                            root = page.locator('#leading-select' if selectable else '#leading-plain')
+                            before = root.evaluate(geometry)
+                            self.assertEqual(before['column'], 'project')
+                            self.assertGreaterEqual(before['triggerInset'], 0)
+                            # A sort button's native border can add one token-
+                            # sized inset beyond the matching cell padding.
+                            self.assertAlmostEqual(before['labelStart'], before['bodyStart'], delta=before['triggerBorder'] + 0.5)
+                            self.assertEqual(before['padding'], before['bodyPadding'])
+                            if selectable:
+                                self.assertEqual(before['padding'], before['followingPadding'])
+                            else:
+                                self.assertGreater(float(before['padding'][:-2]), float(before['followingPadding'][:-2]))
+                            root.get_by_role('button', name='Sort by Project', exact=True).click()
+                            page.locator('.dropdown-menu.show [data-datatable-sort-action="hide"]').click()
+                            after = root.evaluate(geometry)
+                            self.assertEqual(after['column'], 'status')
+                            self.assertGreaterEqual(after['triggerInset'], 0)
+                            self.assertAlmostEqual(after['labelStart'], after['bodyStart'], delta=after['triggerBorder'] + 0.5)
+                            self.assertEqual(after['padding'], before['padding'])
+                            self.assertEqual(after['bodyPadding'], after['padding'])
+                        evidence.assert_clean()
+                    finally:
+                        context.close()
 
     def test_search_filters_rows_without_opening_filter_menu(self) -> None:
         context, page, evidence = self.open_preview()

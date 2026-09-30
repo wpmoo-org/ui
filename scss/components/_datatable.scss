@@ -127,6 +127,14 @@
   vertical-align: middle;
 }
 
+// A leading content column needs room for the sort trigger's negative margin.
+// Use Bootstrap's spacing scale for both header and body cells, and follow the
+// first visible column when the column picker hides the original leading one.
+// The select column already owns its inset through the checkbox geometry.
+.datatable-table > :not(caption) > * > .datatable-col:nth-child(1 of :not(.datatable-col-hidden)) {
+  padding-inline-start: $spacer;
+}
+
 // The toolbar's flex layout belongs to the component itself, not to
 // Bootstrap layout utilities on the macro markup: the narrow-screen grid
 // override below can replace it without an !important fight against
