@@ -4679,6 +4679,50 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_dropdown_selected_row_yields_highlight_to_hovered_row(self) -> None:
+        for color_scheme in ("light", "dark"):
+            with self.subTest(color_scheme=color_scheme):
+                case = BrowserCase(
+                    name=f"dropdown-hover-{color_scheme}",
+                    viewport={"width": 1040, "height": 844},
+                    color_scheme=color_scheme,
+                    direction="ltr",
+                )
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                try:
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/dropdown-menu.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+
+                    page.locator("#certification-dropdown-trigger").click()
+                    selected = page.locator("#certification-dropdown-first-item")
+                    hovered = page.locator("#certification-dropdown-second-item")
+                    selected.evaluate("element => element.classList.add('active')")
+
+                    def background(item):
+                        return item.evaluate("element => getComputedStyle(element).backgroundColor")
+
+                    resting_background = background(hovered)
+                    selected_background = background(selected)
+                    self.assertNotEqual(selected_background, resting_background)
+
+                    hovered.hover()
+                    self.assertEqual(background(selected), resting_background)
+                    self.assertEqual(background(hovered), selected_background)
+
+                    page.mouse.move(0, 0)
+                    self.assertEqual(background(selected), selected_background)
+                    self.assertEqual(background(hovered), resting_background)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
 
     def test_menubar_fixture_proves_grouped_dropdown_contracts(self) -> None:
         for case in CERTIFICATION_CASES:
