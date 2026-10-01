@@ -76,7 +76,8 @@ class ContainedSidebarBrowserTests(unittest.TestCase):
                                             content = sidebar.locator('[data-slot="sidebar-content"]')
                                             expect(sidebar).to_be_hidden()
                                             self.assertEqual(sidebar.evaluate("e => getComputedStyle(e).position"), "fixed")
-                                            self.assertAlmostEqual(page.locator('[data-slot="page"] > header').bounding_box()["y"], 0, delta=1)
+                                            header = page.locator('[data-slot="page"]').get_by_role("banner")
+                                            self.assertAlmostEqual(header.bounding_box()["y"], 0, delta=1)
                                             trigger.press("Enter")
                                             expect(sidebar).to_have_attribute("role", "dialog")
                                             expect(sidebar).to_have_attribute("aria-modal", "true")
@@ -107,7 +108,10 @@ class ContainedSidebarBrowserTests(unittest.TestCase):
                                             page.set_viewport_size({"width": 992, "height": 844})
                                             page.wait_for_function("getComputedStyle(document.querySelector('[data-slot=sidebar]')).position === 'relative'")
                                             expect(sidebar).to_be_visible()
-                                            self.assertAlmostEqual(page.locator('[data-layout="app"]').bounding_box()["height"], 544, delta=1)
+                                            app_height = page.locator('[data-layout="app"]').bounding_box()["height"]
+                                            host_height = page.locator('#layout-certification-host').bounding_box()["height"]
+                                            self.assertAlmostEqual(app_height, host_height, delta=1)
+                                            self.assertLess(app_height, 844)
                                             self.assertEqual(page.locator("main").evaluate("e => getComputedStyle(e).overflowY"), "auto")
                                             page.set_viewport_size({"width": 991, "height": 844})
                                             page.wait_for_function("getComputedStyle(document.querySelector('[data-slot=sidebar]')).position === 'fixed'")
