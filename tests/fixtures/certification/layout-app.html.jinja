@@ -10,6 +10,9 @@
 {% set fixture_side = fixture_side | default("left") %}
 {% set fixture_direction = fixture_direction | default("ltr") %}
 {% set fixture_navigation = fixture_navigation | default("sidebar") %}
+{% set fixture_variant = fixture_variant | default("sidebar") %}
+{% set fixture_collapsible = fixture_collapsible | default("icon") %}
+{% set fixture_long_navigation = fixture_long_navigation | default(false) %}
 
 <!doctype html>
 <html lang="en" dir="{{ fixture_direction }}">
@@ -50,8 +53,8 @@
       default_open=true,
       sidebar_id="layout-certification-sidebar",
       side=fixture_side,
-      variant="sidebar",
-      collapsible="icon",
+      variant=fixture_variant,
+      collapsible=fixture_collapsible,
       rail=true,
       shell_mode=fixture_shell_mode
     ) %}
@@ -83,6 +86,11 @@
                   {% endcall %}
                 {% endcall %}
                 {% call sidebar_menu_item() %}{{ sidebar_menu_button("Settings", href="#settings", icon="settings") }}{% endcall %}
+                {% if fixture_long_navigation %}
+                  {% for index in range(40) %}
+                    {% call sidebar_menu_item() %}{{ sidebar_menu_button("Navigation item " ~ index, href="#item-" ~ index) }}{% endcall %}
+                  {% endfor %}
+                {% endif %}
               {% endcall %}
             {% endcall %}
           {% endcall %}
@@ -104,6 +112,7 @@
         {% call(region) page(width="xl") %}
           {% if region == "header" %}
             {% call card(size="sm") %}
+              {% if fixture_navigation == "sidebar" %}{{ sidebar_trigger(sidebar_id="layout-certification-sidebar", aria_label="Toggle page sidebar") }}{% endif %}
               {{ breadcrumb([
                 {"label": "Workspace", "href": "#workspace"},
                 {"label": "Overview"}

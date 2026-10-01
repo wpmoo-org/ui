@@ -99,19 +99,4 @@
   .sidebar-rail {
     display: none;
   }
-
-  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar {
-    position: relative;
-    inset: auto;
-    flex: 0 0 auto;
-    width: 100%;
-    height: auto;
-    visibility: visible;
-    transform: none;
-  }
-
-  .wrapper[data-layout="app"][data-shell-mode="contained"] .sidebar-inner {
-    height: auto;
-    max-height: none;
-  }
 }
