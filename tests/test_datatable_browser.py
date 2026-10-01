@@ -150,7 +150,13 @@ class DataTableBrowserTests(unittest.TestCase):
               const header = [...table.querySelectorAll('thead .datatable-col')].find(visible);
               const cell = [...table.querySelectorAll('tbody .datatable-col')].find(visible);
               const trigger = header.querySelector('.datatable-sort-trigger');
-              const label = trigger.querySelector('span');
+              const labels = {project: 'Project', status: 'Status'};
+              const labelNodes = document.createTreeWalker(trigger, NodeFilter.SHOW_TEXT, {
+                acceptNode: node => node.textContent.trim() === labels[header.dataset.datatableColumn]
+                  ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
+              });
+              const labelRange = document.createRange();
+              labelRange.selectNodeContents(labelNodes.nextNode());
               const range = document.createRange();
               range.selectNodeContents(cell);
               const rtl = getComputedStyle(table).direction === 'rtl';
@@ -158,7 +164,7 @@ class DataTableBrowserTests(unittest.TestCase):
               return {
                 column: header.dataset.datatableColumn,
                 triggerInset: start(trigger.getBoundingClientRect()) - start(table.getBoundingClientRect()),
-                labelStart: start(label.getBoundingClientRect()),
+                labelStart: start(labelRange.getBoundingClientRect()),
                 bodyStart: start(range.getBoundingClientRect()),
                 triggerBorder: parseFloat(getComputedStyle(trigger).borderInlineStartWidth),
                 padding: getComputedStyle(header).paddingInlineStart,
