@@ -430,7 +430,7 @@ class DataTableTests(CatalogTestCase):
         self.assertIn('from "../theme-owner.js"', source)
         self.assertIn("this._reparentedRowMenus = new Map();", source)
         self.assertIn("this._reparentedRowMenuByTrigger = new WeakMap();", source)
-        self.assertIn('trigger?.closest?.(".table-row-actions")', source)
+        self.assertIn('trigger?.closest?.("tr[data-datatable-row], [data-datatable-card]")', source)
         self.assertIn("this._reparentedRowMenuByTrigger.set(trigger, menu);", source)
         self.assertIn("this._reparentedRowMenuByTrigger.get(trigger)", source)
         self.assertIn("this._reparentedRowMenuByTrigger.delete(trigger);", source)
@@ -483,16 +483,15 @@ class DataTableTests(CatalogTestCase):
         source = DATATABLE_JS.read_text(encoding="utf-8")
 
         self.assertIn(
-            '[data-datatable-card] .table-row-actions [data-bs-toggle=\\"dropdown\\"]"',
+            '[data-datatable-card] .dropdown [data-bs-toggle=\\"dropdown\\"]"',
             source,
         )
         self.assertIn("_rowActionTriggers()", source)
         # Both init and dispose must select triggers through the same shared
         # method, so table and card views can never drift out of sync again.
-        self.assertEqual(
-            source.count("this._rowActionTriggers()"),
-            2,
-        )
+        for method in ("_initRowActionDropdowns", "_disposeRowActionDropdowns"):
+            body = source.split(method + "() {", 1)[1].split("\n  }\n", 1)[0]
+            self.assertIn("this._rowActionTriggers()", body)
 
     def test_dispose_cleans_up_open_row_action_dropdowns(self) -> None:
         source = DATATABLE_JS.read_text(encoding="utf-8")
@@ -588,8 +587,13 @@ class DataTableTests(CatalogTestCase):
         self.assertIn('class="mx-auto datatable-preview-shell"', preview)
         self.assertIn('data-moo-example-tasks', preview)
         self.assertIn('id="examples-tasks-datatable"', preview)
+        self.assertIn("datatable--responsive-auto", preview)
+        self.assertIn('data-datatable-responsive-breakpoint="md"', preview)
         self.assertIn('data-moo-task-delete', preview)
         self.assertIn('id="tasks-delete-dialog"', preview)
-        self.assertIn("datatable--responsive-toggle", page)
+        self.assertTrue(
+            "datatable--responsive-auto" in page,
+            "The live Tasks export must retain automatic responsive defaults",
+        )
         self.assertIn("datatable-view-toggle", page)
         self.assertIn('data-datatable-empty', page)

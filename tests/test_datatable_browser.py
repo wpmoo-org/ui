@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+from contextlib import contextmanager
 import tempfile
 import unittest
 from pathlib import Path
@@ -114,6 +116,197 @@ class DataTableBrowserTests(unittest.TestCase):
         prepare_page(page, CERTIFICATION_CASES[0])
         return context, page, evidence
 
+    @contextmanager
+    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False):
+        template = create_environment().from_string("""
+            <!doctype html><html><head><meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+            <link rel="icon" href="data:,"></head><body>
+            <main class="moo-ui" data-bs-theme="light">
+            {% from "components/datatable.html.jinja" import datatable %}
+            {% from "components/button.html.jinja" import button %}
+            {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
+            {% set actions %}{% call dropdown('Actions', variant='ghost', align='end') %}
+              {{ dropdown_item('View item', href='#item') }}
+            {% endcall %}{% endset %}
+            {% set rows = [] %}
+            {% for title in ['Solar Powered Robot', 'Clean Water Sensor', 'VeryLongUnbrokenProjectTitleThatMustStayInsideItsCell'] %}
+              {% set link %}{{ button(title, element='a', href='#item', variant='link', size='sm', extra_class='p-0') }}{% endset %}
+              {% set _ = rows.append({'id':'responsive-item-' ~ loop.index, 'label':title,
+                'facets':{'status':'draft'}, 'cells':{'project':link,
+                'edition':'Olympiad 2027', 'category':'Applied Science',
+                'students':'2', 'status':'Draft', 'actions':actions}}) %}
+            {% endfor %}
+            {{ datatable('responsive-items', [
+              {'key':'project', 'label':'Project', 'card_role':'title'},
+              {'key':'edition', 'label':'Edition'},
+              {'key':'category', 'label':'Category'},
+              {'key':'students', 'label':'Students'},
+              {'key':'status', 'label':'Status'},
+              {'key':'actions', 'label':'Actions', 'sortable':false,
+               'hideable':false, 'align':'end', 'card_role':'actions'}
+            ], rows, selectable=selectable, responsive_mode=mode,
+               responsive_breakpoint=breakpoint) }}
+            </main>
+            {% if runtime %}
+            <script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+            <script type="module">
+              import DataTable from '/dist/js/datatable.js';
+              DataTable.getOrCreateInstance(document.querySelector('.datatable'));
+              document.body.dataset.datatableReady = 'true';
+            </script>{% endif %}</body></html>
+        """)
+        try:
+            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable)
+        except ValueError as error:
+            self.fail(f"Public responsive configuration rejected: {error}")
+        with tempfile.TemporaryDirectory(prefix="datatable-responsive-", dir=ROOT / "site-dist") as temporary:
+            fixture = Path(temporary) / "index.html"
+            fixture.write_text(rendered, encoding="utf-8")
+            context = new_case_context(self.browser, CERTIFICATION_CASES[0]) if runtime else self.browser.new_context(java_script_enabled=False, viewport={'width': 1280, 'height': 900})
+            try:
+                if blocked_storage:
+                    context.add_init_script("""Storage.prototype.getItem = Storage.prototype.setItem = () => {
+                        throw new DOMException('Storage blocked', 'SecurityError');
+                    };""")
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                page.goto(f"{self.base_url}/{fixture.relative_to(ROOT).as_posix()}", wait_until="networkidle")
+                if runtime:
+                    expect(page.locator('body')).to_have_attribute('data-datatable-ready', 'true')
+                yield page, page.locator('#responsive-items'), evidence
+            finally:
+                context.close()
+
+    def test_card_actions_keep_end_padding_and_distinct_hover_across_themes(self) -> None:
+        for selectable in (False, True):
+            with self.responsive_fixture(selectable=selectable) as (page, root, evidence):
+                page.set_viewport_size({'width': 598, 'height': 900})
+                expect(root).to_have_attribute('data-datatable-view', 'cards')
+                owner = page.locator('.moo-ui')
+                # Presets may map the tertiary background to the Ghost hover role.
+                owner.evaluate("e => e.style.setProperty('--bs-tertiary-bg', 'var(--moo-muted-surface)')")
+                header = root.locator('.datatable-card-header').first
+                trigger = header.get_by_role('button', name='Actions', exact=True)
+                for theme in ('light', 'dark'):
+                    for direction in ('ltr', 'rtl'):
+                        with self.subTest(selectable=selectable, theme=theme, direction=direction):
+                            owner.evaluate('(e, state) => { e.dataset.bsTheme = state.theme; e.dir = state.direction; }',
+                                           {'theme': theme, 'direction': direction})
+                            trigger.hover()
+                            measured = header.evaluate("""header => {
+                                const button = header.querySelector('[data-bs-toggle="dropdown"]');
+                                const h = header.getBoundingClientRect();
+                                const b = button.getBoundingClientRect();
+                                const style = getComputedStyle(header);
+                                const ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+                                const color = value => {
+                                    ctx.clearRect(0, 0, 1, 1);
+                                    ctx.fillStyle = value;
+                                    ctx.fillRect(0, 0, 1, 1);
+                                    return Array.from(ctx.getImageData(0, 0, 1, 1).data);
+                                };
+                                return {
+                                    inset: style.direction === 'rtl' ? b.left - h.left : h.right - b.right,
+                                    padding: parseFloat(style.paddingInlineEnd),
+                                    hovered: button.matches(':hover'),
+                                    headerColor: color(style.backgroundColor),
+                                    buttonColor: color(getComputedStyle(button).backgroundColor),
+                                };
+                            }""")
+                            self.assertAlmostEqual(measured['inset'], measured['padding'], delta=0.5)
+                            self.assertTrue(measured['hovered'])
+                            self.assertEqual(measured['buttonColor'][3], 255)
+                            self.assertNotEqual(measured['buttonColor'], measured['headerColor'])
+                evidence.assert_clean()
+
+    def test_auto_view_keeps_preferences_separate_across_breakpoint_and_reload(self) -> None:
+        with self.responsive_fixture() as (page, root, evidence):
+            page.set_viewport_size({'width': 1280, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.set_viewport_size({'width': 767, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            expect(root.locator('.datatable-card-frame')).to_be_visible()
+            expect(root.locator('.datatable-frame')).not_to_be_visible()
+            expect(root.locator('input[value="cards"]')).to_be_checked()
+            page.evaluate("localStorage.setItem('moo-datatable-view:responsive-items', 'table')")
+            page.reload(wait_until='networkidle')
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            page.set_viewport_size({'width': 768, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.set_viewport_size({'width': 375, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            root.locator('label[for$="-view-table"]').click()
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            # A resize also closes a popup whose owning frame becomes hidden.
+            root.locator('#responsive-item-1').get_by_role('button', name='Actions').click()
+            expect(page.locator('.moo-ui > .dropdown-menu.show')).to_have_count(1)
+            page.set_viewport_size({'width': 1280, 'height': 900})
+            root.locator('label[for$="-view-cards"]').click()
+            expect(page.locator('.moo-ui > .dropdown-menu.show')).to_have_count(0)
+            page.set_viewport_size({'width': 375, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.reload(wait_until='networkidle')
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.set_viewport_size({'width': 1280, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            page.reload(wait_until='networkidle')
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            expect(root.locator('input[value="cards"]')).to_be_checked()
+            evidence.assert_clean()
+
+    def test_auto_view_fallback_and_blocked_storage_lifecycle(self) -> None:
+        with self.responsive_fixture(runtime=False, breakpoint='lg') as (page, root, _):
+            page.set_viewport_size({'width': 991, 'height': 900})
+            expect(root.locator('.datatable-card-frame')).to_be_visible()
+            expect(root.locator('.datatable-frame')).not_to_be_visible()
+            page.set_viewport_size({'width': 992, 'height': 900})
+            expect(root.locator('.datatable-frame')).to_be_visible()
+            expect(root.locator('.datatable-card-frame')).not_to_be_visible()
+        with self.responsive_fixture(blocked_storage=True) as (page, root, evidence):
+            page.set_viewport_size({'width': 375, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            root.locator('label[for$="-view-table"]').click()
+            page.set_viewport_size({'width': 1280, 'height': 900})
+            root.locator('label[for$="-view-cards"]').click()
+            page.set_viewport_size({'width': 375, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.evaluate("""async () => {
+                const {default: DataTable} = await import('/dist/js/datatable.js');
+                DataTable.getInstance(document.querySelector('.datatable')).dispose();
+            }""")
+            page.set_viewport_size({'width': 1280, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.evaluate("""async () => {
+                const {default: DataTable} = await import('/dist/js/datatable.js');
+                DataTable.getOrCreateInstance(document.querySelector('.datatable'));
+            }""")
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            page.set_viewport_size({'width': 375, 'height': 900})
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            evidence.assert_clean()
+
+    def test_linked_titles_stay_inside_their_table_cell_and_card_heading(self) -> None:
+        with self.responsive_fixture(mode='toggle') as (page, root, evidence):
+            page.set_viewport_size({'width': 375, 'height': 900})
+            for direction in ('ltr', 'rtl'):
+                page.locator('.moo-ui').evaluate('(e, dir) => e.dir = dir', direction)
+                links = root.locator('td[data-datatable-column="project"] > .btn-link')
+                for link in links.all():
+                    self.assertTrue(link.evaluate("""e => {
+                        const cell = e.parentElement.getBoundingClientRect();
+                        const range = document.createRange(); range.selectNodeContents(e);
+                        return [...range.getClientRects()].every(r => r.left >= cell.left - 1 && r.right <= cell.right + 1);
+                    }"""), f"Linked title crossed its cell ({direction})")
+            root.locator('label[for$="-view-cards"]').click()
+            for link in root.locator('.datatable-card-title > .btn-link').all():
+                self.assertTrue(link.evaluate("""e => {
+                    const title = e.parentElement.getBoundingClientRect();
+                    return e.scrollWidth <= title.width + 1;
+                }"""))
+            evidence.assert_clean()
+
     def test_leading_sort_trigger_stays_inside_frame_and_aligns_with_body(self) -> None:
         # Accepted 2026-10-01 on shared Core and the live Olympiad consumer.
         # Render the public macro so the check covers selectable and plain
@@ -210,6 +403,89 @@ class DataTableBrowserTests(unittest.TestCase):
                         evidence.assert_clean()
                     finally:
                         context.close()
+
+    def test_composed_dropdown_escapes_table_and_card_frames(self) -> None:
+        # A public Dropdown in an actions cell has no private row-action class.
+        template = create_environment().from_string("""
+            <!doctype html><html><head><meta charset="utf-8">
+            <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+            <link rel="icon" href="data:,"></head><body>
+            <main class="moo-ui" data-bs-theme="light">
+            {% from "components/datatable.html.jinja" import datatable %}
+            {% from "components/dropdown_menu.html.jinja" import dropdown, dropdown_item %}
+            {% set actions %}
+              {% call dropdown('Actions', variant='ghost', align='end') %}
+                {{ dropdown_item('View item', href='#item') }}
+                {{ dropdown_item('Copy link') }}
+                {{ dropdown_item('More information') }}
+              {% endcall %}
+            {% endset %}
+            {{ datatable('composed-dropdowns', [
+              {'key':'name', 'label':'Item', 'card_role':'title'},
+              {'key':'actions', 'label':'Actions', 'sortable':false,
+               'hideable':false, 'align':'end', 'card_role':'actions'}
+            ], [{'id':'composed-item', 'label':'Example',
+                 'cells':{'name':'Example', 'actions':actions}}],
+              selectable=false, responsive_mode='toggle') }}
+            </main><script src="/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+            <script type="module">
+              import DataTable from '/dist/js/datatable.js';
+              DataTable.getOrCreateInstance(document.querySelector('.datatable'));
+              document.body.dataset.datatableReady = 'true';
+            </script></body></html>
+        """)
+        with tempfile.TemporaryDirectory(prefix="datatable-dropdown-", dir=ROOT / "site-dist") as temporary:
+            fixture = Path(temporary) / "index.html"
+            fixture.write_text(template.render(), encoding="utf-8")
+            context = new_case_context(self.browser, CERTIFICATION_CASES[0])
+            try:
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                page.goto(f"{self.base_url}/{fixture.relative_to(ROOT).as_posix()}", wait_until="networkidle")
+                expect(page.locator('body')).to_have_attribute('data-datatable-ready', 'true')
+                root = page.locator('#composed-dropdowns')
+                for view in ('table', 'cards'):
+                    with self.subTest(view=view):
+                        if view == 'cards':
+                            root.locator('label[for$="-view-cards"]').click()
+                        source = root.locator('#composed-item' if view == 'table' else '[data-datatable-card-for="composed-item"]')
+                        trigger = source.get_by_role('button', name='Actions', exact=True)
+                        original_menu = source.locator('.dropdown-menu')
+                        trigger.click()
+                        menu = page.locator('.moo-ui[data-bs-theme] > .dropdown-menu.show')
+                        expect(menu).to_have_count(1)
+                        expect(menu).to_be_visible()
+                        self.assertEqual(menu.evaluate('e => getComputedStyle(e).position'), 'fixed')
+                        self.assertEqual(menu.get_attribute('data-datatable-row-action-owner'), 'composed-item')
+                        self.assertTrue(menu.evaluate("""menu => {
+                            return [...menu.querySelectorAll('.dropdown-item')].every(item => {
+                                const r = item.getBoundingClientRect();
+                                return item.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+                            });
+                        }"""))
+                        if view == 'table':
+                            self.assertGreater(menu.bounding_box()['y'] + menu.bounding_box()['height'], root.locator('.datatable-frame').bounding_box()['y'] + root.locator('.datatable-frame').bounding_box()['height'])
+                        trigger.press('Escape')
+                        expect(trigger).to_have_attribute('aria-expanded', 'false')
+                        expect(trigger).to_be_focused()
+                        expect(original_menu).to_have_count(1)
+                        trigger.click()
+                        expect(menu).to_be_visible()
+                        page.evaluate("""async () => {
+                            const {default: DataTable} = await import('/dist/js/datatable.js');
+                            DataTable.getInstance(document.querySelector('.datatable')).dispose();
+                        }""")
+                        expect(original_menu).to_have_count(1)
+                        expect(original_menu).not_to_have_class(re.compile(r'\bshow\b'))
+                        expect(trigger).to_have_attribute('aria-expanded', 'false')
+                        self.assertEqual(page.locator('.moo-ui[data-bs-theme] > .dropdown-menu.show').count(), 0)
+                        page.evaluate("""async () => {
+                            const {default: DataTable} = await import('/dist/js/datatable.js');
+                            DataTable.getOrCreateInstance(document.querySelector('.datatable'));
+                        }""")
+                evidence.assert_clean()
+            finally:
+                context.close()
 
     def test_search_filters_rows_without_opening_filter_menu(self) -> None:
         context, page, evidence = self.open_preview()

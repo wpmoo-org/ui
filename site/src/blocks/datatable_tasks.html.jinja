@@ -239,7 +239,7 @@
   {% endcall %}
 {%- endmacro %}
 
-{% macro render_tasks_table(id="datatable-tasks") -%}
+{% macro render_tasks_table(id="datatable-tasks", responsive_mode="toggle") -%}
   {% set status_by_value = {} %}
   {% for status in task_statuses %}{% set _ = status_by_value.update({status.value: status}) %}{% endfor %}
   {% set priority_by_value = {} %}
@@ -337,7 +337,7 @@
     default_page_size=10,
     selection_noun="tasks",
     filter_mode="picker",
-    responsive_mode="toggle",
+    responsive_mode=responsive_mode,
     responsive_breakpoint="md",
     bulk_actions=[
       {"key": "status", "label": "Update status", "icon": "circle-check-big", "options": task_statuses},

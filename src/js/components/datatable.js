@@ -105,12 +105,12 @@ export default class DataTable {
   // That keeps the menu out of the scroll wrapper's layout math, so Safari
   // cannot clip it at the rounded frame edge or shift the visible table
   // slice while Popper positions it against the viewport.
-  // Table and card views both wrap row actions in .table-row-actions, but
-  // .table-responsive only contains the table view; card triggers must be
-  // selected separately so both views get the same fixed Popper config.
+  // Public Dropdown compositions need the same behavior as the built-in
+  // row actions. Scope by row/card ownership so toolbar and sort menus keep
+  // their own lifecycle.
   _rowActionTriggers() {
     return this._element.querySelectorAll(
-      ".table-responsive .table-row-actions [data-bs-toggle=\"dropdown\"], [data-datatable-card] .table-row-actions [data-bs-toggle=\"dropdown\"]"
+      "tr[data-datatable-row] .dropdown [data-bs-toggle=\"dropdown\"], [data-datatable-card] .dropdown [data-bs-toggle=\"dropdown\"]"
     );
   }
 
@@ -201,7 +201,7 @@ export default class DataTable {
   }
 
   _rowActionMenuForTrigger(trigger) {
-    if (!trigger?.closest?.(".table-row-actions")) {
+    if (!trigger?.closest?.("tr[data-datatable-row], [data-datatable-card]")) {
       return null;
     }
     return trigger.closest(".dropdown")?.querySelector(":scope > .dropdown-menu") || null;
@@ -399,39 +399,52 @@ export default class DataTable {
     }
   }
 
-  // responsive_mode="toggle" renders both the table and the card list and
-  // lets the reader pick between them (Odoo's List/Kanban switcher, not a
-  // developer-chosen breakpoint), so the choice belongs to the reader across
-  // visits, not just the current render.
+  // Auto mode remembers independent narrow/wide choices; toggle mode keeps
+  // its existing viewport-independent preference.
   _initViewToggle() {
     const toggles = Array.from(this._element.querySelectorAll(".datatable-view-toggle"));
     if (!toggles.length) {
       return;
     }
     const inputs = toggles.flatMap((toggle) => Array.from(toggle.querySelectorAll("input")));
-    const storageKey = `moo-datatable-view:${this._element.id}`;
+    const breakpoint = this._window.getComputedStyle(this._element)
+      .getPropertyValue("--moo-datatable-responsive-breakpoint").trim();
+    const media = this._element.hasAttribute("data-datatable-responsive-breakpoint")
+      ? this._window.matchMedia(`(min-width: ${breakpoint})`) : null;
+    const preferences = new Map();
+    const storageKey = () => `moo-datatable-view:${this._element.id}${media ? (media.matches ? ":wide" : ":narrow") : ""}`;
     const setView = (value, { persist = false } = {}) => {
+      if (this._element.dataset.datatableView !== value) {
+        const Dropdown = this._bootstrap("Dropdown");
+        [...this._rowActionTriggers(), ...this._sortTriggers()].forEach((trigger) => {
+          Dropdown?.getInstance(trigger)?.hide();
+        });
+      }
       this._element.dataset.datatableView = value;
       inputs.forEach((input) => {
         input.checked = input.value === value;
       });
       if (persist) {
+        preferences.set(storageKey(), value);
         try {
-          this._window.localStorage.setItem(storageKey, value);
+          this._window.localStorage.setItem(storageKey(), value);
         } catch {
           // Storage may be unavailable (private browsing); the toggle still works for this session.
         }
       }
     };
-    let stored = null;
-    try {
-      stored = this._window.localStorage.getItem(storageKey);
-    } catch {
-      stored = null;
-    }
-    if (stored === "table" || stored === "cards") {
-      setView(stored);
-    }
+    const restoreView = () => {
+      let stored = preferences.get(storageKey());
+      try {
+        stored ??= this._window.localStorage.getItem(storageKey());
+      } catch {
+        // In-memory preferences still apply when storage is unavailable.
+      }
+      setView(stored === "table" || stored === "cards" ? stored
+        : media ? (media.matches ? "table" : "cards") : this._element.dataset.datatableView);
+    };
+    restoreView();
+    if (media) this._listen(media, "change", restoreView);
     toggles.forEach((toggle) => {
       this._listen(toggle, "change", (event) => {
         const value = event.target.value;
