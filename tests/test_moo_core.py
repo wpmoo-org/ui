@@ -126,7 +126,9 @@ class MooCoreTests(CatalogTestCase):
             "background-color: rgb(from var(--bs-secondary-bg) r g b / var(--bs-bg-opacity)) !important;",
             utility.group(1),
         )
-        self.assertIn(".bg-opacity-50 {", full_css)
+        opacity = re.search(r"\.bg-opacity-50\s*\{([^}]+)\}", full_css)
+        self.assertIsNotNone(opacity)
+        self.assertIn("--bs-bg-opacity: 0.5;", opacity.group(1))
 
     def _build_and_read_core(self) -> str:
         result = self.run_build()

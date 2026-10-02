@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from html.parser import HTMLParser
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -103,11 +105,32 @@ class RadioGroupTests(CatalogTestCase):
             'variant="cards", show_control=false, required=true, '
             'invalid=true, feedback="Choose a category.")'
         )
-        self.assertIn('type="radio" name="category" id="category-a" value="a"', output)
-        self.assertIn('checked required aria-invalid="true"', output)
-        self.assertIn('aria-labelledby="category-a-label"', output)
-        self.assertIn('aria-describedby="category-a-description category-feedback"', output)
-        self.assertIn('class="form-check-input visually-hidden is-invalid"', output)
+        class InputParser(HTMLParser):
+            def __init__(self) -> None:
+                super().__init__()
+                self.inputs = []
+
+            def handle_starttag(self, tag, attributes) -> None:
+                if tag == "input":
+                    self.inputs.append(dict(attributes))
+
+        parser = InputParser()
+        parser.feed(output)
+        self.assertEqual(len(parser.inputs), 1)
+        attributes = parser.inputs[0]
+        for name, value in (
+            ("type", "radio"), ("name", "category"), ("id", "category-a"),
+            ("value", "a"), ("aria-invalid", "true"),
+            ("aria-labelledby", "category-a-label"),
+            ("aria-describedby", "category-a-description category-feedback"),
+        ):
+            self.assertEqual(attributes.get(name), value, name)
+        for name in ("checked", "required"):
+            self.assertIn(name, attributes)
+        self.assertEqual(
+            set(attributes["class"].split()),
+            {"form-check-input", "visually-hidden", "is-invalid"},
+        )
         self.assertIn('<label class="form-check-label" for="category-a">', output)
         self.assertIn('id="category-a-label">Category A</span>', output)
         self.assertIn('id="category-a-description">Up to 3 students</span>', output)
@@ -135,6 +158,7 @@ class RadioGroupTests(CatalogTestCase):
                 self.assertIn(f"<span>{expected}</span>", output)
 
     def test_card_codes_enforce_the_public_letter_limit(self) -> None:
+        # Uppercasing expands "ßß" to four letters, exceeding the rendered limit.
         for code in ("ABCD", "A1", "A B", "ßß"):
             with self.subTest(code=code), self.assertRaisesRegex(
                 ValueError, "Radio Group card code must contain 1 to 3 letters"
