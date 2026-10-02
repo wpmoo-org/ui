@@ -246,10 +246,10 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertNotIn("workspaces", package)
 
-    def test_rc9_candidate_declares_the_state_artifact_surface(self) -> None:
+    def test_rc10_candidate_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.0.0-rc.9")
+        self.assertEqual(package["version"], "1.0.0-rc.10")
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",
@@ -358,7 +358,7 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(manifest["schemaVersion"], 1)
         self.assertEqual(
             manifest["package"],
-            {"name": "@wpmoo/ui", "version": "1.0.0-rc.9"},
+            {"name": "@wpmoo/ui", "version": "1.0.0-rc.10"},
         )
         self.assertEqual(
             [entry["export"] for entry in manifest["artifacts"]],

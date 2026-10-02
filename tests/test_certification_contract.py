@@ -1127,7 +1127,7 @@ class CertificationContractTests(unittest.TestCase):
             freeze["description"],
         )
 
-    def test_rc9_api_freeze_and_public_browser_surface_are_well_formed(self) -> None:
+    def test_rc9_api_freeze_remains_a_historical_public_browser_guard(self) -> None:
         self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.8.json").is_file())
         freeze_path = CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.9.json"
         self.assertTrue(freeze_path.is_file(), "RC9 candidate API inventory is missing")
@@ -1139,10 +1139,10 @@ class CertificationContractTests(unittest.TestCase):
         public_entrypoints = schema["properties"]["publicEntrypoints"]
 
         self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.9")
-        self.assertEqual(package["version"], "1.0.0-rc.9")
-        self.assertEqual(certification["coreVersion"], "1.0.0-rc.9")
-        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
-        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        self.assertNotEqual(package["version"], freeze["freezeVersion"])
+        self.assertEqual(certification["coreVersion"], package["version"])
+        self.assertTrue(set(freeze["packageExports"]).issubset(package["exports"]))
+        self.assertTrue(set(freeze["packageFiles"]).issubset(package["files"]))
         self.assertIn("browser", public_entrypoints["properties"])
         self.assertNotIn("browser", public_entrypoints["required"])
         self.assertEqual(
@@ -1161,6 +1161,31 @@ class CertificationContractTests(unittest.TestCase):
             [entry["export"] for entry in freeze["metadataEntrypoints"]][-1],
             "./release-manifest.json",
         )
+
+    def test_rc10_api_freeze_matches_current_package_and_runtime_exports(self) -> None:
+        self.assertTrue((CERTIFICATION_ROOT / "api-freeze-1.0.0-rc.10.json").is_file())
+        freeze = self._read_json("src/certification/api-freeze-1.0.0-rc.10.json")
+        package = self._read_json("package.json")
+        certification = self._read_json("certification.json")
+        self.assertEqual(freeze["freezeVersion"], "1.0.0-rc.10")
+        self.assertEqual(package["version"], freeze["freezeVersion"])
+        self.assertEqual(certification["coreVersion"], freeze["freezeVersion"])
+        self.assertEqual(set(freeze["packageExports"]), set(package["exports"]))
+        self.assertEqual(set(freeze["packageFiles"]), set(package["files"]))
+        self.assertEqual(certification["status"], "preview")
+        sheet = next(record for record in freeze["esmModules"] if record["module"] == "sheet.js")
+        self.assertEqual(sheet["export"], "./sheet.js")
+        self.assertEqual(sheet["namedExports"], ["initSheets"])
+        self.assertIn(sheet["export"], certification["publicEntrypoints"]["esm"])
+        aggregate = next(record for record in freeze["esmModules"] if record["module"] == "moo-ui.js")
+        imported = subprocess.run(
+            ["node", "--input-type=module", "--eval",
+             'import * as api from "./src/js/moo-ui.js"; '
+             'process.stdout.write(JSON.stringify(Object.keys(api).filter(key => key !== "default")));'],
+            cwd=ROOT, capture_output=True, text=True, check=False, env=npm_env(),
+        )
+        self.assertEqual(imported.returncode, 0, imported.stderr)
+        self.assertEqual(set(aggregate["namedExports"]), set(json.loads(imported.stdout)))
 
     def test_rc5_freeze_test_docstring_matches_enforced_equality(self) -> None:
         docstring = self.test_rc5_api_freeze_declaration_is_well_formed.__doc__ or ""

@@ -3,6 +3,22 @@
 This file records package-surface decisions that are intentionally broader
 than one component page.
 
+## 1.0.0-rc.10 Entrypoints
+
+RC10 preserves the RC9 state bootstrap and release manifest. It adds the public,
+side-effect-free `./sheet.js` ESM entrypoint and the aggregate's named
+`initSheets(root)` export. Initialization is explicit and delegates opening to
+Bootstrap Offcanvas; importing the module never scans the document.
+
+The current API inventory records the exact package exports/files and runtime
+exports. Historical freezes remain removal guards. Radio Group choice cards,
+responsive DataTable behavior and Body typography consume the existing CSS/Sass
+entrypoints without introducing another runtime or stylesheet export.
+
+Release-facing links use RC10 in the candidate commit. Adapter release pins
+must follow publication and consumer validation; local release preparation does
+not establish a published artifact or a certified component set.
+
 ## 1.0.0-rc.9 Entrypoints
 
 RC9 replaces the public classic browser export
