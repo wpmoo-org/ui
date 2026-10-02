@@ -3214,18 +3214,22 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
 
                     for name in ('radio-plan-cards', 'radio-workspace-cards', 'radio-category-cards'):
                         group = page.locator(f'fieldset.radio-group:has(input[name="{name}"])')
-                        preview = group.locator('..')
+                        preview = page.locator(f'.moo-example__preview:has(input[name="{name}"])')
                         self.assertIn('moo-example__preview--narrow', preview.get_attribute('class').split())
                         geometry = group.evaluate("""group => {
                             const content = group.getBoundingClientRect();
-                            const frame = group.parentElement.getBoundingClientRect();
+                            const preview = group.closest('.moo-example__preview');
+                            const frame = preview.getBoundingClientRect();
+                            const limit = parseFloat(getComputedStyle(group.closest('.field')).maxWidth);
                             return {
                                 width: content.width,
-                                limit: parseFloat(getComputedStyle(group).maxWidth),
+                                limit,
+                                hasWidthLimit: Number.isFinite(limit),
                                 center: content.x + content.width / 2,
                                 frameCenter: frame.x + frame.width / 2,
                             };
                         }""")
+                        self.assertTrue(geometry['hasWidthLimit'], 'Choice Card Field must have a finite width limit')
                         self.assertLessEqual(geometry['width'], geometry['limit'])
                         self.assertAlmostEqual(geometry['center'], geometry['frameCenter'], delta=0.5)
 

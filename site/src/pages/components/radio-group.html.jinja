@@ -95,15 +95,17 @@
     ) }}
 
     {% set choice_cards %}
-      {{ radio_group(
-        "radio-plan-cards", "Subscription plan",
-        [
-          {"id": "radio-plan-plus", "value": "plus", "label": "Plus", "description": "For individuals and small teams.", "checked": true},
-          {"id": "radio-plan-pro", "value": "pro", "label": "Pro", "description": "For growing businesses."},
-          {"id": "radio-plan-enterprise", "value": "enterprise", "label": "Enterprise", "description": "For large teams and enterprises."}
-        ],
-        variant="cards"
-      ) }}
+      {% call field() %}
+        {{ radio_group(
+          "radio-plan-cards", "Subscription plan",
+          [
+            {"id": "radio-plan-plus", "value": "plus", "label": "Plus", "description": "For individuals and small teams.", "checked": true},
+            {"id": "radio-plan-pro", "value": "pro", "label": "Pro", "description": "For growing businesses."},
+            {"id": "radio-plan-enterprise", "value": "enterprise", "label": "Enterprise", "description": "For large teams and enterprises."}
+          ],
+          variant="cards"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("radio-group", "Radio Group",
       "choice-card", "Choice Card",
@@ -113,15 +115,17 @@
     ) }}
 
     {% set icon_cards %}
-      {{ radio_group(
-        "radio-workspace-cards", "Workspace location",
-        [
-          {"id": "radio-workspace-cloud", "value": "cloud", "label": "Cloud workspace", "description": "Work together from any device.", "icon": "cloud", "checked": true},
-          {"id": "radio-workspace-local", "value": "local", "label": "Local workspace", "description": "Keep files on this device.", "icon": "folder-open"},
-          {"id": "radio-workspace-managed", "value": "managed", "label": "Managed workspace", "description": "Available with an organization plan.", "icon": "building-2", "disabled": true}
-        ],
-        variant="cards"
-      ) }}
+      {% call field() %}
+        {{ radio_group(
+          "radio-workspace-cards", "Workspace location",
+          [
+            {"id": "radio-workspace-cloud", "value": "cloud", "label": "Cloud workspace", "description": "Work together from any device.", "icon": "cloud", "checked": true},
+            {"id": "radio-workspace-local", "value": "local", "label": "Local workspace", "description": "Keep files on this device.", "icon": "folder-open"},
+            {"id": "radio-workspace-managed", "value": "managed", "label": "Managed workspace", "description": "Available with an organization plan.", "icon": "building-2", "disabled": true}
+          ],
+          variant="cards"
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("radio-group", "Radio Group",
       "choice-card-icon", "Choice Card with Icon",
@@ -131,15 +135,17 @@
     ) }}
 
     {% set code_cards %}
-      {{ radio_group(
-        "radio-category-cards", "Project category",
-        [
-          {"id": "radio-category-acs", "value": "acs", "label": "AI & Computer Science", "description": "Up to 3 students", "code": "ACS", "checked": true},
-          {"id": "radio-category-art", "value": "art", "label": "Art & Digital Design", "description": "Up to 1 student", "code": "ART"},
-          {"id": "radio-category-eme", "value": "eme", "label": "Engineering & Mathematics, Energy – Physics", "description": "Up to 3 students", "code": "EME"}
-        ],
-        variant="cards", show_control=false, required=true
-      ) }}
+      {% call field() %}
+        {{ radio_group(
+          "radio-category-cards", "Project category",
+          [
+            {"id": "radio-category-acs", "value": "acs", "label": "AI & Computer Science", "description": "Up to 3 students", "code": "ACS", "checked": true},
+            {"id": "radio-category-art", "value": "art", "label": "Art & Digital Design", "description": "Up to 1 student", "code": "ART"},
+            {"id": "radio-category-eme", "value": "eme", "label": "Engineering & Mathematics, Energy – Physics", "description": "Up to 3 students", "code": "EME"}
+          ],
+          variant="cards", show_control=false, required=true
+        ) }}
+      {% endcall %}
     {% endset %}
     {{ render_component_example("radio-group", "Radio Group",
       "choice-card-code", "Choice Card with Code",

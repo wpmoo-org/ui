@@ -80,9 +80,9 @@ COMPONENT_SELECTOR_PREFIXES = {
     # visible on mouse click (matching _focus.scss's pattern for
     # .form-control.is-invalid and .form-select.is-invalid).
     "checkbox": ("form-check", "is-invalid"),
-    # The legend reuses Bootstrap's shared .form-label class to
-    # match sibling form labels.
-    "radio_group": ("radio-group", "form-label"),
+    # Choice Cards compose Bootstrap's native form-check controls, helper
+    # text and validation/visibility states inside their radio/card scope.
+    "radio_group": ("radio-group", "form-label", "form-check", "form-text", "is-invalid", "visually-hidden"),
     # Bootstrap's switch markup uses the shared .form-switch and
     # .form-check families, not a "switch-" prefixed one.
     "switch": ("form-switch", "form-check"),
@@ -4500,10 +4500,10 @@ class CatalogContractTests(CatalogTestCase):
                     if declaration.startswith("box-shadow:"):
                         self.assertRegex(
                             declaration,
-                            r"^box-shadow: (?:none|\$input-focus-box-shadow|"
+                            r"^box-shadow: (?:none|\$(?:form-check-)?input-focus-box-shadow|"
                             r"\$[a-z0-9-]*ring-shadow|"
                             r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
-                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
+                            r"0 0 0 (?:(?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})?|var\(--bs-focus-ring-width\)) var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
                             r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? color-mix\(in srgb, (?:\$|\#\{\$)[a-z0-9-]*ring-color(?:\})? 50%, transparent\));$",
                         )
                     elif declaration.startswith("border-radius:"):
