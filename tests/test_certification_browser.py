@@ -3197,6 +3197,119 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_radio_choice_cards_keep_square_media_native_selection_and_theme_roles(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/components/radio-group/index.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+
+                    for name in ('radio-plan-cards', 'radio-workspace-cards', 'radio-category-cards'):
+                        group = page.locator(f'fieldset.radio-group:has(input[name="{name}"])')
+                        preview = group.locator('..')
+                        self.assertIn('moo-example__preview--narrow', preview.get_attribute('class').split())
+                        geometry = group.evaluate("""group => {
+                            const content = group.getBoundingClientRect();
+                            const frame = group.parentElement.getBoundingClientRect();
+                            return {
+                                width: content.width,
+                                limit: parseFloat(getComputedStyle(group).maxWidth),
+                                center: content.x + content.width / 2,
+                                frameCenter: frame.x + frame.width / 2,
+                            };
+                        }""")
+                        self.assertLessEqual(geometry['width'], geometry['limit'])
+                        self.assertAlmostEqual(geometry['center'], geometry['frameCenter'], delta=0.5)
+
+                    page.locator('label[for="radio-plan-pro"]').click()
+                    expect(page.locator('#radio-plan-pro')).to_be_checked()
+                    expect(page.locator('#radio-plan-plus')).not_to_be_checked()
+
+                    local = page.locator("#radio-workspace-local")
+                    cloud = page.locator("#radio-workspace-cloud")
+                    disabled = page.locator("#radio-workspace-managed")
+                    page.locator('label[for="radio-workspace-local"]').click()
+                    expect(local).to_be_checked()
+                    expect(cloud).not_to_be_checked()
+                    expect(disabled).to_be_disabled()
+                    local.press("ArrowDown")
+                    expect(cloud).to_be_checked()
+                    expect(disabled).not_to_be_checked()
+
+                    first_code = page.locator("#radio-category-acs")
+                    next_code = page.locator("#radio-category-art")
+                    page.locator('label[for="radio-category-acs"]').click()
+                    expect(first_code).to_be_checked()
+                    first_code.press("ArrowDown")
+                    expect(next_code).to_be_checked()
+                    expect(next_code).to_be_focused()
+                    expect(first_code).not_to_be_checked()
+                    self.assertNotEqual(
+                        page.locator('label[for="radio-category-art"]').evaluate(
+                            "label => getComputedStyle(label).boxShadow"
+                        ),
+                        "none",
+                    )
+
+                    def measured_media():
+                        return page.evaluate("""() => {
+                            const ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+                            const color = value => {
+                                ctx.clearRect(0, 0, 1, 1);
+                                ctx.fillStyle = value;
+                                ctx.fillRect(0, 0, 1, 1);
+                                return Array.from(ctx.getImageData(0, 0, 1, 1).data);
+                            };
+                            return ['radio-workspace-cloud', 'radio-category-art'].map(id => {
+                                const label = document.querySelector(`label[for="${id}"]`);
+                                const media = label.querySelector('.form-check-card-media');
+                                const content = label.querySelector('.form-check-card-content');
+                                const box = media.getBoundingClientRect();
+                                const body = content.getBoundingClientRect();
+                                const style = getComputedStyle(media);
+                                return {
+                                    width: box.width, height: box.height, bodyHeight: body.height,
+                                    leadingGap: style.direction === 'rtl'
+                                        ? box.left - body.right : body.left - box.right,
+                                    background: color(style.backgroundColor),
+                                    primary: color(style.getPropertyValue('--moo-primary')),
+                                    foreground: color(style.color),
+                                    primaryForeground: color(style.getPropertyValue('--moo-primary-foreground')),
+                                };
+                            });
+                        }""")
+
+                    for branded in (False, True):
+                        if branded:
+                            # The accepted Orange preview proves selection consumes the
+                            # owner's tokens instead of a fixed neutral color.
+                            page.locator('.moo-ui[data-bs-theme]').first.evaluate("""owner => {
+                                owner.style.setProperty('--moo-primary', 'rgb(198, 82, 6)');
+                                owner.style.setProperty('--moo-primary-foreground', 'rgb(255, 255, 255)');
+                            }""")
+                        for media in measured_media():
+                            self.assertAlmostEqual(media['width'], media['height'], delta=0.5)
+                            self.assertAlmostEqual(media['height'], media['bodyHeight'], delta=0.5)
+                            self.assertGreater(media['leadingGap'], 0)
+                            self.assertEqual(media['background'], media['primary'])
+                            self.assertEqual(media['foreground'], media['primaryForeground'])
+                    self.assertEqual(
+                        page.evaluate("document.documentElement.scrollWidth"),
+                        case.viewport['width'],
+                    )
+                    self.assertEqual(run_axe(page), [])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_radio_group_fixture_proves_native_form_check_contracts(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):

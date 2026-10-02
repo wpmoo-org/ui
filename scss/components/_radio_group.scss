@@ -7,3 +7,114 @@
 .radio-group legend.form-label {
   font-size: inherit;
 }
+
+// Choice Cards retain Bootstrap's native input/label pairing. Bootstrap's
+// checks-radios and toggle-button contracts have no two-line card/media layout.
+.form-check-card {
+  position: relative;
+  padding: 0;
+  margin-bottom: 0;
+
+  + .form-check-card {
+    margin-block-start: $spacer * 0.5;
+  }
+
+  > .form-check-input:not(.visually-hidden) {
+    position: absolute;
+    inset-block-start: $spacer * 0.75;
+    inset-inline-end: $spacer * 0.75;
+    float: none;
+    margin: 0;
+  }
+
+  > .form-check-label {
+    display: flex;
+    align-items: center;
+    gap: $spacer * 0.75;
+    padding: $spacer * 0.75;
+    padding-inline-end: $spacer * 1.5 + $form-check-input-width;
+    border: var(--bs-border-width) solid var(--moo-border);
+    border-radius: var(--bs-border-radius);
+    color: var(--moo-foreground);
+    cursor: pointer;
+  }
+
+  &.form-check-card--no-control > .form-check-label {
+    padding-inline-end: $spacer * 0.75;
+  }
+
+  > .form-check-input:not(:disabled) ~ .form-check-label:hover,
+  > .form-check-input:checked ~ .form-check-label {
+    background-color: var(--moo-muted-surface);
+
+    .form-text {
+      color: var(--moo-foreground);
+    }
+  }
+
+  > .form-check-input:checked ~ .form-check-label {
+    border-color: var(--moo-foreground);
+  }
+
+  > .form-check-input:checked ~ .form-check-label .form-check-card-media {
+    border-color: var(--moo-primary);
+    background-color: var(--moo-primary);
+    color: var(--moo-primary-foreground);
+  }
+
+  > .form-check-input:focus-visible ~ .form-check-label {
+    border-color: var(--moo-ring);
+    box-shadow: $form-check-input-focus-box-shadow;
+  }
+
+  > .form-check-input.is-invalid ~ .form-check-label {
+    border-color: var(--bs-form-invalid-border-color);
+  }
+
+  > .form-check-input.is-invalid:focus-visible ~ .form-check-label {
+    box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--moo-form-invalid-ring-color);
+  }
+}
+
+.form-check-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacer * 0.25;
+  min-width: 0;
+  line-height: $line-height-sm;
+  overflow-wrap: anywhere;
+
+  > .form-text {
+    margin: 0;
+    font-size: $font-size-sm;
+    line-height: inherit;
+  }
+}
+
+.form-check-card-title {
+  font-weight: $font-weight-medium;
+}
+
+.form-check-card-media {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  // A square matches one title line, one small description line and their
+  // gap. Derive it from the same Bootstrap type/spacing scale as that body.
+  inline-size: ($font-size-base + $font-size-sm) * $line-height-sm + $spacer * 0.25;
+  aspect-ratio: 1;
+  border: var(--bs-border-width) solid var(--moo-border);
+  border-radius: var(--bs-border-radius-sm);
+  background-color: var(--moo-muted-surface);
+  color: var(--moo-foreground);
+
+  > span {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+  }
+
+  > [data-icon] {
+    width: $font-size-base;
+    height: $font-size-base;
+  }
+}

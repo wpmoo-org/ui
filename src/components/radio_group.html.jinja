@@ -1,7 +1,9 @@
-{% macro radio_group(name, legend, items, extra_class="", required=false, invalid=false, feedback="", reverse=false, bare=false) -%}
+{% macro radio_group(name, legend, items, extra_class="", required=false, invalid=false, feedback="", reverse=false, bare=false, variant="default", show_control=true) -%}
   {% if not name | trim %}{{ fail("Radio Group name is required") }}{% endif %}
   {% if not bare and not legend | trim %}{{ fail("Radio Group legend is required") }}{% endif %}
   {% if not items %}{{ fail("Radio Group requires at least one item") }}{% endif %}
+  {% if variant not in ["default", "cards"] %}{{ fail("Unknown Radio Group variant: " ~ variant) }}{% endif %}
+  {% set cards = variant == "cards" %}
   {% set has_feedback = invalid and feedback | trim %}
   {% set feedback_id = name ~ "-feedback" %}
   {% if not bare %}<fieldset class="radio-group{% if extra_class %} {{ extra_class }}{% endif %}"{% if has_feedback %} aria-describedby="{{ feedback_id }}"{% endif %}>
@@ -9,11 +11,28 @@
     {% for item in items %}
       {% if not item.id | default("", true) | trim %}{{ fail("Radio Group item id is required") }}{% endif %}
       {% if not item.label | default("", true) | trim %}{{ fail("Radio Group item label is required") }}{% endif %}
+      {% set code = item.code | default("", true) | trim | upper %}
+      {% if cards and code and (code | length > 3 or not code.isalpha()) %}{{ fail("Radio Group card code must contain 1 to 3 letters") }}{% endif %}
+      {% if cards and code and item.icon | default("", true) %}{{ fail("Radio Group card accepts either code or icon") }}{% endif %}
       {% set has_description = item.description is defined and item.description %}
-      <div class="form-check{% if reverse %} form-check-reverse{% endif %}">
-        <input class="form-check-input{% if invalid %} is-invalid{% endif %}" type="radio" name="{{ name }}" id="{{ item.id }}"{% if item.value is defined %} value="{{ item.value }}"{% endif %}{% if item.checked is defined and item.checked %} checked{% endif %}{% if item.disabled is defined and item.disabled %} disabled{% endif %}{% if required %} required{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if has_description or has_feedback %} aria-describedby="{% if has_description %}{{ item.id }}-description{% endif %}{% if has_description and has_feedback %} {% endif %}{% if has_feedback %}{{ feedback_id }}{% endif %}"{% endif %}>
+      <div class="form-check{% if cards %} form-check-card{% if not show_control %} form-check-card--no-control{% endif %}{% elif reverse %} form-check-reverse{% endif %}">
+        <input class="form-check-input{% if cards and not show_control %} visually-hidden{% endif %}{% if invalid %} is-invalid{% endif %}" type="radio" name="{{ name }}" id="{{ item.id }}"{% if item.value is defined %} value="{{ item.value }}"{% endif %}{% if item.checked is defined and item.checked %} checked{% endif %}{% if item.disabled is defined and item.disabled %} disabled{% endif %}{% if required %} required{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if cards %} aria-labelledby="{{ item.id }}-label"{% endif %}{% if has_description or has_feedback %} aria-describedby="{% if has_description %}{{ item.id }}-description{% endif %}{% if has_description and has_feedback %} {% endif %}{% if has_feedback %}{{ feedback_id }}{% endif %}"{% endif %}>
+        {% if cards %}
+        <label class="form-check-label" for="{{ item.id }}">
+          {% if code or item.icon | default("", true) %}
+          <span class="form-check-card-media" aria-hidden="true">
+            {% if item.icon | default("", true) %}{{ render_icon(item.icon, "inline-start") }}{% else %}<span>{{ code }}</span>{% endif %}
+          </span>
+          {% endif %}
+          <span class="form-check-card-content">
+            <span class="form-check-card-title" id="{{ item.id }}-label">{{ item.label }}</span>
+            {% if has_description %}<span class="form-text" id="{{ item.id }}-description">{{ item.description }}</span>{% endif %}
+          </span>
+        </label>
+        {% else %}
         <label class="form-check-label" for="{{ item.id }}">{{ item.label }}</label>
         {% if has_description %}<div class="form-text" id="{{ item.id }}-description">{{ item.description }}</div>{% endif %}
+        {% endif %}
       </div>
     {% endfor %}
     {% if has_feedback %}<div class="invalid-feedback d-block" id="{{ feedback_id }}">{{ feedback }}</div>{% endif %}
