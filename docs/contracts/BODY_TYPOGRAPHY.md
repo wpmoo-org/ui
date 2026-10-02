@@ -15,3 +15,8 @@ host adapter; consumers never pass raw CSS or selectors.
 
 This contract is limited to Body typography. Heading level overrides and font
 variant delivery are separate work.
+
+Sass consumers can configure Small through `$moo-small-font-size` and paragraph
+top spacing through `$moo-paragraph-margin-top`, both `!default` settings. The
+bottom spacing consumes Bootstrap's `$paragraph-margin-bottom`. Default output
+is unchanged; runtime owner overrides continue to use the tokens above.

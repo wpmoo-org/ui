@@ -871,6 +871,7 @@ for (const specifier of [
             "sidebar.js",
             "context-menu.js",
             "datatable.js",
+            "sheet.js",
             "slider.js",
             "src/js/moo-ui.js",
             "chart.js",

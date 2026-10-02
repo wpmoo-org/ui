@@ -56,7 +56,7 @@
 
 // Keep Bootstrap's configured breakpoint scale in CSS. The runtime reads the
 // same threshold, while this fallback selects a layout before it starts.
-@each $name, $value in $grid-breakpoints {
+@each $name, $value in map-merge($grid-breakpoints, $moo-datatable-responsive-breakpoint) {
   @if $value != 0 {
     .datatable--responsive-auto[data-datatable-responsive-breakpoint="#{$name}"] {
       --moo-datatable-responsive-breakpoint: #{$value};
@@ -65,7 +65,7 @@
         display: none;
       }
 
-      @include media-breakpoint-down($name) {
+      @include media-breakpoint-down($name, map-merge($grid-breakpoints, $moo-datatable-responsive-breakpoint)) {
         &[data-datatable-view="auto"] .datatable-frame {
           display: none;
         }

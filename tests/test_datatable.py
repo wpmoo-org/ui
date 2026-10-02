@@ -108,6 +108,31 @@ def _parse_html(source: str) -> _Node:
 
 
 class DataTableTests(CatalogTestCase):
+    def test_configured_responsive_breakpoint_aligns_css_and_runtime_thresholds(self) -> None:
+        import sass
+
+        css = sass.compile(
+            string='$moo-datatable-responsive-breakpoint: (md: 840px); @import "moo-core";',
+            include_paths=[str(ROOT / 'scss'), str(ROOT / 'vendor')],
+        )
+        self.assertIsNotNone(
+            re.search(
+                r'data-datatable-responsive-breakpoint="md"\]\s*\{\s*'
+                r'--moo-datatable-responsive-breakpoint: 840px;',
+                css,
+            ),
+            'The scoped runtime threshold must consume the Sass override',
+        )
+        self.assertIn('@media (max-width: 839.98px)', css)
+        self.assertIsNotNone(
+            re.search(
+                r'data-datatable-responsive-breakpoint="sm"\]\s*\{\s*'
+                r'--moo-datatable-responsive-breakpoint: 576px;',
+                css,
+            ),
+            'Unspecified breakpoints must retain the Bootstrap scale',
+        )
+
     def render_release_review(self, responsive_mode: str = "toggle") -> str:
         self.assertTrue(COMPONENT.is_file(), "Data Table macro is not implemented")
         self.assertTrue(

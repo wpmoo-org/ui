@@ -95,6 +95,27 @@ def active_scss_imports(source: str) -> list[str]:
 
 
 class MooCoreTests(CatalogTestCase):
+    def test_body_typography_consumes_configured_sass_defaults(self) -> None:
+        import sass
+
+        overrides = (
+            "$moo-small-font-size: 0.8125rem; "
+            "$moo-paragraph-margin-top: 0.25rem; "
+            "$paragraph-margin-bottom: 1.5rem; "
+        )
+        for entrypoint in ("moo-core", "moo-ui"):
+            with self.subTest(entrypoint=entrypoint):
+                css = sass.compile(
+                    string=overrides + f'@import "{entrypoint}";',
+                    include_paths=[str(SCSS), str(ROOT / "vendor")],
+                )
+                for declaration in (
+                    "--moo-small-font-size: 0.8125rem;",
+                    "--moo-paragraph-margin-top: 0.25rem;",
+                    "--moo-paragraph-margin-bottom: 1.5rem;",
+                ):
+                    self.assertTrue(declaration in css, f"{entrypoint} must emit {declaration}")
+
     def test_body_secondary_utility_follows_the_resolved_base_color(self) -> None:
         full_css = build.compile_style(SCSS / "moo-ui.scss")
         utility = re.search(r"\.bg-body-secondary\s*\{([^}]+)\}", full_css)

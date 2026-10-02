@@ -409,7 +409,8 @@ export default class DataTable {
     const inputs = toggles.flatMap((toggle) => Array.from(toggle.querySelectorAll("input")));
     const breakpoint = this._window.getComputedStyle(this._element)
       .getPropertyValue("--moo-datatable-responsive-breakpoint").trim();
-    const media = this._element.hasAttribute("data-datatable-responsive-breakpoint")
+    const auto = this._element.hasAttribute("data-datatable-responsive-breakpoint");
+    const media = auto && breakpoint
       ? this._window.matchMedia(`(min-width: ${breakpoint})`) : null;
     const preferences = new Map();
     const storageKey = () => `moo-datatable-view:${this._element.id}${media ? (media.matches ? ":wide" : ":narrow") : ""}`;
@@ -443,7 +444,13 @@ export default class DataTable {
       setView(stored === "table" || stored === "cards" ? stored
         : media ? (media.matches ? "table" : "cards") : this._element.dataset.datatableView);
     };
-    restoreView();
+    if (!auto || media) {
+      restoreView();
+    } else {
+      // CSS owns automatic layout without a runtime threshold. Clear the
+      // server's checked default so either manual radio can emit a change.
+      inputs.forEach((input) => { input.checked = false; });
+    }
     if (media) this._listen(media, "change", restoreView);
     toggles.forEach((toggle) => {
       this._listen(toggle, "change", (event) => {

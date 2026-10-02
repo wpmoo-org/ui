@@ -209,6 +209,7 @@
       if (!root) return;
       var breakpoint = getComputedStyle(root).getPropertyValue("--moo-datatable-responsive-breakpoint").trim();
       var auto = root.hasAttribute("data-datatable-responsive-breakpoint");
+      if (auto && !breakpoint) return;
       var wide = !auto || window.matchMedia("(min-width: " + breakpoint + ")").matches;
       var key = "moo-datatable-view:" + root.id + (auto ? (wide ? ":wide" : ":narrow") : "");
       var view = auto ? (wide ? "table" : "cards") : root.dataset.datatableView;

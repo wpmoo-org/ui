@@ -117,11 +117,14 @@ class DataTableBrowserTests(unittest.TestCase):
         return context, page, evidence
 
     @contextmanager
-    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False):
+    def responsive_fixture(self, *, mode="auto", breakpoint="md", runtime=True, blocked_storage=False, selectable=False, missing_breakpoint=False):
         template = create_environment().from_string("""
             <!doctype html><html><head><meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" href="/dist/assets/css/moo-ui.css">
+            {% if missing_breakpoint %}<style>
+              #responsive-items { --moo-datatable-responsive-breakpoint: initial; }
+            </style>{% endif %}
             <link rel="icon" href="data:,"></head><body>
             <main class="moo-ui" data-bs-theme="light">
             {% from "components/datatable.html.jinja" import datatable %}
@@ -158,7 +161,7 @@ class DataTableBrowserTests(unittest.TestCase):
             </script>{% endif %}</body></html>
         """)
         try:
-            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable)
+            rendered = template.render(mode=mode, breakpoint=breakpoint, runtime=runtime, selectable=selectable, missing_breakpoint=missing_breakpoint)
         except ValueError as error:
             self.fail(f"Public responsive configuration rejected: {error}")
         with tempfile.TemporaryDirectory(prefix="datatable-responsive-", dir=ROOT / "site-dist") as temporary:
@@ -285,6 +288,21 @@ class DataTableBrowserTests(unittest.TestCase):
             expect(root).to_have_attribute('data-datatable-view', 'table')
             page.set_viewport_size({'width': 375, 'height': 900})
             expect(root).to_have_attribute('data-datatable-view', 'cards')
+            evidence.assert_clean()
+
+    def test_auto_view_keeps_css_fallback_when_runtime_breakpoint_is_missing(self) -> None:
+        with self.responsive_fixture(missing_breakpoint=True) as (page, root, evidence):
+            expect(root).to_have_attribute('data-datatable-view', 'auto')
+            expect(root.locator('.datatable-frame')).to_be_visible()
+            page.set_viewport_size({'width': 598, 'height': 900})
+            expect(root.locator('.datatable-card-frame')).to_be_visible()
+            expect(root.locator('.datatable-frame')).not_to_be_visible()
+            root.locator('label[for$="-view-table"]').click()
+            expect(root).to_have_attribute('data-datatable-view', 'table')
+            expect(root.locator('.datatable-frame')).to_be_visible()
+            root.locator('label[for$="-view-cards"]').click()
+            expect(root).to_have_attribute('data-datatable-view', 'cards')
+            expect(root.locator('.datatable-card-frame')).to_be_visible()
             evidence.assert_clean()
 
     def test_linked_titles_stay_inside_their_table_cell_and_card_heading(self) -> None:
