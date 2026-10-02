@@ -129,6 +129,8 @@ $form-check-input-width: 1rem !default;
 // Bootstrap derives this as $form-check-input-width + .5em, but mixing
 // rem and em in Sass arithmetic fails to compile; restate it in rem.
 $form-check-padding-start: 1.5rem !default;
+// Pure muted foreground falls below 4.5:1 on the default selected card surface.
+$moo-form-check-card-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%, var(--moo-foreground)) !default;
 // The reference switch track is chubbier than Bootstrap's default: 32x18.4px
 // versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
 // Bootstrap's own customization point, but there is no matching height

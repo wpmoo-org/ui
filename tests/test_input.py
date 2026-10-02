@@ -121,6 +121,13 @@ class InputTests(CatalogTestCase):
         self.assertIn(" readonly", readonly)
         self.assertNotIn(" disabled", readonly)
 
+    def test_native_autofocus_is_opt_in(self) -> None:
+        output = self.render_input('input(aria_label="Title", autofocus=true)')
+        self.assertIn(" autofocus", output)
+        for call in ('input(aria_label="Title")', 'input(aria_label="Title", autofocus=false)'):
+            with self.subTest(call=call):
+                self.assertNotIn(" autofocus", self.render_input(call))
+
     def test_disabled_form_controls_share_disabled_text_token(self) -> None:
         variables = read_settings()
         tokens_root = (ROOT / "scss/themes/_root.scss").read_text(

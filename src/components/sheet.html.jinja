@@ -14,6 +14,15 @@
 {% from "components/close_button.html.jinja" import close_button %}
 
 {% set sheet_placements = ["start", "end", "top", "bottom"] %}
+{% set sheet_sizes = {
+  "default": "",
+  "sm": "20rem",
+  "md": "24rem",
+  "wide": "30rem",
+  "lg": "44rem",
+  "xl": "56rem",
+  "full": "100vw"
+} %}
 
 {% macro sheet(
   id,
@@ -21,10 +30,12 @@
   backdrop=true,
   scroll=false,
   aria_label="",
-  open_on_load=false
+  open_on_load=false,
+  size="default"
 ) -%}
   {% if not id | trim %}{{ fail("Sheet id is required") }}{% endif %}
   {% if placement not in sheet_placements %}{{ fail("Unknown sheet placement: " ~ placement) }}{% endif %}
+  {% if size not in sheet_sizes %}{{ fail("Unknown sheet size: " ~ size) }}{% endif %}
   <div
     class="offcanvas offcanvas-{{ placement }} sheet"
     tabindex="-1"
@@ -37,6 +48,7 @@
     {% if not backdrop %}data-bs-backdrop="false"{% endif %}
     {% if scroll %}data-bs-scroll="true"{% endif %}
     {% if open_on_load %}data-sheet-open-on-load="true"{% endif %}
+    {% if sheet_sizes[size] %}style="--bs-offcanvas-width: {{ sheet_sizes[size] }};"{% endif %}
   >
     {{ caller() | trim | safe }}
   </div>

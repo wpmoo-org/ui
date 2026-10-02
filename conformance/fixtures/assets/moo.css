@@ -5662,10 +5662,6 @@ label.btn {
 .form-check-card > .form-check-input:checked ~ .form-check-label {
     background-color: var(--moo-muted-surface);
   }
-  .form-check-card > .form-check-input:not(:disabled) ~ .form-check-label:hover .form-text,
-.form-check-card > .form-check-input:checked ~ .form-check-label .form-text {
-    color: var(--moo-foreground);
-  }
   .form-check-card > .form-check-input:checked ~ .form-check-label {
     border-color: var(--moo-foreground);
   }
@@ -5696,6 +5692,7 @@ label.btn {
     margin: 0;
     font-size: 0.76562rem;
     line-height: inherit;
+    color: color-mix(in srgb, var(--moo-muted-foreground) 95%, var(--moo-foreground));
   }
   .form-check-card-title {
     font-weight: 500;

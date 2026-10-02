@@ -30,6 +30,7 @@
       <p>Keep the sheet body focused on one supporting task, such as filters, settings, or contextual details. Configure backdrop and body scrolling intentionally: a backdrop keeps attention inside the sheet, while body scrolling can preserve page context for lighter side panels.</p>
       <p>Sheet uses Bootstrap Offcanvas behavior, so Bootstrap owns focus management, Escape dismissal, backdrop clicks, and reduced-motion-aware transitions. Keep essential page actions outside the sheet unless the sheet is already open, and avoid placing another overlay workflow inside it.</p>
       <p>For a URL that should display an open sheet on load, pass <code>open_on_load=true</code> and call the public <code>initSheets(root)</code> ESM initializer after Bootstrap is available. The initializer consumes the one-time marker; ordinary sheets remain closed until their trigger is used.</p>
+      <p>Use <code>size</code> to choose the horizontal width: <code>default</code> inherits the theme, <code>sm</code> is 20rem, <code>md</code> is 24rem, <code>wide</code> is 30rem, <code>lg</code> is 44rem, <code>xl</code> is 56rem, and <code>full</code> is the viewport width. Bootstrap limits the panel to the available screen width.</p>
     {% endset %}
     {{ render_component_intro(
       intro,

@@ -48,6 +48,13 @@ class SheetTests(CatalogTestCase):
         self.assertIn('aria-labelledby="address-editor-title"', output)
         self.assertIn('data-sheet-open-on-load="true"', output)
 
+    def test_sheet_wide_size_uses_native_width_override(self) -> None:
+        output = self.render(
+            '{% call sheet("example", size="wide") %}Content{% endcall %}'
+        )
+
+        self.assertIn('style="--bs-offcanvas-width: 30rem;"', output)
+
     def test_sheet_requires_id(self) -> None:
         with self.assertRaisesRegex(ValueError, "Sheet id is required"):
             self.render('{% call sheet("   ") %}Content{% endcall %}')

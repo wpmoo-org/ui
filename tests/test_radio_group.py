@@ -11,6 +11,17 @@ PAGE = ROOT / "site/src/pages/components/radio-group.html.jinja"
 
 
 class RadioGroupTests(CatalogTestCase):
+    def test_card_description_color_can_be_configured_by_the_host(self) -> None:
+        import sass
+
+        css = sass.compile(
+            string='$moo-form-check-card-description-color: var(--bs-secondary-color); @import "moo-core";',
+            include_paths=[str(ROOT / 'scss'), str(ROOT / 'vendor')],
+        )
+        start = css.index('.form-check-card-content > .form-text {')
+        description = css[start:css.index('}', start)]
+        self.assertIn('color: var(--bs-secondary-color);', description)
+
     def render_radio_group(self, call: str) -> str:
         self.assertTrue(COMPONENT.is_file(), "Radio Group macro is not implemented")
         template = create_environment().from_string(

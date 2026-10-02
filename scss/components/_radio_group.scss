@@ -46,10 +46,6 @@
   > .form-check-input:not(:disabled) ~ .form-check-label:hover,
   > .form-check-input:checked ~ .form-check-label {
     background-color: var(--moo-muted-surface);
-
-    .form-text {
-      color: var(--moo-foreground);
-    }
   }
 
   > .form-check-input:checked ~ .form-check-label {
@@ -88,6 +84,8 @@
     margin: 0;
     font-size: $font-size-sm;
     line-height: inherit;
+    // Keep descriptions muted with enough contrast on the selected surface.
+    color: $moo-form-check-card-description-color;
   }
 }
 
