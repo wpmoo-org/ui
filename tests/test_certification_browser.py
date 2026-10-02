@@ -2165,39 +2165,108 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_sheet_initializer_cleanup_and_reinitialization(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/sheet.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    no_bootstrap_cleanup = page.evaluate("""async () => {
+                        const { initSheets } = await import('/src/js/components/sheet.js');
+                        const bootstrap = window.bootstrap;
+                        window.bootstrap = undefined;
+                        try {
+                            const cleanup = initSheets(document);
+                            if (typeof cleanup === 'function') cleanup();
+                            return typeof cleanup;
+                        } finally {
+                            window.bootstrap = bootstrap;
+                        }
+                    }""")
+                    self.assertEqual(no_bootstrap_cleanup, "function")
+                    page.evaluate("""async () => {
+                        const { initSheets } = await import('/src/js/components/sheet.js');
+                        window.sheetCleanup = {
+                            document: initSheets(document),
+                            owner: initSheets(document.querySelector('.moo-ui')),
+                        };
+                        initSheets(document);
+                    }""")
+                    trigger = page.locator("#certification-sheet-trigger")
+                    sheet = page.locator("#certification-sheet")
+                    name_input = page.locator("#certification-sheet-name")
+                    name_input.evaluate("element => element.autofocus = true")
+                    for phase, action, focused in (
+                        ("initialized", "", name_input),
+                        ("independent root", "sheetCleanup.document(); sheetCleanup.document();", name_input),
+                        ("disposed", "sheetCleanup.owner(); sheetCleanup.owner();", sheet),
+                        ("reinitialized", """async () => {
+                            const { initSheets } = await import('/src/js/components/sheet.js');
+                            sheetCleanup.current = initSheets(document);
+                            sheetCleanup.document();
+                        }""", name_input),
+                        ("disposed again", "sheetCleanup.current();", sheet),
+                    ):
+                        with self.subTest(phase=phase):
+                            if action:
+                                page.evaluate(action)
+                            trigger.click()
+                            expect(focused).to_be_focused()
+                            page.keyboard.press("Escape")
+                            expect(sheet).not_to_be_visible()
+                            expect(trigger).to_be_focused()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_sheet_autofocus_runs_after_open_and_on_reopen(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
                 context = new_case_context(self.browser, case)
-                page = context.new_page()
-                evidence = BrowserEvidence(page)
-                page.goto(f"{self.base_url}/tests/fixtures/certification/sheet.html", wait_until="networkidle")
-                prepare_page(page, case)
-                trigger = page.locator("#certification-sheet-trigger")
-                sheet = page.locator("#certification-sheet")
-                name_input = page.locator("#certification-sheet-name")
-                name_input.evaluate("element => element.autofocus = true")
-                page.evaluate("""async () => {
-                    const { initSheets } = await import('/src/js/components/sheet.js');
-                    initSheets(document);
-                    initSheets(document);
-                }""")
-                for _ in range(2):
-                    name_input.evaluate("element => element.value = ''")
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/sheet.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    trigger = page.locator("#certification-sheet-trigger")
+                    sheet = page.locator("#certification-sheet")
+                    name_input = page.locator("#certification-sheet-name")
+                    name_input.evaluate("element => element.autofocus = true")
+                    page.evaluate("""async () => {
+                        const { initSheets } = await import('/src/js/components/sheet.js');
+                        initSheets(document);
+                        initSheets(document);
+                    }""")
+                    for _ in range(2):
+                        name_input.evaluate("element => element.value = ''")
+                        trigger.click()
+                        expect(name_input).to_be_focused()
+                        page.keyboard.type("Project")
+                        expect(name_input).to_have_value("Project")
+                        page.keyboard.press("Escape")
+                        expect(sheet).not_to_be_visible()
+                        expect(trigger).to_be_focused()
+                    name_input.evaluate("element => element.autofocus = false")
                     trigger.click()
-                    expect(name_input).to_be_focused()
-                    page.keyboard.type("Project")
-                    expect(name_input).to_have_value("Project")
+                    expect(sheet).to_be_focused()
                     page.keyboard.press("Escape")
-                    expect(sheet).not_to_be_visible()
                     expect(trigger).to_be_focused()
-                name_input.evaluate("element => element.autofocus = false")
-                trigger.click()
-                expect(sheet).to_be_focused()
-                page.keyboard.press("Escape")
-                expect(trigger).to_be_focused()
-                evidence.assert_clean()
-                context.close()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
 
     def test_sheet_fixture_proves_focus_backdrop_scroll_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:

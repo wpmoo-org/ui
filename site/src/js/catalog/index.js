@@ -158,7 +158,7 @@ export function initCatalog(root = document) {
 
   disposers.push(initCodePreview(root));
   disposers.push(initBootstrapPreview(root));
-  initSheets(root);
+  disposers.push(initSheets(root));
 
   const sidebarRoots = root.querySelectorAll(
     '[data-slot="sidebar-wrapper"][data-sidebar-key]',
