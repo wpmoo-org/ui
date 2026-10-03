@@ -1,8 +1,9 @@
 /*!
- * Moo UI sidebar.js v1.0.0-rc.10 (https://ui.wpmoo.org/)
- * Copyright 2026 WPMoo (https://wpmoo.org)
+ * Moo UI sidebar.js v1.0.0-rc.10 (https://wpmoo.org/)
+ * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  */
+
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
