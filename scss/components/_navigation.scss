@@ -1,8 +1,22 @@
 /* Navigation */
+$nav-step-icon-size: $spacer * 2 !default;
+$nav-step-gap: $spacer * 0.25 !default;
+$nav-step-border-color: var(--moo-border) !default;
+$nav-step-completed-border-color: var(--moo-primary) !default;
+// Bootstrap secondary-color aliases the muted foreground, which fails 4.5:1
+// on the active pill (4.39:1 in the accepted light fixture). Nav link-color
+// is full foreground. Match Choice Cards' readable, reduced-emphasis mix.
+$nav-link-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%, var(--moo-foreground)) !default;
+
 .nav {
   --bs-nav-link-color: var(--moo-foreground);
   --bs-nav-link-hover-color: var(--moo-foreground);
   --bs-nav-link-disabled-color: var(--moo-disabled-foreground);
+  --bs-nav-link-description-color: #{$nav-link-description-color};
+}
+
+.nav-link-description {
+  color: var(--bs-nav-link-description-color);
 }
 
 .nav-pills {
@@ -39,4 +53,66 @@
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
+}
+
+.nav-link-icon {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+// Bootstrap Nav has no step connector or framed icon scale. Keep the
+// extension on the same native Nav selectors and consumption variables.
+.nav-steps {
+  --bs-nav-step-icon-size: #{$nav-step-icon-size};
+  --bs-nav-step-gap: #{$nav-step-gap};
+
+  gap: var(--bs-nav-step-gap);
+
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-item:not(:only-child)::before {
+    position: absolute;
+    z-index: 1;
+    inset-inline-start: calc(var(--bs-nav-link-padding-x) + var(--bs-nav-step-icon-size) / 2);
+    inset-block: calc(var(--bs-nav-step-gap) / -2);
+    border-inline-start: var(--bs-border-width) solid $nav-step-border-color;
+    content: "";
+    pointer-events: none;
+  }
+
+  .nav-item:first-child::before {
+    inset-block-start: 50%;
+  }
+
+  .nav-item:last-child::before {
+    inset-block-end: 50%;
+  }
+
+  .nav-link-icon {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--bs-nav-step-icon-size);
+    inline-size: var(--bs-nav-step-icon-size);
+    block-size: var(--bs-nav-step-icon-size);
+    color: var(--moo-foreground);
+    background-color: var(--moo-muted-surface);
+    border: var(--bs-border-width) solid $nav-step-border-color;
+    border-radius: var(--bs-border-radius);
+  }
+
+  .nav-link.disabled .nav-link-icon {
+    color: var(--moo-disabled-foreground);
+  }
+
+  .nav-item[data-nav-completed="true"] .nav-link-icon {
+    color: var(--moo-primary-foreground);
+    background-color: var(--moo-primary);
+    border-color: $nav-step-completed-border-color;
+  }
 }

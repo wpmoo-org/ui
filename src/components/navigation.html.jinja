@@ -3,7 +3,8 @@
 {% set nav_styles = {
   "base": "nav",
   "pills": "nav nav-pills",
-  "underline": "nav nav-underline"
+  "underline": "nav nav-underline",
+  "steps": "nav nav-pills nav-steps flex-column"
 } %}
 
 {% set nav_directions = ["", "ltr", "rtl"] %}
@@ -13,7 +14,7 @@
   {% if style not in nav_styles %}{{ fail("Unknown navigation style: " ~ style) }}{% endif %}
   {% if dir not in nav_directions %}{{ fail("Unknown navigation direction: " ~ dir) }}{% endif %}
   {% set classes = nav_styles[style] %}
-  {% if vertical %}{% set classes = classes ~ " flex-column gap-1" %}{% endif %}
+  {% if vertical and style != "steps" %}{% set classes = classes ~ " flex-column gap-1" %}{% endif %}
   {% if extra_class %}{% set classes = classes ~ " " ~ extra_class %}{% endif %}
   <nav aria-label="{{ aria_label }}"{% if dir %} dir="{{ dir }}"{% endif %}>
     <ul class="{{ classes }}">
@@ -22,15 +23,19 @@
   </nav>
 {%- endmacro %}
 
-{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary") -%}
+{% macro nav_item(label, href="#", active=false, disabled=false, icon="", end_icon="", badge_label="", badge_variant="secondary", description="", completed=false, completed_label="Completed") -%}
   {% if not label | trim %}{{ fail("Navigation item label is required") }}{% endif %}
   {% set classes = "nav-link" %}
   {% if active %}{% set classes = classes ~ " active" %}{% endif %}
   {% if disabled %}{% set classes = classes ~ " disabled" %}{% endif %}
-  <li class="nav-item">
+  <li class="nav-item"{% if completed %} data-nav-completed="true"{% endif %}>
     <a class="{{ classes }}"{% if not disabled %} href="{{ href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}{% if active %} aria-current="page"{% endif %}>
-      {% if icon %}{{ render_icon(icon, "inline-start") }}{% endif %}
-      <span>{{ label }}</span>
+      {% if icon %}<span class="nav-link-icon" aria-hidden="true">{{ render_icon(icon, "inline-start") }}</span>{% endif %}
+      <span>
+        {{ label }}
+        {% if description %}<span class="nav-link-description d-block small">{{ description }}</span>{% endif %}
+        {% if completed %}<span class="visually-hidden">{{ completed_label }}</span>{% endif %}
+      </span>
       {% if badge_label %}{{ badge(badge_label, variant=badge_variant, pill=true, extra_class="ms-auto") }}{% endif %}
       {% if end_icon %}<span class="ms-auto">{{ render_icon(end_icon, "inline-end") }}</span>{% endif %}
     </a>

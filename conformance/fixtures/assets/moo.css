@@ -4743,6 +4743,10 @@ label.btn {
     --bs-nav-link-color: var(--moo-foreground);
     --bs-nav-link-hover-color: var(--moo-foreground);
     --bs-nav-link-disabled-color: var(--moo-disabled-foreground);
+    --bs-nav-link-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%, var(--moo-foreground));
+  }
+  .nav-link-description {
+    color: var(--bs-nav-link-description-color);
   }
   .nav-pills {
     --bs-nav-pills-border-radius: var(--bs-border-radius);
@@ -4767,6 +4771,56 @@ label.btn {
     width: 1rem;
     height: 1rem;
     flex: 0 0 auto;
+  }
+  .nav-link-icon {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+  .nav-steps {
+    --bs-nav-step-icon-size: 2rem;
+    --bs-nav-step-gap: 0.25rem;
+    gap: var(--bs-nav-step-gap);
+  }
+  .nav-steps .nav-item {
+    position: relative;
+  }
+  .nav-steps .nav-item:not(:only-child)::before {
+    position: absolute;
+    z-index: 1;
+    inset-inline-start: calc(var(--bs-nav-link-padding-x) + var(--bs-nav-step-icon-size) / 2);
+    inset-block: calc(var(--bs-nav-step-gap) / -2);
+    border-inline-start: var(--bs-border-width) solid var(--moo-border);
+    content: "";
+    pointer-events: none;
+  }
+  .nav-steps .nav-item:first-child::before {
+    inset-block-start: 50%;
+  }
+  .nav-steps .nav-item:last-child::before {
+    inset-block-end: 50%;
+  }
+  .nav-steps .nav-link-icon {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--bs-nav-step-icon-size);
+    inline-size: var(--bs-nav-step-icon-size);
+    block-size: var(--bs-nav-step-icon-size);
+    color: var(--moo-foreground);
+    background-color: var(--moo-muted-surface);
+    border: var(--bs-border-width) solid var(--moo-border);
+    border-radius: var(--bs-border-radius);
+  }
+  .nav-steps .nav-link.disabled .nav-link-icon {
+    color: var(--moo-disabled-foreground);
+  }
+  .nav-steps .nav-item[data-nav-completed="true"] .nav-link-icon {
+    color: var(--moo-primary-foreground);
+    background-color: var(--moo-primary);
+    border-color: var(--moo-primary);
   }
 
   /* Skeleton */
