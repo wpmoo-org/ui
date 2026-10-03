@@ -1177,6 +1177,8 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(sheet["namedExports"], ["initSheets"])
         self.assertIn(sheet["export"], certification["publicEntrypoints"]["esm"])
         aggregate = next(record for record in freeze["esmModules"] if record["module"] == "moo-ui.js")
+        self.assertEqual(aggregate["lazyModules"], {"loadChart": "./chart.js"})
+        self.assertNotIn("runtime", aggregate)
         imported = subprocess.run(
             ["node", "--input-type=module", "--eval",
              'import * as api from "./src/js/moo-ui.js"; '

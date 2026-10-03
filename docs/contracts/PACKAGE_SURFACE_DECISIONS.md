@@ -10,6 +10,18 @@ side-effect-free `./sheet.js` ESM entrypoint and the aggregate's named
 `initSheets(root)` export. Initialization is explicit and delegates opening to
 Bootstrap Offcanvas; importing the module never scans the document.
 
+On 2026-10-03 the maintainer approved deferring Chart dependencies until use.
+The aggregate replaces its synchronous named/default-namespace `Chart` export
+with `loadChart()`, which returns a promise for the standalone Moo Chart
+constructor. Both aggregate variants dynamically import the adjacent
+`chart.js`; repeated calls use the native ESM module cache and share the direct
+module's instance registry. Hosts must keep that asset beside the aggregate and
+handle any rejected loading promise. The standalone `chart.js`/`chart.min.js`
+APIs and package file/export paths remain unchanged. Chart.js and its color
+dependency are bundled only into the standalone Chart assets, retaining their
+license notices there. Historical aggregate records describe the earlier
+synchronous API; the current RC10 freeze records this approved migration.
+
 The current API inventory records the exact package exports/files and runtime
 exports. Historical freezes remain removal guards. Radio Group choice cards,
 responsive DataTable behavior and Body typography consume the existing CSS/Sass

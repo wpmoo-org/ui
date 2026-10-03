@@ -1,7 +1,7 @@
 {
   "freezeVersion": "1.0.0-rc.10",
-  "frozenAt": "2026-10-02",
-  "description": "API inventory for the 1.0.0-rc.10 release candidate. RC10 retains the RC9 state bootstrap and artifact manifest, adds the explicit Sheet initializer, and carries the accepted Radio Group choice cards, responsive DataTable and configurable Body typography contracts. The export and package-file inventory, Sass allow-list, ESM records, Bootstrap support, and artifact relationships are traceable to this document and docs/contracts/PACKAGE_SURFACE_DECISIONS.md.",
+  "frozenAt": "2026-10-03",
+  "description": "API inventory for the 1.0.0-rc.10 release candidate. RC10 retains the RC9 state bootstrap and artifact manifest, adds the explicit Sheet initializer, and carries the accepted Radio Group choice cards, responsive DataTable and configurable Body typography contracts. The export and package-file inventory, Sass allow-list, ESM records, Bootstrap support, and artifact relationships are traceable to this document and docs/contracts/PACKAGE_SURFACE_DECISIONS.md. The maintainer-approved aggregate Chart migration replaces its synchronous Chart export with loadChart(), loading the standalone Chart asset only on demand.",
   "packageExports": [
     "./moo-ui.css",
     "./moo-ui.min.css",
@@ -106,16 +106,15 @@
       "lifecycle": [
         "side-effect-free import",
         "default namespace export",
-        "named lifecycle class exports"
+        "named lifecycle class exports",
+        "explicit asynchronous Chart loader"
       ],
       "source": "src/js/moo-ui.js",
       "bundled": true,
       "buildTool": "esbuild",
-      "runtime": "chart.js@4.5.1",
-      "note": "Convenience aggregate for all optional Moo UI ESM modules; importing it never scans the document automatically",
+      "note": "Side-effect-free convenience aggregate; loadChart() returns a promise for the adjacent chart.js default export. Both aggregate variants use the same Chart module; no Chart.js runtime is included in the aggregate.",
       "defaultExport": "MooUI",
       "namedExports": [
-        "Chart",
         "Combobox",
         "ContextMenu",
         "DataTable",
@@ -124,8 +123,12 @@
         "MooDateRangePicker",
         "Sidebar",
         "Slider",
-        "initSheets"
-      ]
+        "initSheets",
+        "loadChart"
+      ],
+      "lazyModules": {
+        "loadChart": "./chart.js"
+      }
     },
     {
       "module": "combobox.js",

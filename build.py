@@ -2105,8 +2105,14 @@ def _bundle_module(
     ]
     if module_name != "state.js":
         cmd.append("--format=esm")
+    if module_name in AGGREGATE_JS_MODULES:
+        cmd.append("--external:./chart.js")
+    if bundle:
+        cmd.append("--legal-comments=external")
     if minify:
-        cmd.extend(["--supported:template-literal=false", "--legal-comments=eof"])
+        cmd.append("--supported:template-literal=false")
+        if not bundle:
+            cmd.append("--legal-comments=eof")
     if keep_names:
         cmd.append("--keep-names")
 
@@ -2125,11 +2131,21 @@ def _bundle_module(
             f"stderr: {result.stderr}"
         )
 
-    if minify:
+    if bundle:
+        notice_output = output.with_name(output.name + ".LEGAL.txt")
+        notices = notice_output.read_text(encoding="utf-8") if notice_output.is_file() else ""
+        notice_output.unlink(missing_ok=True)
+        if notices.strip():
+            # The bundler has already separated real legal comments from code.
+            # Escape their delimiters when wrapping the unchanged notice text.
+            notices = notices.strip().replace("/*", "(*").replace("*/", "*)")
+            source = output.read_text(encoding="utf-8")
+            output.write_text("/*! " + notices + "\n*/\n\n" + source, encoding="utf-8")
+    elif minify:
         body, _, notices = output.read_text(encoding="utf-8").partition("\n")
         header = notices.strip() + "\n\n" if notices.strip() else ""
         output.write_text(header + body + "\n", encoding="utf-8")
-    else:
+    if not minify:
         _normalize_esbuild_module_comments(output)
     apply_js_license_banner(output, output_name)
 

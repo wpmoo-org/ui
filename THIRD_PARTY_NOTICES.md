@@ -46,6 +46,19 @@ Moo UI bundles Chart.js into the published `@wpmoo/ui` ESM outputs at build time
 Only the JavaScript runtime is bundled. Chart.js's default CSS is not imported
 or shipped.
 
+The complete upstream MIT license is also retained in the published `LICENSE`.
+Both standalone Chart variants carry their bundled dependency notices before
+executable code. The aggregate loads the standalone Chart module on demand.
+
+## @kurkle/color
+
+Chart.js bundles `@kurkle/color` v0.3.4 into the same standalone Chart outputs.
+It is licensed under MIT, with copyright belonging to Jukka Kurkela. Its
+original MIT license text is retained in the published `LICENSE`; the upstream
+copyright notice is preserved in both Chart output headers.
+
+- **Source:** <https://github.com/kurkle/color>
+
 ## WPMoo visual assets
 
 WPMoo-generated visual assets, including image assets under `site/static/images/`,

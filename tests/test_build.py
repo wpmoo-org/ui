@@ -585,6 +585,25 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 self.assertTrue(content.startswith(expected_banner))
                 self.assertEqual(content.count(expected_banner), 1)
 
+    def test_chart_variants_preserve_identical_dependency_notices_at_the_top(self) -> None:
+        self.require_full_build()
+        notices = []
+        for filename in ("chart.js", "chart.min.js"):
+            with self.subTest(module=filename):
+                source = (PACKAGE_DIST / "js" / filename).read_text(encoding="utf-8")
+                own_banner = build.js_license_banner(filename)
+                self.assertTrue(source.startswith(own_banner + "\n"))
+                remainder = source[len(own_banner):].lstrip()
+                match = re.match(r"/\*! Bundled license information:.*?\*/", remainder, re.DOTALL)
+                self.assertIsNotNone(match, "Dependency notices must precede executable code")
+                notice = match.group(0)
+                for upstream in ("@kurkle/color v0.3.4", "Chart.js v4.5.1"):
+                    self.assertIn(upstream, notice)
+                self.assertEqual(source.count(notice), 1)
+                notices.append(notice)
+        self.assertEqual(len(notices), 2)
+        self.assertEqual(notices[0], notices[1])
+
     def test_bundled_module_comments_are_path_stable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "chart.js"
@@ -668,6 +687,30 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
         self.assertTrue((PACKAGE_DIST / "js/slider.js").is_file())
         self.assertFalse((PACKAGE_DIST / "js/slider.min.js").exists())
 
+    def test_aggregate_chart_loader_requires_the_separate_chart_asset(self) -> None:
+        self.require_full_build()
+        for filename in ("moo-ui.js", "moo-ui.min.js"):
+            with self.subTest(module=filename), tempfile.TemporaryDirectory() as temp:
+                directory = Path(temp)
+                (directory / "package.json").write_text('{"type":"module"}\n')
+                shutil.copy2(PACKAGE_DIST / "js" / filename, directory / filename)
+                result = subprocess.run(
+                    ["node", "--input-type=module", "--eval", """
+                    import assert from "node:assert/strict";
+                    const api = await import(process.argv[1]);
+                    assert.equal(typeof api.loadChart, "function");
+                    assert.equal(api.default.loadChart, api.loadChart);
+                    assert.equal(typeof api.Combobox.getOrCreateInstance, "function");
+                    assert.equal("Chart" in api, false);
+                    await assert.rejects(api.loadChart(), {code: "ERR_MODULE_NOT_FOUND"});
+                    """, (directory / filename).as_uri()],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=20,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_canonical_and_minified_bundles_have_equivalent_exports(self) -> None:
         """Canonical and minified bundles must expose the same public API.
 
@@ -699,7 +742,6 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "    'Sidebar',"
                     "    'ContextMenu',"
                     "    'DataTable',"
-                    "    'Chart',"
                     "    'Datepicker',"
                     "    'Slider'"
                     "  ];"
@@ -710,6 +752,12 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "        typeof m.default[key].getOrCreateInstance !== 'function') {"
                     "      console.error(`Moo UI aggregate default export is missing ${key}`);"
                     "      process.exit(1);"
+                    "    }"
+                    "  }"
+                    "  for (const api of [c, m]) {"
+                    "    if (typeof api.loadChart !== 'function' ||"
+                    "        api.default.loadChart !== api.loadChart) {"
+                    "      throw new Error('Moo UI aggregate is missing loadChart');"
                     "    }"
                     "  }"
                     "}"
