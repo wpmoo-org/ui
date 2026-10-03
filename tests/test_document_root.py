@@ -117,12 +117,21 @@ class DocumentRootTests(unittest.TestCase):
 
         state_script = owner.children[0]
         self.assertEqual(state_script.tag, "script")
-        self.assertNotIn("src", state_script.attrs)
+        self.assertNotIn("async", state_script.attrs)
         self.assertNotIn("defer", state_script.attrs)
-        self.assertIn(
-            "const owner = ownerDocument?.currentScript?.parentElement",
-            source,
+        self.assertNotEqual(state_script.attrs.get("type"), "module")
+        self.assertRegex(
+            state_script.attrs["src"],
+            r"^(?:\.\./)*assets/js/state\.js\?v=.+$",
         )
+        preloads = [
+            node for node in nodes
+            if node.tag == "link"
+            and node.attrs.get("rel") == "preload"
+            and node.attrs.get("as") == "script"
+            and node.attrs.get("href") == state_script.attrs["src"]
+        ]
+        self.assertTrue(preloads)
 
         skip_links = [
             node
@@ -149,23 +158,21 @@ class DocumentRootTests(unittest.TestCase):
         source, root = self.parse_page("introduction/index.html")
         body, owner = self.assert_document_owner(source, root)
 
-        canonical = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
-        owner_start = source.index('data-moo-document-owner="true"')
-        owner_script = source.index("<script>", owner_start)
-        owner_end = source.index("</script>", owner_script)
-        self.assertEqual(source[owner_script + len("<script>") : owner_end], canonical)
+        self.assertEqual(
+            (SITE_DIST / "assets/js/state.js").read_bytes(),
+            (ROOT / "dist/js/state.js").read_bytes(),
+        )
 
         wrapper = next(
             node for node in elements(owner)
             if node.attrs.get("data-sidebar-key") == "catalog-shell"
         )
         self.assertEqual(wrapper.children[0].tag, "script")
-        self.assertNotIn("src", wrapper.children[0].attrs)
-        wrapper_start = source.index('data-sidebar-key="catalog-shell"')
-        wrapper_script = source.index("<script>", wrapper_start)
-        wrapper_end = source.index("</script>", wrapper_script)
-        self.assertEqual(source[wrapper_script + len("<script>") : wrapper_end], canonical)
-        self.assertLess(wrapper_end, source.index('id="catalog-sidebar"'))
+        self.assertEqual(wrapper.children[0].attrs["src"], owner.children[0].attrs["src"])
+        self.assertNotIn("async", wrapper.children[0].attrs)
+        self.assertNotIn("defer", wrapper.children[0].attrs)
+        self.assertNotEqual(wrapper.children[0].attrs.get("type"), "module")
+        self.assertEqual(wrapper.children[1].attrs.get("id"), "catalog-sidebar")
 
         catalog = next(node for node in elements(owner) if has_class(node, "moo-catalog"))
         catalog_state = next(

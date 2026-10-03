@@ -20,7 +20,8 @@
   aria_label="Sidebar",
   aria_labelled_by="",
   shell_mode="viewport",
-  id=""
+  id="",
+  state_src=""
 ) -%}
   {% if navigation not in app_navigation_values %}
     {{ fail("Unknown app navigation: " ~ navigation) }}
@@ -45,6 +46,9 @@
   {% endif %}
   {% if aria_label is not string or aria_labelled_by is not string %}
     {{ fail("App accessibility labels must be strings") }}
+  {% endif %}
+  {% if state_src is not string %}
+    {{ fail("App state_src must be a string") }}
   {% endif %}
 
   {% if id is not string %}
@@ -134,7 +138,11 @@
     {% endif %}
   >
     {% if navigation == "sidebar" %}
-      <script>{{ state_source() }}</script>
+      {% if state_src %}
+        <script src="{{ state_src }}"></script>
+      {% else %}
+        <script>{{ state_source() }}</script>
+      {% endif %}
       {% set sidebar_side_class = "offcanvas-end" if side == "right" else "offcanvas-start" %}
       <aside
         id="{{ sidebar_id }}"

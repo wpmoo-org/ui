@@ -17,7 +17,8 @@
       sidebar_id="catalog-sidebar",
       variant="sidebar",
       aria_label="Catalog navigation",
-      shell_mode="viewport"
+      shell_mode="viewport",
+      state_src=root_path ~ "assets/js/state.js?v=" ~ asset_version
     ) %}
       {% if slot == "sidebar" %}
         {{ render_catalog_sidebar() }}

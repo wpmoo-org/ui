@@ -15,6 +15,7 @@ from tests.helpers import (
     ICONS,
     PNG_COLOR_TYPE_RGBA,
     ROOT,
+    SITE_DIST,
     STATIC,
     CatalogTestCase,
     codepen_payload_from_output,
@@ -2042,49 +2043,42 @@ class CatalogContractTests(CatalogTestCase):
             r'<div\s+class="moo-ui"\s+data-bs-theme="\{\{ resolved_theme \}\}"\s+data-moo-document-owner="true"\s*>',
         )
         self.assertIn(
-            "<script>{{ state_source() }}</script>",
+            '<script src="{{ root_path }}assets/js/state.js?v={{ asset_version }}"></script>',
             base,
         )
+        owner_script = base.index('<script src="{{ root_path }}assets/js/state.js?')
         self.assertLess(
             base.index('data-bs-theme="{{ resolved_theme }}"'),
-            base.index("state_source"),
+            owner_script,
         )
         self.assertLess(
-            base.index("state_source"),
+            owner_script,
             base.index('href="#main-content"'),
         )
-        self.assertNotIn('assets/js/state.js?', base)
         self.assertNotIn("body.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
 
-    def test_base_layout_inlines_the_canonical_owner_state_source(self) -> None:
-        canonical = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
-        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(
-            encoding="utf-8"
-        )
-
-        self.assertIn('data-moo-document-owner="true"', base)
+    def test_base_layout_loads_the_same_state_asset_at_each_route_depth(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
-
-        page = self.read_output("introduction/index.html")
-        owner_match = re.search(
-            r'<div\s+class="moo-ui"\s+data-bs-theme="(?:light|dark)"\s+data-moo-document-owner="true"\s*>',
-            page,
-        )
-        self.assertIsNotNone(owner_match)
-        assert owner_match is not None
-        owner_start = owner_match.start()
-        first_child_start = page.index("<script>", owner_start)
-        script_end = page.index("</script>", first_child_start)
-        self.assertEqual(
-            page[first_child_start + len("<script>") : script_end],
-            canonical,
-        )
-        self.assertLess(owner_start, first_child_start)
-        self.assertLess(first_child_start, page.index("Skip to component content"))
+        for path in ("index.html", "introduction/index.html", "components/alert/index.html"):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                owner_match = re.search(
+                    r'data-moo-document-owner="true"\s*>\s*<script src="([^"]+)"></script>',
+                    page,
+                )
+                self.assertIsNotNone(owner_match)
+                assert owner_match is not None
+                url = owner_match.group(1)
+                self.assertIn(f'<link rel="preload" href="{url}" as="script">', page)
+                self.assertEqual(
+                    (SITE_DIST / path).parent.joinpath(url.split("?", 1)[0]).resolve(),
+                    (SITE_DIST / "assets/js/state.js").resolve(),
+                )
+                self.assertLess(owner_match.end(), page.index("Skip to component content"))
 
     def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")

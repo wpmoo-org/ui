@@ -21,6 +21,7 @@
     <link rel="icon" href="{{ root_path }}favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="{{ root_path }}apple-touch-icon.png">
     <link rel="manifest" href="{{ root_path }}site.webmanifest">
+    <link rel="preload" href="{{ root_path }}assets/js/state.js?v={{ asset_version }}" as="script">
     {% block critical_state_styles %}{% endblock %}
     {% block font_preload %}
     <link rel="preload" href="{{ root_path }}assets/fonts/geist/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -37,7 +38,7 @@
       data-bs-theme="{{ resolved_theme }}"
       data-moo-document-owner="true"
     >
-      <script>{{ state_source() }}</script>
+      <script src="{{ root_path }}assets/js/state.js?v={{ asset_version }}"></script>
       {% block owner_state %}{% endblock %}
       <a class="visually-hidden-focusable" href="#main-content">
         Skip to component content

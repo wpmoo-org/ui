@@ -112,6 +112,14 @@ There are two supported first-paint profiles:
   in browser storage, so the server value is the deterministic fallback for
   this profile.
 
+The catalog uses the external profile. It preloads its versioned `state.js`
+URL in the head and invokes that same classic asset as the first child of both
+the document owner and keyed Sidebar wrapper. The Jinja `app` macro accepts
+`state_src` for this external integration; omitting it retains the canonical
+inline profile. Neither invocation uses `async`, `defer`, or `type="module"`.
+Visible content is parsed after state restoration; a cold request can still
+delay content and show the server background while it loads.
+
 Neither profile mirrors Bootstrap theme state to `html` or `body`. The
 bootstrap updates `html[dir]` only for the complete-document owner and uses an
 owner `dir` only for embedded subtree overrides. `blocking="render"` is not a
