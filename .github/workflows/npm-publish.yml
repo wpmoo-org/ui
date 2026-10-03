@@ -121,13 +121,13 @@ jobs:
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Verify package contents
+      - name: Verify prepared release package
         if: steps.package.outputs.published == 'false'
-        run: npm pack --dry-run
+        run: python scripts/verify_package_contents.py --package "./dist/rc-rehearsal/wpmoo-ui-${{ steps.package.outputs.version }}.tgz"
 
       - name: Publish to npm
         if: steps.package.outputs.published == 'false'
-        run: npm publish --access public --provenance --tag "${{ steps.package.outputs.npm_tag }}"
+        run: npm publish "./dist/rc-rehearsal/wpmoo-ui-${{ steps.package.outputs.version }}.tgz" --access public --provenance --tag "${{ steps.package.outputs.npm_tag }}"
 
       - name: Create GitHub release notes
         if: startsWith(steps.package.outputs.tag, 'v')

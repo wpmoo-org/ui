@@ -39,6 +39,30 @@ package build. The `site/` tree owns ui.wpmoo.org templates, catalog chrome,
 metadata, and preview artwork. Do not move site-only assets into the package or
 describe internal Jinja macros as npm APIs.
 
+## Release Package
+
+Prepare release archives from the repository root:
+
+```bash
+.venv/bin/python build.py --core
+.venv/bin/python scripts/package_release.py --pack-destination dist/npm-release
+```
+
+The packer preserves checkout sources and public Sass paths. Distributed
+SCSS omits silent `//` comments and retains `/* ... */` comments. Expanded
+CSS includes section headings; minified CSS retains license notices only.
+Component headings belong in their own partials; import aggregates have only
+group headings. All CSS outputs start with one license block containing Moo UI
+followed by Bootstrap, with a blank line between them.
+Sass-only guidance uses silent comments. Public JavaScript is formatted with
+the locked esbuild; minified JavaScript keeps readable license notices above
+a single-line body while preserving multiline and tagged string values.
+
+The release tier prepares and verifies the archive under `dist/rc-rehearsal/`.
+The publish workflow uses that exact archive. Manual publication must also
+use an explicit prepared tarball path, with `--tag rc` for prereleases and
+`--tag latest` for stable versions. Raw `npm pack` remains an inventory check.
+
 ## Verification
 
 Run the narrowest relevant test first, then expand before asking for review:

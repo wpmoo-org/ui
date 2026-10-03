@@ -41,7 +41,7 @@ def load_attestation_generator():
 
 def pack_tarball(destination: Path) -> Path:
     completed = subprocess.run(
-        ["npm", "pack", "--json", "--pack-destination", str(destination)],
+        [sys.executable, "scripts/package_release.py", "--pack-destination", str(destination)],
         cwd=ROOT,
         check=False,
         capture_output=True,

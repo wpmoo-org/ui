@@ -176,7 +176,7 @@ class PackageMetadataTests(unittest.TestCase):
         temporary_root: Path,
     ) -> tuple[Path, Path, Path]:
         pack_result = subprocess.run(
-            ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
+            [sys.executable, "scripts/package_release.py", "--pack-destination", str(temporary_root)],
             cwd=ROOT,
             check=False,
             capture_output=True,
@@ -385,7 +385,7 @@ class PackageMetadataTests(unittest.TestCase):
     def test_release_manifest_hashes_match_raw_packed_member_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             pack_result = subprocess.run(
-                ["npm", "pack", "--json", "--pack-destination", temporary_directory],
+                [sys.executable, "scripts/package_release.py", "--pack-destination", temporary_directory],
                 cwd=ROOT,
                 check=False,
                 capture_output=True,
@@ -815,6 +815,38 @@ for (const specifier of [
                         "Undefined variable", str(leak_context.exception)
                     )
 
+    def test_packed_scss_removes_silent_comments_without_changing_compilation(self) -> None:
+        import build
+        import sass
+        from scripts.style_comments import space_css_comment_blocks
+
+        originals = {
+            path: (ROOT / path).read_bytes()
+            for path in EXPECTED_SCSS_SOURCE_FILES
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            consumer, installed, _ = self._install_clean_consumer_with_bootstrap_scss(
+                Path(temporary_directory)
+            )
+            config = (installed / "scss/_config.scss").read_text(encoding="utf-8")
+            self.assertNotIn("// Brand color", config)
+            self.assertIn("$primary: #171717 !default;", config)
+            self.assertIn("/*!", (installed / "scss/mixins/_banner.scss").read_text())
+            for name in ("moo-ui.scss", "moo-core.scss"):
+                with self.subTest(entrypoint=name):
+                    compiled = sass.compile(
+                        filename=str(installed / "scss" / name),
+                        include_paths=[str(installed / "scss"), str(consumer / "node_modules")],
+                        output_style="expanded",
+                    )
+                    self.assertEqual(
+                        space_css_comment_blocks(compiled),
+                        build.compile_style(ROOT / "scss" / name),
+                    )
+        for path, content in originals.items():
+            with self.subTest(source=path):
+                self.assertEqual((ROOT / path).read_bytes(), content)
+
     def test_sass_source_entrypoints_compile_from_a_clean_consumer(self) -> None:
         """Published Sass source entrypoints must resolve from an npm layout."""
         import sass
@@ -977,7 +1009,7 @@ for (const specifier of [
                     )
 
         self.assertIn(
-            'npm publish --access public --provenance --tag '
+            'npm publish "./dist/rc-rehearsal/wpmoo-ui-${{ steps.package.outputs.version }}.tgz" --access public --provenance --tag '
             '"${{ steps.package.outputs.npm_tag }}"',
             workflow,
         )

@@ -531,9 +531,8 @@ class CertificationContractTests(unittest.TestCase):
             temporary_root = Path(temporary_directory)
             pack_result = subprocess.run(
                 [
-                    "npm",
-                    "pack",
-                    "--json",
+                    sys.executable,
+                    "scripts/package_release.py",
                     "--pack-destination",
                     str(temporary_root),
                 ],

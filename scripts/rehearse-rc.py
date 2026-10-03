@@ -146,9 +146,8 @@ def step_collect_tarball() -> Path:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     pack = run(
         [
-            "npm",
-            "pack",
-            "--json",
+            sys.executable,
+            "scripts/package_release.py",
             "--pack-destination",
             str(OUT_DIR),
         ]

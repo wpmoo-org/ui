@@ -79,8 +79,12 @@ RELEASE_PATTERNS = [
     "scripts/rehearse-rc.py",
     "scripts/build-certification-*",
     "scripts/package-conformance-kit.py",
+    "scripts/package_release.py",
+    "scripts/style_comments.py",
     "scripts/verify_package_contents.py",
     "tests/test_package.py",
+    "tests/test_package_release.py",
+    "tests/test_style_comments.py",
     "tests/test_rehearse_rc.py",
     "tests/test_certification_contract.py",
     "tests/test_certification_manifest.py",
@@ -221,6 +225,20 @@ TARGETED_MODULE_RULES = [
     (
         ["scripts/verify_package_contents.py"],
         ["tests.test_package"],
+    ),
+    (
+        [
+            ".github/workflows/npm-publish.yml", "scripts/package_release.py",
+            "scripts/verify_package_contents.py", "tests/test_package_release.py",
+        ],
+        ["tests.test_package_release"],
+    ),
+    (
+        [
+            "build.py", "package.json", "scss/**", "scripts/style_comments.py",
+            "tests/test_style_comments.py",
+        ],
+        ["tests.test_style_comments"],
     ),
 ]
 
