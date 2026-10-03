@@ -561,8 +561,8 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(
             entrypoint_imports["moo-ui.scss"],
             [
-                "settings",
                 "mixins/banner",
+                "settings",
                 "bootstrap/scss/functions",
                 "bootstrap/scss/variables",
                 "bootstrap/scss/variables-dark",
@@ -608,6 +608,7 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(
             entrypoint_imports["moo-core.scss"],
             [
+                "mixins/banner",
                 "settings/options",
                 "bootstrap/scss/functions",
                 "settings",
