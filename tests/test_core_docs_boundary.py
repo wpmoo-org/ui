@@ -29,6 +29,7 @@ CORE_OUTPUTS = {
     "dist/js/datatable.js",
     "dist/js/sidebar.js",
     "dist/js/slider.js",
+    "dist/js/sheet.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
@@ -161,6 +162,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/datatable.js",
             "js/sidebar.js",
             "js/slider.js",
+            "js/sheet.js",
             "js/moo-ui.js",
             "js/moo-ui.min.js",
             "js/chart.js",
@@ -191,6 +193,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
             "js/datatable.js",
             "js/sidebar.js",
             "js/slider.js",
+            "js/sheet.js",
             "js/moo-ui.js",
             "js/moo-ui.min.js",
             "js/chart.js",
@@ -448,7 +451,7 @@ class CoreDocsBoundaryTests(unittest.TestCase):
 
     def test_public_policy_docs_track_current_release_candidate_line(self) -> None:
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.0.0-rc.9")
+        self.assertEqual(package["version"], "1.0.0-rc.10")
 
         for relative in ("SUPPORT.md", "SECURITY.md"):
             with self.subTest(relative=relative):

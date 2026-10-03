@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -17,7 +18,7 @@ class BuildTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_render_pages_accepts_precomputed_theme_builder_state(
+    def test_catalog_theme_script_accepts_precomputed_theme_builder_state(
         self,
     ) -> None:
         state = {
@@ -32,7 +33,7 @@ class BuildTests(CatalogTestCase):
                 "radius": "default",
             },
             "options": {
-                "baseColor": ["neutral"],
+                "baseColor": ["neutral", "mist"],
                 "themeColor": ["neutral"],
                 "chartColor": ["neutral"],
                 "headingFont": ["default"],
@@ -46,14 +47,36 @@ class BuildTests(CatalogTestCase):
             with (
                 mock.patch.object(build, "SITE_DIST", Path(tempdir)),
                 mock.patch.object(
-                    build.subprocess,
-                    "run",
+                    build,
+                    "theme_builder_first_paint_payload",
                     side_effect=AssertionError(
-                        "render_pages must not spawn a Theme Builder process"
+                        "The script must reuse the precomputed Theme Builder configuration"
                     ),
                 ),
             ):
-                build.render_pages(version="test", theme_builder_state=state)
+                output = build.write_catalog_theme_state_js(state)
+                self.assertTrue(output.read_text(encoding="utf-8").startswith("/*!"))
+                completed = subprocess.run(
+                    [
+                        "node", "--input-type=module", "--eval", """
+                        import fs from "node:fs";
+                        import vm from "node:vm";
+                        const owner = {matches: () => true, dataset: {}};
+                        vm.runInNewContext(fs.readFileSync(process.argv[1], "utf8"), {
+                          document: {currentScript: {parentElement: owner}},
+                          window: {localStorage: {getItem: () => JSON.stringify({baseColor: "mist"})}},
+                        });
+                        console.log(JSON.stringify(owner.dataset));
+                        """, str(output),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                self.assertEqual(
+                    json.loads(completed.stdout)["mooCatalogThemeBuilderBaseColor"], "mist",
+                )
 
     def test_catalog_state_css_is_owner_scoped_and_allowlisted(self) -> None:
         payload = {
@@ -210,6 +233,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "catalog state js"),
+                ("assets/js/catalog-theme-state.js", "catalog theme state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
@@ -242,6 +266,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "initial state js"),
+                ("assets/js/catalog-theme-state.js", "catalog theme state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
@@ -273,6 +298,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "catalog state js"),
+                ("assets/js/catalog-theme-state.js", "catalog theme state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
@@ -283,11 +309,12 @@ class BuildTests(CatalogTestCase):
             original_site_dist = build.SITE_DIST
             try:
                 build.SITE_DIST = site_dist
-                original_version = build.asset_version()
                 for relative in (
                     "assets/js/state.js",
                     "assets/js/theme-owner.js",
+                    "assets/js/catalog-theme-state.js",
                 ):
+                    original_version = build.asset_version()
                     target = site_dist / relative
                     target.write_text(
                         f"changed {relative}", encoding="utf-8"
@@ -535,6 +562,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "sheet.js",
+            "state.js",
             "moo-ui.js",
             "moo-ui.min.js",
             "chart.js",
@@ -545,8 +574,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             with self.subTest(module=module_name):
                 expected_banner = (
                     "/*!\n"
-                    f" * Moo UI {module_name} v{package['version']} (https://ui.wpmoo.org/)\n"
-                    " * Copyright 2026 WPMoo (https://wpmoo.org)\n"
+                    f" * Moo UI {module_name} v{package['version']} (https://wpmoo.org/)\n"
+                    " * Copyright 2026 WPMoo Authors\n"
                     " * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)\n"
                     " */\n"
                 )
@@ -555,6 +584,25 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 )
                 self.assertTrue(content.startswith(expected_banner))
                 self.assertEqual(content.count(expected_banner), 1)
+
+    def test_chart_variants_preserve_identical_dependency_notices_at_the_top(self) -> None:
+        self.require_full_build()
+        notices = []
+        for filename in ("chart.js", "chart.min.js"):
+            with self.subTest(module=filename):
+                source = (PACKAGE_DIST / "js" / filename).read_text(encoding="utf-8")
+                own_banner = build.js_license_banner(filename)
+                self.assertTrue(source.startswith(own_banner + "\n"))
+                remainder = source[len(own_banner):].lstrip()
+                match = re.match(r"/\*! Bundled license information:.*?\*/", remainder, re.DOTALL)
+                self.assertIsNotNone(match, "Dependency notices must precede executable code")
+                notice = match.group(0)
+                for upstream in ("@kurkle/color v0.3.4", "Chart.js v4.5.1"):
+                    self.assertIn(upstream, notice)
+                self.assertEqual(source.count(notice), 1)
+                notices.append(notice)
+        self.assertEqual(len(notices), 2)
+        self.assertEqual(notices[0], notices[1])
 
     def test_bundled_module_comments_are_path_stable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -583,11 +631,85 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                 ],
             )
 
+    def test_published_js_is_readable_and_minified_bodies_have_one_line(self) -> None:
+        self.require_full_build()
+        for path in sorted((PACKAGE_DIST / "js").glob("*.js")):
+            with self.subTest(module=path.name):
+                source = path.read_text(encoding="utf-8")
+                body = re.sub(r"\A(?:/\*!.*?\*/\s*)+", "", source, flags=re.DOTALL)
+                self.assertTrue(source.startswith("/*!\n * Moo UI "))
+                self.assertTrue(source.endswith("\n"))
+                self.assertNotIn("\r", source)
+                if path.name.endswith(".min.js"):
+                    self.assertEqual(len(body.strip().splitlines()), 1)
+                else:
+                    self.assertGreater(len(body.splitlines()), 2)
+                    self.assertTrue(any(line.startswith("  ") for line in body.splitlines()))
+                    self.assertFalse(any(line.startswith("\t") for line in body.splitlines()))
+
+    def test_minified_bundle_preserves_multiline_and_tagged_template_values(self) -> None:
+        with tempfile.TemporaryDirectory() as scratch:
+            root = Path(scratch)
+            (root / "package.json").write_text('{"type":"module"}\n')
+            (root / "js").mkdir()
+            (root / "sample.js").write_text(
+                "export function describe(value) {\r\n"
+                " return `Hello ${value}\\nnext`;\r\n"
+                "}\r\n"
+                "export const literal = `first\nsecond`;\r\n"
+                "export const raw = String.raw`path\\name\nnext`;\r\n",
+                encoding="utf-8",
+            )
+            with (
+                mock.patch.object(build, "JS_COMPONENTS", root),
+                mock.patch.object(build, "PACKAGE_DIST", root),
+            ):
+                build._bundle_module("sample.js", minify=False)
+                build._bundle_module("sample.js", minify=True)
+            source = (root / "js/sample.min.js").read_text()
+            body = re.sub(r"\A(?:/\*!.*?\*/\s*)+", "", source, flags=re.DOTALL)
+            self.assertEqual(len(body.strip().splitlines()), 1)
+            self.assertIn("  return", (root / "js/sample.js").read_text())
+            for name in ("sample.js", "sample.min.js"):
+                result = subprocess.run(
+                    ["node", "--input-type=module", "-e",
+                     f"const m = await import({json.dumps(str(root / 'js' / name))});"
+                     "console.log(JSON.stringify([m.describe('World'), m.literal, m.raw]));"],
+                    capture_output=True, text=True, check=True,
+                )
+                self.assertEqual(json.loads(result.stdout), [
+                    "Hello World\nnext", "first\nsecond", "path\\name\nnext",
+                ])
+
     def test_slider_has_no_minified_variant(self) -> None:
         """Slider is a plain ESM module; no minified variant should exist."""
         self.require_full_build()
         self.assertTrue((PACKAGE_DIST / "js/slider.js").is_file())
         self.assertFalse((PACKAGE_DIST / "js/slider.min.js").exists())
+
+    def test_aggregate_chart_loader_requires_the_separate_chart_asset(self) -> None:
+        self.require_full_build()
+        for filename in ("moo-ui.js", "moo-ui.min.js"):
+            with self.subTest(module=filename), tempfile.TemporaryDirectory() as temp:
+                directory = Path(temp)
+                (directory / "package.json").write_text('{"type":"module"}\n')
+                shutil.copy2(PACKAGE_DIST / "js" / filename, directory / filename)
+                result = subprocess.run(
+                    ["node", "--input-type=module", "--eval", """
+                    import assert from "node:assert/strict";
+                    const api = await import(process.argv[1]);
+                    assert.equal(typeof api.loadChart, "function");
+                    assert.equal(api.default.loadChart, api.loadChart);
+                    assert.equal(typeof api.Combobox.getOrCreateInstance, "function");
+                    assert.equal("Chart" in api, false);
+                    await assert.rejects(api.loadChart(), {code: "ERR_MODULE_NOT_FOUND"});
+                    """, (directory / filename).as_uri()],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=20,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_canonical_and_minified_bundles_have_equivalent_exports(self) -> None:
         """Canonical and minified bundles must expose the same public API.
@@ -620,7 +742,6 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "    'Sidebar',"
                     "    'ContextMenu',"
                     "    'DataTable',"
-                    "    'Chart',"
                     "    'Datepicker',"
                     "    'Slider'"
                     "  ];"
@@ -631,6 +752,12 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "        typeof m.default[key].getOrCreateInstance !== 'function') {"
                     "      console.error(`Moo UI aggregate default export is missing ${key}`);"
                     "      process.exit(1);"
+                    "    }"
+                    "  }"
+                    "  for (const api of [c, m]) {"
+                    "    if (typeof api.loadChart !== 'function' ||"
+                    "        api.default.loadChart !== api.loadChart) {"
+                    "      throw new Error('Moo UI aggregate is missing loadChart');"
                     "    }"
                     "  }"
                     "}"

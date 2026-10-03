@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from html.parser import HTMLParser
+
 from build import create_environment
 from tests.helpers import ROOT, CatalogTestCase
 
@@ -9,6 +11,17 @@ PAGE = ROOT / "site/src/pages/components/radio-group.html.jinja"
 
 
 class RadioGroupTests(CatalogTestCase):
+    def test_card_description_color_can_be_configured_by_the_host(self) -> None:
+        import sass
+
+        css = sass.compile(
+            string='$moo-form-check-card-description-color: var(--bs-secondary-color); @import "moo-core";',
+            include_paths=[str(ROOT / 'scss'), str(ROOT / 'vendor')],
+        )
+        start = css.index('.form-check-card-content > .form-text {')
+        description = css[start:css.index('}', start)]
+        self.assertIn('color: var(--bs-secondary-color);', description)
+
     def render_radio_group(self, call: str) -> str:
         self.assertTrue(COMPONENT.is_file(), "Radio Group macro is not implemented")
         template = create_environment().from_string(
@@ -94,6 +107,100 @@ class RadioGroupTests(CatalogTestCase):
             '[{"id": "plan-a", "label": "A"}, {"id": "plan-b", "label": "B"}], reverse=true)'
         )
         self.assertEqual(output.count('class="form-check form-check-reverse"'), 2)
+
+    def test_cards_keep_named_native_inputs_and_accessible_labels(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("category", "Category", '
+            '[{"id": "category-a", "value": "a", "label": "Category A", '
+            '"description": "Up to 3 students", "code": "ACS", "checked": true}], '
+            'variant="cards", show_control=false, required=true, '
+            'invalid=true, feedback="Choose a category.")'
+        )
+        class InputParser(HTMLParser):
+            def __init__(self) -> None:
+                super().__init__()
+                self.inputs = []
+
+            def handle_starttag(self, tag, attributes) -> None:
+                if tag == "input":
+                    self.inputs.append(dict(attributes))
+
+        parser = InputParser()
+        parser.feed(output)
+        self.assertEqual(len(parser.inputs), 1)
+        attributes = parser.inputs[0]
+        for name, value in (
+            ("type", "radio"), ("name", "category"), ("id", "category-a"),
+            ("value", "a"), ("aria-invalid", "true"),
+            ("aria-labelledby", "category-a-label"),
+            ("aria-describedby", "category-a-description category-feedback"),
+        ):
+            self.assertEqual(attributes.get(name), value, name)
+        for name in ("checked", "required"):
+            self.assertIn(name, attributes)
+        self.assertEqual(
+            set(attributes["class"].split()),
+            {"form-check-input", "visually-hidden", "is-invalid"},
+        )
+        self.assertIn('<label class="form-check-label" for="category-a">', output)
+        self.assertIn('id="category-a-label">Category A</span>', output)
+        self.assertIn('id="category-a-description">Up to 3 students</span>', output)
+        self.assertIn('class="form-check-card-media" aria-hidden="true"', output)
+
+    def test_cards_support_lucide_media_and_disabled_state(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("workspace", "Workspace", '
+            '[{"id": "workspace-local", "label": "Local", '
+            '"icon": "folder-open", "disabled": true}], variant="cards")'
+        )
+        self.assertIn('class="form-check-input" type="radio"', output)
+        self.assertIn('id="workspace-local" disabled', output)
+        self.assertIn('data-lucide="folder-open"', output)
+        self.assertIn('aria-labelledby="workspace-local-label"', output)
+
+    def test_card_codes_render_one_to_three_uppercase_letters(self) -> None:
+        for code, expected in (("a", "A"), (" art ", "ART"), ("üö", "ÜÖ")):
+            with self.subTest(code=code):
+                output = self.render_radio_group(
+                    'radio_group("category", "Category", '
+                    f'[{{"id": "category-a", "label": "Category", "code": "{code}"}}], '
+                    'variant="cards")'
+                )
+                self.assertIn(f"<span>{expected}</span>", output)
+
+    def test_card_codes_enforce_the_public_letter_limit(self) -> None:
+        # Uppercasing expands "ßß" to four letters, exceeding the rendered limit.
+        for code in ("ABCD", "A1", "A B", "ßß"):
+            with self.subTest(code=code), self.assertRaisesRegex(
+                ValueError, "Radio Group card code must contain 1 to 3 letters"
+            ):
+                self.render_radio_group(
+                    'radio_group("category", "Category", '
+                    f'[{{"id": "category-a", "label": "Category", "code": "{code}"}}], '
+                    'variant="cards")'
+                )
+
+    def test_cards_reject_ambiguous_media_and_unknown_variants(self) -> None:
+        with self.assertRaisesRegex(ValueError, "accepts either code or icon"):
+            self.render_radio_group(
+                'radio_group("category", "Category", '
+                '[{"id": "category-a", "label": "Category", '
+                '"code": "ACS", "icon": "folder-open"}], variant="cards")'
+            )
+        with self.assertRaisesRegex(ValueError, "Unknown Radio Group variant"):
+            self.render_radio_group(
+                'radio_group("category", "Category", '
+                '[{"id": "category-a", "label": "Category"}], variant="unknown")'
+            )
+
+    def test_card_titles_and_descriptions_remain_escaped(self) -> None:
+        output = self.render_radio_group(
+            'radio_group("category", "Category", '
+            '[{"id": "category-a", "label": "<strong>Title</strong>", '
+            '"description": "<img src=x onerror=alert(1)>"}], variant="cards")'
+        )
+        self.assertIn("&lt;strong&gt;Title&lt;/strong&gt;", output)
+        self.assertIn("&lt;img src=x onerror=alert(1)&gt;", output)
 
     def test_radio_group_rtl_example_uses_described_options_in_each_direction(self) -> None:
         source = PAGE.read_text(encoding="utf-8")

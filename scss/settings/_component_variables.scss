@@ -8,6 +8,11 @@ $dropdown-padding-y: 0.25rem !default;
 $dropdown-item-padding-y: 0.25rem !default;
 $dropdown-item-padding-x: 0.375rem !default;
 $dropdown-header-padding-x: $dropdown-item-padding-x !default;
+// Bootstrap's $small-font-size is relative to the surrounding text; Moo's
+// accepted Body contract keeps Small fixed across resolved owners. Bootstrap
+// exposes paragraph bottom margin, but has no paragraph top-margin knob.
+$moo-small-font-size: 0.75rem !default;
+$moo-paragraph-margin-top: 0 !default;
 // Bootstrap has no Combobox component. The Basic pass uses Bootstrap's input
 // height and dropdown menu surface, but the reference control widths,
 // item line-height, and secondary-row size have no Bootstrap knob, so they
@@ -124,6 +129,8 @@ $form-check-input-width: 1rem !default;
 // Bootstrap derives this as $form-check-input-width + .5em, but mixing
 // rem and em in Sass arithmetic fails to compile; restate it in rem.
 $form-check-padding-start: 1.5rem !default;
+// Pure muted foreground falls below 4.5:1 on the default selected card surface.
+$moo-form-check-card-description-color: color-mix(in srgb, var(--moo-muted-foreground) 95%, var(--moo-foreground)) !default;
 // The reference switch track is chubbier than Bootstrap's default: 32x18.4px
 // versus Bootstrap's 2em x 1em (a flatter 2:1 shape). $form-switch-width is
 // Bootstrap's own customization point, but there is no matching height
@@ -429,6 +436,9 @@ $moo-datatable-min-width: 48rem !default;
 $moo-datatable-release-review-min-width: 64rem !default;
 $moo-datatable-card-min-width: 20rem !default;
 $moo-datatable-card-label-width: 7rem !default;
+// Bootstrap has no scoped Data Table CSS/runtime breakpoint bridge. Empty
+// overrides inherit $grid-breakpoints; both consumers use the same map.
+$moo-datatable-responsive-breakpoint: () !default;
 // Sticky row-action cells need just enough opaque surface for the trigger;
 // this fade prevents the pinned cell from reading as a dominant blank column.
 $moo-datatable-actions-cell-fade-width: 1.25rem !default;

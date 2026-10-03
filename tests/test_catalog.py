@@ -15,6 +15,7 @@ from tests.helpers import (
     ICONS,
     PNG_COLOR_TYPE_RGBA,
     ROOT,
+    SITE_DIST,
     STATIC,
     CatalogTestCase,
     codepen_payload_from_output,
@@ -80,9 +81,9 @@ COMPONENT_SELECTOR_PREFIXES = {
     # visible on mouse click (matching _focus.scss's pattern for
     # .form-control.is-invalid and .form-select.is-invalid).
     "checkbox": ("form-check", "is-invalid"),
-    # The legend reuses Bootstrap's shared .form-label class to
-    # match sibling form labels.
-    "radio_group": ("radio-group", "form-label"),
+    # Choice Cards compose Bootstrap's native form-check controls, helper
+    # text and validation/visibility states inside their radio/card scope.
+    "radio_group": ("radio-group", "form-label", "form-check", "form-text", "is-invalid", "visually-hidden"),
     # Bootstrap's switch markup uses the shared .form-switch and
     # .form-check families, not a "switch-" prefixed one.
     "switch": ("form-switch", "form-check"),
@@ -2042,54 +2043,50 @@ class CatalogContractTests(CatalogTestCase):
             r'<div\s+class="moo-ui"\s+data-bs-theme="\{\{ resolved_theme \}\}"\s+data-moo-document-owner="true"\s*>',
         )
         self.assertIn(
-            "<script>{{ state_source() }}</script>",
+            '<script src="{{ root_path }}assets/js/state.js?v={{ asset_version }}"></script>',
             base,
         )
+        owner_script = base.index('<script src="{{ root_path }}assets/js/state.js?')
         self.assertLess(
             base.index('data-bs-theme="{{ resolved_theme }}"'),
-            base.index("state_source"),
+            owner_script,
         )
         self.assertLess(
-            base.index("state_source"),
+            owner_script,
             base.index('href="#main-content"'),
         )
-        self.assertNotIn('assets/js/state.js?', base)
         self.assertNotIn("body.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset.bsTheme", base)
         self.assertNotIn("document.documentElement.dataset[datasetKey]", base)
         self.assertNotIn("themeBuilderFirstPaint", base)
 
-    def test_base_layout_inlines_the_canonical_owner_state_source(self) -> None:
-        canonical = (ROOT / "src/js/state.js").read_text(encoding="utf-8")
-        base = (ROOT / "site/src/layouts/base.html.jinja").read_text(
-            encoding="utf-8"
-        )
-
-        self.assertIn('data-moo-document-owner="true"', base)
+    def test_base_layout_loads_the_same_state_asset_at_each_route_depth(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
-
-        page = self.read_output("introduction/index.html")
-        owner_match = re.search(
-            r'<div\s+class="moo-ui"\s+data-bs-theme="(?:light|dark)"\s+data-moo-document-owner="true"\s*>',
-            page,
-        )
-        self.assertIsNotNone(owner_match)
-        assert owner_match is not None
-        owner_start = owner_match.start()
-        first_child_start = page.index("<script>", owner_start)
-        script_end = page.index("</script>", first_child_start)
-        self.assertEqual(
-            page[first_child_start + len("<script>") : script_end],
-            canonical,
-        )
-        self.assertLess(owner_start, first_child_start)
-        self.assertLess(first_child_start, page.index("Skip to component content"))
+        for path in ("index.html", "introduction/index.html", "components/alert/index.html"):
+            with self.subTest(path=path):
+                page = self.read_output(path)
+                owner_match = re.search(
+                    r'data-moo-document-owner="true"\s*>\s*<script src="([^"]+)"></script>',
+                    page,
+                )
+                self.assertIsNotNone(owner_match)
+                assert owner_match is not None
+                url = owner_match.group(1)
+                self.assertIn(f'<link rel="preload" href="{url}" as="script">', page)
+                self.assertEqual(
+                    (SITE_DIST / path).parent.joinpath(url.split("?", 1)[0]).resolve(),
+                    (SITE_DIST / "assets/js/state.js").resolve(),
+                )
+                self.assertLess(owner_match.end(), page.index("Skip to component content"))
 
     def test_catalog_uses_cacheable_first_paint_token_sheet(self) -> None:
         base = (ROOT / "site/src/layouts/base.html.jinja").read_text(encoding="utf-8")
         catalog = (ROOT / "site/src/layouts/catalog.html.jinja").read_text(encoding="utf-8")
         include = (ROOT / "site/src/includes/catalog-theme-state.html.jinja").read_text(
+            encoding="utf-8"
+        )
+        theme_state = (ROOT / "site/src/js/catalog-theme-state.js.jinja").read_text(
             encoding="utf-8"
         )
 
@@ -2099,10 +2096,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("moo-ui-state.css", catalog)
         self.assertIn("catalog-state.css", base)
         self.assertIn("catalog-theme-state.html.jinja", catalog)
-        self.assertIn("document.currentScript?.parentElement", include)
-        self.assertNotIn("document.documentElement", include)
-        self.assertNotIn("document.body", include)
-        self.assertNotIn("createElement(\"style\")", include)
+        self.assertIn('src="{{ root_path }}assets/js/catalog-theme-state.js?v={{ asset_version }}"', include)
+        self.assertIn("document.currentScript?.parentElement", theme_state)
+        self.assertNotIn("document.documentElement", theme_state)
+        self.assertNotIn("document.body", theme_state)
+        self.assertNotIn("createElement(\"style\")", theme_state)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -3532,10 +3530,11 @@ class CatalogContractTests(CatalogTestCase):
             normalized_installation_text,
         )
         self.assertIn(
-            "Because the aggregate includes the Chart module and its bundled "
-            "Chart.js runtime",
+            "The aggregate fetches Chart and its Chart.js runtime only when "
+            "loadChart() is called.",
             normalized_installation_text,
         )
+        self.assertIn("const Chart = await MooUI.loadChart()", installation_text)
         self.assertNotIn("after the release that publishes", installation)
 
     def test_public_docs_track_package_manifest_and_exports(self) -> None:
@@ -3715,9 +3714,6 @@ class CatalogContractTests(CatalogTestCase):
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version="test",
-            theme_builder_state=site_build.catalog_state_config(
-                site_build.theme_builder_first_paint_payload()
-            ),
         )
 
         self.assertIn("No public metadata entrypoints yet", rendered)
@@ -4500,10 +4496,10 @@ class CatalogContractTests(CatalogTestCase):
                     if declaration.startswith("box-shadow:"):
                         self.assertRegex(
                             declaration,
-                            r"^box-shadow: (?:none|\$input-focus-box-shadow|"
+                            r"^box-shadow: (?:none|\$(?:form-check-)?input-focus-box-shadow|"
                             r"\$[a-z0-9-]*ring-shadow|"
                             r"var\(--bs-[a-z0-9-]*box-shadow[a-z0-9-]*\)|"
-                            r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
+                            r"0 0 0 (?:(?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})?|var\(--bs-focus-ring-width\)) var\(--(?:bs-body-bg|moo-[a-z0-9-]*ring-color)\)|"
                             r"0 0 0 (?:\$|\#\{\$)[a-z0-9-]*ring-width(?:\})? color-mix\(in srgb, (?:\$|\#\{\$)[a-z0-9-]*ring-color(?:\})? 50%, transparent\));$",
                         )
                     elif declaration.startswith("border-radius:"):

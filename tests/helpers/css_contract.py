@@ -280,6 +280,9 @@ def assert_animation_closure(test_case, css: str) -> None:
 
 
 def assert_safe_assets(test_case, css: str) -> None:
+    css = tinycss2.serialize(
+        tinycss2.parse_component_value_list(css, skip_comments=True)
+    )
     css_without_embedded_svg = URL_PATTERN.sub(
         lambda match: ""
         if match.group(1).strip().strip("\"'").lower().startswith("data:image/svg+xml")

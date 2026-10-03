@@ -340,6 +340,7 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         aria_labelled_by: str = "app-navigation-label",
         shell_mode: str = "viewport",
         app_id: str = "",
+        state_src: str = "",
         include_sidebar: bool = True,
         page_main: str = "Page main",
     ) -> str:
@@ -357,7 +358,8 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
               aria_label=aria_label,
               aria_labelled_by=aria_labelled_by,
               shell_mode=shell_mode,
-              id=app_id
+              id=app_id,
+              state_src=state_src
             ) %}
               {% if slot == "sidebar" and include_sidebar %}
                 <span id="app-navigation-label">Navigation</span>
@@ -387,6 +389,7 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
             aria_labelled_by=aria_labelled_by,
             shell_mode=shell_mode,
             app_id=app_id,
+            state_src=state_src,
             include_sidebar=include_sidebar,
             page_main=page_main,
         )
@@ -413,6 +416,19 @@ class AppLayoutTests(LayoutRenderMixin, unittest.TestCase):
         self.assertNotIn("sidebar_provider", output)
         self.assertNotIn("sidebar_inset", output)
         self.assertNotIn("sidebar-inset__", output)
+
+    def test_app_accepts_an_external_classic_state_asset_at_the_wrapper_start(self) -> None:
+        output = self.render_app_shell(state_src="/assets/state.js?v=rc10&host=catalog")
+        parser = self._TreeParser()
+        parser.feed(output)
+        wrapper = parser.root.children[0]
+        state = wrapper.children[0]
+        self.assertEqual(state.tag, "script")
+        self.assertEqual(state.attrs["src"], "/assets/state.js?v=rc10&host=catalog")
+        self.assertNotIn("async", state.attrs)
+        self.assertNotIn("defer", state.attrs)
+        self.assertNotEqual(state.attrs.get("type"), "module")
+        self.assertEqual(wrapper.children[1].tag, "aside")
 
     def test_app_navigation_none_emits_only_the_page_and_no_sidebar_runtime(self) -> None:
         output = self.render_app_shell(

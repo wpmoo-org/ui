@@ -1,4 +1,3 @@
-import Chart from "./components/chart.js";
 import Combobox from "./components/combobox.js";
 import ContextMenu from "./components/context-menu.js";
 import DataTable from "./components/datatable.js";
@@ -8,9 +7,15 @@ import Datepicker, {
 } from "./components/datepicker.js";
 import Sidebar from "./components/sidebar.js";
 import Slider from "./components/slider.js";
+import { initSheets } from "./components/sheet.js";
+
+async function loadChart() {
+  const { default: Chart } = await import("./chart.js");
+  return Chart;
+}
 
 const MooUI = {
-  Chart,
+  loadChart,
   Combobox,
   ContextMenu,
   DataTable,
@@ -19,10 +24,11 @@ const MooUI = {
   MooDateRangePicker,
   Sidebar,
   Slider,
+  initSheets,
 };
 
 export {
-  Chart,
+  loadChart,
   Combobox,
   ContextMenu,
   DataTable,
@@ -31,6 +37,7 @@ export {
   MooDateRangePicker,
   Sidebar,
   Slider,
+  initSheets,
 };
 
 export default MooUI;

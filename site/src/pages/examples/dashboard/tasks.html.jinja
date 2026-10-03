@@ -22,7 +22,7 @@
       actions=button("New Task", icon_start="plus", element="button", sheet_target="tasks-new-sheet")
     ) }}
 
-    {{ render_tasks_table(id="examples-tasks-datatable") }}
+    {{ render_tasks_table(id="examples-tasks-datatable", responsive_mode="auto") }}
 
     {{ render_task_sheet() }}
     {{ render_task_delete_dialog() }}

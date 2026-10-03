@@ -508,7 +508,11 @@ console.log(JSON.stringify(Object.fromEntries(
                 path.relative_to(SCSS / "utilities").as_posix()
                 for path in (SCSS / "utilities").rglob("*.scss")
             },
-            {"_scroll_fade.scss", "_scroll_fade_primitives.scss"},
+            {
+                "_background_color.scss",
+                "_scroll_fade.scss",
+                "_scroll_fade_primitives.scss",
+            },
         )
         self.assertEqual(
             owned_partial_targets(SCSS / "mixins"),
@@ -557,8 +561,8 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(
             entrypoint_imports["moo-ui.scss"],
             [
-                "settings",
                 "mixins/banner",
+                "settings",
                 "bootstrap/scss/functions",
                 "bootstrap/scss/variables",
                 "bootstrap/scss/variables-dark",
@@ -594,6 +598,7 @@ console.log(JSON.stringify(Object.fromEntries(
                 "bootstrap/scss/helpers/stretched-link",
                 "bootstrap/scss/helpers/text-truncation",
                 "bootstrap/scss/helpers/vr",
+                "utilities/background_color",
                 "bootstrap/scss/utilities/api",
                 "utilities/scroll_fade_primitives",
                 "foundations/backdrop",
@@ -603,6 +608,7 @@ console.log(JSON.stringify(Object.fromEntries(
         self.assertEqual(
             entrypoint_imports["moo-core.scss"],
             [
+                "mixins/banner",
                 "settings/options",
                 "bootstrap/scss/functions",
                 "settings",

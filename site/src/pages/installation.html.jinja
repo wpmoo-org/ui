@@ -233,17 +233,31 @@
           If your host prefers one Moo UI module request, use the
           side-effect-free aggregate instead of importing each module
           separately.
-          Because the aggregate includes the Chart module and its bundled
-          Chart.js runtime, use per-module imports when a page does not need
-          charts.
+          The aggregate fetches Chart and its Chart.js runtime only when
+          <code>loadChart()</code> is called. This asynchronous loader replaces
+          the aggregate's synchronous <code>Chart</code> export in RC10;
+          standalone Chart imports keep their existing API.
         </p>
         {% set esm_aggregate_example %}
         import MooUI, { Combobox, DataTable } from "@wpmoo/ui/moo-ui.js";
 
         Combobox.getOrCreateInstance(document.querySelector(".combobox"));
         MooUI.DataTable.getOrCreateInstance(document.querySelector(".datatable"));
+
+        const chartRoot = document.querySelector(".chart");
+        if (chartRoot) {
+          const Chart = await MooUI.loadChart();
+          Chart.getOrCreateInstance(chartRoot);
+        }
         {% endset %}
         {{ render_code_snippet("installation-esm-aggregate", esm_aggregate_example, "js") }}
+        <p>
+          Both aggregate variants load the adjacent <code>chart.js</code> asset.
+          Keep that file beside the aggregate when self-hosting. Repeated loader
+          calls share the same constructor and module cache. A failed fetch
+          rejects the loader promise; the host can handle that error in its
+          existing loading flow.
+        </p>
         {% set esm_cdn_example %}
         <script type="module">
           import Chart from "https://cdn.jsdelivr.net/npm/@wpmoo/ui@{{ product.version }}/{{ product.exports["./chart.js"] | replace("./", "") }}";

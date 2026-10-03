@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 
+import build
+
 from tests.helpers import DIST, ROOT, CatalogTestCase, read_settings
 from tests.helpers.css_contract import (
     assert_allowed_global_rules,
@@ -93,6 +95,41 @@ def active_scss_imports(source: str) -> list[str]:
 
 
 class MooCoreTests(CatalogTestCase):
+    def test_body_typography_consumes_configured_sass_defaults(self) -> None:
+        import sass
+
+        overrides = (
+            "$moo-small-font-size: 0.8125rem; "
+            "$moo-paragraph-margin-top: 0.25rem; "
+            "$paragraph-margin-bottom: 1.5rem; "
+        )
+        for entrypoint in ("moo-core", "moo-ui"):
+            with self.subTest(entrypoint=entrypoint):
+                css = sass.compile(
+                    string=overrides + f'@import "{entrypoint}";',
+                    include_paths=[str(SCSS), str(ROOT / "vendor")],
+                )
+                for declaration in (
+                    "--moo-small-font-size: 0.8125rem;",
+                    "--moo-paragraph-margin-top: 0.25rem;",
+                    "--moo-paragraph-margin-bottom: 1.5rem;",
+                ):
+                    self.assertTrue(declaration in css, f"{entrypoint} must emit {declaration}")
+
+    def test_body_secondary_utility_follows_the_resolved_base_color(self) -> None:
+        full_css = build.compile_style(SCSS / "moo-ui.scss")
+        utility = re.search(r"\.bg-body-secondary\s*\{([^}]+)\}", full_css)
+
+        self.assertIsNotNone(utility)
+        self.assertIn("--bs-bg-opacity: 1;", utility.group(1))
+        self.assertIn(
+            "background-color: rgb(from var(--bs-secondary-bg) r g b / var(--bs-bg-opacity)) !important;",
+            utility.group(1),
+        )
+        opacity = re.search(r"\.bg-opacity-50\s*\{([^}]+)\}", full_css)
+        self.assertIsNotNone(opacity)
+        self.assertIn("--bs-bg-opacity: 0.5;", opacity.group(1))
+
     def _build_and_read_core(self) -> str:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)

@@ -64,17 +64,20 @@
       without squeezing every column into one narrow row. Use the user toggle
       when the layout should be the reader's own choice instead of a
       breakpoint the developer picked, the way Odoo's List/Kanban switcher works.
+      Use auto to combine a responsive default with independent reader choices
+      for narrow and wide screens.
     </p>
 
     {% set responsive_mode_rows = [
       ["Scroll", "Default. Keeps every column in the table and adds a horizontal scroll fade to Bootstrap's <code>.table-responsive</code> viewport."],
       ["Cards", "Opt-in. Keeps the desktop table unchanged, then renders each paginated row as a mobile card with a primary header and compact label/value metadata below the configured Bootstrap breakpoint."],
-      ["Toggle", "Opt-in. Renders both the table and the card list at once and adds a Table/Cards toggle to the toolbar so the reader picks, independent of viewport. The choice persists per table id in <code>localStorage</code>."]
+      ["Toggle", "Opt-in. Renders both the table and the card list at once and adds a Table/Cards toggle to the toolbar so the reader picks, independent of viewport. The choice persists per table id in <code>localStorage</code>."],
+      ["Auto", "Opt-in with <code>.datatable--responsive-auto</code>, initial <code>data-datatable-view=\"auto\"</code> and <code>data-datatable-responsive-breakpoint=\"lg\"</code>. Defaults to Cards below the configured breakpoint and Table at or above it. Set the breakpoint to <code>sm</code>, <code>md</code>, <code>xl</code> or <code>xxl</code> when needed. Table/Cards controls retain separate preferences for both width ranges, including when storage is blocked. Old global Toggle preferences are ignored in Auto mode."]
     ] %}
     {{ table(
       ["Mode", "Behavior"],
       responsive_mode_rows,
-      row_ids=["responsive-scroll", "responsive-cards", "responsive-toggle"],
+      row_ids=["responsive-scroll", "responsive-cards", "responsive-toggle", "responsive-auto"],
       row_header=true,
       extra_class="align-middle mb-4"
     ) }}

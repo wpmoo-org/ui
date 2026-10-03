@@ -19,6 +19,8 @@ import sass
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from markupsafe import Markup
 
+from scripts.style_comments import space_css_comment_blocks, strip_css_non_license_comments
+
 try:
     import fcntl
 except ImportError:  # pragma: no cover - POSIX workstation path owns locking.
@@ -70,6 +72,7 @@ BUNDLED_JS_MODULES = (
     "datepicker.js",
     "sidebar.js",
     "datatable.js",
+    "sheet.js",
 )
 # Keep the published package inventory stable: only component entrypoints that
 # already publish minified variants produce them in dist/js. Sidebar and
@@ -87,7 +90,7 @@ RELEASE_ARTIFACTS = (
     ("./moo-ui.css", "dist/assets/css/moo-ui.css"),
     ("./state.js", "dist/js/state.js"),
 )
-MOO_UI_COPYRIGHT_URL = "https://wpmoo.org"
+MOO_UI_URL = "https://wpmoo.org/"
 MOO_UI_LICENSE_URL = "https://github.com/wpmoo-org/ui/blob/main/LICENSE"
 THEME_BUILDER_FIRST_PAINT_TIMEOUT_SECONDS = 10
 EVIDENCE_FILES = (
@@ -1899,7 +1902,27 @@ def compile_style(entrypoint: Path, *, output_style: str = "expanded") -> str:
         include_paths=style_include_paths(entrypoint),
         output_style=output_style,
     )
-    return css.replace("\r\n", "\n").replace("\r", "\n").rstrip() + "\n"
+    css = css.replace("\r\n", "\n").replace("\r", "\n")
+    if output_style == "compressed":
+        css = strip_css_non_license_comments(css)
+        notices = []
+        while css.startswith("/*!"):
+            end = css.index("*/") + 2
+            notices.append(css[:end])
+            css = css[end:].lstrip()
+        result = subprocess.run(
+            [
+                str(ROOT / "node_modules/.bin/esbuild"), "--loader=css",
+                "--minify-whitespace", "--legal-comments=inline",
+            ],
+            input=css, capture_output=True, text=True, check=True,
+        )
+        css = result.stdout.strip()
+        if notices:
+            css = "\n\n".join(notices) + "\n\n" + css
+    else:
+        css = space_css_comment_blocks(css)
+    return css.rstrip() + "\n"
 
 
 def write_compiled_style(
@@ -1952,6 +1975,7 @@ def asset_version() -> str:
         SITE_DIST / "assets/css/catalog-state.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog-state.js",
+        SITE_DIST / "assets/js/catalog-theme-state.js",
         SITE_DIST / "assets/js/state.js",
         SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
@@ -1966,11 +1990,9 @@ def asset_version() -> str:
 def copy_package_js() -> None:
     package_js_dir = PACKAGE_DIST / "js"
     package_js_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(STATE_PATH, package_js_dir / "state.js")
+    _bundle_module("state.js", minify=False, bundle=False)
     for module_name in CORE_JS_MODULES:
-        target = package_js_dir / module_name
-        shutil.copy2(JS_COMPONENTS / module_name, target)
-        apply_js_license_banner(target, module_name)
+        _bundle_module(module_name, minify=False, bundle=False)
     for module_name in BUNDLED_JS_MODULES:
         _bundle_module(
             module_name,
@@ -2020,11 +2042,10 @@ def write_release_manifest() -> None:
 
 def js_license_banner(module_name: str) -> str:
     package = json.loads(PACKAGE_MANIFEST.read_text(encoding="utf-8"))
-    homepage = package.get("homepage", "https://ui.wpmoo.org/")
     return (
         "/*!\n"
-        f" * Moo UI {module_name} v{package['version']} ({homepage})\n"
-        f" * Copyright 2026 WPMoo ({MOO_UI_COPYRIGHT_URL})\n"
+        f" * Moo UI {module_name} v{package['version']} ({MOO_UI_URL})\n"
+        " * Copyright 2026 WPMoo Authors\n"
         f" * Licensed under {package.get('license', 'MIT')} ({MOO_UI_LICENSE_URL})\n"
         " */\n"
     )
@@ -2040,19 +2061,24 @@ def apply_js_license_banner(output: Path, module_name: str) -> None:
         marker_index = source.find(marker)
         if marker_index != -1:
             source = source[marker_index + len(marker) :]
-    output.write_text(banner + source.lstrip(), encoding="utf-8")
+    output.write_text(banner + "\n" + source.lstrip(), encoding="utf-8")
 
 
-def _bundle_module(module_name: str, *, minify: bool, keep_names: bool = False) -> None:
-    """Bundle a module using esbuild with the locked configuration.
+def _bundle_module(
+    module_name: str, *, minify: bool, keep_names: bool = False, bundle: bool = True,
+) -> None:
+    """Bundle or format a module using esbuild with the locked configuration.
 
     Args:
         module_name: The module name (e.g., "chart.js")
         minify: Whether to minify the output
+        bundle: Whether to resolve internal imports into the output
     """
     source = JS_COMPONENTS / module_name
     if module_name in AGGREGATE_JS_MODULES:
         source = JS_ROOT / module_name
+    elif module_name == "state.js":
+        source = STATE_PATH
     if not source.is_file():
         raise FileNotFoundError(f"Bundled module source not found: {source}")
 
@@ -2071,13 +2097,22 @@ def _bundle_module(module_name: str, *, minify: bool, keep_names: bool = False) 
         str(esbuild_cmd),
         str(source),
         f"--outfile={output}",
-        "--bundle=true",
-        "--format=esm",
+        f"--bundle={'true' if bundle else 'false'}",
         "--platform=browser",
         "--target=es2020",
         "--tree-shaking=true",
         f"--minify={'true' if minify else 'false'}",
     ]
+    if module_name != "state.js":
+        cmd.append("--format=esm")
+    if module_name in AGGREGATE_JS_MODULES:
+        cmd.append("--external:./chart.js")
+    if bundle:
+        cmd.append("--legal-comments=external")
+    if minify:
+        cmd.append("--supported:template-literal=false")
+        if not bundle:
+            cmd.append("--legal-comments=eof")
     if keep_names:
         cmd.append("--keep-names")
 
@@ -2096,6 +2131,20 @@ def _bundle_module(module_name: str, *, minify: bool, keep_names: bool = False) 
             f"stderr: {result.stderr}"
         )
 
+    if bundle:
+        notice_output = output.with_name(output.name + ".LEGAL.txt")
+        notices = notice_output.read_text(encoding="utf-8") if notice_output.is_file() else ""
+        notice_output.unlink(missing_ok=True)
+        if notices.strip():
+            # The bundler has already separated real legal comments from code.
+            # Escape their delimiters when wrapping the unchanged notice text.
+            notices = notices.strip().replace("/*", "(*").replace("*/", "*)")
+            source = output.read_text(encoding="utf-8")
+            output.write_text("/*! " + notices + "\n*/\n\n" + source, encoding="utf-8")
+    elif minify:
+        body, _, notices = output.read_text(encoding="utf-8").partition("\n")
+        header = notices.strip() + "\n\n" if notices.strip() else ""
+        output.write_text(header + body + "\n", encoding="utf-8")
     if not minify:
         _normalize_esbuild_module_comments(output)
     apply_js_license_banner(output, output_name)
@@ -2110,6 +2159,35 @@ def _normalize_esbuild_module_comments(output: Path) -> None:
     )
     if normalized != source:
         output.write_text(normalized, encoding="utf-8")
+
+
+def write_catalog_theme_state_js(state: dict[str, object]) -> Path:
+    source = create_environment().get_template("js/catalog-theme-state.js.jinja").render(
+        theme_builder_state=state,
+    )
+    output = SITE_DIST / "assets/js/catalog-theme-state.js"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        [
+            str(ROOT / "node_modules/.bin/esbuild"),
+            "--loader=js",
+            "--target=es2020",
+        ],
+        input=source,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "esbuild failed for catalog-theme-state.js:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+    output.write_text(result.stdout, encoding="utf-8")
+    apply_js_license_banner(output, output.name)
+    return output
 
 
 def required_core_outputs() -> tuple[Path, ...]:
@@ -2465,7 +2543,6 @@ def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
 def render_pages(
     version: str | None = None,
     layouts: list[dict[str, str]] | None = None,
-    theme_builder_state: dict[str, object] | None = None,
 ) -> None:
     environment = create_environment()
     catalog = load_catalog()
@@ -2494,10 +2571,6 @@ def render_pages(
         examples,
         layouts,
     )
-    if theme_builder_state is None:
-        theme_builder_state = catalog_state_config(
-            theme_builder_first_paint_payload()
-        )
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2549,7 +2622,6 @@ def render_pages(
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
-            theme_builder_state=theme_builder_state,
         )
         output_file.write_text(rendered, encoding="utf-8")
 
@@ -2594,6 +2666,7 @@ def build_site() -> None:
     copy_site_assets()
     theme_builder_payload = theme_builder_first_paint_payload()
     write_catalog_state_css(theme_builder_payload)
+    write_catalog_theme_state_js(catalog_state_config(theme_builder_payload))
     copy_certification_fixtures_to_site()
     render_layout_certification_fixtures()
     copy_site_metadata()
@@ -2603,7 +2676,6 @@ def build_site() -> None:
     render_pages(
         version,
         layouts,
-        theme_builder_state=catalog_state_config(theme_builder_payload),
     )
     write_sitemap(layouts)
 

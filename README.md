@@ -121,7 +121,7 @@ when it needs independent browser persistence:
 On a first visit, a static host without a known server preference can only
 correct a browser-only preference after the external asset is fetched, so that
 correction may be visible. The server value remains the deterministic fallback;
-an external fetch cannot guarantee zero flash in this profile. RC9 exposes
+an external fetch cannot guarantee zero flash in this profile. Since RC9, Moo UI exposes
 this asset as `@wpmoo/ui/state.js`.
 
 ### Optional runtime
@@ -137,8 +137,33 @@ if (combobox) {
 
 The runtime bundle is optional and side-effect-free. Import the aggregate
 `@wpmoo/ui/moo-ui.js` entrypoint, or import only the component module you use.
+The aggregate loads Chart.js only when `loadChart()` is called:
+
+```js
+const chartRoot = document.querySelector(".chart");
+if (chartRoot) {
+  const Chart = await MooUI.loadChart();
+  Chart.getOrCreateInstance(chartRoot);
+}
+```
+
+RC10 replaces the aggregate's synchronous `Chart` export with the asynchronous
+`loadChart()` loader, also available as a named export. Both aggregate variants
+resolve the adjacent `chart.js` asset, so keep that file beside the aggregate
+when self-hosting. Repeated loader calls and direct `chart.js` imports share
+the same constructor. The standalone `chart.js` and `chart.min.js` APIs remain
+synchronous and unchanged.
+
 See the [Installation guide](https://ui.wpmoo.org/installation/) for npm, CDN,
 Sass, Bootstrap JavaScript, and ESM recipes.
+
+For server-marked Sheets, call the explicit initializer after Bootstrap
+Offcanvas is available on the document's window:
+
+```js
+import { initSheets } from "@wpmoo/ui/sheet.js";
+initSheets(document);
+```
 
 ## Why Teams Try It
 
@@ -166,7 +191,7 @@ calm.
 
 ## Status And Support
 
-The current release candidate is `1.0.0-rc.9`. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
+The current release candidate is `1.0.0-rc.10`. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
 
@@ -187,6 +212,8 @@ paths live in the [Installation guide](https://ui.wpmoo.org/installation/).
 
 Moo UI source code is MIT licensed. License details live in
 [LICENSE](LICENSE) and the [License page](https://ui.wpmoo.org/license/).
+The published `LICENSE` also retains the full MIT notices for bundled
+Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.9/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.10/THIRD_PARTY_NOTICES.md).

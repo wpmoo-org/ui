@@ -1,3 +1,4 @@
+/* Data Table */
 // Bootstrap ships .table markup only, with no sort/filter/pagination
 // behavior and no faceted-filter or column-visibility concept, so this
 // partial covers only the pieces that have no Bootstrap token to consume:
@@ -34,7 +35,8 @@
 }
 
 .datatable--responsive-scroll .datatable-table,
-.datatable--responsive-toggle .datatable-table {
+.datatable--responsive-toggle .datatable-table,
+.datatable--responsive-auto .datatable-table {
   min-width: var(--moo-datatable-min-width);
 }
 
@@ -43,12 +45,37 @@
 // can choose the layout the way Odoo's List/Kanban switcher works. Visibility
 // follows the root's own data-datatable-view state instead of a d-*-none
 // utility.
-.datatable--responsive-toggle[data-datatable-view="table"] .datatable-card-frame {
+.datatable--responsive-toggle[data-datatable-view="table"] .datatable-card-frame,
+.datatable--responsive-auto[data-datatable-view="table"] .datatable-card-frame {
   display: none;
 }
 
-.datatable--responsive-toggle[data-datatable-view="cards"] .datatable-frame {
+.datatable--responsive-toggle[data-datatable-view="cards"] .datatable-frame,
+.datatable--responsive-auto[data-datatable-view="cards"] .datatable-frame {
   display: none;
+}
+
+// Keep Bootstrap's configured breakpoint scale in CSS. The runtime reads the
+// same threshold, while this fallback selects a layout before it starts.
+@each $name, $value in map-merge($grid-breakpoints, $moo-datatable-responsive-breakpoint) {
+  @if $value != 0 {
+    .datatable--responsive-auto[data-datatable-responsive-breakpoint="#{$name}"] {
+      --moo-datatable-responsive-breakpoint: #{$value};
+
+      &[data-datatable-view="auto"] .datatable-card-frame {
+        display: none;
+      }
+
+      @include media-breakpoint-down($name, map-merge($grid-breakpoints, $moo-datatable-responsive-breakpoint)) {
+        &[data-datatable-view="auto"] .datatable-frame {
+          display: none;
+        }
+        &[data-datatable-view="auto"] .datatable-card-frame {
+          display: block;
+        }
+      }
+    }
+  }
 }
 
 // Bootstrap's .table has no bordered/rounded container variant of its own
@@ -125,6 +152,24 @@
 
 .datatable-table > :not(caption) > * > * {
   vertical-align: middle;
+}
+
+// Public Button links used as titles inherit nowrap from Button. Allow their
+// text to wrap within fixed table cells and narrow card headings.
+.datatable-col > .btn-link,
+.datatable-card-title > .btn-link {
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: inherit;
+}
+
+// A leading content column needs room for the sort trigger's negative margin.
+// Use Bootstrap's spacing scale for both header and body cells, and follow the
+// first visible column when the column picker hides the original leading one.
+// The select column already owns its inset through the checkbox geometry.
+.datatable-table > :not(caption) > * > .datatable-col:nth-child(1 of :not(.datatable-col-hidden)) {
+  padding-inline-start: $spacer;
 }
 
 // The toolbar's flex layout belongs to the component itself, not to
@@ -647,7 +692,11 @@
   align-items: center;
   padding: 0.5rem 0.75rem;
   border-bottom: var(--bs-border-width) solid var(--bs-border-color);
-  background-color: var(--bs-tertiary-bg);
+  background-color: color-mix(in srgb, var(--moo-surface) 50%, var(--moo-muted-surface));
+}
+
+.datatable-card-header:not(:has(> .datatable-card-select)) {
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .datatable-card-select {

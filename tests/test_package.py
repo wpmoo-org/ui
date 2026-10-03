@@ -86,6 +86,7 @@ EXPECTED_SCSS_SOURCE_FILES = {
     "scss/themes/_root.scss",
     "scss/themes/_standalone.scss",
     "scss/themes/_theme.scss",
+    "scss/utilities/_background_color.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
 }
@@ -99,6 +100,7 @@ EXPECTED_PACKAGE_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/sheet.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
@@ -124,6 +126,7 @@ EXPECTED_PACKAGE_EXPORTS = {
     "./context-menu.js": "./dist/js/context-menu.js",
     "./datatable.js": "./dist/js/datatable.js",
     "./slider.js": "./dist/js/slider.js",
+    "./sheet.js": "./dist/js/sheet.js",
     "./moo-ui.js": "./dist/js/moo-ui.js",
     "./moo-ui.min.js": "./dist/js/moo-ui.min.js",
     "./chart.js": "./dist/js/chart.js",
@@ -173,7 +176,7 @@ class PackageMetadataTests(unittest.TestCase):
         temporary_root: Path,
     ) -> tuple[Path, Path, Path]:
         pack_result = subprocess.run(
-            ["npm", "pack", "--json", "--pack-destination", str(temporary_root)],
+            [sys.executable, "scripts/package_release.py", "--pack-destination", str(temporary_root)],
             cwd=ROOT,
             check=False,
             capture_output=True,
@@ -243,10 +246,10 @@ class PackageMetadataTests(unittest.TestCase):
         )
         self.assertNotIn("workspaces", package)
 
-    def test_rc9_candidate_declares_the_state_artifact_surface(self) -> None:
+    def test_rc10_candidate_declares_the_state_artifact_surface(self) -> None:
         package = self._read_package()
 
-        self.assertEqual(package["version"], "1.0.0-rc.9")
+        self.assertEqual(package["version"], "1.0.0-rc.10")
         self.assertEqual(
             package["exports"]["./state.js"],
             "./dist/js/state.js",
@@ -355,7 +358,7 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(manifest["schemaVersion"], 1)
         self.assertEqual(
             manifest["package"],
-            {"name": "@wpmoo/ui", "version": "1.0.0-rc.9"},
+            {"name": "@wpmoo/ui", "version": "1.0.0-rc.10"},
         )
         self.assertEqual(
             [entry["export"] for entry in manifest["artifacts"]],
@@ -382,7 +385,7 @@ class PackageMetadataTests(unittest.TestCase):
     def test_release_manifest_hashes_match_raw_packed_member_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             pack_result = subprocess.run(
-                ["npm", "pack", "--json", "--pack-destination", temporary_directory],
+                [sys.executable, "scripts/package_release.py", "--pack-destination", temporary_directory],
                 cwd=ROOT,
                 check=False,
                 capture_output=True,
@@ -468,6 +471,7 @@ class PackageMetadataTests(unittest.TestCase):
                 "context-menu.js",
                 "datatable.js",
                 "slider.js",
+                "sheet.js",
                 "chart.js",
                 "datepicker.js",
             },
@@ -517,6 +521,19 @@ class PackageMetadataTests(unittest.TestCase):
             readme,
             r"THIRD_PARTY_NOTICES\.md[^.\n]*(?:does not|doesn't|omits?|excludes?|not shipped|not publish)",
         )
+
+    def test_prepared_package_preserves_chart_dependency_mit_licenses(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            _, installed_package, _ = self._install_clean_consumer_with_bootstrap_scss(
+                Path(temporary_directory)
+            )
+            license_text = (installed_package / "LICENSE").read_text(encoding="utf-8")
+            for dependency in ("chart.js", "@kurkle/color"):
+                with self.subTest(dependency=dependency):
+                    upstream_license = (
+                        ROOT / "node_modules" / dependency / "LICENSE.md"
+                    ).read_text(encoding="utf-8").strip()
+                    self.assertIn(upstream_license, license_text)
 
     def test_package_manifest_validator_accepts_approved_tarball_files(self) -> None:
         payload = [
@@ -638,8 +655,9 @@ import Sidebar from "@wpmoo/ui/sidebar.js";
 import ContextMenu from "@wpmoo/ui/context-menu.js";
 import DataTable from "@wpmoo/ui/datatable.js";
 import Slider from "@wpmoo/ui/slider.js";
+import { initSheets } from "@wpmoo/ui/sheet.js";
 import MooUI, {
-  Chart as AggregateChart,
+  loadChart as AggregateLoadChart,
   Combobox as AggregateCombobox,
   ContextMenu as AggregateContextMenu,
   DataTable as AggregateDataTable,
@@ -648,15 +666,20 @@ import MooUI, {
   MooDateRangePicker,
   Sidebar as AggregateSidebar,
   Slider as AggregateSlider,
+  initSheets as AggregateInitSheets,
 } from "@wpmoo/ui/moo-ui.js";
 import MooUIMinified, {
-  Chart as MinifiedAggregateChart,
+  loadChart as MinifiedAggregateLoadChart,
   Datepicker as MinifiedAggregateDatepicker,
 } from "@wpmoo/ui/moo-ui.min.js";
 import Chart from "@wpmoo/ui/chart.js";
 import ChartMinified from "@wpmoo/ui/chart.min.js";
 import Datepicker from "@wpmoo/ui/datepicker.js";
 import DatepickerMinified from "@wpmoo/ui/datepicker.min.js";
+
+const [AggregateChart, MinifiedAggregateChart] = await Promise.all([
+  AggregateLoadChart(), MinifiedAggregateLoadChart(),
+]);
 
 if (
   Combobox.name !== "Combobox" ||
@@ -669,6 +692,9 @@ if (
   typeof AggregateContextMenu.getOrCreateInstance !== "function" ||
   typeof AggregateDataTable.getOrCreateInstance !== "function" ||
   typeof AggregateSlider.getOrCreateInstance !== "function" ||
+  typeof initSheets !== "function" ||
+  typeof AggregateInitSheets !== "function" ||
+  MooUI.initSheets !== AggregateInitSheets ||
   typeof AggregateChart.getOrCreateInstance !== "function" ||
   typeof AggregateDatepicker.getOrCreateInstance !== "function" ||
   typeof MooCalendar !== "function" ||
@@ -678,11 +704,13 @@ if (
   MooUI.ContextMenu !== AggregateContextMenu ||
   MooUI.DataTable !== AggregateDataTable ||
   MooUI.Slider !== AggregateSlider ||
-  MooUI.Chart !== AggregateChart ||
+  MooUI.loadChart !== AggregateLoadChart ||
+  AggregateChart !== Chart ||
   MooUI.Datepicker !== AggregateDatepicker ||
-  typeof MooUIMinified.Chart.getOrCreateInstance !== "function" ||
+  typeof MinifiedAggregateChart.getOrCreateInstance !== "function" ||
   typeof MooUIMinified.Datepicker.getOrCreateInstance !== "function" ||
-  MooUIMinified.Chart !== MinifiedAggregateChart ||
+  MooUIMinified.loadChart !== MinifiedAggregateLoadChart ||
+  MinifiedAggregateChart !== Chart ||
   MooUIMinified.Datepicker !== MinifiedAggregateDatepicker ||
   typeof Chart.getOrCreateInstance !== "function" ||
   typeof ChartMinified.getOrCreateInstance !== "function" ||
@@ -806,6 +834,38 @@ for (const specifier of [
                         "Undefined variable", str(leak_context.exception)
                     )
 
+    def test_packed_scss_removes_silent_comments_without_changing_compilation(self) -> None:
+        import build
+        import sass
+        from scripts.style_comments import space_css_comment_blocks
+
+        originals = {
+            path: (ROOT / path).read_bytes()
+            for path in EXPECTED_SCSS_SOURCE_FILES
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            consumer, installed, _ = self._install_clean_consumer_with_bootstrap_scss(
+                Path(temporary_directory)
+            )
+            config = (installed / "scss/_config.scss").read_text(encoding="utf-8")
+            self.assertNotIn("// Brand color", config)
+            self.assertIn("$primary: #171717 !default;", config)
+            self.assertIn("/*!", (installed / "scss/mixins/_banner.scss").read_text())
+            for name in ("moo-ui.scss", "moo-core.scss"):
+                with self.subTest(entrypoint=name):
+                    compiled = sass.compile(
+                        filename=str(installed / "scss" / name),
+                        include_paths=[str(installed / "scss"), str(consumer / "node_modules")],
+                        output_style="expanded",
+                    )
+                    self.assertEqual(
+                        space_css_comment_blocks(compiled),
+                        build.compile_style(ROOT / "scss" / name),
+                    )
+        for path, content in originals.items():
+            with self.subTest(source=path):
+                self.assertEqual((ROOT / path).read_bytes(), content)
+
     def test_sass_source_entrypoints_compile_from_a_clean_consumer(self) -> None:
         """Published Sass source entrypoints must resolve from an npm layout."""
         import sass
@@ -862,6 +922,7 @@ for (const specifier of [
             "sidebar.js",
             "context-menu.js",
             "datatable.js",
+            "sheet.js",
             "slider.js",
             "src/js/moo-ui.js",
             "chart.js",
@@ -967,7 +1028,7 @@ for (const specifier of [
                     )
 
         self.assertIn(
-            'npm publish --access public --provenance --tag '
+            'npm publish "./dist/rc-rehearsal/wpmoo-ui-${{ steps.package.outputs.version }}.tgz" --access public --provenance --tag '
             '"${{ steps.package.outputs.npm_tag }}"',
             workflow,
         )

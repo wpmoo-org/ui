@@ -187,7 +187,7 @@ class LayoutBrowserTests(unittest.TestCase):
         finally:
             context.close()
 
-    def test_document_owner_state_applies_stored_theme_before_external_asset(self) -> None:
+    def test_document_owner_state_restores_theme_and_viewport_surface(self) -> None:
         def open_catalog(*, theme: str, direction: str):
             context = new_case_context(self.browser, LAYOUT_CASES[0])
             context.add_init_script(
@@ -219,7 +219,9 @@ class LayoutBrowserTests(unittest.TestCase):
             theme="dark", direction="rtl"
         )
         try:
-            self.assertEqual(state_requests, [])
+            self.assertTrue(state_requests)
+            for url in state_requests:
+                self.assertRegex(url, r"/assets/js/state\.js\?v=[0-9a-f]+$")
 
             surface = page.evaluate(
                 """
@@ -261,7 +263,9 @@ class LayoutBrowserTests(unittest.TestCase):
             theme="not-a-theme", direction="sideways"
         )
         try:
-            self.assertEqual(state_requests, [])
+            self.assertTrue(state_requests)
+            for url in state_requests:
+                self.assertRegex(url, r"/assets/js/state\.js\?v=[0-9a-f]+$")
             surface = page.evaluate(
                 """
                 () => ({

@@ -1,4 +1,5 @@
 import Sidebar from "../../../../src/js/components/sidebar.js";
+import { initSheets } from "../../../../src/js/components/sheet.js";
 import { initAcceptancePortal } from "./acceptance.js";
 import { initBlockFrames } from "./block-frame.js";
 import { initBootstrapPreview } from "./bootstrap-preview.js";
@@ -157,6 +158,7 @@ export function initCatalog(root = document) {
 
   disposers.push(initCodePreview(root));
   disposers.push(initBootstrapPreview(root));
+  disposers.push(initSheets(root));
 
   const sidebarRoots = root.querySelectorAll(
     '[data-slot="sidebar-wrapper"][data-sidebar-key]',

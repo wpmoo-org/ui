@@ -94,6 +94,9 @@ $moo-theme-colors-border-subtle-dark: (
   // Resolved owners reset this token so nested Moo owners never inherit a
   // parent owner's heading-font choice.
   --moo-heading-font-family: var(--#{$prefix}body-font-family);
+  --moo-small-font-size: #{$moo-small-font-size};
+  --moo-paragraph-margin-top: #{$moo-paragraph-margin-top};
+  --moo-paragraph-margin-bottom: #{$paragraph-margin-bottom};
 }
 
 @mixin moo-core-light {

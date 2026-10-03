@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 import os
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.style_comments import css_comments, is_license_comment, strip_scss_line_comments
 
 
 APPROVED_TARBALL_FILES = {
@@ -24,6 +33,7 @@ APPROVED_TARBALL_FILES = {
     "dist/js/context-menu.js",
     "dist/js/datatable.js",
     "dist/js/slider.js",
+    "dist/js/sheet.js",
     "dist/js/moo-ui.js",
     "dist/js/moo-ui.min.js",
     "dist/js/chart.js",
@@ -103,6 +113,7 @@ APPROVED_TARBALL_FILES = {
     "scss/themes/_root.scss",
     "scss/themes/_standalone.scss",
     "scss/themes/_theme.scss",
+    "scss/utilities/_background_color.scss",
     "scss/utilities/_scroll_fade.scss",
     "scss/utilities/_scroll_fade_primitives.scss",
     "package.json",
@@ -180,10 +191,39 @@ def load_manifest_payload() -> Any:
     return json.loads(result.stdout)
 
 
+def validate_release_tarball(path: Path) -> None:
+    with tarfile.open(path, "r:gz") as archive:
+        members = archive.getmembers()
+        if any(not member.isfile() or not member.name.startswith("package/") for member in members):
+            raise ValueError("Release package must contain regular package files only")
+        validate_package_manifest([{"files": [
+            {"path": member.name.removeprefix("package/")} for member in members
+        ]}])
+        for member in members:
+            if member.name.endswith((".scss", ".min.css")):
+                source = archive.extractfile(member).read().decode("utf-8")
+                if member.name.endswith(".scss"):
+                    if strip_scss_line_comments(source) != source:
+                        raise ValueError(f"Silent SCSS comment in {member.name}")
+                elif any(not is_license_comment(token.value) for token in css_comments(source)):
+                    raise ValueError(f"Non-license CSS comment in {member.name}")
+        manifest = json.loads(archive.extractfile("package/dist/release-manifest.json").read())
+        for entry in manifest["artifacts"]:
+            content = archive.extractfile(f"package/{entry['path']}").read()
+            if hashlib.sha256(content).hexdigest() != entry["sha256"]:
+                raise ValueError(f"Release manifest hash mismatch: {entry['path']}")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--package", type=Path)
+    args = parser.parse_args()
     try:
-        validate_package_manifest(load_manifest_payload())
-    except (json.JSONDecodeError, ValueError) as error:
+        if args.package:
+            validate_release_tarball(args.package)
+        else:
+            validate_package_manifest(load_manifest_payload())
+    except (OSError, KeyError, tarfile.TarError, ValueError) as error:
         print(f"Package manifest validation failed: {error}", file=sys.stderr)
         return 1
 

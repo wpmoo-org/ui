@@ -1,3 +1,4 @@
+/* Dropdown */
 // Dropdown uses Bootstrap's own consumption variables. These aliases give
 // the native menu the reference's surface without a private Moo token layer.
 .dropdown-menu {
@@ -37,6 +38,12 @@
 // of :focus and this selector explicitly excludes it.
 .dropdown-item:focus:not(:focus-visible):not(:hover) {
   color: var(--bs-dropdown-link-color);
+  background-color: transparent;
+}
+
+// Keep the hovered row as the only filled row while preserving the active
+// selection for when the pointer leaves the menu.
+.dropdown-menu:has(.dropdown-item:hover) .dropdown-item.active:not(:hover) {
   background-color: transparent;
 }
 

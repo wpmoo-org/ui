@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the RC9 package candidate from the bytes in its npm tarball.
+"""Verify the RC10 package candidate from the bytes in its npm tarball.
 
 The verifier deliberately does not extract the archive.  It validates one
 canonical member policy, reads only the required JSON/artifact members, and
@@ -20,7 +20,7 @@ from typing import Any
 
 
 PACKAGE_NAME = "@wpmoo/ui"
-PACKAGE_VERSION = "1.0.0-rc.9"
+PACKAGE_VERSION = "1.0.0-rc.10"
 MANIFEST_MEMBER = "package/dist/release-manifest.json"
 PACKAGE_JSON_MEMBER = "package/package.json"
 MANIFEST_LIMIT = 1 * 1024 * 1024
@@ -193,12 +193,12 @@ def _verify_manifest(
                 f"package.json export {export!r} must point at './{path}'"
             )
     if "./theme-prepaint.js" in exports:
-        raise ReleaseTarballError("RC9 must not export theme-prepaint.js")
+        raise ReleaseTarballError("RC10 must not export theme-prepaint.js")
     files = package.get("files")
     if isinstance(files, list) and "dist/js/theme-prepaint.js" in files:
-        raise ReleaseTarballError("RC9 package files must not include theme-prepaint.js")
+        raise ReleaseTarballError("RC10 package files must not include theme-prepaint.js")
     if "package/dist/js/theme-prepaint.js" in members:
-        raise ReleaseTarballError("RC9 archive must not include theme-prepaint.js")
+        raise ReleaseTarballError("RC10 archive must not include theme-prepaint.js")
 
     artifacts = manifest.get("artifacts")
     if not isinstance(artifacts, list):
@@ -278,7 +278,7 @@ def verify_tarball(tarball: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Verify a Moo UI RC9 npm tarball.")
+    parser = argparse.ArgumentParser(description="Verify a Moo UI RC10 npm tarball.")
     parser.add_argument("--tarball", required=True, type=Path)
     args = parser.parse_args(argv)
     try:

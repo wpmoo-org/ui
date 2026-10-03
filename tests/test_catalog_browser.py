@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import time
 import unittest
 
 from playwright.sync_api import expect, sync_playwright
@@ -36,6 +38,122 @@ class CatalogBrowserTests(unittest.TestCase):
         cls.addClassCleanup(cls.playwright_manager.__exit__, None, None, None)
         cls.browser = launch_certification_browser(cls.playwright)
         cls.addClassCleanup(cls.browser.close)
+
+    def test_external_state_restores_the_first_content_frame_and_sidebar_reload(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                expected = {
+                    "theme": case.color_scheme,
+                    "direction": case.direction,
+                    "sidebar": "collapsed",
+                    "builder": {
+                        "baseColor": "mist",
+                        "themeColor": "blue",
+                        "chartColor": "azure",
+                        "headingFont": "system",
+                        "bodyFont": "geist",
+                        "radius": "small",
+                    },
+                }
+                context.add_init_script(
+                    """
+                    (() => {
+                      const expected = """ + json.dumps(expected) + """;
+                      if (!localStorage.getItem('moo:theme')) {
+                        localStorage.setItem('moo:theme', expected.theme);
+                      }
+                      if (!localStorage.getItem('moo:direction')) {
+                        localStorage.setItem('moo:direction', expected.direction);
+                      }
+                      if (!localStorage.getItem('moo-sidebar:catalog-shell')) {
+                        localStorage.setItem('moo-sidebar:catalog-shell', expected.sidebar);
+                      }
+                      if (!localStorage.getItem('moo:theme-builder')) {
+                        localStorage.setItem('moo:theme-builder', JSON.stringify(expected.builder));
+                      }
+                      const sample = () => {
+                        const owner = document.querySelector('.moo-ui[data-moo-document-owner]');
+                        const wrapper = document.querySelector('[data-sidebar-key="catalog-shell"]');
+                        const heading = document.querySelector('main h1');
+                        if (!heading?.getBoundingClientRect().height || !owner || !wrapper) {
+                          requestAnimationFrame(sample);
+                          return;
+                        }
+                        window.__catalogFirstContentFrame = {
+                          theme: owner.dataset.bsTheme,
+                          direction: document.documentElement.dir,
+                          sidebar: wrapper.dataset.sidebarState,
+                          ownerReady: owner.dataset.mooState === 'ready',
+                          sidebarReady: wrapper.hasAttribute('data-sidebar-state-ready'),
+                          builder: Object.fromEntries(Object.keys(expected.builder).map(key => [
+                            key,
+                            owner.dataset[`mooCatalogThemeBuilder${key[0].toUpperCase()}${key.slice(1)}`],
+                          ])),
+                        };
+                      };
+                      requestAnimationFrame(sample);
+                    })();
+                    """
+                )
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    state_requests = []
+
+                    def delay_state(route) -> None:
+                        state_requests.append(route.request.url)
+                        # A slow cold fetch must not reveal unrestored content.
+                        time.sleep(0.15)
+                        route.continue_()
+
+                    page.route("**/assets/js/state.js?*", delay_state)
+                    page.route("**/assets/js/catalog-theme-state.js?*", delay_state)
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/components/alert/",
+                        wait_until="load",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    expect(page.get_by_role("heading", name="Alert", level=1)).to_be_visible()
+                    page.wait_for_function("window.__catalogFirstContentFrame")
+                    first_frame = page.evaluate("window.__catalogFirstContentFrame")
+                    self.assertEqual(first_frame, {
+                        **expected,
+                        "ownerReady": True,
+                        "sidebarReady": True,
+                    })
+                    self.assertTrue(state_requests)
+                    self.assertEqual(len(set(state_requests)), 2)
+                    self.assertEqual(
+                        {url.split("?", 1)[0].rsplit("/", 1)[-1] for url in state_requests},
+                        {"state.js", "catalog-theme-state.js"},
+                    )
+
+                    if not case.is_mobile:
+                        page.get_by_role("button", name="Toggle sidebar").first.click()
+                        expect(page.locator('[data-sidebar-key="catalog-shell"]')).to_have_attribute(
+                            "data-sidebar-state", "expanded",
+                        )
+                        page.reload(wait_until="load")
+                        page.wait_for_function("window.__catalogFirstContentFrame")
+                        self.assertEqual(
+                            page.evaluate("window.__catalogFirstContentFrame.sidebar"),
+                            "expanded",
+                        )
+                    changed_theme = "dark" if case.color_scheme == "light" else "light"
+                    page.locator("[data-moo-theme]").click()
+                    expect(page.locator(".moo-ui[data-moo-document-owner]")).to_have_attribute(
+                        "data-bs-theme", changed_theme,
+                    )
+                    page.goto(f"{self.base_url}/site-dist/components/button/", wait_until="load")
+                    expect(page.get_by_role("heading", name="Button", level=1)).to_be_visible()
+                    expect(page.locator(".moo-ui[data-moo-document-owner]")).to_have_attribute(
+                        "data-bs-theme", changed_theme,
+                    )
+                    evidence.assert_clean()
+                finally:
+                    context.close()
 
     def test_command_palette_keyboard_navigation_keeps_active_item_clear_of_scroll_edges(
         self,

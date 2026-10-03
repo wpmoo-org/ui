@@ -2165,6 +2165,109 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 evidence.assert_clean()
                 context.close()
 
+    def test_sheet_initializer_cleanup_and_reinitialization(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/sheet.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    no_bootstrap_cleanup = page.evaluate("""async () => {
+                        const { initSheets } = await import('/src/js/components/sheet.js');
+                        const bootstrap = window.bootstrap;
+                        window.bootstrap = undefined;
+                        try {
+                            const cleanup = initSheets(document);
+                            if (typeof cleanup === 'function') cleanup();
+                            return typeof cleanup;
+                        } finally {
+                            window.bootstrap = bootstrap;
+                        }
+                    }""")
+                    self.assertEqual(no_bootstrap_cleanup, "function")
+                    page.evaluate("""async () => {
+                        const { initSheets } = await import('/src/js/components/sheet.js');
+                        window.sheetCleanup = {
+                            document: initSheets(document),
+                            owner: initSheets(document.querySelector('.moo-ui')),
+                        };
+                        initSheets(document);
+                    }""")
+                    trigger = page.locator("#certification-sheet-trigger")
+                    sheet = page.locator("#certification-sheet")
+                    name_input = page.locator("#certification-sheet-name")
+                    name_input.evaluate("element => element.autofocus = true")
+                    for phase, action, focused in (
+                        ("initialized", "", name_input),
+                        ("independent root", "sheetCleanup.document(); sheetCleanup.document();", name_input),
+                        ("disposed", "sheetCleanup.owner(); sheetCleanup.owner();", sheet),
+                        ("reinitialized", """async () => {
+                            const { initSheets } = await import('/src/js/components/sheet.js');
+                            sheetCleanup.current = initSheets(document);
+                            sheetCleanup.document();
+                        }""", name_input),
+                        ("disposed again", "sheetCleanup.current();", sheet),
+                    ):
+                        with self.subTest(phase=phase):
+                            if action:
+                                page.evaluate(action)
+                            trigger.click()
+                            expect(focused).to_be_focused()
+                            page.keyboard.press("Escape")
+                            expect(sheet).not_to_be_visible()
+                            expect(trigger).to_be_focused()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
+    def test_sheet_autofocus_runs_after_open_and_on_reopen(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/sheet.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+                    trigger = page.locator("#certification-sheet-trigger")
+                    sheet = page.locator("#certification-sheet")
+                    name_input = page.locator("#certification-sheet-name")
+                    name_input.evaluate("element => element.autofocus = true")
+                    page.evaluate("""async () => {
+                        const { initSheets } = await import('/src/js/components/sheet.js');
+                        initSheets(document);
+                        initSheets(document);
+                    }""")
+                    for _ in range(2):
+                        name_input.evaluate("element => element.value = ''")
+                        trigger.click()
+                        expect(name_input).to_be_focused()
+                        page.keyboard.type("Project")
+                        expect(name_input).to_have_value("Project")
+                        page.keyboard.press("Escape")
+                        expect(sheet).not_to_be_visible()
+                        expect(trigger).to_be_focused()
+                    name_input.evaluate("element => element.autofocus = false")
+                    trigger.click()
+                    expect(sheet).to_be_focused()
+                    page.keyboard.press("Escape")
+                    expect(trigger).to_be_focused()
+                    evidence.assert_clean()
+                finally:
+                    context.close()
+
     def test_sheet_fixture_proves_focus_backdrop_scroll_and_lifecycle(self) -> None:
         for case in CERTIFICATION_CASES:
             with self.subTest(case=case.name):
@@ -3196,6 +3299,123 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertGreater(len(page.screenshot(full_page=True)), 1000)
                 evidence.assert_clean()
                 context.close()
+
+    def test_radio_choice_cards_keep_square_media_native_selection_and_theme_roles(self) -> None:
+        for case in CERTIFICATION_CASES:
+            with self.subTest(case=case.name):
+                context = new_case_context(self.browser, case)
+                try:
+                    page = context.new_page()
+                    evidence = BrowserEvidence(page)
+                    response = page.goto(
+                        f"{self.base_url}/site-dist/components/radio-group/index.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+
+                    for name in ('radio-plan-cards', 'radio-workspace-cards', 'radio-category-cards'):
+                        group = page.locator(f'fieldset.radio-group:has(input[name="{name}"])')
+                        preview = page.locator(f'.moo-example__preview:has(input[name="{name}"])')
+                        self.assertIn('moo-example__preview--narrow', preview.get_attribute('class').split())
+                        geometry = group.evaluate("""group => {
+                            const content = group.getBoundingClientRect();
+                            const preview = group.closest('.moo-example__preview');
+                            const frame = preview.getBoundingClientRect();
+                            const limit = parseFloat(getComputedStyle(group.closest('.field')).maxWidth);
+                            return {
+                                width: content.width,
+                                limit,
+                                hasWidthLimit: Number.isFinite(limit),
+                                center: content.x + content.width / 2,
+                                frameCenter: frame.x + frame.width / 2,
+                            };
+                        }""")
+                        self.assertTrue(geometry['hasWidthLimit'], 'Choice Card Field must have a finite width limit')
+                        self.assertLessEqual(geometry['width'], geometry['limit'])
+                        self.assertAlmostEqual(geometry['center'], geometry['frameCenter'], delta=0.5)
+
+                    page.locator('label[for="radio-plan-pro"]').click()
+                    expect(page.locator('#radio-plan-pro')).to_be_checked()
+                    expect(page.locator('#radio-plan-plus')).not_to_be_checked()
+
+                    local = page.locator("#radio-workspace-local")
+                    cloud = page.locator("#radio-workspace-cloud")
+                    disabled = page.locator("#radio-workspace-managed")
+                    page.locator('label[for="radio-workspace-local"]').click()
+                    expect(local).to_be_checked()
+                    expect(cloud).not_to_be_checked()
+                    expect(disabled).to_be_disabled()
+                    local.press("ArrowDown")
+                    expect(cloud).to_be_checked()
+                    expect(disabled).not_to_be_checked()
+
+                    first_code = page.locator("#radio-category-acs")
+                    next_code = page.locator("#radio-category-art")
+                    page.locator('label[for="radio-category-acs"]').click()
+                    expect(first_code).to_be_checked()
+                    first_code.press("ArrowDown")
+                    expect(next_code).to_be_checked()
+                    expect(next_code).to_be_focused()
+                    expect(first_code).not_to_be_checked()
+                    self.assertNotEqual(
+                        page.locator('label[for="radio-category-art"]').evaluate(
+                            "label => getComputedStyle(label).boxShadow"
+                        ),
+                        "none",
+                    )
+
+                    def measured_media():
+                        return page.evaluate("""() => {
+                            const ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+                            const color = value => {
+                                ctx.clearRect(0, 0, 1, 1);
+                                ctx.fillStyle = value;
+                                ctx.fillRect(0, 0, 1, 1);
+                                return Array.from(ctx.getImageData(0, 0, 1, 1).data);
+                            };
+                            return ['radio-workspace-cloud', 'radio-category-art'].map(id => {
+                                const label = document.querySelector(`label[for="${id}"]`);
+                                const media = label.querySelector('.form-check-card-media');
+                                const content = label.querySelector('.form-check-card-content');
+                                const box = media.getBoundingClientRect();
+                                const body = content.getBoundingClientRect();
+                                const style = getComputedStyle(media);
+                                return {
+                                    width: box.width, height: box.height, bodyHeight: body.height,
+                                    leadingGap: style.direction === 'rtl'
+                                        ? box.left - body.right : body.left - box.right,
+                                    background: color(style.backgroundColor),
+                                    primary: color(style.getPropertyValue('--moo-primary')),
+                                    foreground: color(style.color),
+                                    primaryForeground: color(style.getPropertyValue('--moo-primary-foreground')),
+                                };
+                            });
+                        }""")
+
+                    for branded in (False, True):
+                        if branded:
+                            # The accepted Orange preview proves selection consumes the
+                            # owner's tokens instead of a fixed neutral color.
+                            page.locator('.moo-ui[data-bs-theme]').first.evaluate("""owner => {
+                                owner.style.setProperty('--moo-primary', 'rgb(198, 82, 6)');
+                                owner.style.setProperty('--moo-primary-foreground', 'rgb(255, 255, 255)');
+                            }""")
+                        for media in measured_media():
+                            self.assertAlmostEqual(media['width'], media['height'], delta=0.5)
+                            self.assertAlmostEqual(media['height'], media['bodyHeight'], delta=0.5)
+                            self.assertGreater(media['leadingGap'], 0)
+                            self.assertEqual(media['background'], media['primary'])
+                            self.assertEqual(media['foreground'], media['primaryForeground'])
+                    self.assertEqual(
+                        page.evaluate("document.documentElement.scrollWidth"),
+                        case.viewport['width'],
+                    )
+                    self.assertEqual(run_axe(page), [])
+                    evidence.assert_clean()
+                finally:
+                    context.close()
 
     def test_radio_group_fixture_proves_native_form_check_contracts(self) -> None:
         for case in CERTIFICATION_CASES:
@@ -4678,6 +4898,50 @@ class CertificationBrowserHarnessTests(unittest.TestCase):
                 self.assertGreater(len(page.screenshot(full_page=True)), 1000)
                 evidence.assert_clean()
                 context.close()
+
+    def test_dropdown_selected_row_yields_highlight_to_hovered_row(self) -> None:
+        for color_scheme in ("light", "dark"):
+            with self.subTest(color_scheme=color_scheme):
+                case = BrowserCase(
+                    name=f"dropdown-hover-{color_scheme}",
+                    viewport={"width": 1040, "height": 844},
+                    color_scheme=color_scheme,
+                    direction="ltr",
+                )
+                context = new_case_context(self.browser, case)
+                page = context.new_page()
+                evidence = BrowserEvidence(page)
+                try:
+                    response = page.goto(
+                        f"{self.base_url}/tests/fixtures/certification/dropdown-menu.html",
+                        wait_until="networkidle",
+                    )
+                    self.assertIsNotNone(response)
+                    self.assertTrue(response.ok)
+                    prepare_page(page, case)
+
+                    page.locator("#certification-dropdown-trigger").click()
+                    selected = page.locator("#certification-dropdown-first-item")
+                    hovered = page.locator("#certification-dropdown-second-item")
+                    selected.evaluate("element => element.classList.add('active')")
+
+                    def background(item):
+                        return item.evaluate("element => getComputedStyle(element).backgroundColor")
+
+                    resting_background = background(hovered)
+                    selected_background = background(selected)
+                    self.assertNotEqual(selected_background, resting_background)
+
+                    hovered.hover()
+                    self.assertEqual(background(selected), resting_background)
+                    self.assertEqual(background(hovered), selected_background)
+
+                    page.mouse.move(0, 0)
+                    self.assertEqual(background(selected), selected_background)
+                    self.assertEqual(background(hovered), resting_background)
+                    evidence.assert_clean()
+                finally:
+                    context.close()
 
 
     def test_menubar_fixture_proves_grouped_dropdown_contracts(self) -> None:

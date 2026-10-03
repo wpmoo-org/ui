@@ -108,6 +108,10 @@ class TestTierRunnerTests(unittest.TestCase):
             (["tests/test_catalog_browser.py"], "browser-full"),
             (["conformance/runner/run.py"], "release"),
             (["package.json"], "release"),
+            (["scripts/package_release.py"], "release"),
+            (["scripts/style_comments.py"], "release"),
+            (["tests/test_package_release.py"], "release"),
+            (["tests/test_style_comments.py"], "release"),
             ([".github/workflows/ui-ci.yml"], "release"),
             (["unrecognized/generated-output.txt"], "release"),
         ]
@@ -356,6 +360,23 @@ class TestTierRunnerTests(unittest.TestCase):
             f"{self.runner.python_executable()} scripts/rehearse-rc.py",
             command_text,
         )
+
+    def test_dev_auto_includes_changed_package_and_style_contracts(self) -> None:
+        cases = (
+            ("scripts/package_release.py", "tests.test_package_release"),
+            ("scripts/verify_package_contents.py", "tests.test_package_release"),
+            (".github/workflows/npm-publish.yml", "tests.test_package_release"),
+            ("tests/test_package_release.py", "tests.test_package_release"),
+            ("scripts/style_comments.py", "tests.test_style_comments"),
+            ("tests/test_style_comments.py", "tests.test_style_comments"),
+            ("build.py", "tests.test_style_comments"),
+            ("package.json", "tests.test_style_comments"),
+            ("scss/mixins/_banner.scss", "tests.test_style_comments"),
+        )
+        for path, module in cases:
+            with self.subTest(path=path):
+                tier = self.runner.dev_auto_tier_for_paths([path])
+                self.assertIn(module, self.runner.modules_for(tier, [path]))
 
     def test_release_runner_fails_closed_when_npm_pack_loses_verifier(self) -> None:
         python = self.runner.python_executable()

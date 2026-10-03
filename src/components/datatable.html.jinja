@@ -195,7 +195,7 @@
       <span class="visually-hidden">Cards</span>
     </label>
   </div>
-  {#- The root always renders data-datatable-view="table" server-side (there's
+  {#- The root renders its default view server-side (there's
      no per-request access to localStorage at build time). DataTable.js's
      module script restores a saved table/cards choice too, but module
      scripts run after the parser finishes, by which point the browser has
@@ -207,17 +207,21 @@
     (function () {
       var root = document.currentScript.closest("[data-datatable-view]");
       if (!root) return;
+      var breakpoint = getComputedStyle(root).getPropertyValue("--moo-datatable-responsive-breakpoint").trim();
+      var auto = root.hasAttribute("data-datatable-responsive-breakpoint");
+      if (auto && !breakpoint) return;
+      var wide = !auto || window.matchMedia("(min-width: " + breakpoint + ")").matches;
+      var key = "moo-datatable-view:" + root.id + (auto ? (wide ? ":wide" : ":narrow") : "");
+      var view = auto ? (wide ? "table" : "cards") : root.dataset.datatableView;
       var stored;
       try {
-        stored = window.localStorage.getItem("moo-datatable-view:" + root.id);
-      } catch (_) {
-        return;
-      }
-      if (stored !== "table" && stored !== "cards") return;
-      root.dataset.datatableView = stored;
+        stored = window.localStorage.getItem(key);
+      } catch (_) {}
+      if (stored === "table" || stored === "cards") view = stored;
+      root.dataset.datatableView = view;
       var inputs = root.querySelectorAll(".datatable-view-toggle input");
       for (var i = 0; i < inputs.length; i++) {
-        inputs[i].checked = inputs[i].value === stored;
+        inputs[i].checked = inputs[i].value === view;
       }
     })();
   </script>
@@ -269,7 +273,7 @@
   {% if not rows %}{{ fail("Data Table rows are required") }}{% endif %}
   {% if default_page_size not in page_sizes %}{{ fail("Data Table default_page_size must be one of page_sizes") }}{% endif %}
   {% if filter_mode not in ["inline", "picker"] %}{{ fail("Data Table filter_mode must be 'inline' or 'picker'") }}{% endif %}
-  {% if responsive_mode not in ["scroll", "cards", "toggle"] %}{{ fail("Data Table responsive_mode must be 'scroll', 'cards', or 'toggle'") }}{% endif %}
+  {% if responsive_mode not in ["scroll", "cards", "toggle", "auto"] %}{{ fail("Data Table responsive_mode must be 'scroll', 'cards', 'toggle', or 'auto'") }}{% endif %}
   {% if responsive_breakpoint not in ["sm", "md", "lg", "xl", "xxl"] %}{{ fail("Data Table responsive_breakpoint must be a Bootstrap breakpoint") }}{% endif %}
   {% set total_rows = rows | length %}
   {% set page_count = (total_rows + default_page_size - 1) // default_page_size %}
@@ -303,12 +307,12 @@
     {% set ordered_rows = decorated_rows | sort(attribute="value", reverse=(initial_sort.direction == "desc")) | map(attribute="row") | list %}
   {% endif %}
   {% set table_id = id ~ "-table" %}
-  {% set responsive_cards_enabled = responsive_mode in ["cards", "toggle"] %}
+  {% set responsive_cards_enabled = responsive_mode in ["cards", "toggle", "auto"] %}
   {% set root_class = "datatable datatable--responsive-" ~ responsive_mode %}
   {% if responsive_cards_enabled %}{% set root_class = root_class ~ " datatable--responsive-cards-active" %}{% endif %}
   {% if extra_class %}{% set root_class = root_class ~ " " ~ extra_class %}{% endif %}
   {% set table_responsive_class = "table-responsive scrollbar-thin" %}
-  {% if responsive_mode in ["scroll", "toggle"] %}{% set table_responsive_class = table_responsive_class ~ " scroll-fade-x" %}{% endif %}
+  {% if responsive_mode in ["scroll", "toggle", "auto"] %}{% set table_responsive_class = table_responsive_class ~ " scroll-fade-x" %}{% endif %}
   {% set frame_class = "datatable-frame" %}
   {% if responsive_mode == "cards" %}{% set frame_class = frame_class ~ " d-none d-" ~ responsive_breakpoint ~ "-block" %}{% endif %}
   {% set card_frame_class = "datatable-card-frame" %}
@@ -319,7 +323,7 @@
     {% if column.card_role | default("") == "title" %}{% set card_columns.title = column %}{% endif %}
     {% if column.card_role | default("") == "actions" %}{% set card_columns.actions = column %}{% endif %}
   {% endfor %}
-  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}" data-datatable-filter-mode="{{ filter_mode }}"{% if responsive_mode == "toggle" %} data-datatable-view="table"{% endif %}>
+  <div class="{{ root_class }}" id="{{ id }}" data-datatable-page-size="{{ default_page_size }}" data-datatable-filter-mode="{{ filter_mode }}"{% if responsive_mode in ["toggle", "auto"] %} data-datatable-view="{{ 'auto' if responsive_mode == 'auto' else 'table' }}"{% endif %}{% if responsive_mode == "auto" %} data-datatable-responsive-breakpoint="{{ responsive_breakpoint }}"{% endif %}>
     <div class="datatable-toolbar" data-datatable-toolbar>
       <div class="datatable-toolbar-query">
         {{ datatable_search_filter(search_placeholder, facets, filter_mode) }}
@@ -334,7 +338,7 @@
         </button>
       </div>
       <div class="datatable-toolbar-actions">
-        {% if responsive_mode == "toggle" %}
+        {% if responsive_mode in ["toggle", "auto"] %}
         <div class="datatable-layout-switch">
           {{ datatable_view_toggle(id) }}
         </div>

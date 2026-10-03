@@ -112,6 +112,14 @@ There are two supported first-paint profiles:
   in browser storage, so the server value is the deterministic fallback for
   this profile.
 
+The catalog uses the external profile. It preloads its versioned `state.js`
+URL in the head and invokes that same classic asset as the first child of both
+the document owner and keyed Sidebar wrapper. The Jinja `app` macro accepts
+`state_src` for this external integration; omitting it retains the canonical
+inline profile. Neither invocation uses `async`, `defer`, or `type="module"`.
+Visible content is parsed after state restoration; a cold request can still
+delay content and show the server background while it loads.
+
 Neither profile mirrors Bootstrap theme state to `html` or `body`. The
 bootstrap updates `html[dir]` only for the complete-document owner and uses an
 owner `dir` only for embedded subtree overrides. `blocking="render"` is not a
@@ -121,7 +129,13 @@ the owner-local bootstrap contract.
 The catalog's persisted Theme Builder state is private site behavior. It
 normalizes storage into private `data-moo-catalog-theme-builder-*` attributes
 on the owner and applies the generated catalog stylesheet; it is neither a
-package export nor a cross-host theme API.
+package export nor a cross-host theme API. Its formatted
+unminified `catalog-theme-state.js` asset is generated from the same
+configuration as the token stylesheet and preloaded in the head. It reads
+`document.currentScript.parentElement`, so its invocation must stay classic
+and non-deferred inside the owner, after the public owner bootstrap. Its
+configuration and executable code stay outside the HTML document and npm
+inventory.
 
 ## Public Token Allow-List
 

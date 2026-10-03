@@ -1,13 +1,26 @@
 @scope (.moo-ui) to (:where(.moo-ui[data-bs-theme="light"], .moo-ui[data-bs-theme="dark"])) {
   @import "../components";
+  /* Focus and keyboard navigation */
   @import "../foundations/focus";
+  /* Scroll utilities */
   @import "../utilities/scroll_fade";
+  /* Application layout */
   @import "../layouts/app";
   @import "../layouts/page_grid";
+  /* Form themes */
   @import "../themes/forms";
+  /* Overlay backdrops */
   @include moo-overlay-backdrop-scoped;
+  /* Typography */
   :where(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,
     .display-1, .display-2, .display-3, .display-4, .display-5, .display-6) {
     font-family: var(--moo-heading-font-family, var(--bs-body-font-family));
+  }
+  :is(small, .small) {
+    font-size: var(--moo-small-font-size);
+  }
+  p {
+    margin-top: var(--moo-paragraph-margin-top);
+    margin-bottom: var(--moo-paragraph-margin-bottom);
   }
 }
