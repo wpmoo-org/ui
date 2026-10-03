@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -535,6 +536,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             "context-menu.js",
             "datatable.js",
             "slider.js",
+            "sheet.js",
+            "state.js",
             "moo-ui.js",
             "moo-ui.min.js",
             "chart.js",
@@ -545,8 +548,8 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
             with self.subTest(module=module_name):
                 expected_banner = (
                     "/*!\n"
-                    f" * Moo UI {module_name} v{package['version']} (https://ui.wpmoo.org/)\n"
-                    " * Copyright 2026 WPMoo (https://wpmoo.org)\n"
+                    f" * Moo UI {module_name} v{package['version']} (https://wpmoo.org/)\n"
+                    " * Copyright 2026 WPMoo Authors\n"
                     " * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)\n"
                     " */\n"
                 )
@@ -582,6 +585,56 @@ console.log(JSON.stringify({ sidebar: Sidebar.name, datatable: DataTable.name })
                     "// src/js/components/chart.js",
                 ],
             )
+
+    def test_published_js_is_readable_and_minified_bodies_have_one_line(self) -> None:
+        self.require_full_build()
+        for path in sorted((PACKAGE_DIST / "js").glob("*.js")):
+            with self.subTest(module=path.name):
+                source = path.read_text(encoding="utf-8")
+                body = re.sub(r"\A(?:/\*!.*?\*/\s*)+", "", source, flags=re.DOTALL)
+                self.assertTrue(source.startswith("/*!\n * Moo UI "))
+                self.assertTrue(source.endswith("\n"))
+                self.assertNotIn("\r", source)
+                if path.name.endswith(".min.js"):
+                    self.assertEqual(len(body.strip().splitlines()), 1)
+                else:
+                    self.assertGreater(len(body.splitlines()), 2)
+                    self.assertTrue(any(line.startswith("  ") for line in body.splitlines()))
+                    self.assertFalse(any(line.startswith("\t") for line in body.splitlines()))
+
+    def test_minified_bundle_preserves_multiline_and_tagged_template_values(self) -> None:
+        with tempfile.TemporaryDirectory() as scratch:
+            root = Path(scratch)
+            (root / "package.json").write_text('{"type":"module"}\n')
+            (root / "js").mkdir()
+            (root / "sample.js").write_text(
+                "export function describe(value) {\r\n"
+                " return `Hello ${value}\\nnext`;\r\n"
+                "}\r\n"
+                "export const literal = `first\nsecond`;\r\n"
+                "export const raw = String.raw`path\\name\nnext`;\r\n",
+                encoding="utf-8",
+            )
+            with (
+                mock.patch.object(build, "JS_COMPONENTS", root),
+                mock.patch.object(build, "PACKAGE_DIST", root),
+            ):
+                build._bundle_module("sample.js", minify=False)
+                build._bundle_module("sample.js", minify=True)
+            source = (root / "js/sample.min.js").read_text()
+            body = re.sub(r"\A(?:/\*!.*?\*/\s*)+", "", source, flags=re.DOTALL)
+            self.assertEqual(len(body.strip().splitlines()), 1)
+            self.assertIn("  return", (root / "js/sample.js").read_text())
+            for name in ("sample.js", "sample.min.js"):
+                result = subprocess.run(
+                    ["node", "--input-type=module", "-e",
+                     f"const m = await import({json.dumps(str(root / 'js' / name))});"
+                     "console.log(JSON.stringify([m.describe('World'), m.literal, m.raw]));"],
+                    capture_output=True, text=True, check=True,
+                )
+                self.assertEqual(json.loads(result.stdout), [
+                    "Hello World\nnext", "first\nsecond", "path\\name\nnext",
+                ])
 
     def test_slider_has_no_minified_variant(self) -> None:
         """Slider is a plain ESM module; no minified variant should exist."""

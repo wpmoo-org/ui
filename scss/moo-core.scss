@@ -1,9 +1,4 @@
-/*!
- * Moo UI core
- * Copyright (c) 2026 WPMoo (wpmoo.org)
- * Includes Bootstrap 5.3.3 component output
- * SPDX-License-Identifier: MIT
- */
+@import "mixins/banner";
 @import "settings/options";
 @import "bootstrap/scss/functions";
 @import "settings";
@@ -13,7 +8,9 @@
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
 @import "themes/theme";
+/* Global styles */
 @import "foundations/globals";
 @import "foundations/backdrop";
+/* Theme tokens */
 @import "themes/root";
 @import "foundations/scope";
