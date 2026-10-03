@@ -1180,9 +1180,13 @@ class CertificationContractTests(unittest.TestCase):
         self.assertEqual(aggregate["lazyModules"], {"loadChart": "./chart.js"})
         self.assertNotIn("runtime", aggregate)
         imported = subprocess.run(
-            ["node", "--input-type=module", "--eval",
-             'import * as api from "./src/js/moo-ui.js"; '
-             'process.stdout.write(JSON.stringify(Object.keys(api).filter(key => key !== "default")));'],
+            [
+                "node",
+                "--input-type=module",
+                "--eval",
+                'import * as api from "./src/js/moo-ui.js"; '
+                + 'process.stdout.write(JSON.stringify(Object.keys(api).filter(key => key !== "default")));',
+            ],
             cwd=ROOT, capture_output=True, text=True, check=False, env=npm_env(),
         )
         self.assertEqual(imported.returncode, 0, imported.stderr)
