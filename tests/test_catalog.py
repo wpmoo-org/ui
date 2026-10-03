@@ -3530,10 +3530,11 @@ class CatalogContractTests(CatalogTestCase):
             normalized_installation_text,
         )
         self.assertIn(
-            "Because the aggregate includes the Chart module and its bundled "
-            "Chart.js runtime",
+            "The aggregate fetches Chart and its Chart.js runtime only when "
+            "loadChart() is called.",
             normalized_installation_text,
         )
+        self.assertIn("const Chart = await MooUI.loadChart()", installation_text)
         self.assertNotIn("after the release that publishes", installation)
 
     def test_public_docs_track_package_manifest_and_exports(self) -> None:
