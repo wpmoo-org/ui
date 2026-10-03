@@ -47,6 +47,14 @@ class CatalogBrowserTests(unittest.TestCase):
                     "theme": case.color_scheme,
                     "direction": case.direction,
                     "sidebar": "collapsed",
+                    "builder": {
+                        "baseColor": "mist",
+                        "themeColor": "blue",
+                        "chartColor": "azure",
+                        "headingFont": "system",
+                        "bodyFont": "geist",
+                        "radius": "small",
+                    },
                 }
                 context.add_init_script(
                     """
@@ -60,6 +68,9 @@ class CatalogBrowserTests(unittest.TestCase):
                       }
                       if (!localStorage.getItem('moo-sidebar:catalog-shell')) {
                         localStorage.setItem('moo-sidebar:catalog-shell', expected.sidebar);
+                      }
+                      if (!localStorage.getItem('moo:theme-builder')) {
+                        localStorage.setItem('moo:theme-builder', JSON.stringify(expected.builder));
                       }
                       const sample = () => {
                         const owner = document.querySelector('.moo-ui[data-moo-document-owner]');
@@ -75,6 +86,10 @@ class CatalogBrowserTests(unittest.TestCase):
                           sidebar: wrapper.dataset.sidebarState,
                           ownerReady: owner.dataset.mooState === 'ready',
                           sidebarReady: wrapper.hasAttribute('data-sidebar-state-ready'),
+                          builder: Object.fromEntries(Object.keys(expected.builder).map(key => [
+                            key,
+                            owner.dataset[`mooCatalogThemeBuilder${key[0].toUpperCase()}${key.slice(1)}`],
+                          ])),
                         };
                       };
                       requestAnimationFrame(sample);
@@ -93,6 +108,7 @@ class CatalogBrowserTests(unittest.TestCase):
                         route.continue_()
 
                     page.route("**/assets/js/state.js?*", delay_state)
+                    page.route("**/assets/js/catalog-theme-state.js?*", delay_state)
                     response = page.goto(
                         f"{self.base_url}/site-dist/components/alert/",
                         wait_until="load",
@@ -108,7 +124,11 @@ class CatalogBrowserTests(unittest.TestCase):
                         "sidebarReady": True,
                     })
                     self.assertTrue(state_requests)
-                    self.assertEqual(len(set(state_requests)), 1)
+                    self.assertEqual(len(set(state_requests)), 2)
+                    self.assertEqual(
+                        {url.split("?", 1)[0].rsplit("/", 1)[-1] for url in state_requests},
+                        {"state.js", "catalog-theme-state.js"},
+                    )
 
                     if not case.is_mobile:
                         page.get_by_role("button", name="Toggle sidebar").first.click()

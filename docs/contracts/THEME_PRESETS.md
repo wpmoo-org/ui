@@ -129,7 +129,13 @@ the owner-local bootstrap contract.
 The catalog's persisted Theme Builder state is private site behavior. It
 normalizes storage into private `data-moo-catalog-theme-builder-*` attributes
 on the owner and applies the generated catalog stylesheet; it is neither a
-package export nor a cross-host theme API.
+package export nor a cross-host theme API. Its formatted
+unminified `catalog-theme-state.js` asset is generated from the same
+configuration as the token stylesheet and preloaded in the head. It reads
+`document.currentScript.parentElement`, so its invocation must stay classic
+and non-deferred inside the owner, after the public owner bootstrap. Its
+configuration and executable code stay outside the HTML document and npm
+inventory.
 
 ## Public Token Allow-List
 

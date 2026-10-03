@@ -5,6 +5,10 @@
 {% from "shell/sidebar.html.jinja" import render_catalog_sidebar with context %}
 {% from "includes/page-navigation.html.jinja" import render_section_page_pagination %}
 
+{% block critical_state_styles %}
+  <link rel="preload" href="{{ root_path }}assets/js/catalog-theme-state.js?v={{ asset_version }}" as="script">
+{% endblock %}
+
 {% block owner_state %}
   {% include "includes/catalog-theme-state.html.jinja" %}
 {% endblock %}

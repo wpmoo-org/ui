@@ -192,6 +192,31 @@ class DocumentRootTests(unittest.TestCase):
         _body, owner = self.assert_document_owner(source, root)
         self.assertNotIn("moo-catalog", owner.attrs.get("class", ""))
 
+    def test_catalog_theme_builder_uses_a_preloaded_classic_asset_before_content(self) -> None:
+        source, root = self.parse_page("components/alert/index.html")
+        _body, owner = self.assert_document_owner(source, root)
+        script = next(
+            node for node in owner.children
+            if node.tag == "script"
+            and "assets/js/catalog-theme-state.js?" in node.attrs.get("src", "")
+        )
+        self.assertEqual(script.tag, "script")
+        self.assertRegex(script.attrs.get("src", ""), r"assets/js/catalog-theme-state\.js\?v=.+$")
+        self.assertNotIn("async", script.attrs)
+        self.assertNotIn("defer", script.attrs)
+        self.assertNotEqual(script.attrs.get("type"), "module")
+        self.assertTrue(any(
+            node.tag == "link"
+            and node.attrs.get("rel") == "preload"
+            and node.attrs.get("as") == "script"
+            and node.attrs.get("href") == script.attrs["src"]
+            for node in elements(root)
+        ))
+        self.assertTrue((SITE_DIST / "assets/js/catalog-theme-state.js").is_file())
+        catalog = next(node for node in owner.children if has_class(node, "moo-catalog"))
+        self.assertGreater(owner.children.index(script), 0)
+        self.assertLess(owner.children.index(script), owner.children.index(catalog))
+
     def test_block_preview_does_not_create_a_nested_resolved_owner(self) -> None:
         source, root = self.parse_page("blocks/previews/sidebar-floating/index.html")
         _body, owner = self.assert_document_owner(source, root)

@@ -18,7 +18,7 @@ class BuildTests(CatalogTestCase):
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_render_pages_accepts_precomputed_theme_builder_state(
+    def test_catalog_theme_script_accepts_precomputed_theme_builder_state(
         self,
     ) -> None:
         state = {
@@ -33,7 +33,7 @@ class BuildTests(CatalogTestCase):
                 "radius": "default",
             },
             "options": {
-                "baseColor": ["neutral"],
+                "baseColor": ["neutral", "mist"],
                 "themeColor": ["neutral"],
                 "chartColor": ["neutral"],
                 "headingFont": ["default"],
@@ -47,14 +47,36 @@ class BuildTests(CatalogTestCase):
             with (
                 mock.patch.object(build, "SITE_DIST", Path(tempdir)),
                 mock.patch.object(
-                    build.subprocess,
-                    "run",
+                    build,
+                    "theme_builder_first_paint_payload",
                     side_effect=AssertionError(
-                        "render_pages must not spawn a Theme Builder process"
+                        "The script must reuse the precomputed Theme Builder configuration"
                     ),
                 ),
             ):
-                build.render_pages(version="test", theme_builder_state=state)
+                output = build.write_catalog_theme_state_js(state)
+                self.assertTrue(output.read_text(encoding="utf-8").startswith("/*!"))
+                completed = subprocess.run(
+                    [
+                        "node", "--input-type=module", "--eval", """
+                        import fs from "node:fs";
+                        import vm from "node:vm";
+                        const owner = {matches: () => true, dataset: {}};
+                        vm.runInNewContext(fs.readFileSync(process.argv[1], "utf8"), {
+                          document: {currentScript: {parentElement: owner}},
+                          window: {localStorage: {getItem: () => JSON.stringify({baseColor: "mist"})}},
+                        });
+                        console.log(JSON.stringify(owner.dataset));
+                        """, str(output),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                self.assertEqual(
+                    json.loads(completed.stdout)["mooCatalogThemeBuilderBaseColor"], "mist",
+                )
 
     def test_catalog_state_css_is_owner_scoped_and_allowlisted(self) -> None:
         payload = {
@@ -211,6 +233,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "catalog state js"),
+                ("assets/js/catalog-theme-state.js", "catalog theme state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
                 ("assets/js/codepen-demo.js", "initial codepen demo"),
@@ -243,6 +266,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "initial state js"),
+                ("assets/js/catalog-theme-state.js", "catalog theme state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
@@ -274,6 +298,7 @@ class BuildTests(CatalogTestCase):
                 ("assets/js/bootstrap.bundle.min.js", "bootstrap js"),
                 ("assets/js/catalog/index.js", "catalog js"),
                 ("assets/js/catalog-state.js", "catalog state js"),
+                ("assets/js/catalog-theme-state.js", "catalog theme state js"),
                 ("assets/js/state.js", "state js"),
                 ("assets/js/theme-owner.js", "theme owner js"),
             ):
@@ -284,11 +309,12 @@ class BuildTests(CatalogTestCase):
             original_site_dist = build.SITE_DIST
             try:
                 build.SITE_DIST = site_dist
-                original_version = build.asset_version()
                 for relative in (
                     "assets/js/state.js",
                     "assets/js/theme-owner.js",
+                    "assets/js/catalog-theme-state.js",
                 ):
+                    original_version = build.asset_version()
                     target = site_dist / relative
                     target.write_text(
                         f"changed {relative}", encoding="utf-8"

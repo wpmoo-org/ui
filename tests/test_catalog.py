@@ -2086,6 +2086,9 @@ class CatalogContractTests(CatalogTestCase):
         include = (ROOT / "site/src/includes/catalog-theme-state.html.jinja").read_text(
             encoding="utf-8"
         )
+        theme_state = (ROOT / "site/src/js/catalog-theme-state.js.jinja").read_text(
+            encoding="utf-8"
+        )
 
         self.assertNotIn("<style data-moo-catalog-state", base)
         self.assertNotIn("<style data-moo-catalog-state", catalog)
@@ -2093,10 +2096,11 @@ class CatalogContractTests(CatalogTestCase):
         self.assertNotIn("moo-ui-state.css", catalog)
         self.assertIn("catalog-state.css", base)
         self.assertIn("catalog-theme-state.html.jinja", catalog)
-        self.assertIn("document.currentScript?.parentElement", include)
-        self.assertNotIn("document.documentElement", include)
-        self.assertNotIn("document.body", include)
-        self.assertNotIn("createElement(\"style\")", include)
+        self.assertIn('src="{{ root_path }}assets/js/catalog-theme-state.js?v={{ asset_version }}"', include)
+        self.assertIn("document.currentScript?.parentElement", theme_state)
+        self.assertNotIn("document.documentElement", theme_state)
+        self.assertNotIn("document.body", theme_state)
+        self.assertNotIn("createElement(\"style\")", theme_state)
 
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -3709,9 +3713,6 @@ class CatalogContractTests(CatalogTestCase):
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version="test",
-            theme_builder_state=site_build.catalog_state_config(
-                site_build.theme_builder_first_paint_payload()
-            ),
         )
 
         self.assertIn("No public metadata entrypoints yet", rendered)

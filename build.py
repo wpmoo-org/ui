@@ -1975,6 +1975,7 @@ def asset_version() -> str:
         SITE_DIST / "assets/css/catalog-state.css",
         SITE_DIST / "assets/js/bootstrap.bundle.min.js",
         SITE_DIST / "assets/js/catalog-state.js",
+        SITE_DIST / "assets/js/catalog-theme-state.js",
         SITE_DIST / "assets/js/state.js",
         SITE_DIST / "assets/js/theme-owner.js",
         SITE_DIST / "assets/js/catalog/index.js",
@@ -2142,6 +2143,35 @@ def _normalize_esbuild_module_comments(output: Path) -> None:
     )
     if normalized != source:
         output.write_text(normalized, encoding="utf-8")
+
+
+def write_catalog_theme_state_js(state: dict[str, object]) -> Path:
+    source = create_environment().get_template("js/catalog-theme-state.js.jinja").render(
+        theme_builder_state=state,
+    )
+    output = SITE_DIST / "assets/js/catalog-theme-state.js"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        [
+            str(ROOT / "node_modules/.bin/esbuild"),
+            "--loader=js",
+            "--target=es2020",
+        ],
+        input=source,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "esbuild failed for catalog-theme-state.js:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+    output.write_text(result.stdout, encoding="utf-8")
+    apply_js_license_banner(output, output.name)
+    return output
 
 
 def required_core_outputs() -> tuple[Path, ...]:
@@ -2497,7 +2527,6 @@ def write_sitemap(layouts: list[dict[str, str]] | None = None) -> None:
 def render_pages(
     version: str | None = None,
     layouts: list[dict[str, str]] | None = None,
-    theme_builder_state: dict[str, object] | None = None,
 ) -> None:
     environment = create_environment()
     catalog = load_catalog()
@@ -2526,10 +2555,6 @@ def render_pages(
         examples,
         layouts,
     )
-    if theme_builder_state is None:
-        theme_builder_state = catalog_state_config(
-            theme_builder_first_paint_payload()
-        )
     version = version or asset_version()
     for page in sorted(PAGES.rglob("*.html.jinja")):
         relative = page.relative_to(PAGES)
@@ -2581,7 +2606,6 @@ def render_pages(
             page_meta=metadata,
             page_canonical_url=metadata["url"],
             asset_version=version,
-            theme_builder_state=theme_builder_state,
         )
         output_file.write_text(rendered, encoding="utf-8")
 
@@ -2626,6 +2650,7 @@ def build_site() -> None:
     copy_site_assets()
     theme_builder_payload = theme_builder_first_paint_payload()
     write_catalog_state_css(theme_builder_payload)
+    write_catalog_theme_state_js(catalog_state_config(theme_builder_payload))
     copy_certification_fixtures_to_site()
     render_layout_certification_fixtures()
     copy_site_metadata()
@@ -2635,7 +2660,6 @@ def build_site() -> None:
     render_pages(
         version,
         layouts,
-        theme_builder_state=catalog_state_config(theme_builder_payload),
     )
     write_sitemap(layouts)
 
