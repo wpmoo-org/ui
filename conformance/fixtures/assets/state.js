@@ -1,5 +1,5 @@
 /*!
- * Moo UI state.js v1.0.0-rc.11 (https://wpmoo.org/)
+ * Moo UI state.js v1.0.0 (https://wpmoo.org/)
  * Copyright 2026 WPMoo Authors
  * Licensed under MIT (https://github.com/wpmoo-org/ui/blob/main/LICENSE)
  */

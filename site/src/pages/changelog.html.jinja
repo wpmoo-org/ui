@@ -16,6 +16,32 @@
       ) }}
 
       <section class="moo-changelog" aria-label="Moo UI release history">
+        <article class="moo-changelog__release" aria-labelledby="release-1-0-0">
+          <div class="moo-changelog__release-heading">
+            <span class="badge text-bg-dark">v1.0.0</span>
+            <span class="text-body-secondary">Stable public contract</span>
+          </div>
+          <h2 id="release-1-0-0">Moo UI 1.0.0</h2>
+          <p>
+            The first stable release preserves RC11's documented package exports,
+            Sass configuration, CSS hooks and optional runtime lifecycle.
+          </p>
+          <div class="moo-changelog__changes">
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Fixed</span>
+              <span>The catalog search palette retains its theme-colored outline and elevation above the scoped Bootstrap modal rules.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Release</span>
+              <span>The stable public API is frozen. Compatible additions belong to 1.1.0; incompatible changes require a new major release.</span>
+            </div>
+            <div class="moo-changelog__change-row">
+              <span class="moo-changelog__change-label">Support</span>
+              <span>Package stability and component certification remain independent. Certification is preview, with the documented manual accessibility and browser/device limits.</span>
+            </div>
+          </div>
+        </article>
+
         <article class="moo-changelog__release" aria-labelledby="release-1-0-0-rc-11">
           <div class="moo-changelog__release-heading">
             <span class="badge text-bg-dark">v1.0.0-rc.11</span>
@@ -641,6 +667,7 @@
     </article>
 
     {{ render_doc_toc([
+      {"id": "release-1-0-0", "label": "v1.0.0"},
       {"id": "release-1-0-0-rc-11", "label": "v1.0.0-rc.11"},
       {"id": "release-1-0-0-rc-10", "label": "v1.0.0-rc.10"},
       {"id": "release-1-0-0-rc-9", "label": "v1.0.0-rc.9"},

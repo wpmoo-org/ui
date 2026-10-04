@@ -4,8 +4,9 @@ Moo UI Core is an open-source Bootstrap component system. This document defines
 the public support boundary for the Core package. It does not cover separate
 platform integrations or commercial products.
 
-Moo UI is currently in the `1.0.0-rc.11` release-candidate certification phase.
-Production certification is being introduced incrementally; a component's
+Moo UI `1.0.0` freezes the documented public package contract. Package stability
+and component certification are independent: the certification manifest remains
+`preview`. Production certification is introduced incrementally; a component's
 presence in the catalog does not by itself mean that it has completed
 certification.
 
@@ -111,7 +112,13 @@ UI's light and dark theme surfaces. Certification records the combinations
 actually reviewed. A component-specific limitation must be disclosed in the
 release attestation.
 
-## Versioning Before 1.0
+## Stable Versioning
+
+In the `1.x` line, compatible additions use minor releases and fixes use patch
+releases. Removing or incompatibly changing a documented public contract requires
+a new major release. Existing API inventories remain historical removal guards.
+
+## Historical Versioning Before 1.0
 
 Although Semantic Versioning permits greater instability during `0.x`, Moo UI
 uses a stricter policy:
@@ -186,9 +193,9 @@ conformance pass for that host. The runner needs Python 3 and Playwright
 only; no Moo UI build tooling is involved.
 
 The archive is reproducible byte-for-byte from the repository source at any
-time. The current kit carries contract version 1.0, and its archive hashes
-to SHA-256
-`f29b3e7e22273671facb4391a1da005362ea6fb9a05ccf5bdf6c827a48416c3c`.
+time. For Moo UI 1.0.0, the kit carries contract version 1.0 and its archive
+hashes to SHA-256
+`3bda0e10fe23e6f157f5e7bd3c09af0efd05c5827fe65615ef2017b7da6929f1`.
 Published artifacts are listed on the GitHub Releases page:
 
 https://github.com/wpmoo-org/ui/releases

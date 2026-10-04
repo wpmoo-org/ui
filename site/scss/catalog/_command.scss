@@ -4,11 +4,13 @@
   margin-top: 12vh;
 }
 
-.moo-catalog__command-content {
+.modal-content.moo-catalog__command-content {
   border-radius: var(--bs-border-radius-xl);
   // The command palette is catalog chrome, not a shipped Bootstrap component.
   // It needs a stronger focus-ring/elevation treatment than the shared
   // $enable-shadows-off component scale, so the shadow has a catalog Sass knob.
+  // Qualify the Bootstrap surface so its scoped modal rule cannot replace this
+  // catalog-owned ring and elevation at equal specificity.
   box-shadow:
     0 0 0 4px var(--moo-border),
     $moo-catalog-command-shadow;

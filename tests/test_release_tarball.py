@@ -28,7 +28,7 @@ BASE_EXPORTS = {
 }
 BASE_PACKAGE = {
     "name": "@wpmoo/ui",
-    "version": "1.0.0-rc.11",
+    "version": "1.0.0",
     "exports": {
         export: f"./{path}"
         for path, export in BASE_EXPORTS.items()
@@ -56,7 +56,7 @@ class ReleaseTarballTests(unittest.TestCase):
             ]
         manifest: dict[str, object] = {
             "schemaVersion": 1,
-            "package": {"name": "@wpmoo/ui", "version": "1.0.0-rc.11"},
+            "package": {"name": "@wpmoo/ui", "version": "1.0.0"},
             "artifacts": artifacts,
         }
         if padding:
@@ -150,7 +150,7 @@ class ReleaseTarballTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             tarball = self._write_candidate(
                 Path(temporary_directory),
-                package={"name": "@wpmoo/not-ui", "version": "1.0.0-rc.11"},
+                package={"name": "@wpmoo/not-ui", "version": "1.0.0"},
             )
             self._assert_rejected(tarball, r"package|name|identity")
 

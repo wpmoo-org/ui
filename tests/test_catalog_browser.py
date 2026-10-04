@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 import time
 import unittest
@@ -214,6 +215,68 @@ class CatalogBrowserTests(unittest.TestCase):
             evidence.assert_clean()
         finally:
             context.close()
+
+    def test_command_palette_preserves_its_theme_ring_and_regular_modal_elevation(self) -> None:
+        for reference_case in CERTIFICATION_CASES:
+            for theme in ("light", "dark"):
+                case = replace(reference_case, color_scheme=theme)
+                with self.subTest(viewport=case.name, theme=theme):
+                    context = new_case_context(self.browser, case)
+                    try:
+                        page = context.new_page()
+                        evidence = BrowserEvidence(page)
+                        response = load_home_page(page, self.base_url)
+                        self.assertIsNotNone(response)
+                        self.assertTrue(response.ok)
+                        prepare_page(page, case)
+
+                        page.get_by_role("button", name="Search documentation").click()
+                        search = page.locator("#catalog-command input[type='search']")
+                        expect(search).to_be_focused()
+                        surface = page.evaluate(
+                            """
+                            () => {
+                              const content = document.querySelector(
+                                '#catalog-command.show .modal-content'
+                              );
+                              const owner = content.closest('.moo-ui');
+                              const probe = document.createElement('div');
+                              probe.className = 'modal-content';
+                              probe.style.color = 'var(--moo-border)';
+                              owner.append(probe);
+                              const ringColor = getComputedStyle(probe).color;
+                              const regularShadow = getComputedStyle(probe).boxShadow;
+                              probe.style.boxShadow = 'var(--bs-box-shadow-lg)';
+                              const expectedRegularShadow = getComputedStyle(probe).boxShadow;
+                              probe.remove();
+                              const rect = content.getBoundingClientRect();
+                              return {
+                                shadow: getComputedStyle(content).boxShadow,
+                                ringColor, regularShadow, expectedRegularShadow,
+                                left: rect.left, right: rect.right, viewport: innerWidth,
+                                top: rect.top, bottom: rect.bottom, viewportHeight: innerHeight,
+                              };
+                            }
+                            """
+                        )
+                        self.assertTrue(
+                            surface["shadow"].startswith(
+                                f'{surface["ringColor"]} 0px 0px 0px 4px,'
+                            ),
+                            surface,
+                        )
+                        self.assertEqual(
+                            surface["regularShadow"], surface["expectedRegularShadow"],
+                        )
+                        self.assertGreaterEqual(surface["left"], 4)
+                        self.assertLessEqual(surface["right"], surface["viewport"] - 4)
+                        self.assertGreaterEqual(surface["top"], 4)
+                        self.assertLessEqual(surface["bottom"], surface["viewportHeight"] - 4)
+                        search.press("Escape")
+                        expect(page.locator("#catalog-command")).not_to_be_visible()
+                        evidence.assert_clean()
+                    finally:
+                        context.close()
 
     def test_command_palette_body_omits_search_divider(self) -> None:
         context = new_case_context(self.browser, CERTIFICATION_CASES[0])

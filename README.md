@@ -191,7 +191,8 @@ calm.
 
 ## Status And Support
 
-The current release candidate is `1.0.0-rc.11`. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
+The stable public-contract release is `1.0.0`. Component certification remains
+`preview`, with its documented manual and browser/device limits. Public exports, package boundaries, browser support, and release evidence live in [Support & Evidence](https://ui.wpmoo.org/support/).
 Complete release notes are on
 [GitHub Releases](https://github.com/wpmoo-org/ui/releases).
 
@@ -216,4 +217,4 @@ The published `LICENSE` also retains the full MIT notices for bundled
 Chart.js and `@kurkle/color`.
 Asset terms live in [ASSET_LICENSE.md](ASSET_LICENSE.md); dependency notices
 live in the
-[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0-rc.11/THIRD_PARTY_NOTICES.md).
+[version-pinned third-party notices](https://github.com/wpmoo-org/ui/blob/v1.0.0/THIRD_PARTY_NOTICES.md).
