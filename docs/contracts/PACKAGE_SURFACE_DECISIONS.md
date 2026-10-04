@@ -10,8 +10,11 @@ contracts. Connected Steps navigation uses `nav_menu(style="steps")` and the
 item's independent `completed` state. Its public CSS hooks are `.nav-steps` and
 `data-nav-completed="true"`; the current route does not imply completion.
 
-The scoped `.border-dashed` utility changes only border style. Components keep
-their border width, color and radius. Its Sass partial is packaged through the
+The scoped `.border-dashed` utility changes only border style. Surfaces with
+borders declared on all four sides, such as Card or an element with `.border`,
+keep their border width, color and radius. A directional border alone does not
+meet that precondition; use `.border` first when a full outline is intended.
+Its Sass partial is packaged through the
 existing source glob and included by both full and scoped CSS entrypoints;
 there is no additional stylesheet or JavaScript entrypoint. The catalog groups
 Border and Scroll Fade under Utilities.

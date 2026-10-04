@@ -359,7 +359,10 @@ class PackageMetadataTests(unittest.TestCase):
         self.assertEqual(manifest["schemaVersion"], 1)
         self.assertEqual(
             manifest["package"],
-            {"name": "@wpmoo/ui", "version": "1.0.0-rc.10"},
+            {
+                "name": "@wpmoo/ui",
+                "version": self._read_package()["version"],
+            },
         )
         self.assertEqual(
             [entry["export"] for entry in manifest["artifacts"]],

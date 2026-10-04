@@ -14,14 +14,14 @@
 
   <div class="moo-component-examples">
     {% set available_slot %}
-      {% call card(size="sm", body_class="p-0", extra_class="p-0 border-dashed") %}
+      {% call card(size="sm", body_class="p-0", extra_class="p-0 border border-dashed") %}
         {{ button("Add item", variant="ghost", icon_start="plus", extra_class="w-100 justify-content-start p-3 rounded-4") }}
       {% endcall %}
     {% endset %}
     {{ render_example(
       "available-slot",
       "Dashed border",
-      "Add <code>border-dashed</code> to a bordered component. It changes only the border style; the component keeps its width, color and radius. The utility is scoped to a Moo UI owner.",
+      "Use <code>border-dashed</code> on surfaces with borders declared on all four sides, such as Card or an element with <code>border</code>. For those surfaces, width, color and radius stay the same. For a surface with only a directional border, add <code>border</code> first to define the full outline. The utility is scoped to a Moo UI owner.",
       available_slot
     ) }}
   </div>

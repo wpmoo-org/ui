@@ -4222,7 +4222,19 @@ class CatalogContractTests(CatalogTestCase):
         package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
 
         self.assertIn(f'id="release-{package["version"].replace(".", "-")}"', changelog)
-        self.assertIn(f"Release candidate v{package['version']}", changelog)
+        current_release = re.search(
+            rf'<article\b[^>]*aria-labelledby="release-{re.escape(package["version"].replace(".", "-"))}"[^>]*>'
+            r"(?P<body>.*?)</article>",
+            changelog,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(current_release)
+        active_release = current_release.group("body")
+        self.assertRegex(
+            active_release,
+            rf'<span\b[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>\s*v{re.escape(package["version"])}\s*</span>',
+        )
+        self.assertIn("preview", active_release)
         self.assertIn("Post-release", changelog)
         self.assertIn("PR #38 separated Core package outputs", changelog)
         self.assertNotIn("Phase 2 Evidence and Public Docs Boundary", changelog)

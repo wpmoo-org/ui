@@ -42,6 +42,7 @@ def build():
                 build_source.format(value="old layout"), encoding="utf-8"
             )
             driver = """import importlib.util
+import os
 from pathlib import Path
 import sys
 
@@ -49,13 +50,20 @@ spec = importlib.util.spec_from_file_location('moo_dev', sys.argv[1])
 dev = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(dev)
 replacement = sys.argv[2]
+source = Path('build.py')
+initial_mtime_ns = 1780000000100000000
+os.utime(source, ns=(initial_mtime_ns, initial_mtime_ns))
 
 class OneSourceChange:
     calls = 0
     def wait(self, timeout):
         self.calls += 1
         if self.calls == 1:
-            Path('build.py').write_text(replacement, encoding='utf-8')
+            previous_size = source.stat().st_size
+            source.write_text(replacement, encoding='utf-8')
+            assert source.stat().st_size == previous_size
+            updated_mtime_ns = initial_mtime_ns + 500000000
+            os.utime(source, ns=(updated_mtime_ns, updated_mtime_ns))
             return False
         return True
 
@@ -67,7 +75,7 @@ dev.watch_sources(OneSourceChange())
                     "-c",
                     driver,
                     str(ROOT / "dev.py"),
-                    build_source.format(value="current archive layout and navigation"),
+                    build_source.format(value="new layout"),
                 ],
                 cwd=root,
                 check=False,
@@ -78,7 +86,7 @@ dev.watch_sources(OneSourceChange())
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(
                 (root / "rendered.txt").read_text(encoding="utf-8"),
-                "current archive layout and navigation",
+                "new layout",
             )
 
     def test_help_lists_dev_server_options(self) -> None:

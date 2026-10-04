@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from html.parser import HTMLParser
 from pathlib import Path
 
 import build
@@ -17,6 +18,21 @@ from tests.helpers.browser_harness import (
 
 
 class BorderTests(CatalogTestCase):
+    def test_border_example_declares_all_edges_before_applying_dashes(self) -> None:
+        class BorderExampleParser(HTMLParser):
+            complete_borders = 0
+
+            def handle_starttag(self, tag, attrs):
+                classes = set(dict(attrs).get("class", "").split())
+                if {"card", "border", "border-dashed"}.issubset(classes):
+                    self.complete_borders += 1
+
+        result = self.run_build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        parser = BorderExampleParser()
+        parser.feed(self.read_output("utils/border.html"))
+        self.assertGreater(parser.complete_borders, 0)
+
     def test_utility_archive_has_canonical_metadata_and_registered_links(self) -> None:
         result = self.run_build()
         self.assertEqual(result.returncode, 0, result.stderr)
